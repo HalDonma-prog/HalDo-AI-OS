@@ -74,3 +74,21 @@ input.addEventListener("keypress", function(event){
     }
 
 });
+HalDo-ai/
+│
+├── index.html
+├── dashboard.html
+├── chat.html
+│
+├── style.css
+├── dashboard.css
+├── chat.css
+│
+├── script.js
+├── dashboard.js
+├── chat.js
+│
+├── README.md
+├── 227E9D20-F8F7-44E9-B194-1F76378888B7.PNG
+│
+└── images/
