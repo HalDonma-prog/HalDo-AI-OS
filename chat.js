@@ -1,46 +1,25 @@
-// HalDo AI Chat Version 1.0
-
-
-const input = document.getElementById("userInput");
-const button = document.getElementById("sendButton");
+const sendButton = document.getElementById("sendButton");
+const userInput = document.getElementById("userInput");
 const messages = document.getElementById("messages");
 
 
+sendButton.addEventListener("click", sendMessage);
 
-function addMessage(text, type) {
 
-    const message = document.createElement("div");
+userInput.addEventListener("keypress", function(event) {
 
-    message.classList.add("message");
+    if (event.key === "Enter") {
 
-    if (type === "user") {
-
-        message.classList.add("user");
-
-    } else {
-
-        message.classList.add("ai");
+        sendMessage();
 
     }
 
-
-    message.innerText = text;
-
-
-    messages.appendChild(message);
-
-
-    messages.scrollTop = messages.scrollHeight;
-
-}
-
-
+});
 
 
 function sendMessage() {
 
-
-    const text = input.value.trim();
+    const text = userInput.value.trim();
 
 
     if (text === "") {
@@ -50,55 +29,39 @@ function sendMessage() {
     }
 
 
-
     // Nutzer Nachricht
 
-    addMessage(text, "user");
+    const userMessage = document.createElement("div");
+
+    userMessage.className = "message user";
+
+    userMessage.textContent = text;
 
 
-
-    input.value = "";
-
+    messages.appendChild(userMessage);
 
 
-    // HalDo AI Test Antwort
-
-    setTimeout(function(){
+    userInput.value = "";
 
 
-        addMessage(
-            "🤖 Ich habe deine Nachricht erhalten. HalDo AI entwickelt sich weiter.",
-            "ai"
-        );
+    // Test-Antwort von HalDo AI
+
+    setTimeout(function() {
+
+        const aiMessage = document.createElement("div");
+
+        aiMessage.className = "message ai";
+
+        aiMessage.textContent =
+        "🤖 HalDo AI: Ich habe deine Nachricht erhalten. Die echte KI-Verbindung folgt.";
+
+        messages.appendChild(aiMessage);
 
 
-    },700);
-
+    }, 700);
 
 
 }
-
-
-
-button.addEventListener(
-    "click",
-    sendMessage
-);
-
-
-
-input.addEventListener(
-    "keypress",
-    function(event){
-
-        if(event.key === "Enter"){
-
-            sendMessage();
-
-        }
-
-    }
-);
 
 HalDo-ai/
 │
