@@ -1,11 +1,11 @@
-// HalDo AI - Chat Funktion
-
-const input = document.getElementById("chat-input");
-const sendButton = document.getElementById("send-button");
-const messages = document.getElementById("chat-messages");
+// HalDo AI Chat Version 1.0
 
 
-// Nachricht hinzufügen
+const input = document.getElementById("userInput");
+const button = document.getElementById("sendButton");
+const messages = document.getElementById("messages");
+
+
 
 function addMessage(text, type) {
 
@@ -14,66 +14,91 @@ function addMessage(text, type) {
     message.classList.add("message");
 
     if (type === "user") {
-        message.classList.add("user-message");
+
+        message.classList.add("user");
+
     } else {
-        message.classList.add("ai-message");
+
+        message.classList.add("ai");
+
     }
+
 
     message.innerText = text;
 
+
     messages.appendChild(message);
 
-    // automatisch nach unten scrollen
+
     messages.scrollTop = messages.scrollHeight;
+
 }
 
 
-// Nachricht senden
+
 
 function sendMessage() {
 
+
     const text = input.value.trim();
 
+
     if (text === "") {
+
         return;
+
     }
 
 
-    // User Nachricht
+
+    // Nutzer Nachricht
+
     addMessage(text, "user");
 
 
-    // Eingabe leeren
+
     input.value = "";
 
 
-    // KI Testantwort
-    setTimeout(() => {
+
+    // HalDo AI Test Antwort
+
+    setTimeout(function(){
+
 
         addMessage(
-            "Hallo! Ich bin HalDo AI 🤖. Deine Nachricht wurde empfangen.",
+            "🤖 Ich habe deine Nachricht erhalten. HalDo AI entwickelt sich weiter.",
             "ai"
         );
 
-    }, 700);
+
+    },700);
+
+
 
 }
 
 
-// Button Klick
 
-sendButton.addEventListener("click", sendMessage);
+button.addEventListener(
+    "click",
+    sendMessage
+);
 
 
-// Enter Taste
 
-input.addEventListener("keypress", function(event){
+input.addEventListener(
+    "keypress",
+    function(event){
 
-    if(event.key === "Enter"){
-        sendMessage();
+        if(event.key === "Enter"){
+
+            sendMessage();
+
+        }
+
     }
-
-});
+);
 HalDo-ai/
 │
 ├── index.html
