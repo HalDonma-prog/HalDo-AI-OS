@@ -1,5 +1,5 @@
+alert("HalDo Chat JS geladen");
 alert("chat.js wird geladen");
-
 document.addEventListener("DOMContentLoaded", () => {
     const chatBox = document.getElementById("chatBox");
     const userInput = document.getElementById("userInput");
