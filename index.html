@@ -30,17 +30,58 @@
 
 <h1>Apps Web 3.0</h1>
 
-<p id="subtitle">Home</p>
+<p id="subtitle">Login</p>
 
 </header>
 
 
-<section id="home" class="page">
+
+<!-- LOGIN -->
+
+<section id="loginPage" class="page">
+
+
+<h2>Anmelden</h2>
+
+
+<input 
+id="loginName"
+placeholder="Benutzername"
+>
+
+
+<input 
+id="loginPassword"
+type="password"
+placeholder="Passwort"
+>
+
+
+<button onclick="login()">
+Anmelden
+</button>
+
+
+</section>
+
+
+
+
+<!-- HOME -->
+
+<section id="home" class="page hidden">
 
 
 <h2 id="welcome">
 Willkommen
 </h2>
+
+
+<p>
+Aktiver Benutzer:
+<span id="activeUser"></span>
+</p>
+
 
 
 <div class="icons">
@@ -52,16 +93,19 @@ Willkommen
 </button>
 
 
-<button onclick="openSettings()">
-⚙️
-<span>Einstellungen</span>
+
+<button onclick="openUsers()">
+👤
+<span>Benutzer</span>
 </button>
 
 
-<button>
-📁
-<span>Dateien</span>
+
+<button onclick="logout()">
+🚪
+<span>Logout</span>
 </button>
+
 
 
 <button>
@@ -70,6 +114,7 @@ Willkommen
 </button>
 
 
+
 </div>
 
 
@@ -77,73 +122,99 @@ Willkommen
 
 
 
+
+
+<!-- CHAT -->
+
+
 <section id="chatPage" class="page hidden">
+
 
 <div id="chatBox" class="chat"></div>
 
 
 <div class="input-area">
 
-<input id="messageInput"
-placeholder="Nachricht schreiben...">
+
+<input 
+id="messageInput"
+placeholder="Nachricht schreiben..."
+>
 
 
 <button onclick="sendMessage()">
 ➤
 </button>
 
+
 </div>
 
 
-<button class="delete" onclick="clearChat()">
-🗑 Löschen
+</section>
+
+
+
+
+
+<!-- USERS -->
+
+
+<section id="usersPage" class="page hidden">
+
+
+<h2>Benutzer</h2>
+
+
+<div id="usersList"></div>
+
+
+<input 
+id="newUser"
+placeholder="Neuer Benutzer"
+>
+
+
+<button onclick="addUser()">
+Hinzufügen
 </button>
 
 
 </section>
 
 
-
-<section id="settingsPage" class="page hidden">
-
-
-<h2>Einstellungen</h2>
-
-
-<input id="nameInput"
-placeholder="Dein Name">
-
-
-<button onclick="saveName()">
-Speichern
-</button>
-
-
-</section>
 
 
 
 <nav>
 
+
 <button onclick="goHome()">
-🏠<br>Home
+🏠
+<br>
+Home
 </button>
 
 
 <button onclick="openChat()">
-💬<br>Chat
+💬
+<br>
+Chat
 </button>
 
 
-<button onclick="openSettings()">
-⚙️<br>Einstellungen
+<button onclick="openUsers()">
+👤
+<br>
+Benutzer
 </button>
 
 
 </nav>
 
 
+
 </div>
+
 
 
 <script src="script.js"></script>
