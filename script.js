@@ -1,28 +1,35 @@
-let chatSpeicher = [];
-let username = "Gast";
+let chatSpeicher=[];
+let username="Gast";
+
 
 
 function loadData(){
 
-    username = localStorage.getItem("name") || "Gast";
+username=localStorage.getItem("name") || "Gast";
 
-    let data = localStorage.getItem("appsChat");
 
-    if(data){
-        chatSpeicher = JSON.parse(data);
-    }
+let data=localStorage.getItem("appsChat");
 
-    updateWelcome();
+
+if(data){
+
+chatSpeicher=JSON.parse(data);
+
+}
+
+
+updateWelcome();
+
 }
 
 
 
 function saveChat(){
 
-    localStorage.setItem(
-        "appsChat",
-        JSON.stringify(chatSpeicher)
-    );
+localStorage.setItem(
+"appsChat",
+JSON.stringify(chatSpeicher)
+);
 
 }
 
@@ -30,33 +37,14 @@ function saveChat(){
 
 function showPage(page){
 
-    document.getElementById("home").style.display = "none";
-    document.getElementById("chatPage").style.display = "none";
-    document.getElementById("settingsPage").style.display = "none";
+document.getElementById("home").style.display="none";
 
-    document.getElementById(page).style.display = "block";
+document.getElementById("chatPage").style.display="none";
 
-}
+document.getElementById("settingsPage").style.display="none";
 
 
-
-function openChat(){
-
-    showPage("chatPage");
-
-    document.getElementById("subtitle").innerText="Chat";
-
-    loadMessages();
-
-}
-
-
-
-function openSettings(){
-
-    showPage("settingsPage");
-
-    document.getElementById("subtitle").innerText="Einstellungen";
+document.getElementById(page).style.display="block";
 
 }
 
@@ -64,11 +52,33 @@ function openSettings(){
 
 function goHome(){
 
-    showPage("home");
+showPage("home");
 
-    document.getElementById("subtitle").innerText="Startseite";
+document.getElementById("subtitle").innerText="Home";
 
-    updateWelcome();
+updateWelcome();
+
+}
+
+
+
+function openChat(){
+
+showPage("chatPage");
+
+document.getElementById("subtitle").innerText="Chat";
+
+loadMessages();
+
+}
+
+
+
+function openSettings(){
+
+showPage("settingsPage");
+
+document.getElementById("subtitle").innerText="Einstellungen";
 
 }
 
@@ -76,29 +86,30 @@ function goHome(){
 
 function sendMessage(){
 
-    let input=document.getElementById("messageInput");
+let input=document.getElementById("messageInput");
 
-    let text=input.value.trim();
-
-
-    if(text===""){
-        return;
-    }
+let text=input.value.trim();
 
 
-    chatSpeicher.push({
-
-        user:username,
-        text:text
-
-    });
+if(text===""){
+return;
+}
 
 
-    saveChat();
+chatSpeicher.push({
 
-    input.value="";
+user:username,
 
-    loadMessages();
+text:text
+
+});
+
+
+saveChat();
+
+input.value="";
+
+loadMessages();
 
 }
 
@@ -106,22 +117,24 @@ function sendMessage(){
 
 function loadMessages(){
 
-    let chat=document.getElementById("chatBox");
+let chat=document.getElementById("chatBox");
 
-    chat.innerHTML="";
+chat.innerHTML="";
 
 
-    chatSpeicher.forEach(function(item){
+chatSpeicher.forEach(function(item){
 
-        let div=document.createElement("div");
+let div=document.createElement("div");
 
-        div.className="message user";
+div.className="message user";
 
-        div.innerText=item.user+": "+item.text;
+div.innerText=item.user+": "+item.text;
 
-        chat.appendChild(div);
+chat.appendChild(div);
 
-    });
+
+});
+
 
 }
 
@@ -129,11 +142,11 @@ function loadMessages(){
 
 function clearChat(){
 
-    chatSpeicher=[];
+chatSpeicher=[];
 
-    saveChat();
+saveChat();
 
-    loadMessages();
+loadMessages();
 
 }
 
@@ -141,19 +154,19 @@ function clearChat(){
 
 function saveName(){
 
-    let name=document.getElementById("nameInput").value.trim();
+let name=document.getElementById("nameInput").value.trim();
 
 
-    if(name){
+if(name){
 
-        username=name;
+username=name;
 
-        localStorage.setItem("name",name);
+localStorage.setItem("name",name);
 
-    }
+}
 
 
-    goHome();
+goHome();
 
 }
 
@@ -161,13 +174,13 @@ function saveName(){
 
 function updateWelcome(){
 
-    let title=document.getElementById("welcome");
+let w=document.getElementById("welcome");
 
-    if(title){
+if(w){
 
-        title.innerText="Willkommen "+username;
+w.innerText="Willkommen "+username;
 
-    }
+}
 
 }
 
@@ -175,26 +188,26 @@ function updateWelcome(){
 
 window.onload=function(){
 
-    loadData();
+loadData();
 
 
-    let input=document.getElementById("messageInput");
+let input=document.getElementById("messageInput");
 
 
-    if(input){
+if(input){
 
-        input.addEventListener("keydown",function(e){
+input.addEventListener("keydown",function(e){
 
-            if(e.key==="Enter"){
+if(e.key==="Enter"){
 
-                e.preventDefault();
+e.preventDefault();
 
-                sendMessage();
+sendMessage();
 
-            }
+}
 
-        });
+});
 
-    }
+}
 
 };
