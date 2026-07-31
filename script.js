@@ -5,7 +5,6 @@ let history = [];
 let historyIndex = -1;
 
 
-
 // Start
 
 window.onload = function(){
@@ -20,23 +19,25 @@ if(user){
 showHome();
 
 
-document.getElementById("welcomeUser").innerText=user;
+document.getElementById("welcomeUser").innerText = user;
 
 
-document.getElementById("dashboardUser").innerText=user;
+document.getElementById("dashboardUser").innerText = user;
 
 
-let welcome=document.getElementById("haldoWelcome");
+let welcome = document.getElementById("haldoWelcome");
 
 
 if(welcome){
 
-welcome.innerText="Hallo "+user+" 👋 HalDo AI ist bereit.";
+welcome.innerText =
+"Hallo "+user+" 👋 HalDo AI ist bereit.";
 
 }
 
 
 }
+
 
 
 loadMessages();
@@ -51,18 +52,19 @@ loadMessages();
 
 
 
-// Login
+// LOGIN
 
 function login(){
 
 
-let name=document.getElementById("loginName").value.trim();
+let name =
+document.getElementById("loginName").value.trim();
 
 
 
 if(name===""){
 
-alert("Bitte Benutzername eingeben");
+alert("Bitte Namen eingeben");
 
 return;
 
@@ -86,7 +88,8 @@ let welcome=document.getElementById("haldoWelcome");
 
 if(welcome){
 
-welcome.innerText="Hallo "+name+" 👋 HalDo AI ist bereit.";
+welcome.innerText =
+"Hallo "+name+" 👋 HalDo AI ist bereit.";
 
 }
 
@@ -104,7 +107,7 @@ showHome();
 
 
 
-// Seiten öffnen
+// Seiten wechseln
 
 function openPage(page){
 
@@ -121,6 +124,7 @@ p.classList.add("hidden");
 
 
 let target=document.getElementById(page);
+
 
 
 if(target){
@@ -141,6 +145,7 @@ historyIndex=history.length-1;
 }
 
 
+
 }
 
 
@@ -158,9 +163,6 @@ openPage("homePage");
 
 
 
-
-
-
 function goHome(){
 
 openPage("homePage");
@@ -174,7 +176,7 @@ openPage("homePage");
 
 
 
-// Navigation zurück
+// zurück
 
 function goBack(){
 
@@ -200,7 +202,7 @@ openPage(history[historyIndex]);
 
 
 
-// Navigation weiter
+// weiter
 
 function goForward(){
 
@@ -226,12 +228,14 @@ openPage(history[historyIndex]);
 
 
 
-// Profil speichern
+
+// Profil
 
 function saveProfile(){
 
 
-let name=document.getElementById("newName").value.trim();
+let name =
+document.getElementById("newName").value.trim();
 
 
 
@@ -248,14 +252,12 @@ document.getElementById("welcomeUser").innerText=name;
 document.getElementById("dashboardUser").innerText=name;
 
 
-
 alert("Profil gespeichert");
 
 
 }
 
 
-
 }
 
 
@@ -265,7 +267,7 @@ alert("Profil gespeichert");
 
 
 
-// Chat senden
+// Chat
 
 function sendMessage(){
 
@@ -289,7 +291,9 @@ addMessage(text,"user-message");
 
 
 
-let messages=JSON.parse(localStorage.getItem("chatMessages") || "[]");
+let messages =
+JSON.parse(localStorage.getItem("chatMessages") || "[]");
+
 
 
 messages.push({
@@ -302,25 +306,30 @@ type:"user-message"
 
 
 
-localStorage.setItem("chatMessages",JSON.stringify(messages));
+localStorage.setItem(
+"chatMessages",
+JSON.stringify(messages)
+);
 
 
 
 input.value="";
 
 
-
 updateCount();
+
 
 
 setTimeout(function(){
 
 
-addMessage("Nachricht gespeichert 👍","ai-message");
+addMessage(
+"Nachricht gespeichert 👍",
+"ai-message"
+);
 
 
 },400);
-
 
 
 }
@@ -369,14 +378,18 @@ box.scrollTop=box.scrollHeight;
 function loadMessages(){
 
 
-let messages=JSON.parse(localStorage.getItem("chatMessages") || "[]");
+let messages =
+JSON.parse(localStorage.getItem("chatMessages") || "[]");
 
 
 
 messages.forEach(function(m){
 
 
-addMessage(m.text,m.type);
+addMessage(
+m.text,
+m.type
+);
 
 
 });
@@ -398,11 +411,13 @@ updateCount();
 function updateCount(){
 
 
-let messages=JSON.parse(localStorage.getItem("chatMessages") || "[]");
+let messages =
+JSON.parse(localStorage.getItem("chatMessages") || "[]");
 
 
 
 let count=document.getElementById("messageCount");
+
 
 
 if(count){
@@ -422,7 +437,8 @@ count.innerText=messages.length;
 
 
 
-// HalDo AI
+// HALDO AI
+
 
 function sendHalDo(){
 
@@ -456,6 +472,9 @@ setTimeout(function(){
 addHalDo(answer,"ai-message");
 
 
+speak(answer);
+
+
 },500);
 
 
@@ -478,15 +497,17 @@ function addHalDo(text,type){
 let box=document.getElementById("haldoChat");
 
 
-let div=document.createElement("div");
+if(!box)return;
 
+
+
+let div=document.createElement("div");
 
 
 div.className="message "+type;
 
 
 div.innerText=text;
-
 
 
 box.appendChild(div);
@@ -503,6 +524,9 @@ box.scrollTop=box.scrollHeight;
 
 
 
+
+
+// HalDo Antworten
 
 function getHalDoAnswer(text){
 
@@ -554,6 +578,20 @@ return "Ich öffne den Chat.";
 
 
 
+if(command.includes("cloud")){
+
+
+openPage("cloudPage");
+
+
+return "Ich öffne die Cloud-Vorbereitung.";
+
+}
+
+
+
+
+
 if(command.includes("einstellung")){
 
 
@@ -568,13 +606,14 @@ return "Ich öffne die Einstellungen.";
 
 
 
-if(command.includes("nach hause") || command.includes("home")){
+if(command.includes("nach hause")
+|| command.includes("home")){
 
 
 openPage("homePage");
 
 
-return "Ich gehe zurück zum Hauptmenü.";
+return "Ich gehe zum Hauptmenü.";
 
 }
 
@@ -585,7 +624,10 @@ return "Ich gehe zurück zum Hauptmenü.";
 if(command.includes("wer bin ich")){
 
 
-let user=localStorage.getItem("appsUser") || "unbekannt";
+let user =
+localStorage.getItem("appsUser")
+|| "unbekannt";
+
 
 
 return "Du bist "+user+".";
@@ -599,7 +641,7 @@ return "Du bist "+user+".";
 if(command.includes("version")){
 
 
-return "Apps/Web 3.0 Version 2.4.0 läuft.";
+return "Apps/Web 3.0 Version 2.5.0 läuft.";
 
 }
 
@@ -607,21 +649,11 @@ return "Apps/Web 3.0 Version 2.4.0 läuft.";
 
 
 
-if(command.includes("hilfe") || command.includes("was kannst du")){
+if(command.includes("hilfe")
+|| command.includes("was kannst du")){
 
 
-return "Ich kann Bereiche öffnen, Nachrichten zählen und dir bei Apps/Web 3.0 helfen.";
-
-}
-
-
-
-
-
-if(command.includes("hallo") || command.includes("hi")){
-
-
-return "Hallo 👋 Ich bin HalDo AI. Wie kann ich helfen?";
+return "Ich kann Bereiche öffnen und dich durch Apps/Web 3.0 führen.";
 
 }
 
@@ -629,6 +661,72 @@ return "Hallo 👋 Ich bin HalDo AI. Wie kann ich helfen?";
 
 
 
-return "Ich lerne weiter. Neue Funktionen kommen mit den nächsten Versionen.";
+if(command.includes("hallo")
+|| command.includes("hi")){
+
+
+return "Hallo 👋 Ich bin HalDo AI.";
+
+}
+
+
+
+
+
+return "Ich habe dich verstanden. Meine Funktionen werden weiter erweitert.";
+
+}
+
+
+
+
+
+
+
+
+// Sprache vorbereiten
+
+function startVoice(){
+
+
+let status=document.getElementById("voiceStatus");
+
+
+
+if(status){
+
+status.innerText=
+"🎤 Sprachfunktion vorbereitet.";
+
+}
+
+
+
+}
+
+
+
+
+
+// Sprachausgabe
+
+function speak(text){
+
+
+if("speechSynthesis" in window){
+
+
+let speech =
+new SpeechSynthesisUtterance(text);
+
+
+speech.lang="de-DE";
+
+
+window.speechSynthesis.speak(speech);
+
+
+}
+
 
 }
