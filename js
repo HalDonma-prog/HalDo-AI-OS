@@ -125,3 +125,28 @@ document.addEventListener("DOMContentLoaded", () => {
     );
     loadMessages();
 });
+HalDo-ai/
+│
+├── index.html
+├── dashboard.html
+├── chat.html
+├── tools.html
+├── profile.html
+├── settings.html
+│
+├── style.css
+├── dashboard.css
+├── chat.css
+├── tools.css
+├── profile.css
+├── settings.css
+│
+├── script.js
+├── dashboard.js
+├── chat.js
+├── tools.js
+├── profile.js
+├── settings.js
+│
+├── images/
+└── README.md
