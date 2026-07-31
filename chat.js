@@ -1,61 +1,42 @@
-alert("HalDo Chat JS geladen");
-alert("chat.js wird geladen");
-document.addEventListener("DOMContentLoaded", () => {
-    const chatBox = document.getElementById("chatBox");
-    const userInput = document.getElementById("userInput");
-    const sendButton = document.getElementById("sendButton");
-    const clearButton = document.getElementById("clearChat");
-    function addMessage(text, type) {
-        const message = document.createElement("div");
-        message.className = "message " + type;
-        message.innerHTML = `
-            <div class="bubble">
-                ${text}
+alert("CHAT.JS WIRD GELADEN");
+
+window.onload = function () {
+
+    const button = document.getElementById("sendButton");
+    const input = document.getElementById("userInput");
+    const box = document.getElementById("chatBox");
+
+
+    alert("ELEMENTE GEFUNDEN");
+
+
+    button.onclick = function () {
+
+        alert("BUTTON FUNKTIONIERT");
+
+
+        const text = input.value;
+
+
+        if(text.trim() === "") {
+            return;
+        }
+
+
+        box.innerHTML += `
+            <div class="message user">
+                <div class="bubble">
+                    ${text}
+                </div>
             </div>
         `;
-        chatBox.appendChild(message);
-        chatBox.scrollTop = chatBox.scrollHeight;
-    }
-    function sendMessage() {
-        const text = userInput.value.trim();
-        if(text === "") return;
-        addMessage(text, "user");
-        userInput.value = "";
-        setTimeout(() => {
-            addMessage(
-                "HalDo AI Testantwort funktioniert.",
-                "ai"
-            );
-        }, 800);
-    }
-    if(sendButton){
-    sendButton.addEventListener(
-        "click",
-        sendMessage
-    );
-}
-    userInput.addEventListener(
-        "keydown",
-        (event) => {
-            if(event.key === "Enter" && !event.shiftKey){
-                event.preventDefault();
-                sendMessage();
-            }
-        }
-    );
-    if(clearButton){
-        "click",
-        () => {
-            chatBox.innerHTML = "";
-            addMessage(
-                "Neuer Chat gestartet.",
-                "ai"
-            );
-        }
-    );
-    console.log("HalDo AI Chat geladen");
-});
 
+
+        input.value = "";
+
+    };
+
+};
 HalDo-ai/
 │
 ├── index.html
