@@ -1,3 +1,4 @@
+alert("HalDo chat.js läuft");
 alert("CHAT.JS WIRD GELADEN");
 
 window.onload = function () {
