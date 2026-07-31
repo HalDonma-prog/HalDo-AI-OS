@@ -616,41 +616,7 @@ showNotes();
 
 
 
-function showNotes(){
 
-
-let list =
-document.getElementById("notesList");
-
-
-if(!list)return;
-
-
-
-list.innerHTML="";
-
-
-
-notes.forEach(function(note){
-
-
-let item =
-document.createElement("div");
-
-
-item.className="note-item";
-
-
-item.innerText=note;
-
-
-list.appendChild(item);
-
-
-});
-
-
-}
 function saveNotes() {
     localStorage.setItem("haldoNotes", JSON.stringify(notes));
 }
