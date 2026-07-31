@@ -7,11 +7,9 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Apps/Web 3.0</title>
+<title>Apps/Web 3.0 v3.0</title>
 
 <link rel="stylesheet" href="style.css">
-
-<link rel="manifest" href="manifest.json">
 
 <meta name="theme-color" content="#0d47a1">
 
@@ -24,6 +22,8 @@
 <div class="app">
 
 
+
+<!-- HEADER -->
 
 <header class="app-header">
 
@@ -38,6 +38,7 @@ HD
 </div>
 
 
+
 <div>
 
 <h1>
@@ -46,7 +47,7 @@ Apps/Web 3.0
 
 
 <p>
-HalDo AI v2.8.0
+HalDo AI Plattform v3.0
 </p>
 
 
@@ -65,35 +66,21 @@ HalDo AI v2.8.0
 
 
 
+
 <!-- STARTSEITE -->
 
 
 <section id="startPage" class="page">
 
 
-<div class="haldo-start-card">
+<div class="hero-card">
 
 
-<div class="haldo-avatar-container">
-
-
-<div id="haldoAvatar" class="haldo-avatar-big">
+<div class="haldo-avatar">
 
 🤖
 
 </div>
-
-
-<div id="haldoState" class="avatar-state">
-
-🟢 Bereit
-
-</div>
-
-
-</div>
-
-
 
 
 
@@ -104,6 +91,7 @@ Willkommen bei HalDo AI
 </h2>
 
 
+
 <p>
 
 Dein persönlicher KI-Assistent für Apps/Web 3.0
@@ -112,23 +100,25 @@ Dein persönlicher KI-Assistent für Apps/Web 3.0
 
 
 
-<button onclick="startGuest()">
 
-🤖 HalDo AI starten
+<div class="ai-status">
 
-</button>
+🟢 HalDo ist bereit
+
+</div>
 
 
 
-<button onclick="showLogin()">
+<button onclick="startApp()">
 
-🔐 Anmelden
+🚀 Starten
 
 </button>
 
 
 
 </div>
+
 
 
 
@@ -141,17 +131,55 @@ Dein persönlicher KI-Assistent für Apps/Web 3.0
 
 <h3>
 
-Was ist HalDo AI?
+Schnellzugriff
 
 </h3>
 
 
-<p>
 
-HalDo AI unterstützt dich bei Navigation,
-Informationen und Funktionen der Plattform.
+<div class="quick-grid">
 
-</p>
+
+<button onclick="openPage('haldoPage')">
+
+🤖
+<br>
+HalDo AI
+
+</button>
+
+
+
+<button onclick="openPage('notesPage')">
+
+📝
+<br>
+Notizen
+
+</button>
+
+
+
+<button onclick="openPage('cloudPage')">
+
+☁️
+<br>
+Cloud
+
+</button>
+
+
+
+<button onclick="openPage('chatPage')">
+
+💬
+<br>
+Chat
+
+</button>
+
+
+</div>
 
 
 </div>
@@ -167,70 +195,11 @@ Informationen und Funktionen der Plattform.
 
 
 
-<!-- LOGIN -->
-
-
-<section id="loginPage" class="page hidden">
-
-
-<div class="card">
-
-
-<h2>
-
-Anmelden
-
-</h2>
-
-
-
-<input
-id="loginName"
-placeholder="Benutzername"
->
-
-
-
-<input
-id="loginPassword"
-type="password"
-placeholder="Passwort"
->
-
-
-
-<button onclick="login()">
-
-Anmelden
-
-</button>
-
-
-<button onclick="startGuest()">
-
-Als Gast starten
-
-</button>
-
-
-
-</div>
-
-
-</section>
-
-
-
-
-
-
-
-
-
-<!-- HOME -->
+<!-- HAUPTMENÜ -->
 
 
 <section id="homePage" class="page hidden">
+
 
 
 <div class="haldo-card">
@@ -251,16 +220,14 @@ HalDo AI
 </h2>
 
 
+<p id="welcomeText">
 
-<p id="haldoWelcome">
-
-Dein intelligenter Assistent
+Hallo 👋
 
 </p>
 
 
-
-<div id="mainStatus" class="status">
+<div id="statusText" class="ai-status">
 
 🟢 Bereit
 
@@ -275,33 +242,8 @@ Dein intelligenter Assistent
 
 
 
-<div class="welcome-card">
-
-
-<h2>
-
-Hallo <span id="welcomeUser"></span> 👋
-
-</h2>
-
-
-<p>
-
-Was möchtest du öffnen?
-
-</p>
-
-
-</div>
-
-
-
-
-
-
-
-
 <div class="menu-grid">
+
 
 
 <button class="menu-card"
@@ -335,7 +277,6 @@ Assistent
 
 
 
-
 <button class="menu-card"
 onclick="openPage('chatPage')">
 
@@ -356,7 +297,67 @@ Chat
 
 <p>
 
-Nachrichten
+Kommunikation
+
+</p>
+
+
+</button>
+
+
+
+
+<button class="menu-card"
+onclick="openPage('notesPage')">
+
+
+<span>
+
+📝
+
+</span>
+
+
+<h3>
+
+Notizen
+
+</h3>
+
+
+<p>
+
+Organisation
+
+</p>
+
+
+</button>
+
+
+
+
+<button class="menu-card"
+onclick="openPage('cloudPage')">
+
+
+<span>
+
+☁️
+
+</span>
+
+
+<h3>
+
+Cloud
+
+</h3>
+
+
+<p>
+
+Dateien
 
 </p>
 
@@ -425,37 +426,6 @@ Benutzer
 
 
 <button class="menu-card"
-onclick="openPage('cloudPage')">
-
-
-<span>
-
-☁️
-
-</span>
-
-
-<h3>
-
-Cloud
-
-</h3>
-
-
-<p>
-
-Online
-
-</p>
-
-
-</button>
-
-
-
-
-
-<button class="menu-card"
 onclick="openPage('settingsPage')">
 
 
@@ -483,6 +453,7 @@ System
 </button>
 
 
+
 </div>
 
 
@@ -502,11 +473,11 @@ System
 <section id="haldoPage" class="page hidden">
 
 
-<div class="haldo-console card">
+<div class="ai-panel">
 
 
-<div id="haldoFace"
-class="haldo-face">
+<div id="haldoAvatar"
+class="haldo-avatar-large">
 
 🤖
 
@@ -523,7 +494,7 @@ HalDo AI
 
 
 <div id="voiceStatus"
-class="voice-status">
+class="ai-status">
 
 🟢 Bereit
 
@@ -531,6 +502,7 @@ class="voice-status">
 
 
 </div>
+
 
 
 
@@ -597,7 +569,7 @@ placeholder="HalDo fragen..."
 
 <h2>
 
-💬 Chat
+💬 Nachrichten
 
 </h2>
 
@@ -618,7 +590,7 @@ class="chat-box">
 
 <input
 id="messageInput"
-placeholder="Nachricht..."
+placeholder="Nachricht schreiben..."
 >
 
 
@@ -628,6 +600,84 @@ placeholder="Nachricht..."
 ➤
 
 </button>
+
+
+</div>
+
+
+</section>
+
+
+
+
+
+
+
+
+
+<!-- NOTIZEN -->
+
+
+<section id="notesPage" class="page hidden">
+
+
+<div class="card">
+
+
+<h2>
+
+📝 Notizen
+
+</h2>
+
+
+<button onclick="createNote()">
+
++ Neue Notiz
+
+</button>
+
+
+
+<div id="notesList">
+
+</div>
+
+
+</div>
+
+
+</section>
+
+
+
+
+
+
+
+
+
+<!-- CLOUD -->
+
+
+<section id="cloudPage" class="page hidden">
+
+
+<div class="card">
+
+
+<h2>
+
+☁️ Cloud
+
+</h2>
+
+
+<p>
+
+Dateisystem vorbereitet
+
+</p>
 
 
 </div>
@@ -659,26 +709,20 @@ placeholder="Nachricht..."
 </h2>
 
 
-<p>
-
-Benutzer:
-<span id="dashboardUser"></span>
-
-</p>
-
 
 <p>
 
 HalDo Status:
-🟢 Aktiv
+🟢 Online
 
 </p>
+
 
 
 <p>
 
 Version:
-2.8.0
+v3.0
 
 </p>
 
@@ -713,7 +757,7 @@ Version:
 
 
 
-<div class="avatar">
+<div class="profile-avatar">
 
 👤
 
@@ -722,8 +766,8 @@ Version:
 
 
 <input
-id="newName"
-placeholder="Neuer Name"
+id="profileName"
+placeholder="Name"
 >
 
 
@@ -748,43 +792,7 @@ Speichern
 
 
 
-<!-- CLOUD -->
-
-
-<section id="cloudPage" class="page hidden">
-
-
-<div class="card">
-
-
-<h2>
-
-☁️ Cloud
-
-</h2>
-
-
-<p>
-
-Vorbereitung Online-System
-
-</p>
-
-
-</div>
-
-
-</section>
-
-
-
-
-
-
-
-
-
-<!-- SETTINGS -->
+<!-- EINSTELLUNGEN -->
 
 
 <section id="settingsPage" class="page hidden">
@@ -801,23 +809,22 @@ Vorbereitung Online-System
 
 
 <p>
+🎨 Design
+</p>
 
+
+<p>
 🎤 Sprache
-
 </p>
 
 
 <p>
-
-🤖 Avatar-System vorbereitet
-
+🤖 HalDo Avatar
 </p>
 
 
 <p>
-
-🎨 Logo-System vorbereitet
-
+🔐 Sicherheit
 </p>
 
 
@@ -840,13 +847,14 @@ Vorbereitung Online-System
 <nav class="bottom-nav">
 
 
-<button onclick="goHome()">
+<button onclick="openPage('homePage')">
 
 🏠
 <br>
 Home
 
 </button>
+
 
 
 <button onclick="goBack()">
@@ -858,14 +866,6 @@ Zurück
 </button>
 
 
-<button onclick="goForward()">
-
-➡️
-<br>
-Weiter
-
-</button>
-
 
 <button onclick="openPage('haldoPage')">
 
@@ -876,9 +876,17 @@ HalDo
 </button>
 
 
+
+<button onclick="openPage('settingsPage')">
+
+⚙️
+<br>
+Setup
+
+</button>
+
+
 </nav>
-
-
 
 
 
