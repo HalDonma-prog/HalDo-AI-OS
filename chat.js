@@ -41,7 +41,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     }
 
-    sendButton.addEventListener("click", sendMessage);
+sendButton.addEventListener("click", () => {
+
+    alert("Button funktioniert");
+
+    sendMessage();
+
+});
 
     userInput.addEventListener("keydown", (event) => {
 
