@@ -7,7 +7,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Apps/Web 3.0 v3.0</title>
+<title>Apps/Web 3.1 - HalDo AI</title>
 
 <link rel="stylesheet" href="style.css">
 
@@ -22,9 +22,6 @@
 <div class="app">
 
 
-
-<!-- HEADER -->
-
 <header class="app-header">
 
 
@@ -38,16 +35,15 @@ HD
 </div>
 
 
-
 <div>
 
 <h1>
-Apps/Web 3.0
+Apps/Web 3.1
 </h1>
 
 
 <p>
-HalDo AI Plattform v3.0
+HalDo AI Zentrum
 </p>
 
 
@@ -67,7 +63,7 @@ HalDo AI Plattform v3.0
 
 
 
-<!-- STARTSEITE -->
+<!-- START -->
 
 
 <section id="startPage" class="page">
@@ -76,7 +72,8 @@ HalDo AI Plattform v3.0
 <div class="hero-card">
 
 
-<div class="haldo-avatar">
+<div class="haldo-avatar-main"
+id="mainAvatar">
 
 🤖
 
@@ -94,16 +91,16 @@ Willkommen bei HalDo AI
 
 <p>
 
-Dein persönlicher KI-Assistent für Apps/Web 3.0
+Dein persönlicher intelligenter Assistent
 
 </p>
 
 
 
+<div id="startStatus"
+class="ai-status">
 
-<div class="ai-status">
-
-🟢 HalDo ist bereit
+🟢 HalDo bereit
 
 </div>
 
@@ -114,7 +111,6 @@ Dein persönlicher KI-Assistent für Apps/Web 3.0
 🚀 Starten
 
 </button>
-
 
 
 </div>
@@ -131,7 +127,7 @@ Dein persönlicher KI-Assistent für Apps/Web 3.0
 
 <h3>
 
-Schnellzugriff
+HalDo AI Funktionen
 
 </h3>
 
@@ -144,7 +140,7 @@ Schnellzugriff
 
 🤖
 <br>
-HalDo AI
+AI Assistent
 
 </button>
 
@@ -160,21 +156,21 @@ Notizen
 
 
 
-<button onclick="openPage('cloudPage')">
-
-☁️
-<br>
-Cloud
-
-</button>
-
-
-
 <button onclick="openPage('chatPage')">
 
 💬
 <br>
 Chat
+
+</button>
+
+
+
+<button onclick="openPage('dashboardPage')">
+
+📊
+<br>
+Dashboard
 
 </button>
 
@@ -195,17 +191,16 @@ Chat
 
 
 
-<!-- HAUPTMENÜ -->
+<!-- HOME -->
 
 
 <section id="homePage" class="page hidden">
 
 
+<div class="ai-center-card">
 
-<div class="haldo-card">
 
-
-<div class="haldo-avatar">
+<div class="haldo-avatar-main">
 
 🤖
 
@@ -220,6 +215,7 @@ HalDo AI
 </h2>
 
 
+
 <p id="welcomeText">
 
 Hallo 👋
@@ -227,7 +223,9 @@ Hallo 👋
 </p>
 
 
-<div id="statusText" class="ai-status">
+
+<div id="statusText"
+class="ai-status">
 
 🟢 Bereit
 
@@ -242,8 +240,8 @@ Hallo 👋
 
 
 
-<div class="menu-grid">
 
+<div class="menu-grid">
 
 
 <button class="menu-card"
@@ -278,36 +276,6 @@ Assistent
 
 
 <button class="menu-card"
-onclick="openPage('chatPage')">
-
-
-<span>
-
-💬
-
-</span>
-
-
-<h3>
-
-Chat
-
-</h3>
-
-
-<p>
-
-Kommunikation
-
-</p>
-
-
-</button>
-
-
-
-
-<button class="menu-card"
 onclick="openPage('notesPage')">
 
 
@@ -333,6 +301,7 @@ Organisation
 
 
 </button>
+
 
 
 
@@ -363,9 +332,37 @@ Dateien
 
 
 </button>
+
+
+
+<button class="menu-card"
+onclick="openPage('chatPage')">
+
+
+<span>
+
+💬
+
+</span>
+
+
+<h3>
+
+Chat
+
+</h3>
+
+
+<p>
+
+Kommunikation
+
+</p>
+
+
+</button>
 <button class="menu-card"
 onclick="openPage('dashboardPage')">
-
 
 <span>
 
@@ -373,20 +370,13 @@ onclick="openPage('dashboardPage')">
 
 </span>
 
-
 <h3>
-
 Dashboard
-
 </h3>
 
-
 <p>
-
 Übersicht
-
 </p>
-
 
 </button>
 
@@ -397,27 +387,19 @@ Dashboard
 <button class="menu-card"
 onclick="openPage('profilePage')">
 
-
 <span>
 
 👤
 
 </span>
 
-
 <h3>
-
 Profil
-
 </h3>
 
-
 <p>
-
 Benutzer
-
 </p>
-
 
 </button>
 
@@ -428,30 +410,21 @@ Benutzer
 <button class="menu-card"
 onclick="openPage('settingsPage')">
 
-
 <span>
 
 ⚙️
 
 </span>
 
-
 <h3>
-
 Einstellungen
-
 </h3>
 
-
 <p>
-
 System
-
 </p>
 
-
 </button>
-
 
 
 </div>
@@ -469,11 +442,10 @@ System
 
 <!-- HALDO AI -->
 
-
 <section id="haldoPage" class="page hidden">
 
 
-<div class="ai-panel">
+<div class="ai-center-card">
 
 
 <div id="haldoAvatar"
@@ -501,8 +473,16 @@ class="ai-status">
 </div>
 
 
+
+<div id="aiThinking"
+class="thinking hidden">
+
+💭 HalDo denkt...
+
 </div>
 
+
+</div>
 
 
 
@@ -525,7 +505,7 @@ class="chat-box">
 
 <input
 id="haldoInput"
-placeholder="HalDo fragen..."
+placeholder="Frag HalDo..."
 >
 
 
@@ -569,13 +549,12 @@ placeholder="HalDo fragen..."
 
 <h2>
 
-💬 Nachrichten
+💬 Chat
 
 </h2>
 
 
 </div>
-
 
 
 <div id="chatBox"
@@ -590,9 +569,8 @@ class="chat-box">
 
 <input
 id="messageInput"
-placeholder="Nachricht schreiben..."
+placeholder="Nachricht..."
 >
-
 
 
 <button onclick="sendMessage()">
@@ -629,6 +607,7 @@ placeholder="Nachricht schreiben..."
 📝 Notizen
 
 </h2>
+
 
 
 <button onclick="createNote()">
@@ -675,7 +654,7 @@ placeholder="Nachricht schreiben..."
 
 <p>
 
-Dateisystem vorbereitet
+Cloud-System Vorbereitung
 
 </p>
 
@@ -709,20 +688,18 @@ Dateisystem vorbereitet
 </h2>
 
 
-
 <p>
 
 HalDo Status:
-🟢 Online
+🟢 Aktiv
 
 </p>
-
 
 
 <p>
 
 Version:
-v3.0
+Apps/Web 3.1
 
 </p>
 
@@ -809,17 +786,17 @@ Speichern
 
 
 <p>
-🎨 Design
-</p>
-
-
-<p>
 🎤 Sprache
 </p>
 
 
 <p>
 🤖 HalDo Avatar
+</p>
+
+
+<p>
+🎨 Design
 </p>
 
 
@@ -890,9 +867,8 @@ Setup
 
 
 
-
-
 </div>
+
 
 
 <script src="script.js"></script>
