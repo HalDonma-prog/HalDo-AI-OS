@@ -1,7 +1,5 @@
 let aktuellerBenutzer = "";
 
-let benutzerListe = [];
-
 let chatSpeicher = [];
 
 
@@ -11,39 +9,32 @@ let chatSpeicher = [];
 
 function loadData(){
 
-    aktuellerBenutzer =
-    localStorage.getItem("aktuellerBenutzer") || "";
+
+aktuellerBenutzer =
+localStorage.getItem("aktuellerBenutzer") || "";
 
 
-    let users =
-    localStorage.getItem("benutzerListe");
+
+let chat =
+localStorage.getItem("appsChat");
 
 
-    if(users){
+if(chat){
 
-        benutzerListe = JSON.parse(users);
+chatSpeicher = JSON.parse(chat);
 
-    }
-
-
-    let chat =
-    localStorage.getItem("appsChat");
+}
 
 
-    if(chat){
 
-        chatSpeicher = JSON.parse(chat);
+if(aktuellerBenutzer){
 
-    }
+showPage("dashboard");
 
+updateUser();
 
-    if(aktuellerBenutzer){
+}
 
-        showPage("home");
-
-        updateUser();
-
-    }
 
 
 }
@@ -55,18 +46,22 @@ function loadData(){
 
 function showPage(page){
 
-    document.getElementById("loginPage").style.display="none";
 
-    document.getElementById("home").style.display="none";
+document.getElementById("loginPage").style.display="none";
 
-    document.getElementById("chatPage").style.display="none";
+document.getElementById("dashboard").style.display="none";
 
-    document.getElementById("usersPage").style.display="none";
+document.getElementById("chatPage").style.display="none";
+
+document.getElementById("profilePage").style.display="none";
 
 
-    document.getElementById(page).style.display="block";
+
+document.getElementById(page).style.display="block";
+
 
 }
+
 
 
 
@@ -75,52 +70,52 @@ function showPage(page){
 
 function login(){
 
-    let name =
-    document.getElementById("loginName").value.trim();
 
-
-    let password =
-    document.getElementById("loginPassword").value.trim();
+let name =
+document.getElementById("loginName").value.trim();
 
 
 
-    if(name==="" || password===""){
-
-        alert("Bitte Name und Passwort eingeben");
-
-        return;
-
-    }
+let password =
+document.getElementById("loginPassword").value.trim();
 
 
 
-    aktuellerBenutzer=name;
+if(name==="" || password===""){
 
 
-    if(!benutzerListe.includes(name)){
-
-        benutzerListe.push(name);
-
-    }
+alert("Bitte Daten eingeben");
 
 
-    localStorage.setItem(
-    "aktuellerBenutzer",
-    name
-    );
+return;
 
-
-    localStorage.setItem(
-    "benutzerListe",
-    JSON.stringify(benutzerListe)
-    );
-
-
-    showPage("home");
-
-    updateUser();
 
 }
+
+
+
+aktuellerBenutzer=name;
+
+
+
+localStorage.setItem(
+
+"aktuellerBenutzer",
+
+name
+
+);
+
+
+
+showPage("dashboard");
+
+
+updateUser();
+
+
+}
+
 
 
 
@@ -129,203 +124,242 @@ function login(){
 
 function updateUser(){
 
-    document.getElementById("activeUser")
-    .innerText=aktuellerBenutzer;
+
+document.getElementById("activeUser")
+.innerText=aktuellerBenutzer;
 
 
-    document.getElementById("welcome")
-    .innerText="Willkommen "+aktuellerBenutzer;
 
 }
 
 
 
 
-// Logout
+// Dashboard
 
-function logout(){
-
-    aktuellerBenutzer="";
+function goDashboard(){
 
 
-    localStorage.removeItem(
-    "aktuellerBenutzer"
-    );
+showPage("dashboard");
 
-
-    showPage("loginPage");
 
 }
 
 
 
-
-
-// Home
-
-function goHome(){
-
-    showPage("home");
-
-}
-
-
-
-
-// Chat öffnen
+// Chat
 
 function openChat(){
 
-    showPage("chatPage");
 
-    loadMessages();
+showPage("chatPage");
+
+
+loadMessages();
+
 
 }
 
 
 
-
-// Nachricht senden
 
 function sendMessage(){
 
-    let input =
-    document.getElementById("messageInput");
 
-
-    let text =
-    input.value.trim();
+let input =
+document.getElementById("messageInput");
 
 
 
-    if(text===""){
-
-        return;
-
-    }
+let text =
+input.value.trim();
 
 
 
-    chatSpeicher.push({
+if(text===""){
 
-        user:aktuellerBenutzer,
+return;
 
-        text:text
-
-    });
+}
 
 
 
-    botAntwort(text);
+chatSpeicher.push({
+
+user:aktuellerBenutzer,
+
+text:text
+
+});
 
 
 
-    saveChat();
+kiAntwort(text);
 
 
-    input.value="";
+
+saveChat();
 
 
-    loadMessages();
+
+input.value="";
+
+
+
+loadMessages();
+
+
 
 }
 
 
 
 
-// einfache KI Antwort
 
-function botAntwort(text){
+// KI Antworten
 
-
-    let antwort="Ich habe deine Nachricht gespeichert. 🙂";
+function kiAntwort(text){
 
 
-    text=text.toLowerCase();
+let frage=text.toLowerCase();
 
 
-
-    if(text.includes("hallo")){
-
-        antwort="Hallo "+aktuellerBenutzer+" 👋";
-
-    }
-
-
-    if(text.includes("wie geht")){
-
-        antwort="Mir geht es gut. Ich bin bereit zu helfen. 🤖";
-
-    }
-
-
-    if(text.includes("name")){
-
-        antwort="Du bist angemeldet als "+aktuellerBenutzer+".";
-
-    }
+let antwort=
+"Ich habe deine Nachricht verstanden. 🙂";
 
 
 
-    chatSpeicher.push({
 
-        user:"Apps Web KI",
+if(frage.includes("hallo")){
 
-        text:antwort
 
-    });
+antwort="Hallo "+aktuellerBenutzer+" 👋 Wie kann ich helfen?";
 
 
 }
 
+
+
+else if(frage.includes("hilfe")){
+
+
+antwort=
+"Befehle: Hallo, Status, Name, Apps, Zeit";
+
+
+}
+
+
+
+else if(frage.includes("status")){
+
+
+antwort=
+"Apps Web 3.0 läuft erfolgreich 🟢";
+
+
+}
+
+
+
+else if(frage.includes("name")){
+
+
+antwort=
+"Du bist angemeldet als "+aktuellerBenutzer;
+
+
+}
+
+
+
+else if(frage.includes("apps")){
+
+
+antwort=
+"Verfügbare Bereiche: Chat, Profil, Dashboard";
+
+
+}
+
+
+
+else if(frage.includes("zeit")){
+
+
+antwort=
+"Die aktuelle Zeit ist: "+
+new Date().toLocaleTimeString();
+
+
+}
+
+
+
+
+chatSpeicher.push({
+
+user:"Apps Web KI",
+
+text:antwort
+
+});
+
+
+
+}
 
 
 
 
 function loadMessages(){
 
-    let box =
-    document.getElementById("chatBox");
 
-
-    box.innerHTML="";
-
-
-
-    chatSpeicher.forEach(function(item){
-
-
-        let div =
-        document.createElement("div");
-
-
-        div.className="message";
+let box =
+document.getElementById("chatBox");
 
 
 
-        if(item.user==="Apps Web KI"){
-
-            div.className="message bot";
-
-        }
-
-        else{
-
-            div.className="message user";
-
-        }
+box.innerHTML="";
 
 
 
-        div.innerText =
-        item.user+": "+item.text;
+chatSpeicher.forEach(function(item){
 
 
-        box.appendChild(div);
+let div =
+document.createElement("div");
 
 
 
-    });
+if(item.user==="Apps Web KI"){
+
+
+div.className="message bot";
+
+
+}
+
+else{
+
+
+div.className="message user";
+
+
+}
+
+
+
+div.innerText =
+item.user+": "+item.text;
+
+
+
+box.appendChild(div);
+
+
+
+});
 
 
 
@@ -336,151 +370,125 @@ function loadMessages(){
 
 function saveChat(){
 
-    localStorage.setItem(
 
-    "appsChat",
+localStorage.setItem(
 
-    JSON.stringify(chatSpeicher)
+"appsChat",
 
-    );
+JSON.stringify(chatSpeicher)
+
+);
+
+
+}
+
+
+
+
+
+// Profil
+
+function openProfile(){
+
+
+showPage("profilePage");
+
 
 }
 
 
 
+function changeName(){
 
-// Benutzerverwaltung
 
-function openUsers(){
+let name =
+document.getElementById("profileName")
+.value.trim();
 
-    showPage("usersPage");
 
-    displayUsers();
+
+if(name){
+
+
+aktuellerBenutzer=name;
+
+
+
+localStorage.setItem(
+
+"aktuellerBenutzer",
+
+name
+
+);
+
+
 
 }
 
 
 
-
-function addUser(){
-
-    let input =
-    document.getElementById("newUser");
+goDashboard();
 
 
-    let name =
-    input.value.trim();
-
-
-
-    if(name===""){
-
-        return;
-
-    }
-
-
-
-    if(!benutzerListe.includes(name)){
-
-        benutzerListe.push(name);
-
-    }
-
-
-
-    localStorage.setItem(
-
-    "benutzerListe",
-
-    JSON.stringify(benutzerListe)
-
-    );
-
-
-
-    input.value="";
-
-
-    displayUsers();
 
 }
 
-
-
-
-function displayUsers(){
-
-    let box =
-    document.getElementById("usersList");
-
-
-    box.innerHTML="";
-
-
-
-    benutzerListe.forEach(function(user){
-
-
-        let div =
-        document.createElement("div");
-
-
-        div.className="user-card";
-
-
-        div.innerText=user;
-
-
-        box.appendChild(div);
-
-
-    });
-
-
-}
 
 
 
 
 window.onload=function(){
 
-    loadData();
 
-
-    let input =
-    document.getElementById("messageInput");
-
-
-    if(input){
-
-        input.addEventListener(
-        "keydown",
-        function(e){
-
-
-            if(e.key==="Enter"){
-
-                e.preventDefault();
-
-                sendMessage();
-
-            }
-
-
-        });
-
-    }
+loadData();
 
 
 
-    if("serviceWorker" in navigator){
+let input =
+document.getElementById("messageInput");
 
-        navigator.serviceWorker.register(
-        "service-worker.js"
-        );
 
-    }
+
+if(input){
+
+
+input.addEventListener(
+
+"keydown",
+
+function(e){
+
+
+if(e.key==="Enter"){
+
+
+e.preventDefault();
+
+
+sendMessage();
+
+
+}
+
+
+});
+
+
+}
+
+
+
+if("serviceWorker" in navigator){
+
+
+navigator.serviceWorker.register(
+"service-worker.js"
+);
+
+
+}
+
 
 
 };
