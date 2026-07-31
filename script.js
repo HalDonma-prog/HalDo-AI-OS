@@ -15,7 +15,7 @@ if(user){
 updateUser(user);
 
 }
-
+loadNotes();
 };
 
 
