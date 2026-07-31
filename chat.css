@@ -1,168 +1,22 @@
-/* ==================================
-   HalDo AI Chat - Version 1.0
-================================== */
+document.addEventListener("DOMContentLoaded", function () {
 
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-}
+    var button = document.getElementById("sendButton");
+    var input = document.getElementById("userInput");
+    var messages = document.getElementById("messages");
 
-body{
-    font-family:Arial, Helvetica, sans-serif;
-    background:linear-gradient(135deg,#0b1020,#16213e,#1b3a6b);
-    color:white;
-    line-height:1.6;
-}
+    button.onclick = function () {
 
-/* Navigation */
+        if (input.value.trim() === "") return;
 
-.navbar{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    padding:20px 8%;
-    background:rgba(0,0,0,.30);
-}
+        messages.innerHTML += "<div class='message user'>" + input.value + "</div>";
 
-.logo{
-    font-size:28px;
-    font-weight:bold;
-    color:#4da6ff;
-}
+        input.value = "";
 
-.menu{
-    display:flex;
-    list-style:none;
-    gap:25px;
-}
+        messages.innerHTML += "<div class='message ai'>🤖 Hallo! Ich habe deine Nachricht erhalten.</div>";
 
-.menu a{
-    color:white;
-    text-decoration:none;
-}
+    };
 
-.menu a:hover{
-    color:#4da6ff;
-}
-
-/* Überschrift */
-
-.hero{
-    text-align:center;
-    padding:50px 20px;
-}
-
-.hero h1{
-    font-size:42px;
-    margin-bottom:10px;
-}
-
-.hero p{
-    color:#cfe4ff;
-}
-
-/* Chatfenster */
-
-.chat-window{
-    width:90%;
-    max-width:900px;
-    margin:40px auto;
-    background:rgba(255,255,255,.08);
-    border-radius:20px;
-    padding:25px;
-}
-/* Nachrichten */
-
-#messages{
-    min-height:300px;
-    margin-bottom:20px;
-}
-
-.message{
-    padding:15px;
-    border-radius:15px;
-    margin-bottom:15px;
-    max-width:80%;
-}
-
-.message.ai{
-    background:#2f8cff;
-    color:white;
-}
-
-.message.user{
-    background:#2b2b2b;
-    color:white;
-    margin-left:auto;
-}
-
-/* Eingabebereich */
-
-.chat-input{
-    display:flex;
-    gap:10px;
-}
-
-.chat-input input{
-    flex:1;
-    padding:15px;
-    border:none;
-    border-radius:12px;
-    font-size:16px;
-}
-
-.chat-input button{
-    background:#4da6ff;
-    color:white;
-    border:none;
-    border-radius:12px;
-    padding:15px 25px;
-    cursor:pointer;
-    font-size:16px;
-    transition:.3s;
-}
-
-.chat-input button:hover{
-    background:#2f8cff;
-}
-
-/* Footer */
-
-footer{
-    margin-top:40px;
-    padding:20px;
-    text-align:center;
-    background:rgba(0,0,0,.30);
-}
-
-/* Smartphone */
-
-@media(max-width:768px){
-
-    .navbar{
-        flex-direction:column;
-        gap:15px;
-    }
-
-    .menu{
-        flex-wrap:wrap;
-        justify-content:center;
-    }
-
-    .hero h1{
-        font-size:32px;
-    }
-
-    .chat-input{
-        flex-direction:column;
-    }
-
-    .chat-input button{
-        width:100%;
-    }
-
-}
+});
 HalDo-ai/
 │
 ├── index.html
