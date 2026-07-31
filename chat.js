@@ -1,4 +1,5 @@
 alert("HalDo Chat JS geladen");
+
 const sendButton = document.getElementById("sendButton");
 const userInput = document.getElementById("userInput");
 const messages = document.getElementById("messages");
