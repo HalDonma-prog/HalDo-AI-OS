@@ -28,10 +28,12 @@ document.addEventListener("DOMContentLoaded", () => {
             );
         }, 800);
     }
+    if(sendButton){
     sendButton.addEventListener(
         "click",
         sendMessage
     );
+}
     userInput.addEventListener(
         "keydown",
         (event) => {
