@@ -2,6 +2,10 @@ let aktuellerBenutzer = "";
 
 let chatSpeicher = [];
 
+let verlauf = [];
+
+let verlaufPosition = -1;
+
 
 
 
@@ -28,7 +32,6 @@ chatSpeicher = JSON.parse(chat);
 
 
 
-
 if(aktuellerBenutzer){
 
 showPage("dashboard");
@@ -47,9 +50,107 @@ updateCount();
 
 
 
-// Seiten wechseln
+// Seiten wechseln mit Verlauf
 
 function showPage(page){
+
+
+let aktuelleSeite = page;
+
+
+
+if(verlauf[verlaufPosition] !== page){
+
+
+verlauf =
+verlauf.slice(0, verlaufPosition + 1);
+
+
+
+verlauf.push(page);
+
+
+verlaufPosition = verlauf.length - 1;
+
+
+}
+
+
+
+
+
+document.getElementById("loginPage").style.display="none";
+
+document.getElementById("dashboard").style.display="none";
+
+document.getElementById("haldoPage").style.display="none";
+
+document.getElementById("profilePage").style.display="none";
+
+
+
+document.getElementById(page).style.display="block";
+
+
+
+}
+
+
+
+
+
+
+// Zurück
+
+function goBack(){
+
+
+if(verlaufPosition > 0){
+
+
+verlaufPosition--;
+
+
+zeigeVerlauf();
+
+}
+
+
+}
+
+
+
+
+
+// Vorwärts
+
+function goForward(){
+
+
+if(verlaufPosition < verlauf.length-1){
+
+
+verlaufPosition++;
+
+
+zeigeVerlauf();
+
+
+}
+
+
+}
+
+
+
+
+
+function zeigeVerlauf(){
+
+
+let page =
+verlauf[verlaufPosition];
+
 
 
 document.getElementById("loginPage").style.display="none";
@@ -71,7 +172,11 @@ document.getElementById(page).style.display="block";
 
 
 
+
+
+
 // Login
+
 
 function login(){
 
@@ -88,9 +193,12 @@ document.getElementById("loginPassword").value.trim();
 
 if(name==="" || password===""){
 
+
 alert("Bitte Daten eingeben");
 
+
 return;
+
 
 }
 
@@ -137,8 +245,6 @@ document.getElementById("activeUser")
 
 
 
-// Dashboard
-
 function goDashboard(){
 
 
@@ -155,7 +261,9 @@ updateCount();
 
 
 
-// HalDo öffnen
+
+// HalDo
+
 
 function openHalDoAI(){
 
@@ -171,8 +279,6 @@ loadMessages();
 
 
 
-
-// Nachricht senden
 
 function sendMessage(){
 
@@ -216,7 +322,6 @@ saveChat();
 input.value="";
 
 
-
 loadMessages();
 
 
@@ -230,18 +335,16 @@ updateCount();
 
 
 
-
-// HalDo Antwort
-
 function haldoAntwort(text){
 
 
-let frage=text.toLowerCase();
+let frage =
+text.toLowerCase();
+
 
 
 let antwort =
-"Ich bin HalDo AI. Ich habe dich verstanden. 🤖";
-
+"Ich bin HalDo AI. Ich helfe dir gerne. 🤖";
 
 
 
@@ -249,62 +352,38 @@ if(frage.includes("hallo")){
 
 
 antwort =
-"Hallo "+aktuellerBenutzer+" 👋 Schön dich zu sehen.";
+"Hallo "+aktuellerBenutzer+" 👋";
 
 
 }
-
-
-
-else if(frage.includes("wer bist du")){
-
-
-antwort =
-"Ich bin HalDo AI, dein Assistent in Apps Web 3.0.";
-
-
-}
-
 
 
 else if(frage.includes("hilfe")){
 
 
 antwort =
-"Du kannst mich fragen über Apps, Profil, Status oder Einstellungen.";
+"Ich kann Fragen beantworten und dich durch Apps Web 3.0 führen.";
 
 
 }
-
 
 
 else if(frage.includes("status")){
 
 
 antwort =
-"Alle Systeme laufen 🟢 Apps Web 3.0 ist aktiv.";
+"System Status: Alles läuft 🟢";
 
 
 }
 
 
 
-else if(frage.includes("zeit")){
+else if(frage.includes("zurück")){
 
 
 antwort =
-"Die Uhrzeit ist "+new Date().toLocaleTimeString();
-
-
-}
-
-
-
-else if(frage.includes("danke")){
-
-
-antwort =
-"Gerne 😊 Ich helfe dir jederzeit.";
+"Nutze den Zurück-Button ⬅️ oben.";
 
 
 }
@@ -321,8 +400,6 @@ text:antwort
 
 
 
-// Stimme aktivieren
-
 sprechen(antwort);
 
 
@@ -333,44 +410,37 @@ sprechen(antwort);
 
 
 
-// Text sprechen
-
 function sprechen(text){
 
 
 if("speechSynthesis" in window){
 
 
-let sprache =
+let stimme =
 new SpeechSynthesisUtterance(text);
 
 
-
-sprache.lang="de-DE";
-
-
-window.speechSynthesis.speak(sprache);
+stimme.lang="de-DE";
 
 
-}
+window.speechSynthesis.speak(stimme);
 
 
 }
 
 
+}
 
 
 
 
 
-// Mikrofon Vorbereitung
+
 
 function startVoice(){
 
 
-alert(
-"Sprachsteuerung wird vorbereitet 🎤"
-);
+alert("Sprachsteuerung wird weiter entwickelt 🎤");
 
 
 }
@@ -381,15 +451,12 @@ alert(
 
 
 
-
-// Chat anzeigen
 
 function loadMessages(){
 
 
 let box =
 document.getElementById("chatBox");
-
 
 
 box.innerHTML="";
@@ -404,21 +471,10 @@ document.createElement("div");
 
 
 
-if(item.user==="HalDo AI"){
-
-
-div.className="message bot";
-
-
-}
-
-else{
-
-
-div.className="message user";
-
-
-}
+div.className =
+item.user==="HalDo AI"
+?"message bot"
+:"message user";
 
 
 
@@ -428,7 +484,6 @@ item.user+": "+item.text;
 
 
 box.appendChild(div);
-
 
 
 });
@@ -459,9 +514,6 @@ JSON.stringify(chatSpeicher)
 
 
 
-
-// Anzahl Nachrichten
-
 function updateCount(){
 
 
@@ -473,23 +525,20 @@ document.getElementById("messageCount");
 if(count){
 
 
-count.innerText =
-chatSpeicher.length;
+count.innerText=chatSpeicher.length;
 
 
 }
 
 
 }
-
-
-
 
 
 
 
 
 // Profil
+
 
 function openProfile(){
 
@@ -502,13 +551,11 @@ showPage("profilePage");
 
 
 
-
 function changeName(){
 
 
 let name =
-document.getElementById("profileName")
-.value.trim();
+document.getElementById("profileName").value.trim();
 
 
 
@@ -516,7 +563,6 @@ if(name){
 
 
 aktuellerBenutzer=name;
-
 
 
 localStorage.setItem(
@@ -528,9 +574,7 @@ name
 );
 
 
-
 }
-
 
 
 goDashboard();
@@ -543,48 +587,10 @@ goDashboard();
 
 
 
-
-
 window.onload=function(){
 
 
 loadData();
-
-
-
-let input =
-document.getElementById("messageInput");
-
-
-
-if(input){
-
-
-input.addEventListener(
-
-"keydown",
-
-function(e){
-
-
-if(e.key==="Enter"){
-
-
-e.preventDefault();
-
-
-sendMessage();
-
-
-}
-
-
-});
-
-
-}
-
-
 
 
 
