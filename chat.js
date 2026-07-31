@@ -53,6 +53,7 @@ document.addEventListener("DOMContentLoaded", () => {
     );
     console.log("HalDo AI Chat geladen");
 });
+
 HalDo-ai/
 │
 ├── index.html
