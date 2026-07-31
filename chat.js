@@ -43,7 +43,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
     );
-    clearButton.addEventListener(
+    if(clearButton){
         "click",
         () => {
             chatBox.innerHTML = "";
