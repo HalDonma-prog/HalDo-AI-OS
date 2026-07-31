@@ -16,7 +16,8 @@ localStorage.getItem("aktuellerBenutzer") || "";
 
 
 let chat =
-localStorage.getItem("appsChat");
+localStorage.getItem("haldoChat");
+
 
 
 if(chat){
@@ -24,6 +25,7 @@ if(chat){
 chatSpeicher = JSON.parse(chat);
 
 }
+
 
 
 
@@ -42,6 +44,7 @@ updateUser();
 
 
 
+
 // Seiten wechseln
 
 function showPage(page){
@@ -51,7 +54,7 @@ document.getElementById("loginPage").style.display="none";
 
 document.getElementById("dashboard").style.display="none";
 
-document.getElementById("chatPage").style.display="none";
+document.getElementById("haldoPage").style.display="none";
 
 document.getElementById("profilePage").style.display="none";
 
@@ -61,7 +64,6 @@ document.getElementById(page).style.display="block";
 
 
 }
-
 
 
 
@@ -88,7 +90,6 @@ alert("Bitte Daten eingeben");
 
 
 return;
-
 
 }
 
@@ -120,8 +121,6 @@ updateUser();
 
 
 
-// Benutzer anzeigen
-
 function updateUser(){
 
 
@@ -129,8 +128,8 @@ document.getElementById("activeUser")
 .innerText=aktuellerBenutzer;
 
 
-
 }
+
 
 
 
@@ -147,18 +146,20 @@ showPage("dashboard");
 
 
 
-// Chat
 
-function openChat(){
+// HalDo AI
+
+function openHalDoAI(){
 
 
-showPage("chatPage");
+showPage("haldoPage");
 
 
 loadMessages();
 
 
 }
+
 
 
 
@@ -194,7 +195,7 @@ text:text
 
 
 
-kiAntwort(text);
+haldoAntwort(text);
 
 
 
@@ -209,23 +210,22 @@ input.value="";
 loadMessages();
 
 
-
 }
 
 
 
 
 
-// KI Antworten
+// HalDo KI Antwort
 
-function kiAntwort(text){
+function haldoAntwort(text){
 
 
 let frage=text.toLowerCase();
 
 
-let antwort=
-"Ich habe deine Nachricht verstanden. 🙂";
+let antwort =
+"Ich bin HalDo AI und habe deine Nachricht verstanden. 🤖";
 
 
 
@@ -233,8 +233,8 @@ let antwort=
 if(frage.includes("hallo")){
 
 
-antwort="Hallo "+aktuellerBenutzer+" 👋 Wie kann ich helfen?";
-
+antwort =
+"Hallo "+aktuellerBenutzer+" 👋 Ich bin HalDo AI.";
 
 }
 
@@ -243,8 +243,8 @@ antwort="Hallo "+aktuellerBenutzer+" 👋 Wie kann ich helfen?";
 else if(frage.includes("hilfe")){
 
 
-antwort=
-"Befehle: Hallo, Status, Name, Apps, Zeit";
+antwort =
+"Ich kann dir helfen mit: Apps, Profil, Status und Fragen.";
 
 
 }
@@ -254,60 +254,47 @@ antwort=
 else if(frage.includes("status")){
 
 
-antwort=
-"Apps Web 3.0 läuft erfolgreich 🟢";
+antwort =
+"Apps Web 3.0 ist aktiv 🟢";
 
 
 }
 
 
 
-else if(frage.includes("name")){
+else if(frage.includes("profil")){
 
 
-antwort=
-"Du bist angemeldet als "+aktuellerBenutzer;
-
-
-}
-
-
-
-else if(frage.includes("apps")){
-
-
-antwort=
-"Verfügbare Bereiche: Chat, Profil, Dashboard";
+antwort =
+"Du kannst dein Profil im Profil-Bereich ändern.";
 
 
 }
 
 
 
-else if(frage.includes("zeit")){
+else if(frage.includes("app")){
 
 
-antwort=
-"Die aktuelle Zeit ist: "+
-new Date().toLocaleTimeString();
+antwort =
+"Deine verfügbaren Bereiche sind: HalDo AI, Profil und Cloud.";
 
 
 }
-
 
 
 
 chatSpeicher.push({
 
-user:"Apps Web KI",
+user:"HalDo AI",
 
 text:antwort
 
 });
 
 
-
 }
+
 
 
 
@@ -332,7 +319,7 @@ document.createElement("div");
 
 
 
-if(item.user==="Apps Web KI"){
+if(item.user==="HalDo AI"){
 
 
 div.className="message bot";
@@ -362,8 +349,8 @@ box.appendChild(div);
 });
 
 
-
 }
+
 
 
 
@@ -373,7 +360,7 @@ function saveChat(){
 
 localStorage.setItem(
 
-"appsChat",
+"haldoChat",
 
 JSON.stringify(chatSpeicher)
 
@@ -413,7 +400,6 @@ if(name){
 aktuellerBenutzer=name;
 
 
-
 localStorage.setItem(
 
 "aktuellerBenutzer",
@@ -423,7 +409,6 @@ name
 );
 
 
-
 }
 
 
@@ -431,9 +416,7 @@ name
 goDashboard();
 
 
-
 }
-
 
 
 
