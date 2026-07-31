@@ -1,23 +1,30 @@
 // ==================================
-// HalDo AI Dashboard - Version 1.1
+// HalDo AI Dashboard - Version 1.2
 // ==================================
 
 document.addEventListener("DOMContentLoaded", () => {
 
-    const buttons = document.querySelectorAll(".card button");
+    const cards = document.querySelectorAll(".card");
 
-    buttons.forEach(button => {
+    cards.forEach(card => {
+
+        const title = card.querySelector("h2").textContent;
+        const button = card.querySelector("button");
 
         button.addEventListener("click", () => {
 
-            const card = button.parentElement;
-            const title = card.querySelector("h2").textContent;
+            if (title.includes("KI Chat")) {
 
-            alert(
-                title +
-                "\n\nDiese Funktion befindet sich gerade im Aufbau.\n\n" +
-                "Sie wird in einer der nächsten Versionen verfügbar sein. 🚀"
-            );
+                window.location.href = "chat.html";
+
+            } else {
+
+                alert(
+                    title +
+                    "\n\nDiese Funktion wird in einer der nächsten Versionen verfügbar sein. 🚀"
+                );
+
+            }
 
         });
 
