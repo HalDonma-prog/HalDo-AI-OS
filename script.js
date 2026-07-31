@@ -1,31 +1,49 @@
 function sendMessage() {
 
-    let input = document.getElementById("messageInput");
-    let chat = document.getElementById("chatBox");
+    const input = document.getElementById("messageInput");
+    const chat = document.getElementById("chatBox");
 
-    let text = input.value.trim();
-
-    if (text === "") {
+    if (!input || !chat) {
         return;
     }
 
-    let message = document.createElement("div");
+    const text = input.value.trim();
+
+    if (text.length === 0) {
+        return;
+    }
+
+    const message = document.createElement("div");
+
     message.className = "message user";
-    message.textContent = text;
+    message.innerText = text;
 
     chat.appendChild(message);
 
     input.value = "";
 
-    chat.scrollTop = chat.scrollHeight;
+    setTimeout(function() {
+        chat.scrollTop = chat.scrollHeight;
+    }, 100);
 }
 
 
-document.getElementById("messageInput")
-.addEventListener("keydown", function(event) {
+// iPhone Tastatur-Unterstützung
+window.onload = function() {
 
-    if (event.key === "Enter") {
-        sendMessage();
+    const input = document.getElementById("messageInput");
+
+    if (input) {
+
+        input.addEventListener("keypress", function(event) {
+
+            if (event.key === "Enter") {
+                event.preventDefault();
+                sendMessage();
+            }
+
+        });
+
     }
 
-});
+};
