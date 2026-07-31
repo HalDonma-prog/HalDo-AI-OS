@@ -601,8 +601,7 @@ if(note){
 
 
 notes.push(note);
-
-
+saveNotes();
 showNotes();
 
 
