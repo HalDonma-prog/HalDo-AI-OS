@@ -1,13 +1,13 @@
+let chatSpeicher = [];
+
+
 function openChat(){
 
-document.getElementById("home").style.display="none";
+    document.getElementById("home").style.display="none";
+    document.getElementById("chatPage").style.display="block";
+    document.getElementById("subtitle").innerText="Chat";
 
-document.getElementById("chatPage").style.display="block";
-
-document.getElementById("subtitle").innerText="Chat";
-
-
-loadMessages();
+    loadMessages();
 
 }
 
@@ -15,11 +15,50 @@ loadMessages();
 
 function goHome(){
 
-document.getElementById("chatPage").style.display="none";
+    document.getElementById("chatPage").style.display="none";
+    document.getElementById("home").style.display="block";
+    document.getElementById("subtitle").innerText="Startseite";
 
-document.getElementById("home").style.display="block";
+}
 
-document.getElementById("subtitle").innerText="Startseite";
+
+
+function saveMessages(){
+
+    try {
+
+        localStorage.setItem(
+            "appsWebChat",
+            JSON.stringify(chatSpeicher)
+        );
+
+    } catch(e) {
+
+        console.log("Speichern nicht möglich");
+
+    }
+
+}
+
+
+
+function loadStorage(){
+
+    try {
+
+        let data = localStorage.getItem("appsWebChat");
+
+        if(data){
+
+            chatSpeicher = JSON.parse(data);
+
+        }
+
+    } catch(e){
+
+        chatSpeicher = [];
+
+    }
 
 }
 
@@ -27,32 +66,30 @@ document.getElementById("subtitle").innerText="Startseite";
 
 function sendMessage(){
 
-let input=document.getElementById("messageInput");
+    let input=document.getElementById("messageInput");
 
-let text=input.value.trim();
-
-
-if(text===""){
-return;
-}
+    let text=input.value.trim();
 
 
-let messages=JSON.parse(localStorage.getItem("chat")) || [];
+    if(text===""){
+        return;
+    }
 
 
-messages.push({
-user:"Du",
-text:text
-});
+    chatSpeicher.push({
+
+        user:"Du",
+        text:text
+
+    });
 
 
-localStorage.setItem("chat",JSON.stringify(messages));
+    saveMessages();
 
 
-input.value="";
+    input.value="";
 
-
-loadMessages();
+    loadMessages();
 
 }
 
@@ -60,41 +97,35 @@ loadMessages();
 
 function loadMessages(){
 
-let chat=document.getElementById("chatBox");
+    let chat=document.getElementById("chatBox");
+
+    chat.innerHTML="";
 
 
-chat.innerHTML="";
+    if(chatSpeicher.length===0){
+
+        chat.innerHTML=
+        '<div class="message bot">Willkommen im Chat 👋</div>';
+
+        return;
+
+    }
 
 
-let messages=JSON.parse(localStorage.getItem("chat")) || [];
+    chatSpeicher.forEach(function(item){
+
+        let div=document.createElement("div");
+
+        div.className="message user";
+
+        div.innerText=item.user+": "+item.text;
+
+        chat.appendChild(div);
+
+    });
 
 
-if(messages.length===0){
-
-chat.innerHTML=
-'<div class="message bot">Willkommen im Chat 👋</div>';
-
-}
-
-
-
-messages.forEach(function(item){
-
-
-let div=document.createElement("div");
-
-div.className="message user";
-
-div.innerText=item.user+": "+item.text;
-
-
-chat.appendChild(div);
-
-
-});
-
-
-chat.scrollTop=chat.scrollHeight;
+    chat.scrollTop=chat.scrollHeight;
 
 }
 
@@ -102,23 +133,26 @@ chat.scrollTop=chat.scrollHeight;
 
 window.onload=function(){
 
-
-let input=document.getElementById("messageInput");
-
-
-input.addEventListener("keydown",function(event){
+    loadStorage();
 
 
-if(event.key==="Enter"){
-
-event.preventDefault();
-
-sendMessage();
-
-}
+    let input=document.getElementById("messageInput");
 
 
-});
+    if(input){
 
+        input.addEventListener("keydown",function(event){
+
+            if(event.key==="Enter"){
+
+                event.preventDefault();
+
+                sendMessage();
+
+            }
+
+        });
+
+    }
 
 };
