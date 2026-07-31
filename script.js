@@ -1,8 +1,7 @@
-let currentPage = "loginPage";
-
 let history = [];
 
 let historyIndex = -1;
+
 
 
 // Start
@@ -19,25 +18,10 @@ if(user){
 showHome();
 
 
-document.getElementById("welcomeUser").innerText = user;
-
-
-document.getElementById("dashboardUser").innerText = user;
-
-
-let welcome = document.getElementById("haldoWelcome");
-
-
-if(welcome){
-
-welcome.innerText =
-"Hallo "+user+" 👋 HalDo AI ist bereit.";
-
-}
+setUser(user);
 
 
 }
-
 
 
 loadMessages();
@@ -50,21 +34,46 @@ loadMessages();
 
 
 
+function setUser(user){
 
 
-// LOGIN
+let a=document.getElementById("welcomeUser");
+
+let b=document.getElementById("dashboardUser");
+
+let c=document.getElementById("haldoWelcome");
+
+
+
+if(a) a.innerText=user;
+
+if(b) b.innerText=user;
+
+if(c) c.innerText=
+"Hallo "+user+" 👋 HalDo AI ist bereit.";
+
+}
+
+
+
+
+
+
+
+// Login
+
 
 function login(){
 
 
-let name =
+let name=
 document.getElementById("loginName").value.trim();
 
 
 
-if(name===""){
+if(!name){
 
-alert("Bitte Namen eingeben");
+alert("Bitte Benutzername eingeben");
 
 return;
 
@@ -75,24 +84,7 @@ return;
 localStorage.setItem("appsUser",name);
 
 
-
-document.getElementById("welcomeUser").innerText=name;
-
-
-document.getElementById("dashboardUser").innerText=name;
-
-
-
-let welcome=document.getElementById("haldoWelcome");
-
-
-if(welcome){
-
-welcome.innerText =
-"Hallo "+name+" 👋 HalDo AI ist bereit.";
-
-}
-
+setUser(name);
 
 
 showHome();
@@ -107,15 +99,14 @@ showHome();
 
 
 
-// Seiten wechseln
+// Navigation
+
 
 function openPage(page){
 
 
-let pages=document.querySelectorAll(".page");
-
-
-pages.forEach(function(p){
+document.querySelectorAll(".page")
+.forEach(function(p){
 
 p.classList.add("hidden");
 
@@ -129,25 +120,17 @@ let target=document.getElementById(page);
 
 if(target){
 
-
 target.classList.remove("hidden");
-
-
-currentPage=page;
 
 
 history.push(page);
 
-
 historyIndex=history.length-1;
 
-
 }
 
 
-
 }
-
 
 
 
@@ -162,7 +145,6 @@ openPage("homePage");
 }
 
 
-
 function goHome(){
 
 openPage("homePage");
@@ -175,21 +157,15 @@ openPage("homePage");
 
 
 
-
-// zurück
-
 function goBack(){
 
 
 if(historyIndex>0){
 
-
 historyIndex--;
-
 
 openPage(history[historyIndex]);
 
-
 }
 
 
@@ -200,21 +176,15 @@ openPage(history[historyIndex]);
 
 
 
-
-
-// weiter
 
 function goForward(){
 
 
 if(historyIndex<history.length-1){
 
-
 historyIndex++;
 
-
 openPage(history[historyIndex]);
-
 
 }
 
@@ -231,10 +201,11 @@ openPage(history[historyIndex]);
 
 // Profil
 
+
 function saveProfile(){
 
 
-let name =
+let name=
 document.getElementById("newName").value.trim();
 
 
@@ -245,11 +216,7 @@ if(name){
 localStorage.setItem("appsUser",name);
 
 
-
-document.getElementById("welcomeUser").innerText=name;
-
-
-document.getElementById("dashboardUser").innerText=name;
+setUser(name);
 
 
 alert("Profil gespeichert");
@@ -267,23 +234,22 @@ alert("Profil gespeichert");
 
 
 
+
 // Chat
+
 
 function sendMessage(){
 
 
-let input=document.getElementById("messageInput");
+let input=
+document.getElementById("messageInput");
 
 
 let text=input.value.trim();
 
 
 
-if(text===""){
-
-return;
-
-}
+if(!text)return;
 
 
 
@@ -291,8 +257,10 @@ addMessage(text,"user-message");
 
 
 
-let messages =
-JSON.parse(localStorage.getItem("chatMessages") || "[]");
+let messages=
+JSON.parse(
+localStorage.getItem("chatMessages")||"[]"
+);
 
 
 
@@ -319,22 +287,17 @@ input.value="";
 updateCount();
 
 
-
-setTimeout(function(){
-
+setTimeout(()=>{
 
 addMessage(
 "Nachricht gespeichert 👍",
 "ai-message"
 );
 
-
 },400);
 
 
 }
-
-
 
 
 
@@ -374,23 +337,22 @@ box.scrollTop=box.scrollHeight;
 
 
 
-
 function loadMessages(){
 
 
-let messages =
-JSON.parse(localStorage.getItem("chatMessages") || "[]");
+let messages=
+JSON.parse(
+localStorage.getItem("chatMessages")||"[]"
+);
 
 
 
-messages.forEach(function(m){
-
+messages.forEach(m=>{
 
 addMessage(
 m.text,
 m.type
 );
-
 
 });
 
@@ -407,22 +369,22 @@ updateCount();
 
 
 
-
 function updateCount(){
 
 
-let messages =
-JSON.parse(localStorage.getItem("chatMessages") || "[]");
+let box=document.getElementById("messageCount");
+
+
+let messages=
+JSON.parse(
+localStorage.getItem("chatMessages")||"[]"
+);
 
 
 
-let count=document.getElementById("messageCount");
+if(box){
 
-
-
-if(count){
-
-count.innerText=messages.length;
+box.innerText=messages.length;
 
 }
 
@@ -443,18 +405,15 @@ count.innerText=messages.length;
 function sendHalDo(){
 
 
-let input=document.getElementById("haldoInput");
+let input=
+document.getElementById("haldoInput");
 
 
 let text=input.value.trim();
 
 
 
-if(text===""){
-
-return;
-
-}
+if(!text)return;
 
 
 
@@ -466,7 +425,7 @@ let answer=getHalDoAnswer(text);
 
 
 
-setTimeout(function(){
+setTimeout(()=>{
 
 
 addHalDo(answer,"ai-message");
@@ -483,7 +442,6 @@ input.value="";
 
 
 }
-
 
 
 
@@ -525,22 +483,21 @@ box.scrollTop=box.scrollHeight;
 
 
 
+// Befehle
 
-// HalDo Antworten
 
 function getHalDoAnswer(text){
 
 
-let command=text.toLowerCase();
+let cmd=text.toLowerCase();
 
 
 
 
-if(command.includes("profil")){
 
+if(cmd.includes("profil")){
 
 openPage("profilePage");
-
 
 return "Ich öffne dein Profil.";
 
@@ -550,11 +507,9 @@ return "Ich öffne dein Profil.";
 
 
 
-if(command.includes("dashboard")){
-
+if(cmd.includes("dashboard")){
 
 openPage("dashboardPage");
-
 
 return "Ich öffne dein Dashboard.";
 
@@ -564,11 +519,9 @@ return "Ich öffne dein Dashboard.";
 
 
 
-if(command.includes("chat")){
-
+if(cmd.includes("chat")){
 
 openPage("chatPage");
-
 
 return "Ich öffne den Chat.";
 
@@ -578,13 +531,11 @@ return "Ich öffne den Chat.";
 
 
 
-if(command.includes("cloud")){
-
+if(cmd.includes("cloud")){
 
 openPage("cloudPage");
 
-
-return "Ich öffne die Cloud-Vorbereitung.";
+return "Ich öffne die Cloud.";
 
 }
 
@@ -592,13 +543,11 @@ return "Ich öffne die Cloud-Vorbereitung.";
 
 
 
-if(command.includes("einstellung")){
-
+if(cmd.includes("einstellung")){
 
 openPage("settingsPage");
 
-
-return "Ich öffne die Einstellungen.";
+return "Ich öffne Einstellungen.";
 
 }
 
@@ -606,12 +555,12 @@ return "Ich öffne die Einstellungen.";
 
 
 
-if(command.includes("nach hause")
-|| command.includes("home")){
+if(cmd.includes("home") ||
+cmd.includes("hauptmenü") ||
+cmd.includes("nach hause")){
 
 
 openPage("homePage");
-
 
 return "Ich gehe zum Hauptmenü.";
 
@@ -621,16 +570,12 @@ return "Ich gehe zum Hauptmenü.";
 
 
 
-if(command.includes("wer bin ich")){
+if(cmd.includes("wer bin ich")){
 
 
-let user =
-localStorage.getItem("appsUser")
-|| "unbekannt";
-
-
-
-return "Du bist "+user+".";
+return "Du bist "+
+(localStorage.getItem("appsUser")||"unbekannt")+
+".";
 
 }
 
@@ -638,22 +583,10 @@ return "Du bist "+user+".";
 
 
 
-if(command.includes("version")){
+if(cmd.includes("version")){
 
 
-return "Apps/Web 3.0 Version 2.5.0 läuft.";
-
-}
-
-
-
-
-
-if(command.includes("hilfe")
-|| command.includes("was kannst du")){
-
-
-return "Ich kann Bereiche öffnen und dich durch Apps/Web 3.0 führen.";
+return "Apps/Web 3.0 Version 2.6.0 läuft.";
 
 }
 
@@ -661,8 +594,8 @@ return "Ich kann Bereiche öffnen und dich durch Apps/Web 3.0 führen.";
 
 
 
-if(command.includes("hallo")
-|| command.includes("hi")){
+if(cmd.includes("hallo") ||
+cmd.includes("hi")){
 
 
 return "Hallo 👋 Ich bin HalDo AI.";
@@ -673,7 +606,18 @@ return "Hallo 👋 Ich bin HalDo AI.";
 
 
 
-return "Ich habe dich verstanden. Meine Funktionen werden weiter erweitert.";
+if(cmd.includes("hilfe")){
+
+
+return "Ich kann Seiten öffnen und dir bei Apps/Web 3.0 helfen.";
+
+}
+
+
+
+
+
+return "Ich habe deine Anfrage verstanden und lerne weiter.";
 
 }
 
@@ -684,31 +628,127 @@ return "Ich habe dich verstanden. Meine Funktionen werden weiter erweitert.";
 
 
 
-// Sprache vorbereiten
+
+// 🎤 Sprachsteuerung
+
 
 function startVoice(){
 
 
-let status=document.getElementById("voiceStatus");
+let status=
+document.getElementById("voiceStatus");
+
+
+
+if(!('webkitSpeechRecognition' in window)){
+
+
+if(status){
+
+status.innerText=
+"Spracherkennung wird von diesem Browser nicht unterstützt.";
+
+}
+
+
+return;
+
+}
+
+
+
+
+
+let recognition=
+new webkitSpeechRecognition();
+
+
+
+recognition.lang="de-DE";
+
+
+recognition.continuous=false;
+
+
+recognition.interimResults=false;
+
+
+
+recognition.onstart=function(){
+
+
+if(status){
+
+status.innerText=
+"🎤 Ich höre zu...";
+
+}
+
+
+};
+
+
+
+
+
+recognition.onresult=function(event){
+
+
+let text=
+event.results[0][0].transcript;
 
 
 
 if(status){
 
 status.innerText=
-"🎤 Sprachfunktion vorbereitet.";
+"Erkannt: "+text;
 
 }
 
 
 
+document.getElementById("haldoInput").value=text;
+
+
+sendHalDo();
+
+
+};
+
+
+
+
+
+recognition.onerror=function(){
+
+
+if(status){
+
+status.innerText=
+"Fehler bei Spracheingabe.";
+
+}
+
+
+};
+
+
+
+recognition.start();
+
+
 }
 
 
 
 
 
-// Sprachausgabe
+
+
+
+// 🔊 Stimme
+
 
 function speak(text){
 
@@ -716,11 +756,14 @@ function speak(text){
 if("speechSynthesis" in window){
 
 
-let speech =
+let speech=
 new SpeechSynthesisUtterance(text);
 
 
 speech.lang="de-DE";
+
+
+speech.rate=1;
 
 
 window.speechSynthesis.speak(speech);
