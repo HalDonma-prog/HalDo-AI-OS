@@ -1,76 +1,124 @@
-function openChat() {
+function openChat(){
 
-    const home = document.getElementById("home");
-    const chatPage = document.getElementById("chatPage");
-    const subtitle = document.getElementById("subtitle");
+document.getElementById("home").style.display="none";
 
-    home.style.display = "none";
-    chatPage.style.display = "block";
-    subtitle.innerText = "Chat";
+document.getElementById("chatPage").style.display="block";
 
-}
+document.getElementById("subtitle").innerText="Chat";
 
 
-function goHome() {
-
-    const home = document.getElementById("home");
-    const chatPage = document.getElementById("chatPage");
-    const subtitle = document.getElementById("subtitle");
-
-    chatPage.style.display = "none";
-    home.style.display = "block";
-    subtitle.innerText = "Startseite";
+loadMessages();
 
 }
 
 
 
-function sendMessage() {
+function goHome(){
 
-    const input = document.getElementById("messageInput");
-    const chat = document.getElementById("chatBox");
+document.getElementById("chatPage").style.display="none";
 
-    const text = input.value.trim();
+document.getElementById("home").style.display="block";
 
-    if (text === "") {
-        return;
-    }
-
-
-    const message = document.createElement("div");
-
-    message.className = "message user";
-    message.innerText = text;
-
-
-    chat.appendChild(message);
-
-    input.value = "";
-
-    chat.scrollTop = chat.scrollHeight;
+document.getElementById("subtitle").innerText="Startseite";
 
 }
 
 
 
-window.onload = function() {
+function sendMessage(){
 
-    const input = document.getElementById("messageInput");
+let input=document.getElementById("messageInput");
 
-    if (input) {
+let text=input.value.trim();
 
-        input.addEventListener("keydown", function(event) {
 
-            if (event.key === "Enter") {
+if(text===""){
+return;
+}
 
-                event.preventDefault();
 
-                sendMessage();
+let messages=JSON.parse(localStorage.getItem("chat")) || [];
 
-            }
 
-        });
+messages.push({
+user:"Du",
+text:text
+});
 
-    }
+
+localStorage.setItem("chat",JSON.stringify(messages));
+
+
+input.value="";
+
+
+loadMessages();
+
+}
+
+
+
+function loadMessages(){
+
+let chat=document.getElementById("chatBox");
+
+
+chat.innerHTML="";
+
+
+let messages=JSON.parse(localStorage.getItem("chat")) || [];
+
+
+if(messages.length===0){
+
+chat.innerHTML=
+'<div class="message bot">Willkommen im Chat 👋</div>';
+
+}
+
+
+
+messages.forEach(function(item){
+
+
+let div=document.createElement("div");
+
+div.className="message user";
+
+div.innerText=item.user+": "+item.text;
+
+
+chat.appendChild(div);
+
+
+});
+
+
+chat.scrollTop=chat.scrollHeight;
+
+}
+
+
+
+window.onload=function(){
+
+
+let input=document.getElementById("messageInput");
+
+
+input.addEventListener("keydown",function(event){
+
+
+if(event.key==="Enter"){
+
+event.preventDefault();
+
+sendMessage();
+
+}
+
+
+});
+
 
 };
