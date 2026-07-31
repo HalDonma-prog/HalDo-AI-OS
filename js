@@ -125,6 +125,7 @@ document.addEventListener("DOMContentLoaded", () => {
     );
     loadMessages();
 });
+
 HalDo-ai/
 │
 ├── index.html
