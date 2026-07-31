@@ -1,227 +1,486 @@
-*{
-box-sizing:border-box;
-}
+let aktuellerBenutzer = "";
 
+let benutzerListe = [];
 
-body{
-
-margin:0;
-font-family:Arial,sans-serif;
-background:#e9eef5;
-
-}
+let chatSpeicher = [];
 
 
 
-.app{
 
-max-width:600px;
-margin:auto;
-min-height:100vh;
-background:white;
-display:flex;
-flex-direction:column;
+// Daten laden
 
-}
+function loadData(){
+
+    aktuellerBenutzer =
+    localStorage.getItem("aktuellerBenutzer") || "";
 
 
-
-header{
-
-background:#1f6feb;
-color:white;
-text-align:center;
-padding:20px;
-
-}
+    let users =
+    localStorage.getItem("benutzerListe");
 
 
+    if(users){
 
-header h1{
+        benutzerListe = JSON.parse(users);
 
-margin:0;
-
-}
-
+    }
 
 
-.page{
+    let chat =
+    localStorage.getItem("appsChat");
 
-padding:20px;
-flex:1;
+
+    if(chat){
+
+        chatSpeicher = JSON.parse(chat);
+
+    }
+
+
+    if(aktuellerBenutzer){
+
+        showPage("home");
+
+        updateUser();
+
+    }
+
 
 }
 
 
 
-.hidden{
 
-display:none;
+// Seiten wechseln
 
-}
+function showPage(page){
 
+    document.getElementById("loginPage").style.display="none";
 
+    document.getElementById("home").style.display="none";
 
-input{
+    document.getElementById("chatPage").style.display="none";
 
-width:100%;
-padding:14px;
-margin:8px 0;
-font-size:16px;
-border-radius:8px;
-border:1px solid #aaa;
-
-}
+    document.getElementById("usersPage").style.display="none";
 
 
-
-button{
-
-padding:12px;
-border:0;
-border-radius:10px;
-cursor:pointer;
+    document.getElementById(page).style.display="block";
 
 }
 
 
 
-.page button{
 
-background:#1f6feb;
-color:white;
+// Login
 
-}
+function login(){
+
+    let name =
+    document.getElementById("loginName").value.trim();
 
 
-
-.icons{
-
-display:grid;
-grid-template-columns:repeat(2,1fr);
-gap:15px;
-margin-top:20px;
-
-}
+    let password =
+    document.getElementById("loginPassword").value.trim();
 
 
 
-.icons button{
+    if(name==="" || password===""){
 
-height:120px;
-background:#f1f1f1;
-color:#111;
-font-size:35px;
+        alert("Bitte Name und Passwort eingeben");
 
-}
+        return;
 
-
-
-.icons span{
-
-display:block;
-font-size:16px;
-
-}
+    }
 
 
 
-.chat{
-
-height:350px;
-overflow-y:auto;
-
-}
+    aktuellerBenutzer=name;
 
 
+    if(!benutzerListe.includes(name)){
 
-.message{
+        benutzerListe.push(name);
 
-padding:12px;
-margin:10px 0;
-border-radius:12px;
+    }
+
+
+    localStorage.setItem(
+    "aktuellerBenutzer",
+    name
+    );
+
+
+    localStorage.setItem(
+    "benutzerListe",
+    JSON.stringify(benutzerListe)
+    );
+
+
+    showPage("home");
+
+    updateUser();
 
 }
 
 
 
-.user{
 
-background:#1f6feb;
-color:white;
-margin-left:40px;
+// Benutzer anzeigen
 
-}
+function updateUser(){
+
+    document.getElementById("activeUser")
+    .innerText=aktuellerBenutzer;
 
 
-
-.bot{
-
-background:#eeeeee;
+    document.getElementById("welcome")
+    .innerText="Willkommen "+aktuellerBenutzer;
 
 }
 
 
 
-.input-area{
 
-display:flex;
-gap:10px;
+// Logout
 
-}
+function logout(){
 
-
-
-.input-area input{
-
-flex:1;
-
-}
+    aktuellerBenutzer="";
 
 
+    localStorage.removeItem(
+    "aktuellerBenutzer"
+    );
 
-.input-area button{
 
-width:60px;
+    showPage("loginPage");
 
 }
 
 
 
-nav{
-
-display:flex;
-justify-content:space-around;
-border-top:1px solid #ddd;
-padding:10px;
-
-}
 
 
+// Home
 
-nav button{
+function goHome(){
 
-background:white;
-color:#111;
-font-size:14px;
+    showPage("home");
 
 }
 
 
 
-#usersList{
 
-margin:15px 0;
+// Chat öffnen
+
+function openChat(){
+
+    showPage("chatPage");
+
+    loadMessages();
+
+}
+
+
+
+
+// Nachricht senden
+
+function sendMessage(){
+
+    let input =
+    document.getElementById("messageInput");
+
+
+    let text =
+    input.value.trim();
+
+
+
+    if(text===""){
+
+        return;
+
+    }
+
+
+
+    chatSpeicher.push({
+
+        user:aktuellerBenutzer,
+
+        text:text
+
+    });
+
+
+
+    botAntwort(text);
+
+
+
+    saveChat();
+
+
+    input.value="";
+
+
+    loadMessages();
 
 }
 
 
 
-.user-card{
 
-padding:10px;
-background:#eeeeee;
-border-radius:8px;
-margin-bottom:8px;
+// einfache KI Antwort
+
+function botAntwort(text){
+
+
+    let antwort="Ich habe deine Nachricht gespeichert. 🙂";
+
+
+    text=text.toLowerCase();
+
+
+
+    if(text.includes("hallo")){
+
+        antwort="Hallo "+aktuellerBenutzer+" 👋";
+
+    }
+
+
+    if(text.includes("wie geht")){
+
+        antwort="Mir geht es gut. Ich bin bereit zu helfen. 🤖";
+
+    }
+
+
+    if(text.includes("name")){
+
+        antwort="Du bist angemeldet als "+aktuellerBenutzer+".";
+
+    }
+
+
+
+    chatSpeicher.push({
+
+        user:"Apps Web KI",
+
+        text:antwort
+
+    });
+
 
 }
+
+
+
+
+
+function loadMessages(){
+
+    let box =
+    document.getElementById("chatBox");
+
+
+    box.innerHTML="";
+
+
+
+    chatSpeicher.forEach(function(item){
+
+
+        let div =
+        document.createElement("div");
+
+
+        div.className="message";
+
+
+
+        if(item.user==="Apps Web KI"){
+
+            div.className="message bot";
+
+        }
+
+        else{
+
+            div.className="message user";
+
+        }
+
+
+
+        div.innerText =
+        item.user+": "+item.text;
+
+
+        box.appendChild(div);
+
+
+
+    });
+
+
+
+}
+
+
+
+
+function saveChat(){
+
+    localStorage.setItem(
+
+    "appsChat",
+
+    JSON.stringify(chatSpeicher)
+
+    );
+
+}
+
+
+
+
+// Benutzerverwaltung
+
+function openUsers(){
+
+    showPage("usersPage");
+
+    displayUsers();
+
+}
+
+
+
+
+function addUser(){
+
+    let input =
+    document.getElementById("newUser");
+
+
+    let name =
+    input.value.trim();
+
+
+
+    if(name===""){
+
+        return;
+
+    }
+
+
+
+    if(!benutzerListe.includes(name)){
+
+        benutzerListe.push(name);
+
+    }
+
+
+
+    localStorage.setItem(
+
+    "benutzerListe",
+
+    JSON.stringify(benutzerListe)
+
+    );
+
+
+
+    input.value="";
+
+
+    displayUsers();
+
+}
+
+
+
+
+function displayUsers(){
+
+    let box =
+    document.getElementById("usersList");
+
+
+    box.innerHTML="";
+
+
+
+    benutzerListe.forEach(function(user){
+
+
+        let div =
+        document.createElement("div");
+
+
+        div.className="user-card";
+
+
+        div.innerText=user;
+
+
+        box.appendChild(div);
+
+
+    });
+
+
+}
+
+
+
+
+window.onload=function(){
+
+    loadData();
+
+
+    let input =
+    document.getElementById("messageInput");
+
+
+    if(input){
+
+        input.addEventListener(
+        "keydown",
+        function(e){
+
+
+            if(e.key==="Enter"){
+
+                e.preventDefault();
+
+                sendMessage();
+
+            }
+
+
+        });
+
+    }
+
+
+
+    if("serviceWorker" in navigator){
+
+        navigator.serviceWorker.register(
+        "service-worker.js"
+        );
+
+    }
+
+
+};
