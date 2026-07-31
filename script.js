@@ -1,6 +1,4 @@
-let pageHistory = [];
-let currentPage = "";
-
+let history = [];
 let notes = [];
 
 
@@ -8,16 +6,15 @@ let notes = [];
 
 window.onload = function(){
 
-let savedName =
+let user =
 localStorage.getItem("haldoUser");
 
 
-if(savedName){
+if(user){
 
-updateUser(savedName);
+updateUser(user);
 
 }
-
 
 };
 
@@ -32,23 +29,22 @@ updateUser(savedName);
 
 function startApp(){
 
-let name =
-localStorage.getItem("haldoUser");
+
+let user =
+localStorage.getItem("haldoUser")
+|| "Gast";
 
 
-if(!name){
 
-name="Gast";
+updateUser(user);
 
-}
-
-
-updateUser(name);
 
 openPage("homePage");
 
 
 }
+
+
 
 
 
@@ -64,9 +60,9 @@ function openPage(page){
 
 document
 .querySelectorAll(".page")
-.forEach(function(item){
+.forEach(function(p){
 
-item.classList.add("hidden");
+p.classList.add("hidden");
 
 });
 
@@ -82,36 +78,31 @@ if(target){
 target.classList.remove("hidden");
 
 
-pageHistory.push(page);
-
-currentPage=page;
+history.push(page);
 
 }
 
-
 }
-
-
-
-
 
 
 
 function goBack(){
 
-if(pageHistory.length>1){
 
-pageHistory.pop();
+if(history.length>1){
+
+history.pop();
+
 
 let last =
-pageHistory[pageHistory.length-1];
+history[history.length-1];
 
 
 document
 .querySelectorAll(".page")
-.forEach(function(item){
+.forEach(function(p){
 
-item.classList.add("hidden");
+p.classList.add("hidden");
 
 });
 
@@ -120,35 +111,41 @@ document
 .getElementById(last)
 .classList.remove("hidden");
 
-}
 
 }
 
 
+}
 
 
 
 
 
-// BENUTZER
+
+
+
+
+// PROFIL
 
 
 function updateUser(name){
 
 
-let text =
+let box =
 document.getElementById("welcomeText");
 
 
-if(text){
+if(box){
 
-text.innerText=
+box.innerText =
 "Hallo "+name+" 👋";
 
 }
 
 
 }
+
+
 
 
 
@@ -192,33 +189,30 @@ alert("Profil gespeichert");
 
 
 
-// HALDO STATUS
+// STATUS
 
 
 function setStatus(status){
 
 
-let statusBox =
+let a =
 document.getElementById("statusText");
 
 
-let voice =
+let b =
 document.getElementById("voiceStatus");
 
 
-
-if(statusBox){
-
-statusBox.innerText=status;
-
-}
+let c =
+document.getElementById("startStatus");
 
 
-if(voice){
 
-voice.innerText=status;
+if(a)a.innerText=status;
 
-}
+if(b)b.innerText=status;
+
+if(c)c.innerText=status;
 
 
 }
@@ -246,43 +240,32 @@ input.value.trim();
 
 
 
-if(!text){
-
-return;
-
-}
+if(!text)return;
 
 
 
-addHalDoMessage(
-text,
-"user-message"
-);
+addHalDo(text,"user-message");
 
 
-
-setStatus("🔵 Denkt...");
+setStatus("🔵 HalDo denkt...");
 
 
 
 let answer =
-haldoAnswer(text);
+haldoResponse(text);
 
 
 
 setTimeout(function(){
 
 
-addHalDoMessage(
-answer,
-"ai-message"
-);
+addHalDo(answer,"ai-message");
 
 
 speak(answer);
 
 
-setStatus("🟢 Bereit");
+setStatus("🟢 HalDo bereit");
 
 
 },700);
@@ -300,7 +283,9 @@ input.value="";
 
 
 
-function addHalDoMessage(text,type){
+
+
+function addHalDo(text,type){
 
 
 let box =
@@ -315,7 +300,7 @@ let div =
 document.createElement("div");
 
 
-div.className =
+div.className=
 "message "+type;
 
 
@@ -325,7 +310,7 @@ div.innerText=text;
 box.appendChild(div);
 
 
-box.scrollTop =
+box.scrollTop=
 box.scrollHeight;
 
 
@@ -337,7 +322,9 @@ box.scrollHeight;
 
 
 
-function haldoAnswer(text){
+
+
+function haldoResponse(text){
 
 
 let command =
@@ -357,13 +344,10 @@ return "Ich öffne deine Notizen.";
 
 
 
-if(command.includes("cloud")){
+if(command.includes("erstelle")){
 
 
-openPage("cloudPage");
-
-
-return "Ich öffne die Cloud.";
+return "Ich kann eine neue Aufgabe oder Notiz vorbereiten.";
 
 }
 
@@ -375,7 +359,7 @@ if(command.includes("dashboard")){
 openPage("dashboardPage");
 
 
-return "Ich öffne das Dashboard.";
+return "Dashboard geöffnet.";
 
 }
 
@@ -387,7 +371,25 @@ if(command.includes("profil")){
 openPage("profilePage");
 
 
-return "Ich öffne dein Profil.";
+return "Profil geöffnet.";
+
+}
+
+
+
+if(command.includes("module")){
+
+
+return "Meine Module sind AI, Chat, Notizen, Cloud, Dashboard und Einstellungen.";
+
+}
+
+
+
+if(command.includes("hilfe")){
+
+
+return "Ich helfe dir bei Navigation und Organisation.";
 
 }
 
@@ -406,13 +408,13 @@ return "Hallo 👋 Ich bin HalDo AI.";
 if(command.includes("version")){
 
 
-return "Apps/Web 3.0 v3.0 läuft.";
+return "Apps/Web 3.1 mit HalDo AI läuft.";
 
 }
 
 
 
-return "Ich habe dich verstanden. Meine Funktionen werden weiter ausgebaut.";
+return "Ich habe deine Anfrage verstanden. Meine Fähigkeiten werden weiter ausgebaut.";
 
 }
 
@@ -430,16 +432,14 @@ return "Ich habe dich verstanden. Meine Funktionen werden weiter ausgebaut.";
 function startVoice(){
 
 
-setStatus("🎤 Hört zu...");
+setStatus("🎤 HalDo hört zu...");
 
 
 
 if(!("webkitSpeechRecognition" in window)){
 
 
-setStatus(
-"Sprache nicht verfügbar"
-);
+setStatus("Sprache nicht verfügbar");
 
 
 return;
@@ -452,7 +452,6 @@ let recognition =
 new webkitSpeechRecognition();
 
 
-
 recognition.lang="de-DE";
 
 
@@ -460,14 +459,14 @@ recognition.lang="de-DE";
 recognition.onresult=function(event){
 
 
-let text =
+let result =
 event.results[0][0].transcript;
 
 
 
 document
 .getElementById("haldoInput")
-.value=text;
+.value=result;
 
 
 sendHalDo();
@@ -479,7 +478,7 @@ sendHalDo();
 
 recognition.onend=function(){
 
-setStatus("🟢 Bereit");
+setStatus("🟢 HalDo bereit");
 
 };
 
@@ -498,23 +497,22 @@ recognition.start();
 
 
 
-// SPRACHAUSGABE
+// SPRACHE AUSGABE
 
 
 function speak(text){
 
 
-if(
-"speechSynthesis"
-in window
-){
+if("speechSynthesis" in window){
 
 
 let speech =
 new SpeechSynthesisUtterance(text);
 
 
+
 speech.lang="de-DE";
+
 
 
 window
@@ -558,19 +556,19 @@ let box =
 document.getElementById("chatBox");
 
 
-let message =
+let div =
 document.createElement("div");
 
 
 
-message.className=
+div.className=
 "message user-message";
 
 
-message.innerText=text;
+div.innerText=text;
 
 
-box.appendChild(message);
+box.appendChild(div);
 
 
 input.value="";
@@ -594,7 +592,7 @@ function createNote(){
 
 let note =
 prompt(
-"Neue Notiz:"
+"Neue Notiz eingeben:"
 );
 
 
@@ -605,18 +603,21 @@ if(note){
 notes.push(note);
 
 
-renderNotes();
+showNotes();
 
 
 }
 
+
 }
 
 
 
 
 
-function renderNotes(){
+
+
+function showNotes(){
 
 
 let list =
@@ -626,23 +627,25 @@ document.getElementById("notesList");
 if(!list)return;
 
 
+
 list.innerHTML="";
 
 
-notes.forEach(function(item){
+
+notes.forEach(function(note){
 
 
-let div =
+let item =
 document.createElement("div");
 
 
-div.className="note-item";
+item.className="note-item";
 
 
-div.innerText=item;
+item.innerText=note;
 
 
-list.appendChild(div);
+list.appendChild(item);
 
 
 });
