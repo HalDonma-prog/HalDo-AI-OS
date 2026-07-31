@@ -3,7 +3,7 @@
 // ==================================
 
 document.addEventListener("DOMContentLoaded", () => {
-
+    alert("chat.js wurde geladen");
     const sendButton = document.getElementById("sendButton");
     const userInput = document.getElementById("userInput");
     const messages = document.getElementById("messages");
