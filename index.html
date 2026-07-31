@@ -7,13 +7,13 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Apps Web 3.0</title>
+<title>Apps/Web 3.0</title>
 
 <link rel="stylesheet" href="style.css">
 
 <link rel="manifest" href="manifest.json">
 
-<meta name="theme-color" content="#1f6feb">
+<meta name="theme-color" content="#0d47a1">
 
 <link rel="apple-touch-icon" href="icon.png">
 
@@ -26,28 +26,20 @@
 <div class="app">
 
 
-<header>
+<header class="app-header">
 
-<div class="top-navigation">
+<div class="logo-area">
 
-<button onclick="goBack()">
-⬅️
-</button>
-
-<h1>
-Apps Web 3.0
-</h1>
-
-<button onclick="goForward()">
-➡️
-</button>
-
+<div class="haldo-logo">
+🤖
 </div>
 
+<div>
+<h1>Apps/Web 3.0</h1>
+<p>Powered by HalDo AI</p>
+</div>
 
-<p id="subtitle">
-Login
-</p>
+</div>
 
 
 </header>
@@ -61,9 +53,17 @@ Login
 <section id="loginPage" class="page">
 
 
+<div class="card">
+
+
 <h2>
-Anmelden
+Willkommen
 </h2>
+
+
+<p>
+Bitte anmelden
+</p>
 
 
 <input 
@@ -84,6 +84,9 @@ Anmelden
 </button>
 
 
+</div>
+
+
 </section>
 
 
@@ -92,35 +95,20 @@ Anmelden
 
 
 
-<!-- DASHBOARD -->
 
-<section id="dashboard" class="page hidden">
+<!-- HAUPTMENÜ -->
 
-
-<h2>
-Dashboard
-</h2>
-
+<section id="homePage" class="page hidden">
 
 
 <div class="welcome-card">
 
-
-<h3>
-Hallo <span id="activeUser"></span> 👋
-</h3>
-
+<h2>
+Hallo <span id="welcomeUser"></span> 👋
+</h2>
 
 <p>
-🟢 HalDo AI Online
-</p>
-
-
-<p>
-💬 Nachrichten:
-<span id="messageCount">
-0
-</span>
+🤖 HalDo AI ist bereit
 </p>
 
 
@@ -129,27 +117,22 @@ Hallo <span id="activeUser"></span> 👋
 
 
 
-<div class="cards">
+<div class="menu-grid">
 
 
 
-<button class="app-card" onclick="openHalDoAI()">
+<button onclick="openPage('haldoPage')"
+class="menu-card">
 
-
-<div class="logo">
-🤖
-</div>
-
+<span>🤖</span>
 
 <h3>
 HalDo AI
 </h3>
 
-
 <p>
-Chat & Sprache
+Assistent
 </p>
-
 
 </button>
 
@@ -157,23 +140,56 @@ Chat & Sprache
 
 
 
-<button class="app-card" onclick="openProfile()">
+<button onclick="openPage('chatPage')"
+class="menu-card">
+
+<span>💬</span>
+
+<h3>
+Chat
+</h3>
+
+<p>
+Nachrichten
+</p>
+
+</button>
 
 
-<div class="logo">
-👤
-</div>
 
+
+
+<button onclick="openPage('dashboardPage')"
+class="menu-card">
+
+<span>📊</span>
+
+<h3>
+Dashboard
+</h3>
+
+<p>
+Übersicht
+</p>
+
+</button>
+
+
+
+
+
+<button onclick="openPage('profilePage')"
+class="menu-card">
+
+<span>👤</span>
 
 <h3>
 Profil
 </h3>
 
-
 <p>
-Einstellungen
+Benutzer
 </p>
-
 
 </button>
 
@@ -181,24 +197,37 @@ Einstellungen
 
 
 
+<button onclick="openPage('settingsPage')"
+class="menu-card">
 
-<button class="app-card">
+<span>⚙️</span>
+
+<h3>
+Einstellungen
+</h3>
+
+<p>
+Optionen
+</p>
+
+</button>
 
 
-<div class="logo">
-☁️
-</div>
 
+
+
+<button onclick="openPage('cloudPage')"
+class="menu-card">
+
+<span>☁️</span>
 
 <h3>
 Cloud
 </h3>
 
-
 <p>
-Synchronisierung
+Vorbereitung
 </p>
-
 
 </button>
 
@@ -206,33 +235,28 @@ Synchronisierung
 
 
 
-<button class="app-card">
+<button onclick="openPage('infoPage')"
+class="menu-card">
 
-
-<div class="logo">
-🔔
-</div>
-
+<span>ℹ️</span>
 
 <h3>
-Aktivität
+Info
 </h3>
 
-
 <p>
-Updates
+Version
 </p>
-
 
 </button>
 
 
 
 </div>
-
 
 
 </section>
+
 
 
 
@@ -242,14 +266,13 @@ Updates
 
 <!-- HALDO AI -->
 
-
 <section id="haldoPage" class="page hidden">
 
 
-<div class="haldo-header">
+<div class="card">
 
 
-<div class="haldo-logo">
+<div class="haldo-big-logo">
 🤖
 </div>
 
@@ -260,7 +283,7 @@ HalDo AI
 
 
 <p>
-Dein persönlicher Assistent
+🟢 Online
 </p>
 
 
@@ -268,11 +291,62 @@ Dein persönlicher Assistent
 
 
 
+<div id="haldoChat"
+class="chat-box">
+
+</div>
 
 
-<div id="chatBox" class="chat"></div>
+
+<div class="input-area">
 
 
+<input
+id="haldoInput"
+placeholder="HalDo fragen..."
+>
+
+
+<button onclick="sendHalDo()">
+➤
+</button>
+
+
+</div>
+
+
+</section>
+
+
+
+
+
+
+
+
+
+<!-- CHAT -->
+
+
+<section id="chatPage" class="page hidden">
+
+
+<div class="card">
+
+
+<h2>
+Chat
+</h2>
+
+
+</div>
+
+
+
+<div id="chatBox"
+class="chat-box">
+
+</div>
 
 
 
@@ -281,15 +355,8 @@ Dein persönlicher Assistent
 
 <input
 id="messageInput"
-placeholder="HalDo fragen..."
+placeholder="Nachricht..."
 >
-
-
-
-<button onclick="startVoice()">
-🎤
-</button>
-
 
 
 <button onclick="sendMessage()">
@@ -297,12 +364,57 @@ placeholder="HalDo fragen..."
 </button>
 
 
+</div>
+
+
+</section>
+
+
+
+
+
+
+
+
+<!-- DASHBOARD -->
+
+
+<section id="dashboardPage" class="page hidden">
+
+
+<div class="card">
+
+
+<h2>
+📊 Dashboard
+</h2>
+
+
+<p>
+Benutzer:
+<span id="dashboardUser"></span>
+</p>
+
+
+<p>
+Nachrichten:
+<span id="messageCount">
+0
+</span>
+</p>
+
+
+<p>
+HalDo Status:
+🟢 Aktiv
+</p>
+
 
 </div>
 
 
-
 </section>
+
 
 
 
@@ -316,27 +428,31 @@ placeholder="HalDo fragen..."
 <section id="profilePage" class="page hidden">
 
 
+<div class="card">
+
+
 <h2>
-Mein Profil
+👤 Profil
 </h2>
 
 
-
-<div class="profile-avatar">
+<div class="avatar">
 👤
 </div>
 
 
-<input 
-id="profileName"
+<input
+id="newName"
 placeholder="Neuer Name"
 >
 
 
-<button onclick="changeName()">
+<button onclick="saveProfile()">
 Speichern
 </button>
 
+
+</div>
 
 
 </section>
@@ -348,30 +464,149 @@ Speichern
 
 
 
-<!-- APP NAVIGATION -->
+
+<!-- EINSTELLUNGEN -->
 
 
-<nav>
+<section id="settingsPage" class="page hidden">
 
 
-<button onclick="goDashboard()">
+<div class="card">
+
+
+<h2>
+⚙️ Einstellungen
+</h2>
+
+
+<label>
+🔊 Stimme
+</label>
+
+
+<br>
+
+
+<label>
+🌙 Dunkler Modus vorbereitet
+</label>
+
+
+<br>
+
+
+<label>
+🔔 Benachrichtigungen vorbereitet
+</label>
+
+
+</div>
+
+
+</section>
+
+
+
+
+
+
+
+
+<!-- CLOUD -->
+
+
+<section id="cloudPage" class="page hidden">
+
+
+<div class="card">
+
+
+<h2>
+☁️ Cloud
+</h2>
+
+
+<p>
+Online-Speicherung vorbereitet
+</p>
+
+
+</div>
+
+
+</section>
+
+
+
+
+
+
+
+
+<!-- INFO -->
+
+
+<section id="infoPage" class="page hidden">
+
+
+<div class="card">
+
+
+<h2>
+ℹ️ Apps/Web 3.0
+</h2>
+
+
+<p>
+Version v2.3.0
+</p>
+
+
+<p>
+Powered by HalDo AI 🤖
+</p>
+
+
+</div>
+
+
+</section>
+
+
+
+
+
+
+
+
+<nav class="bottom-nav">
+
+
+<button onclick="goHome()">
 🏠
 <br>
 Home
 </button>
 
 
-<button onclick="openHalDoAI()">
-🤖
+<button onclick="goBack()">
+⬅️
 <br>
-HalDo
+Zurück
 </button>
 
 
-<button onclick="openProfile()">
-👤
+<button onclick="goForward()">
+➡️
 <br>
-Profil
+Weiter
+</button>
+
+
+<button onclick="openPage('haldoPage')">
+🤖
+<br>
+HalDo
 </button>
 
 
