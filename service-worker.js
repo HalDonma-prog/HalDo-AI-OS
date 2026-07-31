@@ -1,23 +1,26 @@
-const cacheName = "apps-web-3-v1";
+const cacheName="apps-web-3.0-v2";
 
 
-const files = [
+const files=[
 
 "index.html",
 "style.css",
 "script.js",
-"manifest.json"
+"manifest.json",
+"icon.png"
 
 ];
 
 
-self.addEventListener("install", function(event){
+self.addEventListener(
+"install",
+event=>{
 
 event.waitUntil(
 
 caches.open(cacheName)
 
-.then(function(cache){
+.then(cache=>{
 
 return cache.addAll(files);
 
@@ -29,13 +32,15 @@ return cache.addAll(files);
 
 
 
-self.addEventListener("fetch", function(event){
+self.addEventListener(
+"fetch",
+event=>{
 
 event.respondWith(
 
 caches.match(event.request)
 
-.then(function(response){
+.then(response=>{
 
 return response || fetch(event.request);
 
