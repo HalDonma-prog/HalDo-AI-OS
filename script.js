@@ -652,3 +652,18 @@ list.appendChild(item);
 
 
 }
+function saveNotes() {
+    localStorage.setItem("haldoNotes", JSON.stringify(notes));
+}
+
+function loadNotes() {
+    const saved = localStorage.getItem("haldoNotes");
+
+    if (saved) {
+        notes = JSON.parse(saved);
+    } else {
+        notes = [];
+    }
+
+    showNotes();
+}
