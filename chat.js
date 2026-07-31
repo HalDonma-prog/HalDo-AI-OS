@@ -38,21 +38,29 @@ window.onload = function () {
     };
 
 };
+
 HalDo-ai/
 │
 ├── index.html
 ├── dashboard.html
 ├── chat.html
+├── tools.html
+├── profile.html
+├── settings.html
 │
 ├── style.css
 ├── dashboard.css
 ├── chat.css
+├── tools.css
+├── profile.css
+├── settings.css
 │
 ├── script.js
 ├── dashboard.js
 ├── chat.js
+├── tools.js
+├── profile.js
+├── settings.js
 │
-├── README.md
-├── 227E9D20-F8F7-44E9-B194-1F76378888B7.PNG
-│
-└── images/
+├── images/
+└── README.md
