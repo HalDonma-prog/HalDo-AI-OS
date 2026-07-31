@@ -1,65 +1,181 @@
-// ==================================
-// HalDo AI Chat - Version 1.0
-// ==================================
+const chatBox = document.getElementById("chatBox");
+const userInput = document.getElementById("userInput");
+const sendButton = document.getElementById("sendButton");
+const clearButton = document.getElementById("clearChat");
 
-document.addEventListener("DOMContentLoaded", () => {
-    alert("chat.js wurde geladen");
-    const sendButton = document.getElementById("sendButton");
-    const userInput = document.getElementById("userInput");
-    const messages = document.getElementById("messages");
 
-    function sendMessage() {
+let history = JSON.parse(
+    localStorage.getItem("haldo_chat")
+) || [];
 
-        const text = userInput.value.trim();
 
-        if (text === "") return;
+function addMessage(text, type){
 
-        // Nachricht des Benutzers anzeigen
-        const userMessage = document.createElement("div");
-        userMessage.className = "message user";
-        userMessage.textContent = text;
+    const wrapper = document.createElement("div");
 
-        messages.appendChild(userMessage);
+    wrapper.className = `message ${type}`;
 
-        userInput.value = "";
 
-        // Automatische Antwort
-        setTimeout(() => {
+    wrapper.innerHTML = `
+        <div class="bubble">
+            ${text}
+        </div>
+    `;
 
-            const aiMessage = document.createElement("div");
-            aiMessage.className = "message ai";
 
-            aiMessage.textContent =
-                "🤖 Danke für deine Nachricht! Dies ist die erste Version von HalDo AI. Bald wirst du hier echte KI-Antworten erhalten.";
+    chatBox.appendChild(wrapper);
 
-            messages.appendChild(aiMessage);
+    chatBox.scrollTop = chatBox.scrollHeight;
 
-            // Automatisch nach unten scrollen
-            messages.scrollTop = messages.scrollHeight;
+}
 
-        }, 700);
+
+
+function saveChat(){
+
+    localStorage.setItem(
+        "haldo_chat",
+        JSON.stringify(history)
+    );
+
+}
+
+
+
+function loadChat(){
+
+    if(history.length){
+
+        chatBox.innerHTML="";
+
+        history.forEach(msg=>{
+
+            addMessage(
+                msg.text,
+                msg.type
+            );
+
+        });
 
     }
 
-sendButton.addEventListener("click", () => {
+}
 
-    alert("Button funktioniert");
 
-    sendMessage();
 
-});
+async function sendMessage(){
 
-    userInput.addEventListener("keydown", (event) => {
+    const text = userInput.value.trim();
 
-        if (event.key === "Enter") {
+
+    if(!text) return;
+
+
+    addMessage(text,"user");
+
+
+    history.push({
+        text:text,
+        type:"user"
+    });
+
+
+    saveChat();
+
+
+    userInput.value="";
+
+
+    const loading=document.createElement("div");
+
+    loading.className="message ai typing";
+
+    loading.innerHTML=
+    `<div class="bubble">
+        HalDo AI denkt...
+    </div>`;
+
+
+    chatBox.appendChild(loading);
+
+
+    setTimeout(()=>{
+
+        loading.remove();
+
+
+        const answer =
+        "Das ist aktuell die Testversion von HalDo AI. Die echte KI-Schnittstelle wird als nächster Schritt verbunden.";
+
+
+        addMessage(answer,"ai");
+
+
+        history.push({
+
+            text:answer,
+            type:"ai"
+
+        });
+
+
+        saveChat();
+
+
+    },1200);
+
+
+}
+
+
+
+sendButton.addEventListener(
+    "click",
+    sendMessage
+);
+
+
+
+userInput.addEventListener(
+    "keydown",
+    function(e){
+
+        if(e.key==="Enter" && !e.shiftKey){
+
+            e.preventDefault();
 
             sendMessage();
 
         }
 
-    });
+    }
+);
 
-});
+
+
+clearButton.addEventListener(
+    "click",
+    function(){
+
+        localStorage.removeItem(
+            "haldo_chat"
+        );
+
+        history=[];
+
+        chatBox.innerHTML="";
+
+        addMessage(
+            "Hallo! Ich bin HalDo AI. Wie kann ich dir helfen?",
+            "ai"
+        );
+
+    }
+);
+
+
+
+loadChat();
 HalDo-ai/
 │
 ├── index.html
