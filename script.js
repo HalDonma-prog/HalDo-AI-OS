@@ -1,29 +1,25 @@
 function openChat() {
 
-    document.getElementById("home").classList.add("hidden");
+    const home = document.getElementById("home");
+    const chatPage = document.getElementById("chatPage");
+    const subtitle = document.getElementById("subtitle");
 
-    document.getElementById("chatPage")
-    .classList.remove("hidden");
-
-    document.getElementById("subtitle")
-    .innerText = "Chat";
+    home.style.display = "none";
+    chatPage.style.display = "block";
+    subtitle.innerText = "Chat";
 
 }
 
 
-
 function goHome() {
 
-    document.getElementById("chatPage")
-    .classList.add("hidden");
+    const home = document.getElementById("home");
+    const chatPage = document.getElementById("chatPage");
+    const subtitle = document.getElementById("subtitle");
 
-
-    document.getElementById("home")
-    .classList.remove("hidden");
-
-
-    document.getElementById("subtitle")
-    .innerText = "Startseite";
+    chatPage.style.display = "none";
+    home.style.display = "block";
+    subtitle.innerText = "Startseite";
 
 }
 
@@ -31,36 +27,25 @@ function goHome() {
 
 function sendMessage() {
 
+    const input = document.getElementById("messageInput");
+    const chat = document.getElementById("chatBox");
 
-    let input = document.getElementById("messageInput");
+    const text = input.value.trim();
 
-    let chat = document.getElementById("chatBox");
-
-
-    let text = input.value.trim();
-
-
-    if(text === "") {
-
+    if (text === "") {
         return;
-
     }
 
 
-    let message = document.createElement("div");
-
+    const message = document.createElement("div");
 
     message.className = "message user";
-
-
     message.innerText = text;
 
 
     chat.appendChild(message);
 
-
     input.value = "";
-
 
     chat.scrollTop = chat.scrollHeight;
 
@@ -68,21 +53,24 @@ function sendMessage() {
 
 
 
-window.onload = function(){
+window.onload = function() {
 
-    let input = document.getElementById("messageInput");
+    const input = document.getElementById("messageInput");
 
+    if (input) {
 
-    input.addEventListener("keypress", function(event){
+        input.addEventListener("keydown", function(event) {
 
-        if(event.key === "Enter"){
+            if (event.key === "Enter") {
 
-            event.preventDefault();
+                event.preventDefault();
 
-            sendMessage();
+                sendMessage();
 
-        }
+            }
 
-    });
+        });
+
+    }
 
 };
