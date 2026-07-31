@@ -1,33 +1,18 @@
-// ==================================
-// HalDo AI Dashboard - Version 1.2
-// ==================================
+// ==========================================
+// HalDo AI 3.0
+// Dashboard
+// ==========================================
 
-document.addEventListener("DOMContentLoaded", () => {
+// KI-Chat öffnen
+function openChat() {
+    window.location.href = "chat.html";
+}
 
-    const cards = document.querySelectorAll(".card");
-
-    cards.forEach(card => {
-
-        const title = card.querySelector("h2").textContent;
-        const button = card.querySelector("button");
-
-        button.addEventListener("click", () => {
-
-            if (title.includes("KI Chat")) {
-
-                window.location.href = "chat.html";
-
-            } else {
-
-                alert(
-                    title +
-                    "\n\nDiese Funktion wird in einer der nächsten Versionen verfügbar sein. 🚀"
-                );
-
-            }
-
-        });
-
-    });
-
-});
+// Platzhalter für Funktionen,
+// die wir später entwickeln
+function comingSoon() {
+    alert(
+        "🚀 Diese Funktion ist noch in Entwicklung.\n\n" +
+        "Sie wird bald in HalDo AI 3.0 verfügbar sein."
+    );
+}
