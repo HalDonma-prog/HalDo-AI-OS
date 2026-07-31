@@ -35,6 +35,8 @@ showPage("dashboard");
 
 updateUser();
 
+updateCount();
+
 }
 
 
@@ -68,6 +70,7 @@ document.getElementById(page).style.display="block";
 
 
 
+
 // Login
 
 function login(){
@@ -85,9 +88,7 @@ document.getElementById("loginPassword").value.trim();
 
 if(name==="" || password===""){
 
-
 alert("Bitte Daten eingeben");
-
 
 return;
 
@@ -121,6 +122,7 @@ updateUser();
 
 
 
+
 function updateUser(){
 
 
@@ -134,6 +136,7 @@ document.getElementById("activeUser")
 
 
 
+
 // Dashboard
 
 function goDashboard(){
@@ -142,12 +145,17 @@ function goDashboard(){
 showPage("dashboard");
 
 
+updateCount();
+
+
 }
 
 
 
 
-// HalDo AI
+
+
+// HalDo öffnen
 
 function openHalDoAI(){
 
@@ -163,6 +171,8 @@ loadMessages();
 
 
 
+
+// Nachricht senden
 
 function sendMessage(){
 
@@ -210,13 +220,18 @@ input.value="";
 loadMessages();
 
 
+updateCount();
+
+
 }
 
 
 
 
 
-// HalDo KI Antwort
+
+
+// HalDo Antwort
 
 function haldoAntwort(text){
 
@@ -225,7 +240,7 @@ let frage=text.toLowerCase();
 
 
 let antwort =
-"Ich bin HalDo AI und habe deine Nachricht verstanden. 🤖";
+"Ich bin HalDo AI. Ich habe dich verstanden. 🤖";
 
 
 
@@ -234,7 +249,19 @@ if(frage.includes("hallo")){
 
 
 antwort =
-"Hallo "+aktuellerBenutzer+" 👋 Ich bin HalDo AI.";
+"Hallo "+aktuellerBenutzer+" 👋 Schön dich zu sehen.";
+
+
+}
+
+
+
+else if(frage.includes("wer bist du")){
+
+
+antwort =
+"Ich bin HalDo AI, dein Assistent in Apps Web 3.0.";
+
 
 }
 
@@ -244,7 +271,7 @@ else if(frage.includes("hilfe")){
 
 
 antwort =
-"Ich kann dir helfen mit: Apps, Profil, Status und Fragen.";
+"Du kannst mich fragen über Apps, Profil, Status oder Einstellungen.";
 
 
 }
@@ -255,29 +282,29 @@ else if(frage.includes("status")){
 
 
 antwort =
-"Apps Web 3.0 ist aktiv 🟢";
+"Alle Systeme laufen 🟢 Apps Web 3.0 ist aktiv.";
 
 
 }
 
 
 
-else if(frage.includes("profil")){
+else if(frage.includes("zeit")){
 
 
 antwort =
-"Du kannst dein Profil im Profil-Bereich ändern.";
+"Die Uhrzeit ist "+new Date().toLocaleTimeString();
 
 
 }
 
 
 
-else if(frage.includes("app")){
+else if(frage.includes("danke")){
 
 
 antwort =
-"Deine verfügbaren Bereiche sind: HalDo AI, Profil und Cloud.";
+"Gerne 😊 Ich helfe dir jederzeit.";
 
 
 }
@@ -293,11 +320,69 @@ text:antwort
 });
 
 
+
+// Stimme aktivieren
+
+sprechen(antwort);
+
+
 }
 
 
 
 
+
+
+// Text sprechen
+
+function sprechen(text){
+
+
+if("speechSynthesis" in window){
+
+
+let sprache =
+new SpeechSynthesisUtterance(text);
+
+
+
+sprache.lang="de-DE";
+
+
+window.speechSynthesis.speak(sprache);
+
+
+}
+
+
+}
+
+
+
+
+
+
+
+// Mikrofon Vorbereitung
+
+function startVoice(){
+
+
+alert(
+"Sprachsteuerung wird vorbereitet 🎤"
+);
+
+
+}
+
+
+
+
+
+
+
+
+// Chat anzeigen
 
 function loadMessages(){
 
@@ -355,6 +440,7 @@ box.appendChild(div);
 
 
 
+
 function saveChat(){
 
 
@@ -373,6 +459,36 @@ JSON.stringify(chatSpeicher)
 
 
 
+
+// Anzahl Nachrichten
+
+function updateCount(){
+
+
+let count =
+document.getElementById("messageCount");
+
+
+
+if(count){
+
+
+count.innerText =
+chatSpeicher.length;
+
+
+}
+
+
+}
+
+
+
+
+
+
+
+
 // Profil
 
 function openProfile(){
@@ -382,6 +498,8 @@ showPage("profilePage");
 
 
 }
+
+
 
 
 
@@ -400,6 +518,7 @@ if(name){
 aktuellerBenutzer=name;
 
 
+
 localStorage.setItem(
 
 "aktuellerBenutzer",
@@ -407,6 +526,7 @@ localStorage.setItem(
 name
 
 );
+
 
 
 }
@@ -417,6 +537,10 @@ goDashboard();
 
 
 }
+
+
+
+
 
 
 
@@ -459,6 +583,8 @@ sendMessage();
 
 
 }
+
+
 
 
 
