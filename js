@@ -1,3 +1,4 @@
+alert("HalDo chat.js läuft");
 document.addEventListener("DOMContentLoaded", () => {
     const chatWindow = document.getElementById("chatWindow");
     const messageInput = document.getElementById("messageInput");
