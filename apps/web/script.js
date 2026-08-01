@@ -965,3 +965,75 @@ window.addEventListener(
     "load",
     loadUserProfile
 );
+// ===============================
+// HALDO SYSTEM INFO v4.9
+// ===============================
+
+
+function updateSystemInfo(){
+
+
+    const now = new Date();
+
+
+
+    const date =
+    now.toLocaleDateString(
+        "de-DE"
+    );
+
+
+
+    const time =
+    now.toLocaleTimeString(
+        "de-DE"
+    );
+
+
+
+    const dateBox =
+    document.getElementById(
+        "systemDate"
+    );
+
+
+    const timeBox =
+    document.getElementById(
+        "systemTime"
+    );
+
+
+
+    if(dateBox){
+
+        dateBox.innerHTML =
+        "📅 Datum: " + date;
+
+    }
+
+
+
+    if(timeBox){
+
+        timeBox.innerHTML =
+        "🕒 Uhrzeit: " + time;
+
+    }
+
+
+}
+
+
+
+
+setInterval(
+    updateSystemInfo,
+    1000
+);
+
+
+
+window.addEventListener(
+    "load",
+    updateSystemInfo
+);
