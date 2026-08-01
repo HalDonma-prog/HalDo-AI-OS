@@ -632,3 +632,42 @@ function loadNotes() {
 
     showNotes();
 }
+let currentDocument = {
+    type: "",
+    recipient: "",
+    content: "",
+    created: ""
+};
+
+
+function selectDocumentType(type){
+
+    currentDocument.type = type;
+
+
+    document
+    .getElementById("documentCreator")
+    .classList.remove("hidden");
+
+
+    let title =
+    document.getElementById("documentTitle");
+
+
+    if(type === "brief"){
+        title.innerHTML = "✉️ Neuer Brief";
+    }
+
+    if(type === "email"){
+        title.innerHTML = "📧 Neue E-Mail";
+    }
+
+    if(type === "pdf"){
+        title.innerHTML = "📄 Neues PDF Dokument";
+    }
+
+    if(type === "improve"){
+        title.innerHTML = "📝 Text verbessern";
+    }
+
+}
