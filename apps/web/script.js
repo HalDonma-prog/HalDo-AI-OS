@@ -912,3 +912,56 @@ function saveSettings(){
 
 
 }
+// ===============================
+// HALDO USER PROFILE v4.8
+// ===============================
+
+
+function loadUserProfile(){
+
+
+    const saved =
+    localStorage.getItem(
+        "haldoSettings"
+    );
+
+
+
+    if(saved){
+
+
+        const settings =
+        JSON.parse(saved);
+
+
+
+        const welcome =
+        document.getElementById(
+            "userWelcome"
+        );
+
+
+
+        if(welcome && settings.name){
+
+
+            welcome.innerHTML =
+            "🌍 Willkommen zurück, " 
+            + settings.name;
+
+
+        }
+
+
+    }
+
+
+}
+
+
+
+
+window.addEventListener(
+    "load",
+    loadUserProfile
+);
