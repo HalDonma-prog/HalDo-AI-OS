@@ -751,3 +751,114 @@ function mailToPDF(){
 
 
 }
+// ===============================
+// HALDO SCANNER v4.5
+// ===============================
+
+
+function saveScan(){
+
+
+    const title = document.getElementById(
+        "scanTitle"
+    ).value;
+
+
+    const file = document.getElementById(
+        "scanFile"
+    ).files[0];
+
+
+
+    if(title === "" || !file){
+
+
+        alert(
+            "Bitte Name und Bild auswählen."
+        );
+
+
+        return;
+
+    }
+
+
+
+    const scanData = {
+
+
+        title: title,
+
+        fileName: file.name,
+
+        date: new Date().toLocaleString()
+
+
+    };
+
+
+
+    localStorage.setItem(
+        "haldoLastScan",
+        JSON.stringify(scanData)
+    );
+
+
+
+    document.getElementById(
+        "scanMessage"
+    ).innerHTML =
+    "✅ Scan gespeichert";
+
+}
+
+
+
+
+
+
+
+function scanToPDF(){
+
+
+    const title = document.getElementById(
+        "scanTitle"
+    ).value;
+
+
+
+    if(title === ""){
+
+
+        alert(
+            "Bitte zuerst Scan Name eingeben."
+        );
+
+
+        return;
+
+    }
+
+
+
+    localStorage.setItem(
+        "haldoPDFTitle",
+        title
+    );
+
+
+
+    localStorage.setItem(
+        "haldoPDFContent",
+        "Gescanntes Dokument: " + title
+    );
+
+
+
+    document.getElementById(
+        "scanMessage"
+    ).innerHTML =
+    "✅ Scan für PDF vorbereitet";
+
+
+}
