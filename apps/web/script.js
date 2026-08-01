@@ -1037,3 +1037,66 @@ window.addEventListener(
     "load",
     updateSystemInfo
 );
+// ===============================
+// HALDO AI ZENTRALE v5.1
+// ===============================
+
+
+function sendAIMessage(){
+
+
+    const input =
+    document.getElementById(
+        "aiInput"
+    );
+
+
+    const history =
+    document.getElementById(
+        "chatHistory"
+    );
+
+
+
+    const message =
+    input.value.trim();
+
+
+
+    if(message === ""){
+
+        return;
+
+    }
+
+
+
+    history.innerHTML +=
+    "<p>👤 Du: "
+    + message
+    + "</p>";
+
+
+
+
+    let answer =
+    "🤖 HalDo: Ich habe deine Anfrage erhalten. Die KI-Antwortfunktion wird weiter ausgebaut.";
+
+
+
+    history.innerHTML +=
+    "<p>"
+    + answer
+    + "</p>";
+
+
+
+    input.value = "";
+
+
+
+    history.scrollTop =
+    history.scrollHeight;
+
+
+}
