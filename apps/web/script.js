@@ -510,7 +510,85 @@ function prepareDocument(){
 
 
 
+// ===============================
+// SCHREIBASSISTENT → PDF CREATOR
+// ===============================
+
+
 function sendToPDF(){
+
+
+    const title = document.getElementById(
+        "writingTitle"
+    ).value;
+
+
+    const content = document.getElementById(
+        "writingContent"
+    ).value;
+
+
+
+    if(title === "" || content === ""){
+
+
+        alert(
+            "Bitte zuerst ein Dokument erstellen."
+        );
+
+
+        return;
+
+    }
+
+
+
+    localStorage.setItem(
+        "haldoPDFTitle",
+        title
+    );
+
+
+    localStorage.setItem(
+        "haldoPDFContent",
+        content
+    );
+
+
+
+    // Wechsel zum PDF Bereich
+
+    openPage("pdf");
+
+
+
+    // Daten in PDF Felder einsetzen
+
+    setTimeout(function(){
+
+
+        document.getElementById(
+            "pdfTitle"
+        ).value = title;
+
+
+
+        document.getElementById(
+            "pdfContent"
+        ).value = content;
+
+
+
+        document.getElementById(
+            "pdfMessage"
+        ).innerHTML =
+        "✅ Dokument vom Schreibassistent übernommen";
+
+
+    },100);
+
+
+}
 
 
     const title = document.getElementById(
