@@ -633,3 +633,121 @@ function sendToPDF(){
     "✅ Für PDF vorbereitet";
 
 }
+// ===============================
+// HALDO MAIL v4.4
+// ===============================
+
+
+function prepareMail(){
+
+
+    const receiver = document.getElementById(
+        "mailReceiver"
+    ).value;
+
+
+    const subject = document.getElementById(
+        "mailSubject"
+    ).value;
+
+
+    const content = document.getElementById(
+        "mailContent"
+    ).value;
+
+
+
+    if(receiver === "" || subject === "" || content === ""){
+
+
+        alert(
+            "Bitte Empfänger, Betreff und Nachricht ausfüllen."
+        );
+
+
+        return;
+
+    }
+
+
+
+    const preparedMail =
+
+    "An: " + receiver +
+    "\n\n" +
+
+    "Betreff: " + subject +
+    "\n\n" +
+
+    content;
+
+
+
+    document.getElementById(
+        "mailContent"
+    ).value = preparedMail;
+
+
+
+    document.getElementById(
+        "mailMessage"
+    ).innerHTML =
+    "✅ E-Mail vorbereitet";
+
+
+}
+
+
+
+
+
+
+
+function mailToPDF(){
+
+
+    const subject = document.getElementById(
+        "mailSubject"
+    ).value;
+
+
+    const content = document.getElementById(
+        "mailContent"
+    ).value;
+
+
+
+    if(subject === "" || content === ""){
+
+
+        alert(
+            "Bitte zuerst eine E-Mail erstellen."
+        );
+
+
+        return;
+
+    }
+
+
+
+    localStorage.setItem(
+        "haldoPDFTitle",
+        subject
+    );
+
+
+    localStorage.setItem(
+        "haldoPDFContent",
+        content
+    );
+
+
+
+    document.getElementById(
+        "mailMessage"
+    ).innerHTML =
+    "✅ E-Mail für PDF vorbereitet";
+
+
+}
