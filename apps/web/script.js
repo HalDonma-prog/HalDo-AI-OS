@@ -211,3 +211,129 @@ document.addEventListener(
 
     }
 );
+// ===============================
+// HALDO PDF CREATOR
+// ===============================
+
+
+function savePDFDocument(){
+
+
+    const title = document.getElementById(
+        "pdfTitle"
+    ).value;
+
+
+    const content = document.getElementById(
+        "pdfContent"
+    ).value;
+
+
+
+    const pdfDraft = {
+
+        title: title,
+
+        content: content,
+
+        date: new Date().toLocaleString()
+
+    };
+
+
+
+    localStorage.setItem(
+        "haldoPDFDraft",
+        JSON.stringify(pdfDraft)
+    );
+
+
+
+    document.getElementById(
+        "pdfMessage"
+    ).innerHTML =
+    "✅ PDF Entwurf gespeichert";
+
+
+}
+
+
+
+
+
+
+
+function createPDF(){
+
+
+    const title = document.getElementById(
+        "pdfTitle"
+    ).value;
+
+
+    const content = document.getElementById(
+        "pdfContent"
+    ).value;
+
+
+
+    if(title === "" || content === ""){
+
+
+        alert(
+            "Bitte Titel und Inhalt eingeben."
+        );
+
+
+        return;
+
+    }
+
+
+
+    const pdfWindow = window.open(
+        "",
+        "_blank"
+    );
+
+
+
+    pdfWindow.document.write(`
+
+        <html>
+
+        <head>
+
+        <title>${title}</title>
+
+        </head>
+
+
+        <body>
+
+        <h1>${title}</h1>
+
+        <p>
+        ${content}
+        </p>
+
+
+        </body>
+
+        </html>
+
+    `);
+
+
+
+    pdfWindow.document.close();
+
+
+
+    document.getElementById(
+        "pdfMessage"
+    ).innerHTML =
+    "✅ PDF Vorschau geöffnet";
+
+
+}
