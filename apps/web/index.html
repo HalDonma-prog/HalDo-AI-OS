@@ -242,33 +242,99 @@ placeholder="Name für Unterschrift">
 <section id="writing" class="page hidden">
 
 
-<h2>✍️ HalDo Schreibassistent</h2>
+<h2>
+✍️ HalDo Schreibassistent
+</h2>
 
 
 <p>
-Erstelle Briefe, E-Mails und Dokumente
+Erstelle Briefe, E-Mails und Dokumente mit HalDo AI.
 </p>
 
 
-<button>
-✉️ Brief erstellen
-</button>
 
-
-<button>
-📧 E-Mail erstellen
-</button>
-
-
-<button>
-📄 PDF vorbereiten
-</button>
+<div class="writing-box">
 
 
 
-<textarea 
-placeholder="Dokument Inhalt">
+<label>
+Dokument Art
+</label>
+
+
+<select id="documentType">
+
+<option value="brief">
+✉️ Brief
+</option>
+
+<option value="email">
+📧 E-Mail
+</option>
+
+<option value="bewerbung">
+📄 Bewerbung
+</option>
+
+<option value="rechnung">
+🧾 Rechnung
+</option>
+
+</select>
+
+
+
+
+
+<label>
+Titel
+</label>
+
+
+<input
+id="writingTitle"
+type="text"
+placeholder="Titel des Dokuments">
+
+
+
+
+
+<label>
+Dein Inhalt
+</label>
+
+
+<textarea
+id="writingContent"
+placeholder="Schreibe deine Gedanken oder Informationen...">
 </textarea>
+
+
+
+
+
+<button onclick="prepareDocument()">
+🤖 Dokument vorbereiten
+</button>
+
+
+
+<button onclick="sendToPDF()">
+📄 Als PDF vorbereiten
+</button>
+
+
+
+
+
+<div id="writingMessage">
+
+</div>
+
+
+
+</div>
 
 
 </section>
