@@ -862,3 +862,53 @@ function scanToPDF(){
 
 
 }
+// ===============================
+// HALDO SETTINGS v4.7
+// ===============================
+
+
+function saveSettings(){
+
+
+    const name = document.getElementById(
+        "userName"
+    ).value;
+
+
+    const language = document.getElementById(
+        "language"
+    ).value;
+
+
+    const theme = document.getElementById(
+        "theme"
+    ).value;
+
+
+
+    const settings = {
+
+        name: name,
+
+        language: language,
+
+        theme: theme
+
+    };
+
+
+
+    localStorage.setItem(
+        "haldoSettings",
+        JSON.stringify(settings)
+    );
+
+
+
+    document.getElementById(
+        "settingsMessage"
+    ).innerHTML =
+    "✅ Einstellungen gespeichert";
+
+
+}
