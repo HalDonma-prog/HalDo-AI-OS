@@ -263,11 +263,26 @@ function savePDFDocument(){
 
 
 
+// ===============================
+// HALDO PDF CREATOR v4.2
+// ===============================
+
+
 function createPDF(){
+
+
+    const sender = document.getElementById("pdfSender").value;
+
+    const receiver = document.getElementById("pdfReceiver").value;
+
+    const date = document.getElementById("pdfDate").value;
 
     const title = document.getElementById("pdfTitle").value;
 
     const content = document.getElementById("pdfContent").value;
+
+    const signature = document.getElementById("pdfSignature").value;
+
 
 
     if(title === "" || content === ""){
@@ -279,31 +294,104 @@ function createPDF(){
     }
 
 
+
     const { jsPDF } = window.jspdf;
 
 
     const doc = new jsPDF();
 
 
+
+    let y = 20;
+
+
+
     doc.setFontSize(18);
 
-    doc.text(title, 20, 20);
+    doc.text(
+        "HalDo AI OS Dokument",
+        20,
+        y
+    );
+
+
+    y += 15;
 
 
     doc.setFontSize(12);
 
 
-    const lines = doc.splitTextToSize(
+
+    doc.text(
+        "Absender: " + sender,
+        20,
+        y
+    );
+
+
+    y += 10;
+
+
+    doc.text(
+        "Empfänger: " + receiver,
+        20,
+        y
+    );
+
+
+    y += 10;
+
+
+    doc.text(
+        "Datum: " + date,
+        20,
+        y
+    );
+
+
+    y += 15;
+
+
+
+    doc.setFontSize(16);
+
+    doc.text(
+        title,
+        20,
+        y
+    );
+
+
+    y += 15;
+
+
+    doc.setFontSize(12);
+
+
+
+    const textLines = doc.splitTextToSize(
         content,
         170
     );
 
 
     doc.text(
-        lines,
+        textLines,
         20,
-        40
+        y
     );
+
+
+    y += textLines.length * 7 + 15;
+
+
+
+    doc.text(
+        "Unterschrift: " + signature,
+        20,
+        y
+    );
+
 
 
     doc.save(
@@ -311,82 +399,11 @@ function createPDF(){
     );
 
 
-    document.getElementById(
-        "pdfMessage"
-    ).innerHTML =
-    "✅ PDF-Datei erstellt";
-
-}
-
-
-    const title = document.getElementById(
-        "pdfTitle"
-    ).value;
-
-
-    const content = document.getElementById(
-        "pdfContent"
-    ).value;
-
-
-
-    if(title === "" || content === ""){
-
-
-        alert(
-            "Bitte Titel und Inhalt eingeben."
-        );
-
-
-        return;
-
-    }
-
-
-
-    const pdfWindow = window.open(
-        "",
-        "_blank"
-    );
-
-
-
-    pdfWindow.document.write(`
-
-        <html>
-
-        <head>
-
-        <title>${title}</title>
-
-        </head>
-
-
-        <body>
-
-        <h1>${title}</h1>
-
-        <p>
-        ${content}
-        </p>
-
-
-        </body>
-
-        </html>
-
-    `);
-
-
-
-    pdfWindow.document.close();
-
-
 
     document.getElementById(
         "pdfMessage"
     ).innerHTML =
-    "✅ PDF Vorschau geöffnet";
+    "✅ Professionelles PDF erstellt";
 
 
 }
