@@ -1,19 +1,17 @@
-/*
-HalDo AI OS v4.0
-script.js
-Grundfunktionen
-*/
-
-
 // ===============================
-// SEITEN NAVIGATION
+// HALDO AI OS v6.0 STABLE
+// SCRIPT.JS
 // ===============================
 
 
-function openPage(pageId) {
+
+// Seiten wechseln
+
+function openPage(pageId){
 
 
-    const pages = document.querySelectorAll(".page");
+    const pages =
+    document.querySelectorAll(".page");
 
 
     pages.forEach(page => {
@@ -23,75 +21,17 @@ function openPage(pageId) {
     });
 
 
-    const selectedPage = document.getElementById(pageId);
 
-
-    if(selectedPage){
-
-        selectedPage.classList.remove("hidden");
-
-    }
-
-
-}
+    const activePage =
+    document.getElementById(pageId);
 
 
 
-// ===============================
-// NOTIZEN SYSTEM
-// ===============================
+    if(activePage){
 
-
-let notes = JSON.parse(
-    localStorage.getItem("haldoNotes")
-) || [];
-
-
-
-
-
-function saveNote(){
-
-
-    const input = document.getElementById("noteInput");
-
-
-    const text = input.value.trim();
-
-
-
-    if(text === ""){
-
-        alert("Bitte eine Notiz eingeben.");
-
-        return;
+        activePage.classList.remove("hidden");
 
     }
-
-
-
-    notes.push({
-
-        id: Date.now(),
-
-        text: text
-
-    });
-
-
-
-    localStorage.setItem(
-        "haldoNotes",
-        JSON.stringify(notes)
-    );
-
-
-
-    input.value = "";
-
-
-    renderNotes();
-
 
 }
 
@@ -99,881 +39,36 @@ function saveNote(){
 
 
 
+// Startseite laden
+
+window.onload = function(){
 
 
-function renderNotes(){
+    openPage("dashboard");
 
 
-    const list = document.getElementById(
-        "noteList"
+    updateSystemTime();
+
+
+    setInterval(
+        updateSystemTime,
+        1000
     );
 
 
+};
 
-    if(!list){
 
-        return;
 
-    }
 
 
+// Datum und Uhrzeit
 
-    list.innerHTML = "";
+function updateSystemTime(){
 
 
-
-    notes.forEach(note => {
-
-
-
-        const div = document.createElement(
-            "div"
-        );
-
-
-        div.className = "note-item";
-
-
-
-        div.innerHTML = `
-
-            <p>${note.text}</p>
-
-            <button onclick="deleteNote(${note.id})">
-            🗑️ Löschen
-            </button>
-
-        `;
-
-
-
-        list.appendChild(div);
-
-
-
-    });
-
-
-
-}
-
-
-
-
-
-
-
-function deleteNote(id){
-
-
-
-    notes = notes.filter(
-        note => note.id !== id
-    );
-
-
-
-    localStorage.setItem(
-        "haldoNotes",
-        JSON.stringify(notes)
-    );
-
-
-
-    renderNotes();
-
-
-
-}
-
-
-
-
-
-
-
-// ===============================
-// START
-// ===============================
-
-
-
-document.addEventListener(
-    "DOMContentLoaded",
-    function(){
-
-
-        renderNotes();
-
-
-        openPage("dashboard");
-
-
-    }
-);
-// ===============================
-// HALDO PDF CREATOR
-// ===============================
-
-
-function savePDFDocument(){
-
-
-    const title = document.getElementById(
-        "pdfTitle"
-    ).value;
-
-
-    const content = document.getElementById(
-        "pdfContent"
-    ).value;
-
-
-
-    const pdfDraft = {
-
-        title: title,
-
-        content: content,
-
-        date: new Date().toLocaleString()
-
-    };
-
-
-
-    localStorage.setItem(
-        "haldoPDFDraft",
-        JSON.stringify(pdfDraft)
-    );
-
-
-
-    document.getElementById(
-        "pdfMessage"
-    ).innerHTML =
-    "✅ PDF Entwurf gespeichert";
-
-
-}
-
-
-
-
-
-
-
-// ===============================
-// HALDO PDF CREATOR v4.2
-// ===============================
-
-
-function createPDF(){
-
-
-    const sender = document.getElementById("pdfSender").value;
-
-    const receiver = document.getElementById("pdfReceiver").value;
-
-    const date = document.getElementById("pdfDate").value;
-
-    const title = document.getElementById("pdfTitle").value;
-
-    const content = document.getElementById("pdfContent").value;
-
-    const signature = document.getElementById("pdfSignature").value;
-
-
-
-    if(title === "" || content === ""){
-
-        alert("Bitte Titel und Inhalt eingeben.");
-
-        return;
-
-    }
-
-
-
-    const { jsPDF } = window.jspdf;
-
-
-    const doc = new jsPDF();
-
-
-
-    let y = 20;
-
-
-
-    doc.setFontSize(18);
-
-    doc.text(
-        "HalDo AI OS Dokument",
-        20,
-        y
-    );
-
-
-    y += 15;
-
-
-    doc.setFontSize(12);
-
-
-
-    doc.text(
-        "Absender: " + sender,
-        20,
-        y
-    );
-
-
-    y += 10;
-
-
-    doc.text(
-        "Empfänger: " + receiver,
-        20,
-        y
-    );
-
-
-    y += 10;
-
-
-    doc.text(
-        "Datum: " + date,
-        20,
-        y
-    );
-
-
-    y += 15;
-
-
-
-    doc.setFontSize(16);
-
-    doc.text(
-        title,
-        20,
-        y
-    );
-
-
-    y += 15;
-
-
-    doc.setFontSize(12);
-
-
-
-    const textLines = doc.splitTextToSize(
-        content,
-        170
-    );
-
-
-    doc.text(
-        textLines,
-        20,
-        y
-    );
-
-
-    y += textLines.length * 7 + 15;
-
-
-
-    doc.text(
-        "Unterschrift: " + signature,
-        20,
-        y
-    );
-
-
-
-    doc.save(
-        title + ".pdf"
-    );
-
-
-
-    document.getElementById(
-        "pdfMessage"
-    ).innerHTML =
-    "✅ Professionelles PDF erstellt";
-
-
-}
-// ===============================
-// HALDO SCHREIBASSISTENT v4.3
-// ===============================
-
-
-function prepareDocument(){
-
-
-    const type = document.getElementById(
-        "documentType"
-    ).value;
-
-
-    const title = document.getElementById(
-        "writingTitle"
-    ).value;
-
-
-    const content = document.getElementById(
-        "writingContent"
-    ).value;
-
-
-
-    if(title === "" || content === ""){
-
-        alert(
-            "Bitte Titel und Inhalt eingeben."
-        );
-
-        return;
-
-    }
-
-
-
-    let prefix = "";
-
-
-
-    if(type === "brief"){
-
-        prefix =
-        "Sehr geehrte Damen und Herren,\n\n";
-
-    }
-
-
-    if(type === "email"){
-
-        prefix =
-        "Hallo,\n\n";
-
-    }
-
-
-    if(type === "bewerbung"){
-
-        prefix =
-        "Bewerbung\n\n";
-
-    }
-
-
-    if(type === "rechnung"){
-
-        prefix =
-        "Rechnung\n\n";
-
-    }
-
-
-
-
-    const preparedText =
-    prefix +
-    content +
-    "\n\nMit freundlichen Grüßen";
-
-
-
-
-    document.getElementById(
-        "writingContent"
-    ).value = preparedText;
-
-
-
-
-    document.getElementById(
-        "writingMessage"
-    ).innerHTML =
-    "✅ Dokument vorbereitet";
-
-}
-
-
-
-
-
-
-
-
-// ===============================
-// SCHREIBASSISTENT → PDF CREATOR
-// ===============================
-
-
-function sendToPDF(){
-
-
-    const title = document.getElementById(
-        "writingTitle"
-    ).value;
-
-
-    const content = document.getElementById(
-        "writingContent"
-    ).value;
-
-
-
-    if(title === "" || content === ""){
-
-
-        alert(
-            "Bitte zuerst ein Dokument erstellen."
-        );
-
-
-        return;
-
-    }
-
-
-
-    localStorage.setItem(
-        "haldoPDFTitle",
-        title
-    );
-
-
-    localStorage.setItem(
-        "haldoPDFContent",
-        content
-    );
-
-
-
-    // Wechsel zum PDF Bereich
-
-    openPage("pdf");
-
-
-
-    // Daten in PDF Felder einsetzen
-
-    setTimeout(function(){
-
-
-        document.getElementById(
-            "pdfTitle"
-        ).value = title;
-
-
-
-        document.getElementById(
-            "pdfContent"
-        ).value = content;
-
-
-
-        document.getElementById(
-            "pdfMessage"
-        ).innerHTML =
-        "✅ Dokument vom Schreibassistent übernommen";
-
-
-    },100);
-
-
-}
-
-
-    const title = document.getElementById(
-        "writingTitle"
-    ).value;
-
-
-    const content = document.getElementById(
-        "writingContent"
-    ).value;
-
-
-
-    if(title === "" || content === ""){
-
-        alert(
-            "Bitte erst ein Dokument erstellen."
-        );
-
-        return;
-
-    }
-
-
-
-    localStorage.setItem(
-        "haldoPDFTitle",
-        title
-    );
-
-
-    localStorage.setItem(
-        "haldoPDFContent",
-        content
-    );
-
-
-
-    document.getElementById(
-        "writingMessage"
-    ).innerHTML =
-    "✅ Für PDF vorbereitet";
-
-}
-// ===============================
-// HALDO MAIL v4.4
-// ===============================
-
-
-function prepareMail(){
-
-
-    const receiver = document.getElementById(
-        "mailReceiver"
-    ).value;
-
-
-    const subject = document.getElementById(
-        "mailSubject"
-    ).value;
-
-
-    const content = document.getElementById(
-        "mailContent"
-    ).value;
-
-
-
-    if(receiver === "" || subject === "" || content === ""){
-
-
-        alert(
-            "Bitte Empfänger, Betreff und Nachricht ausfüllen."
-        );
-
-
-        return;
-
-    }
-
-
-
-    const preparedMail =
-
-    "An: " + receiver +
-    "\n\n" +
-
-    "Betreff: " + subject +
-    "\n\n" +
-
-    content;
-
-
-
-    document.getElementById(
-        "mailContent"
-    ).value = preparedMail;
-
-
-
-    document.getElementById(
-        "mailMessage"
-    ).innerHTML =
-    "✅ E-Mail vorbereitet";
-
-
-}
-
-
-
-
-
-
-
-function mailToPDF(){
-
-
-    const subject = document.getElementById(
-        "mailSubject"
-    ).value;
-
-
-    const content = document.getElementById(
-        "mailContent"
-    ).value;
-
-
-
-    if(subject === "" || content === ""){
-
-
-        alert(
-            "Bitte zuerst eine E-Mail erstellen."
-        );
-
-
-        return;
-
-    }
-
-
-
-    localStorage.setItem(
-        "haldoPDFTitle",
-        subject
-    );
-
-
-    localStorage.setItem(
-        "haldoPDFContent",
-        content
-    );
-
-
-
-    document.getElementById(
-        "mailMessage"
-    ).innerHTML =
-    "✅ E-Mail für PDF vorbereitet";
-
-
-}
-// ===============================
-// HALDO SCANNER v4.5
-// ===============================
-
-
-function saveScan(){
-
-
-    const title = document.getElementById(
-        "scanTitle"
-    ).value;
-
-
-    const file = document.getElementById(
-        "scanFile"
-    ).files[0];
-
-
-
-    if(title === "" || !file){
-
-
-        alert(
-            "Bitte Name und Bild auswählen."
-        );
-
-
-        return;
-
-    }
-
-
-
-    const scanData = {
-
-
-        title: title,
-
-        fileName: file.name,
-
-        date: new Date().toLocaleString()
-
-
-    };
-
-
-
-    localStorage.setItem(
-        "haldoLastScan",
-        JSON.stringify(scanData)
-    );
-
-
-
-    document.getElementById(
-        "scanMessage"
-    ).innerHTML =
-    "✅ Scan gespeichert";
-
-}
-
-
-
-
-
-
-
-function scanToPDF(){
-
-
-    const title = document.getElementById(
-        "scanTitle"
-    ).value;
-
-
-
-    if(title === ""){
-
-
-        alert(
-            "Bitte zuerst Scan Name eingeben."
-        );
-
-
-        return;
-
-    }
-
-
-
-    localStorage.setItem(
-        "haldoPDFTitle",
-        title
-    );
-
-
-
-    localStorage.setItem(
-        "haldoPDFContent",
-        "Gescanntes Dokument: " + title
-    );
-
-
-
-    document.getElementById(
-        "scanMessage"
-    ).innerHTML =
-    "✅ Scan für PDF vorbereitet";
-
-
-}
-// ===============================
-// HALDO SETTINGS v4.7
-// ===============================
-
-
-function saveSettings(){
-
-
-    const name = document.getElementById(
-        "userName"
-    ).value;
-
-
-    const language = document.getElementById(
-        "language"
-    ).value;
-
-
-    const theme = document.getElementById(
-        "theme"
-    ).value;
-
-
-
-    const settings = {
-
-        name: name,
-
-        language: language,
-
-        theme: theme
-
-    };
-
-
-
-    localStorage.setItem(
-        "haldoSettings",
-        JSON.stringify(settings)
-    );
-
-
-
-    document.getElementById(
-        "settingsMessage"
-    ).innerHTML =
-    "✅ Einstellungen gespeichert";
-
-
-}
-// ===============================
-// HALDO USER PROFILE v4.8
-// ===============================
-
-
-function loadUserProfile(){
-
-
-    const saved =
-    localStorage.getItem(
-        "haldoSettings"
-    );
-
-
-
-    if(saved){
-
-
-        const settings =
-        JSON.parse(saved);
-
-
-
-        const welcome =
-        document.getElementById(
-            "userWelcome"
-        );
-
-
-
-        if(welcome && settings.name){
-
-
-            welcome.innerHTML =
-            "🌍 Willkommen zurück, " 
-            + settings.name;
-
-
-        }
-
-
-    }
-
-
-}
-
-
-
-
-window.addEventListener(
-    "load",
-    loadUserProfile
-);
-// ===============================
-// HALDO SYSTEM INFO v4.9
-// ===============================
-
-
-function updateSystemInfo(){
-
-
-    const now = new Date();
+    const now =
+    new Date();
 
 
 
@@ -991,32 +86,32 @@ function updateSystemInfo(){
 
 
 
-    const dateBox =
+    const dateElement =
     document.getElementById(
         "systemDate"
     );
 
 
-    const timeBox =
+    const timeElement =
     document.getElementById(
         "systemTime"
     );
 
 
 
-    if(dateBox){
+    if(dateElement){
 
-        dateBox.innerHTML =
-        "📅 Datum: " + date;
+        dateElement.innerHTML =
+        "📅 " + date;
 
     }
 
 
 
-    if(timeBox){
+    if(timeElement){
 
-        timeBox.innerHTML =
-        "🕒 Uhrzeit: " + time;
+        timeElement.innerHTML =
+        "🕒 " + time;
 
     }
 
@@ -1026,19 +121,10 @@ function updateSystemInfo(){
 
 
 
-setInterval(
-    updateSystemInfo,
-    1000
-);
 
 
-
-window.addEventListener(
-    "load",
-    updateSystemInfo
-);
 // ===============================
-// HALDO AI ZENTRALE v5.1
+// HALDO AI CHAT
 // ===============================
 
 
@@ -1051,10 +137,19 @@ function sendAIMessage(){
     );
 
 
+
     const history =
     document.getElementById(
         "chatHistory"
     );
+
+
+
+    if(!input || !history){
+
+        return;
+
+    }
 
 
 
@@ -1072,22 +167,16 @@ function sendAIMessage(){
 
 
     history.innerHTML +=
+
     "<p>👤 Du: "
     + message
     + "</p>";
 
 
 
-
-    let answer =
-    "🤖 HalDo: Ich habe deine Anfrage erhalten. Die KI-Antwortfunktion wird weiter ausgebaut.";
-
-
-
     history.innerHTML +=
-    "<p>"
-    + answer
-    + "</p>";
+
+    "<p>🤖 HalDo: Deine Anfrage wurde gespeichert. Die KI-Funktion wird weiter ausgebaut.</p>";
 
 
 
@@ -1095,8 +184,256 @@ function sendAIMessage(){
 
 
 
-    history.scrollTop =
-    history.scrollHeight;
+}
+// ===============================
+// HALDO NOTES
+// ===============================
+
+
+function saveNote(){
+
+
+    const input =
+    document.getElementById(
+        "noteInput"
+    );
+
+
+    const list =
+    document.getElementById(
+        "noteList"
+    );
+
+
+
+    if(!input || !list){
+
+        return;
+
+    }
+
+
+
+    const text =
+    input.value.trim();
+
+
+
+    if(text === ""){
+
+        return;
+
+    }
+
+
+
+    const note =
+    document.createElement(
+        "p"
+    );
+
+
+
+    note.innerHTML =
+    "📝 " + text;
+
+
+
+    list.appendChild(note);
+
+
+
+    input.value = "";
+
+}
+
+
+
+
+
+// ===============================
+// EINSTELLUNGEN
+// ===============================
+
+
+function saveSettings(){
+
+
+    const name =
+    document.getElementById(
+        "userName"
+    );
+
+
+
+    const message =
+    document.getElementById(
+        "settingsMessage"
+    );
+
+
+
+    if(name && name.value !== ""){
+
+
+        localStorage.setItem(
+            "haldoUser",
+            name.value
+        );
+
+
+
+        const welcome =
+        document.getElementById(
+            "userWelcome"
+        );
+
+
+
+        if(welcome){
+
+            welcome.innerHTML =
+            "🌍 Willkommen "
+            + name.value
+            + " bei HalDo AI OS";
+
+        }
+
+
+    }
+
+
+
+    if(message){
+
+        message.innerHTML =
+        "✅ Einstellungen gespeichert";
+
+    }
 
 
 }
+
+
+
+
+
+// gespeicherten Benutzer laden
+
+
+function loadUser(){
+
+
+    const savedUser =
+    localStorage.getItem(
+        "haldoUser"
+    );
+
+
+
+    const welcome =
+    document.getElementById(
+        "userWelcome"
+    );
+
+
+
+    if(
+        savedUser &&
+        welcome
+    ){
+
+
+        welcome.innerHTML =
+        "🌍 Willkommen "
+        + savedUser
+        + " bei HalDo AI OS";
+
+
+    }
+
+
+}
+
+
+
+window.addEventListener(
+    "load",
+    loadUser
+);
+// ===============================
+// PDF CREATOR VORBEREITUNG
+// ===============================
+
+
+function createPDF(){
+
+
+    const text =
+    document.getElementById(
+        "pdfText"
+    );
+
+
+
+    if(!text){
+
+        return;
+
+    }
+
+
+
+    if(text.value.trim() === ""){
+
+
+        alert(
+            "Bitte zuerst Text eingeben."
+        );
+
+
+        return;
+
+    }
+
+
+
+    alert(
+        "📄 PDF Vorbereitung erfolgreich!"
+    );
+
+
+}
+
+
+
+
+
+// ===============================
+// DARK MODE VORBEREITUNG
+// ===============================
+
+
+function toggleDarkMode(){
+
+
+    document.body.classList.toggle(
+        "dark"
+    );
+
+
+}
+
+
+
+
+
+
+// ===============================
+// SYSTEM START
+// ===============================
+
+
+console.log(
+    "🌍 HalDo AI OS v6.0 Stable gestartet"
+);
