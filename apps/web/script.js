@@ -265,6 +265,59 @@ function savePDFDocument(){
 
 function createPDF(){
 
+    const title = document.getElementById("pdfTitle").value;
+
+    const content = document.getElementById("pdfContent").value;
+
+
+    if(title === "" || content === ""){
+
+        alert("Bitte Titel und Inhalt eingeben.");
+
+        return;
+
+    }
+
+
+    const { jsPDF } = window.jspdf;
+
+
+    const doc = new jsPDF();
+
+
+    doc.setFontSize(18);
+
+    doc.text(title, 20, 20);
+
+
+    doc.setFontSize(12);
+
+
+    const lines = doc.splitTextToSize(
+        content,
+        170
+    );
+
+
+    doc.text(
+        lines,
+        20,
+        40
+    );
+
+
+    doc.save(
+        title + ".pdf"
+    );
+
+
+    document.getElementById(
+        "pdfMessage"
+    ).innerHTML =
+    "✅ PDF-Datei erstellt";
+
+}
+
 
     const title = document.getElementById(
         "pdfTitle"
