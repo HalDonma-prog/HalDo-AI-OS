@@ -437,3 +437,30 @@ function toggleDarkMode(){
 console.log(
     "🌍 HalDo AI OS v6.0 Stable gestartet"
 );
+// ===============================
+// HALDO SPRACHE SPEICHERN
+// ===============================
+
+function saveLanguage(){
+
+    const language =
+    document.getElementById(
+        "language"
+    );
+
+
+    if(language){
+
+        localStorage.setItem(
+            "haldoLanguage",
+            language.value
+        );
+
+        console.log(
+            "🌍 Sprache gespeichert:",
+            language.value
+        );
+
+    }
+
+}
