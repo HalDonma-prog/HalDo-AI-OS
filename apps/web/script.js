@@ -407,3 +407,151 @@ function createPDF(){
 
 
 }
+// ===============================
+// HALDO SCHREIBASSISTENT v4.3
+// ===============================
+
+
+function prepareDocument(){
+
+
+    const type = document.getElementById(
+        "documentType"
+    ).value;
+
+
+    const title = document.getElementById(
+        "writingTitle"
+    ).value;
+
+
+    const content = document.getElementById(
+        "writingContent"
+    ).value;
+
+
+
+    if(title === "" || content === ""){
+
+        alert(
+            "Bitte Titel und Inhalt eingeben."
+        );
+
+        return;
+
+    }
+
+
+
+    let prefix = "";
+
+
+
+    if(type === "brief"){
+
+        prefix =
+        "Sehr geehrte Damen und Herren,\n\n";
+
+    }
+
+
+    if(type === "email"){
+
+        prefix =
+        "Hallo,\n\n";
+
+    }
+
+
+    if(type === "bewerbung"){
+
+        prefix =
+        "Bewerbung\n\n";
+
+    }
+
+
+    if(type === "rechnung"){
+
+        prefix =
+        "Rechnung\n\n";
+
+    }
+
+
+
+
+    const preparedText =
+    prefix +
+    content +
+    "\n\nMit freundlichen Grüßen";
+
+
+
+
+    document.getElementById(
+        "writingContent"
+    ).value = preparedText;
+
+
+
+
+    document.getElementById(
+        "writingMessage"
+    ).innerHTML =
+    "✅ Dokument vorbereitet";
+
+}
+
+
+
+
+
+
+
+
+function sendToPDF(){
+
+
+    const title = document.getElementById(
+        "writingTitle"
+    ).value;
+
+
+    const content = document.getElementById(
+        "writingContent"
+    ).value;
+
+
+
+    if(title === "" || content === ""){
+
+        alert(
+            "Bitte erst ein Dokument erstellen."
+        );
+
+        return;
+
+    }
+
+
+
+    localStorage.setItem(
+        "haldoPDFTitle",
+        title
+    );
+
+
+    localStorage.setItem(
+        "haldoPDFContent",
+        content
+    );
+
+
+
+    document.getElementById(
+        "writingMessage"
+    ).innerHTML =
+    "✅ Für PDF vorbereitet";
+
+}
