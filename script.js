@@ -1156,3 +1156,309 @@ document.addEventListener(
 
 
 });
+/* =====================================
+   HALDO AI OS 10.1
+   FINAL MODULE CONNECTION
+   PART 4/4
+===================================== */
+
+
+
+/* =====================================
+   PDF CREATOR
+===================================== */
+
+
+function setupPDF(){
+
+
+    const button =
+
+    document.getElementById(
+        "createPDF"
+    );
+
+
+
+    if(!button)
+    return;
+
+
+
+    button.addEventListener(
+    "click",
+    ()=>{
+
+
+        const title =
+
+        document.getElementById(
+            "pdfTitle"
+        )?.value || "HalDo PDF";
+
+
+
+        const text =
+
+        document.getElementById(
+            "pdfText"
+        )?.value || "";
+
+
+
+        console.log(
+
+            "📄 PDF vorbereitet:",
+
+            title,
+
+            text
+
+        );
+
+
+
+        HalDoNotification.add(
+
+            "📄 PDF wurde vorbereitet"
+
+        );
+
+
+    });
+
+
+}
+
+
+
+
+
+
+
+
+
+/* =====================================
+   CALENDAR SYSTEM
+===================================== */
+
+
+function setupCalendar(){
+
+
+    const button =
+
+    document.getElementById(
+        "saveEvent"
+    );
+
+
+
+    const date =
+
+    document.getElementById(
+        "calendarDate"
+    );
+
+
+
+    const eventText =
+
+    document.getElementById(
+        "calendarEvent"
+    );
+
+
+
+    const list =
+
+    document.getElementById(
+        "calendarList"
+    );
+
+
+
+    if(
+        !button ||
+        !date ||
+        !eventText ||
+        !list
+    )
+    return;
+
+
+
+    button.addEventListener(
+    "click",
+    ()=>{
+
+
+        const item =
+
+        document.createElement(
+            "p"
+        );
+
+
+
+        item.innerText =
+
+        "📅 "
+        +
+        date.value
+        +
+        " - "
+        +
+        eventText.value;
+
+
+
+        list.appendChild(
+            item
+        );
+
+
+
+        eventText.value="";
+
+
+    });
+
+
+}
+
+
+
+
+
+
+
+
+
+/* =====================================
+   MAIL SYSTEM
+===================================== */
+
+
+function setupMail(){
+
+
+    const button =
+
+    document.getElementById(
+        "sendMail"
+    );
+
+
+
+    if(!button)
+    return;
+
+
+
+    button.addEventListener(
+    "click",
+    ()=>{
+
+
+        const receiver =
+
+        document.getElementById(
+            "mailReceiver"
+        )?.value;
+
+
+
+        console.log(
+
+            "📧 Mail an:",
+
+            receiver
+
+        );
+
+
+
+        HalDoNotification.add(
+
+            "📧 Mail vorbereitet"
+
+        );
+
+
+    });
+
+
+}
+
+
+
+
+
+
+
+
+
+/* =====================================
+   SYSTEM STATUS
+===================================== */
+
+
+function systemReady(){
+
+
+    HalDo.ready=true;
+
+
+
+    console.log(
+
+        "🚀 HalDo AI OS 10.1 vollständig verbunden"
+
+    );
+
+
+
+    HalDoNotification.add(
+
+        "✅ Alle Module bereit"
+
+    );
+
+
+}
+
+
+
+
+
+
+
+
+
+/* =====================================
+   FINAL START CONNECTION
+===================================== */
+
+
+document.addEventListener(
+
+"DOMContentLoaded",
+
+()=>{
+
+
+    setupPDF();
+
+
+    setupCalendar();
+
+
+    setupMail();
+
+
+
+    systemReady();
+
+
+});
