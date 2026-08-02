@@ -1,60 +1,49 @@
-// ==================================
-// HALDO AI OS v8.1
-// COMPLETE SCRIPT FIX
-// ==================================
+/* =====================================
+   HALDO AI OS v9.0
+   MAIN SYSTEM ENGINE
+   PART 1/8
+   ===================================== */
 
 
 
-// START SYSTEM
+// =====================================
+// SYSTEM START
+// =====================================
+
 
 window.onload = function(){
 
 
-const splash =
-document.getElementById("splashScreen");
-
-
-const welcome =
-document.getElementById("welcomeScreen");
-
-
-const main =
-document.getElementById("mainOS");
+console.log(
+"🌍 HalDo AI OS v9.0 gestartet"
+);
 
 
 
-if(main){
-
-main.style.display = "none";
-
-}
+setTimeout(()=>{
 
 
+document.getElementById(
+"bootScreen"
+).style.display="none";
 
-setTimeout(function(){
+
+document.getElementById(
+"welcomeScreen"
+).style.display="flex";
 
 
-if(splash){
-
-splash.style.display = "none";
-
-}
+},3500);
 
 
 
-if(welcome){
-
-welcome.style.display = "flex";
-
-}
+updateClock();
 
 
-
-},2500);
-
-
-
-loadChat();
+setInterval(
+updateClock,
+1000
+);
 
 
 };
@@ -64,37 +53,36 @@ loadChat();
 
 
 
-// START BUTTON
+
+// =====================================
+// START OS
+// =====================================
+
 
 function startOS(){
 
 
-const welcome =
-document.getElementById("welcomeScreen");
+document.getElementById(
+"welcomeScreen"
+).style.display="none";
 
 
-const main =
-document.getElementById("mainOS");
-
-
-
-if(welcome){
-
-welcome.style.display="none";
-
-}
+document.getElementById(
+"desktop"
+).style.display="block";
 
 
 
-if(main){
-
-main.style.display="block";
-
-}
+openApp(
+"dashboard"
+);
 
 
 
-openPage("dashboard");
+showNotification(
+"🚀 HalDo AI OS gestartet"
+);
+
 
 
 }
@@ -105,400 +93,104 @@ openPage("dashboard");
 
 
 
-// NAVIGATION
 
-function openPage(id){
-
-
-const pages =
-document.querySelectorAll(".page");
+// =====================================
+// CLOCK
+// =====================================
 
 
+function updateClock(){
 
-pages.forEach(function(page){
 
-page.classList.remove("active");
+let now =
+new Date();
+
+
+
+let time =
+now.toLocaleTimeString(
+"de-DE"
+);
+
+
+
+let clock =
+document.getElementById(
+"clock"
+);
+
+
+
+let systemTime =
+document.getElementById(
+"systemTime"
+);
+
+
+
+if(clock){
+
+clock.innerHTML=time;
+
+}
+
+
+
+if(systemTime){
+
+systemTime.innerHTML=time;
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+
+// =====================================
+// APP NAVIGATION
+// =====================================
+
+
+function openApp(appName){
+
+
+let windows =
+document.querySelectorAll(
+".window"
+);
+
+
+
+windows.forEach(
+window=>{
+
+window.classList.remove(
+"active"
+);
 
 });
 
 
 
-const target =
-document.getElementById(id);
-
-
-
-if(target){
-
-target.classList.add("active");
-
-}
-
-
-}
-
-
-
-
-
-
-
-// AI CHAT
-
-function sendAI(){
-
-
-const input =
-document.getElementById("aiInput");
-
-
-
-if(!input){
-
-return;
-
-}
-
-
-
-let text =
-input.value.trim();
-
-
-
-if(text===""){
-
-return;
-
-}
-
-
-
-addChatMessage(
-"👤 " + text,
-"user"
+let app =
+document.getElementById(
+appName
 );
 
 
 
-setTimeout(function(){
+if(app){
 
-
-let answer =
-getAnswer(text);
-
-
-
-addChatMessage(
-"🤖 " + answer,
-"ai"
+app.classList.add(
+"active"
 );
-
-
-
-saveChat();
-
-
-},500);
-
-
-
-input.value="";
-
-
-}
-
-
-
-
-
-function getAnswer(text){
-
-
-text =
-text.toLowerCase();
-
-
-
-if(text.includes("hallo")){
-
-return "Hallo 👋 Ich bin HalDo AI.";
-
-}
-
-
-
-if(text.includes("wer bist du")){
-
-return "Ich bin HalDo AI Engine.";
-
-}
-
-
-
-if(text.includes("hilfe")){
-
-return "Ich helfe dir mit deinen Aufgaben und Modulen.";
-
-}
-
-
-
-return "Ich habe deine Nachricht erhalten.";
-
-
-}
-
-
-
-
-
-
-
-function addChatMessage(text,type){
-
-
-const history =
-document.getElementById("chatHistory");
-
-
-
-if(!history){
-
-return;
-
-}
-
-
-
-const message =
-document.createElement("div");
-
-
-
-message.className =
-"chat-message " + type + "-message";
-
-
-
-message.innerHTML =
-text +
-"<br><small>"
-+
-new Date().toLocaleTimeString()
-+
-"</small>";
-
-
-
-history.appendChild(message);
-
-
-}
-
-
-
-
-
-
-
-function saveChat(){
-
-
-const history =
-document.getElementById("chatHistory");
-
-
-
-if(history){
-
-localStorage.setItem(
-"haldoChat",
-history.innerHTML
-);
-
-
-}
-
-
-}
-
-
-
-
-
-
-
-function loadChat(){
-
-
-const history =
-document.getElementById("chatHistory");
-
-
-
-const saved =
-localStorage.getItem("haldoChat");
-
-
-
-if(history && saved){
-
-history.innerHTML =
-saved;
-
-}
-
-
-}
-
-
-
-
-
-
-
-function clearChat(){
-
-
-const history =
-document.getElementById("chatHistory");
-
-
-
-if(history){
-
-history.innerHTML="";
-
-}
-
-
-
-localStorage.removeItem("haldoChat");
-
-
-}
-
-
-
-
-
-
-
-function speakAI(){
-
-
-const history =
-document.getElementById("chatHistory");
-
-
-
-if(
-history &&
-window.speechSynthesis
-){
-
-
-let speech =
-new SpeechSynthesisUtterance(
-history.innerText
-);
-
-
-
-speech.lang="de-DE";
-
-
-speechSynthesis.speak(
-speech
-);
-
-
-}
-
-
-}
-
-
-
-
-
-
-
-function createPDF(){
-
-alert(
-"📄 PDF Funktion wird erweitert"
-);
-
-
-}
-
-
-
-
-
-
-
-function saveNote(){
-
-const input =
-document.getElementById("noteInput");
-
-
-const list =
-document.getElementById("noteList");
-
-
-
-if(input && list && input.value.trim()!==""){
-
-
-let note =
-document.createElement("p");
-
-
-note.innerHTML =
-"📝 " + input.value;
-
-
-list.appendChild(note);
-
-
-input.value="";
-
-
-}
-
-
-}
-
-
-
-
-
-
-
-function saveLanguage(){
-
-
-const lang =
-document.getElementById("language");
-
-
-
-if(lang){
-
-localStorage.setItem(
-"haldoLanguage",
-lang.value
-);
-
-
-alert(
-"🌍 Sprache gespeichert"
-);
-
 
 }
 
