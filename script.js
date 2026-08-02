@@ -855,6 +855,482 @@ function startVoiceInput(){
 
 
 }
+/* =====================================
+   HALDO AI OS v9.1
+   VOICE + LANGUAGE + SETTINGS
+   PART 3
+   ===================================== */
+
+
+
+
+
+// =====================================
+// VOICE SYSTEM
+// =====================================
+
+
+const HalDoVoice = {
+
+
+    enabled:true,
+
+    gender:"neutral",
+
+    language:"de-DE",
+
+    speed:1,
+
+
+
+    load(){
+
+
+        this.enabled =
+        localStorage.getItem(
+            "haldoVoice"
+        )
+        !==
+        "off";
+
+
+
+        this.gender =
+        localStorage.getItem(
+            "haldoVoiceGender"
+        )
+        ||
+        "neutral";
+
+
+
+        this.language =
+        localStorage.getItem(
+            "haldoLanguage"
+        )
+        ||
+        "de-DE";
+
+
+
+        this.speed =
+        Number(
+            localStorage.getItem(
+                "haldoSpeed"
+            )
+        )
+        ||
+        1;
+
+
+    }
+
+
+
+};
+
+
+
+
+
+
+
+
+
+// =====================================
+// VOICE EINSTELLUNGEN SPEICHERN
+// =====================================
+
+
+function saveVoiceSettings(){
+
+
+    const voice =
+    document.getElementById(
+        "voiceSetting"
+    );
+
+
+    if(voice){
+
+
+        localStorage.setItem(
+
+            "haldoVoice",
+
+            voice.value === "Aus"
+            ?
+            "off"
+            :
+            "on"
+
+        );
+
+
+    }
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// =====================================
+// STIMME AUSWAHL
+// =====================================
+
+
+function setVoiceGender(
+    gender
+){
+
+
+    HalDoVoice.gender =
+    gender;
+
+
+
+    localStorage.setItem(
+
+        "haldoVoiceGender",
+
+        gender
+
+    );
+
+
+}
+
+
+
+
+
+
+
+
+
+// =====================================
+// GESCHWINDIGKEIT
+// =====================================
+
+
+function setVoiceSpeed(
+    value
+){
+
+
+    HalDoVoice.speed =
+    value;
+
+
+
+    localStorage.setItem(
+
+        "haldoSpeed",
+
+        value
+
+    );
+
+
+}
+
+
+
+
+
+
+
+
+
+// =====================================
+// SPRACHEN SYSTEM
+// =====================================
+
+
+const HalDoLanguages = {
+
+
+    de:"de-DE",
+
+    en:"en-US",
+
+    tr:"tr-TR",
+
+    ku:"ku",
+
+    ezi:"ku"
+
+
+};
+
+
+
+
+
+
+
+
+function changeLanguage(
+    language
+){
+
+
+    let selected =
+    HalDoLanguages[
+        language
+    ];
+
+
+
+    if(!selected)
+    return;
+
+
+
+    localStorage.setItem(
+
+        "haldoLanguage",
+
+        selected
+
+    );
+
+
+
+    HalDoVoice.language =
+    selected;
+
+
+
+    speak(
+
+        "Sprache geändert"
+
+    );
+
+
+}
+
+
+
+
+
+
+
+
+
+// =====================================
+// AI EINSTELLUNGEN LADEN
+// =====================================
+
+
+function loadAISettings(){
+
+
+    HalDoVoice.load();
+
+
+
+    console.log(
+
+        "🤖 AI Einstellungen geladen"
+
+    );
+
+
+}
+
+
+
+
+
+
+
+
+
+// =====================================
+// SPEICHER SYSTEM ERWEITERT
+// =====================================
+
+
+const HalDoMemory = {
+
+
+    save(
+        key,
+        value
+    ){
+
+
+        localStorage.setItem(
+
+            key,
+
+            JSON.stringify(
+                value
+            )
+
+        );
+
+
+    },
+
+
+
+    get(
+        key
+    ){
+
+
+        let data =
+        localStorage.getItem(
+            key
+        );
+
+
+
+        if(!data)
+        return null;
+
+
+
+        return JSON.parse(
+            data
+        );
+
+
+    },
+
+
+
+    remove(
+        key
+    ){
+
+
+        localStorage.removeItem(
+            key
+        );
+
+
+    }
+
+
+};
+
+
+
+
+
+
+
+
+
+// =====================================
+// BENUTZER PROFIL BASIS
+// =====================================
+
+
+function saveUserProfile(
+    name
+){
+
+
+    HalDoMemory.save(
+
+        "haldoUser",
+
+        {
+
+            name:name,
+
+            created:
+            new Date()
+            .toISOString()
+
+
+        }
+
+    );
+
+
+}
+
+
+
+
+
+
+
+
+
+function loadUserProfile(){
+
+
+    return HalDoMemory.get(
+
+        "haldoUser"
+
+    );
+
+
+}
+
+
+
+
+
+
+
+
+
+// =====================================
+// EINSTELLUNGEN STARTEN
+// =====================================
+
+
+document.addEventListener(
+
+"DOMContentLoaded",
+
+()=>{
+
+
+    loadAISettings();
+
+
+    let profile =
+    loadUserProfile();
+
+
+
+    if(profile){
+
+        console.log(
+
+            "Willkommen zurück "
+            +
+            profile.name
+
+        );
+
+    }
+
+
+}
+
+);
+
+
+
+
 
 Halil Donma 
 /* =====================================
