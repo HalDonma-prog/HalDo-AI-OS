@@ -698,3 +698,461 @@ document.addEventListener(
 
 
 });
+/* =====================================
+   HALDO AI OS 10.1
+   SYSTEM FUNCTIONS
+   PART 3/4
+===================================== */
+
+
+
+/* =====================================
+   DARK MODE
+===================================== */
+
+
+function setupDarkMode(){
+
+
+    const button =
+
+    document.getElementById(
+        "darkModeButton"
+    );
+
+
+
+    if(!button)
+    return;
+
+
+
+    button.addEventListener(
+    "click",
+    ()=>{
+
+
+        document.body.classList.toggle(
+            "dark-mode"
+        );
+
+
+
+        localStorage.setItem(
+
+            "haldoDarkMode",
+
+            document.body.classList.contains(
+                "dark-mode"
+            )
+
+        );
+
+
+    });
+
+
+}
+
+
+
+
+
+
+
+
+
+function loadDarkMode(){
+
+
+    const enabled =
+
+    localStorage.getItem(
+        "haldoDarkMode"
+    );
+
+
+
+    if(enabled === "true"){
+
+
+        document.body.classList.add(
+            "dark-mode"
+        );
+
+
+    }
+
+
+}
+
+
+
+
+
+
+
+
+
+/* =====================================
+   SETTINGS SYSTEM
+===================================== */
+
+
+const HalDoSettings = {
+
+
+    save(){
+
+
+        const settings = {
+
+
+            name:
+
+            document.getElementById(
+                "userName"
+            )?.value || "",
+
+
+
+            email:
+
+            document.getElementById(
+                "userEmail"
+            )?.value || "",
+
+
+
+            language:
+
+            document.getElementById(
+                "languageSelect"
+            )?.value || "de-DE"
+
+
+        };
+
+
+
+        localStorage.setItem(
+
+            "haldoSettings",
+
+            JSON.stringify(settings)
+
+        );
+
+
+    },
+
+
+
+
+
+
+
+
+
+    load(){
+
+
+        const data =
+
+        localStorage.getItem(
+            "haldoSettings"
+        );
+
+
+
+        if(!data)
+        return;
+
+
+
+        const settings =
+
+        JSON.parse(data);
+
+
+
+        if(
+            document.getElementById(
+                "userName"
+            )
+        )
+
+        document.getElementById(
+            "userName"
+        ).value = settings.name;
+
+
+
+    }
+
+
+};
+
+
+
+
+
+
+
+
+
+/* =====================================
+   FILE SYSTEM
+===================================== */
+
+
+function setupFileSystem(){
+
+
+    const upload =
+
+    document.getElementById(
+        "fileUpload"
+    );
+
+
+    const list =
+
+    document.getElementById(
+        "fileList"
+    );
+
+
+
+    if(!upload || !list)
+    return;
+
+
+
+    upload.addEventListener(
+    "change",
+    ()=>{
+
+
+        list.innerHTML="";
+
+
+
+        Array.from(
+            upload.files
+        ).forEach(file=>{
+
+
+            const item =
+
+            document.createElement(
+                "p"
+            );
+
+
+
+            item.innerText =
+
+            "📁 " + file.name;
+
+
+
+            list.appendChild(
+                item
+            );
+
+
+        });
+
+
+    });
+
+
+}
+
+
+
+
+
+
+
+
+
+/* =====================================
+   WRITING SAVE
+===================================== */
+
+
+function setupWriting(){
+
+
+    const button =
+
+    document.getElementById(
+        "saveDocument"
+    );
+
+
+
+    const text =
+
+    document.getElementById(
+        "writerText"
+    );
+
+
+
+    if(!button || !text)
+    return;
+
+
+
+    button.addEventListener(
+    "click",
+    ()=>{
+
+
+        localStorage.setItem(
+
+            "haldoDocument",
+
+            text.value
+
+        );
+
+
+
+        HalDoNotification.add(
+
+            "📝 Dokument gespeichert"
+
+        );
+
+
+    });
+
+
+}
+
+
+
+
+
+
+
+
+
+/* =====================================
+   NOTES SYSTEM
+===================================== */
+
+
+function setupNotes(){
+
+
+    const button =
+
+    document.getElementById(
+        "addNote"
+    );
+
+
+
+    const input =
+
+    document.getElementById(
+        "noteInput"
+    );
+
+
+
+    const list =
+
+    document.getElementById(
+        "noteList"
+    );
+
+
+
+    if(!button || !input || !list)
+    return;
+
+
+
+    button.addEventListener(
+    "click",
+    ()=>{
+
+
+        if(!input.value)
+        return;
+
+
+
+        const note =
+
+        document.createElement(
+            "p"
+        );
+
+
+
+        note.innerText =
+
+        "📒 " + input.value;
+
+
+
+        list.appendChild(
+            note
+        );
+
+
+
+        input.value="";
+
+
+    });
+
+
+}
+
+
+
+
+
+
+
+
+
+/* =====================================
+   CONNECTION
+===================================== */
+
+
+document.addEventListener(
+
+"DOMContentLoaded",
+
+()=>{
+
+
+    setupDarkMode();
+
+
+    loadDarkMode();
+
+
+    HalDoSettings.load();
+
+
+    setupFileSystem();
+
+
+    setupWriting();
+
+
+    setupNotes();
+
+
+});
