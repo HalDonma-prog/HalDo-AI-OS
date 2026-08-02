@@ -1141,3 +1141,562 @@ document.addEventListener(
 
 
 });
+/* =====================================
+   HALDO AI OS 10.0
+   FILES + APPS + SYSTEM
+   PART 4/8
+===================================== */
+
+
+/* =====================================
+   FILE SYSTEM
+===================================== */
+
+
+const HalDoFiles = {
+
+
+    files:[],
+
+
+
+    init(){
+
+
+        const upload =
+        document.querySelector(
+            "#fileUpload"
+        );
+
+
+        if(upload){
+
+
+            upload.addEventListener(
+            "change",
+            (event)=>{
+
+
+                this.addFiles(
+                    event.target.files
+                );
+
+
+            });
+
+
+        }
+
+
+    },
+
+
+
+
+
+
+
+
+
+    addFiles(files){
+
+
+        for(
+            let file of files
+        ){
+
+            this.files.push({
+
+                name:file.name,
+
+                size:file.size,
+
+                type:file.type
+
+            });
+
+        }
+
+
+        this.render();
+
+
+    },
+
+
+
+
+
+
+
+
+
+    render(){
+
+
+        const list =
+        document.querySelector(
+            "#fileList"
+        );
+
+
+
+        if(!list) return;
+
+
+
+        list.innerHTML="";
+
+
+
+        this.files.forEach(
+        file=>{
+
+
+            const item =
+            document.createElement(
+                "p"
+            );
+
+
+            item.innerHTML =
+            "📄 "
+            + file.name;
+
+
+
+            list.appendChild(
+                item
+            );
+
+
+        });
+
+
+    }
+
+
+};
+
+
+
+
+
+
+
+
+
+/* =====================================
+   PDF CREATOR BASIS
+===================================== */
+
+
+const HalDoPDF = {
+
+
+    create(){
+
+
+        const title =
+        document.querySelector(
+            "#pdfTitle"
+        )?.value;
+
+
+
+        const text =
+        document.querySelector(
+            "#pdfText"
+        )?.value;
+
+
+
+        if(!text){
+
+            alert(
+                "Bitte Inhalt eingeben"
+            );
+
+            return;
+
+        }
+
+
+
+        const content =
+
+        title
+        +
+        "\n\n"
+        +
+        text;
+
+
+
+        const blob =
+        new Blob(
+            [content],
+            {
+                type:
+                "text/plain"
+            }
+        );
+
+
+
+        const link =
+        document.createElement(
+            "a"
+        );
+
+
+        link.href =
+        URL.createObjectURL(
+            blob
+        );
+
+
+        link.download =
+        "HalDo_Dokument.txt";
+
+
+
+        link.click();
+
+
+    }
+
+
+};
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+"DOMContentLoaded",
+()=>{
+
+
+    const pdfButton =
+    document.querySelector(
+        "#createPDF"
+    );
+
+
+
+    if(pdfButton){
+
+
+        pdfButton.onclick =
+        ()=>{
+
+            HalDoPDF.create();
+
+        };
+
+
+    }
+
+
+});
+
+
+
+
+
+
+
+
+
+/* =====================================
+   WRITING APP
+===================================== */
+
+
+const HalDoWriter = {
+
+
+    save(){
+
+
+        const text =
+        document.querySelector(
+            "#writerText"
+        )?.value;
+
+
+
+        localStorage.setItem(
+
+            "haldoDocument",
+
+            text || ""
+
+        );
+
+
+        alert(
+            "📝 Dokument gespeichert"
+        );
+
+
+    }
+
+
+};
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+"DOMContentLoaded",
+()=>{
+
+
+    const save =
+    document.querySelector(
+        "#saveDocument"
+    );
+
+
+
+    if(save){
+
+
+        save.onclick =
+        ()=>{
+
+            HalDoWriter.save();
+
+        };
+
+
+    }
+
+
+});
+
+
+
+
+
+
+
+
+
+/* =====================================
+   NOTES SYSTEM
+===================================== */
+
+
+const HalDoNotes = {
+
+
+    notes:[],
+
+
+
+    add(){
+
+
+        const input =
+        document.querySelector(
+            "#noteInput"
+        );
+
+
+
+        if(!input || !input.value)
+        return;
+
+
+
+        this.notes.push(
+            input.value
+        );
+
+
+        input.value="";
+
+
+        this.save();
+
+
+        this.render();
+
+
+    },
+
+
+
+
+
+
+
+
+
+    save(){
+
+
+        localStorage.setItem(
+
+            "haldoNotes",
+
+            JSON.stringify(
+                this.notes
+            )
+
+        );
+
+
+    },
+
+
+
+
+
+
+
+
+
+    render(){
+
+
+        const list =
+        document.querySelector(
+            "#noteList"
+        );
+
+
+        if(!list)return;
+
+
+
+        list.innerHTML="";
+
+
+
+        this.notes.forEach(
+        note=>{
+
+
+            list.innerHTML +=
+
+            `<p>📒 ${note}</p>`;
+
+        });
+
+
+    }
+
+
+};
+
+
+
+
+
+
+
+
+
+/* =====================================
+   DARK MODE
+===================================== */
+
+
+function toggleDarkMode(){
+
+
+    document.body
+    .classList
+    .toggle(
+        "dark-mode"
+    );
+
+
+    localStorage.setItem(
+
+        "haldoDark",
+
+        document.body
+        .classList
+        .contains(
+            "dark-mode"
+        )
+
+    );
+
+
+}
+
+
+
+
+
+
+
+
+
+/* =====================================
+   SYSTEM SETTINGS
+===================================== */
+
+
+const HalDoSystem = {
+
+
+    getStatus(){
+
+
+        return {
+
+            version:
+            HalDo.version,
+
+
+            ready:
+            HalDo.ready,
+
+
+            memory:
+            Object.keys(
+                HalDo.memory
+            ).length
+
+
+        };
+
+
+    }
+
+
+};
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+"DOMContentLoaded",
+()=>{
+
+
+    HalDoFiles.init();
+
+
+});
