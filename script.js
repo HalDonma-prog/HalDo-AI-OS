@@ -1490,3 +1490,329 @@ function HalDoNaturalAnswer(input){
 
 
 }
+/* =====================================
+   HALDO AI CHAT v10.3
+   MEMORY & PERSONALITY
+   PART 2/4
+===================================== */
+
+
+
+const HalDoMemory = {
+
+
+    history:[],
+
+
+    userName:"",
+
+
+    topics:[],
+
+
+
+    remember(type,text){
+
+
+        this.history.push({
+
+            type:type,
+
+            text:text,
+
+            time:new Date().toISOString()
+
+        });
+
+
+
+        if(this.history.length > 20){
+
+
+            this.history.shift();
+
+
+        }
+
+
+
+        localStorage.setItem(
+
+            "haldoHistory",
+
+            JSON.stringify(
+                this.history
+            )
+
+        );
+
+
+    },
+
+
+
+
+
+
+
+
+
+    load(){
+
+
+        const saved =
+
+        localStorage.getItem(
+            "haldoHistory"
+        );
+
+
+
+        if(saved){
+
+
+            this.history =
+
+            JSON.parse(saved);
+
+
+        }
+
+
+    }
+
+};
+
+
+
+
+
+
+
+
+
+/* =====================================
+   CONTEXT ANALYSIS
+===================================== */
+
+
+function HalDoContext(input){
+
+
+    const text =
+
+    input.toLowerCase();
+
+
+
+
+
+    if(
+
+        text.includes("mein name ist")
+
+    ){
+
+
+        const name =
+
+        input.split(
+            "ist"
+        )[1];
+
+
+
+        if(name){
+
+
+            HalDoMemory.userName =
+
+            name.trim();
+
+
+
+            localStorage.setItem(
+
+                "haldoUserName",
+
+                HalDoMemory.userName
+
+            );
+
+
+
+            return (
+
+                "Freut mich, dich kennenzulernen " +
+
+                HalDoMemory.userName +
+
+                ". 😊"
+
+            );
+
+
+        }
+
+
+    }
+
+
+
+
+
+
+
+
+
+    if(
+
+        text.includes("erinnerst du dich")
+
+    ){
+
+
+        if(
+
+            HalDoMemory.history.length > 0
+
+        ){
+
+
+            return (
+
+                "Ja, ich habe unser aktuelles Gespräch im Speicher. " +
+
+                "Wir arbeiten gerade an HalDo AI OS. 🚀"
+
+            );
+
+
+        }
+
+
+        return (
+
+            "Ich habe noch keinen gespeicherten Verlauf."
+
+        );
+
+
+    }
+
+
+
+
+
+
+
+
+
+    return null;
+
+
+}
+
+
+
+
+
+
+
+
+
+/* =====================================
+   PERSONALITY LAYER
+===================================== */
+
+
+const HalDoCharacter = {
+
+
+    style:"freundlich",
+
+
+
+    respond(){
+
+
+        const replies=[
+
+
+            "Ich bin dabei. Lass uns das gemeinsam lösen. 🤖",
+
+
+            "Gute Idee! Wir können das Schritt für Schritt verbessern. 🚀",
+
+
+            "Ich helfe dir gerne weiter. 💙"
+
+
+        ];
+
+
+
+        return replies[
+
+            Math.floor(
+
+                Math.random()
+
+                *
+
+                replies.length
+
+            )
+
+        ];
+
+
+    }
+
+
+};
+
+
+
+
+
+
+
+
+
+/* =====================================
+   MEMORY START
+===================================== */
+
+
+document.addEventListener(
+
+"DOMContentLoaded",
+
+()=>{
+
+
+    HalDoMemory.load();
+
+
+
+    const savedName =
+
+    localStorage.getItem(
+        "haldoUserName"
+    );
+
+
+
+    if(savedName){
+
+
+        HalDoMemory.userName =
+
+        savedName;
+
+
+    }
+
+
+});
