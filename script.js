@@ -678,3 +678,484 @@ sendButton.click();
 
 
 }
+/* =====================================
+   HALDO AI OS BROWSER v1.1
+   CLEAN FINAL SCRIPT
+   PART 3/4
+===================================== */
+
+
+
+/* =====================================
+   FILE SYSTEM
+===================================== */
+
+
+const fileUpload =
+document.getElementById(
+"fileUpload"
+);
+
+
+const fileList =
+document.getElementById(
+"fileList"
+);
+
+
+
+if(fileUpload){
+
+
+fileUpload.addEventListener(
+"change",
+()=>{
+
+
+fileList.innerHTML="";
+
+
+
+Array.from(
+fileUpload.files
+).forEach(file=>{
+
+
+const item =
+document.createElement(
+"p"
+);
+
+
+
+item.innerHTML =
+"📄 " + file.name;
+
+
+
+fileList.appendChild(
+item
+);
+
+
+
+});
+
+
+
+}
+
+);
+
+
+}
+
+
+
+
+
+
+
+
+
+/* =====================================
+   WRITING SYSTEM
+===================================== */
+
+
+const writerText =
+document.getElementById(
+"writerText"
+);
+
+
+
+const saveDocument =
+document.getElementById(
+"saveDocument"
+);
+
+
+
+if(saveDocument){
+
+
+saveDocument.addEventListener(
+"click",
+()=>{
+
+
+localStorage.setItem(
+
+"haldo_document",
+
+writerText.value
+
+);
+
+
+
+alert(
+"💾 Dokument gespeichert"
+);
+
+
+
+}
+
+);
+
+
+}
+
+
+
+if(writerText){
+
+
+const savedText =
+localStorage.getItem(
+"haldo_document"
+);
+
+
+
+if(savedText){
+
+writerText.value =
+savedText;
+
+}
+
+
+}
+
+
+
+
+
+
+
+
+
+/* =====================================
+   NOTES SYSTEM
+===================================== */
+
+
+const noteInput =
+document.getElementById(
+"noteInput"
+);
+
+
+
+const addNote =
+document.getElementById(
+"addNote"
+);
+
+
+
+const noteList =
+document.getElementById(
+"noteList"
+);
+
+
+
+let notes =
+JSON.parse(
+localStorage.getItem(
+"haldo_notes"
+)
+)
+|| [];
+
+
+
+
+
+function showNotes(){
+
+
+if(!noteList)
+return;
+
+
+
+noteList.innerHTML="";
+
+
+
+notes.forEach(
+(note,index)=>{
+
+
+const box =
+document.createElement(
+"div"
+);
+
+
+
+box.className =
+"ai-message";
+
+
+
+box.innerHTML =
+
+note +
+
+" <button onclick='deleteNote("+index+")'>❌</button>";
+
+
+
+noteList.appendChild(
+box
+);
+
+
+
+});
+
+
+}
+
+
+
+window.deleteNote =
+function(index){
+
+
+notes.splice(
+index,
+1
+);
+
+
+
+localStorage.setItem(
+
+"haldo_notes",
+
+JSON.stringify(notes)
+
+);
+
+
+
+showNotes();
+
+
+
+};
+
+
+
+
+
+
+
+if(addNote){
+
+
+addNote.addEventListener(
+"click",
+()=>{
+
+
+if(!noteInput.value)
+return;
+
+
+
+notes.push(
+noteInput.value
+);
+
+
+
+localStorage.setItem(
+
+"haldo_notes",
+
+JSON.stringify(notes)
+
+);
+
+
+
+noteInput.value="";
+
+
+showNotes();
+
+
+
+}
+
+);
+
+
+}
+
+
+
+showNotes();
+
+
+
+
+
+
+
+
+
+/* =====================================
+   CALENDAR SYSTEM
+===================================== */
+
+
+const saveEvent =
+document.getElementById(
+"saveEvent"
+);
+
+
+
+const calendarList =
+document.getElementById(
+"calendarList"
+);
+
+
+
+let events =
+JSON.parse(
+localStorage.getItem(
+"haldo_events"
+)
+)
+|| [];
+
+
+
+
+
+function showEvents(){
+
+
+if(!calendarList)
+return;
+
+
+
+calendarList.innerHTML="";
+
+
+
+events.forEach(event=>{
+
+
+const item =
+document.createElement(
+"p"
+);
+
+
+
+item.innerHTML =
+"📅 " + event;
+
+
+
+calendarList.appendChild(
+item
+);
+
+
+
+});
+
+
+}
+
+
+
+
+
+if(saveEvent){
+
+
+saveEvent.addEventListener(
+"click",
+()=>{
+
+
+const date =
+document.getElementById(
+"calendarDate"
+).value;
+
+
+
+const text =
+document.getElementById(
+"calendarEvent"
+).value;
+
+
+
+if(!text)
+return;
+
+
+
+events.push(
+
+date +
+" - " +
+text
+
+);
+
+
+
+localStorage.setItem(
+
+"haldo_events",
+
+JSON.stringify(events)
+
+);
+
+
+
+showEvents();
+
+
+
+}
+
+);
+
+
+}
+
+
+
+showEvents();
+
+
+
+
+
+
+
+
+
+console.log(
+"💾 HalDo Storage System aktiv"
+);
