@@ -1,8 +1,11 @@
-// ===============================
-// HALDO AI OS v7.0
-// STARTSYSTEM
-// ===============================
+// ==================================
+// HALDO AI OS v7.3
+// COMPLETE SCRIPT
+// ==================================
 
+
+
+// START SPLASH
 
 
 window.addEventListener(
@@ -17,37 +20,51 @@ document.getElementById(
 
 
 
-if(splash){
-
-
-setTimeout(
-function(){
-
-
-splash.style.display =
-"none";
-
-
 const welcome =
 document.getElementById(
 "welcomeScreen"
 );
 
 
-if(welcome){
 
-welcome.style.display =
-"flex";
+const main =
+document.getElementById(
+"mainOS"
+);
+
+
+
+if(main){
+
+main.style.display="none";
 
 }
+
+
+
+setTimeout(
+function(){
+
+
+if(splash){
+
+splash.style.display="none";
+
+}
+
+
+
+if(welcome){
+
+welcome.style.display="flex";
+
+}
+
 
 
 },
 2500
 );
-
-
-}
 
 
 
@@ -57,9 +74,10 @@ welcome.style.display =
 
 
 
-// ===============================
+
+// ==================================
 // START BUTTON
-// ===============================
+// ==================================
 
 
 
@@ -74,7 +92,7 @@ document.getElementById(
 
 
 
-const mainOS =
+const main =
 document.getElementById(
 "mainOS"
 );
@@ -83,17 +101,15 @@ document.getElementById(
 
 if(welcome){
 
-welcome.style.display =
-"none";
+welcome.style.display="none";
 
 }
 
 
 
-if(mainOS){
+if(main){
 
-mainOS.style.display =
-"block";
+main.style.display="block";
 
 }
 
@@ -106,10 +122,17 @@ openPage(
 
 
 }
-// ===============================
-// SEITEN WECHSEL
-// ===============================
 
+
+
+
+
+
+
+
+// ==================================
+// NAVIGATION
+// ==================================
 
 
 function openPage(pageId){
@@ -126,42 +149,48 @@ document.querySelectorAll(
 pages.forEach(
 function(page){
 
+
 page.classList.remove(
 "active"
 );
+
 
 });
 
 
 
-const selected =
+const page =
 document.getElementById(
 pageId
 );
 
 
 
-if(selected){
+if(page){
 
-selected.classList.add(
+
+page.classList.add(
 "active"
 );
 
-}
-
-
 
 }
 
 
 
+}
 
 
 
-// ===============================
-// HALDO AI CHAT
-// ===============================
 
+
+
+
+
+
+// ==================================
+// AI
+// ==================================
 
 
 function sendAI(){
@@ -185,65 +214,81 @@ document.getElementById(
 if(
 input &&
 history &&
-input.value.trim() !== ""
+input.value.trim()!==""
 ){
 
 
-const message =
+
+let user =
 document.createElement(
 "p"
 );
 
 
-message.innerHTML =
+
+user.innerHTML =
 "👤 " +
 input.value;
 
 
 
 history.appendChild(
-message
+user
 );
 
 
 
-const answer =
+
+let ai =
 document.createElement(
 "p"
 );
 
 
-answer.innerHTML =
-"🤖 HalDo AI ist bereit.";
+
+ai.innerHTML =
+"🤖 HalDo AI: Ich bin bereit.";
 
 
 
 history.appendChild(
-answer
+ai
 );
 
 
 
-input.value =
-"";
+input.value="";
 
 
 }
 
 
+
 }
-// ===============================
-// NOTIZEN SPEICHERN
-// ===============================
+
+
+
+
+
+
+
+
+
+// ==================================
+// NOTES
+// ==================================
+
 
 
 function saveNote(){
+
 
 
 const input =
 document.getElementById(
 "noteInput"
 );
+
 
 
 const list =
@@ -256,14 +301,16 @@ document.getElementById(
 if(
 input &&
 list &&
-input.value.trim() !== ""
+input.value.trim()!==""
 ){
 
 
-const note =
+
+let note =
 document.createElement(
-"div"
+"p"
 );
+
 
 
 note.innerHTML =
@@ -278,8 +325,7 @@ note
 
 
 
-input.value =
-"";
+input.value="";
 
 
 }
@@ -292,9 +338,37 @@ input.value =
 
 
 
-// ===============================
-// SPRACHE SPEICHERN
-// ===============================
+
+
+
+// ==================================
+// PDF
+// ==================================
+
+
+
+function createPDF(){
+
+
+alert(
+"📄 PDF Creator wird vorbereitet"
+);
+
+
+}
+
+
+
+
+
+
+
+
+
+// ==================================
+// LANGUAGE
+// ==================================
+
 
 
 function saveLanguage(){
@@ -323,27 +397,7 @@ alert(
 );
 
 
-
 }
-
-
-}
-
-
-
-
-
-// ===============================
-// PDF VORBEREITUNG
-// ===============================
-
-
-function createPDF(){
-
-
-alert(
-"📄 PDF Creator vorbereitet"
-);
 
 
 }
