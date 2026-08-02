@@ -778,3 +778,417 @@ document.addEventListener(
 
 
 });
+/* =====================================
+   HALDO AI OS FOUNDATION v1
+   MODULE SYSTEM
+   SCRIPT PART 3/4
+===================================== */
+
+
+/* =====================================
+   FILE SYSTEM
+===================================== */
+
+
+function connectFileSystem(){
+
+
+    const upload =
+
+    document.getElementById(
+        "fileUpload"
+    );
+
+
+    const list =
+
+    document.getElementById(
+        "fileList"
+    );
+
+
+    if(!upload || !list)
+
+    return;
+
+
+
+
+    upload.addEventListener(
+
+        "change",
+
+        ()=>{
+
+
+            list.innerHTML="";
+
+
+            Array.from(
+                upload.files
+            ).forEach(file=>{
+
+
+                const item =
+
+                document.createElement(
+                    "p"
+                );
+
+
+                item.innerText=
+
+                "📁 " + file.name;
+
+
+                list.appendChild(
+                    item
+                );
+
+
+            });
+
+
+        }
+
+    );
+
+
+}
+
+
+
+
+
+
+
+
+
+/* =====================================
+   WRITING SYSTEM
+===================================== */
+
+
+function connectWriter(){
+
+
+    const text =
+
+    document.getElementById(
+        "writerText"
+    );
+
+
+    const save =
+
+    document.getElementById(
+        "saveDocument"
+    );
+
+
+
+    if(!text || !save)
+
+    return;
+
+
+
+    const old =
+
+    localStorage.getItem(
+        "haldoDocument"
+    );
+
+
+    if(old){
+
+
+        text.value=old;
+
+
+    }
+
+
+
+    save.onclick=()=>{
+
+
+        localStorage.setItem(
+
+            "haldoDocument",
+
+            text.value
+
+        );
+
+
+        alert(
+            "📝 Dokument gespeichert."
+        );
+
+
+    };
+
+
+}
+
+
+
+
+
+
+
+
+
+/* =====================================
+   NOTES SYSTEM
+===================================== */
+
+
+function connectNotes(){
+
+
+    const input =
+
+    document.getElementById(
+        "noteInput"
+    );
+
+
+    const button =
+
+    document.getElementById(
+        "addNote"
+    );
+
+
+    const list =
+
+    document.getElementById(
+        "noteList"
+    );
+
+
+
+    if(
+        !input ||
+        !button ||
+        !list
+    )
+
+    return;
+
+
+
+
+    button.onclick=()=>{
+
+
+        if(!input.value)
+
+        return;
+
+
+
+        const note =
+
+        document.createElement(
+            "p"
+        );
+
+
+
+        note.innerText=
+
+        "📒 " + input.value;
+
+
+
+        list.appendChild(
+            note
+        );
+
+
+
+        input.value="";
+
+
+    };
+
+
+}
+
+
+
+
+
+
+
+
+
+/* =====================================
+   PDF PREPARATION
+===================================== */
+
+
+function connectPDF(){
+
+
+    const button =
+
+    document.getElementById(
+        "createPDF"
+    );
+
+
+    if(!button)
+
+    return;
+
+
+
+
+    button.onclick=()=>{
+
+
+        alert(
+
+            "📄 PDF Creator ist vorbereitet."
+
+        );
+
+
+    };
+
+
+}
+
+
+
+
+
+
+
+
+
+/* =====================================
+   CALENDAR SYSTEM
+===================================== */
+
+
+function connectCalendar(){
+
+
+    const button =
+
+    document.getElementById(
+        "saveEvent"
+    );
+
+
+    const date =
+
+    document.getElementById(
+        "calendarDate"
+    );
+
+
+    const eventText =
+
+    document.getElementById(
+        "calendarEvent"
+    );
+
+
+
+    const list =
+
+    document.getElementById(
+        "calendarList"
+    );
+
+
+
+    if(
+        !button ||
+        !date ||
+        !eventText ||
+        !list
+    )
+
+    return;
+
+
+
+
+    button.onclick=()=>{
+
+
+        const item =
+
+        document.createElement(
+            "p"
+        );
+
+
+
+        item.innerText=
+
+        "📅 " +
+
+        date.value +
+
+        " - " +
+
+        eventText.value;
+
+
+
+        list.appendChild(
+            item
+        );
+
+
+
+    };
+
+
+}
+
+
+
+
+
+
+
+
+
+/* =====================================
+   MODULE START
+===================================== */
+
+
+document.addEventListener(
+
+"DOMContentLoaded",
+
+()=>{
+
+
+    connectFileSystem();
+
+
+    connectWriter();
+
+
+    connectNotes();
+
+
+    connectPDF();
+
+
+    connectCalendar();
+
+
+
+});
