@@ -750,3 +750,632 @@ document.addEventListener(
 
 
 });
+/* =====================================
+   HALDO AI OS v10.3 CLEAN FINAL
+   PART 3/4
+
+   Module Connection
+   Files
+   Writing
+   Notes
+   PDF
+   Calendar
+===================================== */
+
+
+
+
+
+/* =====================================
+   FILE SYSTEM
+===================================== */
+
+
+function initFileSystem(){
+
+
+    const upload =
+
+    document.getElementById(
+        "fileUpload"
+    );
+
+
+
+    const list =
+
+    document.getElementById(
+        "fileList"
+    );
+
+
+
+
+
+    if(
+        !upload ||
+        !list
+    )
+
+    return;
+
+
+
+
+
+    upload.addEventListener(
+        "change",
+        ()=>{
+
+
+            list.innerHTML="";
+
+
+
+            Array.from(
+                upload.files
+            ).forEach(file=>{
+
+
+                const item =
+
+                document.createElement(
+                    "p"
+                );
+
+
+
+                item.innerText =
+
+                "📄 " + file.name;
+
+
+
+                list.appendChild(
+                    item
+                );
+
+
+            });
+
+
+        }
+    );
+
+
+}
+
+
+
+
+
+
+
+
+
+/* =====================================
+   WRITING SYSTEM
+===================================== */
+
+
+function initWriting(){
+
+
+    const button =
+
+    document.getElementById(
+        "saveDocument"
+    );
+
+
+
+    const text =
+
+    document.getElementById(
+        "writerText"
+    );
+
+
+
+
+
+    if(
+        !button ||
+        !text
+    )
+
+    return;
+
+
+
+
+
+    const saved =
+
+    localStorage.getItem(
+        "haldoWriter"
+    );
+
+
+
+    if(saved){
+
+
+        text.value = saved;
+
+
+    }
+
+
+
+
+
+    button.addEventListener(
+        "click",
+        ()=>{
+
+
+            localStorage.setItem(
+
+                "haldoWriter",
+
+                text.value
+
+            );
+
+
+
+            alert(
+                "📝 Dokument gespeichert."
+            );
+
+
+        }
+    );
+
+
+}
+
+
+
+
+
+
+
+
+
+/* =====================================
+   NOTES SYSTEM
+===================================== */
+
+
+function initNotes(){
+
+
+    const input =
+
+    document.getElementById(
+        "noteInput"
+    );
+
+
+
+    const button =
+
+    document.getElementById(
+        "addNote"
+    );
+
+
+
+    const list =
+
+    document.getElementById(
+        "noteList"
+    );
+
+
+
+
+
+    if(
+        !input ||
+        !button ||
+        !list
+    )
+
+    return;
+
+
+
+
+
+    let notes =
+
+    JSON.parse(
+
+        localStorage.getItem(
+            "haldoNotes"
+        )
+
+        ||
+
+        "[]"
+
+    );
+
+
+
+
+
+    function render(){
+
+
+        list.innerHTML="";
+
+
+
+        notes.forEach(note=>{
+
+
+            const p =
+
+            document.createElement(
+                "p"
+            );
+
+
+
+            p.innerText =
+            
+            "📒 " + note;
+
+
+
+            list.appendChild(
+                p
+            );
+
+
+        });
+
+
+    }
+
+
+
+
+
+    render();
+
+
+
+
+
+    button.addEventListener(
+        "click",
+        ()=>{
+
+
+            if(!input.value.trim())
+
+            return;
+
+
+
+            notes.push(
+                input.value
+            );
+
+
+
+            localStorage.setItem(
+
+                "haldoNotes",
+
+                JSON.stringify(
+                    notes
+                )
+
+            );
+
+
+
+            input.value="";
+
+
+
+            render();
+
+
+        }
+    );
+
+
+}
+
+
+
+
+
+
+
+
+
+/* =====================================
+   PDF PREPARATION
+===================================== */
+
+
+function initPDF(){
+
+
+    const button =
+
+    document.getElementById(
+        "createPDF"
+    );
+
+
+
+    const title =
+
+    document.getElementById(
+        "pdfTitle"
+    );
+
+
+
+    const content =
+
+    document.getElementById(
+        "pdfText"
+    );
+
+
+
+
+
+    if(
+        !button ||
+        !title ||
+        !content
+    )
+
+    return;
+
+
+
+
+
+    button.addEventListener(
+        "click",
+        ()=>{
+
+
+            alert(
+
+                "📄 PDF Creator vorbereitet:\n\n"
+
+                +
+
+                title.value
+
+            );
+
+
+        }
+    );
+
+
+}
+
+
+
+
+
+
+
+
+
+/* =====================================
+   CALENDAR SYSTEM
+===================================== */
+
+
+function initCalendar(){
+
+
+    const button =
+
+    document.getElementById(
+        "saveEvent"
+    );
+
+
+
+    const date =
+
+    document.getElementById(
+        "calendarDate"
+    );
+
+
+
+    const eventText =
+
+    document.getElementById(
+        "calendarEvent"
+    );
+
+
+
+    const list =
+
+    document.getElementById(
+        "calendarList"
+    );
+
+
+
+
+
+    if(
+        !button ||
+        !date ||
+        !eventText ||
+        !list
+    )
+
+    return;
+
+
+
+
+
+    let events =
+
+    JSON.parse(
+
+        localStorage.getItem(
+            "haldoCalendar"
+        )
+
+        ||
+
+        "[]"
+
+    );
+
+
+
+
+
+    function render(){
+
+
+        list.innerHTML="";
+
+
+
+        events.forEach(event=>{
+
+
+            const p =
+
+            document.createElement(
+                "p"
+            );
+
+
+
+            p.innerText =
+
+            "📅 "
+
+            +
+
+            event.date
+
+            +
+
+            " - "
+
+            +
+
+            event.text;
+
+
+
+            list.appendChild(
+                p
+            );
+
+
+        });
+
+
+    }
+
+
+
+
+
+    render();
+
+
+
+
+
+    button.addEventListener(
+        "click",
+        ()=>{
+
+
+            events.push({
+
+                date:date.value,
+
+                text:eventText.value
+
+            });
+
+
+
+            localStorage.setItem(
+
+                "haldoCalendar",
+
+                JSON.stringify(
+                    events
+                )
+
+            );
+
+
+
+            render();
+
+
+        }
+    );
+
+
+}
+
+
+
+
+
+
+
+
+
+/* =====================================
+   MODULE START
+===================================== */
+
+
+document.addEventListener(
+"DOMContentLoaded",
+()=>{
+
+
+    initFileSystem();
+
+    initWriting();
+
+    initNotes();
+
+    initPDF();
+
+    initCalendar();
+
+
+
+    console.log(
+        "🧩 HalDo Module aktiv"
+    );
+
+
+});
