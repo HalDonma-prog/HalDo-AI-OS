@@ -193,15 +193,18 @@ page.classList.add(
 // ==================================
 
 
-function sendAI(){
+// ==================================
+// HALDO AI ENGINE v8.0
+// ==================================
 
+
+function sendAI(){
 
 
 const input =
 document.getElementById(
 "aiInput"
 );
-
 
 
 const history =
@@ -212,47 +215,37 @@ document.getElementById(
 
 
 if(
-input &&
-history &&
-input.value.trim()!==""
+!input ||
+!history ||
+input.value.trim()===""
 ){
 
+return;
 
-
-let user =
-document.createElement(
-"p"
-);
+}
 
 
 
-user.innerHTML =
-"👤 " +
+let userMessage =
 input.value;
 
 
 
-history.appendChild(
-user
+addMessage(
+"👤 Du: " + userMessage
 );
 
 
 
-
-let ai =
-document.createElement(
-"p"
+let answer =
+getHalDoAnswer(
+userMessage
 );
 
 
 
-ai.innerHTML =
-"🤖 HalDo AI: Ich bin bereit.";
-
-
-
-history.appendChild(
-ai
+addMessage(
+"🤖 HalDo AI: " + answer
 );
 
 
@@ -262,6 +255,180 @@ input.value="";
 
 }
 
+
+
+
+function addMessage(text){
+
+
+const history =
+document.getElementById(
+"chatHistory"
+);
+
+
+let message =
+document.createElement(
+"p"
+);
+
+
+
+message.innerHTML =
+text;
+
+
+
+history.appendChild(
+message
+);
+
+
+
+history.scrollTop =
+history.scrollHeight;
+
+
+}
+
+
+
+
+
+
+function getHalDoAnswer(message){
+
+
+message =
+message.toLowerCase();
+
+
+
+if(
+message.includes("hallo")
+||
+message.includes("hi")
+){
+
+return "Hallo 👋 Ich bin HalDo AI und bereit zu helfen.";
+
+}
+
+
+
+if(
+message.includes("wer bist du")
+){
+
+return "Ich bin HalDo AI, dein digitaler Assistent.";
+
+}
+
+
+
+if(
+message.includes("zeit")
+){
+
+return "Die Zeit kann ich später mit dem System verbinden.";
+
+}
+
+
+
+if(
+message.includes("danke")
+){
+
+return "Sehr gerne 😊";
+
+}
+
+
+
+return "Ich habe deine Nachricht erhalten. Meine KI-Funktionen werden weiter ausgebaut.";
+
+
+}
+
+
+
+
+
+
+
+function speakAI(){
+
+
+const history =
+document.getElementById(
+"chatHistory"
+);
+
+
+
+if(!history){
+
+return;
+
+}
+
+
+
+let text =
+history.innerText;
+
+
+
+if(
+"speechSynthesis" in window
+){
+
+
+let speech =
+new SpeechSynthesisUtterance(
+text
+);
+
+
+speech.lang =
+"de-DE";
+
+
+speechSynthesis.speak(
+speech
+);
+
+
+}
+
+
+}
+
+
+
+
+
+
+
+function clearChat(){
+
+
+const history =
+document.getElementById(
+"chatHistory"
+);
+
+
+
+if(history){
+
+
+history.innerHTML =
+"🤖 Chat gelöscht.";
+
+
+}
 
 
 }
