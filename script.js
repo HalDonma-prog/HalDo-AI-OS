@@ -106,3 +106,129 @@ openPage(
 
 
 }
+// ===============================
+// SEITEN WECHSEL
+// ===============================
+
+
+
+function openPage(pageId){
+
+
+
+const pages =
+document.querySelectorAll(
+".page"
+);
+
+
+
+pages.forEach(
+function(page){
+
+page.classList.remove(
+"active"
+);
+
+});
+
+
+
+const selected =
+document.getElementById(
+pageId
+);
+
+
+
+if(selected){
+
+selected.classList.add(
+"active"
+);
+
+}
+
+
+
+}
+
+
+
+
+
+
+// ===============================
+// HALDO AI CHAT
+// ===============================
+
+
+
+function sendAI(){
+
+
+
+const input =
+document.getElementById(
+"aiInput"
+);
+
+
+
+const history =
+document.getElementById(
+"chatHistory"
+);
+
+
+
+if(
+input &&
+history &&
+input.value.trim() !== ""
+){
+
+
+const message =
+document.createElement(
+"p"
+);
+
+
+message.innerHTML =
+"👤 " +
+input.value;
+
+
+
+history.appendChild(
+message
+);
+
+
+
+const answer =
+document.createElement(
+"p"
+);
+
+
+answer.innerHTML =
+"🤖 HalDo AI ist bereit.";
+
+
+
+history.appendChild(
+answer
+);
+
+
+
+input.value =
+"";
+
+
+}
+
+
+}
