@@ -1935,3 +1935,282 @@ username.value=name;
 
 
 }
+/* =====================================
+   SYSTEM SERVICES
+   PART 5/8
+   ===================================== */
+
+
+
+
+
+
+// =====================================
+// NOTIFICATION SYSTEM
+// =====================================
+
+
+function showNotification(message){
+
+
+
+let box =
+document.getElementById(
+"notification"
+);
+
+
+
+if(!box){
+
+return;
+
+}
+
+
+
+box.innerHTML =
+message;
+
+
+
+box.style.display =
+"block";
+
+
+
+setTimeout(()=>{
+
+
+box.style.display =
+"none";
+
+
+},3000);
+
+
+
+}
+
+
+
+
+
+
+
+
+// =====================================
+// AUTO LOAD SYSTEM
+// =====================================
+
+
+function autoLoad(){
+
+
+
+loadNotes();
+
+
+
+loadWriting();
+
+
+
+loadSettings();
+
+
+
+showNotification(
+"⚡ System geladen"
+);
+
+
+
+}
+
+
+
+
+
+
+
+
+// =====================================
+// MOBILE CHECK
+// =====================================
+
+
+function checkMobile(){
+
+
+
+let mobile =
+window.innerWidth < 900;
+
+
+
+if(mobile){
+
+
+
+console.log(
+"📱 Mobile Modus aktiv"
+);
+
+
+
+}else{
+
+
+
+console.log(
+"🖥️ Desktop Modus aktiv"
+);
+
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// =====================================
+// RESPONSIVE LISTENER
+// =====================================
+
+
+window.addEventListener(
+"resize",
+function(){
+
+
+checkMobile();
+
+
+});
+
+
+
+
+
+
+
+
+// =====================================
+// SYSTEM CLEANUP
+// =====================================
+
+
+function clearSystemCache(){
+
+
+
+chatMemory=[];
+
+
+
+localStorage.removeItem(
+"temporaryData"
+);
+
+
+
+showNotification(
+"🚀 System optimiert"
+);
+
+
+
+}
+
+
+
+
+
+
+
+
+// =====================================
+// SAFE START
+// =====================================
+
+
+window.addEventListener(
+"load",
+function(){
+
+
+
+autoLoad();
+
+
+
+checkMobile();
+
+
+
+});
+
+
+
+
+
+
+
+
+// =====================================
+// KEYBOARD SHORTCUTS
+// =====================================
+
+
+document.addEventListener(
+"keydown",
+function(event){
+
+
+
+// ESC = Dashboard
+
+
+if(
+event.key==="Escape"
+){
+
+
+openApp(
+"dashboard"
+);
+
+
+}
+
+
+
+// STRG + K = AI
+
+
+if(
+event.ctrlKey &&
+event.key==="k"
+){
+
+
+openApp(
+"ai"
+);
+
+
+}
+
+
+
+});
