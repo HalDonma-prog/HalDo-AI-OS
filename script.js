@@ -1550,3 +1550,388 @@ item
 
 
 }
+/* =====================================
+   FILES + PDF + SETTINGS SYSTEM
+   PART 4/8
+   ===================================== */
+
+
+
+
+
+
+// =====================================
+// FILE UPLOAD
+// =====================================
+
+
+function uploadFile(){
+
+
+let input =
+document.getElementById(
+"fileUpload"
+);
+
+
+
+if(
+!input ||
+!input.files.length
+){
+
+showNotification(
+"📁 Keine Datei ausgewählt"
+);
+
+return;
+
+}
+
+
+
+let file =
+input.files[0];
+
+
+
+let list =
+document.getElementById(
+"fileList"
+);
+
+
+
+if(list){
+
+
+let item =
+document.createElement(
+"div"
+);
+
+
+
+item.className =
+"file-item";
+
+
+
+item.innerHTML = `
+
+<span>
+
+📄 ${file.name}
+
+</span>
+
+
+<span>
+
+${Math.round(file.size/1024)}
+ KB
+
+</span>
+
+`;
+
+
+
+list.appendChild(
+item
+);
+
+
+}
+
+
+
+showNotification(
+"📁 Datei hinzugefügt"
+);
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// =====================================
+// PDF CREATOR PREPARATION
+// =====================================
+
+
+function createPDF(){
+
+
+
+let text =
+document.getElementById(
+"pdfInput"
+);
+
+
+
+if(
+!text ||
+text.value.trim()===""
+){
+
+showNotification(
+"📄 Bitte Inhalt eingeben"
+);
+
+return;
+
+}
+
+
+
+let content =
+text.value;
+
+
+
+let blob =
+new Blob(
+[
+content
+],
+{
+type:
+"text/plain"
+}
+);
+
+
+
+let link =
+document.createElement(
+"a"
+);
+
+
+
+link.href =
+URL.createObjectURL(
+blob
+);
+
+
+
+link.download =
+"HalDo_Dokument.txt";
+
+
+
+link.click();
+
+
+
+showNotification(
+"📄 Dokument erstellt"
+);
+
+
+
+}
+
+
+
+
+
+
+
+
+// =====================================
+// USER SETTINGS
+// =====================================
+
+
+function saveUser(){
+
+
+
+let name =
+document.getElementById(
+"username"
+);
+
+
+
+if(name){
+
+
+localStorage.setItem(
+
+"haldoUser",
+
+name.value
+
+);
+
+
+
+showNotification(
+"👤 Benutzer gespeichert"
+);
+
+
+
+}
+
+
+}
+
+
+
+
+
+
+
+
+
+// =====================================
+// LANGUAGE
+// =====================================
+
+
+function saveLanguage(){
+
+
+
+let lang =
+document.getElementById(
+"language"
+);
+
+
+
+if(lang){
+
+
+localStorage.setItem(
+
+"haldoLanguage",
+
+lang.value
+
+);
+
+
+
+showNotification(
+"🌍 Sprache gespeichert"
+);
+
+
+
+}
+
+
+}
+
+
+
+
+
+
+
+
+// =====================================
+// DARK MODE
+// =====================================
+
+
+function toggleDarkMode(){
+
+
+
+document.body.classList.toggle(
+"dark-mode"
+);
+
+
+
+localStorage.setItem(
+
+"haldoDark",
+
+document.body.classList.contains(
+"dark-mode"
+)
+
+);
+
+
+
+showNotification(
+"🌙 Design geändert"
+);
+
+
+
+}
+
+
+
+
+
+
+
+function loadSettings(){
+
+
+
+let dark =
+localStorage.getItem(
+"haldoDark"
+);
+
+
+
+if(
+dark==="true"
+){
+
+document.body.classList.add(
+"dark-mode"
+);
+
+}
+
+
+
+
+let name =
+localStorage.getItem(
+"haldoUser"
+);
+
+
+
+let username =
+document.getElementById(
+"username"
+);
+
+
+
+if(
+username &&
+name
+){
+
+username.value=name;
+
+}
+
+
+
+}
