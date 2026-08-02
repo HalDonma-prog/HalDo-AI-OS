@@ -311,3 +311,359 @@ HalDo.showSystemReady = function(){
 
 
 };
+/* =====================================
+   HALDO AI OS 10.0
+   CHAT + VOICE SYSTEM
+   PART 2/8
+===================================== */
+
+
+/* =====================================
+   CHAT SYSTEM
+===================================== */
+
+
+const HalDoChat = {
+
+
+    send(message){
+
+
+        if(!message) return;
+
+
+        this.addMessage(
+            "user",
+            message
+        );
+
+
+        const answer =
+        this.createAnswer(
+            message
+        );
+
+
+        setTimeout(()=>{
+
+
+            this.addMessage(
+                "ai",
+                answer
+            );
+
+
+            HalDoVoice.speak(
+                answer
+            );
+
+
+        },500);
+
+
+    },
+
+
+
+
+
+
+
+
+
+    addMessage(type,text){
+
+
+        const container =
+        document.querySelector(
+            ".chat-container"
+        );
+
+
+        if(!container) return;
+
+
+
+        const message =
+        document.createElement(
+            "div"
+        );
+
+
+        message.className =
+        type === "ai"
+        ?
+        "ai-message"
+        :
+        "user-message";
+
+
+
+        message.innerHTML = `
+
+            <div class="chat-bubble">
+
+            ${text}
+
+            </div>
+
+        `;
+
+
+
+        container.appendChild(
+            message
+        );
+
+
+
+        container.scrollTop =
+        container.scrollHeight;
+
+
+    },
+
+
+
+
+
+
+
+
+
+    createAnswer(message){
+
+
+        let text =
+        message.toLowerCase();
+
+
+
+        if(
+            text.includes(
+                "hallo"
+            )
+        ){
+
+            return "Hallo! Ich bin HalDo AI. Wie kann ich dir helfen?";
+
+        }
+
+
+
+        if(
+            text.includes(
+                "name"
+            )
+        ){
+
+            return "Ich bin HalDo AI OS Version 10.0.";
+
+        }
+
+
+
+        if(
+            text.includes(
+                "hilfe"
+            )
+        ){
+
+            return "Ich kann dich bei Navigation, Dateien, Schreiben und Systemfunktionen unterstützen.";
+
+        }
+
+
+
+        return "Ich habe deine Nachricht erhalten. Meine AI Engine wird weiter erweitert.";
+
+    }
+
+
+};
+
+
+
+
+
+
+
+
+
+/* =====================================
+   CHAT INPUT CONNECTION
+===================================== */
+
+
+document.addEventListener(
+"DOMContentLoaded",
+()=>{
+
+
+    const button =
+    document.querySelector(
+        "#sendMessage"
+    );
+
+
+    const input =
+    document.querySelector(
+        "#chatInput"
+    );
+
+
+
+    if(button && input){
+
+
+        button.onclick = ()=>{
+
+
+            HalDoChat.send(
+                input.value
+            );
+
+
+            input.value="";
+
+
+        };
+
+
+    }
+
+
+});
+
+
+
+
+
+
+
+
+
+/* =====================================
+   VOICE SYSTEM BASIS
+===================================== */
+
+
+const HalDoVoice = {
+
+
+    enabled:true,
+
+
+    speak(text){
+
+
+        if(
+            !this.enabled
+        ) return;
+
+
+
+        if(
+            "speechSynthesis"
+            in window
+        ){
+
+
+            const speech =
+            new SpeechSynthesisUtterance(
+                text
+            );
+
+
+            speech.lang =
+            "de-DE";
+
+
+            speech.rate =
+            1;
+
+
+
+            window
+            .speechSynthesis
+            .speak(
+                speech
+            );
+
+
+        }
+
+
+    }
+
+
+};
+
+
+
+
+
+
+
+
+
+/* =====================================
+   VOICE BUTTON PREPARATION
+===================================== */
+
+
+function startVoiceInput(){
+
+
+    const SpeechRecognition =
+    window.SpeechRecognition ||
+    window.webkitSpeechRecognition;
+
+
+
+    if(!SpeechRecognition){
+
+
+        alert(
+            "Spracherkennung wird nicht unterstützt."
+        );
+
+
+        return;
+
+    }
+
+
+
+    const recognition =
+    new SpeechRecognition();
+
+
+
+    recognition.lang =
+    "de-DE";
+
+
+
+    recognition.onresult =
+    function(event){
+
+
+        const text =
+        event.results[0][0].transcript;
+
+
+
+        HalDoChat.send(
+            text
+        );
+
+
+    };
+
+
+
+    recognition.start();
+
+
+}
