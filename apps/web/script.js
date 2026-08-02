@@ -9,6 +9,40 @@
 
 function openPage(pageId){
 
+    const mainOS =
+    document.getElementById("mainOS");
+
+
+    if(mainOS){
+
+        mainOS.classList.add("active");
+
+    }
+
+
+    const pages =
+    document.querySelectorAll(".page");
+
+
+    pages.forEach(page => {
+
+        page.classList.add("hidden");
+
+    });
+
+
+    const activePage =
+    document.getElementById(pageId);
+
+
+    if(activePage){
+
+        activePage.classList.remove("hidden");
+
+    }
+
+}
+
 
     const pages =
     document.querySelectorAll(".page");
