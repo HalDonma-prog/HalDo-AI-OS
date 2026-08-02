@@ -1192,3 +1192,315 @@ document.addEventListener(
 
 
 });
+/* =====================================
+   HALDO AI OS FOUNDATION v1
+   FINAL CONNECTION
+   SCRIPT PART 4/4 FINAL
+===================================== */
+
+
+/* =====================================
+   DARK MODE
+===================================== */
+
+
+function connectDarkMode(){
+
+
+    const button =
+
+    document.getElementById(
+        "darkModeButton"
+    );
+
+
+    if(!button)
+
+    return;
+
+
+
+    const saved =
+
+    localStorage.getItem(
+        "haldoDarkMode"
+    );
+
+
+
+    if(saved==="true"){
+
+
+        document.body.classList.add(
+            "dark-mode"
+        );
+
+
+    }
+
+
+
+
+
+    button.onclick=()=>{
+
+
+        document.body.classList.toggle(
+            "dark-mode"
+        );
+
+
+
+        const active =
+
+        document.body.classList.contains(
+            "dark-mode"
+        );
+
+
+
+        localStorage.setItem(
+
+            "haldoDarkMode",
+
+            active
+
+        );
+
+
+    };
+
+
+}
+
+
+
+
+
+
+
+
+
+/* =====================================
+   SETTINGS
+===================================== */
+
+
+function connectSettings(){
+
+
+    const name =
+
+    document.getElementById(
+        "userName"
+    );
+
+
+    if(!name)
+
+    return;
+
+
+
+    const savedName =
+
+    localStorage.getItem(
+        "haldoUserName"
+    );
+
+
+
+    if(savedName){
+
+
+        name.value=savedName;
+
+
+    }
+
+
+
+
+
+    name.onchange=()=>{
+
+
+        localStorage.setItem(
+
+            "haldoUserName",
+
+            name.value
+
+        );
+
+
+    };
+
+
+}
+
+
+
+
+
+
+
+
+
+/* =====================================
+   VOICE PREPARATION
+===================================== */
+
+
+const HalDoVoice = {
+
+
+    enabled:false,
+
+
+
+    speak(text){
+
+
+        if(!this.enabled)
+
+        return;
+
+
+
+        if(
+            "speechSynthesis"
+            in window
+        ){
+
+
+            const voice =
+
+            new SpeechSynthesisUtterance(
+                text
+            );
+
+
+            voice.lang="de-DE";
+
+
+            voice.rate=1;
+
+
+            speechSynthesis.speak(
+                voice
+            );
+
+
+        }
+
+
+    }
+
+
+};
+
+
+
+
+
+
+
+
+
+function enableVoice(){
+
+
+    const saved =
+
+    localStorage.getItem(
+        "haldoVoice"
+    );
+
+
+
+    if(saved==="true"){
+
+
+        HalDoVoice.enabled=true;
+
+
+    }
+
+
+}
+
+
+
+
+
+
+
+
+
+/* =====================================
+   AI SYSTEM CONNECTION
+===================================== */
+
+
+function HalDoSystemReady(){
+
+
+    console.log(
+
+        "🤖 HalDo AI Core online"
+
+    );
+
+
+
+    HalDoNotification(
+
+        "HalDo AI OS Foundation v1 ist bereit 🚀"
+
+    );
+
+
+}
+
+
+
+
+
+
+
+
+
+/* =====================================
+   START ALL MODULES
+===================================== */
+
+
+document.addEventListener(
+
+"DOMContentLoaded",
+
+()=>{
+
+
+    connectDarkMode();
+
+
+    connectSettings();
+
+
+    enableVoice();
+
+
+    HalDoSystemReady();
+
+
+
+    console.log(
+
+        "💙 HalDo AI OS Foundation v1 CLEAN FINAL gestartet"
+
+    );
+
+
+});
