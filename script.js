@@ -232,3 +232,118 @@ input.value =
 
 
 }
+// ===============================
+// NOTIZEN SPEICHERN
+// ===============================
+
+
+function saveNote(){
+
+
+const input =
+document.getElementById(
+"noteInput"
+);
+
+
+const list =
+document.getElementById(
+"noteList"
+);
+
+
+
+if(
+input &&
+list &&
+input.value.trim() !== ""
+){
+
+
+const note =
+document.createElement(
+"div"
+);
+
+
+note.innerHTML =
+"📝 " +
+input.value;
+
+
+
+list.appendChild(
+note
+);
+
+
+
+input.value =
+"";
+
+
+}
+
+
+
+}
+
+
+
+
+
+// ===============================
+// SPRACHE SPEICHERN
+// ===============================
+
+
+function saveLanguage(){
+
+
+
+const language =
+document.getElementById(
+"language"
+);
+
+
+
+if(language){
+
+
+localStorage.setItem(
+"haldoLanguage",
+language.value
+);
+
+
+
+alert(
+"🌍 Sprache gespeichert"
+);
+
+
+
+}
+
+
+}
+
+
+
+
+
+// ===============================
+// PDF VORBEREITUNG
+// ===============================
+
+
+function createPDF(){
+
+
+alert(
+"📄 PDF Creator vorbereitet"
+);
+
+
+}
