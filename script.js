@@ -196,3 +196,377 @@ app.classList.add(
 
 
 }
+/* =====================================
+   HALDO AI CHAT ENGINE
+   PART 2/8
+   ===================================== */
+
+
+
+
+
+let chatMemory = [];
+
+
+
+
+
+
+
+// =====================================
+// SEND AI MESSAGE
+// =====================================
+
+
+function sendAI(){
+
+
+
+let input =
+document.getElementById(
+"aiInput"
+);
+
+
+
+if(!input){
+
+return;
+
+}
+
+
+
+let message =
+input.value.trim();
+
+
+
+
+if(message===""){
+
+return;
+
+}
+
+
+
+
+addUserMessage(
+message
+);
+
+
+
+input.value="";
+
+
+
+
+setTimeout(()=>{
+
+
+let answer =
+generateAIResponse(
+message
+);
+
+
+
+addAIMessage(
+answer
+);
+
+
+
+},800);
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// =====================================
+// ADD USER MESSAGE
+// =====================================
+
+
+function addUserMessage(text){
+
+
+
+let container =
+document.getElementById(
+"chatHistory"
+);
+
+
+
+if(!container){
+
+return;
+
+}
+
+
+
+
+let box =
+document.createElement(
+"div"
+);
+
+
+
+box.className=
+"user-message";
+
+
+
+box.innerHTML=`
+
+<div class="chat-bubble">
+
+<h4>
+
+Du
+
+</h4>
+
+
+<p>
+
+${text}
+
+</p>
+
+
+</div>
+
+`;
+
+
+
+container.appendChild(
+box
+);
+
+
+
+chatMemory.push({
+
+type:"user",
+
+text:text
+
+});
+
+
+
+container.scrollTop =
+container.scrollHeight;
+
+
+}
+
+
+
+
+
+
+
+
+
+// =====================================
+// ADD AI MESSAGE
+// =====================================
+
+
+function addAIMessage(text){
+
+
+
+let container =
+document.getElementById(
+"chatHistory"
+);
+
+
+
+if(!container){
+
+return;
+
+}
+
+
+
+let box =
+document.createElement(
+"div"
+);
+
+
+
+box.className=
+"ai-message";
+
+
+
+box.innerHTML=`
+
+<div class="chat-avatar">
+
+🤖
+
+</div>
+
+
+<div class="chat-bubble">
+
+
+<h4>
+
+HalDo AI
+
+</h4>
+
+
+<p>
+
+${text}
+
+</p>
+
+
+<span class="chat-time">
+
+Jetzt
+
+</span>
+
+
+</div>
+
+`;
+
+
+
+container.appendChild(
+box
+);
+
+
+
+chatMemory.push({
+
+type:"ai",
+
+text:text
+
+});
+
+
+
+container.scrollTop =
+container.scrollHeight;
+
+
+}
+
+
+
+
+
+
+
+
+
+// =====================================
+// AI RESPONSE SYSTEM
+// =====================================
+
+
+function generateAIResponse(message){
+
+
+
+let text =
+message.toLowerCase();
+
+
+
+
+
+if(
+text.includes("hallo")
+||
+text.includes("hi")
+){
+
+return:
+
+"Hallo 👋 Ich bin HalDo AI. Wie kann ich dir helfen?";
+
+}
+
+
+
+
+
+if(
+text.includes("name")
+){
+
+return:
+
+"Ich bin HalDo AI, dein intelligenter Assistent im HalDo AI OS.";
+
+}
+
+
+
+
+
+if(
+text.includes("zeit")
+){
+
+return:
+
+"Die aktuelle Uhrzeit wird oben im System angezeigt.";
+
+}
+
+
+
+
+
+if(
+text.includes("pdf")
+){
+
+return:
+
+"Der PDF Creator ist bereit. Du kannst später Dokumente als PDF erstellen.";
+
+}
+
+
+
+
+
+return:
+
+"Ich habe deine Nachricht erhalten. Meine KI-Funktionen werden weiter ausgebaut. 🚀";
+
+
+
+}
