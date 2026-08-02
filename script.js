@@ -1,72 +1,42 @@
 // ==================================
-// HALDO AI OS v7.3
-// COMPLETE SCRIPT
+// HALDO AI OS v8.1
+// COMPLETE SCRIPT FIX
 // ==================================
 
 
 
-// START SPLASH
-window.addEventListener("load", function(){
-const splash = document.getElementById("splashScreen");
-const welcome = document.getElementById("welcomeScreen");
-const main = document.getElementById("mainOS");
+// START SYSTEM
 
-if(main){
-    main.style.display = "none";
-}
-
-setTimeout(function(){
-
-    if(splash){
-        splash.style.display = "none";
-    }
-
-    if(welcome){
-        welcome.style.display = "flex";
-    }
-
-}, 2500);
-window.addEventListener(
-"load",
-function(){
+window.onload = function(){
 
 
 const splash =
-document.getElementById(
-"splashScreen"
-);
-
+document.getElementById("splashScreen");
 
 
 const welcome =
-document.getElementById(
-"welcomeScreen"
-);
-
+document.getElementById("welcomeScreen");
 
 
 const main =
-document.getElementById(
-"mainOS"
-);
+document.getElementById("mainOS");
 
 
 
 if(main){
 
-main.style.display="none";
+main.style.display = "none";
 
 }
 
 
 
-setTimeout(
-function(){
+setTimeout(function(){
 
 
 if(splash){
 
-splash.style.display="none";
+splash.style.display = "none";
 
 }
 
@@ -74,46 +44,37 @@ splash.style.display="none";
 
 if(welcome){
 
-welcome.style.display="flex";
+welcome.style.display = "flex";
 
 }
 
 
 
-},
-2500
-);
+},2500);
 
 
 
-});
+loadChat();
+
+
+};
 
 
 
 
 
 
-// ==================================
 // START BUTTON
-// ==================================
-
-
 
 function startOS(){
 
 
-
 const welcome =
-document.getElementById(
-"welcomeScreen"
-);
-
+document.getElementById("welcomeScreen");
 
 
 const main =
-document.getElementById(
-"mainOS"
-);
+document.getElementById("mainOS");
 
 
 
@@ -133,10 +94,7 @@ main.style.display="block";
 
 
 
-openPage(
-"dashboard"
-);
-
+openPage("dashboard");
 
 
 }
@@ -147,53 +105,34 @@ openPage(
 
 
 
-
-// ==================================
 // NAVIGATION
-// ==================================
 
-
-function openPage(pageId){
-
+function openPage(id){
 
 
 const pages =
-document.querySelectorAll(
-".page"
-);
+document.querySelectorAll(".page");
 
 
 
-pages.forEach(
-function(page){
+pages.forEach(function(page){
 
-
-page.classList.remove(
-"active"
-);
-
+page.classList.remove("active");
 
 });
 
 
 
-const page =
-document.getElementById(
-pageId
-);
+const target =
+document.getElementById(id);
 
 
 
-if(page){
+if(target){
 
-
-page.classList.add(
-"active"
-);
-
+target.classList.add("active");
 
 }
-
 
 
 }
@@ -204,40 +143,17 @@ page.classList.add(
 
 
 
-
-
-// ==================================
-// AI
-// ==================================
-
-
-// ==================================
-// HALDO AI ENGINE v8.0
-// ==================================
-
-
-function sendAI(){
-// ==================================
-// HALDO AI ENGINE v8.1
-// CHAT SYSTEM
-// ==================================
-
-
+// AI CHAT
 
 function sendAI(){
 
 
 const input =
-document.getElementById(
-"aiInput"
-);
+document.getElementById("aiInput");
 
 
 
-if(
-!input ||
-input.value.trim()===""
-){
+if(!input){
 
 return;
 
@@ -246,34 +162,35 @@ return;
 
 
 let text =
-input.value;
+input.value.trim();
+
+
+
+if(text===""){
+
+return;
+
+}
 
 
 
 addChatMessage(
-text,
+"👤 " + text,
 "user"
 );
 
 
 
-saveChat();
-
-
-
-setTimeout(
-function(){
+setTimeout(function(){
 
 
 let answer =
-getHalDoAnswer(
-text
-);
+getAnswer(text);
 
 
 
 addChatMessage(
-answer,
+"🤖 " + answer,
 "ai"
 );
 
@@ -282,9 +199,7 @@ answer,
 saveChat();
 
 
-},
-500
-);
+},500);
 
 
 
@@ -297,122 +212,89 @@ input.value="";
 
 
 
+function getAnswer(text){
 
 
-function addChatMessage(
-text,
-type
-){
+text =
+text.toLowerCase();
+
+
+
+if(text.includes("hallo")){
+
+return "Hallo 👋 Ich bin HalDo AI.";
+
+}
+
+
+
+if(text.includes("wer bist du")){
+
+return "Ich bin HalDo AI Engine.";
+
+}
+
+
+
+if(text.includes("hilfe")){
+
+return "Ich helfe dir mit deinen Aufgaben und Modulen.";
+
+}
+
+
+
+return "Ich habe deine Nachricht erhalten.";
+
+
+}
+
+
+
+
+
+
+
+function addChatMessage(text,type){
 
 
 const history =
-document.getElementById(
-"chatHistory"
-);
+document.getElementById("chatHistory");
 
 
 
-let box =
-document.createElement(
-"div"
-);
+if(!history){
 
+return;
 
-
-box.className =
-"chat-message " +
-(type==="user"
-?
-"user-message"
-:
-"ai-message");
-
-
-
-let time =
-new Date()
-.toLocaleTimeString(
-"de-DE",
-{
-hour:"2-digit",
-minute:"2-digit"
 }
-);
 
 
 
-box.innerHTML =
+const message =
+document.createElement("div");
+
+
+
+message.className =
+"chat-message " + type + "-message";
+
+
+
+message.innerHTML =
 text +
-"<div class='ai-time'>"
+"<br><small>"
 +
-time
+new Date().toLocaleTimeString()
 +
-"</div>";
+"</small>";
 
 
 
-history.appendChild(
-box
-);
-
-
-
-history.scrollTop =
-history.scrollHeight;
+history.appendChild(message);
 
 
 }
-
-
-
-
-
-
-
-function getHalDoAnswer(
-message
-){
-
-
-message =
-message.toLowerCase();
-
-
-
-if(
-message.includes("hallo")
-){
-
-return "Hallo 👋 Schön dich zu sehen. Ich bin HalDo AI.";
-
-}
-
-
-
-if(
-message.includes("name")
-){
-
-return "Ich bin HalDo AI Engine v8.1.";
-
-}
-
-
-
-if(
-message.includes("hilfe")
-){
-
-return "Ich kann dir später mit Dateien, Schreiben, PDF und vielen Aufgaben helfen.";
-
-}
-
-
-
-return "Ich habe deine Nachricht verstanden und werde immer weiter verbessert.";
-
-}
-
 
 
 
@@ -423,10 +305,8 @@ return "Ich habe deine Nachricht verstanden und werde immer weiter verbessert.";
 function saveChat(){
 
 
-let history =
-document.getElementById(
-"chatHistory"
-);
+const history =
+document.getElementById("chatHistory");
 
 
 
@@ -449,28 +329,20 @@ history.innerHTML
 
 
 
-
 function loadChat(){
 
 
-let history =
-document.getElementById(
-"chatHistory"
-);
+const history =
+document.getElementById("chatHistory");
 
 
 
-let saved =
-localStorage.getItem(
-"haldoChat"
-);
+const saved =
+localStorage.getItem("haldoChat");
 
 
 
-if(
-history &&
-saved
-){
+if(history && saved){
 
 history.innerHTML =
 saved;
@@ -486,14 +358,11 @@ saved;
 
 
 
-
 function clearChat(){
 
 
-let history =
-document.getElementById(
-"chatHistory"
-);
+const history =
+document.getElementById("chatHistory");
 
 
 
@@ -501,48 +370,48 @@ if(history){
 
 history.innerHTML="";
 
+}
+
+
+
+localStorage.removeItem("haldoChat");
+
 
 }
 
 
 
-localStorage.removeItem(
-"haldoChat"
-);
-
-
-}
 
 
 
 
-
-
-
-
-window.addEventListener(
-"load",
-function(){
-
-loadChat();
-
-});
-
-function clearChat(){
+function speakAI(){
 
 
 const history =
-document.getElementById(
-"chatHistory"
+document.getElementById("chatHistory");
+
+
+
+if(
+history &&
+window.speechSynthesis
+){
+
+
+let speech =
+new SpeechSynthesisUtterance(
+history.innerText
 );
 
 
 
-if(history){
+speech.lang="de-DE";
 
 
-history.innerHTML =
-"🤖 Chat gelöscht.";
+speechSynthesis.speak(
+speech
+);
 
 
 }
@@ -556,57 +425,44 @@ history.innerHTML =
 
 
 
+function createPDF(){
+
+alert(
+"📄 PDF Funktion wird erweitert"
+);
 
 
-// ==================================
-// NOTES
-// ==================================
+}
+
+
+
+
 
 
 
 function saveNote(){
 
-
-
 const input =
-document.getElementById(
-"noteInput"
-);
-
+document.getElementById("noteInput");
 
 
 const list =
-document.getElementById(
-"noteList"
-);
+document.getElementById("noteList");
 
 
 
-if(
-input &&
-list &&
-input.value.trim()!==""
-){
-
+if(input && list && input.value.trim()!==""){
 
 
 let note =
-document.createElement(
-"p"
-);
-
+document.createElement("p");
 
 
 note.innerHTML =
-"📝 " +
-input.value;
+"📝 " + input.value;
 
 
-
-list.appendChild(
-note
-);
-
+list.appendChild(note);
 
 
 input.value="";
@@ -615,65 +471,28 @@ input.value="";
 }
 
 
-
 }
 
 
 
 
-
-
-
-
-// ==================================
-// PDF
-// ==================================
-
-
-
-function createPDF(){
-
-
-alert(
-"📄 PDF Creator wird vorbereitet"
-);
-
-
-}
-
-
-
-
-
-
-
-
-
-// ==================================
-// LANGUAGE
-// ==================================
 
 
 
 function saveLanguage(){
 
 
-
-const language =
-document.getElementById(
-"language"
-);
+const lang =
+document.getElementById("language");
 
 
 
-if(language){
-
+if(lang){
 
 localStorage.setItem(
 "haldoLanguage",
-language.value
+lang.value
 );
-
 
 
 alert(
