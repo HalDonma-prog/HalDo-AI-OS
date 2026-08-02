@@ -1960,8 +1960,970 @@ document.addEventListener(
 }
 
 );
+/* =====================================
+   HALDO AI OS v9.1
+   SYSTEM CENTER + DESKTOP
+   PART 5
+   ===================================== */
 
 
+
+
+
+
+
+// =====================================
+// BENACHRICHTIGUNGSZENTRALE
+// =====================================
+
+
+const HalDoNotifications = {
+
+
+    list:[],
+
+
+
+    add(message,type="info"){
+
+
+        let notification = {
+
+
+            message:message,
+
+            type:type,
+
+            time:
+            new Date()
+            .toLocaleTimeString()
+
+
+        };
+
+
+
+        this.list.push(
+            notification
+        );
+
+
+        this.save();
+
+
+        showNotification(
+            message
+        );
+
+
+    },
+
+
+
+    save(){
+
+
+        localStorage.setItem(
+
+            "haldoNotifications",
+
+            JSON.stringify(
+                this.list
+            )
+
+        );
+
+
+    },
+
+
+
+    load(){
+
+
+        let data =
+        localStorage.getItem(
+            "haldoNotifications"
+        );
+
+
+
+        if(data){
+
+            this.list =
+            JSON.parse(
+                data
+            );
+
+        }
+
+
+    }
+
+
+};
+
+
+
+
+
+
+
+
+
+// =====================================
+// MOBILE ERKENNUNG
+// =====================================
+
+
+const HalDoMobile = {
+
+
+    isMobile(){
+
+
+        return (
+
+            window.innerWidth <= 768
+
+        );
+
+
+    },
+
+
+
+    init(){
+
+
+        if(
+            this.isMobile()
+        ){
+
+            document.body.classList.add(
+                "mobile-device"
+            );
+
+
+            console.log(
+                "📱 Mobile Modus aktiv"
+            );
+
+
+        }
+
+
+    }
+
+
+
+};
+
+
+
+
+
+
+
+
+
+// =====================================
+// DESKTOP SYSTEM
+// =====================================
+
+
+const HalDoDesktop = {
+
+
+    active:true,
+
+
+
+    init(){
+
+
+        if(
+            !HalDoMobile.isMobile()
+        ){
+
+
+            document.body.classList.add(
+                "desktop-device"
+            );
+
+
+            console.log(
+                "🖥️ Desktop Modus aktiv"
+            );
+
+
+        }
+
+
+    },
+
+
+
+    fullscreen(){
+
+
+        if(
+            document.documentElement.requestFullscreen
+        ){
+
+            document.documentElement.requestFullscreen();
+
+        }
+
+
+    }
+
+
+};
+
+
+
+
+
+
+
+
+
+// =====================================
+// FENSTER MANAGER
+// =====================================
+
+
+const HalDoWindowManager = {
+
+
+    windows:[],
+
+
+
+    register(id){
+
+
+        let windowElement =
+        document.getElementById(
+            id
+        );
+
+
+
+        if(windowElement){
+
+
+            this.windows.push(
+                id
+            );
+
+
+        }
+
+
+    },
+
+
+
+    open(id){
+
+
+        closeWindows();
+
+
+        openWindow(
+            id
+        );
+
+
+    },
+
+
+
+    closeAll(){
+
+
+        closeWindows();
+
+
+    }
+
+
+};
+
+
+
+
+
+
+
+
+
+// =====================================
+// SUCHE SYSTEM
+// =====================================
+
+
+const HalDoSearch = {
+
+
+    items:[
+
+        "HalDo AI",
+
+        "Einstellungen",
+
+        "Dateien",
+
+        "PDF Creator",
+
+        "Notizen",
+
+        "Kalender"
+
+    ],
+
+
+
+
+    search(text){
+
+
+        let result =
+        this.items.filter(
+
+            item =>
+
+            item
+            .toLowerCase()
+            .includes(
+
+                text
+                .toLowerCase()
+
+            )
+
+        );
+
+
+
+        return result;
+
+
+    }
+
+
+};
+
+
+
+
+
+
+
+
+
+function performSearch(){
+
+
+    let input =
+    document.getElementById(
+        "searchInput"
+    );
+
+
+
+    if(!input)
+    return;
+
+
+
+    let results =
+    HalDoSearch.search(
+        input.value
+    );
+
+
+
+    console.log(
+        "🔍 Suche:",
+        results
+    );
+
+
+}
+
+
+
+
+
+
+
+
+
+// =====================================
+// DOCK BASIS
+// =====================================
+
+
+function openDockApp(
+    app
+){
+
+
+    openWindow(
+        app
+    );
+
+
+}
+
+
+
+
+
+
+
+
+
+// =====================================
+// SYSTEM START
+// =====================================
+
+
+document.addEventListener(
+
+"DOMContentLoaded",
+
+()=>{
+
+
+    HalDoNotifications.load();
+
+
+    HalDoMobile.init();
+
+
+    HalDoDesktop.init();
+
+
+
+    console.log(
+
+        "🔔 Systemzentrale bereit"
+
+    );
+
+
+}
+
+);
+/* =====================================
+   HALDO AI OS v9.1
+   MEMORY + LANGUAGE + FUTURE ENGINE
+   PART 6
+   ===================================== */
+
+
+
+
+
+
+
+// =====================================
+// ERWEITERTES AI GEDÄCHTNIS
+// =====================================
+
+
+const HalDoAIMemory = {
+
+
+    conversations:[],
+
+
+    preferences:{},
+
+
+    facts:[],
+
+
+
+    saveConversation(message){
+
+
+        this.conversations.push({
+
+            text:message,
+
+            date:
+            new Date()
+            .toISOString()
+
+        });
+
+
+        this.store();
+
+
+    },
+
+
+
+    savePreference(
+        key,
+        value
+    ){
+
+
+        this.preferences[key]=value;
+
+
+        this.store();
+
+
+    },
+
+
+
+    rememberFact(
+        fact
+    ){
+
+
+        this.facts.push(
+            fact
+        );
+
+
+        this.store();
+
+
+    },
+
+
+
+    store(){
+
+
+        localStorage.setItem(
+
+            "haldoAI_memory",
+
+            JSON.stringify({
+
+                conversations:
+                this.conversations,
+
+
+                preferences:
+                this.preferences,
+
+
+                facts:
+                this.facts
+
+
+            })
+
+        );
+
+
+    },
+
+
+
+    load(){
+
+
+        let data =
+        localStorage.getItem(
+            "haldoAI_memory"
+        );
+
+
+
+        if(data){
+
+
+            let saved =
+            JSON.parse(
+                data
+            );
+
+
+            this.conversations =
+            saved.conversations
+            ||
+            [];
+
+
+
+            this.preferences =
+            saved.preferences
+            ||
+            {};
+
+
+
+            this.facts =
+            saved.facts
+            ||
+            [];
+
+
+        }
+
+
+    }
+
+
+};
+
+
+
+
+
+
+
+
+
+// =====================================
+// MEHRSPRACHIGKEIT SYSTEM
+// =====================================
+
+
+const HalDoTranslator = {
+
+
+    current:
+    "de-DE",
+
+
+
+    languages:{
+
+
+        deutsch:
+        "de-DE",
+
+
+        english:
+        "en-US",
+
+
+        turkce:
+        "tr-TR",
+
+
+        kurdish:
+        "ku",
+
+
+        ezidi:
+        "ku"
+
+    },
+
+
+
+    setLanguage(
+        language
+    ){
+
+
+        if(
+            this.languages[language]
+        ){
+
+
+            this.current =
+            this.languages[language];
+
+
+            localStorage.setItem(
+
+                "haldoLanguage",
+
+                this.current
+
+            );
+
+
+            speak(
+                "Sprache geändert"
+            );
+
+
+        }
+
+
+    }
+
+
+
+};
+
+
+
+
+
+
+
+
+
+// =====================================
+// SICHERHEIT BASIS
+// =====================================
+
+
+const HalDoSecurity = {
+
+
+    locked:false,
+
+
+
+    enableLock(){
+
+
+        this.locked =
+        true;
+
+
+        localStorage.setItem(
+
+            "haldoSecurity",
+
+            "locked"
+
+        );
+
+
+    },
+
+
+
+    disableLock(){
+
+
+        this.locked =
+        false;
+
+
+        localStorage.setItem(
+
+            "haldoSecurity",
+
+            "open"
+
+        );
+
+
+    },
+
+
+
+    status(){
+
+
+        return this.locked;
+
+
+    }
+
+
+
+};
+
+
+
+
+
+
+
+
+
+// =====================================
+// ZUKUNFTSMODULE
+// =====================================
+
+
+const HalDoFutureModules = {
+
+
+    modules:[],
+
+
+
+    add(
+        name
+    ){
+
+
+        this.modules.push({
+
+            name:name,
+
+            status:
+            "ready"
+
+
+        });
+
+
+        this.save();
+
+
+    },
+
+
+
+    save(){
+
+
+        localStorage.setItem(
+
+            "haldoFutureModules",
+
+            JSON.stringify(
+                this.modules
+            )
+
+        );
+
+
+    },
+
+
+
+    load(){
+
+
+        let data =
+        localStorage.getItem(
+
+            "haldoFutureModules"
+
+        );
+
+
+
+        if(data){
+
+
+            this.modules =
+            JSON.parse(
+                data
+            );
+
+
+        }
+
+
+    }
+
+
+};
+
+
+
+
+
+
+
+
+
+// =====================================
+// ERWEITERUNGS ENGINE
+// =====================================
+
+
+const HalDoExtensionEngine = {
+
+
+    extensions:[],
+
+
+
+    register(
+        extension
+    ){
+
+
+        this.extensions.push(
+            extension
+        );
+
+
+        console.log(
+
+            "🧩 Erweiterung registriert:",
+            extension
+
+        );
+
+
+    },
+
+
+
+    list(){
+
+
+        return this.extensions;
+
+
+    }
+
+
+
+};
+
+
+
+
+
+
+
+
+
+// =====================================
+// SYSTEM LADEN
+// =====================================
+
+
+document.addEventListener(
+
+"DOMContentLoaded",
+
+()=>{
+
+
+    HalDoAIMemory.load();
+
+
+    HalDoFutureModules.load();
+
+
+
+    console.log(
+
+        "🧠 AI Memory Engine aktiv"
+
+    );
+
+
+    console.log(
+
+        "🚀 Erweiterungs-System bereit"
+
+    );
+
+
+}
+
+);
 
 
 Halil Donma 
