@@ -667,3 +667,477 @@ function startVoiceInput(){
 
 
 }
+/* =====================================
+   HALDO AI OS 10.0
+   VOICE + LANGUAGE + SETTINGS
+   PART 3/8
+===================================== */
+
+
+/* =====================================
+   ADVANCED VOICE SYSTEM
+===================================== */
+
+
+const HalDoVoiceControl = {
+
+
+    recognition:null,
+
+
+    active:false,
+
+
+    init(){
+
+
+        const Recognition =
+        window.SpeechRecognition ||
+        window.webkitSpeechRecognition;
+
+
+
+        if(!Recognition){
+
+            console.log(
+                "🎤 Sprache nicht verfügbar"
+            );
+
+            return;
+
+        }
+
+
+
+        this.recognition =
+        new Recognition();
+
+
+
+        this.recognition.lang =
+        HalDoSettings.language;
+
+
+
+        this.recognition.continuous =
+        false;
+
+
+
+        this.recognition.onstart =
+        ()=>{
+
+            this.active = true;
+
+            console.log(
+                "🎤 Sprachaufnahme gestartet"
+            );
+
+        };
+
+
+
+        this.recognition.onend =
+        ()=>{
+
+            this.active = false;
+
+        };
+
+
+
+        this.recognition.onresult =
+        (event)=>{
+
+
+            const text =
+            event
+            .results[0][0]
+            .transcript;
+
+
+
+            HalDoChat.send(
+                text
+            );
+
+
+        };
+
+
+    },
+
+
+
+
+
+
+
+
+
+    start(){
+
+
+        if(
+            this.recognition
+        ){
+
+            this.recognition.start();
+
+        }
+
+
+    },
+
+
+    stop(){
+
+
+        if(
+            this.recognition
+        ){
+
+            this.recognition.stop();
+
+        }
+
+
+    }
+
+
+};
+
+
+
+
+
+
+
+
+
+/* =====================================
+   VOICE SELECTION BASIS
+===================================== */
+
+
+const HalDoVoiceSettings = {
+
+
+    voice:null,
+
+
+    rate:1,
+
+
+    pitch:1,
+
+
+
+    loadVoices(){
+
+
+        const voices =
+        speechSynthesis
+        .getVoices();
+
+
+
+        if(
+            voices.length
+        ){
+
+            this.voice =
+            voices[0];
+
+        }
+
+
+    },
+
+
+
+
+
+
+
+
+
+    apply(text){
+
+
+        const speech =
+        new SpeechSynthesisUtterance(
+            text
+        );
+
+
+        speech.voice =
+        this.voice;
+
+
+
+        speech.rate =
+        this.rate;
+
+
+
+        speech.pitch =
+        this.pitch;
+
+
+
+        speech.lang =
+        HalDoSettings.language;
+
+
+
+        speechSynthesis.speak(
+            speech
+        );
+
+
+    }
+
+
+};
+
+
+
+speechSynthesis.onvoiceschanged =
+()=>{
+
+    HalDoVoiceSettings
+    .loadVoices();
+
+};
+
+
+
+
+
+
+
+
+
+/* =====================================
+   LANGUAGE SYSTEM
+===================================== */
+
+
+const HalDoLanguage = {
+
+
+    current:"de-DE",
+
+
+
+    change(language){
+
+
+        this.current =
+        language;
+
+
+
+        HalDoSettings.language =
+        language;
+
+
+
+        HalDo.saveSettings();
+
+
+        console.log(
+            "🌍 Sprache geändert:",
+            language
+        );
+
+
+    }
+
+
+};
+
+
+
+
+
+
+
+
+
+/* =====================================
+   SETTINGS SYSTEM
+===================================== */
+
+
+const HalDoSettings = {
+
+
+    language:"de-DE",
+
+
+    theme:"default",
+
+
+    voice:true,
+
+
+    load(){
+
+
+        const saved =
+        localStorage.getItem(
+            "haldoSettings"
+        );
+
+
+
+        if(saved){
+
+
+            Object.assign(
+
+                this,
+
+                JSON.parse(
+                    saved
+                )
+
+            );
+
+
+        }
+
+
+    },
+
+
+
+
+
+
+
+
+
+    save(){
+
+
+        localStorage.setItem(
+
+            "haldoSettings",
+
+            JSON.stringify(
+                this
+            )
+
+        );
+
+
+    }
+
+
+};
+
+
+
+
+
+
+
+
+
+HalDoSettings.saveSettings =
+HalDoSettings.save;
+
+
+
+
+
+
+
+
+
+/* =====================================
+   MEMORY EXTENSION
+===================================== */
+
+
+HalDoMemory = {
+
+
+    add(key,value){
+
+
+        HalDo.memory[key] =
+        value;
+
+
+        HalDo.saveMemory();
+
+
+    },
+
+
+
+
+
+
+
+
+
+    get(key){
+
+
+        return HalDo.memory[key];
+
+
+    },
+
+
+
+
+
+
+
+
+
+    remove(key){
+
+
+        delete HalDo.memory[key];
+
+
+        HalDo.saveMemory();
+
+
+    }
+
+
+};
+
+
+
+
+
+
+
+
+
+/* =====================================
+   SYSTEM CONNECTION
+===================================== */
+
+
+document.addEventListener(
+"DOMContentLoaded",
+()=>{
+
+
+    HalDoSettings.load();
+
+
+    HalDoVoiceControl.init();
+
+
+});
