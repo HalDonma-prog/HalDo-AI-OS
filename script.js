@@ -504,36 +504,24 @@ function saveLanguage(){
 // ===============================
 
 
-window.addEventListener(
-    "load",
-    function(){
+window.addEventListener("load", function(){
 
-        const splash =
-        document.getElementById(
-            "splashScreen"
-        );
+    const splash = document.getElementById("splashScreen");
 
+    if(splash){
 
-        if(splash){
+        setTimeout(function(){
 
-            setTimeout(
-                function(){
+            splash.style.opacity = "0";
 
-                    splash.style.opacity = "0";
+            setTimeout(function(){
 
+                splash.remove();
 
-                    setTimeout(
-                        function(){
+            }, 800);
 
-                            splash.style.display = "none";
-document.body.style.overflow = "auto";
+        }, 2000);
 
-const mainOS =
-document.getElementById("mainOS");
+    }
 
-
-if(mainOS){
-
-    mainOS.classList.add("active");
-
-}
+});
