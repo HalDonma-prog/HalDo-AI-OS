@@ -606,3 +606,338 @@ document.addEventListener(
 
 
 });
+/* =====================================
+   HALDO AI CHAT v10.2
+   COMMAND SYSTEM
+   PART 3/4
+===================================== */
+
+
+
+const HalDoCommands = {
+
+
+    commands:{
+
+
+        "dark mode":()=>{
+
+
+            document.body.classList.toggle(
+                "dark-mode"
+            );
+
+
+            return "🌙 Dark Mode wurde geändert.";
+
+
+        },
+
+
+
+
+
+        "hilfe":()=>{
+
+
+            return (
+
+                "🤖 Verfügbare Befehle:\n\n" +
+
+                "- Dark Mode\n" +
+
+                "- System Status\n" +
+
+                "- Zeit\n" +
+
+                "- Speicher\n"
+
+            );
+
+
+        },
+
+
+
+
+
+        "system status":()=>{
+
+
+            return (
+
+                "🚀 HalDo AI OS v10.2\n" +
+
+                "System läuft stabil. 💙"
+
+            );
+
+
+        },
+
+
+
+
+
+        "speicher":()=>{
+
+
+            return (
+
+                "💾 HalDo Speicher ist aktiv " +
+
+                "und speichert lokale Daten."
+
+            );
+
+
+        }
+
+    }
+
+};
+
+
+
+
+
+
+
+
+
+/* =====================================
+   COMMAND CHECK
+===================================== */
+
+
+function HalDoCommandCheck(input){
+
+
+    const text =
+
+    input.toLowerCase();
+
+
+
+
+
+    for(
+
+        const command in HalDoCommands.commands
+
+    ){
+
+
+        if(
+
+            text.includes(command)
+
+        ){
+
+
+            return (
+
+                HalDoCommands.commands[command]()
+
+            );
+
+
+        }
+
+
+    }
+
+
+
+    return null;
+
+
+}
+
+
+
+
+
+
+
+
+
+/* =====================================
+   SEARCH UNDERSTANDING
+===================================== */
+
+
+const HalDoSearch = {
+
+
+    find(topic){
+
+
+        const text =
+
+        topic.toLowerCase();
+
+
+
+
+
+        if(
+
+            text.includes("haldo")
+
+        ){
+
+
+            return (
+
+                "Du fragst über HalDo AI OS. " +
+
+                "Wir entwickeln gerade Version 10.2. 🚀"
+
+            );
+
+
+        }
+
+
+
+
+
+
+
+
+
+        if(
+
+            text.includes("wetter")
+
+        ){
+
+
+            return (
+
+                "Eine Wetterfunktion kann später " +
+
+                "über eine Verbindung ergänzt werden. 🌍"
+
+            );
+
+
+        }
+
+
+
+
+
+
+
+
+
+        return (
+
+            "Ich habe deine Suche verstanden: "
+
+            +
+
+            topic
+
+        );
+
+
+    }
+
+
+};
+
+
+
+
+
+
+
+
+
+/* =====================================
+   ADVANCED AI BEHAVIOR
+===================================== */
+
+
+function HalDoAdvancedAnswer(input){
+
+
+    const command =
+
+    HalDoCommandCheck(input);
+
+
+
+    if(command){
+
+
+        return command;
+
+
+    }
+
+
+
+
+
+
+
+
+
+    const context =
+
+    HalDoContextAnswer(input);
+
+
+
+    if(context){
+
+
+        return context;
+
+
+    }
+
+
+
+
+
+
+
+
+
+    if(
+
+        input.toLowerCase()
+        .includes("suche")
+
+    ){
+
+
+        return HalDoSearch.find(
+
+            input.replace(
+                "suche",
+                ""
+            )
+
+        );
+
+
+    }
+
+
+
+
+
+
+
+
+
+    return HalDoResponse(input);
+
+
+}
