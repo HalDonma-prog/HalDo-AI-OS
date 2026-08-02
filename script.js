@@ -1379,3 +1379,331 @@ document.addEventListener(
 
 
 });
+/* =====================================
+   HALDO AI OS v10.3 CLEAN FINAL
+   PART 4/4 FINAL
+
+   Settings
+   Voice
+   AI Connection
+   System Finish
+===================================== */
+
+
+
+
+
+/* =====================================
+   SETTINGS SYSTEM
+===================================== */
+
+
+function initSettings(){
+
+
+    const nameInput =
+
+    document.getElementById(
+        "userName"
+    );
+
+
+
+    const emailInput =
+
+    document.getElementById(
+        "userEmail"
+    );
+
+
+
+
+
+    if(nameInput){
+
+
+        const savedName =
+
+        localStorage.getItem(
+            "haldoUserName"
+        );
+
+
+
+        if(savedName){
+
+
+            nameInput.value = savedName;
+
+
+        }
+
+
+
+        nameInput.addEventListener(
+            "change",
+            ()=>{
+
+
+                localStorage.setItem(
+
+                    "haldoUserName",
+
+                    nameInput.value
+
+                );
+
+
+            }
+        );
+
+
+    }
+
+
+
+
+
+
+
+
+
+    if(emailInput){
+
+
+        emailInput.addEventListener(
+            "change",
+            ()=>{
+
+
+                localStorage.setItem(
+
+                    "haldoEmail",
+
+                    emailInput.value
+
+                );
+
+
+            }
+        );
+
+
+    }
+
+
+}
+
+
+
+
+
+
+
+
+
+/* =====================================
+   VOICE PREPARATION
+===================================== */
+
+
+const HalDoVoice = {
+
+
+    enabled:false,
+
+
+
+    speak(text){
+
+
+        if(!this.enabled)
+
+        return;
+
+
+
+        if(
+            window.speechSynthesis
+        ){
+
+
+            const speech =
+
+            new SpeechSynthesisUtterance(
+                text
+            );
+
+
+
+            speech.lang =
+            "de-DE";
+
+
+
+            window.speechSynthesis.speak(
+                speech
+            );
+
+
+        }
+
+
+    }
+
+
+};
+
+
+
+
+
+
+
+
+
+function initVoice(){
+
+
+    const saved =
+
+    localStorage.getItem(
+        "haldoVoice"
+    );
+
+
+
+    if(saved==="true"){
+
+
+        HalDoVoice.enabled=true;
+
+
+    }
+
+
+}
+
+
+
+
+
+
+
+
+
+/* =====================================
+   AI CORE CONNECTION
+===================================== */
+
+
+const HalDoCore = {
+
+
+    status(){
+
+
+        return {
+
+            system:"HalDo AI OS",
+
+            version:"10.3",
+
+            status:"Online"
+
+        };
+
+
+    },
+
+
+
+    message(){
+
+        return (
+
+            "🤖 HalDo AI OS v10.3 läuft."
+
+        );
+
+
+    }
+
+
+};
+
+
+
+
+
+
+
+
+
+/* =====================================
+   SYSTEM START FINAL
+===================================== */
+
+
+document.addEventListener(
+"DOMContentLoaded",
+()=>{
+
+
+    initSettings();
+
+
+    initVoice();
+
+
+
+    console.log(
+
+        "================================"
+
+    );
+
+
+    console.log(
+
+        "🤖 HalDo AI OS v10.3 CLEAN FINAL"
+
+    );
+
+
+    console.log(
+
+        "✅ Navigation Online"
+
+    );
+
+
+    console.log(
+
+        "✅ Chat Online"
+
+    );
+
+
+    console.log(
+
+        "✅ Module Online"
+
+    );
+
+
+    console.log(
+
+        "🚀 System bereit"
+
+    );
+
+
+    console.log(
+
+        "================================"
+
+    );
+
+
+});
