@@ -1290,3 +1290,203 @@ document.addEventListener(
 
 
 });
+/* =====================================
+   HALDO AI CHAT v10.3
+   INTELLIGENCE CORE
+   PART 1/4
+===================================== */
+
+
+const HalDoIntelligence = {
+
+
+    detectIntent(input){
+
+
+        const text =
+        input.toLowerCase();
+
+
+
+        if(
+            text.includes("wie geht es dir") ||
+            text.includes("wie gehts dir")
+        ){
+
+            return "mood";
+
+        }
+
+
+
+        if(
+            text.includes("was machst du") ||
+            text.includes("was kannst du")
+        ){
+
+            return "capabilities";
+
+        }
+
+
+
+        if(
+            text.includes("projekt") ||
+            text.includes("haldo")
+        ){
+
+            return "project";
+
+        }
+
+
+
+        if(
+            text.includes("danke") ||
+            text.includes("super") ||
+            text.includes("gut")
+        ){
+
+            return "positive";
+
+        }
+
+
+
+        if(
+            text.endsWith("?")
+        ){
+
+            return "question";
+
+        }
+
+
+
+        return "conversation";
+
+
+    }
+
+};
+
+
+
+
+
+
+
+
+
+/* =====================================
+   HALDO NATURAL ANSWERS
+===================================== */
+
+
+function HalDoNaturalAnswer(input){
+
+
+    const intent =
+
+    HalDoIntelligence.detectIntent(
+        input
+    );
+
+
+
+    switch(intent){
+
+
+        case "mood":
+
+
+            return (
+
+            "Mir geht es gut. 😊 " +
+
+            "Ich bin bereit, dir bei deinem HalDo AI OS Projekt zu helfen."
+
+            );
+
+
+
+
+
+        case "capabilities":
+
+
+            return (
+
+            "Ich kann dir helfen mit Chat, " +
+
+            "Organisation, Dateien, Schreiben " +
+
+            "und der Weiterentwicklung von HalDo AI OS."
+
+            );
+
+
+
+
+
+        case "project":
+
+
+            return (
+
+            "Unser Projekt ist HalDo AI OS. 🚀 " +
+
+            "Ein persönliches AI Betriebssystem mit Chat, Apps und Erweiterungen."
+
+            );
+
+
+
+
+
+        case "positive":
+
+
+            return (
+
+            "Das freut mich zu hören. 😊 " +
+
+            "Lass uns weiter an HalDo arbeiten."
+
+            );
+
+
+
+
+
+        case "question":
+
+
+            return (
+
+            "Gute Frage. 🤖 " +
+
+            "Ich denke darüber nach und helfe dir dabei."
+
+            );
+
+
+
+
+
+        default:
+
+
+            return (
+
+            "Ich verstehe. Erzähle mir mehr darüber. " +
+
+            "Ich höre zu. 💙"
+
+            );
+
+
+    }
+
+
+}
