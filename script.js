@@ -1630,3 +1630,554 @@ document.addEventListener(
 
 
 });
+/* =====================================
+   HALDO AI OS FOUNDATION v1.0.1
+   CLEAN FIX
+   CHAT + LANGUAGE CORE
+   PART 2/3
+===================================== */
+
+
+/* =====================================
+   LANGUAGE SYSTEM
+===================================== */
+
+
+const HalDoLanguage = {
+
+
+    current:"de-DE",
+
+
+
+    texts:{
+
+
+        "de-DE":{
+
+            hello:
+            "Hallo! Schön, dass du wieder da bist. Ich bin HalDo AI OS. 💙",
+
+            ready:
+            "HalDo ist bereit. 🚀",
+
+            help:
+            "Ich helfe dir bei Chat, Dateien, Organisation und deinem AI OS Projekt."
+
+        },
+
+
+
+        "en-US":{
+
+            hello:
+            "Hello! Nice to see you again. I am HalDo AI OS. 💙",
+
+            ready:
+            "HalDo is ready. 🚀",
+
+            help:
+            "I can help you with chat, files, organization and your AI OS project."
+
+        },
+
+
+
+        "fr-FR":{
+
+            hello:
+            "Bonjour! Je suis HalDo AI OS. 💙",
+
+            ready:
+            "HalDo est prêt. 🚀",
+
+            help:
+            "Je peux vous aider avec le chat, les fichiers et votre projet AI OS."
+
+        },
+
+
+        "es-ES":{
+
+            hello:
+            "Hola! Soy HalDo AI OS. 💙",
+
+            ready:
+            "HalDo está listo. 🚀",
+
+            help:
+            "Puedo ayudarte con chat, archivos y tu proyecto AI OS."
+
+        }
+
+
+    },
+
+
+
+    set(language){
+
+
+        if(this.texts[language]){
+
+
+            this.current=language;
+
+
+            localStorage.setItem(
+
+                "haldoLanguage",
+
+                language
+
+            );
+
+
+        }
+
+
+    },
+
+
+
+    get(key){
+
+
+        return this.texts[this.current][key];
+
+
+    }
+
+
+};
+
+
+
+
+
+
+
+
+
+/* =====================================
+   CHAT ENGINE FIX
+===================================== */
+
+
+function HalDoAnswer(input){
+
+
+    const text =
+
+    input.toLowerCase();
+
+
+
+
+
+    if(
+
+        text.includes("hallo") ||
+
+        text.includes("hello") ||
+
+        text.includes("hi")
+
+    ){
+
+
+        return HalDoLanguage.get(
+            "hello"
+        );
+
+
+    }
+
+
+
+
+
+
+
+
+
+    if(
+
+        text.includes("hilfe") ||
+
+        text.includes("help")
+
+    ){
+
+
+        return HalDoLanguage.get(
+            "help"
+        );
+
+
+    }
+
+
+
+
+
+
+
+
+
+    if(
+
+        text.includes("wer bist du")
+
+        ||
+
+        text.includes("who are you")
+
+    ){
+
+
+        return (
+
+            "Ich bin HalDo AI OS. 🤖\n\n" +
+
+            "Dein persönlicher digitaler Assistent."
+
+        );
+
+
+    }
+
+
+
+
+
+
+
+
+
+    if(
+
+        text.includes("witz")
+
+        ||
+
+        text.includes("joke")
+
+    ){
+
+
+        return (
+
+            "Warum war der Computer müde? " +
+
+            "Weil er zu viele Tabs offen hatte. 😄"
+
+        );
+
+
+    }
+
+
+
+
+
+
+
+
+
+    return (
+
+        HalDoLanguage.get(
+            "ready"
+        )
+
+        +
+
+        "\n\n"
+
+        +
+
+        "Du hast gesagt: "
+
+        +
+
+        input
+
+    );
+
+
+}
+
+
+
+
+
+
+
+
+
+/* =====================================
+   CHAT BUTTON CONNECTION FIX
+===================================== */
+
+
+function FixHalDoChat(){
+
+
+    const button =
+
+    document.getElementById(
+
+        "sendMessage"
+
+    );
+
+
+
+    const input =
+
+    document.getElementById(
+
+        "chatInput"
+
+    );
+
+
+
+    const box =
+
+    document.querySelector(
+
+        ".chat-container"
+
+    );
+
+
+
+
+
+    if(
+
+        !button ||
+
+        !input ||
+
+        !box
+
+    ){
+
+
+        console.log(
+            "Chat wartet auf Elemente"
+        );
+
+
+        return;
+
+
+    }
+
+
+
+
+
+
+
+
+
+    button.addEventListener(
+
+        "click",
+
+        ()=>{
+
+
+            const message =
+
+            input.value.trim();
+
+
+
+            if(!message)
+
+            return;
+
+
+
+
+
+            const user =
+
+            document.createElement(
+                "div"
+            );
+
+
+            user.className=
+
+            "user-message";
+
+
+            user.innerText=
+
+            message;
+
+
+
+            box.appendChild(
+                user
+            );
+
+
+
+
+
+            if(
+                typeof HalDoMemory !== "undefined"
+            ){
+
+                HalDoMemory.save(
+                    message
+                );
+
+            }
+
+
+
+
+
+
+
+
+
+            const answer =
+
+            HalDoAnswer(
+                message
+            );
+
+
+
+
+
+
+
+
+
+            setTimeout(()=>{
+
+
+                const ai =
+
+                document.createElement(
+                    "div"
+                );
+
+
+
+                ai.className=
+
+                "ai-message";
+
+
+
+                ai.innerText=
+
+                answer;
+
+
+
+                box.appendChild(
+                    ai
+                );
+
+
+
+                if(
+                    typeof HalDoVoice !== "undefined"
+                ){
+
+                    HalDoVoice.speak(
+                        answer
+                    );
+
+                }
+
+
+
+            },500);
+
+
+
+            input.value="";
+
+
+
+        }
+
+    );
+
+
+}
+
+
+
+
+
+
+
+
+
+/* =====================================
+   LANGUAGE LOAD
+===================================== */
+
+
+function LoadHalDoLanguage(){
+
+
+    const saved =
+
+    localStorage.getItem(
+
+        "haldoLanguage"
+
+    );
+
+
+
+    if(saved){
+
+
+        HalDoLanguage.set(
+            saved
+        );
+
+
+    }
+
+
+}
+
+
+
+
+
+
+
+
+
+document.addEventListener(
+
+"DOMContentLoaded",
+
+()=>{
+
+
+    LoadHalDoLanguage();
+
+
+    FixHalDoChat();
+
+
+});
