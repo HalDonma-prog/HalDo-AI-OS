@@ -2112,3 +2112,424 @@ const HalDoModules = {
 
 
 };
+/* =====================================
+   HALDO AI CHAT v10.3
+   FINAL AI CONNECTION
+   PART 4/4
+===================================== */
+
+
+
+/* =====================================
+   COMPLETE RESPONSE ENGINE
+===================================== */
+
+
+function HalDoCompleteAnswer(input){
+
+
+    const command =
+
+    HalDoOSCommand(input);
+
+
+
+    if(command){
+
+
+        return command;
+
+
+    }
+
+
+
+
+
+
+
+
+
+    const context =
+
+    HalDoContext(input);
+
+
+
+    if(context){
+
+
+        return context;
+
+
+    }
+
+
+
+
+
+
+
+
+
+    const natural =
+
+    HalDoNaturalAnswer(input);
+
+
+
+    HalDoMemory.remember(
+
+        "user",
+
+        input
+
+    );
+
+
+
+    HalDoMemory.remember(
+
+        "ai",
+
+        natural
+
+    );
+
+
+
+    return natural;
+
+
+}
+
+
+
+
+
+
+
+
+
+/* =====================================
+   VOICE CONNECTION
+===================================== */
+
+
+const HalDoSpeech = {
+
+
+    enabled:false,
+
+
+
+    speak(text){
+
+
+        if(
+
+            !this.enabled
+
+        )
+
+        return;
+
+
+
+        if(
+
+            window.speechSynthesis
+
+        ){
+
+
+            const speech =
+
+            new SpeechSynthesisUtterance(
+
+                text
+
+            );
+
+
+
+            speech.lang="de-DE";
+
+
+
+            speech.rate=1;
+
+
+
+            window.speechSynthesis.speak(
+
+                speech
+
+            );
+
+
+        }
+
+
+    }
+
+};
+
+
+
+
+
+
+
+
+
+function toggleSpeech(){
+
+
+    HalDoSpeech.enabled =
+
+    !HalDoSpeech.enabled;
+
+
+
+    localStorage.setItem(
+
+        "haldoSpeech",
+
+        HalDoSpeech.enabled
+
+    );
+
+
+
+    return HalDoSpeech.enabled;
+
+
+}
+
+
+
+
+
+
+
+
+
+/* =====================================
+   FINAL CHAT OVERRIDE
+===================================== */
+
+
+function connectFinalHalDoChat(){
+
+
+    const button =
+
+    document.getElementById(
+        "sendMessage"
+    );
+
+
+
+    const input =
+
+    document.getElementById(
+        "chatInput"
+    );
+
+
+
+    const box =
+
+    document.querySelector(
+        ".chat-container"
+    );
+
+
+
+    if(
+
+        !button ||
+
+        !input ||
+
+        !box
+
+    )
+
+    return;
+
+
+
+
+
+
+
+
+
+    button.onclick = ()=>{
+
+
+        const message =
+
+        input.value.trim();
+
+
+
+        if(!message)
+
+        return;
+
+
+
+        const user =
+
+        document.createElement(
+            "div"
+        );
+
+
+
+        user.className=
+
+        "user-message";
+
+
+
+        user.innerText=
+
+        message;
+
+
+
+        box.appendChild(
+            user
+        );
+
+
+
+
+
+
+
+
+
+        const answer =
+
+        HalDoCompleteAnswer(
+
+            message
+
+        );
+
+
+
+
+
+
+
+
+
+        setTimeout(()=>{
+
+
+            const ai =
+
+            document.createElement(
+                "div"
+            );
+
+
+
+            ai.className=
+
+            "ai-message";
+
+
+
+            ai.innerText=
+
+            answer;
+
+
+
+            box.appendChild(
+                ai
+            );
+
+
+
+            HalDoSpeech.speak(
+                answer
+            );
+
+
+
+            box.scrollTop=
+
+            box.scrollHeight;
+
+
+
+        },500);
+
+
+
+        input.value="";
+
+
+    };
+
+
+}
+
+
+
+
+
+
+
+
+
+/* =====================================
+   HALDO AI START
+===================================== */
+
+
+document.addEventListener(
+
+"DOMContentLoaded",
+
+()=>{
+
+
+    const voice =
+
+    localStorage.getItem(
+        "haldoSpeech"
+    );
+
+
+
+    if(voice==="true"){
+
+
+        HalDoSpeech.enabled=true;
+
+
+    }
+
+
+
+    connectFinalHalDoChat();
+
+
+
+    console.log(
+
+        "🤖 HalDo AI Chat v10.3 ONLINE"
+
+    );
+
+
+});
