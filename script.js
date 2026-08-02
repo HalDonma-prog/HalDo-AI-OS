@@ -464,3 +464,46 @@ function saveLanguage(){
     }
 
 }
+// ===============================
+// HALDO AI OS v7.0
+// SPLASH SCREEN START
+// ===============================
+
+
+window.addEventListener(
+    "load",
+    function(){
+
+        const splash =
+        document.getElementById(
+            "splashScreen"
+        );
+
+
+        if(splash){
+
+            setTimeout(
+                function(){
+
+                    splash.style.opacity = "0";
+
+
+                    setTimeout(
+                        function(){
+
+                            splash.style.display =
+                            "none";
+
+                        },
+                        800
+                    );
+
+
+                },
+                2500
+            );
+
+        }
+
+    }
+);
