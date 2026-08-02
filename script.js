@@ -412,6 +412,452 @@ window.addEventListener(
 
 );
 /* =====================================
+   HALDO AI OS v9.1
+   CHAT + VOICE ENGINE
+   PART 2
+   ===================================== */
+
+
+
+
+
+// =====================================
+// CHAT OBERFLÄCHE
+// =====================================
+
+
+function addMessage(
+    sender,
+    message
+){
+
+
+    const chat =
+    document.getElementById(
+        "chat"
+    );
+
+
+    if(!chat)
+    return;
+
+
+
+    const box =
+    document.createElement(
+        "div"
+    );
+
+
+    box.className =
+    sender === "user"
+    ?
+    "user-message"
+    :
+    "ai-message";
+
+
+
+    box.innerHTML = `
+
+        <div class="chat-bubble">
+
+        <strong>
+        ${sender === "user" ? "Du" : "HalDo AI"}
+        </strong>
+
+        <br>
+
+        ${message}
+
+        </div>
+
+    `;
+
+
+
+    chat.appendChild(
+        box
+    );
+
+
+    chat.scrollTop =
+    chat.scrollHeight;
+
+
+}
+
+
+
+
+
+
+
+
+
+// =====================================
+// NACHRICHTEN SENDEN
+// =====================================
+
+
+function sendMessage(){
+
+
+    const input =
+    document.getElementById(
+        "userInput"
+    );
+
+
+    if(!input)
+    return;
+
+
+
+    let message =
+    input.value.trim();
+
+
+
+    if(message === "")
+    return;
+
+
+
+    addMessage(
+        "user",
+        message
+    );
+
+
+
+    saveMemory(
+        message
+    );
+
+
+
+    setTimeout(
+        ()=>{
+
+
+            let answer =
+            createAIAnswer(
+                message
+            );
+
+
+
+            addMessage(
+                "ai",
+                answer
+            );
+
+
+            speak(
+                answer
+            );
+
+
+        },
+
+        500
+
+    );
+
+
+
+    input.value = "";
+
+}
+
+
+
+
+
+
+
+
+
+// =====================================
+// VERBESSERTE AI ANTWORTEN
+// =====================================
+
+
+function createAIAnswer(
+    message
+){
+
+
+    let text =
+    message.toLowerCase();
+
+
+
+
+    if(
+        text.includes(
+            "hallo"
+        )
+        ||
+        text.includes(
+            "hi"
+        )
+    ){
+
+        return "Hallo! Schön dich wieder zu sehen. Ich bin HalDo AI.";
+
+    }
+
+
+
+
+    if(
+        text.includes(
+            "hilfe"
+        )
+    ){
+
+        return "Ich kann dich bei Dateien, Einstellungen, Schreiben, Planung und weiteren Funktionen unterstützen.";
+
+    }
+
+
+
+
+    if(
+        text.includes(
+            "datei"
+        )
+    ){
+
+        return "Das Datei-System wird vorbereitet. Ich helfe dir später beim Verwalten deiner Dateien.";
+
+    }
+
+
+
+
+    if(
+        text.includes(
+            "einstellung"
+        )
+    ){
+
+        return "Die Einstellungen von HalDo AI OS können angepasst werden.";
+
+    }
+
+
+
+
+    if(
+        text.includes(
+            "danke"
+        )
+    ){
+
+        return "Gerne! Ich bin für dich da.";
+
+    }
+
+
+
+
+    return (
+        "Ich habe deine Nachricht gespeichert. "
+        +
+        "Meine AI-Funktionen werden weiter erweitert."
+    );
+
+
+}
+
+
+
+
+
+
+
+
+
+// =====================================
+// TEXT TO SPEECH ENGINE
+// =====================================
+
+
+function speak(
+    text
+){
+
+
+    if(
+        localStorage.getItem(
+            "haldoVoice"
+        )
+        ===
+        "off"
+    ){
+
+        return;
+
+    }
+
+
+
+    if(
+        "speechSynthesis"
+        in
+        window
+    ){
+
+
+        let speech =
+        new SpeechSynthesisUtterance(
+            text
+        );
+
+
+        speech.lang =
+        getLanguage();
+
+
+
+        speech.rate =
+        Number(
+            localStorage.getItem(
+                "haldoSpeed"
+            )
+        )
+        ||
+        1;
+
+
+
+        window.speechSynthesis.cancel();
+
+
+        window.speechSynthesis.speak(
+            speech
+        );
+
+
+    }
+
+
+}
+
+
+
+
+
+
+
+
+
+// =====================================
+// SPRACHE EINSTELLUNG
+// =====================================
+
+
+function getLanguage(){
+
+
+    return (
+
+        localStorage.getItem(
+            "haldoLanguage"
+        )
+
+        ||
+
+        "de-DE"
+
+    );
+
+
+}
+
+
+
+
+
+
+
+
+
+// =====================================
+// SPRACHEINGABE VORBEREITUNG
+// =====================================
+
+
+function startVoiceInput(){
+
+
+    const SpeechRecognition =
+    window.SpeechRecognition
+    ||
+    window.webkitSpeechRecognition;
+
+
+
+    if(!SpeechRecognition){
+
+        alert(
+            "Spracherkennung wird nicht unterstützt."
+        );
+
+        return;
+
+    }
+
+
+
+    const recognition =
+    new SpeechRecognition();
+
+
+
+    recognition.lang =
+    getLanguage();
+
+
+
+    recognition.onresult =
+    function(event){
+
+
+        let text =
+        event.results[0][0].transcript;
+
+
+
+        const input =
+        document.getElementById(
+            "userInput"
+        );
+
+
+
+        if(input){
+
+            input.value =
+            text;
+
+        }
+
+
+    };
+
+
+
+    recognition.start();
+
+
+}
+
+Halil Donma 
+/* =====================================
    HALDO AI OS v9.0
    MAIN SYSTEM ENGINE
    PART 1/8
