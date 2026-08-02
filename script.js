@@ -526,7 +526,7 @@ window.addEventListener(
                         function(){
 
                             splash.style.display = "none";
-
+document.body.style.overflow = "auto";
 
 const mainOS =
 document.getElementById("mainOS");
