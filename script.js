@@ -2549,3 +2549,358 @@ showNotification(
 
 
 });
+/* =====================================
+   AI MEMORY + FUTURE MODULES
+   PART 7/8
+   ===================================== */
+
+
+
+
+
+
+// =====================================
+// AI MEMORY SYSTEM
+// =====================================
+
+
+let aiMemory = [];
+
+
+
+
+
+
+function saveAIMemory(data){
+
+
+
+aiMemory.push(
+data
+);
+
+
+
+localStorage.setItem(
+
+"haldoAIMemory",
+
+JSON.stringify(
+aiMemory
+)
+
+);
+
+
+
+}
+
+
+
+
+
+
+
+function loadAIMemory(){
+
+
+
+let saved =
+localStorage.getItem(
+"haldoAIMemory"
+);
+
+
+
+if(saved){
+
+
+
+aiMemory =
+JSON.parse(
+saved
+);
+
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+function clearAIMemory(){
+
+
+
+aiMemory=[];
+
+
+
+localStorage.removeItem(
+"haldoAIMemory"
+);
+
+
+
+showNotification(
+"🧠 AI Speicher gelöscht"
+);
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// =====================================
+// LANGUAGE SYSTEM
+// =====================================
+
+
+const languages = {
+
+
+
+de:{
+
+welcome:
+"Willkommen",
+
+start:
+"HalDo starten"
+
+},
+
+
+
+en:{
+
+welcome:
+"Welcome",
+
+start:
+"Start HalDo"
+
+},
+
+
+
+tr:{
+
+welcome:
+"Hoş geldiniz",
+
+start:
+"HalDo başlat"
+
+},
+
+
+
+ar:{
+
+welcome:
+"مرحبا",
+
+start:
+"ابدأ HalDo"
+
+}
+
+
+
+};
+
+
+
+
+
+
+
+
+function translate(key){
+
+
+
+let current =
+localStorage.getItem(
+"haldoLanguage"
+)
+
+|| "de";
+
+
+
+if(
+languages[current]
+&&
+languages[current][key]
+){
+
+
+return languages[current][key];
+
+
+}
+
+
+
+return key;
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// =====================================
+// SECURITY PREPARATION
+// =====================================
+
+
+function securityCheck(){
+
+
+
+console.log(
+"🔐 Security check running"
+);
+
+
+
+return true;
+
+
+
+}
+
+
+
+
+
+
+
+
+function lockSystem(){
+
+
+
+document.body.style.filter =
+"blur(5px)";
+
+
+
+showNotification(
+"🔒 System gesperrt"
+);
+
+
+
+}
+
+
+
+
+
+
+
+
+function unlockSystem(){
+
+
+
+document.body.style.filter =
+"none";
+
+
+
+showNotification(
+"🔓 System entsperrt"
+);
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// =====================================
+// FUTURE MODULE LOADER
+// =====================================
+
+
+const futureModules = {
+
+
+
+camera:false,
+
+
+
+cloud:false,
+
+
+
+store:false,
+
+
+
+advancedAI:false,
+
+
+
+robot:false
+
+
+
+};
+
+
+
+
+
+
+
+function enableModule(name){
+
+
+
+futureModules[name]=true;
+
+
+
+console.log(
+
+"🚀 Modul aktiviert:",
+name
+
+);
+
+
+
+}
