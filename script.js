@@ -2214,3 +2214,338 @@ openApp(
 
 
 });
+/* =====================================
+   DESKTOP + WINDOW CONTROL
+   PART 6/8
+   ===================================== */
+
+
+
+
+
+
+// =====================================
+// CLOSE ALL WINDOWS
+// =====================================
+
+
+function closeAllApps(){
+
+
+
+let windows =
+document.querySelectorAll(
+".window"
+);
+
+
+
+windows.forEach(
+item=>{
+
+
+item.classList.remove(
+"active"
+);
+
+
+});
+
+
+}
+
+
+
+
+
+
+
+
+
+// =====================================
+// IMPROVED APP OPEN
+// =====================================
+
+
+function switchApp(appName){
+
+
+
+closeAllApps();
+
+
+
+let app =
+document.getElementById(
+appName
+);
+
+
+
+if(app){
+
+
+app.classList.add(
+"active"
+);
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// =====================================
+// GO HOME
+// =====================================
+
+
+function goHome(){
+
+
+
+switchApp(
+"dashboard"
+);
+
+
+
+showNotification(
+"🏠 Startseite"
+);
+
+
+
+}
+
+
+
+
+
+
+
+
+// =====================================
+// DOCK ACTIONS
+// =====================================
+
+
+function dockOpen(app){
+
+
+
+switchApp(
+app
+);
+
+
+
+showNotification(
+"🚀 App geöffnet"
+);
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// =====================================
+// WINDOW MEMORY
+// =====================================
+
+
+let lastOpenedApp =
+"dashboard";
+
+
+
+
+function rememberApp(app){
+
+
+
+lastOpenedApp =
+app;
+
+
+
+localStorage.setItem(
+
+"lastApp",
+
+app
+
+);
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// =====================================
+// RESTORE LAST APP
+// =====================================
+
+
+function restoreLastApp(){
+
+
+
+let app =
+localStorage.getItem(
+"lastApp"
+);
+
+
+
+if(app){
+
+
+
+switchApp(
+app
+);
+
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// =====================================
+// DOUBLE CLICK DESKTOP
+// =====================================
+
+
+document.addEventListener(
+"dblclick",
+function(event){
+
+
+
+let target =
+event.target.closest(
+".desktop-icon"
+);
+
+
+
+if(target){
+
+
+
+target.style.transform =
+"scale(1.15)";
+
+
+
+setTimeout(()=>{
+
+
+target.style.transform =
+"";
+
+
+},200);
+
+
+
+}
+
+
+
+});
+
+
+
+
+
+
+
+
+// =====================================
+// TOUCH SUPPORT MOBILE
+// =====================================
+
+
+let touchStart = 0;
+
+
+
+document.addEventListener(
+"touchstart",
+function(event){
+
+
+
+touchStart =
+event.changedTouches[0].screenX;
+
+
+
+});
+
+
+
+
+
+document.addEventListener(
+"touchend",
+function(event){
+
+
+
+let touchEnd =
+event.changedTouches[0].screenX;
+
+
+
+if(
+touchEnd - touchStart > 120
+){
+
+
+showNotification(
+"⬅️ Zurück Geste erkannt"
+);
+
+
+
+}
+
+
+
+});
