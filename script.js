@@ -2181,3 +2181,351 @@ document.addEventListener(
 
 
 });
+/* =====================================
+   HALDO AI OS FOUNDATION v1.0.1
+   CLEAN FIX
+   FINAL SYSTEM CONNECTION
+   PART 3/3 FINAL
+===================================== */
+
+
+/* =====================================
+   DARK MODE FIX
+===================================== */
+
+
+function FixDarkMode(){
+
+
+    const button =
+
+    document.getElementById(
+        "darkModeButton"
+    );
+
+
+
+    if(!button)
+
+    return;
+
+
+
+    const saved =
+
+    localStorage.getItem(
+        "haldoDarkMode"
+    );
+
+
+
+    if(saved==="true"){
+
+        document.body.classList.add(
+            "dark-mode"
+        );
+
+    }
+
+
+
+
+
+    button.onclick=()=>{
+
+
+        document.body.classList.toggle(
+            "dark-mode"
+        );
+
+
+
+        const active =
+
+        document.body.classList.contains(
+            "dark-mode"
+        );
+
+
+
+        localStorage.setItem(
+
+            "haldoDarkMode",
+
+            active
+
+        );
+
+
+    };
+
+
+}
+
+
+
+
+
+
+
+
+
+/* =====================================
+   LANGUAGE SELECT CONNECTION
+===================================== */
+
+
+function ConnectLanguageSelect(){
+
+
+    const select =
+
+    document.getElementById(
+        "languageSelect"
+    );
+
+
+
+    if(!select)
+
+    return;
+
+
+
+    const saved =
+
+    localStorage.getItem(
+        "haldoLanguage"
+    );
+
+
+
+    if(saved){
+
+        select.value=saved;
+
+    }
+
+
+
+
+
+    select.onchange=()=>{
+
+
+        HalDoLanguage.set(
+
+            select.value
+
+        );
+
+
+        HalDoNotification(
+
+            "Sprache geändert: " +
+
+            select.value
+
+        );
+
+
+    };
+
+
+}
+
+
+
+
+
+
+
+
+
+/* =====================================
+   VOICE SYSTEM
+===================================== */
+
+
+function FixVoiceSystem(){
+
+
+    const saved =
+
+    localStorage.getItem(
+        "haldoVoice"
+    );
+
+
+
+    if(saved==="true"){
+
+
+        HalDoVoice.enabled=true;
+
+
+    }
+
+
+
+}
+
+
+
+
+
+
+
+
+
+function HalDoSpeak(text){
+
+
+    if(
+
+        !HalDoVoice ||
+
+        !HalDoVoice.enabled
+
+    )
+
+    return;
+
+
+
+    if(
+        "speechSynthesis"
+        in window
+    ){
+
+
+        const speech =
+
+        new SpeechSynthesisUtterance(
+            text
+        );
+
+
+
+        speech.lang =
+
+        HalDoLanguage.current;
+
+
+
+        speech.rate=1;
+
+
+
+        window.speechSynthesis.speak(
+            speech
+        );
+
+
+    }
+
+
+}
+
+
+
+
+
+
+
+
+
+/* =====================================
+   FINAL SYSTEM CHECK
+===================================== */
+
+
+function HalDoFinalCheck(){
+
+
+    console.log(
+
+        "===================="
+
+    );
+
+
+    console.log(
+
+        "🤖 HalDo AI OS Foundation v1.0.1"
+
+    );
+
+
+    console.log(
+
+        "✅ Chat aktiv"
+
+    );
+
+
+    console.log(
+
+        "✅ Sprache aktiv"
+
+    );
+
+
+    console.log(
+
+        "✅ Module verbunden"
+
+    );
+
+
+    console.log(
+
+        "===================="
+
+    );
+
+
+
+}
+
+
+
+
+
+
+
+
+
+/* =====================================
+   FINAL START CONNECTION
+===================================== */
+
+
+document.addEventListener(
+
+"DOMContentLoaded",
+
+()=>{
+
+
+    FixDarkMode();
+
+
+    ConnectLanguageSelect();
+
+
+    FixVoiceSystem();
+
+
+    HalDoFinalCheck();
+
+
+
+    HalDoNotification(
+
+        "HalDo AI OS v1.0.1 CLEAN FIX bereit 🚀"
+
+    );
+
+
+});
