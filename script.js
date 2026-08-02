@@ -1700,3 +1700,526 @@ document.addEventListener(
 
 
 });
+/* =====================================
+   HALDO AI OS 10.0
+   SYSTEM CONTROL + SEARCH
+   PART 5/8
+===================================== */
+
+
+/* =====================================
+   NOTIFICATION CENTER
+===================================== */
+
+
+const HalDoNotification = {
+
+
+    list:[],
+
+
+    add(message){
+
+
+        this.list.push({
+
+            text:message,
+
+            time:
+            new Date()
+            .toLocaleTimeString()
+
+        });
+
+
+        this.render();
+
+
+    },
+
+
+
+
+
+
+
+
+
+    render(){
+
+
+        const box =
+        document.querySelector(
+            "#notificationList"
+        );
+
+
+
+        if(!box)return;
+
+
+
+        box.innerHTML="";
+
+
+
+        this.list
+        .slice()
+        .reverse()
+        .forEach(
+        note=>{
+
+
+            box.innerHTML += `
+
+            <div class="notification-item">
+
+            🔔 ${note.text}
+
+            <small>
+            ${note.time}
+            </small>
+
+            </div>
+
+            `;
+
+
+        });
+
+
+    },
+
+
+
+
+
+
+
+
+
+    clear(){
+
+
+        this.list=[];
+
+
+        this.render();
+
+
+    }
+
+
+};
+
+
+
+
+
+
+
+
+
+/* =====================================
+   GLOBAL NOTIFICATION
+===================================== */
+
+
+function showNotification(text){
+
+
+    HalDoNotification.add(
+        text
+    );
+
+
+}
+
+
+
+
+
+
+
+
+
+/* =====================================
+   WINDOW MANAGER
+===================================== */
+
+
+const HalDoWindow = {
+
+
+    current:null,
+
+
+
+    open(id){
+
+
+        const windows =
+        document.querySelectorAll(
+            ".app-window"
+        );
+
+
+
+        windows.forEach(
+        win=>{
+
+            win.classList.remove(
+                "active"
+            );
+
+        });
+
+
+
+        const target =
+        document.getElementById(
+            id
+        );
+
+
+
+        if(target){
+
+
+            target.classList.add(
+                "active"
+            );
+
+
+            this.current =
+            id;
+
+
+        }
+
+
+    },
+
+
+
+
+
+
+
+
+
+    close(){
+
+
+        document
+        .querySelectorAll(
+            ".app-window"
+        )
+        .forEach(
+        win=>{
+
+            win.classList.remove(
+                "active"
+            );
+
+        });
+
+
+
+        this.current=null;
+
+
+    }
+
+
+};
+
+
+
+
+
+
+
+
+
+/* =====================================
+   DESKTOP SYSTEM
+===================================== */
+
+
+const HalDoDesktop = {
+
+
+    init(){
+
+
+        const icons =
+        document.querySelectorAll(
+            ".desktop-icon"
+        );
+
+
+
+        icons.forEach(
+        icon=>{
+
+
+            icon.addEventListener(
+            "dblclick",
+            ()=>{
+
+
+                const app =
+                icon.dataset.window;
+
+
+
+                if(app){
+
+                    HalDoWindow.open(
+                        app
+                    );
+
+                }
+
+
+            });
+
+
+        });
+
+
+    }
+
+
+};
+
+
+
+
+
+
+
+
+
+/* =====================================
+   MOBILE SYSTEM
+===================================== */
+
+
+const HalDoMobile = {
+
+
+    check(){
+
+
+        return window.innerWidth <= 768;
+
+
+    },
+
+
+
+
+
+
+
+
+
+    init(){
+
+
+        if(
+            this.check()
+        ){
+
+
+            document.body
+            .classList
+            .add(
+                "mobile-mode"
+            );
+
+
+        }
+
+
+    }
+
+
+};
+
+
+
+
+
+
+
+
+
+window.addEventListener(
+"resize",
+()=>{
+
+
+    HalDoMobile.init();
+
+
+});
+
+
+
+
+
+
+
+
+
+/* =====================================
+   SEARCH SYSTEM
+===================================== */
+
+
+const HalDoSearch = {
+
+
+    apps:[
+
+        {
+            name:"Dateien",
+            id:"filesWindow"
+        },
+
+        {
+            name:"PDF Creator",
+            id:"pdfWindow"
+        },
+
+        {
+            name:"Schreiben",
+            id:"writingWindow"
+        },
+
+        {
+            name:"Notizen",
+            id:"notesWindow"
+        },
+
+        {
+            name:"Kalender",
+            id:"calendarWindow"
+        }
+
+    ],
+
+
+
+
+
+
+
+    search(text){
+
+
+        const result =
+        document.querySelector(
+            "#searchResults"
+        );
+
+
+
+        if(!result)return;
+
+
+
+        result.innerHTML="";
+
+
+
+        this.apps
+        .filter(
+        app=>
+
+        app.name
+        .toLowerCase()
+        .includes(
+            text.toLowerCase()
+        )
+
+        )
+        .forEach(
+        app=>{
+
+
+            result.innerHTML += `
+
+            <div class="search-result-item"
+            onclick="HalDoWindow.open('${app.id}')">
+
+            🔎 ${app.name}
+
+            </div>
+
+            `;
+
+
+        });
+
+
+    }
+
+
+};
+
+
+
+
+
+
+
+
+
+/* =====================================
+   SEARCH CONNECTION
+===================================== */
+
+
+document.addEventListener(
+"DOMContentLoaded",
+()=>{
+
+
+    HalDoDesktop.init();
+
+
+    HalDoMobile.init();
+
+
+
+    const input =
+    document.querySelector(
+        "#searchInput"
+    );
+
+
+
+    if(input){
+
+
+        input.addEventListener(
+        "input",
+        ()=>{
+
+
+            HalDoSearch.search(
+                input.value
+            );
+
+
+        });
+
+
+    }
+
+
+});
