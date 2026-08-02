@@ -1816,3 +1816,299 @@ document.addEventListener(
 
 
 });
+/* =====================================
+   HALDO AI CHAT v10.3
+   OS ASSISTANT ENGINE
+   PART 3/4
+===================================== */
+
+
+
+const HalDoOS = {
+
+
+    openModule(module){
+
+
+        const page =
+
+        document.getElementById(
+            module
+        );
+
+
+
+        if(page){
+
+
+            document
+            .querySelectorAll(".page")
+            .forEach(p=>{
+
+
+                p.classList.remove(
+                    "active"
+                );
+
+
+            });
+
+
+
+            page.classList.add(
+                "active"
+            );
+
+
+
+            return true;
+
+
+        }
+
+
+
+        return false;
+
+
+    }
+
+};
+
+
+
+
+
+
+
+
+
+/* =====================================
+   COMMAND CENTER
+===================================== */
+
+
+function HalDoOSCommand(input){
+
+
+    const text =
+
+    input.toLowerCase();
+
+
+
+
+
+    if(
+
+        text.includes("öffne chat")
+
+        ||
+
+        text.includes("zeige chat")
+
+    ){
+
+
+        HalDoOS.openModule(
+            "chat"
+        );
+
+
+
+        return (
+
+            "🤖 Chat geöffnet."
+
+        );
+
+
+    }
+
+
+
+
+
+
+
+
+
+    if(
+
+        text.includes("öffne dateien")
+
+        ||
+
+        text.includes("dateien öffnen")
+
+    ){
+
+
+        HalDoOS.openModule(
+            "files"
+        );
+
+
+
+        return (
+
+            "📁 Datei-System geöffnet."
+
+        );
+
+
+    }
+
+
+
+
+
+
+
+
+
+    if(
+
+        text.includes("öffne schreiben")
+
+    ){
+
+
+        HalDoOS.openModule(
+            "writing"
+        );
+
+
+
+        return (
+
+            "📝 Schreibbereich geöffnet."
+
+        );
+
+
+    }
+
+
+
+
+
+
+
+
+
+    if(
+
+        text.includes("öffne einstellungen")
+
+    ){
+
+
+        HalDoOS.openModule(
+            "settings"
+        );
+
+
+
+        return (
+
+            "⚙️ Einstellungen geöffnet."
+
+        );
+
+
+    }
+
+
+
+
+
+
+
+
+
+    if(
+
+        text.includes("system status")
+
+    ){
+
+
+        return (
+
+            "🚀 HalDo AI OS läuft. Alle Grundmodule sind aktiv."
+
+        );
+
+
+    }
+
+
+
+
+
+
+
+
+
+    return null;
+
+
+}
+
+
+
+
+
+
+
+
+
+/* =====================================
+   MODULE CONNECTION
+===================================== */
+
+
+const HalDoModules = {
+
+
+    modules:[
+
+        "chat",
+
+        "files",
+
+        "writing",
+
+        "settings",
+
+        "calendar",
+
+        "mail"
+
+    ],
+
+
+
+    status(){
+
+
+        return (
+
+            "🧩 Aktive Module: "
+
+            +
+
+            this.modules.length
+
+            +
+
+            " bereit."
+
+        );
+
+
+    }
+
+
+};
