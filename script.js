@@ -199,6 +199,14 @@ page.classList.add(
 
 
 function sendAI(){
+// ==================================
+// HALDO AI ENGINE v8.1
+// CHAT SYSTEM
+// ==================================
+
+
+
+function sendAI(){
 
 
 const input =
@@ -207,16 +215,9 @@ document.getElementById(
 );
 
 
-const history =
-document.getElementById(
-"chatHistory"
-);
-
-
 
 if(
 !input ||
-!history ||
 input.value.trim()===""
 ){
 
@@ -226,26 +227,45 @@ return;
 
 
 
-let userMessage =
+let text =
 input.value;
 
 
 
-addMessage(
-"👤 Du: " + userMessage
+addChatMessage(
+text,
+"user"
 );
 
+
+
+saveChat();
+
+
+
+setTimeout(
+function(){
 
 
 let answer =
 getHalDoAnswer(
-userMessage
+text
 );
 
 
 
-addMessage(
-"🤖 HalDo AI: " + answer
+addChatMessage(
+answer,
+"ai"
+);
+
+
+
+saveChat();
+
+
+},
+500
 );
 
 
@@ -258,7 +278,13 @@ input.value="";
 
 
 
-function addMessage(text){
+
+
+
+function addChatMessage(
+text,
+type
+){
 
 
 const history =
@@ -267,20 +293,48 @@ document.getElementById(
 );
 
 
-let message =
+
+let box =
 document.createElement(
-"p"
+"div"
 );
 
 
 
-message.innerHTML =
-text;
+box.className =
+"chat-message " +
+(type==="user"
+?
+"user-message"
+:
+"ai-message");
+
+
+
+let time =
+new Date()
+.toLocaleTimeString(
+"de-DE",
+{
+hour:"2-digit",
+minute:"2-digit"
+}
+);
+
+
+
+box.innerHTML =
+text +
+"<div class='ai-time'>"
++
+time
++
+"</div>";
 
 
 
 history.appendChild(
-message
+box
 );
 
 
@@ -296,7 +350,10 @@ history.scrollHeight;
 
 
 
-function getHalDoAnswer(message){
+
+function getHalDoAnswer(
+message
+){
 
 
 message =
@@ -306,48 +363,35 @@ message.toLowerCase();
 
 if(
 message.includes("hallo")
-||
-message.includes("hi")
 ){
 
-return "Hallo 👋 Ich bin HalDo AI und bereit zu helfen.";
+return "Hallo 👋 Schön dich zu sehen. Ich bin HalDo AI.";
 
 }
 
 
 
 if(
-message.includes("wer bist du")
+message.includes("name")
 ){
 
-return "Ich bin HalDo AI, dein digitaler Assistent.";
+return "Ich bin HalDo AI Engine v8.1.";
 
 }
 
 
 
 if(
-message.includes("zeit")
+message.includes("hilfe")
 ){
 
-return "Die Zeit kann ich später mit dem System verbinden.";
+return "Ich kann dir später mit Dateien, Schreiben, PDF und vielen Aufgaben helfen.";
 
 }
 
 
 
-if(
-message.includes("danke")
-){
-
-return "Sehr gerne 😊";
-
-}
-
-
-
-return "Ich habe deine Nachricht erhalten. Meine KI-Funktionen werden weiter ausgebaut.";
-
+return "Ich habe deine Nachricht verstanden und werde immer weiter verbessert.";
 
 }
 
@@ -357,48 +401,61 @@ return "Ich habe deine Nachricht erhalten. Meine KI-Funktionen werden weiter aus
 
 
 
-function speakAI(){
+
+function saveChat(){
 
 
-const history =
+let history =
 document.getElementById(
 "chatHistory"
 );
 
 
 
-if(!history){
+if(history){
 
-return;
+localStorage.setItem(
+"haldoChat",
+history.innerHTML
+);
+
+
+}
+
 
 }
 
 
 
-let text =
-history.innerText;
+
+
+
+
+
+function loadChat(){
+
+
+let history =
+document.getElementById(
+"chatHistory"
+);
+
+
+
+let saved =
+localStorage.getItem(
+"haldoChat"
+);
 
 
 
 if(
-"speechSynthesis" in window
+history &&
+saved
 ){
 
-
-let speech =
-new SpeechSynthesisUtterance(
-text
-);
-
-
-speech.lang =
-"de-DE";
-
-
-speechSynthesis.speak(
-speech
-);
-
+history.innerHTML =
+saved;
 
 }
 
@@ -410,6 +467,48 @@ speech
 
 
 
+
+
+function clearChat(){
+
+
+let history =
+document.getElementById(
+"chatHistory"
+);
+
+
+
+if(history){
+
+history.innerHTML="";
+
+
+}
+
+
+
+localStorage.removeItem(
+"haldoChat"
+);
+
+
+}
+
+
+
+
+
+
+
+
+window.addEventListener(
+"load",
+function(){
+
+loadChat();
+
+});
 
 function clearChat(){
 
