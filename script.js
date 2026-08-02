@@ -525,19 +525,15 @@ window.addEventListener(
                     setTimeout(
                         function(){
 
-                            splash.style.display =
-                            "none";
-
-                        },
-                        800
-                    );
+                            splash.style.display = "none";
 
 
-                },
-                2500
-            );
+const mainOS =
+document.getElementById("mainOS");
 
-        }
 
-    }
-);
+if(mainOS){
+
+    mainOS.classList.add("active");
+
+}
