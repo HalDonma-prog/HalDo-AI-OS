@@ -1,7 +1,7 @@
-/* ===============================
-   HALDO AI OS v7.0
-   BASIS DESIGN
-   =============================== */
+/* ==================================
+   HALDO AI OS v7.3
+   COMPLETE DESIGN
+   ================================== */
 
 
 * {
@@ -14,7 +14,7 @@
 
 body {
 
-    margin: 0;
+    margin:0;
 
     font-family:
     Arial,
@@ -22,94 +22,145 @@ body {
     sans-serif;
 
     background:
-    #f4f7fb;
+    #f3f6fb;
 
-    color:
-    #1b1b1b;
+    color:#1f2937;
 
 }
 
 
 
-/* ===============================
-   SPLASH SCREEN
-   =============================== */
+button {
+
+    border:none;
+
+    background:#0066ff;
+
+    color:white;
+
+    padding:14px 22px;
+
+    border-radius:14px;
+
+    font-size:16px;
+
+    cursor:pointer;
+
+}
+
+
+
+button:hover {
+
+    opacity:0.85;
+
+}
+
+
+
+textarea,
+select {
+
+    width:100%;
+
+    padding:15px;
+
+    border-radius:14px;
+
+    border:1px solid #d1d5db;
+
+    font-size:16px;
+
+    margin:10px 0;
+
+}
+
+
+
+textarea {
+
+    min-height:120px;
+
+}
+
+
+
+
+
+/* ==================================
+   SPLASH
+   ================================== */
 
 
 #splashScreen {
 
-    position: fixed;
 
-    top: 0;
+    position:fixed;
 
-    left: 0;
+    top:0;
 
-    width: 100%;
+    left:0;
 
-    height: 100vh;
+
+    width:100%;
+
+    height:100vh;
+
 
     background:
+
     radial-gradient(
         circle,
-        white,
-        #d7ebff,
+        #ffffff,
+        #b9ddff,
         #0066ff
     );
 
-    display: flex;
 
-    flex-direction: column;
+    display:flex;
 
-    justify-content: center;
+    flex-direction:column;
 
-    align-items: center;
+    justify-content:center;
 
-    z-index: 9999;
+    align-items:center;
 
-    color: white;
 
-    text-align: center;
+    z-index:9999;
+
+
+    color:white;
+
+    text-align:center;
+
 
 }
 
 
 
-.logo-light {
+#splashScreen img {
 
-    width: 190px;
 
-    height: 190px;
+    width:180px;
 
-    border-radius: 50%;
+    height:180px;
 
-    display: flex;
 
-    align-items: center;
+    object-fit:contain;
 
-    justify-content: center;
+
+    border-radius:30px;
+
 
     animation:
-    logoGlow 2s infinite alternate;
+    glow 2s infinite alternate;
+
 
 }
 
 
 
-.logo-light img {
-
-    width: 150px;
-
-    height: 150px;
-
-    object-fit: contain;
-
-    border-radius: 25px;
-
-}
-
-
-
-@keyframes logoGlow {
+@keyframes glow {
 
 
 from {
@@ -132,26 +183,34 @@ to {
 
 
 
-/* ===============================
-   WELCOME SCREEN
-   =============================== */
 
 
-.screen {
 
-    min-height: 100vh;
+/* ==================================
+   WELCOME
+   ================================== */
 
-    display: flex;
 
-    flex-direction: column;
+#welcomeScreen {
 
-    justify-content: center;
 
-    align-items: center;
+    height:100vh;
 
-    text-align: center;
 
-    padding: 25px;
+    display:flex;
+
+    flex-direction:column;
+
+    justify-content:center;
+
+    align-items:center;
+
+
+    text-align:center;
+
+
+    padding:25px;
+
 
 }
 
@@ -159,59 +218,54 @@ to {
 
 .welcome-logo {
 
-    width: 150px;
 
-    border-radius: 25px;
+    width:150px;
+
+    border-radius:25px;
+
 
 }
 
 
 
-button {
 
-    border: none;
 
-    padding: 15px 25px;
 
-    border-radius: 15px;
 
-    background:
-    #0066ff;
-
-    color:
-    white;
-
-    font-size: 16px;
-
-    cursor: pointer;
-
-}
-/* ===============================
-   HAUPT ZENTRALE
-   =============================== */
+/* ==================================
+   MAIN SYSTEM
+   ================================== */
 
 
 #mainOS {
 
-    padding: 20px;
+
+    padding:20px;
+
 
 }
 
 
 
-.top-header {
+header {
 
-    text-align: center;
 
-    padding: 20px;
+    text-align:center;
+
+    padding:20px;
+
 
 }
+
+
 
 
 
 .page {
 
-    display: none;
+
+    display:none;
+
 
 }
 
@@ -219,7 +273,9 @@ button {
 
 .page.active {
 
-    display: block;
+
+    display:block;
+
 
 }
 
@@ -227,412 +283,218 @@ button {
 
 
 
-/* ===============================
-   KARTEN SYSTEM
-   =============================== */
 
+/* ==================================
+   STATUS
+   ================================== */
 
-.card {
 
-    background:
-    white;
+.status-card {
 
-    padding: 20px;
 
-    border-radius: 20px;
+    background:white;
 
-    margin: 15px 0;
 
-    box-shadow:
-    0 5px 20px
-    rgba(
-        0,
-        0,
-        0,
-        0.08
-    );
+    padding:20px;
 
-}
 
+    border-radius:20px;
 
-
-
-.module-grid {
-
-    display: grid;
-
-    grid-template-columns:
-    repeat(
-        auto-fit,
-        minmax(
-            160px,
-            1fr
-        )
-    );
-
-    gap: 20px;
-
-}
-
-
-
-
-.module-card {
-
-    background:
-    white;
-
-    padding: 25px;
-
-    border-radius: 20px;
-
-    text-align: center;
-
-    cursor: pointer;
-
-    box-shadow:
-    0 5px 15px
-    rgba(
-        0,
-        0,
-        0,
-        0.08
-    );
-
-    transition:
-    transform 0.2s;
-
-}
-
-
-
-
-.module-card:hover {
-
-    transform:
-    translateY(-5px);
-
-}
-
-
-
-
-
-textarea,
-select {
-
-    width: 100%;
-
-    padding: 15px;
-
-    border-radius: 12px;
-
-    border:
-    1px solid #ddd;
-
-    font-size: 16px;
-
-}
-
-
-
-textarea {
-
-    min-height: 120px;
-
-}
-/* ===============================
-   MOBILE OPTIMIERUNG
-   iPHONE + TABLET
-   =============================== */
-
-
-@media (max-width: 700px) {
-
-
-    #mainOS {
-
-        padding: 12px;
-
-    }
-
-
-
-    .top-header h1 {
-
-        font-size: 24px;
-
-    }
-
-
-
-    .module-grid {
-
-        grid-template-columns:
-        1fr;
-
-    }
-
-
-
-    .module-card {
-
-        padding: 20px;
-
-    }
-
-
-
-    button {
-
-        width: 100%;
-
-    }
-
-
-}
-
-
-
-
-/* ===============================
-   NOTES
-   =============================== */
-
-
-#noteList div {
-
-    background:
-    #f1f5ff;
-
-    padding: 15px;
-
-    border-radius: 15px;
-
-    margin-top: 10px;
-
-}
-
-
-
-
-
-/* ===============================
-   CHAT
-   =============================== */
-
-
-#chatHistory {
-
-    min-height: 80px;
-
-    background:
-    #f7f9fc;
-
-    padding: 15px;
-
-    border-radius: 15px;
-
-    margin-top: 15px;
-
-}
-
-
-
-
-/* ===============================
-   DARK MODE VORBEREITUNG
-   =============================== */
-
-
-.dark {
-
-    background:
-    #111;
-
-    color:
-    white;
-
-}
-
-
-
-.dark .card,
-.dark .module-card {
-
-    background:
-    #222;
-
-    color:
-    white;
-
-}
-/* ===============================
-   HALDO AI OS v7.1
-   DASHBOARD DESIGN
-   =============================== */
-
-
-.welcome-card {
-
-    background:
-    linear-gradient(
-        135deg,
-        #0066ff,
-        #00c6ff
-    );
-
-    color:white;
-
-    padding:25px;
-
-    border-radius:25px;
 
     margin-bottom:25px;
 
+
+    text-align:center;
+
+
+    color:#008000;
+
+
+    font-weight:bold;
+
+
     box-shadow:
-    0 10px 30px
-    rgba(
-        0,
-        102,
-        255,
-        0.25
+
+    0 5px 20px
+
+    rgba(0,0,0,0.08);
+
+
+}
+
+
+
+
+
+
+
+
+/* ==================================
+   APP GRID
+   ================================== */
+
+
+.app-grid {
+
+
+    display:grid;
+
+
+    grid-template-columns:
+
+    repeat(
+    auto-fit,
+    minmax(
+    150px,
+    1fr
+    )
     );
 
-}
 
+    gap:20px;
 
-
-.status-online {
-
-    margin-top:15px;
-
-    background:
-    rgba(
-        255,
-        255,
-        255,
-        0.2
-    );
-
-    padding:10px;
-
-    border-radius:15px;
 
 }
 
 
 
-.app-icon {
-
-    font-size:45px;
-
-    margin-bottom:10px;
-
-}
 
 
+.app-card {
 
-.module-card {
+
+    background:white;
+
+
+    padding:25px;
+
+
+    border-radius:25px;
+
+
+    text-align:center;
+
+
+    cursor:pointer;
+
+
+    box-shadow:
+
+    0 8px 25px
+
+    rgba(0,0,0,0.08);
+
 
     transition:
-    transform 0.25s,
-    box-shadow 0.25s;
+
+    0.25s;
+
+
+    font-size:40px;
+
 
 }
 
 
 
-.module-card:hover {
+
+.app-card h3 {
+
+
+    font-size:20px;
+
+
+}
+
+
+
+
+
+.app-card p {
+
+
+    font-size:14px;
+
+
+}
+
+
+
+
+
+.app-card:hover {
+
 
     transform:
-    translateY(-8px);
 
-    box-shadow:
-    0 15px 30px
-    rgba(
-        0,
-        0,
-        0,
-        0.15
-    );
+    translateY(-6px);
 
-}
-/* ===============================
-   HALDO AI OS v7.2
-   CLEAN OS DESIGN
-   =============================== */
-
-
-.welcome-card {
-
-    background:
-    white;
-
-    color:
-    #222;
-
-    border-radius:
-    24px;
-
-    padding:
-    25px;
-
-    border:
-    1px solid #e5e7eb;
 
 }
 
 
 
-.status-online {
 
-    background:
-    #eaffea;
 
-    color:
-    #008000;
 
-    display:
-    inline-block;
+
+/* ==================================
+   MOBILE
+   ================================== */
+
+
+@media(max-width:700px){
+
+
+#mainOS {
+
+
+    padding:12px;
+
 
 }
 
 
 
-.module-card {
+.app-grid {
 
-    background:
-    white;
 
-    border-radius:
-    24px;
+    grid-template-columns:
 
-    min-height:
-    150px;
+    1fr;
 
-    border:
-    1px solid #e5e7eb;
-
-    box-shadow:
-    none;
 
 }
 
 
 
-.app-icon {
+.app-card {
 
-    font-size:
-    55px;
+
+    padding:22px;
+
 
 }
 
 
 
-.module-card:hover {
+button {
 
-    transform:
-    scale(1.03);
+
+    width:100%;
+
+
+}
+
+
+
+header h1 {
+
+
+    font-size:25px;
+
+
+}
+
 
 }
