@@ -7,7 +7,25 @@
 
 // START SPLASH
 window.addEventListener("load", function(){
+const splash = document.getElementById("splashScreen");
+const welcome = document.getElementById("welcomeScreen");
+const main = document.getElementById("mainOS");
 
+if(main){
+    main.style.display = "none";
+}
+
+setTimeout(function(){
+
+    if(splash){
+        splash.style.display = "none";
+    }
+
+    if(welcome){
+        welcome.style.display = "flex";
+    }
+
+}, 2500);
 window.addEventListener(
 "load",
 function(){
