@@ -1327,7 +1327,639 @@ document.addEventListener(
 }
 
 );
+/* =====================================
+   HALDO AI OS v9.1
+   FILES + PRODUCTIVITY + SETTINGS
+   PART 4
+   ===================================== */
 
+
+
+
+
+
+
+// =====================================
+// DATEIEN SYSTEM
+// =====================================
+
+
+const HalDoFiles = {
+
+
+    files:[],
+
+
+
+    add(file){
+
+
+        this.files.push(
+            file
+        );
+
+
+        this.save();
+
+
+    },
+
+
+
+    remove(index){
+
+
+        this.files.splice(
+            index,
+            1
+        );
+
+
+        this.save();
+
+
+    },
+
+
+
+    save(){
+
+
+        localStorage.setItem(
+
+            "haldoFiles",
+
+            JSON.stringify(
+                this.files
+            )
+
+        );
+
+
+    },
+
+
+
+    load(){
+
+
+        let data =
+        localStorage.getItem(
+            "haldoFiles"
+        );
+
+
+        if(data){
+
+            this.files =
+            JSON.parse(
+                data
+            );
+
+        }
+
+
+    }
+
+
+};
+
+
+
+
+
+
+
+
+
+// =====================================
+// DATEI HOCHLADEN
+// =====================================
+
+
+function uploadFile(){
+
+
+    const input =
+    document.getElementById(
+        "fileInput"
+    );
+
+
+    if(
+        !input ||
+        !input.files.length
+    ){
+
+        return;
+
+    }
+
+
+
+    let file =
+    input.files[0];
+
+
+
+    HalDoFiles.add({
+
+        name:file.name,
+
+        size:file.size,
+
+        type:file.type,
+
+        date:
+        new Date()
+        .toISOString()
+
+
+    });
+
+
+
+    showNotification(
+        "Datei gespeichert 📁"
+    );
+
+
+}
+
+
+
+
+
+
+
+
+
+// =====================================
+// PDF CREATOR BASIS
+// =====================================
+
+
+function createPDF(){
+
+
+    const text =
+    document.getElementById(
+        "pdfText"
+    );
+
+
+
+    if(!text)
+    return;
+
+
+
+    let content =
+    text.value;
+
+
+
+    if(
+        content.trim()===""
+    ){
+
+        showNotification(
+            "Kein Text vorhanden"
+        );
+
+        return;
+
+    }
+
+
+
+    let blob =
+    new Blob(
+
+        [
+            content
+        ],
+
+        {
+            type:
+            "application/pdf"
+        }
+
+    );
+
+
+
+    let url =
+    URL.createObjectURL(
+        blob
+    );
+
+
+
+    let link =
+    document.createElement(
+        "a"
+    );
+
+
+    link.href =
+    url;
+
+
+    link.download =
+    "HalDo_Dokument.pdf";
+
+
+    link.click();
+
+
+
+    showNotification(
+        "PDF erstellt 📄"
+    );
+
+
+}
+
+
+
+
+
+
+
+
+
+// =====================================
+// SCHREIBEN APP
+// =====================================
+
+
+function saveWriting(){
+
+
+    let text =
+    document.getElementById(
+        "writingArea"
+    );
+
+
+
+    if(!text)
+    return;
+
+
+
+    localStorage.setItem(
+
+        "haldoWriting",
+
+        text.value
+
+    );
+
+
+
+    showNotification(
+        "Text gespeichert 📝"
+    );
+
+
+}
+
+
+
+
+
+
+
+
+
+function loadWriting(){
+
+
+    let text =
+    document.getElementById(
+        "writingArea"
+    );
+
+
+
+    let saved =
+    localStorage.getItem(
+        "haldoWriting"
+    );
+
+
+
+    if(
+        text &&
+        saved
+    ){
+
+        text.value =
+        saved;
+
+    }
+
+
+}
+
+
+
+
+
+
+
+
+
+// =====================================
+// NOTIZEN SYSTEM
+// =====================================
+
+
+function saveNote(note){
+
+
+    let notes =
+    HalDoMemory.get(
+        "haldoNotes"
+    )
+    ||
+    [];
+
+
+
+    notes.push({
+
+        text:note,
+
+        date:
+        new Date()
+        .toLocaleString()
+
+    });
+
+
+
+    HalDoMemory.save(
+
+        "haldoNotes",
+
+        notes
+
+    );
+
+
+}
+
+
+
+
+
+
+
+
+
+function getNotes(){
+
+
+    return (
+
+        HalDoMemory.get(
+            "haldoNotes"
+        )
+
+        ||
+
+        []
+
+    );
+
+
+}
+
+
+
+
+
+
+
+
+
+// =====================================
+// DARK MODE
+// =====================================
+
+
+function toggleDarkMode(){
+
+
+    document.body.classList.toggle(
+        "dark-mode"
+    );
+
+
+
+    let active =
+    document.body.classList.contains(
+        "dark-mode"
+    );
+
+
+
+    localStorage.setItem(
+
+        "haldoDarkMode",
+
+        active
+
+    );
+
+
+}
+
+
+
+
+
+
+
+
+
+function loadDarkMode(){
+
+
+    let mode =
+    localStorage.getItem(
+        "haldoDarkMode"
+    );
+
+
+
+    if(mode==="true"){
+
+
+        document.body.classList.add(
+            "dark-mode"
+        );
+
+
+    }
+
+
+}
+
+
+
+
+
+
+
+
+
+// =====================================
+// SYSTEM EINSTELLUNGEN
+// =====================================
+
+
+const HalDoSettings = {
+
+
+    save(
+        key,
+        value
+    ){
+
+
+        localStorage.setItem(
+
+            "setting_"+key,
+
+            value
+
+        );
+
+
+    },
+
+
+
+    get(
+        key
+    ){
+
+
+        return localStorage.getItem(
+
+            "setting_"+key
+
+        );
+
+
+    }
+
+
+};
+
+
+
+
+
+
+
+
+
+// =====================================
+// BENACHRICHTIGUNG
+// =====================================
+
+
+function showNotification(
+    text
+){
+
+
+    console.log(
+        "🔔",
+        text
+    );
+
+
+    let box =
+    document.getElementById(
+        "notification"
+    );
+
+
+
+    if(box){
+
+
+        box.innerHTML =
+        text;
+
+
+        box.style.display =
+        "block";
+
+
+
+        setTimeout(
+
+            ()=>{
+
+                box.style.display =
+                "none";
+
+            },
+
+            3000
+
+        );
+
+
+    }
+
+
+}
+
+
+
+
+
+
+
+
+
+// =====================================
+// SYSTEM LADEN
+// =====================================
+
+
+document.addEventListener(
+
+"DOMContentLoaded",
+
+()=>{
+
+
+    HalDoFiles.load();
+
+    loadDarkMode();
+
+    loadWriting();
+
+
+    console.log(
+
+        "📁 Produktivitätssystem bereit"
+
+    );
+
+
+}
+
+);
 
 
 
