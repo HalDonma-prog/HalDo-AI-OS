@@ -1,0 +1,3223 @@
+<!-- =====================================
+     HALDO AI OS v9.1
+     NAVIGATION SYSTEM
+     INDEX PART 1
+     ===================================== -->
+
+
+<!-- MAIN NAVIGATION MENU -->
+
+<nav id="mainMenu">
+
+
+<div class="menu-header">
+
+<img src="logo.png" class="menu-logo">
+
+<h2>
+HalDo AI
+</h2>
+
+</div>
+
+
+
+<div class="menu-search">
+
+<input
+id="systemSearch"
+type="text"
+placeholder="🔍 Suche in HalDo..."
+>
+
+
+</div>
+
+
+
+
+
+<div class="menu-items">
+
+
+<button onclick="goHome()">
+
+🏠 Start
+
+</button>
+
+
+
+<button onclick="openApp('ai')">
+
+🤖 HalDo AI
+
+</button>
+
+
+
+<button onclick="openApp('apps')">
+
+📂 Anwendungen
+
+</button>
+
+
+
+<button onclick="openApp('files')">
+
+📁 Dateien
+
+</button>
+
+
+
+<button onclick="openApp('settings')">
+
+⚙️ Einstellungen
+
+</button>
+
+
+
+<button onclick="openApp('help')">
+
+❓ Hilfe
+
+</button>
+
+
+
+<button onclick="openApp('info')">
+
+ℹ️ Informationen
+
+</button>
+
+
+
+</div>
+
+
+</nav>
+
+
+
+
+
+
+
+
+
+<!-- SYSTEM SEARCH RESULTS -->
+
+
+<div id="searchResults">
+
+</div>
+
+
+
+
+
+
+
+
+
+<!-- WINDOW CONTROL BAR -->
+
+
+<div id="windowControls">
+
+
+<button onclick="minimizeWindow()">
+
+➖
+
+</button>
+
+
+<button onclick="maximizeWindow()">
+
+□
+
+</button>
+
+
+<button onclick="closeWindow()">
+
+✕
+
+</button>
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<!-- EXTENDED DOCK -->
+
+
+<div id="extendedDock">
+
+
+<div 
+class="dock-item"
+onclick="openApp('dashboard')">
+
+🏠
+
+</div>
+
+
+
+<div 
+class="dock-item"
+onclick="openApp('ai')">
+
+🤖
+
+</div>
+
+
+
+<div 
+class="dock-item"
+onclick="openApp('files')">
+
+📁
+
+</div>
+
+
+
+<div 
+class="dock-item"
+onclick="openApp('notes')">
+
+📝
+
+</div>
+
+
+
+<div 
+class="dock-item"
+onclick="openApp('settings')">
+
+⚙️
+
+</div>
+
+
+
+</div>
+<!-- =====================================
+     SETTINGS SYSTEM
+     HALDO AI OS v9.1
+     INDEX PART 2
+     ===================================== -->
+
+
+<section 
+id="settings"
+class="window">
+
+
+<div class="window-header">
+
+
+<button 
+class="back-button"
+onclick="goHome()">
+
+⬅
+
+</button>
+
+
+<h2>
+
+⚙️ Einstellungen
+
+</h2>
+
+
+</div>
+
+
+
+
+
+
+<div class="settings-layout">
+
+
+
+<!-- SETTINGS MENU -->
+
+
+<div class="settings-menu">
+
+
+
+<button onclick="openSettingsPage('general')">
+
+🌍 Allgemein
+
+</button>
+
+
+
+<button onclick="openSettingsPage('aiVoice')">
+
+🤖 AI Stimme
+
+</button>
+
+
+
+<button onclick="openSettingsPage('design')">
+
+🎨 Hintergrund
+
+</button>
+
+
+
+<button onclick="openSettingsPage('control')">
+
+🖥️ Bedienung
+
+</button>
+
+
+
+<button onclick="openSettingsPage('security')">
+
+🔐 Sicherheit
+
+</button>
+
+
+
+<button onclick="openSettingsPage('help')">
+
+❓ Hilfe
+
+</button>
+
+
+
+<button onclick="openSettingsPage('info')">
+
+ℹ️ Information
+
+</button>
+
+
+
+</div>
+
+
+
+
+
+
+
+<!-- SETTINGS CONTENT -->
+
+
+<div 
+id="settingsContent"
+class="settings-content">
+
+
+
+<div id="general">
+
+
+<h3>
+
+🌍 Allgemein
+
+</h3>
+
+
+<p>
+
+Sprache, Benutzer und Systemoptionen
+
+</p>
+
+
+
+<label>
+
+Benutzername
+
+</label>
+
+
+<input
+id="username"
+placeholder="Name">
+
+
+<button onclick="saveUser()">
+
+💾 Speichern
+
+</button>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<div id="aiVoice"
+style="display:none;">
+
+
+<h3>
+
+🤖 AI Stimme
+
+</h3>
+
+
+
+<label>
+
+AI Stimme
+
+</label>
+
+
+<select id="voiceEnabled">
+
+
+<option>
+
+Ein
+
+</option>
+
+
+<option>
+
+Aus
+
+</option>
+
+
+</select>
+
+
+
+
+
+<label>
+
+Stimme
+
+</label>
+
+
+<select id="voiceType">
+
+
+<option>
+
+Neutral
+
+</option>
+
+
+<option>
+
+Männlich
+
+</option>
+
+
+<option>
+
+Weiblich
+
+</option>
+
+
+</select>
+
+
+
+
+
+<label>
+
+Geschwindigkeit
+
+</label>
+
+
+<input
+type="range"
+id="voiceSpeed"
+min="0.5"
+max="2"
+step="0.1"
+value="1">
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<div id="design"
+style="display:none;">
+
+
+<h3>
+
+🎨 Hintergrund
+
+</h3>
+
+
+<button>
+
+🌌 HalDo Standard
+
+</button>
+
+
+<button>
+
+🌃 Sterne
+
+</button>
+
+
+<button>
+
+🖼️ Eigenes Bild
+
+</button>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<div id="control"
+style="display:none;">
+
+
+<h3>
+
+🖥️ Bedienung
+
+</h3>
+
+
+<p>
+
+Maus, Touch und Tastatur Einstellungen
+
+</p>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<div id="security"
+style="display:none;">
+
+
+<h3>
+
+🔐 Sicherheit
+
+</h3>
+
+
+<button onclick="lockSystem()">
+
+🔒 Sperren
+
+</button>
+
+
+<button onclick="clearAIMemory()">
+
+🧠 AI Speicher löschen
+
+</button>
+
+
+
+</div>
+
+
+
+</div>
+
+
+
+</div>
+
+
+
+</section>
+<!-- =====================================
+     HALDO AI ENGINE INTERFACE
+     HALDO AI OS v9.1
+     INDEX PART 3
+     ===================================== -->
+
+
+
+<section
+id="ai"
+class="window">
+
+
+
+<div class="window-header">
+
+
+<button
+class="back-button"
+onclick="goHome()">
+
+⬅
+
+</button>
+
+
+<h2>
+
+🤖 HalDo AI
+
+</h2>
+
+
+</div>
+
+
+
+
+
+
+
+<div class="window-content">
+
+
+
+
+
+<!-- AI STATUS -->
+
+
+<div class="tool-card">
+
+
+<h3>
+
+🧠 AI Status
+
+</h3>
+
+
+<p id="aiStatus">
+
+HalDo AI ist bereit 🚀
+
+</p>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<!-- CHAT AREA -->
+
+
+<div class="chat-container"
+id="chatHistory">
+
+
+
+<div class="ai-message">
+
+
+<div class="chat-avatar">
+
+🤖
+
+</div>
+
+
+<div class="chat-bubble">
+
+
+<h4>
+
+HalDo AI
+
+</h4>
+
+
+<p>
+
+Hallo 👋 Ich bin bereit.
+
+</p>
+
+
+</div>
+
+
+
+</div>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+<!-- CHAT INPUT -->
+
+
+<div class="chat-input-area">
+
+
+<textarea
+
+id="aiInput"
+
+placeholder="Schreibe eine Nachricht an HalDo AI..."
+
+></textarea>
+
+
+
+<div class="chat-buttons">
+
+
+<button onclick="sendAI()">
+
+📤 Senden
+
+</button>
+
+
+
+<button onclick="startVoiceInput()">
+
+🎤 Sprache
+
+</button>
+
+
+
+<button onclick="speakLastAnswer()">
+
+🔊 Vorlesen
+
+</button>
+
+
+
+<button onclick="clearChat()">
+
+🗑️ Löschen
+
+</button>
+
+
+
+</div>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+<!-- AI MEMORY -->
+
+
+<div class="tool-card">
+
+
+<h3>
+
+🧠 AI Speicher
+
+</h3>
+
+
+
+<p>
+
+Gespeicherte Informationen und Verlauf
+
+</p>
+
+
+
+<button onclick="loadAIMemory()">
+
+📂 Speicher laden
+
+</button>
+
+
+
+<button onclick="clearAIMemory()">
+
+🗑️ Speicher löschen
+
+</button>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<!-- LANGUAGE SYSTEM -->
+
+
+<div class="tool-card">
+
+
+<h3>
+
+🌍 Sprache
+
+</h3>
+
+
+
+<select id="haldoLanguage">
+
+
+<option value="de">
+
+🇩🇪 Deutsch
+
+</option>
+
+
+
+<option value="en">
+
+🇬🇧 English
+
+</option>
+
+
+
+<option value="tr">
+
+🇹🇷 Türkçe
+
+</option>
+
+
+
+<option value="ku">
+
+☀️ Kurdisch
+
+</option>
+
+
+
+<option value="ez">
+
+🌿 Êzîdî
+
+</option>
+
+
+
+</select>
+
+
+
+<button onclick="saveLanguage()">
+
+💾 Sprache speichern
+
+</button>
+
+
+
+</div>
+
+
+
+</div>
+
+
+
+</section>
+<!-- =====================================
+     PRODUCTIVITY APPS
+     HALDO AI OS v9.1
+     INDEX PART 4
+     ===================================== -->
+
+
+
+
+
+
+<!-- FILE MANAGER -->
+
+
+<section
+id="files"
+class="window">
+
+
+
+<div class="window-header">
+
+
+<button
+class="back-button"
+onclick="goHome()">
+
+⬅
+
+</button>
+
+
+
+<h2>
+
+📂 Dateien
+
+</h2>
+
+
+</div>
+
+
+
+
+
+
+<div class="window-content">
+
+
+<div class="tool-card">
+
+
+<h3>
+
+Datei hinzufügen
+
+</h3>
+
+
+<input
+
+type="file"
+
+id="fileUpload"
+
+>
+
+
+
+<button onclick="uploadFile()">
+
+📁 Hochladen
+
+</button>
+
+
+
+</div>
+
+
+
+
+
+<div
+
+id="fileList"
+
+class="file-list">
+
+
+</div>
+
+
+
+</div>
+
+
+
+</section>
+
+
+
+
+
+
+
+
+
+<!-- PDF CREATOR -->
+
+
+<section
+
+id="pdf"
+
+class="window">
+
+
+
+<div class="window-header">
+
+
+<button
+onclick="goHome()">
+
+⬅
+
+</button>
+
+
+
+<h2>
+
+📄 PDF Creator
+
+</h2>
+
+
+
+</div>
+
+
+
+
+
+<div class="window-content">
+
+
+
+<div class="tool-card">
+
+
+<h3>
+
+Dokument erstellen
+
+</h3>
+
+
+
+<textarea
+
+id="pdfInput"
+
+placeholder="Text für Dokument..."
+
+></textarea>
+
+
+
+<button onclick="createPDF()">
+
+📄 PDF erstellen
+
+</button>
+
+
+
+</div>
+
+
+
+</div>
+
+
+
+</section>
+
+
+
+
+
+
+
+
+
+<!-- WRITING APP -->
+
+
+<section
+
+id="writing"
+
+class="window">
+
+
+
+<div class="window-header">
+
+
+<button
+onclick="goHome()">
+
+⬅
+
+</button>
+
+
+
+<h2>
+
+📝 Schreiben
+
+</h2>
+
+
+
+</div>
+
+
+
+
+
+
+
+<div class="window-content">
+
+
+<div class="tool-card">
+
+
+
+<textarea
+
+id="writingArea"
+
+placeholder="Schreibe hier..."
+
+></textarea>
+
+
+
+<button onclick="saveWriting()">
+
+💾 Speichern
+
+</button>
+
+
+
+</div>
+
+
+</div>
+
+
+
+</section>
+
+
+
+
+
+
+
+
+
+<!-- NOTES APP -->
+
+
+<section
+
+id="notes"
+
+class="window">
+
+
+
+<div class="window-header">
+
+
+<button
+onclick="goHome()">
+
+⬅
+
+</button>
+
+
+
+<h2>
+
+📒 Notizen
+
+</h2>
+
+
+
+</div>
+
+
+
+
+
+<div class="window-content">
+
+
+<div class="tool-card">
+
+
+<input
+
+id="noteInput"
+
+placeholder="Neue Notiz..."
+
+>
+
+
+
+<button onclick="saveNote()">
+
+📝 Hinzufügen
+
+</button>
+
+
+
+</div>
+
+
+
+
+<div
+
+id="noteList"
+
+class="note-list">
+
+
+</div>
+
+
+
+</div>
+
+
+
+</section>
+
+
+
+
+
+
+
+
+
+<!-- BROWSER PREPARATION -->
+
+
+<section
+
+id="browser"
+
+class="window">
+
+
+
+<div class="window-header">
+
+
+<button
+
+onclick="goHome()">
+
+⬅
+
+</button>
+
+
+
+<h2>
+
+🌐 Browser
+
+</h2>
+
+
+
+</div>
+
+
+
+
+
+<div class="window-content">
+
+
+
+<div class="tool-card">
+
+
+<input
+
+id="browserSearch"
+
+placeholder="Adresse oder Suche..."
+
+>
+
+
+
+<button>
+
+🔍 Öffnen
+
+</button>
+
+
+
+</div>
+
+
+
+</div>
+
+
+
+</section>
+<!-- =====================================
+     COMMUNICATION + SYSTEM APPS
+     HALDO AI OS v9.1
+     INDEX PART 5
+     ===================================== -->
+
+
+
+
+
+
+
+<!-- MAIL SYSTEM -->
+
+
+<section
+
+id="mail"
+
+class="window">
+
+
+
+<div class="window-header">
+
+
+<button
+
+onclick="goHome()">
+
+⬅
+
+</button>
+
+
+
+<h2>
+
+📧 Mail
+
+</h2>
+
+
+
+</div>
+
+
+
+
+
+<div class="window-content">
+
+
+<div class="tool-card">
+
+
+<input
+
+id="mailReceiver"
+
+placeholder="Empfänger..."
+
+>
+
+
+
+<input
+
+id="mailSubject"
+
+placeholder="Betreff..."
+
+>
+
+
+
+<textarea
+
+id="mailText"
+
+placeholder="Nachricht..."
+
+></textarea>
+
+
+
+
+<button onclick="sendMail()">
+
+📤 Senden
+
+</button>
+
+
+
+</div>
+
+
+
+</div>
+
+
+
+</section>
+
+
+
+
+
+
+
+
+
+<!-- SCANNER -->
+
+
+<section
+
+id="scanner"
+
+class="window">
+
+
+
+<div class="window-header">
+
+
+<button
+
+onclick="goHome()">
+
+⬅
+
+</button>
+
+
+
+<h2>
+
+📷 Scanner
+
+</h2>
+
+
+
+</div>
+
+
+
+
+
+
+<div class="window-content">
+
+
+<div class="tool-card">
+
+
+
+<div
+
+id="scannerPreview">
+
+
+📷
+
+</div>
+
+
+
+
+<button onclick="startScanner()">
+
+📷 Scannen
+
+</button>
+
+
+
+</div>
+
+
+
+</div>
+
+
+
+</section>
+
+
+
+
+
+
+
+
+
+<!-- CALENDAR -->
+
+
+<section
+
+id="calendar"
+
+class="window">
+
+
+
+<div class="window-header">
+
+
+<button
+
+onclick="goHome()">
+
+⬅
+
+</button>
+
+
+
+<h2>
+
+📅 Kalender
+
+</h2>
+
+
+
+</div>
+
+
+
+
+
+
+
+<div class="window-content">
+
+
+<div class="tool-card">
+
+
+<input
+
+type="date"
+
+id="calendarDate"
+
+>
+
+
+
+<textarea
+
+id="calendarNote"
+
+placeholder="Termin Notiz..."
+
+></textarea>
+
+
+
+
+<button onclick="saveCalendarEvent()">
+
+📅 Speichern
+
+</button>
+
+
+
+</div>
+
+
+
+
+<div
+
+id="calendarList">
+
+
+</div>
+
+
+
+</div>
+
+
+
+</section>
+
+
+
+
+
+
+
+
+
+<!-- CALCULATOR -->
+
+
+<section
+
+id="calculator"
+
+class="window">
+
+
+
+<div class="window-header">
+
+
+<button
+
+onclick="goHome()">
+
+⬅
+
+</button>
+
+
+
+<h2>
+
+🧮 Rechner
+
+</h2>
+
+
+
+</div>
+
+
+
+
+
+
+
+<div class="window-content">
+
+
+<div class="tool-card">
+
+
+
+<input
+
+id="calcInput"
+
+placeholder="Berechnung..."
+
+>
+
+
+
+<button onclick="calculate()">
+
+=
+
+</button>
+
+
+
+<p
+
+id="calcResult">
+
+</p>
+
+
+
+</div>
+
+
+
+</div>
+
+
+
+</section>
+
+
+
+
+
+
+
+
+
+<!-- NOTIFICATION CENTER -->
+
+
+<section
+
+id="notifications"
+
+class="window">
+
+
+
+<div class="window-header">
+
+
+<button
+
+onclick="goHome()">
+
+⬅
+
+</button>
+
+
+
+<h2>
+
+🔔 Benachrichtigungen
+
+</h2>
+
+
+
+</div>
+
+
+
+
+
+
+
+<div class="window-content">
+
+
+<div
+
+id="notificationList"
+
+class="tool-card">
+
+
+Keine neuen Meldungen
+
+</div>
+
+
+
+</div>
+
+
+
+</section>
+<!-- =====================================
+     DESKTOP CORE SYSTEM
+     HALDO AI OS v9.1
+     INDEX PART 6
+     ===================================== -->
+
+
+
+
+
+
+
+
+<!-- DESKTOP AREA -->
+
+
+<main
+
+id="desktop"
+
+class="desktop">
+
+
+
+
+
+
+<!-- DESKTOP HEADER -->
+
+
+<header
+
+class="desktop-header">
+
+
+
+<button
+
+class="menu-button"
+
+onclick="toggleMainMenu()">
+
+☰
+
+</button>
+
+
+
+
+<div
+
+class="desktop-search">
+
+
+<input
+
+id="globalSearch"
+
+placeholder="🔍 Suche in HalDo..."
+
+>
+
+
+
+</div>
+
+
+
+
+
+<div
+
+class="system-status">
+
+
+<span>
+
+🟢 Online
+
+</span>
+
+
+</div>
+
+
+
+</header>
+
+
+
+
+
+
+
+
+
+<!-- DESKTOP ICONS -->
+
+
+<div
+
+class="desktop-icons">
+
+
+
+
+
+<div
+
+class="desktop-icon"
+
+onclick="openApp('ai')">
+
+
+🤖
+
+<p>
+
+HalDo AI
+
+</p>
+
+
+</div>
+
+
+
+
+
+
+
+<div
+
+class="desktop-icon"
+
+onclick="openApp('files')">
+
+
+📁
+
+<p>
+
+Dateien
+
+</p>
+
+
+</div>
+
+
+
+
+
+
+
+<div
+
+class="desktop-icon"
+
+onclick="openApp('writing')">
+
+
+📝
+
+<p>
+
+Schreiben
+
+</p>
+
+
+</div>
+
+
+
+
+
+
+
+<div
+
+class="desktop-icon"
+
+onclick="openApp('settings')">
+
+
+⚙️
+
+<p>
+
+Einstellungen
+
+</p>
+
+
+</div>
+
+
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<!-- START MENU OVERLAY -->
+
+
+<div
+
+id="startMenu"
+
+class="start-menu">
+
+
+
+<div
+
+class="start-title">
+
+
+🌍 HalDo AI OS
+
+</div>
+
+
+
+
+
+<button
+
+onclick="openApp('dashboard')">
+
+
+🏠 Start
+
+</button>
+
+
+
+
+<button
+
+onclick="openApp('ai')">
+
+
+🤖 HalDo AI
+
+</button>
+
+
+
+
+<button
+
+onclick="openApp('apps')">
+
+
+📂 Apps
+
+</button>
+
+
+
+
+<button
+
+onclick="openApp('settings')">
+
+
+⚙️ Einstellungen
+
+</button>
+
+
+
+
+<button
+
+onclick="openApp('help')">
+
+
+❓ Hilfe
+
+</button>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<!-- DOCK SYSTEM -->
+
+
+<div
+
+id="dock"
+
+class="dock">
+
+
+
+
+
+<button
+
+onclick="openApp('dashboard')">
+
+🏠
+
+</button>
+
+
+
+
+
+<button
+
+onclick="openApp('ai')">
+
+🤖
+
+</button>
+
+
+
+
+
+<button
+
+onclick="openApp('files')">
+
+📁
+
+</button>
+
+
+
+
+
+<button
+
+onclick="openApp('notes')">
+
+📒
+
+</button>
+
+
+
+
+
+<button
+
+onclick="openApp('calendar')">
+
+📅
+
+</button>
+
+
+
+
+
+<button
+
+onclick="openApp('settings')">
+
+⚙️
+
+</button>
+
+
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<!-- WINDOW MANAGER -->
+
+
+<div
+
+id="windowManager">
+
+
+
+<div
+
+id="activeWindow">
+
+
+</div>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<!-- SEARCH SYSTEM -->
+
+
+<div
+
+id="searchOverlay">
+
+
+<div
+
+class="search-box">
+
+
+<h3>
+
+🔍 HalDo Suche
+
+</h3>
+
+
+<input
+
+id="searchInput"
+
+placeholder="Suche Apps, Dateien, Einstellungen..."
+
+>
+
+
+
+<div
+
+id="searchResults">
+
+
+</div>
+
+
+</div>
+
+
+</div>
+<!-- =====================================
+     SYSTEM + USER + FUTURE MODULES
+     HALDO AI OS v9.1
+     INDEX PART 7
+     ===================================== -->
+
+
+
+
+
+
+
+
+<!-- SYSTEM AREA -->
+
+
+<section
+
+id="system"
+
+class="window">
+
+
+
+<div class="window-header">
+
+
+<button onclick="goHome()">
+
+⬅
+
+</button>
+
+
+
+<h2>
+
+🔔 System
+
+</h2>
+
+
+
+</div>
+
+
+
+
+
+
+<div class="window-content">
+
+
+<div class="tool-card">
+
+
+<h3>
+
+Systemstatus
+
+</h3>
+
+
+
+<p id="systemStatus">
+
+🟢 HalDo AI OS läuft
+
+</p>
+
+
+
+<button onclick="systemCheck()">
+
+🔧 System prüfen
+
+</button>
+
+
+
+<button onclick="clearSystemCache()">
+
+🚀 Optimieren
+
+</button>
+
+
+
+</div>
+
+
+
+</div>
+
+
+
+</section>
+
+
+
+
+
+
+
+
+
+<!-- USER PROFILE -->
+
+
+<section
+
+id="profile"
+
+class="window">
+
+
+
+<div class="window-header">
+
+
+<button onclick="goHome()">
+
+⬅
+
+</button>
+
+
+
+<h2>
+
+👤 Benutzer
+
+</h2>
+
+
+
+</div>
+
+
+
+
+
+
+
+<div class="window-content">
+
+
+<div class="tool-card">
+
+
+
+<img
+
+id="profileImage"
+
+class="profile-image"
+
+src="default-user.png">
+
+
+
+
+
+<h3 id="profileName">
+
+Benutzer
+
+</h3>
+
+
+
+<input
+
+id="profileInput"
+
+placeholder="Name ändern"
+
+>
+
+
+
+<button onclick="saveUser()">
+
+💾 Speichern
+
+</button>
+
+
+
+</div>
+
+
+
+</div>
+
+
+
+</section>
+
+
+
+
+
+
+
+
+
+<!-- LANGUAGE CENTER -->
+
+
+<section
+
+id="languageCenter"
+
+class="window">
+
+
+
+<div class="window-header">
+
+
+<button onclick="goHome()">
+
+⬅
+
+</button>
+
+
+
+<h2>
+
+🌐 Sprache
+
+</h2>
+
+
+
+</div>
+
+
+
+
+
+
+<div class="window-content">
+
+
+<div class="tool-card">
+
+
+
+<button onclick="changeLanguage('de')">
+
+🇩🇪 Deutsch
+
+</button>
+
+
+
+
+<button onclick="changeLanguage('en')">
+
+🇬🇧 English
+
+</button>
+
+
+
+
+<button onclick="changeLanguage('tr')">
+
+🇹🇷 Türkçe
+
+</button>
+
+
+
+
+<button onclick="changeLanguage('ku')">
+
+☀️ Kurdisch
+
+</button>
+
+
+
+
+<button onclick="changeLanguage('ez')">
+
+🌿 Êzîdî
+
+</button>
+
+
+
+</div>
+
+
+
+</div>
+
+
+
+</section>
+
+
+
+
+
+
+
+
+
+<!-- HELP CENTER -->
+
+
+<section
+
+id="help"
+
+class="window">
+
+
+
+<div class="window-header">
+
+
+<button onclick="goHome()">
+
+⬅
+
+</button>
+
+
+
+<h2>
+
+❓ Hilfe
+
+</h2>
+
+
+
+</div>
+
+
+
+
+
+
+<div class="window-content">
+
+
+<div class="tool-card">
+
+
+
+<h3>
+
+HalDo Hilfe
+
+</h3>
+
+
+
+<p>
+
+Wie funktioniert HalDo AI OS?
+
+</p>
+
+
+
+<button>
+
+🚀 Erste Schritte
+
+</button>
+
+
+
+<button>
+
+🤖 AI Hilfe
+
+</button>
+
+
+
+<button>
+
+📞 Support
+
+</button>
+
+
+
+</div>
+
+
+
+</div>
+
+
+
+</section>
+
+
+
+
+
+
+
+
+
+<!-- INFORMATION -->
+
+
+<section
+
+id="info"
+
+class="window">
+
+
+
+<div class="window-header">
+
+
+<button onclick="goHome()">
+
+⬅
+
+</button>
+
+
+
+<h2>
+
+ℹ️ Informationen
+
+</h2>
+
+
+
+</div>
+
+
+
+
+
+
+
+<div class="window-content">
+
+
+<div class="tool-card">
+
+
+<h3>
+
+HalDo AI OS
+
+</h3>
+
+
+
+<p>
+
+Version: v9.1
+
+</p>
+
+
+
+<p>
+
+Digitales Betriebssystem mit KI-Assistent
+
+</p>
+
+
+
+</div>
+
+
+
+</div>
+
+
+
+</section>
+
+
+
+
+
+
+
+
+
+<!-- FUTURE MODULES -->
+
+
+<section
+
+id="future"
+
+class="window">
+
+
+
+<div class="window-header">
+
+
+<button onclick="goHome()">
+
+⬅
+
+</button>
+
+
+
+<h2>
+
+🚀 Zukunft
+
+</h2>
+
+
+
+</div>
+
+
+
+
+
+
+
+<div class="window-content">
+
+
+<div class="tool-card">
+
+
+<h3>
+
+Zukünftige Erweiterungen
+
+</h3>
+
+
+
+<ul>
+
+
+<li>
+
+🧠 Erweiterte AI
+
+</li>
+
+
+<li>
+
+☁️ Cloud System
+
+</li>
+
+
+<li>
+
+🏠 Smart Home
+
+</li>
+
+
+<li>
+
+🤖 Robotik
+
+</li>
+
+
+<li>
+
+🌍 Globale Dienste
+
+</li>
+
+
+</ul>
+
+
+
+</div>
+
+
+
+</div>
+
+
+
+</section>
+<!-- =====================================
+     FINAL SYSTEM STRUCTURE
+     HALDO AI OS v9.1
+     INDEX PART 8/8
+     ===================================== -->
+
+
+
+
+
+
+
+
+<!-- START SCREEN CONNECTION -->
+
+
+<section
+
+id="welcomeScreen"
+
+class="welcome-screen">
+
+
+
+<div class="welcome-content">
+
+
+<img
+
+src="logo.png"
+
+class="haldo-logo">
+
+
+
+<h1>
+
+Willkommen bei HalDo AI OS
+
+</h1>
+
+
+
+<p id="welcomeText">
+
+Dein digitales KI-Betriebssystem
+
+</p>
+
+
+
+
+<button
+
+onclick="startHalDo()">
+
+🚀 HalDo starten
+
+</button>
+
+
+
+</div>
+
+
+
+</section>
+
+
+
+
+
+
+
+
+
+<!-- APPLICATION HUB -->
+
+
+<section
+
+id="apps"
+
+class="window">
+
+
+
+<div class="window-header">
+
+
+<button onclick="goHome()">
+
+⬅
+
+</button>
+
+
+
+<h2>
+
+📂 Anwendungen
+
+</h2>
+
+
+
+</div>
+
+
+
+
+
+
+
+<div class="app-grid">
+
+
+
+<button onclick="openApp('ai')">
+
+🤖
+
+<br>
+
+HalDo AI
+
+</button>
+
+
+
+<button onclick="openApp('files')">
+
+📁
+
+<br>
+
+Dateien
+
+</button>
+
+
+
+<button onclick="openApp('writing')">
+
+📝
+
+<br>
+
+Schreiben
+
+</button>
+
+
+
+<button onclick="openApp('pdf')">
+
+📄
+
+<br>
+
+PDF
+
+</button>
+
+
+
+<button onclick="openApp('notes')">
+
+📒
+
+<br>
+
+Notizen
+
+</button>
+
+
+
+<button onclick="openApp('calendar')">
+
+📅
+
+<br>
+
+Kalender
+
+</button>
+
+
+
+<button onclick="openApp('calculator')">
+
+🧮
+
+<br>
+
+Rechner
+
+</button>
+
+
+
+<button onclick="openApp('settings')">
+
+⚙️
+
+<br>
+
+Einstellungen
+
+</button>
+
+
+
+</div>
+
+
+
+</section>
+
+
+
+
+
+
+
+
+
+<!-- FUTURE EXTENSION AREA -->
+
+
+<section
+
+id="extensionArea"
+
+class="extension-area">
+
+
+
+<h2>
+
+🧩 Erweiterungsbereich
+
+</h2>
+
+
+
+<div
+
+class="future-box">
+
+
+🚀 Neue HalDo Module können hier integriert werden
+
+
+</div>
+
+
+
+</section>
+
+
+
+
+
+
+
+
+
+<!-- GLOBAL NOTIFICATION -->
+
+
+<div
+
+id="notification"
+
+class="notification">
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<!-- SYSTEM FOOTER -->
+
+
+<footer
+
+id="systemFooter">
+
+
+
+<p>
+
+🌍 HalDo AI OS v9.1
+
+</p>
+
+
+
+<p>
+
+🤖 AI System Ready
+
+</p>
+
+
+
+</footer>
+
+
+
+
+
+
+
+
+
+<!-- END OF INDEX.HTML v9.1 -->
+
+
+<!-- =====================================
+     HALDO AI OS v9.1 COMPLETE
+     INDEX FINISHED
+     ===================================== -->
