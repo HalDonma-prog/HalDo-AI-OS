@@ -1,4 +1,417 @@
 /* =====================================
+   HALDO AI OS v9.1
+   SCRIPT SYSTEM
+   PART 1
+   AI ENGINE CORE
+   ===================================== */
+
+
+
+// =====================================
+// HALDO SYSTEM START
+// =====================================
+
+
+const HalDoSystem = {
+
+    version: "v9.1",
+
+    name: "HalDo AI OS",
+
+    started: false,
+
+
+    start(){
+
+        this.started = true;
+
+        console.log(
+            "🚀 HalDo AI OS gestartet"
+        );
+
+        loadMemory();
+
+        welcomeAI();
+
+    }
+
+};
+
+
+
+
+
+
+
+
+// =====================================
+// AI ENGINE KERN
+// =====================================
+
+
+const HalDoAI = {
+
+
+    name:"HalDo",
+
+    memory:[],
+
+
+    respond(message){
+
+
+        let text =
+        message.toLowerCase();
+
+
+
+        if(
+            text.includes("hallo") ||
+            text.includes("hi")
+        ){
+
+            return "Hallo! Ich bin HalDo AI. Wie kann ich dir helfen? 🤖";
+
+        }
+
+
+
+        if(
+            text.includes("wer bist du")
+        ){
+
+            return "Ich bin HalDo AI, dein persönlicher digitaler Assistent.";
+
+        }
+
+
+
+        if(
+            text.includes("zeit")
+        ){
+
+            return "Die aktuelle Zeit ist: "
+            +
+            new Date().toLocaleTimeString();
+
+        }
+
+
+
+        return "Ich habe dich verstanden. Meine Funktionen werden weiter ausgebaut. 🚀";
+
+
+    }
+
+
+};
+
+
+
+
+
+
+
+
+
+// =====================================
+// START BEGRÜSSUNG
+// =====================================
+
+
+function welcomeAI(){
+
+
+    console.log(
+        "🤖 HalDo AI bereit"
+    );
+
+
+    if(
+        localStorage.getItem("haldoVoice")
+        !==
+        "off"
+    ){
+
+        speak(
+            "Willkommen bei HalDo AI OS"
+        );
+
+    }
+
+
+}
+
+
+
+
+
+
+
+
+
+// =====================================
+// NAVIGATION
+// =====================================
+
+
+function openWindow(id){
+
+
+    let windows =
+    document.querySelectorAll(
+        ".window"
+    );
+
+
+    windows.forEach(
+        win=>{
+
+            win.classList.remove(
+                "active"
+            );
+
+        }
+
+    );
+
+
+    let target =
+    document.getElementById(id);
+
+
+
+    if(target){
+
+        target.classList.add(
+            "active"
+        );
+
+    }
+
+
+}
+
+
+
+
+
+
+
+
+function closeWindows(){
+
+
+    document
+    .querySelectorAll(
+        ".window"
+    )
+    .forEach(
+
+        win=>{
+
+            win.classList.remove(
+                "active"
+            );
+
+        }
+
+    );
+
+
+}
+
+
+
+
+
+
+
+
+
+// =====================================
+// HAUPTMENÜ
+// =====================================
+
+
+function toggleMenu(){
+
+
+    const menu =
+    document.getElementById(
+        "mainMenu"
+    );
+
+
+    if(menu){
+
+        menu.classList.toggle(
+            "active"
+        );
+
+    }
+
+
+}
+
+
+
+
+
+
+
+
+
+// =====================================
+// CHAT ENGINE
+// =====================================
+
+
+function sendAIMessage(){
+
+
+    const input =
+    document.getElementById(
+        "userInput"
+    );
+
+
+    if(!input) return;
+
+
+
+    let message =
+    input.value;
+
+
+
+    if(
+        message.trim()===""
+    ){
+
+        return;
+
+    }
+
+
+
+    let answer =
+    HalDoAI.respond(
+        message
+    );
+
+
+
+    saveMemory(
+        message
+    );
+
+
+
+    console.log(
+        answer
+    );
+
+
+    input.value="";
+
+
+}
+
+
+
+
+
+
+
+
+
+// =====================================
+// SPEICHER BASIS
+// =====================================
+
+
+function saveMemory(data){
+
+
+    if(!data)
+    return;
+
+
+
+    HalDoAI.memory.push(
+        data
+    );
+
+
+    localStorage.setItem(
+
+        "haldoMemory",
+
+        JSON.stringify(
+            HalDoAI.memory
+        )
+
+    );
+
+
+}
+
+
+
+
+
+
+
+function loadMemory(){
+
+
+    let saved =
+    localStorage.getItem(
+        "haldoMemory"
+    );
+
+
+
+    if(saved){
+
+
+        HalDoAI.memory =
+        JSON.parse(
+            saved
+        );
+
+
+    }
+
+
+}
+
+
+
+
+
+
+
+
+
+// =====================================
+// SYSTEM LADEN
+// =====================================
+
+
+window.addEventListener(
+
+"load",
+
+()=>{
+
+    HalDoSystem.start();
+
+}
+
+);
+/* =====================================
    HALDO AI OS v9.0
    MAIN SYSTEM ENGINE
    PART 1/8
