@@ -1,46 +1,248 @@
 /* =====================================
-   HALDO AI OS 10.0
-   SCRIPT SYSTEM
-   PART 1/8
+   HALDO AI OS 10.1
+   CLEAN SCRIPT
+   PART 1/4
 ===================================== */
 
 
+
 /* =====================================
-   HALDO CORE
+   SYSTEM CORE
 ===================================== */
 
 
 const HalDo = {
 
-    version: "10.0",
 
-    name: "HalDo AI OS",
+    version:"10.1",
 
-    ready: false,
 
-    memory: {},
+    ready:false,
+
+
+    memory:{},
+
 
 
     start(){
 
+
+        this.ready=true;
+
+
         console.log(
-            "🚀 HalDo AI OS gestartet"
+
+            "🚀 HalDo AI OS 10.1 gestartet"
+
         );
 
 
-        this.loadMemory();
+    },
 
-        this.connectNavigation();
 
-        this.connectWindows();
 
-        this.ready = true;
+    saveMemory(){
 
-        this.showSystemReady();
+
+        localStorage.setItem(
+
+            "haldoMemory",
+
+            JSON.stringify(this.memory)
+
+        );
+
+
+    },
+
+
+
+    loadMemory(){
+
+
+        const data =
+
+        localStorage.getItem(
+            "haldoMemory"
+        );
+
+
+
+        if(data){
+
+
+            this.memory =
+            JSON.parse(data);
+
+
+        }
+
 
     }
 
+
 };
+
+
+
+
+
+
+
+
+
+/* =====================================
+   NAVIGATION SYSTEM
+===================================== */
+
+
+function setupNavigation(){
+
+
+    const buttons =
+
+    document.querySelectorAll(
+        ".nav-button"
+    );
+
+
+
+    const pages =
+
+    document.querySelectorAll(
+        ".page"
+    );
+
+
+
+
+
+    buttons.forEach(button=>{
+
+
+        button.addEventListener(
+        "click",
+        ()=>{
+
+
+
+            const target =
+
+            button.dataset.page;
+
+
+
+            if(!target)
+            return;
+
+
+
+            pages.forEach(page=>{
+
+
+                page.classList.remove(
+                    "active"
+                );
+
+
+            });
+
+
+
+            const selected =
+
+            document.getElementById(
+                target
+            );
+
+
+
+            if(selected){
+
+
+                selected.classList.add(
+                    "active"
+                );
+
+
+            }
+
+
+
+            buttons.forEach(btn=>{
+
+
+                btn.classList.remove(
+                    "active"
+                );
+
+
+            });
+
+
+
+            button.classList.add(
+                "active"
+            );
+
+
+
+        });
+
+
+
+    });
+
+
+}
+
+
+
+
+
+
+
+
+
+/* =====================================
+   START BUTTON CONNECTION
+===================================== */
+
+
+function setupStartButtons(){
+
+
+    const buttons =
+
+    document.querySelectorAll(
+        ".primary-button"
+    );
+
+
+
+    buttons.forEach(button=>{
+
+
+        button.addEventListener(
+        "click",
+        ()=>{
+
+
+            console.log(
+
+                "Button:",
+                button.innerText
+
+            );
+
+
+        });
+
+
+    });
+
+
+}
 
 
 
@@ -56,358 +258,248 @@ const HalDo = {
 
 
 document.addEventListener(
+
 "DOMContentLoaded",
+
 ()=>{
+
+
+    HalDo.loadMemory();
+
 
     HalDo.start();
 
-});
 
+    setupNavigation();
 
 
+    setupStartButtons();
 
 
-
-
-
-
-/* =====================================
-   NAVIGATION SYSTEM
-===================================== */
-
-
-HalDo.connectNavigation = function(){
-
-
-    const menuButton =
-    document.querySelector(
-        ".menu-button"
-    );
-
-
-    const menu =
-    document.querySelector(
-        "#mainMenu"
-    );
-
-
-    if(menuButton && menu){
-
-        menuButton.onclick = ()=>{
-
-            menu.classList.toggle(
-                "active"
-            );
-
-        };
-
-    }
-
-};
-
-
-
-
-
-
-
-
-
-/* =====================================
-   WINDOW SYSTEM
-===================================== */
-
-
-HalDo.connectWindows = function(){
-
-
-    const buttons =
-    document.querySelectorAll(
-        "[data-window]"
-    );
-
-
-    buttons.forEach(
-    button=>{
-
-        button.addEventListener(
-        "click",
-        ()=>{
-
-            openWindow(
-                button.dataset.window
-            );
-
-        });
-
-    });
-
-
-};
-
-
-
-
-
-
-
-
-
-function openWindow(id){
-
-
-    document
-    .querySelectorAll(
-        ".app-window"
-    )
-    .forEach(
-    window=>{
-
-        window.classList.remove(
-            "active"
-        );
-
-    });
-
-
-    const target =
-    document.getElementById(
-        id
-    );
-
-
-    if(target){
-
-        target.classList.add(
-            "active"
-        );
-
-    }
-
-}
-
-
-
-
-
-
-
-
-
-function closeWindow(){
-
-
-    document
-    .querySelectorAll(
-        ".app-window"
-    )
-    .forEach(
-    window=>{
-
-        window.classList.remove(
-            "active"
-        );
-
-    });
-
-}
-
-
-
-
-
-document
-.querySelectorAll(
-".close-window"
-)
-.forEach(
-button=>{
-
-    button.onclick =
-    closeWindow;
 
 });
-
-
-
-
-
-
-
-
-
 /* =====================================
-   MEMORY BASIS
-===================================== */
-
-
-HalDo.loadMemory = function(){
-
-
-    const data =
-    localStorage.getItem(
-        "haldoMemory"
-    );
-
-
-    if(data){
-
-        this.memory =
-        JSON.parse(
-            data
-        );
-
-    }
-    else{
-
-        this.memory = {};
-
-    }
-
-};
-
-
-
-
-
-
-
-
-
-HalDo.saveMemory = function(){
-
-
-    localStorage.setItem(
-
-        "haldoMemory",
-
-        JSON.stringify(
-            this.memory
-        )
-
-    );
-
-};
-
-
-
-
-
-
-
-
-
-/* =====================================
-   SYSTEM READY
-===================================== */
-
-
-HalDo.showSystemReady = function(){
-
-
-    console.log(
-        "✅ HalDo AI OS 10.0 bereit"
-    );
-
-
-};
-/* =====================================
-   HALDO AI OS 10.0
-   CHAT + VOICE SYSTEM
-   PART 2/8
-===================================== */
-
-
-/* =====================================
+   HALDO AI OS 10.1
    CHAT SYSTEM
+   PART 2/4
 ===================================== */
 
 
-const HalDoChat = {
+
+/* =====================================
+   CHAT MEMORY
+===================================== */
 
 
-    send(message){
+const HalDoChatMemory = {
 
 
-        if(!message) return;
+    messages:[],
 
 
-        this.addMessage(
-            "user",
-            message
+
+    add(message){
+
+
+        this.messages.push(message);
+
+
+        localStorage.setItem(
+
+            "haldoChat",
+
+            JSON.stringify(
+                this.messages
+            )
+
         );
-
-
-        const answer =
-        this.createAnswer(
-            message
-        );
-
-
-        setTimeout(()=>{
-
-
-            this.addMessage(
-                "ai",
-                answer
-            );
-
-
-            HalDoVoice.speak(
-                answer
-            );
-
-
-        },500);
 
 
     },
 
 
 
+    load(){
 
 
+        const data =
 
-
-
-
-    addMessage(type,text){
-
-
-        const container =
-        document.querySelector(
-            ".chat-container"
+        localStorage.getItem(
+            "haldoChat"
         );
 
 
-        if(!container) return;
+
+        if(data){
+
+
+            this.messages =
+
+            JSON.parse(data);
+
+
+        }
+
+
+    }
+
+
+};
+
+
+
+
+
+
+
+
+
+/* =====================================
+   AI RESPONSE ENGINE
+===================================== */
+
+
+const HalDoChat = {
+
+
+    createAnswer(input){
+
+
+        const text =
+
+        input.toLowerCase();
+
+
+
+        if(
+            text.includes("hallo")
+        ){
+
+
+            return "Hallo! Ich bin HalDo AI. Wie kann ich helfen?";
+
+
+        }
+
+
+
+        if(
+            text.includes("name")
+        ){
+
+
+            return "Ich bin HalDo AI OS v10.1";
+
+
+        }
+
+
+
+        if(
+            text.includes("hilfe")
+        ){
+
+
+            return "Ich unterstütze dich mit Chat, Apps und Systemfunktionen.";
+
+
+        }
+
+
+
+        return (
+
+            "Ich habe deine Nachricht erhalten: "
+
+            + input
+
+        );
+
+
+    }
+
+
+};
+
+
+
+
+
+
+
+
+
+/* =====================================
+   CHAT INTERFACE
+===================================== */
+
+
+function setupChat(){
+
+
+    const input =
+
+    document.getElementById(
+        "chatInput"
+    );
+
+
+
+    const button =
+
+    document.getElementById(
+        "sendMessage"
+    );
+
+
+
+    const container =
+
+    document.querySelector(
+        ".chat-container"
+    );
+
+
+
+    if(
+        !input ||
+        !button ||
+        !container
+    )
+    return;
+
+
+
+
+
+
+
+
+
+    function addMessage(
+        text,
+        type
+    ){
 
 
 
         const message =
+
         document.createElement(
             "div"
         );
 
 
+
         message.className =
-        type === "ai"
-        ?
-        "ai-message"
-        :
-        "user-message";
+
+        type;
 
 
 
-        message.innerHTML = `
+        message.innerText =
 
-            <div class="chat-bubble">
-
-            ${text}
-
-            </div>
-
-        `;
+        text;
 
 
 
@@ -418,1224 +510,95 @@ const HalDoChat = {
 
 
         container.scrollTop =
+
         container.scrollHeight;
 
 
-    },
-
-
-
-
-
-
-
-
-
-    createAnswer(message){
-
-
-        let text =
-        message.toLowerCase();
-
-
-
-        if(
-            text.includes(
-                "hallo"
-            )
-        ){
-
-            return "Hallo! Ich bin HalDo AI. Wie kann ich dir helfen?";
-
-        }
-
-
-
-        if(
-            text.includes(
-                "name"
-            )
-        ){
-
-            return "Ich bin HalDo AI OS Version 10.0.";
-
-        }
-
-
-
-        if(
-            text.includes(
-                "hilfe"
-            )
-        ){
-
-            return "Ich kann dich bei Navigation, Dateien, Schreiben und Systemfunktionen unterstützen.";
-
-        }
-
-
-
-        return "Ich habe deine Nachricht erhalten. Meine AI Engine wird weiter erweitert.";
-
-    }
-
-
-};
-
-
-
-
-
-
-
-
-
-/* =====================================
-   CHAT INPUT CONNECTION
-===================================== */
-
-
-document.addEventListener(
-"DOMContentLoaded",
-()=>{
-
-
-    const button =
-    document.querySelector(
-        "#sendMessage"
-    );
-
-
-    const input =
-    document.querySelector(
-        "#chatInput"
-    );
-
-
-
-    if(button && input){
-
-
-        button.onclick = ()=>{
-
-
-            HalDoChat.send(
-                input.value
-            );
-
-
-            input.value="";
-
-
-        };
-
-
-    }
-
-
-});
-
-
-
-
-
-
-
-
-
-/* =====================================
-   VOICE SYSTEM BASIS
-===================================== */
-
-
-const HalDoVoice = {
-
-
-    enabled:true,
-
-
-    speak(text){
-
-
-        if(
-            !this.enabled
-        ) return;
-
-
-
-        if(
-            "speechSynthesis"
-            in window
-        ){
-
-
-            const speech =
-            new SpeechSynthesisUtterance(
-                text
-            );
-
-
-            speech.lang =
-            "de-DE";
-
-
-            speech.rate =
-            1;
-
-
-
-            window
-            .speechSynthesis
-            .speak(
-                speech
-            );
-
-
-        }
-
-
-    }
-
-
-};
-
-
-
-
-
-
-
-
-
-/* =====================================
-   VOICE BUTTON PREPARATION
-===================================== */
-
-
-function startVoiceInput(){
-
-
-    const SpeechRecognition =
-    window.SpeechRecognition ||
-    window.webkitSpeechRecognition;
-
-
-
-    if(!SpeechRecognition){
-
-
-        alert(
-            "Spracherkennung wird nicht unterstützt."
-        );
-
-
-        return;
-
     }
 
 
 
-    const recognition =
-    new SpeechRecognition();
 
 
 
-    recognition.lang =
-    "de-DE";
 
 
 
-    recognition.onresult =
-    function(event){
+    button.addEventListener(
+    "click",
+    ()=>{
 
 
         const text =
-        event.results[0][0].transcript;
 
+        input.value.trim();
 
 
-        HalDoChat.send(
-            text
-        );
 
+        if(!text)
+        return;
 
-    };
 
 
+        addMessage(
 
-    recognition.start();
+            text,
 
+            "user-message"
 
-}
-/* =====================================
-   HALDO AI OS 10.0
-   VOICE + LANGUAGE + SETTINGS
-   PART 3/8
-===================================== */
-
-
-/* =====================================
-   ADVANCED VOICE SYSTEM
-===================================== */
-
-
-const HalDoVoiceControl = {
-
-
-    recognition:null,
-
-
-    active:false,
-
-
-    init(){
-
-
-        const Recognition =
-        window.SpeechRecognition ||
-        window.webkitSpeechRecognition;
-
-
-
-        if(!Recognition){
-
-            console.log(
-                "🎤 Sprache nicht verfügbar"
-            );
-
-            return;
-
-        }
-
-
-
-        this.recognition =
-        new Recognition();
-
-
-
-        this.recognition.lang =
-        HalDoSettings.language;
-
-
-
-        this.recognition.continuous =
-        false;
-
-
-
-        this.recognition.onstart =
-        ()=>{
-
-            this.active = true;
-
-            console.log(
-                "🎤 Sprachaufnahme gestartet"
-            );
-
-        };
-
-
-
-        this.recognition.onend =
-        ()=>{
-
-            this.active = false;
-
-        };
-
-
-
-        this.recognition.onresult =
-        (event)=>{
-
-
-            const text =
-            event
-            .results[0][0]
-            .transcript;
-
-
-
-            HalDoChat.send(
-                text
-            );
-
-
-        };
-
-
-    },
-
-
-
-
-
-
-
-
-
-    start(){
-
-
-        if(
-            this.recognition
-        ){
-
-            this.recognition.start();
-
-        }
-
-
-    },
-
-
-    stop(){
-
-
-        if(
-            this.recognition
-        ){
-
-            this.recognition.stop();
-
-        }
-
-
-    }
-
-
-};
-
-
-
-
-
-
-
-
-
-/* =====================================
-   VOICE SELECTION BASIS
-===================================== */
-
-
-const HalDoVoiceSettings = {
-
-
-    voice:null,
-
-
-    rate:1,
-
-
-    pitch:1,
-
-
-
-    loadVoices(){
-
-
-        const voices =
-        speechSynthesis
-        .getVoices();
-
-
-
-        if(
-            voices.length
-        ){
-
-            this.voice =
-            voices[0];
-
-        }
-
-
-    },
-
-
-
-
-
-
-
-
-
-    apply(text){
-
-
-        const speech =
-        new SpeechSynthesisUtterance(
-            text
-        );
-
-
-        speech.voice =
-        this.voice;
-
-
-
-        speech.rate =
-        this.rate;
-
-
-
-        speech.pitch =
-        this.pitch;
-
-
-
-        speech.lang =
-        HalDoSettings.language;
-
-
-
-        speechSynthesis.speak(
-            speech
-        );
-
-
-    }
-
-
-};
-
-
-
-speechSynthesis.onvoiceschanged =
-()=>{
-
-    HalDoVoiceSettings
-    .loadVoices();
-
-};
-
-
-
-
-
-
-
-
-
-/* =====================================
-   LANGUAGE SYSTEM
-===================================== */
-
-
-const HalDoLanguage = {
-
-
-    current:"de-DE",
-
-
-
-    change(language){
-
-
-        this.current =
-        language;
-
-
-
-        HalDoSettings.language =
-        language;
-
-
-
-        HalDo.saveSettings();
-
-
-        console.log(
-            "🌍 Sprache geändert:",
-            language
-        );
-
-
-    }
-
-
-};
-
-
-
-
-
-
-
-
-
-/* =====================================
-   SETTINGS SYSTEM
-===================================== */
-
-
-const HalDoSettings = {
-
-
-    language:"de-DE",
-
-
-    theme:"default",
-
-
-    voice:true,
-
-
-    load(){
-
-
-        const saved =
-        localStorage.getItem(
-            "haldoSettings"
         );
 
 
 
-        if(saved){
+        HalDoChatMemory.add({
 
+            type:"user",
 
-            Object.assign(
-
-                this,
-
-                JSON.parse(
-                    saved
-                )
-
-            );
-
-
-        }
-
-
-    },
-
-
-
-
-
-
-
-
-
-    save(){
-
-
-        localStorage.setItem(
-
-            "haldoSettings",
-
-            JSON.stringify(
-                this
-            )
-
-        );
-
-
-    }
-
-
-};
-
-
-
-
-
-
-
-
-
-HalDoSettings.saveSettings =
-HalDoSettings.save;
-
-
-
-
-
-
-
-
-
-/* =====================================
-   MEMORY EXTENSION
-===================================== */
-
-
-HalDoMemory = {
-
-
-    add(key,value){
-
-
-        HalDo.memory[key] =
-        value;
-
-
-        HalDo.saveMemory();
-
-
-    },
-
-
-
-
-
-
-
-
-
-    get(key){
-
-
-        return HalDo.memory[key];
-
-
-    },
-
-
-
-
-
-
-
-
-
-    remove(key){
-
-
-        delete HalDo.memory[key];
-
-
-        HalDo.saveMemory();
-
-
-    }
-
-
-};
-
-
-
-
-
-
-
-
-
-/* =====================================
-   SYSTEM CONNECTION
-===================================== */
-
-
-document.addEventListener(
-"DOMContentLoaded",
-()=>{
-
-
-    HalDoSettings.load();
-
-
-    HalDoVoiceControl.init();
-
-
-});
-/* =====================================
-   HALDO AI OS 10.0
-   FILES + APPS + SYSTEM
-   PART 4/8
-===================================== */
-
-
-/* =====================================
-   FILE SYSTEM
-===================================== */
-
-
-const HalDoFiles = {
-
-
-    files:[],
-
-
-
-    init(){
-
-
-        const upload =
-        document.querySelector(
-            "#fileUpload"
-        );
-
-
-        if(upload){
-
-
-            upload.addEventListener(
-            "change",
-            (event)=>{
-
-
-                this.addFiles(
-                    event.target.files
-                );
-
-
-            });
-
-
-        }
-
-
-    },
-
-
-
-
-
-
-
-
-
-    addFiles(files){
-
-
-        for(
-            let file of files
-        ){
-
-            this.files.push({
-
-                name:file.name,
-
-                size:file.size,
-
-                type:file.type
-
-            });
-
-        }
-
-
-        this.render();
-
-
-    },
-
-
-
-
-
-
-
-
-
-    render(){
-
-
-        const list =
-        document.querySelector(
-            "#fileList"
-        );
-
-
-
-        if(!list) return;
-
-
-
-        list.innerHTML="";
-
-
-
-        this.files.forEach(
-        file=>{
-
-
-            const item =
-            document.createElement(
-                "p"
-            );
-
-
-            item.innerHTML =
-            "📄 "
-            + file.name;
-
-
-
-            list.appendChild(
-                item
-            );
-
+            text:text
 
         });
 
 
-    }
 
+        const answer =
 
-};
-
-
-
-
-
+        HalDoChat.createAnswer(
+            text
+        );
 
 
 
-
-/* =====================================
-   PDF CREATOR BASIS
-===================================== */
+        setTimeout(()=>{
 
 
-const HalDoPDF = {
+            addMessage(
 
+                answer,
 
-    create(){
+                "ai-message"
 
-
-        const title =
-        document.querySelector(
-            "#pdfTitle"
-        )?.value;
-
-
-
-        const text =
-        document.querySelector(
-            "#pdfText"
-        )?.value;
-
-
-
-        if(!text){
-
-            alert(
-                "Bitte Inhalt eingeben"
             );
 
-            return;
 
-        }
 
+            HalDoChatMemory.add({
 
+                type:"ai",
 
-        const content =
+                text:answer
 
-        title
-        +
-        "\n\n"
-        +
-        text;
+            });
 
 
 
-        const blob =
-        new Blob(
-            [content],
-            {
-                type:
-                "text/plain"
-            }
-        );
+        },400);
 
-
-
-        const link =
-        document.createElement(
-            "a"
-        );
-
-
-        link.href =
-        URL.createObjectURL(
-            blob
-        );
-
-
-        link.download =
-        "HalDo_Dokument.txt";
-
-
-
-        link.click();
-
-
-    }
-
-
-};
-
-
-
-
-
-
-
-
-
-document.addEventListener(
-"DOMContentLoaded",
-()=>{
-
-
-    const pdfButton =
-    document.querySelector(
-        "#createPDF"
-    );
-
-
-
-    if(pdfButton){
-
-
-        pdfButton.onclick =
-        ()=>{
-
-            HalDoPDF.create();
-
-        };
-
-
-    }
-
-
-});
-
-
-
-
-
-
-
-
-
-/* =====================================
-   WRITING APP
-===================================== */
-
-
-const HalDoWriter = {
-
-
-    save(){
-
-
-        const text =
-        document.querySelector(
-            "#writerText"
-        )?.value;
-
-
-
-        localStorage.setItem(
-
-            "haldoDocument",
-
-            text || ""
-
-        );
-
-
-        alert(
-            "📝 Dokument gespeichert"
-        );
-
-
-    }
-
-
-};
-
-
-
-
-
-
-
-
-
-document.addEventListener(
-"DOMContentLoaded",
-()=>{
-
-
-    const save =
-    document.querySelector(
-        "#saveDocument"
-    );
-
-
-
-    if(save){
-
-
-        save.onclick =
-        ()=>{
-
-            HalDoWriter.save();
-
-        };
-
-
-    }
-
-
-});
-
-
-
-
-
-
-
-
-
-/* =====================================
-   NOTES SYSTEM
-===================================== */
-
-
-const HalDoNotes = {
-
-
-    notes:[],
-
-
-
-    add(){
-
-
-        const input =
-        document.querySelector(
-            "#noteInput"
-        );
-
-
-
-        if(!input || !input.value)
-        return;
-
-
-
-        this.notes.push(
-            input.value
-        );
 
 
         input.value="";
 
 
-        this.save();
-
-
-        this.render();
-
-
-    },
-
-
-
-
-
-
-
-
-
-    save(){
-
-
-        localStorage.setItem(
-
-            "haldoNotes",
-
-            JSON.stringify(
-                this.notes
-            )
-
-        );
-
-
-    },
-
-
-
-
-
-
-
-
-
-    render(){
-
-
-        const list =
-        document.querySelector(
-            "#noteList"
-        );
-
-
-        if(!list)return;
-
-
-
-        list.innerHTML="";
-
-
-
-        this.notes.forEach(
-        note=>{
-
-
-            list.innerHTML +=
-
-            `<p>📒 ${note}</p>`;
-
-        });
-
-
-    }
-
-
-};
-
-
-
-
-
-
-
-
-
-/* =====================================
-   DARK MODE
-===================================== */
-
-
-function toggleDarkMode(){
-
-
-    document.body
-    .classList
-    .toggle(
-        "dark-mode"
-    );
-
-
-    localStorage.setItem(
-
-        "haldoDark",
-
-        document.body
-        .classList
-        .contains(
-            "dark-mode"
-        )
-
-    );
+    });
 
 
 }
@@ -1649,523 +612,52 @@ function toggleDarkMode(){
 
 
 /* =====================================
-   SYSTEM SETTINGS
-===================================== */
-
-
-const HalDoSystem = {
-
-
-    getStatus(){
-
-
-        return {
-
-            version:
-            HalDo.version,
-
-
-            ready:
-            HalDo.ready,
-
-
-            memory:
-            Object.keys(
-                HalDo.memory
-            ).length
-
-
-        };
-
-
-    }
-
-
-};
-
-
-
-
-
-
-
-
-
-document.addEventListener(
-"DOMContentLoaded",
-()=>{
-
-
-    HalDoFiles.init();
-
-
-});
-/* =====================================
-   HALDO AI OS 10.0
-   SYSTEM CONTROL + SEARCH
-   PART 5/8
-===================================== */
-
-
-/* =====================================
-   NOTIFICATION CENTER
+   NOTIFICATION SYSTEM
 ===================================== */
 
 
 const HalDoNotification = {
 
 
-    list:[],
+    add(text){
 
 
-    add(message){
+        const list =
 
-
-        this.list.push({
-
-            text:message,
-
-            time:
-            new Date()
-            .toLocaleTimeString()
-
-        });
-
-
-        this.render();
-
-
-    },
-
-
-
-
-
-
-
-
-
-    render(){
-
-
-        const box =
-        document.querySelector(
-            "#notificationList"
-        );
-
-
-
-        if(!box)return;
-
-
-
-        box.innerHTML="";
-
-
-
-        this.list
-        .slice()
-        .reverse()
-        .forEach(
-        note=>{
-
-
-            box.innerHTML += `
-
-            <div class="notification-item">
-
-            🔔 ${note.text}
-
-            <small>
-            ${note.time}
-            </small>
-
-            </div>
-
-            `;
-
-
-        });
-
-
-    },
-
-
-
-
-
-
-
-
-
-    clear(){
-
-
-        this.list=[];
-
-
-        this.render();
-
-
-    }
-
-
-};
-
-
-
-
-
-
-
-
-
-/* =====================================
-   GLOBAL NOTIFICATION
-===================================== */
-
-
-function showNotification(text){
-
-
-    HalDoNotification.add(
-        text
-    );
-
-
-}
-
-
-
-
-
-
-
-
-
-/* =====================================
-   WINDOW MANAGER
-===================================== */
-
-
-const HalDoWindow = {
-
-
-    current:null,
-
-
-
-    open(id){
-
-
-        const windows =
-        document.querySelectorAll(
-            ".app-window"
-        );
-
-
-
-        windows.forEach(
-        win=>{
-
-            win.classList.remove(
-                "active"
-            );
-
-        });
-
-
-
-        const target =
         document.getElementById(
-            id
+            "notificationList"
         );
 
 
 
-        if(target){
-
-
-            target.classList.add(
-                "active"
-            );
-
-
-            this.current =
-            id;
-
-
-        }
-
-
-    },
+        if(!list)
+        return;
 
 
 
+        const item =
 
-
-
-
-
-
-    close(){
-
-
-        document
-        .querySelectorAll(
-            ".app-window"
-        )
-        .forEach(
-        win=>{
-
-            win.classList.remove(
-                "active"
-            );
-
-        });
-
-
-
-        this.current=null;
-
-
-    }
-
-
-};
-
-
-
-
-
-
-
-
-
-/* =====================================
-   DESKTOP SYSTEM
-===================================== */
-
-
-const HalDoDesktop = {
-
-
-    init(){
-
-
-        const icons =
-        document.querySelectorAll(
-            ".desktop-icon"
+        document.createElement(
+            "p"
         );
 
 
 
-        icons.forEach(
-        icon=>{
+        item.className =
+        "notification-item";
 
 
-            icon.addEventListener(
-            "dblclick",
-            ()=>{
 
+        item.innerText =
+        text;
 
-                const app =
-                icon.dataset.window;
 
 
-
-                if(app){
-
-                    HalDoWindow.open(
-                        app
-                    );
-
-                }
-
-
-            });
-
-
-        });
-
-
-    }
-
-
-};
-
-
-
-
-
-
-
-
-
-/* =====================================
-   MOBILE SYSTEM
-===================================== */
-
-
-const HalDoMobile = {
-
-
-    check(){
-
-
-        return window.innerWidth <= 768;
-
-
-    },
-
-
-
-
-
-
-
-
-
-    init(){
-
-
-        if(
-            this.check()
-        ){
-
-
-            document.body
-            .classList
-            .add(
-                "mobile-mode"
-            );
-
-
-        }
-
-
-    }
-
-
-};
-
-
-
-
-
-
-
-
-
-window.addEventListener(
-"resize",
-()=>{
-
-
-    HalDoMobile.init();
-
-
-});
-
-
-
-
-
-
-
-
-
-/* =====================================
-   SEARCH SYSTEM
-===================================== */
-
-
-const HalDoSearch = {
-
-
-    apps:[
-
-        {
-            name:"Dateien",
-            id:"filesWindow"
-        },
-
-        {
-            name:"PDF Creator",
-            id:"pdfWindow"
-        },
-
-        {
-            name:"Schreiben",
-            id:"writingWindow"
-        },
-
-        {
-            name:"Notizen",
-            id:"notesWindow"
-        },
-
-        {
-            name:"Kalender",
-            id:"calendarWindow"
-        }
-
-    ],
-
-
-
-
-
-
-
-    search(text){
-
-
-        const result =
-        document.querySelector(
-            "#searchResults"
+        list.appendChild(
+            item
         );
 
 
-
-        if(!result)return;
-
-
-
-        result.innerHTML="";
-
-
-
-        this.apps
-        .filter(
-        app=>
-
-        app.name
-        .toLowerCase()
-        .includes(
-            text.toLowerCase()
-        )
-
-        )
-        .forEach(
-        app=>{
-
-
-            result.innerHTML += `
-
-            <div class="search-result-item"
-            onclick="HalDoWindow.open('${app.id}')">
-
-            🔎 ${app.name}
-
-            </div>
-
-            `;
-
-
-        });
-
-
     }
 
 
@@ -2180,1317 +672,29 @@ const HalDoSearch = {
 
 
 /* =====================================
-   SEARCH CONNECTION
+   CHAT START CONNECTION
 ===================================== */
 
 
 document.addEventListener(
+
 "DOMContentLoaded",
+
 ()=>{
 
 
-    HalDoDesktop.init();
+    HalDoChatMemory.load();
 
 
-    HalDoMobile.init();
-
-
-
-    const input =
-    document.querySelector(
-        "#searchInput"
-    );
-
-
-
-    if(input){
-
-
-        input.addEventListener(
-        "input",
-        ()=>{
-
-
-            HalDoSearch.search(
-                input.value
-            );
-
-
-        });
-
-
-    }
-
-
-});
-/* =====================================
-   HALDO AI OS 10.0
-   MEMORY + SECURITY + EXTENSIONS
-   PART 6/8
-===================================== */
-
-
-/* =====================================
-   ADVANCED AI MEMORY
-===================================== */
-
-
-const HalDoMemorySystem = {
-
-
-    data:{},
-
-
-    load(){
-
-
-        const saved =
-        localStorage.getItem(
-            "haldoAIData"
-        );
-
-
-
-        if(saved){
-
-
-            this.data =
-            JSON.parse(
-                saved
-            );
-
-
-        }
-
-
-    },
-
-
-
-
-
-
-
-
-
-    save(){
-
-
-        localStorage.setItem(
-
-            "haldoAIData",
-
-            JSON.stringify(
-                this.data
-            )
-
-        );
-
-
-    },
-
-
-
-
-
-
-
-
-
-    remember(key,value){
-
-
-        this.data[key] =
-        value;
-
-
-
-        this.save();
-
-
-
-        HalDoNotification.add(
-            "🧠 Erinnerung gespeichert"
-        );
-
-
-    },
-
-
-
-
-
-
-
-
-
-    recall(key){
-
-
-        return this.data[key];
-
-
-    },
-
-
-
-
-
-
-
-
-
-    clear(){
-
-
-        this.data={};
-
-
-        this.save();
-
-
-    }
-
-
-};
-
-
-
-
-
-
-
-
-
-/* =====================================
-   LANGUAGE INTERFACE
-===================================== */
-
-
-const HalDoTranslator = {
-
-
-    language:"de",
-
-
-
-    texts:{
-
-
-        de:{
-
-
-            welcome:
-            "Willkommen bei HalDo AI",
-
-
-            ready:
-            "System bereit"
-
-
-        },
-
-
-        en:{
-
-
-            welcome:
-            "Welcome to HalDo AI",
-
-
-            ready:
-            "System ready"
-
-
-        },
-
-
-        fr:{
-
-
-            welcome:
-            "Bienvenue dans HalDo AI",
-
-
-            ready:
-            "Système prêt"
-
-
-        }
-
-
-    },
-
-
-
-
-
-
-
-
-
-    setLanguage(lang){
-
-
-        if(
-            this.texts[lang]
-        ){
-
-
-            this.language =
-            lang;
-
-
-
-            HalDoSettings.language =
-            lang;
-
-
-
-            HalDoSettings.save();
-
-
-        }
-
-
-    },
-
-
-
-
-
-
-
-
-
-    get(key){
-
-
-        return (
-
-            this.texts
-            [this.language]
-            [key]
-
-        )
-        ||
-        key;
-
-
-    }
-
-
-};
-
-
-
-
-
-
-
-
-
-/* =====================================
-   SECURITY SYSTEM BASIS
-===================================== */
-
-
-const HalDoSecurity = {
-
-
-    locked:false,
-
-
-
-    status:"safe",
-
-
-
-    check(){
-
-
-        console.log(
-
-            "🔐 Sicherheit geprüft"
-
-        );
-
-
-        this.status =
-        "safe";
-
-
-        return true;
-
-
-    },
-
-
-
-
-
-
-
-
-
-    lock(){
-
-
-        this.locked=true;
-
-
-        HalDoNotification.add(
-
-            "🔒 System gesperrt"
-
-        );
-
-
-    },
-
-
-
-
-
-
-
-
-
-    unlock(){
-
-
-        this.locked=false;
-
-
-        HalDoNotification.add(
-
-            "🔓 System entsperrt"
-
-        );
-
-
-    }
-
-
-};
-
-
-
-
-
-
-
-
-
-/* =====================================
-   FUTURE MODULE SYSTEM
-===================================== */
-
-
-const HalDoFuture = {
-
-
-    modules:[],
-
-
-
-    register(name,func){
-
-
-        this.modules.push({
-
-            name:name,
-
-            function:func
-
-        });
-
-
-        console.log(
-
-            "🧩 Modul registriert:",
-            name
-
-        );
-
-
-    },
-
-
-
-
-
-
-
-
-
-    start(name){
-
-
-        const module =
-        this.modules.find(
-
-            item=>
-
-            item.name===name
-
-        );
-
-
-
-        if(module){
-
-
-            module.function();
-
-
-        }
-
-
-    }
-
-
-};
-
-
-
-
-
-
-
-
-
-/* =====================================
-   EXTENSION ENGINE
-===================================== */
-
-
-const HalDoExtension = {
-
-
-    plugins:[],
-
-
-
-    add(plugin){
-
-
-        this.plugins.push(
-            plugin
-        );
-
-
-        console.log(
-
-            "🚀 Erweiterung geladen:",
-            plugin
-
-        );
-
-
-    },
-
-
-
-
-
-
-
-
-
-    list(){
-
-
-        return this.plugins;
-
-
-    }
-
-
-};
-
-
-
-
-
-
-
-
-
-/* =====================================
-   SYSTEM CONNECTION
-===================================== */
-
-
-document.addEventListener(
-"DOMContentLoaded",
-()=>{
-
-
-    HalDoMemorySystem.load();
-
-
-    HalDoSecurity.check();
-
-
-
-    HalDoFuture.register(
-
-        "AI Future Core",
-
-        ()=>{
-
-            console.log(
-                "🌌 Future Core aktiv"
-            );
-
-        }
-
-    );
-
-
-});
-/* =====================================
-   HALDO AI OS 10.0
-   FINAL CORE CONNECTION
-   PART 7/8
-===================================== */
-
-
-/* =====================================
-   ERROR CHECK SYSTEM
-===================================== */
-
-
-const HalDoDiagnostics = {
-
-
-    errors:[],
-
-
-
-    check(){
-
-
-        this.errors=[];
-
-
-
-        const required = [
-
-
-            "index.html",
-
-
-            "style.css",
-
-
-            "script.js"
-
-
-        ];
-
-
-
-        console.log(
-            "⚡ Systemprüfung gestartet"
-        );
-
-
-
-        return this.errors.length === 0;
-
-
-    },
-
-
-
-
-
-
-
-
-
-    report(){
-
-
-        if(
-            this.errors.length === 0
-        ){
-
-            return "✅ Keine Fehler gefunden";
-
-        }
-
-
-        return this.errors;
-
-
-    }
-
-
-};
-
-
-
-
-
-
-
-
-
-/* =====================================
-   AI ENGINE CONNECTION
-===================================== */
-
-
-const HalDoAIEngine = {
-
-
-    active:false,
-
-
-    mode:"basic",
-
-
-
-    start(){
-
-
-        this.active=true;
-
-
-
-        console.log(
-
-            "🧠 HalDo AI Engine verbunden"
-
-        );
-
-
-
-        HalDoNotification.add(
-
-            "🧠 AI Engine gestartet"
-
-        );
-
-
-    },
-
-
-
-
-
-
-
-
-
-    setMode(mode){
-
-
-        this.mode =
-        mode;
-
-
-
-        console.log(
-
-            "AI Modus:",
-            mode
-
-        );
-
-
-    },
-
-
-
-
-
-
-
-
-
-    process(input){
-
-
-        if(!input)
-        return "";
-
-
-
-        return HalDoChat.createAnswer(
-            input
-        );
-
-
-    }
-
-
-};
-
-
-
-
-
-
-
-
-
-/* =====================================
-   PERFORMANCE OPTIMIZATION
-===================================== */
-
-
-const HalDoOptimizer = {
-
-
-    startTime:null,
-
-
-
-    start(){
-
-
-        this.startTime =
-        performance.now();
-
-
-
-        console.log(
-
-            "🚀 Optimierung gestartet"
-
-        );
-
-
-    },
-
-
-
-
-
-
-
-
-
-    finish(){
-
-
-        const time =
-        performance.now()
-        -
-        this.startTime;
-
-
-
-        console.log(
-
-            "⚡ Startzeit:",
-            time,
-            "ms"
-
-        );
-
-
-    }
-
-
-};
-
-
-
-
-
-
-
-
-
-/* =====================================
-   SYSTEM CLOSE SEQUENCE
-===================================== */
-
-
-const HalDoSystemCore = {
-
-
-    shutdown(){
-
-
-        console.log(
-
-            "🌙 HalDo wird beendet"
-
-        );
-
-
-        HalDo.saveMemory();
-
-
-        HalDoSettings.save();
-
-
-    },
-
-
-
-
-
-
-
-
-
-    restart(){
-
-
-        console.log(
-
-            "🚀 Neustart vorbereitet"
-
-        );
-
-
-        location.reload();
-
-
-    }
-
-
-};
-
-
-
-
-
-
-
-
-
-/* =====================================
-   FUTURE STRUCTURE
-===================================== */
-
-
-const HalDoFutureCore = {
-
-
-    version:"10.0",
-
-
-    roadmap:[
-
-
-        "Advanced AI",
-
-
-        "Cloud Memory",
-
-
-        "App Connections",
-
-
-        "Automation",
-
-
-        "Multi Device"
-
-
-    ],
-
-
-
-
-
-
-
-
-
-    show(){
-
-
-        console.log(
-
-            "🌌 Zukunftsstruktur",
-
-            this.roadmap
-
-        );
-
-
-    }
-
-
-};
-
-
-
-
-
-
-
-
-
-/* =====================================
-   FINAL CONNECTION
-===================================== */
-
-
-document.addEventListener(
-"DOMContentLoaded",
-()=>{
-
-
-    HalDoDiagnostics.check();
-
-
-    HalDoOptimizer.start();
-
-
-    HalDoAIEngine.start();
-
-
-    HalDoFutureCore.show();
-
-
-
-    setTimeout(()=>{
-
-
-        HalDoOptimizer.finish();
-
-
-    },1000);
-
-
-
-});
-/* =====================================
-   HALDO AI OS 10.0
-   FINAL SYSTEM CORE
-   PART 8/8
-===================================== */
-
-
-/* =====================================
-   GLOBAL AI CONTROLLER
-===================================== */
-
-
-const HalDoController = {
-
-
-    modules:[],
-
-
-
-    connect(name,module){
-
-
-        this.modules.push({
-
-            name:name,
-
-            module:module
-
-        });
-
-
-
-        console.log(
-
-            "🔧 Modul verbunden:",
-            name
-
-        );
-
-
-    },
-
-
-
-
-
-
-
-
-
-    status(){
-
-
-        return {
-
-
-            system:
-            "HalDo AI OS 10.0",
-
-
-            modules:
-            this.modules.length,
-
-
-            ai:
-            HalDoAIEngine.active,
-
-
-            ready:
-            HalDo.ready
-
-
-        };
-
-
-    }
-
-
-};
-
-
-
-
-
-
-
-
-
-/* =====================================
-   MODULE CONNECTION
-===================================== */
-
-
-function connectAllHalDoModules(){
-
-
-    HalDoController.connect(
-
-        "Core",
-
-        HalDo
-
-    );
-
-
-
-    HalDoController.connect(
-
-        "Chat",
-
-        HalDoChat
-
-    );
-
-
-
-    HalDoController.connect(
-
-        "Voice",
-
-        HalDoVoiceControl
-
-    );
-
-
-
-    HalDoController.connect(
-
-        "Memory",
-
-        HalDoMemorySystem
-
-    );
-
-
-
-    HalDoController.connect(
-
-        "Security",
-
-        HalDoSecurity
-
-    );
-
-
-
-    HalDoController.connect(
-
-        "Future",
-
-        HalDoFutureCore
-
-    );
-
-
-}
-
-
-
-
-
-
-
-
-
-/* =====================================
-   START SEQUENCE
-===================================== */
-
-
-function haldoStartSequence(){
-
-
-    console.log(
-
-        "🚀 HalDo AI OS 10.0 Startsequenz"
-
-    );
-
-
-
-    connectAllHalDoModules();
+    setupChat();
 
 
 
     HalDoNotification.add(
 
-        "🚀 HalDo AI OS vollständig gestartet"
+        "🤖 HalDo Chat bereit"
 
     );
-
-
-
-    console.log(
-
-        "✅ Alle Module aktiv"
-
-    );
-
-
-}
-
-
-
-
-
-
-
-
-
-/* =====================================
-   AI MASTER COMMAND
-===================================== */
-
-
-const HalDoMasterAI = {
-
-
-    ask(question){
-
-
-        console.log(
-
-            "🧠 AI Anfrage:",
-
-            question
-
-        );
-
-
-
-        return HalDoAIEngine.process(
-
-            question
-
-        );
-
-
-    },
-
-
-
-
-
-
-
-
-
-    learn(key,value){
-
-
-        HalDoMemorySystem.remember(
-
-            key,
-
-            value
-
-        );
-
-
-    },
-
-
-
-
-
-
-
-
-
-    info(){
-
-
-        return HalDoController.status();
-
-
-    }
-
-
-};
-
-
-
-
-
-
-
-
-
-/* =====================================
-   AUTO START
-===================================== */
-
-
-document.addEventListener(
-"DOMContentLoaded",
-()=>{
-
-
-    setTimeout(()=>{
-
-
-        haldoStartSequence();
-
-
-
-    },500);
 
 
 });
-
-
-
-
-
-
-
-
-
-/* =====================================
-   HALDO AI OS 10.0 COMPLETE
-===================================== */
-
-
-console.log(
-
-"🌌 HALDO AI OS 10.0 COMPLETE"
-
-);
