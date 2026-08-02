@@ -1504,3 +1504,129 @@ document.addEventListener(
 
 
 });
+/* =====================================
+   HALDO AI OS FOUNDATION v1.0.1
+   CLEAN SYSTEM FIX
+   PART 1/3
+===================================== */
+
+
+const HalDoSystem = {
+
+
+    version:"v1.0.1",
+
+
+    modules:[],
+
+
+
+    register(module){
+
+        this.modules.push(module);
+
+        console.log(
+            "✅ Modul geladen:",
+            module
+        );
+
+    },
+
+
+
+    start(){
+
+        console.log(
+            "🤖 HalDo AI OS System Start"
+        );
+
+
+        this.register("Boot");
+
+
+        this.register("Chat");
+
+
+        this.register("Memory");
+
+
+        this.register("Apps");
+
+
+        this.register("Voice");
+
+
+        HalDoNotification(
+            "HalDo AI OS ist bereit 🚀"
+        );
+
+
+    }
+
+
+};
+
+
+
+
+
+
+
+
+
+/* =====================================
+   REMOVE OLD CLICK PROBLEMS
+===================================== */
+
+
+function HalDoSafeClick(id, callback){
+
+
+    const element =
+
+    document.getElementById(id);
+
+
+
+    if(!element){
+
+        console.log(
+            "Element fehlt:",
+            id
+        );
+
+        return;
+
+    }
+
+
+
+    element.onclick = callback;
+
+
+}
+
+
+
+
+
+
+
+
+
+/* =====================================
+   CLEAN START
+===================================== */
+
+
+document.addEventListener(
+
+"DOMContentLoaded",
+
+()=>{
+
+
+    HalDoSystem.start();
+
+
+});
