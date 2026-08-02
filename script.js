@@ -1060,3 +1060,493 @@ item
 
 
 }
+/* =====================================
+   VOICE + STORAGE SYSTEM
+   PART 3/8
+   ===================================== */
+
+
+
+
+
+
+// =====================================
+// VOICE INPUT PREPARATION
+// =====================================
+
+
+function startVoiceInput(){
+
+
+
+if(
+"webkitSpeechRecognition" in window
+){
+
+
+
+let recognition =
+new webkitSpeechRecognition();
+
+
+
+recognition.lang =
+"de-DE";
+
+
+
+recognition.start();
+
+
+
+
+recognition.onresult =
+function(event){
+
+
+
+let text =
+event.results[0][0].transcript;
+
+
+
+let input =
+document.getElementById(
+"aiInput"
+);
+
+
+
+if(input){
+
+input.value=text;
+
+}
+
+
+
+};
+
+
+
+}else{
+
+
+
+showNotification(
+"🎤 Sprachfunktion wird vorbereitet"
+);
+
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+
+// =====================================
+// TEXT TO SPEECH
+// =====================================
+
+
+function speakLastAnswer(){
+
+
+
+let messages =
+document.querySelectorAll(
+".ai-message .chat-bubble p"
+);
+
+
+
+if(
+messages.length===0
+){
+
+return;
+
+}
+
+
+
+
+let last =
+messages[
+messages.length-1
+].innerText;
+
+
+
+let speech =
+new SpeechSynthesisUtterance(
+last
+);
+
+
+
+speech.lang =
+"de-DE";
+
+
+
+speech.rate =
+1;
+
+
+
+speech.pitch =
+1;
+
+
+
+speechSynthesis.speak(
+speech
+);
+
+
+
+}
+
+
+
+
+
+
+
+
+// =====================================
+// CLEAR CHAT
+// =====================================
+
+
+function clearChat(){
+
+
+
+let container =
+document.getElementById(
+"chatHistory"
+);
+
+
+
+if(container){
+
+
+
+container.innerHTML=`
+
+
+<div class="ai-message">
+
+
+<div class="chat-avatar">
+
+🤖
+
+</div>
+
+
+<div class="chat-bubble">
+
+
+<h4>
+
+HalDo AI
+
+</h4>
+
+
+<p>
+
+Chat wurde gelöscht. Wie kann ich helfen?
+
+</p>
+
+
+</div>
+
+
+</div>
+
+
+
+`;
+
+
+
+}
+
+
+
+
+chatMemory=[];
+
+
+
+showNotification(
+"🗑️ Chat gelöscht"
+);
+
+
+
+}
+
+
+
+
+
+
+
+
+// =====================================
+// WRITING SAVE
+// =====================================
+
+
+function saveWriting(){
+
+
+
+let text =
+document.getElementById(
+"writingArea"
+);
+
+
+
+if(text){
+
+
+
+localStorage.setItem(
+
+"haldoWriting",
+
+text.value
+
+);
+
+
+
+showNotification(
+"💾 Dokument gespeichert"
+);
+
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+
+// =====================================
+// LOAD WRITING
+// =====================================
+
+
+function loadWriting(){
+
+
+
+let text =
+document.getElementById(
+"writingArea"
+);
+
+
+
+let saved =
+localStorage.getItem(
+"haldoWriting"
+);
+
+
+
+if(
+text &&
+saved
+){
+
+
+
+text.value=saved;
+
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+// =====================================
+// NOTE SYSTEM
+// =====================================
+
+
+function saveNote(){
+
+
+
+let input =
+document.getElementById(
+"noteInput"
+);
+
+
+
+if(
+!input ||
+input.value.trim()===""
+){
+
+return;
+
+}
+
+
+
+let notes =
+JSON.parse(
+
+localStorage.getItem(
+"haldoNotes"
+)
+
+)
+
+|| [];
+
+
+
+notes.push(
+input.value
+);
+
+
+
+localStorage.setItem(
+
+"haldoNotes",
+
+JSON.stringify(notes)
+
+);
+
+
+
+input.value="";
+
+
+
+loadNotes();
+
+
+
+showNotification(
+"📝 Notiz gespeichert"
+);
+
+
+
+}
+
+
+
+
+
+
+
+
+function loadNotes(){
+
+
+
+let list =
+document.getElementById(
+"noteList"
+);
+
+
+
+if(!list){
+
+return;
+
+}
+
+
+
+let notes =
+JSON.parse(
+
+localStorage.getItem(
+"haldoNotes"
+
+)
+
+)
+
+|| [];
+
+
+
+list.innerHTML="";
+
+
+
+notes.forEach(
+note=>{
+
+
+
+let item =
+document.createElement(
+"p"
+);
+
+
+
+item.innerText =
+"📝 "+note;
+
+
+
+list.appendChild(
+item
+);
+
+
+
+}
+
+
+
+);
+
+
+
+}
