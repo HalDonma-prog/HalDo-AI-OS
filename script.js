@@ -1159,3 +1159,272 @@ showEvents();
 console.log(
 "💾 HalDo Storage System aktiv"
 );
+/* =====================================
+   HALDO AI OS BROWSER v1.1
+   CLEAN FINAL SCRIPT
+   PART 4/4 FINAL
+===================================== */
+
+
+/* =====================================
+   DARK MODE SYSTEM
+===================================== */
+
+
+const darkModeButton =
+document.getElementById("darkModeButton");
+
+
+const savedDarkMode =
+localStorage.getItem("haldo_dark_mode");
+
+
+if(savedDarkMode === "true"){
+
+    document.body.classList.add(
+        "dark-mode"
+    );
+
+}
+
+
+
+if(darkModeButton){
+
+    darkModeButton.addEventListener(
+        "click",
+        ()=>{
+
+            document.body.classList.toggle(
+                "dark-mode"
+            );
+
+
+            const active =
+            document.body.classList.contains(
+                "dark-mode"
+            );
+
+
+            localStorage.setItem(
+                "haldo_dark_mode",
+                active
+            );
+
+
+        }
+    );
+
+}
+
+
+
+
+
+
+
+
+
+/* =====================================
+   SETTINGS STORAGE
+===================================== */
+
+
+const userName =
+document.getElementById("userName");
+
+
+const userEmail =
+document.getElementById("userEmail");
+
+
+
+if(userName){
+
+    userName.value =
+    localStorage.getItem(
+        "haldo_user_name"
+    ) || "";
+
+
+    userName.addEventListener(
+        "change",
+        ()=>{
+
+            localStorage.setItem(
+                "haldo_user_name",
+                userName.value
+            );
+
+        }
+    );
+
+}
+
+
+
+if(userEmail){
+
+    userEmail.value =
+    localStorage.getItem(
+        "haldo_user_email"
+    ) || "";
+
+
+    userEmail.addEventListener(
+        "change",
+        ()=>{
+
+            localStorage.setItem(
+                "haldo_user_email",
+                userEmail.value
+            );
+
+        }
+    );
+
+}
+
+
+
+
+
+
+
+
+
+/* =====================================
+   SYSTEM STATUS
+===================================== */
+
+
+const securityStatus =
+document.getElementById(
+    "securityStatus"
+);
+
+
+
+if(securityStatus){
+
+    securityStatus.innerHTML =
+    "Aktiv 💙";
+
+}
+
+
+
+
+
+
+
+
+
+/* =====================================
+   VOICE AI PREPARATION
+===================================== */
+
+
+window.HalDoVoice = {
+
+    enabled:false,
+
+
+    start(){
+
+        console.log(
+            "🎤 HalDo Voice vorbereitet"
+        );
+
+    }
+
+};
+
+
+
+
+
+
+
+
+
+/* =====================================
+   NOTIFICATION CENTER
+===================================== */
+
+
+window.haldoNotification =
+function(message){
+
+
+    const list =
+    document.getElementById(
+        "notificationList"
+    );
+
+
+    if(!list)
+    return;
+
+
+    const item =
+    document.createElement(
+        "p"
+    );
+
+
+    item.innerHTML =
+    "🔔 " + message;
+
+
+    list.appendChild(
+        item
+    );
+
+
+};
+
+
+
+
+
+
+
+
+
+/* =====================================
+   HALDO FINAL START
+===================================== */
+
+
+setTimeout(
+()=>{
+
+
+console.log(
+"🌌 Das ist HalDo AI OS."
+);
+
+
+if(window.haldoNotification){
+
+    haldoNotification(
+        "HalDo AI OS erfolgreich gestartet"
+    );
+
+}
+
+
+},
+1500
+);
+
+
+
+
+
+
+
+console.log(
+"🚀 HalDo AI OS Browser v1.1 CLEAN FINAL aktiv"
+);
