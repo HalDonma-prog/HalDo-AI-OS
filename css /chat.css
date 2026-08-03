@@ -1,0 +1,450 @@
+/* =====================================
+   HalDo AI OS v3.0
+   CHAT MASTER DESIGN
+===================================== */
+
+
+* {
+
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+
+    font-family:
+    "Segoe UI",
+    Arial,
+    sans-serif;
+
+}
+
+
+
+:root {
+
+    --blue:#2563eb;
+    --cyan:#06b6d4;
+
+    --dark:#020617;
+
+    --panel:#111827;
+
+    --glass:
+    rgba(255,255,255,0.08);
+
+    --white:#ffffff;
+
+    --gray:#9ca3af;
+
+}
+
+
+
+
+body {
+
+
+    min-height:100vh;
+
+    background:
+
+    radial-gradient(
+        circle at top,
+        #1e40af,
+        var(--dark)
+    );
+
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    color:white;
+
+    padding:20px;
+
+
+}
+
+
+
+
+
+.chat-container {
+
+
+    width:100%;
+
+    max-width:700px;
+
+    height:90vh;
+
+
+    background:
+
+    rgba(17,24,39,0.85);
+
+
+    backdrop-filter:
+    blur(20px);
+
+
+    border-radius:30px;
+
+
+    overflow:hidden;
+
+
+    box-shadow:
+
+    0 30px 80px
+    rgba(0,0,0,0.5);
+
+
+}
+
+
+
+
+
+.chat-header {
+
+
+    display:flex;
+
+    align-items:center;
+
+    gap:15px;
+
+    padding:25px;
+
+
+    background:
+
+    rgba(255,255,255,0.05);
+
+
+}
+
+
+
+
+
+.ai-logo {
+
+
+    width:60px;
+
+    height:60px;
+
+
+    border-radius:50%;
+
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+
+    font-size:32px;
+
+
+    background:
+
+    linear-gradient(
+        135deg,
+        var(--blue),
+        var(--cyan)
+    );
+
+
+    box-shadow:
+
+    0 0 30px
+    rgba(37,99,235,0.7);
+
+
+}
+
+
+
+
+.chat-header p {
+
+
+    color:
+    var(--gray);
+
+
+}
+
+
+
+
+
+.chat-area {
+
+
+    height:calc(100% - 160px);
+
+    padding:20px;
+
+
+    overflow-y:auto;
+
+
+}
+
+
+
+
+
+.messages {
+
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:15px;
+
+
+}
+
+
+
+
+.message {
+
+
+    max-width:80%;
+
+    padding:15px 20px;
+
+
+    border-radius:20px;
+
+
+    line-height:1.5;
+
+
+    animation:
+
+    messageIn
+    0.3s ease;
+
+
+}
+
+
+
+
+.message.ai {
+
+
+    background:
+
+    rgba(37,99,235,0.25);
+
+
+    border:
+
+    1px solid
+    rgba(255,255,255,0.1);
+
+
+    align-self:flex-start;
+
+
+}
+
+
+
+
+.message.user {
+
+
+    background:
+
+    var(--blue);
+
+
+    align-self:flex-end;
+
+
+}
+
+
+
+
+
+.chat-input-area {
+
+
+    display:flex;
+
+    gap:10px;
+
+    padding:20px;
+
+
+}
+
+
+
+
+
+.chat-input-area input {
+
+
+    flex:1;
+
+
+    padding:15px;
+
+
+    border:none;
+
+
+    outline:none;
+
+
+    border-radius:20px;
+
+
+    background:
+
+    rgba(255,255,255,0.1);
+
+
+    color:white;
+
+
+    font-size:16px;
+
+
+}
+
+
+
+
+
+.chat-input-area input::placeholder {
+
+
+    color:#cbd5e1;
+
+
+}
+
+
+
+
+
+.chat-input-area button {
+
+
+    width:55px;
+
+    height:55px;
+
+
+    border:none;
+
+
+    border-radius:50%;
+
+
+    background:
+
+    linear-gradient(
+        135deg,
+        var(--blue),
+        var(--cyan)
+    );
+
+
+    color:white;
+
+
+    font-size:22px;
+
+
+    cursor:pointer;
+
+
+    transition:0.3s;
+
+
+}
+
+
+
+
+
+.chat-input-area button:hover {
+
+
+    transform:
+
+    scale(1.1);
+
+
+}
+
+
+
+
+@keyframes messageIn {
+
+
+    from {
+
+        opacity:0;
+
+        transform:
+        translateY(10px);
+
+    }
+
+
+    to {
+
+        opacity:1;
+
+        transform:
+        translateY(0);
+
+    }
+
+
+}
+
+
+
+
+
+@media(max-width:700px){
+
+
+    body {
+
+        padding:0;
+
+    }
+
+
+
+    .chat-container {
+
+        height:100vh;
+
+        border-radius:0;
+
+    }
+
+
+}
