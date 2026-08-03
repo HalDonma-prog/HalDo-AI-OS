@@ -1,66 +1,139 @@
-alert("HalDo chat.js läuft");
-alert("CHAT.JS WIRD GELADEN");
-
-window.onload = function () {
-
-    const button = document.getElementById("sendButton");
-    const input = document.getElementById("userInput");
-    const box = document.getElementById("chatBox");
+/* =====================================
+   HalDo AI OS
+   CHAT SYSTEM v3.0 FOUNDATION
+===================================== */
 
 
-    alert("ELEMENTE GEFUNDEN");
+/*
+    Verbindung:
+    Chat ↔ HalDo AI Core
+
+    Vorbereitung für:
+    - KI Antworten
+    - Sprache
+    - Memory
+    - spätere API Verbindung
+*/
 
 
-    button.onclick = function () {
 
-        alert("BUTTON FUNKTIONIERT");
+// Prüfen ob AI Core vorhanden ist
+
+if(window.HalDoAI){
+
+    console.log(
+        "🤖 HalDo AI Core verbunden"
+    );
+
+}else{
+
+    console.log(
+        "⚠️ AI Core nicht gefunden"
+    );
+
+}
 
 
-        const text = input.value;
 
 
-        if(text.trim() === "") {
-            return;
+// ================================
+// Chat Nachrichten Speicher
+// ================================
+
+
+const HalDoChat = {
+
+
+    messages: [],
+
+
+
+    send(message){
+
+
+        this.messages.push({
+
+            user: message,
+
+            time: new Date()
+
+        });
+
+
+
+        console.log(
+            "💬 Nachricht:",
+            message
+        );
+
+
+        return this.createResponse(message);
+
+
+    },
+
+
+
+
+    createResponse(message){
+
+
+        let response =
+        "Ich bin HalDo AI. Wie kann ich helfen?";
+
+
+
+        if(
+            message.toLowerCase()
+            .includes("hallo")
+        ){
+
+            response =
+            "Hallo 💙 Ich bin HalDo AI OS.";
+
         }
 
 
-        box.innerHTML += `
-            <div class="message user">
-                <div class="bubble">
-                    ${text}
-                </div>
-            </div>
-        `;
+
+        if(
+            message.toLowerCase()
+            .includes("name")
+        ){
+
+            response =
+            "Mein Name ist HalDo AI.";
+
+        }
 
 
-        input.value = "";
 
-    };
+        this.messages.push({
+
+            ai: response,
+
+            time: new Date()
+
+        });
+
+
+
+        return response;
+
+
+    }
+
 
 };
 
-HalDo-ai/
-│
-├── index.html
-├── dashboard.html
-├── chat.html
-├── tools.html
-├── profile.html
-├── settings.html
-│
-├── style.css
-├── dashboard.css
-├── chat.css
-├── tools.css
-├── profile.css
-├── settings.css
-│
-├── script.js
-├── dashboard.js
-├── chat.js
-├── tools.js
-├── profile.js
-├── settings.js
-│
-├── images/
-└── README.md
+
+
+
+// Global verfügbar
+
+window.HalDoChat = HalDoChat;
+
+
+
+console.log(
+    "💬 HalDo Chat System bereit"
+);
