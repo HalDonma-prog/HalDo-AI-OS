@@ -1,64 +1,188 @@
 <!DOCTYPE html>
 <html lang="de">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
-    <title>HalDo AI Chat</title>
-    <link rel="stylesheet" href="css/chat.css">
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>HalDo AI Chat</title>
+
+<link rel="stylesheet" href="css/chat.css">
+
 </head>
+
+
 <body>
-<div class="app">
-    <!-- Kopfbereich -->
-    <header class="chat-header">
-        <div class="brand">
-            <div class="logo">
-                🤖
-            </div>
-            <div>
-                <h1>
-                    HalDo AI
-                </h1>
-                <p>
-                    Dein persönlicher KI-Assistent
-                </p>
-            </div>
-        </div>
-        <button id="newChat">
-            Neuer Chat
-        </button>
-    </header>
-    <!-- Chat Nachrichten -->
-    <main id="chatWindow"
-          class="chat-window">
-        <div class="message ai">
-            <div class="avatar">
-                🤖
-            </div>
-            <div class="bubble">
-                Hallo! Ich bin HalDo AI.
-                Wie kann ich dir helfen?
-            </div>
-        </div>
-    </main>
-    <!-- Eingabe -->
-    <footer class="input-area">
-        <button id="attachButton"
-                class="icon-button">
-            📎
-        </button>
-        <textarea
-            id="messageInput"
-            placeholder="Nachricht an HalDo AI..."
-            rows="1">
-        </textarea>
-        <button id="sendButton"
-        class="send-button"
-        onclick="sendMessage()">
-            ➤
-</button>
-    </footer>
+
+
+<div class="chat-container">
+
+
+<header class="chat-header">
+
+<div class="ai-logo">
+🤖
 </div>
+
+
+<div>
+
+<h1>
+HalDo AI
+</h1>
+
+<p>
+AI Core Chat System v3.0
+</p>
+
+</div>
+
+
+</header>
+
+
+
+
+
+<main class="chat-area">
+
+
+<div id="messages"
+class="messages">
+
+
+<div class="message ai">
+
+🤖 Hallo 💙  
+Ich bin HalDo AI OS.  
+Wie kann ich dir helfen?
+
+</div>
+
+
+</div>
+
+
+</main>
+
+
+
+
+
+<footer class="chat-input-area">
+
+
+<input
+id="chatInput"
+type="text"
+placeholder="Schreibe eine Nachricht..."
+>
+
+
+<button onclick="sendMessage()">
+
+🚀
+
+</button>
+
+
+</footer>
+
+
+
+
+</div>
+
+
+
+
+
+<script src="js/ai-core.js"></script>
+
 <script src="js/chat.js"></script>
+
+
+
+<script>
+
+
+function sendMessage(){
+
+
+const input =
+document.getElementById(
+"chatInput"
+);
+
+
+const text =
+input.value.trim();
+
+
+
+if(text === "")
+return;
+
+
+
+const messages =
+document.getElementById(
+"messages"
+);
+
+
+
+// Benutzer Nachricht
+
+messages.innerHTML += `
+
+<div class="message user">
+
+👤 ${text}
+
+</div>
+
+`;
+
+
+
+// HalDo Antwort
+
+let answer =
+HalDoChat.send(text);
+
+
+
+messages.innerHTML += `
+
+<div class="message ai">
+
+🤖 ${answer}
+
+</div>
+
+`;
+
+
+
+input.value="";
+
+
+
+messages.scrollTop =
+messages.scrollHeight;
+
+
+
+}
+
+
+</script>
+
+
+
 </body>
+
 </html>
