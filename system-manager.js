@@ -1,6 +1,6 @@
 /* =====================================
    HalDo AI OS v3.0
-   SYSTEM MANAGER
+   SYSTEM MANAGER v1.1
 ===================================== */
 
 
@@ -11,6 +11,7 @@
     - Systemstatus
     - Module verwalten
     - Version
+    - Registrierung
     - Erweiterungen vorbereiten
 */
 
@@ -27,12 +28,19 @@ const HalDoSystem = {
     "3.0",
 
 
+    managerVersion:
+    "1.1",
+
+
     status:
     "online",
 
 
     modules:
     {},
+
+
+
 
 
 
@@ -43,7 +51,20 @@ const HalDoSystem = {
     registerModule(name, module){
 
 
+        if(!name){
+
+            console.log(
+                "⚠️ Modul ohne Namen"
+            );
+
+            return;
+
+        }
+
+
+
         this.modules[name] = module;
+
 
 
         console.log(
@@ -58,8 +79,29 @@ const HalDoSystem = {
 
 
 
+
+
     // ==========================
-    // System Status
+    // Modul prüfen
+    // ==========================
+
+    hasModule(name){
+
+
+        return this.modules[name]
+        !== undefined;
+
+
+    },
+
+
+
+
+
+
+
+    // ==========================
+    // Status abrufen
     // ==========================
 
     getStatus(){
@@ -67,12 +109,17 @@ const HalDoSystem = {
 
         return {
 
+
             name:
             this.name,
 
 
             version:
             this.version,
+
+
+            manager:
+            this.managerVersion,
 
 
             status:
@@ -94,6 +141,8 @@ const HalDoSystem = {
 
 
 
+
+
     // ==========================
     // System Start
     // ==========================
@@ -106,6 +155,7 @@ const HalDoSystem = {
         );
 
 
+
         console.log(
             this.getStatus()
         );
@@ -114,13 +164,18 @@ const HalDoSystem = {
     }
 
 
+
 };
 
 
 
 
 
+
+
+
 // Global verfügbar machen
+
 
 window.HalDoSystem =
 HalDoSystem;
@@ -129,6 +184,10 @@ HalDoSystem;
 
 
 
-// System starten
+
+
+
+// Start
+
 
 HalDoSystem.start();
