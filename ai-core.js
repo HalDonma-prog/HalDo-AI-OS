@@ -1,6 +1,6 @@
 /* =====================================
    HalDo AI OS
-   AI CORE v1.0 FOUNDATION
+   AI CORE v1.1 SYSTEM CONNECTED
 ===================================== */
 
 
@@ -8,11 +8,13 @@
     HalDo AI Core
 
     Zentrale Verwaltung für:
+
     - Benutzer
     - Sprache
     - Einstellungen
     - Module
     - Erinnerungen
+    - System Manager Verbindung
 
 */
 
@@ -21,55 +23,101 @@
 const HalDoAI = {
 
 
-    systemName: "HalDo AI OS",
+    systemName:
+    "HalDo AI OS",
 
 
-    version: "3.0",
+    version:
+    "3.0",
 
 
-    status: "online",
+    coreVersion:
+    "1.1",
+
+
+    status:
+    "online",
+
+
 
 
 
     user: {
 
-        name: "User",
 
-        language: "de",
+        name:
+        "User",
 
-        preferences: {}
+
+        language:
+        "de",
+
+
+        preferences:
+        {}
+
 
     },
 
 
 
-    memory: [],
+
+
+    memory:
+    [],
+
+
 
 
 
     modules: {
 
-        chat: true,
 
-        files: false,
+        chat:
+        true,
 
-        music: false,
 
-        video: false,
+        files:
+        true,
 
-        image: false,
 
-        navigation: false,
+        music:
+        false,
 
-        learning: false,
 
-        store: false,
+        video:
+        false,
 
-        cloud: false,
 
-        security: true
+        image:
+        false,
+
+
+        navigation:
+        false,
+
+
+        learning:
+        false,
+
+
+        store:
+        false,
+
+
+        cloud:
+        false,
+
+
+        security:
+        true
+
 
     },
+
+
+
+
 
 
     // =========================
@@ -87,11 +135,51 @@ const HalDoAI = {
 
         console.log(
             this.systemName,
-            this.version
+            "Core",
+            this.coreVersion
         );
 
 
+
+
+        // Verbindung mit System Manager
+
+
+        if(window.HalDoSystem){
+
+
+            HalDoSystem.registerModule(
+
+                "AI Core",
+
+                this
+
+            );
+
+
+
+            console.log(
+                "⚙️ AI Core mit System Manager verbunden"
+            );
+
+
+
+        }else{
+
+
+            console.log(
+                "⚠️ System Manager nicht gefunden"
+            );
+
+
+        }
+
+
     },
+
+
+
+
 
 
 
@@ -103,16 +191,26 @@ const HalDoAI = {
     setLanguage(lang){
 
 
-        this.user.language = lang;
+        this.user.language =
+        lang;
+
 
 
         console.log(
+
             "🌍 Sprache geändert:",
+
             lang
+
         );
 
 
     },
+
+
+
+
+
 
 
 
@@ -124,16 +222,27 @@ const HalDoAI = {
     remember(data){
 
 
-        this.memory.push(data);
-
-
-        console.log(
-            "🧠 Erinnerung gespeichert:",
+        this.memory.push(
             data
         );
 
 
+
+        console.log(
+
+            "🧠 Erinnerung gespeichert:",
+
+            data
+
+        );
+
+
     },
+
+
+
+
+
 
 
 
@@ -145,19 +254,91 @@ const HalDoAI = {
     enableModule(module){
 
 
-        if(this.modules[module] !== undefined){
+
+        if(
+
+            this.modules[module]
+
+            !==
+
+            undefined
+
+        ){
 
 
-            this.modules[module] = true;
+            this.modules[module]
+            =
+            true;
+
 
 
             console.log(
+
                 "📱 Modul aktiviert:",
+
                 module
+
+            );
+
+
+        }else{
+
+
+            console.log(
+
+                "⚠️ Modul nicht gefunden:",
+
+                module
+
             );
 
 
         }
+
+
+    },
+
+
+
+
+
+
+
+
+    // =========================
+    // System Status
+    // =========================
+
+
+    getStatus(){
+
+
+
+        return {
+
+
+            name:
+            this.systemName,
+
+
+            version:
+            this.version,
+
+
+            core:
+            this.coreVersion,
+
+
+            status:
+            this.status,
+
+
+            modules:
+            this.modules
+
+
+
+        };
 
 
     }
@@ -169,13 +350,24 @@ const HalDoAI = {
 
 
 
-// System starten
-
-HalDoAI.start();
 
 
 
 
 // Global verfügbar machen
 
-window.HalDoAI = HalDoAI;
+
+window.HalDoAI =
+HalDoAI;
+
+
+
+
+
+
+
+
+// System starten
+
+
+HalDoAI.start();
