@@ -1,21 +1,20 @@
 /* =====================================
-   HalDo AI OS
-   AI CORE v1.1 SYSTEM CONNECTED
+   HalDo AI OS v3.0
+   AI CORE v1.2 SYSTEM CONNECTED
 ===================================== */
 
 
 /*
     HalDo AI Core
 
-    Zentrale Verwaltung für:
+    Zentrale Intelligenz von HalDo AI OS
 
-    - Benutzer
+    Aufgaben:
+    - Benutzerverwaltung
     - Sprache
-    - Einstellungen
-    - Module
     - Erinnerungen
+    - Module
     - System Manager Verbindung
-
 */
 
 
@@ -32,7 +31,7 @@ const HalDoAI = {
 
 
     coreVersion:
-    "1.1",
+    "1.2",
 
 
     status:
@@ -42,7 +41,8 @@ const HalDoAI = {
 
 
 
-    user: {
+
+    user:{
 
 
         name:
@@ -53,8 +53,7 @@ const HalDoAI = {
         "de",
 
 
-        preferences:
-        {}
+        preferences:{}
 
 
     },
@@ -63,22 +62,23 @@ const HalDoAI = {
 
 
 
-    memory:
-    [],
+
+    memory: [],
 
 
 
 
 
-    modules: {
+
+    modules:{
 
 
         chat:
-        true,
+        false,
 
 
         files:
-        true,
+        false,
 
 
         music:
@@ -120,17 +120,22 @@ const HalDoAI = {
 
 
 
+
+
+
     // =========================
-    // Start System
+    // SYSTEM START
     // =========================
 
 
     start(){
 
 
+
         console.log(
             "🤖 HalDo AI Core gestartet"
         );
+
 
 
         console.log(
@@ -142,10 +147,12 @@ const HalDoAI = {
 
 
 
-        // Verbindung mit System Manager
+
+        // Verbindung System Manager
 
 
         if(window.HalDoSystem){
+
 
 
             HalDoSystem.registerModule(
@@ -168,11 +175,12 @@ const HalDoAI = {
 
 
             console.log(
-                "⚠️ System Manager nicht gefunden"
+                "⚠️ System Manager nicht geladen"
             );
 
 
         }
+
 
 
     },
@@ -183,8 +191,10 @@ const HalDoAI = {
 
 
 
+
+
     // =========================
-    // Sprache
+    // SPRACHE
     // =========================
 
 
@@ -214,17 +224,17 @@ const HalDoAI = {
 
 
 
+
     // =========================
-    // Erinnerung speichern
+    // MEMORY
     // =========================
 
 
     remember(data){
 
 
-        this.memory.push(
-            data
-        );
+
+        this.memory.push(data);
 
 
 
@@ -237,6 +247,7 @@ const HalDoAI = {
         );
 
 
+
     },
 
 
@@ -246,18 +257,19 @@ const HalDoAI = {
 
 
 
+
     // =========================
-    // Modul aktivieren
+    // MODUL AKTIVIEREN
     // =========================
 
 
-    enableModule(module){
+    enableModule(name){
 
 
 
         if(
 
-            this.modules[module]
+            this.modules[name]
 
             !==
 
@@ -266,8 +278,7 @@ const HalDoAI = {
         ){
 
 
-            this.modules[module]
-            =
+            this.modules[name] =
             true;
 
 
@@ -276,9 +287,10 @@ const HalDoAI = {
 
                 "📱 Modul aktiviert:",
 
-                module
+                name
 
             );
+
 
 
         }else{
@@ -286,14 +298,15 @@ const HalDoAI = {
 
             console.log(
 
-                "⚠️ Modul nicht gefunden:",
+                "⚠️ Modul nicht vorhanden:",
 
-                module
+                name
 
             );
 
 
         }
+
 
 
     },
@@ -305,8 +318,9 @@ const HalDoAI = {
 
 
 
+
     // =========================
-    // System Status
+    // STATUS
     // =========================
 
 
@@ -354,6 +368,7 @@ const HalDoAI = {
 
 
 
+
 // Global verfügbar machen
 
 
@@ -367,7 +382,8 @@ HalDoAI;
 
 
 
-// System starten
+
+// Start
 
 
 HalDoAI.start();
