@@ -8,19 +8,33 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>
-HalDo AI OS Browser v1.1
+HalDo AI OS v2.0
 </title>
 
-<link rel="stylesheet" href="style.css">
+
+<meta name="description"
+content="HalDo AI OS - Personal AI Operating System">
+
+
+<link rel="manifest" href="manifest.json">
+
+
+<link rel="stylesheet" href="css/main.css">
+
+<link rel="stylesheet" href="css/dashboard.css">
+
+<link rel="stylesheet" href="css/apps.css">
+
 
 </head>
+
 
 
 <body>
 
 
 <!-- =====================================
-     HALDO BOOT SCREEN
+     HALDO BOOT SYSTEM
 ===================================== -->
 
 
@@ -29,10 +43,9 @@ HalDo AI OS Browser v1.1
 
     <div class="boot-logo">
 
-        <img 
-        src="haldo-logo.png"
-        alt="HalDo AI Logo"
-        >
+        <img
+        src="images/haldo-logo.png"
+        alt="HalDo AI Logo">
 
     </div>
 
@@ -42,12 +55,16 @@ HalDo AI OS Browser v1.1
     </h1>
 
 
-    <p>
-        AI System wird gestartet...
+    <p data-i18n="system_loading">
+        System wird gestartet...
     </p>
 
 
-    <div class="boot-line"></div>
+    <div class="boot-progress">
+
+        <div class="boot-bar"></div>
+
+    </div>
 
 
 </div>
@@ -61,7 +78,7 @@ HalDo AI OS Browser v1.1
 
 
 <!-- =====================================
-     MAIN SYSTEM
+     MAIN HALDO SYSTEM
 ===================================== -->
 
 
@@ -69,20 +86,25 @@ HalDo AI OS Browser v1.1
 
 
 
+<!-- =====================================
+     TOP HEADER
+===================================== -->
+
+
 <header class="haldo-header">
 
 
-<div class="brand-area">
+<div class="brand">
 
 
-<img 
-src="haldo-logo.png"
-class="header-logo"
-alt="HalDo Logo"
->
+<img
+src="images/haldo-logo.png"
+class="main-logo"
+alt="HalDo">
 
 
 <div>
+
 
 <h1>
 HalDo AI OS
@@ -90,7 +112,7 @@ HalDo AI OS
 
 
 <p>
-Persönlicher AI Browser
+Personal AI System
 </p>
 
 
@@ -103,13 +125,62 @@ Persönlicher AI Browser
 
 
 
-<div class="system-status">
 
 
-🟢 Online
+<div class="header-tools">
+
+
+<div class="online-status">
+
+🟢
+<span data-i18n="online">
+Online
+</span>
 
 
 </div>
+
+
+
+
+
+<select id="languageSelect">
+
+
+<option value="de">
+
+🇩🇪 Deutsch
+
+</option>
+
+
+<option value="ku">
+
+🏳️ Kurmancî
+
+</option>
+
+
+<option value="tr">
+
+🇹🇷 Türkçe
+
+</option>
+
+
+<option value="en">
+
+🇬🇧 English
+
+</option>
+
+
+</select>
+
+
+
+</div>
+
 
 
 </header>
@@ -122,46 +193,50 @@ Persönlicher AI Browser
 
 
 
+<!-- =====================================
+     SYSTEM LAYOUT
+===================================== -->
+
+
 <div class="os-layout">
 
 
 
+<!-- SIDEBAR -->
 
 
-<!-- =====================================
-     LEFT SIDEBAR
-===================================== -->
+<aside class="sidebar">
 
 
-<aside class="left-sidebar">
+
+<div class="sidebar-logo">
 
 
-<div class="sidebar-brand">
+<div class="ai-symbol">
 
-
-<div class="mini-logo">
-
-🤖
+H★AI
 
 </div>
 
 
-<div>
 
 <h3>
+
 HalDo
+
 </h3>
 
 
 <p>
-AI OS Browser
+
+AI OS v2.0
+
 </p>
 
 
 </div>
 
 
-</div>
 
 
 
@@ -169,1091 +244,145 @@ AI OS Browser
 
 
 
+<nav class="navigation">
 
 
-<nav class="main-navigation">
+
+<button
+class="nav-item active"
+data-app="dashboard">
 
 
-<button 
-class="nav-button active"
-data-page="homePage">
+🏠
+<span data-i18n="home">
+Start
+</span>
 
-🏠 Start
 
 </button>
 
 
 
 
-<button 
-class="nav-button"
-data-page="chatPage">
 
-🤖 AI Chat
+<button
+class="nav-item"
+data-app="chat">
+
+
+🤖
+<span data-i18n="chat">
+AI Chat
+</span>
+
 
 </button>
 
 
 
 
-<button 
-class="nav-button"
-data-page="filesPage">
 
-📁 Dateien
+<button
+class="nav-item"
+data-app="mail">
+
+
+📧
+<span data-i18n="mail">
+E-Mail
+</span>
+
 
 </button>
 
 
 
 
-<button 
-class="nav-button"
-data-page="writingPage">
 
-📝 Schreiben
+<button
+class="nav-item"
+data-app="files">
+
+
+📁
+<span data-i18n="files">
+Dateien
+</span>
+
+
+</button>
+
+
+
+
+
+<button
+class="nav-item"
+data-app="music">
+
+
+🎵
+<span data-i18n="music">
+Musik
+</span>
+
 
 </button>
 
 
 
-<button 
-class="nav-button"
-data-page="settingsPage">
 
-⚙️ Einstellungen
+
+<button
+class="nav-item"
+data-app="video">
+
+
+🎬
+<span data-i18n="video">
+Video
+</span>
+
 
 </button>
+
+
+
+
+
+<button
+class="nav-item"
+data-app="images">
+
+
+🖼️
+<span data-i18n="images">
+Bilder
+</span>
+
+
+</button>
+
+
+
+
+
+<button
+class="nav-item"
+data-app="navigation">
+
+
+🚗
+<span data-i18n="navigation">
+Navigation
+</span>
+
+
+</button>
+
 
 
 </nav>
 
 
-
-
-
-
-
-
-
-<div class="sidebar-bottom">
-
-
-<button 
-class="nav-button"
-id="darkModeButton">
-
-🌙 Dark Mode
-
-</button>
-
-
-</div>
-
-
-
 </aside>
-
-
-
-
-
-
-
-
-
-<!-- MAIN CONTENT START -->
-
-<main class="main-content">
-<!-- =====================================
-     HOME DASHBOARD
-===================================== -->
-
-
-<section 
-id="homePage"
-class="page active">
-
-
-<div class="welcome-card">
-
-
-<h2>
-🤖 Willkommen bei HalDo AI OS
-</h2>
-
-
-<p>
-Dein persönlicher AI Browser ist bereit.
-</p>
-
-
-<div class="ai-message-start">
-
-💙 Hallo, ich bin HalDo.  
-Ich unterstütze dich beim Arbeiten, Organisieren und Erstellen.
-
-</div>
-
-
-<div class="dashboard-grid">
-
-
-<div class="dashboard-card">
-
-<h3>
-🤖 AI Assistant
-</h3>
-
-<p>
-Chat, Ideen und Hilfe.
-</p>
-
-</div>
-
-
-
-<div class="dashboard-card">
-
-<h3>
-📁 Dateien
-</h3>
-
-<p>
-Dokumente verwalten.
-</p>
-
-</div>
-
-
-
-<div class="dashboard-card">
-
-<h3>
-📝 Kreativbereich
-</h3>
-
-<p>
-Schreiben und speichern.
-</p>
-
-</div>
-
-
-
-<div class="dashboard-card">
-
-<h3>
-⚙️ System
-</h3>
-
-<p>
-Einstellungen und Kontrolle.
-</p>
-
-</div>
-
-
-</div>
-
-
-</div>
-
-
-</section>
-
-
-
-
-
-
-
-
-
-<!-- =====================================
-     CHAT PAGE
-===================================== -->
-
-
-<section 
-id="chatPage"
-class="page">
-
-
-<h2>
-🤖 HalDo AI Chat
-</h2>
-
-
-
-<div 
-class="chat-container"
-id="chatContainer">
-
-
-<div class="ai-message">
-
-Hallo 👋  
-Ich bin HalDo AI. Wie kann ich helfen?
-
-</div>
-
-
-</div>
-
-
-
-
-
-<div class="chat-input-area">
-
-
-<input
-
-id="chatInput"
-
-placeholder="Nachricht an HalDo..."
-
->
-
-
-<button
-
-id="sendMessage"
-
-class="primary-button">
-
-Senden
-
-</button>
-
-
-</div>
-
-
-</section>
-
-
-
-
-
-
-
-
-
-<!-- =====================================
-     FILE SYSTEM
-===================================== -->
-
-
-<section
-
-id="filesPage"
-
-class="page">
-
-
-<h2>
-📁 Dateien
-</h2>
-
-
-
-<div class="app-card">
-
-
-<input
-
-type="file"
-
-id="fileUpload"
-
-multiple
-
->
-
-
-
-<div
-
-id="fileList">
-
-
-<p>
-Noch keine Dateien geladen.
-</p>
-
-
-</div>
-
-
-</div>
-
-
-</section>
-
-
-
-
-
-
-
-
-
-<!-- =====================================
-     WRITING AREA
-===================================== -->
-
-
-<section
-
-id="writingPage"
-
-class="page">
-
-
-<h2>
-📝 Schreibbereich
-</h2>
-
-
-
-<div class="app-card">
-
-
-<textarea
-
-id="writerText"
-
-placeholder="Hier schreiben..."
-
-></textarea>
-
-
-
-<button
-
-id="saveDocument"
-
-class="primary-button">
-
-
-💾 Speichern
-
-
-</button>
-
-
-</div>
-
-
-</section>
-
-
-
-
-
-
-
-
-
-<!-- =====================================
-     PDF PREPARATION
-===================================== -->
-
-
-<section
-
-id="pdfPage"
-
-class="page">
-
-
-<h2>
-📄 PDF Creator
-</h2>
-
-
-
-<div class="app-card">
-
-
-<input
-
-id="pdfTitle"
-
-placeholder="PDF Titel"
-
-
->
-
-
-
-<textarea
-
-id="pdfText"
-
-placeholder="PDF Inhalt..."
-
-></textarea>
-
-
-
-<button
-
-id="createPDF"
-
-class="primary-button">
-
-📄 PDF erstellen
-
-</button>
-
-
-</div>
-
-
-</section>
-<!-- =====================================
-     NOTES
-===================================== -->
-
-
-<section
-
-id="notesPage"
-
-class="page">
-
-
-<h2>
-📒 Notizen
-</h2>
-
-
-
-<div class="app-card">
-
-
-<textarea
-
-id="noteInput"
-
-placeholder="Neue Notiz schreiben..."
-
-></textarea>
-
-
-
-<button
-
-id="addNote"
-
-class="primary-button">
-
-➕ Hinzufügen
-
-</button>
-
-
-
-<div
-
-id="noteList">
-
-</div>
-
-
-</div>
-
-
-</section>
-
-
-
-
-
-
-
-
-
-<!-- =====================================
-     CALENDAR
-===================================== -->
-
-
-<section
-
-id="calendarPage"
-
-class="page">
-
-
-<h2>
-📅 Kalender
-</h2>
-
-
-
-<div class="app-card">
-
-
-<input
-
-type="date"
-
-id="calendarDate"
-
->
-
-
-
-<textarea
-
-id="calendarEvent"
-
-placeholder="Termin oder Erinnerung..."
-
-></textarea>
-
-
-
-<button
-
-id="saveEvent"
-
-class="primary-button">
-
-📅 Speichern
-
-</button>
-
-
-
-<div
-
-id="calendarList">
-
-</div>
-
-
-</div>
-
-
-</section>
-
-
-
-
-
-
-
-
-
-<!-- =====================================
-     MAIL
-===================================== -->
-
-
-<section
-
-id="mailPage"
-
-class="page">
-
-
-<h2>
-📧 Mail System
-</h2>
-
-
-
-<div class="app-card">
-
-
-<input
-
-id="mailReceiver"
-
-placeholder="Empfänger"
-
->
-
-
-
-<input
-
-id="mailSubject"
-
-placeholder="Betreff"
-
->
-
-
-
-<textarea
-
-id="mailText"
-
-placeholder="Nachricht..."
-
-></textarea>
-
-
-
-<button
-
-id="sendMail"
-
-class="primary-button">
-
-📨 Senden
-
-</button>
-
-
-</div>
-
-
-</section>
-
-
-
-
-
-
-
-
-
-<!-- =====================================
-     SETTINGS
-===================================== -->
-
-
-<section
-
-id="settingsPage"
-
-class="page">
-
-
-<h2>
-⚙️ Einstellungen
-</h2>
-
-
-
-<div class="settings-card">
-
-
-
-<div class="settings-box">
-
-
-<h3>
-👤 Profil
-</h3>
-
-
-
-<input
-
-id="userName"
-
-placeholder="Name"
-
->
-
-
-
-<input
-
-id="userEmail"
-
-placeholder="E-Mail"
-
->
-
-
-</div>
-
-
-
-
-
-
-
-
-
-<div class="settings-box">
-
-
-<h3>
-🌍 Sprache
-</h3>
-
-
-
-<select
-
-id="languageSelect">
-
-
-<option value="de-DE">
-
-Deutsch 🇩🇪
-
-</option>
-
-
-
-<option value="en-US">
-
-English 🇬🇧
-
-</option>
-
-
-
-<option value="fr-FR">
-
-Français 🇫🇷
-
-</option>
-
-
-
-<option value="es-ES">
-
-Español 🇪🇸
-
-</option>
-
-
-</select>
-
-
-</div>
-
-
-
-
-
-
-
-
-
-<div class="settings-box">
-
-
-<h3>
-🌙 Design
-</h3>
-
-
-
-<button
-
-id="darkModeButton"
-
-class="primary-button">
-
-
-🌙 Dark Mode umschalten
-
-
-</button>
-
-
-</div>
-
-
-
-
-
-
-
-
-
-<div class="settings-box">
-
-
-<h3>
-🔐 System
-</h3>
-
-
-
-<p>
-
-Status:
-
-<span id="securityStatus">
-
-Aktiv
-
-</span>
-
-</p>
-
-
-</div>
-
-
-
-</div>
-
-
-</section>
-<!-- =====================================
-     NOTIFICATION CENTER
-===================================== -->
-
-
-<div
-
-id="notificationCenter"
-
-class="notification-center">
-
-
-<h3>
-🔔 Benachrichtigungen
-</h3>
-
-
-
-<div
-
-id="notificationList">
-
-
-<p>
-Keine neuen Meldungen.
-</p>
-
-
-</div>
-
-
-</div>
-
-
-
-
-
-
-
-
-
-<!-- =====================================
-     FUTURE MODULES
-===================================== -->
-
-
-<section
-
-id="futurePage"
-
-class="page">
-
-
-<h2>
-🧩 Zukunftsmodule
-</h2>
-
-
-
-<div class="future-grid">
-
-
-<div class="future-card">
-
-<span>
-🧠
-</span>
-
-<h3>
-Advanced AI
-</h3>
-
-<p>
-Erweiterte KI Funktionen
-</p>
-
-</div>
-
-
-
-<div class="future-card">
-
-<span>
-☁️
-</span>
-
-<h3>
-Cloud System
-</h3>
-
-<p>
-Synchronisation vorbereitet
-</p>
-
-</div>
-
-
-
-<div class="future-card">
-
-<span>
-🎤
-</span>
-
-<h3>
-Voice AI
-</h3>
-
-<p>
-Sprachsteuerung vorbereitet
-</p>
-
-</div>
-
-
-
-<div class="future-card">
-
-<span>
-🚀
-</span>
-
-<h3>
-Expansion
-</h3>
-
-<p>
-Neue Module geplant
-</p>
-
-</div>
-
-
-</div>
-
-
-</section>
-
-
-
-
-
-
-
-
-
-<!-- =====================================
-     SYSTEM CONNECTION
-===================================== -->
-
-
-<div
-
-id="systemConnection">
-
-
-<!--
-
-HalDo AI Core
-Cloud
-Plugins
-Automation
-
--->
-
-</div>
-
-
-
-
-
-
-
-
-
-</main>
-
-
-</div>
-
-
-
-
-
-
-
-
-
-<!-- =====================================
-     FOOTER
-===================================== -->
-
-
-<footer
-
-class="haldo-footer">
-
-
-<div class="footer-logo">
-
-🤖 HalDo AI OS
-
-</div>
-
-
-
-<p>
-
-Browser Edition v1.1
-
-</p>
-
-
-
-<p>
-
-© HalDo AI System
-
-</p>
-
-
-</footer>
-
-
-
-
-
-
-
-
-
-</div>
-
-
-
-
-
-
-
-
-
-<!-- =====================================
-     SCRIPT CONNECTION ONLY ONCE
-===================================== -->
-
-
-<script src="script.js"></script>
-
-
-</body>
-
-</html>
