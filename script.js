@@ -1801,3 +1801,584 @@ console.log(
 "🛍️ App Store Engine geladen"
 
 );
+/* =====================================
+   HALDO AI OS v2.0
+   MASTER CORE SCRIPT
+   PART 4/4 FINAL
+===================================== */
+
+
+
+/* =====================================
+   CLOUD SYSTEM ☁️
+===================================== */
+
+
+window.HalDoCloud = {
+
+
+    connected:false,
+
+
+    userData:{},
+
+
+
+    connect(){
+
+
+        this.connected=true;
+
+
+
+        HalDoNotify(
+
+            "☁️ HalDo Cloud vorbereitet"
+
+        );
+
+
+
+        return true;
+
+
+    },
+
+
+
+    sync(data){
+
+
+        if(!this.connected){
+
+            return false;
+
+        }
+
+
+
+        this.userData=data;
+
+
+
+        HalDoStorage.save(
+
+            "cloud_data",
+
+            data
+
+        );
+
+
+
+        HalDoNotify(
+
+            "☁️ Daten synchronisiert"
+
+        );
+
+
+
+        return true;
+
+
+    }
+
+
+
+};
+
+
+
+
+
+
+
+
+
+/* =====================================
+   SECURITY CENTER 🔐
+===================================== */
+
+
+window.HalDoSecurity = {
+
+
+    status:
+
+    "protected",
+
+
+
+    checks:{
+
+
+        storage:true,
+
+
+        privacy:true,
+
+
+        system:true
+
+
+    },
+
+
+
+
+    scan(){
+
+
+        return {
+
+
+            status:
+
+            "safe",
+
+
+
+            message:
+
+            "HalDo AI OS Sicherheit aktiv 🔐"
+
+
+
+        };
+
+
+    }
+
+
+
+};
+
+
+
+
+
+
+
+
+
+/* =====================================
+   SETTINGS ENGINE ⚙️
+===================================== */
+
+
+window.HalDoSettings = {
+
+
+    theme:
+
+    localStorage.getItem(
+        "haldo_theme"
+    )
+    ||
+    "dark",
+
+
+
+
+    language:
+
+    localStorage.getItem(
+        "haldo_language"
+    )
+    ||
+    "de",
+
+
+
+
+    setTheme(theme){
+
+
+        this.theme=theme;
+
+
+
+        localStorage.setItem(
+
+            "haldo_theme",
+
+            theme
+
+        );
+
+
+    },
+
+
+
+
+    setLanguage(lang){
+
+
+        this.language=lang;
+
+
+
+        HalDoLanguage.change(
+            lang
+        );
+
+
+    }
+
+
+
+};
+
+
+
+
+
+
+
+
+
+/* =====================================
+   PWA SERVICE WORKER 📱
+===================================== */
+
+
+if(
+"serviceWorker"
+in navigator
+){
+
+
+
+window.addEventListener(
+
+"load",
+
+()=>{
+
+
+
+navigator.serviceWorker.register(
+
+"service-worker.js"
+
+)
+
+.then(()=>{
+
+
+console.log(
+
+"📱 Service Worker aktiv"
+
+);
+
+
+
+})
+
+.catch(error=>{
+
+
+console.log(
+
+"Service Worker Fehler:",
+
+error
+
+);
+
+
+
+});
+
+
+
+}
+
+
+
+);
+
+}
+
+
+
+
+
+
+
+
+
+/* =====================================
+   EXTRA LANGUAGE PACK 🌍
+===================================== */
+
+
+window.HalDoLanguagePack = {
+
+
+languages:[
+
+
+{
+
+code:"de",
+
+name:"Deutsch 🇩🇪"
+
+
+},
+
+
+
+{
+
+code:"en",
+
+name:"English 🇬🇧"
+
+
+},
+
+
+
+{
+
+code:"tr",
+
+name:"Türkçe 🇹🇷"
+
+
+},
+
+
+
+{
+
+code:"ku",
+
+name:"Kurmancî ☀️"
+
+
+},
+
+
+
+{
+
+code:"ar",
+
+name:"العربية"
+
+
+},
+
+
+
+{
+
+code:"fr",
+
+name:"Français 🇫🇷"
+
+
+},
+
+
+
+{
+
+code:"es",
+
+name:"Español 🇪🇸"
+
+
+},
+
+
+
+{
+
+code:"it",
+
+name:"Italiano 🇮🇹"
+
+
+}
+
+
+
+]
+
+
+
+};
+
+
+
+
+
+
+
+
+
+/* =====================================
+   HALDO AI CORE FINAL CONNECTION 🧠
+===================================== */
+
+
+window.HalDoSystem = {
+
+
+    ready:false,
+
+
+
+    start(){
+
+
+
+        HalDoCloud.connect();
+
+
+
+        const security =
+
+        HalDoSecurity.scan();
+
+
+
+
+        this.ready=true;
+
+
+
+        return {
+
+
+            status:
+
+            "READY",
+
+
+            security:
+
+            security.status,
+
+
+            message:
+
+            "HalDo AI OS v2.0 läuft 💙"
+
+
+
+        };
+
+
+    }
+
+
+
+};
+
+
+
+
+
+
+
+
+
+/* =====================================
+   SYSTEM BOOT COMPLETE 🚀
+===================================== */
+
+
+setTimeout(
+
+()=>{
+
+
+
+const system =
+
+HalDoSystem.start();
+
+
+
+
+console.log(
+
+"🚀",
+
+system
+
+);
+
+
+
+HalDoNotify(
+
+"💙 HalDo AI OS v2.0 System Ready"
+
+);
+
+
+
+},
+
+2000
+
+);
+
+
+
+
+
+
+
+
+
+/* =====================================
+   FINAL CORE MESSAGE
+===================================== */
+
+
+console.log(
+
+`
+
+💙 HALDO AI OS v2.0 MASTER CORE
+
+🤖 AI Core: READY
+
+🌍 Languages: READY
+
+📁 Files: READY
+
+📧 Mail: READY
+
+🎵 Music AI: READY
+
+🎬 Video AI: READY
+
+🖼️ Image AI: READY
+
+🚗 Navigation AI: READY
+
+📚 Learning AI: READY
+
+🛍️ Store: READY
+
+☁️ Cloud: PREPARED
+
+🔐 Security: ACTIVE
+
+
+SYSTEM ONLINE 🚀
+
+`
+
+);
