@@ -1,1 +1,317 @@
-script.js
+/* =====================================
+   HALDO AI OS 6.0 STABLE
+   MAIN SYSTEM SCRIPT
+===================================== */
+
+
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
+
+
+        console.log(
+            "💙 HalDo AI OS 6.0 gestartet"
+        );
+
+
+
+        /*
+            BOOT SYSTEM
+        */
+
+
+        const boot =
+        document.getElementById(
+            "boot-screen"
+        );
+
+
+        const app =
+        document.getElementById(
+            "app"
+        );
+
+
+
+        setTimeout(
+            () => {
+
+
+                if(boot){
+
+                    boot.style.display =
+                    "none";
+
+                }
+
+
+                if(app){
+
+                    app.classList.remove(
+                        "hidden"
+                    );
+
+                }
+
+
+            },
+            2000
+        );
+
+
+
+
+
+        /*
+            DATE & TIME
+        */
+
+
+        function updateClock(){
+
+
+            const now =
+            new Date();
+
+
+
+            const date =
+            document.getElementById(
+                "date"
+            );
+
+
+            const time =
+            document.getElementById(
+                "time"
+            );
+
+
+
+            if(date){
+
+                date.innerHTML =
+                "📅 " +
+                now.toLocaleDateString(
+                    "de-DE"
+                );
+
+            }
+
+
+
+            if(time){
+
+                time.innerHTML =
+                "🕒 " +
+                now.toLocaleTimeString(
+                    "de-DE"
+                );
+
+            }
+
+
+        }
+
+
+
+        updateClock();
+
+
+        setInterval(
+            updateClock,
+            1000
+        );
+
+
+
+
+
+    }
+
+);
+
+
+
+
+
+/*
+    PAGE SYSTEM
+*/
+
+
+function showPage(page){
+
+
+    const pages =
+    document.querySelectorAll(
+        ".page"
+    );
+
+
+
+    pages.forEach(
+        item => {
+
+
+            item.classList.add(
+                "hidden"
+            );
+
+
+        }
+    );
+
+
+
+    const active =
+    document.getElementById(
+        page
+    );
+
+
+
+    if(active){
+
+        active.classList.remove(
+            "hidden"
+        );
+
+    }
+
+
+}
+
+
+
+window.showPage =
+showPage;
+
+
+
+
+
+
+
+/*
+    SIMPLE AI CORE
+*/
+
+
+function sendMessage(){
+
+
+    const input =
+    document.getElementById(
+        "aiInput"
+    );
+
+
+    const output =
+    document.getElementById(
+        "aiOutput"
+    );
+
+
+
+    if(!input || !output)
+    return;
+
+
+
+    const text =
+    input.value.toLowerCase();
+
+
+
+    if(
+        text.includes("hallo")
+    ){
+
+        output.innerHTML =
+        "🤖 Hallo! Ich bin HalDo AI.";
+
+    }
+
+    else if(
+        text.includes("wer")
+    ){
+
+        output.innerHTML =
+        "🤖 Ich bin HalDo AI OS 6.0.";
+
+    }
+
+    else {
+
+
+        output.innerHTML =
+        "💙 Nachricht empfangen. HalDo AI entwickelt sich weiter.";
+
+    }
+
+
+
+    input.value="";
+
+
+}
+
+
+
+window.sendMessage =
+sendMessage;
+
+
+
+
+
+
+
+/*
+    NOTES SYSTEM
+*/
+
+
+function saveNote(){
+
+
+    const input =
+    document.getElementById(
+        "noteInput"
+    );
+
+
+    const output =
+    document.getElementById(
+        "noteOutput"
+    );
+
+
+
+    if(!input)
+    return;
+
+
+
+    localStorage.setItem(
+        "haldo_note",
+        input.value
+    );
+
+
+
+    if(output){
+
+        output.innerHTML =
+        "✅ Notiz gespeichert";
+
+    }
+
+
+}
+
+
+
+window.saveNote =
+saveNote;
