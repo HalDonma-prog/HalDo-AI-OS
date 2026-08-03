@@ -1,17 +1,21 @@
 /* =====================================
    HalDo AI OS v3.0
-   MASTER DASHBOARD CONTROL
+   DASHBOARD CONTROL v1.1
 ===================================== */
 
 
 /*
-    HalDo Dashboard System
-    Controls:
+    Dashboard Steuerung
+
+    Aufgaben:
     - Navigation
-    - Modules
-    - AI Core
-    - Future Extensions
+    - Modul Öffnung
+    - System Status
+    - Verbindung mit AI Core
 */
+
+
+
 
 
 
@@ -19,11 +23,20 @@
 // CHAT ÖFFNEN
 // =====================================
 
+
 function openChat(){
 
-    window.location.href = "chat.html";
+
+    window.location.href =
+    "chat.html";
+
 
 }
+
+
+
+
+
 
 
 
@@ -31,70 +44,125 @@ function openChat(){
 // FILES ÖFFNEN
 // =====================================
 
+
 function openFiles(){
 
-    window.location.href = "files.html";
+
+    window.location.href =
+    "files.html";
+
 
 }
+
+
+
+
+
+
+
+
 // =====================================
 // MODULE ÖFFNEN
 // =====================================
 
+
 function openModule(page){
+
+
 
     if(page){
 
-        window.location.href = page;
+
+        window.location.href =
+        page;
+
+
+    }else{
+
+
+        console.log(
+            "⚠️ Kein Modul angegeben"
+        );
+
 
     }
+
+
 
 }
 
 
 
 
+
+
+
+
+
 // =====================================
-// SYSTEM START
+// DASHBOARD START
 // =====================================
 
+
 document.addEventListener(
+
     "DOMContentLoaded",
-    () => {
+
+    ()=>{
 
 
         console.log(
-            "💙 HalDo AI OS v3.0 Dashboard gestartet"
+            "💙 HalDo Dashboard gestartet"
         );
+
 
 
         loadSystemStatus();
 
 
+
+        connectCore();
+
+
+
     }
+
 );
 
 
 
 
+
+
+
+
+
 // =====================================
-// STATUS SYSTEM
+// SYSTEM STATUS
 // =====================================
+
 
 function loadSystemStatus(){
 
 
+
     const status =
-        document.querySelector(
-            ".status span"
-        );
+
+    document.querySelector(
+        ".status span"
+    );
+
 
 
     if(status){
 
+
         status.innerHTML =
         "🟢 HalDo AI Online";
 
+
     }
+
 
 
 }
@@ -102,124 +170,72 @@ function loadSystemStatus(){
 
 
 
+
+
+
+
+
 // =====================================
-// ZUKÜNFTIGER AI CORE
+// AI CORE VERBINDUNG
 // =====================================
 
-const HalDoCore = {
 
-
-    name:
-    "HalDo AI",
-
-
-    version:
-    "3.0",
-
-
-    status:
-    "online",
+function connectCore(){
 
 
 
-    start(){
+    if(window.HalDoAI){
+
+
 
         console.log(
-            "🤖 HalDo AI Core aktiv"
+            "🧠 Dashboard mit AI Core verbunden"
         );
+
+
+
+    }else{
+
+
+
+        console.log(
+            "⚠️ AI Core nicht verfügbar"
+        );
+
+
 
     }
 
 
-};
+
+
+    if(window.HalDoSystem){
 
 
 
+        HalDoSystem.registerModule(
 
-HalDoCore.start();
+            "Dashboard",
 
+            {
 
+                status:
+                "online"
 
+            }
 
-// =====================================
-// SPRACHVORBEREITUNG
-// =====================================
-
-
-const languages = {
-
-
-    de:
-    "Deutsch",
-
-
-    en:
-    "English",
-
-
-    tr:
-    "Türkçe",
-
-
-    ku:
-    "Kurmancî"
-
-};
+        );
 
 
 
-console.log(
-    "🌍 Sprachen geladen",
-    languages
-);
+        console.log(
+            "⚙️ Dashboard beim System Manager registriert"
+        );
 
 
 
-
-// =====================================
-// ZUKÜNFTIGE MODULE
-// =====================================
-
-
-const modules = {
-
-
-    music:
-    "🎵 Music Studio",
-
-
-    video:
-    "🎬 Video Studio",
-
-
-    image:
-    "🖼 Image Studio",
-
-
-    navigation:
-    "🚗 Navigation",
-
-
-    learning:
-    "📚 Learning",
-
-
-    store:
-    "🛍 Store",
-
-
-    cloud:
-    "☁ Cloud",
-
-
-    security:
-    "🔐 Security"
-
-};
+    }
 
 
 
-console.log(
-    "📱 Module vorbereitet",
-    modules
-);
+}
