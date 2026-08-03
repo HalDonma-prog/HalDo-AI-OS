@@ -1,13 +1,16 @@
 /* =====================================
    HalDo AI OS v3.0
-   FILE SYSTEM CONTROL
+   FILE SYSTEM v1.1 CONNECTED
 ===================================== */
 
 
 /*
-    HalDo Files
+    HalDo Files Modul
 
-    Vorbereitung für:
+    Verbindung:
+    Files ↔ AI Core ↔ System Manager
+
+    Vorbereitung:
     - Dateien
     - Dokumente
     - Bilder
@@ -19,19 +22,29 @@
 
 
 
-// Verbindung mit AI Core prüfen
+
+
+
+// ================================
+// Verbindung prüfen
+// ================================
+
 
 if(window.HalDoAI){
 
+
     console.log(
-        "🧠 Files verbunden mit HalDo AI Core"
+        "🧠 Files mit AI Core verbunden"
     );
 
+
 }else{
+
 
     console.log(
         "⚠️ AI Core nicht gefunden"
     );
+
 
 }
 
@@ -39,11 +52,25 @@ if(window.HalDoAI){
 
 
 
+
+
+
+
+// ================================
+// HalDo Files Modul
+// ================================
+
+
 const HalDoFiles = {
 
 
+
+    name:
+    "Files",
+
+
     version:
-    "3.0",
+    "1.1",
 
 
 
@@ -51,21 +78,48 @@ const HalDoFiles = {
 
 
 
-    // ==========================
-    // Datei hinzufügen
-    // ==========================
 
+
+
+
+    // Datei hinzufügen
 
     addFile(file){
+
+
+
+        if(!file){
+
+
+            console.log(
+                "⚠️ Keine Datei angegeben"
+            );
+
+
+            return;
+
+
+        }
+
+
+
 
 
         this.files.push(file);
 
 
+
+
+
         console.log(
+
             "📁 Datei hinzugefügt:",
+
             file
+
         );
+
+
 
 
     },
@@ -74,25 +128,47 @@ const HalDoFiles = {
 
 
 
-    // ==========================
-    // Suche vorbereiten
-    // ==========================
 
+
+
+
+    // Suche
 
     search(text){
 
 
+
+        if(!text){
+
+
+            return this.files;
+
+
+        }
+
+
+
+
+
         return this.files.filter(
+
 
             file =>
 
+
             file
+
             .toLowerCase()
+
             .includes(
+
                 text.toLowerCase()
+
             )
 
+
         );
+
 
 
     },
@@ -101,9 +177,11 @@ const HalDoFiles = {
 
 
 
-    // ==========================
+
+
+
+
     // Kategorien
-    // ==========================
 
 
     categories:{
@@ -129,32 +207,75 @@ const HalDoFiles = {
         "☁ Cloud"
 
 
+
     },
 
 
 
 
 
-    // ==========================
+
+
+
+
+    // Status
+
+
+    getStatus(){
+
+
+        return {
+
+
+            name:
+            this.name,
+
+
+            version:
+            this.version,
+
+
+            count:
+            this.files.length
+
+
+
+        };
+
+
+    },
+
+
+
+
+
+
+
+
+
     // Start
-    // ==========================
 
 
     start(){
 
 
         console.log(
+
             "📁 HalDo Files System gestartet"
+
         );
 
 
+
         console.log(
-            "Version:",
-            this.version
+
+            this.getStatus()
+
         );
 
 
     }
+
 
 
 };
@@ -163,13 +284,60 @@ const HalDoFiles = {
 
 
 
+
+
+
+
 // Global verfügbar machen
+
 
 window.HalDoFiles =
 HalDoFiles;
 
 
 
-// System starten
+
+
+
+
+
+
+// Registrierung beim System Manager
+
+
+if(window.HalDoSystem){
+
+
+
+    HalDoSystem.registerModule(
+
+        "Files",
+
+        HalDoFiles
+
+    );
+
+
+
+    console.log(
+
+        "⚙️ Files beim System Manager registriert"
+
+    );
+
+
+
+}
+
+
+
+
+
+
+
+
+
+// Start
+
 
 HalDoFiles.start();
