@@ -1,78 +1,102 @@
 /* =====================================
-   HALDO AI OS BROWSER v1.1
-   CLEAN FINAL STYLE
-   PART 1/4
+   HALDO AI OS v2.0
+   MASTER DESIGN
+   STYLE.CSS PART 1/4
 ===================================== */
 
 
 /* =====================================
-   GLOBAL
+   GLOBAL SYSTEM
 ===================================== */
 
 * {
-
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+}
+
+
+:root {
+
+    --haldo-blue: #00aaff;
+    --haldo-dark: #050914;
+    --haldo-card: rgba(255,255,255,0.08);
+    --haldo-border: rgba(255,255,255,0.15);
+    --haldo-glow: 0 0 25px rgba(0,170,255,.45);
 
 }
 
 
+
+html {
+
+    scroll-behavior: smooth;
+
+}
+
+
+
 body {
+
+    min-height:100vh;
 
     font-family:
     "Segoe UI",
     Arial,
     sans-serif;
 
+
     background:
+
     radial-gradient(
         circle at top,
-        #12345c,
-        #050914
+        #123c70,
+        #050914 60%
     );
 
-    color: #ffffff;
 
-    min-height: 100vh;
+    color:white;
 
-    overflow-x: hidden;
+    overflow-x:hidden;
 
 }
 
 
 
+
+
+
 /* =====================================
-   BOOT SCREEN
+   HALDO BOOT SCREEN
 ===================================== */
 
 
 #haldoBoot {
 
-    position: fixed;
+    position:fixed;
 
-    inset: 0;
+    inset:0;
+
+    z-index:9999;
+
+
+    display:flex;
+
+    flex-direction:column;
+
+    justify-content:center;
+
+    align-items:center;
+
 
     background:
 
     radial-gradient(
         circle,
-        #123c70,
+        #0066aa,
         #02040a
     );
 
-    display: flex;
-
-    flex-direction: column;
-
-    justify-content: center;
-
-    align-items: center;
-
-    z-index: 9999;
-
-    animation:
-    bootFade 2.5s ease forwards;
 
 }
 
@@ -80,20 +104,23 @@ body {
 
 .boot-logo img {
 
-    width: 160px;
+    width:160px;
 
-    height: 160px;
+    height:160px;
 
-    object-fit: contain;
+    object-fit:contain;
+
 
     filter:
+
     drop-shadow(
-        0 0 30px #00aaff
+        0 0 35px var(--haldo-blue)
     );
+
 
     animation:
 
-    logoPulse 2s infinite;
+    haldoPulse 2s infinite;
 
 }
 
@@ -101,11 +128,11 @@ body {
 
 #haldoBoot h1 {
 
-    margin-top: 25px;
+    margin-top:25px;
 
-    font-size: 42px;
+    font-size:42px;
 
-    letter-spacing: 2px;
+    letter-spacing:3px;
 
 }
 
@@ -113,114 +140,28 @@ body {
 
 #haldoBoot p {
 
-    margin-top: 12px;
+    margin-top:15px;
 
-    opacity: .8;
-
-}
-
-
-
-.boot-line {
-
-    width: 240px;
-
-    height: 4px;
-
-    margin-top: 30px;
-
-    background:
-
-    linear-gradient(
-        90deg,
-        transparent,
-        #00bfff,
-        transparent
-    );
-
-    animation:
-
-    lineMove 2s infinite;
+    opacity:.8;
 
 }
 
 
 
-
-
-@keyframes logoPulse {
-
+@keyframes haldoPulse {
 
     0%,100% {
 
-        transform:
-        scale(1);
+        transform:scale(1);
 
     }
 
 
     50% {
 
-        transform:
-        scale(1.08);
+        transform:scale(1.08);
 
     }
-
-
-}
-
-
-
-
-
-@keyframes lineMove {
-
-
-    from {
-
-        opacity:.3;
-
-    }
-
-
-    to {
-
-        opacity:1;
-
-    }
-
-
-}
-
-
-
-
-
-@keyframes bootFade {
-
-
-    0% {
-
-        opacity:1;
-
-    }
-
-
-    90% {
-
-        opacity:1;
-
-    }
-
-
-    100% {
-
-        opacity:0;
-
-        pointer-events:none;
-
-    }
-
 
 }
 
@@ -260,38 +201,34 @@ body {
 
     height:90px;
 
+
     display:flex;
 
     justify-content:space-between;
 
     align-items:center;
 
-    padding:
 
-    0 30px;
+    padding:0 30px;
 
 
     background:
 
-    rgba(
-    255,255,255,.08
-    );
+    rgba(255,255,255,.08);
 
 
     backdrop-filter:
-    blur(15px);
+
+    blur(20px);
 
 
     border-bottom:
 
-    1px solid
-
-    rgba(
-    255,255,255,.15
-    );
+    1px solid var(--haldo-border);
 
 
 }
+
 
 
 
@@ -307,18 +244,21 @@ body {
 
 
 
+
 .header-logo {
 
     width:65px;
 
     height:65px;
 
+
     object-fit:contain;
+
 
     filter:
 
     drop-shadow(
-    0 0 15px #00aaff
+        0 0 20px var(--haldo-blue)
     );
 
 }
@@ -341,6 +281,9 @@ body {
 
 
 
+
+
+
 .system-status {
 
     padding:
@@ -348,28 +291,29 @@ body {
     10px 20px;
 
 
-    border-radius:
-
-    20px;
+    border-radius:30px;
 
 
     background:
 
-    rgba(
-    0,255,150,.15
-    );
+    rgba(0,255,150,.15);
+
+
+    border:
+
+    1px solid rgba(0,255,150,.35);
+
 
 }
 /* =====================================
-   HALDO AI OS BROWSER v1.1
-   CLEAN FINAL STYLE
-   PART 2/4
+   HALDO AI OS v2.0
+   MASTER DESIGN
+   STYLE.CSS PART 2/4
 ===================================== */
 
 
-
 /* =====================================
-   MAIN LAYOUT
+   MAIN OS LAYOUT
 ===================================== */
 
 
@@ -388,35 +332,30 @@ body {
 
 
 /* =====================================
-   SIDEBAR
+   SIDEBAR NAVIGATION
 ===================================== */
 
 
-.left-sidebar {
+.sidebar {
 
-    width:260px;
+    width:270px;
 
     padding:25px;
 
+
     background:
 
-    rgba(
-    255,255,255,.06
-    );
+    rgba(255,255,255,.06);
 
 
     backdrop-filter:
 
-    blur(18px);
+    blur(20px);
 
 
     border-right:
 
-    1px solid
-
-    rgba(
-    255,255,255,.12
-    );
+    1px solid var(--haldo-border);
 
 
 }
@@ -424,14 +363,9 @@ body {
 
 
 
+.sidebar-logo {
 
-.sidebar-brand {
-
-    display:flex;
-
-    align-items:center;
-
-    gap:12px;
+    text-align:center;
 
     margin-bottom:30px;
 
@@ -439,11 +373,15 @@ body {
 
 
 
-.mini-logo {
+.ai-symbol {
 
-    width:45px;
+    width:70px;
 
-    height:45px;
+    height:70px;
+
+
+    margin:auto;
+
 
     display:flex;
 
@@ -451,18 +389,46 @@ body {
 
     justify-content:center;
 
+
     border-radius:50%;
 
 
     background:
 
-    rgba(
-    0,170,255,.25
+    linear-gradient(
+        135deg,
+        #008cff,
+        #003b80
     );
 
 
+    font-size:22px;
+
+    font-weight:bold;
+
+
+    box-shadow:
+
+    var(--haldo-glow);
+
+}
+
+
+
+
+.sidebar-logo h3 {
+
+    margin-top:15px;
+
     font-size:24px;
 
+}
+
+
+
+.sidebar-logo p {
+
+    opacity:.7;
 
 }
 
@@ -470,7 +436,16 @@ body {
 
 
 
-.main-navigation {
+
+
+
+
+/* =====================================
+   NAV ITEMS
+===================================== */
+
+
+.navigation {
 
     display:flex;
 
@@ -482,27 +457,28 @@ body {
 
 
 
+.nav-item {
 
-
-.nav-button {
 
     width:100%;
 
-    padding:14px;
+
+    padding:15px;
+
 
     border:none;
 
-    border-radius:14px;
+
+    border-radius:16px;
 
 
     background:
 
-    rgba(
-    255,255,255,.08
-    );
+    rgba(255,255,255,.08);
 
 
     color:white;
+
 
     cursor:pointer;
 
@@ -510,7 +486,7 @@ body {
     text-align:left;
 
 
-    font-size:15px;
+    font-size:16px;
 
 
     transition:.3s;
@@ -520,14 +496,14 @@ body {
 
 
 
-.nav-button:hover {
+
+
+.nav-item:hover {
 
 
     background:
 
-    rgba(
-    0,170,255,.35
-    );
+    rgba(0,170,255,.25);
 
 
     transform:
@@ -539,35 +515,35 @@ body {
 
 
 
-.nav-button.active {
+
+.nav-item.active {
 
 
     background:
 
     linear-gradient(
 
-    135deg,
+        135deg,
 
-    #008cff,
+        #00aaff,
 
-    #0055aa
+        #0055aa
 
     );
 
 
-}
+    box-shadow:
 
+    0 0 20px
 
-
-
-
-.sidebar-bottom {
-
-
-    margin-top:40px;
+    rgba(0,170,255,.4);
 
 
 }
+
+
+
+
 
 
 
@@ -580,30 +556,36 @@ body {
 
 .main-content {
 
+
     flex:1;
+
 
     padding:30px;
 
+
 }
 
 
 
 
 
-.page {
+.app-page {
+
 
     display:none;
 
+
     animation:
 
-    fadePage .4s ease;
+    pageShow .4s ease;
 
 
 }
 
 
 
-.page.active {
+.app-page.active {
+
 
     display:block;
 
@@ -612,8 +594,7 @@ body {
 
 
 
-
-@keyframes fadePage {
+@keyframes pageShow {
 
 
     from {
@@ -621,7 +602,7 @@ body {
         opacity:0;
 
         transform:
-        translateY(15px);
+        translateY(20px);
 
     }
 
@@ -635,6 +616,118 @@ body {
 
     }
 
+}
+
+
+
+
+
+
+
+
+
+/* =====================================
+   DASHBOARD WELCOME
+===================================== */
+
+
+.welcome-panel {
+
+
+    padding:35px;
+
+
+    border-radius:28px;
+
+
+    background:
+
+    var(--haldo-card);
+
+
+    backdrop-filter:
+
+    blur(20px);
+
+
+    border:
+
+    1px solid var(--haldo-border);
+
+
+}
+
+
+
+.welcome-panel h2 {
+
+
+    font-size:34px;
+
+
+}
+
+
+
+
+
+.haldo-ai-box {
+
+
+    margin-top:25px;
+
+
+    display:flex;
+
+
+    align-items:center;
+
+
+    gap:20px;
+
+
+    padding:20px;
+
+
+    border-radius:20px;
+
+
+    background:
+
+    rgba(0,170,255,.15);
+
+
+}
+
+
+
+
+.ai-avatar {
+
+
+    width:60px;
+
+    height:60px;
+
+
+    border-radius:50%;
+
+
+    display:flex;
+
+
+    justify-content:center;
+
+    align-items:center;
+
+
+    background:
+
+    rgba(0,170,255,.4);
+
+
+    font-size:30px;
+
 
 }
 
@@ -647,85 +740,11 @@ body {
 
 
 /* =====================================
-   DASHBOARD
+   APP GRID
 ===================================== */
 
 
-.welcome-card {
-
-
-    padding:35px;
-
-
-    border-radius:25px;
-
-
-    background:
-
-    rgba(
-    255,255,255,.08
-    );
-
-
-    backdrop-filter:
-
-    blur(20px);
-
-
-    box-shadow:
-
-    0 20px 50px
-
-    rgba(
-    0,0,0,.25
-    );
-
-
-}
-
-
-
-
-
-.welcome-card h2 {
-
-
-    font-size:32px;
-
-    margin-bottom:10px;
-
-
-}
-
-
-
-
-
-.ai-message-start {
-
-
-    margin-top:25px;
-
-    padding:20px;
-
-
-    border-radius:18px;
-
-
-    background:
-
-    rgba(
-    0,170,255,.15
-    );
-
-
-}
-
-
-
-
-
-.dashboard-grid {
+.app-grid {
 
 
     margin-top:30px;
@@ -737,8 +756,11 @@ body {
     grid-template-columns:
 
     repeat(
-    auto-fit,
-    minmax(220px,1fr)
+
+        auto-fit,
+
+        minmax(220px,1fr)
+
     );
 
 
@@ -753,39 +775,50 @@ body {
 
 
 
-.dashboard-card {
+
+
+/* =====================================
+   APP CARDS
+===================================== */
+
+
+.app-card {
 
 
     padding:25px;
 
 
-    border-radius:20px;
+    border-radius:24px;
 
 
     background:
 
-    rgba(
-    255,255,255,.09
-    );
+    var(--haldo-card);
+
+
+    backdrop-filter:
+
+    blur(18px);
 
 
     border:
 
-    1px solid
-
-    rgba(
-    255,255,255,.15
-    );
+    1px solid var(--haldo-border);
 
 
-    transition:.3s;
+    cursor:pointer;
+
+
+    transition:.35s;
 
 
 }
 
 
 
-.dashboard-card:hover {
+
+
+.app-card:hover {
 
 
     transform:
@@ -795,11 +828,31 @@ body {
 
     box-shadow:
 
-    0 15px 40px
+    0 20px 45px
 
-    rgba(
-    0,170,255,.25
-    );
+    rgba(0,170,255,.25);
+
+
+}
+
+
+
+.app-icon {
+
+
+    font-size:42px;
+
+    margin-bottom:15px;
+
+
+}
+
+
+
+.app-card h3 {
+
+
+    margin-bottom:10px;
 
 
 }
@@ -817,7 +870,7 @@ body {
 ===================================== */
 
 
-.chat-container {
+.chat-box {
 
 
     height:450px;
@@ -829,200 +882,12 @@ body {
     padding:20px;
 
 
-    border-radius:20px;
-
-
-    background:
-
-    rgba(
-    0,0,0,.25
-    );
-
-
-}
-
-
-
-
-
-.chat-input-area {
-
-
-    margin-top:20px;
-
-
-    display:flex;
-
-
-    gap:10px;
-
-
-}
-
-
-
-
-
-.chat-input-area input {
-
-
-    flex:1;
-
-
-    padding:15px;
-
-
-    border-radius:15px;
-
-
-    border:none;
-
-
-    outline:none;
-
-
-}
-
-
-
-
-
-.primary-button {
-
-
-    padding:14px 22px;
-
-
-    border:none;
-
-
-    border-radius:15px;
-
-
-    background:
-
-    linear-gradient(
-
-    135deg,
-
-    #00aaff,
-
-    #0066cc
-
-    );
-
-
-    color:white;
-
-
-    cursor:pointer;
-
-
-    transition:.3s;
-
-
-}
-
-
-
-.primary-button:hover {
-
-
-    transform:
-
-    scale(1.05);
-
-
-}
-
-
-
-
-
-
-
-.user-message {
-
-
-    margin:10px 0;
-
-    padding:15px;
-
-
-    border-radius:15px;
-
-
-    background:
-
-    rgba(
-    0,140,255,.25
-    );
-
-
-}
-
-
-
-.ai-message {
-
-
-    margin:10px 0;
-
-    padding:15px;
-
-
-    border-radius:15px;
-
-
-    background:
-
-    rgba(
-    255,255,255,.12
-    );
-
-
-}
-/* =====================================
-   HALDO AI OS BROWSER v1.1
-   CLEAN FINAL STYLE
-   PART 3/4
-===================================== */
-
-
-
-/* =====================================
-   APP CARDS
-===================================== */
-
-
-.app-card {
-
-    margin-top:25px;
-
-    padding:25px;
-
     border-radius:22px;
 
 
     background:
 
-    rgba(
-    255,255,255,.08
-    );
-
-
-    backdrop-filter:
-
-    blur(15px);
-
-
-    border:
-
-    1px solid
-
-    rgba(
-    255,255,255,.12
-    );
+    rgba(0,0,0,.25);
 
 
 }
@@ -1031,152 +896,63 @@ body {
 
 
 
-/* =====================================
-   FILE SYSTEM
-===================================== */
+.chat-message {
 
 
-#fileUpload {
+    display:flex;
 
 
-    width:100%;
+    gap:12px;
+
+
+    margin-bottom:18px;
+
+
+}
+
+
+
+
+
+.chat-message .avatar {
+
+
+    width:40px;
+
+    height:40px;
+
+
+    border-radius:50%;
+
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+
+    background:
+
+    rgba(0,170,255,.4);
+
+
+}
+
+
+
+.message-content {
+
 
     padding:15px;
-
-
-    border-radius:15px;
-
-
-    background:
-
-    rgba(
-    255,255,255,.1
-    );
-
-
-    color:white;
-
-
-}
-
-
-
-#fileList {
-
-
-    margin-top:20px;
-
-
-}
-
-
-
-#fileList p {
-
-
-    padding:12px;
-
-
-    border-radius:12px;
-
-
-    background:
-
-    rgba(
-    0,170,255,.15
-    );
-
-
-}
-
-
-
-
-
-
-
-
-
-/* =====================================
-   WRITING AREA
-===================================== */
-
-
-#wri​terText {
-
-
-    width:100%;
-
-
-    min-height:300px;
-
-
-    padding:20px;
-
-
-    resize:vertical;
-
-
-    border:none;
-
-
-    outline:none;
-
-
-    border-radius:20px;
-
-
-    background:
-
-    rgba(
-    0,0,0,.25
-    );
-
-
-    color:white;
-
-
-    font-size:16px;
-
-
-}
-
-
-
-
-
-textarea {
-
-
-    width:100%;
-
-
-    min-height:150px;
-
-
-    padding:18px;
 
 
     border-radius:18px;
 
 
-    border:none;
-
-
-    outline:none;
-
-
-    resize:vertical;
-
-
     background:
 
-    rgba(
-    0,0,0,.25
-    );
-
-
-    color:white;
+    rgba(255,255,255,.12);
 
 
 }
@@ -1190,443 +966,14 @@ textarea {
 
 
 /* =====================================
-   SETTINGS
+   MODULE CARDS
 ===================================== */
 
 
-.settings-card {
-
-
-    display:grid;
-
-
-    gap:20px;
-
-
-}
-
-
-
-
-
-.settings-box {
-
-
-    padding:25px;
-
-
-    border-radius:20px;
-
-
-    background:
-
-    rgba(
-    255,255,255,.08
-    );
-
-
-}
-
-
-
-
-
-.settings-box h3 {
-
-
-    margin-bottom:15px;
-
-
-}
-
-
-
-
-
-.settings-box input,
-
-
-.settings-box select {
-
-
-    width:100%;
-
-
-    padding:14px;
-
-
-    border-radius:14px;
-
-
-    border:none;
-
-
-    margin-top:10px;
-
-
-    background:
-
-    rgba(
-    0,0,0,.25
-    );
-
-
-    color:white;
-
-
-}
-
-
-
-
-
-
-
-
-
-/* =====================================
-   DARK MODE
-===================================== */
-
-
-body.dark-mode {
-
-
-    background:
-
-    #02030a;
-
-
-}
-
-
-
-body.dark-mode .dashboard-card,
-
-
-body.dark-mode .app-card,
-
-
-body.dark-mode .settings-box {
-
-
-    background:
-
-    rgba(
-    0,0,0,.45
-    );
-
-
-}
-
-
-
-
-
-
-
-
-
-/* =====================================
-   NOTIFICATION CENTER
-===================================== */
-
-
-.notification-center {
-
-
-    position:fixed;
-
-
-    right:25px;
-
-
-    bottom:25px;
-
-
-    width:300px;
-
-
-    padding:20px;
-
-
-    border-radius:20px;
-
-
-    background:
-
-    rgba(
-    255,255,255,.1
-    );
-
-
-    backdrop-filter:
-
-    blur(20px);
-
-
-}
-
-
-
-
-
-
-
-
-
-/* =====================================
-   MOBILE / HUAWEI OPTIMIZATION
-===================================== */
-
-
-@media(max-width:900px){
-
-
-
-.os-layout {
-
-
-    flex-direction:column;
-
-
-}
-
-
-
-.left-sidebar {
-
-
-    width:100%;
-
-
-    display:flex;
-
-
-    overflow-x:auto;
-
-
-}
-
-
-
-.main-navigation {
-
-
-    flex-direction:row;
-
-
-}
-
-
-
-.nav-button {
-
-
-    min-width:130px;
-
-
-}
-
-
-
-.main-content {
-
-
-    padding:15px;
-
-
-}
-
-
-
-.haldo-header {
-
-
-    padding:0 15px;
-
-
-}
-
-
-
-.brand-area h1 {
-
-
-    font-size:20px;
-
-
-}
-
-
-
-.header-logo {
-
-
-    width:50px;
-
-
-    height:50px;
-
-
-}
-
-
-
-.dashboard-grid {
-
-
-    grid-template-columns:
-
-    1fr;
-
-
-}
-
-
-
-.chat-input-area {
-
-
-    flex-direction:column;
-
-
-}
-
-
-
-}
-/* =====================================
-   HALDO AI OS BROWSER v1.1
-   CLEAN FINAL STYLE
-   PART 4/4 FINAL
-===================================== */
-
-
-
-/* =====================================
-   FOOTER
-===================================== */
-
-
-.haldo-footer {
-
-
-    margin-top:40px;
-
-
-    padding:30px;
-
-
-    text-align:center;
-
-
-    background:
-
-
-    rgba(
-    255,255,255,.06
-    );
-
-
-    border-top:
-
-
-    1px solid
-
-    rgba(
-    255,255,255,.12
-    );
-
-
-    backdrop-filter:
-
-
-    blur(15px);
-
-
-}
-
-
-
-.footer-logo {
-
-
-    font-size:22px;
-
-
-    font-weight:bold;
-
-
-    color:#00bfff;
-
-
-    text-shadow:
-
-
-    0 0 15px
-
-    #00bfff;
-
-
-}
-
-
-
-
-
-.haldo-footer p {
-
-
-    margin-top:10px;
-
-
-    opacity:.7;
-
-
-}
-
-
-
-
-
-
-
-
-
-/* =====================================
-   FUTURE MODULES
-===================================== */
-
-
-.future-grid {
-
-
-    display:grid;
-
-
-    grid-template-columns:
-
-
-    repeat(
-    auto-fit,
-    minmax(220px,1fr)
-    );
-
-
-    gap:20px;
+.module-card {
 
 
     margin-top:25px;
-
-
-}
-
-
-
-
-
-.future-card {
 
 
     padding:25px;
@@ -1637,311 +984,51 @@ body.dark-mode .settings-box {
 
     background:
 
-
-    rgba(
-    255,255,255,.08
-    );
+    var(--haldo-card);
 
 
     border:
 
-
-    1px solid
-
-
-    rgba(
-    255,255,255,.12
-    );
+    1px solid var(--haldo-border);
 
 
-    transition:.35s;
+    backdrop-filter:
+
+    blur(15px);
 
 
 }
 
 
 
+.module-card input,
 
+.module-card textarea,
 
-.future-card:hover {
-
-
-    transform:
-
-
-    translateY(-10px);
-
-
-    box-shadow:
-
-
-    0 20px 40px
-
-
-    rgba(
-    0,170,255,.3
-    );
-
-
-}
-
-
-
-
-
-.future-card span {
-
-
-    font-size:40px;
-
-
-}
-
-
-
-
-
-
-
-
-
-/* =====================================
-   PREMIUM GLOW EFFECTS
-===================================== */
-
-
-.primary-button,
-
-
-.nav-button {
-
-
-    position:relative;
-
-
-    overflow:hidden;
-
-
-}
-
-
-
-
-
-.primary-button::after,
-
-
-.nav-button::after {
-
-
-    content:"";
-
-
-    position:absolute;
-
-
-    top:0;
-
-
-    left:-100%;
+.module-card select {
 
 
     width:100%;
 
 
-    height:100%;
+    padding:15px;
+
+
+    margin-top:12px;
+
+
+    border:none;
+
+
+    border-radius:15px;
 
 
     background:
 
+    rgba(0,0,0,.3);
 
-    linear-gradient(
 
-    120deg,
-
-    transparent,
-
-    rgba(255,255,255,.35),
-
-    transparent
-
-    );
-
-
-    transition:.5s;
-
-
-}
-
-
-
-
-
-.primary-button:hover::after,
-
-
-.nav-button:hover::after {
-
-
-    left:100%;
-
-
-}
-
-
-
-
-
-
-
-
-
-/* =====================================
-   SMOOTH SCROLL
-===================================== */
-
-
-html {
-
-
-    scroll-behavior:
-
-    smooth;
-
-
-}
-
-
-
-
-
-
-
-
-
-/* =====================================
-   SYSTEM CONNECTION AREA
-===================================== */
-
-
-#systemConnection {
-
-
-    display:none;
-
-
-}
-
-
-
-
-
-
-
-
-
-/* =====================================
-   EXTRA POLISH
-===================================== */
-
-
-h2 {
-
-
-    margin-bottom:20px;
-
-
-}
-
-
-
-p {
-
-
-    line-height:1.6;
-
-
-}
-
-
-
-
-
-button {
-
-
-    font-family:inherit;
-
-
-}
-
-
-
-
-
-
-
-
-
-/* =====================================
-   FINAL RESPONSIVE FIX
-===================================== */
-
-
-@media(max-width:600px){
-
-
-.boot-logo img {
-
-
-    width:110px;
-
-
-    height:110px;
-
-
-}
-
-
-
-#haldoBoot h1 {
-
-
-    font-size:28px;
-
-
-}
-
-
-
-.system-status {
-
-
-    display:none;
-
-
-}
-
-
-
-.left-sidebar {
-
-
-    padding:15px;
-
-
-}
-
-
-
-.welcome-card {
-
-
-    padding:20px;
-
-
-}
-
+    color:white;
 
 
 }
