@@ -1,73 +1,135 @@
 /* =====================================
-   HalDo AI OS
-   CHAT SYSTEM v3.0 FOUNDATION
+   HalDo AI OS v3.0
+   CHAT SYSTEM v1.1 CONNECTED
 ===================================== */
 
 
 /*
-    Verbindung:
-    Chat ↔ HalDo AI Core
+    HalDo Chat Modul
 
-    Vorbereitung für:
+    Verbindung:
+    Chat ↔ AI Core ↔ System Manager
+
+    Vorbereitung:
     - KI Antworten
-    - Sprache
     - Memory
+    - Sprache
     - spätere API Verbindung
 */
 
 
 
-// Prüfen ob AI Core vorhanden ist
+
+
+
+// ================================
+// Verbindung prüfen
+// ================================
+
 
 if(window.HalDoAI){
 
+
     console.log(
-        "🤖 HalDo AI Core verbunden"
+        "🧠 Chat mit AI Core verbunden"
     );
 
+
 }else{
+
 
     console.log(
         "⚠️ AI Core nicht gefunden"
     );
+
 
 }
 
 
 
 
+
+
 // ================================
-// Chat Nachrichten Speicher
+// HalDo Chat Modul
 // ================================
 
 
 const HalDoChat = {
 
 
+
+    name:
+    "Chat",
+
+
+    version:
+    "1.1",
+
+
     messages: [],
 
 
 
+
+
+
+
+    // Nachricht senden
+
     send(message){
+
+
+
+        if(!message){
+
+
+            console.log(
+                "⚠️ Leere Nachricht"
+            );
+
+
+            return;
+
+
+        }
+
+
 
 
         this.messages.push({
 
-            user: message,
 
-            time: new Date()
+            user:
+            message,
+
+
+            time:
+            new Date()
+
 
         });
 
 
 
+
+
         console.log(
+
             "💬 Nachricht:",
+
             message
+
         );
 
 
-        return this.createResponse(message);
+
+
+
+        return this.createResponse(
+            message
+        );
+
 
 
     },
@@ -75,52 +137,124 @@ const HalDoChat = {
 
 
 
+
+
+
+
+
+    // Antwort erstellen
+
     createResponse(message){
 
 
+
         let response =
+
         "Ich bin HalDo AI. Wie kann ich helfen?";
 
 
 
+
+
+
+        const text =
+
+        message.toLowerCase();
+
+
+
+
+
+
         if(
-            message.toLowerCase()
-            .includes("hallo")
+            text.includes("hallo")
         ){
 
+
             response =
+
             "Hallo 💙 Ich bin HalDo AI OS.";
 
+
         }
+
+
+
+
 
 
 
         if(
-            message.toLowerCase()
-            .includes("name")
+            text.includes("name")
         ){
 
+
             response =
+
             "Mein Name ist HalDo AI.";
 
+
         }
+
+
+
+
 
 
 
         this.messages.push({
 
-            ai: response,
 
-            time: new Date()
+            ai:
+            response,
+
+
+            time:
+            new Date()
+
 
         });
+
+
+
+
+
+
+
+        // Memory Verbindung vorbereiten
+
+        if(window.HalDoAI){
+
+
+            HalDoAI.remember({
+
+                type:
+                "chat",
+
+
+                message:
+                message
+
+
+            });
+
+
+        }
+
+
+
 
 
 
         return response;
 
 
+
     }
+
+
+
+
 
 
 };
@@ -128,12 +262,62 @@ const HalDoChat = {
 
 
 
-// Global verfügbar
 
-window.HalDoChat = HalDoChat;
+
+
+
+
+// Global verfügbar machen
+
+
+window.HalDoChat =
+HalDoChat;
+
+
+
+
+
+
+
+
+
+// Registrierung beim System Manager
+
+
+if(window.HalDoSystem){
+
+
+
+    HalDoSystem.registerModule(
+
+        "Chat",
+
+        HalDoChat
+
+    );
+
+
+
+    console.log(
+
+        "⚙️ Chat beim System Manager registriert"
+
+    );
+
+
+
+}
+
+
+
+
+
+
 
 
 
 console.log(
+
     "💬 HalDo Chat System bereit"
+
 );
