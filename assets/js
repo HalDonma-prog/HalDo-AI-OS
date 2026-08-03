@@ -3,34 +3,46 @@
    MAIN SYSTEM SCRIPT
 ===================================== */
 
+console.log("💙 HalDo AI OS 6.0 Script geladen");
 
-/* SYSTEM START */
+
+window.addEventListener("error", function(event){
+
+    console.log(
+        "HalDo Fehler:",
+        event.message
+    );
+
+});
+
+
 
 document.addEventListener(
-    "DOMContentLoaded",
-    () => {
-
-        console.log(
-            "💙 HalDo AI OS 6.0 Stable gestartet"
-        );
+"DOMContentLoaded",
+function(){
 
 
-        startBoot();
+    console.log(
+        "🚀 HalDo AI OS 6.0 gestartet"
+    );
 
 
-        updateClock();
+    startBoot();
+
+    updateClock();
+
+    setInterval(
+        updateClock,
+        1000
+    );
 
 
-        setInterval(
-            updateClock,
-            1000
-        );
+    loadSavedNote();
 
 
-        loadSavedNote();
+});
 
-    }
-);
+
 
 
 
@@ -40,6 +52,7 @@ document.addEventListener(
 
 
 function startBoot(){
+
 
     const boot =
     document.getElementById(
@@ -53,42 +66,53 @@ function startBoot(){
     );
 
 
+
     setTimeout(
-        () => {
+    function(){
 
 
-            if(boot){
+        if(boot){
 
-                boot.style.display =
-                "none";
+            boot.classList.add(
+                "hidden"
+            );
 
-            }
-
-
-            if(app){
-
-                app.classList.remove(
-                    "hidden"
-                );
-
-            }
+        }
 
 
-        },
-        2000
+
+        if(app){
+
+            app.classList.remove(
+                "hidden"
+            );
+
+        }
+
+
+
+        console.log(
+            "✅ System bereit"
+        );
+
+
+    },
+    2000
     );
+
 
 }
 
 
 
 
+
 /* =====================================
-   NAVIGATION SYSTEM
+   PAGE NAVIGATION
 ===================================== */
 
 
-function showPage(page){
+function showPage(pageName){
 
 
     const pages =
@@ -97,21 +121,23 @@ function showPage(page){
     );
 
 
+
     pages.forEach(
-        p => {
+    function(page){
 
-            p.classList.add(
-                "hidden"
-            );
+        page.classList.add(
+            "hidden"
+        );
 
-        }
-    );
+    });
+
 
 
     const active =
     document.getElementById(
-        page
+        pageName
     );
+
 
 
     if(active){
@@ -126,6 +152,7 @@ function showPage(page){
 }
 
 
+
 window.showPage =
 showPage;
 
@@ -134,8 +161,10 @@ showPage;
 
 
 
+
+
 /* =====================================
-   CLOCK SYSTEM
+   CLOCK
 ===================================== */
 
 
@@ -151,6 +180,7 @@ function updateClock(){
     document.getElementById(
         "date"
     );
+
 
 
     const time =
@@ -191,8 +221,9 @@ function updateClock(){
 
 
 
+
 /* =====================================
-   HALDO AI CORE 🤖
+   HALDO AI CHAT
 ===================================== */
 
 
@@ -211,10 +242,8 @@ function sendMessage(){
     );
 
 
-    if(
-        !input ||
-        !output
-    ){
+
+    if(!input || !output){
 
         return;
 
@@ -222,52 +251,56 @@ function sendMessage(){
 
 
 
-    let message =
+    const message =
     input.value
-    .toLowerCase()
-    .trim();
+    .trim()
+    .toLowerCase();
+
+
+
+    if(message === ""){
+
+        output.innerHTML =
+        "✏️ Bitte eine Nachricht eingeben.";
+
+        return;
+
+    }
 
 
 
     let answer =
-    "💙 Ich habe deine Nachricht erhalten.";
+    "💙 Ich habe dich verstanden.";
 
 
 
-    if(
-        message.includes(
-            "hallo"
-        )
-    ){
+    if(message.includes("hallo")){
+
 
         answer =
-        "🤖 Hallo! Ich bin HalDo AI v6.0.";
+        "🤖 Hallo! Ich bin HalDo AI OS 6.0.";
 
     }
 
 
-
     else if(
-        message.includes(
-            "wer bist du"
-        )
+        message.includes("wer bist du")
     ){
 
+
         answer =
-        "🌍 Ich bin HalDo AI OS 6.0, dein intelligentes System.";
+        "🌍 Ich bin HalDo AI OS 6.0 Stable.";
 
     }
 
 
-
     else if(
-        message.includes(
-            "hilfe"
-        )
+        message.includes("hilfe")
     ){
 
+
         answer =
-        "🚀 Ich unterstütze dich bei KI, Schreiben, Notizen und Systemfunktionen.";
+        "🚀 Ich helfe bei KI, Notizen und Systemfunktionen.";
 
     }
 
@@ -278,10 +311,11 @@ function sendMessage(){
 
 
 
-    input.value="";
+    input.value = "";
 
 
 }
+
 
 
 window.sendMessage =
@@ -295,7 +329,7 @@ sendMessage;
 
 
 /* =====================================
-   NOTES SYSTEM 📝
+   NOTES
 ===================================== */
 
 
@@ -342,6 +376,7 @@ function saveNote(){
 
 
 
+
 function loadSavedNote(){
 
 
@@ -349,6 +384,7 @@ function loadSavedNote(){
     document.getElementById(
         "noteInput"
     );
+
 
 
     const saved =
@@ -372,6 +408,7 @@ function loadSavedNote(){
 }
 
 
+
 window.saveNote =
 saveNote;
 
@@ -380,8 +417,10 @@ saveNote;
 
 
 
+
+
 /* =====================================
-   SYSTEM INFO
+   SYSTEM INFORMATION
 ===================================== */
 
 
@@ -401,18 +440,15 @@ window.HalDoSystem = {
 
 
 
-    getStatus(){
+    info(){
 
         return {
 
-            system:
-            this.name,
+            name:this.name,
 
-            version:
-            this.version,
+            version:this.version,
 
-            status:
-            this.status
+            status:this.status
 
         };
 
@@ -423,6 +459,7 @@ window.HalDoSystem = {
 
 
 
+
 console.log(
-"🚀 HalDo AI OS 6.0 CORE READY"
+"💙 HALDO AI OS 6.0 CORE READY"
 );
