@@ -6,9 +6,22 @@
 
 function openSystem() {
 
-    console.log("🚀 Öffne HalDo AI OS Dashboard");
-
-
     window.location.href = "dashboard.html";
+
+}
+
+
+
+function openChat() {
+
+    window.location.href = "chat.html";
+
+}
+
+
+
+function openSettings() {
+
+    window.location.href = "settings.html";
 
 }
