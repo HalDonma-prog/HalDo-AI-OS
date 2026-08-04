@@ -1,20 +1,18 @@
 /* =====================================
-   HALDO AI OS 6.0 STABLE
-   MAIN SYSTEM SCRIPT
+   HALDO AI OS 7.0 STABLE
+   CORE SYSTEM
 ===================================== */
 
-console.log("💙 HalDo AI OS 6.0 Script geladen");
+
+console.log(
+    "💙 HalDo AI OS 7.0 geladen"
+);
 
 
-window.addEventListener("error", function(event){
 
-    console.log(
-        "HalDo Fehler:",
-        event.message
-    );
-
-});
-
+/* =====================================
+   SYSTEM START
+===================================== */
 
 
 document.addEventListener(
@@ -23,13 +21,15 @@ function(){
 
 
     console.log(
-        "🚀 HalDo AI OS 6.0 gestartet"
+        "🚀 HalDo System Start"
     );
 
 
     startBoot();
 
+
     updateClock();
+
 
     setInterval(
         updateClock,
@@ -41,6 +41,7 @@ function(){
 
 
 });
+
 
 
 
@@ -92,8 +93,9 @@ function startBoot(){
 
 
         console.log(
-            "✅ System bereit"
+            "✅ HalDo OS bereit"
         );
+
 
 
     },
@@ -107,12 +109,13 @@ function startBoot(){
 
 
 
+
 /* =====================================
-   PAGE NAVIGATION
+   NAVIGATION
 ===================================== */
 
 
-function showPage(pageName){
+function showPage(page){
 
 
     const pages =
@@ -123,9 +126,9 @@ function showPage(pageName){
 
 
     pages.forEach(
-    function(page){
+    function(item){
 
-        page.classList.add(
+        item.classList.add(
             "hidden"
         );
 
@@ -135,7 +138,7 @@ function showPage(pageName){
 
     const active =
     document.getElementById(
-        pageName
+        page
     );
 
 
@@ -162,9 +165,8 @@ showPage;
 
 
 
-
 /* =====================================
-   CLOCK
+   CLOCK SYSTEM
 ===================================== */
 
 
@@ -182,7 +184,6 @@ function updateClock(){
     );
 
 
-
     const time =
     document.getElementById(
         "time"
@@ -192,7 +193,7 @@ function updateClock(){
 
     if(date){
 
-        date.innerHTML =
+        date.textContent =
         "📅 " +
         now.toLocaleDateString(
             "de-DE"
@@ -204,7 +205,7 @@ function updateClock(){
 
     if(time){
 
-        time.innerHTML =
+        time.textContent =
         "🕒 " +
         now.toLocaleTimeString(
             "de-DE"
@@ -221,9 +222,8 @@ function updateClock(){
 
 
 
-
 /* =====================================
-   HALDO AI CHAT
+   HALDO AI BASIC CORE
 ===================================== */
 
 
@@ -251,17 +251,19 @@ function sendMessage(){
 
 
 
-    const message =
+    let text =
     input.value
     .trim()
     .toLowerCase();
 
 
 
-    if(message === ""){
+    if(text === ""){
 
-        output.innerHTML =
-        "✏️ Bitte eine Nachricht eingeben.";
+
+        output.textContent =
+        "✏️ Bitte Nachricht eingeben.";
+
 
         return;
 
@@ -269,44 +271,50 @@ function sendMessage(){
 
 
 
+
+
     let answer =
-    "💙 Ich habe dich verstanden.";
+    "💙 Nachricht empfangen.";
 
 
 
-    if(message.includes("hallo")){
+
+    if(text.includes("hallo")){
 
 
         answer =
-        "🤖 Hallo! Ich bin HalDo AI OS 6.0.";
+        "🤖 Hallo! Ich bin HalDo AI OS 7.0.";
+
 
     }
 
 
     else if(
-        message.includes("wer bist du")
+        text.includes("wer bist du")
     ){
 
 
         answer =
-        "🌍 Ich bin HalDo AI OS 6.0 Stable.";
+        "🌍 Ich bin HalDo AI OS, dein intelligentes System.";
+
 
     }
 
 
     else if(
-        message.includes("hilfe")
+        text.includes("hilfe")
     ){
 
 
         answer =
-        "🚀 Ich helfe bei KI, Notizen und Systemfunktionen.";
+        "🚀 Ich unterstütze dich mit HalDo Funktionen.";
+
 
     }
 
 
 
-    output.innerHTML =
+    output.textContent =
     answer;
 
 
@@ -329,7 +337,7 @@ sendMessage;
 
 
 /* =====================================
-   NOTES
+   NOTES SYSTEM
 ===================================== */
 
 
@@ -366,13 +374,14 @@ function saveNote(){
 
     if(output){
 
-        output.innerHTML =
+        output.textContent =
         "✅ Notiz gespeichert";
 
     }
 
 
 }
+
 
 
 
@@ -418,9 +427,8 @@ saveNote;
 
 
 
-
 /* =====================================
-   SYSTEM INFORMATION
+   SYSTEM INFO
 ===================================== */
 
 
@@ -432,27 +440,12 @@ window.HalDoSystem = {
 
 
     version:
-    "6.0 Stable",
+    "7.0 Stable",
 
 
     status:
-    "ONLINE",
+    "ONLINE"
 
-
-
-    info(){
-
-        return {
-
-            name:this.name,
-
-            version:this.version,
-
-            status:this.status
-
-        };
-
-    }
 
 
 };
@@ -461,5 +454,5 @@ window.HalDoSystem = {
 
 
 console.log(
-"💙 HALDO AI OS 6.0 CORE READY"
+"🚀 HALDO AI OS 7.0 CORE READY"
 );
