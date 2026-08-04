@@ -25,3 +25,8 @@ function openSettings() {
     window.location.href = "settings.html";
 
 }
+function goBack() {
+
+    window.location.href = "dashboard.html";
+
+}
