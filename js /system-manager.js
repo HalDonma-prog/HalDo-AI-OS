@@ -1,66 +1,47 @@
 /* =====================================
-   HalDo AI OS v3.0
-   SYSTEM MANAGER v1.1
+   HALDO AI OS
+   SYSTEM MANAGER v2.1
+   MODULE CONTROL CENTER
 ===================================== */
 
 
 /*
-    Zentrale Verwaltung von HalDo AI OS
-
-    Aufgaben:
-    - Systemstatus
-    - Module verwalten
-    - Version
-    - Registrierung
-    - Erweiterungen vorbereiten
+   System Manager
 */
 
 
-
-const HalDoSystem = {
+const HalDoSystemManager = {
 
 
     name:
-    "HalDo AI OS",
+
+    "HalDo System Manager",
+
 
 
     version:
-    "3.0",
 
+    "2.1",
 
-    managerVersion:
-    "1.1",
 
 
     status:
+
     "online",
 
 
-    modules:
-    {},
+
+    modules:{},
 
 
 
 
 
-
-    // ==========================
-    // Modul registrieren
-    // ==========================
+    /*
+       Modul registrieren
+    */
 
     registerModule(name, module){
-
-
-        if(!name){
-
-            console.log(
-                "⚠️ Modul ohne Namen"
-            );
-
-            return;
-
-        }
-
 
 
         this.modules[name] = module;
@@ -68,8 +49,11 @@ const HalDoSystem = {
 
 
         console.log(
-            "📦 Modul registriert:",
+
+            "⚙️ Modul verbunden:",
+
             name
+
         );
 
 
@@ -79,17 +63,14 @@ const HalDoSystem = {
 
 
 
+    /*
+       Modul abrufen
+    */
+
+    getModule(name){
 
 
-    // ==========================
-    // Modul prüfen
-    // ==========================
-
-    hasModule(name){
-
-
-        return this.modules[name]
-        !== undefined;
+        return this.modules[name];
 
 
     },
@@ -98,35 +79,33 @@ const HalDoSystem = {
 
 
 
+    /*
+       System Status
+    */
 
-
-    // ==========================
-    // Status abrufen
-    // ==========================
-
-    getStatus(){
+    statusReport(){
 
 
         return {
 
 
-            name:
+            system:
+
             this.name,
 
 
             version:
+
             this.version,
 
 
-            manager:
-            this.managerVersion,
-
-
             status:
+
             this.status,
 
 
             modules:
+
             Object.keys(
                 this.modules
             )
@@ -141,28 +120,25 @@ const HalDoSystem = {
 
 
 
-
-
-    // ==========================
-    // System Start
-    // ==========================
+    /*
+       System Start
+    */
 
     start(){
 
 
         console.log(
+
             "🚀 HalDo System Manager gestartet"
+
         );
 
 
 
-        console.log(
-            this.getStatus()
-        );
+        return this.statusReport();
 
 
     }
-
 
 
 };
@@ -171,23 +147,35 @@ const HalDoSystem = {
 
 
 
+/*
+   Global verfügbar machen
+*/
+
+
+window.HalDoSystemManager =
+
+HalDoSystemManager;
 
 
 
-// Global verfügbar machen
+
+
+/*
+   Verbindung mit altem Namen
+   für Module
+*/
 
 
 window.HalDoSystem =
-HalDoSystem;
+
+HalDoSystemManager;
 
 
 
 
 
+console.log(
 
+"⚙️ HalDo System Manager v2.1 READY"
 
-
-// Start
-
-
-HalDoSystem.start();
+);
