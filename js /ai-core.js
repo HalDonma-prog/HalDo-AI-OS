@@ -1,65 +1,33 @@
 /* =====================================
-   HalDo AI OS v3.0
-   AI CORE v1.2 SYSTEM CONNECTED
+   HALDO AI OS
+   AI CORE v2.1
+   CLEAN INTELLIGENCE MODULE
 ===================================== */
 
 
 /*
-    HalDo AI Core
-
-    Zentrale Intelligenz von HalDo AI OS
-
-    Aufgaben:
-    - Benutzerverwaltung
-    - Sprache
-    - Erinnerungen
-    - Module
-    - System Manager Verbindung
+   HalDo AI Core
 */
 
 
+const HalDoAICore = {
 
-const HalDoAI = {
 
+    name:
 
-    systemName:
-    "HalDo AI OS",
+    "HalDo AI Core",
+
 
 
     version:
-    "3.0",
 
+    "2.1",
 
-    coreVersion:
-    "1.2",
 
 
     status:
+
     "online",
-
-
-
-
-
-
-    user:{
-
-
-        name:
-        "User",
-
-
-        language:
-        "de",
-
-
-        preferences:{}
-
-
-    },
-
-
-
 
 
 
@@ -69,148 +37,18 @@ const HalDoAI = {
 
 
 
-
-    modules:{
-
-
-        chat:
-        false,
+    learn(text){
 
 
-        files:
-        false,
-
-
-        music:
-        false,
-
-
-        video:
-        false,
-
-
-        image:
-        false,
-
-
-        navigation:
-        false,
-
-
-        learning:
-        false,
-
-
-        store:
-        false,
-
-
-        cloud:
-        false,
-
-
-        security:
-        true
-
-
-    },
-
-
-
-
-
-
-
-
-
-    // =========================
-    // SYSTEM START
-    // =========================
-
-
-    start(){
+        this.memory.push(text);
 
 
 
         console.log(
-            "🤖 HalDo AI Core gestartet"
-        );
 
+            "🧠 AI gelernt:",
 
-
-        console.log(
-            this.systemName,
-            "Core",
-            this.coreVersion
-        );
-
-
-
-
-
-        // Verbindung System Manager
-
-
-        if(window.HalDoSystem){
-
-
-
-            HalDoSystem.registerModule(
-
-                "AI Core",
-
-                this
-
-            );
-
-
-
-            console.log(
-                "⚙️ AI Core mit System Manager verbunden"
-            );
-
-
-
-        }else{
-
-
-            console.log(
-                "⚠️ System Manager nicht geladen"
-            );
-
-
-        }
-
-
-
-    },
-
-
-
-
-
-
-
-
-
-    // =========================
-    // SPRACHE
-    // =========================
-
-
-    setLanguage(lang){
-
-
-        this.user.language =
-        lang;
-
-
-
-        console.log(
-
-            "🌍 Sprache geändert:",
-
-            lang
+            text
 
         );
 
@@ -221,143 +59,63 @@ const HalDoAI = {
 
 
 
+    reply(message){
 
 
+        const text =
 
+        message.toLowerCase();
 
-    // =========================
-    // MEMORY
-    // =========================
-
-
-    remember(data){
-
-
-
-        this.memory.push(data);
-
-
-
-        console.log(
-
-            "🧠 Erinnerung gespeichert:",
-
-            data
-
-        );
-
-
-
-    },
-
-
-
-
-
-
-
-
-
-    // =========================
-    // MODUL AKTIVIEREN
-    // =========================
-
-
-    enableModule(name){
 
 
 
         if(
-
-            this.modules[name]
-
-            !==
-
-            undefined
-
+            text.includes("hallo") ||
+            text.includes("hi")
         ){
 
-
-            this.modules[name] =
-            true;
-
-
-
-            console.log(
-
-                "📱 Modul aktiviert:",
-
-                name
-
-            );
-
-
-
-        }else{
-
-
-            console.log(
-
-                "⚠️ Modul nicht vorhanden:",
-
-                name
-
-            );
-
+            return "👋 Hallo! Ich bin HalDo AI.";
 
         }
 
 
 
-    },
+
+
+        if(
+            text.includes("wie geht es")
+        ){
+
+            return "💙 Mein System läuft stabil.";
+
+        }
 
 
 
 
 
+        if(
+            text.includes("wer bist du")
+        ){
+
+            return "🤖 Ich bin der KI-Kern von HalDo AI OS.";
+
+        }
 
 
 
 
-    // =========================
-    // STATUS
-    // =========================
 
+        return (
 
-    getStatus(){
+            "🧠 Ich habe deine Nachricht erhalten: "
 
+            + message
 
-
-        return {
-
-
-            name:
-            this.systemName,
-
-
-            version:
-            this.version,
-
-
-            core:
-            this.coreVersion,
-
-
-            status:
-            this.status,
-
-
-            modules:
-            this.modules
-
-
-
-        };
+        );
 
 
     }
-
-
 
 };
 
@@ -365,25 +123,44 @@ const HalDoAI = {
 
 
 
+/*
+   Global verbinden
+*/
 
 
+window.HalDoAICore =
 
-
-// Global verfügbar machen
-
-
-window.HalDoAI =
-HalDoAI;
-
-
-
-
+HalDoAICore;
 
 
 
 
 
-// Start
+/*
+   Verbindung mit System Manager
+*/
 
 
-HalDoAI.start();
+if(window.HalDoSystem){
+
+
+    HalDoSystem.registerModule(
+
+        "AI Core",
+
+        HalDoAICore
+
+    );
+
+
+}
+
+
+
+
+
+console.log(
+
+    "🤖 HalDo AI Core v2.1 READY"
+
+);
