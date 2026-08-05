@@ -1,6 +1,6 @@
 /*
 ========================================
-HalDo AI OS Professional 16.0
+HalDo AI OS Professional Ultimate 16.0
 
 Core Configuration System
 
@@ -12,63 +12,156 @@ Core Configuration System
 
 const HalDoConfig = {
 
+
     system: {
+
 
         name: "HalDo AI OS",
 
+
         version: "16.0.0",
 
-        edition: "Professional Ultimate Foundation",
 
-        status: "starting"
+        edition:
+        "Professional Ultimate",
+
+
+        status:
+        "initializing"
+
+
+
+    },
+
+
+
+
+
+    developer: {
+
+
+        project:
+        "HalDo AI OS",
+
+
+        build:
+        "16.0 Ultimate",
+
+
+        environment:
+        "production"
+
+
 
     },
 
 
-    settings: {
 
-        language: "de",
 
-        theme: "dark"
+
+    user: {
+
+
+        language:
+        "de",
+
+
+        theme:
+        "dark"
+
+
 
     },
+
+
+
 
 
     features: {
 
+
         dashboard: true,
+
 
         chat: true,
 
-        settings: true,
 
-        storage: true,
+        voice: true,
+
+
+        languages: true,
+
 
         modules: true,
 
+
+        storage: true,
+
+
+        security: true,
+
+
         pwa: true
+
+
 
     },
 
 
+
+
+
+
+    get(key){
+
+
+        return this[key];
+
+
+    },
+
+
+
+
+
+
     info(){
+
 
         return {
 
-            name: this.system.name,
 
-            version: this.system.version,
+            name:
+            this.system.name,
 
-            edition: this.system.edition,
 
-            status: this.system.status
+            version:
+            this.system.version,
+
+
+            edition:
+            this.system.edition,
+
+
+            status:
+            this.system.status
+
+
 
         };
+
 
     }
 
 
+
+
+
 };
+
+
+
+
 
 
 window.HalDoConfig = HalDoConfig;
