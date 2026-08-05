@@ -1,17 +1,17 @@
 /*
 ========================================
-HalDo AI OS Professional 16.0
+HalDo AI OS Professional Ultimate 16.0
 
 Core System Engine
 
 ========================================
 */
 
+
 "use strict";
 
 
 const HalDoSystem = {
-
 
 
     status: "offline",
@@ -27,21 +27,25 @@ const HalDoSystem = {
 
 
 
-    init(){
+
+    async init(){
 
 
 
-        if(window.HalDoLogger){
+        console.log(
+
+            "🤖 HalDo AI OS startet..."
+
+        );
 
 
-            HalDoLogger.info(
-
-                "System Initialisierung gestartet"
-
-            );
 
 
-        }
+
+
+        this.startTime =
+
+        new Date();
 
 
 
@@ -52,7 +56,9 @@ const HalDoSystem = {
         if(window.HalDoKernel){
 
 
-            HalDoKernel.boot();
+
+            HalDoKernel.init();
+
 
 
         }
@@ -63,7 +69,26 @@ const HalDoSystem = {
 
 
 
-        this.loadModules();
+        if(window.HalDoLanguage){
+
+
+
+            await HalDoLanguage.init();
+
+
+
+        }
+
+
+
+
+
+
+
+
+        this.loadCoreModules();
+
+
 
 
 
@@ -71,22 +96,25 @@ const HalDoSystem = {
         this.status = "online";
 
 
-        this.startTime = new Date();
 
 
 
 
 
+        if(window.HalDoLogger){
 
-        if(window.HalDoConfig){
 
 
-            HalDoConfig.system.status =
+            HalDoLogger.success(
 
-            "online";
+                "HalDo AI OS erfolgreich gestartet"
+
+            );
+
 
 
         }
+
 
 
 
@@ -95,6 +123,7 @@ const HalDoSystem = {
 
 
         if(window.HalDoEvents){
+
 
 
             HalDoEvents.emit(
@@ -106,6 +135,7 @@ const HalDoSystem = {
             );
 
 
+
         }
 
 
@@ -113,14 +143,9 @@ const HalDoSystem = {
 
 
 
-
-        this.updateScreen();
-
+        this.updateStatus();
 
 
-
-
-        return true;
 
 
 
@@ -134,7 +159,7 @@ const HalDoSystem = {
 
 
 
-    loadModules(){
+    loadCoreModules(){
 
 
 
@@ -142,17 +167,25 @@ const HalDoSystem = {
 
 
 
-            "Configuration",
+            "Config",
+
 
             "Logger",
 
+
             "Events",
+
 
             "Storage",
 
+
             "Kernel",
 
-            "Router"
+
+            "Router",
+
+
+            "Language"
 
 
 
@@ -164,15 +197,14 @@ const HalDoSystem = {
 
 
 
-        this.modules.forEach(
+
+        if(window.HalDoKernel){
 
 
 
-            module => {
+            this.modules.forEach(
 
-
-
-                if(window.HalDoKernel){
+                module => {
 
 
 
@@ -188,10 +220,11 @@ const HalDoSystem = {
 
 
 
-            }
+            );
 
 
-        );
+
+        }
 
 
 
@@ -205,11 +238,11 @@ const HalDoSystem = {
 
 
 
-    updateScreen(){
+    updateStatus(){
 
 
 
-        const status =
+        const element =
 
         document.getElementById(
 
@@ -222,17 +255,17 @@ const HalDoSystem = {
 
 
 
-        if(status){
+        if(element){
 
 
 
-            status.innerHTML =
+            element.innerHTML =
 
             "🟢 HalDo AI OS 16.0 Online";
 
 
 
-            status.className =
+            element.className =
 
             "status-box status-online";
 
@@ -280,11 +313,18 @@ const HalDoSystem = {
 
             modules:
 
-            this.modules
+            this.modules,
+
+
+
+            startTime:
+
+            this.startTime
 
 
 
         };
+
 
 
     }
@@ -295,6 +335,7 @@ const HalDoSystem = {
 
 
 };
+
 
 
 
