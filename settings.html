@@ -9,12 +9,9 @@
 
 
 <title>
-HalDo AI OS Einstellungen 16.0
+HalDo AI OS - Einstellungen
 </title>
 
-
-
-<!-- Design System -->
 
 <link rel="stylesheet" href="css/main.css">
 <link rel="stylesheet" href="css/components.css">
@@ -25,12 +22,10 @@ HalDo AI OS Einstellungen 16.0
 </head>
 
 
-
 <body>
 
 
 <div class="os-container">
-
 
 
 <header class="system-header">
@@ -44,16 +39,12 @@ class="logo"
 
 
 <h1>
-
 ⚙️ Einstellungen
-
 </h1>
 
 
 <p>
-
 HalDo AI OS Professional 16.0
-
 </p>
 
 
@@ -62,168 +53,63 @@ HalDo AI OS Professional 16.0
 
 
 
-
-
-
 <main id="app">
 
 
-
-<section class="settings-box">
-
+<section class="settings-panel">
 
 
 <h2>
-
 System Einstellungen
-
 </h2>
 
 
 
 
 
+<div
+id="current-theme"
+class="card"
+>
 
-<div class="card">
+🌙 Theme: dark
+
+</div>
 
 
-<h3>
-
-🌙 Design
-
-</h3>
 
 
-<p>
 
-Aktuelles Theme: Dark Mode
+<div
+id="current-language"
+class="card"
+>
 
-</p>
+🌍 Sprache: de
+
+</div>
+
+
+
+
+
+
+<div class="settings-actions">
 
 
 
 <button onclick="changeTheme()">
 
-Theme speichern
+🌙 Theme ändern
 
 </button>
 
-
-</div>
-
-
-
-
-
-
-
-<div class="card">
-
-
-<h3>
-
-🌍 Sprache
-
-</h3>
-
-
-<p>
-
-Deutsch
-
-</p>
 
 
 
 <button onclick="changeLanguage()">
 
-Sprache speichern
-
-</button>
-
-
-</div>
-
-
-
-
-
-
-
-<div class="card">
-
-
-<h3>
-
-🤖 System Information
-
-</h3>
-
-
-<p id="system-info">
-
-System wird geladen...
-
-</p>
-
-
-</div>
-
-
-
-
-
-
-
-<div class="card">
-
-
-<h3>
-
-💾 Speicher
-
-</h3>
-
-
-<p id="storage-info">
-
-Storage bereit
-
-</p>
-
-
-</div>
-
-
-
-
-
-
-
-<div class="menu">
-
-
-<button onclick="openPage('index.html')">
-
-🏠 Startseite
-
-</button>
-
-
-
-
-<button onclick="openPage('dashboard.html')">
-
-📊 Dashboard
-
-</button>
-
-
-
-
-<button onclick="openPage('chat.html')">
-
-🤖 KI Chat
+🌍 Sprache ändern
 
 </button>
 
@@ -232,35 +118,30 @@ Storage bereit
 </div>
 
 
+
+
+
+
+<button onclick="goHome()">
+
+⬅️ Zurück
+
+</button>
 
 
 
 </section>
 
 
-
 </main>
-
-
-
-
 
 
 
 <footer>
 
-
-<p>
-
 HalDo AI OS Professional 16.0
 
-</p>
-
-
 </footer>
-
-
-
 
 
 
@@ -270,38 +151,75 @@ HalDo AI OS Professional 16.0
 
 
 
-
-
-<!-- Core System -->
-
+<!-- Core -->
 
 <script src="core/config.js"></script>
-
 <script src="core/logger.js"></script>
-
 <script src="core/events.js"></script>
-
 <script src="core/storage.js"></script>
-
 <script src="core/kernel.js"></script>
-
 <script src="core/router.js"></script>
-
 <script src="core/system.js"></script>
-
-
-
 
 
 <!-- Application -->
 
-
 <script src="js/navigation.js"></script>
-
 <script src="js/modules.js"></script>
-
 <script src="js/settings.js"></script>
+<script src="js/app.js"></script>
 
+
+
+
+<script>
+
+
+function changeTheme(){
+
+
+HalDoSettings.saveTheme(
+
+"dark"
+
+);
+
+
+alert(
+
+"Theme gespeichert"
+
+);
+
+
+}
+
+
+
+
+
+function changeLanguage(){
+
+
+HalDoSettings.saveLanguage(
+
+"de"
+
+);
+
+
+alert(
+
+"Sprache gespeichert"
+
+);
+
+
+}
+
+
+
+</script>
 
 
 </body>
