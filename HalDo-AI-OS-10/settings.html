@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>HalDo AI Einstellungen</title>
+
+    <link rel="stylesheet" href="css/main.css">
+
+</head>
+
+
+<body>
+
+
+<header class="header">
+
+    <div class="logo">
+        🤖 HalDo AI Einstellungen
+    </div>
+
+</header>
+
+
+
+<main class="container">
+
+
+    <h1>
+        ⚙️ Einstellungen
+    </h1>
+
+
+    <p>
+        System-Konfiguration
+        <br>
+        Foundation Build 001
+    </p>
+
+
+
+    <div class="status-box">
+
+        🎨 Design
+
+        <br><br>
+
+        🌙 Theme-System Vorbereitung
+
+    </div>
+
+
+
+    <button onclick="saveSettings()">
+
+        💾 Einstellungen speichern
+
+    </button>
+
+
+
+    <button onclick="loadSettings()">
+
+        📂 Einstellungen laden
+
+    </button>
+
+
+
+    <button onclick="goHome()">
+
+        🏠 Startseite
+
+    </button>
+
+
+
+</main>
+
+
+
+
+<script src="js/core/events.js"></script>
+
+<script src="js/core/storage.js"></script>
+
+<script src="js/core/router.js"></script>
+
+<script src="js/core/system.js"></script>
+
+<script src="js/core/navigation.js"></script>
+
+<script src="js/app.js"></script>
+
+
+
+
+<script>
+
+
+function saveSettings(){
+
+
+    HalDoStorage.save(
+
+        "settings",
+
+        {
+
+            theme: "default",
+
+            language: "de"
+
+        }
+
+    );
+
+
+    alert(
+        "✅ Einstellungen gespeichert"
+    );
+
+
+}
+
+
+
+
+
+function loadSettings(){
+
+
+    const settings =
+    HalDoStorage.load(
+        "settings"
+    );
+
+
+    if(settings){
+
+
+        alert(
+
+            "⚙️ Sprache: "
+            +
+            settings.language
+
+        );
+
+
+    }
+
+    else{
+
+
+        alert(
+            "Keine Einstellungen gefunden"
+        );
+
+
+    }
+
+
+}
+
+
+
+
+
+function goHome(){
+
+
+    window.location.href =
+    "index.html";
+
+
+}
+
+
+</script>
+
+
+
+</body>
+
+</html>
