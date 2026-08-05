@@ -1,11 +1,12 @@
 /*
 ========================================
-HalDo AI OS Professional 16.0
+HalDo AI OS Professional Ultimate 16.0
 
 Language Management System
 
 ========================================
 */
+
 
 "use strict";
 
@@ -19,47 +20,34 @@ const HalDoLanguage = {
     languages: [],
 
 
-
-
-    async load(){
-
-
-        try {
-
-
-            const response = await fetch(
-                "data/languages.json"
-            );
-
-
-            const data = await response.json();
-
-
-            this.languages = data.available;
-
-
-            this.current = data.default;
+    translations: {},
 
 
 
-            console.log(
-                "🌍 Sprachen geladen:",
-                this.languages
-            );
 
 
-        }
-
-        catch(error){
 
 
-            console.error(
-                "Language System Fehler:",
-                error
-            );
+    async init(){
 
 
-        }
+
+        await this.loadLanguages();
+
+
+
+        this.loadSavedLanguage();
+
+
+
+        console.log(
+
+            "🌍 Language System bereit:",
+
+            this.current
+
+        );
+
 
 
     },
@@ -69,21 +57,112 @@ const HalDoLanguage = {
 
 
 
+
+
+
+    async loadLanguages(){
+
+
+
+        try {
+
+
+
+            const response =
+
+            await fetch(
+
+                "data/languages.json"
+
+            );
+
+
+
+
+
+
+            const data =
+
+            await response.json();
+
+
+
+
+
+
+            this.languages =
+
+            data.available;
+
+
+
+
+
+
+            this.current =
+
+            data.default;
+
+
+
+
+
+
+        }
+
+
+
+        catch(error){
+
+
+
+            console.error(
+
+                "Sprachen konnten nicht geladen werden:",
+
+                error
+
+            );
+
+
+
+        }
+
+
+
+    },
+
+
+
+
+
+
+
+
+
     setLanguage(code){
 
 
-        const exists = this.languages.find(
 
-            lang => lang.code === code
+        const language =
+
+        this.languages.find(
+
+            item => item.code === code
 
         );
 
 
 
-        if(!exists){
+
+
+
+        if(!language){
+
 
 
             return false;
+
 
 
         }
@@ -92,7 +171,11 @@ const HalDoLanguage = {
 
 
 
+
         this.current = code;
+
+
+
 
 
 
@@ -106,7 +189,32 @@ const HalDoLanguage = {
 
 
 
+
+
+
+        if(window.HalDoEvents){
+
+
+
+            HalDoEvents.emit(
+
+                "language-change",
+
+                code
+
+            );
+
+
+
+        }
+
+
+
+
+
+
         return true;
+
 
 
     },
@@ -117,12 +225,54 @@ const HalDoLanguage = {
 
 
 
-    getLanguage(){
+
+
+    loadSavedLanguage(){
+
+
+
+        const saved =
+
+        localStorage.getItem(
+
+            "HalDo_language"
+
+        );
+
+
+
+
+
+        if(saved){
+
+
+
+            this.current = saved;
+
+
+
+        }
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    getCurrent(){
+
 
 
         return this.current;
 
 
+
     },
 
 
@@ -131,10 +281,14 @@ const HalDoLanguage = {
 
 
 
-    getAvailable(){
+
+
+    getLanguages(){
+
 
 
         return this.languages;
+
 
 
     }
@@ -145,6 +299,7 @@ const HalDoLanguage = {
 
 
 };
+
 
 
 
