@@ -1,12 +1,11 @@
 /*
 ========================================
 HalDo AI OS Professional 16.0
-Ultimate Foundation
 
 Core System Engine
+
 ========================================
 */
-
 
 "use strict";
 
@@ -18,8 +17,10 @@ const HalDoSystem = {
     status: "offline",
 
 
-
     modules: [],
+
+
+    startTime: null,
 
 
 
@@ -30,9 +31,19 @@ const HalDoSystem = {
 
 
 
-        console.log(
-            "🤖 HalDo AI OS System Initialisierung..."
-        );
+        if(window.HalDoLogger){
+
+
+            HalDoLogger.info(
+
+                "System Initialisierung gestartet"
+
+            );
+
+
+        }
+
+
 
 
 
@@ -41,10 +52,11 @@ const HalDoSystem = {
         if(window.HalDoKernel){
 
 
-            HalDoKernel.init();
+            HalDoKernel.boot();
 
 
         }
+
 
 
 
@@ -55,23 +67,27 @@ const HalDoSystem = {
 
 
 
+
         this.status = "online";
 
 
+        this.startTime = new Date();
 
 
 
-        if(window.HalDoLogger){
 
 
-            HalDoLogger.success(
 
-                "System erfolgreich gestartet"
+        if(window.HalDoConfig){
 
-            );
+
+            HalDoConfig.system.status =
+
+            "online";
 
 
         }
+
 
 
 
@@ -97,7 +113,14 @@ const HalDoSystem = {
 
 
 
+
         this.updateScreen();
+
+
+
+
+
+        return true;
 
 
 
@@ -119,15 +142,15 @@ const HalDoSystem = {
 
 
 
-            "Config",
+            "Configuration",
 
             "Logger",
-
-            "Kernel",
 
             "Events",
 
             "Storage",
+
+            "Kernel",
 
             "Router"
 
@@ -138,13 +161,19 @@ const HalDoSystem = {
 
 
 
-        if(window.HalDoKernel){
 
 
 
-            this.modules.forEach(
+        this.modules.forEach(
 
-                module => {
+
+
+            module => {
+
+
+
+                if(window.HalDoKernel){
+
 
 
                     HalDoKernel.register(
@@ -154,13 +183,15 @@ const HalDoSystem = {
                     );
 
 
+
                 }
 
-            );
 
 
+            }
 
-        }
+
+        );
 
 
 
@@ -190,6 +221,7 @@ const HalDoSystem = {
 
 
 
+
         if(status){
 
 
@@ -197,6 +229,12 @@ const HalDoSystem = {
             status.innerHTML =
 
             "🟢 HalDo AI OS 16.0 Online";
+
+
+
+            status.className =
+
+            "status-box status-online";
 
 
 
@@ -249,15 +287,14 @@ const HalDoSystem = {
         };
 
 
-
     }
 
 
 
 
 
-};
 
+};
 
 
 
