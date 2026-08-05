@@ -1,9 +1,9 @@
 /*
 ========================================
-HalDo AI OS Professional 16.0
-Ultimate Foundation
+HalDo AI OS Professional Ultimate 16.0
 
-Core Kernel Engine
+Core Kernel System
+
 ========================================
 */
 
@@ -14,19 +14,12 @@ Core Kernel Engine
 const HalDoKernel = {
 
 
-    name: "HalDo AI OS",
-
-
-    version: "16.0.0",
-
-
-    status: "created",
-
-
     modules: [],
 
 
-    startTime: null,
+    status: "offline",
+
+
 
 
 
@@ -35,26 +28,39 @@ const HalDoKernel = {
     init(){
 
 
-        this.status = "initialized";
+        this.status = "online";
+
+
+
+        console.log(
+
+            "⚙️ HalDo Kernel gestartet"
+
+        );
+
+
+
 
 
         if(window.HalDoLogger){
 
 
             HalDoLogger.success(
-                "Kernel initialisiert"
+
+                "Kernel erfolgreich initialisiert"
+
             );
 
 
         }
 
 
-        console.log(
-            "⚙️ Kernel bereit"
-        );
-
 
     },
+
+
+
+
 
 
 
@@ -65,90 +71,61 @@ const HalDoKernel = {
 
 
         if(
-            !this.modules.includes(moduleName)
+
+            !this.modules.includes(
+
+                moduleName
+
+            )
+
         ){
 
 
-            this.modules.push(moduleName);
 
+            this.modules.push(
 
+                moduleName
 
-            if(window.HalDoLogger){
-
-
-                HalDoLogger.info(
-                    "Modul registriert: "
-                    + moduleName
-                );
-
-
-            }
-
-
-        }
-
-
-    },
-
-
-
-
-
-    boot(){
-
-
-
-        if(
-            this.status === "running"
-        ){
-
-
-            console.warn(
-                "Kernel läuft bereits"
             );
 
 
-            return;
 
+            console.log(
 
-        }
+                "📦 Modul registriert:",
 
+                moduleName
 
-
-
-
-        this.status = "running";
-
-
-        this.startTime =
-        new Date();
-
-
-
-
-        if(window.HalDoLogger){
-
-
-            HalDoLogger.success(
-                "HalDo Kernel gestartet"
             );
 
 
+
         }
 
 
 
+    },
 
 
-        console.log(
-            "🚀 HalDo AI OS Kernel gestartet"
+
+
+
+
+
+
+
+    remove(moduleName){
+
+
+
+        this.modules =
+
+        this.modules.filter(
+
+            item => item !== moduleName
+
         );
 
-
-        console.log(
-            "📦 Module:",
-            this.modules
-        );
 
 
     },
@@ -157,13 +134,23 @@ const HalDoKernel = {
 
 
 
-    getStatus(){
 
 
-        return this.status;
+
+
+    getModules(){
+
+
+
+        return this.modules;
+
 
 
     },
+
+
+
+
 
 
 
@@ -176,27 +163,21 @@ const HalDoKernel = {
         return {
 
 
-            name:
-            this.name,
-
-
-            version:
-            this.version,
-
 
             status:
+
             this.status,
 
 
+
             modules:
-            this.modules,
 
+            this.modules
 
-            startTime:
-            this.startTime
 
 
         };
+
 
 
     }
@@ -205,7 +186,9 @@ const HalDoKernel = {
 
 
 
+
 };
+
 
 
 
