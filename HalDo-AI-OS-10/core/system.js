@@ -1,8 +1,9 @@
 /*
 ========================================
-HalDo AI OS Professional 10.0
-System Manager
-Foundation Build
+HalDo AI OS Professional 16.0
+Ultimate Foundation
+
+Core System Engine
 ========================================
 */
 
@@ -13,55 +14,93 @@ Foundation Build
 const HalDoSystem = {
 
 
-    name: "HalDo AI OS",
 
-
-    version: "10.0.0",
-
+    status: "offline",
 
 
 
-    start(){
+    modules: [],
+
+
+
+
+
+
+    init(){
+
 
 
         console.log(
-            "⚙️ HalDo System startet..."
+            "🤖 HalDo AI OS System Initialisierung..."
         );
 
 
-        this.updateStatus(
-            "System läuft"
-        );
-
-
-        this.ready();
-
-
-    },
 
 
 
+        if(window.HalDoKernel){
 
 
-    ready(){
+            HalDoKernel.init();
 
 
-        console.log(
-            "✅ HalDo AI OS System bereit"
-        );
+        }
 
 
-        if(window.HalDoEvents){
 
 
-            HalDoEvents.emit(
-                "system-ready"
+
+
+        this.loadModules();
+
+
+
+        this.status = "online";
+
+
+
+
+
+        if(window.HalDoLogger){
+
+
+            HalDoLogger.success(
+
+                "System erfolgreich gestartet"
+
             );
 
 
         }
 
 
+
+
+
+
+        if(window.HalDoEvents){
+
+
+            HalDoEvents.emit(
+
+                "system-ready",
+
+                this.info()
+
+            );
+
+
+        }
+
+
+
+
+
+
+        this.updateScreen();
+
+
+
     },
 
 
@@ -69,25 +108,146 @@ const HalDoSystem = {
 
 
 
-    updateStatus(message){
+
+
+
+    loadModules(){
+
+
+
+        this.modules = [
+
+
+
+            "Config",
+
+            "Logger",
+
+            "Kernel",
+
+            "Events",
+
+            "Storage",
+
+            "Router"
+
+
+
+        ];
+
+
+
+
+        if(window.HalDoKernel){
+
+
+
+            this.modules.forEach(
+
+                module => {
+
+
+                    HalDoKernel.register(
+
+                        module
+
+                    );
+
+
+                }
+
+            );
+
+
+
+        }
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    updateScreen(){
+
 
 
         const status =
 
         document.getElementById(
+
             "system-status"
+
         );
+
+
 
 
 
         if(status){
 
 
-            status.textContent =
-            message;
+
+            status.innerHTML =
+
+            "🟢 HalDo AI OS 16.0 Online";
+
 
 
         }
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    info(){
+
+
+
+        return {
+
+
+
+            name:
+
+            "HalDo AI OS",
+
+
+
+            version:
+
+            "16.0.0",
+
+
+
+            status:
+
+            this.status,
+
+
+
+            modules:
+
+            this.modules
+
+
+
+        };
+
 
 
     }
@@ -95,7 +255,9 @@ const HalDoSystem = {
 
 
 
+
 };
+
 
 
 
