@@ -2,247 +2,47 @@
 ========================================
 HalDo AI OS Professional 16.0
 
-Chat Controller
+AI Chat Controller
 
 ========================================
 */
 
-
 "use strict";
 
 
+const HalDoChat = {
 
 
 
-function sendMessage(){
+    messages: [],
 
 
+    initialized: false,
 
-    const input =
 
-    document.getElementById(
 
-        "chat-input"
 
-    );
 
 
+    init(){
 
 
 
+        if(this.initialized){
 
-    const messages =
 
-    document.getElementById(
+            return;
 
-        "chat-messages"
 
-    );
+        }
 
 
 
 
 
+        console.log(
 
-    if(!input || !messages){
-
-
-        return;
-
-
-    }
-
-
-
-
-
-
-    const text =
-
-    input.value.trim();
-
-
-
-
-
-
-    if(text === ""){
-
-
-        return;
-
-
-    }
-
-
-
-
-
-
-    addMessage(
-
-        text,
-
-        "user"
-
-    );
-
-
-
-
-
-
-    input.value = "";
-
-
-
-
-
-
-    setTimeout(
-
-        function(){
-
-
-
-            addMessage(
-
-                "🤖 Ich habe deine Nachricht erhalten. Die KI-Schnittstelle wird vorbereitet.",
-
-                "ai"
-
-            );
-
-
-
-        },
-
-        500
-
-    );
-
-
-
-
-
-
-    saveChatMessage(
-
-        text
-
-    );
-
-
-
-}
-
-
-
-
-
-
-
-
-
-function addMessage(text, type){
-
-
-
-    const messages =
-
-    document.getElementById(
-
-        "chat-messages"
-
-    );
-
-
-
-
-
-
-    if(!messages){
-
-
-        return;
-
-
-    }
-
-
-
-
-
-
-    const div =
-
-    document.createElement(
-
-        "div"
-
-    );
-
-
-
-
-
-
-    div.className =
-
-    "message " + type;
-
-
-
-
-
-
-    div.innerHTML = text;
-
-
-
-
-
-
-    messages.appendChild(
-
-        div
-
-    );
-
-
-
-
-
-
-    messages.scrollTop =
-
-    messages.scrollHeight;
-
-
-
-}
-
-
-
-
-
-
-
-
-
-function saveChatMessage(message){
-
-
-
-    if(window.HalDoStorage){
-
-
-
-        let history =
-
-        HalDoStorage.load(
-
-            "chat_history"
+            "🤖 KI Chat gestartet"
 
         );
 
@@ -250,13 +50,32 @@ function saveChatMessage(message){
 
 
 
-
-        if(!history){
-
+        this.load();
 
 
-            history = [];
 
+        this.initialized = true;
+
+
+
+    },
+
+
+
+
+
+
+
+
+    send(message){
+
+
+
+        if(!message){
+
+
+
+            return;
 
 
         }
@@ -266,30 +85,231 @@ function saveChatMessage(message){
 
 
 
-        history.push({
+
+        const userMessage = {
+
+
+            type: "user",
+
+
+            text: message,
+
+
+            time: new Date()
+
+        };
 
 
 
-            message: message,
-
-            time: new Date().toISOString()
 
 
+        this.messages.push(
 
-        });
-
-
-
-
-
-
-        HalDoStorage.save(
-
-            "chat_history",
-
-            history
+            userMessage
 
         );
+
+
+
+
+
+
+
+        const response = {
+
+
+            type: "ai",
+
+
+            text:
+
+            "Hallo! Ich bin HalDo AI. Wie kann ich helfen?",
+
+
+            time: new Date()
+
+
+        };
+
+
+
+
+
+        this.messages.push(
+
+            response
+
+        );
+
+
+
+
+
+
+        this.render();
+
+
+
+    },
+
+
+
+
+
+
+
+
+    load(){
+
+
+
+        if(window.HalDoStorage){
+
+
+
+            this.messages =
+
+            HalDoStorage.get(
+
+                "chat_messages",
+
+                []
+
+            );
+
+
+
+        }
+
+
+
+    },
+
+
+
+
+
+
+
+
+    save(){
+
+
+
+        if(window.HalDoStorage){
+
+
+
+            HalDoStorage.save(
+
+                "chat_messages",
+
+                this.messages
+
+            );
+
+
+        }
+
+
+
+    },
+
+
+
+
+
+
+
+
+    render(){
+
+
+
+        const area =
+
+        document.getElementById(
+
+            "chat-area"
+
+        );
+
+
+
+
+
+        if(!area){
+
+
+            return;
+
+
+        }
+
+
+
+
+
+
+        area.innerHTML = "";
+
+
+
+
+
+
+
+        this.messages.forEach(
+
+
+
+            message => {
+
+
+
+                const div =
+
+                document.createElement(
+
+                    "div"
+
+                );
+
+
+
+                div.className =
+
+                "chat-message " +
+
+                message.type;
+
+
+
+                div.innerHTML =
+
+                message.text;
+
+
+
+                area.appendChild(
+
+                    div
+
+                );
+
+
+
+            }
+
+
+        );
+
+
+
+
+
+
+        this.save();
 
 
 
@@ -297,9 +317,17 @@ function saveChatMessage(message){
 
 
 
-}
 
 
+
+
+};
+
+
+
+
+
+window.HalDoChat = HalDoChat;
 
 
 
@@ -311,14 +339,28 @@ document.addEventListener(
 
     "DOMContentLoaded",
 
-    function(){
+    () => {
 
 
-        console.log(
 
-            "🤖 Chat Modul bereit"
+        if(
 
-        );
+            document.getElementById(
+
+                "chat-area"
+
+            )
+
+        ){
+
+
+
+            HalDoChat.init();
+
+
+
+        }
+
 
 
     }
