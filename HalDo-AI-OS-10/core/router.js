@@ -1,17 +1,17 @@
 /*
 ========================================
-HalDo AI OS Professional 16.0
+HalDo AI OS Professional Ultimate 16.0
 
 Core Router System
 
 ========================================
 */
 
+
 "use strict";
 
 
 const HalDoRouter = {
-
 
 
     routes: {},
@@ -24,8 +24,10 @@ const HalDoRouter = {
 
 
 
-    register(name, path){
 
+
+
+    register(name, path){
 
 
         this.routes[name] = path;
@@ -36,11 +38,13 @@ const HalDoRouter = {
         if(window.HalDoLogger){
 
 
+
             HalDoLogger.info(
 
                 "Route registriert: " + name
 
             );
+
 
 
         }
@@ -77,11 +81,9 @@ const HalDoRouter = {
             if(window.HalDoLogger){
 
 
-                HalDoLogger.error(
+                HalDoLogger.warning(
 
-                    "Route nicht gefunden: "
-
-                    + name
+                    "Route nicht gefunden: " + name
 
                 );
 
@@ -91,7 +93,6 @@ const HalDoRouter = {
 
 
             return false;
-
 
 
         }
@@ -111,19 +112,25 @@ const HalDoRouter = {
         if(window.HalDoEvents){
 
 
+
             HalDoEvents.emit(
 
                 "route-change",
 
                 {
 
-                    name:name,
 
-                    path:path
+                    page: name,
+
+
+                    path: path
+
 
                 }
 
+
             );
+
 
 
         }
@@ -185,6 +192,7 @@ const HalDoRouter = {
 
 
 };
+
 
 
 
