@@ -7,240 +7,86 @@ Settings Controller
 ========================================
 */
 
-
 "use strict";
 
 
+const HalDoSettings = {
 
 
 
-function loadSettings(){
+    initialized: false,
 
 
 
-    console.log(
 
-        "⚙️ Einstellungen gestartet"
 
-    );
 
+    init(){
 
 
 
+        if(this.initialized){
 
 
-    updateSystemInfo();
+            return;
 
 
+        }
 
-    updateStorageInfo();
 
 
 
-}
 
+        console.log(
 
+            "⚙️ Einstellungen gestartet"
 
+        );
 
 
 
 
 
 
-function updateSystemInfo(){
+        this.load();
 
 
 
-    const infoBox =
 
-    document.getElementById(
+        this.initialized = true;
 
-        "system-info"
 
-    );
 
+    },
 
 
 
 
 
-    if(!infoBox){
 
 
-        return;
 
+    load(){
 
-    }
 
 
+        const theme =
 
+        window.HalDoStorage
 
+        ?
 
-
-    if(window.HalDoSystem){
-
-
-
-        const info =
-
-        HalDoSystem.info();
-
-
-
-
-
-
-        infoBox.innerHTML =
-
-
-
-        "🤖 Name: " +
-
-        info.name +
-
-        "<br>" +
-
-        "📦 Version: " +
-
-        info.version +
-
-        "<br>" +
-
-        "🟢 Status: " +
-
-        info.status;
-
-
-
-    }
-
-    else {
-
-
-
-        infoBox.innerHTML =
-
-
-        "⚠️ System nicht verfügbar";
-
-
-
-    }
-
-
-
-}
-
-
-
-
-
-
-
-
-
-function updateStorageInfo(){
-
-
-
-    const storageBox =
-
-    document.getElementById(
-
-        "storage-info"
-
-    );
-
-
-
-
-
-
-    if(!storageBox){
-
-
-        return;
-
-
-    }
-
-
-
-
-
-
-    if(window.HalDoStorage){
-
-
-
-        storageBox.innerHTML =
-
-
-        "💾 Speicher bereit";
-
-
-
-    }
-
-    else {
-
-
-
-        storageBox.innerHTML =
-
-
-        "⚠️ Speicher nicht geladen";
-
-
-
-    }
-
-
-
-}
-
-
-
-
-
-
-
-
-
-function changeTheme(){
-
-
-
-    if(window.HalDoStorage){
-
-
-
-        HalDoStorage.save(
+        HalDoStorage.get(
 
             "theme",
 
             "dark"
 
-        );
+        )
 
+        :
 
-
-    }
-
-
-
-
-
-
-    alert(
-
-        "🌙 Dark Mode gespeichert"
-
-    );
-
-
-
-}
+        "dark";
 
 
 
@@ -248,23 +94,177 @@ function changeTheme(){
 
 
 
+        const language =
 
+        window.HalDoStorage
 
-function changeLanguage(){
+        ?
 
-
-
-    if(window.HalDoStorage){
-
-
-
-        HalDoStorage.save(
+        HalDoStorage.get(
 
             "language",
 
             "de"
 
+        )
+
+        :
+
+        "de";
+
+
+
+
+
+
+        this.updateScreen(
+
+            theme,
+
+            language
+
         );
+
+
+
+    },
+
+
+
+
+
+
+
+
+    saveTheme(theme){
+
+
+
+        if(window.HalDoStorage){
+
+
+
+            HalDoStorage.save(
+
+                "theme",
+
+                theme
+
+            );
+
+
+        }
+
+
+
+
+
+        this.load();
+
+
+
+    },
+
+
+
+
+
+
+
+
+    saveLanguage(language){
+
+
+
+        if(window.HalDoStorage){
+
+
+
+            HalDoStorage.save(
+
+                "language",
+
+                language
+
+            );
+
+
+        }
+
+
+
+
+
+        this.load();
+
+
+
+    },
+
+
+
+
+
+
+
+
+    updateScreen(theme, language){
+
+
+
+        const themeBox =
+
+        document.getElementById(
+
+            "current-theme"
+
+        );
+
+
+
+        const languageBox =
+
+        document.getElementById(
+
+            "current-language"
+
+        );
+
+
+
+
+
+
+
+        if(themeBox){
+
+
+
+            themeBox.innerHTML =
+
+            "🌙 Theme: " + theme;
+
+
+
+        }
+
+
+
+
+
+
+
+        if(languageBox){
+
+
+
+            languageBox.innerHTML =
+
+            "🌍 Sprache: " + language;
+
+
+
+        }
 
 
 
@@ -275,16 +275,13 @@ function changeLanguage(){
 
 
 
-    alert(
-
-        "🌍 Deutsch gespeichert"
-
-    );
+};
 
 
 
-}
 
+
+window.HalDoSettings = HalDoSettings;
 
 
 
@@ -297,6 +294,30 @@ document.addEventListener(
 
     "DOMContentLoaded",
 
-    loadSettings
+    () => {
+
+
+
+        if(
+
+            document.getElementById(
+
+                "current-theme"
+
+            )
+
+        ){
+
+
+
+            HalDoSettings.init();
+
+
+
+        }
+
+
+
+    }
 
 );
