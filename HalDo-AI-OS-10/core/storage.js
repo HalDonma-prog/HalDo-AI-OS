@@ -1,11 +1,12 @@
 /*
 ========================================
-HalDo AI OS Professional 16.0
+HalDo AI OS Professional Ultimate 16.0
 
 Core Storage System
 
 ========================================
 */
+
 
 "use strict";
 
@@ -13,9 +14,9 @@ Core Storage System
 const HalDoStorage = {
 
 
+    prefix:
 
-    prefix: "HalDoAI_",
-
+    "HalDo_",
 
 
 
@@ -30,11 +31,16 @@ const HalDoStorage = {
 
             localStorage.setItem(
 
+
                 this.prefix + key,
+
 
                 JSON.stringify(value)
 
+
+
             );
+
 
 
 
@@ -42,7 +48,7 @@ const HalDoStorage = {
             if(window.HalDoLogger){
 
 
-                HalDoLogger.info(
+                HalDoLogger.success(
 
                     "Gespeichert: " + key
 
@@ -53,38 +59,29 @@ const HalDoStorage = {
 
 
 
+
             return true;
 
 
 
         }
 
-
         catch(error){
 
 
+            console.error(
 
-            if(window.HalDoLogger){
+                "Storage Fehler:",
+                error
 
-
-                HalDoLogger.error(
-
-                    "Speicher Fehler: " +
-
-                    error.message
-
-                );
-
-
-            }
-
+            );
 
 
             return false;
 
 
-
         }
+
 
 
     },
@@ -97,7 +94,7 @@ const HalDoStorage = {
 
 
 
-    get(key, defaultValue = null){
+    load(key, defaultValue = null){
 
 
 
@@ -112,6 +109,7 @@ const HalDoStorage = {
                 this.prefix + key
 
             );
+
 
 
 
@@ -133,15 +131,24 @@ const HalDoStorage = {
 
 
 
-        }
 
+
+        }
 
         catch(error){
 
 
 
-            return defaultValue;
+            console.error(
 
+                "Storage Ladefehler:",
+                error
+
+            );
+
+
+
+            return defaultValue;
 
 
         }
@@ -179,7 +186,6 @@ const HalDoStorage = {
 
 
 
-
     clear(){
 
 
@@ -190,62 +196,34 @@ const HalDoStorage = {
 
         )
 
-        .forEach(
-
-            key => {
+        .forEach(key => {
 
 
 
-                if(
+            if(
 
-                    key.startsWith(
+                key.startsWith(
 
-                        this.prefix
+                    this.prefix
 
-                    )
+                )
 
-                ){
-
-
-                    localStorage.removeItem(
-
-                        key
-
-                    );
+            ){
 
 
-                }
+                localStorage.removeItem(
+
+                    key
+
+                );
 
 
             }
 
-        );
 
 
+        });
 
-    },
-
-
-
-
-
-
-
-
-
-    has(key){
-
-
-
-        return (
-
-            localStorage.getItem(
-
-                this.prefix + key
-
-            ) !== null
-
-        );
 
 
     }
@@ -254,7 +232,9 @@ const HalDoStorage = {
 
 
 
+
 };
+
 
 
 
