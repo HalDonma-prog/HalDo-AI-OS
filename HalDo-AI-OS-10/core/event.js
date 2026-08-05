@@ -1,8 +1,9 @@
 /*
 ========================================
-HalDo AI OS Professional 10.0
-Event Manager
-Foundation Build
+HalDo AI OS Professional 16.0
+Ultimate Foundation
+
+Core Event Manager
 ========================================
 */
 
@@ -22,7 +23,30 @@ const HalDoEvents = {
     on(name, callback){
 
 
-        if(!this.events[name]){
+
+        if(
+            typeof callback !== "function"
+        ){
+
+
+            console.error(
+                "Event Callback ungültig:",
+                name
+            );
+
+
+            return;
+
+
+        }
+
+
+
+
+
+        if(
+            !this.events[name]
+        ){
 
 
             this.events[name] = [];
@@ -32,16 +56,23 @@ const HalDoEvents = {
 
 
 
+
+
         this.events[name].push(callback);
 
 
 
-        console.log(
+        if(window.HalDoLogger){
 
-            "📡 Event registriert:",
-            name
 
-        );
+            HalDoLogger.info(
+                "Event registriert: "
+                + name
+            );
+
+
+        }
+
 
 
     },
@@ -57,8 +88,8 @@ const HalDoEvents = {
 
 
         const listeners =
-
         this.events[name];
+
 
 
 
@@ -73,24 +104,55 @@ const HalDoEvents = {
 
 
 
-        listeners.forEach(
 
+
+        listeners.forEach(
             callback => {
 
-                callback(data);
+
+                try{
+
+
+                    callback(data);
+
+
+                }
+                catch(error){
+
+
+
+                    if(window.HalDoLogger){
+
+
+                        HalDoLogger.error(
+                            error.message
+                        );
+
+
+                    }
+
+
+                }
+
 
             }
-
         );
 
 
 
-        console.log(
 
-            "📨 Event gesendet:",
-            name
 
-        );
+
+        if(window.HalDoLogger){
+
+
+            HalDoLogger.info(
+                "Event ausgelöst: "
+                + name
+            );
+
+
+        }
 
 
 
@@ -105,12 +167,27 @@ const HalDoEvents = {
     remove(name){
 
 
-
         delete this.events[name];
 
 
 
+    },
+
+
+
+
+
+
+
+    clear(){
+
+
+        this.events = {};
+
+
+
     }
+
 
 
 
