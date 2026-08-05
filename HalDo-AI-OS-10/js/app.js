@@ -2,16 +2,12 @@
 ========================================
 HalDo AI OS Professional 16.0
 
-Application Boot Controller
+Application Controller
 
 ========================================
 */
 
-
 "use strict";
-
-
-
 
 
 const HalDoApp = {
@@ -19,6 +15,9 @@ const HalDoApp = {
 
 
     version: "16.0.0",
+
+
+    started: false,
 
 
 
@@ -29,33 +28,22 @@ const HalDoApp = {
 
 
 
-        console.log(
-
-            "🚀 HalDo AI OS Start..."
-
-        );
+        if(this.started){
 
 
-
-
-
-
-        this.checkCore();
-
-
-
-
-
-
-        if(window.HalDoKernel){
-
-
-
-            HalDoKernel.boot();
-
+            return;
 
 
         }
+
+
+
+
+        console.log(
+
+            "🚀 HalDo AI OS Application Start"
+
+        );
 
 
 
@@ -65,19 +53,16 @@ const HalDoApp = {
         if(window.HalDoSystem){
 
 
-
             HalDoSystem.init();
 
 
-
         }
 
 
 
 
 
-
-        this.updateStatus();
+        this.started = true;
 
 
 
@@ -88,136 +73,20 @@ const HalDoApp = {
 
 
 
+    info(){
 
 
+        return {
 
-    checkCore(){
 
+            name: "HalDo AI OS",
 
+            version: this.version,
 
-        const modules = [
+            running: this.started
 
 
-
-            "HalDoKernel",
-
-            "HalDoEvents",
-
-            "HalDoStorage",
-
-            "HalDoRouter",
-
-            "HalDoSystem"
-
-
-
-        ];
-
-
-
-
-
-
-        modules.forEach(
-
-            module => {
-
-
-
-                if(window[module]){
-
-
-
-                    console.log(
-
-                        "✅",
-
-                        module,
-
-                        "bereit"
-
-                    );
-
-
-
-                }
-
-                else {
-
-
-
-                    console.warn(
-
-                        "⚠️",
-
-                        module,
-
-                        "fehlt"
-
-                    );
-
-
-
-                }
-
-
-
-            }
-
-        );
-
-
-
-    },
-
-
-
-
-
-
-
-
-
-    updateStatus(){
-
-
-
-        const status =
-
-        document.getElementById(
-
-            "system-status"
-
-        );
-
-
-
-
-
-
-        if(status){
-
-
-
-            status.className =
-
-            "status-box status-online";
-
-
-
-
-
-
-            status.innerHTML =
-
-
-
-            "🟢 HalDo AI OS 16.0 Online";
-
-
-
-        }
-
+        };
 
 
     }
@@ -225,13 +94,7 @@ const HalDoApp = {
 
 
 
-
-
 };
-
-
-
-
 
 
 
@@ -243,20 +106,14 @@ window.HalDoApp = HalDoApp;
 
 
 
-
-
-
-
 document.addEventListener(
 
     "DOMContentLoaded",
 
-    function(){
-
+    () => {
 
 
         HalDoApp.start();
-
 
 
     }
