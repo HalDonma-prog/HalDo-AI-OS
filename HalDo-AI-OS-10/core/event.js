@@ -1,11 +1,12 @@
 /*
 ========================================
-HalDo AI OS Professional 16.0
+HalDo AI OS Professional Ultimate 16.0
 
-Core Event Manager
+Core Event System
 
 ========================================
 */
+
 
 "use strict";
 
@@ -13,38 +14,34 @@ Core Event Manager
 const HalDoEvents = {
 
 
-    listeners: {},
+    events: {},
 
 
 
-    on(event, callback){
 
 
-        if(!this.listeners[event]){
-
-
-            this.listeners[event] = [];
-
-
-        }
+    on(name, callback){
 
 
 
-        this.listeners[event].push(callback);
+        if(!this.events[name]){
 
 
-
-        if(window.HalDoLogger){
-
-
-            HalDoLogger.info(
-
-                "Event registriert: " + event
-
-            );
+            this.events[name] = [];
 
 
         }
+
+
+
+
+
+        this.events[name].push(
+
+            callback
+
+        );
+
 
 
     },
@@ -54,19 +51,13 @@ const HalDoEvents = {
 
 
 
-    emit(event, data = null){
+
+
+    emit(name, data = null){
 
 
 
-        const callbacks =
-
-        this.listeners[event];
-
-
-
-
-
-        if(!callbacks){
+        if(!this.events[name]){
 
 
             return;
@@ -79,7 +70,7 @@ const HalDoEvents = {
 
 
 
-        callbacks.forEach(
+        this.events[name].forEach(
 
             callback => {
 
@@ -97,17 +88,12 @@ const HalDoEvents = {
 
 
 
-                    if(window.HalDoLogger){
+                    console.error(
 
+                        "Event Fehler:",
+                        error
 
-                        HalDoLogger.error(
-
-                            error.message
-
-                        );
-
-
-                    }
+                    );
 
 
                 }
@@ -116,24 +102,25 @@ const HalDoEvents = {
 
             }
 
+
         );
 
 
 
+    },
 
 
 
-        if(window.HalDoLogger){
 
 
-            HalDoLogger.info(
-
-                "Event gesendet: " + event
-
-            );
 
 
-        }
+
+    off(name){
+
+
+
+        delete this.events[name];
 
 
 
@@ -144,27 +131,12 @@ const HalDoEvents = {
 
 
 
-    remove(event){
 
 
-
-        delete this.listeners[event];
-
+    list(){
 
 
-    },
-
-
-
-
-
-
-    clear(){
-
-
-
-        this.listeners = {};
-
+        return this.events;
 
 
     }
@@ -174,6 +146,7 @@ const HalDoEvents = {
 
 
 };
+
 
 
 
