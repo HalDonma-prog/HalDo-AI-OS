@@ -7,247 +7,145 @@ Dashboard Controller
 ========================================
 */
 
-
 "use strict";
 
 
+const HalDoDashboard = {
 
 
 
-function loadDashboard(){
+    initialized: false,
 
 
 
-    console.log(
+    init(){
 
-        "📊 Dashboard gestartet"
 
-    );
 
+        if(this.initialized){
 
 
+            return;
 
 
+        }
 
 
-    updateSystemInfo();
 
 
 
-    updateModuleList();
+        console.log(
 
-
-
-}
-
-
-
-
-
-
-
-
-
-function updateSystemInfo(){
-
-
-
-    const status =
-
-    document.getElementById(
-
-        "dashboard-status"
-
-    );
-
-
-
-
-
-
-    if(!status){
-
-
-        return;
-
-
-    }
-
-
-
-
-
-
-    if(window.HalDoSystem){
-
-
-
-        const info =
-
-        HalDoSystem.info();
-
-
-
-
-
-
-        status.innerHTML =
-
-
-
-        "🟢 " +
-
-        info.status +
-
-        "<br>" +
-
-        "Module: " +
-
-        info.modules.length;
-
-
-
-    }
-
-    else {
-
-
-
-        status.innerHTML =
-
-
-        "🔴 System nicht verbunden";
-
-
-
-    }
-
-
-
-}
-
-
-
-
-
-
-
-
-
-function updateModuleList(){
-
-
-
-    const list =
-
-    document.getElementById(
-
-        "module-list"
-
-    );
-
-
-
-
-
-
-    if(!list){
-
-
-        return;
-
-
-    }
-
-
-
-
-
-
-    if(window.HalDoSystem){
-
-
-
-        const modules =
-
-        HalDoSystem.modules;
-
-
-
-
-
-
-        list.innerHTML = "";
-
-
-
-
-
-
-        modules.forEach(
-
-            module => {
-
-
-
-                const item =
-
-                document.createElement(
-
-                    "p"
-
-                );
-
-
-
-
-
-                item.innerHTML =
-
-
-
-                "✅ " + module;
-
-
-
-
-
-
-                list.appendChild(
-
-                    item
-
-                );
-
-
-
-            }
+            "📊 Dashboard gestartet"
 
         );
 
 
 
+
+
+        this.update();
+
+
+
+        this.initialized = true;
+
+
+
+    },
+
+
+
+
+
+
+
+
+    update(){
+
+
+
+        const box =
+
+        document.getElementById(
+
+            "dashboard-status"
+
+        );
+
+
+
+
+
+
+        if(box){
+
+
+
+            box.innerHTML =
+
+            "🟢 Dashboard Online";
+
+
+
+        }
+
+
+
+
+
+    },
+
+
+
+
+
+
+
+    info(){
+
+
+
+        return {
+
+
+
+            name:
+
+            "Dashboard",
+
+
+
+            status:
+
+            this.initialized
+
+            ?
+
+            "online"
+
+            :
+
+            "offline"
+
+
+
+        };
+
+
+
     }
 
-    else {
 
 
 
-        list.innerHTML =
-
-
-        "Keine Module gefunden";
+};
 
 
 
-    }
 
 
-
-}
-
-
-
+window.HalDoDashboard = HalDoDashboard;
 
 
 
@@ -258,6 +156,30 @@ document.addEventListener(
 
     "DOMContentLoaded",
 
-    loadDashboard
+    () => {
+
+
+
+        if(
+
+            document.getElementById(
+
+                "dashboard-status"
+
+            )
+
+        ){
+
+
+
+            HalDoDashboard.init();
+
+
+
+        }
+
+
+
+    }
 
 );
