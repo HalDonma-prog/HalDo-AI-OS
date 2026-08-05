@@ -1,67 +1,154 @@
-// ==========================================
-// HalDo AI OS 10.0
-// Application Controller
-// Clean Foundation Build 001
-// ==========================================
+/*
+========================================
+HalDo AI OS Professional 16.0
+
+Application Controller
+
+========================================
+*/
 
 
 "use strict";
 
 
 
-const HalDoApp = {
 
 
-    name: "HalDo AI OS",
-
-
-    version: "10.0",
+function startHalDo(){
 
 
 
-    start: function(){
+    console.log(
+
+        "🚀 HalDo AI OS 16.0 startet..."
+
+    );
 
 
-        console.log(
-            "🚀 HalDo AI OS startet..."
-        );
 
 
-        console.log(
-            "🤖 System bereit"
-        );
+
+    if(window.HalDoSystem){
 
 
-        console.log(
-            "✅ Foundation Build 001 geladen"
-        );
+
+        HalDoSystem.init();
+
 
 
     }
 
 
-};
+
+
+
+
+    if(window.HalDoKernel){
+
+
+
+        HalDoKernel.boot();
+
+
+
+    }
 
 
 
 
 
-window.HalDoApp = HalDoApp;
+
+    updateSystemStatus();
+
+
+
+}
 
 
 
 
 
-window.addEventListener(
+
+
+
+
+function updateSystemStatus(){
+
+
+
+    const status =
+
+    document.getElementById(
+
+        "system-status"
+
+    );
+
+
+
+
+
+
+    if(status){
+
+
+
+        status.innerHTML =
+
+
+        "🟢 HalDo AI OS 16.0 läuft";
+
+
+
+    }
+
+
+
+
+
+
+    const dashboardStatus =
+
+    document.getElementById(
+
+        "dashboard-status"
+
+    );
+
+
+
+
+
+
+    if(dashboardStatus){
+
+
+
+        dashboardStatus.innerHTML =
+
+
+        "🟢 System aktiv";
+
+
+
+    }
+
+
+
+}
+
+
+
+
+
+
+
+
+
+document.addEventListener(
 
     "DOMContentLoaded",
 
-    function(){
-
-
-        HalDoApp.start();
-
-
-    }
+    startHalDo
 
 );
