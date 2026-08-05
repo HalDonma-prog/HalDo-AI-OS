@@ -1,8 +1,9 @@
 /*
 ========================================
-HalDo AI OS Professional 10.0
-Router System
-Foundation Build
+HalDo AI OS Professional 16.0
+Ultimate Foundation
+
+Core Router System
 ========================================
 */
 
@@ -13,10 +14,7 @@ Foundation Build
 const HalDoRouter = {
 
 
-
-    currentPage: "home",
-
-
+    current: null,
 
 
     routes: {},
@@ -31,10 +29,19 @@ const HalDoRouter = {
         this.routes[name] = path;
 
 
-        console.log(
-            "🛣️ Route registriert:",
-            name
-        );
+
+        if(window.HalDoLogger){
+
+
+            HalDoLogger.info(
+
+                "Route registriert: "
+                + name
+
+            );
+
+
+        }
 
 
     },
@@ -49,19 +56,30 @@ const HalDoRouter = {
 
 
 
-        const page = this.routes[name];
+        const path =
+
+        this.routes[name];
 
 
 
-        if(!page){
+
+        if(!path){
 
 
-            console.error(
 
-                "❌ Route nicht gefunden:",
-                name
+            if(window.HalDoLogger){
 
-            );
+
+                HalDoLogger.warning(
+
+                    "Route nicht gefunden: "
+                    + name
+
+                );
+
+
+            }
+
 
 
             return;
@@ -72,20 +90,39 @@ const HalDoRouter = {
 
 
 
-        this.currentPage = name;
+
+
+        this.current = name;
 
 
 
-        console.log(
 
-            "➡️ Navigation zu:",
-            page
-
-        );
+        if(window.HalDoEvents){
 
 
+            HalDoEvents.emit(
 
-        window.location.href = page;
+                "route-change",
+
+                {
+
+                    page: name,
+
+                    path: path
+
+                }
+
+            );
+
+
+        }
+
+
+
+
+
+
+        window.location.href = path;
 
 
 
@@ -100,11 +137,24 @@ const HalDoRouter = {
     getCurrent(){
 
 
-        return this.currentPage;
+        return this.current;
+
+
+    },
+
+
+
+
+
+
+
+    getRoutes(){
+
+
+        return this.routes;
 
 
     }
-
 
 
 
