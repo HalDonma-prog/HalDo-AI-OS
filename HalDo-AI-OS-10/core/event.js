@@ -1,12 +1,11 @@
 /*
 ========================================
 HalDo AI OS Professional 16.0
-Ultimate Foundation
 
 Core Event Manager
+
 ========================================
 */
-
 
 "use strict";
 
@@ -14,51 +13,24 @@ Core Event Manager
 const HalDoEvents = {
 
 
-    events: {},
+    listeners: {},
 
 
 
+    on(event, callback){
 
 
-    on(name, callback){
+        if(!this.listeners[event]){
 
 
-
-        if(
-            typeof callback !== "function"
-        ){
-
-
-            console.error(
-                "Event Callback ungültig:",
-                name
-            );
-
-
-            return;
+            this.listeners[event] = [];
 
 
         }
 
 
 
-
-
-        if(
-            !this.events[name]
-        ){
-
-
-            this.events[name] = [];
-
-
-        }
-
-
-
-
-
-        this.events[name].push(callback);
+        this.listeners[event].push(callback);
 
 
 
@@ -66,13 +38,13 @@ const HalDoEvents = {
 
 
             HalDoLogger.info(
-                "Event registriert: "
-                + name
+
+                "Event registriert: " + event
+
             );
 
 
         }
-
 
 
     },
@@ -82,18 +54,19 @@ const HalDoEvents = {
 
 
 
-
-    emit(name, data = null){
-
-
-
-        const listeners =
-        this.events[name];
+    emit(event, data = null){
 
 
 
+        const callbacks =
 
-        if(!listeners){
+        this.listeners[event];
+
+
+
+
+
+        if(!callbacks){
 
 
             return;
@@ -106,17 +79,20 @@ const HalDoEvents = {
 
 
 
-        listeners.forEach(
+        callbacks.forEach(
+
             callback => {
 
 
-                try{
+                try {
 
 
                     callback(data);
 
 
                 }
+
+
                 catch(error){
 
 
@@ -125,7 +101,9 @@ const HalDoEvents = {
 
 
                         HalDoLogger.error(
+
                             error.message
+
                         );
 
 
@@ -135,7 +113,9 @@ const HalDoEvents = {
                 }
 
 
+
             }
+
         );
 
 
@@ -147,8 +127,9 @@ const HalDoEvents = {
 
 
             HalDoLogger.info(
-                "Event ausgelöst: "
-                + name
+
+                "Event gesendet: " + event
+
             );
 
 
@@ -163,11 +144,11 @@ const HalDoEvents = {
 
 
 
+    remove(event){
 
-    remove(name){
 
 
-        delete this.events[name];
+        delete this.listeners[event];
 
 
 
@@ -178,11 +159,11 @@ const HalDoEvents = {
 
 
 
-
     clear(){
 
 
-        this.events = {};
+
+        this.listeners = {};
 
 
 
