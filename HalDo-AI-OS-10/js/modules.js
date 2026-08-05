@@ -7,49 +7,49 @@ Module Manager
 ========================================
 */
 
-
 "use strict";
-
-
-
 
 
 const HalDoModules = {
 
 
 
-    modules: {},
+    modules: [],
 
 
 
 
 
 
-
-    register(name, module){
-
+    register(name, version = "1.0.0"){
 
 
-        if(
 
-            !name ||
-
-            !module
-
-        ){
+        const module = {
 
 
-            return;
+            name: name,
 
 
-        }
+            version: version,
 
 
+            status: "active"
+
+
+
+        };
 
 
 
 
-        this.modules[name] = module;
+
+
+        this.modules.push(
+
+            module
+
+        );
 
 
 
@@ -74,43 +74,8 @@ const HalDoModules = {
 
 
 
-    },
 
-
-
-
-
-
-
-
-
-    get(name){
-
-
-
-        return this.modules[name] || null;
-
-
-
-    },
-
-
-
-
-
-
-
-
-
-    list(){
-
-
-
-        return Object.keys(
-
-            this.modules
-
-        );
+        return module;
 
 
 
@@ -128,7 +93,113 @@ const HalDoModules = {
 
 
 
-        delete this.modules[name];
+        this.modules =
+
+        this.modules.filter(
+
+            module =>
+
+            module.name !== name
+
+        );
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    get(name){
+
+
+
+        return this.modules.find(
+
+            module =>
+
+            module.name === name
+
+        );
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    all(){
+
+
+
+        return this.modules;
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    init(){
+
+
+
+        console.log(
+
+            "🧩 Modul-System gestartet"
+
+        );
+
+
+
+
+
+
+
+        this.register(
+
+            "Dashboard",
+
+            "16.0"
+
+        );
+
+
+
+        this.register(
+
+            "AI Chat",
+
+            "16.0"
+
+        );
+
+
+
+        this.register(
+
+            "Settings",
+
+            "16.0"
+
+        );
 
 
 
@@ -138,10 +209,7 @@ const HalDoModules = {
 
 
 
-
 };
-
-
 
 
 
@@ -155,39 +223,15 @@ window.HalDoModules = HalDoModules;
 
 
 
-// Grundmodule registrieren
-
-
-
 document.addEventListener(
 
     "DOMContentLoaded",
 
-    function(){
+    () => {
 
 
 
-        if(window.HalDoModules){
-
-
-
-            HalDoModules.register(
-
-                "Core",
-
-                {
-
-                    version:
-
-                    "16.0.0"
-
-                }
-
-            );
-
-
-
-        }
+        HalDoModules.init();
 
 
 
