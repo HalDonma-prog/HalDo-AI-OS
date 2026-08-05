@@ -7,8 +7,66 @@ Navigation Controller
 ========================================
 */
 
-
 "use strict";
+
+
+
+
+
+const HalDoNavigation = {
+
+
+
+    open(page){
+
+
+
+        if(!page){
+
+
+            return false;
+
+
+        }
+
+
+
+
+
+        if(window.HalDoLogger){
+
+
+            HalDoLogger.info(
+
+                "Navigation: " + page
+
+            );
+
+
+        }
+
+
+
+
+
+        window.location.href = page;
+
+
+
+        return true;
+
+
+
+    }
+
+
+
+
+
+
+};
+
+
 
 
 
@@ -18,55 +76,14 @@ function openPage(page){
 
 
 
-    if(!page){
-
-
-        return;
-
-
-    }
-
-
-
-
-
-    console.log(
-
-        "➡️ Öffne Seite:",
+    return HalDoNavigation.open(
 
         page
 
     );
 
 
-
-
-
-
-    if(window.HalDoLogger){
-
-
-
-        HalDoLogger.info(
-
-            "Navigation zu: " + page
-
-        );
-
-
-    }
-
-
-
-
-
-
-    window.location.href = page;
-
-
-
 }
-
 
 
 
@@ -86,9 +103,7 @@ function goHome(){
     );
 
 
-
 }
-
 
 
 
@@ -108,9 +123,7 @@ function goDashboard(){
     );
 
 
-
 }
-
 
 
 
@@ -130,9 +143,7 @@ function goChat(){
     );
 
 
-
 }
-
 
 
 
@@ -152,5 +163,12 @@ function goSettings(){
     );
 
 
-
 }
+
+
+
+
+
+
+
+window.HalDoNavigation = HalDoNavigation;
