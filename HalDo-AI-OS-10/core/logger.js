@@ -1,11 +1,12 @@
 /*
 ========================================
-HalDo AI OS Professional 16.0
+HalDo AI OS Professional Ultimate 16.0
 
 Core Logger System
 
 ========================================
 */
+
 
 "use strict";
 
@@ -16,72 +17,171 @@ const HalDoLogger = {
     logs: [],
 
 
-    write(type, message){
+
+
+
+    add(type, message){
 
 
         const entry = {
 
-            type,
 
-            message,
+            type: type,
 
-            time: new Date().toISOString()
+
+            message: message,
+
+
+            time: new Date()
+                .toISOString()
+
+
 
         };
+
+
+
 
 
         this.logs.push(entry);
 
 
+
+
+
         console.log(
+
             `[${type}]`,
             message
+
         );
+
+
+
 
 
         return entry;
 
+
     },
+
+
+
+
+
 
 
     info(message){
 
-        return this.write(
+
+        return this.add(
+
             "INFO",
+
             message
+
         );
 
+
     },
+
+
+
+
+
 
 
     success(message){
 
-        return this.write(
+
+        return this.add(
+
             "SUCCESS",
+
             message
+
         );
 
+
     },
+
+
+
+
+
+
+
+    warning(message){
+
+
+        return this.add(
+
+            "WARNING",
+
+            message
+
+        );
+
+
+    },
+
+
+
+
+
 
 
     error(message){
 
-        return this.write(
+
+        return this.add(
+
             "ERROR",
+
             message
+
         );
+
 
     },
 
 
-    all(){
+
+
+
+
+
+    getAll(){
+
 
         return this.logs;
+
+
+    },
+
+
+
+
+
+
+
+    clear(){
+
+
+        this.logs = [];
+
 
     }
 
 
+
+
+
 };
+
+
+
+
 
 
 window.HalDoLogger = HalDoLogger;
