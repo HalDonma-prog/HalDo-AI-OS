@@ -1,11 +1,11 @@
 /*
 ========================================
-HalDo AI OS Professional 10.0
-Kernel Core
-Foundation Build
+HalDo AI OS Professional 16.0
+
+Core Kernel System
+
 ========================================
 */
-
 
 "use strict";
 
@@ -13,32 +13,145 @@ Foundation Build
 const HalDoKernel = {
 
 
-    name: "HalDo AI Kernel",
+
+    name: "HalDo AI OS Kernel",
 
 
-    version: "10.0.0",
+    version: "16.0.0",
 
 
     status: "offline",
 
 
-
-    modules: {},
-
+    modules: [],
 
 
-    start(){
 
-        console.log(
-            "🧠 HalDo Kernel startet..."
-        );
+
+
+
+    boot(){
+
 
 
         this.status = "online";
 
 
-        console.log(
-            "✅ Kernel ist aktiv"
+
+
+
+        if(window.HalDoLogger){
+
+
+            HalDoLogger.success(
+
+                "Kernel gestartet"
+
+            );
+
+
+        }
+
+
+
+
+        if(window.HalDoEvents){
+
+
+            HalDoEvents.emit(
+
+                "kernel-ready",
+
+                this.info()
+
+            );
+
+
+        }
+
+
+
+        return true;
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    register(moduleName){
+
+
+
+        if(
+
+            !this.modules.includes(
+
+                moduleName
+
+            )
+
+        ){
+
+
+
+            this.modules.push(
+
+                moduleName
+
+            );
+
+
+
+
+            if(window.HalDoLogger){
+
+
+                HalDoLogger.info(
+
+                    "Modul registriert: "
+
+                    + moduleName
+
+                );
+
+
+            }
+
+
+
+        }
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    remove(moduleName){
+
+
+
+        this.modules =
+
+        this.modules.filter(
+
+            module =>
+
+            module !== moduleName
+
         );
 
 
@@ -48,52 +161,48 @@ const HalDoKernel = {
 
 
 
-    registerModule(name, module){
-
-
-        this.modules[name] = module;
-
-
-        console.log(
-
-            "📦 Modul geladen:",
-            name
-
-        );
-
-
-    },
 
 
 
 
-
-
-    getModule(name){
-
-
-        return this.modules[name];
-
-
-    },
+    info(){
 
 
 
+        return {
 
 
 
-    shutdown(){
+            name:
+
+            this.name,
 
 
-        this.status = "offline";
+
+            version:
+
+            this.version,
 
 
-        console.log(
-            "⛔ Kernel beendet"
-        );
+
+            status:
+
+            this.status,
+
+
+
+            modules:
+
+            this.modules
+
+
+
+        };
 
 
     }
+
+
 
 
 
