@@ -1,8 +1,9 @@
 /*
 ========================================
-HalDo AI OS Professional 10.0
-Storage Manager
-Foundation Build
+HalDo AI OS Professional 16.0
+Ultimate Foundation
+
+Core Storage System
 ========================================
 */
 
@@ -13,9 +14,7 @@ Foundation Build
 const HalDoStorage = {
 
 
-
     prefix: "HalDoAI_",
-
 
 
 
@@ -25,7 +24,11 @@ const HalDoStorage = {
 
 
 
-        try {
+        try{
+
+
+            const data =
+            JSON.stringify(value);
 
 
 
@@ -33,18 +36,23 @@ const HalDoStorage = {
 
                 this.prefix + key,
 
-                JSON.stringify(value)
+                data
 
             );
 
 
 
-            console.log(
+            if(window.HalDoLogger){
 
-                "💾 Gespeichert:",
-                key
 
-            );
+                HalDoLogger.success(
+
+                    "Gespeichert: " + key
+
+                );
+
+
+            }
 
 
 
@@ -58,12 +66,18 @@ const HalDoStorage = {
 
 
 
-            console.error(
+            if(window.HalDoLogger){
 
-                "❌ Speicherfehler:",
-                error
 
-            );
+                HalDoLogger.error(
+
+                    error.message
+
+                );
+
+
+            }
+
 
 
             return false;
@@ -84,8 +98,7 @@ const HalDoStorage = {
 
 
 
-        try {
-
+        try{
 
 
             const data =
@@ -98,13 +111,15 @@ const HalDoStorage = {
 
 
 
-            if(data === null){
+
+            if(!data){
 
 
                 return null;
 
 
             }
+
 
 
 
@@ -118,12 +133,17 @@ const HalDoStorage = {
 
 
 
-            console.error(
+            if(window.HalDoLogger){
 
-                "❌ Ladefehler:",
-                error
 
-            );
+                HalDoLogger.error(
+
+                    error.message
+
+                );
+
+
+            }
 
 
 
@@ -153,15 +173,6 @@ const HalDoStorage = {
 
 
 
-        console.log(
-
-            "🗑️ Entfernt:",
-            key
-
-        );
-
-
-
     },
 
 
@@ -174,39 +185,71 @@ const HalDoStorage = {
 
 
 
-        Object.keys(localStorage)
+        Object.keys(
 
-        .filter(
-
-            key =>
-
-            key.startsWith(
-
-                this.prefix
-
-            )
+            localStorage
 
         )
 
-        .forEach(
-
-            key =>
-
-            localStorage.removeItem(key)
-
-        );
+        .forEach(key => {
 
 
 
-        console.log(
+            if(
 
-            "🧹 HalDo Speicher gelöscht"
+                key.startsWith(
+
+                    this.prefix
+
+                )
+
+            ){
+
+
+
+                localStorage.removeItem(
+
+                    key
+
+                );
+
+
+
+            }
+
+
+
+        });
+
+
+
+    },
+
+
+
+
+
+
+
+    exists(key){
+
+
+
+        return (
+
+            localStorage.getItem(
+
+                this.prefix + key
+
+            ) !== null
 
         );
 
 
 
     }
+
+
 
 
 
