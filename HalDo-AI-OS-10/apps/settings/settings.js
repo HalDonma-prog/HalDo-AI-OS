@@ -1,38 +1,110 @@
-// =================================
-// HalDo Settings
-// =================================
-
-
-function openLanguage(){
-
-window.location.href =
-"../language/index.html";
-
-}
+// =====================================
+// HalDo AI OS Settings
+// =====================================
 
 
 
-function changeTheme(){
-
-document.body.style.background =
-"#334155";
-
-}
+function saveLanguage(){
 
 
+const language = document.getElementById(
 
-function notifications(){
+"language"
 
-alert(
-"Benachrichtigungen geändert"
+).value;
+
+
+
+if(window.HalDoStorage){
+
+
+HalDoStorage.save(
+
+"language",
+
+language
+
 );
 
+
 }
 
 
 
-function back(){
+alert(
 
-window.history.back();
+"Sprache gespeichert"
+
+);
+
+
+
+}
+
+
+
+
+
+function toggleTheme(){
+
+
+document.body.classList.toggle(
+
+"dark"
+
+);
+
+
+
+}
+
+
+
+
+
+function securityInfo(){
+
+
+alert(
+
+"🔐 Sicherheitssystem aktiv"
+
+);
+
+
+
+}
+
+
+
+
+
+function checkUpdates(){
+
+
+alert(
+
+"🔄 Update-System vorbereitet"
+
+);
+
+
+
+}
+
+
+
+
+
+function openProfile(){
+
+
+alert(
+
+"👤 Profil-System kommt in nächster Version"
+
+);
+
+
 
 }
