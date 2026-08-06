@@ -1,154 +1,49 @@
-/*
-========================================
-HalDo AI OS Professional Ultimate 16.0
-
-Core Event System
-
-========================================
-*/
-
-
-"use strict";
+// =====================================
+// HalDo AI OS Event System
+// =====================================
 
 
 const HalDoEvents = {
 
 
-    events: {},
+    listeners:{},
 
 
+    on(event, callback){
 
+        if(!this.listeners[event]){
 
-
-    on(name, callback){
-
-
-
-        if(!this.events[name]){
-
-
-            this.events[name] = [];
-
+            this.listeners[event] = [];
 
         }
 
 
-
-
-
-        this.events[name].push(
-
-            callback
-
-        );
-
-
+        this.listeners[event].push(callback);
 
     },
 
 
 
+    emit(event,data){
 
 
+        if(this.listeners[event]){
 
 
+            this.listeners[event].forEach(
 
-    emit(name, data = null){
+                callback => callback(data)
 
-
-
-        if(!this.events[name]){
-
-
-            return;
+            );
 
 
         }
-
-
-
-
-
-
-        this.events[name].forEach(
-
-            callback => {
-
-
-                try {
-
-
-                    callback(data);
-
-
-                }
-
-
-                catch(error){
-
-
-
-                    console.error(
-
-                        "Event Fehler:",
-                        error
-
-                    );
-
-
-                }
-
-
-
-            }
-
-
-        );
-
-
-
-    },
-
-
-
-
-
-
-
-
-    off(name){
-
-
-
-        delete this.events[name];
-
-
-
-    },
-
-
-
-
-
-
-
-
-    list(){
-
-
-        return this.events;
 
 
     }
 
 
-
-
-
 };
-
-
-
 
 
 
