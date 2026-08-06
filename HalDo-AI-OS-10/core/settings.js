@@ -1,53 +1,76 @@
-// ==========================================
-// HalDo AI OS Settings
-// ==========================================
+// =====================================
+// HalDo Settings Core
+// =====================================
+
 
 const HalDoSettings = {
 
-    data: {
 
-        language: "de",
-
-        theme: "dark",
-
-        notifications: true,
-
-        version: "16.0"
-
-    },
+data:{
 
 
-    update(key, value) {
+language:"de",
 
-        this.data[key] = value;
+theme:"dark",
 
-        localStorage.setItem(
-            "haldo_settings",
-            JSON.stringify(this.data)
-        );
-
-    },
+version:"16.0"
 
 
-    load() {
-
-        const saved =
-            localStorage.getItem(
-                "haldo_settings"
-            );
+},
 
 
-        if(saved){
 
-            this.data = JSON.parse(saved);
+save(){
 
-        }
 
-        return this.data;
+HalDoStorage.save(
+"haldo_settings",
+this.data
+);
 
-    }
+
+},
+
+
+
+load(){
+
+
+const saved =
+HalDoStorage.load(
+"haldo_settings"
+);
+
+
+if(saved){
+
+this.data=saved;
+
+}
+
+
+return this.data;
+
+
+},
+
+
+
+set(key,value){
+
+
+this.data[key]=value;
+
+this.save();
+
+
+}
+
+
 
 };
 
 
-window.HalDoSettings = HalDoSettings;
+
+window.HalDoSettings =
+HalDoSettings;
