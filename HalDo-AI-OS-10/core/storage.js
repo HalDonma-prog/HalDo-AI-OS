@@ -1,51 +1,73 @@
-// =====================================
-// HalDo AI OS Storage
-// =====================================
+// ========================================
+// HalDo AI OS 16
+// Storage Manager
+// ========================================
 
 
 const HalDoStorage = {
 
 
-save(key,value){
-
-    localStorage.setItem(
-
-        "haldo_"+key,
-
-        JSON.stringify(value)
-
-    );
-
-},
+    save(key, value){
 
 
+        localStorage.setItem(
 
-load(key){
+            "haldo_" + key,
 
+            JSON.stringify(value)
 
-    const data = localStorage.getItem(
-
-        "haldo_"+key
-
-    );
+        );
 
 
-    return data ? JSON.parse(data) : null;
-
-
-},
+    },
 
 
 
-remove(key){
+    load(key){
 
-    localStorage.removeItem(
 
-        "haldo_"+key
+        const data = localStorage.getItem(
 
-    );
+            "haldo_" + key
 
-}
+        );
+
+
+        if(!data){
+
+            return null;
+
+        }
+
+
+        return JSON.parse(data);
+
+
+    },
+
+
+
+    remove(key){
+
+
+        localStorage.removeItem(
+
+            "haldo_" + key
+
+        );
+
+
+    },
+
+
+
+    clear(){
+
+
+        localStorage.clear();
+
+
+    }
 
 
 };
