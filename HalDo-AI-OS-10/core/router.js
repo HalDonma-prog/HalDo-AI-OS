@@ -1,26 +1,65 @@
-// ==========================================
-// HalDo Router System
-// ==========================================
+// ========================================
+// HalDo AI OS 16
+// Router System
+// ========================================
 
 
 const HalDoRouter = {
 
 
-    open(path) {
+    apps:{
 
-        window.location.href = path;
+
+        dashboard:
+
+        "apps/dashboard/index.html",
+
+
+        ai-chat:
+
+        "apps/ai-chat/index.html",
+
+
+        settings:
+
+        "apps/settings/index.html"
+
 
     },
 
 
-    back() {
 
-        window.history.back();
+    open(app){
+
+
+        if(this.apps[app]){
+
+
+            window.location.href = this.apps[app];
+
+
+        }
+
+        else {
+
+
+            console.error(
+
+                "App nicht gefunden:",
+
+                app
+
+            );
+
+
+        }
+
 
     }
 
 
 };
+
 
 
 window.HalDoRouter = HalDoRouter;
