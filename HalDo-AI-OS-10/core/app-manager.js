@@ -1,95 +1,104 @@
-// =================================
-// HalDo Central App Manager
-// =================================
+// ========================================
+// HalDo AI OS 16
+// Application Manager
+// ========================================
 
 
 const HalDoAppManager = {
 
 
-apps:[],
-
-
-load(){
-
-fetch("../../data/apps.json")
-
-.then(response=>response.json())
-
-.then(data=>{
-
-this.apps=data.apps;
-
-this.render();
-
-});
-
-
-},
+    apps:{},
 
 
 
-getApps(){
-
-return this.apps;
-
-},
+    register(id, config){
 
 
+        this.apps[id] = config;
 
 
-open(app){
-
-
-if(app.active){
-
-window.location.href =
-"../../"+app.path;
-
-}
-
-
-},
+    },
 
 
 
-
-disable(id){
-
-
-let app =
-this.apps.find(
-a=>a.id===id
-);
+    get(id){
 
 
-if(app){
-
-app.active=false;
-
-}
+        return this.apps[id] || null;
 
 
-},
+    },
 
 
 
-enable(id){
+    list(){
 
 
-let app =
-this.apps.find(
-a=>a.id===id
-);
+        return Object.keys(this.apps);
 
 
-if(app){
-
-app.active=true;
-
-}
+    },
 
 
-}
+
+    remove(id){
+
+
+        if(this.apps[id]){
+
+
+            delete this.apps[id];
+
+
+            return true;
+
+
+        }
+
+
+        return false;
+
+
+    },
+
+
+
+    launch(id){
+
+
+        const app = this.get(id);
+
+
+
+        if(!app){
+
+
+            console.error(
+
+                "App nicht registriert:",
+
+                id
+
+            );
+
+
+            return;
+
+
+        }
+
+
+
+        if(HalDoRouter){
+
+
+            HalDoRouter.open(id);
+
+
+        }
+
+
+    }
 
 
 
@@ -97,5 +106,4 @@ app.active=true;
 
 
 
-window.HalDoAppManager =
-HalDoAppManager;
+window.HalDoAppManager = HalDoAppManager;
