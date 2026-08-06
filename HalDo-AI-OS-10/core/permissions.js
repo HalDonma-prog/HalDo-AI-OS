@@ -1,47 +1,47 @@
-// =====================================
-// HalDo Permissions
-// =====================================
+// ==========================================
+// HalDo Permissions System
+// ==========================================
 
 
 const HalDoPermissions = {
 
 
-admin:[
-
-"create",
-"edit",
-"delete",
-"block",
-"settings",
-"update"
-
-],
+    roles:{
 
 
-user:[
+        admin:[
 
-"create",
-"edit"
+            "create",
+            "edit",
+            "delete",
+            "block",
+            "update"
 
-]
-
-,
-
-
-
-check(role,action){
+        ],
 
 
-return this[role]
-.includes(action);
+        user:[
+
+            "use",
+            "edit"
+
+        ]
 
 
-}
+    },
 
+
+    check(role,permission){
+
+
+        return this.roles[role]
+        ?.includes(permission);
+
+
+    }
 
 
 };
-
 
 
 window.HalDoPermissions =
