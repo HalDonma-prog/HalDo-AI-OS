@@ -1,243 +1,51 @@
-/*
-========================================
-HalDo AI OS Professional Ultimate 16.0
-
-Core Storage System
-
-========================================
-*/
-
-
-"use strict";
+// =====================================
+// HalDo Storage System
+// =====================================
 
 
 const HalDoStorage = {
 
 
-    prefix:
+save(key,data){
 
-    "HalDo_",
+localStorage.setItem(
+key,
+JSON.stringify(data)
+);
 
+},
 
 
 
+load(key){
 
-    save(key, value){
 
+const value =
+localStorage.getItem(key);
 
-        try {
 
 
+return value
+?
+JSON.parse(value)
+:
+null;
 
-            localStorage.setItem(
 
+},
 
-                this.prefix + key,
 
 
-                JSON.stringify(value)
+remove(key){
 
+localStorage.removeItem(key);
 
-
-            );
-
-
-
-
-
-            if(window.HalDoLogger){
-
-
-                HalDoLogger.success(
-
-                    "Gespeichert: " + key
-
-                );
-
-
-            }
-
-
-
-
-            return true;
-
-
-
-        }
-
-        catch(error){
-
-
-            console.error(
-
-                "Storage Fehler:",
-                error
-
-            );
-
-
-            return false;
-
-
-        }
-
-
-
-    },
-
-
-
-
-
-
-
-
-
-    load(key, defaultValue = null){
-
-
-
-        try {
-
-
-
-            const data =
-
-            localStorage.getItem(
-
-                this.prefix + key
-
-            );
-
-
-
-
-
-
-            if(data === null){
-
-
-                return defaultValue;
-
-
-            }
-
-
-
-
-
-            return JSON.parse(data);
-
-
-
-
-
-        }
-
-        catch(error){
-
-
-
-            console.error(
-
-                "Storage Ladefehler:",
-                error
-
-            );
-
-
-
-            return defaultValue;
-
-
-        }
-
-
-
-    },
-
-
-
-
-
-
-
-
-
-    remove(key){
-
-
-
-        localStorage.removeItem(
-
-            this.prefix + key
-
-        );
-
-
-
-    },
-
-
-
-
-
-
-
-
-    clear(){
-
-
-
-        Object.keys(
-
-            localStorage
-
-        )
-
-        .forEach(key => {
-
-
-
-            if(
-
-                key.startsWith(
-
-                    this.prefix
-
-                )
-
-            ){
-
-
-                localStorage.removeItem(
-
-                    key
-
-                );
-
-
-            }
-
-
-
-        });
-
-
-
-    }
-
-
-
-
+}
 
 
 };
 
 
 
-
-
-
-window.HalDoStorage = HalDoStorage;
+window.HalDoStorage =
+HalDoStorage;
