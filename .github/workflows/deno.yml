@@ -5,39 +5,20 @@ on:
     branches:
       - main
 
-  pull_request:
-    branches:
-      - main
-
-
 jobs:
-
-  check:
-
-    name: Website Check
-
+  website-check:
     runs-on: ubuntu-latest
 
-
     steps:
+      - uses: actions/checkout@v4
 
-      - name: Repository laden
-        uses: actions/checkout@v4
-
-
-      - name: Dateien prüfen
+      - name: Prüfe index.html
         run: |
-          echo "🤖 HalDo AI OS"
-          echo "Version 16 Foundation"
-          echo "Repository erfolgreich geladen"
-
-
-      - name: HTML Struktur prüfen
-        run: |
-          test -f index.html
+          if [ ! -f index.html ]; then
+            echo "❌ index.html fehlt"
+            exit 1
+          fi
           echo "✅ index.html gefunden"
 
-
-      - name: Abschluss
-        run: |
-          echo "🟢 HalDo AI OS Prüfung erfolgreich"
+      - name: Fertig
+        run: echo "🟢 HalDo AI OS ist bereit"
