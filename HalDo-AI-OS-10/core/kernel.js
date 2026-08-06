@@ -1,182 +1,109 @@
-/*
-========================================
-HalDo AI OS Professional Ultimate 16.0
-
-Core Kernel System
-
-========================================
-*/
-
-
-"use strict";
+// ========================================
+// HalDo AI OS 16
+// Kernel
+// ========================================
 
 
 const HalDoKernel = {
 
 
-    modules: [],
-
-
-    status: "offline",
-
-
-
-
-
-
-
-    init(){
-
-
-        this.status = "online";
-
+    boot(){
 
 
         console.log(
 
-            "⚙️ HalDo Kernel gestartet"
+            "🤖 HalDo AI OS Kernel startet..."
 
         );
 
 
 
-
-
-        if(window.HalDoLogger){
-
-
-            HalDoLogger.success(
-
-                "Kernel erfolgreich initialisiert"
-
-            );
-
-
-        }
+        this.loadApps();
 
 
 
-    },
+        if(window.HalDoSystem){
 
 
-
-
-
-
-
-
-
-    register(moduleName){
-
-
-
-        if(
-
-            !this.modules.includes(
-
-                moduleName
-
-            )
-
-        ){
-
-
-
-            this.modules.push(
-
-                moduleName
-
-            );
-
-
-
-            console.log(
-
-                "📦 Modul registriert:",
-
-                moduleName
-
-            );
-
+            HalDoSystem.start();
 
 
         }
 
 
-
     },
 
 
 
+    loadApps(){
 
 
 
+        if(window.HalDoAppManager){
 
 
 
-    remove(moduleName){
+            HalDoAppManager.register(
+
+                "dashboard",
+
+                {
+
+                    name:
+
+                    "Dashboard",
+
+                    type:
+
+                    "system"
+
+                }
+
+            );
 
 
 
-        this.modules =
+            HalDoAppManager.register(
 
-        this.modules.filter(
+                "ai-chat",
 
-            item => item !== moduleName
+                {
 
-        );
+                    name:
 
+                    "KI Chat",
 
+                    type:
 
-    },
+                    "ai"
 
+                }
 
-
-
-
-
-
-
-
-    getModules(){
+            );
 
 
 
-        return this.modules;
+            HalDoAppManager.register(
+
+                "settings",
+
+                {
+
+                    name:
+
+                    "Einstellungen",
+
+                    type:
+
+                    "system"
+
+                }
+
+            );
 
 
 
-    },
-
-
-
-
-
-
-
-
-
-    info(){
-
-
-
-        return {
-
-
-
-            status:
-
-            this.status,
-
-
-
-            modules:
-
-            this.modules
-
-
-
-        };
+        }
 
 
 
@@ -184,14 +111,22 @@ const HalDoKernel = {
 
 
 
-
-
-
 };
 
 
 
-
-
-
 window.HalDoKernel = HalDoKernel;
+
+
+
+window.addEventListener(
+
+"DOMContentLoaded",
+
+()=>{
+
+
+    HalDoKernel.boot();
+
+
+});
