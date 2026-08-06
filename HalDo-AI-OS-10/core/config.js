@@ -1,7 +1,7 @@
-// =====================================
+// ========================================
 // HalDo AI OS 16
-// Core Configuration
-// =====================================
+// System Configuration
+// ========================================
 
 
 const HalDoConfig = {
@@ -12,9 +12,20 @@ const HalDoConfig = {
 
     edition: "Professional Ultimate Foundation",
 
+    developer: "HalDo AI",
+
     language: "de",
 
-    systemStatus: "ready",
+
+    system: {
+
+        status: "starting",
+
+        maintenance: false,
+
+        updateChannel: "stable"
+
+    },
 
 
     features: {
@@ -23,17 +34,21 @@ const HalDoConfig = {
 
         apps: true,
 
+        storage: true,
+
         security: true,
 
-        storage: true,
+        language: true,
 
         updates: true,
 
-        languages: true
+        backup: true
 
     }
 
+
 };
+
 
 
 window.HalDoConfig = HalDoConfig;
