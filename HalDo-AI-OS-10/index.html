@@ -8,13 +8,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>
-HalDo AI OS Professional 16.0
+HalDo AI OS
 </title>
 
 
-<link rel="stylesheet" href="css/main.css">
-<link rel="stylesheet" href="css/components.css">
-<link rel="stylesheet" href="css/responsive.css">
+<meta name="description" content="HalDo AI OS - Intelligent Personal AI System">
+
+
+<link rel="manifest" href="manifest.json">
+
+
+<link rel="stylesheet" href="shared/css/main.css">
+<link rel="stylesheet" href="shared/css/components.css">
+<link rel="stylesheet" href="shared/css/responsive.css">
 
 
 </head>
@@ -23,72 +29,67 @@ HalDo AI OS Professional 16.0
 <body>
 
 
-<div class="os-container">
+<div id="system">
 
 
-<header class="system-header">
+<header class="header">
 
 
-<img
-src="assets/logo.png"
-alt="HalDo AI Logo"
-class="logo"
->
+<div class="logo">
 
-
-<h1>
 🤖 HalDo AI OS
-</h1>
+
+</div>
 
 
-<p>
-Professional Ultimate Foundation 16.0
-</p>
+<div class="version">
+
+Foundation 1.0
+
+</div>
 
 
 </header>
 
 
 
-
-<main id="app">
+<main class="container">
 
 
 <section class="welcome">
 
 
-<h2>
+<h1>
 Willkommen bei HalDo AI OS
-</h2>
+</h1>
 
 
 <p>
-Dein intelligentes KI-System
+Dein persönliches intelligentes KI-System.
 </p>
 
 
 
 <div id="system-status">
 
-🟢 System bereit
+🟡 System startet...
 
 </div>
 
 
 
-<div class="menu">
+<div class="app-grid">
 
 
-<button onclick="openPage('apps/dashboard/index.html')">
+<button onclick="openApp('dashboard')">
 
-🚀 Dashboard
+🏠 Dashboard
 
 </button>
 
 
 
-
-<button onclick="openPage('apps/chat/index.html')">
+<button onclick="openApp('ai-chat')">
 
 🤖 KI Chat
 
@@ -96,8 +97,7 @@ Dein intelligentes KI-System
 
 
 
-
-<button onclick="openPage('apps/settings/index.html')">
+<button onclick="openApp('settings')">
 
 ⚙️ Einstellungen
 
@@ -115,46 +115,48 @@ Dein intelligentes KI-System
 
 
 
-
 <footer>
 
-HalDo AI OS Professional 16.0
+© HalDo AI OS
 
 </footer>
+
 
 
 </div>
 
 
 
+<script src="system/config/config.js"></script>
+
+
+<script src="system/core/events.js"></script>
+<script src="system/core/storage.js"></script>
+<script src="system/core/router.js"></script>
+<script src="system/core/app-manager.js"></script>
+<script src="system/core/kernel.js"></script>
+
+
+<script src="shared/js/helpers.js"></script>
+<script src="shared/js/navigation.js"></script>
+
+
 
 <script>
 
+window.addEventListener(
+"load",
+()=>{
 
-function openPage(page){
+if(window.HalDoKernel){
 
-window.location.href = page;
+HalDoKernel.start();
 
 }
 
+});
 
 </script>
-
-
-
-
-<script src="core/config.js"></script>
-<script src="core/logger.js"></script>
-<script src="core/events.js"></script>
-<script src="core/storage.js"></script>
-<script src="core/kernel.js"></script>
-<script src="core/router.js"></script>
-<script src="core/system.js"></script>
-
-
-<script src="js/navigation.js"></script>
-<script src="js/modules.js"></script>
-<script src="js/app.js"></script>
 
 
 
