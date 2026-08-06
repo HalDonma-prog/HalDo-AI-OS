@@ -1,111 +1,101 @@
-// ==========================================
-// HalDo App Manager
-// ==========================================
+// =================================
+// HalDo Central App Manager
+// =================================
 
 
-const HalDoApps = {
+const HalDoAppManager = {
 
 
-    apps: [],
+apps:[],
 
 
-    register(app) {
+load(){
 
-        this.apps.push(app);
+fetch("../../data/apps.json")
 
-        this.save();
+.then(response=>response.json())
 
-    },
+.then(data=>{
 
+this.apps=data.apps;
 
-    remove(id) {
+this.render();
 
-        this.apps =
-        this.apps.filter(
-            app => app.id !== id
-        );
-
-        this.save();
-
-    },
+});
 
 
-    block(id) {
-
-        const app =
-        this.apps.find(
-            a => a.id === id
-        );
+},
 
 
-        if(app){
 
-            app.blocked = true;
+getApps(){
 
-        }
+return this.apps;
 
-
-        this.save();
-
-    },
+},
 
 
-    unblock(id) {
-
-        const app =
-        this.apps.find(
-            a => a.id === id
-        );
 
 
-        if(app){
-
-            app.blocked = false;
-
-        }
+open(app){
 
 
-        this.save();
+if(app.active){
 
-    },
+window.location.href =
+"../../"+app.path;
 
-
-    getAll(){
-
-        return this.apps;
-
-    },
+}
 
 
-    save(){
-
-        if(window.HalDoStorage){
-
-            HalDoStorage.save(
-                "haldo_apps",
-                this.apps
-            );
-
-        }
-
-    },
+},
 
 
-    load(){
 
-        if(window.HalDoStorage){
 
-            this.apps =
-            HalDoStorage.load(
-                "haldo_apps"
-            ) || [];
+disable(id){
 
-        }
 
-    }
+let app =
+this.apps.find(
+a=>a.id===id
+);
+
+
+if(app){
+
+app.active=false;
+
+}
+
+
+},
+
+
+
+enable(id){
+
+
+let app =
+this.apps.find(
+a=>a.id===id
+);
+
+
+if(app){
+
+app.active=true;
+
+}
+
+
+}
+
 
 
 };
 
 
-window.HalDoApps = HalDoApps;
+
+window.HalDoAppManager =
+HalDoAppManager;
