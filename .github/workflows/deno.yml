@@ -1,24 +1,39 @@
-name: HalDo AI OS Check
+name: Deploy HalDo AI OS 18
 
 on:
   push:
     branches:
       - main
 
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
 jobs:
-  website-check:
+
+  deploy:
+
+    environment:
+      name: github-pages
+
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
 
-      - name: Prüfe index.html
-        run: |
-          if [ ! -f index.html ]; then
-            echo "❌ index.html fehlt"
-            exit 1
-          fi
-          echo "✅ index.html gefunden"
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Fertig
-        run: echo "🟢 HalDo AI OS ist bereit"
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+
+      - name: Upload Pages Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
