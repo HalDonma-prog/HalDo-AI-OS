@@ -1,51 +1,46 @@
-// =====================================
+// ==========================================
 // HalDo Storage System
-// =====================================
-
+// ==========================================
 
 const HalDoStorage = {
 
 
-save(key,data){
+    save(key, data) {
 
-localStorage.setItem(
-key,
-JSON.stringify(data)
-);
+        localStorage.setItem(
+            key,
+            JSON.stringify(data)
+        );
 
-},
-
-
-
-load(key){
+    },
 
 
-const value =
-localStorage.getItem(key);
+    load(key) {
+
+        const data =
+            localStorage.getItem(key);
 
 
+        if (!data) {
 
-return value
-?
-JSON.parse(value)
-:
-null;
+            return null;
 
-
-},
+        }
 
 
+        return JSON.parse(data);
 
-remove(key){
+    },
 
-localStorage.removeItem(key);
 
-}
+    remove(key) {
+
+        localStorage.removeItem(key);
+
+    }
 
 
 };
 
 
-
-window.HalDoStorage =
-HalDoStorage;
+window.HalDoStorage = HalDoStorage;
