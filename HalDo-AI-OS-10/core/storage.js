@@ -1,46 +1,55 @@
-// ==========================================
-// HalDo Storage System
-// ==========================================
+// =====================================
+// HalDo AI OS Storage
+// =====================================
+
 
 const HalDoStorage = {
 
 
-    save(key, data) {
+save(key,value){
 
-        localStorage.setItem(
-            key,
-            JSON.stringify(data)
-        );
+    localStorage.setItem(
 
-    },
+        "haldo_"+key,
 
+        JSON.stringify(value)
 
-    load(key) {
+    );
 
-        const data =
-            localStorage.getItem(key);
+},
 
 
-        if (!data) {
 
-            return null;
-
-        }
+load(key){
 
 
-        return JSON.parse(data);
+    const data = localStorage.getItem(
 
-    },
+        "haldo_"+key
+
+    );
 
 
-    remove(key) {
+    return data ? JSON.parse(data) : null;
 
-        localStorage.removeItem(key);
 
-    }
+},
+
+
+
+remove(key){
+
+    localStorage.removeItem(
+
+        "haldo_"+key
+
+    );
+
+}
 
 
 };
+
 
 
 window.HalDoStorage = HalDoStorage;
