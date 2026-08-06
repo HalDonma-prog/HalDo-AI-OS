@@ -1,44 +1,104 @@
-// ==========================================
-// HalDo AI OS System Core
-// Version 16.0
-// ==========================================
+// ========================================
+// HalDo AI OS 16
+// System Manager
+// ========================================
+
 
 const HalDoSystem = {
 
-    name: "HalDo AI OS",
 
-    version: "16.0",
+    start(){
 
-    status: "running",
-
-
-    start() {
 
         console.log(
-            this.name +
-            " gestartet Version " +
-            this.version
+
+            "HalDo AI OS System startet..."
+
         );
+
+
+
+        if(window.HalDoConfig){
+
+
+            HalDoConfig.system.status = "running";
+
+
+        }
+
+
+
+        if(window.HalDoEvents){
+
+
+            HalDoEvents.emit(
+
+                "system-ready",
+
+                {
+
+                    version:
+
+                    HalDoConfig.version
+
+                }
+
+            );
+
+
+        }
+
+
+
+        const status = document.getElementById(
+
+            "system-message"
+
+        );
+
+
+
+        if(status){
+
+
+            status.innerHTML =
+
+            "🟢 System bereit";
+
+
+        }
+
+
 
     },
 
 
-    info() {
+
+    info(){
+
 
         return {
 
-            name: this.name,
 
-            version: this.version,
+            name:
 
-            status: this.status
+            HalDoConfig.name,
+
+
+            version:
+
+            HalDoConfig.version
+
 
         };
+
 
     }
 
 
+
 };
+
 
 
 window.HalDoSystem = HalDoSystem;
