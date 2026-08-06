@@ -1,28 +1,38 @@
 // =================================
-// HalDo Settings System
+// HalDo Settings
 // =================================
 
 
-console.log(
-"HalDo Settings geladen"
-);
+function openLanguage(){
+
+window.location.href =
+"../language/index.html";
+
+}
 
 
 
-function changeLanguage(){
+function changeTheme(){
+
+document.body.style.background =
+"#334155";
+
+}
+
+
+
+function notifications(){
 
 alert(
-"Sprachverwaltung öffnen"
+"Benachrichtigungen geändert"
 );
 
 }
 
 
 
-function checkUpdates(){
+function back(){
 
-alert(
-"Suche nach Updates..."
-);
+window.history.back();
 
 }
