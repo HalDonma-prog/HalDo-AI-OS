@@ -1,36 +1,39 @@
-// =====================================
-// HalDo AI OS Event System
-// =====================================
+// ========================================
+// HalDo AI OS 16
+// Event System
+// ========================================
 
 
 const HalDoEvents = {
 
 
-    listeners:{},
+    events: {},
 
 
-    on(event, callback){
+    on(name, callback){
 
-        if(!this.listeners[event]){
 
-            this.listeners[event] = [];
+        if(!this.events[name]){
+
+            this.events[name] = [];
 
         }
 
 
-        this.listeners[event].push(callback);
+        this.events[name].push(callback);
+
 
     },
 
 
 
-    emit(event,data){
+    emit(name, data){
 
 
-        if(this.listeners[event]){
+        if(this.events[name]){
 
 
-            this.listeners[event].forEach(
+            this.events[name].forEach(
 
                 callback => callback(data)
 
