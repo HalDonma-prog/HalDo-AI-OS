@@ -1,38 +1,48 @@
-// ==========================================
-// HalDo AI OS Permissions
-// ==========================================
+// =====================================
+// HalDo Permissions
+// =====================================
+
 
 const HalDoPermissions = {
 
-    roles: {
 
-        admin: [
-            "create",
-            "edit",
-            "delete",
-            "block",
-            "settings",
-            "updates"
-        ],
+admin:[
 
+"create",
+"edit",
+"delete",
+"block",
+"settings",
+"update"
 
-        user: [
-            "create",
-            "edit",
-            "delete"
-        ]
-
-    },
+],
 
 
-    check(role, action) {
+user:[
 
-        return this.roles[role]
-            ?.includes(action);
+"create",
+"edit"
 
-    }
+]
+
+,
+
+
+
+check(role,action){
+
+
+return this[role]
+.includes(action);
+
+
+}
+
+
 
 };
 
 
-window.HalDoPermissions = HalDoPermissions;
+
+window.HalDoPermissions =
+HalDoPermissions;
