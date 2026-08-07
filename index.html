@@ -33,7 +33,10 @@ content="#090D18">
 <body>
 
 
-<!-- START -->
+<!-- =========================
+BOOT SCREEN
+========================= -->
+
 
 <section id="startup-screen"
 class="boot-screen">
@@ -58,9 +61,17 @@ HalDo AI OS 18
 
 
 
-<p id="startup-message">
+<p id="status">
 
 🟡 System startet...
+
+</p>
+
+
+
+<p id="startup-message">
+
+Boot wird vorbereitet...
 
 </p>
 
@@ -72,13 +83,25 @@ HalDo AI OS 18
 
 
 
-<!-- WELCOME -->
+
+<!-- =========================
+WELCOME SCREEN
+========================= -->
+
 
 <section id="welcome-screen"
 
-class="boot-screen"
+class="boot-screen hidden">
 
-style="display:none;">
+
+
+<img
+
+src="assets/logo/logo.svg"
+
+class="logo"
+
+alt="HalDo AI OS Logo">
 
 
 
@@ -94,17 +117,17 @@ HalDo AI OS 18
 
 
 
-<p>
+<h3>
 
 Professional Ultimate Foundation
 
-</p>
+</h3>
 
 
 
 <p id="system-time">
 
-Systemzeit wird geladen...
+Systemzeit
 
 </p>
 
@@ -134,11 +157,17 @@ Systemzeit wird geladen...
 
 
 
-<!-- DESKTOP -->
+
+<!-- =========================
+DESKTOP / MAIN MENU
+========================= -->
+
 
 <section id="desktop"
 
-style="display:none;">
+class="hidden">
+
+
 
 
 
@@ -184,6 +213,7 @@ Professional Ultimate Foundation
 
 
 
+
 <main class="main-menu">
 
 
@@ -210,13 +240,11 @@ Professional Ultimate Foundation
 
 
 
-
 <button onclick="openPage('ai-core.html')">
 
 🤖 AI Core
 
 </button>
-
 
 
 
@@ -228,13 +256,11 @@ Professional Ultimate Foundation
 
 
 
-
 <button onclick="openPage('apps.html')">
 
 📱 Apps
 
 </button>
-
 
 
 
@@ -246,7 +272,6 @@ Professional Ultimate Foundation
 
 
 
-
 <button onclick="openPage('status.html')">
 
 📡 System Status
@@ -255,9 +280,7 @@ Professional Ultimate Foundation
 
 
 
-
 </div>
-
 
 
 </main>
@@ -272,9 +295,13 @@ Professional Ultimate Foundation
 
 
 
+
+
 <script src="js/boot.js"></script>
 
 <script src="js/startup.js"></script>
+
+
 
 
 
@@ -286,32 +313,35 @@ function openDesktop(){
 
 document.getElementById(
 "welcome-screen"
-)
-.style.display="none";
-
-
-
-let desktop =
-document.getElementById(
-"desktop"
+).classList.add(
+"hidden"
 );
 
 
 
-desktop.style.display="block";
+document.getElementById(
+"desktop"
+).classList.remove(
+"hidden"
+);
+
 
 
 }
+
+
 
 
 
 function openPage(page){
 
 
-window.location.href=page;
+window.location.href =
+page;
 
 
 }
+
 
 
 
@@ -332,29 +362,35 @@ now.toLocaleTimeString(
 
 
 
-let a =
+let system =
 document.getElementById(
 "system-time"
 );
 
 
 
-let b =
+let desktop =
 document.getElementById(
 "desktop-time"
 );
 
 
 
-if(a)
-a.innerHTML =
+if(system){
+
+system.innerHTML =
 "🕒 " + time;
 
+}
 
 
-if(b)
-b.innerHTML =
+
+if(desktop){
+
+desktop.innerHTML =
 "🕒 " + time;
+
+}
 
 
 
@@ -372,7 +408,10 @@ updateTime,
 updateTime();
 
 
+
 </script>
+
+
 
 
 
