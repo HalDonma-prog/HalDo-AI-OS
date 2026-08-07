@@ -2,12 +2,12 @@
 ========================================
 
 HalDo AI OS 18
-Module Manager Foundation
+Module Manager
 
 Version:
 18.0.0
 
-Module Management Layer
+Module Control System
 
 ========================================
 */
@@ -28,6 +28,7 @@ const ModuleManager = {
     "offline",
 
 
+
     modules:
     [],
 
@@ -37,7 +38,7 @@ const ModuleManager = {
 
 
         console.log(
-            "🧩 Module Manager Initialisierung..."
+            "🧩 Module Manager startet..."
         );
 
 
@@ -45,83 +46,84 @@ const ModuleManager = {
         "starting";
 
 
-        this.start();
+        this.updateStatus(
+            "🔵 Module werden geladen..."
+        );
 
+
+        this.loadDefaultModules();
 
 
     },
 
 
 
-    start(){
+    loadDefaultModules(){
 
 
-        this.status =
-        "active";
+        this.modules = [
 
 
+            {
 
-        if(
-            typeof Logger !== "undefined"
-        ){
+                name:
+                "AI Core",
 
-            Logger.info(
-                "Module Manager gestartet"
-            );
+                status:
+                "ready"
 
-
-        }
+            },
 
 
+            {
 
-        if(
-            typeof EventBus !== "undefined"
-        ){
+                name:
+                "Security",
 
-            EventBus.emit(
-                "modules.ready",
-                {
+                status:
+                "ready"
 
-                    status:
-                    this.status
+            },
 
 
-                }
+            {
 
-            );
+                name:
+                "Database",
+
+                status:
+                "ready"
+
+            }
 
 
-        }
+        ];
 
 
 
         console.log(
-            "🧩 Module System bereit"
+            "🧩 Module geladen:",
+            this.modules
         );
+
+
+
+        this.status =
+        "ready";
+
+
+
+        this.updateStatus(
+            "🟢 Module geladen"
+        );
+
 
 
     },
 
 
 
-    register(module){
-
-
-        if(
-            !module.name
-        ){
-
-
-            console.error(
-                "❌ Modul ohne Namen"
-            );
-
-
-            return false;
-
-
-        }
-
+    registerModule(module){
 
 
         this.modules.push(
@@ -131,106 +133,30 @@ const ModuleManager = {
 
 
         console.log(
-            "🧩 Modul registriert:",
-            module.name
+            "➕ Neues Modul:",
+            module
         );
-
-
-
-        if(
-            typeof Logger !== "undefined"
-        ){
-
-            Logger.info(
-                "Modul registriert: "
-                + module.name
-            );
-
-        }
-
-
-
-        return true;
 
 
     },
 
 
 
-    load(name){
+    removeModule(name){
 
 
-        const module =
-        this.modules.find(
-            item =>
-            item.name === name
+        this.modules =
+        this.modules.filter(
+            module =>
+            module.name !== name
         );
-
-
-
-        if(
-            !module
-        ){
-
-
-            console.warn(
-                "🟡 Modul nicht gefunden:",
-                name
-            );
-
-
-            return false;
-
-
-        }
-
-
-
-        module.status =
-        "active";
 
 
 
         console.log(
-            "🟢 Modul geladen:",
+            "🗑️ Modul entfernt:",
             name
         );
-
-
-
-        return true;
-
-
-    },
-
-
-
-    unload(name){
-
-
-        const module =
-        this.modules.find(
-            item =>
-            item.name === name
-        );
-
-
-
-        if(
-            module
-        ){
-
-            module.status =
-            "inactive";
-
-
-            console.log(
-                "🔵 Modul deaktiviert:",
-                name
-            );
-
-
-        }
 
 
     },
@@ -241,6 +167,111 @@ const ModuleManager = {
 
 
         return this.modules;
+
+
+    },
+
+
+
+    getModule(name){
+
+
+        return this.modules.find(
+
+            module =>
+            module.name === name
+
+        );
+
+
+    },
+
+
+
+    startModule(name){
+
+
+        const module =
+        this.getModule(name);
+
+
+
+        if(module){
+
+
+            module.status =
+            "active";
+
+
+
+            console.log(
+                "🟢 Modul gestartet:",
+                name
+            );
+
+
+        }
+
+
+
+    },
+
+
+
+    stopModule(name){
+
+
+        const module =
+        this.getModule(name);
+
+
+
+        if(module){
+
+
+            module.status =
+            "stopped";
+
+
+
+            console.log(
+                "🔴 Modul gestoppt:",
+                name
+            );
+
+
+        }
+
+
+
+    },
+
+
+
+    updateStatus(message){
+
+
+        const element =
+        document.getElementById(
+            "system-status"
+        );
+
+
+
+        if(element){
+
+
+            element.innerHTML =
+            message;
+
+
+        }
+
+
+
+        console.log(
+            message
+        );
 
 
     },
@@ -266,7 +297,7 @@ const ModuleManager = {
 
 
             modules:
-            this.modules.length
+            this.modules
 
 
         };
@@ -281,6 +312,6 @@ const ModuleManager = {
 
 
 
-// Module System starten
-
-ModuleManager.initialize();
+console.log(
+    "🧩 HalDo Module Manager geladen"
+);
