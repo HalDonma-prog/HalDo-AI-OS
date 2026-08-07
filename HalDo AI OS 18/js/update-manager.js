@@ -2,12 +2,12 @@
 ========================================
 
 HalDo AI OS 18
-Update Manager Foundation
+Update Manager
 
 Version:
 18.0.0
 
-System Update Layer
+System Update Controller
 
 ========================================
 */
@@ -28,6 +28,12 @@ const UpdateManager = {
     "offline",
 
 
+
+    currentVersion:
+    "18.0.0",
+
+
+
     updates:
     [],
 
@@ -37,7 +43,7 @@ const UpdateManager = {
 
 
         console.log(
-            "🔄 Update Manager Initialisierung..."
+            "🔄 Update Manager startet..."
         );
 
 
@@ -45,123 +51,101 @@ const UpdateManager = {
         "starting";
 
 
-        this.start();
+        this.updateStatus(
+            "🔵 Update System wird geladen..."
+        );
 
+
+        this.checkUpdates();
 
 
     },
 
 
 
-    start(){
+    checkUpdates(){
+
+
+        console.log(
+            "🔍 Suche nach Updates..."
+        );
+
+
+
+        this.updates = [];
+
 
 
         this.status =
-        "active";
+        "ready";
 
 
 
-        if(
-            typeof Logger !== "undefined"
-        ){
-
-            Logger.info(
-                "Update Manager gestartet"
-            );
-
-
-        }
-
-
-
-        if(
-            typeof EventBus !== "undefined"
-        ){
-
-            EventBus.emit(
-                "updates.ready",
-                {
-
-                    status:
-                    this.status
-
-                }
-
-            );
-
-        }
-
-
-
-        console.log(
-            "🔄 Update System bereit"
+        this.updateStatus(
+            "🟢 Update System bereit"
         );
+
 
 
     },
 
 
 
-    check(){
-
-
-        console.log(
-            "🔎 Suche nach Updates..."
-        );
-
-
-
-        const result = {
-
-
-            currentVersion:
-            this.version,
-
-
-            updateAvailable:
-            false,
-
-
-            message:
-            "System ist aktuell"
-
-
-        };
-
+    addUpdate(update){
 
 
         this.updates.push(
-            result
-        );
-
-
-
-        return result;
-
-
-    },
-
-
-
-    install(update){
-
-
-        console.log(
-            "⬇️ Installation vorbereitet:",
             update
         );
 
 
 
-        if(
-            typeof Logger !== "undefined"
-        ){
+        console.log(
+            "➕ Update hinzugefügt:",
+            update
+        );
 
-            Logger.info(
-                "Update Installation vorbereitet"
+
+    },
+
+
+
+    installUpdate(update){
+
+
+        console.log(
+            "⬆️ Installiere Update:",
+            update
+        );
+
+
+
+        this.status =
+        "updating";
+
+
+
+        this.updateStatus(
+            "🟡 Update wird installiert..."
+        );
+
+
+
+        setTimeout(()=>{
+
+
+            this.status =
+            "ready";
+
+
+
+            this.updateStatus(
+                "🟢 Update abgeschlossen"
             );
 
-        }
+
+
+        },1000);
 
 
 
@@ -169,10 +153,50 @@ const UpdateManager = {
 
 
 
-    getHistory(){
+    getUpdates(){
 
 
         return this.updates;
+
+
+    },
+
+
+
+    getVersion(){
+
+
+        return this.currentVersion;
+
+
+    },
+
+
+
+    updateStatus(message){
+
+
+        const element =
+        document.getElementById(
+            "system-status"
+        );
+
+
+
+        if(element){
+
+
+            element.innerHTML =
+            message;
+
+
+        }
+
+
+
+        console.log(
+            message
+        );
 
 
     },
@@ -193,12 +217,16 @@ const UpdateManager = {
             this.version,
 
 
+            systemVersion:
+            this.currentVersion,
+
+
             status:
             this.status,
 
 
             updates:
-            this.updates.length
+            this.updates
 
 
         };
@@ -213,6 +241,6 @@ const UpdateManager = {
 
 
 
-// Update System starten
-
-UpdateManager.initialize();
+console.log(
+    "🔄 HalDo Update Manager geladen"
+);
