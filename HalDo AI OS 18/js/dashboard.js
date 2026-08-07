@@ -7,17 +7,25 @@ Dashboard Foundation
 Version:
 18.0.0
 
-System Dashboard
+User Interface Layer
 
 ========================================
 */
 
 
-const HalDoDashboard = {
+const Dashboard = {
+
+
+    name:
+    "HalDo Dashboard",
 
 
     version:
     "18.0.0",
+
+
+    status:
+    "starting",
 
 
 
@@ -25,8 +33,12 @@ const HalDoDashboard = {
 
 
         console.log(
-            "📊 Dashboard Foundation gestartet"
+            "📱 Dashboard Initialisierung..."
         );
+
+
+        this.status =
+        "active";
 
 
         this.render();
@@ -46,59 +58,16 @@ const HalDoDashboard = {
 
 
 
-        if(!dashboard){
+        if(
+            !dashboard
+        ){
 
-            console.error(
+            console.warn(
                 "Dashboard Bereich nicht gefunden"
             );
 
+
             return;
-
-        }
-
-
-
-        let system =
-        "nicht verfügbar";
-
-
-        let modules =
-        "0";
-
-
-        let ai =
-        "offline";
-
-
-
-        if(
-            typeof HalDoSystem !== "undefined"
-        ){
-
-            system =
-            HalDoSystem.state;
-
-        }
-
-
-
-        if(
-            typeof ModuleManager !== "undefined"
-        ){
-
-            modules =
-            ModuleManager.modules.length;
-
-        }
-
-
-
-        if(
-            typeof AICore !== "undefined"
-        ){
-
-            ai =
-            AICore.status;
 
         }
 
@@ -108,35 +77,209 @@ const HalDoDashboard = {
 
 
         <h2>
-        🚀 HalDo AI OS 18 Dashboard
+        🤖 HalDo AI OS 18 Dashboard
         </h2>
 
 
         <p>
-        Version:
-        ${this.version}
+        Version: ${this.version}
         </p>
 
 
         <p>
-        🖥️ System:
-        ${system}
+        Status:
+        🟢 ${this.status}
         </p>
 
 
-        <p>
-        🧩 Module:
-        ${modules}
-        </p>
+        <hr>
 
 
-        <p>
-        🤖 AI Core:
-        ${ai}
-        </p>
+        <h3>
+        System Komponenten
+        </h3>
+
+
+        <div id="component-list">
+
+        Wird geladen...
+
+        </div>
 
 
         `;
+
+
+
+        this.showComponents();
+
+
+    },
+
+
+
+    showComponents(){
+
+
+        const area =
+        document.getElementById(
+            "component-list"
+        );
+
+
+
+        if(
+            !area
+        ){
+
+            return;
+
+        }
+
+
+
+        let content = "";
+
+
+
+        if(
+            typeof SystemStatus !== "undefined"
+        ){
+
+
+            const systems =
+            SystemStatus.systems;
+
+
+
+            content += `
+
+            <p>
+            🚀 Boot:
+            ${this.getValue(
+                systems.boot
+            )}
+            </p>
+
+
+            <p>
+            🧠 Kernel:
+            ${this.getValue(
+                systems.kernel
+            )}
+            </p>
+
+
+            <p>
+            ⚙️ Engine:
+            ${this.getValue(
+                systems.engine
+            )}
+            </p>
+
+
+            <p>
+            🧩 Module:
+            ${this.getValue(
+                systems.modules
+            )}
+            </p>
+
+
+            <p>
+            🔄 Updates:
+            ${this.getValue(
+                systems.updates
+            )}
+            </p>
+
+            `;
+
+
+        }
+        else {
+
+
+            content =
+            "Status-System lädt...";
+
+
+        }
+
+
+
+        area.innerHTML =
+        content;
+
+
+    },
+
+
+
+    getValue(data){
+
+
+        if(
+            typeof data === "string"
+        ){
+
+            return data;
+
+        }
+
+
+
+        return (
+            data.status
+            ||
+            data.state
+            ||
+            "bereit"
+        );
+
+
+    },
+
+
+
+    refresh(){
+
+
+        if(
+            typeof SystemStatus !== "undefined"
+        ){
+
+            SystemStatus.refresh();
+
+        }
+
+
+        this.showComponents();
+
+
+    },
+
+
+
+    getStatus(){
+
+
+        return {
+
+
+            name:
+            this.name,
+
+
+            version:
+            this.version,
+
+
+            status:
+            this.status
+
+
+        };
 
 
     }
@@ -150,4 +293,4 @@ const HalDoDashboard = {
 
 // Dashboard starten
 
-HalDoDashboard.initialize();
+Dashboard.initialize();
