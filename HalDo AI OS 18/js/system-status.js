@@ -28,8 +28,32 @@ const SystemStatus = {
     "starting",
 
 
-    systems:
-    {},
+
+    data:
+    {
+
+
+        kernel:
+        "starting",
+
+
+        system:
+        "starting",
+
+
+        modules:
+        "starting",
+
+
+        services:
+        "starting",
+
+
+        updates:
+        "starting"
+
+
+    },
 
 
 
@@ -37,7 +61,7 @@ const SystemStatus = {
 
 
         console.log(
-            "📊 System Status Center startet..."
+            "📡 System Status Center gestartet"
         );
 
 
@@ -45,10 +69,7 @@ const SystemStatus = {
         "active";
 
 
-        this.collect();
-
-
-        this.display();
+        this.monitor();
 
 
 
@@ -56,181 +77,190 @@ const SystemStatus = {
 
 
 
-    collect(){
+    monitor(){
 
 
-        this.systems = {
-
-
-            boot:
-            typeof BootSystem !== "undefined"
-            ?
-            BootSystem.getStatus()
-            :
-            "offline",
+        this.data.kernel =
+        this.checkKernel();
 
 
 
-            kernel:
-            typeof Kernel !== "undefined"
-            ?
-            Kernel.getStatus()
-            :
-            "offline",
+        this.data.system =
+        this.checkSystem();
 
 
 
-            engine:
-            typeof HalDoEngine !== "undefined"
-            ?
-            HalDoEngine.getStatus()
-            :
-            "offline",
+        this.data.modules =
+        this.checkModules();
 
 
 
-            system:
-            typeof HalDoSystem !== "undefined"
-            ?
-            HalDoSystem.getStatus()
-            :
-            "offline",
+        this.data.services =
+        this.checkServices();
 
 
 
-            modules:
+        this.data.updates =
+        this.checkUpdates();
+
+
+
+        this.render();
+
+
+
+    },
+
+
+
+    checkKernel(){
+
+
+        if(
+            typeof KernelSystem !== "undefined"
+        ){
+
+            return KernelSystem.status;
+
+        }
+
+
+        return "offline";
+
+
+    },
+
+
+
+    checkSystem(){
+
+
+        if(
+            typeof SystemManager !== "undefined"
+        ){
+
+            return SystemManager.status;
+
+        }
+
+
+        return "offline";
+
+
+    },
+
+
+
+    checkModules(){
+
+
+        if(
             typeof ModuleManager !== "undefined"
-            ?
-            ModuleManager.getStatus()
-            :
-            "offline",
+        ){
+
+            return ModuleManager.status;
+
+        }
 
 
-
-            services:
-            typeof ServiceManager !== "undefined"
-            ?
-            ServiceManager.getStatus()
-            :
-            "offline",
-
-
-
-            updates:
-            typeof UpdateManager !== "undefined"
-            ?
-            UpdateManager.getStatus()
-            :
-            "offline"
-
-
-        };
-
-
-
-        console.log(
-            "📊 System Daten gesammelt",
-            this.systems
-        );
+        return "offline";
 
 
     },
 
 
 
-    display(){
+    checkServices(){
 
 
-        const area =
+        if(
+            typeof ServiceManager !== "undefined"
+        ){
+
+            return ServiceManager.status;
+
+        }
+
+
+        return "offline";
+
+
+    },
+
+
+
+    checkUpdates(){
+
+
+        if(
+            typeof UpdateManager !== "undefined"
+        ){
+
+            return UpdateManager.status;
+
+        }
+
+
+        return "offline";
+
+
+    },
+
+
+
+    render(){
+
+
+        const element =
         document.getElementById(
             "system-status"
         );
 
 
 
-        if(
-            !area
-        ){
-
-            return;
-
-        }
+        if(element){
 
 
+            element.innerHTML = `
 
-        area.innerHTML = `
+            🟢 HalDo AI OS 18 Status
 
+            <br><br>
 
-        <h2>
-        📊 HalDo AI OS 18 Status
-        </h2>
+            ⚙️ Kernel:
+            ${this.data.kernel}
 
+            <br>
 
-        <p>
-        🧠 Kernel:
-        ${this.read(
-            this.systems.kernel
-        )}
-        </p>
+            🖥️ System:
+            ${this.data.system}
 
+            <br>
 
-        <p>
-        ⚙️ Engine:
-        ${this.read(
-            this.systems.engine
-        )}
-        </p>
+            🧩 Module:
+            ${this.data.modules}
 
+            <br>
 
-        <p>
-        🖥️ System:
-        ${this.read(
-            this.systems.system
-        )}
-        </p>
+            ⚙️ Services:
+            ${this.data.services}
 
+            <br>
 
-        <p>
-        🧩 Module:
-        ${this.read(
-            this.systems.modules
-        )}
-        </p>
+            🔄 Updates:
+            ${this.data.updates}
 
-
-        <p>
-        🔄 Updates:
-        ${this.read(
-            this.systems.updates
-        )}
-        </p>
-
-
-        `;
-
-
-    },
-
-
-
-    read(data){
-
-
-        if(
-            typeof data === "string"
-        ){
-
-            return data;
+            `;
 
 
         }
 
 
-        return data.status
-        ||
-        data.state
-        ||
-        "unknown";
+
+        console.log(
+            "📡 Status:",
+            this.data
+        );
 
 
     },
@@ -240,9 +270,7 @@ const SystemStatus = {
     refresh(){
 
 
-        this.collect();
-
-        this.display();
+        this.monitor();
 
 
     },
@@ -267,8 +295,8 @@ const SystemStatus = {
             this.status,
 
 
-            systems:
-            this.systems
+            data:
+            this.data
 
 
         };
@@ -283,6 +311,6 @@ const SystemStatus = {
 
 
 
-// Status Center starten
-
-SystemStatus.initialize();
+console.log(
+    "📡 HalDo System Status Center geladen"
+);
