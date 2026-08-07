@@ -1,23 +1,14 @@
 /*
-========================================
+====================================
 
 HalDo AI OS 18
-Boot System
+Boot Manager
 
-Version:
-18.0.0
-
-System Startup Controller
-
-========================================
+====================================
 */
 
 
-const BootSystem = {
-
-
-    name:
-    "HalDo Boot System",
+const HalDoBoot = {
 
 
     version:
@@ -25,7 +16,7 @@ const BootSystem = {
 
 
     status:
-    "offline",
+    "starting",
 
 
 
@@ -33,166 +24,46 @@ const BootSystem = {
 
 
         console.log(
-            "🚀 HalDo AI OS 18 Boot gestartet"
+        "HalDo AI OS Boot gestartet"
         );
 
 
-        this.status =
-        "starting";
+        this.checkSystem();
 
 
-        this.updateStatus(
-            "🟡 HalDo AI OS 18 startet..."
+    },
+
+
+
+    checkSystem(){
+
+
+        console.log(
+        "Systemprüfung..."
         );
-
-
-        this.startSequence();
-
-
-    },
-
-
-
-    startSequence(){
-
-
-        setTimeout(() => {
-
-
-            this.updateStatus(
-                "🔵 Kernel wird geladen..."
-            );
-
-
-            this.startKernel();
-
-
-
-        },500);
-
-
-
-    },
-
-
-
-    startKernel(){
-
-
-        if(
-            typeof KernelSystem !== "undefined"
-        ){
-
-            KernelSystem.initialize();
-
-
-            this.status =
-            "kernel-loaded";
-
-
-            this.updateStatus(
-                "🔵 Kernel geladen"
-            );
-
-
-        }
-        else {
-
-
-            console.warn(
-                "Kernel nicht gefunden"
-            );
-
-
-        }
-
-
-
-    },
-
-
-
-    complete(){
 
 
         this.status =
         "ready";
 
 
-        this.updateStatus(
-            "🟢 HalDo AI OS 18 bereit"
-        );
-
-
-        console.log(
-            "✅ Boot abgeschlossen"
-        );
-
-
-    },
-
-
-
-    updateStatus(message){
-
-
-        const element =
-        document.getElementById(
-            "system-status"
-        );
-
-
-
-        if(element){
-
-
-            element.innerHTML =
-            message;
-
-
-        }
-
-
-
-        console.log(
-            message
-        );
-
-
-    },
-
-
-
-    getStatus(){
-
-
-        return {
-
-
-            name:
-            this.name,
-
-
-            version:
-            this.version,
-
-
-            status:
-            this.status
-
-
-        };
-
-
     }
+
 
 
 };
 
 
 
+window.HalDoBoot =
+HalDoBoot;
 
 
-// Boot starten
 
-BootSystem.initialize();
+window.addEventListener(
+"load",
+()=>{
+
+    HalDoBoot.initialize();
+
+});
