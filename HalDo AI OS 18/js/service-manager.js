@@ -2,12 +2,12 @@
 ========================================
 
 HalDo AI OS 18
-Service Manager Foundation
+Service Manager
 
 Version:
 18.0.0
 
-System Service Layer
+System Service Control
 
 ========================================
 */
@@ -28,6 +28,7 @@ const ServiceManager = {
     "offline",
 
 
+
     services:
     [],
 
@@ -37,7 +38,7 @@ const ServiceManager = {
 
 
         console.log(
-            "⚙️ Service Manager Initialisierung..."
+            "⚙️ Service Manager startet..."
         );
 
 
@@ -45,78 +46,95 @@ const ServiceManager = {
         "starting";
 
 
-        this.start();
+        this.updateStatus(
+            "🔵 Systemdienste werden geladen..."
+        );
 
+
+        this.loadDefaultServices();
 
 
     },
 
 
 
-    start(){
+    loadDefaultServices(){
 
 
-        this.status =
-        "active";
+        this.services = [
 
 
+            {
 
-        if(
-            typeof Logger !== "undefined"
-        ){
+                name:
+                "Status Service",
 
-            Logger.info(
-                "Service Manager gestartet"
-            );
+                status:
+                "active"
 
-        }
-
+            },
 
 
-        if(
-            typeof EventBus !== "undefined"
-        ){
+            {
 
-            EventBus.emit(
-                "services.ready",
-                {
+                name:
+                "Update Service",
 
-                    status:
-                    this.status
+                status:
+                "ready"
 
-                }
+            },
 
-            );
 
-        }
+            {
+
+                name:
+                "Database Service",
+
+                status:
+                "ready"
+
+            },
+
+
+            {
+
+                name:
+                "Security Service",
+
+                status:
+                "ready"
+
+            }
+
+
+        ];
 
 
 
         console.log(
-            "⚙️ Service System bereit"
+            "⚙️ Dienste geladen:",
+            this.services
         );
+
+
+
+        this.status =
+        "ready";
+
+
+
+        this.updateStatus(
+            "🟢 Systemdienste bereit"
+        );
+
 
 
     },
 
 
 
-    register(service){
-
-
-        if(
-            !service.name
-        ){
-
-            console.error(
-                "❌ Service benötigt Namen"
-            );
-
-
-            return false;
-
-        }
-
+    registerService(service){
 
 
         this.services.push(
@@ -126,26 +144,9 @@ const ServiceManager = {
 
 
         console.log(
-            "⚙️ Service registriert:",
-            service.name
+            "➕ Dienst registriert:",
+            service
         );
-
-
-
-        if(
-            typeof Logger !== "undefined"
-        ){
-
-            Logger.info(
-                "Service registriert: "
-                + service.name
-            );
-
-        }
-
-
-
-        return true;
 
 
     },
@@ -156,42 +157,25 @@ const ServiceManager = {
 
 
         const service =
-        this.services.find(
-            item =>
-            item.name === name
-        );
+        this.getService(name);
 
 
 
-        if(
-            !service
-        ){
+        if(service){
 
-            console.warn(
-                "🟡 Service nicht gefunden:",
+
+            service.status =
+            "active";
+
+
+
+            console.log(
+                "🟢 Dienst gestartet:",
                 name
             );
 
 
-            return false;
-
         }
-
-
-
-        service.status =
-        "active";
-
-
-
-        console.log(
-            "🟢 Service gestartet:",
-            name
-        );
-
-
-
-        return true;
 
 
     },
@@ -202,23 +186,20 @@ const ServiceManager = {
 
 
         const service =
-        this.services.find(
-            item =>
-            item.name === name
-        );
+        this.getService(name);
 
 
 
-        if(
-            service
-        ){
+        if(service){
+
 
             service.status =
-            "inactive";
+            "stopped";
+
 
 
             console.log(
-                "🔵 Service gestoppt:",
+                "🔴 Dienst gestoppt:",
                 name
             );
 
@@ -230,10 +211,55 @@ const ServiceManager = {
 
 
 
+    getService(name){
+
+
+        return this.services.find(
+
+            service =>
+            service.name === name
+
+        );
+
+
+    },
+
+
+
     getServices(){
 
 
         return this.services;
+
+
+    },
+
+
+
+    updateStatus(message){
+
+
+        const element =
+        document.getElementById(
+            "system-status"
+        );
+
+
+
+        if(element){
+
+
+            element.innerHTML =
+            message;
+
+
+        }
+
+
+
+        console.log(
+            message
+        );
 
 
     },
@@ -259,7 +285,7 @@ const ServiceManager = {
 
 
             services:
-            this.services.length
+            this.services
 
 
         };
@@ -274,6 +300,6 @@ const ServiceManager = {
 
 
 
-// Service System starten
-
-ServiceManager.initialize();
+console.log(
+    "⚙️ HalDo Service Manager geladen"
+);
