@@ -2,18 +2,18 @@
 ========================================
 
 HalDo AI OS 18
-Kernel Foundation
+Kernel System
 
 Version:
 18.0.0
 
-System Core Controller
+Core System Controller
 
 ========================================
 */
 
 
-const Kernel = {
+const KernelSystem = {
 
 
     name:
@@ -28,16 +28,12 @@ const Kernel = {
     "offline",
 
 
-    components:
-    {},
-
-
 
     initialize(){
 
 
         console.log(
-            "🧠 Kernel Initialisierung..."
+            "⚙️ Kernel Initialisierung..."
         );
 
 
@@ -45,44 +41,12 @@ const Kernel = {
         "starting";
 
 
-        this.registerCoreComponents();
+        this.updateStatus(
+            "🔵 Kernel startet..."
+        );
 
 
         this.start();
-
-
-
-    },
-
-
-
-    registerCoreComponents(){
-
-
-        this.components = {
-
-
-            eventBus:
-            typeof EventBus !== "undefined",
-
-
-            logger:
-            typeof Logger !== "undefined",
-
-
-            config:
-            typeof ConfigManager !== "undefined"
-
-
-        };
-
-
-
-        console.log(
-            "🧩 Kernel Komponenten:",
-            this.components
-        );
-
 
 
     },
@@ -92,80 +56,110 @@ const Kernel = {
     start(){
 
 
+        this.loadEngine();
+
+
+    },
+
+
+
+    loadEngine(){
+
+
+        if(
+            typeof EngineSystem !== "undefined"
+        ){
+
+
+            EngineSystem.initialize();
+
+
+
+            this.status =
+            "active";
+
+
+
+            this.updateStatus(
+                "🟢 Kernel aktiv"
+            );
+
+
+
+            this.connectSystem();
+
+
+
+        }
+        else {
+
+
+            console.warn(
+                "Engine System nicht gefunden"
+            );
+
+
+        }
+
+
+
+    },
+
+
+
+    connectSystem(){
+
+
+        if(
+            typeof SystemManager !== "undefined"
+        ){
+
+
+            SystemManager.initialize();
+
+
+
+        }
+
+
+
+        if(
+            typeof BootSystem !== "undefined"
+        ){
+
+
+            setTimeout(()=>{
+
+
+                BootSystem.complete();
+
+
+            },500);
+
+
+        }
+
+
+
+        console.log(
+            "🔗 Kernel Verbindungen hergestellt"
+        );
+
+
+    },
+
+
+
+    shutdown(){
+
+
         this.status =
-        "active";
-
-
-
-        if(
-            typeof Logger !== "undefined"
-        ){
-
-            Logger.info(
-                "Kernel erfolgreich gestartet"
-            );
-
-
-        }
-
-
-
-        if(
-            typeof EventBus !== "undefined"
-        ){
-
-            EventBus.emit(
-                "kernel.ready",
-                {
-
-                    version:
-                    this.version
-
-                }
-
-            );
-
-
-        }
-
+        "offline";
 
 
         console.log(
-            "🧠 HalDo AI OS 18 Kernel aktiv"
+            "🔴 Kernel beendet"
         );
-
-
-
-    },
-
-
-
-    registerComponent(
-        name,
-        component
-    ){
-
-
-        this.components[name]
-        =
-        component;
-
-
-
-        console.log(
-            "🧩 Komponente registriert:",
-            name
-        );
-
-
-    },
-
-
-
-    getComponent(name){
-
-
-        return this.components[name];
 
 
     },
@@ -187,11 +181,7 @@ const Kernel = {
 
 
             status:
-            this.status,
-
-
-            components:
-            this.components
+            this.status
 
 
         };
@@ -206,6 +196,6 @@ const Kernel = {
 
 
 
-// Kernel starten
-
-Kernel.initialize();
+console.log(
+    "⚙️ HalDo Kernel geladen"
+);
