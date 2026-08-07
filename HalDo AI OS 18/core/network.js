@@ -13,7 +13,7 @@ System Network Layer
 */
 
 
-const Network = {
+const NetworkSystem = {
 
 
     name:
@@ -28,15 +28,17 @@ const Network = {
     "offline",
 
 
+
     connection:
     {
+
 
         online:
         false,
 
 
         type:
-        "none"
+        "unknown"
 
 
     },
@@ -47,7 +49,7 @@ const Network = {
 
 
         console.log(
-            "🌐 Network Initialisierung..."
+            "🌐 Network System startet..."
         );
 
 
@@ -55,97 +57,54 @@ const Network = {
         "starting";
 
 
-        this.start();
+        this.checkConnection();
 
 
     },
 
 
 
-    start(){
+    checkConnection(){
 
 
-        this.status =
-        "active";
-
-
-
-        this.detect();
+        this.connection.online =
+        navigator.onLine;
 
 
 
         if(
-            typeof Logger !== "undefined"
+            this.connection.online
         ){
-
-            Logger.info(
-                "Network System gestartet"
-            );
-
-        }
-
-
-
-        if(
-            typeof EventBus !== "undefined"
-        ){
-
-            EventBus.emit(
-                "network.ready",
-                {
-
-                    status:
-                    this.status
-
-                }
-
-            );
-
-        }
-
-
-
-        console.log(
-            "🌐 HalDo Network bereit"
-        );
-
-
-    },
-
-
-
-    detect(){
-
-
-        if(
-            navigator.onLine
-        ){
-
-            this.connection.online =
-            true;
 
 
             this.connection.type =
             "online";
 
 
+            this.status =
+            "active";
+
+
         }
         else {
-
-
-            this.connection.online =
-            false;
 
 
             this.connection.type =
             "offline";
 
 
+            this.status =
+            "standby";
+
+
         }
 
 
 
-        return this.connection;
+        console.log(
+            "🌐 Netzwerk:",
+            this.connection
+        );
 
 
     },
@@ -155,18 +114,14 @@ const Network = {
     connect(){
 
 
-        this.connection.online =
-        true;
-
-
-        this.connection.type =
-        "connected";
-
-
-
         console.log(
-            "🌐 Verbindung hergestellt"
+            "🔗 Netzwerk Verbindung wird hergestellt..."
         );
+
+
+
+        this.status =
+        "connecting";
 
 
     },
@@ -176,18 +131,14 @@ const Network = {
     disconnect(){
 
 
-        this.connection.online =
-        false;
-
-
-        this.connection.type =
-        "disconnected";
-
-
-
         console.log(
-            "🌐 Verbindung getrennt"
+            "🔌 Netzwerk getrennt"
         );
+
+
+
+        this.status =
+        "offline";
 
 
     },
@@ -238,6 +189,12 @@ const Network = {
 
 
 
-// Network starten
+// Netzwerk starten
 
-Network.initialize();
+NetworkSystem.initialize();
+
+
+
+console.log(
+    "🌐 HalDo Network geladen"
+);
