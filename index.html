@@ -24,7 +24,7 @@ href="manifest.json">
 
 
 <meta name="theme-color"
-content="#090D18">
+content="#101522">
 
 
 </head>
@@ -33,25 +33,25 @@ content="#090D18">
 <body>
 
 
-<!-- =========================
-BOOT SCREEN
-========================= -->
+<!-- =====================
+START SYSTEM
+===================== -->
 
 
 <section id="startup-screen"
-class="boot-screen">
+class="screen">
 
 
 
 <img
 
-id="system-logo"
-
 src="assets/logo/logo.svg"
+
+id="system-logo"
 
 class="logo"
 
-alt="HalDo AI OS Logo">
+alt="HalDo AI OS">
 
 
 
@@ -61,17 +61,9 @@ HalDo AI OS 18
 
 
 
-<p id="status">
+<p id="system-status">
 
 🟡 System startet...
-
-</p>
-
-
-
-<p id="startup-message">
-
-Boot wird vorbereitet...
 
 </p>
 
@@ -84,14 +76,13 @@ Boot wird vorbereitet...
 
 
 
-<!-- =========================
-WELCOME SCREEN
-========================= -->
+<!-- =====================
+WELCOME
+===================== -->
 
 
 <section id="welcome-screen"
-
-class="boot-screen hidden">
+class="screen hidden">
 
 
 
@@ -101,7 +92,7 @@ src="assets/logo/logo.svg"
 
 class="logo"
 
-alt="HalDo AI OS Logo">
+alt="HalDo AI OS">
 
 
 
@@ -117,31 +108,21 @@ HalDo AI OS 18
 
 
 
-<h3>
+<p>
 
 Professional Ultimate Foundation
 
-</h3>
+</p>
 
 
 
-<p id="system-time">
-
-Systemzeit
+<p id="clock">
 
 </p>
 
 
 
-<p>
-
-🟢 System bereit
-
-</p>
-
-
-
-<button onclick="openDesktop()">
+<button onclick="openMenu()">
 
 🚀 Hauptmenü öffnen
 
@@ -158,16 +139,13 @@ Systemzeit
 
 
 
-<!-- =========================
-DESKTOP / MAIN MENU
-========================= -->
+<!-- =====================
+MAIN MENU
+===================== -->
 
 
-<section id="desktop"
-
+<section id="main-menu"
 class="hidden">
-
-
 
 
 
@@ -178,10 +156,9 @@ class="hidden">
 
 src="assets/logo/logo.svg"
 
-class="logo"
+class="logo small"
 
-alt="HalDo AI OS Logo">
-
+alt="HalDo AI OS">
 
 
 <h1>
@@ -199,12 +176,6 @@ Professional Ultimate Foundation
 </p>
 
 
-
-<p id="desktop-time">
-
-</p>
-
-
 </header>
 
 
@@ -213,8 +184,7 @@ Professional Ultimate Foundation
 
 
 
-
-<main class="main-menu">
+<main class="menu-container">
 
 
 
@@ -223,7 +193,6 @@ Professional Ultimate Foundation
 🚀 Hauptmenü
 
 </h2>
-
 
 
 
@@ -283,13 +252,12 @@ Professional Ultimate Foundation
 </div>
 
 
+
 </main>
 
 
 
 </section>
-
-
 
 
 
@@ -303,28 +271,21 @@ Professional Ultimate Foundation
 
 
 
-
-
 <script>
 
 
-function openDesktop(){
+function openMenu(){
 
 
-document.getElementById(
-"welcome-screen"
-).classList.add(
-"hidden"
-);
+document
+.getElementById("welcome-screen")
+.classList.add("hidden");
 
 
 
-document.getElementById(
-"desktop"
-).classList.remove(
-"hidden"
-);
-
+document
+.getElementById("main-menu")
+.classList.remove("hidden");
 
 
 }
@@ -336,8 +297,7 @@ document.getElementById(
 function openPage(page){
 
 
-window.location.href =
-page;
+window.location.href = page;
 
 
 }
@@ -346,52 +306,30 @@ page;
 
 
 
-
-function updateTime(){
-
-
-let now =
-new Date();
-
+function updateClock(){
 
 
 let time =
-now.toLocaleTimeString(
+new Date()
+.toLocaleTimeString(
 "de-DE"
 );
 
 
 
-let system =
+let clock =
 document.getElementById(
-"system-time"
+"clock"
 );
 
 
 
-let desktop =
-document.getElementById(
-"desktop-time"
-);
+if(clock){
 
-
-
-if(system){
-
-system.innerHTML =
+clock.innerHTML =
 "🕒 " + time;
 
 }
-
-
-
-if(desktop){
-
-desktop.innerHTML =
-"🕒 " + time;
-
-}
-
 
 
 }
@@ -399,19 +337,16 @@ desktop.innerHTML =
 
 
 setInterval(
-updateTime,
+updateClock,
 1000
 );
 
 
-
-updateTime();
+updateClock();
 
 
 
 </script>
-
-
 
 
 
