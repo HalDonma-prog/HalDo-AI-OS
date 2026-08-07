@@ -1,258 +1,234 @@
 /*
-=====================================
-
+==========================================
 HalDo AI OS 18
-App Manager
-
+APP MANAGER
 Professional Ultimate Foundation
-
-Version:
-18.0.0
-
-=====================================
+Version 18.0.0
+==========================================
 */
 
+(function () {
 
-const HalDoAppManager = {
+    "use strict";
 
+    const HalDoAppManager = {
 
-    apps:{},
+        name: "HalDo App Manager",
+        version: "18.0.0",
 
+        status: "starting",
 
-
-
-
-
-    register:function(
-        name,
-        data
-    ){
+        apps: {},
 
 
-        this.apps[name] = {
+        init() {
 
+            if (this.status === "running") {
+                return true;
+            }
 
-            name:name,
+            this.status = "running";
 
+            this.registerDefaultApps();
 
-            version:
-            data.version || "1.0.0",
+            if (window.HalDoModuleManager) {
 
+                HalDoModuleManager.register(
+                    "app-manager",
+                    this
+                );
 
-            category:
-            data.category || "System",
-
-
-            status:
-            "ready"
-
-
-
-        };
-
-
-
-        console.log(
-        "📱 App registriert:",
-        name
-        );
-
-
-    },
-
-
-
-
-
-
-
-    start:function(name){
-
-
-        if(this.apps[name]){
-
-
-            this.apps[name]
-            .status =
-            "running";
-
-
+            }
 
             console.log(
-            "🚀 App gestartet:",
-            name
+                "📱 HalDo App Manager gestartet"
             );
 
-
-        }
-
-
-    },
+            return true;
+        },
 
 
+        registerApp(
+            id,
+            config = {}
+        ) {
+
+            if (!id) {
+                return false;
+            }
+
+            this.apps[id] = {
+
+                id: id,
+
+                name:
+                    config.name ||
+                    id,
+
+                page:
+                    config.page ||
+                    null,
+
+                icon:
+                    config.icon ||
+                    "",
+
+                description:
+                    config.description ||
+                    "",
+
+                status:
+                    "available"
+
+            };
+
+            return true;
+        },
 
 
+        registerDefaultApps() {
 
-
-
-    stop:function(name){
-
-
-        if(this.apps[name]){
-
-
-            this.apps[name]
-            .status =
-            "stopped";
-
-
-
-            console.log(
-            "⏹ App beendet:",
-            name
+            this.registerApp(
+                "dashboard",
+                {
+                    name: "Dashboard",
+                    page: "dashboard.html",
+                    icon: "📊"
+                }
             );
 
+            this.registerApp(
+                "ai-core",
+                {
+                    name: "AI Core",
+                    page: "ai-core.html",
+                    icon: "🧠"
+                }
+            );
 
-        }
+            this.registerApp(
+                "modules",
+                {
+                    name: "Module",
+                    page: "modules.html",
+                    icon: "🧩"
+                }
+            );
+
+            this.registerApp(
+                "apps",
+                {
+                    name: "Apps",
+                    page: "apps.html",
+                    icon: "📱"
+                }
+            );
+
+            this.registerApp(
+                "settings",
+                {
+                    name: "Einstellungen",
+                    page: "settings.html",
+                    icon: "⚙️"
+                }
+            );
+
+            this.registerApp(
+                "status",
+                {
+                    name: "System Status",
+                    page: "status.html",
+                    icon: "📡"
+                }
+            );
+
+            this.registerApp(
+                "health",
+                {
+                    name: "Health Center",
+                    page: "health.html",
+                    icon: "🏥"
+                }
+            );
+
+        },
 
 
-    },
+        getApp(id) {
+
+            return (
+                this.apps[id] ||
+                null
+            );
+
+        },
 
 
+        getApps() {
 
-
-
-
-
-    getApps:function(){
-
-
-        return this.apps;
-
-
-    },
-
-
-
-
-
-
-
-    getStatus:function(){
-
-
-        return {
-
-
-            total:
-            Object.keys(
+            return Object.values(
                 this.apps
-            ).length,
+            );
 
+        },
 
-            apps:
-            this.apps
 
+        open(id) {
 
+            const app =
+                this.getApp(id);
 
-        };
+            if (!app || !app.page) {
+                return false;
+            }
 
+            window.location.href =
+                app.page;
 
-    }
+            return true;
+        },
 
 
+        getStatus() {
 
-};
+            return {
 
+                status:
+                    this.status,
 
+                count:
+                    Object.keys(
+                        this.apps
+                    ).length,
 
+                apps:
+                    this.apps
 
+            };
 
+        }
 
+    };
 
 
+    window.HalDoAppManager =
+        HalDoAppManager;
 
-window.HalDoAppManager =
-HalDoAppManager;
 
+    window.addEventListener(
+        "DOMContentLoaded",
+        function () {
 
+            setTimeout(
+                function () {
 
+                    HalDoAppManager.init();
 
+                },
+                150
+            );
 
+        }
+    );
 
-
-
-
-window.addEventListener(
-"load",
-function(){
-
-
-
-HalDoAppManager.register(
-
-"AI Assistant",
-
-{
-
-version:
-"18.0.0",
-
-category:
-"AI"
-
-}
-
-);
-
-
-
-
-
-HalDoAppManager.register(
-
-"Chat System",
-
-{
-
-version:
-"1.0.0",
-
-category:
-"Communication"
-
-}
-
-);
-
-
-
-
-
-HalDoAppManager.register(
-
-"Health Center",
-
-{
-
-version:
-"1.0.0",
-
-category:
-"Health"
-
-}
-
-);
-
-
-
-
-
-console.log(
-"📱 App Manager bereit"
-);
-
-
-
-});
+})();
