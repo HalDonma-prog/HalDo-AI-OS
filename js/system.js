@@ -11,44 +11,30 @@ Version 18.0.0
 
     "use strict";
 
-
     const HalDoSystem = {
 
-        name:
-            "HalDo AI OS System",
+        name: "HalDo AI OS System",
+        version: "18.0.0",
 
-        version:
-            "18.0.0",
+        status: "starting",
 
-        status:
-            "starting",
-
-        startedAt:
-            null,
+        startedAt: null,
 
         services: {},
 
 
         init() {
 
-            this.startedAt =
-                new Date();
+            if (this.status === "running") {
+                return true;
+            }
 
-            this.status =
-                "running";
+            this.startedAt = new Date();
+            this.status = "running";
 
+            this.refresh();
 
-            console.log(
-                "🔵 HalDo AI OS System gestartet"
-            );
-
-
-            this.registerCoreServices();
-
-
-            if (
-                window.HalDoKernel
-            ) {
+            if (window.HalDoKernel) {
 
                 HalDoKernel.registerModule(
                     "system",
@@ -57,98 +43,99 @@ Version 18.0.0
 
             }
 
+            console.log(
+                "🔵 HalDo AI OS System gestartet"
+            );
+
+            window.dispatchEvent(
+                new CustomEvent(
+                    "haldo:system-ready"
+                )
+            );
 
             return true;
-
         },
 
 
-        registerCoreServices() {
+        refresh() {
 
             this.services = {
 
                 kernel:
                     !!window.HalDoKernel,
 
+                boot:
+                    !!window.HalDoBoot,
+
                 storage:
                     !!window.HalDoStorage,
 
-                modules:
+                moduleManager:
                     !!window.HalDoModuleManager,
+
+                appManager:
+                    !!window.HalDoAppManager,
 
                 ai:
                     !!window.HalDoAI,
 
-                language:
-                    !!window.HalDoLanguageSystem,
+                aiEngine:
+                    !!window.HalDoAIEngine,
 
-                memory:
-                    !!window.HalDoMemory,
+                chat:
+                    !!window.HalDoChat,
 
                 speech:
                     !!window.HalDoSpeech,
 
                 voice:
-                    !!window.HalDoVoice
+                    !!window.HalDoVoice,
+
+                memory:
+                    !!window.HalDoMemory,
+
+                commands:
+                    !!window.HalDoCommands,
+
+                language:
+                    !!window.HalDoLanguageSystem
 
             };
 
-        },
-
-
-        refresh() {
-
-            this.registerCoreServices();
-
-            return this.getStatus();
-
+            return this.services;
         },
 
 
         getStatus() {
 
-            const services =
-                this.services;
-
-
             const values =
                 Object.values(
-                    services
+                    this.services
                 );
-
 
             const loaded =
                 values.filter(
                     Boolean
                 ).length;
 
-
             return {
 
-                name:
-                    this.name,
+                name: this.name,
 
-                version:
-                    this.version,
+                version: this.version,
 
-                status:
-                    this.status,
+                status: this.status,
 
-                loaded:
+                startedAt:
+                    this.startedAt,
 
-                    loaded,
+                loaded: loaded,
 
                 total:
-
                     values.length,
 
                 services:
-
-                    services,
-
-                startedAt:
-
-                    this.startedAt
+                    this.services
 
             };
 
@@ -165,11 +152,26 @@ Version 18.0.0
         },
 
 
+        registerService(
+            name,
+            service
+        ) {
+
+            if (!name) {
+                return false;
+            }
+
+            this.services[name] =
+                !!service;
+
+            return true;
+        },
+
+
         shutdown() {
 
             this.status =
                 "stopped";
-
 
             console.log(
                 "🟡 HalDo System gestoppt"
@@ -194,7 +196,7 @@ Version 18.0.0
                     HalDoSystem.init();
 
                 },
-                50
+                75
             );
 
         }
