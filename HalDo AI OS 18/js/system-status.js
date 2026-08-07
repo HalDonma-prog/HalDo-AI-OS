@@ -7,7 +7,7 @@ System Status Center
 Version:
 18.0.0
 
-System Monitoring
+System Monitoring Layer
 
 ========================================
 */
@@ -17,11 +17,19 @@ const SystemStatus = {
 
 
     name:
-    "HalDo AI OS Status Center",
+    "HalDo System Status Center",
 
 
     version:
     "18.0.0",
+
+
+    status:
+    "starting",
+
+
+    systems:
+    {},
 
 
 
@@ -29,45 +37,18 @@ const SystemStatus = {
 
 
         console.log(
-            "📊 System Status Center gestartet"
+            "📊 System Status Center startet..."
         );
 
 
-        this.update();
+        this.status =
+        "active";
 
 
-    },
+        this.collect();
 
 
-
-    update(){
-
-
-        const kernel =
-        this.getKernelStatus();
-
-
-        const system =
-        this.getSystemStatus();
-
-
-        const modules =
-        this.getModuleStatus();
-
-
-        const updates =
-        this.getUpdateStatus();
-
-
-
-        this.render({
-
-            kernel,
-            system,
-            modules,
-            updates
-
-        });
+        this.display();
 
 
 
@@ -75,145 +56,222 @@ const SystemStatus = {
 
 
 
-    getKernelStatus(){
+    collect(){
 
 
-        if(
-            typeof HalDoKernel !== "undefined"
-        ){
-
-            return "🟢 Aktiv";
-
-        }
+        this.systems = {
 
 
-        return "🔴 Nicht geladen";
-
-
-    },
+            boot:
+            typeof BootSystem !== "undefined"
+            ?
+            BootSystem.getStatus()
+            :
+            "offline",
 
 
 
-    getSystemStatus(){
+            kernel:
+            typeof Kernel !== "undefined"
+            ?
+            Kernel.getStatus()
+            :
+            "offline",
 
 
-        if(
+
+            engine:
+            typeof HalDoEngine !== "undefined"
+            ?
+            HalDoEngine.getStatus()
+            :
+            "offline",
+
+
+
+            system:
             typeof HalDoSystem !== "undefined"
-        ){
-
-            return HalDoSystem.state;
-
-        }
-
-
-        return "unknown";
-
-
-    },
+            ?
+            HalDoSystem.getStatus()
+            :
+            "offline",
 
 
 
-    getModuleStatus(){
-
-
-        if(
+            modules:
             typeof ModuleManager !== "undefined"
-        ){
-
-            return ModuleManager.modules.length
-            + " Module";
-
-        }
-
-
-        return "0 Module";
-
-
-    },
+            ?
+            ModuleManager.getStatus()
+            :
+            "offline",
 
 
 
-    getUpdateStatus(){
+            services:
+            typeof ServiceManager !== "undefined"
+            ?
+            ServiceManager.getStatus()
+            :
+            "offline",
 
 
-        if(
+
+            updates:
             typeof UpdateManager !== "undefined"
-        ){
+            ?
+            UpdateManager.getStatus()
+            :
+            "offline"
 
-            return UpdateManager.status;
 
-        }
+        };
 
 
-        return "unknown";
+
+        console.log(
+            "📊 System Daten gesammelt",
+            this.systems
+        );
 
 
     },
 
 
 
-    render(data){
+    display(){
 
 
-        const box =
+        const area =
         document.getElementById(
             "system-status"
         );
 
 
 
-        if(box){
+        if(
+            !area
+        ){
 
-
-            box.innerHTML = `
-
-
-            <h2>
-            📊 System Status
-            </h2>
-
-
-            <p>
-            ⚙️ Kernel:
-            ${data.kernel}
-            </p>
-
-
-            <p>
-            🖥️ System:
-            ${data.system}
-            </p>
-
-
-            <p>
-            🧩 Module:
-            ${data.modules}
-            </p>
-
-
-            <p>
-            🔄 Updates:
-            ${data.updates}
-            </p>
-
-
-            <p>
-            Version:
-            ${this.version}
-            </p>
-
-
-            `;
-
+            return;
 
         }
 
 
 
-        console.log(
-            "📊 Status aktualisiert",
-            data
-        );
+        area.innerHTML = `
+
+
+        <h2>
+        📊 HalDo AI OS 18 Status
+        </h2>
+
+
+        <p>
+        🧠 Kernel:
+        ${this.read(
+            this.systems.kernel
+        )}
+        </p>
+
+
+        <p>
+        ⚙️ Engine:
+        ${this.read(
+            this.systems.engine
+        )}
+        </p>
+
+
+        <p>
+        🖥️ System:
+        ${this.read(
+            this.systems.system
+        )}
+        </p>
+
+
+        <p>
+        🧩 Module:
+        ${this.read(
+            this.systems.modules
+        )}
+        </p>
+
+
+        <p>
+        🔄 Updates:
+        ${this.read(
+            this.systems.updates
+        )}
+        </p>
+
+
+        `;
+
+
+    },
+
+
+
+    read(data){
+
+
+        if(
+            typeof data === "string"
+        ){
+
+            return data;
+
+
+        }
+
+
+        return data.status
+        ||
+        data.state
+        ||
+        "unknown";
+
+
+    },
+
+
+
+    refresh(){
+
+
+        this.collect();
+
+        this.display();
+
+
+    },
+
+
+
+    getStatus(){
+
+
+        return {
+
+
+            name:
+            this.name,
+
+
+            version:
+            this.version,
+
+
+            status:
+            this.status,
+
+
+            systems:
+            this.systems
+
+
+        };
 
 
     }
