@@ -6,313 +6,394 @@
 
 <meta charset="UTF-8">
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
 
 <title>
-HalDo AI OS 18 - Status
+HalDo AI OS 18 – System Status
 </title>
 
-
-<link rel="stylesheet" href="style.css">
-
+<link
+    rel="stylesheet"
+    href="style.css"
+>
 
 </head>
 
-
-
 <body>
 
-
-
-
-
-<header class="header">
+<section class="screen">
 
 
 <img
-
-src="assets/logo/logo.svg"
-
-class="logo small"
-
-alt="HalDo AI OS Logo">
-
+    src="assets/logo/logo.svg"
+    class="logo"
+    alt="HalDo AI OS Logo"
+>
 
 
 <h1>
-
-📡 System Status
-
+📡 HalDo AI OS 18
 </h1>
 
 
-
 <p>
-
-HalDo AI OS Überwachung
-
+System Status
 </p>
 
 
-
-</header>
-
-
-
-
-
-
-
-
-<main class="menu-container">
-
-
+<div class="settings-card">
 
 <h2>
-
-🟢 System Monitor
-
+🟢 System
 </h2>
 
+<p id="overall-status">
+System wird geprüft...
+</p>
 
-
-
-
-
-<div class="menu-grid">
-
-
-
-<button>
-
-🟢 Betriebssystem
-
-<br>
-
-Online
-
-</button>
-
-
-
-
-<button>
-
-🟢 AI Core
-
-<br>
-
-Bereit
-
-</button>
-
-
-
-
-<button>
-
-🟢 Module
-
-<br>
-
-Aktiv
-
-</button>
-
-
-
-
-<button>
-
-🟢 Netzwerk
-
-<br>
-
-Verbunden
-
-</button>
-
-
-
-
-<button>
-
-🟢 Sicherheit
-
-<br>
-
-Geschützt
-
-</button>
-
-
-
-
-<button>
-
-🟢 Speicher
-
-<br>
-
-Überwacht
-
-</button>
-
-
+<p id="module-count">
+Module werden geprüft...
+</p>
 
 </div>
 
 
-
-
-
-
-
-
-<section style="margin-top:40px;">
-
-
+<div class="settings-card">
 
 <h2>
-
-📊 System Informationen
-
+🧩 Module
 </h2>
 
-
-
-
-
-<div class="menu-grid">
-
-
-
-<button>
-
-🚀 Version
-
-<br>
-
-HalDo AI OS 18.0.0
-
-</button>
-
-
-
-
-<button>
-
-⚡ Leistung
-
-<br>
-
-Optimiert
-
-</button>
-
-
-
-
-<button>
-
-🧩 Architektur
-
-<br>
-
-Foundation
-
-</button>
-
-
-
-
-<button>
-
-🔄 Updates
-
-<br>
-
-Vorbereitet
-
-</button>
-
-
+<div id="module-list">
+Wird geladen...
+</div>
 
 </div>
 
+
+<div class="settings-card">
+
+<h2>
+🤖 AI
+</h2>
+
+<p id="ai-status">
+Wird geprüft...
+</p>
+
+</div>
+
+
+<div class="settings-card">
+
+<h2>
+🌍 Sprache
+</h2>
+
+<select
+    id="language-select"
+></select>
+
+</div>
+
+
+<br>
+
+
+<button
+    onclick="refreshStatus()"
+>
+
+🔄 Status aktualisieren
+
+</button>
+
+
+<br><br>
+
+
+<button
+    onclick="goBack()"
+>
+
+⬅️ Zurück
+
+</button>
 
 
 </section>
 
 
+<script src="js/boot.js"></script>
 
+<script src="js/kernel.js"></script>
 
+<script src="js/system.js"></script>
 
+<script src="js/ai-core.js"></script>
 
+<script src="js/ai-engine.js"></script>
 
+<script src="js/ai-chat.js"></script>
 
+<script src="js/ai-speech.js"></script>
 
-<section style="margin-top:40px;">
+<script src="js/ai-voice.js"></script>
 
+<script src="js/ai-memory.js"></script>
 
+<script src="js/ai-commands.js"></script>
 
-<div class="menu-grid">
+<script src="js/language-system.js"></script>
 
-
-<button onclick="openPage('dashboard.html')">
-
-⬅️ Dashboard
-
-</button>
-
-
-
-<button onclick="openPage('index.html')">
-
-🏠 Hauptmenü
-
-</button>
-
-
-
-</div>
-
-
-</section>
-
-
-
-
-
-
-
-</main>
-
-
-
-
-
+<script src="js/system-status.js"></script>
 
 
 <script>
 
+function refreshStatus() {
 
-function openPage(page){
+    if (
+        window.HalDoSystemStatus
+    ) {
 
+        HalDoSystemStatus.refresh();
 
-window.location.href = page;
+    }
 
+    updateStatus();
 
 }
 
 
+function updateStatus() {
+
+    if (
+        !window.HalDoSystemStatus
+    ) {
+
+        return;
+
+    }
+
+
+    const status =
+        HalDoSystemStatus.getStatus();
+
+
+    const overall =
+        document.getElementById(
+            "overall-status"
+        );
+
+
+    const count =
+        document.getElementById(
+            "module-count"
+        );
+
+
+    if (
+        status.state ===
+        "online"
+    ) {
+
+        overall.textContent =
+            "🟢 HalDo AI OS ist vollständig online.";
+
+    }
+    else if (
+        status.state ===
+        "partial"
+    ) {
+
+        overall.textContent =
+            "🟡 HalDo AI OS ist teilweise geladen.";
+
+    }
+    else {
+
+        overall.textContent =
+            "🔴 HalDo AI OS ist offline.";
+
+    }
+
+
+    count.textContent =
+        "🧩 "
+        +
+        status.loaded
+        +
+        " / "
+        +
+        status.total
+        +
+        " Kernmodule geladen.";
+
+
+    const list =
+        document.getElementById(
+            "module-list"
+        );
+
+
+    list.innerHTML = "";
+
+
+    Object.entries(
+        status.modules
+    ).forEach(
+        function ([name, loaded]) {
+
+
+            const row =
+                document.createElement(
+                    "p"
+                );
+
+
+            row.textContent =
+                (
+                    loaded
+                    ? "🟢 "
+                    : "🔴 "
+                )
+                +
+                name;
+
+
+            list.appendChild(
+                row
+            );
+
+        }
+    );
+
+
+    const ai =
+        document.getElementById(
+            "ai-status"
+        );
+
+
+    if (
+        window.HalDoAI
+    ) {
+
+        ai.textContent =
+            "🟢 AI Engine: "
+            +
+            (
+                HalDoAI.status
+                ||
+                "bereit"
+            );
+
+    }
+    else {
+
+        ai.textContent =
+            "🔴 AI Engine nicht geladen.";
+
+    }
+
+}
+
+
+function loadLanguages() {
+
+    const select =
+        document.getElementById(
+            "language-select"
+        );
+
+
+    if (
+        !window.HalDoLanguageSystem
+    ) {
+
+        return;
+
+    }
+
+
+    HalDoLanguageSystem
+        .getLanguages()
+        .forEach(
+            function (language) {
+
+
+                const option =
+                    document.createElement(
+                        "option"
+                    );
+
+
+                option.value =
+                    language.id;
+
+
+                option.textContent =
+                    language.native;
+
+
+                select.appendChild(
+                    option
+                );
+
+            }
+        );
+
+
+    select.value =
+        HalDoLanguageSystem.current;
+
+
+    select.addEventListener(
+        "change",
+        function () {
+
+            HalDoLanguageSystem
+                .setLanguage(
+                    this.value
+                );
+
+        }
+    );
+
+}
+
+
+function goBack() {
+
+    window.location.href =
+        "index.html";
+
+}
+
+
+window.addEventListener(
+    "DOMContentLoaded",
+    function () {
+
+        setTimeout(
+            function () {
+
+                refreshStatus();
+
+                loadLanguages();
+
+            },
+            500
+        );
+
+    }
+);
 
 </script>
-
-
-
-
 
 </body>
 
