@@ -1,179 +1,100 @@
 /*
 ========================================
-
 HalDo AI OS 18
 AI Core Foundation
-
 Version:
 18.0.0
-
-Artificial Intelligence Core
-
+Artificial Intelligence Core Layer
 ========================================
 */
-
-
 const AICore = {
-
-
     name:
     "HalDo AI Core",
-
-
     version:
     "18.0.0",
-
-
     status:
     "offline",
-
-
-    memory:
+    requests:
     [],
-
-
-
     initialize(){
-
-
         console.log(
             "🤖 AI Core Initialisierung..."
         );
-
-
+        this.status =
+        "starting";
+        this.start();
+    },
+    start(){
         this.status =
         "active";
-
-
-        this.report();
-
-
+        if(
+            typeof Logger !== "undefined"
+        ){
+            Logger.info(
+                "AI Core gestartet"
+            );
+        }
+        if(
+            typeof EventBus !== "undefined"
+        ){
+            EventBus.emit(
+                "ai.ready",
+                {
+                    status:
+                    this.status
+                }
+            );
+        }
+        console.log(
+            "🤖 HalDo AI Core bereit"
+        );
     },
-
-
-
     process(input){
-
-
+        const request = {
+            input:
+            input,
+            time:
+            new Date()
+            .toISOString()
+        };
+        this.requests.push(
+            request
+        );
         console.log(
             "🤖 AI Anfrage:",
             input
         );
-
-
-        this.memory.push({
-
-            input:
-            input,
-
-            time:
-            new Date()
-
-        });
-
-
-
+        if(
+            typeof Logger !== "undefined"
+        ){
+            Logger.info(
+                "AI Anfrage verarbeitet"
+            );
+        }
         return {
-
             status:
             "received",
-
             message:
-            "AI Core verarbeitet Anfrage"
-
+            "AI Core hat die Anfrage empfangen",
+            input:
+            input
         };
-
-
     },
-
-
-
-    addMemory(data){
-
-
-        this.memory.push(
-            data
-        );
-
-
-        console.log(
-            "🧠 Speicher erweitert"
-        );
-
-
+    getHistory(){
+        return this.requests;
     },
-
-
-
-    report(){
-
-
-        console.log(
-            "===================="
-        );
-
-
-        console.log(
-            "🤖",
-            this.name
-        );
-
-
-        console.log(
-            "Version:",
-            this.version
-        );
-
-
-        console.log(
-            "Status:",
-            this.status
-        );
-
-
-        console.log(
-            "===================="
-        );
-
-
-    },
-
-
-
     getStatus(){
-
-
         return {
-
-
             name:
             this.name,
-
-
             version:
             this.version,
-
-
             status:
             this.status,
-
-
-            memory:
-            this.memory.length
-
-
+            requests:
+            this.requests.length
         };
-
-
     }
-
-
 };
-
-
-
-
-
-// AI Core vorbereiten
-
+// AI Core starten
 AICore.initialize();
