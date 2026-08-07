@@ -7,331 +7,131 @@ Main Menu Controller
 Version:
 18.0.0
 
-User Control Layer
+User Interface Navigation
 
 ========================================
 */
 
 
-const MainMenu = {
-
-
-    name:
-    "HalDo Main Menu",
-
-
-    version:
-    "18.0.0",
-
-
-    status:
-    "offline",
-
-
-
-    initialize(){
-
-
-        console.log(
-            "🚀 Main Menu Initialisierung..."
-        );
-
-
-        this.status =
-        "active";
-
-
-        this.connect();
-
-
-    },
-
-
-
-    connect(){
-
-
-        console.log(
-            "🔗 Menü Verbindungen werden geprüft..."
-        );
-
-
-
-        const systems = {
-
-
-            dashboard:
-            typeof Dashboard !== "undefined",
-
-
-            ai:
-            typeof AICore !== "undefined",
-
-
-            modules:
-            typeof ModuleManager !== "undefined",
-
-
-            status:
-            typeof SystemStatus !== "undefined",
-
-
-            security:
-            typeof Security !== "undefined",
-
-
-            database:
-            typeof Database !== "undefined"
-
-
-        };
-
-
-
-        console.log(
-            "🔗 Menü Systeme:",
-            systems
-        );
-
-
-
-    },
-
-
-
-    openDashboard(){
-
-
-        console.log(
-            "📊 Dashboard geöffnet"
-        );
-
-
-
-        if(
-            typeof Dashboard !== "undefined"
-        ){
-
-            Dashboard.refresh();
-
-        }
-
-
-
-    },
-
-
-
-    openAI(){
-
-
-        console.log(
-            "🤖 AI System geöffnet"
-        );
-
-
-
-        if(
-            typeof AICore !== "undefined"
-        ){
-
-            AICore.process(
-                "AI Menü geöffnet"
-            );
-
-        }
-
-
-
-    },
-
-
-
-    openModules(){
-
-
-        console.log(
-            "🧩 Module geöffnet"
-        );
-
-
-
-        if(
-            typeof ModuleManager !== "undefined"
-        ){
-
-            console.log(
-                ModuleManager.getModules()
-            );
-
-        }
-
-
-
-    },
-
-
-
-    openApps(){
-
-
-        console.log(
-            "📱 Apps Bereich geöffnet"
-        );
-
-
-
-        const area =
-        document.getElementById(
-            "app-container"
-        );
-
-
-
-        if(area){
-
-            area.innerHTML = `
-
-            <h3>
-            📱 App System
-            </h3>
-
-            <p>
-            App Manager wird vorbereitet...
-            </p>
-
-            `;
-
-        }
-
-
-    },
-
-
-
-    openSettings(){
-
-
-        console.log(
-            "⚙️ Einstellungen geöffnet"
-        );
-
-
-
-        if(
-            typeof Database !== "undefined"
-        ){
-
-            Database.set(
-                "lastPage",
-                "settings"
-            );
-
-        }
-
-
-    },
-
-
-
-    showSystemStatus(){
-
-
-        console.log(
-            "📡 System Status"
-        );
-
-
-
-        if(
-            typeof SystemStatus !== "undefined"
-        ){
-
-            SystemStatus.refresh();
-
-        }
-
-
-    },
-
-
-
-    getStatus(){
-
-
-        return {
-
-
-            name:
-            this.name,
-
-
-            version:
-            this.version,
-
-
-            status:
-            this.status
-
-
-        };
-
-
-    }
-
-
-};
-
-
-
-
-
-// Globale Button Verbindungen
-
 
 function openDashboard(){
 
-    MainMenu.openDashboard();
+
+    window.location.href =
+    "dashboard.html";
+
 
 }
+
+
 
 
 
 function openAI(){
 
-    MainMenu.openAI();
+
+    showMessage(
+        "🤖 AI Core wird vorbereitet..."
+    );
+
+
+    if(
+        typeof AICore !== "undefined"
+    ){
+
+
+        console.log(
+            "🤖 AI Core verfügbar"
+        );
+
+
+    }
+
+
 
 }
+
+
 
 
 
 function openModules(){
 
-    MainMenu.openModules();
+
+    showMessage(
+        "🧩 Module System geöffnet..."
+    );
+
+
+    if(
+        typeof ModuleManager !== "undefined"
+    ){
+
+
+        console.log(
+            ModuleManager.getModules()
+        );
+
+
+    }
+
+
 
 }
+
+
 
 
 
 function openApps(){
 
-    MainMenu.openApps();
+
+    showMessage(
+        "📱 App System wird geladen..."
+    );
+
 
 }
+
+
 
 
 
 function openSettings(){
 
-    MainMenu.openSettings();
+
+    showMessage(
+        "⚙️ Einstellungen vorbereitet..."
+    );
+
 
 }
+
+
 
 
 
 function showSystemStatus(){
 
-    MainMenu.showSystemStatus();
+
+    if(
+        typeof SystemStatus !== "undefined"
+    ){
+
+
+        console.log(
+            SystemStatus.getStatus()
+        );
+
+
+    }
+
+
+
+    showMessage(
+        "📡 System Status aktualisiert"
+    );
+
 
 }
 
@@ -339,6 +139,38 @@ function showSystemStatus(){
 
 
 
-// Menü starten
+function showMessage(message){
 
-MainMenu.initialize();
+
+    const element =
+    document.getElementById(
+        "app-container"
+    );
+
+
+
+    if(element){
+
+
+        element.innerHTML =
+        message;
+
+
+    }
+
+
+
+    console.log(
+        message
+    );
+
+
+}
+
+
+
+
+
+console.log(
+    "🚀 HalDo Hauptmenü geladen"
+);
