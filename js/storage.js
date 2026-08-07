@@ -1,204 +1,257 @@
 /*
-=====================================
-
+==========================================
 HalDo AI OS 18
-Storage Manager
-
+STORAGE MANAGER
 Professional Ultimate Foundation
-
-Version:
-18.0.0
-
-=====================================
+Version 18.0.0
+==========================================
 */
 
+(function () {
 
-const HalDoStorage = {
+    "use strict";
 
+    const HalDoStorage = {
 
+        name: "HalDo Storage",
+        version: "18.0.0",
 
-    data:{},
+        prefix: "haldo_ai_os_18_",
 
-
-
-
-
-    load:function(name,url){
-
-
-        return fetch(url)
-
-        .then(response=>{
+        status: "ready",
 
 
-            if(!response.ok){
+        key(name) {
+
+            return (
+                this.prefix +
+                name
+            );
+
+        },
 
 
-                throw new Error(
-                "Datei nicht gefunden: "
-                + url
+        set(
+            name,
+            value
+        ) {
+
+            try {
+
+                localStorage.setItem(
+                    this.key(name),
+                    JSON.stringify(value)
                 );
 
+                return true;
+
+            } catch (error) {
+
+                console.error(
+                    "HalDo Storage SET Error:",
+                    error
+                );
+
+                return false;
 
             }
 
+        },
 
 
-            return response.json();
-
-
-
-        })
-
-        .then(json=>{
-
-
-            this.data[name] = json;
-
-
-
-            console.log(
-            "💾 Daten geladen:",
-            name
-            );
-
-
-
-            return json;
-
-
-
-        })
-
-        .catch(error=>{
-
-
-            console.error(
-            "❌ Ladefehler:",
-            error
-            );
-
-
-        });
-
-
-
-    },
-
-
-
-
-
-
-
-    get:function(name){
-
-
-        return this.data[name];
-
-
-    },
-
-
-
-
-
-
-
-    saveLocal:function(
-        name,
-        value
-    ){
-
-
-        localStorage.setItem(
-
+        get(
             name,
+            fallback = null
+        ) {
 
-            JSON.stringify(value)
+            try {
 
-        );
+                const value =
+                    localStorage.getItem(
+                        this.key(name)
+                    );
 
+                if (value === null) {
+                    return fallback;
+                }
 
+                return JSON.parse(value);
 
-        console.log(
-        "💾 Lokal gespeichert:",
-        name
-        );
+            } catch (error) {
 
+                console.error(
+                    "HalDo Storage GET Error:",
+                    error
+                );
 
+                return fallback;
 
-    },
+            }
 
-
-
-
-
-
-
-    loadLocal:function(name){
-
-
-        const data =
-
-        localStorage.getItem(
-            name
-        );
+        },
 
 
+        remove(name) {
 
-        if(data){
+            try {
+
+                localStorage.removeItem(
+                    this.key(name)
+                );
+
+                return true;
+
+            } catch (error) {
+
+                console.error(
+                    "HalDo Storage REMOVE Error:",
+                    error
+                );
+
+                return false;
+
+            }
+
+        },
 
 
-            return JSON.parse(
-                data
+        clear() {
+
+            try {
+
+                const keys = [];
+
+                for (
+                    let i = 0;
+                    i < localStorage.length;
+                    i++
+                ) {
+
+                    const key =
+                        localStorage.key(i);
+
+                    if (
+                        key &&
+                        key.startsWith(
+                            this.prefix
+                        )
+                    ) {
+
+                        keys.push(key);
+
+                    }
+
+                }
+
+                keys.forEach(
+                    key =>
+                        localStorage.removeItem(
+                            key
+                        )
+                );
+
+                return true;
+
+            } catch (error) {
+
+                console.error(
+                    "HalDo Storage CLEAR Error:",
+                    error
+                );
+
+                return false;
+
+            }
+
+        },
+
+
+        has(name) {
+
+            return (
+                localStorage.getItem(
+                    this.key(name)
+                ) !== null
             );
 
+        },
+
+
+        keys() {
+
+            const result = [];
+
+            for (
+                let i = 0;
+                i < localStorage.length;
+                i++
+            ) {
+
+                const key =
+                    localStorage.key(i);
+
+                if (
+                    key &&
+                    key.startsWith(
+                        this.prefix
+                    )
+                ) {
+
+                    result.push(
+                        key.substring(
+                            this.prefix.length
+                        )
+                    );
+
+                }
+
+            }
+
+            return result;
+
+        },
+
+
+        getStatus() {
+
+            return {
+
+                status:
+                    this.status,
+
+                storage:
+                    "localStorage",
+
+                keys:
+                    this.keys()
+
+            };
 
         }
 
+    };
 
 
-        return null;
+    window.HalDoStorage =
+        HalDoStorage;
 
 
+    window.addEventListener(
+        "DOMContentLoaded",
+        function () {
 
-    }
+            if (
+                window.HalDoKernel
+            ) {
 
+                HalDoKernel.registerModule(
+                    "storage",
+                    HalDoStorage
+                );
 
+            }
 
+        }
+    );
 
-
-
-};
-
-
-
-
-
-
-
-
-window.HalDoStorage =
-HalDoStorage;
-
-
-
-
-
-
-
-
-window.addEventListener(
-"load",
-function(){
-
-
-
-console.log(
-"💾 Storage Manager bereit"
-);
-
-
-
-});
+})();
