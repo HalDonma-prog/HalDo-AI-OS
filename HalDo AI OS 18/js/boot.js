@@ -4,6 +4,11 @@
 HalDo AI OS 18
 Boot Manager
 
+Professional Ultimate Foundation
+
+Version:
+18.0.0
+
 ====================================
 */
 
@@ -15,43 +20,122 @@ const HalDoBoot = {
     "18.0.0",
 
 
+    system:
+    "HalDo AI OS",
+
+
     status:
     "starting",
 
 
 
-    initialize(){
+
+    updateStatus(text){
 
 
-        console.log(
-        "HalDo AI OS Boot gestartet"
+        const status =
+        document.getElementById(
+            "status"
         );
 
 
-        this.checkSystem();
+
+        if(status){
+
+
+            status.innerHTML =
+            text;
+
+
+        }
 
 
     },
 
 
 
-    checkSystem(){
+
+
+
+    start(){
 
 
         console.log(
-        "Systemprüfung..."
+        "🟡 HalDo AI OS 18 Bootloader gestartet"
         );
 
 
+
         this.status =
-        "ready";
+        "booting";
+
+
+
+        this.updateStatus(
+        "🟡 System wird vorbereitet..."
+        );
+
+
+
+        setTimeout(()=>{
+
+
+            this.updateStatus(
+            "🔵 Kernel wird geladen..."
+            );
+
+
+
+        },1000);
+
+
+
+
+
+
+        setTimeout(()=>{
+
+
+            this.updateStatus(
+            "🔵 Module werden geprüft..."
+            );
+
+
+
+        },2500);
+
+
+
+
+
+
+
+        setTimeout(()=>{
+
+
+            this.status =
+            "ready";
+
+
+
+            this.updateStatus(
+            "🟢 System bereit"
+            );
+
+
+
+        },4000);
+
 
 
     }
 
 
 
+
 };
+
+
 
 
 
@@ -60,10 +144,13 @@ HalDoBoot;
 
 
 
+
 window.addEventListener(
 "load",
 ()=>{
 
-    HalDoBoot.initialize();
+
+    HalDoBoot.start();
+
 
 });
