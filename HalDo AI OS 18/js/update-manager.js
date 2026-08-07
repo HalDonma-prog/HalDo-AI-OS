@@ -1,16 +1,50 @@
-// ======================================
-// HalDo AI OS 18
-// Update Manager
-// ======================================
+/*
+========================================
+
+HalDo AI OS 18
+Update Manager
+
+Version:
+18.0.0
+
+Software Update System
+
+========================================
+*/
 
 
 const UpdateManager = {
 
 
-    version: "18.0.0",
+    name:
+    "HalDo AI OS Update System",
 
 
-    status: "ready",
+    version:
+    "18.0.0",
+
+
+    status:
+    "ready",
+
+
+    updates:
+    [],
+
+
+
+    initialize(){
+
+
+        console.log(
+            "🔄 Update Manager gestartet"
+        );
+
+
+        this.checkUpdates();
+
+
+    },
 
 
 
@@ -18,32 +52,126 @@ const UpdateManager = {
 
 
         console.log(
-            "🔵 Suche nach Updates..."
+            "🔍 Suche nach Updates..."
         );
 
 
-        return "Keine neuen Updates";
+        /*
+            Später:
+
+            Verbindung zu:
+            - Update Server
+            - Versionsprüfung
+            - Download System
+
+        */
+
+
+        this.status =
+        "no-updates";
+
+
+        this.report();
 
 
     },
 
 
 
-    showVersion(){
+    addUpdate(version, description){
+
+
+        this.updates.push({
+
+
+            version:
+            version,
+
+
+            description:
+            description,
+
+
+            status:
+            "available"
+
+
+        });
+
+
+    },
+
+
+
+    report(){
 
 
         console.log(
-            "🟢 HalDo AI OS Version:",
+            "===================="
+        );
+
+
+        console.log(
+            "🔄",
+            this.name
+        );
+
+
+        console.log(
+            "Version:",
             this.version
         );
+
+
+        console.log(
+            "Status:",
+            this.status
+        );
+
+
+        console.log(
+            "===================="
+        );
+
+
+    },
+
+
+
+    getStatus(){
+
+
+        return {
+
+
+            name:
+            this.name,
+
+
+            version:
+            this.version,
+
+
+            status:
+            this.status,
+
+
+            updates:
+            this.updates
+
+
+        };
 
 
     }
 
 
-
 };
 
 
-UpdateManager.showVersion();
-UpdateManager.checkUpdates();
+
+
+
+// Update System starten
+
+UpdateManager.initialize();
