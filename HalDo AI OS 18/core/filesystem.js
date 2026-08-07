@@ -7,7 +7,7 @@ File System Foundation
 Version:
 18.0.0
 
-System File Management Layer
+Virtual File Management Layer
 
 ========================================
 */
@@ -28,8 +28,14 @@ const FileSystem = {
     "offline",
 
 
-    structure:
+
+    files:
     {},
+
+
+
+    folders:
+    [],
 
 
 
@@ -37,7 +43,7 @@ const FileSystem = {
 
 
         console.log(
-            "📁 File System Initialisierung..."
+            "📁 File System startet..."
         );
 
 
@@ -45,56 +51,32 @@ const FileSystem = {
         "starting";
 
 
-        this.createBaseStructure();
-
-
-        this.start();
+        this.load();
 
 
     },
 
 
 
-    createBaseStructure(){
+    load(){
 
 
-        this.structure = {
+        this.folders = [
 
 
-            system:
-            {},
+            "system",
+
+            "apps",
+
+            "modules",
+
+            "data",
+
+            "users"
 
 
-            users:
-            {},
+        ];
 
-
-            apps:
-            {},
-
-
-            modules:
-            {},
-
-
-            storage:
-            {}
-
-
-        };
-
-
-
-        console.log(
-            "📁 Grundstruktur erstellt"
-        );
-
-
-    },
-
-
-
-    start(){
 
 
         this.status =
@@ -102,39 +84,8 @@ const FileSystem = {
 
 
 
-        if(
-            typeof Logger !== "undefined"
-        ){
-
-            Logger.info(
-                "File System gestartet"
-            );
-
-        }
-
-
-
-        if(
-            typeof EventBus !== "undefined"
-        ){
-
-            EventBus.emit(
-                "filesystem.ready",
-                {
-
-                    status:
-                    this.status
-
-                }
-
-            );
-
-        }
-
-
-
         console.log(
-            "📁 HalDo File System bereit"
+            "📁 File System aktiv"
         );
 
 
@@ -142,20 +93,15 @@ const FileSystem = {
 
 
 
-    createFolder(
-        name
-    ){
+    createFolder(name){
 
 
         if(
-            !this.structure[name]
+            !this.folders.includes(name)
         ){
 
-            this.structure[name] = {};
 
-
-            console.log(
-                "📁 Ordner erstellt:",
+            this.folders.push(
                 name
             );
 
@@ -163,38 +109,10 @@ const FileSystem = {
         }
 
 
-    },
-
-
-
-    addFile(
-        folder,
-        file,
-        content
-    ){
-
-
-        if(
-            !this.structure[folder]
-        ){
-
-            this.createFolder(
-                folder
-            );
-
-        }
-
-
-
-        this.structure[folder][file]
-        =
-        content;
-
-
 
         console.log(
-            "📄 Datei hinzugefügt:",
-            file
+            "📁 Ordner erstellt:",
+            name
         );
 
 
@@ -202,22 +120,82 @@ const FileSystem = {
 
 
 
-    getFolder(
-        name
-    ){
+    createFile(path,content){
 
 
-        return this.structure[name];
+        this.files[path] =
+        {
+
+
+            content:
+            content,
+
+
+            created:
+            new Date()
+
+
+        };
+
+
+
+        console.log(
+            "📄 Datei erstellt:",
+            path
+        );
+
+
+
+        return true;
 
 
     },
 
 
 
-    getAll(){
+    readFile(path){
 
 
-        return this.structure;
+        return this.files[path];
+
+
+    },
+
+
+
+    deleteFile(path){
+
+
+        delete this.files[path];
+
+
+
+        console.log(
+            "🗑️ Datei gelöscht:",
+            path
+        );
+
+
+    },
+
+
+
+    listFiles(){
+
+
+        return Object.keys(
+            this.files
+        );
+
+
+    },
+
+
+
+    listFolders(){
+
+
+        return this.folders;
 
 
     },
@@ -242,10 +220,14 @@ const FileSystem = {
             this.status,
 
 
-            folders:
+            files:
             Object.keys(
-                this.structure
-            ).length
+                this.files
+            ).length,
+
+
+            folders:
+            this.folders.length
 
 
         };
@@ -263,3 +245,9 @@ const FileSystem = {
 // File System starten
 
 FileSystem.initialize();
+
+
+
+console.log(
+    "📁 HalDo File System geladen"
+);
