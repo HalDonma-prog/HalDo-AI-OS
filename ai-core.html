@@ -8,222 +8,90 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-
 <title>
-HalDo AI OS 18 - AI Core
+HalDo AI Core 18
 </title>
-
 
 <link rel="stylesheet" href="style.css">
 
-
 </head>
-
 
 
 <body>
 
 
-
-
-
-<header class="header">
+<section class="screen">
 
 
 <img
 
 src="assets/logo/logo.svg"
 
-class="logo small"
+class="logo"
 
 alt="HalDo AI Logo">
 
 
-
 <h1>
-
-🤖 AI Core
-
+🧠 HalDo AI Core
 </h1>
 
 
-
 <p>
-
-HalDo Intelligenz Zentrale
-
+Professional Ultimate Foundation
 </p>
 
 
 
-</header>
+<div class="ai-box">
 
 
+<div id="chat-output">
 
-
-
-
-
-
-<main class="menu-container">
-
-
-
-<h2>
-
-🧠 AI System
-
-</h2>
-
-
-
-
-
-
-<div class="menu-grid">
-
-
-
-<button>
-
-🟢 AI Status
+🤖 Hallo! Ich bin HalDo AI.
 
 <br>
 
-Bereit
+Wie kann ich dir helfen?
+
+</div>
+
+
+
+<input
+
+id="user-input"
+
+type="text"
+
+placeholder="Schreibe eine Nachricht...">
+
+
+
+<button onclick="sendMessage()">
+
+💬 Senden
 
 </button>
 
 
 
+<button onclick="speakLast()">
 
-<button>
-
-💬 AI Chat
-
-<br>
-
-Vorbereitung
+🔊 Sprechen
 
 </button>
-
-
-
-
-<button>
-
-💻 Software Builder
-
-<br>
-
-Entwicklung
-
-</button>
-
-
-
-
-<button>
-
-📊 Daten Analyse
-
-<br>
-
-System Lernen
-
-</button>
-
-
-
-
-<button>
-
-📚 Lern KI
-
-<br>
-
-Wissen
-
-</button>
-
-
-
-
-<button>
-
-🔐 AI Sicherheit
-
-<br>
-
-Schutz
-
-</button>
-
 
 
 </div>
 
 
 
+<button onclick="goBack()">
 
-
-
-
-
-<section style="margin-top:40px;">
-
-
-
-<h2>
-
-🚀 AI Werkzeuge
-
-</h2>
-
-
-
-
-<div class="menu-grid">
-
-
-
-<button>
-
-✍️ Text Generator
+⬅️ Zurück
 
 </button>
-
-
-
-
-<button>
-
-🧩 Code Generator
-
-</button>
-
-
-
-
-<button>
-
-🎨 Kreativ Studio
-
-</button>
-
-
-
-
-<button onclick="openPage('dashboard.html')">
-
-⬅️ Dashboard
-
-</button>
-
-
-
-</div>
-
 
 
 </section>
@@ -232,33 +100,131 @@ Schutz
 
 
 
+<script src="js/ai-core.js"></script>
 
+<script src="js/ai-engine.js"></script>
 
-</main>
+<script src="js/ai-language.js"></script>
 
+<script src="js/ai-voice.js"></script>
 
-
-
+<script src="js/ai-chat.js"></script>
 
 
 
 <script>
 
 
-function openPage(page){
+let lastAnswer = "";
 
 
-window.location.href = page;
+
+function sendMessage(){
+
+
+
+const input =
+
+document.getElementById(
+"user-input"
+);
+
+
+
+const output =
+
+document.getElementById(
+"chat-output"
+);
+
+
+
+let message =
+input.value;
+
+
+
+if(!message){
+
+return;
+
+}
+
+
+
+let answer =
+
+HalDoChat.send(
+message
+);
+
+
+
+lastAnswer = answer;
+
+
+
+output.innerHTML +=
+
+"<br><br>👤 Du: "
+
++ message
+
++
+
+"<br>🤖 HalDo: "
+
++ answer;
+
+
+
+input.value = "";
+
 
 
 }
 
 
 
+
+
+
+
+function speakLast(){
+
+
+
+if(lastAnswer){
+
+
+HalDoVoice.speak(
+lastAnswer
+);
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+function goBack(){
+
+
+window.location.href =
+"index.html";
+
+
+}
+
+
 </script>
-
-
-
 
 
 </body>
