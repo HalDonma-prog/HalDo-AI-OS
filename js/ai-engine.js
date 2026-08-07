@@ -4,7 +4,7 @@
 HalDo AI OS 18
 AI Engine
 
-Command Integration
+Professional Ultimate Foundation
 
 Version 18.0.0
 
@@ -15,35 +15,68 @@ Version 18.0.0
 const HalDoAI = {
 
 
-    version:"18.0.0",
+    name:
+    "HalDo AI",
 
 
-    name:"HalDo AI",
+    version:
+    "18.0.0",
 
 
-    status:"ready",
+    status:
+    "offline",
 
 
-    language:"de",
-
-
-
-    memory:[],
-
-
-
+    language:
+    "de",
 
 
 
     start(){
 
 
-        this.status="running";
+        this.status =
+        "online";
+
+
+        console.log(
+        "🤖 HalDo AI Engine online"
+        );
+
+
+    },
+
+
+
+
+
+
+    setLanguage(language){
+
+
+        this.language =
+        language;
+
+
+        if(window.HalDoMemory){
+
+
+            HalDoMemory.setLanguage(
+
+                language
+
+            );
+
+
+        }
+
 
 
         console.log(
 
-        "🤖 HalDo AI Engine gestartet"
+        "🌍 Sprache geändert:",
+
+        language
 
         );
 
@@ -56,36 +89,12 @@ const HalDoAI = {
 
 
 
-    setLanguage(lang){
 
-
-        this.language = lang;
-
-
-
-        console.log(
-
-        "🌍 Sprache:",
-
-        lang
-
-        );
-
-
-    },
-
-
-
-
-
-
-
-    answer(message){
+    process(message){
 
 
 
         if(!message){
-
 
             return "";
 
@@ -96,7 +105,23 @@ const HalDoAI = {
 
 
 
-        // Erst Befehle prüfen
+        const text =
+
+        message.toLowerCase();
+
+
+
+
+
+
+
+        /*
+        ==========================
+        System Befehle
+        ==========================
+        */
+
+
 
         if(window.HalDoCommands){
 
@@ -106,7 +131,7 @@ const HalDoAI = {
 
             HalDoCommands.execute(
 
-                message
+                text
 
             );
 
@@ -129,24 +154,31 @@ const HalDoAI = {
 
 
 
-        const text =
-
-        message.toLowerCase();
 
 
-
-
+        /*
+        ==========================
+        Normale Antworten
+        ==========================
+        */
 
 
 
         if(
-            text.includes("hallo")
+        text.includes("hallo")
+        ||
+
+        text.includes("hi")
         ){
 
 
             return (
 
-            "👋 Hallo! Ich bin HalDo AI. "
+            "👋 Hallo! "
+
+            +
+
+            "Ich bin HalDo AI OS 18. "
 
             +
 
@@ -162,19 +194,22 @@ const HalDoAI = {
 
 
 
-
         if(
-            text.includes("wie geht")
+        text.includes("wer bist du")
         ){
 
 
             return (
 
-            "😊 Mir geht es gut. "
+            "🤖 Ich bin HalDo AI, "
 
             +
 
-            "Ich bin bereit zu helfen."
+            der intelligente Assistent "
+
+            +
+
+            "von HalDo AI OS 18."
 
             );
 
@@ -186,15 +221,17 @@ const HalDoAI = {
 
 
 
-
         if(
-            text.includes("uhr")
+        text.includes("zeit")
+        ||
+
+        text.includes("uhr")
         ){
 
 
             return (
 
-            "🕒 "
+            "🕒 Die aktuelle Zeit ist "
 
             +
 
@@ -202,7 +239,36 @@ const HalDoAI = {
 
             .toLocaleTimeString(
 
-                "de-DE"
+            "de-DE"
+
+            )
+
+            );
+
+
+        }
+
+
+
+
+
+
+        if(
+        text.includes("datum")
+        ){
+
+
+            return (
+
+            "📅 Heute ist "
+
+            +
+
+            new Date()
+
+            .toLocaleDateString(
+
+            "de-DE"
 
             )
 
@@ -217,24 +283,19 @@ const HalDoAI = {
 
 
 
+
         if(
-            text.includes("datum")
+        text.includes("danke")
         ){
 
 
             return (
 
-            "📅 "
+            "😊 Sehr gerne! "
 
             +
 
-            new Date()
-
-            .toLocaleDateString(
-
-                "de-DE"
-
-            )
+            Ich helfe dir weiter."
 
             );
 
@@ -250,11 +311,15 @@ const HalDoAI = {
 
         return (
 
-        "🤖 Ich habe dich verstanden: "
+        "🤖 Ich habe verstanden: "
 
         +
 
         message
+
+        +
+
+        ". Meine KI-Funktionen werden weiter ausgebaut."
 
         );
 
@@ -266,8 +331,9 @@ const HalDoAI = {
 
 
 
-};
 
+
+};
 
 
 
