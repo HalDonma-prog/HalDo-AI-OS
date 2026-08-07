@@ -1,52 +1,201 @@
-// =================================
-// HalDo AI OS 18
-// Module Manager
-// =================================
+/*
+========================================
+
+HalDo AI OS 18
+Module Manager
+
+Version:
+18.0.0
+
+Module Control System
+
+========================================
+*/
 
 
 const ModuleManager = {
 
 
-loaded:[],
+    version:
+    "18.0.0",
+
+
+    modules:
+    [],
 
 
 
-load(name){
+    initialize(){
 
 
-this.loaded.push(name);
+        console.log(
+            "🧩 Module Manager gestartet"
+        );
 
 
-console.log(
-"🟢 Modul geladen:",
-name
-);
+        this.registerDefaultModules();
 
 
-},
+        this.startModules();
+
+
+    },
 
 
 
-start(){
+    register(name, type){
 
 
-this.load("AI Core");
-
-this.load("Security");
-
-this.load("Database");
+        const module = {
 
 
-console.log(
-"🚀 Alle Foundation Module aktiv"
-);
+            name:
+            name,
 
 
-}
+            type:
+            type,
+
+
+            status:
+            "registered"
+
+
+        };
+
+
+
+        this.modules.push(
+            module
+        );
+
+
+        console.log(
+            "📦 Modul registriert:",
+            name
+        );
+
+
+    },
+
+
+
+    registerDefaultModules(){
+
+
+        this.register(
+            "AI Foundation",
+            "core"
+        );
+
+
+        this.register(
+            "Security Foundation",
+            "core"
+        );
+
+
+        this.register(
+            "Database Foundation",
+            "core"
+        );
+
+
+        this.register(
+            "Update System",
+            "system"
+        );
+
+
+    },
+
+
+
+    startModules(){
+
+
+        this.modules.forEach(
+            module => {
+
+
+                module.status =
+                "active";
+
+
+                console.log(
+                    "🟢 Modul aktiv:",
+                    module.name
+                );
+
+
+            }
+        );
+
+
+
+        this.updateScreen();
+
+
+    },
+
+
+
+    updateScreen(){
+
+
+        const box =
+        document.getElementById(
+            "system-status"
+        );
+
+
+
+        if(box){
+
+
+            box.innerHTML = `
+
+            <h2>
+            System Status
+            </h2>
+
+
+            <p>
+            🟢 Module aktiv:
+            ${this.modules.length}
+            </p>
+
+
+            <p>
+            Version:
+            ${this.version}
+            </p>
+
+            `;
+
+
+        }
+
+
+    },
+
+
+
+    getModules(){
+
+
+        return this.modules;
+
+
+    }
 
 
 };
 
 
 
-ModuleManager.start();
+
+
+// Module Manager starten
+
+ModuleManager.initialize();
