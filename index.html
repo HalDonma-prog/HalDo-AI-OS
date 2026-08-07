@@ -8,361 +8,188 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-
 <title>
 HalDo AI OS 18
 </title>
 
-
 <link rel="stylesheet" href="style.css">
-
 
 <link rel="manifest" href="manifest.json">
 
-
 <meta name="theme-color" content="#090D18">
-
 
 </head>
 
-
-
 <body>
-
-
 
 <section id="startup-screen" class="screen">
 
-
 <img
-
 src="assets/logo/logo.svg"
-
 class="logo"
-
 alt="HalDo AI OS Logo">
 
-
 <h1>
-
 HalDo AI OS 18
-
 </h1>
 
-
 <p id="system-status">
-
 🟡 HalDo AI OS startet...
-
 </p>
 
-
 </section>
-
-
-
-
-
-
 
 <section id="welcome-screen" class="screen hidden">
 
-
 <img
-
 src="assets/logo/logo.svg"
-
 class="logo"
-
 alt="HalDo AI OS Logo">
 
-
-
 <h1>
-
 👋 Willkommen bei
-
 <br>
-
 HalDo AI OS 18
-
 </h1>
 
-
 <p>
-
 Professional Ultimate Foundation
-
 </p>
-
-
 
 <p id="clock">
-
 Systemzeit wird geladen...
-
 </p>
 
-
-
 <button onclick="openMainMenu()">
-
 🚀 Hauptmenü öffnen
-
 </button>
 
-
-
 </section>
-
-
-
-
-
-
-
 
 <section id="main-menu" class="hidden">
 
-
-
 <header class="header">
 
-
 <img
-
 src="assets/logo/logo.svg"
-
 class="logo small"
-
 alt="HalDo AI OS">
 
-
 <h1>
-
 HalDo AI OS 18
-
 </h1>
 
-
 <p>
-
 Professional Ultimate Foundation
-
 </p>
-
 
 </header>
 
-
-
-
-
 <main class="menu-container">
 
-
 <h2>
-
 🚀 Hauptmenü
-
 </h2>
-
-
 
 <div class="menu-grid">
 
-
-
 <button onclick="openPage('dashboard.html')">
-
 📊 Dashboard
-
 </button>
-
-
 
 <button onclick="openPage('ai-core.html')">
-
 🧠 AI Core
-
 </button>
-
-
 
 <button onclick="openPage('modules.html')">
-
 🧩 Module
-
 </button>
-
-
 
 <button onclick="openPage('apps.html')">
-
 📱 Apps
-
 </button>
-
-
 
 <button onclick="openPage('settings.html')">
-
 ⚙️ Einstellungen
-
 </button>
-
-
 
 <button onclick="openPage('status.html')">
-
 📡 System Status
-
 </button>
-
-
 
 <button onclick="openPage('health.html')">
-
 🏥 Health Center
-
 </button>
-
-
 
 </div>
 
-
 </main>
-
-
 
 </section>
 
-
-
-
-
-
-
-
-<script src="js/boot.js"></script>
-
-
-<script src="js/kernel.js"></script>
-
-
-<script src="js/system.js"></script>
-
-
-<script src="js/module-manager.js"></script>
-
-
-<script src="js/system-status.js"></script>
-
-
-<script src="js/startup.js"></script>
-
-
-
-
-
 <script>
-
 
 function openMainMenu(){
 
+document.getElementById("welcome-screen").style.display="none";
 
-document
-
-.getElementById(
-"welcome-screen"
-)
-
-.style.display="none";
-
-
-
-document
-
-.getElementById(
-"main-menu"
-)
-
-.classList.remove(
-"hidden"
-);
-
-
+document.getElementById("main-menu").classList.remove("hidden");
 
 }
-
-
-
-
-
-
 
 function openPage(page){
 
-
-window.location.href =
-page;
-
+window.location.href=page;
 
 }
-
-
-
-
-
-
 
 function updateClock(){
 
-
-const clock =
-document.getElementById(
-"clock"
-);
-
-
+const clock=document.getElementById("clock");
 
 if(clock){
 
-
-clock.innerHTML =
-
-"🕒 " +
-
-new Date()
-
-.toLocaleTimeString(
-"de-DE"
-);
-
+clock.innerHTML="🕒 "+new Date().toLocaleTimeString("de-DE");
 
 }
 
-
 }
 
-
-
-setInterval(
-updateClock,
-1000
-);
-
+setInterval(updateClock,1000);
 
 updateClock();
 
-
-
 </script>
 
+<!-- Boot -->
 
+<script src="js/boot.js"></script>
 
+<script src="js/startup.js"></script>
 
+<!-- Kernel -->
+
+<script src="js/kernel.js"></script>
+
+<script src="js/system.js"></script>
+
+<!-- Manager -->
+
+<script src="js/module-manager.js"></script>
+
+<script src="js/app-manager.js"></script>
+
+<script src="js/storage.js"></script>
+
+<!-- AI -->
+
+<script src="js/ai-core.js"></script>
+
+<!-- Status -->
+
+<script src="js/system-status.js"></script>
+
+<script src="js/system-loader.js"></script>
 
 </body>
 
