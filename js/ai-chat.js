@@ -4,7 +4,7 @@
 HalDo AI OS 18
 AI Chat System
 
-Memory Integration
+Professional Ultimate Foundation
 
 Version 18.0.0
 
@@ -21,57 +21,78 @@ const HalDoChat = {
 
 
 
+
     send(message){
 
 
 
         if(!message){
 
+
             return "";
+
 
         }
 
 
 
 
-        this.history.push({
-
-
-            user: message,
-
-
-            time: new Date()
-
-
-        });
 
 
 
+        console.log(
 
+        "👤 Benutzer:",
 
+        message
 
-        let answer =
-
-        "🤖 HalDo AI verarbeitet: "
-
-        + message;
+        );
 
 
 
 
+
+
+
+
+        let answer = "";
+
+
+
+
+
+
+
+        /*
+        ==========================
+        AI Engine Verbindung
+        ==========================
+        */
 
 
 
         if(window.HalDoAI){
 
 
+
             answer =
 
-            HalDoAI.answer(
+            HalDoAI.process(
 
                 message
 
             );
+
+
+
+        }
+
+        else{
+
+
+            answer =
+
+            "🤖 AI Engine wird geladen...";
 
 
         }
@@ -82,13 +103,37 @@ const HalDoChat = {
 
 
 
+
+
+        /*
+        ==========================
+        Verlauf speichern
+        ==========================
+        */
+
+
+
         this.history.push({
 
 
-            ai: answer,
+
+            user:
+
+            message,
 
 
-            time: new Date()
+
+            ai:
+
+            answer,
+
+
+
+            time:
+
+            new Date()
+
+
 
 
         });
@@ -99,18 +144,30 @@ const HalDoChat = {
 
 
 
-        // Gespräch speichern
+
+        /*
+        ==========================
+        Memory speichern
+        ==========================
+        */
+
+
 
         if(window.HalDoMemory){
 
 
+
             HalDoMemory.addConversation(
+
 
                 message,
 
+
                 answer
 
+
             );
+
 
 
         }
@@ -121,14 +178,24 @@ const HalDoChat = {
 
 
 
-        // Antwort sprechen
+
+        /*
+        ==========================
+        Antwort sprechen
+        ==========================
+        */
+
+
 
         if(window.HalDoVoice){
 
 
+
             HalDoVoice.speak(
 
+
                 answer
+
 
             );
 
@@ -153,36 +220,19 @@ const HalDoChat = {
 
 
 
+
+
     getHistory(){
+
 
 
         return this.history;
 
 
-    },
-
-
-
-
-
-
-
-    loadMemory(){
-
-
-        if(window.HalDoMemory){
-
-
-            return HalDoMemory.getConversations();
-
-
-        }
-
-
-        return [];
-
 
     },
+
+
 
 
 
@@ -193,7 +243,8 @@ const HalDoChat = {
     clear(){
 
 
-        this.history=[];
+
+        this.history = [];
 
 
 
@@ -204,7 +255,11 @@ const HalDoChat = {
         );
 
 
+
     }
+
+
+
 
 
 
@@ -216,7 +271,10 @@ const HalDoChat = {
 
 
 
+
+
 window.HalDoChat =
+
 HalDoChat;
 
 
@@ -234,7 +292,7 @@ window.addEventListener(
 
 console.log(
 
-"💬 AI Chat + Memory bereit"
+"💬 HalDo AI Chat bereit"
 
 );
 
