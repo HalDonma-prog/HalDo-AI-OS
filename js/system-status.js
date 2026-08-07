@@ -1,138 +1,185 @@
 /*
-=====================================
-
+==========================================
 HalDo AI OS 18
-System Status Controller
+System Status Manager
 
 Professional Ultimate Foundation
-
-Version:
-18.0.0
-
-=====================================
+Version 18.0.0
+==========================================
 */
 
+(function () {
 
-const HalDoStatus = {
+    "use strict";
 
+    const HalDoSystemStatus = {
 
-    system:"online",
+        version: "18.0.0",
 
+        state: "starting",
 
-    ai:"ready",
+        modules: {},
 
+        lastCheck: null,
 
-    modules:"active",
+        init() {
 
+            this.check();
 
-    security:"protected",
+            console.log(
+                "📡 HalDo System Status bereit"
+            );
 
+        },
 
-    network:"connected",
+        check() {
 
+            this.lastCheck =
+                new Date();
 
+            this.modules = {
 
+                boot:
+                    this.exists("HalDoBoot"),
 
+                kernel:
+                    this.exists("HalDoKernel"),
 
-    getStatus:function(){
+                system:
+                    this.exists("HalDoSystem"),
 
+                ai:
+                    this.exists("HalDoAI"),
 
-        return {
+                chat:
+                    this.exists("HalDoChat"),
 
+                speech:
+                    this.exists("HalDoSpeech"),
 
-            os:
-            "HalDo AI OS 18",
+                voice:
+                    this.exists("HalDoVoice"),
 
+                memory:
+                    this.exists("HalDoMemory"),
 
-            system:
-            this.system,
+                commands:
+                    this.exists("HalDoCommands"),
 
+                language:
+                    this.exists(
+                        "HalDoLanguageSystem"
+                    )
 
-            ai:
-            this.ai,
+            };
 
+            const values =
+                Object.values(
+                    this.modules
+                );
 
-            modules:
-            this.modules,
+            const loaded =
+                values.filter(
+                    value => value
+                ).length;
 
+            const total =
+                values.length;
 
-            security:
-            this.security,
+            if (loaded === total) {
 
+                this.state =
+                    "online";
 
-            network:
-            this.network,
+            }
+            else if (loaded > 0) {
 
+                this.state =
+                    "partial";
 
-            time:
-            new Date()
-            .toLocaleTimeString(
-                "de-DE"
-            )
+            }
+            else {
 
-        };
+                this.state =
+                    "offline";
 
+            }
 
-    },
+            return this.getStatus();
 
+        },
 
+        exists(name) {
 
+            return (
+                typeof window[name] !==
+                "undefined"
+            );
 
+        },
 
+        getStatus() {
 
+            return {
 
-    print:function(){
+                state:
+                    this.state,
 
+                modules:
+                    this.modules,
 
-        console.log(
-        "📡 HalDo System Status"
-        );
+                lastCheck:
+                    this.lastCheck,
 
+                loaded:
+                    Object.values(
+                        this.modules
+                    ).filter(
+                        value => value
+                    ).length,
 
-        console.table(
-        this.getStatus()
-        );
+                total:
+                    Object.keys(
+                        this.modules
+                    ).length
 
+            };
 
-    }
+        },
 
+        isOnline() {
 
+            return (
+                this.state ===
+                "online"
+            );
 
+        },
 
+        getModuleStatus(name) {
 
+            return !!this.modules[name];
 
-};
+        },
 
+        refresh() {
 
+            return this.check();
 
+        }
 
+    };
 
+    window.HalDoSystemStatus =
+        HalDoSystemStatus;
 
+    window.addEventListener(
+        "DOMContentLoaded",
+        function () {
 
+            HalDoSystemStatus.init();
 
-window.HalDoStatus =
-HalDoStatus;
+        }
+    );
 
-
-
-
-
-
-
-
-window.addEventListener(
-"load",
-function(){
-
-
-console.log(
-"📡 System Status Controller geladen"
-);
-
-
-
-HalDoStatus.print();
-
-
-
-});
+})();
