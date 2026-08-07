@@ -1,17 +1,14 @@
-/*
-========================================
+/* =====================================
 
 HalDo AI OS 18
-Premium Glass Interface
-
-Version:
-18.0.0
-
 Professional Ultimate Foundation
 
-========================================
-*/
+Premium Glass Interface
 
+===================================== */
+
+
+/* Grundsystem */
 
 * {
 
@@ -22,26 +19,22 @@ Professional Ultimate Foundation
 }
 
 
+
 body {
 
     min-height: 100vh;
 
     font-family:
-    Arial,
-    Helvetica,
-    sans-serif;
-
-
-    background:
-
-    radial-gradient(
-        circle at top,
-        #243b6b,
-        #090d18
-    );
-
+    Arial, Helvetica, sans-serif;
 
     color: white;
+
+    background:
+    radial-gradient(
+        circle at top,
+        #243b55,
+        #090d18 60%
+    );
 
     overflow-x: hidden;
 
@@ -49,14 +42,22 @@ body {
 
 
 
-
-
-/* Logo Bereich */
+/* =====================================
+   Header
+===================================== */
 
 
 .header {
 
-    padding: 35px 20px;
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding: 30px;
 
     text-align: center;
 
@@ -64,81 +65,36 @@ body {
 
 
 
-.logo-box {
-
-    display: flex;
-
-    justify-content: center;
-
-    align-items: center;
-
-    gap: 20px;
-
-}
-
+/* =====================================
+   Logo
+===================================== */
 
 
 .logo {
 
+    width: 150px;
 
-    width: 110px;
+    height: 150px;
 
-    height: 110px;
-
-
-    display: flex;
-
-    justify-content: center;
-
-    align-items: center;
-
-
-    border-radius: 50%;
-
-
-    font-size: 65px;
-
-
-    background:
-
-    rgba(
-        255,
-        255,
-        255,
-        0.15
-    );
-
-
-    backdrop-filter:
-
-    blur(15px);
-
-
-
-    box-shadow:
-
-    0 0 35px
-    rgba(
-        80,
-        160,
-        255,
-        0.8
-    );
-
+    margin-bottom: 20px;
 
     animation:
 
-    logoGlow 3s infinite;
-
+    logoPulse 3s infinite;
 
 }
 
 
 
-@keyframes logoGlow {
+@keyframes logoPulse {
 
 
     0% {
+
+        filter:
+        drop-shadow(
+        0 0 5px #00e5ff
+        );
 
         transform:
         scale(1);
@@ -148,13 +104,23 @@ body {
 
     50% {
 
+        filter:
+        drop-shadow(
+        0 0 35px #4da6ff
+        );
+
         transform:
-        scale(1.08);
+        scale(1.05);
 
     }
 
 
     100% {
+
+        filter:
+        drop-shadow(
+        0 0 5px #00e5ff
+        );
 
         transform:
         scale(1);
@@ -166,237 +132,114 @@ body {
 
 
 
-
-.logo-box h1 {
-
-
-    font-size:
-
-    32px;
-
-
-}
-
-
-
-.logo-box p {
-
-
-    opacity:
-
-    0.8;
-
-
-}
-
-
-
-
-
-/* Start Bereich */
-
-
-.boot-screen {
-
-
-    max-width:
-
-    800px;
-
-
-    margin:
-
-    20px auto;
-
-
-    padding:
-
-    25px;
-
-
-
-    text-align:
-
-    center;
-
-
-    background:
-
-    rgba(
-        255,
-        255,
-        255,
-        0.12
-    );
-
-
-    border-radius:
-
-    25px;
-
-
-
-    backdrop-filter:
-
-    blur(18px);
-
-
-
-    border:
-
-    1px solid
-
-    rgba(
-        255,
-        255,
-        255,
-        0.2
-    );
-
-
-}
-
-
-
-
-
-/* Hauptmenü */
+/* =====================================
+   Hauptbereich
+===================================== */
 
 
 .main-menu {
 
-
-    max-width:
-
-    950px;
-
+    max-width: 1000px;
 
     margin:
 
     auto;
 
-
-    padding:
-
-    25px;
-
+    padding: 30px;
 
 }
+
+
 
 
 
 .main-menu h2 {
 
+    text-align: center;
 
-    text-align:
-
-    center;
-
-
-    margin-bottom:
-
-    30px;
-
+    margin-bottom: 25px;
 
 }
 
 
 
+
+
+.main-menu p {
+
+    color:
+    #c9d6ff;
+
+}
+
+
+
+/* =====================================
+   Menü Karten
+===================================== */
 
 
 .menu-grid {
 
 
-    display:
-
-    grid;
-
+    display: grid;
 
     grid-template-columns:
 
     repeat(
-        auto-fit,
-        minmax(
-            180px,
-            1fr
-        )
+    auto-fit,
+    minmax(220px,1fr)
     );
 
 
-    gap:
-
-    22px;
+    gap: 20px;
 
 
 }
 
 
 
-
-.menu-grid button {
-
-
-    padding:
-
-    25px;
+/* =====================================
+   Glass Buttons
+===================================== */
 
 
-    border:
-
-    none;
+button {
 
 
-    border-radius:
-
-    25px;
-
-
-
-    color:
-
-    white;
-
-
-
-    font-size:
-
-    18px;
-
-
-
-    cursor:
-
-    pointer;
-
-
-
-    background:
-
-    rgba(
-        255,
-        255,
-        255,
-        0.14
-    );
-
-
-
-    backdrop-filter:
-
-    blur(15px);
-
+    min-height: 90px;
 
 
     border:
 
     1px solid
+    rgba(
+    255,255,255,0.25
+    );
+
+
+    border-radius: 25px;
+
+
+    background:
 
     rgba(
-        255,
-        255,
-        255,
-        0.25
+    255,255,255,0.12
     );
+
+
+    color:white;
+
+
+    font-size:18px;
+
+
+    cursor:pointer;
+
+
+    backdrop-filter:
+
+    blur(15px);
 
 
 
@@ -411,80 +254,72 @@ body {
 
 
 
-.menu-grid button:hover {
+
+button:hover {
 
 
     transform:
 
-    translateY(-8px)
+    translateY(-5px)
     scale(1.03);
-
-
-
-    box-shadow:
-
-    0 0 25px
-
-    rgba(
-        100,
-        180,
-        255,
-        0.7
-    );
-
-
-}
-
-
-
-
-/* Info Karte */
-
-
-.system-info {
-
-
-    max-width:
-
-    600px;
-
-
-    margin:
-
-    25px auto;
-
-
-    padding:
-
-    25px;
-
-
-    text-align:
-
-    center;
 
 
 
     background:
 
     rgba(
-        255,
-        255,
-        255,
-        0.12
+    77,166,255,0.35
     );
 
 
 
-    backdrop-filter:
+    box-shadow:
 
-    blur(18px);
+    0 0 25px
+    #4da6ff;
+
+
+}
 
 
 
-    border-radius:
 
-    25px;
+button:active {
+
+
+    transform:
+
+    scale(0.96);
+
+
+}
+
+
+
+/* =====================================
+   Start Bildschirm
+===================================== */
+
+
+.boot-screen {
+
+
+    min-height:100vh;
+
+
+    display:flex;
+
+
+    flex-direction:column;
+
+
+    align-items:center;
+
+
+    justify-content:center;
+
+
+    text-align:center;
 
 
 }
@@ -493,46 +328,62 @@ body {
 
 
 
-/* Mobile */
+.boot-screen h1 {
+
+
+    font-size:40px;
+
+
+    margin:20px;
+
+
+}
+
+
+
+
+
+.boot-screen p {
+
+
+    font-size:22px;
+
+
+}
+
+
+
+/* =====================================
+   Mobile Optimierung
+===================================== */
 
 
 @media(max-width:600px){
 
 
-.logo-box {
+    .logo {
 
+        width:110px;
 
-    flex-direction:
+        height:110px;
 
-    column;
-
-
-}
-
-
-
-.logo-box h1 {
-
-
-    font-size:
-
-    25px;
-
-
-}
+    }
 
 
 
-.menu-grid button {
+    .boot-screen h1 {
+
+        font-size:28px;
+
+    }
 
 
-    font-size:
 
-    16px;
+    button {
 
+        font-size:16px;
 
-}
-
+    }
 
 
 }
