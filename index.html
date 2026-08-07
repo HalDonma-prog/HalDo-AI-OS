@@ -6,190 +6,583 @@
 
 <meta charset="UTF-8">
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
 
 <title>
 HalDo AI OS 18
 </title>
 
-<link rel="stylesheet" href="style.css">
+<link
+    rel="stylesheet"
+    href="style.css"
+>
 
-<link rel="manifest" href="manifest.json">
+<link
+    rel="manifest"
+    href="manifest.json"
+>
 
-<meta name="theme-color" content="#090D18">
+<meta
+    name="theme-color"
+    content="#090D18"
+>
 
 </head>
 
+
 <body>
 
-<section id="startup-screen" class="screen">
 
-<img
-src="assets/logo/logo.png"
-class="logo"
-alt="HalDo AI OS Logo">
+<!-- =========================================
+     STARTUP SCREEN
+========================================= -->
 
-<h1>
-HalDo AI OS 18
-</h1>
+<section
+    id="startup-screen"
+    class="screen"
+>
 
-<p id="system-status">
-🟡 HalDo AI OS startet...
-</p>
 
-</section>
+    <img
+        src="assets/logo/logo.svg"
+        class="logo"
+        alt="HalDo AI OS Logo"
+    >
 
-<section id="welcome-screen" class="screen hidden">
 
-<img
-src="assets/logo/logo.png"
-class="logo"
-alt="HalDo AI OS Logo">
+    <h1>
+        HalDo AI OS 18
+    </h1>
 
-<h1>
-👋 Willkommen bei
-<br>
-HalDo AI OS 18
-</h1>
 
-<p>
-Professional Ultimate Foundation
-</p>
+    <p id="system-status">
+        🟡 HalDo AI OS startet...
+    </p>
 
-<p id="clock">
-Systemzeit wird geladen...
-</p>
-
-<button onclick="openMainMenu()">
-🚀 Hauptmenü öffnen
-</button>
 
 </section>
 
-<section id="main-menu" class="hidden">
 
-<header class="header">
 
-<img
-src="assets/logo/logo.png"
-class="logo small"
-alt="HalDo AI OS">
 
-<h1>
-HalDo AI OS 18
-</h1>
+<!-- =========================================
+     WELCOME SCREEN
+========================================= -->
 
-<p>
-Professional Ultimate Foundation
-</p>
+<section
+    id="welcome-screen"
+    class="screen hidden"
+>
 
-</header>
 
-<main class="menu-container">
+    <img
+        src="assets/logo/logo.svg"
+        class="logo"
+        alt="HalDo AI OS Logo"
+    >
 
-<h2>
-🚀 Hauptmenü
-</h2>
 
-<div class="menu-grid">
+    <h1>
 
-<button onclick="openPage('dashboard.html')">
-📊 Dashboard
-</button>
+        👋
+        <span data-i18n="welcome">
+            Willkommen bei HalDo AI OS
+        </span>
 
-<button onclick="openPage('ai-core.html')">
-🧠 AI Core
-</button>
+        <br>
 
-<button onclick="openPage('modules.html')">
-🧩 Module
-</button>
+        18
 
-<button onclick="openPage('apps.html')">
-📱 Apps
-</button>
+    </h1>
 
-<button onclick="openPage('settings.html')">
-⚙️ Einstellungen
-</button>
 
-<button onclick="openPage('status.html')">
-📡 System Status
-</button>
+    <p>
+        Professional Ultimate Foundation
+    </p>
 
-<button onclick="openPage('health.html')">
-🏥 Health Center
-</button>
 
-</div>
+    <p id="clock">
+        Systemzeit wird geladen...
+    </p>
 
-</main>
+
+    <button
+        onclick="openMainMenu()"
+    >
+
+        🚀
+        <span data-i18n="menu">
+            Hauptmenü
+        </span>
+
+    </button>
+
 
 </section>
 
-<script>
 
-function openMainMenu(){
 
-document.getElementById("welcome-screen").style.display="none";
 
-document.getElementById("main-menu").classList.remove("hidden");
+<!-- =========================================
+     MAIN MENU
+========================================= -->
 
-}
+<section
+    id="main-menu"
+    class="hidden"
+>
 
-function openPage(page){
 
-window.location.href=page;
+    <header class="header">
 
-}
 
-function updateClock(){
+        <img
+            src="assets/logo/logo.svg"
+            class="logo small"
+            alt="HalDo AI OS"
+        >
 
-const clock=document.getElementById("clock");
 
-if(clock){
+        <h1>
+            HalDo AI OS 18
+        </h1>
 
-clock.innerHTML="🕒 "+new Date().toLocaleTimeString("de-DE");
 
-}
+        <p>
+            Professional Ultimate Foundation
+        </p>
 
-}
 
-setInterval(updateClock,1000);
+        <!-- LANGUAGE SELECTOR -->
 
-updateClock();
+        <div class="language-selector">
 
-</script>
+            🌍
 
-<!-- Boot -->
+            <select
+                id="main-language-select"
+                aria-label="Sprache"
+            >
+
+            </select>
+
+        </div>
+
+
+    </header>
+
+
+
+
+    <main class="menu-container">
+
+
+        <h2>
+
+            🚀
+
+            <span data-i18n="menu">
+                Hauptmenü
+            </span>
+
+        </h2>
+
+
+
+
+        <div class="menu-grid">
+
+
+            <!-- DASHBOARD -->
+
+            <button
+                onclick="openPage('dashboard.html')"
+            >
+
+                📊
+
+                <span data-i18n="dashboard">
+                    Dashboard
+                </span>
+
+            </button>
+
+
+
+
+            <!-- AI CORE -->
+
+            <button
+                onclick="openPage('ai-core.html')"
+            >
+
+                🧠
+
+                <span data-i18n="aiCore">
+                    AI Core
+                </span>
+
+            </button>
+
+
+
+
+            <!-- MODULES -->
+
+            <button
+                onclick="openPage('modules.html')"
+            >
+
+                🧩
+
+                <span data-i18n="modules">
+                    Module
+                </span>
+
+            </button>
+
+
+
+
+            <!-- APPS -->
+
+            <button
+                onclick="openPage('apps.html')"
+            >
+
+                📱
+
+                <span data-i18n="apps">
+                    Apps
+                </span>
+
+            </button>
+
+
+
+
+            <!-- SETTINGS -->
+
+            <button
+                onclick="openPage('settings.html')"
+            >
+
+                ⚙️
+
+                <span data-i18n="settings">
+                    Einstellungen
+                </span>
+
+            </button>
+
+
+
+
+            <!-- SYSTEM STATUS -->
+
+            <button
+                onclick="openPage('status.html')"
+            >
+
+                📡
+
+                <span data-i18n="status">
+                    System Status
+                </span>
+
+            </button>
+
+
+
+
+            <!-- HEALTH -->
+
+            <button
+                onclick="openPage('health.html')"
+            >
+
+                🏥
+
+                <span data-i18n="health">
+                    Health Center
+                </span>
+
+            </button>
+
+
+        </div>
+
+
+    </main>
+
+
+</section>
+
+
+
+
+<!-- =========================================
+     CORE SYSTEM
+========================================= -->
 
 <script src="js/boot.js"></script>
-
-<script src="js/startup.js"></script>
-
-<!-- Kernel -->
 
 <script src="js/kernel.js"></script>
 
 <script src="js/system.js"></script>
 
-<!-- Manager -->
-
 <script src="js/module-manager.js"></script>
-
-<script src="js/app-manager.js"></script>
-
-<script src="js/storage.js"></script>
-
-<!-- AI -->
-
-<script src="js/ai-core.js"></script>
-
-<!-- Status -->
 
 <script src="js/system-status.js"></script>
 
-<script src="js/system-loader.js"></script>
+<script src="js/language-system.js"></script>
+
+<script src="js/language-manager.js"></script>
+
+<script src="js/startup.js"></script>
+
+
+
+
+<!-- =========================================
+     INDEX CONTROLLER
+========================================= -->
+
+<script>
+
+(function () {
+
+    "use strict";
+
+
+
+    /* ======================================
+       MAIN MENU
+    ====================================== */
+
+
+    window.openMainMenu = function () {
+
+
+        const welcome =
+            document.getElementById(
+                "welcome-screen"
+            );
+
+
+        const menu =
+            document.getElementById(
+                "main-menu"
+            );
+
+
+        if (welcome) {
+
+            welcome.style.display =
+                "none";
+
+        }
+
+
+        if (menu) {
+
+            menu.classList.remove(
+                "hidden"
+            );
+
+        }
+
+
+        initializeMainLanguage();
+
+    };
+
+
+
+
+    /* ======================================
+       PAGE NAVIGATION
+    ====================================== */
+
+
+    window.openPage = function (page) {
+
+        if (!page) {
+
+            return;
+
+        }
+
+
+        window.location.href =
+            page;
+
+    };
+
+
+
+
+    /* ======================================
+       CLOCK
+    ====================================== */
+
+
+    function updateClock() {
+
+
+        const clock =
+            document.getElementById(
+                "clock"
+            );
+
+
+        if (!clock) {
+
+            return;
+
+        }
+
+
+        const now =
+            new Date();
+
+
+        clock.textContent =
+            "🕒 " +
+            now.toLocaleTimeString(
+                "de-DE"
+            );
+
+    }
+
+
+
+
+    setInterval(
+        updateClock,
+        1000
+    );
+
+
+    updateClock();
+
+
+
+
+    /* ======================================
+       LANGUAGE SELECTOR
+    ====================================== */
+
+
+    function initializeMainLanguage() {
+
+
+        const select =
+            document.getElementById(
+                "main-language-select"
+            );
+
+
+        if (
+            !select ||
+            !window.HalDoLanguageSystem
+        ) {
+
+            return;
+
+        }
+
+
+        const languages =
+            HalDoLanguageSystem
+                .getLanguages();
+
+
+        select.innerHTML =
+            "";
+
+
+        languages.forEach(
+            function (language) {
+
+
+                const option =
+                    document.createElement(
+                        "option"
+                    );
+
+
+                option.value =
+                    language.id;
+
+
+                option.textContent =
+                    language.native;
+
+
+                select.appendChild(
+                    option
+                );
+
+            }
+        );
+
+
+        select.value =
+            HalDoLanguageSystem.current;
+
+
+
+
+        select.onchange =
+            function () {
+
+
+                HalDoLanguageSystem
+                    .setLanguage(
+                        this.value
+                    );
+
+
+            };
+
+    }
+
+
+
+
+    /* ======================================
+       LANGUAGE SYSTEM READY
+    ====================================== */
+
+
+    window.addEventListener(
+        "DOMContentLoaded",
+        function () {
+
+
+            setTimeout(
+                function () {
+
+
+                    initializeMainLanguage();
+
+
+                },
+                300
+            );
+
+
+        }
+    );
+
+})();
+
+</script>
+
 
 </body>
 
