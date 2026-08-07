@@ -2,18 +2,18 @@
 ========================================
 
 HalDo AI OS 18
-System Manager Foundation
+System Manager
 
 Version:
 18.0.0
 
-Operating System Management Layer
+Central System Administration
 
 ========================================
 */
 
 
-const HalDoSystem = {
+const SystemManager = {
 
 
     name:
@@ -24,12 +24,13 @@ const HalDoSystem = {
     "18.0.0",
 
 
-    state:
+    status:
     "offline",
 
 
+
     components:
-    {},
+    [],
 
 
 
@@ -41,124 +42,80 @@ const HalDoSystem = {
         );
 
 
-        this.state =
+        this.status =
         "starting";
 
 
-        this.connect();
+        this.updateStatus(
+            "🔵 System Verwaltung startet..."
+        );
 
 
-        this.start();
-
+        this.loadComponents();
 
 
     },
 
 
 
-    connect(){
+    loadComponents(){
 
 
-        this.components = {
+        this.components = [
 
 
-            kernel:
-            typeof Kernel !== "undefined",
+            "Kernel",
+
+            "Engine",
+
+            "Module Manager",
+
+            "Service Manager",
+
+            "Update Manager",
+
+            "Status Center"
 
 
-            engine:
-            typeof HalDoEngine !== "undefined",
-
-
-            logger:
-            typeof Logger !== "undefined",
-
-
-            eventBus:
-            typeof EventBus !== "undefined"
-
-
-        };
+        ];
 
 
 
         console.log(
-            "🖥️ System Verbindungen:",
+            "🖥️ System Komponenten:",
             this.components
         );
 
 
-    },
 
-
-
-    start(){
-
-
-        this.state =
+        this.status =
         "ready";
 
 
 
-        if(
-            typeof Logger !== "undefined"
-        ){
-
-            Logger.info(
-                "System Manager bereit"
-            );
-
-
-        }
-
-
-
-        if(
-            typeof EventBus !== "undefined"
-        ){
-
-            EventBus.emit(
-                "system.ready",
-                {
-
-                    status:
-                    this.state
-
-
-                }
-
-            );
-
-
-        }
-
-
-
-        console.log(
-            "🟢 HalDo AI OS 18 System bereit"
+        this.updateStatus(
+            "🟢 System Verwaltung bereit"
         );
 
 
 
+        this.connectModules();
+
+
     },
 
 
 
-    setState(state){
-
-
-        this.state =
-        state;
-
+    connectModules(){
 
 
         if(
-            typeof Logger !== "undefined"
+            typeof ModuleManager !== "undefined"
         ){
 
-            Logger.info(
-                "System Status geändert: "
-                + state
+
+            console.log(
+                "🧩 Module Manager verbunden"
             );
 
 
@@ -167,44 +124,60 @@ const HalDoSystem = {
 
 
         if(
-            typeof EventBus !== "undefined"
+            typeof ServiceManager !== "undefined"
         ){
 
-            EventBus.emit(
-                "system.status",
-                {
 
-                    state:
-                    state
-
-                }
-
+            console.log(
+                "⚙️ Service Manager verbunden"
             );
 
 
         }
 
 
+
+        if(
+            typeof UpdateManager !== "undefined"
+        ){
+
+
+            console.log(
+                "🔄 Update Manager verbunden"
+            );
+
+
+        }
+
+
+
     },
 
 
 
-    registerComponent(
-        name,
-        component
-    ){
+    registerComponent(name){
 
 
-        this.components[name]
-        =
-        component;
-
-
-
-        console.log(
-            "🧩 System Komponente registriert:",
+        this.components.push(
             name
         );
+
+
+
+        console.log(
+            "➕ Komponente registriert:",
+            name
+        );
+
+
+    },
+
+
+
+    getComponents(){
+
+
+        return this.components;
 
 
     },
@@ -225,8 +198,8 @@ const HalDoSystem = {
             this.version,
 
 
-            state:
-            this.state,
+            status:
+            this.status,
 
 
             components:
@@ -234,6 +207,36 @@ const HalDoSystem = {
 
 
         };
+
+
+    },
+
+
+
+    updateStatus(message){
+
+
+        const element =
+        document.getElementById(
+            "system-status"
+        );
+
+
+
+        if(element){
+
+
+            element.innerHTML =
+            message;
+
+
+        }
+
+
+
+        console.log(
+            message
+        );
 
 
     }
@@ -245,6 +248,6 @@ const HalDoSystem = {
 
 
 
-// System starten
-
-HalDoSystem.initialize();
+console.log(
+    "🖥️ HalDo System Manager geladen"
+);
