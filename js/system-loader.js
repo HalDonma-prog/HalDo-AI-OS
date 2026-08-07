@@ -11,17 +11,26 @@ Version 18.0.0
 
     "use strict";
 
-
     const HalDoSystemLoader = {
 
         status: "waiting",
 
-        startedAt: null,
-
         steps: [],
+
+        startedAt: null,
 
 
         init() {
+
+            if (
+                this.status ===
+                "ready"
+            ) {
+
+                return true;
+
+            }
+
 
             this.status =
                 "loading";
@@ -32,105 +41,129 @@ Version 18.0.0
             this.steps = [];
 
 
-            this.update(
+            this.message(
                 "🔵 HalDo AI OS lädt Module..."
             );
 
 
-            this.checkModules();
+            this.check(
+                "Boot",
+                "HalDoBoot"
+            );
+
+
+            this.check(
+                "Kernel",
+                "HalDoKernel"
+            );
+
+
+            this.check(
+                "System",
+                "HalDoSystem"
+            );
+
+
+            this.check(
+                "Module Manager",
+                "HalDoModuleManager"
+            );
+
+
+            this.check(
+                "App Manager",
+                "HalDoAppManager"
+            );
+
+
+            this.check(
+                "Storage",
+                "HalDoStorage"
+            );
+
+
+            this.check(
+                "System Status",
+                "HalDoSystemStatus"
+            );
 
 
             this.status =
                 "ready";
 
 
-            this.update(
+            this.message(
                 "🟢 HalDo AI OS ist bereit."
             );
 
 
-            if (
-                window.HalDoKernel
-            ) {
-
-                HalDoKernel.emit(
-                    "system-loader:ready"
-                );
-
-            }
-
-        },
-
-
-        checkModules() {
-
-            const modules = [
-
-                "HalDoKernel",
-
-                "HalDoSystem",
-
-                "HalDoModuleManager",
-
-                "HalDoSystemStatus"
-
-            ];
-
-
-            modules.forEach(
-                (name) => {
-
-                    const loaded =
-                        typeof window[name] !==
-                        "undefined";
-
-
-                    this.steps.push({
-
-                        name:
-                            name,
-
-                        loaded:
-                            loaded
-
-                    });
-
-
-                    console.log(
-
-                        loaded
-                        ? "🟢"
-                        : "🟡",
-
-                        name
-
-                    );
-
-                }
+            window.dispatchEvent(
+                new CustomEvent(
+                    "haldo:loader-ready"
+                )
             );
 
+
+            return true;
+
         },
 
 
-        update(message) {
+        check(
+            name,
+            globalName
+        ) {
 
-            const status =
+            const loaded =
+                typeof window[
+                    globalName
+                ] !== "undefined";
+
+
+            this.steps.push({
+
+                name:
+                    name,
+
+                global:
+                    globalName,
+
+                loaded:
+                    loaded
+
+            });
+
+
+            console.log(
+                loaded
+                    ? "🟢"
+                    : "🟡",
+                name
+            );
+
+
+            return loaded;
+
+        },
+
+
+        message(text) {
+
+            const element =
                 document.getElementById(
                     "system-status"
                 );
 
 
-            if (status) {
+            if (element) {
 
-                status.textContent =
-                    message;
+                element.textContent =
+                    text;
 
             }
 
 
-            console.log(
-                message
-            );
+            console.log(text);
 
         },
 
@@ -169,7 +202,7 @@ Version 18.0.0
                     HalDoSystemLoader.init();
 
                 },
-                250
+                400
             );
 
         }
