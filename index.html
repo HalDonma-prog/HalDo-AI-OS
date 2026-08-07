@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="de">
 
 <head>
@@ -15,7 +16,9 @@ HalDo AI OS 18
 
 <link rel="stylesheet" href="style.css">
 
+
 <link rel="manifest" href="manifest.json">
+
 
 <meta name="theme-color" content="#090D18">
 
@@ -23,20 +26,27 @@ HalDo AI OS 18
 </head>
 
 
+
 <body>
+
 
 
 <section id="startup-screen" class="screen">
 
 
 <img
+
 src="assets/logo/logo.svg"
+
 class="logo"
+
 alt="HalDo AI OS Logo">
 
 
 <h1>
+
 HalDo AI OS 18
+
 </h1>
 
 
@@ -59,9 +69,13 @@ HalDo AI OS 18
 
 
 <img
+
 src="assets/logo/logo.svg"
+
 class="logo"
+
 alt="HalDo AI OS Logo">
+
 
 
 <h1>
@@ -82,6 +96,7 @@ Professional Ultimate Foundation
 </p>
 
 
+
 <p id="clock">
 
 Systemzeit wird geladen...
@@ -97,6 +112,7 @@ Systemzeit wird geladen...
 </button>
 
 
+
 </section>
 
 
@@ -109,13 +125,17 @@ Systemzeit wird geladen...
 <section id="main-menu" class="hidden">
 
 
+
 <header class="header">
 
 
 <img
+
 src="assets/logo/logo.svg"
+
 class="logo small"
-alt="HalDo AI OS Logo">
+
+alt="HalDo AI OS">
 
 
 <h1>
@@ -148,7 +168,9 @@ Professional Ultimate Foundation
 </h2>
 
 
+
 <div class="menu-grid">
+
 
 
 <button onclick="openPage('dashboard.html')">
@@ -193,39 +215,15 @@ Professional Ultimate Foundation
 
 <button onclick="openPage('status.html')">
 
-📡 Status
+📡 System Status
 
 </button>
 
 
 
-<button>
+<button onclick="openPage('health.html')">
 
 🏥 Health Center
-
-</button>
-
-
-
-<button>
-
-📚 Learning Center
-
-</button>
-
-
-
-<button>
-
-💻 Developer Center
-
-</button>
-
-
-
-<button>
-
-🌍 Language Center
 
 </button>
 
@@ -237,9 +235,32 @@ Professional Ultimate Foundation
 </main>
 
 
+
 </section>
 
 
+
+
+
+
+
+
+<script src="js/boot.js"></script>
+
+
+<script src="js/kernel.js"></script>
+
+
+<script src="js/system.js"></script>
+
+
+<script src="js/module-manager.js"></script>
+
+
+<script src="js/system-status.js"></script>
+
+
+<script src="js/startup.js"></script>
 
 
 
@@ -251,17 +272,31 @@ Professional Ultimate Foundation
 function openMainMenu(){
 
 
-document.getElementById(
+document
+
+.getElementById(
 "welcome-screen"
-).style.display="none";
+)
+
+.style.display="none";
 
 
-document.getElementById(
+
+document
+
+.getElementById(
 "main-menu"
-).classList.remove("hidden");
+)
+
+.classList.remove(
+"hidden"
+);
+
 
 
 }
+
+
 
 
 
@@ -270,10 +305,13 @@ document.getElementById(
 function openPage(page){
 
 
-window.location.href = page;
+window.location.href =
+page;
 
 
 }
+
+
 
 
 
@@ -283,15 +321,24 @@ function updateClock(){
 
 
 const clock =
-document.getElementById("clock");
+document.getElementById(
+"clock"
+);
+
 
 
 if(clock){
 
 
 clock.innerHTML =
+
 "🕒 " +
-new Date().toLocaleTimeString("de-DE");
+
+new Date()
+
+.toLocaleTimeString(
+"de-DE"
+);
 
 
 }
@@ -300,20 +347,21 @@ new Date().toLocaleTimeString("de-DE");
 }
 
 
-setInterval(updateClock,1000);
+
+setInterval(
+updateClock,
+1000
+);
+
 
 updateClock();
+
 
 
 </script>
 
 
 
-
-
-<script src="js/boot.js"></script>
-
-<script src="js/startup.js"></script>
 
 
 </body>
