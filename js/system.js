@@ -1,173 +1,203 @@
 /*
-=====================================
-
+==========================================
 HalDo AI OS 18
-System Manager
-
+SYSTEM MANAGER
 Professional Ultimate Foundation
-
-Version:
-18.0.0
-
-=====================================
+Version 18.0.0
+==========================================
 */
 
+(function () {
 
-const HalDoSystem = {
+    "use strict";
 
 
-    name:
-    "HalDo AI OS 18",
+    const HalDoSystem = {
 
+        name:
+            "HalDo AI OS System",
 
+        version:
+            "18.0.0",
 
-    version:
-    "18.0.0",
+        status:
+            "starting",
 
+        startedAt:
+            null,
 
+        services: {},
 
-    edition:
-    "Professional Ultimate Foundation",
 
+        init() {
 
+            this.startedAt =
+                new Date();
 
-    status:
-    "online",
+            this.status =
+                "running";
 
 
+            console.log(
+                "🔵 HalDo AI OS System gestartet"
+            );
 
-    startTime:
-    new Date(),
 
+            this.registerCoreServices();
 
 
+            if (
+                window.HalDoKernel
+            ) {
 
+                HalDoKernel.registerModule(
+                    "system",
+                    this
+                );
 
+            }
 
-    getTime:function(){
 
+            return true;
 
-        return new Date()
-        .toLocaleTimeString(
-            "de-DE"
-        );
+        },
 
 
-    },
+        registerCoreServices() {
 
+            this.services = {
 
+                kernel:
+                    !!window.HalDoKernel,
 
+                storage:
+                    !!window.HalDoStorage,
 
+                modules:
+                    !!window.HalDoModuleManager,
 
+                ai:
+                    !!window.HalDoAI,
 
+                language:
+                    !!window.HalDoLanguageSystem,
 
-    getInfo:function(){
+                memory:
+                    !!window.HalDoMemory,
 
+                speech:
+                    !!window.HalDoSpeech,
 
-        return {
+                voice:
+                    !!window.HalDoVoice
 
+            };
 
-            name:this.name,
+        },
 
 
-            version:this.version,
+        refresh() {
 
+            this.registerCoreServices();
 
-            edition:this.edition,
+            return this.getStatus();
 
+        },
 
-            status:this.status,
 
+        getStatus() {
 
-            time:this.getTime(),
+            const services =
+                this.services;
 
 
-            uptime:this.getUptime()
+            const values =
+                Object.values(
+                    services
+                );
 
 
+            const loaded =
+                values.filter(
+                    Boolean
+                ).length;
 
-        };
 
+            return {
 
-    },
+                name:
+                    this.name,
 
+                version:
+                    this.version,
 
+                status:
+                    this.status,
 
+                loaded:
 
+                    loaded,
 
+                total:
 
+                    values.length,
 
+                services:
 
-    getUptime:function(){
+                    services,
 
+                startedAt:
 
-        let now =
-        new Date();
+                    this.startedAt
 
+            };
 
+        },
 
-        let seconds =
-        Math.floor(
-            (now - this.startTime)
-            /1000
-        );
 
+        isReady() {
 
+            return (
+                this.status ===
+                "running"
+            );
 
-        return seconds +
-        " Sekunden";
+        },
 
 
-    },
+        shutdown() {
 
+            this.status =
+                "stopped";
 
 
+            console.log(
+                "🟡 HalDo System gestoppt"
+            );
 
+        }
 
+    };
 
 
+    window.HalDoSystem =
+        HalDoSystem;
 
-    setStatus:function(value){
 
+    window.addEventListener(
+        "DOMContentLoaded",
+        function () {
 
-        this.status =
-        value;
+            setTimeout(
+                function () {
 
+                    HalDoSystem.init();
 
-    }
+                },
+                50
+            );
 
+        }
+    );
 
-
-
-
-
-};
-
-
-
-
-
-
-
-
-window.HalDoSystem =
-HalDoSystem;
-
-
-
-
-
-
-
-window.addEventListener(
-"load",
-function(){
-
-
-console.log(
-"🟢 HalDo System Manager geladen"
-);
-
-
-
-});
+})();
