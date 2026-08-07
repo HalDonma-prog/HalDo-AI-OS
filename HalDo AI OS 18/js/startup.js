@@ -1,82 +1,33 @@
-/*
-====================================
+window.addEventListener("load", function(){
 
-HalDo AI OS 18
-Startup Controller
-
-Professional Ultimate Foundation
-
-Version:
-18.0.0
-
-====================================
-*/
+    console.log("HalDo Startup geladen");
 
 
+    setTimeout(function(){
 
-function startHalDoOS(){
-
-
-
-    const startup =
-    document.getElementById(
-        "startup-screen"
-    );
+        const startup =
+        document.getElementById("startup-screen");
 
 
-
-    const welcome =
-    document.getElementById(
-        "welcome-screen"
-    );
+        const welcome =
+        document.getElementById("welcome-screen");
 
 
+        if(startup){
 
-    if(!startup || !welcome){
+            startup.style.display = "none";
 
-        return;
-
-    }
-
+        }
 
 
+        if(welcome){
+
+            welcome.classList.remove("hidden");
+
+        }
 
 
-
-    setTimeout(()=>{
-
-
-        startup.classList.add(
-            "hidden"
-        );
-
-
-
-        welcome.classList.remove(
-            "hidden"
-        );
-
-
-
-    },5500);
-
-
-
-
-
-}
-
-
-
-
-
-
-window.addEventListener(
-"load",
-()=>{
-
-
-    startHalDoOS();
+    },3000);
 
 
 });
