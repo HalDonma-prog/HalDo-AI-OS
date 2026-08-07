@@ -38,24 +38,20 @@ alt="HalDo AI Logo">
 </h1>
 
 
-
 <p>
 Professional Ultimate Foundation
 </p>
 
 
 
+
 <div class="ai-status">
 
-
-🟢 AI System:
+🟢 AI Status:
 
 <span id="ai-status">
-
 Bereit
-
 </span>
-
 
 </div>
 
@@ -65,7 +61,6 @@ Bereit
 
 <div class="language-box">
 
-
 <h3>
 🌍 Sprache
 </h3>
@@ -73,45 +68,34 @@ Bereit
 
 <select id="language-select">
 
-<option value="de">
 
-Deutsch
-
+<option value="de-DE">
+🇩🇪 Deutsch
 </option>
 
 
-<option value="en">
-
-English
-
+<option value="en-US">
+🇬🇧 English
 </option>
 
 
 <option value="ku">
-
-Kurdî (Kurmancî)
-
+🟡 Kurdî (Kurmancî)
 </option>
 
 
 <option value="ez">
-
-Êzîkî
-
+🟡 Êzîkî
 </option>
 
 
-<option value="tr">
-
-Türkçe
-
+<option value="tr-TR">
+🇹🇷 Türkçe
 </option>
 
 
-<option value="ar">
-
-العربية
-
+<option value="ar-SA">
+🇸🇦 العربية
 </option>
 
 
@@ -125,8 +109,8 @@ Türkçe
 
 
 
-
 <div class="ai-box">
+
 
 
 <div id="chat-output">
@@ -134,7 +118,7 @@ Türkçe
 
 🤖 Hallo! Ich bin HalDo AI.
 
-<br>
+<br><br>
 
 Wie kann ich dir helfen?
 
@@ -151,7 +135,8 @@ id="user-input"
 
 type="text"
 
-placeholder="Nachricht schreiben...">
+placeholder="Schreibe eine Nachricht...">
+
 
 
 
@@ -192,12 +177,12 @@ placeholder="Nachricht schreiben...">
 
 
 
-
 <button onclick="goBack()">
 
-⬅️ Zurück
+⬅️ Hauptmenü
 
 </button>
+
 
 
 
@@ -209,6 +194,8 @@ placeholder="Nachricht schreiben...">
 
 
 
+<!-- AI SYSTEM -->
+
 <script src="js/ai-core.js"></script>
 
 <script src="js/ai-engine.js"></script>
@@ -216,6 +203,12 @@ placeholder="Nachricht schreiben...">
 <script src="js/ai-language.js"></script>
 
 <script src="js/ai-voice.js"></script>
+
+<script src="js/ai-speech.js"></script>
+
+<script src="js/ai-memory.js"></script>
+
+<script src="js/ai-commands.js"></script>
 
 <script src="js/ai-chat.js"></script>
 
@@ -226,11 +219,13 @@ placeholder="Nachricht schreiben...">
 
 
 
+
 <script>
 
 
-
 let lastAnswer = "";
+
+
 
 
 
@@ -256,27 +251,38 @@ document.getElementById(
 
 
 
-let message =
+const message =
 input.value;
 
 
 
-if(!message)
+if(!message){
 
 return;
 
+}
 
 
 
-let answer =
+
+
+
+
+const answer =
 
 HalDoChat.send(
+
 message
+
 );
 
 
 
+
+
 lastAnswer = answer;
+
+
 
 
 
@@ -301,6 +307,9 @@ answer;
 
 
 
+
+
+
 input.value = "";
 
 
@@ -313,24 +322,27 @@ input.value = "";
 
 
 
-
 function speakLast(){
+
 
 
 if(lastAnswer){
 
 
+
 HalDoVoice.speak(
+
 lastAnswer
+
 );
 
 
-}
-
-
 
 }
 
+
+
+}
 
 
 
@@ -342,16 +354,28 @@ function startVoice(){
 
 
 
-alert(
+if(window.HalDoSpeech){
 
-"🎤 Mikrofon-System wird vorbereitet"
 
-);
-
+HalDoSpeech.start();
 
 
 }
 
+else{
+
+
+alert(
+
+"🎤 Sprachsystem wird geladen..."
+
+);
+
+
+}
+
+
+}
 
 
 
@@ -372,11 +396,18 @@ document
 function(){
 
 
-HalDoLanguageManager.change(
+
+if(window.HalDoVoice){
+
+
+HalDoVoice.setLanguage(
 
 this.value
 
 );
+
+
+}
 
 
 
@@ -388,11 +419,11 @@ this.value
 
 
 
-
 function goBack(){
 
 
 window.location.href =
+
 "index.html";
 
 
