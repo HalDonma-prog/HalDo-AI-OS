@@ -1,211 +1,178 @@
 /*
-=====================================
-
+==========================================
 HalDo AI OS 18
-System Loader
-
+SYSTEM LOADER
 Professional Ultimate Foundation
-
-Version:
-18.0.0
-
-=====================================
+Version 18.0.0
+==========================================
 */
 
+(function () {
 
-const HalDoSystemLoader = {
-
-
-    status:
-    "initializing",
+    "use strict";
 
 
+    const HalDoSystemLoader = {
 
-    services:[],
+        status: "waiting",
 
+        startedAt: null,
 
-
-
-
-
-    check:function(name,service){
+        steps: [],
 
 
-        if(service){
+        init() {
+
+            this.status =
+                "loading";
+
+            this.startedAt =
+                new Date();
+
+            this.steps = [];
 
 
-            this.services.push(name);
-
-
-
-            console.log(
-            "🟢 Dienst geladen:",
-            name
+            this.update(
+                "🔵 HalDo AI OS lädt Module..."
             );
 
 
+            this.checkModules();
 
-            return true;
 
+            this.status =
+                "ready";
+
+
+            this.update(
+                "🟢 HalDo AI OS ist bereit."
+            );
+
+
+            if (
+                window.HalDoKernel
+            ) {
+
+                HalDoKernel.emit(
+                    "system-loader:ready"
+                );
+
+            }
+
+        },
+
+
+        checkModules() {
+
+            const modules = [
+
+                "HalDoKernel",
+
+                "HalDoSystem",
+
+                "HalDoModuleManager",
+
+                "HalDoSystemStatus"
+
+            ];
+
+
+            modules.forEach(
+                (name) => {
+
+                    const loaded =
+                        typeof window[name] !==
+                        "undefined";
+
+
+                    this.steps.push({
+
+                        name:
+                            name,
+
+                        loaded:
+                            loaded
+
+                    });
+
+
+                    console.log(
+
+                        loaded
+                        ? "🟢"
+                        : "🟡",
+
+                        name
+
+                    );
+
+                }
+            );
+
+        },
+
+
+        update(message) {
+
+            const status =
+                document.getElementById(
+                    "system-status"
+                );
+
+
+            if (status) {
+
+                status.textContent =
+                    message;
+
+            }
+
+
+            console.log(
+                message
+            );
+
+        },
+
+
+        getStatus() {
+
+            return {
+
+                status:
+                    this.status,
+
+                steps:
+                    this.steps,
+
+                startedAt:
+                    this.startedAt
+
+            };
 
         }
 
+    };
 
 
-        console.warn(
-        "🟡 Dienst fehlt:",
-        name
-        );
+    window.HalDoSystemLoader =
+        HalDoSystemLoader;
 
 
-        return false;
+    window.addEventListener(
+        "DOMContentLoaded",
+        function () {
 
+            setTimeout(
+                function () {
 
+                    HalDoSystemLoader.init();
 
-    },
+                },
+                250
+            );
 
+        }
+    );
 
-
-
-
-
-
-    start:function(){
-
-
-
-        console.log(
-        "🚀 HalDo System Loader startet"
-        );
-
-
-
-        this.check(
-        "Kernel",
-        window.HalDoKernel
-        );
-
-
-
-        this.check(
-        "System Manager",
-        window.HalDoSystem
-        );
-
-
-
-        this.check(
-        "Module Manager",
-        window.HalDoModuleManager
-        );
-
-
-
-        this.check(
-        "App Manager",
-        window.HalDoAppManager
-        );
-
-
-
-        this.check(
-        "AI Core",
-        window.HalDoAICore
-        );
-
-
-
-        this.check(
-        "Status Controller",
-        window.HalDoStatus
-        );
-
-
-
-
-
-        this.status =
-        "ready";
-
-
-
-        console.log(
-        "🟢 HalDo AI OS System bereit"
-        );
-
-
-
-    },
-
-
-
-
-
-
-
-    getStatus:function(){
-
-
-        return {
-
-
-            status:
-            this.status,
-
-
-            services:
-            this.services
-
-
-
-        };
-
-
-    }
-
-
-
-
-};
-
-
-
-
-
-
-
-
-
-window.HalDoSystemLoader =
-HalDoSystemLoader;
-
-
-
-
-
-
-
-
-
-window.addEventListener(
-"load",
-function(){
-
-
-setTimeout(
-
-function(){
-
-
-HalDoSystemLoader.start();
-
-
-},
-
-500
-
-);
-
-
-
-});
+})();
