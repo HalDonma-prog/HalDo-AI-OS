@@ -30,30 +30,32 @@ content="#090D18">
 </head>
 
 
-
 <body>
 
 
-
-<!-- START SYSTEM -->
+<!-- START -->
 
 <section id="startup-screen"
 class="boot-screen">
 
 
-<img id="system-logo"
+
+<img
+
+id="system-logo"
 
 src="assets/logo/logo.svg"
 
 class="logo"
 
-
 alt="HalDo AI OS Logo">
+
 
 
 <h1>
 HalDo AI OS 18
 </h1>
+
 
 
 <p id="startup-message">
@@ -63,13 +65,14 @@ HalDo AI OS 18
 </p>
 
 
+
 </section>
 
 
 
 
 
-<!-- WILLKOMMEN -->
+<!-- WELCOME -->
 
 <section id="welcome-screen"
 
@@ -81,7 +84,7 @@ style="display:none;">
 
 <h1>
 
-Willkommen bei
+👋 Willkommen bei
 
 <br>
 
@@ -99,8 +102,23 @@ Professional Ultimate Foundation
 
 
 
-<button
-onclick="openDesktop()">
+<p id="system-time">
+
+Systemzeit wird geladen...
+
+</p>
+
+
+
+<p>
+
+🟢 System bereit
+
+</p>
+
+
+
+<button onclick="openDesktop()">
 
 🚀 Hauptmenü öffnen
 
@@ -116,7 +134,7 @@ onclick="openDesktop()">
 
 
 
-<!-- HAUPTMENÜ -->
+<!-- DESKTOP -->
 
 <section id="desktop"
 
@@ -133,8 +151,8 @@ src="assets/logo/logo.svg"
 
 class="logo"
 
+alt="HalDo AI OS Logo">
 
-alt="Logo">
 
 
 <h1>
@@ -144,7 +162,22 @@ HalDo AI OS 18
 </h1>
 
 
+
+<p>
+
+Professional Ultimate Foundation
+
+</p>
+
+
+
+<p id="desktop-time">
+
+</p>
+
+
 </header>
+
 
 
 
@@ -154,11 +187,14 @@ HalDo AI OS 18
 <main class="main-menu">
 
 
+
 <h2>
 
-Hauptmenü
+🚀 Hauptmenü
 
 </h2>
+
+
 
 
 
@@ -171,6 +207,7 @@ Hauptmenü
 📊 Dashboard
 
 </button>
+
 
 
 
@@ -218,7 +255,9 @@ Hauptmenü
 
 
 
+
 </div>
+
 
 
 </main>
@@ -247,30 +286,90 @@ function openDesktop(){
 
 document.getElementById(
 "welcome-screen"
-).style.display="none";
+)
+.style.display="none";
 
 
 
+let desktop =
 document.getElementById(
 "desktop"
-).style.display="block";
+);
+
+
+
+desktop.style.display="block";
 
 
 }
-
-
 
 
 
 function openPage(page){
 
 
-window.location.href =
-page;
+window.location.href=page;
 
 
 }
 
+
+
+
+
+function updateTime(){
+
+
+let now =
+new Date();
+
+
+
+let time =
+now.toLocaleTimeString(
+"de-DE"
+);
+
+
+
+let a =
+document.getElementById(
+"system-time"
+);
+
+
+
+let b =
+document.getElementById(
+"desktop-time"
+);
+
+
+
+if(a)
+a.innerHTML =
+"🕒 " + time;
+
+
+
+if(b)
+b.innerHTML =
+"🕒 " + time;
+
+
+
+}
+
+
+
+setInterval(
+updateTime,
+1000
+);
+
+
+
+updateTime();
 
 
 </script>
