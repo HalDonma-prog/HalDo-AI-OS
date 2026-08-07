@@ -2,115 +2,177 @@
 ========================================
 
 HalDo AI OS 18
-Kernel Core
+Kernel Foundation
 
 Version:
 18.0.0
 
-Main System Kernel
+System Core Controller
 
 ========================================
 */
 
 
-const HalDoKernel = {
+const Kernel = {
 
 
     name:
-    "HalDo AI OS Kernel",
+    "HalDo Kernel",
 
 
     version:
     "18.0.0",
 
 
-    state:
+    status:
     "offline",
+
+
+    components:
+    {},
+
+
+
+    initialize(){
+
+
+        console.log(
+            "🧠 Kernel Initialisierung..."
+        );
+
+
+        this.status =
+        "starting";
+
+
+        this.registerCoreComponents();
+
+
+        this.start();
+
+
+
+    },
+
+
+
+    registerCoreComponents(){
+
+
+        this.components = {
+
+
+            eventBus:
+            typeof EventBus !== "undefined",
+
+
+            logger:
+            typeof Logger !== "undefined",
+
+
+            config:
+            typeof ConfigManager !== "undefined"
+
+
+        };
+
+
+
+        console.log(
+            "🧩 Kernel Komponenten:",
+            this.components
+        );
+
+
+
+    },
 
 
 
     start(){
 
 
-        console.log(
-            "⚙️ Kernel Start..."
-        );
-
-
-        this.state =
+        this.status =
         "active";
 
 
-        this.updateScreen();
 
+        if(
+            typeof Logger !== "undefined"
+        ){
 
-        this.report();
-
-
-    },
-
-
-
-    updateScreen(){
-
-
-        const status =
-        document.getElementById(
-            "status"
-        );
-
-
-
-        if(status){
-
-
-            status.innerHTML =
-            "🟢 Kernel aktiv - System wird geladen";
+            Logger.info(
+                "Kernel erfolgreich gestartet"
+            );
 
 
         }
 
 
-    },
+
+        if(
+            typeof EventBus !== "undefined"
+        ){
+
+            EventBus.emit(
+                "kernel.ready",
+                {
+
+                    version:
+                    this.version
+
+                }
+
+            );
 
 
+        }
 
-    report(){
 
 
         console.log(
-            "===================="
+            "🧠 HalDo AI OS 18 Kernel aktiv"
         );
 
-
-        console.log(
-            "⚙️",
-            this.name
-        );
-
-
-        console.log(
-            "Version:",
-            this.version
-        );
-
-
-        console.log(
-            "Status:",
-            this.state
-        );
-
-
-        console.log(
-            "===================="
-        );
 
 
     },
 
 
 
-    getInfo(){
+    registerComponent(
+        name,
+        component
+    ){
+
+
+        this.components[name]
+        =
+        component;
+
+
+
+        console.log(
+            "🧩 Komponente registriert:",
+            name
+        );
+
+
+    },
+
+
+
+    getComponent(name){
+
+
+        return this.components[name];
+
+
+    },
+
+
+
+    getStatus(){
 
 
         return {
@@ -124,8 +186,12 @@ const HalDoKernel = {
             this.version,
 
 
-            state:
-            this.state
+            status:
+            this.status,
+
+
+            components:
+            this.components
 
 
         };
@@ -140,6 +206,6 @@ const HalDoKernel = {
 
 
 
-// Kernel automatisch starten
+// Kernel starten
 
-HalDoKernel.start();
+Kernel.initialize();
