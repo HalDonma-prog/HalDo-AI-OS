@@ -2,22 +2,22 @@
 ========================================
 
 HalDo AI OS 18
-Engine Foundation
+System Engine
 
 Version:
 18.0.0
 
-System Orchestration Layer
+System Coordination Layer
 
 ========================================
 */
 
 
-const HalDoEngine = {
+const EngineSystem = {
 
 
     name:
-    "HalDo System Engine",
+    "HalDo Engine",
 
 
     version:
@@ -28,8 +28,9 @@ const HalDoEngine = {
     "offline",
 
 
-    systems:
-    {},
+
+    services:
+    [],
 
 
 
@@ -37,7 +38,7 @@ const HalDoEngine = {
 
 
         console.log(
-            "⚙️ Engine Initialisierung..."
+            "🧠 Engine Initialisierung..."
         );
 
 
@@ -45,56 +46,44 @@ const HalDoEngine = {
         "starting";
 
 
-        this.connectSystems();
+        this.updateStatus(
+            "🔵 System Engine startet..."
+        );
 
 
-        this.start();
-
+        this.loadServices();
 
 
     },
 
 
 
-    connectSystems(){
+    loadServices(){
 
 
-        this.systems = {
+        this.services = [
 
 
-            kernel:
-            typeof Kernel !== "undefined",
+            "System Manager",
+
+            "Module Manager",
+
+            "Service Manager",
+
+            "Update Manager",
+
+            "Status Center"
 
 
-            eventBus:
-            typeof EventBus !== "undefined",
-
-
-            logger:
-            typeof Logger !== "undefined",
-
-
-            config:
-            typeof ConfigManager !== "undefined"
-
-
-
-        };
+        ];
 
 
 
         console.log(
-            "⚙️ Engine Verbindungen:",
-            this.systems
+            "⚙️ Dienste vorbereitet:",
+            this.services
         );
 
-
-
-    },
-
-
-
-    start(){
 
 
         this.status =
@@ -102,13 +91,28 @@ const HalDoEngine = {
 
 
 
+        this.updateStatus(
+            "🟢 System Engine aktiv"
+        );
+
+
+
+        this.connect();
+
+
+    },
+
+
+
+    connect(){
+
+
         if(
-            typeof Logger !== "undefined"
+            typeof SystemManager !== "undefined"
         ){
 
-            Logger.info(
-                "Engine erfolgreich gestartet"
-            );
+
+            SystemManager.initialize();
 
 
         }
@@ -116,18 +120,12 @@ const HalDoEngine = {
 
 
         if(
-            typeof EventBus !== "undefined"
+            typeof ModuleManager !== "undefined"
         ){
 
-            EventBus.emit(
-                "engine.ready",
-                {
 
-                    version:
-                    this.version
-
-                }
-
+            console.log(
+                "🧩 Module System bereit"
             );
 
 
@@ -136,30 +134,26 @@ const HalDoEngine = {
 
 
         console.log(
-            "⚙️ HalDo AI OS 18 Engine aktiv"
+            "🔗 Engine Verbindungen hergestellt"
         );
-
 
 
     },
 
 
 
-    registerSystem(
-        name,
-        system
-    ){
+    registerService(service){
 
 
-        this.systems[name]
-        =
-        system;
+        this.services.push(
+            service
+        );
 
 
 
         console.log(
-            "⚙️ System registriert:",
-            name
+            "➕ Service registriert:",
+            service
         );
 
 
@@ -167,10 +161,10 @@ const HalDoEngine = {
 
 
 
-    getSystem(name){
+    getServices(){
 
 
-        return this.systems[name];
+        return this.services;
 
 
     },
@@ -195,8 +189,8 @@ const HalDoEngine = {
             this.status,
 
 
-            systems:
-            this.systems
+            services:
+            this.services
 
 
         };
@@ -211,6 +205,6 @@ const HalDoEngine = {
 
 
 
-// Engine starten
-
-HalDoEngine.initialize();
+console.log(
+    "🧠 HalDo AI OS 18 Engine geladen"
+);
