@@ -14,12 +14,11 @@ Version 18.0.0
     const HalDoKernel = {
 
         name: "HalDo Kernel",
-
         version: "18.0.0",
 
         status: "starting",
 
-        bootTime: null,
+        startedAt: null,
 
         modules: {},
 
@@ -28,22 +27,23 @@ Version 18.0.0
 
         init() {
 
-            this.bootTime =
-                new Date();
+            if (this.status === "running") {
+                return true;
+            }
 
-            this.status =
-                "running";
+            this.startedAt = new Date();
+            this.status = "running";
 
             console.log(
                 "🔵 HalDo Kernel gestartet"
             );
 
             this.emit(
-                "kernel:ready"
+                "kernel:ready",
+                this.getStatus()
             );
 
             return true;
-
         },
 
 
@@ -53,83 +53,86 @@ Version 18.0.0
         ) {
 
             if (!name) {
-
                 return false;
-
             }
 
             this.modules[name] =
                 module || {};
 
             console.log(
-                "🧩 Kernel Modul:",
+                "🧩 Kernel Modul registriert:",
                 name
             );
 
             this.emit(
                 "module:registered",
+                {
+                    name: name,
+                    module: module
+                }
+            );
+
+            return true;
+        },
+
+
+        unregisterModule(name) {
+
+            if (!this.modules[name]) {
+                return false;
+            }
+
+            delete this.modules[name];
+
+            this.emit(
+                "module:unregistered",
                 name
             );
 
             return true;
-
         },
 
 
         getModule(name) {
 
             return (
-                this.modules[name]
-                ||
+                this.modules[name] ||
                 null
             );
-
         },
 
 
         hasModule(name) {
 
             return !!this.modules[name];
-
         },
 
 
-        on(
-            event,
-            callback
-        ) {
+        on(event, callback) {
 
             if (
                 typeof callback !==
                 "function"
             ) {
-
-                return;
-
+                return false;
             }
 
             if (!this.events[event]) {
-
-                this.events[event] =
-                    [];
-
+                this.events[event] = [];
             }
 
-            this.events[event]
-                .push(callback);
+            this.events[event].push(
+                callback
+            );
 
+            return true;
         },
 
 
-        emit(
-            event,
-            data
-        ) {
+        emit(event, data) {
 
             const listeners =
-                this.events[event]
-                ||
-                [];
+                this.events[event] || [];
 
             listeners.forEach(
                 function (callback) {
@@ -138,8 +141,7 @@ Version 18.0.0
 
                         callback(data);
 
-                    }
-                    catch (error) {
+                    } catch (error) {
 
                         console.error(
                             "HalDo Kernel Event Error:",
@@ -158,17 +160,19 @@ Version 18.0.0
 
             return {
 
-                name:
-                    this.name,
+                name: this.name,
 
-                version:
-                    this.version,
+                version: this.version,
 
-                status:
-                    this.status,
+                status: this.status,
 
-                bootTime:
-                    this.bootTime,
+                startedAt:
+                    this.startedAt,
+
+                moduleCount:
+                    Object.keys(
+                        this.modules
+                    ).length,
 
                 modules:
                     Object.keys(
@@ -190,7 +194,14 @@ Version 18.0.0
         "DOMContentLoaded",
         function () {
 
-            HalDoKernel.init();
+            setTimeout(
+                function () {
+
+                    HalDoKernel.init();
+
+                },
+                25
+            );
 
         }
     );
