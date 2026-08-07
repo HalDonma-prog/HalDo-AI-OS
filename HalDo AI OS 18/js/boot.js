@@ -1,30 +1,123 @@
-// =================================
-// HalDo AI OS 18
-// Boot Loader
-// =================================
+/*
+========================================
+
+HalDo AI OS 18
+Boot System
+
+Version:
+18.0.0
+
+Start Loader
+
+========================================
+*/
 
 
-console.log(
-"🟡 HalDo AI OS 18 Bootloader gestartet"
-);
+const HalDoBoot = {
 
 
-function updateStatus(text){
-
-const status =
-document.getElementById("status");
+    version: "18.0.0",
 
 
-if(status){
-
-status.innerHTML = text;
-
-}
-
-}
+    status: "initializing",
 
 
 
-updateStatus(
-"🔵 Kernel wird vorbereitet..."
-);
+    start(){
+
+
+        console.log(
+            "🚀 HalDo AI OS 18 Boot gestartet"
+        );
+
+
+        this.updateScreen(
+            "🔵 Boot System wird geladen..."
+        );
+
+
+        this.status =
+        "running";
+
+
+        this.prepareKernel();
+
+
+    },
+
+
+
+    prepareKernel(){
+
+
+        console.log(
+            "🔵 Vorbereitung Kernel..."
+        );
+
+
+        this.updateScreen(
+            "🔵 Kernel Vorbereitung läuft..."
+        );
+
+
+    },
+
+
+
+    updateScreen(message){
+
+
+        const status =
+        document.getElementById(
+            "status"
+        );
+
+
+
+        if(status){
+
+
+            status.innerHTML =
+            message;
+
+
+        }
+
+
+    },
+
+
+
+    getStatus(){
+
+
+        return {
+
+
+            system:
+            "HalDo AI OS 18",
+
+
+            version:
+            this.version,
+
+
+            boot:
+            this.status
+
+
+        };
+
+
+    }
+
+
+};
+
+
+
+
+
+// Start Boot System
+
+HalDoBoot.start();
