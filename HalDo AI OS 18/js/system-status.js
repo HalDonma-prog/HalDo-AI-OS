@@ -1,47 +1,27 @@
-// ======================================
-// HalDo AI OS 18
-// System Status Center
-// Version 18.0.0
-// ======================================
+/*
+========================================
 
-console.log("🚀 HalDo AI OS 18 System Status geladen");
+HalDo AI OS 18
+System Status Center
+
+Version:
+18.0.0
+
+System Monitoring
+
+========================================
+*/
+
+
 const SystemStatus = {
 
 
-    version: "18.0.0",
+    name:
+    "HalDo AI OS Status Center",
 
 
-    status: {
-
-
-        kernel: "starting",
-
-        system: "starting",
-
-        modules: "starting",
-
-        updates: "starting"
-
-
-    },
-
-
-
-    setStatus(name, value){
-
-
-        this.status[name] = value;
-
-
-        console.log(
-            "🟢",
-            name,
-            ":",
-            value
-        );
-
-
-    },
+    version:
+    "18.0.0",
 
 
 
@@ -49,67 +29,190 @@ const SystemStatus = {
 
 
         console.log(
-            "🔵 System Status Center gestartet"
+            "📊 System Status Center gestartet"
         );
 
 
-        this.setStatus(
-            "kernel",
-            "active"
-        );
-
-
-        this.setStatus(
-            "system",
-            "ready"
-        );
-
-
-        this.setStatus(
-            "modules",
-            "loaded"
-        );
-
-
-        this.setStatus(
-            "updates",
-            "ready"
-        );
-
-
-        this.show();
+        this.update();
 
 
     },
 
 
 
-    show(){
+    update(){
 
 
-        console.log(
-            "===================="
+        const kernel =
+        this.getKernelStatus();
+
+
+        const system =
+        this.getSystemStatus();
+
+
+        const modules =
+        this.getModuleStatus();
+
+
+        const updates =
+        this.getUpdateStatus();
+
+
+
+        this.render({
+
+            kernel,
+            system,
+            modules,
+            updates
+
+        });
+
+
+
+    },
+
+
+
+    getKernelStatus(){
+
+
+        if(
+            typeof HalDoKernel !== "undefined"
+        ){
+
+            return "🟢 Aktiv";
+
+        }
+
+
+        return "🔴 Nicht geladen";
+
+
+    },
+
+
+
+    getSystemStatus(){
+
+
+        if(
+            typeof HalDoSystem !== "undefined"
+        ){
+
+            return HalDoSystem.state;
+
+        }
+
+
+        return "unknown";
+
+
+    },
+
+
+
+    getModuleStatus(){
+
+
+        if(
+            typeof ModuleManager !== "undefined"
+        ){
+
+            return ModuleManager.modules.length
+            + " Module";
+
+        }
+
+
+        return "0 Module";
+
+
+    },
+
+
+
+    getUpdateStatus(){
+
+
+        if(
+            typeof UpdateManager !== "undefined"
+        ){
+
+            return UpdateManager.status;
+
+        }
+
+
+        return "unknown";
+
+
+    },
+
+
+
+    render(data){
+
+
+        const box =
+        document.getElementById(
+            "system-status"
         );
 
 
+
+        if(box){
+
+
+            box.innerHTML = `
+
+
+            <h2>
+            📊 System Status
+            </h2>
+
+
+            <p>
+            ⚙️ Kernel:
+            ${data.kernel}
+            </p>
+
+
+            <p>
+            🖥️ System:
+            ${data.system}
+            </p>
+
+
+            <p>
+            🧩 Module:
+            ${data.modules}
+            </p>
+
+
+            <p>
+            🔄 Updates:
+            ${data.updates}
+            </p>
+
+
+            <p>
+            Version:
+            ${this.version}
+            </p>
+
+
+            `;
+
+
+        }
+
+
+
         console.log(
-            "🤖 HalDo AI OS 18"
-        );
-
-
-        console.log(
-            "Version:",
-            this.version
-        );
-
-
-        console.log(
-            this.status
-        );
-
-
-        console.log(
-            "===================="
+            "📊 Status aktualisiert",
+            data
         );
 
 
@@ -119,5 +222,9 @@ const SystemStatus = {
 };
 
 
+
+
+
+// Status Center starten
 
 SystemStatus.initialize();
