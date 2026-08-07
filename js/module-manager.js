@@ -1,279 +1,189 @@
 /*
-=====================================
-
+==========================================
 HalDo AI OS 18
-Module Manager
-
+MODULE MANAGER
 Professional Ultimate Foundation
-
-Version:
-18.0.0
-
-=====================================
+Version 18.0.0
+==========================================
 */
-
-
-const HalDoModuleManager = {
-
-
-    modules:{},
-
-
-
-
-
-
-    register:function(
-        name,
-        data
-    ){
-
-
-        this.modules[name] = {
-
-
-            name:name,
-
-
-            status:"inactive",
-
-
-            version:
-            data.version || "1.0.0",
-
-
-            description:
-            data.description || "HalDo Modul"
-
-
-
-        };
-
-
-
-        console.log(
-        "🧩 Modul registriert:",
-        name
-        );
-
-
-    },
-
-
-
-
-
-
-
-    activate:function(name){
-
-
-        if(
-        this.modules[name]
-        ){
-
-
-            this.modules[name]
-            .status =
-            "active";
-
-
-
+(function () {
+    "use strict";
+    const HalDoModuleManager = {
+        version:
+            "18.0.0",
+        modules: {},
+        status:
+            "starting",
+        init() {
+            this.status =
+                "running";
             console.log(
-            "🟢 Modul aktiv:",
-            name
+                "🧩 HalDo Module Manager gestartet"
             );
-
-
-        }
-
-
-    },
-
-
-
-
-
-
-
-    deactivate:function(name){
-
-
-        if(
-        this.modules[name]
-        ){
-
-
-            this.modules[name]
-            .status =
-            "inactive";
-
-
-
+            this.detectCoreModules();
+            if (
+                window.HalDoKernel
+            ) {
+                HalDoKernel.registerModule(
+                    "module-manager",
+                    this
+                );
+            }
+            return true;
+        },
+        detectCoreModules() {
+            this.registerDetected(
+                "kernel",
+                "HalDoKernel"
+            );
+            this.registerDetected(
+                "system",
+                "HalDoSystem"
+            );
+            this.registerDetected(
+                "storage",
+                "HalDoStorage"
+            );
+            this.registerDetected(
+                "ai",
+                "HalDoAI"
+            );
+            this.registerDetected(
+                "memory",
+                "HalDoMemory"
+            );
+            this.registerDetected(
+                "speech",
+                "HalDoSpeech"
+            );
+            this.registerDetected(
+                "voice",
+                "HalDoVoice"
+            );
+            this.registerDetected(
+                "language",
+                "HalDoLanguageSystem"
+            );
+            this.registerDetected(
+                "commands",
+                "HalDoCommands"
+            );
+        },
+        registerDetected(
+            id,
+            globalName
+        ) {
+            if (
+                typeof window[globalName] ===
+                "undefined"
+            ) {
+                this.modules[id] = {
+                    id:
+                        id,
+                    global:
+                        globalName,
+                    status:
+                        "not-loaded"
+                };
+                return false;
+            }
+            this.modules[id] = {
+                id:
+                    id,
+                global:
+                    globalName,
+                status:
+                    "loaded",
+                object:
+                    window[globalName]
+            };
             console.log(
-            "🟡 Modul deaktiviert:",
-            name
+                "🟢 Modul geladen:",
+                id
             );
-
-
+            return true;
+        },
+        register(
+            id,
+            module
+        ) {
+            if (!id) {
+                return false;
+            }
+            this.modules[id] = {
+                id:
+                    id,
+                global:
+                    null,
+                status:
+                    "loaded",
+                object:
+                    module
+            };
+            if (
+                window.HalDoKernel
+            ) {
+                HalDoKernel.registerModule(
+                    id,
+                    module
+                );
+            }
+            return true;
+        },
+        get(id) {
+            return (
+                this.modules[id]
+                ||
+                null
+            );
+        },
+        isLoaded(id) {
+            return (
+                this.modules[id]
+                &&
+                this.modules[id]
+                    .status ===
+                "loaded"
+            );
+        },
+        refresh() {
+            this.detectCoreModules();
+            return this.getStatus();
+        },
+        getStatus() {
+            const list =
+                Object.values(
+                    this.modules
+                );
+            const loaded =
+                list.filter(
+                    module =>
+                        module.status ===
+                        "loaded"
+                ).length;
+            return {
+                status:
+                    this.status,
+                loaded:
+                    loaded,
+                total:
+                    list.length,
+                modules:
+                    this.modules
+            };
         }
-
-
-    },
-
-
-
-
-
-
-
-    getModules:function(){
-
-
-        return this.modules;
-
-
-    },
-
-
-
-
-
-
-
-    getStatus:function(){
-
-
-        return {
-
-
-            total:
-            Object.keys(
-                this.modules
-            ).length,
-
-
-            modules:
-            this.modules
-
-
-
-        };
-
-
-    }
-
-
-
-
-
-};
-
-
-
-
-
-
-
-
-
-window.HalDoModuleManager =
-HalDoModuleManager;
-
-
-
-
-
-
-
-
-
-window.addEventListener(
-"load",
-function(){
-
-
-
-HalDoModuleManager.register(
-
-"AI Core",
-
-{
-
-version:"18.0.0",
-
-description:
-"KI Zentrale"
-
-}
-
-);
-
-
-
-
-
-HalDoModuleManager.register(
-
-"Health Center",
-
-{
-
-version:"1.0.0",
-
-description:
-"Körper Lernsystem"
-
-}
-
-);
-
-
-
-
-
-HalDoModuleManager.register(
-
-"Learning Center",
-
-{
-
-version:"1.0.0",
-
-description:
-"Wissenssystem"
-
-}
-
-);
-
-
-
-
-
-HalDoModuleManager.register(
-
-"Developer Center",
-
-{
-
-version:"1.0.0",
-
-description:
-"Software Entwicklung"
-
-}
-
-);
-
-
-
-
-
-console.log(
-"🧩 Module Manager bereit"
-);
-
-
-
-});
+    };
+    window.HalDoModuleManager =
+        HalDoModuleManager;
+    window.addEventListener(
+        "DOMContentLoaded",
+        function () {
+            setTimeout(
+                function () {
+                    HalDoModuleManager.init();
+                },
+                100
+            );
+        }
+    );
+})();
