@@ -7,17 +7,17 @@ Security Foundation
 Version:
 18.0.0
 
-System Protection Layer
+System Security Layer
 
 ========================================
 */
 
 
-const SecurityCore = {
+const Security = {
 
 
     name:
-    "HalDo AI Security",
+    "HalDo Security System",
 
 
     version:
@@ -29,6 +29,10 @@ const SecurityCore = {
 
 
     permissions:
+    {},
+
+
+    logs:
     [],
 
 
@@ -37,48 +41,156 @@ const SecurityCore = {
 
 
         console.log(
-            "🔐 Security Core Initialisierung..."
+            "🔐 Security System Initialisierung..."
         );
+
+
+        this.status =
+        "starting";
+
+
+        this.loadDefaults();
+
+
+        this.start();
+
+
+    },
+
+
+
+    loadDefaults(){
+
+
+        this.permissions = {
+
+
+            system:
+            "admin",
+
+
+            modules:
+            "allowed",
+
+
+            apps:
+            "allowed"
+
+
+        };
+
+
+        console.log(
+            "🔐 Standard Berechtigungen geladen"
+        );
+
+
+    },
+
+
+
+    start(){
 
 
         this.status =
         "active";
 
 
-        this.loadDefaultPermissions();
+
+        if(
+            typeof Logger !== "undefined"
+        ){
+
+            Logger.info(
+                "Security System gestartet"
+            );
 
 
-        this.report();
+        }
+
+
+
+        if(
+            typeof EventBus !== "undefined"
+        ){
+
+            EventBus.emit(
+                "security.ready",
+                {
+
+                    status:
+                    this.status
+
+                }
+
+            );
+
+        }
+
+
+
+        console.log(
+            "🔐 HalDo Security aktiv"
+        );
 
 
     },
 
 
 
-    loadDefaultPermissions(){
+    checkPermission(
+        area
+    ){
 
 
-        this.permissions = [
+        const result =
+        this.permissions[area]
+        !== undefined;
 
 
-            "system.start",
+
+        this.logs.push({
+
+            action:
+            "permission-check",
+
+            area:
+            area,
+
+            result:
+            result,
+
+            time:
+            new Date()
+            .toISOString()
 
 
-            "module.load",
+        });
 
 
-            "update.check",
+
+        return result;
 
 
-            "ai.process"
+    },
 
 
-        ];
+
+    setPermission(
+        area,
+        value
+    ){
+
+
+        this.permissions[area]
+        =
+        value;
 
 
 
         console.log(
-            "🔐 Standard-Berechtigungen geladen"
+            "🔐 Berechtigung geändert:",
+            area
         );
 
 
@@ -86,80 +198,10 @@ const SecurityCore = {
 
 
 
-    checkPermission(permission){
+    getLogs(){
 
 
-        const allowed =
-        this.permissions.includes(
-            permission
-        );
-
-
-
-        console.log(
-
-            allowed
-            ? "🟢 Zugriff erlaubt:"
-            : "🔴 Zugriff verweigert:",
-
-            permission
-
-        );
-
-
-
-        return allowed;
-
-
-    },
-
-
-
-    protect(module){
-
-
-        console.log(
-            "🛡️ Prüfe Modul:",
-            module
-        );
-
-
-        return true;
-
-
-    },
-
-
-
-    report(){
-
-
-        console.log(
-            "===================="
-        );
-
-
-        console.log(
-            "🔐",
-            this.name
-        );
-
-
-        console.log(
-            "Version:",
-            this.version
-        );
-
-
-        console.log(
-            "Status:",
-            this.status
-        );
-
-
-        console.log(
-            "===================="
-        );
+        return this.logs;
 
 
     },
@@ -202,4 +244,4 @@ const SecurityCore = {
 
 // Security starten
 
-SecurityCore.initialize();
+Security.initialize();
