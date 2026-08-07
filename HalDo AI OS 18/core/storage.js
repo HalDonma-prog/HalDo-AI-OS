@@ -28,7 +28,8 @@ const StorageSystem = {
     "offline",
 
 
-    files:
+
+    storage:
     {},
 
 
@@ -37,7 +38,7 @@ const StorageSystem = {
 
 
         console.log(
-            "💾 Storage System Initialisierung..."
+            "💾 Storage System startet..."
         );
 
 
@@ -45,14 +46,14 @@ const StorageSystem = {
         "starting";
 
 
-        this.start();
+        this.connect();
 
 
     },
 
 
 
-    start(){
+    connect(){
 
 
         this.status =
@@ -60,39 +61,8 @@ const StorageSystem = {
 
 
 
-        if(
-            typeof Logger !== "undefined"
-        ){
-
-            Logger.info(
-                "Storage System gestartet"
-            );
-
-        }
-
-
-
-        if(
-            typeof EventBus !== "undefined"
-        ){
-
-            EventBus.emit(
-                "storage.ready",
-                {
-
-                    status:
-                    this.status
-
-                }
-
-            );
-
-        }
-
-
-
         console.log(
-            "💾 HalDo Storage bereit"
+            "💾 Storage System aktiv"
         );
 
 
@@ -100,20 +70,27 @@ const StorageSystem = {
 
 
 
-    save(
-        name,
-        data
-    ){
+    saveFile(name,content){
 
 
-        this.files[name]
-        =
-        data;
+        this.storage[name] =
+        {
+
+
+            content:
+            content,
+
+
+            created:
+            new Date()
+
+
+        };
 
 
 
         console.log(
-            "💾 Datei gespeichert:",
+            "📁 Datei gespeichert:",
             name
         );
 
@@ -126,29 +103,25 @@ const StorageSystem = {
 
 
 
-    read(
-        name
-    ){
+    loadFile(name){
 
 
-        return this.files[name];
+        return this.storage[name];
 
 
     },
 
 
 
-    delete(
-        name
-    ){
+    deleteFile(name){
 
 
-        delete this.files[name];
+        delete this.storage[name];
 
 
 
         console.log(
-            "💾 Datei gelöscht:",
+            "🗑️ Datei gelöscht:",
             name
         );
 
@@ -157,11 +130,21 @@ const StorageSystem = {
 
 
 
-    list(){
+    exists(name){
+
+
+        return name in this.storage;
+
+
+    },
+
+
+
+    listFiles(){
 
 
         return Object.keys(
-            this.files
+            this.storage
         );
 
 
@@ -172,12 +155,13 @@ const StorageSystem = {
     clear(){
 
 
-        this.files = {};
+        this.storage =
+        {};
 
 
 
         console.log(
-            "💾 Speicher geleert"
+            "🧹 Speicher geleert"
         );
 
 
@@ -205,7 +189,7 @@ const StorageSystem = {
 
             files:
             Object.keys(
-                this.files
+                this.storage
             ).length
 
 
@@ -224,3 +208,9 @@ const StorageSystem = {
 // Storage starten
 
 StorageSystem.initialize();
+
+
+
+console.log(
+    "💾 HalDo Storage geladen"
+);
