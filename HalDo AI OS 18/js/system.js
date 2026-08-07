@@ -2,12 +2,12 @@
 ========================================
 
 HalDo AI OS 18
-System Manager
+System Manager Foundation
 
 Version:
 18.0.0
 
-Main System Controller
+Operating System Management Layer
 
 ========================================
 */
@@ -17,7 +17,7 @@ const HalDoSystem = {
 
 
     name:
-    "HalDo AI OS System",
+    "HalDo System Manager",
 
 
     version:
@@ -25,11 +25,11 @@ const HalDoSystem = {
 
 
     state:
-    "starting",
+    "offline",
 
 
-    modules:
-    [],
+    components:
+    {},
 
 
 
@@ -37,81 +37,54 @@ const HalDoSystem = {
 
 
         console.log(
-            "🖥️ System Manager gestartet"
+            "🖥️ System Manager Initialisierung..."
         );
 
 
         this.state =
-        "initializing";
+        "starting";
 
 
-        this.checkKernel();
+        this.connect();
 
 
-        this.prepareModules();
+        this.start();
 
-
-        this.finish();
 
 
     },
 
 
 
-    checkKernel(){
+    connect(){
 
 
-        if(
-            typeof HalDoKernel !== "undefined"
-        ){
+        this.components = {
 
 
-            console.log(
-                "🟢 Kernel Verbindung OK"
-            );
+            kernel:
+            typeof Kernel !== "undefined",
 
 
-            this.state =
-            "kernel-connected";
+            engine:
+            typeof HalDoEngine !== "undefined",
 
 
-        }
-
-        else {
-
-
-            console.error(
-                "🔴 Kernel nicht gefunden"
-            );
+            logger:
+            typeof Logger !== "undefined",
 
 
-        }
+            eventBus:
+            typeof EventBus !== "undefined"
 
 
-    },
+        };
 
-
-
-    prepareModules(){
 
 
         console.log(
-            "🔵 Module Vorbereitung..."
-        );
-
-
-        this.modules.push(
-            "Core"
-        );
-
-
-        this.modules.push(
-            "Security"
-        );
-
-
-        this.modules.push(
-            "AI Foundation"
+            "🖥️ System Verbindungen:",
+            this.components
         );
 
 
@@ -119,44 +92,119 @@ const HalDoSystem = {
 
 
 
-    finish(){
+    start(){
 
 
         this.state =
         "ready";
 
 
-        this.updateScreen();
+
+        if(
+            typeof Logger !== "undefined"
+        ){
+
+            Logger.info(
+                "System Manager bereit"
+            );
+
+
+        }
+
+
+
+        if(
+            typeof EventBus !== "undefined"
+        ){
+
+            EventBus.emit(
+                "system.ready",
+                {
+
+                    status:
+                    this.state
+
+
+                }
+
+            );
+
+
+        }
+
 
 
         console.log(
-            "🟢 System bereit"
+            "🟢 HalDo AI OS 18 System bereit"
         );
+
 
 
     },
 
 
 
-    updateScreen(){
+    setState(state){
 
 
-        const status =
-        document.getElementById(
-            "status"
-        );
+        this.state =
+        state;
 
 
 
-        if(status){
+        if(
+            typeof Logger !== "undefined"
+        ){
 
-
-            status.innerHTML =
-
-            "🟢 HalDo AI OS 18 System bereit";
+            Logger.info(
+                "System Status geändert: "
+                + state
+            );
 
 
         }
+
+
+
+        if(
+            typeof EventBus !== "undefined"
+        ){
+
+            EventBus.emit(
+                "system.status",
+                {
+
+                    state:
+                    state
+
+                }
+
+            );
+
+
+        }
+
+
+    },
+
+
+
+    registerComponent(
+        name,
+        component
+    ){
+
+
+        this.components[name]
+        =
+        component;
+
+
+
+        console.log(
+            "🧩 System Komponente registriert:",
+            name
+        );
 
 
     },
@@ -181,8 +229,8 @@ const HalDoSystem = {
             this.state,
 
 
-            modules:
-            this.modules
+            components:
+            this.components
 
 
         };
@@ -197,6 +245,6 @@ const HalDoSystem = {
 
 
 
-// System automatisch starten
+// System starten
 
 HalDoSystem.initialize();
