@@ -1,8 +1,7 @@
 /*
 ==========================================
 HalDo AI OS 18
-System Status Manager
-
+SYSTEM STATUS
 Professional Ultimate Foundation
 Version 18.0.0
 ==========================================
@@ -22,6 +21,7 @@ Version 18.0.0
 
         lastCheck: null,
 
+
         init() {
 
             this.check();
@@ -32,39 +32,89 @@ Version 18.0.0
 
         },
 
+
+        exists(name) {
+
+            return (
+                typeof window[name] !==
+                "undefined"
+            );
+
+        },
+
+
         check() {
 
             this.lastCheck =
                 new Date();
 
+
             this.modules = {
 
                 boot:
-                    this.exists("HalDoBoot"),
+                    this.exists(
+                        "HalDoBoot"
+                    ),
 
                 kernel:
-                    this.exists("HalDoKernel"),
+                    this.exists(
+                        "HalDoKernel"
+                    ),
 
                 system:
-                    this.exists("HalDoSystem"),
+                    this.exists(
+                        "HalDoSystem"
+                    ),
+
+                moduleManager:
+                    this.exists(
+                        "HalDoModuleManager"
+                    ),
+
+                appManager:
+                    this.exists(
+                        "HalDoAppManager"
+                    ),
+
+                storage:
+                    this.exists(
+                        "HalDoStorage"
+                    ),
 
                 ai:
-                    this.exists("HalDoAI"),
+                    this.exists(
+                        "HalDoAI"
+                    ),
+
+                aiEngine:
+                    this.exists(
+                        "HalDoAIEngine"
+                    ),
 
                 chat:
-                    this.exists("HalDoChat"),
+                    this.exists(
+                        "HalDoChat"
+                    ),
 
                 speech:
-                    this.exists("HalDoSpeech"),
+                    this.exists(
+                        "HalDoSpeech"
+                    ),
 
                 voice:
-                    this.exists("HalDoVoice"),
+                    this.exists(
+                        "HalDoVoice"
+                    ),
 
                 memory:
-                    this.exists("HalDoMemory"),
+                    this.exists(
+                        "HalDoMemory"
+                    ),
 
                 commands:
-                    this.exists("HalDoCommands"),
+                    this.exists(
+                        "HalDoCommands"
+                    ),
 
                 language:
                     this.exists(
@@ -73,18 +123,22 @@ Version 18.0.0
 
             };
 
+
             const values =
                 Object.values(
                     this.modules
                 );
 
+
             const loaded =
                 values.filter(
-                    value => value
+                    Boolean
                 ).length;
+
 
             const total =
                 values.length;
+
 
             if (loaded === total) {
 
@@ -105,47 +159,49 @@ Version 18.0.0
 
             }
 
+
             return this.getStatus();
 
         },
 
-        exists(name) {
 
-            return (
-                typeof window[name] !==
-                "undefined"
-            );
+        refresh() {
+
+            return this.check();
 
         },
 
+
         getStatus() {
+
+            const values =
+                Object.values(
+                    this.modules
+                );
 
             return {
 
                 state:
                     this.state,
 
+                loaded:
+                    values.filter(
+                        Boolean
+                    ).length,
+
+                total:
+                    values.length,
+
                 modules:
                     this.modules,
 
                 lastCheck:
-                    this.lastCheck,
-
-                loaded:
-                    Object.values(
-                        this.modules
-                    ).filter(
-                        value => value
-                    ).length,
-
-                total:
-                    Object.keys(
-                        this.modules
-                    ).length
+                    this.lastCheck
 
             };
 
         },
+
 
         isOnline() {
 
@@ -154,30 +210,27 @@ Version 18.0.0
                 "online"
             );
 
-        },
-
-        getModuleStatus(name) {
-
-            return !!this.modules[name];
-
-        },
-
-        refresh() {
-
-            return this.check();
-
         }
 
     };
 
+
     window.HalDoSystemStatus =
         HalDoSystemStatus;
+
 
     window.addEventListener(
         "DOMContentLoaded",
         function () {
 
-            HalDoSystemStatus.init();
+            setTimeout(
+                function () {
+
+                    HalDoSystemStatus.init();
+
+                },
+                300
+            );
 
         }
     );
