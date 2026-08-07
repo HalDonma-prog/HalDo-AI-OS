@@ -13,6 +13,7 @@ Version:
 */
 
 
+
 function startHalDoOS(){
 
 
@@ -31,79 +32,11 @@ function startHalDoOS(){
 
 
 
-    const message =
-    document.getElementById(
-        "startup-message"
-    );
-
-
-
-
-    if(!startup){
+    if(!startup || !welcome){
 
         return;
 
     }
-
-
-
-
-
-
-    setTimeout(()=>{
-
-
-        if(message){
-
-            message.innerHTML =
-            "🟡 HalDo AI OS wird gestartet...";
-
-        }
-
-
-
-    },1000);
-
-
-
-
-
-
-
-    setTimeout(()=>{
-
-
-        if(message){
-
-            message.innerHTML =
-            "🔵 Systemmodule werden geladen...";
-
-        }
-
-
-
-    },2500);
-
-
-
-
-
-
-
-    setTimeout(()=>{
-
-
-        if(message){
-
-            message.innerHTML =
-            "🟢 System bereit";
-
-        }
-
-
-
-    },4000);
-
 
 
 
@@ -119,16 +52,9 @@ function startHalDoOS(){
 
 
 
-        if(welcome){
-
-
-            welcome.classList.remove(
-                "hidden"
-            );
-
-
-        }
-
+        welcome.classList.remove(
+            "hidden"
+        );
 
 
 
@@ -139,7 +65,6 @@ function startHalDoOS(){
 
 
 }
-
 
 
 
