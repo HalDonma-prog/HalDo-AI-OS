@@ -4,7 +4,7 @@
 HalDo AI OS 18
 AI Chat System
 
-Professional Ultimate Foundation
+Memory Integration
 
 Version 18.0.0
 
@@ -19,7 +19,10 @@ const HalDoChat = {
 
 
 
+
+
     send(message){
+
 
 
         if(!message){
@@ -30,35 +33,50 @@ const HalDoChat = {
 
 
 
+
         this.history.push({
+
 
             user: message,
 
-            time:
-            new Date()
+
+            time: new Date()
+
 
         });
+
+
+
 
 
 
         let answer =
+
         "🤖 HalDo AI verarbeitet: "
+
         + message;
 
 
 
-        if(
-            window.HalDoAI
-        ){
+
+
+
+
+        if(window.HalDoAI){
 
 
             answer =
+
             HalDoAI.answer(
+
                 message
+
             );
 
 
         }
+
+
 
 
 
@@ -66,10 +84,12 @@ const HalDoChat = {
 
         this.history.push({
 
+
             ai: answer,
 
-            time:
-            new Date()
+
+            time: new Date()
+
 
         });
 
@@ -77,17 +97,45 @@ const HalDoChat = {
 
 
 
-        if(
-            window.HalDoVoice
-        ){
 
 
-            HalDoVoice.speak(
+        // Gespräch speichern
+
+        if(window.HalDoMemory){
+
+
+            HalDoMemory.addConversation(
+
+                message,
+
                 answer
+
             );
 
 
         }
+
+
+
+
+
+
+
+        // Antwort sprechen
+
+        if(window.HalDoVoice){
+
+
+            HalDoVoice.speak(
+
+                answer
+
+            );
+
+
+        }
+
+
 
 
 
@@ -98,6 +146,7 @@ const HalDoChat = {
 
 
     },
+
 
 
 
@@ -118,14 +167,40 @@ const HalDoChat = {
 
 
 
+    loadMemory(){
+
+
+        if(window.HalDoMemory){
+
+
+            return HalDoMemory.getConversations();
+
+
+        }
+
+
+        return [];
+
+
+    },
+
+
+
+
+
+
+
     clear(){
 
 
-        this.history = [];
+        this.history=[];
+
 
 
         console.log(
-        "🧹 Chat gelöscht"
+
+        "🧹 Chat Verlauf gelöscht"
+
         );
 
 
@@ -139,8 +214,11 @@ const HalDoChat = {
 
 
 
+
+
 window.HalDoChat =
 HalDoChat;
+
 
 
 
@@ -155,11 +233,11 @@ window.addEventListener(
 
 
 console.log(
-"💬 AI Chat System bereit"
-);
 
-
-
-}
+"💬 AI Chat + Memory bereit"
 
 );
+
+
+
+});
