@@ -4,117 +4,294 @@
 HalDo AI OS 18
 AI Engine
 
-Professional Ultimate Foundation
+Command Integration
 
 Version 18.0.0
 
 =====================================
 */
 
+
 const HalDoAI = {
 
-    version: "18.0.0",
 
-    name: "HalDo AI",
+    version:"18.0.0",
 
-    status: "ready",
 
-    language: "de",
+    name:"HalDo AI",
 
-    userName: "Benutzer",
 
-    memory: [],
+    status:"ready",
 
-    commands: {
 
-        "dashboard": "dashboard.html",
+    language:"de",
 
-        "apps": "apps.html",
 
-        "settings": "settings.html",
 
-        "module": "modules.html",
+    memory:[],
 
-        "status": "status.html",
 
-        "ai": "ai-core.html"
 
-    },
 
-    start() {
 
-        this.status = "running";
 
-        console.log("🤖 HalDo AI Engine gestartet");
+    start(){
 
-    },
 
-    stop() {
+        this.status="running";
 
-        this.status = "stopped";
 
-        console.log("🛑 HalDo AI Engine beendet");
+        console.log(
+
+        "🤖 HalDo AI Engine gestartet"
+
+        );
+
 
     },
 
-    setLanguage(lang) {
+
+
+
+
+
+
+    setLanguage(lang){
+
 
         this.language = lang;
 
-        console.log("🌍 Sprache:", lang);
+
+
+        console.log(
+
+        "🌍 Sprache:",
+
+        lang
+
+        );
+
 
     },
 
-    remember(text) {
 
-        this.memory.push(text);
 
-    },
 
-    getMemory() {
 
-        return this.memory;
 
-    },
 
-    answer(message) {
+    answer(message){
 
-        const text = message.toLowerCase();
 
-        if (text.includes("hallo")) {
 
-            return "👋 Hallo! Ich bin HalDo AI. Wie kann ich dir helfen?";
+        if(!message){
+
+
+            return "";
 
         }
 
-        if (text.includes("hilfe")) {
 
-            return "💙 Ich helfe dir gerne bei HalDo AI OS.";
+
+
+
+
+        // Erst Befehle prüfen
+
+        if(window.HalDoCommands){
+
+
+
+            const command =
+
+            HalDoCommands.execute(
+
+                message
+
+            );
+
+
+
+            if(command){
+
+
+                return command;
+
+
+            }
+
 
         }
 
-        if (text.includes("uhr")) {
 
-            return "🕒 " + new Date().toLocaleTimeString("de-DE");
+
+
+
+
+
+        const text =
+
+        message.toLowerCase();
+
+
+
+
+
+
+
+        if(
+            text.includes("hallo")
+        ){
+
+
+            return (
+
+            "👋 Hallo! Ich bin HalDo AI. "
+
+            +
+
+            "Wie kann ich dir helfen?"
+
+            );
+
 
         }
 
-        if (text.includes("datum")) {
 
-            return "📅 " + new Date().toLocaleDateString("de-DE");
+
+
+
+
+
+        if(
+            text.includes("wie geht")
+        ){
+
+
+            return (
+
+            "😊 Mir geht es gut. "
+
+            +
+
+            "Ich bin bereit zu helfen."
+
+            );
+
 
         }
 
-        return "🤖 Ich habe deine Nachricht erhalten: " + message;
+
+
+
+
+
+
+        if(
+            text.includes("uhr")
+        ){
+
+
+            return (
+
+            "🕒 "
+
+            +
+
+            new Date()
+
+            .toLocaleTimeString(
+
+                "de-DE"
+
+            )
+
+            );
+
+
+        }
+
+
+
+
+
+
+
+        if(
+            text.includes("datum")
+        ){
+
+
+            return (
+
+            "📅 "
+
+            +
+
+            new Date()
+
+            .toLocaleDateString(
+
+                "de-DE"
+
+            )
+
+            );
+
+
+        }
+
+
+
+
+
+
+
+
+        return (
+
+        "🤖 Ich habe dich verstanden: "
+
+        +
+
+        message
+
+        );
+
+
 
     }
 
+
+
+
+
 };
 
-window.HalDoAI = HalDoAI;
 
-window.addEventListener("load", () => {
 
-    HalDoAI.start();
+
+
+
+
+window.HalDoAI =
+HalDoAI;
+
+
+
+
+
+
+
+window.addEventListener(
+
+"load",
+
+()=>{
+
+
+HalDoAI.start();
+
+
 
 });
