@@ -2,12 +2,12 @@
 ========================================
 
 HalDo AI OS 18
-Update Manager
+Update Manager Foundation
 
 Version:
 18.0.0
 
-Software Update System
+System Update Layer
 
 ========================================
 */
@@ -17,7 +17,7 @@ const UpdateManager = {
 
 
     name:
-    "HalDo AI OS Update System",
+    "HalDo Update Manager",
 
 
     version:
@@ -25,7 +25,7 @@ const UpdateManager = {
 
 
     status:
-    "ready",
+    "offline",
 
 
     updates:
@@ -37,101 +37,142 @@ const UpdateManager = {
 
 
         console.log(
-            "🔄 Update Manager gestartet"
+            "🔄 Update Manager Initialisierung..."
         );
-
-
-        this.checkUpdates();
-
-
-    },
-
-
-
-    checkUpdates(){
-
-
-        console.log(
-            "🔍 Suche nach Updates..."
-        );
-
-
-        /*
-            Später:
-
-            Verbindung zu:
-            - Update Server
-            - Versionsprüfung
-            - Download System
-
-        */
 
 
         this.status =
-        "no-updates";
+        "starting";
 
 
-        this.report();
+        this.start();
+
 
 
     },
 
 
 
-    addUpdate(version, description){
+    start(){
 
 
-        this.updates.push({
+        this.status =
+        "active";
 
 
-            version:
-            version,
+
+        if(
+            typeof Logger !== "undefined"
+        ){
+
+            Logger.info(
+                "Update Manager gestartet"
+            );
 
 
-            description:
-            description,
+        }
 
 
-            status:
-            "available"
+
+        if(
+            typeof EventBus !== "undefined"
+        ){
+
+            EventBus.emit(
+                "updates.ready",
+                {
+
+                    status:
+                    this.status
+
+                }
+
+            );
+
+        }
 
 
-        });
+
+        console.log(
+            "🔄 Update System bereit"
+        );
 
 
     },
 
 
 
-    report(){
+    check(){
 
 
         console.log(
-            "===================="
+            "🔎 Suche nach Updates..."
         );
+
+
+
+        const result = {
+
+
+            currentVersion:
+            this.version,
+
+
+            updateAvailable:
+            false,
+
+
+            message:
+            "System ist aktuell"
+
+
+        };
+
+
+
+        this.updates.push(
+            result
+        );
+
+
+
+        return result;
+
+
+    },
+
+
+
+    install(update){
 
 
         console.log(
-            "🔄",
-            this.name
+            "⬇️ Installation vorbereitet:",
+            update
         );
 
 
-        console.log(
-            "Version:",
-            this.version
-        );
+
+        if(
+            typeof Logger !== "undefined"
+        ){
+
+            Logger.info(
+                "Update Installation vorbereitet"
+            );
+
+        }
 
 
-        console.log(
-            "Status:",
-            this.status
-        );
+
+    },
 
 
-        console.log(
-            "===================="
-        );
+
+    getHistory(){
+
+
+        return this.updates;
 
 
     },
@@ -157,7 +198,7 @@ const UpdateManager = {
 
 
             updates:
-            this.updates
+            this.updates.length
 
 
         };
