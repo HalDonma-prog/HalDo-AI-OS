@@ -2,86 +2,170 @@
 ========================================
 
 HalDo AI OS 18
-Boot System
+Boot System Foundation
 
 Version:
 18.0.0
 
-Start Loader
+System Startup Layer
 
 ========================================
 */
 
 
-const HalDoBoot = {
+const BootSystem = {
 
 
-    version: "18.0.0",
+    name:
+    "HalDo Boot Manager",
 
 
-    status: "initializing",
+    version:
+    "18.0.0",
+
+
+    status:
+    "offline",
+
+
+
+    initialize(){
+
+
+        console.log(
+            "🚀 Boot System Initialisierung..."
+        );
+
+
+        this.status =
+        "starting";
+
+
+
+        this.checkDependencies();
+
+
+
+    },
+
+
+
+    checkDependencies(){
+
+
+        console.log(
+            "🔎 Prüfe System-Abhängigkeiten..."
+        );
+
+
+
+        const dependencies = [
+
+
+            "EventBus",
+
+
+            "Logger",
+
+
+            "ConfigManager"
+
+
+        ];
+
+
+
+        dependencies.forEach(
+            dependency => {
+
+
+                if(
+                    typeof window[dependency]
+                    !== "undefined"
+                ){
+
+                    console.log(
+                        "🟢",
+                        dependency,
+                        "bereit"
+                    );
+
+
+                }
+                else {
+
+
+                    console.warn(
+                        "🟡",
+                        dependency,
+                        "nicht gefunden"
+                    );
+
+
+                }
+
+
+            }
+
+        );
+
+
+
+        this.start();
+
+
+
+    },
 
 
 
     start(){
 
 
-        console.log(
-            "🚀 HalDo AI OS 18 Boot gestartet"
-        );
-
-
-        this.updateScreen(
-            "🔵 Boot System wird geladen..."
-        );
-
-
         this.status =
-        "running";
-
-
-        this.prepareKernel();
-
-
-    },
+        "active";
 
 
 
-    prepareKernel(){
+        if(
+            typeof Logger
+            !== "undefined"
+        ){
 
-
-        console.log(
-            "🔵 Vorbereitung Kernel..."
-        );
-
-
-        this.updateScreen(
-            "🔵 Kernel Vorbereitung läuft..."
-        );
-
-
-    },
-
-
-
-    updateScreen(message){
-
-
-        const status =
-        document.getElementById(
-            "status"
-        );
-
-
-
-        if(status){
-
-
-            status.innerHTML =
-            message;
+            Logger.info(
+                "Boot System erfolgreich gestartet"
+            );
 
 
         }
+
+
+
+        if(
+            typeof EventBus
+            !== "undefined"
+        ){
+
+            EventBus.emit(
+                "system.boot",
+                {
+
+                    status:
+                    "active"
+
+                }
+
+            );
+
+
+        }
+
+
+
+        console.log(
+            "🚀 HalDo AI OS 18 Boot abgeschlossen"
+        );
+
 
 
     },
@@ -94,15 +178,15 @@ const HalDoBoot = {
         return {
 
 
-            system:
-            "HalDo AI OS 18",
+            name:
+            this.name,
 
 
             version:
             this.version,
 
 
-            boot:
+            status:
             this.status
 
 
@@ -118,6 +202,6 @@ const HalDoBoot = {
 
 
 
-// Start Boot System
+// Boot starten
 
-HalDoBoot.start();
+BootSystem.initialize();
