@@ -2,12 +2,12 @@
 ========================================
 
 HalDo AI OS 18
-Module Manager
+Module Manager Foundation
 
 Version:
 18.0.0
 
-Module Control System
+Module Management Layer
 
 ========================================
 */
@@ -16,8 +16,16 @@ Module Control System
 const ModuleManager = {
 
 
+    name:
+    "HalDo Module Manager",
+
+
     version:
     "18.0.0",
+
+
+    status:
+    "offline",
 
 
     modules:
@@ -29,39 +37,90 @@ const ModuleManager = {
 
 
         console.log(
-            "🧩 Module Manager gestartet"
+            "🧩 Module Manager Initialisierung..."
         );
 
 
-        this.registerDefaultModules();
+        this.status =
+        "starting";
 
 
-        this.startModules();
+        this.start();
+
 
 
     },
 
 
 
-    register(name, type){
+    start(){
 
 
-        const module = {
+        this.status =
+        "active";
 
 
-            name:
-            name,
+
+        if(
+            typeof Logger !== "undefined"
+        ){
+
+            Logger.info(
+                "Module Manager gestartet"
+            );
 
 
-            type:
-            type,
+        }
 
 
-            status:
-            "registered"
+
+        if(
+            typeof EventBus !== "undefined"
+        ){
+
+            EventBus.emit(
+                "modules.ready",
+                {
+
+                    status:
+                    this.status
 
 
-        };
+                }
+
+            );
+
+
+        }
+
+
+
+        console.log(
+            "🧩 Module System bereit"
+        );
+
+
+    },
+
+
+
+    register(module){
+
+
+        if(
+            !module.name
+        ){
+
+
+            console.error(
+                "❌ Modul ohne Namen"
+            );
+
+
+            return false;
+
+
+        }
 
 
 
@@ -70,108 +129,105 @@ const ModuleManager = {
         );
 
 
+
         console.log(
-            "📦 Modul registriert:",
+            "🧩 Modul registriert:",
+            module.name
+        );
+
+
+
+        if(
+            typeof Logger !== "undefined"
+        ){
+
+            Logger.info(
+                "Modul registriert: "
+                + module.name
+            );
+
+        }
+
+
+
+        return true;
+
+
+    },
+
+
+
+    load(name){
+
+
+        const module =
+        this.modules.find(
+            item =>
+            item.name === name
+        );
+
+
+
+        if(
+            !module
+        ){
+
+
+            console.warn(
+                "🟡 Modul nicht gefunden:",
+                name
+            );
+
+
+            return false;
+
+
+        }
+
+
+
+        module.status =
+        "active";
+
+
+
+        console.log(
+            "🟢 Modul geladen:",
             name
         );
 
 
-    },
 
-
-
-    registerDefaultModules(){
-
-
-        this.register(
-            "AI Foundation",
-            "core"
-        );
-
-
-        this.register(
-            "Security Foundation",
-            "core"
-        );
-
-
-        this.register(
-            "Database Foundation",
-            "core"
-        );
-
-
-        this.register(
-            "Update System",
-            "system"
-        );
+        return true;
 
 
     },
 
 
 
-    startModules(){
+    unload(name){
 
 
-        this.modules.forEach(
-            module => {
-
-
-                module.status =
-                "active";
-
-
-                console.log(
-                    "🟢 Modul aktiv:",
-                    module.name
-                );
-
-
-            }
+        const module =
+        this.modules.find(
+            item =>
+            item.name === name
         );
 
 
 
-        this.updateScreen();
+        if(
+            module
+        ){
+
+            module.status =
+            "inactive";
 
 
-    },
-
-
-
-    updateScreen(){
-
-
-        const box =
-        document.getElementById(
-            "system-status"
-        );
-
-
-
-        if(box){
-
-
-            box.innerHTML = `
-
-            <h2>
-            System Status
-            </h2>
-
-
-            <p>
-            🟢 Module aktiv:
-            ${this.modules.length}
-            </p>
-
-
-            <p>
-            Version:
-            ${this.version}
-            </p>
-
-            `;
+            console.log(
+                "🔵 Modul deaktiviert:",
+                name
+            );
 
 
         }
@@ -187,6 +243,35 @@ const ModuleManager = {
         return this.modules;
 
 
+    },
+
+
+
+    getStatus(){
+
+
+        return {
+
+
+            name:
+            this.name,
+
+
+            version:
+            this.version,
+
+
+            status:
+            this.status,
+
+
+            modules:
+            this.modules.length
+
+
+        };
+
+
     }
 
 
@@ -196,6 +281,6 @@ const ModuleManager = {
 
 
 
-// Module Manager starten
+// Module System starten
 
 ModuleManager.initialize();
