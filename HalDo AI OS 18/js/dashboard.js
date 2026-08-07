@@ -2,18 +2,18 @@
 ========================================
 
 HalDo AI OS 18
-Dashboard Foundation
+Dashboard Controller
 
 Version:
 18.0.0
 
-User Interface Layer
+Dashboard Management System
 
 ========================================
 */
 
 
-const Dashboard = {
+const DashboardSystem = {
 
 
     name:
@@ -33,7 +33,7 @@ const Dashboard = {
 
 
         console.log(
-            "📱 Dashboard Initialisierung..."
+            "📊 Dashboard startet..."
         );
 
 
@@ -51,191 +51,123 @@ const Dashboard = {
     render(){
 
 
-        const dashboard =
+        const systemInfo =
         document.getElementById(
-            "dashboard"
+            "system-information"
         );
 
 
 
-        if(
-            !dashboard
-        ){
-
-            console.warn(
-                "Dashboard Bereich nicht gefunden"
-            );
+        if(systemInfo){
 
 
-            return;
-
-        }
+            let statusData =
+            "Keine Daten verfügbar";
 
 
 
-        dashboard.innerHTML = `
+            if(
+                typeof SystemStatus !== "undefined"
+            ){
 
 
-        <h2>
-        🤖 HalDo AI OS 18 Dashboard
-        </h2>
+                statusData =
+                JSON.stringify(
+                    SystemStatus.data,
+                    null,
+                    2
+                );
 
 
-        <p>
-        Version: ${this.version}
-        </p>
-
-
-        <p>
-        Status:
-        🟢 ${this.status}
-        </p>
-
-
-        <hr>
-
-
-        <h3>
-        System Komponenten
-        </h3>
-
-
-        <div id="component-list">
-
-        Wird geladen...
-
-        </div>
-
-
-        `;
+            }
 
 
 
-        this.showComponents();
+            systemInfo.innerHTML = `
 
-
-    },
-
-
-
-    showComponents(){
-
-
-        const area =
-        document.getElementById(
-            "component-list"
-        );
-
-
-
-        if(
-            !area
-        ){
-
-            return;
-
-        }
-
-
-
-        let content = "";
-
-
-
-        if(
-            typeof SystemStatus !== "undefined"
-        ){
-
-
-            const systems =
-            SystemStatus.systems;
-
-
-
-            content += `
-
-            <p>
-            🚀 Boot:
-            ${this.getValue(
-                systems.boot
-            )}
-            </p>
-
-
-            <p>
-            🧠 Kernel:
-            ${this.getValue(
-                systems.kernel
-            )}
-            </p>
-
-
-            <p>
-            ⚙️ Engine:
-            ${this.getValue(
-                systems.engine
-            )}
-            </p>
-
-
-            <p>
-            🧩 Module:
-            ${this.getValue(
-                systems.modules
-            )}
-            </p>
-
-
-            <p>
-            🔄 Updates:
-            ${this.getValue(
-                systems.updates
-            )}
-            </p>
+            <pre>
+${statusData}
+            </pre>
 
             `;
 
 
         }
-        else {
-
-
-            content =
-            "Status-System lädt...";
-
-
-        }
 
 
 
-        area.innerHTML =
-        content;
 
 
-    },
-
-
-
-    getValue(data){
-
-
-        if(
-            typeof data === "string"
-        ){
-
-            return data;
-
-        }
-
-
-
-        return (
-            data.status
-            ||
-            data.state
-            ||
-            "bereit"
+        const moduleInfo =
+        document.getElementById(
+            "module-information"
         );
+
+
+
+        if(moduleInfo){
+
+
+            if(
+                typeof ModuleManager !== "undefined"
+            ){
+
+
+                moduleInfo.innerHTML = `
+
+                Module:
+                ${ModuleManager.modules.length}
+
+                <br><br>
+
+                ${ModuleManager.modules
+                .map(
+                    module =>
+                    "🧩 "
+                    +
+                    module.name
+                    +
+                    " - "
+                    +
+                    module.status
+                )
+                .join("<br>")}
+
+                `;
+
+
+            }
+            else {
+
+
+                moduleInfo.innerHTML =
+                "Module System wartet...";
+
+
+            }
+
+
+        }
+
+
+
+        const dashboardStatus =
+        document.getElementById(
+            "dashboard-status"
+        );
+
+
+
+        if(dashboardStatus){
+
+
+            dashboardStatus.innerHTML =
+
+            "🟢 Dashboard bereit";
+
+
+        }
+
 
 
     },
@@ -245,16 +177,7 @@ const Dashboard = {
     refresh(){
 
 
-        if(
-            typeof SystemStatus !== "undefined"
-        ){
-
-            SystemStatus.refresh();
-
-        }
-
-
-        this.showComponents();
+        this.render();
 
 
     },
@@ -291,6 +214,23 @@ const Dashboard = {
 
 
 
-// Dashboard starten
+console.log(
+    "📊 HalDo Dashboard geladen"
+);
 
-Dashboard.initialize();
+
+
+
+
+// Dashboard automatisch starten
+
+window.addEventListener(
+    "load",
+    () => {
+
+
+        DashboardSystem.initialize();
+
+
+    }
+);
