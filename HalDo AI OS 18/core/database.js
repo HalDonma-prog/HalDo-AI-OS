@@ -7,17 +7,17 @@ Database Foundation
 Version:
 18.0.0
 
-System Data Layer
+System Data Management Layer
 
 ========================================
 */
 
 
-const Database = {
+const DatabaseSystem = {
 
 
     name:
-    "HalDo Database System",
+    "HalDo Database",
 
 
     version:
@@ -26,6 +26,7 @@ const Database = {
 
     status:
     "offline",
+
 
 
     data:
@@ -37,7 +38,7 @@ const Database = {
 
 
         console.log(
-            "🗄️ Database Initialisierung..."
+            "🗄️ Database System startet..."
         );
 
 
@@ -45,14 +46,14 @@ const Database = {
         "starting";
 
 
-        this.start();
+        this.connect();
 
 
     },
 
 
 
-    start(){
+    connect(){
 
 
         this.status =
@@ -60,63 +61,28 @@ const Database = {
 
 
 
-        if(
-            typeof Logger !== "undefined"
-        ){
-
-            Logger.info(
-                "Database System gestartet"
-            );
-
-        }
-
-
-
-        if(
-            typeof EventBus !== "undefined"
-        ){
-
-            EventBus.emit(
-                "database.ready",
-                {
-
-                    status:
-                    this.status
-
-                }
-
-            );
-
-        }
-
-
-
         console.log(
-            "🗄️ HalDo Database bereit"
+            "🗄️ Database verbunden"
         );
+
 
 
     },
 
 
 
-    set(
-        key,
-        value
-    ){
+    save(key,value){
 
 
-        this.data[key]
-        =
+        this.data[key] =
         value;
 
 
 
         console.log(
-            "🗄️ Daten gespeichert:",
+            "💾 Daten gespeichert:",
             key
         );
-
 
 
         return true;
@@ -126,9 +92,7 @@ const Database = {
 
 
 
-    get(
-        key
-    ){
+    load(key){
 
 
         return this.data[key];
@@ -138,9 +102,7 @@ const Database = {
 
 
 
-    remove(
-        key
-    ){
+    delete(key){
 
 
         delete this.data[key];
@@ -148,8 +110,35 @@ const Database = {
 
 
         console.log(
-            "🗄️ Daten entfernt:",
+            "🗑️ Daten gelöscht:",
             key
+        );
+
+
+    },
+
+
+
+    exists(key){
+
+
+        return key in this.data;
+
+
+    },
+
+
+
+    clear(){
+
+
+        this.data =
+        {};
+
+
+
+        console.log(
+            "🧹 Datenbank geleert"
         );
 
 
@@ -161,22 +150,6 @@ const Database = {
 
 
         return this.data;
-
-
-    },
-
-
-
-    clear(){
-
-
-        this.data = {};
-
-
-
-        console.log(
-            "🗄️ Datenbank geleert"
-        );
 
 
     },
@@ -219,6 +192,12 @@ const Database = {
 
 
 
-// Database starten
+// Datenbank starten
 
-Database.initialize();
+DatabaseSystem.initialize();
+
+
+
+console.log(
+    "🗄️ HalDo Database geladen"
+);
