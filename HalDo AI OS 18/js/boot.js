@@ -16,36 +16,26 @@ Version:
 const HalDoBoot = {
 
 
-    version:
-    "18.0.0",
+    version: "18.0.0",
 
 
-    system:
-    "HalDo AI OS",
-
-
-    status:
-    "starting",
+    status: "starting",
 
 
 
+    setStatus(message){
 
-    updateStatus(text){
 
-
-        const status =
+        const element =
         document.getElementById(
-            "status"
+            "system-status"
         );
 
 
+        if(element){
 
-        if(status){
-
-
-            status.innerHTML =
-            text;
-
+            element.innerHTML =
+            message;
 
         }
 
@@ -56,12 +46,11 @@ const HalDoBoot = {
 
 
 
-
     start(){
 
 
         console.log(
-        "🟡 HalDo AI OS 18 Bootloader gestartet"
+        "🟡 HalDo AI OS 18 Boot gestartet"
         );
 
 
@@ -71,22 +60,25 @@ const HalDoBoot = {
 
 
 
-        this.updateStatus(
-        "🟡 System wird vorbereitet..."
+        this.setStatus(
+        "🟡 HalDo AI OS wird gestartet..."
         );
+
+
 
 
 
         setTimeout(()=>{
 
 
-            this.updateStatus(
+            this.setStatus(
             "🔵 Kernel wird geladen..."
             );
 
 
 
-        },1000);
+        },1500);
+
 
 
 
@@ -96,13 +88,13 @@ const HalDoBoot = {
         setTimeout(()=>{
 
 
-            this.updateStatus(
-            "🔵 Module werden geprüft..."
+            this.setStatus(
+            "🔵 Systemmodule werden geprüft..."
             );
 
 
 
-        },2500);
+        },3000);
 
 
 
@@ -118,18 +110,18 @@ const HalDoBoot = {
 
 
 
-            this.updateStatus(
+            this.setStatus(
             "🟢 System bereit"
             );
 
 
 
-        },4000);
+        },4500);
+
 
 
 
     }
-
 
 
 
@@ -139,8 +131,13 @@ const HalDoBoot = {
 
 
 
+
+
 window.HalDoBoot =
 HalDoBoot;
+
+
+
 
 
 
