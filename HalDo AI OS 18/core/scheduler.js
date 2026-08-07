@@ -7,13 +7,13 @@ Scheduler Foundation
 Version:
 18.0.0
 
-System Task Management Layer
+System Task Scheduler Layer
 
 ========================================
 */
 
 
-const Scheduler = {
+const SchedulerSystem = {
 
 
     name:
@@ -28,6 +28,7 @@ const Scheduler = {
     "offline",
 
 
+
     tasks:
     [],
 
@@ -37,7 +38,7 @@ const Scheduler = {
 
 
         console.log(
-            "⏱️ Scheduler Initialisierung..."
+            "⏱️ Scheduler System startet..."
         );
 
 
@@ -45,14 +46,14 @@ const Scheduler = {
         "starting";
 
 
-        this.start();
+        this.load();
 
 
     },
 
 
 
-    start(){
+    load(){
 
 
         this.status =
@@ -60,39 +61,8 @@ const Scheduler = {
 
 
 
-        if(
-            typeof Logger !== "undefined"
-        ){
-
-            Logger.info(
-                "Scheduler gestartet"
-            );
-
-        }
-
-
-
-        if(
-            typeof EventBus !== "undefined"
-        ){
-
-            EventBus.emit(
-                "scheduler.ready",
-                {
-
-                    status:
-                    this.status
-
-                }
-
-            );
-
-        }
-
-
-
         console.log(
-            "⏱️ HalDo Scheduler bereit"
+            "⏱️ Scheduler aktiv"
         );
 
 
@@ -100,26 +70,26 @@ const Scheduler = {
 
 
 
-    addTask(
-        name,
-        action,
-        interval
-    ){
+    addTask(name,callback,time){
 
 
         const task = {
+
+
+            id:
+            Date.now(),
 
 
             name:
             name,
 
 
-            action:
-            action,
+            callback:
+            callback,
 
 
-            interval:
-            interval,
+            time:
+            time,
 
 
             status:
@@ -137,8 +107,8 @@ const Scheduler = {
 
 
         console.log(
-            "⏱️ Aufgabe hinzugefügt:",
-            name
+            "➕ Aufgabe hinzugefügt:",
+            task
         );
 
 
@@ -150,39 +120,36 @@ const Scheduler = {
 
 
 
-    runTask(
-        name
-    ){
+    runTask(id){
 
 
         const task =
         this.tasks.find(
+
             item =>
-            item.name === name
+            item.id === id
+
         );
 
 
 
-        if(
-            !task
-        ){
-
-            console.warn(
-                "🟡 Aufgabe nicht gefunden:",
-                name
-            );
+        if(task){
 
 
-            return false;
-
-        }
+            task.status =
+            "running";
 
 
 
-        try {
+            if(
+                typeof task.callback === "function"
+            ){
 
 
-            task.action();
+                task.callback();
+
+
+            }
 
 
 
@@ -192,30 +159,34 @@ const Scheduler = {
 
 
             console.log(
-                "🟢 Aufgabe abgeschlossen:",
-                name
-            );
-
-
-        }
-        catch(error){
-
-
-            task.status =
-            "error";
-
-
-            console.error(
-                "🔴 Scheduler Fehler:",
-                error
+                "✅ Aufgabe abgeschlossen:",
+                task.name
             );
 
 
         }
 
 
+    },
 
-        return true;
+
+
+    removeTask(id){
+
+
+        this.tasks =
+        this.tasks.filter(
+
+            task =>
+            task.id !== id
+
+        );
+
+
+        console.log(
+            "🗑️ Aufgabe entfernt:",
+            id
+        );
 
 
     },
@@ -226,22 +197,6 @@ const Scheduler = {
 
 
         return this.tasks;
-
-
-    },
-
-
-
-    clear(){
-
-
-        this.tasks = [];
-
-
-
-        console.log(
-            "⏱️ Aufgaben gelöscht"
-        );
 
 
     },
@@ -284,4 +239,10 @@ const Scheduler = {
 
 // Scheduler starten
 
-Scheduler.initialize();
+SchedulerSystem.initialize();
+
+
+
+console.log(
+    "⏱️ HalDo Scheduler geladen"
+);
