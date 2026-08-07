@@ -7,7 +7,7 @@ AI Core Foundation
 Version:
 18.0.0
 
-Artificial Intelligence Core Layer
+Artificial Intelligence Core
 
 ========================================
 */
@@ -28,7 +28,8 @@ const AICore = {
     "offline",
 
 
-    requests:
+
+    memory:
     [],
 
 
@@ -45,55 +46,25 @@ const AICore = {
         "starting";
 
 
-        this.start();
+        this.load();
 
 
     },
 
 
 
-    start(){
+    load(){
 
 
         this.status =
-        "active";
-
-
-
-        if(
-            typeof Logger !== "undefined"
-        ){
-
-            Logger.info(
-                "AI Core gestartet"
-            );
-
-        }
-
-
-
-        if(
-            typeof EventBus !== "undefined"
-        ){
-
-            EventBus.emit(
-                "ai.ready",
-                {
-
-                    status:
-                    this.status
-
-                }
-
-            );
-
-        }
+        "ready";
 
 
 
         console.log(
-            "🤖 HalDo AI Core bereit"
+            "🤖 AI Core bereit"
         );
+
 
 
     },
@@ -103,8 +74,14 @@ const AICore = {
     process(input){
 
 
-        const request = {
+        console.log(
+            "🧠 AI Anfrage:",
+            input
+        );
 
+
+
+        this.memory.push({
 
             input:
             input,
@@ -112,35 +89,8 @@ const AICore = {
 
             time:
             new Date()
-            .toISOString()
 
-
-        };
-
-
-
-        this.requests.push(
-            request
-        );
-
-
-
-        console.log(
-            "🤖 AI Anfrage:",
-            input
-        );
-
-
-
-        if(
-            typeof Logger !== "undefined"
-        ){
-
-            Logger.info(
-                "AI Anfrage verarbeitet"
-            );
-
-        }
+        });
 
 
 
@@ -148,15 +98,11 @@ const AICore = {
 
 
             status:
-            "received",
+            "processed",
 
 
-            message:
-            "AI Core hat die Anfrage empfangen",
-
-
-            input:
-            input
+            response:
+            "HalDo AI Core verarbeitet Anfrage"
 
 
         };
@@ -166,10 +112,27 @@ const AICore = {
 
 
 
-    getHistory(){
+    learn(data){
 
 
-        return this.requests;
+        this.memory.push(
+            data
+        );
+
+
+        console.log(
+            "📚 AI Daten gespeichert"
+        );
+
+
+    },
+
+
+
+    getMemory(){
+
+
+        return this.memory;
 
 
     },
@@ -194,8 +157,8 @@ const AICore = {
             this.status,
 
 
-            requests:
-            this.requests.length
+            memory:
+            this.memory.length
 
 
         };
@@ -213,3 +176,9 @@ const AICore = {
 // AI Core starten
 
 AICore.initialize();
+
+
+
+console.log(
+    "🤖 HalDo AI Core geladen"
+);
