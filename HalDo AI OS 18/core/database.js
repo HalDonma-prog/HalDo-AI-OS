@@ -13,11 +13,11 @@ System Data Layer
 */
 
 
-const DatabaseCore = {
+const Database = {
 
 
     name:
-    "HalDo AI Database",
+    "HalDo Database System",
 
 
     version:
@@ -28,7 +28,7 @@ const DatabaseCore = {
     "offline",
 
 
-    storage:
+    data:
     {},
 
 
@@ -37,66 +37,62 @@ const DatabaseCore = {
 
 
         console.log(
-            "💾 Database Core Initialisierung..."
+            "🗄️ Database Initialisierung..."
         );
+
+
+        this.status =
+        "starting";
+
+
+        this.start();
+
+
+    },
+
+
+
+    start(){
 
 
         this.status =
         "active";
 
 
-        this.createDefaultData();
+
+        if(
+            typeof Logger !== "undefined"
+        ){
+
+            Logger.info(
+                "Database System gestartet"
+            );
+
+        }
 
 
-        this.report();
 
+        if(
+            typeof EventBus !== "undefined"
+        ){
 
-    },
+            EventBus.emit(
+                "database.ready",
+                {
 
+                    status:
+                    this.status
 
+                }
 
-    createDefaultData(){
+            );
 
+        }
 
-        this.storage = {
-
-
-            system: {
-
-
-                name:
-                "HalDo AI OS",
-
-
-                version:
-                "18.0.0"
-
-
-            },
-
-
-            settings: {
-
-
-                language:
-                "de",
-
-
-                theme:
-                "foundation"
-
-
-            },
-
-
-            modules: []
-
-
-        };
 
 
         console.log(
-            "💾 Standarddaten erstellt"
+            "🗄️ HalDo Database bereit"
         );
 
 
@@ -104,15 +100,55 @@ const DatabaseCore = {
 
 
 
-    save(key, value){
+    set(
+        key,
+        value
+    ){
 
 
-        this.storage[key] =
+        this.data[key]
+        =
         value;
 
 
+
         console.log(
-            "💾 Daten gespeichert:",
+            "🗄️ Daten gespeichert:",
+            key
+        );
+
+
+
+        return true;
+
+
+    },
+
+
+
+    get(
+        key
+    ){
+
+
+        return this.data[key];
+
+
+    },
+
+
+
+    remove(
+        key
+    ){
+
+
+        delete this.data[key];
+
+
+
+        console.log(
+            "🗄️ Daten entfernt:",
             key
         );
 
@@ -121,62 +157,25 @@ const DatabaseCore = {
 
 
 
-    load(key){
+    getAll(){
 
 
-        return this.storage[key];
-
-
-    },
-
-
-
-    addModule(module){
-
-
-        this.storage.modules.push(
-            module
-        );
-
-
-        console.log(
-            "📦 Modul gespeichert:",
-            module
-        );
+        return this.data;
 
 
     },
 
 
 
-    report(){
+    clear(){
 
 
-        console.log(
-            "===================="
-        );
+        this.data = {};
 
-
-        console.log(
-            "💾",
-            this.name
-        );
 
 
         console.log(
-            "Version:",
-            this.version
-        );
-
-
-        console.log(
-            "Status:",
-            this.status
-        );
-
-
-        console.log(
-            "===================="
+            "🗄️ Datenbank geleert"
         );
 
 
@@ -202,8 +201,10 @@ const DatabaseCore = {
             this.status,
 
 
-            data:
-            this.storage
+            entries:
+            Object.keys(
+                this.data
+            ).length
 
 
         };
@@ -218,6 +219,6 @@ const DatabaseCore = {
 
 
 
-// Datenbank starten
+// Database starten
 
-DatabaseCore.initialize();
+Database.initialize();
