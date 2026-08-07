@@ -2,7 +2,9 @@
 ====================================
 
 HalDo AI OS 18
-Startup System
+Startup Controller
+
+Professional Ultimate Foundation
 
 Version:
 18.0.0
@@ -11,97 +13,8 @@ Version:
 */
 
 
-function startHalDoOS() {
+function startHalDoOS(){
 
-
-    const startup = document.getElementById(
-        "startup-screen"
-    );
-
-
-    const logo =
-    document.getElementById(
-        "system-logo"
-    );
-
-
-    const message =
-    document.getElementById(
-        "startup-message"
-    );
-
-
-
-    if(!startup) return;
-
-
-
-    // Logo anzeigen
-
-    logo.style.opacity = "1";
-
-
-
-    setTimeout(() => {
-
-
-        message.innerHTML =
-        "🟡 HalDo AI OS wird gestartet...";
-
-
-    },1000);
-
-
-
-
-    setTimeout(() => {
-
-
-        message.innerHTML =
-        "🔵 Systemmodule werden geladen...";
-
-
-    },2500);
-
-
-
-
-
-    setTimeout(() => {
-
-
-        message.innerHTML =
-        "🟢 System bereit";
-
-
-    },4000);
-
-
-
-
-
-    setTimeout(() => {
-
-
-        showWelcome();
-
-
-    },5500);
-
-
-
-}
-
-
-
-
-function showWelcome(){
-
-
-    const welcome =
-    document.getElementById(
-        "welcome-screen"
-    );
 
 
     const startup =
@@ -111,21 +24,119 @@ function showWelcome(){
 
 
 
-    if(startup){
+    const welcome =
+    document.getElementById(
+        "welcome-screen"
+    );
 
-        startup.style.display =
-        "none";
+
+
+    const message =
+    document.getElementById(
+        "startup-message"
+    );
+
+
+
+
+    if(!startup){
+
+        return;
 
     }
 
 
 
-    if(welcome){
 
-        welcome.style.display =
-        "flex";
 
-    }
+
+    setTimeout(()=>{
+
+
+        if(message){
+
+            message.innerHTML =
+            "🟡 HalDo AI OS wird gestartet...";
+
+        }
+
+
+
+    },1000);
+
+
+
+
+
+
+
+    setTimeout(()=>{
+
+
+        if(message){
+
+            message.innerHTML =
+            "🔵 Systemmodule werden geladen...";
+
+        }
+
+
+
+    },2500);
+
+
+
+
+
+
+
+    setTimeout(()=>{
+
+
+        if(message){
+
+            message.innerHTML =
+            "🟢 System bereit";
+
+        }
+
+
+
+    },4000);
+
+
+
+
+
+
+
+    setTimeout(()=>{
+
+
+        startup.classList.add(
+            "hidden"
+        );
+
+
+
+        if(welcome){
+
+
+            welcome.classList.remove(
+                "hidden"
+            );
+
+
+        }
+
+
+
+
+    },5500);
+
+
+
+
 
 }
 
@@ -134,7 +145,13 @@ function showWelcome(){
 
 
 
+
 window.addEventListener(
 "load",
-startHalDoOS
-);
+()=>{
+
+
+    startHalDoOS();
+
+
+});
