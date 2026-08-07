@@ -1,163 +1,198 @@
 /*
-=====================================
-
+==========================================
 HalDo AI OS 18
-Kernel System
-
+KERNEL
 Professional Ultimate Foundation
-
-Version:
-18.0.0
-
-=====================================
+Version 18.0.0
+==========================================
 */
 
+(function () {
 
-const HalDoKernel = {
+    "use strict";
 
+    const HalDoKernel = {
 
-    name:
-    "HalDo AI OS Kernel",
+        name: "HalDo Kernel",
 
+        version: "18.0.0",
 
+        status: "starting",
 
-    version:
-    "18.0.0",
+        bootTime: null,
 
+        modules: {},
 
+        events: {},
 
-    status:
-    "starting",
 
+        init() {
 
+            this.bootTime =
+                new Date();
 
+            this.status =
+                "running";
 
+            console.log(
+                "🔵 HalDo Kernel gestartet"
+            );
 
-    modules:
-    [],
+            this.emit(
+                "kernel:ready"
+            );
 
+            return true;
 
+        },
 
 
+        registerModule(
+            name,
+            module
+        ) {
 
+            if (!name) {
 
-    start:function(){
+                return false;
 
+            }
 
-        console.log(
-        "🚀 HalDo Kernel gestartet"
-        );
+            this.modules[name] =
+                module || {};
 
+            console.log(
+                "🧩 Kernel Modul:",
+                name
+            );
 
+            this.emit(
+                "module:registered",
+                name
+            );
 
-        this.status =
-        "running";
+            return true;
 
+        },
 
 
-        this.loadSystem();
+        getModule(name) {
 
+            return (
+                this.modules[name]
+                ||
+                null
+            );
 
+        },
 
-    },
 
+        hasModule(name) {
 
+            return !!this.modules[name];
 
+        },
 
 
+        on(
+            event,
+            callback
+        ) {
 
+            if (
+                typeof callback !==
+                "function"
+            ) {
 
-    loadSystem:function(){
+                return;
 
+            }
 
-        console.log(
-        "🔵 System Module werden vorbereitet..."
-        );
+            if (!this.events[event]) {
 
+                this.events[event] =
+                    [];
 
+            }
 
-        this.modules.push(
+            this.events[event]
+                .push(callback);
 
-            "system",
+        },
 
-            "module-manager",
 
-            "ai-core",
+        emit(
+            event,
+            data
+        ) {
 
-            "storage"
+            const listeners =
+                this.events[event]
+                ||
+                [];
 
-        );
+            listeners.forEach(
+                function (callback) {
 
+                    try {
 
+                        callback(data);
 
-        this.status =
-        "ready";
+                    }
+                    catch (error) {
 
+                        console.error(
+                            "HalDo Kernel Event Error:",
+                            error
+                        );
 
+                    }
 
-        console.log(
-        "🟢 Kernel bereit"
-        );
+                }
+            );
 
+        },
 
 
-    },
+        getStatus() {
 
+            return {
 
+                name:
+                    this.name,
 
+                version:
+                    this.version,
 
+                status:
+                    this.status,
 
+                bootTime:
+                    this.bootTime,
 
+                modules:
+                    Object.keys(
+                        this.modules
+                    )
 
-    getStatus:function(){
+            };
 
+        }
 
-        return {
+    };
 
 
-            name:this.name,
+    window.HalDoKernel =
+        HalDoKernel;
 
 
-            version:this.version,
+    window.addEventListener(
+        "DOMContentLoaded",
+        function () {
 
+            HalDoKernel.init();
 
-            status:this.status,
+        }
+    );
 
-
-            modules:this.modules
-
-
-
-        };
-
-
-    }
-
-
-
-
-};
-
-
-
-
-
-
-
-
-window.HalDoKernel =
-HalDoKernel;
-
-
-
-
-
-window.addEventListener(
-"load",
-function(){
-
-
-HalDoKernel.start();
-
-
-});
+})();
