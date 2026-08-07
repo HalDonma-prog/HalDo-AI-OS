@@ -32,9 +32,11 @@ class="logo"
 alt="HalDo AI Logo">
 
 
+
 <h1>
-🧠 HalDo AI Core
+🤖 HalDo AI Core
 </h1>
+
 
 
 <p>
@@ -43,10 +45,92 @@ Professional Ultimate Foundation
 
 
 
+<div class="ai-status">
+
+
+🟢 AI System:
+
+<span id="ai-status">
+
+Bereit
+
+</span>
+
+
+</div>
+
+
+
+
+
+<div class="language-box">
+
+
+<h3>
+🌍 Sprache
+</h3>
+
+
+<select id="language-select">
+
+<option value="de">
+
+Deutsch
+
+</option>
+
+
+<option value="en">
+
+English
+
+</option>
+
+
+<option value="ku">
+
+Kurdî (Kurmancî)
+
+</option>
+
+
+<option value="ez">
+
+Êzîkî
+
+</option>
+
+
+<option value="tr">
+
+Türkçe
+
+</option>
+
+
+<option value="ar">
+
+العربية
+
+</option>
+
+
+</select>
+
+
+</div>
+
+
+
+
+
+
+
 <div class="ai-box">
 
 
 <div id="chat-output">
+
 
 🤖 Hallo! Ich bin HalDo AI.
 
@@ -54,7 +138,10 @@ Professional Ultimate Foundation
 
 Wie kann ich dir helfen?
 
+
 </div>
+
+
 
 
 
@@ -64,7 +151,9 @@ id="user-input"
 
 type="text"
 
-placeholder="Schreibe eine Nachricht...">
+placeholder="Nachricht schreiben...">
+
+
 
 
 
@@ -76,14 +165,31 @@ placeholder="Schreibe eine Nachricht...">
 
 
 
+
+
 <button onclick="speakLast()">
 
-🔊 Sprechen
+🔊 Vorlesen
 
 </button>
 
 
+
+
+
+<button onclick="startVoice()">
+
+🎤 Mikrofon
+
+</button>
+
+
+
 </div>
+
+
+
+
 
 
 
@@ -94,7 +200,10 @@ placeholder="Schreibe eine Nachricht...">
 </button>
 
 
+
 </section>
+
+
 
 
 
@@ -110,12 +219,20 @@ placeholder="Schreibe eine Nachricht...">
 
 <script src="js/ai-chat.js"></script>
 
+<script src="js/language-manager.js"></script>
+
+
+
+
 
 
 <script>
 
 
+
 let lastAnswer = "";
+
+
 
 
 
@@ -144,11 +261,10 @@ input.value;
 
 
 
-if(!message){
+if(!message)
 
 return;
 
-}
 
 
 
@@ -164,17 +280,24 @@ lastAnswer = answer;
 
 
 
+
 output.innerHTML +=
+
 
 "<br><br>👤 Du: "
 
-+ message
++
+
+message
 
 +
 
 "<br>🤖 HalDo: "
 
-+ answer;
++
+
+answer;
+
 
 
 
@@ -190,8 +313,8 @@ input.value = "";
 
 
 
-function speakLast(){
 
+function speakLast(){
 
 
 if(lastAnswer){
@@ -214,6 +337,58 @@ lastAnswer
 
 
 
+
+function startVoice(){
+
+
+
+alert(
+
+"🎤 Mikrofon-System wird vorbereitet"
+
+);
+
+
+
+}
+
+
+
+
+
+
+
+
+document
+
+.getElementById(
+"language-select"
+)
+
+.addEventListener(
+
+"change",
+
+function(){
+
+
+HalDoLanguageManager.change(
+
+this.value
+
+);
+
+
+
+});
+
+
+
+
+
+
+
+
 function goBack(){
 
 
@@ -224,7 +399,9 @@ window.location.href =
 }
 
 
+
 </script>
+
 
 
 </body>
