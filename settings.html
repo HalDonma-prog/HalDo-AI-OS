@@ -6,160 +6,369 @@
 
 <meta charset="UTF-8">
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
 
 <title>
-HalDo AI OS 18 - Einstellungen
+HalDo AI OS 18 – Einstellungen
 </title>
 
-
-<link rel="stylesheet" href="style.css">
-
+<link rel="stylesheet"
+      href="style.css">
 
 </head>
-
 
 
 <body>
 
 
+<section class="screen">
 
 
-
-<header class="header">
-
+<!-- ==================================
+     LOGO
+================================== -->
 
 <img
 
 src="assets/logo/logo.svg"
 
-class="logo small"
+class="logo"
 
 alt="HalDo AI OS Logo">
 
 
-
 <h1>
 
-⚙️ Einstellungen
+⚙️
+<span data-i18n="settings">
+Einstellungen
+</span>
 
 </h1>
 
 
-
 <p>
 
-HalDo AI OS System Kontrolle
+HalDo AI OS 18
+
+<br>
+
+Professional Ultimate Foundation
 
 </p>
 
 
 
-</header>
+
+<!-- ==================================
+     SYSTEM STATUS
+================================== -->
+
+<div class="settings-card">
+
+<h2>
+📡 System
+</h2>
+
+
+<p>
+
+Status:
+
+<strong id="system-status">
+
+🟢 Online
+
+</strong>
+
+</p>
+
+
+<p>
+
+AI:
+
+<strong id="ai-status">
+
+🟢 Bereit
+
+</strong>
+
+</p>
+
+
+<p>
+
+Version:
+
+<strong>
+
+18.0.0
+
+</strong>
+
+</p>
+
+</div>
 
 
 
 
 
+<!-- ==================================
+     LANGUAGE
+================================== -->
 
-
-
-<main class="menu-container">
-
-
+<div class="settings-card">
 
 <h2>
 
-⚙️ System
+🌍
+
+<span data-i18n="language">
+Sprache
+</span>
 
 </h2>
 
 
+<label for="language-select">
+
+Sprache auswählen:
+
+</label>
+
+
+<select
+id="language-select"
+>
+
+</select>
+
+
+<p id="language-info">
+
+Aktuelle Sprache wird geladen...
+
+</p>
+
+</div>
 
 
 
 
-<div class="menu-grid">
+
+<!-- ==================================
+     VOICE
+================================== -->
+
+<div class="settings-card">
+
+<h2>
+
+🔊
+
+<span data-i18n="voice">
+Stimme
+</span>
+
+</h2>
+
+
+<label>
+
+Stimme aktivieren
+
+</label>
+
+
+<input
+
+type="checkbox"
+
+id="voice-enabled"
+
+checked>
+
+
+<br><br>
+
+
+<button
+onclick="testVoice()"
+>
+
+🔊 Stimme testen
+
+</button>
+
+</div>
 
 
 
-<button>
+
+
+<!-- ==================================
+     MICROPHONE
+================================== -->
+
+<div class="settings-card">
+
+<h2>
+
+🎤
+
+<span data-i18n="microphone">
+Mikrofon
+</span>
+
+</h2>
+
+
+<p id="speech-status">
+
+Sprachsystem wird geprüft...
+
+</p>
+
+
+<button
+onclick="testMicrophone()"
+>
+
+🎤 Mikrofon testen
+
+</button>
+
+</div>
+
+
+
+
+
+<!-- ==================================
+     AI
+================================== -->
+
+<div class="settings-card">
+
+<h2>
+
+🧠 AI System
+
+</h2>
+
+
+<p>
+
+AI Engine:
+
+<strong id="engine-status">
+
+Wird geprüft...
+
+</strong>
+
+</p>
+
+
+<button
+onclick="restartAI()"
+>
+
+🔄 AI neu starten
+
+</button>
+
+</div>
+
+
+
+
+
+<!-- ==================================
+     MEMORY
+================================== -->
+
+<div class="settings-card">
+
+<h2>
+
+💾 AI Memory
+
+</h2>
+
+
+<p id="memory-info">
+
+Memory wird geladen...
+
+</p>
+
+
+<button
+onclick="clearMemory()"
+>
+
+🧹 Memory löschen
+
+</button>
+
+</div>
+
+
+
+
+
+<!-- ==================================
+     DESIGN
+================================== -->
+
+<div class="settings-card">
+
+<h2>
 
 🎨 Design
 
-<br>
-
-Glass Interface
-
-</button>
+</h2>
 
 
+<label>
+
+Design-Modus:
+
+</label>
 
 
-<button>
+<select id="theme-select">
 
-🌍 Sprache
+<option value="dark">
 
-<br>
+🌙 Dark
 
-Mehrsprachig
-
-</button>
+</option>
 
 
+<option value="light">
+
+☀️ Light
+
+</option>
+
+</select>
 
 
-<button>
-
-🤖 AI Einstellungen
-
-<br>
-
-KI Optionen
-
-</button>
+<br><br>
 
 
+<button
+onclick="applyTheme()"
+>
 
-
-<button>
-
-🔐 Sicherheit
-
-<br>
-
-System Schutz
+🎨 Design anwenden
 
 </button>
-
-
-
-
-<button>
-
-🔄 Updates
-
-<br>
-
-Version Verwaltung
-
-</button>
-
-
-
-
-<button>
-
-💾 Speicher
-
-<br>
-
-Daten Verwaltung
-
-</button>
-
-
 
 </div>
 
@@ -167,79 +376,51 @@ Daten Verwaltung
 
 
 
+<!-- ==================================
+     RESET
+================================== -->
 
-
-
-<section style="margin-top:40px;">
-
-
+<div class="settings-card">
 
 <h2>
 
-🚀 Erweiterte Optionen
+⚠️ System
 
 </h2>
 
 
+<button
+onclick="resetSettings()"
+>
 
-
-
-<div class="menu-grid">
-
-
-
-<button>
-
-⚡ Performance
-
-<br>
-
-Optimierung
+🔄 Einstellungen zurücksetzen
 
 </button>
-
-
-
-
-<button>
-
-🧩 Module Verwaltung
-
-<br>
-
-Manager
-
-</button>
-
-
-
-
-<button>
-
-👤 Benutzer System
-
-<br>
-
-Profile
-
-</button>
-
-
-
-
-<button>
-
-🛠 Entwickler Modus
-
-<br>
-
-Tools
-
-</button>
-
-
 
 </div>
+
+
+
+
+
+<!-- ==================================
+     BACK
+================================== -->
+
+<br>
+
+
+<button
+onclick="goBack()"
+>
+
+⬅️
+
+<span data-i18n="back">
+Zurück
+</span>
+
+</button>
 
 
 
@@ -249,45 +430,27 @@ Tools
 
 
 
+<!-- ==================================
+     CORE SYSTEMS
+================================== -->
 
+<script src="js/ai-core.js"></script>
 
+<script src="js/ai-engine.js"></script>
 
-<section style="margin-top:40px;">
+<script src="js/ai-voice.js"></script>
 
+<script src="js/ai-speech.js"></script>
 
+<script src="js/ai-memory.js"></script>
 
-<div class="menu-grid">
+<script src="js/ai-commands.js"></script>
 
+<script src="js/ai-chat.js"></script>
 
-<button onclick="openPage('dashboard.html')">
+<script src="js/language-system.js"></script>
 
-⬅️ Dashboard
-
-</button>
-
-
-
-<button onclick="openPage('index.html')">
-
-🏠 Hauptmenü
-
-</button>
-
-
-
-</div>
-
-
-</section>
-
-
-
-
-
-
-</main>
-
-
+<script src="js/language-manager.js"></script>
 
 
 
@@ -296,20 +459,515 @@ Tools
 <script>
 
 
-function openPage(page){
+/* =====================================
+   LANGUAGE SYSTEM
+===================================== */
 
 
-window.location.href = page;
+function loadLanguages(){
 
+    const select =
+        document.getElementById(
+            "language-select"
+        );
+
+
+    if(
+        !window.HalDoLanguageSystem
+    ){
+
+        return;
+
+    }
+
+
+    const languages =
+        HalDoLanguageSystem
+            .getLanguages();
+
+
+    select.innerHTML = "";
+
+
+    languages.forEach(
+        language => {
+
+            const option =
+                document.createElement(
+                    "option"
+                );
+
+
+            option.value =
+                language.id;
+
+
+            option.textContent =
+                language.native;
+
+
+            select.appendChild(
+                option
+            );
+
+        }
+    );
+
+
+    select.value =
+        HalDoLanguageSystem.current;
+
+
+    updateLanguageInfo();
 
 }
 
 
 
+
+
+selectLanguage();
+
+
+function selectLanguage(){
+
+    const select =
+        document.getElementById(
+            "language-select"
+        );
+
+
+    select.addEventListener(
+        "change",
+        function(){
+
+            const language =
+                this.value;
+
+
+            HalDoLanguageSystem
+                .setLanguage(
+                    language
+                );
+
+
+            updateLanguageInfo();
+
+        }
+    );
+
+}
+
+
+
+
+
+function updateLanguageInfo(){
+
+    const info =
+        document.getElementById(
+            "language-info"
+        );
+
+
+    const language =
+        HalDoLanguageSystem
+            .getLanguage();
+
+
+    if(language){
+
+        info.textContent =
+            language.native
+            +
+            " ("
+            +
+            language.voice
+            +
+            ")";
+
+    }
+
+}
+
+
+
+
+
+/* =====================================
+   VOICE
+===================================== */
+
+
+function testVoice(){
+
+    if(
+        !window.HalDoVoice
+    ){
+
+        alert(
+            "🔊 Voice-System nicht verfügbar."
+        );
+
+        return;
+
+    }
+
+
+    const language =
+        HalDoLanguageSystem
+            .getLanguage();
+
+
+    const text =
+        "Hallo! Ich bin HalDo AI.";
+
+
+    HalDoVoice.setLanguage(
+        language.voice
+    );
+
+
+    HalDoVoice.speak(
+        text
+    );
+
+}
+
+
+
+
+
+/* =====================================
+   MICROPHONE
+===================================== */
+
+
+function testMicrophone(){
+
+    if(
+        window.HalDoSpeech &&
+        HalDoSpeech.recognition
+    ){
+
+        document.getElementById(
+            "speech-status"
+        ).textContent =
+            "🟢 Mikrofon-System bereit.";
+
+        HalDoSpeech.start();
+
+    }
+    else{
+
+        document.getElementById(
+            "speech-status"
+        ).textContent =
+            "🟡 Sprachaufnahme wird von diesem Browser möglicherweise nicht unterstützt.";
+
+    }
+
+}
+
+
+
+
+
+/* =====================================
+   AI STATUS
+===================================== */
+
+
+function checkAI(){
+
+    const status =
+        document.getElementById(
+            "engine-status"
+        );
+
+
+    if(
+        window.HalDoAI &&
+        HalDoAI.status
+    ){
+
+        status.textContent =
+            "🟢 "
+            +
+            HalDoAI.status;
+
+    }
+    else{
+
+        status.textContent =
+            "🟡 Nicht geladen";
+
+    }
+
+}
+
+
+
+
+
+function restartAI(){
+
+    if(
+        window.HalDoAI &&
+        typeof HalDoAI.start ===
+        "function"
+    ){
+
+        HalDoAI.start();
+
+        checkAI();
+
+        alert(
+            "🤖 HalDo AI wurde neu gestartet."
+        );
+
+    }
+
+}
+
+
+
+
+
+/* =====================================
+   MEMORY
+===================================== */
+
+
+function updateMemory(){
+
+    const info =
+        document.getElementById(
+            "memory-info"
+        );
+
+
+    if(
+        !window.HalDoMemory
+    ){
+
+        info.textContent =
+            "🟡 Memory-System nicht geladen.";
+
+        return;
+
+    }
+
+
+    const conversations =
+        HalDoMemory
+            .getConversations();
+
+
+    info.textContent =
+        "💾 Gespeicherte Gespräche: "
+        +
+        conversations.length;
+
+}
+
+
+
+
+
+function clearMemory(){
+
+    if(
+        !window.HalDoMemory
+    ){
+
+        return;
+
+    }
+
+
+    const confirmed =
+        confirm(
+            "Möchtest du den gesamten AI Memory Verlauf wirklich löschen?"
+        );
+
+
+    if(!confirmed){
+
+        return;
+
+    }
+
+
+    HalDoMemory.clear();
+
+
+    updateMemory();
+
+
+    alert(
+        "🧹 AI Memory wurde gelöscht."
+    );
+
+}
+
+
+
+
+
+/* =====================================
+   THEME
+===================================== */
+
+
+function applyTheme(){
+
+    const select =
+        document.getElementById(
+            "theme-select"
+        );
+
+
+    const theme =
+        select.value;
+
+
+    document.body.dataset.theme =
+        theme;
+
+
+    localStorage.setItem(
+        "haldo_theme",
+        theme
+    );
+
+}
+
+
+
+
+
+function loadTheme(){
+
+    const theme =
+        localStorage.getItem(
+            "haldo_theme"
+        )
+        ||
+        "dark";
+
+
+    document.body.dataset.theme =
+        theme;
+
+
+    document.getElementById(
+        "theme-select"
+    ).value =
+        theme;
+
+}
+
+
+
+
+
+/* =====================================
+   RESET
+===================================== */
+
+
+function resetSettings(){
+
+    const confirmed =
+        confirm(
+            "Alle HalDo AI OS Einstellungen zurücksetzen?"
+        );
+
+
+    if(!confirmed){
+
+        return;
+
+    }
+
+
+    localStorage.removeItem(
+        "haldo_language"
+    );
+
+
+    localStorage.removeItem(
+        "haldo_theme"
+    );
+
+
+    if(
+        window.HalDoMemory
+    ){
+
+        HalDoMemory.clear();
+
+    }
+
+
+    alert(
+        "🔄 Einstellungen wurden zurückgesetzt."
+    );
+
+
+    location.reload();
+
+}
+
+
+
+
+
+/* =====================================
+   BACK
+===================================== */
+
+
+function goBack(){
+
+    window.location.href =
+        "index.html";
+
+}
+
+
+
+
+
+/* =====================================
+   START
+===================================== */
+
+
+window.addEventListener(
+    "DOMContentLoaded",
+    function(){
+
+        setTimeout(
+            function(){
+
+                loadLanguages();
+
+                checkAI();
+
+                updateMemory();
+
+                loadTheme();
+
+            },
+            200
+        );
+
+    }
+);
+
 </script>
-
-
-
 
 
 </body>
