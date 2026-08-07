@@ -7,13 +7,13 @@ Memory Foundation
 Version:
 18.0.0
 
-AI Memory Layer
+AI Memory Management Layer
 
 ========================================
 */
 
 
-const Memory = {
+const MemorySystem = {
 
 
     name:
@@ -28,7 +28,8 @@ const Memory = {
     "offline",
 
 
-    storage:
+
+    memories:
     [],
 
 
@@ -37,7 +38,7 @@ const Memory = {
 
 
         console.log(
-            "🧠 Memory System Initialisierung..."
+            "🧠 Memory System startet..."
         );
 
 
@@ -45,14 +46,14 @@ const Memory = {
         "starting";
 
 
-        this.start();
+        this.load();
 
 
     },
 
 
 
-    start(){
+    load(){
 
 
         this.status =
@@ -60,39 +61,8 @@ const Memory = {
 
 
 
-        if(
-            typeof Logger !== "undefined"
-        ){
-
-            Logger.info(
-                "Memory System gestartet"
-            );
-
-        }
-
-
-
-        if(
-            typeof EventBus !== "undefined"
-        ){
-
-            EventBus.emit(
-                "memory.ready",
-                {
-
-                    status:
-                    this.status
-
-                }
-
-            );
-
-        }
-
-
-
         console.log(
-            "🧠 HalDo Memory bereit"
+            "🧠 Memory System aktiv"
         );
 
 
@@ -100,61 +70,54 @@ const Memory = {
 
 
 
-    save(
-        key,
-        value
-    ){
+    remember(data){
 
 
-        const item = {
+        const memory = {
 
 
-            key:
-            key,
+            id:
+            Date.now(),
 
 
-            value:
-            value,
+            data:
+            data,
 
 
-            time:
+            created:
             new Date()
-            .toISOString()
 
 
         };
 
 
 
-        this.storage.push(
-            item
+        this.memories.push(
+            memory
         );
 
 
 
         console.log(
             "🧠 Erinnerung gespeichert:",
-            key
+            memory
         );
 
 
-
-        return item;
+        return memory;
 
 
     },
 
 
 
-    find(
-        key
-    ){
+    recall(id){
 
 
-        return this.storage.filter(
+        return this.memories.find(
 
-            item =>
-            item.key === key
+            memory =>
+            memory.id === id
 
         );
 
@@ -163,12 +126,40 @@ const Memory = {
 
 
 
-    getLatest(){
+    search(text){
 
 
-        return this.storage[
-            this.storage.length - 1
-        ];
+        return this.memories.filter(
+
+            memory =>
+            JSON.stringify(
+                memory.data
+            )
+            .includes(text)
+
+        );
+
+
+    },
+
+
+
+    forget(id){
+
+
+        this.memories =
+        this.memories.filter(
+
+            memory =>
+            memory.id !== id
+
+        );
+
+
+
+        console.log(
+            "🗑️ Erinnerung entfernt"
+        );
 
 
     },
@@ -178,13 +169,24 @@ const Memory = {
     clear(){
 
 
-        this.storage = [];
+        this.memories =
+        [];
 
 
 
         console.log(
-            "🧠 Memory gelöscht"
+            "🧹 Memory geleert"
         );
+
+
+    },
+
+
+
+    getAll(){
+
+
+        return this.memories;
 
 
     },
@@ -209,8 +211,8 @@ const Memory = {
             this.status,
 
 
-            memories:
-            this.storage.length
+            count:
+            this.memories.length
 
 
         };
@@ -227,4 +229,10 @@ const Memory = {
 
 // Memory starten
 
-Memory.initialize();
+MemorySystem.initialize();
+
+
+
+console.log(
+    "🧠 HalDo Memory geladen"
+);
