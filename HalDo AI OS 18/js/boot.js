@@ -2,12 +2,12 @@
 ========================================
 
 HalDo AI OS 18
-Boot System Foundation
+Boot System
 
 Version:
 18.0.0
 
-System Startup Layer
+System Startup Controller
 
 ========================================
 */
@@ -17,7 +17,7 @@ const BootSystem = {
 
 
     name:
-    "HalDo Boot Manager",
+    "HalDo Boot System",
 
 
     version:
@@ -33,7 +33,7 @@ const BootSystem = {
 
 
         console.log(
-            "🚀 Boot System Initialisierung..."
+            "🚀 HalDo AI OS 18 Boot gestartet"
         );
 
 
@@ -41,8 +41,34 @@ const BootSystem = {
         "starting";
 
 
+        this.updateStatus(
+            "🟡 HalDo AI OS 18 startet..."
+        );
 
-        this.checkDependencies();
+
+        this.startSequence();
+
+
+    },
+
+
+
+    startSequence(){
+
+
+        setTimeout(() => {
+
+
+            this.updateStatus(
+                "🔵 Kernel wird geladen..."
+            );
+
+
+            this.startKernel();
+
+
+
+        },500);
 
 
 
@@ -50,68 +76,35 @@ const BootSystem = {
 
 
 
-    checkDependencies(){
+    startKernel(){
 
 
-        console.log(
-            "🔎 Prüfe System-Abhängigkeiten..."
-        );
+        if(
+            typeof KernelSystem !== "undefined"
+        ){
+
+            KernelSystem.initialize();
 
 
-
-        const dependencies = [
-
-
-            "EventBus",
+            this.status =
+            "kernel-loaded";
 
 
-            "Logger",
+            this.updateStatus(
+                "🔵 Kernel geladen"
+            );
 
 
-            "ConfigManager"
+        }
+        else {
 
 
-        ];
+            console.warn(
+                "Kernel nicht gefunden"
+            );
 
 
-
-        dependencies.forEach(
-            dependency => {
-
-
-                if(
-                    typeof window[dependency]
-                    !== "undefined"
-                ){
-
-                    console.log(
-                        "🟢",
-                        dependency,
-                        "bereit"
-                    );
-
-
-                }
-                else {
-
-
-                    console.warn(
-                        "🟡",
-                        dependency,
-                        "nicht gefunden"
-                    );
-
-
-                }
-
-
-            }
-
-        );
-
-
-
-        this.start();
+        }
 
 
 
@@ -119,43 +112,42 @@ const BootSystem = {
 
 
 
-    start(){
+    complete(){
 
 
         this.status =
-        "active";
+        "ready";
+
+
+        this.updateStatus(
+            "🟢 HalDo AI OS 18 bereit"
+        );
+
+
+        console.log(
+            "✅ Boot abgeschlossen"
+        );
+
+
+    },
 
 
 
-        if(
-            typeof Logger
-            !== "undefined"
-        ){
-
-            Logger.info(
-                "Boot System erfolgreich gestartet"
-            );
+    updateStatus(message){
 
 
-        }
+        const element =
+        document.getElementById(
+            "system-status"
+        );
 
 
 
-        if(
-            typeof EventBus
-            !== "undefined"
-        ){
+        if(element){
 
-            EventBus.emit(
-                "system.boot",
-                {
 
-                    status:
-                    "active"
-
-                }
-
-            );
+            element.innerHTML =
+            message;
 
 
         }
@@ -163,9 +155,8 @@ const BootSystem = {
 
 
         console.log(
-            "🚀 HalDo AI OS 18 Boot abgeschlossen"
+            message
         );
-
 
 
     },
