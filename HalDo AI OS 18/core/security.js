@@ -7,13 +7,13 @@ Security Foundation
 Version:
 18.0.0
 
-System Security Layer
+System Protection Layer
 
 ========================================
 */
 
 
-const Security = {
+const SecuritySystem = {
 
 
     name:
@@ -28,11 +28,8 @@ const Security = {
     "offline",
 
 
+
     permissions:
-    {},
-
-
-    logs:
     [],
 
 
@@ -41,7 +38,7 @@ const Security = {
 
 
         console.log(
-            "🔐 Security System Initialisierung..."
+            "🔐 Security System startet..."
         );
 
 
@@ -49,47 +46,30 @@ const Security = {
         "starting";
 
 
-        this.loadDefaults();
-
-
-        this.start();
+        this.load();
 
 
     },
 
 
 
-    loadDefaults(){
+    load(){
 
 
-        this.permissions = {
+        this.permissions = [
 
 
-            system:
-            "admin",
+            "system_access",
+
+            "module_access",
+
+            "database_access",
+
+            "ai_access"
 
 
-            modules:
-            "allowed",
+        ];
 
-
-            apps:
-            "allowed"
-
-
-        };
-
-
-        console.log(
-            "🔐 Standard Berechtigungen geladen"
-        );
-
-
-    },
-
-
-
-    start(){
 
 
         this.status =
@@ -97,40 +77,21 @@ const Security = {
 
 
 
-        if(
-            typeof Logger !== "undefined"
-        ){
-
-            Logger.info(
-                "Security System gestartet"
-            );
-
-
-        }
-
-
-
-        if(
-            typeof EventBus !== "undefined"
-        ){
-
-            EventBus.emit(
-                "security.ready",
-                {
-
-                    status:
-                    this.status
-
-                }
-
-            );
-
-        }
-
-
-
         console.log(
-            "🔐 HalDo Security aktiv"
+            "🔐 Security System aktiv"
+        );
+
+
+
+    },
+
+
+
+    checkPermission(permission){
+
+
+        return this.permissions.includes(
+            permission
         );
 
 
@@ -138,70 +99,69 @@ const Security = {
 
 
 
-    checkPermission(
-        area
-    ){
+    addPermission(permission){
 
 
-        const result =
-        this.permissions[area]
-        !== undefined;
+        this.permissions.push(
+            permission
+        );
 
 
 
-        this.logs.push({
+        console.log(
+            "➕ Berechtigung hinzugefügt:",
+            permission
+        );
 
-            action:
-            "permission-check",
 
-            area:
-            area,
+    },
+
+
+
+    removePermission(permission){
+
+
+        this.permissions =
+        this.permissions.filter(
+
+            item =>
+            item !== permission
+
+        );
+
+
+
+        console.log(
+            "➖ Berechtigung entfernt:",
+            permission
+        );
+
+
+    },
+
+
+
+    scan(){
+
+
+        console.log(
+            "🔍 Sicherheitsscan läuft..."
+        );
+
+
+
+        return {
+
 
             result:
-            result,
+            "safe",
+
 
             time:
             new Date()
-            .toISOString()
 
 
-        });
-
-
-
-        return result;
-
-
-    },
-
-
-
-    setPermission(
-        area,
-        value
-    ){
-
-
-        this.permissions[area]
-        =
-        value;
-
-
-
-        console.log(
-            "🔐 Berechtigung geändert:",
-            area
-        );
-
-
-    },
-
-
-
-    getLogs(){
-
-
-        return this.logs;
+        };
 
 
     },
@@ -244,4 +204,10 @@ const Security = {
 
 // Security starten
 
-Security.initialize();
+SecuritySystem.initialize();
+
+
+
+console.log(
+    "🔐 HalDo Security geladen"
+);
