@@ -16,7 +16,7 @@ Version 18.0.0
 
         started: false,
 
-        logoIntroFinished: false,
+        introFinished: false,
 
         welcomeFinished: false,
 
@@ -24,20 +24,14 @@ Version 18.0.0
         init() {
 
             if (this.started) {
-
                 return;
-
             }
 
-
-            this.started =
-                true;
-
+            this.started = true;
 
             console.log(
                 "🚀 HalDo AI OS 18 Startup"
             );
-
 
             this.startLogoIntro();
 
@@ -52,20 +46,6 @@ Version 18.0.0
                 );
 
 
-            const welcome =
-                document.getElementById(
-                    "welcome-screen"
-                );
-
-
-            const logo =
-                startup
-                ? startup.querySelector(
-                    ".logo"
-                )
-                : null;
-
-
             if (!startup) {
 
                 this.showWelcome();
@@ -75,16 +55,16 @@ Version 18.0.0
             }
 
 
-            startup.style.display =
-                "flex";
-
-
-            startup.classList.remove(
-                "hidden"
-            );
+            const logo =
+                startup.querySelector(
+                    ".logo"
+                );
 
 
             if (logo) {
+
+                logo.src =
+                    "assets/logo/logo.png";
 
                 logo.classList.add(
                     "haldo-logo-intro"
@@ -93,7 +73,16 @@ Version 18.0.0
             }
 
 
-            this.setStatus(
+            startup.classList.remove(
+                "hidden"
+            );
+
+
+            startup.style.display =
+                "flex";
+
+
+            this.status(
                 "🟡 HalDo AI OS startet..."
             );
 
@@ -101,7 +90,7 @@ Version 18.0.0
             setTimeout(
                 () => {
 
-                    this.setStatus(
+                    this.status(
                         "✨ HalDo AI OS lädt..."
                     );
 
@@ -113,7 +102,7 @@ Version 18.0.0
             setTimeout(
                 () => {
 
-                    this.setStatus(
+                    this.status(
                         "🔵 HalDo AI OS lädt Module..."
                     );
 
@@ -125,7 +114,7 @@ Version 18.0.0
             setTimeout(
                 () => {
 
-                    this.setStatus(
+                    this.status(
                         "🔵 HalDo AI OS verbindet Systeme..."
                     );
 
@@ -137,7 +126,7 @@ Version 18.0.0
             setTimeout(
                 () => {
 
-                    this.logoIntroFinished =
+                    this.introFinished =
                         true;
 
                     this.showWelcome();
@@ -180,6 +169,20 @@ Version 18.0.0
             }
 
 
+            const logo =
+                welcome.querySelector(
+                    ".logo"
+                );
+
+
+            if (logo) {
+
+                logo.src =
+                    "assets/logo/logo.png";
+
+            }
+
+
             welcome.classList.remove(
                 "hidden"
             );
@@ -193,12 +196,12 @@ Version 18.0.0
                 true;
 
 
-            this.startWelcomeVoice();
+            this.welcomeVoice();
 
         },
 
 
-        startWelcomeVoice() {
+        welcomeVoice() {
 
             if (
                 !window.HalDoVoice
@@ -228,17 +231,16 @@ Version 18.0.0
                             "Willkommen bei HalDo AI OS 18."
                         );
 
-                    }
-                    catch (error) {
+                    } catch (error) {
 
                         console.log(
-                            "Voice nicht verfügbar."
+                            "HalDo Voice momentan nicht verfügbar."
                         );
 
                     }
 
                 },
-                700
+                600
             );
 
         },
@@ -289,45 +291,61 @@ Version 18.0.0
                 "block";
 
 
-            this.applyLogoToMenu();
+            this.applyLogo();
 
         },
 
 
-        applyLogoToMenu() {
+        applyLogo() {
 
-            const images =
-                document.querySelectorAll(
+            document
+                .querySelectorAll(
                     ".logo"
+                )
+                .forEach(
+                    function (image) {
+
+                        image.src =
+                            "assets/logo/logo.png";
+
+                    }
                 );
 
-
-            images.forEach(
-                function (image) {
-
-                    image.src =
-                        "assets/logo/logo.png";
-
-                }
-            );
-
         },
 
 
-        setStatus(message) {
+        status(message) {
 
-            const status =
+            const element =
                 document.getElementById(
                     "system-status"
                 );
 
 
-            if (status) {
+            if (element) {
 
-                status.textContent =
+                element.textContent =
                     message;
 
             }
+
+        },
+
+
+        getStatus() {
+
+            return {
+
+                started:
+                    this.started,
+
+                introFinished:
+                    this.introFinished,
+
+                welcomeFinished:
+                    this.welcomeFinished
+
+            };
 
         }
 
@@ -338,12 +356,6 @@ Version 18.0.0
         HalDoStartup;
 
 
-    /*
-    ======================================
-    GLOBAL BUTTON
-    ======================================
-    */
-
     window.openMainMenu =
         function () {
 
@@ -352,12 +364,6 @@ Version 18.0.0
 
         };
 
-
-    /*
-    ======================================
-    STARTUP
-    ======================================
-    */
 
     window.addEventListener(
         "DOMContentLoaded",
@@ -369,7 +375,7 @@ Version 18.0.0
                     HalDoStartup.init();
 
                 },
-                150
+                500
             );
 
         }
