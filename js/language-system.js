@@ -1,821 +1,1461 @@
 /*
-==========================================
+========================================================
+
 HalDo AI OS 18
-Central Language System
+Language System
 
 Professional Ultimate Foundation
-Version 18.0.0
-==========================================
+
+Version:
+18.0.0
+
+Aufgaben:
+- Zentrale Sprachverwaltung
+- Deutsch
+- Kurdî
+- Êzîdî
+- Englisch
+- Arabisch
+- Türkisch
+- Französisch
+- Spanisch
+- Italienisch
+- Portugiesisch
+- Russisch
+- Persisch
+- UI-Übersetzungen
+- AI-Sprache
+- Voice-Sprache
+- Tastatur-Sprache
+- Speicherung der Auswahl
+
+========================================================
 */
 
-(function () {
+(function (window, document) {
 
     "use strict";
 
-    const HalDoLanguageSystem = {
 
-        version: "18.0.0",
+    const HalDoLanguage = {
 
-        current: "de",
 
-        fallback: "de",
+        /* ==================================================
+           GRUNDINFORMATIONEN
+           ================================================== */
 
-        ready: false,
+        name:
+            "HalDo Language System",
+
+        version:
+            "18.0.0",
+
+        status:
+            "ready",
+
+
+        /* ==================================================
+           STANDARDSPRACHE
+           ================================================== */
+
+        defaultLanguage:
+            "de",
+
+
+        currentLanguage:
+            "de",
+
+
+        /* ==================================================
+           VERFÜGBARE SPRACHEN
+           ================================================== */
 
         languages: {
 
+
             de: {
-                id: "de",
+                code: "de",
+                locale: "de-DE",
                 name: "Deutsch",
-                native: "Deutsch",
-                voice: "de-DE",
+                nativeName: "Deutsch",
                 direction: "ltr"
             },
 
-            en: {
-                id: "en",
-                name: "English",
-                native: "English",
-                voice: "en-US",
-                direction: "ltr"
-            },
 
             ku: {
-                id: "ku",
-                name: "Kurdî",
-                native: "Kurmancî",
-                voice: "ku",
+                code: "ku",
+                locale: "ku",
+                name: "Kurdisch",
+                nativeName: "Kurdî",
                 direction: "ltr"
             },
+
 
             ez: {
-                id: "ez",
-                name: "Êzîkî",
-                native: "Êzîkî",
-                voice: "ku",
+                code: "ez",
+                locale: "ku-Latn",
+                name: "Êzîdî",
+                nativeName: "Êzîdî",
                 direction: "ltr"
             },
 
-            tr: {
-                id: "tr",
-                name: "Türkçe",
-                native: "Türkçe",
-                voice: "tr-TR",
+
+            en: {
+                code: "en",
+                locale: "en-US",
+                name: "English",
+                nativeName: "English",
                 direction: "ltr"
             },
+
 
             ar: {
-                id: "ar",
-                name: "العربية",
-                native: "العربية",
-                voice: "ar-SA",
+                code: "ar",
+                locale: "ar-SA",
+                name: "Arabisch",
+                nativeName: "العربية",
                 direction: "rtl"
             },
+
+
+            tr: {
+                code: "tr",
+                locale: "tr-TR",
+                name: "Türkisch",
+                nativeName: "Türkçe",
+                direction: "ltr"
+            },
+
 
             fr: {
-                id: "fr",
-                name: "Français",
-                native: "Français",
-                voice: "fr-FR",
+                code: "fr",
+                locale: "fr-FR",
+                name: "Französisch",
+                nativeName: "Français",
                 direction: "ltr"
             },
+
 
             es: {
-                id: "es",
-                name: "Español",
-                native: "Español",
-                voice: "es-ES",
+                code: "es",
+                locale: "es-ES",
+                name: "Spanisch",
+                nativeName: "Español",
                 direction: "ltr"
             },
+
 
             it: {
-                id: "it",
-                name: "Italiano",
-                native: "Italiano",
-                voice: "it-IT",
+                code: "it",
+                locale: "it-IT",
+                name: "Italienisch",
+                nativeName: "Italiano",
                 direction: "ltr"
             },
+
 
             pt: {
-                id: "pt",
-                name: "Português",
-                native: "Português",
-                voice: "pt-PT",
+                code: "pt",
+                locale: "pt-PT",
+                name: "Portugiesisch",
+                nativeName: "Português",
                 direction: "ltr"
             },
 
-            nl: {
-                id: "nl",
-                name: "Nederlands",
-                native: "Nederlands",
-                voice: "nl-NL",
-                direction: "ltr"
-            },
-
-            pl: {
-                id: "pl",
-                name: "Polski",
-                native: "Polski",
-                voice: "pl-PL",
-                direction: "ltr"
-            },
-
-            uk: {
-                id: "uk",
-                name: "Українська",
-                native: "Українська",
-                voice: "uk-UA",
-                direction: "ltr"
-            },
 
             ru: {
-                id: "ru",
-                name: "Русский",
-                native: "Русский",
-                voice: "ru-RU",
+                code: "ru",
+                locale: "ru-RU",
+                name: "Russisch",
+                nativeName: "Русский",
                 direction: "ltr"
             },
 
-            hi: {
-                id: "hi",
-                name: "हिन्दी",
-                native: "हिन्दी",
-                voice: "hi-IN",
-                direction: "ltr"
-            },
 
             fa: {
-                id: "fa",
-                name: "فارسی",
-                native: "فارسی",
-                voice: "fa-IR",
+                code: "fa",
+                locale: "fa-IR",
+                name: "Persisch",
+                nativeName: "فارسی",
                 direction: "rtl"
-            },
-
-            zh: {
-                id: "zh",
-                name: "中文",
-                native: "中文",
-                voice: "zh-CN",
-                direction: "ltr"
-            },
-
-            ja: {
-                id: "ja",
-                name: "日本語",
-                native: "日本語",
-                voice: "ja-JP",
-                direction: "ltr"
-            },
-
-            ko: {
-                id: "ko",
-                name: "한국어",
-                native: "한국어",
-                voice: "ko-KR",
-                direction: "ltr"
-            },
-
-            el: {
-                id: "el",
-                name: "Ελληνικά",
-                native: "Ελληνικά",
-                voice: "el-GR",
-                direction: "ltr"
             }
 
         },
+
+
+        /* ==================================================
+           ÜBERSETZUNGEN
+           ================================================== */
 
         translations: {
 
+
             de: {
-                menu: "Hauptmenü",
-                dashboard: "Dashboard",
-                aiCore: "AI Core",
-                modules: "Module",
-                apps: "Apps",
-                settings: "Einstellungen",
-                status: "System Status",
-                health: "Health Center",
-                language: "Sprache",
-                voice: "Stimme",
-                microphone: "Mikrofon",
-                send: "Senden",
-                speak: "Vorlesen",
-                back: "Zurück",
-                welcome: "Willkommen bei HalDo AI OS",
-                ready: "Bereit",
-                loading: "Wird geladen...",
-                online: "Online",
-                offline: "Offline"
+
+                welcome:
+                    "Willkommen bei HalDo AI",
+
+                mainMenu:
+                    "Hauptmenü",
+
+                dashboard:
+                    "Dashboard",
+
+                aiCore:
+                    "AI Core",
+
+                modules:
+                    "Module",
+
+                apps:
+                    "Apps",
+
+                settings:
+                    "Einstellungen",
+
+                systemStatus:
+                    "System Status",
+
+                health:
+                    "Health Center",
+
+                microphone:
+                    "Mikrofon",
+
+                listening:
+                    "HalDo AI hört zu...",
+
+                thinking:
+                    "HalDo AI denkt nach...",
+
+                answering:
+                    "HalDo AI antwortet...",
+
+                speaking:
+                    "HalDo AI spricht...",
+
+                write:
+                    "Schreibe mit HalDo AI...",
+
+                send:
+                    "Senden",
+
+                language:
+                    "Sprache",
+
+                keyboard:
+                    "Tastatur",
+
+                save:
+                    "Speichern",
+
+                cancel:
+                    "Abbrechen"
+
             },
 
-            en: {
-                menu: "Main Menu",
-                dashboard: "Dashboard",
-                aiCore: "AI Core",
-                modules: "Modules",
-                apps: "Apps",
-                settings: "Settings",
-                status: "System Status",
-                health: "Health Center",
-                language: "Language",
-                voice: "Voice",
-                microphone: "Microphone",
-                send: "Send",
-                speak: "Read aloud",
-                back: "Back",
-                welcome: "Welcome to HalDo AI OS",
-                ready: "Ready",
-                loading: "Loading...",
-                online: "Online",
-                offline: "Offline"
-            },
 
             ku: {
-                menu: "Menuya Sereke",
-                dashboard: "Panoya kontrolê",
-                aiCore: "AI Core",
-                modules: "Modûl",
-                apps: "Sepan",
-                settings: "Mîheng",
-                status: "Rewşa Sîstemê",
-                health: "Navenda Tenduristiyê",
-                language: "Ziman",
-                voice: "Deng",
-                microphone: "Mîkrofon",
-                send: "Şandin",
-                speak: "Bi deng bixwîne",
-                back: "Vegere",
-                welcome: "Bi xêr hatî HalDo AI OS",
-                ready: "Amade",
-                loading: "Tê barkirin...",
-                online: "Girêdayî",
-                offline: "Ne girêdayî"
+
+                welcome:
+                    "Bi xêr hatî HalDo AI",
+
+                mainMenu:
+                    "Menuya Sereke",
+
+                dashboard:
+                    "Dashboard",
+
+                aiCore:
+                    "AI Core",
+
+                modules:
+                    "Modul",
+
+                apps:
+                    "Sepan",
+
+                settings:
+                    "Mîheng",
+
+                systemStatus:
+                    "Rewşa Sîstemê",
+
+                health:
+                    "Navenda Tenduristiyê",
+
+                microphone:
+                    "Mîkrofon",
+
+                listening:
+                    "HalDo AI guhdarî dike...",
+
+                thinking:
+                    "HalDo AI difikire...",
+
+                answering:
+                    "HalDo AI bersiv dide...",
+
+                speaking:
+                    "HalDo AI diaxive...",
+
+                write:
+                    "Bi HalDo AI re binivîse...",
+
+                send:
+                    "Bişîne",
+
+                language:
+                    "Ziman",
+
+                keyboard:
+                    "Klavyeyê",
+
+                save:
+                    "Tomar bike",
+
+                cancel:
+                    "Betal bike"
+
             },
+
 
             ez: {
-                menu: "Menu",
-                dashboard: "Panoya kontrolê",
-                aiCore: "AI Core",
-                modules: "Modûl",
-                apps: "Sepan",
-                settings: "Mîheng",
-                status: "Rewşa Sîstemê",
-                health: "Navenda Tenduristiyê",
-                language: "Ziman",
-                voice: "Deng",
-                microphone: "Mîkrofon",
-                send: "Şandin",
-                speak: "Bi deng bixwîne",
-                back: "Vegere",
-                welcome: "Bi xêr hatî HalDo AI OS",
-                ready: "Amade",
-                loading: "Tê barkirin...",
-                online: "Girêdayî",
-                offline: "Ne girêdayî"
+
+                welcome:
+                    "Bi xêr hatî bo HalDo AI",
+
+                mainMenu:
+                    "Menuya Serî",
+
+                dashboard:
+                    "Dashboard",
+
+                aiCore:
+                    "AI Core",
+
+                modules:
+                    "Modul",
+
+                apps:
+                    "Sepan",
+
+                settings:
+                    "Mîheng",
+
+                systemStatus:
+                    "Rewşa Sîstemê",
+
+                health:
+                    "Navenda Tenduristiyê",
+
+                microphone:
+                    "Mîkrofon",
+
+                listening:
+                    "HalDo AI guhdarî dike...",
+
+                thinking:
+                    "HalDo AI difikire...",
+
+                answering:
+                    "HalDo AI bersiv dide...",
+
+                speaking:
+                    "HalDo AI diaxive...",
+
+                write:
+                    "Bi HalDo AI re binivîse...",
+
+                send:
+                    "Bişîne",
+
+                language:
+                    "Ziman",
+
+                keyboard:
+                    "Klavyeyê",
+
+                save:
+                    "Tomar bike",
+
+                cancel:
+                    "Betal bike"
+
             },
+
+
+            en: {
+
+                welcome:
+                    "Welcome to HalDo AI",
+
+                mainMenu:
+                    "Main Menu",
+
+                dashboard:
+                    "Dashboard",
+
+                aiCore:
+                    "AI Core",
+
+                modules:
+                    "Modules",
+
+                apps:
+                    "Apps",
+
+                settings:
+                    "Settings",
+
+                systemStatus:
+                    "System Status",
+
+                health:
+                    "Health Center",
+
+                microphone:
+                    "Microphone",
+
+                listening:
+                    "HalDo AI is listening...",
+
+                thinking:
+                    "HalDo AI is thinking...",
+
+                answering:
+                    "HalDo AI is answering...",
+
+                speaking:
+                    "HalDo AI is speaking...",
+
+                write:
+                    "Write with HalDo AI...",
+
+                send:
+                    "Send",
+
+                language:
+                    "Language",
+
+                keyboard:
+                    "Keyboard",
+
+                save:
+                    "Save",
+
+                cancel:
+                    "Cancel"
+
+            },
+
 
             tr: {
-                menu: "Ana Menü",
-                dashboard: "Kontrol Paneli",
-                aiCore: "AI Core",
-                modules: "Modüller",
-                apps: "Uygulamalar",
-                settings: "Ayarlar",
-                status: "Sistem Durumu",
-                health: "Sağlık Merkezi",
-                language: "Dil",
-                voice: "Ses",
-                microphone: "Mikrofon",
-                send: "Gönder",
-                speak: "Sesli Oku",
-                back: "Geri",
-                welcome: "HalDo AI OS'ye Hoş Geldiniz",
-                ready: "Hazır",
-                loading: "Yükleniyor...",
-                online: "Çevrimiçi",
-                offline: "Çevrimdışı"
+
+                welcome:
+                    "HalDo AI'ya hoş geldiniz",
+
+                mainMenu:
+                    "Ana Menü",
+
+                dashboard:
+                    "Kontrol Paneli",
+
+                aiCore:
+                    "AI Core",
+
+                modules:
+                    "Modüller",
+
+                apps:
+                    "Uygulamalar",
+
+                settings:
+                    "Ayarlar",
+
+                systemStatus:
+                    "Sistem Durumu",
+
+                health:
+                    "Sağlık Merkezi",
+
+                microphone:
+                    "Mikrofon",
+
+                listening:
+                    "HalDo AI dinliyor...",
+
+                thinking:
+                    "HalDo AI düşünüyor...",
+
+                answering:
+                    "HalDo AI cevaplıyor...",
+
+                speaking:
+                    "HalDo AI konuşuyor...",
+
+                write:
+                    "HalDo AI ile yaz...",
+
+                send:
+                    "Gönder",
+
+                language:
+                    "Dil",
+
+                keyboard:
+                    "Klavye",
+
+                save:
+                    "Kaydet",
+
+                cancel:
+                    "İptal"
+
             },
+
 
             ar: {
-                menu: "القائمة الرئيسية",
-                dashboard: "لوحة التحكم",
-                aiCore: "نواة الذكاء الاصطناعي",
-                modules: "الوحدات",
-                apps: "التطبيقات",
-                settings: "الإعدادات",
-                status: "حالة النظام",
-                health: "مركز الصحة",
-                language: "اللغة",
-                voice: "الصوت",
-                microphone: "الميكروفون",
-                send: "إرسال",
-                speak: "قراءة بصوت عالٍ",
-                back: "رجوع",
-                welcome: "مرحباً بك في HalDo AI OS",
-                ready: "جاهز",
-                loading: "جارٍ التحميل...",
-                online: "متصل",
-                offline: "غير متصل"
+
+                welcome:
+                    "مرحباً بك في HalDo AI",
+
+                mainMenu:
+                    "القائمة الرئيسية",
+
+                dashboard:
+                    "لوحة التحكم",
+
+                aiCore:
+                    "نواة الذكاء الاصطناعي",
+
+                modules:
+                    "الوحدات",
+
+                apps:
+                    "التطبيقات",
+
+                settings:
+                    "الإعدادات",
+
+                systemStatus:
+                    "حالة النظام",
+
+                health:
+                    "المركز الصحي",
+
+                microphone:
+                    "الميكروفون",
+
+                listening:
+                    "HalDo AI يستمع...",
+
+                thinking:
+                    "HalDo AI يفكر...",
+
+                answering:
+                    "HalDo AI يجيب...",
+
+                speaking:
+                    "HalDo AI يتحدث...",
+
+                write:
+                    "اكتب مع HalDo AI...",
+
+                send:
+                    "إرسال",
+
+                language:
+                    "اللغة",
+
+                keyboard:
+                    "لوحة المفاتيح",
+
+                save:
+                    "حفظ",
+
+                cancel:
+                    "إلغاء"
+
             },
+
 
             fr: {
-                menu: "Menu principal",
-                dashboard: "Tableau de bord",
-                aiCore: "AI Core",
-                modules: "Modules",
-                apps: "Applications",
-                settings: "Paramètres",
-                status: "État du système",
-                health: "Centre de santé",
-                language: "Langue",
-                voice: "Voix",
-                microphone: "Microphone",
-                send: "Envoyer",
-                speak: "Lire à voix haute",
-                back: "Retour",
-                welcome: "Bienvenue dans HalDo AI OS",
-                ready: "Prêt",
-                loading: "Chargement...",
-                online: "En ligne",
-                offline: "Hors ligne"
+
+                welcome:
+                    "Bienvenue sur HalDo AI",
+
+                mainMenu:
+                    "Menu principal",
+
+                dashboard:
+                    "Tableau de bord",
+
+                aiCore:
+                    "AI Core",
+
+                modules:
+                    "Modules",
+
+                apps:
+                    "Applications",
+
+                settings:
+                    "Paramètres",
+
+                systemStatus:
+                    "État du système",
+
+                health:
+                    "Centre de santé",
+
+                microphone:
+                    "Microphone",
+
+                listening:
+                    "HalDo AI écoute...",
+
+                thinking:
+                    "HalDo AI réfléchit...",
+
+                answering:
+                    "HalDo AI répond...",
+
+                speaking:
+                    "HalDo AI parle...",
+
+                write:
+                    "Écrivez avec HalDo AI...",
+
+                send:
+                    "Envoyer",
+
+                language:
+                    "Langue",
+
+                keyboard:
+                    "Clavier",
+
+                save:
+                    "Enregistrer",
+
+                cancel:
+                    "Annuler"
+
             },
+
 
             es: {
-                menu: "Menú principal",
-                dashboard: "Panel",
-                aiCore: "AI Core",
-                modules: "Módulos",
-                apps: "Aplicaciones",
-                settings: "Configuración",
-                status: "Estado del sistema",
-                health: "Centro de salud",
-                language: "Idioma",
-                voice: "Voz",
-                microphone: "Micrófono",
-                send: "Enviar",
-                speak: "Leer en voz alta",
-                back: "Volver",
-                welcome: "Bienvenido a HalDo AI OS",
-                ready: "Listo",
-                loading: "Cargando...",
-                online: "En línea",
-                offline: "Sin conexión"
+
+                welcome:
+                    "Bienvenido a HalDo AI",
+
+                mainMenu:
+                    "Menú principal",
+
+                dashboard:
+                    "Panel",
+
+                aiCore:
+                    "AI Core",
+
+                modules:
+                    "Módulos",
+
+                apps:
+                    "Aplicaciones",
+
+                settings:
+                    "Configuración",
+
+                systemStatus:
+                    "Estado del sistema",
+
+                health:
+                    "Centro de salud",
+
+                microphone:
+                    "Micrófono",
+
+                listening:
+                    "HalDo AI está escuchando...",
+
+                thinking:
+                    "HalDo AI está pensando...",
+
+                answering:
+                    "HalDo AI está respondiendo...",
+
+                speaking:
+                    "HalDo AI está hablando...",
+
+                write:
+                    "Escribe con HalDo AI...",
+
+                send:
+                    "Enviar",
+
+                language:
+                    "Idioma",
+
+                keyboard:
+                    "Teclado",
+
+                save:
+                    "Guardar",
+
+                cancel:
+                    "Cancelar"
+
             },
+
 
             it: {
-                menu: "Menu principale",
-                dashboard: "Dashboard",
-                aiCore: "AI Core",
-                modules: "Moduli",
-                apps: "App",
-                settings: "Impostazioni",
-                status: "Stato del sistema",
-                health: "Centro salute",
-                language: "Lingua",
-                voice: "Voce",
-                microphone: "Microfono",
-                send: "Invia",
-                speak: "Leggi ad alta voce",
-                back: "Indietro",
-                welcome: "Benvenuto in HalDo AI OS",
-                ready: "Pronto",
-                loading: "Caricamento...",
-                online: "Online",
-                offline: "Offline"
+
+                welcome:
+                    "Benvenuto in HalDo AI",
+
+                mainMenu:
+                    "Menu principale",
+
+                dashboard:
+                    "Dashboard",
+
+                aiCore:
+                    "AI Core",
+
+                modules:
+                    "Moduli",
+
+                apps:
+                    "App",
+
+                settings:
+                    "Impostazioni",
+
+                systemStatus:
+                    "Stato del sistema",
+
+                health:
+                    "Centro salute",
+
+                microphone:
+                    "Microfono",
+
+                listening:
+                    "HalDo AI sta ascoltando...",
+
+                thinking:
+                    "HalDo AI sta pensando...",
+
+                answering:
+                    "HalDo AI sta rispondendo...",
+
+                speaking:
+                    "HalDo AI sta parlando...",
+
+                write:
+                    "Scrivi con HalDo AI...",
+
+                send:
+                    "Invia",
+
+                language:
+                    "Lingua",
+
+                keyboard:
+                    "Tastiera",
+
+                save:
+                    "Salva",
+
+                cancel:
+                    "Annulla"
+
             },
+
 
             pt: {
-                menu: "Menu principal",
-                dashboard: "Painel",
-                aiCore: "AI Core",
-                modules: "Módulos",
-                apps: "Aplicativos",
-                settings: "Configurações",
-                status: "Estado do sistema",
-                health: "Centro de saúde",
-                language: "Idioma",
-                voice: "Voz",
-                microphone: "Microfone",
-                send: "Enviar",
-                speak: "Ler em voz alta",
-                back: "Voltar",
-                welcome: "Bem-vindo ao HalDo AI OS",
-                ready: "Pronto",
-                loading: "Carregando...",
-                online: "Online",
-                offline: "Offline"
+
+                welcome:
+                    "Bem-vindo ao HalDo AI",
+
+                mainMenu:
+                    "Menu principal",
+
+                dashboard:
+                    "Painel",
+
+                aiCore:
+                    "AI Core",
+
+                modules:
+                    "Módulos",
+
+                apps:
+                    "Aplicações",
+
+                settings:
+                    "Definições",
+
+                systemStatus:
+                    "Estado do sistema",
+
+                health:
+                    "Centro de saúde",
+
+                microphone:
+                    "Microfone",
+
+                listening:
+                    "HalDo AI está a ouvir...",
+
+                thinking:
+                    "HalDo AI está a pensar...",
+
+                answering:
+                    "HalDo AI está a responder...",
+
+                speaking:
+                    "HalDo AI está a falar...",
+
+                write:
+                    "Escreva com HalDo AI...",
+
+                send:
+                    "Enviar",
+
+                language:
+                    "Idioma",
+
+                keyboard:
+                    "Teclado",
+
+                save:
+                    "Guardar",
+
+                cancel:
+                    "Cancelar"
+
             },
 
-            nl: {
-                menu: "Hoofdmenu",
-                dashboard: "Dashboard",
-                aiCore: "AI Core",
-                modules: "Modules",
-                apps: "Apps",
-                settings: "Instellingen",
-                status: "Systeemstatus",
-                health: "Gezondheidscentrum",
-                language: "Taal",
-                voice: "Stem",
-                microphone: "Microfoon",
-                send: "Versturen",
-                speak: "Voorlezen",
-                back: "Terug",
-                welcome: "Welkom bij HalDo AI OS",
-                ready: "Gereed",
-                loading: "Laden...",
-                online: "Online",
-                offline: "Offline"
-            },
-
-            pl: {
-                menu: "Menu główne",
-                dashboard: "Panel",
-                aiCore: "AI Core",
-                modules: "Moduły",
-                apps: "Aplikacje",
-                settings: "Ustawienia",
-                status: "Stan systemu",
-                health: "Centrum zdrowia",
-                language: "Język",
-                voice: "Głos",
-                microphone: "Mikrofon",
-                send: "Wyślij",
-                speak: "Czytaj na głos",
-                back: "Wstecz",
-                welcome: "Witamy w HalDo AI OS",
-                ready: "Gotowy",
-                loading: "Ładowanie...",
-                online: "Online",
-                offline: "Offline"
-            },
-
-            uk: {
-                menu: "Головне меню",
-                dashboard: "Панель",
-                aiCore: "AI Core",
-                modules: "Модулі",
-                apps: "Застосунки",
-                settings: "Налаштування",
-                status: "Стан системи",
-                health: "Центр здоров'я",
-                language: "Мова",
-                voice: "Голос",
-                microphone: "Мікрофон",
-                send: "Надіслати",
-                speak: "Прочитати вголос",
-                back: "Назад",
-                welcome: "Ласкаво просимо до HalDo AI OS",
-                ready: "Готово",
-                loading: "Завантаження...",
-                online: "Онлайн",
-                offline: "Офлайн"
-            },
 
             ru: {
-                menu: "Главное меню",
-                dashboard: "Панель",
-                aiCore: "AI Core",
-                modules: "Модули",
-                apps: "Приложения",
-                settings: "Настройки",
-                status: "Состояние системы",
-                health: "Центр здоровья",
-                language: "Язык",
-                voice: "Голос",
-                microphone: "Микрофон",
-                send: "Отправить",
-                speak: "Прочитать вслух",
-                back: "Назад",
-                welcome: "Добро пожаловать в HalDo AI OS",
-                ready: "Готово",
-                loading: "Загрузка...",
-                online: "Онлайн",
-                offline: "Офлайн"
+
+                welcome:
+                    "Добро пожаловать в HalDo AI",
+
+                mainMenu:
+                    "Главное меню",
+
+                dashboard:
+                    "Панель управления",
+
+                aiCore:
+                    "AI Core",
+
+                modules:
+                    "Модули",
+
+                apps:
+                    "Приложения",
+
+                settings:
+                    "Настройки",
+
+                systemStatus:
+                    "Состояние системы",
+
+                health:
+                    "Центр здоровья",
+
+                microphone:
+                    "Микрофон",
+
+                listening:
+                    "HalDo AI слушает...",
+
+                thinking:
+                    "HalDo AI думает...",
+
+                answering:
+                    "HalDo AI отвечает...",
+
+                speaking:
+                    "HalDo AI говорит...",
+
+                write:
+                    "Пишите с HalDo AI...",
+
+                send:
+                    "Отправить",
+
+                language:
+                    "Язык",
+
+                keyboard:
+                    "Клавиатура",
+
+                save:
+                    "Сохранить",
+
+                cancel:
+                    "Отмена"
+
             },
 
-            hi: {
-                menu: "मुख्य मेनू",
-                dashboard: "डैशबोर्ड",
-                aiCore: "AI Core",
-                modules: "मॉड्यूल",
-                apps: "ऐप्स",
-                settings: "सेटिंग्स",
-                status: "सिस्टम स्थिति",
-                health: "स्वास्थ्य केंद्र",
-                language: "भाषा",
-                voice: "आवाज़",
-                microphone: "माइक्रोफ़ोन",
-                send: "भेजें",
-                speak: "ज़ोर से पढ़ें",
-                back: "वापस",
-                welcome: "HalDo AI OS में आपका स्वागत है",
-                ready: "तैयार",
-                loading: "लोड हो रहा है...",
-                online: "ऑनलाइन",
-                offline: "ऑफ़लाइन"
-            },
 
             fa: {
-                menu: "منوی اصلی",
-                dashboard: "داشبورد",
-                aiCore: "هسته هوش مصنوعی",
-                modules: "ماژول‌ها",
-                apps: "برنامه‌ها",
-                settings: "تنظیمات",
-                status: "وضعیت سیستم",
-                health: "مرکز سلامت",
-                language: "زبان",
-                voice: "صدا",
-                microphone: "میکروفون",
-                send: "ارسال",
-                speak: "بلندخوانی",
-                back: "بازگشت",
-                welcome: "به HalDo AI OS خوش آمدید",
-                ready: "آماده",
-                loading: "در حال بارگذاری...",
-                online: "آنلاین",
-                offline: "آفلاین"
-            },
 
-            zh: {
-                menu: "主菜单",
-                dashboard: "仪表板",
-                aiCore: "AI 核心",
-                modules: "模块",
-                apps: "应用",
-                settings: "设置",
-                status: "系统状态",
-                health: "健康中心",
-                language: "语言",
-                voice: "语音",
-                microphone: "麦克风",
-                send: "发送",
-                speak: "朗读",
-                back: "返回",
-                welcome: "欢迎使用 HalDo AI OS",
-                ready: "就绪",
-                loading: "加载中...",
-                online: "在线",
-                offline: "离线"
-            },
+                welcome:
+                    "به HalDo AI خوش آمدید",
 
-            ja: {
-                menu: "メインメニュー",
-                dashboard: "ダッシュボード",
-                aiCore: "AI Core",
-                modules: "モジュール",
-                apps: "アプリ",
-                settings: "設定",
-                status: "システム状態",
-                health: "ヘルスセンター",
-                language: "言語",
-                voice: "音声",
-                microphone: "マイク",
-                send: "送信",
-                speak: "読み上げ",
-                back: "戻る",
-                welcome: "HalDo AI OSへようこそ",
-                ready: "準備完了",
-                loading: "読み込み中...",
-                online: "オンライン",
-                offline: "オフライン"
-            },
+                mainMenu:
+                    "منوی اصلی",
 
-            ko: {
-                menu: "메인 메뉴",
-                dashboard: "대시보드",
-                aiCore: "AI Core",
-                modules: "모듈",
-                apps: "앱",
-                settings: "설정",
-                status: "시스템 상태",
-                health: "헬스 센터",
-                language: "언어",
-                voice: "음성",
-                microphone: "마이크",
-                send: "보내기",
-                speak: "소리 내어 읽기",
-                back: "뒤로",
-                welcome: "HalDo AI OS에 오신 것을 환영합니다",
-                ready: "준비됨",
-                loading: "로드 중...",
-                online: "온라인",
-                offline: "오프라인"
-            },
+                dashboard:
+                    "داشبورد",
 
-            el: {
-                menu: "Κύριο μενού",
-                dashboard: "Πίνακας ελέγχου",
-                aiCore: "AI Core",
-                modules: "Μονάδες",
-                apps: "Εφαρμογές",
-                settings: "Ρυθμίσεις",
-                status: "Κατάσταση συστήματος",
-                health: "Κέντρο υγείας",
-                language: "Γλώσσα",
-                voice: "Φωνή",
-                microphone: "Μικρόφωνο",
-                send: "Αποστολή",
-                speak: "Εκφώνηση",
-                back: "Πίσω",
-                welcome: "Καλώς ήρθατε στο HalDo AI OS",
-                ready: "Έτοιμο",
-                loading: "Φόρτωση...",
-                online: "Σε σύνδεση",
-                offline: "Εκτός σύνδεσης"
+                aiCore:
+                    "هسته هوش مصنوعی",
+
+                modules:
+                    "ماژول‌ها",
+
+                apps:
+                    "برنامه‌ها",
+
+                settings:
+                    "تنظیمات",
+
+                systemStatus:
+                    "وضعیت سیستم",
+
+                health:
+                    "مرکز سلامت",
+
+                microphone:
+                    "میکروفون",
+
+                listening:
+                    "HalDo AI در حال گوش دادن است...",
+
+                thinking:
+                    "HalDo AI در حال فکر کردن است...",
+
+                answering:
+                    "HalDo AI در حال پاسخ دادن است...",
+
+                speaking:
+                    "HalDo AI در حال صحبت است...",
+
+                write:
+                    "با HalDo AI بنویسید...",
+
+                send:
+                    "ارسال",
+
+                language:
+                    "زبان",
+
+                keyboard:
+                    "صفحه‌کلید",
+
+                save:
+                    "ذخیره",
+
+                cancel:
+                    "لغو"
+
             }
 
         },
 
-        init() {
 
-            const saved =
-                localStorage.getItem(
-                    "haldo_language"
+        /* ==================================================
+           SPRACHE SETZEN
+           ================================================== */
+
+        setLanguage:
+            function (code) {
+
+
+                if (
+                    !this.languages[code]
+                ) {
+
+
+                    console.warn(
+                        "HalDo Language: unbekannte Sprache:",
+                        code
+                    );
+
+
+                    return false;
+
+                }
+
+
+                this.currentLanguage =
+                    code;
+
+
+                const language =
+                    this.languages[code];
+
+
+                /*
+                 * HTML-Sprache
+                 */
+
+                document.documentElement.lang =
+                    language.locale;
+
+
+                /*
+                 * Schreibrichtung
+                 */
+
+                document.documentElement.dir =
+                    language.direction;
+
+
+                /*
+                 * AI Core
+                 */
+
+                if (
+                    window.HalDoAICore &&
+                    typeof window.HalDoAICore.setLanguage ===
+                        "function"
+                ) {
+
+
+                    window.HalDoAICore.setLanguage(
+                        language.name
+                    );
+
+
+                }
+
+
+                /*
+                 * Voice
+                 */
+
+                if (
+                    window.HalDoVoice &&
+                    typeof window.HalDoVoice.setLanguage ===
+                        "function"
+                ) {
+
+
+                    window.HalDoVoice.setLanguage(
+                        language.locale
+                    );
+
+
+                }
+
+
+                /*
+                 * Speichern
+                 */
+
+                this.saveLanguage(
+                    code
                 );
 
-            if (
-                saved &&
-                this.languages[saved]
-            ) {
 
-                this.current = saved;
+                /*
+                 * UI aktualisieren
+                 */
 
-            }
+                this.updateUI();
 
-            this.apply();
 
-            this.ready = true;
+                /*
+                 * Event
+                 */
 
-            console.log(
-                "🌍 HalDo Language System bereit:",
-                this.current
-            );
+                this.dispatch(
+                    "language-change",
+                    {
+                        code:
+                            code,
 
-        },
-
-        setLanguage(id) {
-
-            if (
-                !this.languages[id]
-            ) {
-
-                console.warn(
-                    "Unbekannte Sprache:",
-                    id
+                        language:
+                            language
+                    }
                 );
 
-                return false;
 
-            }
+                return true;
 
-            this.current = id;
+            },
 
-            localStorage.setItem(
-                "haldo_language",
-                id
-            );
 
-            this.apply();
+        /* ==================================================
+           ÜBERSETZUNG ABRUFEN
+           ================================================== */
 
-            this.syncVoice();
+        t:
+            function (key) {
 
-            return true;
 
-        },
+                const dictionary =
+                    this.translations[
+                        this.currentLanguage
+                    ];
 
-        getLanguage() {
 
-            return this.languages[
-                this.current
-            ];
+                if (
+                    dictionary &&
+                    dictionary[key]
+                ) {
 
-        },
 
-        getLanguages() {
+                    return dictionary[key];
 
-            return Object.values(
-                this.languages
-            );
+                }
 
-        },
 
-        translate(key) {
+                /*
+                 * Fallback Deutsch
+                 */
 
-            const active =
-                this.translations[
-                    this.current
+                if (
+                    this.translations.de[key]
+                ) {
+
+
+                    return this.translations.de[key];
+
+                }
+
+
+                return key;
+
+            },
+
+
+        /* ==================================================
+           UI AKTUALISIEREN
+           ================================================== */
+
+        updateUI:
+            function () {
+
+
+                const elements =
+                    document.querySelectorAll(
+                        "[data-i18n]"
+                    );
+
+
+                elements.forEach(
+                    function (element) {
+
+
+                        const key =
+                            element.getAttribute(
+                                "data-i18n"
+                            );
+
+
+                        const translated =
+                            this.t(
+                                key
+                            );
+
+
+                        if (
+                            translated
+                        ) {
+
+
+                            element.textContent =
+                                translated;
+
+
+                        }
+
+
+                    }.bind(this)
+                );
+
+
+                /*
+                 * Placeholder
+                 */
+
+                const inputs =
+                    document.querySelectorAll(
+                        "[data-i18n-placeholder]"
+                    );
+
+
+                inputs.forEach(
+                    function (input) {
+
+
+                        const key =
+                            input.getAttribute(
+                                "data-i18n-placeholder"
+                            );
+
+
+                        input.placeholder =
+                            this.t(
+                                key
+                            );
+
+
+                    }.bind(this)
+                );
+
+
+            },
+
+
+        /* ==================================================
+           SPRACHLISTE
+           ================================================== */
+
+        getLanguages:
+            function () {
+
+
+                return Object.values(
+                    this.languages
+                );
+
+            },
+
+
+        /* ==================================================
+           AKTUELLE SPRACHE
+           ================================================== */
+
+        getCurrentLanguage:
+            function () {
+
+
+                return this.languages[
+                    this.currentLanguage
                 ];
 
-            const fallback =
-                this.translations[
-                    this.fallback
-                ];
+            },
 
-            return (
-                active?.[key] ||
-                fallback?.[key] ||
-                key
-            );
 
-        },
+        /* ==================================================
+           SPEICHERN
+           ================================================== */
 
-        apply() {
+        saveLanguage:
+            function (code) {
 
-            const language =
-                this.getLanguage();
 
-            document.documentElement
-                .lang =
-                this.current;
+                try {
 
-            document.documentElement
-                .dir =
-                language.direction;
 
-            document
-                .querySelectorAll(
-                    "[data-i18n]"
-                )
-                .forEach(element => {
+                    localStorage.setItem(
+                        "haldo-language",
+                        code
+                    );
 
-                    const key =
-                        element.dataset.i18n;
 
-                    element.textContent =
-                        this.translate(key);
+                } catch (
+                    error
+                ) {
 
-                });
 
-            document
-                .querySelectorAll(
-                    "[data-i18n-placeholder]"
-                )
-                .forEach(element => {
+                    console.warn(
+                        "HalDo Language konnte nicht gespeichert werden.",
+                        error
+                    );
 
-                    const key =
-                        element.dataset
-                            .i18nPlaceholder;
 
-                    element.placeholder =
-                        this.translate(key);
+                }
 
-                });
+            },
 
-        },
 
-        syncVoice() {
+        /* ==================================================
+           LADEN
+           ================================================== */
 
-            const language =
-                this.getLanguage();
+        loadLanguage:
+            function () {
 
-            if (
-                window.HalDoVoice
+
+                try {
+
+
+                    const saved =
+                        localStorage.getItem(
+                            "haldo-language"
+                        );
+
+
+                    if (
+                        saved &&
+                        this.languages[saved]
+                    ) {
+
+
+                        this.currentLanguage =
+                            saved;
+
+
+                        return saved;
+
+                    }
+
+
+                } catch (
+                    error
+                ) {
+
+
+                    console.warn(
+                        "HalDo Language konnte nicht geladen werden.",
+                        error
+                    );
+
+
+                }
+
+
+                this.currentLanguage =
+                    this.defaultLanguage;
+
+
+                return this.currentLanguage;
+
+            },
+
+
+        /* ==================================================
+           EVENT SYSTEM
+           ================================================== */
+
+        dispatch:
+            function (
+                name,
+                detail
             ) {
 
-                HalDoVoice.setLanguage(
-                    language.voice
+
+                try {
+
+
+                    window.dispatchEvent(
+                        new CustomEvent(
+                            "haldo-language-" +
+                            name,
+                            {
+                                detail:
+                                    detail || {}
+                            }
+                        )
+                    );
+
+
+                } catch (
+                    error
+                ) {
+
+
+                    console.warn(
+                        "HalDo Language Event Fehler:",
+                        error
+                    );
+
+
+                }
+
+            },
+
+
+        /* ==================================================
+           INITIALISIERUNG
+           ================================================== */
+
+        init:
+            function () {
+
+
+                this.status =
+                    "running";
+
+
+                const saved =
+                    this.loadLanguage();
+
+
+                this.setLanguage(
+                    saved
                 );
 
-            }
 
-            if (
-                window.HalDoSpeech
-            ) {
-
-                HalDoSpeech.setLanguage(
-                    language.voice
+                console.log(
+                    "HalDo Language System bereit:",
+                    saved
                 );
 
-            }
 
-            if (
-                window.HalDoAI
-            ) {
-
-                HalDoAI.setLanguage(
-                    this.current
-                );
+                return true;
 
             }
-
-        }
 
     };
 
-    window.HalDoLanguageSystem =
-        HalDoLanguageSystem;
 
-    window.addEventListener(
-        "DOMContentLoaded",
-        function () {
+    /* ======================================================
+       GLOBAL
+       ====================================================== */
 
-            HalDoLanguageSystem.init();
+    window.HalDoLanguage =
+        HalDoLanguage;
 
-        }
-    );
 
-})();
+    /* ======================================================
+       START
+       ====================================================== */
+
+    function initialize() {
+
+
+        HalDoLanguage.init();
+
+
+    }
+
+
+    if (
+        document.readyState ===
+        "loading"
+    ) {
+
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            initialize,
+            {
+                once:
+                    true
+            }
+        );
+
+
+    } else {
+
+
+        initialize();
+
+
+    }
+
+
+})(window, document);
