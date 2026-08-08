@@ -1,319 +1,1080 @@
 <!DOCTYPE html>
-
 <html lang="de">
-
 <head>
+    <meta charset="UTF-8">
 
-<meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0"
+    >
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#050914">
 
+    <title>HalDo AI OS 18 — Apps</title>
 
-<title>
-HalDo AI OS 18 - Apps
-</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
 
+        html,
+        body {
+            min-height: 100%;
+        }
 
-<link rel="stylesheet" href="style.css">
+        body {
+            background: #050914;
+            color: #ffffff;
 
+            font-family:
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                Roboto,
+                Arial,
+                sans-serif;
 
+            overflow-x: hidden;
+        }
+
+        button {
+            font: inherit;
+            border: 0;
+        }
+
+        /* =====================================================
+           BACKGROUND
+           ===================================================== */
+
+        .background {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+
+            background:
+                radial-gradient(
+                    circle at 50% 0%,
+                    rgba(0, 126, 255, 0.20),
+                    transparent 34%
+                ),
+                radial-gradient(
+                    circle at 0% 80%,
+                    rgba(0, 200, 255, 0.10),
+                    transparent 30%
+                ),
+                radial-gradient(
+                    circle at 100% 70%,
+                    rgba(130, 50, 255, 0.10),
+                    transparent 30%
+                ),
+                #050914;
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(60px);
+            opacity: .25;
+            animation: float 9s ease-in-out infinite;
+        }
+
+        .orb.one {
+            width: 180px;
+            height: 180px;
+            background: #007bff;
+            top: 5%;
+            left: -80px;
+        }
+
+        .orb.two {
+            width: 160px;
+            height: 160px;
+            background: #793cff;
+            right: -70px;
+            top: 45%;
+            animation-delay: -3s;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translate(0, 0);
+            }
+
+            50% {
+                transform: translate(20px, -25px);
+            }
+        }
+
+        /* =====================================================
+           APP
+           ===================================================== */
+
+        .app {
+            position: relative;
+            z-index: 1;
+
+            width: min(1100px, 100%);
+            min-height: 100vh;
+
+            margin: auto;
+
+            padding-bottom: 110px;
+        }
+
+        /* =====================================================
+           HEADER
+           ===================================================== */
+
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            padding: 12px 16px;
+
+            background: rgba(5, 9, 20, .82);
+
+            border-bottom:
+                1px solid rgba(255,255,255,.08);
+
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-small {
+            width: 42px;
+            height: 42px;
+
+            object-fit: contain;
+
+            animation:
+                rotateLogo 9s linear infinite,
+                glowLogo 2.5s ease-in-out infinite;
+        }
+
+        @keyframes rotateLogo {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes glowLogo {
+            0%, 100% {
+                filter:
+                    drop-shadow(0 0 3px rgba(255,255,255,.5))
+                    drop-shadow(0 0 9px rgba(0,130,255,.45));
+            }
+
+            50% {
+                filter:
+                    drop-shadow(0 0 7px rgba(255,255,255,.9))
+                    drop-shadow(0 0 18px rgba(0,150,255,.9));
+            }
+        }
+
+        .brand-name strong {
+            display: block;
+            font-size: 15px;
+        }
+
+        .brand-name span {
+            display: block;
+
+            margin-top: 2px;
+
+            color: #73819c;
+            font-size: 9px;
+            letter-spacing: .7px;
+        }
+
+        .back-button {
+            padding: 9px 13px;
+
+            border-radius: 13px;
+
+            background: rgba(255,255,255,.07);
+            border: 1px solid rgba(255,255,255,.08);
+
+            color: #9dcfff;
+
+            cursor: pointer;
+
+            transition: .2s ease;
+        }
+
+        .back-button:active {
+            transform: scale(.94);
+        }
+
+        /* =====================================================
+           HERO
+           ===================================================== */
+
+        .hero {
+            padding: 34px 18px 22px;
+            text-align: center;
+        }
+
+        .hero-logo {
+            position: relative;
+
+            width: 115px;
+            height: 115px;
+
+            margin: 0 auto 18px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .hero-ring {
+            position: absolute;
+            inset: 0;
+
+            border-radius: 50%;
+
+            border:
+                1px solid rgba(0,150,255,.55);
+
+            box-shadow:
+                0 0 20px rgba(0,120,255,.20),
+                inset 0 0 20px rgba(0,120,255,.12);
+
+            animation:
+                ringSpin 6s linear infinite,
+                ringPulse 2.5s ease-in-out infinite;
+        }
+
+        .hero-ring::before,
+        .hero-ring::after {
+            content: "";
+
+            position: absolute;
+
+            width: 8px;
+            height: 8px;
+
+            border-radius: 50%;
+
+            background: #ffffff;
+
+            box-shadow:
+                0 0 7px #ffffff,
+                0 0 16px #008cff;
+        }
+
+        .hero-ring::before {
+            top: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .hero-ring::after {
+            bottom: 8px;
+            right: -4px;
+        }
+
+        @keyframes ringSpin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes ringPulse {
+            0%, 100% {
+                opacity: .6;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 1;
+                transform: scale(1.05);
+            }
+        }
+
+        .hero-logo img {
+            position: relative;
+            z-index: 2;
+
+            width: 83px;
+            height: 83px;
+
+            object-fit: contain;
+
+            animation:
+                heroLogoSpin 12s linear infinite,
+                heroGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes heroLogoSpin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes heroGlow {
+            0%, 100% {
+                filter:
+                    drop-shadow(0 0 4px rgba(255,255,255,.5))
+                    drop-shadow(0 0 12px rgba(0,130,255,.5));
+            }
+
+            50% {
+                filter:
+                    drop-shadow(0 0 8px rgba(255,255,255,.95))
+                    drop-shadow(0 0 25px rgba(0,145,255,1));
+            }
+        }
+
+        .hero h1 {
+            font-size: 30px;
+            font-weight: 800;
+
+            background:
+                linear-gradient(
+                    90deg,
+                    #ffffff,
+                    #7bcaff,
+                    #ffffff
+                );
+
+            background-size: 200% auto;
+
+            -webkit-background-clip: text;
+            background-clip: text;
+
+            color: transparent;
+
+            animation: shine 4s linear infinite;
+        }
+
+        @keyframes shine {
+            to {
+                background-position: 200% center;
+            }
+        }
+
+        .hero p {
+            max-width: 620px;
+
+            margin: 9px auto 0;
+
+            color: #7f8da8;
+
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        /* =====================================================
+           SEARCH
+           ===================================================== */
+
+        .search-area {
+            padding: 0 16px 18px;
+        }
+
+        .search {
+            width: 100%;
+
+            padding: 13px 15px;
+
+            border-radius: 16px;
+
+            outline: none;
+
+            color: #ffffff;
+
+            background:
+                rgba(255,255,255,.055);
+
+            border:
+                1px solid rgba(255,255,255,.08);
+        }
+
+        .search::placeholder {
+            color: #63718b;
+        }
+
+        .search:focus {
+            border-color:
+                rgba(0,145,255,.45);
+
+            box-shadow:
+                0 0 0 3px rgba(0,126,255,.08);
+        }
+
+        /* =====================================================
+           APP GRID
+           ===================================================== */
+
+        .section {
+            padding: 0 16px 25px;
+        }
+
+        .section-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            margin-bottom: 12px;
+        }
+
+        .section-title h2 {
+            font-size: 17px;
+        }
+
+        .section-title span {
+            color: #60708b;
+            font-size: 9px;
+        }
+
+        .apps-grid {
+            display: grid;
+
+            grid-template-columns:
+                repeat(2, minmax(0, 1fr));
+
+            gap: 11px;
+        }
+
+        .app-card {
+            min-height: 150px;
+
+            padding: 15px;
+
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+
+            border-radius: 20px;
+
+            background:
+                linear-gradient(
+                    145deg,
+                    rgba(255,255,255,.085),
+                    rgba(255,255,255,.032)
+                );
+
+            border:
+                1px solid rgba(255,255,255,.075);
+
+            cursor: pointer;
+
+            transition:
+                transform .18s ease,
+                border-color .18s ease,
+                background .18s ease;
+        }
+
+        .app-card:hover {
+            border-color:
+                rgba(0,145,255,.38);
+
+            background:
+                linear-gradient(
+                    145deg,
+                    rgba(0,126,255,.12),
+                    rgba(255,255,255,.035)
+                );
+
+            transform: translateY(-3px);
+        }
+
+        .app-card:active {
+            transform: scale(.96);
+        }
+
+        .app-icon {
+            width: 44px;
+            height: 44px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 13px;
+
+            background:
+                rgba(0,126,255,.10);
+
+            border:
+                1px solid rgba(0,145,255,.14);
+
+            font-size: 21px;
+        }
+
+        .app-card h3 {
+            margin-top: 11px;
+
+            font-size: 13px;
+        }
+
+        .app-card p {
+            margin-top: 5px;
+
+            color: #71809b;
+
+            font-size: 9px;
+            line-height: 1.45;
+        }
+
+        .open-label {
+            margin-top: 11px;
+
+            color: #68bdff;
+
+            font-size: 9px;
+            font-weight: 700;
+        }
+
+        /* =====================================================
+           COMING SOON
+           ===================================================== */
+
+        .future {
+            padding: 17px;
+
+            border-radius: 20px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    rgba(0,126,255,.10),
+                    rgba(120,50,255,.07)
+                );
+
+            border:
+                1px solid rgba(0,126,255,.13);
+        }
+
+        .future h3 {
+            font-size: 14px;
+        }
+
+        .future p {
+            margin-top: 6px;
+
+            color: #7886a0;
+
+            font-size: 10px;
+            line-height: 1.5;
+        }
+
+        /* =====================================================
+           BOTTOM NAV
+           ===================================================== */
+
+        .bottom-nav {
+            position: fixed;
+
+            left: 10px;
+            right: 10px;
+            bottom: 10px;
+
+            z-index: 100;
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(4, 1fr);
+
+            gap: 5px;
+
+            padding: 7px;
+
+            border-radius: 21px;
+
+            background:
+                rgba(7,12,25,.9);
+
+            border:
+                1px solid rgba(255,255,255,.09);
+
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+
+            box-shadow:
+                0 15px 45px rgba(0,0,0,.4);
+        }
+
+        .nav-item {
+            min-height: 45px;
+
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+
+            gap: 2px;
+
+            border-radius: 14px;
+
+            background: transparent;
+
+            color: #687791;
+
+            cursor: pointer;
+        }
+
+        .nav-item.active {
+            color: #7cc8ff;
+            background: rgba(0,126,255,.11);
+        }
+
+        .nav-item:active {
+            transform: scale(.92);
+        }
+
+        .nav-icon {
+            font-size: 17px;
+        }
+
+        .nav-label {
+            font-size: 8px;
+        }
+
+        @media (min-width: 600px) {
+            .apps-grid {
+                grid-template-columns:
+                    repeat(3, minmax(0, 1fr));
+            }
+        }
+
+        @media (min-width: 900px) {
+            .apps-grid {
+                grid-template-columns:
+                    repeat(4, minmax(0, 1fr));
+            }
+
+            .bottom-nav {
+                width: 480px;
+                left: 50%;
+                right: auto;
+                transform: translateX(-50%);
+            }
+        }
+    </style>
 </head>
-
-
 
 <body>
 
+    <div class="background">
+        <div class="orb one"></div>
+        <div class="orb two"></div>
+    </div>
 
 
+    <main class="app">
 
+        <!-- HEADER -->
 
-<header class="header">
+        <header class="header">
 
+            <div class="brand">
 
-<img
+                <img
+                    class="logo-small"
+                    src="assets/logo/logo.png"
+                    alt="HalDo AI Logo"
+                >
 
-src="assets/logo/logo.svg"
+                <div class="brand-name">
 
-class="logo small"
+                    <strong>HalDo AI</strong>
 
-alt="HalDo AI OS Logo">
+                    <span>OS 18 • APPS CENTER</span>
 
+                </div>
 
+            </div>
 
-<h1>
 
-📱 App Center
+            <button
+                class="back-button"
+                onclick="goHome()"
+            >
+                ← Home
+            </button>
 
-</h1>
+        </header>
 
 
+        <!-- HERO -->
 
-<p>
+        <section class="hero">
 
-HalDo AI OS Anwendungen
+            <div class="hero-logo">
 
-</p>
+                <div class="hero-ring"></div>
 
+                <img
+                    src="assets/logo/logo.png"
+                    alt="HalDo AI Logo"
+                >
 
+            </div>
 
-</header>
 
+            <h1>HalDo Apps</h1>
 
+            <p>
+                Alle verfügbaren HalDo AI OS Anwendungen
+                an einem zentralen Ort.
+            </p>
 
+        </section>
 
 
+        <!-- SUCHE -->
 
+        <div class="search-area">
 
+            <input
+                id="appSearch"
+                class="search"
+                type="search"
+                placeholder="Apps suchen..."
+                autocomplete="off"
+            >
 
-<main class="menu-container">
+        </div>
 
 
+        <!-- APPS -->
 
-<h2>
+        <section class="section">
 
-🚀 Anwendungen
+            <div class="section-title">
 
-</h2>
+                <h2>Meine Apps</h2>
 
+                <span id="appCount">0 APPS</span>
 
+            </div>
 
 
+            <div
+                class="apps-grid"
+                id="appsGrid"
+            >
 
 
-<div class="menu-grid">
+                <!-- CHAT -->
 
+                <article
+                    class="app-card"
+                    data-name="HalDo AI Chat Chat KI"
+                    onclick="openApp('chat.html')"
+                >
 
+                    <div>
 
-<button>
+                        <div class="app-icon">✦</div>
 
-🤖 AI Assistant
+                        <h3>HalDo AI Chat</h3>
 
-<br>
+                        <p>
+                            Dein intelligenter HalDo
+                            AI Gesprächsbereich.
+                        </p>
 
-KI Hilfe
+                    </div>
 
-</button>
+                    <span class="open-label">
+                        Öffnen →
+                    </span>
 
+                </article>
 
 
+                <!-- DASHBOARD -->
 
-<button>
+                <article
+                    class="app-card"
+                    data-name="Dashboard System Übersicht"
+                    onclick="openApp('dashboard.html')"
+                >
 
-💬 Chat System
+                    <div>
 
-<br>
+                        <div class="app-icon">▦</div>
 
-Kommunikation
+                        <h3>Dashboard</h3>
 
-</button>
+                        <p>
+                            Zentrale Übersicht
+                            deines HalDo Systems.
+                        </p>
 
+                    </div>
 
+                    <span class="open-label">
+                        Öffnen →
+                    </span>
 
+                </article>
 
-<button>
 
-💻 Code Studio
+                <!-- KEYBOARD -->
 
-<br>
+                <article
+                    class="app-card"
+                    data-name="Keyboard Tastatur Ezidi Êzîdî"
+                    onclick="openApp('keyboard.html')"
+                >
 
-Software Entwicklung
+                    <div>
 
-</button>
+                        <div class="app-icon">⌨</div>
 
+                        <h3>HalDo Keyboard</h3>
 
+                        <p>
+                            Eigene Tastatur mit
+                            Êzîdî-Zeichen und Layouts.
+                        </p>
 
+                    </div>
 
-<button>
+                    <span class="open-label">
+                        Öffnen →
+                    </span>
 
-📚 Learning App
+                </article>
 
-<br>
 
-Wissen & Training
+                <!-- SETTINGS -->
 
-</button>
+                <article
+                    class="app-card"
+                    data-name="Settings Einstellungen System"
+                    onclick="openApp('settings.html')"
+                >
 
+                    <div>
 
+                        <div class="app-icon">⚙</div>
 
+                        <h3>Einstellungen</h3>
 
-<button>
+                        <p>
+                            HalDo AI OS konfigurieren
+                            und personalisieren.
+                        </p>
 
-🏥 Health App
+                    </div>
 
-<br>
+                    <span class="open-label">
+                        Öffnen →
+                    </span>
 
-Gesundheit Lernen
+                </article>
 
-</button>
 
+            </div>
 
+        </section>
 
 
-<button>
+        <!-- ZUKUNFT -->
 
-🌍 Translator
+        <section class="section">
 
-<br>
+            <div class="future">
 
-Sprachen
+                <h3>🚀 HalDo AI OS wächst weiter</h3>
 
-</button>
+                <p>
+                    Weitere Anwendungen werden erst dann
+                    hier integriert, wenn ihre eigentlichen
+                    Seiten fertig verbunden sind. Dadurch
+                    vermeiden wir kaputte 404-Verbindungen
+                    und bauen das System Schritt für Schritt
+                    stabil aus.
+                </p>
 
+            </div>
 
+        </section>
 
-</div>
+    </main>
 
 
+    <!-- BOTTOM NAV -->
 
+    <nav class="bottom-nav">
 
+        <button
+            class="nav-item"
+            onclick="goHome()"
+        >
+            <span class="nav-icon">⌂</span>
+            <span class="nav-label">Home</span>
+        </button>
 
 
+        <button
+            class="nav-item"
+            onclick="openApp('chat.html')"
+        >
+            <span class="nav-icon">✦</span>
+            <span class="nav-label">AI</span>
+        </button>
 
 
+        <button
+            class="nav-item active"
+            onclick="window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            })"
+        >
+            <span class="nav-icon">◈</span>
+            <span class="nav-label">Apps</span>
+        </button>
 
-<section style="margin-top:40px;">
 
+        <button
+            class="nav-item"
+            onclick="openApp('dashboard.html')"
+        >
+            <span class="nav-icon">▦</span>
+            <span class="nav-label">System</span>
+        </button>
 
+    </nav>
 
-<h2>
 
-⚡ System Apps
+    <script>
 
-</h2>
+        /* =====================================================
+           NAVIGATION
+           ===================================================== */
 
+        function goHome() {
 
+            window.location.href = "index.html";
 
+        }
 
 
-<div class="menu-grid">
+        function openApp(page) {
 
+            if (!page) {
+                return;
+            }
 
+            window.location.href = page;
 
-<button>
+        }
 
-📊 Dashboard
 
-<br>
+        /* =====================================================
+           APP-SUCHE
+           ===================================================== */
 
-Übersicht
+        const search =
+            document.getElementById("appSearch");
 
-</button>
+        const cards =
+            Array.from(
+                document.querySelectorAll(".app-card")
+            );
 
+        const count =
+            document.getElementById("appCount");
 
 
+        function updateCount(visible) {
 
-<button>
+            count.textContent =
+                visible + (visible === 1
+                    ? " APP"
+                    : " APPS");
 
-🧩 Module Manager
+        }
 
-<br>
 
-Verwaltung
+        function filterApps() {
 
-</button>
+            const query =
+                search.value
+                    .trim()
+                    .toLowerCase();
 
+            let visible = 0;
 
 
+            cards.forEach(function(card) {
 
-<button>
+                const name =
+                    (
+                        card.dataset.name || ""
+                    ).toLowerCase();
 
-⚙️ Settings
 
-<br>
+                const match =
+                    !query ||
+                    name.includes(query);
 
-Kontrolle
 
-</button>
+                if (match) {
 
+                    card.style.display = "";
 
+                    visible++;
 
+                } else {
 
-<button>
+                    card.style.display = "none";
 
-📡 Status Monitor
+                }
 
-<br>
+            });
 
-Überwachung
 
-</button>
+            updateCount(visible);
 
+        }
 
 
-</div>
+        search.addEventListener(
+            "input",
+            filterApps
+        );
 
 
+        filterApps();
 
-</section>
-
-
-
-
-
-
-
-
-<section style="margin-top:40px;">
-
-
-
-<div class="menu-grid">
-
-
-<button onclick="openPage('dashboard.html')">
-
-⬅️ Dashboard
-
-</button>
-
-
-
-<button onclick="openPage('index.html')">
-
-🏠 Hauptmenü
-
-</button>
-
-
-
-</div>
-
-
-</section>
-
-
-
-
-
-
-
-</main>
-
-
-
-
-
-
-
-<script>
-
-
-function openPage(page){
-
-
-window.location.href = page;
-
-
-}
-
-
-
-</script>
-
-
-
-
+    </script>
 
 </body>
-
 </html>
