@@ -2,2099 +2,2671 @@
 <html lang="de">
 
 <head>
-    <meta charset="UTF-8">
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-    >
+<meta charset="UTF-8">
 
-    <meta name="theme-color" content="#050914">
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+>
 
-    <title>HalDo AI OS 18 — System</title>
+<meta
+    name="theme-color"
+    content="#050914"
+>
 
-    <style>
+<title>
+    HalDo AI OS 18 — System
+</title>
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            -webkit-tap-highlight-color: transparent;
-        }
 
-        html,
-        body {
-            min-height: 100%;
-        }
+<style>
 
-        body {
-            min-height: 100vh;
+/* =====================================================
+   HALDO AI OS 18
+   SYSTEM CENTER
+===================================================== */
 
-            background:
-                radial-gradient(
-                    circle at 50% 0%,
-                    rgba(0,126,255,.20),
-                    transparent 35%
-                ),
-                radial-gradient(
-                    circle at 100% 75%,
-                    rgba(115,55,255,.10),
-                    transparent 30%
-                ),
-                #050914;
+* {
 
-            color: #fff;
+    box-sizing:
+        border-box;
 
-            font-family:
-                -apple-system,
-                BlinkMacSystemFont,
-                "Segoe UI",
-                Roboto,
-                Arial,
-                sans-serif;
+    margin:
+        0;
 
-            overflow-x: hidden;
-        }
+    padding:
+        0;
 
-        button {
-            font: inherit;
-            border: 0;
-        }
+    -webkit-tap-highlight-color:
+        transparent;
 
-        /* =====================================================
-           BACKGROUND
-           ===================================================== */
+}
 
-        .orb {
-            position: fixed;
 
-            width: 190px;
-            height: 190px;
+html,
+body {
 
-            border-radius: 50%;
+    min-height:
+        100%;
 
-            filter: blur(75px);
+}
 
-            opacity: .17;
 
-            pointer-events: none;
+body {
 
-            z-index: 0;
-        }
+    min-height:
+        100vh;
 
-        .orb.one {
-            top: -80px;
-            left: -90px;
+    color:
+        #ffffff;
 
-            background: #087cff;
-        }
+    background:
 
-        .orb.two {
-            right: -90px;
-            bottom: 15%;
+        radial-gradient(
+            circle at 50% 0%,
+            rgba(
+                0,
+                126,
+                255,
+                .18
+            ),
+            transparent 35%
+        ),
 
-            background: #773dff;
-        }
+        radial-gradient(
+            circle at 100% 80%,
+            rgba(
+                120,
+                55,
+                255,
+                .10
+            ),
+            transparent 30%
+        ),
 
-        /* =====================================================
-           APP
-           ===================================================== */
+        #050914;
 
-        .app {
-            position: relative;
+    font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Arial,
+        sans-serif;
 
-            z-index: 1;
+    overflow-x:
+        hidden;
 
-            width: min(900px, 100%);
+}
 
-            min-height: 100vh;
 
-            margin: auto;
+button {
 
-            padding-bottom: 125px;
-        }
+    font:
+        inherit;
 
-        /* =====================================================
-           HEADER
-           ===================================================== */
+    -webkit-appearance:
+        none;
 
-        .header {
-            position: sticky;
+}
 
-            top: 0;
 
-            z-index: 50;
+/* =====================================================
+   BACKGROUND
+===================================================== */
 
-            display: flex;
+.background {
 
-            align-items: center;
-            justify-content: space-between;
+    position:
+        fixed;
 
-            padding: 9px 13px;
+    inset:
+        0;
 
-            background:
-                rgba(5,9,20,.90);
+    overflow:
+        hidden;
 
-            border-bottom:
-                1px solid
-                rgba(255,255,255,.08);
+    pointer-events:
+        none;
 
-            backdrop-filter:
-                blur(22px);
+    z-index:
+        0;
 
-            -webkit-backdrop-filter:
-                blur(22px);
-        }
+}
 
-        .brand {
-            display: flex;
 
-            align-items: center;
+.orb {
 
-            gap: 9px;
-        }
+    position:
+        absolute;
 
-        .logo {
-            width: 43px;
-            height: 43px;
+    width:
+        200px;
 
-            object-fit: contain;
+    height:
+        200px;
 
-            animation:
-                logoRotate 9s linear infinite,
-                logoGlow 2.5s ease-in-out infinite;
-        }
+    border-radius:
+        50%;
 
-        @keyframes logoRotate {
+    filter:
+        blur(80px);
 
-            from {
-                transform: rotate(0deg);
-            }
+    opacity:
+        .15;
 
-            to {
-                transform: rotate(360deg);
-            }
+}
 
-        }
 
-        @keyframes logoGlow {
+.orb.one {
 
-            0%,
-            100% {
-                filter:
-                    drop-shadow(
-                        0 0 3px
-                        rgba(255,255,255,.5)
-                    )
-                    drop-shadow(
-                        0 0 10px
-                        rgba(0,130,255,.5)
-                    );
-            }
+    top:
+        -90px;
 
-            50% {
-                filter:
-                    drop-shadow(
-                        0 0 8px
-                        rgba(255,255,255,.95)
-                    )
-                    drop-shadow(
-                        0 0 22px
-                        rgba(0,150,255,1)
-                    );
-            }
+    left:
+        -100px;
 
-        }
+    background:
+        #087cff;
 
-        .brand-text strong {
-            display: block;
+}
 
-            font-size: 14px;
-        }
 
-        .brand-text span {
-            display: block;
+.orb.two {
 
-            margin-top: 2px;
+    right:
+        -100px;
 
-            color: #71809a;
+    bottom:
+        15%;
 
-            font-size: 8px;
+    background:
+        #783cff;
 
-            letter-spacing: .7px;
-        }
+}
 
-        .back-button {
-            padding: 9px 13px;
 
-            border-radius: 13px;
+/* =====================================================
+   APP
+===================================================== */
 
-            background:
-                rgba(255,255,255,.06);
+.app {
 
-            border:
-                1px solid
-                rgba(255,255,255,.08);
+    position:
+        relative;
 
-            color: #9dccff;
+    z-index:
+        1;
 
-            cursor: pointer;
-        }
+    width:
+        min(
+            900px,
+            100%
+        );
 
-        .back-button:active {
-            transform: scale(.94);
-        }
+    min-height:
+        100vh;
 
-        /* =====================================================
-           HERO
-           ===================================================== */
+    margin:
+        auto;
 
-        .hero {
-            padding:
-                27px 15px 18px;
-        }
+    padding-bottom:
+        110px;
 
-        .badge {
-            display: inline-flex;
+}
 
-            align-items: center;
 
-            gap: 6px;
+/* =====================================================
+   HEADER
+===================================================== */
 
-            padding:
-                6px 10px;
+.header {
 
-            border-radius: 20px;
+    position:
+        sticky;
 
-            background:
-                rgba(0,126,255,.08);
+    top:
+        0;
 
-            border:
-                1px solid
-                rgba(0,126,255,.13);
+    z-index:
+        50;
 
-            color: #75c4ff;
+    display:
+        flex;
 
-            font-size: 8px;
+    align-items:
+        center;
 
-            letter-spacing: .7px;
-        }
+    justify-content:
+        space-between;
 
-        .dot {
-            width: 6px;
-            height: 6px;
+    padding:
+        9px 13px;
 
-            border-radius: 50%;
+    background:
+        rgba(
+            5,
+            9,
+            20,
+            .91
+        );
 
-            background: #00ffad;
+    border-bottom:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            .08
+        );
 
-            box-shadow:
+    backdrop-filter:
+        blur(22px);
+
+    -webkit-backdrop-filter:
+        blur(22px);
+
+}
+
+
+.brand {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        9px;
+
+}
+
+
+.logo {
+
+    width:
+        43px;
+
+    height:
+        43px;
+
+    object-fit:
+        contain;
+
+    animation:
+
+        rotateLogo
+        9s
+        linear
+        infinite,
+
+        glowLogo
+        2.5s
+        ease-in-out
+        infinite;
+
+}
+
+
+@keyframes rotateLogo {
+
+    from {
+        transform:
+            rotate(0deg);
+    }
+
+    to {
+        transform:
+            rotate(360deg);
+    }
+
+}
+
+
+@keyframes glowLogo {
+
+    0%,
+    100% {
+
+        filter:
+
+            drop-shadow(
+                0 0 4px
+                rgba(
+                    255,
+                    255,
+                    255,
+                    .55
+                )
+            )
+
+            drop-shadow(
+                0 0 10px
+                rgba(
+                    0,
+                    126,
+                    255,
+                    .55
+                )
+            );
+
+    }
+
+    50% {
+
+        filter:
+
+            drop-shadow(
                 0 0 9px
-                rgba(0,255,173,.8);
-        }
+                rgba(
+                    255,
+                    255,
+                    255,
+                    1
+                )
+            )
 
-        .hero h1 {
-            margin-top: 12px;
+            drop-shadow(
+                0 0 24px
+                rgba(
+                    0,
+                    150,
+                    255,
+                    .95
+                )
+            );
 
-            font-size: 27px;
+    }
 
-            font-weight: 800;
-        }
+}
 
-        .hero p {
-            margin-top: 7px;
 
-            color: #75839c;
+.brand strong {
 
-            font-size: 10px;
+    display:
+        block;
 
-            line-height: 1.55;
-        }
+    font-size:
+        14px;
 
-        /* =====================================================
-           SECTIONS
-           ===================================================== */
+}
 
-        .section {
-            padding:
-                0 15px 17px;
-        }
 
-        .section-title {
-            margin-bottom: 9px;
+.brand span {
 
-            color: #8190a8;
+    display:
+        block;
 
-            font-size: 9px;
+    margin-top:
+        2px;
 
-            font-weight: 700;
+    color:
+        #71809a;
 
-            letter-spacing: .8px;
+    font-size:
+        8px;
 
-            text-transform: uppercase;
-        }
+    letter-spacing:
+        .7px;
 
-        /* =====================================================
-           SYSTEM STATUS
-           ===================================================== */
+}
 
-        .status-card {
-            padding: 17px;
 
-            border-radius: 22px;
+.back {
 
-            background:
-                linear-gradient(
-                    135deg,
-                    rgba(0,126,255,.10),
-                    rgba(120,55,255,.07)
-                );
+    min-height:
+        34px;
 
-            border:
-                1px solid
-                rgba(0,126,255,.14);
-        }
+    padding:
+        0 12px;
 
-        .status-head {
-            display: flex;
+    border-radius:
+        12px;
 
-            align-items: center;
+    color:
+        #9dccff;
 
-            gap: 12px;
-        }
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            .05
+        );
 
-        .status-icon {
-            width: 50px;
-            height: 50px;
+    border:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            .08
+        );
 
-            display: flex;
+    cursor:
+        pointer;
 
-            align-items: center;
-            justify-content: center;
+}
 
-            flex-shrink: 0;
 
-            border-radius: 16px;
+.back:active {
 
-            background:
-                rgba(0,255,173,.09);
+    transform:
+        scale(
+            .95
+        );
 
-            font-size: 23px;
-        }
+}
 
-        .status-info {
-            flex: 1;
-        }
 
-        .status-info strong {
-            display: block;
+/* =====================================================
+   HERO
+===================================================== */
 
-            font-size: 14px;
-        }
+.hero {
 
-        .status-info span {
-            display: block;
+    padding:
+        27px 15px 17px;
 
-            margin-top: 4px;
+}
 
-            color: #71809a;
 
-            font-size: 8px;
-        }
+.status-badge {
 
-        .status-online {
-            display: inline-flex;
+    display:
+        inline-flex;
 
-            align-items: center;
+    align-items:
+        center;
 
-            gap: 6px;
+    gap:
+        6px;
 
-            margin-top: 14px;
+    padding:
+        6px 10px;
 
-            padding: 6px 9px;
+    border-radius:
+        20px;
 
-            border-radius: 20px;
+    color:
+        #6fe7b3;
 
-            color: #65e9b7;
+    background:
+        rgba(
+            0,
+            255,
+            173,
+            .05
+        );
 
-            background:
-                rgba(0,255,173,.07);
+    border:
+        1px solid
+        rgba(
+            0,
+            255,
+            173,
+            .10
+        );
 
-            border:
-                1px solid
-                rgba(0,255,173,.12);
+    font-size:
+        8px;
 
-            font-size: 8px;
-        }
+    letter-spacing:
+        .7px;
 
-        /* =====================================================
-           SYSTEM METRICS
-           ===================================================== */
+}
 
-        .metrics {
-            display: grid;
 
-            grid-template-columns:
-                repeat(2, 1fr);
+.status-dot {
 
-            gap: 8px;
-        }
+    width:
+        6px;
 
-        .metric {
-            padding: 14px;
+    height:
+        6px;
 
-            border-radius: 18px;
+    border-radius:
+        50%;
 
-            background:
-                rgba(255,255,255,.045);
+    background:
+        #00efaa;
 
-            border:
-                1px solid
-                rgba(255,255,255,.07);
-        }
+    box-shadow:
+        0 0 9px
+        rgba(
+            0,
+            239,
+            170,
+            .9
+        );
 
-        .metric-icon {
-            font-size: 17px;
-        }
+}
 
-        .metric strong {
-            display: block;
 
-            margin-top: 8px;
+.hero h1 {
 
-            font-size: 11px;
-        }
+    margin-top:
+        12px;
 
-        .metric span {
-            display: block;
+    font-size:
+        27px;
 
-            margin-top: 4px;
+    font-weight:
+        800;
 
-            color: #71809a;
+}
 
-            font-size: 8px;
 
-            line-height: 1.4;
-        }
+.hero p {
 
-        /* =====================================================
-           MODULES
-           ===================================================== */
+    margin-top:
+        7px;
 
-        .module-list {
-            display: flex;
+    color:
+        #75839b;
 
-            flex-direction: column;
+    font-size:
+        10px;
 
-            gap: 8px;
-        }
+    line-height:
+        1.6;
 
-        .module {
-            display: flex;
+}
 
-            align-items: center;
 
-            gap: 11px;
+/* =====================================================
+   SECTION
+===================================================== */
 
-            padding: 13px;
+.section {
 
-            border-radius: 17px;
+    padding:
+        0 15px 18px;
 
-            background:
-                rgba(255,255,255,.045);
+}
 
-            border:
-                1px solid
-                rgba(255,255,255,.07);
-        }
 
-        .module-icon {
-            width: 39px;
-            height: 39px;
+.section-title {
 
-            display: flex;
+    margin-bottom:
+        9px;
 
-            align-items: center;
-            justify-content: center;
+    color:
+        #8190a8;
 
-            flex-shrink: 0;
+    font-size:
+        9px;
 
-            border-radius: 12px;
+    font-weight:
+        700;
 
-            background:
-                rgba(255,255,255,.055);
+    letter-spacing:
+        .8px;
 
-            font-size: 17px;
-        }
+    text-transform:
+        uppercase;
 
-        .module-info {
-            flex: 1;
+}
 
-            min-width: 0;
-        }
 
-        .module-info strong {
-            display: block;
+/* =====================================================
+   CORE STATUS
+===================================================== */
 
-            font-size: 10px;
-        }
+.core-card {
 
-        .module-info span {
-            display: block;
+    padding:
+        15px;
 
-            margin-top: 4px;
+    border-radius:
+        20px;
 
-            color: #71809a;
+    background:
 
-            font-size: 8px;
-        }
+        linear-gradient(
+            135deg,
+            rgba(
+                0,
+                126,
+                255,
+                .11
+            ),
+            rgba(
+                120,
+                55,
+                255,
+                .07
+            )
+        );
 
-        .module-status {
-            display: inline-flex;
+    border:
+        1px solid
+        rgba(
+            0,
+            126,
+            255,
+            .15
+        );
 
-            align-items: center;
+}
 
-            gap: 5px;
 
-            padding:
-                5px 8px;
+.core-top {
 
-            border-radius: 20px;
+    display:
+        flex;
 
-            background:
-                rgba(0,255,173,.06);
+    align-items:
+        center;
 
-            color: #62ddb0;
+    gap:
+        12px;
 
-            font-size: 7px;
+}
 
-            white-space: nowrap;
-        }
 
-        .module-status .small-dot {
-            width: 5px;
-            height: 5px;
+.core-logo {
 
-            border-radius: 50%;
+    width:
+        57px;
 
-            background: #00e99d;
-        }
+    height:
+        57px;
 
-        /* =====================================================
-           DEVICE INFO
-           ===================================================== */
+    object-fit:
+        contain;
 
-        .device-list {
-            display: flex;
+    animation:
+        glowLogo
+        2.5s
+        ease-in-out
+        infinite;
 
-            flex-direction: column;
+}
 
-            gap: 8px;
-        }
 
-        .device-row {
-            display: flex;
+.core-info {
 
-            align-items: center;
+    flex:
+        1;
 
-            justify-content: space-between;
+}
 
-            gap: 15px;
 
-            padding: 12px 13px;
+.core-info strong {
 
-            border-radius: 15px;
+    display:
+        block;
 
-            background:
-                rgba(255,255,255,.035);
+    font-size:
+        13px;
 
-            border:
-                1px solid
-                rgba(255,255,255,.06);
-        }
+}
 
-        .device-row span {
-            color: #71809a;
 
-            font-size: 8px;
-        }
+.core-info span {
 
-        .device-row strong {
-            color: #c9d9eb;
+    display:
+        block;
 
-            font-size: 8px;
+    margin-top:
+        4px;
 
-            text-align: right;
+    color:
+        #71809a;
 
-            max-width: 65%;
+    font-size:
+        8px;
 
-            word-break: break-word;
-        }
+}
 
-        /* =====================================================
-           ACTIONS
-           ===================================================== */
 
-        .actions {
-            display: grid;
+.core-state {
 
-            grid-template-columns:
-                repeat(2, 1fr);
+    margin-top:
+        7px;
 
-            gap: 8px;
-        }
+    color:
+        #60dfae;
 
-        .action {
-            min-height: 48px;
+    font-size:
+        8px;
 
-            border-radius: 14px;
+}
 
-            color: #a9c4df;
 
-            background:
-                rgba(255,255,255,.05);
+.progress {
 
-            border:
-                1px solid
-                rgba(255,255,255,.07);
+    height:
+        5px;
 
-            cursor: pointer;
-        }
+    margin-top:
+        15px;
 
-        .action.primary {
-            color: #8dd0ff;
+    overflow:
+        hidden;
 
-            background:
-                rgba(0,126,255,.10);
+    border-radius:
+        20px;
 
-            border-color:
-                rgba(0,126,255,.17);
-        }
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            .07
+        );
 
-        .action:active {
-            transform: scale(.97);
-        }
+}
 
-        /* =====================================================
-           SCAN
-           ===================================================== */
 
-        .scan-card {
-            display: none;
+.progress-bar {
 
-            margin-top: 10px;
+    width:
+        100%;
 
-            padding: 14px;
+    height:
+        100%;
 
-            border-radius: 17px;
+    border-radius:
+        inherit;
 
-            background:
-                rgba(0,126,255,.06);
+    background:
+        #54bfff;
 
-            border:
-                1px solid
-                rgba(0,126,255,.12);
-        }
+    box-shadow:
+        0 0 12px
+        rgba(
+            0,
+            145,
+            255,
+            .8
+        );
 
-        .scan-card.show {
-            display: block;
-        }
+}
 
-        .scan-title {
-            font-size: 10px;
 
-            font-weight: 700;
-        }
+/* =====================================================
+   MODULE GRID
+===================================================== */
 
-        .scan-bar {
-            height: 7px;
+.module-grid {
 
-            margin-top: 10px;
+    display:
+        grid;
 
-            overflow: hidden;
+    grid-template-columns:
+        repeat(
+            2,
+            1fr
+        );
 
-            border-radius: 20px;
+    gap:
+        8px;
 
-            background:
-                rgba(255,255,255,.07);
-        }
+}
 
-        .scan-progress {
-            width: 0%;
 
-            height: 100%;
+.module {
 
-            border-radius: inherit;
+    padding:
+        13px;
 
-            background:
-                linear-gradient(
-                    90deg,
-                    #087cff,
-                    #55d4ff
-                );
+    min-height:
+        116px;
 
-            transition:
-                width .18s linear;
-        }
+    border-radius:
+        17px;
 
-        .scan-text {
-            margin-top: 7px;
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            .045
+        );
 
-            color: #71809a;
+    border:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            .07
+        );
 
-            font-size: 8px;
-        }
+}
 
-        /* =====================================================
-           BOTTOM NAV
-           ===================================================== */
 
-        .bottom-nav {
-            position: fixed;
+.module-icon {
 
-            z-index: 100;
+    width:
+        38px;
 
-            left: 10px;
-            right: 10px;
-            bottom: 10px;
+    height:
+        38px;
 
-            display: grid;
+    display:
+        flex;
 
-            grid-template-columns:
-                repeat(4, 1fr);
+    align-items:
+        center;
 
-            gap: 5px;
+    justify-content:
+        center;
 
-            padding: 7px;
+    border-radius:
+        12px;
 
-            border-radius: 21px;
+    background:
+        rgba(
+            0,
+            126,
+            255,
+            .08
+        );
 
-            background:
-                rgba(7,12,25,.93);
+    font-size:
+        17px;
 
-            border:
-                1px solid
-                rgba(255,255,255,.09);
+}
 
-            backdrop-filter:
-                blur(20px);
 
-            -webkit-backdrop-filter:
-                blur(20px);
+.module strong {
 
-            box-shadow:
-                0 15px 45px
-                rgba(0,0,0,.42);
-        }
+    display:
+        block;
 
-        .nav-item {
-            min-height: 45px;
+    margin-top:
+        9px;
 
-            display: flex;
+    font-size:
+        10px;
 
-            flex-direction: column;
+}
 
-            align-items: center;
-            justify-content: center;
 
-            gap: 2px;
+.module p {
 
-            border-radius: 14px;
+    margin-top:
+        4px;
 
-            background: transparent;
+    color:
+        #71809a;
 
-            color: #687791;
+    font-size:
+        7px;
 
-            cursor: pointer;
-        }
+    line-height:
+        1.45;
 
-        .nav-item.active {
-            color: #7cc8ff;
+}
 
-            background:
-                rgba(0,126,255,.11);
-        }
 
-        .nav-icon {
-            font-size: 17px;
-        }
+.module-status {
 
-        .nav-label {
-            font-size: 8px;
-        }
+    display:
+        flex;
 
-        /* =====================================================
-           TOAST
-           ===================================================== */
+    align-items:
+        center;
 
-        .toast {
-            position: fixed;
+    gap:
+        5px;
 
-            z-index: 300;
+    margin-top:
+        8px;
 
-            left: 50%;
+    color:
+        #60dfae;
 
-            bottom: 82px;
+    font-size:
+        7px;
 
-            max-width:
-                calc(100% - 30px);
+}
 
-            padding:
-                10px 14px;
 
-            border-radius: 14px;
+.module-status .status-dot {
 
-            background:
-                rgba(18,28,47,.96);
+    width:
+        5px;
 
-            border:
-                1px solid
-                rgba(255,255,255,.10);
+    height:
+        5px;
 
-            color: #dceaff;
+}
 
-            font-size: 9px;
 
-            opacity: 0;
+/* =====================================================
+   INFORMATION
+===================================================== */
 
-            pointer-events: none;
+.info-list {
 
-            transform:
-                translate(-50%, 10px);
+    display:
+        flex;
 
-            transition: .22s ease;
-        }
+    flex-direction:
+        column;
 
-        .toast.show {
-            opacity: 1;
+    gap:
+        7px;
 
-            transform:
-                translate(-50%, 0);
-        }
+}
 
-        @media (min-width: 700px) {
 
-            .bottom-nav {
-                width: 480px;
+.info-row {
 
-                left: 50%;
-                right: auto;
+    display:
+        flex;
 
-                transform:
-                    translateX(-50%);
-            }
+    align-items:
+        center;
 
-        }
+    justify-content:
+        space-between;
 
-    </style>
+    min-height:
+        48px;
+
+    padding:
+        9px 12px;
+
+    border-radius:
+        14px;
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            .04
+        );
+
+    border:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            .06
+        );
+
+}
+
+
+.info-row span {
+
+    color:
+        #71809a;
+
+    font-size:
+        8px;
+
+}
+
+
+.info-row strong {
+
+    color:
+        #b8d6ee;
+
+    font-size:
+        8px;
+
+    text-align:
+        right;
+
+}
+
+
+/* =====================================================
+   ACTIONS
+===================================================== */
+
+.actions {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(
+            2,
+            1fr
+        );
+
+    gap:
+        8px;
+
+}
+
+
+.action {
+
+    min-height:
+        47px;
+
+    padding:
+        0 10px;
+
+    border-radius:
+        14px;
+
+    color:
+        #a9c8e2;
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            .05
+        );
+
+    border:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            .07
+        );
+
+    cursor:
+        pointer;
+
+}
+
+
+.action.primary {
+
+    color:
+        #91d4ff;
+
+    background:
+        rgba(
+            0,
+            126,
+            255,
+            .10
+        );
+
+    border-color:
+        rgba(
+            0,
+            126,
+            255,
+            .17
+        );
+
+}
+
+
+.action:active {
+
+    transform:
+        scale(
+            .97
+        );
+
+}
+
+
+/* =====================================================
+   LOG
+===================================================== */
+
+.log {
+
+    padding:
+        13px;
+
+    min-height:
+        145px;
+
+    overflow:
+        hidden;
+
+    border-radius:
+        17px;
+
+    background:
+        rgba(
+            0,
+            0,
+            0,
+            .20
+        );
+
+    border:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            .06
+        );
+
+}
+
+
+.log-line {
+
+    display:
+        flex;
+
+    gap:
+        8px;
+
+    margin-bottom:
+        7px;
+
+    color:
+        #8293aa;
+
+    font-family:
+        monospace;
+
+    font-size:
+        7px;
+
+    line-height:
+        1.4;
+
+}
+
+
+.log-line .time {
+
+    color:
+        #4daeff;
+
+}
+
+
+.log-line.ok {
+
+    color:
+        #72cba7;
+
+}
+
+
+/* =====================================================
+   BOTTOM NAV
+===================================================== */
+
+.bottom-nav {
+
+    position:
+        fixed;
+
+    z-index:
+        100;
+
+    left:
+        10px;
+
+    right:
+        10px;
+
+    bottom:
+        10px;
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(
+            4,
+            1fr
+        );
+
+    gap:
+        5px;
+
+    padding:
+        7px;
+
+    border-radius:
+        21px;
+
+    background:
+        rgba(
+            7,
+            12,
+            25,
+            .93
+        );
+
+    border:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            .09
+        );
+
+    backdrop-filter:
+        blur(20px);
+
+    -webkit-backdrop-filter:
+        blur(20px);
+
+    box-shadow:
+        0 15px 45px
+        rgba(
+            0,
+            0,
+            0,
+            .42
+        );
+
+}
+
+
+.nav-item {
+
+    min-height:
+        45px;
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    gap:
+        2px;
+
+    border:
+        0;
+
+    border-radius:
+        14px;
+
+    background:
+        transparent;
+
+    color:
+        #687791;
+
+    cursor:
+        pointer;
+
+}
+
+
+.nav-item.active {
+
+    color:
+        #7cc8ff;
+
+    background:
+        rgba(
+            0,
+            126,
+            255,
+            .11
+        );
+
+}
+
+
+.nav-icon {
+
+    font-size:
+        17px;
+
+}
+
+
+.nav-label {
+
+    font-size:
+        8px;
+
+}
+
+
+/* =====================================================
+   TOAST
+===================================================== */
+
+.toast {
+
+    position:
+        fixed;
+
+    z-index:
+        300;
+
+    left:
+        50%;
+
+    bottom:
+        82px;
+
+    max-width:
+        calc(
+            100% - 30px
+        );
+
+    padding:
+        10px 14px;
+
+    border-radius:
+        14px;
+
+    color:
+        #dceaff;
+
+    background:
+        rgba(
+            18,
+            28,
+            47,
+            .96
+        );
+
+    border:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            .10
+        );
+
+    font-size:
+        9px;
+
+    opacity:
+        0;
+
+    pointer-events:
+        none;
+
+    transform:
+        translate(
+            -50%,
+            10px
+        );
+
+    transition:
+        .22s
+        ease;
+
+}
+
+
+.toast.show {
+
+    opacity:
+        1;
+
+    transform:
+        translate(
+            -50%,
+            0
+        );
+
+}
+
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media (
+    min-width:
+    700px
+) {
+
+    .module-grid {
+
+        grid-template-columns:
+            repeat(
+                4,
+                1fr
+            );
+
+    }
+
+
+    .bottom-nav {
+
+        width:
+            480px;
+
+        left:
+            50%;
+
+        right:
+            auto;
+
+        transform:
+            translateX(
+                -50%
+            );
+
+    }
+
+}
+
+</style>
 
 </head>
 
 
 <body>
 
+
+<div class="background">
+
     <div class="orb one"></div>
+
     <div class="orb two"></div>
 
+</div>
 
-    <main class="app">
+
+<main class="app">
 
 
-        <!-- HEADER -->
+<!-- =====================================================
+     HEADER
+===================================================== -->
 
-        <header class="header">
+<header class="header">
 
-            <div class="brand">
 
-                <img
-                    class="logo"
-                    src="assets/logo/logo.png"
-                    alt="HalDo AI Logo"
-                >
+    <div class="brand">
 
-                <div class="brand-text">
 
-                    <strong>
-                        HalDo AI
-                    </strong>
+        <img
+            class="logo"
+            src="assets/logo/logo.png"
+            alt="HalDo AI"
+        >
 
-                    <span>
-                        OS 18 • SYSTEM CENTER
-                    </span>
+
+        <div>
+
+            <strong>
+                HalDo AI
+            </strong>
+
+            <span>
+                OS 18 • SYSTEM CENTER
+            </span>
+
+        </div>
+
+
+    </div>
+
+
+    <button
+        class="back"
+        onclick="goBack()"
+    >
+
+        ← Zurück
+
+    </button>
+
+
+</header>
+
+
+<!-- =====================================================
+     HERO
+===================================================== -->
+
+<section class="hero">
+
+
+    <div class="status-badge">
+
+        <span class="status-dot"></span>
+
+        SYSTEM ONLINE
+
+    </div>
+
+
+    <h1>
+        Systemzentrale
+    </h1>
+
+
+    <p>
+
+        Die zentrale Übersicht des
+        HalDo AI OS 18 Foundation Systems.
+
+    </p>
+
+
+</section>
+
+
+<!-- =====================================================
+     CORE
+===================================================== -->
+
+<section class="section">
+
+
+    <div class="section-title">
+        HalDo Core
+    </div>
+
+
+    <div class="core-card">
+
+
+        <div class="core-top">
+
+
+            <img
+                class="core-logo"
+                src="assets/logo/logo.png"
+                alt="HalDo Core"
+            >
+
+
+            <div class="core-info">
+
+
+                <strong>
+                    HalDo AI Core
+                </strong>
+
+
+                <span>
+                    Professional Ultimate Foundation
+                </span>
+
+
+                <div class="core-state">
+
+                    ● Betriebsbereit
 
                 </div>
 
-            </div>
-
-
-            <button
-                class="back-button"
-                onclick="goBack()"
-            >
-                ← Zurück
-            </button>
-
-        </header>
-
-
-        <!-- HERO -->
-
-        <section class="hero">
-
-            <div class="badge">
-
-                <span class="dot"></span>
-
-                HALDO SYSTEM CORE
 
             </div>
 
 
-            <h1>
-                Systemzentrale
-            </h1>
+        </div>
+
+
+        <div class="progress">
+
+            <div
+                class="progress-bar"
+                id="coreProgress"
+            ></div>
+
+        </div>
+
+
+    </div>
+
+
+</section>
+
+
+<!-- =====================================================
+     MODULE
+===================================================== -->
+
+<section class="section">
+
+
+    <div class="section-title">
+        Kernmodule
+    </div>
+
+
+    <div class="module-grid">
+
+
+        <div class="module">
+
+
+            <div class="module-icon">
+                ◉
+            </div>
+
+
+            <strong>
+                Kernel
+            </strong>
 
 
             <p>
-                Zentrale Übersicht über den aktuellen
-                Zustand der HalDo AI OS 18 Foundation.
+                Zentrale Systemlogik
             </p>
 
-        </section>
 
+            <div class="module-status">
 
-        <!-- STATUS -->
+                <span class="status-dot"></span>
 
-        <section class="section">
-
-            <div class="section-title">
-                Systemstatus
-            </div>
-
-
-            <div class="status-card">
-
-                <div class="status-head">
-
-                    <div class="status-icon">
-                        ◉
-                    </div>
-
-
-                    <div class="status-info">
-
-                        <strong>
-                            HalDo AI OS 18
-                        </strong>
-
-                        <span>
-                            Professional Ultimate Foundation
-                        </span>
-
-                    </div>
-
-                </div>
-
-
-                <div class="status-online">
-
-                    <span class="dot"></span>
-
-                    SYSTEM ONLINE
-
-                </div>
+                ONLINE
 
             </div>
 
-        </section>
 
+        </div>
 
-        <!-- METRICS -->
 
-        <section class="section">
+        <div class="module">
 
-            <div class="section-title">
-                Systemdaten
-            </div>
 
-
-            <div class="metrics">
-
-
-                <div class="metric">
-
-                    <div class="metric-icon">
-                        ⏱
-                    </div>
-
-                    <strong id="runtime">
-                        00:00:00
-                    </strong>
-
-                    <span>
-                        Seiten-Laufzeit
-                    </span>
-
-                </div>
-
-
-                <div class="metric">
-
-                    <div class="metric-icon">
-                        ◈
-                    </div>
-
-                    <strong id="moduleCount">
-                        0
-                    </strong>
-
-                    <span>
-                        aktive Module
-                    </span>
-
-                </div>
-
-
-                <div class="metric">
-
-                    <div class="metric-icon">
-                        ◫
-                    </div>
-
-                    <strong id="storageSize">
-                        0 KB
-                    </strong>
-
-                    <span>
-                        lokale HalDo-Daten
-                    </span>
-
-                </div>
-
-
-                <div class="metric">
-
-                    <div class="metric-icon">
-                        ✓
-                    </div>
-
-                    <strong id="systemState">
-                        READY
-                    </strong>
-
-                    <span>
-                        Foundation Status
-                    </span>
-
-                </div>
-
-
-            </div>
-
-        </section>
-
-
-        <!-- MODULES -->
-
-        <section class="section">
-
-            <div class="section-title">
-                Core-Module
-            </div>
-
-
-            <div
-                class="module-list"
-                id="moduleList"
-            ></div>
-
-        </section>
-
-
-        <!-- DEVICE -->
-
-        <section class="section">
-
-            <div class="section-title">
-                Geräteinformationen
-            </div>
-
-
-            <div class="device-list">
-
-
-                <div class="device-row">
-
-                    <span>
-                        Browser
-                    </span>
-
-                    <strong id="browserInfo">
-                        Wird erkannt …
-                    </strong>
-
-                </div>
-
-
-                <div class="device-row">
-
-                    <span>
-                        Plattform
-                    </span>
-
-                    <strong id="platformInfo">
-                        Wird erkannt …
-                    </strong>
-
-                </div>
-
-
-                <div class="device-row">
-
-                    <span>
-                        Sprache
-                    </span>
-
-                    <strong id="languageInfo">
-                        Wird erkannt …
-                    </strong>
-
-                </div>
-
-
-                <div class="device-row">
-
-                    <span>
-                        Bildschirm
-                    </span>
-
-                    <strong id="screenInfo">
-                        Wird erkannt …
-                    </strong>
-
-                </div>
-
-
-                <div class="device-row">
-
-                    <span>
-                        Verbindung
-                    </span>
-
-                    <strong id="connectionInfo">
-                        Wird erkannt …
-                    </strong>
-
-                </div>
-
-
-            </div>
-
-        </section>
-
-
-        <!-- ACTIONS -->
-
-        <section class="section">
-
-            <div class="section-title">
-                Systemaktionen
-            </div>
-
-
-            <div class="actions">
-
-
-                <button
-                    class="action primary"
-                    onclick="runSystemScan()"
-                >
-                    ◉ System prüfen
-                </button>
-
-
-                <button
-                    class="action"
-                    onclick="refreshSystem()"
-                >
-                    ↻ Aktualisieren
-                </button>
-
-
-            </div>
-
-
-            <div
-                class="scan-card"
-                id="scanCard"
-            >
-
-                <div class="scan-title">
-                    HalDo System Scan
-                </div>
-
-
-                <div class="scan-bar">
-
-                    <div
-                        class="scan-progress"
-                        id="scanProgress"
-                    ></div>
-
-                </div>
-
-
-                <div
-                    class="scan-text"
-                    id="scanText"
-                >
-                    Vorbereitung …
-                </div>
-
-            </div>
-
-        </section>
-
-
-    </main>
-
-
-    <!-- BOTTOM NAV -->
-
-    <nav class="bottom-nav">
-
-
-        <button
-            class="nav-item"
-            onclick="goHome()"
-        >
-
-            <span class="nav-icon">
-                ⌂
-            </span>
-
-            <span class="nav-label">
-                Home
-            </span>
-
-        </button>
-
-
-        <button
-            class="nav-item"
-            onclick="openPage('chat.html')"
-        >
-
-            <span class="nav-icon">
+            <div class="module-icon">
                 ✦
-            </span>
-
-            <span class="nav-label">
-                AI
-            </span>
-
-        </button>
+            </div>
 
 
-        <button
-            class="nav-item"
-            onclick="openPage('apps.html')"
-        >
+            <strong>
+                AI Core
+            </strong>
 
-            <span class="nav-icon">
+
+            <p>
+                HalDo AI Steuerung
+            </p>
+
+
+            <div class="module-status">
+
+                <span class="status-dot"></span>
+
+                ONLINE
+
+            </div>
+
+
+        </div>
+
+
+        <div class="module">
+
+
+            <div class="module-icon">
+                ▦
+            </div>
+
+
+            <strong>
+                Interface
+            </strong>
+
+
+            <p>
+                Benutzeroberfläche
+            </p>
+
+
+            <div class="module-status">
+
+                <span class="status-dot"></span>
+
+                ONLINE
+
+            </div>
+
+
+        </div>
+
+
+        <div class="module">
+
+
+            <div class="module-icon">
                 ◈
+            </div>
+
+
+            <strong>
+                App Manager
+            </strong>
+
+
+            <p>
+                Anwendungen verwalten
+            </p>
+
+
+            <div class="module-status">
+
+                <span class="status-dot"></span>
+
+                ONLINE
+
+            </div>
+
+
+        </div>
+
+
+        <div class="module">
+
+
+            <div class="module-icon">
+                ◫
+            </div>
+
+
+            <strong>
+                Storage
+            </strong>
+
+
+            <p>
+                Lokaler Speicher
+            </p>
+
+
+            <div class="module-status">
+
+                <span class="status-dot"></span>
+
+                ONLINE
+
+            </div>
+
+
+        </div>
+
+
+        <div class="module">
+
+
+            <div class="module-icon">
+                ⌨
+            </div>
+
+
+            <strong>
+                Keyboard
+            </strong>
+
+
+            <p>
+                Ezidi Eingabesystem
+            </p>
+
+
+            <div class="module-status">
+
+                <span class="status-dot"></span>
+
+                ONLINE
+
+            </div>
+
+
+        </div>
+
+
+        <div class="module">
+
+
+            <div class="module-icon">
+                🔔
+            </div>
+
+
+            <strong>
+                Notifications
+            </strong>
+
+
+            <p>
+                Systemmeldungen
+            </p>
+
+
+            <div class="module-status">
+
+                <span class="status-dot"></span>
+
+                ONLINE
+
+            </div>
+
+
+        </div>
+
+
+        <div class="module">
+
+
+            <div class="module-icon">
+                🔐
+            </div>
+
+
+            <strong>
+                Security
+            </strong>
+
+
+            <p>
+                Grundlegende Systemsicherheit
+            </p>
+
+
+            <div class="module-status">
+
+                <span class="status-dot"></span>
+
+                ACTIVE
+
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+
+</section>
+
+
+<!-- =====================================================
+     SYSTEM INFORMATION
+===================================================== -->
+
+<section class="section">
+
+
+    <div class="section-title">
+        Systeminformationen
+    </div>
+
+
+    <div class="info-list">
+
+
+        <div class="info-row">
+
+            <span>
+                Betriebssystem
             </span>
 
-            <span class="nav-label">
-                Apps
+            <strong>
+                HalDo AI OS 18
+            </strong>
+
+        </div>
+
+
+        <div class="info-row">
+
+            <span>
+                Edition
             </span>
+
+            <strong>
+                Professional Ultimate
+            </strong>
+
+        </div>
+
+
+        <div class="info-row">
+
+            <span>
+                Plattform
+            </span>
+
+            <strong id="platformInfo">
+                Wird erkannt …
+            </strong>
+
+        </div>
+
+
+        <div class="info-row">
+
+            <span>
+                Browser
+            </span>
+
+            <strong id="browserInfo">
+                Wird erkannt …
+            </strong>
+
+        </div>
+
+
+        <div class="info-row">
+
+            <span>
+                Bildschirm
+            </span>
+
+            <strong id="screenInfo">
+                Wird erkannt …
+            </strong>
+
+        </div>
+
+
+        <div class="info-row">
+
+            <span>
+                Sprache
+            </span>
+
+            <strong id="languageInfo">
+                Wird erkannt …
+            </strong>
+
+        </div>
+
+
+    </div>
+
+
+</section>
+
+
+<!-- =====================================================
+     ACTIONS
+===================================================== -->
+
+<section class="section">
+
+
+    <div class="section-title">
+        Systemaktionen
+    </div>
+
+
+    <div class="actions">
+
+
+        <button
+            class="action primary"
+            onclick="runSystemCheck()"
+        >
+
+            ✓ System prüfen
 
         </button>
 
 
         <button
-            class="nav-item active"
-            onclick="window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            })"
+            class="action"
+            onclick="refreshSystem()"
         >
 
-            <span class="nav-icon">
-                ⚙
-            </span>
-
-            <span class="nav-label">
-                System
-            </span>
+            ↻ Aktualisieren
 
         </button>
 
 
-    </nav>
+        <button
+            class="action"
+            onclick="openPage('dashboard.html')"
+        >
+
+            ▦ Dashboard
+
+        </button>
 
 
-    <!-- TOAST -->
+        <button
+            class="action"
+            onclick="openPage('settings.html')"
+        >
+
+            ⚙ Einstellungen
+
+        </button>
+
+
+    </div>
+
+
+</section>
+
+
+<!-- =====================================================
+     SYSTEM LOG
+===================================================== -->
+
+<section class="section">
+
+
+    <div class="section-title">
+        Systemprotokoll
+    </div>
+
 
     <div
-        class="toast"
-        id="toast"
-    ></div>
+        class="log"
+        id="systemLog"
+    >
 
 
-    <script>
+        <div class="log-line ok">
 
-        /* =====================================================
-           HALDO SYSTEM CORE
-           ===================================================== */
+            <span class="time">
+                [BOOT]
+            </span>
 
-        const startTime =
-            Date.now();
+            HalDo AI Core initialisiert
 
-
-        const HALDO_MODULES = [
-
-            {
-                icon: "◉",
-                name: "HalDo Core",
-                description:
-                    "Zentrale Foundation und Laufzeit",
-                status: "ONLINE"
-            },
-
-            {
-                icon: "✦",
-                name: "AI Interface",
-                description:
-                    "HalDo AI Chat Foundation",
-                status: "READY"
-            },
-
-            {
-                icon: "⌨",
-                name: "Ezidi Keyboard",
-                description:
-                    "Tastatur- und Zeichensatz Foundation",
-                status: "READY"
-            },
-
-            {
-                icon: "◈",
-                name: "App Manager",
-                description:
-                    "Verwaltung der HalDo Anwendungen",
-                status: "READY"
-            },
-
-            {
-                icon: "🔔",
-                name: "Notification Center",
-                description:
-                    "Lokale Benachrichtigungen",
-                status: "ONLINE"
-            },
-
-            {
-                icon: "◫",
-                name: "Storage Manager",
-                description:
-                    "Lokale Datenverwaltung",
-                status: "ONLINE"
-            },
-
-            {
-                icon: "🛡",
-                name: "Security Foundation",
-                description:
-                    "Grundlegende Browser-Sicherheitsprüfung",
-                status: "READY"
-            },
-
-            {
-                icon: "☁",
-                name: "Cloud Foundation",
-                description:
-                    "Vorbereitet für spätere Cloud-Dienste",
-                status: "READY"
-            }
-
-        ];
+        </div>
 
 
-        /* =====================================================
-           NAVIGATION
-           ===================================================== */
+        <div class="log-line ok">
 
-        function goHome() {
+            <span class="time">
+                [CORE]
+            </span>
 
-            window.location.href =
-                "index.html";
+            Systemmodule geladen
 
-        }
-
-
-        function goBack() {
-
-            if (
-                document.referrer &&
-                document.referrer.includes(
-                    window.location.hostname
-                )
-            ) {
-
-                history.back();
-
-            } else {
-
-                window.location.href =
-                    "settings.html";
-
-            }
-
-        }
+        </div>
 
 
-        function openPage(page) {
+        <div class="log-line ok">
 
-            if (!page) {
-                return;
-            }
+            <span class="time">
+                [UI]
+            </span>
 
-            window.location.href =
-                page;
+            Interface bereit
 
-        }
-
-
-        /* =====================================================
-           TOAST
-           ===================================================== */
-
-        let toastTimer;
+        </div>
 
 
-        function showToast(message) {
+        <div class="log-line ok">
 
-            const toast =
-                document.getElementById(
-                    "toast"
+            <span class="time">
+                [READY]
+            </span>
+
+            HalDo AI OS 18 online
+
+        </div>
+
+
+    </div>
+
+
+</section>
+
+
+</main>
+
+
+<!-- =====================================================
+     BOTTOM NAV
+===================================================== -->
+
+<nav class="bottom-nav">
+
+
+    <button
+        class="nav-item"
+        onclick="openPage('index.html')"
+    >
+
+        <span class="nav-icon">
+            ⌂
+        </span>
+
+        <span class="nav-label">
+            Home
+        </span>
+
+    </button>
+
+
+    <button
+        class="nav-item"
+        onclick="openPage('chat.html')"
+    >
+
+        <span class="nav-icon">
+            ✦
+        </span>
+
+        <span class="nav-label">
+            AI
+        </span>
+
+    </button>
+
+
+    <button
+        class="nav-item"
+        onclick="openPage('apps.html')"
+    >
+
+        <span class="nav-icon">
+            ◈
+        </span>
+
+        <span class="nav-label">
+            Apps
+        </span>
+
+    </button>
+
+
+    <button
+        class="nav-item active"
+        onclick="window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        })"
+    >
+
+        <span class="nav-icon">
+            ⚙
+        </span>
+
+        <span class="nav-label">
+            System
+        </span>
+
+    </button>
+
+
+</nav>
+
+
+<!-- =====================================================
+     TOAST
+===================================================== -->
+
+<div
+    class="toast"
+    id="toast"
+></div>
+
+
+<script>
+
+/* =====================================================
+   HALDO SYSTEM CORE
+===================================================== */
+
+
+/* -----------------------------------------------------
+   NAVIGATION
+----------------------------------------------------- */
+
+function openPage(page) {
+
+    if (!page) {
+
+        return;
+
+    }
+
+
+    window.location.href =
+        page;
+
+}
+
+
+function goBack() {
+
+    if (
+        document.referrer &&
+        document.referrer.includes(
+            window.location.hostname
+        )
+    ) {
+
+        history.back();
+
+    } else {
+
+        openPage(
+            "index.html"
+        );
+
+    }
+
+}
+
+
+/* -----------------------------------------------------
+   TOAST
+----------------------------------------------------- */
+
+let toastTimer;
+
+
+function showToast(message) {
+
+    const toast =
+        document.getElementById(
+            "toast"
+        );
+
+
+    toast.textContent =
+        message;
+
+
+    toast.classList.add(
+        "show"
+    );
+
+
+    clearTimeout(
+        toastTimer
+    );
+
+
+    toastTimer =
+        setTimeout(
+            function() {
+
+                toast.classList.remove(
+                    "show"
                 );
 
+            },
+            2200
+        );
 
-            toast.textContent =
-                message;
+}
 
 
-            toast.classList.add(
-                "show"
+/* -----------------------------------------------------
+   DEVICE INFORMATION
+----------------------------------------------------- */
+
+function detectSystem() {
+
+
+    const ua =
+        navigator.userAgent ||
+        "";
+
+
+    let platform =
+        navigator.platform ||
+        "Unbekannt";
+
+
+    if (
+        /iPhone|iPad|iPod/i.test(
+            ua
+        )
+    ) {
+
+        platform =
+            "Apple iOS";
+
+    }
+
+    else if (
+        /Android/i.test(
+            ua
+        )
+    ) {
+
+        platform =
+            "Android";
+
+    }
+
+    else if (
+        /Windows/i.test(
+            ua
+        )
+    ) {
+
+        platform =
+            "Windows";
+
+    }
+
+    else if (
+        /Macintosh|Mac OS/i.test(
+            ua
+        )
+    ) {
+
+        platform =
+            "macOS";
+
+    }
+
+    else if (
+        /Linux/i.test(
+            ua
+        )
+    ) {
+
+        platform =
+            "Linux";
+
+    }
+
+
+    document.getElementById(
+        "platformInfo"
+    ).textContent =
+        platform;
+
+
+    let browser =
+        "Browser";
+
+
+    if (
+        /CriOS/i.test(
+            ua
+        )
+    ) {
+
+        browser =
+            "Chrome iOS";
+
+    }
+
+    else if (
+        /FxiOS/i.test(
+            ua
+        )
+    ) {
+
+        browser =
+            "Firefox iOS";
+
+    }
+
+    else if (
+        /EdgiOS/i.test(
+            ua
+        )
+    ) {
+
+        browser =
+            "Edge iOS";
+
+    }
+
+    else if (
+        /Safari/i.test(
+            ua
+        ) &&
+        !/Chrome/i.test(
+            ua
+        )
+    ) {
+
+        browser =
+            "Safari";
+
+    }
+
+    else if (
+        /Chrome/i.test(
+            ua
+        )
+    ) {
+
+        browser =
+            "Chrome";
+
+    }
+
+
+    document.getElementById(
+        "browserInfo"
+    ).textContent =
+        browser;
+
+
+    document.getElementById(
+        "screenInfo"
+    ).textContent =
+
+        window.innerWidth +
+        " × " +
+        window.innerHeight;
+
+
+    document.getElementById(
+        "languageInfo"
+    ).textContent =
+
+        navigator.language ||
+        "de";
+
+}
+
+
+/* -----------------------------------------------------
+   SYSTEM CHECK
+----------------------------------------------------- */
+
+function runSystemCheck() {
+
+    const progress =
+        document.getElementById(
+            "coreProgress"
+        );
+
+
+    const log =
+        document.getElementById(
+            "systemLog"
+        );
+
+
+    progress.style.width =
+        "0%";
+
+
+    showToast(
+        "HalDo Systemprüfung läuft …"
+    );
+
+
+    const steps = [
+        20,
+        40,
+        60,
+        80,
+        100
+    ];
+
+
+    let index =
+        0;
+
+
+    function next() {
+
+        if (
+            index >=
+            steps.length
+        ) {
+
+            addLog(
+                "CHECK",
+                "Systemprüfung erfolgreich abgeschlossen"
             );
-
-
-            clearTimeout(
-                toastTimer
-            );
-
-
-            toastTimer =
-                setTimeout(
-                    function() {
-
-                        toast.classList.remove(
-                            "show"
-                        );
-
-                    },
-                    2200
-                );
-
-        }
-
-
-        /* =====================================================
-           MODULES
-           ===================================================== */
-
-        function renderModules() {
-
-            const list =
-                document.getElementById(
-                    "moduleList"
-                );
-
-
-            list.innerHTML = "";
-
-
-            HALDO_MODULES.forEach(
-                function(module) {
-
-                    const item =
-                        document.createElement(
-                            "div"
-                        );
-
-
-                    item.className =
-                        "module";
-
-
-                    item.innerHTML = `
-
-                        <div class="module-icon">
-                            ${module.icon}
-                        </div>
-
-                        <div class="module-info">
-
-                            <strong>
-                                ${escapeHTML(
-                                    module.name
-                                )}
-                            </strong>
-
-                            <span>
-                                ${escapeHTML(
-                                    module.description
-                                )}
-                            </span>
-
-                        </div>
-
-                        <div class="module-status">
-
-                            <span class="small-dot"></span>
-
-                            ${escapeHTML(
-                                module.status
-                            )}
-
-                        </div>
-
-                    `;
-
-
-                    list.appendChild(
-                        item
-                    );
-
-                }
-            );
-
-
-            document.getElementById(
-                "moduleCount"
-            ).textContent =
-                HALDO_MODULES.length;
-
-        }
-
-
-        /* =====================================================
-           ESCAPE
-           ===================================================== */
-
-        function escapeHTML(value) {
-
-            return String(value)
-                .replace(
-                    /&/g,
-                    "&amp;"
-                )
-                .replace(
-                    /</g,
-                    "&lt;"
-                )
-                .replace(
-                    />/g,
-                    "&gt;"
-                )
-                .replace(
-                    /"/g,
-                    "&quot;"
-                )
-                .replace(
-                    /'/g,
-                    "&#039;"
-                );
-
-        }
-
-
-        /* =====================================================
-           RUNTIME
-           ===================================================== */
-
-        function updateRuntime() {
-
-            const elapsed =
-                Date.now() -
-                startTime;
-
-
-            const totalSeconds =
-                Math.floor(
-                    elapsed / 1000
-                );
-
-
-            const hours =
-                Math.floor(
-                    totalSeconds / 3600
-                );
-
-
-            const minutes =
-                Math.floor(
-                    (totalSeconds % 3600) / 60
-                );
-
-
-            const seconds =
-                totalSeconds % 60;
-
-
-            const formatted =
-                String(hours).padStart(
-                    2,
-                    "0"
-                ) +
-                ":" +
-                String(minutes).padStart(
-                    2,
-                    "0"
-                ) +
-                ":" +
-                String(seconds).padStart(
-                    2,
-                    "0"
-                );
-
-
-            document.getElementById(
-                "runtime"
-            ).textContent =
-                formatted;
-
-        }
-
-
-        /* =====================================================
-           STORAGE
-           ===================================================== */
-
-        function calculateStorage() {
-
-            let bytes = 0;
-
-
-            for (
-                let i = 0;
-                i < localStorage.length;
-                i++
-            ) {
-
-                const key =
-                    localStorage.key(i);
-
-
-                const value =
-                    localStorage.getItem(
-                        key
-                    );
-
-
-                if (
-                    key &&
-                    key.startsWith(
-                        "haldo_"
-                    )
-                ) {
-
-                    bytes +=
-                        (
-                            key.length +
-                            (
-                                value || ""
-                            ).length
-                        ) * 2;
-
-                }
-
-            }
-
-
-            if (
-                bytes < 1024
-            ) {
-
-                return bytes + " B";
-
-            }
-
-
-            if (
-                bytes < 1024 * 1024
-            ) {
-
-                return (
-                    bytes / 1024
-                ).toFixed(1) +
-                    " KB";
-
-            }
-
-
-            return (
-                bytes /
-                (1024 * 1024)
-            ).toFixed(2) +
-                " MB";
-
-        }
-
-
-        /* =====================================================
-           DEVICE INFORMATION
-           ===================================================== */
-
-        function updateDeviceInfo() {
-
-            const userAgent =
-                navigator.userAgent ||
-                "Unbekannt";
-
-
-            let browser =
-                "Unbekannter Browser";
-
-
-            if (
-                /Edg/i.test(
-                    userAgent
-                )
-            ) {
-
-                browser =
-                    "Microsoft Edge";
-
-            } else if (
-                /CriOS/i.test(
-                    userAgent
-                )
-            ) {
-
-                browser =
-                    "Chrome iOS";
-
-            } else if (
-                /Chrome/i.test(
-                    userAgent
-                )
-            ) {
-
-                browser =
-                    "Google Chrome";
-
-            } else if (
-                /FxiOS/i.test(
-                    userAgent
-                )
-            ) {
-
-                browser =
-                    "Firefox iOS";
-
-            } else if (
-                /Firefox/i.test(
-                    userAgent
-                )
-            ) {
-
-                browser =
-                    "Mozilla Firefox";
-
-            } else if (
-                /Safari/i.test(
-                    userAgent
-                )
-            ) {
-
-                browser =
-                    "Safari";
-
-            }
-
-
-            document.getElementById(
-                "browserInfo"
-            ).textContent =
-                browser;
-
-
-            document.getElementById(
-                "platformInfo"
-            ).textContent =
-                navigator.platform ||
-                "Unbekannt";
-
-
-            document.getElementById(
-                "languageInfo"
-            ).textContent =
-                navigator.language ||
-                "Unbekannt";
-
-
-            document.getElementById(
-                "screenInfo"
-            ).textContent =
-                window.screen.width +
-                " × " +
-                window.screen.height +
-                " px";
-
-
-            let connection =
-                "Unbekannt";
-
-
-            if (
-                navigator.onLine === false
-            ) {
-
-                connection =
-                    "Offline";
-
-            } else if (
-                navigator.connection &&
-                navigator.connection.effectiveType
-            ) {
-
-                connection =
-                    "Online • " +
-                    navigator.connection.effectiveType;
-
-            } else {
-
-                connection =
-                    "Online";
-
-            }
-
-
-            document.getElementById(
-                "connectionInfo"
-            ).textContent =
-                connection;
-
-        }
-
-
-        /* =====================================================
-           REFRESH
-           ===================================================== */
-
-        function refreshSystem() {
-
-            updateDeviceInfo();
-
-            document.getElementById(
-                "storageSize"
-            ).textContent =
-                calculateStorage();
-
-
-            document.getElementById(
-                "systemState"
-            ).textContent =
-                navigator.onLine
-                    ? "READY"
-                    : "OFFLINE";
 
 
             showToast(
-                "Systemdaten aktualisiert"
+                "✓ System ist bereit"
             );
+
+
+            return;
 
         }
 
 
-        /* =====================================================
-           SYSTEM SCAN
-           ===================================================== */
-
-        let scanTimer = null;
+        progress.style.width =
+            steps[index] + "%";
 
 
-        function runSystemScan() {
-
-            const card =
-                document.getElementById(
-                    "scanCard"
-                );
+        index++;
 
 
-            const progress =
-                document.getElementById(
-                    "scanProgress"
-                );
+        setTimeout(
+            next,
+            280
+        );
+
+    }
 
 
-            const text =
-                document.getElementById(
-                    "scanText"
-                );
+    next();
+
+}
 
 
-            card.classList.add(
-                "show"
-            );
+/* -----------------------------------------------------
+   LOG
+----------------------------------------------------- */
 
+function addLog(
+    type,
+    message
+) {
 
-            if (scanTimer) {
-
-                clearInterval(
-                    scanTimer
-                );
-
-            }
-
-
-            let value = 0;
-
-
-            progress.style.width =
-                "0%";
-
-
-            text.textContent =
-                "HalDo Core wird geprüft …";
-
-
-            const messages = [
-
-                "HalDo Core wird geprüft …",
-
-                "Module werden geprüft …",
-
-                "Lokaler Speicher wird geprüft …",
-
-                "Navigation Foundation wird geprüft …",
-
-                "AI Foundation wird geprüft …",
-
-                "Systemstatus wird geprüft …",
-
-                "Prüfung abgeschlossen."
-
-            ];
-
-
-            scanTimer =
-                setInterval(
-                    function() {
-
-                        value += 5;
-
-
-                        progress.style.width =
-                            value + "%";
-
-
-                        const index =
-                            Math.min(
-                                Math.floor(
-                                    value / 16
-                                ),
-                                messages.length - 1
-                            );
-
-
-                        text.textContent =
-                            messages[index];
-
-
-                        if (
-                            value >= 100
-                        ) {
-
-                            clearInterval(
-                                scanTimer
-                            );
-
-
-                            document.getElementById(
-                                "systemState"
-                            ).textContent =
-                                "HEALTHY";
-
-
-                            showToast(
-                                "Systemprüfung abgeschlossen"
-                            );
-
-                        }
-
-                    },
-                    80
-                );
-
-        }
-
-
-        /* =====================================================
-           ONLINE / OFFLINE
-           ===================================================== */
-
-        window.addEventListener(
-            "online",
-            function() {
-
-                document.getElementById(
-                    "systemState"
-                ).textContent =
-                    "READY";
-
-                refreshSystem();
-
-            }
+    const log =
+        document.getElementById(
+            "systemLog"
         );
 
 
-        window.addEventListener(
-            "offline",
-            function() {
-
-                document.getElementById(
-                    "systemState"
-                ).textContent =
-                    "OFFLINE";
-
-                refreshSystem();
-
-            }
+    const line =
+        document.createElement(
+            "div"
         );
 
 
-        /* =====================================================
-           START
-           ===================================================== */
-
-        renderModules();
-
-        updateDeviceInfo();
-
-        refreshSystem();
-
-        updateRuntime();
+    line.className =
+        "log-line ok";
 
 
-        setInterval(
-            updateRuntime,
-            1000
+    line.innerHTML =
+
+        "<span class='time'>[" +
+        escapeHtml(type) +
+        "]</span> " +
+        escapeHtml(message);
+
+
+    log.appendChild(
+        line
+    );
+
+
+    log.scrollTop =
+        log.scrollHeight;
+
+}
+
+
+function escapeHtml(value) {
+
+    return String(value)
+
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+
+        .replace(
+            /</g,
+            "&lt;"
+        )
+
+        .replace(
+            />/g,
+            "&gt;"
+        )
+
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+
+        .replace(
+            /'/g,
+            "&#039;"
         );
 
-    </script>
+}
+
+
+/* -----------------------------------------------------
+   REFRESH
+----------------------------------------------------- */
+
+function refreshSystem() {
+
+    detectSystem();
+
+    addLog(
+        "REFRESH",
+        "Systeminformationen aktualisiert"
+    );
+
+
+    showToast(
+        "System aktualisiert"
+    );
+
+}
+
+
+/* -----------------------------------------------------
+   START
+----------------------------------------------------- */
+
+detectSystem();
+
+
+setTimeout(
+    function() {
+
+        addLog(
+            "SYSTEM",
+            "HalDo AI OS 18 System Center aktiv"
+        );
+
+    },
+    500
+);
+
+</script>
+
 
 </body>
 
