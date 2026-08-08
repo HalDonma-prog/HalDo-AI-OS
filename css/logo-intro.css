@@ -1,0 +1,1277 @@
+/*
+============================================================
+ HALDO AI OS 18
+ LOGO INTRO UI
+ Professional Ultimate Foundation
+============================================================
+
+ Datei:
+ css/logo-intro.css
+
+ Aufgabe:
+ - vollständige Intro-Oberfläche
+ - Hintergrund
+ - Logo-Position
+ - Begrüßung
+ - Systemstatus
+ - Sprachstatus
+ - Skip-Button
+ - Fade In / Fade Out
+ - Mobile / Tablet / Desktop
+ - Dark OS Foundation
+============================================================
+*/
+
+
+/* ==========================================================
+   INTRO ROOT
+   ========================================================== */
+
+.haldo-logo-intro {
+
+    position: fixed;
+
+    inset: 0;
+
+    z-index: 999999;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    justify-content: center;
+
+    width: 100vw;
+
+    min-height: 100vh;
+
+    min-height: 100dvh;
+
+    overflow: hidden;
+
+    isolation: isolate;
+
+    background:
+
+        radial-gradient(
+            circle at center,
+            rgba(30, 50, 75, 0.55)
+            0%,
+            rgba(8, 14, 24, 0.96)
+            42%,
+            rgba(2, 5, 10, 1)
+            100%
+        );
+
+    color: #ffffff;
+
+    font-family:
+
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Helvetica,
+        Arial,
+        sans-serif;
+
+    opacity: 0;
+
+    visibility: hidden;
+
+    pointer-events: none;
+
+    transition:
+
+        opacity
+        0.7s
+        ease,
+
+        visibility
+        0s
+        linear
+        0.7s;
+
+}
+
+
+/* ==========================================================
+   INTRO SICHTBAR
+   ========================================================== */
+
+.haldo-logo-intro.is-visible {
+
+    opacity: 1;
+
+    visibility: visible;
+
+    pointer-events: auto;
+
+    transition:
+
+        opacity
+        0.7s
+        ease,
+
+        visibility
+        0s
+        linear
+        0s;
+
+}
+
+
+/* ==========================================================
+   INTRO VERSTECKT
+   ========================================================== */
+
+.haldo-logo-intro.is-hidden {
+
+    opacity: 0;
+
+    visibility: hidden;
+
+    pointer-events: none;
+
+}
+
+
+/* ==========================================================
+   FINISHING
+   ========================================================== */
+
+.haldo-logo-intro.is-finishing {
+
+    opacity: 0;
+
+    pointer-events: none;
+
+}
+
+
+/* ==========================================================
+   BACKGROUND ENERGY
+   ========================================================== */
+
+.haldo-intro-background-energy {
+
+    position: absolute;
+
+    z-index: -5;
+
+    inset: -30%;
+
+    pointer-events: none;
+
+    background:
+
+        radial-gradient(
+            ellipse at center,
+            rgba(255,255,255,0.08)
+            0%,
+            rgba(143,216,255,0.06)
+            18%,
+            transparent 45%
+        );
+
+    animation:
+
+        haldo-background-breathe
+        7s
+        ease-in-out
+        infinite;
+
+}
+
+
+/* ==========================================================
+   BACKGROUND BREATHING
+   ========================================================== */
+
+@keyframes haldo-background-breathe {
+
+    0% {
+
+        transform:
+            scale(0.92);
+
+        opacity:
+            0.55;
+
+    }
+
+    50% {
+
+        transform:
+            scale(1.08);
+
+        opacity:
+            1;
+
+    }
+
+    100% {
+
+        transform:
+            scale(0.92);
+
+        opacity:
+            0.55;
+
+    }
+
+}
+
+
+/* ==========================================================
+   EXTRA STAR FIELD
+   ========================================================== */
+
+.haldo-logo-intro::before {
+
+    content: "";
+
+    position: absolute;
+
+    inset: 0;
+
+    z-index: -4;
+
+    pointer-events: none;
+
+    opacity: 0.55;
+
+    background-image:
+
+        radial-gradient(
+            circle,
+            rgba(255,255,255,0.65)
+            0 1px,
+            transparent 1.5px
+        ),
+
+        radial-gradient(
+            circle,
+            rgba(143,216,255,0.45)
+            0 1px,
+            transparent 1.5px
+        );
+
+    background-size:
+
+        83px 91px,
+
+        137px 121px;
+
+    background-position:
+
+        12px 27px,
+
+        73px 48px;
+
+    animation:
+
+        haldo-stars-drift
+        18s
+        linear
+        infinite;
+
+}
+
+
+/* ==========================================================
+   STARS
+   ========================================================== */
+
+@keyframes haldo-stars-drift {
+
+    from {
+
+        transform:
+            translate3d(
+                0,
+                0,
+                0
+            );
+
+    }
+
+    to {
+
+        transform:
+            translate3d(
+                -45px,
+                35px,
+                0
+            );
+
+    }
+
+}
+
+
+/* ==========================================================
+   LOGO AREA
+   ========================================================== */
+
+.haldo-logo-intro
+.haldo-logo-container {
+
+    position: relative;
+
+    z-index: 10;
+
+    flex: 0 0 auto;
+
+    width: min(
+        82vw,
+        620px
+    );
+
+    height: min(
+        70vh,
+        620px
+    );
+
+    min-height: 300px;
+
+    max-height: 620px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+}
+
+
+/* ==========================================================
+   WELCOME AREA
+   ========================================================== */
+
+.haldo-intro-welcome {
+
+    position: relative;
+
+    z-index: 50;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    justify-content: center;
+
+    width: min(
+        92vw,
+        720px
+    );
+
+    margin-top: -28px;
+
+    text-align: center;
+
+    opacity: 0;
+
+    transform:
+        translateY(
+            22px
+        );
+
+    animation:
+
+        haldo-welcome-in
+        1s
+        0.75s
+        ease-out
+        forwards;
+
+}
+
+
+/* ==========================================================
+   WELCOME IN
+   ========================================================== */
+
+@keyframes haldo-welcome-in {
+
+    to {
+
+        opacity: 1;
+
+        transform:
+            translateY(0);
+
+    }
+
+}
+
+
+/* ==========================================================
+   BRAND
+   ========================================================== */
+
+.haldo-intro-brand {
+
+    margin-bottom: 6px;
+
+    letter-spacing:
+        0.18em;
+
+    text-transform:
+        uppercase;
+
+}
+
+
+/* ==========================================================
+   BRAND NAME
+   ========================================================== */
+
+.haldo-intro-brand-name {
+
+    font-size:
+        clamp(
+            0.72rem,
+            1.8vw,
+            0.92rem
+        );
+
+    font-weight:
+        600;
+
+    color:
+        rgba(
+            255,
+            255,
+            255,
+            0.68
+        );
+
+}
+
+
+/* ==========================================================
+   TITLE
+   ========================================================== */
+
+.haldo-intro-title {
+
+    margin:
+
+        0;
+
+    max-width:
+        92vw;
+
+    font-size:
+
+        clamp(
+            1.65rem,
+            5vw,
+            3.2rem
+        );
+
+    line-height:
+        1.1;
+
+    font-weight:
+        700;
+
+    letter-spacing:
+        -0.025em;
+
+    color:
+        #ffffff;
+
+    text-shadow:
+
+        0 0 18px
+        rgba(
+            255,
+            255,
+            255,
+            0.25
+        );
+
+    opacity: 0;
+
+    transform:
+        translateY(
+            16px
+        );
+
+    transition:
+
+        opacity
+        0.7s
+        ease,
+
+        transform
+        0.7s
+        ease;
+
+}
+
+
+/* ==========================================================
+   TITLE VISIBLE
+   ========================================================== */
+
+.haldo-intro-title.is-visible {
+
+    opacity: 1;
+
+    transform:
+        translateY(0);
+
+}
+
+
+/* ==========================================================
+   SUBTITLE
+   ========================================================== */
+
+.haldo-intro-subtitle {
+
+    margin:
+
+        10px
+        0
+        0;
+
+    font-size:
+
+        clamp(
+            0.8rem,
+            2.5vw,
+            1.05rem
+        );
+
+    font-weight:
+        400;
+
+    letter-spacing:
+        0.08em;
+
+    color:
+
+        rgba(
+            143,
+            216,
+            255,
+            0.78
+        );
+
+    opacity: 0;
+
+    transform:
+        translateY(
+            12px
+        );
+
+    transition:
+
+        opacity
+        0.7s
+        0.12s
+        ease,
+
+        transform
+        0.7s
+        0.12s
+        ease;
+
+}
+
+
+/* ==========================================================
+   SUBTITLE VISIBLE
+   ========================================================== */
+
+.haldo-intro-subtitle.is-visible {
+
+    opacity: 1;
+
+    transform:
+        translateY(0);
+
+}
+
+
+/* ==========================================================
+   SPEECH STATUS
+   ========================================================== */
+
+.haldo-intro-speech-status {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 9px;
+
+    margin-top: 18px;
+
+    min-height: 24px;
+
+    font-size:
+
+        clamp(
+            0.72rem,
+            2vw,
+            0.9rem
+        );
+
+    color:
+
+        rgba(
+            255,
+            255,
+            255,
+            0.64
+        );
+
+}
+
+
+/* ==========================================================
+   SPEECH INDICATOR
+   ========================================================== */
+
+.haldo-speech-indicator {
+
+    position: relative;
+
+    display: inline-block;
+
+    width: 8px;
+
+    height: 8px;
+
+    border-radius: 50%;
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            0.32
+        );
+
+    box-shadow:
+
+        0 0 0
+        rgba(
+            143,
+            216,
+            255,
+            0
+        );
+
+    transition:
+
+        background
+        0.2s
+        ease,
+
+        box-shadow
+        0.2s
+        ease;
+
+}
+
+
+/* ==========================================================
+   SPEECH ACTIVE
+   ========================================================== */
+
+.haldo-speech-indicator.is-active {
+
+    background:
+        #ffffff;
+
+    box-shadow:
+
+        0 0 7px
+        #ffffff,
+
+        0 0 17px
+        rgba(
+            143,
+            216,
+            255,
+            0.95
+        );
+
+    animation:
+
+        haldo-speech-dot
+        0.42s
+        ease-in-out
+        infinite;
+
+}
+
+
+/* ==========================================================
+   SPEECH DOT
+   ========================================================== */
+
+@keyframes haldo-speech-dot {
+
+    0% {
+
+        transform:
+            scale(0.72);
+
+    }
+
+    50% {
+
+        transform:
+            scale(1.3);
+
+    }
+
+    100% {
+
+        transform:
+            scale(0.72);
+
+    }
+
+}
+
+
+/* ==========================================================
+   SPEECH TEXT
+   ========================================================== */
+
+.haldo-speech-status-text {
+
+    white-space:
+        nowrap;
+
+}
+
+
+/* ==========================================================
+   CONTROLS
+   ========================================================== */
+
+.haldo-intro-controls {
+
+    position: absolute;
+
+    z-index: 100;
+
+    right: max(
+        22px,
+        env(safe-area-inset-right)
+    );
+
+    bottom: max(
+        22px,
+        env(safe-area-inset-bottom)
+    );
+
+}
+
+
+/* ==========================================================
+   SKIP BUTTON
+   ========================================================== */
+
+.haldo-intro-skip {
+
+    appearance:
+        none;
+
+    border:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            0.16
+        );
+
+    border-radius:
+        999px;
+
+    padding:
+
+        9px
+        15px;
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            0.045
+        );
+
+    color:
+
+        rgba(
+            255,
+            255,
+            255,
+            0.62
+        );
+
+    font:
+
+        inherit;
+
+    font-size:
+        0.78rem;
+
+    cursor:
+        pointer;
+
+    backdrop-filter:
+        blur(12px);
+
+    -webkit-backdrop-filter:
+        blur(12px);
+
+    transition:
+
+        background
+        0.2s
+        ease,
+
+        color
+        0.2s
+        ease,
+
+        border-color
+        0.2s
+        ease,
+
+        transform
+        0.2s
+        ease;
+
+}
+
+
+/* ==========================================================
+   SKIP HOVER
+   ========================================================== */
+
+.haldo-intro-skip:hover {
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            0.1
+        );
+
+    color:
+        #ffffff;
+
+    border-color:
+        rgba(
+            255,
+            255,
+            255,
+            0.3
+        );
+
+    transform:
+        translateY(-1px);
+
+}
+
+
+/* ==========================================================
+   SKIP ACTIVE
+   ========================================================== */
+
+.haldo-intro-skip:active {
+
+    transform:
+        translateY(0)
+        scale(0.97);
+
+}
+
+
+/* ==========================================================
+   FOCUS
+   ========================================================== */
+
+.haldo-intro-skip:focus-visible {
+
+    outline:
+
+        2px solid
+        rgba(
+            143,
+            216,
+            255,
+            0.9
+        );
+
+    outline-offset:
+        3px;
+
+}
+
+
+/* ==========================================================
+   SYSTEM STATUS
+   ========================================================== */
+
+.haldo-intro-system-status {
+
+    position: absolute;
+
+    z-index: 80;
+
+    left: max(
+        22px,
+        env(safe-area-inset-left)
+    );
+
+    bottom: max(
+        24px,
+        env(safe-area-inset-bottom)
+    );
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    max-width:
+        calc(
+            100vw - 170px
+        );
+
+    font-size:
+        0.72rem;
+
+    color:
+
+        rgba(
+            255,
+            255,
+            255,
+            0.48
+        );
+
+}
+
+
+/* ==========================================================
+   STATUS DOT
+   ========================================================== */
+
+.haldo-intro-status-dot {
+
+    width: 7px;
+
+    height: 7px;
+
+    flex: 0 0 7px;
+
+    border-radius: 50%;
+
+    background:
+
+        rgba(
+            255,
+            210,
+            90,
+            0.9
+        );
+
+    box-shadow:
+
+        0 0 8px
+        rgba(
+            255,
+            210,
+            90,
+            0.45
+        );
+
+}
+
+
+/* ==========================================================
+   STATUS READY
+   ========================================================== */
+
+.haldo-intro-status-dot.ready {
+
+    background:
+        rgba(
+            150,
+            255,
+            190,
+            1
+        );
+
+    box-shadow:
+
+        0 0 8px
+        rgba(
+            150,
+            255,
+            190,
+            0.8
+        );
+
+}
+
+
+/* ==========================================================
+   SMALL MOBILE
+   ========================================================== */
+
+@media (
+    max-width: 420px
+) {
+
+    .haldo-logo-intro
+    .haldo-logo-container {
+
+        width:
+            96vw;
+
+        height:
+            60vh;
+
+        min-height:
+            250px;
+
+    }
+
+
+    .haldo-intro-welcome {
+
+        margin-top:
+            -38px;
+
+    }
+
+
+    .haldo-intro-title {
+
+        font-size:
+            1.5rem;
+
+    }
+
+
+    .haldo-intro-subtitle {
+
+        font-size:
+            0.75rem;
+
+    }
+
+
+    .haldo-intro-controls {
+
+        right:
+            16px;
+
+        bottom:
+            16px;
+
+    }
+
+
+    .haldo-intro-system-status {
+
+        left:
+            16px;
+
+        bottom:
+            18px;
+
+        max-width:
+            55vw;
+
+    }
+
+}
+
+
+/* ==========================================================
+   TABLET
+   ========================================================== */
+
+@media (
+    min-width: 601px
+)
+and (
+    max-width: 1100px
+) {
+
+    .haldo-logo-intro
+    .haldo-logo-container {
+
+        height:
+            65vh;
+
+    }
+
+}
+
+
+/* ==========================================================
+   LANDSCAPE MOBILE
+   ========================================================== */
+
+@media (
+    orientation: landscape
+)
+and (
+    max-height: 600px
+) {
+
+    .haldo-logo-intro {
+
+        justify-content:
+            flex-start;
+
+        overflow-y:
+            auto;
+
+        padding-top:
+            15px;
+
+        padding-bottom:
+            15px;
+
+    }
+
+
+    .haldo-logo-intro
+    .haldo-logo-container {
+
+        width:
+            48vw;
+
+        height:
+            48vw;
+
+        min-width:
+            230px;
+
+        min-height:
+            230px;
+
+    }
+
+
+    .haldo-intro-welcome {
+
+        margin-top:
+            -25px;
+
+    }
+
+
+    .haldo-intro-title {
+
+        font-size:
+            1.35rem;
+
+    }
+
+}
+
+
+/* ==========================================================
+   SAFE AREA
+   ========================================================== */
+
+@supports (
+    padding:
+        max(
+            0px,
+            env(safe-area-inset-top)
+        )
+) {
+
+    .haldo-logo-intro {
+
+        padding-top:
+            env(safe-area-inset-top);
+
+        padding-right:
+            env(safe-area-inset-right);
+
+        padding-bottom:
+            env(safe-area-inset-bottom);
+
+        padding-left:
+            env(safe-area-inset-left);
+
+    }
+
+}
+
+
+/* ==========================================================
+   REDUCED MOTION
+   ========================================================== */
+
+@media (
+    prefers-reduced-motion: reduce
+) {
+
+    .haldo-logo-intro::before,
+    .haldo-intro-background-energy,
+    .haldo-speech-indicator {
+
+        animation:
+            none !important;
+
+    }
+
+
+    .haldo-logo-intro {
+
+        transition:
+            opacity
+            0.2s
+            ease;
+
+    }
+
+}
+
+
+/* ==========================================================
+   PERFORMANCE
+   ========================================================== */
+
+.haldo-logo-intro,
+.haldo-intro-background-energy,
+.haldo-logo-container,
+.haldo-intro-welcome {
+
+    contain:
+        layout
+        paint;
+
+}
