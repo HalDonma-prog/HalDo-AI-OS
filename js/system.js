@@ -1,41 +1,40 @@
-/*
-============================================================
- HALDO AI OS 18
- SYSTEM MANAGER
- Professional Ultimate Foundation
-============================================================
+/* ============================================================
+   HALDO AI OS 18
+   Professional Ultimate Foundation
+   ------------------------------------------------------------
+   Datei:
+   js/system.js
 
- Datei:
- js/system.js
+   Aufgabe:
+   Zentrale Systemverwaltung
 
- Aufgabe:
- - Systemverwaltung
- - Boot-Prozess
- - Statusverwaltung
- - Verbindung mit HalDo Kernel
- - Modulverwaltung
- - Systemereignisse
- - Systemdiagnose
- - Vorbereitung für UI / AI / Apps
-============================================================
-*/
+   Verbindet:
+   - Kernel
+   - App Manager
+   - App Router
+   - Launcher
+   - Logo / Intro
+   - Systemstatus
+   - Boot-Sequenz
+   - Online / Offline
+   - Fehlerstatus
+
+   WICHTIG:
+   Dieses Modul zerstört keine vorhandenen Funktionen.
+   Es koordiniert die einzelnen Module.
+   ============================================================ */
 
 "use strict";
 
 
-(function (window) {
+(function (window, document) {
 
 
     /* ========================================================
-       SYSTEM MANAGER
+       01 — SYSTEM INFORMATION
        ======================================================== */
 
-    const HalDoSystem = {
-
-
-        /* ====================================================
-           INFORMATIONEN
-           ==================================================== */
+    const SYSTEM = {
 
         name:
             "HalDo AI OS",
@@ -46,1697 +45,1644 @@
         edition:
             "Professional Ultimate Foundation",
 
+        build:
+            "HALDO-OS18-PUF",
+
+        language:
+            "de",
+
         status:
-            "CREATED",
-
-        initialized:
-            false,
-
-        bootStarted:
-            false,
-
-        bootCompleted:
-            false,
-
-
-        /* ====================================================
-           BOOT
-           ==================================================== */
-
-        bootTime:
-            null,
-
-        bootStartedAt:
-            null,
-
-        bootCompletedAt:
-            null,
-
-
-        /* ====================================================
-           BOOT PHASEN
-           ==================================================== */
-
-        bootPhases: [
-
-            {
-                id:
-                    "system-check",
-
-                name:
-                    "Systemprüfung",
-
-                status:
-                    "pending"
-            },
-
-            {
-                id:
-                    "kernel-check",
-
-                name:
-                    "Kernelprüfung",
-
-                status:
-                    "pending"
-            },
-
-            {
-                id:
-                    "module-check",
-
-                name:
-                    "Modulprüfung",
-
-                status:
-                    "pending"
-            },
-
-            {
-                id:
-                    "environment",
-
-                name:
-                    "Umgebung",
-
-                status:
-                    "pending"
-            },
-
-            {
-                id:
-                    "interface",
-
-                name:
-                    "Benutzeroberfläche",
-
-                status:
-                    "pending"
-            },
-
-            {
-                id:
-                    "ready",
-
-                name:
-                    "System bereit",
-
-                status:
-                    "pending"
-            }
-
-        ],
-
-
-        /* ====================================================
-           MODULE
-           ==================================================== */
-
-        modules:
-            new Map(),
-
-
-        /* ====================================================
-           EVENTS
-           ==================================================== */
-
-        listeners:
-            new Map(),
-
-
-        /* ====================================================
-           DIAGNOSTICS
-           ==================================================== */
-
-        diagnostics: {
-
-            started:
-                false,
-
-            completed:
-                false,
-
-            passed:
-                0,
-
-            failed:
-                0,
-
-            warnings:
-                0,
-
-            results:
-                []
-
-        },
-
-
-        /* ====================================================
-           INITIALIZE
-           ==================================================== */
-
-        initialize() {
-
-
-            if (
-                this.initialized
-            ) {
-
-                return true;
-
-            }
-
-
-            this.status =
-                "INITIALIZING";
-
-
-            this.registerEvents();
-
-            this.connectKernel();
-
-            this.initialized =
-                true;
-
-
-            this.setStatus(
-                "INITIALIZED"
-            );
-
-
-            this.log(
-                "System Manager initialisiert."
-            );
-
-
-            return true;
-
-        },
-
-
-        /* ====================================================
-           KERNEL VERBINDUNG
-           ==================================================== */
-
-        connectKernel() {
-
-
-            if (
-                !window.HalDoKernel
-            ) {
-
-                this.log(
-                    "Kernel noch nicht verfügbar."
-                );
-
-
-                return false;
-
-            }
-
-
-            this.kernel =
-                window.HalDoKernel;
-
-
-            this.kernel.on(
-                "kernel:ready",
-                (
-                    information
-                ) => {
-
-                    this.emit(
-                        "kernel-ready",
-                        information
-                    );
-
-                }
-            );
-
-
-            this.kernel.on(
-                "system:error",
-                (
-                    error
-                ) => {
-
-                    this.emit(
-                        "system-error",
-                        error
-                    );
-
-                }
-            );
-
-
-            this.log(
-                "Kernel erfolgreich verbunden."
-            );
-
-
-            return true;
-
-        },
-
-
-        /* ====================================================
-           EVENTS REGISTRIEREN
-           ==================================================== */
-
-        registerEvents() {
-
-
-            window.addEventListener(
-                "online",
-                () => {
-
-                    this.emit(
-                        "network-online"
-                    );
-
-                }
-            );
-
-
-            window.addEventListener(
-                "offline",
-                () => {
-
-                    this.emit(
-                        "network-offline"
-                    );
-
-                }
-            );
-
-
-            document.addEventListener(
-                "visibilitychange",
-                () => {
-
-                    this.emit(
-                        "visibility-change",
-                        {
-
-                            hidden:
-                                document.hidden
-
-                        }
-                    );
-
-                }
-            );
-
-
-            window.addEventListener(
-                "beforeunload",
-                () => {
-
-                    this.emit(
-                        "system-unloading"
-                    );
-
-                }
-            );
-
-        },
-
-
-        /* ====================================================
-           BOOT START
-           ==================================================== */
-
-        async boot() {
-
-
-            if (
-                this.bootStarted
-            ) {
-
-                return false;
-
-            }
-
-
-            this.bootStarted =
-                true;
-
-
-            this.bootStartedAt =
-                Date.now();
-
-
-            this.bootTime =
-                null;
-
-
-            this.setStatus(
-                "BOOTING"
-            );
-
-
-            this.log(
-                "HalDo AI OS Boot wird gestartet."
-            );
-
-
-            try {
-
-
-                /* ==========================================
-                   PHASE 1
-                   ========================================== */
-
-                await this.runBootPhase(
-                    "system-check",
-                    () =>
-                        this.checkSystem()
-                );
-
-
-                /* ==========================================
-                   PHASE 2
-                   ========================================== */
-
-                await this.runBootPhase(
-                    "kernel-check",
-                    () =>
-                        this.checkKernel()
-                );
-
-
-                /* ==========================================
-                   PHASE 3
-                   ========================================== */
-
-                await this.runBootPhase(
-                    "module-check",
-                    () =>
-                        this.checkModules()
-                );
-
-
-                /* ==========================================
-                   PHASE 4
-                   ========================================== */
-
-                await this.runBootPhase(
-                    "environment",
-                    () =>
-                        this.checkEnvironment()
-                );
-
-
-                /* ==========================================
-                   PHASE 5
-                   ========================================== */
-
-                await this.runBootPhase(
-                    "interface",
-                    () =>
-                        this.prepareInterface()
-                );
-
-
-                /* ==========================================
-                   PHASE 6
-                   ========================================== */
-
-                await this.runBootPhase(
-                    "ready",
-                    () =>
-                        this.finalizeBoot()
-                );
-
-
-                this.bootCompleted =
-                    true;
-
-
-                this.bootCompletedAt =
-                    Date.now();
-
-
-                this.bootTime =
-                    this.bootCompletedAt -
-                    this.bootStartedAt;
-
-
-                this.setStatus(
-                    "ONLINE"
-                );
-
-
-                if (
-                    this.kernel &&
-                    typeof this.kernel.markBootComplete ===
-                    "function"
-                ) {
-
-                    this.kernel.markBootComplete();
-
-                }
-
-
-                this.emit(
-                    "boot-complete",
-                    this.getStatus()
-                );
-
-
-                this.log(
-                    "HalDo AI OS ist vollständig gestartet."
-                );
-
-
-                return true;
-
-
-            } catch (error) {
-
-
-                this.setStatus(
-                    "ERROR"
-                );
-
-
-                this.emit(
-                    "boot-error",
-                    error
-                );
-
-
-                this.logError(
-                    error
-                );
-
-
-                return false;
-
-            }
-
-        },
-
-
-        /* ====================================================
-           BOOT PHASE AUSFÜHREN
-           ==================================================== */
-
-        async runBootPhase(
-            phaseId,
-            callback
-        ) {
-
-
-            const phase =
-                this.bootPhases.find(
-                    item =>
-                        item.id ===
-                        phaseId
-                );
-
-
-            if (
-                !phase
-            ) {
-
-                throw new Error(
-                    `Bootphase nicht gefunden: ${phaseId}`
-                );
-
-            }
-
-
-            phase.status =
-                "running";
-
-
-            this.emit(
-                "boot-phase-start",
-                phase
-            );
-
-
-            this.log(
-                `Bootphase: ${phase.name}`
-            );
-
-
-            try {
-
-
-                const result =
-                    await Promise.resolve(
-                        callback()
-                    );
-
-
-                phase.status =
-                    "completed";
-
-
-                phase.result =
-                    result;
-
-
-                this.emit(
-                    "boot-phase-complete",
-                    phase
-                );
-
-
-                return result;
-
-
-            } catch (error) {
-
-
-                phase.status =
-                    "failed";
-
-
-                phase.error =
-                    error.message ||
-                    String(error);
-
-
-                this.emit(
-                    "boot-phase-error",
-                    {
-
-                        phase,
-
-                        error
-
-                    }
-                );
-
-
-                throw error;
-
-            }
-
-        },
-
-
-        /* ====================================================
-           SYSTEMPRÜFUNG
-           ==================================================== */
-
-        checkSystem() {
-
-
-            const checks = {
-
-
-                window:
-                    typeof window !==
-                    "undefined",
-
-
-                document:
-                    typeof document !==
-                    "undefined",
-
-
-                navigator:
-                    typeof navigator !==
-                    "undefined",
-
-
-                localStorage:
-                    this.checkStorage(),
-
-
-                browser:
-                    true
-
-            };
-
-
-            const failed =
-                Object.keys(
-                    checks
-                ).filter(
-                    key =>
-                        !checks[key]
-                );
-
-
-            if (
-                failed.length > 0
-            ) {
-
-                throw new Error(
-                    "Systemprüfung fehlgeschlagen: " +
-                    failed.join(", ")
-                );
-
-            }
-
-
-            return checks;
-
-        },
-
-
-        /* ====================================================
-           KERNEL PRÜFEN
-           ==================================================== */
-
-        checkKernel() {
-
-
-            if (
-                !window.HalDoKernel
-            ) {
-
-                throw new Error(
-                    "HalDo Kernel wurde nicht gefunden."
-                );
-
-            }
-
-
-            if (
-                !window.HalDoKernel.ready
-            ) {
-
-                /*
-                   Der Kernel kann noch initialisieren.
-                   Wir behandeln dies nicht sofort als
-                   fatalen Fehler.
-                */
-
-                this.log(
-                    "Kernel wird noch initialisiert."
-                );
-
-            }
-
-
-            this.kernel =
-                window.HalDoKernel;
-
-
-            return true;
-
-        },
-
-
-        /* ====================================================
-           MODULE PRÜFEN
-           ==================================================== */
-
-        checkModules() {
-
-
-            const moduleCount =
-                this.modules.size;
-
-
-            this.log(
-                `Registrierte Systemmodule: ${moduleCount}`
-            );
-
-
-            return {
-
-                count:
-                    moduleCount,
-
-                ready:
-                    true
-
-            };
-
-        },
-
-
-        /* ====================================================
-           UMGEBUNG PRÜFEN
-           ==================================================== */
-
-        checkEnvironment() {
-
-
-            const environment = {
-
-
-                language:
-                    navigator.language ||
-                    "de",
-
-
-                online:
-                    navigator.onLine,
-
-
-                touch:
-                    "ontouchstart" in window ||
-                    navigator.maxTouchPoints > 0,
-
-
-                mobile:
-                    /Android|iPhone|iPad|iPod/i.test(
-                        navigator.userAgent
-                    ),
-
-
-                screenWidth:
-                    window.innerWidth,
-
-
-                screenHeight:
-                    window.innerHeight
-
-            };
-
-
-            this.environment =
-                environment;
-
-
-            this.emit(
-                "environment-ready",
-                environment
-            );
-
-
-            return environment;
-
-        },
-
-
-        /* ====================================================
-           INTERFACE VORBEREITEN
-           ==================================================== */
-
-        prepareInterface() {
-
-
-            const root =
-                document.documentElement;
-
-
-            if (
-                root
-            ) {
-
-                root.setAttribute(
-                    "data-haldo-os",
-                    "18"
-                );
-
-
-                root.setAttribute(
-                    "data-haldo-status",
-                    "booting"
-                );
-
-            }
-
-
-            const body =
-                document.body;
-
-
-            if (
-                body
-            ) {
-
-                body.setAttribute(
-                    "data-haldo-system",
-                    "18"
-                );
-
-            }
-
-
-            this.emit(
-                "interface-ready"
-            );
-
-
-            return true;
-
-        },
-
-
-        /* ====================================================
-           BOOT ABSCHLIESSEN
-           ==================================================== */
-
-        finalizeBoot() {
-
-
-            const root =
-                document.documentElement;
-
-
-            if (
-                root
-            ) {
-
-                root.setAttribute(
-                    "data-haldo-status",
-                    "online"
-                );
-
-            }
-
-
-            this.setStatus(
-                "READY"
-            );
-
-
-            return true;
-
-        },
-
-
-        /* ====================================================
-           MODULE REGISTRIEREN
-           ==================================================== */
-
-        registerModule(
-            name,
-            module,
-            options = {}
-        ) {
-
-
-            if (
-                !name ||
-                typeof name !==
-                "string"
-            ) {
-
-                throw new Error(
-                    "Ungültiger Modulname."
-                );
-
-            }
-
-
-            if (
-                this.modules.has(
-                    name
-                )
-            ) {
-
-                this.log(
-                    `Modul bereits vorhanden: ${name}`
-                );
-
-
-                return false;
-
-            }
-
-
-            const record = {
-
-                name,
-
-                module,
-
-                version:
-                    options.version ||
-                    "1.0.0",
-
-                critical:
-                    options.critical === true,
-
-                enabled:
-                    options.enabled !== false,
-
-                initialized:
-                    false,
-
-                registeredAt:
-                    Date.now()
-
-            };
-
-
-            this.modules.set(
-                name,
-                record
-            );
-
-
-            /*
-               Zusätzlich beim Kernel registrieren.
-            */
-
-            if (
-                this.kernel &&
-                typeof this.kernel.registerModule ===
-                "function"
-            ) {
-
-                this.kernel.registerModule(
-                    name,
-                    module,
-                    options
-                );
-
-            }
-
-
-            this.emit(
-                "module-registered",
-                record
-            );
-
-
-            this.log(
-                `Systemmodul registriert: ${name}`
-            );
-
-
-            return true;
-
-        },
-
-
-        /* ====================================================
-           MODUL INITIALISIEREN
-           ==================================================== */
-
-        initializeModule(
-            name
-        ) {
-
-
-            const record =
-                this.modules.get(
-                    name
-                );
-
-
-            if (
-                !record
-            ) {
-
-                this.log(
-                    `Modul nicht gefunden: ${name}`
-                );
-
-
-                return false;
-
-            }
-
-
-            if (
-                !record.enabled
-            ) {
-
-                return false;
-
-            }
-
-
-            if (
-                record.initialized
-            ) {
-
-                return true;
-
-            }
-
-
-            try {
-
-
-                if (
-                    record.module &&
-                    typeof record.module.initialize ===
-                    "function"
-                ) {
-
-                    record.module.initialize(
-                        this
-                    );
-
-                }
-
-
-                record.initialized =
-                    true;
-
-
-                this.emit(
-                    "module-initialized",
-                    record
-                );
-
-
-                return true;
-
-
-            } catch (error) {
-
-
-                this.logError(
-                    error,
-                    `Modul: ${name}`
-                );
-
-
-                if (
-                    record.critical
-                ) {
-
-                    throw error;
-
-                }
-
-
-                return false;
-
-            }
-
-        },
-
-
-        /* ====================================================
-           ALLE MODULE INITIALISIEREN
-           ==================================================== */
-
-        initializeModules() {
-
-
-            let count =
-                0;
-
-
-            this.modules.forEach(
-                record => {
-
-                    if (
-                        this.initializeModule(
-                            record.name
-                        )
-                    ) {
-
-                        count++;
-
-                    }
-
-                }
-            );
-
-
-            this.emit(
-                "modules-initialized",
-                {
-
-                    count
-
-                }
-            );
-
-
-            return count;
-
-        },
-
-
-        /* ====================================================
-           DIAGNOSTIK
-           ==================================================== */
-
-        runDiagnostics() {
-
-
-            this.diagnostics = {
-
-                started:
-                    true,
-
-                completed:
-                    false,
-
-                passed:
-                    0,
-
-                failed:
-                    0,
-
-                warnings:
-                    0,
-
-                results:
-                    []
-
-            };
-
-
-            const tests = [
-
-                {
-                    name:
-                        "DOM",
-
-                    test:
-                        () =>
-                            typeof document !==
-                            "undefined"
-                },
-
-                {
-                    name:
-                        "Kernel",
-
-                    test:
-                        () =>
-                            !!window.HalDoKernel
-                },
-
-                {
-                    name:
-                        "Local Storage",
-
-                    test:
-                        () =>
-                            this.checkStorage()
-                },
-
-                {
-                    name:
-                        "Internet",
-
-                    test:
-                        () =>
-                            navigator.onLine
-                },
-
-                {
-                    name:
-                        "Touch Support",
-
-                    test:
-                        () =>
-                            (
-                                "ontouchstart" in
-                                window
-                            ) ||
-                            navigator.maxTouchPoints > 0
-                }
-
-            ];
-
-
-            tests.forEach(
-                item => {
-
-
-                    let passed =
-                        false;
-
-
-                    try {
-
-                        passed =
-                            Boolean(
-                                item.test()
-                            );
-
-                    } catch (error) {
-
-                        passed =
-                            false;
-
-                    }
-
-
-                    const result = {
-
-                        name:
-                            item.name,
-
-                        passed,
-
-                        timestamp:
-                            Date.now()
-
-                    };
-
-
-                    this.diagnostics.results.push(
-                        result
-                    );
-
-
-                    if (
-                        passed
-                    ) {
-
-                        this.diagnostics.passed++;
-
-                    } else {
-
-                        this.diagnostics.failed++;
-
-                    }
-
-                }
-            );
-
-
-            this.diagnostics.completed =
-                true;
-
-
-            this.emit(
-                "diagnostics-complete",
-                this.diagnostics
-            );
-
-
-            return this.diagnostics;
-
-        },
-
-
-        /* ====================================================
-           STORAGE PRÜFEN
-           ==================================================== */
-
-        checkStorage() {
-
-
-            try {
-
-
-                const key =
-                    "__haldo_system_test__";
-
-
-                localStorage.setItem(
-                    key,
-                    "ok"
-                );
-
-
-                localStorage.removeItem(
-                    key
-                );
-
-
-                return true;
-
-
-            } catch (error) {
-
-
-                return false;
-
-            }
-
-        },
-
-
-        /* ====================================================
-           STATUS SETZEN
-           ==================================================== */
-
-        setStatus(
-            status
-        ) {
-
-
-            const oldStatus =
-                this.status;
-
-
-            this.status =
-                String(status);
-
-
-            const root =
-                document.documentElement;
-
-
-            if (
-                root
-            ) {
-
-                root.setAttribute(
-                    "data-haldo-status",
-                    this.status.toLowerCase()
-                );
-
-            }
-
-
-            this.emit(
-                "status-change",
-                {
-
-                    oldStatus,
-
-                    newStatus:
-                        this.status
-
-                }
-            );
-
-
-            this.log(
-                `Systemstatus: ${this.status}`
-            );
-
-
-            return this.status;
-
-        },
-
-
-        /* ====================================================
-           STATUS ABFRAGEN
-           ==================================================== */
-
-        getStatus() {
-
-
-            return {
-
-                name:
-                    this.name,
-
-                version:
-                    this.version,
-
-                edition:
-                    this.edition,
-
-                status:
-                    this.status,
-
-                initialized:
-                    this.initialized,
-
-                bootStarted:
-                    this.bootStarted,
-
-                bootCompleted:
-                    this.bootCompleted,
-
-                bootTime:
-                    this.bootTime,
-
-                modules:
-                    this.modules.size,
-
-                environment:
-                    this.environment ||
-                    null,
-
-                diagnostics:
-                    this.diagnostics
-
-            };
-
-        },
-
-
-        /* ====================================================
-           EVENT ON
-           ==================================================== */
-
-        on(
-            eventName,
-            callback
-        ) {
-
-
-            if (
-                typeof callback !==
-                "function"
-            ) {
-
-                return false;
-
-            }
-
-
-            if (
-                !this.listeners.has(
-                    eventName
-                )
-            ) {
-
-                this.listeners.set(
-                    eventName,
-                    []
-                );
-
-            }
-
-
-            this.listeners
-                .get(eventName)
-                .push(callback);
-
-
-            return true;
-
-        },
-
-
-        /* ====================================================
-           EVENT OFF
-           ==================================================== */
-
-        off(
-            eventName,
-            callback
-        ) {
-
-
-            const listeners =
-                this.listeners.get(
-                    eventName
-                );
-
-
-            if (
-                !listeners
-            ) {
-
-                return false;
-
-            }
-
-
-            const index =
-                listeners.indexOf(
-                    callback
-                );
-
-
-            if (
-                index === -1
-            ) {
-
-                return false;
-
-            }
-
-
-            listeners.splice(
-                index,
-                1
-            );
-
-
-            return true;
-
-        },
-
-
-        /* ====================================================
-           EVENT EMIT
-           ==================================================== */
-
-        emit(
-            eventName,
-            data = null
-        ) {
-
-
-            const listeners =
-                this.listeners.get(
-                    eventName
-                );
-
-
-            if (
-                !listeners
-            ) {
-
-                return;
-
-            }
-
-
-            listeners
-                .slice()
-                .forEach(
-                    callback => {
-
-                        try {
-
-                            callback(
-                                data
-                            );
-
-                        } catch (error) {
-
-                            this.logError(
-                                error,
-                                `Event: ${eventName}`
-                            );
-
-                        }
-
-                    }
-                );
-
-        },
-
-
-        /* ====================================================
-           LOG
-           ==================================================== */
-
-        log(
-            message,
-            data = null
-        ) {
-
-
-            if (
-                data !== null
-            ) {
-
-                console.log(
-                    "[HalDo System]",
-                    message,
-                    data
-                );
-
-            } else {
-
-                console.log(
-                    "[HalDo System]",
-                    message
-                );
-
-            }
-
-        },
-
-
-        /* ====================================================
-           ERROR
-           ==================================================== */
-
-        logError(
-            error,
-            source = "System"
-        ) {
-
-
-            console.error(
-                "[HalDo System]",
-                source,
-                error
-            );
-
-
-            if (
-                this.kernel &&
-                typeof this.kernel.handleError ===
-                "function"
-            ) {
-
-                this.kernel.handleError(
-                    error,
-                    source
-                );
-
-            }
-
-        }
+            "starting"
 
     };
 
 
     /* ========================================================
-       GLOBAL VERFÜGBAR MACHEN
+       02 — STATE
        ======================================================== */
 
-    window.HalDoSystem =
-        HalDoSystem;
+    const state = {
+
+        initialized:
+            false,
+
+        booting:
+            false,
+
+        ready:
+            false,
+
+        failed:
+            false,
+
+        online:
+            navigator.onLine,
+
+        bootStarted:
+            null,
+
+        bootFinished:
+            null,
+
+        currentStage:
+            "waiting",
+
+        stages:
+            [],
+
+        errors:
+            [],
+
+        services:
+            new Map()
+
+    };
 
 
-    if (
-        !window.HalDo
+    /* ========================================================
+       03 — EVENT SYSTEM
+       ======================================================== */
+
+    const listeners = {};
+
+
+    function on(
+        eventName,
+        callback
     ) {
 
-        window.HalDo = {};
+        if (
+            typeof callback !==
+            "function"
+        ) {
+
+            return false;
+
+        }
+
+
+        if (
+            !listeners[eventName]
+        ) {
+
+            listeners[eventName] =
+                [];
+
+        }
+
+
+        listeners[eventName].push(
+            callback
+        );
+
+
+        return true;
 
     }
 
 
-    window.HalDo.system =
-        HalDoSystem;
+    function off(
+        eventName,
+        callback
+    ) {
+
+        if (
+            !listeners[eventName]
+        ) {
+
+            return false;
+
+        }
+
+
+        listeners[eventName] =
+            listeners[eventName].filter(
+                item =>
+                    item !== callback
+            );
+
+
+        return true;
+
+    }
+
+
+    function emit(
+        eventName,
+        data = null
+    ) {
+
+        const callbacks =
+            listeners[eventName];
+
+
+        if (
+            !callbacks
+        ) {
+
+            return;
+
+        }
+
+
+        callbacks
+            .slice()
+            .forEach(
+                callback => {
+
+                    try {
+
+                        callback(
+                            data
+                        );
+
+                    }
+                    catch (
+                        error
+                    ) {
+
+                        console.error(
+                            "[HalDo System] Event-Fehler:",
+                            error
+                        );
+
+                    }
+
+                }
+            );
+
+    }
 
 
     /* ========================================================
-       SYSTEM INITIALISIEREN
+       04 — LOG
        ======================================================== */
 
-    function startSystem() {
+    function log(
+        message,
+        type = "info"
+    ) {
+
+        const prefix =
+            "[HalDo System]";
+
+
+        if (
+            type ===
+            "error"
+        ) {
+
+            console.error(
+                prefix,
+                message
+            );
+
+        }
+        else if (
+            type ===
+            "warning"
+        ) {
+
+            console.warn(
+                prefix,
+                message
+            );
+
+        }
+        else {
+
+            console.log(
+                prefix,
+                message
+            );
+
+        }
+
+
+        emit(
+            "log",
+            {
+                message,
+                type
+            }
+        );
+
+    }
+
+
+    /* ========================================================
+       05 — BOOT STAGES
+       ======================================================== */
+
+    const DEFAULT_STAGES = [
+
+        {
+            id:
+                "kernel",
+
+            title:
+                "HalDo AI OS Kernel",
+
+            description:
+                "Systemkern wird gestartet.",
+
+            status:
+                "waiting"
+
+        },
+
+        {
+            id:
+                "system",
+
+            title:
+                "System",
+
+            description:
+                "Systemdienste werden vorbereitet.",
+
+            status:
+                "waiting"
+
+        },
+
+        {
+            id:
+                "apps",
+
+            title:
+                "Apps",
+
+            description:
+                "App-System wird geladen.",
+
+            status:
+                "waiting"
+
+        },
+
+        {
+            id:
+                "router",
+
+            title:
+                "App Router",
+
+            description:
+                "Navigation wird vorbereitet.",
+
+            status:
+                "waiting"
+
+        },
+
+        {
+            id:
+                "interface",
+
+            title:
+                "Benutzeroberfläche",
+
+            description:
+                "HalDo Oberfläche wird vorbereitet.",
+
+            status:
+                "waiting"
+
+        },
+
+        {
+            id:
+                "ready",
+
+            title:
+                "HalDo AI OS bereit",
+
+            description:
+                "System erfolgreich gestartet.",
+
+            status:
+                "waiting"
+
+        }
+
+    ];
+
+
+    function resetStages() {
+
+        state.stages =
+            DEFAULT_STAGES.map(
+                stage => ({
+                    ...stage
+                })
+            );
+
+    }
+
+
+    function updateStage(
+        stageId,
+        status,
+        message = null
+    ) {
+
+        const stage =
+            state.stages.find(
+                item =>
+                    item.id ===
+                    stageId
+            );
+
+
+        if (
+            !stage
+        ) {
+
+            return false;
+
+        }
+
+
+        stage.status =
+            status;
+
+
+        if (
+            message
+        ) {
+
+            stage.description =
+                message;
+
+        }
+
+
+        state.currentStage =
+            stageId;
+
+
+        emit(
+            "boot:stage",
+            {
+                ...stage
+            }
+        );
+
+
+        return true;
+
+    }
+
+
+    /* ========================================================
+       06 — SERVICE REGISTRIEREN
+       ======================================================== */
+
+    function registerService(
+        name,
+        service
+    ) {
+
+        const id =
+            String(
+                name || ""
+            )
+            .trim()
+            .toLowerCase();
+
+
+        if (
+            !id ||
+            !service
+        ) {
+
+            return false;
+
+        }
+
+
+        state.services.set(
+            id,
+            service
+        );
+
+
+        emit(
+            "service:registered",
+            {
+                name:
+                    id,
+
+                service
+            }
+        );
+
+
+        return true;
+
+    }
+
+
+    /* ========================================================
+       07 — SERVICE ABFRAGEN
+       ======================================================== */
+
+    function getService(
+        name
+    ) {
+
+        const id =
+            String(
+                name || ""
+            )
+            .trim()
+            .toLowerCase();
+
+
+        return (
+            state.services.get(
+                id
+            ) ||
+            null
+        );
+
+    }
+
+
+    /* ========================================================
+       08 — KERNEL
+       ======================================================== */
+
+    function getKernel() {
+
+        return (
+            window.HalDoKernel ||
+            null
+        );
+
+    }
+
+
+    /* ========================================================
+       09 — APP MANAGER
+       ======================================================== */
+
+    function getAppManager() {
+
+        return (
+            window.HalDoAppManager ||
+            null
+        );
+
+    }
+
+
+    /* ========================================================
+       10 — ROUTER
+       ======================================================== */
+
+    function getRouter() {
+
+        return (
+            window.HalDoAppRouter ||
+            null
+        );
+
+    }
+
+
+    /* ========================================================
+       11 — STATUS
+       ======================================================== */
+
+    function getStatus() {
+
+        const kernel =
+            getKernel();
+
+
+        const appManager =
+            getAppManager();
+
+
+        const router =
+            getRouter();
+
+
+        return {
+
+            system:
+                {
+                    ...SYSTEM,
+
+                    status:
+                        state.ready
+                            ? "ready"
+                            : state.failed
+                                ? "error"
+                                : state.booting
+                                    ? "starting"
+                                    : "idle"
+                },
+
+
+            state:
+                {
+                    initialized:
+                        state.initialized,
+
+                    booting:
+                        state.booting,
+
+                    ready:
+                        state.ready,
+
+                    failed:
+                        state.failed,
+
+                    online:
+                        state.online,
+
+                    currentStage:
+                        state.currentStage,
+
+                    bootStarted:
+                        state.bootStarted,
+
+                    bootFinished:
+                        state.bootFinished
+
+                },
+
+
+            kernel:
+                kernel &&
+                typeof kernel.getStatus ===
+                    "function"
+                    ? kernel.getStatus()
+                    : null,
+
+
+            apps:
+                appManager &&
+                typeof appManager.getState ===
+                    "function"
+                    ? appManager.getState()
+                    : null,
+
+
+            router:
+                router &&
+                typeof router.getState ===
+                    "function"
+                    ? router.getState()
+                    : null
+
+        };
+
+    }
+
+
+    /* ========================================================
+       12 — DOM STATUS
+       ======================================================== */
+
+    function updateDOMStatus() {
+
+        document.documentElement.dataset.haldoSystem =
+            state.ready
+                ? "ready"
+                : state.failed
+                    ? "error"
+                    : state.booting
+                        ? "starting"
+                        : "idle";
+
+
+        document.documentElement.dataset.haldoOnline =
+            state.online
+                ? "true"
+                : "false";
+
+
+        const statusElements =
+            document.querySelectorAll(
+                "[data-haldo-system-status]"
+            );
+
+
+        statusElements.forEach(
+            element => {
+
+                element.textContent =
+                    state.ready
+                        ? "Bereit"
+                        : state.failed
+                            ? "Fehler"
+                            : state.booting
+                                ? "Wird gestartet"
+                                : "Wartet";
+
+            }
+        );
+
+    }
+
+
+    /* ========================================================
+       13 — ONLINE / OFFLINE
+       ======================================================== */
+
+    function setupNetworkListeners() {
+
+        window.addEventListener(
+            "online",
+            function () {
+
+                state.online =
+                    true;
+
+
+                updateDOMStatus();
+
+
+                emit(
+                    "network:online"
+                );
+
+
+                log(
+                    "Internetverbindung wieder verfügbar."
+                );
+
+            }
+        );
+
+
+        window.addEventListener(
+            "offline",
+            function () {
+
+                state.online =
+                    false;
+
+
+                updateDOMStatus();
+
+
+                emit(
+                    "network:offline"
+                );
+
+
+                log(
+                    "Internetverbindung unterbrochen. Offline-Modus aktiv.",
+                    "warning"
+                );
+
+            }
+        );
+
+    }
+
+
+    /* ========================================================
+       14 — SAFE INIT
+       ======================================================== */
+
+    async function initializeModule(
+        module,
+        name
+    ) {
+
+        if (
+            !module
+        ) {
+
+            return false;
+
+        }
 
 
         try {
 
+            if (
+                typeof module.init ===
+                "function"
+            ) {
 
-            HalDoSystem.initialize();
+                const result =
+                    module.init();
+
+
+                if (
+                    result &&
+                    typeof result.then ===
+                    "function"
+                ) {
+
+                    await result;
+
+                }
+
+            }
+
+
+            registerService(
+                name,
+                module
+            );
+
+
+            return true;
+
+        }
+        catch (
+            error
+        ) {
+
+            recordError(
+                error,
+                name
+            );
+
+
+            return false;
+
+        }
+
+    }
+
+
+    /* ========================================================
+       15 — FEHLER SPEICHERN
+       ======================================================== */
+
+    function recordError(
+        error,
+        context = "System"
+    ) {
+
+        const record = {
+
+            context,
+
+            message:
+                error instanceof Error
+                    ? error.message
+                    : String(
+                        error
+                    ),
+
+            time:
+                Date.now()
+
+        };
+
+
+        state.errors.push(
+            record
+        );
+
+
+        if (
+            state.errors.length >
+            50
+        ) {
+
+            state.errors.shift();
+
+        }
+
+
+        emit(
+            "error",
+            record
+        );
+
+
+        log(
+            `${context}: ${record.message}`,
+            "error"
+        );
+
+
+        return record;
+
+    }
+
+
+    /* ========================================================
+       16 — BOOT
+       ======================================================== */
+
+    async function boot() {
+
+        if (
+            state.ready
+        ) {
+
+            return getStatus();
+
+        }
+
+
+        if (
+            state.booting
+        ) {
+
+            return getStatus();
+
+        }
+
+
+        state.booting =
+            true;
+
+        state.failed =
+            false;
+
+        state.bootStarted =
+            Date.now();
+
+        SYSTEM.status =
+            "starting";
+
+
+        resetStages();
+
+
+        updateDOMStatus();
+
+
+        emit(
+            "boot:start",
+            getStatus()
+        );
+
+
+        log(
+            `${SYSTEM.name} ${SYSTEM.version} wird gestartet.`
+        );
+
+
+        try {
+
+            /* ------------------------------------------------
+               STAGE 1 — KERNEL
+               ------------------------------------------------ */
+
+            updateStage(
+                "kernel",
+                "loading"
+            );
+
+
+            const kernel =
+                getKernel();
+
+
+            if (
+                kernel
+            ) {
+
+                registerService(
+                    "kernel",
+                    kernel
+                );
+
+
+                if (
+                    typeof kernel.getStatus ===
+                    "function"
+                ) {
+
+                    log(
+                        "Kernel erkannt."
+                    );
+
+                }
+
+            }
+            else {
+
+                throw new Error(
+                    "HalDoKernel wurde nicht gefunden."
+                );
+
+            }
+
+
+            updateStage(
+                "kernel",
+                "ready"
+            );
+
+
+            /* ------------------------------------------------
+               STAGE 2 — SYSTEM
+               ------------------------------------------------ */
+
+            updateStage(
+                "system",
+                "loading"
+            );
+
+
+            setupNetworkListeners();
+
+
+            registerService(
+                "system",
+                api
+            );
+
+
+            updateStage(
+                "system",
+                "ready"
+            );
+
+
+            /* ------------------------------------------------
+               STAGE 3 — APPS
+               ------------------------------------------------ */
+
+            updateStage(
+                "apps",
+                "loading"
+            );
+
+
+            const appManager =
+                getAppManager();
+
+
+            if (
+                appManager
+            ) {
+
+                registerService(
+                    "app-manager",
+                    appManager
+                );
+
+
+                if (
+                    typeof appManager.loadApps ===
+                    "function"
+                ) {
+
+                    /*
+                     * App Manager hat bereits
+                     * seinen eigenen Start.
+                     *
+                     * Hier prüfen wir nur,
+                     * ob Daten vorhanden sind.
+                     */
+
+                    const apps =
+                        typeof appManager.getAllApps ===
+                        "function"
+                            ? appManager.getAllApps()
+                            : [];
+
+
+                    log(
+                        `${apps.length} Apps im App-System verfügbar.`
+                    );
+
+                }
+
+            }
+            else {
+
+                log(
+                    "App Manager ist noch nicht verfügbar.",
+                    "warning"
+                );
+
+            }
+
+
+            updateStage(
+                "apps",
+                "ready"
+            );
+
+
+            /* ------------------------------------------------
+               STAGE 4 — ROUTER
+               ------------------------------------------------ */
+
+            updateStage(
+                "router",
+                "loading"
+            );
+
+
+            const router =
+                getRouter();
+
+
+            if (
+                router
+            ) {
+
+                registerService(
+                    "app-router",
+                    router
+                );
+
+
+                if (
+                    typeof router.init ===
+                    "function"
+                ) {
+
+                    await initializeModule(
+                        router,
+                        "app-router"
+                    );
+
+                }
+
+            }
+            else {
+
+                log(
+                    "App Router ist noch nicht verfügbar.",
+                    "warning"
+                );
+
+            }
+
+
+            updateStage(
+                "router",
+                "ready"
+            );
+
+
+            /* ------------------------------------------------
+               STAGE 5 — INTERFACE
+               ------------------------------------------------ */
+
+            updateStage(
+                "interface",
+                "loading"
+            );
+
+
+            prepareInterface();
+
+
+            updateStage(
+                "interface",
+                "ready"
+            );
+
+
+            /* ------------------------------------------------
+               STAGE 6 — READY
+               ------------------------------------------------ */
+
+            updateStage(
+                "ready",
+                "ready"
+            );
+
+
+            state.booting =
+                false;
+
+            state.ready =
+                true;
+
+            state.failed =
+                false;
+
+            state.bootFinished =
+                Date.now();
+
+
+            SYSTEM.status =
+                "ready";
+
+
+            updateDOMStatus();
+
+
+            emit(
+                "boot:ready",
+                getStatus()
+            );
+
+
+            log(
+                `${SYSTEM.name} ${SYSTEM.version} ist vollständig bereit.`
+            );
+
+
+            return getStatus();
+
+        }
+        catch (
+            error
+        ) {
+
+            state.booting =
+                false;
+
+            state.ready =
+                false;
+
+            state.failed =
+                true;
+
+            SYSTEM.status =
+                "error";
+
+
+            recordError(
+                error,
+                "Boot-Sequenz"
+            );
+
+
+            updateDOMStatus();
+
+
+            emit(
+                "boot:failed",
+                getStatus()
+            );
 
 
             /*
-               Boot bewusst leicht verzögert starten,
-               damit Kernel und DOM sauber verfügbar sind.
-            */
+             * System bleibt erreichbar,
+             * selbst wenn ein Teilmodul
+             * fehlschlägt.
+             */
 
-            window.setTimeout(
-                () => {
-
-                    HalDoSystem.boot();
-
-                },
-                50
-            );
-
-
-        } catch (error) {
-
-
-            console.error(
-                "[HalDo System]",
-                "Systemstart fehlgeschlagen.",
+            showSafeErrorState(
                 error
             );
 
+
+            return getStatus();
+
         }
+
+    }
+
+
+    /* ========================================================
+       17 — INTERFACE VORBEREITEN
+       ======================================================== */
+
+    function prepareInterface() {
+
+        /*
+         * App Root nur vorbereiten,
+         * wenn es bereits existiert.
+         *
+         * Wir erzeugen keine konkurrierende
+         * zweite Benutzeroberfläche.
+         */
+
+        const root =
+            document.querySelector(
+                "#haldo-app-root"
+            );
+
+
+        if (
+            root
+        ) {
+
+            root.setAttribute(
+                "data-haldo-ready",
+                "true"
+            );
+
+        }
+
+
+        const launcher =
+            document.querySelector(
+                "#haldo-launcher"
+            );
+
+
+        if (
+            launcher
+        ) {
+
+            launcher.setAttribute(
+                "data-haldo-ready",
+                "true"
+            );
+
+        }
+
+
+        const home =
+            document.querySelector(
+                "#haldo-home"
+            );
+
+
+        if (
+            home
+        ) {
+
+            home.setAttribute(
+                "data-haldo-ready",
+                "true"
+            );
+
+        }
+
+
+        updateDOMStatus();
+
+
+        emit(
+            "interface:ready"
+        );
+
+    }
+
+
+    /* ========================================================
+       18 — SICHERER FEHLERSTATUS
+       ======================================================== */
+
+    function showSafeErrorState(
+        error
+    ) {
+
+        /*
+         * Wir ersetzen NICHT die ganze Seite.
+         * Nur ein vorhandenes Statusfeld wird
+         * aktualisiert.
+         */
+
+        const elements =
+            document.querySelectorAll(
+                "[data-haldo-system-error]"
+            );
+
+
+        elements.forEach(
+            element => {
+
+                element.hidden =
+                    false;
+
+
+                element.textContent =
+                    "HalDo AI OS konnte einen Systemdienst nicht vollständig starten.";
+
+            }
+        );
+
+
+        emit(
+            "safe-error-state",
+            {
+                error:
+                    error instanceof Error
+                        ? error.message
+                        : String(
+                            error
+                        )
+            }
+        );
+
+    }
+
+
+    /* ========================================================
+       19 — SYSTEM RESET
+       ======================================================== */
+
+    function resetRuntime() {
+
+        state.booting =
+            false;
+
+        state.ready =
+            false;
+
+        state.failed =
+            false;
+
+        state.currentStage =
+            "waiting";
+
+        state.bootStarted =
+            null;
+
+        state.bootFinished =
+            null;
+
+        state.errors =
+            [];
+
+        state.services.clear();
+
+
+        SYSTEM.status =
+            "starting";
+
+
+        resetStages();
+
+
+        updateDOMStatus();
+
+
+        emit(
+            "runtime:reset"
+        );
+
+
+        return true;
+
+    }
+
+
+    /* ========================================================
+       20 — DIAGNOSE
+       ======================================================== */
+
+    function diagnose() {
+
+        const kernel =
+            getKernel();
+
+
+        const appManager =
+            getAppManager();
+
+
+        const router =
+            getRouter();
+
+
+        return {
+
+            system:
+                {
+                    ...SYSTEM
+                },
+
+            state:
+                {
+                    ...state,
+
+                    services:
+                        undefined
+                },
+
+            services:
+                {
+                    kernel:
+                        Boolean(
+                            kernel
+                        ),
+
+                    appManager:
+                        Boolean(
+                            appManager
+                        ),
+
+                    router:
+                        Boolean(
+                            router
+                        )
+
+                },
+
+            dom:
+                {
+                    appRoot:
+                        Boolean(
+                            document.querySelector(
+                                "#haldo-app-root"
+                            )
+                        ),
+
+                    launcher:
+                        Boolean(
+                            document.querySelector(
+                                "#haldo-launcher"
+                            )
+                        ),
+
+                    home:
+                        Boolean(
+                            document.querySelector(
+                                "#haldo-home"
+                            )
+                        )
+
+                },
+
+            network:
+                {
+                    online:
+                        navigator.onLine
+                }
+
+        };
+
+    }
+
+
+    /* ========================================================
+       21 — PUBLIC API
+       ======================================================== */
+
+    const api = {
+
+        name:
+            SYSTEM.name,
+
+        version:
+            SYSTEM.version,
+
+        edition:
+            SYSTEM.edition,
+
+        build:
+            SYSTEM.build,
+
+
+        boot,
+
+        init:
+            boot,
+
+
+        on,
+
+        off,
+
+        emit,
+
+
+        getStatus,
+
+        diagnose,
+
+
+        registerService,
+
+        getService,
+
+
+        resetRuntime,
+
+
+        getSystemInfo:
+            function () {
+
+                return {
+                    ...SYSTEM
+                };
+
+            }
+
+    };
+
+
+    /* ========================================================
+       22 — GLOBAL HALDO API
+       ======================================================== */
+
+    window.HalDoSystem =
+        api;
+
+
+    window.HalDoOS =
+        window.HalDoOS ||
+        {};
+
+
+    window.HalDoOS.system =
+        api;
+
+
+    /* ========================================================
+       23 — KERNEL VERBINDUNG
+       ======================================================== */
+
+    function connectKernel() {
+
+        const kernel =
+            getKernel();
+
+
+        if (
+            !kernel
+        ) {
+
+            return false;
+
+        }
+
+
+        /*
+         * System beim Kernel registrieren.
+         */
+
+        if (
+            typeof kernel.registerModule ===
+            "function"
+        ) {
+
+            kernel.registerModule(
+                "system",
+                api
+            );
+
+        }
+
+
+        /*
+         * Kernel Ready überwachen.
+         */
+
+        if (
+            typeof kernel.on ===
+            "function"
+        ) {
+
+            kernel.on(
+                "kernel:ready",
+                function () {
+
+                    emit(
+                        "kernel:ready"
+                    );
+
+                }
+            );
+
+
+            kernel.on(
+                "kernel:error",
+                function (data) {
+
+                    emit(
+                        "kernel:error",
+                        data
+                    );
+
+                }
+            );
+
+        }
+
+
+        return true;
+
+    }
+
+
+    /* ========================================================
+       24 — DOM START
+       ======================================================== */
+
+    function start() {
+
+        state.initialized =
+            true;
+
+
+        connectKernel();
+
+
+        /*
+         * System startet nach dem Kernel.
+         *
+         * Kurze Verzögerung verhindert,
+         * dass sich die Module beim Laden
+         * gegenseitig blockieren.
+         */
+
+        window.setTimeout(
+            function () {
+
+                boot();
+
+            },
+            0
+        );
 
     }
 
@@ -1748,42 +1694,24 @@
 
         document.addEventListener(
             "DOMContentLoaded",
-            startSystem,
+            start,
             {
-                once: true
+                once:
+                    true
             }
         );
 
-    } else {
+    }
+    else {
 
-        startSystem();
+        start();
 
     }
 
 
-    /* ========================================================
-       INFORMATION
-       ======================================================== */
-
-    console.log(
-        "=============================================="
-    );
-
-    console.log(
-        "HalDo AI OS 18 System Manager"
-    );
-
-    console.log(
-        "Professional Ultimate Foundation"
-    );
-
-    console.log(
-        "System Manager geladen."
-    );
-
-    console.log(
-        "=============================================="
-    );
+})(window, document);
 
 
-})(window);
+/* ============================================================
+   ENDE — HALDO AI OS 18 SYSTEM
+   ============================================================ */
