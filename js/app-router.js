@@ -1,21 +1,33 @@
 /* ============================================================
    HALDO AI OS 18
-   Professional Ultimate Foundation
+   PROFESSIONAL ULTIMATE FOUNDATION
    ------------------------------------------------------------
    Datei:
    js/app-router.js
 
-   Zentrale Navigation für HalDo AI OS 18
+   Aufgabe:
+   - Zentrale Navigation innerhalb von HalDo AI OS
+   - Verhindert unnötige 404-Weiterleitungen
+   - Prüft Apps über HalDoAppManager
+   - Öffnet vorhandene Seiten/Module
+   - Unterstützt spätere echte App-Module
+   - Fallback statt harter 404-Seite
+   - Browser-History
+   - Zurück / Vorwärts
+   - Deep-Link-Unterstützung
 
-   Ziele:
-   - Keine unnötigen 404-Fehler
-   - Keine verstreuten .html-Links
-   - Zentrale App-Navigation
-   - App-Module über IDs öffnen
-   - Browser-History unterstützen
-   - Zurück-Navigation unterstützen
-   - Deep Links vorbereiten
-   - Sicherer Fallback für noch nicht fertige Apps
+   WICHTIG:
+   Diese Datei besitzt KEINE eigene App-Liste.
+   Die App-Daten kommen ausschließlich aus:
+
+       config/apps.js
+              ↓
+       HalDoAppRegistry
+              ↓
+       HalDoAppManager
+              ↓
+       HalDoAppRouter
+
    ============================================================ */
 
 "use strict";
@@ -31,34 +43,22 @@
     const CONFIG = {
 
         name:
-            "HalDo App Router",
+            "HalDo AI App Router",
 
         version:
             "18.0.0",
 
         defaultApp:
-            "ai-chat",
+            "haldo-home",
 
-        rootSelector:
-            "#app-root",
-
-        routePrefix:
-            "#/app/",
-
-        homeRoute:
-            "#/home",
-
-        loadingDelay:
-            120,
-
-        transitionDuration:
-            180
+        fallbackApp:
+            "dashboard"
 
     };
 
 
     /* ========================================================
-       02 — STATE
+       02 — STATUS
        ======================================================== */
 
     const state = {
@@ -69,29 +69,23 @@
         ready:
             false,
 
-        navigating:
-            false,
-
-        currentRoute:
-            CONFIG.homeRoute,
-
-        currentAppId:
+        currentApp:
             null,
 
-        previousRoute:
+        previousApp:
             null,
 
-        historyLocked:
-            false,
+        navigationCount:
+            0,
 
-        errors:
-            []
+        lastError:
+            null
 
     };
 
 
     /* ========================================================
-       03 — EVENTS
+       03 — EVENT SYSTEM
        ======================================================== */
 
     const listeners = {};
@@ -208,7 +202,7 @@
 
 
     /* ========================================================
-       04 — LOG
+       04 — LOGGING
        ======================================================== */
 
     function log(
@@ -255,252 +249,7 @@
 
 
     /* ========================================================
-       05 — ROOT ELEMENT
-       ======================================================== */
-
-    function getRoot() {
-
-        let root =
-            document.querySelector(
-                CONFIG.rootSelector
-            );
-
-
-        /*
-         * Falls index.html den Container
-         * noch nicht besitzt, erzeugen wir
-         * ihn automatisch.
-         */
-
-        if (
-            !root
-        ) {
-
-            root =
-                document.createElement(
-                    "main"
-                );
-
-
-            root.id =
-                "app-root";
-
-
-            document.body.appendChild(
-                root
-            );
-
-        }
-
-
-        return root;
-
-    }
-
-
-    /* ========================================================
-       06 — ID NORMALISIEREN
-       ======================================================== */
-
-    function normalizeAppId(
-        value
-    ) {
-
-        return String(
-            value || ""
-        )
-        .trim()
-        .toLowerCase()
-        .replace(
-            /\s+/g,
-            "-"
-        );
-
-    }
-
-
-    /* ========================================================
-       07 — ROUTE ERSTELLEN
-       ======================================================== */
-
-    function createAppRoute(
-        appId
-    ) {
-
-        const id =
-            normalizeAppId(
-                appId
-            );
-
-
-        if (
-            !id
-        ) {
-
-            return CONFIG.homeRoute;
-
-        }
-
-
-        return (
-            CONFIG.routePrefix +
-            encodeURIComponent(
-                id
-            )
-        );
-
-    }
-
-
-    /* ========================================================
-       08 — ROUTE PARSEN
-       ======================================================== */
-
-    function parseRoute(
-        route
-    ) {
-
-        const value =
-            String(
-                route ||
-                ""
-            )
-            .trim();
-
-
-        if (
-            !value
-        ) {
-
-            return {
-
-                type:
-                    "home",
-
-                route:
-                    CONFIG.homeRoute,
-
-                appId:
-                    null
-
-            };
-
-        }
-
-
-        /*
-         * Home
-         */
-
-        if (
-            value ===
-            CONFIG.homeRoute ||
-            value ===
-            "#" ||
-            value ===
-            ""
-        ) {
-
-            return {
-
-                type:
-                    "home",
-
-                route:
-                    CONFIG.homeRoute,
-
-                appId:
-                    null
-
-            };
-
-        }
-
-
-        /*
-         * App Route
-         */
-
-        if (
-            value.indexOf(
-                CONFIG.routePrefix
-            ) ===
-            0
-        ) {
-
-            const encodedId =
-                value.substring(
-                    CONFIG.routePrefix.length
-                );
-
-
-            let appId =
-                "";
-
-
-            try {
-
-                appId =
-                    decodeURIComponent(
-                        encodedId
-                    );
-
-            }
-            catch (
-                error
-            ) {
-
-                appId =
-                    encodedId;
-
-            }
-
-
-            appId =
-                normalizeAppId(
-                    appId
-                );
-
-
-            return {
-
-                type:
-                    "app",
-
-                route:
-                    createAppRoute(
-                        appId
-                    ),
-
-                appId
-
-            };
-
-        }
-
-
-        /*
-         * Unbekannte Route
-         */
-
-        return {
-
-            type:
-                "unknown",
-
-            route:
-                value,
-
-            appId:
-                null
-
-        };
-
-    }
-
-
-    /* ========================================================
-       09 — APP MANAGER
+       05 — APP MANAGER
        ======================================================== */
 
     function getAppManager() {
@@ -514,10 +263,10 @@
 
 
     /* ========================================================
-       10 — APP ABFRAGEN
+       06 — APP ERMITTELN
        ======================================================== */
 
-    function getApp(
+    function resolveApp(
         appId
     ) {
 
@@ -526,14 +275,124 @@
 
 
         if (
-            manager &&
-            typeof manager.getApp ===
+            !manager ||
+            typeof manager.getApp !==
                 "function"
         ) {
 
-            return manager.getApp(
+            return null;
+
+        }
+
+
+        return manager.getApp(
+            appId
+        );
+
+    }
+
+
+    /* ========================================================
+       07 — APP EXISTIERT
+       ======================================================== */
+
+    function appExists(
+        appId
+    ) {
+
+        return Boolean(
+            resolveApp(
                 appId
-            );
+            )
+        );
+
+    }
+
+
+    /* ========================================================
+       08 — APP ID NORMALISIEREN
+       ======================================================== */
+
+    function normalizeAppId(
+        appId
+    ) {
+
+        return String(
+            appId ||
+            ""
+        )
+        .trim()
+        .toLowerCase()
+        .replace(
+            /\s+/g,
+            "-"
+        );
+
+    }
+
+
+    /* ========================================================
+       09 — AKTUELLE APP
+       ======================================================== */
+
+    function getCurrentApp() {
+
+        if (
+            !state.currentApp
+        ) {
+
+            return null;
+
+        }
+
+
+        return resolveApp(
+            state.currentApp
+        );
+
+    }
+
+
+    /* ========================================================
+       10 — APP-CONTAINER
+       ======================================================== */
+
+    function getContainer() {
+
+        const selectors = [
+
+            "#app-container",
+
+            "#app-root",
+
+            "#main-content",
+
+            "[data-haldo-app-container]",
+
+            ".app-container",
+
+            "main"
+
+        ];
+
+
+        for (
+            const selector of selectors
+        ) {
+
+            const element =
+                document.querySelector(
+                    selector
+                );
+
+
+            if (
+                element
+            ) {
+
+                return element;
+
+            }
 
         }
 
@@ -544,26 +403,462 @@
 
 
     /* ========================================================
-       11 — APP MODUL ABFRAGEN
+       11 — APP CONTAINER ERSTELLEN
+       ======================================================== */
+
+    function ensureContainer() {
+
+        let container =
+            getContainer();
+
+
+        if (
+            container
+        ) {
+
+            return container;
+
+        }
+
+
+        container =
+            document.createElement(
+                "main"
+            );
+
+
+        container.id =
+            "app-container";
+
+
+        container.setAttribute(
+            "data-haldo-app-container",
+            "true"
+        );
+
+
+        document.body.appendChild(
+            container
+        );
+
+
+        return container;
+
+    }
+
+
+    /* ========================================================
+       12 — APP-HEADER
+       ======================================================== */
+
+    function createAppHeader(
+        app
+    ) {
+
+        const header =
+            document.createElement(
+                "div"
+            );
+
+
+        header.className =
+            "haldo-app-header";
+
+
+        header.setAttribute(
+            "data-haldo-generated",
+            "true"
+        );
+
+
+        const left =
+            document.createElement(
+                "div"
+            );
+
+
+        left.className =
+            "haldo-app-header-left";
+
+
+        const icon =
+            document.createElement(
+                "div"
+            );
+
+
+        icon.className =
+            "haldo-app-icon";
+
+
+        if (
+            typeof app.icon ===
+                "string" &&
+            app.icon.includes(
+                "/"
+            )
+        ) {
+
+            const image =
+                document.createElement(
+                    "img"
+                );
+
+
+            image.src =
+                app.icon;
+
+
+            image.alt =
+                app.title ||
+                app.name ||
+                "HalDo App";
+
+
+            image.onerror =
+                function () {
+
+                    image.remove();
+
+                    icon.textContent =
+                        "◉";
+
+                };
+
+
+            icon.appendChild(
+                image
+            );
+
+        }
+        else {
+
+            icon.textContent =
+                app.icon ||
+                "◉";
+
+        }
+
+
+        const title =
+            document.createElement(
+                "div"
+            );
+
+
+        title.className =
+            "haldo-app-title";
+
+
+        title.textContent =
+            app.title ||
+            app.name ||
+            app.id;
+
+
+        left.appendChild(
+            icon
+        );
+
+
+        left.appendChild(
+            title
+        );
+
+
+        const closeButton =
+            document.createElement(
+                "button"
+            );
+
+
+        closeButton.type =
+            "button";
+
+
+        closeButton.className =
+            "haldo-app-close";
+
+
+        closeButton.textContent =
+            "×";
+
+
+        closeButton.setAttribute(
+            "aria-label",
+            "App schließen"
+        );
+
+
+        closeButton.addEventListener(
+            "click",
+            function () {
+
+                navigate(
+                    CONFIG.defaultApp
+                );
+
+            }
+        );
+
+
+        header.appendChild(
+            left
+        );
+
+
+        header.appendChild(
+            closeButton
+        );
+
+
+        return header;
+
+    }
+
+
+    /* ========================================================
+       13 — FALLBACK-ANSICHT
+       ======================================================== */
+
+    function createFallbackView(
+        appId,
+        reason
+    ) {
+
+        const container =
+            ensureContainer();
+
+
+        container.innerHTML =
+            "";
+
+
+        const wrapper =
+            document.createElement(
+                "section"
+            );
+
+
+        wrapper.className =
+            "haldo-router-fallback";
+
+
+        wrapper.setAttribute(
+            "role",
+            "region"
+        );
+
+
+        const logo =
+            document.createElement(
+                "div"
+            );
+
+
+        logo.className =
+            "haldo-router-logo";
+
+
+        const image =
+            document.createElement(
+                "img"
+            );
+
+
+        image.src =
+            "assets/logo/logo.png";
+
+
+        image.alt =
+            "HalDo AI";
+
+
+        image.onerror =
+            function () {
+
+                logo.textContent =
+                    "HalDo AI";
+
+            };
+
+
+        logo.appendChild(
+            image
+        );
+
+
+        const title =
+            document.createElement(
+                "h1"
+            );
+
+
+        title.textContent =
+            "HalDo AI";
+
+
+        const message =
+            document.createElement(
+                "p"
+            );
+
+
+        message.textContent =
+            "Diese App ist in der aktuellen Systemversion noch nicht vollständig als Modul verbunden.";
+
+
+        const details =
+            document.createElement(
+                "p"
+            );
+
+
+        details.textContent =
+            `App: ${appId || "unbekannt"}`;
+
+
+        details.className =
+            "haldo-router-details";
+
+
+        if (
+            reason
+        ) {
+
+            details.textContent +=
+                ` · ${reason}`;
+
+        }
+
+
+        const button =
+            document.createElement(
+                "button"
+            );
+
+
+        button.type =
+            "button";
+
+
+        button.textContent =
+            "Zum HalDo Home";
+
+
+        button.addEventListener(
+            "click",
+            function () {
+
+                navigate(
+                    CONFIG.defaultApp
+                );
+
+            }
+        );
+
+
+        wrapper.appendChild(
+            logo
+        );
+
+
+        wrapper.appendChild(
+            title
+        );
+
+
+        wrapper.appendChild(
+            message
+        );
+
+
+        wrapper.appendChild(
+            details
+        );
+
+
+        wrapper.appendChild(
+            button
+        );
+
+
+        container.appendChild(
+            wrapper
+        );
+
+
+        emit(
+            "fallback",
+            {
+
+                appId,
+
+                reason
+
+            }
+        );
+
+
+        return true;
+
+    }
+
+
+    /* ========================================================
+       14 — APP-MODUL FINDEN
        ======================================================== */
 
     function getAppModule(
         appId
     ) {
 
-        const manager =
-            getAppManager();
+        const normalized =
+            normalizeAppId(
+                appId
+            );
+
+
+        /*
+         * Zukünftige App-Module können sich hier registrieren:
+         *
+         * window.HalDoApps["calendar"]
+         * window.HalDoApps["notes"]
+         * usw.
+         */
+
+        if (
+            window.HalDoApps &&
+            window.HalDoApps[
+                normalized
+            ]
+        ) {
+
+            return window.HalDoApps[
+                normalized
+            ];
+
+        }
+
+
+        /*
+         * Zusätzlich kann ein einzelnes Modul
+         * direkt registriert sein.
+         */
+
+        const directName =
+            `HalDoApp_${normalized}`;
 
 
         if (
-            manager &&
-            typeof manager.getModule ===
-                "function"
+            window[
+                directName
+            ]
         ) {
 
-            return manager.getModule(
-                appId
-            );
+            return window[
+                directName
+            ];
 
         }
 
@@ -574,599 +869,114 @@
 
 
     /* ========================================================
-       12 — TRANSITION
+       15 — APP-MODUL AUSFÜHREN
        ======================================================== */
 
-    function transitionStart(
-        root
+    function renderModule(
+        app,
+        module
     ) {
 
-        if (
-            !root
-        ) {
+        const container =
+            ensureContainer();
 
-            return;
 
-        }
+        container.innerHTML =
+            "";
 
 
-        root.classList.add(
-            "haldo-route-loading"
-        );
-
-    }
-
-
-    function transitionEnd(
-        root
-    ) {
-
-        if (
-            !root
-        ) {
-
-            return;
-
-        }
-
-
-        window.setTimeout(
-            function () {
-
-                root.classList.remove(
-                    "haldo-route-loading"
-                );
-
-                root.classList.add(
-                    "haldo-route-ready"
-                );
-
-
-                window.setTimeout(
-                    function () {
-
-                        root.classList.remove(
-                            "haldo-route-ready"
-                        );
-
-                    },
-                    CONFIG.transitionDuration
-                );
-
-            },
-            CONFIG.loadingDelay
-        );
-
-    }
-
-
-    /* ========================================================
-       13 — HOME RENDER
-       ======================================================== */
-
-    function renderHome() {
-
-        const root =
-            getRoot();
-
-
-        transitionStart(
-            root
-        );
-
-
-        root.innerHTML = `
-
-            <section
-                class="haldo-home-view"
-                data-view="home"
-            >
-
-                <div
-                    class="haldo-home-content"
-                >
-
-                    <div
-                        class="haldo-home-logo"
-                    >
-                        <img
-                            src="assets/logo/logo.png"
-                            alt="HalDo AI"
-                            onerror="
-                                this.style.display='none';
-                            "
-                        >
-                    </div>
-
-
-                    <div
-                        class="haldo-home-text"
-                    >
-
-                        <h1>
-                            HalDo AI OS 18
-                        </h1>
-
-                        <p>
-                            Willkommen im
-                            HalDo AI Betriebssystem.
-                        </p>
-
-                    </div>
-
-                </div>
-
-            </section>
-
-        `;
-
-
-        transitionEnd(
-            root
-        );
-
-
-        emit(
-            "home:rendered"
-        );
-
-    }
-
-
-    /* ========================================================
-       14 — APP LOADING
-       ======================================================== */
-
-    function renderLoading(
-        app
-    ) {
-
-        const root =
-            getRoot();
-
-
-        transitionStart(
-            root
-        );
-
-
-        const icon =
-            app &&
-            app.icon
-                ? app.icon
-                : "◇";
-
-
-        const title =
-            app &&
-            app.title
-                ? app.title
-                : "HalDo App";
-
-
-        root.innerHTML = `
-
-            <section
-                class="haldo-app-loading"
-                data-view="loading"
-            >
-
-                <div
-                    class="haldo-loading-orb"
-                >
-
-                    ${
-                        icon.endsWith &&
-                        icon.endsWith(".png")
-                            ? `
-                                <img
-                                    src="${escapeHtml(icon)}"
-                                    alt=""
-                                >
-                              `
-                            : `
-                                <span>
-                                    ${escapeHtml(icon)}
-                                </span>
-                              `
-                    }
-
-                </div>
-
-
-                <h2>
-                    ${escapeHtml(title)}
-                </h2>
-
-
-                <p>
-                    HalDo AI lädt das Modul …
-                </p>
-
-
-                <div
-                    class="haldo-loading-bar"
-                    aria-hidden="true"
-                >
-                    <span></span>
-                </div>
-
-            </section>
-
-        `;
-
-
-        transitionEnd(
-            root
-        );
-
-    }
-
-
-    /* ========================================================
-       15 — APP FALLBACK
-       ======================================================== */
-
-    function renderAppFallback(
-        app
-    ) {
-
-        const root =
-            getRoot();
-
-
-        transitionStart(
-            root
-        );
-
-
-        const title =
-            app &&
-            app.title
-                ? app.title
-                : "HalDo App";
-
-
-        const description =
-            app &&
-            app.description
-                ? app.description
-                : "Dieses Modul wird vorbereitet.";
-
-
-        const icon =
-            app &&
-            app.icon
-                ? app.icon
-                : "◇";
-
-
-        root.innerHTML = `
-
-            <section
-                class="haldo-app-placeholder"
-                data-view="app-placeholder"
-            >
-
-                <div
-                    class="haldo-placeholder-card"
-                >
-
-                    <div
-                        class="haldo-placeholder-icon"
-                    >
-
-                        ${
-                            icon.endsWith &&
-                            icon.endsWith(".png")
-                                ? `
-                                    <img
-                                        src="${escapeHtml(icon)}"
-                                        alt="HalDo AI"
-                                    >
-                                  `
-                                : `
-                                    <span>
-                                        ${escapeHtml(icon)}
-                                    </span>
-                                  `
-                        }
-
-                    </div>
-
-
-                    <div
-                        class="haldo-placeholder-content"
-                    >
-
-                        <span
-                            class="haldo-placeholder-label"
-                        >
-                            HALDO AI OS 18
-                        </span>
-
-
-                        <h1>
-                            ${escapeHtml(title)}
-                        </h1>
-
-
-                        <p>
-                            ${escapeHtml(description)}
-                        </p>
-
-
-                        <div
-                            class="haldo-placeholder-status"
-                        >
-
-                            <span
-                                class="haldo-status-dot"
-                            ></span>
-
-                            Modul wird vorbereitet
-
-                        </div>
-
-
-                        <button
-                            type="button"
-                            class="haldo-back-button"
-                            data-action="router-home"
-                        >
-                            Zur Startseite
-                        </button>
-
-                    </div>
-
-                </div>
-
-            </section>
-
-        `;
-
-
-        const backButton =
-            root.querySelector(
-                '[data-action="router-home"]'
-            );
-
-
-        if (
-            backButton
-        ) {
-
-            backButton.addEventListener(
-                "click",
-                function () {
-
-                    navigateHome();
-
-                }
-            );
-
-        }
-
-
-        transitionEnd(
-            root
-        );
-
-
-        emit(
-            "app:placeholder",
-            {
-                app:
-                    app
-            }
-        );
-
-    }
-
-
-    /* ========================================================
-       16 — APP MODUL RENDERN
-       ======================================================== */
-
-    async function renderApp(
-        app
-    ) {
-
-        if (
-            !app
-        ) {
-
-            return false;
-
-        }
-
-
-        const root =
-            getRoot();
-
-
-        const module =
-            getAppModule(
-                app.id
-            );
-
-
-        /*
-         * Noch kein echtes Modul:
-         * Kein 404!
-         */
-
-        if (
-            !module
-        ) {
-
-            renderAppFallback(
+        const header =
+            createAppHeader(
                 app
             );
 
-            return true;
 
-        }
+        container.appendChild(
+            header
+        );
+
+
+        const content =
+            document.createElement(
+                "div"
+            );
+
+
+        content.className =
+            "haldo-app-content";
+
+
+        container.appendChild(
+            content
+        );
 
 
         try {
 
-            renderLoading(
-                app
-            );
-
-
-            /*
-             * Modul als Funktion
-             */
-
             if (
-                typeof module ===
-                "function"
-            ) {
-
-                const result =
-                    await module(
-                        {
-                            app,
-
-                            root,
-
-                            router:
-                                api
-
-                        }
-                    );
-
-
-                if (
-                    typeof result ===
-                    "string"
-                ) {
-
-                    root.innerHTML =
-                        result;
-
-                }
-
-            }
-
-
-            /*
-             * Modul mit render()
-             */
-
-            else if (
                 typeof module.render ===
-                "function"
+                    "function"
             ) {
 
-                const result =
-                    await module.render(
-                        {
-                            app,
-
-                            root,
-
-                            router:
-                                api
-
-                        }
-                    );
-
-
-                if (
-                    typeof result ===
-                    "string"
-                ) {
-
-                    root.innerHTML =
-                        result;
-
-                }
-
-            }
-
-
-            /*
-             * Modul mit mount()
-             */
-
-            else if (
-                typeof module.mount ===
-                "function"
-            ) {
-
-                await module.mount(
-                    root,
-                    {
-                        app,
-
-                        router:
-                            api
-
-                    }
-                );
-
-            }
-
-
-            else {
-
-                renderAppFallback(
+                module.render(
+                    content,
                     app
                 );
+
 
                 return true;
 
             }
 
 
-            transitionEnd(
-                root
-            );
+            if (
+                typeof module.open ===
+                    "function"
+            ) {
+
+                module.open(
+                    content,
+                    app
+                );
 
 
-            emit(
-                "app:rendered",
-                {
-                    app:
-                        app
-                }
-            );
+                return true;
+
+            }
 
 
-            return true;
+            if (
+                typeof module.init ===
+                    "function"
+            ) {
+
+                module.init(
+                    content,
+                    app
+                );
+
+
+                return true;
+
+            }
+
+
+            return false;
 
         }
         catch (
             error
         ) {
 
-            state.errors.push(
-                {
-                    appId:
-                        app.id,
-
-                    error:
-                        error.message,
-
-                    timestamp:
-                        new Date()
-                            .toISOString()
-                }
-            );
-
-
-            log(
-                `Fehler beim Laden von ${app.id}: ${error.message}`,
-                "error"
-            );
-
-
-            renderError(
-                app,
+            console.error(
+                "[HalDo Router] Fehler beim Rendern:",
                 error
+            );
+
+
+            createFallbackView(
+                app.id,
+                "Fehler beim Laden des App-Moduls."
             );
 
 
@@ -1178,109 +988,436 @@
 
 
     /* ========================================================
-       17 — FEHLERANSICHT
+       16 — DASHBOARD-FALLBACK
        ======================================================== */
 
-    function renderError(
-        app,
-        error
+    function renderDashboardFallback(
+        app
     ) {
 
-        const root =
-            getRoot();
+        const container =
+            ensureContainer();
 
 
-        const title =
-            app &&
-            app.title
-                ? app.title
-                : "HalDo App";
+        container.innerHTML =
+            "";
 
 
-        root.innerHTML = `
-
-            <section
-                class="haldo-app-error"
-                data-view="error"
-            >
-
-                <div
-                    class="haldo-error-card"
-                >
-
-                    <div
-                        class="haldo-error-icon"
-                    >
-                        !
-                    </div>
+        const header =
+            createAppHeader(
+                app
+            );
 
 
-                    <h1>
-                        ${escapeHtml(title)}
-                    </h1>
+        container.appendChild(
+            header
+        );
 
 
-                    <p>
-                        Das App-Modul konnte
-                        nicht geladen werden.
-                    </p>
+        const content =
+            document.createElement(
+                "div"
+            );
 
 
-                    <details>
-
-                        <summary>
-                            Technische Information
-                        </summary>
-
-                        <pre>${escapeHtml(
-                            error &&
-                            error.message
-                                ? error.message
-                                : "Unbekannter Fehler"
-                        )}</pre>
-
-                    </details>
+        content.className =
+            "haldo-dashboard-fallback";
 
 
-                    <button
-                        type="button"
-                        data-action="router-home"
-                    >
-                        Zur Startseite
-                    </button>
-
-                </div>
-
-            </section>
-
-        `;
+        const heading =
+            document.createElement(
+                "h1"
+            );
 
 
-        const button =
-            root.querySelector(
-                '[data-action="router-home"]'
+        heading.textContent =
+            app.title ||
+            "HalDo AI OS";
+
+
+        const paragraph =
+            document.createElement(
+                "p"
+            );
+
+
+        paragraph.textContent =
+            app.description ||
+            "Willkommen bei HalDo AI OS 18.";
+
+
+        const grid =
+            document.createElement(
+                "div"
+            );
+
+
+        grid.className =
+            "haldo-router-app-grid";
+
+
+        const manager =
+            getAppManager();
+
+
+        let apps =
+            [];
+
+
+        if (
+            manager &&
+            typeof manager.getEnabledApps ===
+                "function"
+        ) {
+
+            apps =
+                manager.getEnabledApps();
+
+        }
+
+
+        /*
+         * Maximal 24 Apps auf der Fallback-Oberfläche.
+         */
+
+        apps =
+            apps.slice(
+                0,
+                24
+            );
+
+
+        apps.forEach(
+            item => {
+
+                const button =
+                    document.createElement(
+                        "button"
+                    );
+
+
+                button.type =
+                    "button";
+
+
+                button.className =
+                    "haldo-router-app-button";
+
+
+                button.dataset.appId =
+                    item.id;
+
+
+                const icon =
+                    document.createElement(
+                        "span"
+                    );
+
+
+                icon.className =
+                    "haldo-router-app-button-icon";
+
+
+                icon.textContent =
+                    item.icon &&
+                    !item.icon.includes(
+                        "/"
+                    )
+                        ? item.icon
+                        : "◉";
+
+
+                const name =
+                    document.createElement(
+                        "span"
+                    );
+
+
+                name.textContent =
+                    item.title ||
+                    item.name ||
+                    item.id;
+
+
+                button.appendChild(
+                    icon
+                );
+
+
+                button.appendChild(
+                    name
+                );
+
+
+                button.addEventListener(
+                    "click",
+                    function () {
+
+                        navigate(
+                            item.id
+                        );
+
+                    }
+                );
+
+
+                grid.appendChild(
+                    button
+                );
+
+            }
+        );
+
+
+        content.appendChild(
+            heading
+        );
+
+
+        content.appendChild(
+            paragraph
+        );
+
+
+        content.appendChild(
+            grid
+        );
+
+
+        container.appendChild(
+            content
+        );
+
+
+        return true;
+
+    }
+
+
+    /* ========================================================
+       17 — APP ÖFFNEN
+       ======================================================== */
+
+    function openApp(
+        appId,
+        options = {}
+    ) {
+
+        const normalized =
+            normalizeAppId(
+                appId
             );
 
 
         if (
-            button
+            !normalized
         ) {
 
-            button.addEventListener(
-                "click",
-                navigateHome
+            return navigate(
+                CONFIG.defaultApp,
+                options
             );
 
         }
 
 
-        emit(
-            "app:error",
-            {
-                app,
-                error
+        const app =
+            resolveApp(
+                normalized
+            );
+
+
+        /*
+         * Unbekannte App:
+         * Kein 404.
+         */
+
+        if (
+            !app
+        ) {
+
+            state.lastError =
+                `Unbekannte App: ${normalized}`;
+
+
+            log(
+                state.lastError,
+                "warning"
+            );
+
+
+            createFallbackView(
+                normalized,
+                "App nicht registriert."
+            );
+
+
+            return false;
+
+        }
+
+
+        /*
+         * Deaktivierte App:
+         */
+
+        if (
+            app.enabled ===
+            false
+        ) {
+
+            state.lastError =
+                `App deaktiviert: ${normalized}`;
+
+
+            createFallbackView(
+                normalized,
+                "Diese App ist derzeit deaktiviert."
+            );
+
+
+            return false;
+
+        }
+
+
+        /*
+         * App-Modul prüfen.
+         */
+
+        const module =
+            getAppModule(
+                normalized
+            );
+
+
+        /*
+         * Kein Modul:
+         *
+         * Wir erzeugen KEINEN 404.
+         *
+         * Dashboard und Home erhalten
+         * eine nutzbare Oberfläche.
+         */
+
+        if (
+            !module
+        ) {
+
+            if (
+                normalized ===
+                    "haldo-home" ||
+                normalized ===
+                    "dashboard"
+            ) {
+
+                return renderDashboardFallback(
+                    app
+                );
+
             }
+
+
+            createFallbackView(
+                normalized,
+                "Modul noch nicht verbunden."
+            );
+
+
+            state.previousApp =
+                state.currentApp;
+
+
+            state.currentApp =
+                normalized;
+
+
+            state.navigationCount++;
+
+
+            emit(
+                "navigate",
+                {
+
+                    app,
+
+                    appId:
+                        normalized,
+
+                    fallback:
+                        true
+
+                }
+            );
+
+
+            return true;
+
+        }
+
+
+        /*
+         * Modul rendern.
+         */
+
+        const success =
+            renderModule(
+                app,
+                module
+            );
+
+
+        if (
+            success
+        ) {
+
+            state.previousApp =
+                state.currentApp;
+
+
+            state.currentApp =
+                normalized;
+
+
+            state.navigationCount++;
+
+
+            state.lastError =
+                null;
+
+
+            emit(
+                "navigate",
+                {
+
+                    app,
+
+                    appId:
+                        normalized,
+
+                    fallback:
+                        false
+
+                }
+            );
+
+
+            return true;
+
+        }
+
+
+        /*
+         * Modul konnte nicht geöffnet werden.
+         */
+
+        createFallbackView(
+            normalized,
+            "App-Modul konnte nicht geöffnet werden."
         );
+
+
+        return false;
 
     }
 
@@ -1289,329 +1426,127 @@
        18 — NAVIGATION
        ======================================================== */
 
-    async function navigate(
-        destination,
-        options = {}
-    ) {
-
-        if (
-            state.navigating
-        ) {
-
-            return false;
-
-        }
-
-
-        const parsed =
-            typeof destination ===
-            "object"
-                ? destination
-                : parseRoute(
-                    destination
-                );
-
-
-        state.navigating =
-            true;
-
-
-        try {
-
-            if (
-                parsed.type ===
-                "home"
-            ) {
-
-                state.previousRoute =
-                    state.currentRoute;
-
-                state.currentRoute =
-                    CONFIG.homeRoute;
-
-                state.currentAppId =
-                    null;
-
-
-                if (
-                    options.history !==
-                    false
-                ) {
-
-                    updateHash(
-                        CONFIG.homeRoute,
-                        options.replace
-                    );
-
-                }
-
-
-                renderHome();
-
-
-                emit(
-                    "route:changed",
-                    {
-                        route:
-                            CONFIG.homeRoute,
-
-                        type:
-                            "home",
-
-                        appId:
-                            null
-
-                    }
-                );
-
-
-                return true;
-
-            }
-
-
-            if (
-                parsed.type ===
-                "app"
-            ) {
-
-                const app =
-                    getApp(
-                        parsed.appId
-                    );
-
-
-                /*
-                 * Unbekannte App:
-                 * Kein 404.
-                 */
-
-                if (
-                    !app
-                ) {
-
-                    log(
-                        `App nicht registriert: ${parsed.appId}`,
-                        "warning"
-                    );
-
-
-                    state.previousRoute =
-                        state.currentRoute;
-
-                    state.currentRoute =
-                        CONFIG.homeRoute;
-
-                    state.currentAppId =
-                        null;
-
-
-                    if (
-                        options.history !==
-                        false
-                    ) {
-
-                        updateHash(
-                            CONFIG.homeRoute,
-                            options.replace
-                        );
-
-                    }
-
-
-                    renderUnknownApp(
-                        parsed.appId
-                    );
-
-
-                    emit(
-                        "route:unknown",
-                        {
-                            appId:
-                                parsed.appId
-                        }
-                    );
-
-
-                    return false;
-
-                }
-
-
-                /*
-                 * Deaktivierte App
-                 */
-
-                if (
-                    app.enabled ===
-                    false
-                ) {
-
-                    renderDisabledApp(
-                        app
-                    );
-
-
-                    emit(
-                        "app:disabled-route",
-                        {
-                            app
-                        }
-                    );
-
-
-                    return false;
-
-                }
-
-
-                state.previousRoute =
-                    state.currentRoute;
-
-                state.currentRoute =
-                    createAppRoute(
-                        app.id
-                    );
-
-                state.currentAppId =
-                    app.id;
-
-
-                if (
-                    options.history !==
-                    false
-                ) {
-
-                    updateHash(
-                        state.currentRoute,
-                        options.replace
-                    );
-
-                }
-
-
-                await renderApp(
-                    app
-                );
-
-
-                emit(
-                    "route:changed",
-                    {
-                        route:
-                            state.currentRoute,
-
-                        type:
-                            "app",
-
-                        appId:
-                            app.id,
-
-                        app:
-                            app
-
-                    }
-                );
-
-
-                return true;
-
-            }
-
-
-            /*
-             * Unbekannte Route
-             */
-
-            renderUnknownRoute(
-                parsed.route
-            );
-
-
-            emit(
-                "route:unknown",
-                {
-                    route:
-                        parsed.route
-                }
-            );
-
-
-            return false;
-
-        }
-        finally {
-
-            state.navigating =
-                false;
-
-        }
-
-    }
-
-
-    /* ========================================================
-       19 — HOME
-       ======================================================== */
-
-    function navigateHome(
-        options = {}
-    ) {
-
-        return navigate(
-            CONFIG.homeRoute,
-            options
-        );
-
-    }
-
-
-    /* ========================================================
-       20 — APP ÖFFNEN
-       ======================================================== */
-
-    function openApp(
+    function navigate(
         appId,
         options = {}
     ) {
 
-        const id =
+        const normalized =
             normalizeAppId(
                 appId
             );
 
 
-        if (
-            !id
-        ) {
-
-            return navigateHome(
+        const success =
+            openApp(
+                normalized,
                 options
             );
+
+
+        /*
+         * Browser-History nur bei
+         * erfolgreicher Navigation.
+         */
+
+        if (
+            success &&
+            options.history !==
+                false
+        ) {
+
+            const url =
+                new URL(
+                    window.location.href
+                );
+
+
+            url.searchParams.set(
+                "app",
+                normalized
+            );
+
+
+            if (
+                options.replace ===
+                true
+            ) {
+
+                window.history.replaceState(
+                    {
+                        haldo:
+                            true,
+
+                        appId:
+                            normalized
+
+                    },
+                    "",
+                    url
+                );
+
+            }
+            else {
+
+                window.history.pushState(
+                    {
+                        haldo:
+                            true,
+
+                        appId:
+                            normalized
+
+                    },
+                    "",
+                    url
+                );
+
+            }
 
         }
 
 
+        return success;
+
+    }
+
+
+    /* ========================================================
+       19 — START APP
+       ======================================================== */
+
+    function start(
+        appId
+    ) {
+
         return navigate(
-            createAppRoute(
-                id
-            ),
-            options
+            appId ||
+            CONFIG.defaultApp
         );
 
     }
 
 
     /* ========================================================
-       21 — ZURÜCK
+       20 — ZURÜCK
        ======================================================== */
 
     function back() {
 
         if (
-            window.history &&
+            state.previousApp
+        ) {
+
+            return navigate(
+                state.previousApp
+            );
+
+        }
+
+
+        if (
             window.history.length >
-                1
+            1
         ) {
 
             window.history.back();
@@ -1621,111 +1556,108 @@
         }
 
 
-        return navigateHome();
+        return navigate(
+            CONFIG.defaultApp
+        );
 
     }
 
 
     /* ========================================================
-       22 — HASH
+       21 — URL APP LESEN
        ======================================================== */
 
-    function updateHash(
-        route,
-        replace = false
+    function getAppFromURL() {
+
+        try {
+
+            const params =
+                new URLSearchParams(
+                    window.location.search
+                );
+
+
+            const app =
+                params.get(
+                    "app"
+                );
+
+
+            if (
+                app
+            ) {
+
+                return normalizeAppId(
+                    app
+                );
+
+            }
+
+        }
+        catch (
+            error
+        ) {
+
+            console.warn(
+                "[HalDo Router] URL konnte nicht gelesen werden.",
+                error
+            );
+
+        }
+
+
+        return null;
+
+    }
+
+
+    /* ========================================================
+       22 — BROWSER HISTORY
+       ======================================================== */
+
+    function handlePopState(
+        event
     ) {
 
-        if (
-            state.historyLocked
-        ) {
-
-            return;
-
-        }
-
-
-        const clean =
-            route.startsWith(
-                "#"
-            )
-                ? route.substring(
-                    1
-                )
-                : route;
-
-
-        const url =
-            window.location.pathname +
-            window.location.search +
-            "#" +
-            clean;
+        let appId =
+            null;
 
 
         if (
-            replace &&
-            window.history &&
-            typeof window.history.replaceState ===
-                "function"
+            event &&
+            event.state &&
+            event.state.haldo &&
+            event.state.appId
         ) {
 
-            window.history.replaceState(
-                {
-                    haldoRoute:
-                        route
-                },
-                "",
-                url
-            );
-
-        }
-        else if (
-            window.history &&
-            typeof window.history.pushState ===
-                "function"
-        ) {
-
-            window.history.pushState(
-                {
-                    haldoRoute:
-                        route
-                },
-                "",
-                url
-            );
-
-        }
-        else {
-
-            window.location.hash =
-                clean;
+            appId =
+                event.state.appId;
 
         }
 
-    }
-
-
-    /* ========================================================
-       23 — HASH CHANGE
-       ======================================================== */
-
-    function handleHashChange() {
 
         if (
-            state.historyLocked
+            !appId
         ) {
 
-            return;
+            appId =
+                getAppFromURL();
 
         }
 
 
-        const hash =
-            window.location.hash ||
-            CONFIG.homeRoute;
+        if (
+            !appId
+        ) {
+
+            appId =
+                CONFIG.defaultApp;
+
+        }
 
 
         navigate(
-            hash,
+            appId,
             {
                 history:
                     false
@@ -1736,363 +1668,142 @@
 
 
     /* ========================================================
-       24 — UNBEKANNTE APP
+       23 — APP-LINKS
        ======================================================== */
 
-    function renderUnknownApp(
-        appId
-    ) {
+    function bindAppLinks() {
 
-        const root =
-            getRoot();
-
-
-        root.innerHTML = `
-
-            <section
-                class="haldo-route-error"
-            >
-
-                <div
-                    class="haldo-route-card"
-                >
-
-                    <div
-                        class="haldo-route-icon"
-                    >
-                        ◇
-                    </div>
-
-
-                    <span>
-                        HALDO AI OS 18
-                    </span>
-
-
-                    <h1>
-                        App nicht gefunden
-                    </h1>
-
-
-                    <p>
-                        Die angeforderte App
-                        <strong>
-                            ${escapeHtml(appId)}
-                        </strong>
-                        ist noch nicht registriert.
-                    </p>
-
-
-                    <button
-                        type="button"
-                        data-action="router-home"
-                    >
-                        Zur Startseite
-                    </button>
-
-                </div>
-
-            </section>
-
-        `;
-
-
-        const button =
-            root.querySelector(
-                '[data-action="router-home"]'
+        const links =
+            document.querySelectorAll(
+                "[data-haldo-app]"
             );
 
 
-        if (
-            button
-        ) {
+        links.forEach(
+            link => {
 
-            button.addEventListener(
-                "click",
-                navigateHome
-            );
+                if (
+                    link.dataset.haldoRouterBound ===
+                    "true"
+                ) {
 
-        }
+                    return;
 
-    }
-
-
-    /* ========================================================
-       25 — UNBEKANNTE ROUTE
-       ======================================================== */
-
-    function renderUnknownRoute(
-        route
-    ) {
-
-        const root =
-            getRoot();
+                }
 
 
-        root.innerHTML = `
-
-            <section
-                class="haldo-route-error"
-            >
-
-                <div
-                    class="haldo-route-card"
-                >
-
-                    <div
-                        class="haldo-route-icon"
-                    >
-                        ?
-                    </div>
+                link.dataset.haldoRouterBound =
+                    "true";
 
 
-                    <span>
-                        HALDO AI OS 18
-                    </span>
+                link.addEventListener(
+                    "click",
+                    function (
+                        event
+                    ) {
+
+                        event.preventDefault();
 
 
-                    <h1>
-                        Seite nicht gefunden
-                    </h1>
+                        const appId =
+                            link.dataset.haldoApp;
 
 
-                    <p>
-                        Diese Route existiert
-                        momentan nicht.
-                    </p>
+                        if (
+                            appId
+                        ) {
 
+                            navigate(
+                                appId
+                            );
 
-                    <code>
-                        ${escapeHtml(route)}
-                    </code>
+                        }
 
+                    }
+                );
 
-                    <button
-                        type="button"
-                        data-action="router-home"
-                    >
-                        Zur Startseite
-                    </button>
-
-                </div>
-
-            </section>
-
-        `;
-
-
-        const button =
-            root.querySelector(
-                '[data-action="router-home"]'
-            );
-
-
-        if (
-            button
-        ) {
-
-            button.addEventListener(
-                "click",
-                navigateHome
-            );
-
-        }
-
-    }
-
-
-    /* ========================================================
-       26 — DEAKTIVIERTE APP
-       ======================================================== */
-
-    function renderDisabledApp(
-        app
-    ) {
-
-        const root =
-            getRoot();
-
-
-        root.innerHTML = `
-
-            <section
-                class="haldo-route-error"
-            >
-
-                <div
-                    class="haldo-route-card"
-                >
-
-                    <div
-                        class="haldo-route-icon"
-                    >
-                        ⏸
-                    </div>
-
-
-                    <span>
-                        HALDO AI OS 18
-                    </span>
-
-
-                    <h1>
-                        App momentan deaktiviert
-                    </h1>
-
-
-                    <p>
-                        ${escapeHtml(
-                            app.title
-                        )}
-                        ist momentan
-                        nicht aktiviert.
-                    </p>
-
-
-                    <button
-                        type="button"
-                        data-action="router-home"
-                    >
-                        Zur Startseite
-                    </button>
-
-                </div>
-
-            </section>
-
-        `;
-
-
-        const button =
-            root.querySelector(
-                '[data-action="router-home"]'
-            );
-
-
-        if (
-            button
-        ) {
-
-            button.addEventListener(
-                "click",
-                navigateHome
-            );
-
-        }
-
-    }
-
-
-    /* ========================================================
-       27 — HTML SICHER MACHEN
-       ======================================================== */
-
-    function escapeHtml(
-        value
-    ) {
-
-        return String(
-            value ??
-            ""
-        )
-        .replace(
-            /&/g,
-            "&amp;"
-        )
-        .replace(
-            /</g,
-            "&lt;"
-        )
-        .replace(
-            />/g,
-            "&gt;"
-        )
-        .replace(
-            /"/g,
-            "&quot;"
-        )
-        .replace(
-            /'/g,
-            "&#039;"
+            }
         );
 
     }
 
 
     /* ========================================================
-       28 — AKTUELLE ROUTE
+       24 — APP-LINK ERSTELLEN
        ======================================================== */
 
-    function getCurrentRoute() {
+    function createAppLink(
+        appId,
+        label = null
+    ) {
 
-        return state.currentRoute;
-
-    }
-
-
-    function getCurrentAppId() {
-
-        return state.currentAppId;
-
-    }
+        const app =
+            resolveApp(
+                appId
+            );
 
 
-    function getPreviousRoute() {
+        const button =
+            document.createElement(
+                "button"
+            );
 
-        return state.previousRoute;
+
+        button.type =
+            "button";
+
+
+        button.dataset.haldoApp =
+            normalizeAppId(
+                appId
+            );
+
+
+        button.textContent =
+            label ||
+            (
+                app
+                    ? app.title
+                    : appId
+            );
+
+
+        button.addEventListener(
+            "click",
+            function () {
+
+                navigate(
+                    appId
+                );
+
+            }
+        );
+
+
+        return button;
 
     }
 
 
     /* ========================================================
-       29 — DIAGNOSE
+       25 — ROUTE INFO
        ======================================================== */
 
-    function diagnose() {
-
-        const manager =
-            getAppManager();
-
+    function getRoute() {
 
         return {
 
-            router: {
+            currentApp:
+                state.currentApp,
 
-                initialized:
-                    state.initialized,
+            previousApp:
+                state.previousApp,
 
-                ready:
-                    state.ready,
+            navigationCount:
+                state.navigationCount,
 
-                navigating:
-                    state.navigating,
-
-                currentRoute:
-                    state.currentRoute,
-
-                currentAppId:
-                    state.currentAppId,
-
-                previousRoute:
-                    state.previousRoute
-
-            },
-
-            appManager:
-                Boolean(
-                    manager
-                ),
-
-            root:
-                Boolean(
-                    document.querySelector(
-                        CONFIG.rootSelector
-                    )
-                ),
-
-            hash:
-                window.location.hash ||
-                ""
+            ready:
+                state.ready
 
         };
 
@@ -2100,7 +1811,58 @@
 
 
     /* ========================================================
-       30 — INITIALISIERUNG
+       26 — DIAGNOSE
+       ======================================================== */
+
+    function diagnose() {
+
+        return {
+
+            router: {
+
+                name:
+                    CONFIG.name,
+
+                version:
+                    CONFIG.version,
+
+                initialized:
+                    state.initialized,
+
+                ready:
+                    state.ready,
+
+                currentApp:
+                    state.currentApp,
+
+                previousApp:
+                    state.previousApp,
+
+                navigationCount:
+                    state.navigationCount,
+
+                lastError:
+                    state.lastError
+
+            },
+
+            appManager:
+                Boolean(
+                    getAppManager()
+                ),
+
+            container:
+                Boolean(
+                    getContainer()
+                )
+
+        };
+
+    }
+
+
+    /* ========================================================
+       27 — INITIALISIERUNG
        ======================================================== */
 
     function init() {
@@ -2109,7 +1871,7 @@
             state.initialized
         ) {
 
-            return getState();
+            return getRoute();
 
         }
 
@@ -2119,74 +1881,20 @@
 
 
         /*
-         * Browser Events
+         * Browser-Zurück/Vorwärts.
          */
-
-        window.addEventListener(
-            "hashchange",
-            handleHashChange
-        );
-
 
         window.addEventListener(
             "popstate",
-            handleHashChange
+            handlePopState
         );
 
 
         /*
-         * Erst nach App Manager
+         * Bereits vorhandene App-Links.
          */
 
-        if (
-            window.HalDoAppManager &&
-            typeof window.HalDoAppManager.on ===
-                "function"
-        ) {
-
-            window.HalDoAppManager.on(
-                "ready",
-                function () {
-
-                    handleHashChange();
-
-                }
-            );
-
-        }
-
-
-        /*
-         * Bestehende Hash Route verwenden.
-         */
-
-        const initialHash =
-            window.location.hash;
-
-
-        if (
-            initialHash
-        ) {
-
-            navigate(
-                initialHash,
-                {
-                    history:
-                        false
-                }
-            );
-
-        }
-        else {
-
-            navigateHome(
-                {
-                    history:
-                        false
-                }
-            );
-
-        }
+        bindAppLinks();
 
 
         state.ready =
@@ -2194,7 +1902,7 @@
 
 
         /*
-         * System registrieren
+         * System registrieren.
          */
 
         if (
@@ -2240,53 +1948,48 @@
 
         emit(
             "ready",
-            getState()
+            getRoute()
         );
 
 
         log(
-            "App Router bereit."
+            "Router ist bereit."
         );
 
 
-        return getState();
+        /*
+         * App aus URL lesen.
+         */
+
+        const urlApp =
+            getAppFromURL();
+
+
+        if (
+            urlApp &&
+            appExists(
+                urlApp
+            )
+        ) {
+
+            navigate(
+                urlApp,
+                {
+                    history:
+                        false
+                }
+            );
+
+        }
+
+
+        return getRoute();
 
     }
 
 
     /* ========================================================
-       31 — STATE
-       ======================================================== */
-
-    function getState() {
-
-        return {
-
-            initialized:
-                state.initialized,
-
-            ready:
-                state.ready,
-
-            navigating:
-                state.navigating,
-
-            currentRoute:
-                state.currentRoute,
-
-            currentAppId:
-                state.currentAppId,
-
-            previousRoute:
-                state.previousRoute
-
-        };
-
-    }
-
-
-    /* ========================================================
-       32 — PUBLIC API
+       28 — PUBLIC API
        ======================================================== */
 
     const api = {
@@ -2301,43 +2004,41 @@
         init,
 
 
-        navigate,
+        on,
 
-        navigateHome,
+        off,
+
+
+        start,
+
+        navigate,
 
         openApp,
 
         back,
 
 
-        createAppRoute,
+        getApp,
 
-        parseRoute,
+        appExists,
 
-
-        getCurrentRoute,
-
-        getCurrentAppId,
-
-        getPreviousRoute,
+        getCurrentApp,
 
 
-        getState,
+        getRoute,
 
-        diagnose,
+        createAppLink,
+
+        bindAppLinks,
 
 
-        on,
-
-        off,
-
-        emit
+        diagnose
 
     };
 
 
     /* ========================================================
-       33 — GLOBAL
+       29 — GLOBAL
        ======================================================== */
 
     window.HalDoAppRouter =
@@ -2349,15 +2050,15 @@
         {};
 
 
-    window.HalDoOS.router =
+    window.HalDoOS.appRouter =
         api;
 
 
     /* ========================================================
-       34 — START
+       30 — START
        ======================================================== */
 
-    function start() {
+    function boot() {
 
         init();
 
@@ -2371,7 +2072,7 @@
 
         document.addEventListener(
             "DOMContentLoaded",
-            start,
+            boot,
             {
                 once:
                     true
@@ -2381,7 +2082,7 @@
     }
     else {
 
-        start();
+        boot();
 
     }
 
