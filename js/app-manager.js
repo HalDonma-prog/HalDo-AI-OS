@@ -2,19 +2,24 @@
    HalDo AI OS 18
    Professional Ultimate Foundation
    ------------------------------------------------------------
-   Datei: js/app-manager.js
+   Datei:
+   js/app-manager.js
 
    Aufgabe:
-   - Zentrale App-Verwaltung
-   - App-Registry
+   Zentrale Verwaltung aller HalDo AI OS Apps.
+
+   Datenquelle:
+   config/apps.json
+
+   Verantwortlich für:
    - Apps laden
    - Apps registrieren
    - Apps suchen
-   - Kategorien verwalten
-   - Favoriten verwalten
-   - Apps starten
-   - App-Zustände speichern
-   - Verbindung mit HalDoKernel
+   - Kategorien
+   - Favoriten
+   - App-Status
+   - Modulverwaltung
+   - Launcher-Verbindung
    ============================================================ */
 
 "use strict";
@@ -24,52 +29,149 @@
 
 
     /* ========================================================
-       01 — GRUNDKONFIGURATION
+       01 — KONFIGURATION
        ======================================================== */
 
-    const VERSION = "18.0.0";
-
-    const STORAGE_KEY =
-        "haldo_ai_os18_apps_state";
+    const VERSION =
+        "18.0.0";
 
 
-    const APP_CONFIG_PATH =
+    const APPS_FILE =
         "config/apps.json";
 
 
+    const STORAGE_KEY =
+        "haldo-ai-os-app-state-v18";
+
+
     /* ========================================================
-       02 — INTERNER ZUSTAND
+       02 — SYSTEMZUSTAND
        ======================================================== */
 
     const state = {
 
-        initialized: false,
+        initialized:
+            false,
 
-        ready: false,
+        ready:
+            false,
 
-        loading: false,
+        loading:
+            false,
 
-        error: null,
+        error:
+            null,
 
-        apps: [],
+        apps:
+            [],
 
-        categories: [],
+        categories:
+            [],
 
-        favorites: [],
+        search:
+            "",
 
-        activeCategory: "all",
+        activeCategory:
+            "all",
 
-        searchTerm: "",
+        favoriteIds:
+            new Set(),
 
-        configLoaded: false,
-
-        lastOpenedApp: null
+        registeredModules:
+            new Map()
 
     };
 
 
     /* ========================================================
-       03 — HILFSFUNKTIONEN
+       03 — EVENT SYSTEM
+       ======================================================== */
+
+    const listeners = {};
+
+
+    function on(
+        eventName,
+        callback
+    ) {
+
+        if (
+            typeof callback !==
+            "function"
+        ) {
+
+            return false;
+
+        }
+
+
+        if (
+            !listeners[eventName]
+        ) {
+
+            listeners[eventName] =
+                [];
+
+        }
+
+
+        listeners[eventName].push(
+            callback
+        );
+
+
+        return true;
+
+    }
+
+
+    function emit(
+        eventName,
+        data = null
+    ) {
+
+        const callbacks =
+            listeners[eventName];
+
+
+        if (
+            !callbacks
+        ) {
+
+            return;
+
+        }
+
+
+        callbacks.forEach(
+            callback => {
+
+                try {
+
+                    callback(
+                        data
+                    );
+
+                }
+                catch (
+                    error
+                ) {
+
+                    console.error(
+                        "[HalDo App Manager] Event-Fehler:",
+                        error
+                    );
+
+                }
+
+            }
+        );
+
+    }
+
+
+    /* ========================================================
+       04 — LOG SYSTEM
        ======================================================== */
 
     function log(
@@ -110,83 +212,42 @@
 
         }
 
-
-        /*
-         * Zusätzlich Kernel-Log verwenden,
-         * wenn der Kernel vorhanden ist.
-         */
-
-        if (
-            window.HalDoKernel &&
-            typeof
-                window.HalDoKernel.emit ===
-                "function"
-        ) {
-
-            window.HalDoKernel.emit(
-                "appmanager:log",
-                {
-                    message,
-                    type
-                }
-            );
-
-        }
-
     }
 
 
-    function setStartupStatus(
-        message
-    ) {
+    /* ========================================================
+       05 — ID NORMALISIEREN
+       ======================================================== */
 
-        if (
-            window.HalDoStartup &&
-            typeof
-                window.HalDoStartup.setStatus ===
-                "function"
-        ) {
-
-            window.HalDoStartup.setStatus(
-                message
-            );
-
-        }
-
-    }
-
-
-    function createId(
+    function normalizeId(
         value
     ) {
 
-        return String(value || "")
-            .toLowerCase()
-            .trim()
-            .replace(
-                /[^a-z0-9äöüß_-]+/gi,
-                "-"
-            )
-            .replace(
-                /-+/g,
-                "-"
-            )
-            .replace(
-                /^-|-$/g,
-                ""
-            );
+        return String(
+            value || ""
+        )
+        .trim()
+        .toLowerCase()
+        .replace(
+            /\s+/g,
+            "-"
+        );
 
     }
 
 
+    /* ========================================================
+       06 — APP DATEN NORMALISIEREN
+       ======================================================== */
+
     function normalizeApp(
-        app,
-        index
+        rawApp,
+        index = 0
     ) {
 
         if (
-            !app ||
-            typeof app !==
+            !rawApp ||
+            typeof rawApp !==
             "object"
         ) {
 
@@ -195,475 +256,178 @@
         }
 
 
-        const name =
-            app.name ||
-            app.title ||
-            `App ${index + 1}`;
-
-
         const id =
-            app.id ||
-            createId(name) ||
-            `app-${index + 1}`;
+            normalizeId(
+                rawApp.id ||
+                rawApp.name ||
+                `app-${index + 1}`
+            );
 
 
-        const category =
-            app.category ||
-            "other";
-
-
-        return {
+        const app = {
 
             id,
 
-            name,
+            name:
+                rawApp.name ||
+                id,
 
             title:
-                app.title ||
-                name,
+                rawApp.title ||
+                rawApp.name ||
+                id,
 
             description:
-                app.description ||
-                "",
+                rawApp.description ||
+                "HalDo AI OS Anwendung.",
 
-            category,
+            category:
+                normalizeId(
+                    rawApp.category ||
+                    "other"
+                ),
 
             icon:
-                app.icon ||
-                "",
-
-            path:
-                app.path ||
-                app.url ||
-                "",
-
-            url:
-                app.url ||
-                app.path ||
-                "",
+                rawApp.icon ||
+                "◇",
 
             type:
-                app.type ||
+                rawApp.type ||
                 "internal",
 
             enabled:
-                app.enabled !== false,
+                rawApp.enabled !== false,
 
             visible:
-                app.visible !== false,
+                rawApp.visible !== false,
 
             system:
-                app.system === true,
+                Boolean(
+                    rawApp.system
+                ),
 
             featured:
-                app.featured === true,
+                Boolean(
+                    rawApp.featured
+                ),
 
             favorite:
-                app.favorite === true,
+                Boolean(
+                    rawApp.favorite
+                ),
 
             order:
                 Number.isFinite(
-                    Number(app.order)
+                    Number(
+                        rawApp.order
+                    )
                 )
-                    ? Number(app.order)
+                    ? Number(
+                        rawApp.order
+                    )
                     : index,
 
             keywords:
                 Array.isArray(
-                    app.keywords
+                    rawApp.keywords
                 )
-                    ? app.keywords
+                    ? rawApp.keywords
+                        .map(
+                            keyword =>
+                                String(
+                                    keyword
+                                )
+                                .trim()
+                                .toLowerCase()
+                        )
+                        .filter(
+                            Boolean
+                        )
                     : [],
 
             permissions:
                 Array.isArray(
-                    app.permissions
+                    rawApp.permissions
                 )
-                    ? app.permissions
+                    ? [
+                        ...rawApp.permissions
+                    ]
                     : [],
 
+            module:
+                rawApp.module ||
+                null,
+
+            route:
+                rawApp.route ||
+                null,
+
             metadata:
-                app.metadata &&
-                typeof app.metadata === "object"
-                    ? app.metadata
+                rawApp.metadata &&
+                typeof rawApp.metadata ===
+                    "object"
+                    ? {
+                        ...rawApp.metadata
+                    }
                     : {}
 
         };
 
-    }
 
-
-    /* ========================================================
-       04 — STORAGE
-       ======================================================== */
-
-    function loadSavedState() {
-
-        try {
-
-            const kernel =
-                window.HalDoKernel;
-
-
-            if (
-                kernel &&
-                kernel.storage
-            ) {
-
-                const saved =
-                    kernel.storage.get(
-                        STORAGE_KEY,
-                        null
-                    );
-
-
-                if (
-                    saved &&
-                    typeof saved ===
-                    "object"
-                ) {
-
-                    state.favorites =
-                        Array.isArray(
-                            saved.favorites
-                        )
-                            ? saved.favorites
-                            : [];
-
-                    state.lastOpenedApp =
-                        saved.lastOpenedApp ||
-                        null;
-
-                    log(
-                        "Gespeicherter App-Zustand geladen."
-                    );
-
-                    return;
-
-                }
-
-            }
-
-
-            /*
-             * Fallback
-             */
-
-            const raw =
-                localStorage.getItem(
-                    STORAGE_KEY
-                );
-
-
-            if (!raw) {
-
-                return;
-
-            }
-
-
-            const saved =
-                JSON.parse(raw);
-
-
-            state.favorites =
-                Array.isArray(
-                    saved.favorites
-                )
-                    ? saved.favorites
-                    : [];
-
-
-            state.lastOpenedApp =
-                saved.lastOpenedApp ||
-                null;
-
-        }
-        catch (error) {
-
-            log(
-                "Gespeicherter App-Zustand konnte nicht geladen werden.",
-                "warning"
-            );
-
-        }
-
-    }
-
-
-    function saveState() {
-
-        const data = {
-
-            favorites:
-                state.favorites,
-
-            lastOpenedApp:
-                state.lastOpenedApp
-
-        };
-
-
-        try {
-
-            if (
-                window.HalDoKernel &&
-                window.HalDoKernel.storage
-            ) {
-
-                window.HalDoKernel.storage.set(
-                    STORAGE_KEY,
-                    data
-                );
-
-                return true;
-
-            }
-
-
-            localStorage.setItem(
-                STORAGE_KEY,
-                JSON.stringify(data)
-            );
-
-
-            return true;
-
-        }
-        catch (error) {
-
-            log(
-                "App-Zustand konnte nicht gespeichert werden.",
-                "warning"
-            );
-
-
-            return false;
-
-        }
+        return app;
 
     }
 
 
     /* ========================================================
-       05 — APP REGISTRATION
+       07 — APP SORTIERUNG
        ======================================================== */
 
-    function registerApp(
-        app
-    ) {
-
-        const normalized =
-            normalizeApp(
-                app,
-                state.apps.length
-            );
-
-
-        if (!normalized) {
-
-            return null;
-
-        }
-
-
-        const existingIndex =
-            state.apps.findIndex(
-                item =>
-                    item.id ===
-                    normalized.id
-            );
-
-
-        if (
-            existingIndex >= 0
-        ) {
-
-            state.apps[
-                existingIndex
-            ] = normalized;
-
-        }
-        else {
-
-            state.apps.push(
-                normalized
-            );
-
-        }
-
-
-        /*
-         * Gespeicherte Favoriten anwenden.
-         */
-
-        if (
-            state.favorites.includes(
-                normalized.id
-            )
-        ) {
-
-            normalized.favorite =
-                true;
-
-        }
-
-
-        return normalized;
-
-    }
-
-
-    function registerApps(
+    function sortApps(
         apps
     ) {
 
-        if (
-            !Array.isArray(apps)
-        ) {
-
-            return 0;
-
-        }
-
-
-        let count = 0;
-
-
-        apps.forEach(
-            app => {
-
-                if (
-                    registerApp(app)
-                ) {
-
-                    count++;
-
-                }
-
-            }
-        );
-
-
-        sortApps();
-
-        rebuildCategories();
-
-
-        emit(
-            "apps:registered",
-            {
-                count
-            }
-        );
-
-
-        return count;
-
-    }
-
-
-    function unregisterApp(
-        appId
-    ) {
-
-        const index =
-            state.apps.findIndex(
-                app =>
-                    app.id ===
-                    appId
-            );
-
-
-        if (
-            index < 0
-        ) {
-
-            return false;
-
-        }
-
-
-        state.apps.splice(
-            index,
-            1
-        );
-
-
-        state.favorites =
-            state.favorites.filter(
-                id =>
-                    id !== appId
-            );
-
-
-        saveState();
-
-        rebuildCategories();
-
-
-        emit(
-            "app:unregistered",
-            {
-                appId
-            }
-        );
-
-
-        return true;
-
-    }
-
-
-    /* ========================================================
-       06 — SORTIERUNG
-       ======================================================== */
-
-    function sortApps() {
-
-        state.apps.sort(
+        return [
+            ...apps
+        ]
+        .sort(
             (
                 a,
                 b
             ) => {
 
-                /*
-                 * Featured zuerst.
-                 */
+                const orderA =
+                    Number(
+                        a.order
+                    ) || 0;
+
+
+                const orderB =
+                    Number(
+                        b.order
+                    ) || 0;
+
 
                 if (
-                    a.featured !==
-                    b.featured
+                    orderA !==
+                    orderB
                 ) {
 
-                    return a.featured
-                        ? -1
-                        : 1;
+                    return (
+                        orderA -
+                        orderB
+                    );
 
                 }
 
 
-                /*
-                 * Danach Reihenfolge.
-                 */
-
-                if (
-                    a.order !==
-                    b.order
-                ) {
-
-                    return a.order -
-                        b.order;
-
-                }
-
-
-                /*
-                 * Danach Name.
-                 */
-
-                return a.name.localeCompare(
-                    b.name,
+                return String(
+                    a.name
+                )
+                .localeCompare(
+                    String(
+                        b.name
+                    ),
                     "de"
                 );
 
@@ -674,116 +438,615 @@
 
 
     /* ========================================================
-       07 — KATEGORIEN
+       08 — STORAGE LADEN
        ======================================================== */
 
-    function rebuildCategories() {
+    function loadLocalState() {
+
+        try {
+
+            const stored =
+                window.localStorage.getItem(
+                    STORAGE_KEY
+                );
+
+
+            if (
+                !stored
+            ) {
+
+                return;
+
+            }
+
+
+            const parsed =
+                JSON.parse(
+                    stored
+                );
+
+
+            if (
+                !parsed ||
+                typeof parsed !==
+                    "object"
+            ) {
+
+                return;
+
+            }
+
+
+            if (
+                Array.isArray(
+                    parsed.favoriteIds
+                )
+            ) {
+
+                parsed.favoriteIds
+                    .forEach(
+                        id => {
+
+                            state.favoriteIds.add(
+                                normalizeId(
+                                    id
+                                )
+                            );
+
+                        }
+                    );
+
+            }
+
+
+            if (
+                typeof parsed.search ===
+                "string"
+            ) {
+
+                state.search =
+                    parsed.search;
+
+            }
+
+
+            if (
+                typeof parsed.activeCategory ===
+                "string"
+            ) {
+
+                state.activeCategory =
+                    parsed.activeCategory;
+
+            }
+
+        }
+        catch (
+            error
+        ) {
+
+            log(
+                "Lokaler App-Status konnte nicht geladen werden.",
+                "warning"
+            );
+
+        }
+
+    }
+
+
+    /* ========================================================
+       09 — STORAGE SPEICHERN
+       ======================================================== */
+
+    function saveLocalState() {
+
+        try {
+
+            const data = {
+
+                favoriteIds:
+                    [
+                        ...state.favoriteIds
+                    ],
+
+                search:
+                    state.search,
+
+                activeCategory:
+                    state.activeCategory
+
+            };
+
+
+            window.localStorage.setItem(
+                STORAGE_KEY,
+                JSON.stringify(
+                    data
+                )
+            );
+
+        }
+        catch (
+            error
+        ) {
+
+            log(
+                "Lokaler App-Status konnte nicht gespeichert werden.",
+                "warning"
+            );
+
+        }
+
+    }
+
+
+    /* ========================================================
+       10 — APPS.JSON LADEN
+       ======================================================== */
+
+    async function loadApps(
+        source = APPS_FILE
+    ) {
+
+        if (
+            state.loading
+        ) {
+
+            return state.apps;
+
+        }
+
+
+        state.loading =
+            true;
+
+        state.error =
+            null;
+
+
+        emit(
+            "apps:loading"
+        );
+
+
+        log(
+            `Lade App-Konfiguration: ${source}`
+        );
+
+
+        try {
+
+            const response =
+                await fetch(
+                    source,
+                    {
+                        method:
+                            "GET",
+
+                        cache:
+                            "no-store",
+
+                        headers: {
+                            "Accept":
+                                "application/json"
+                        }
+                    }
+                );
+
+
+            if (
+                !response.ok
+            ) {
+
+                throw new Error(
+                    `HTTP ${response.status}: ${response.statusText}`
+                );
+
+            }
+
+
+            const data =
+                await response.json();
+
+
+            if (
+                !data ||
+                typeof data !==
+                    "object"
+            ) {
+
+                throw new Error(
+                    "Die App-Konfiguration ist kein gültiges JSON-Objekt."
+                );
+
+            }
+
+
+            if (
+                !Array.isArray(
+                    data.apps
+                )
+            ) {
+
+                throw new Error(
+                    "In config/apps.json wurde kein gültiges 'apps'-Array gefunden."
+                );
+
+            }
+
+
+            const normalized =
+                data.apps
+                    .map(
+                        normalizeApp
+                    )
+                    .filter(
+                        Boolean
+                    );
+
+
+            state.apps =
+                sortApps(
+                    normalized
+                );
+
+
+            /*
+             * Favoriten aus JSON übernehmen.
+             * Danach lokale Favoriten anwenden.
+             */
+
+            state.apps.forEach(
+                app => {
+
+                    if (
+                        app.favorite
+                    ) {
+
+                        state.favoriteIds.add(
+                            app.id
+                        );
+
+                    }
+
+
+                    if (
+                        state.favoriteIds.has(
+                            app.id
+                        )
+                    ) {
+
+                        app.favorite =
+                            true;
+
+                    }
+
+                }
+            );
+
+
+            buildCategories();
+
+
+            state.loading =
+                false;
+
+            state.ready =
+                true;
+
+
+            saveLocalState();
+
+
+            emit(
+                "apps:loaded",
+                {
+                    apps:
+                        getAllApps(),
+
+                    version:
+                        data.version ||
+                        VERSION,
+
+                    system:
+                        data.system ||
+                        "HalDo AI OS"
+
+                }
+            );
+
+
+            emit(
+                "ready",
+                getState()
+            );
+
+
+            log(
+                `${state.apps.length} Apps erfolgreich geladen.`
+            );
+
+
+            return getAllApps();
+
+        }
+        catch (
+            error
+        ) {
+
+            state.loading =
+                false;
+
+            state.ready =
+                false;
+
+            state.error =
+                error;
+
+
+            log(
+                `Apps konnten nicht geladen werden: ${error.message}`,
+                "error"
+            );
+
+
+            emit(
+                "apps:error",
+                error
+            );
+
+
+            /*
+             * WICHTIG:
+             * Das System stürzt nicht ab.
+             *
+             * Wir stellen eine minimale
+             * sichere Foundation bereit.
+             */
+
+            if (
+                state.apps.length ===
+                0
+            ) {
+
+                state.apps =
+                    createEmergencyApps();
+
+
+                buildCategories();
+
+            }
+
+
+            return getAllApps();
+
+        }
+
+    }
+
+
+    /* ========================================================
+       11 — NOTFALL-APPS
+       ======================================================== */
+
+    function createEmergencyApps() {
+
+        return [
+
+            normalizeApp(
+                {
+                    id:
+                        "haldo-ai",
+
+                    name:
+                        "HalDo AI",
+
+                    title:
+                        "HalDo AI",
+
+                    description:
+                        "HalDo AI Systemassistent.",
+
+                    category:
+                        "ai",
+
+                    icon:
+                        "assets/logo/logo.png",
+
+                    type:
+                        "internal",
+
+                    enabled:
+                        true,
+
+                    visible:
+                        true,
+
+                    system:
+                        true,
+
+                    order:
+                        1
+
+                }
+            ),
+
+            normalizeApp(
+                {
+                    id:
+                        "settings",
+
+                    name:
+                        "Einstellungen",
+
+                    title:
+                        "Einstellungen",
+
+                    description:
+                        "HalDo AI OS Einstellungen.",
+
+                    category:
+                        "settings",
+
+                    icon:
+                        "⚙",
+
+                    type:
+                        "internal",
+
+                    enabled:
+                        true,
+
+                    visible:
+                        true,
+
+                    system:
+                        true,
+
+                    order:
+                        2
+
+                }
+            )
+
+        ]
+        .filter(
+            Boolean
+        );
+
+    }
+
+
+    /* ========================================================
+       12 — KATEGORIEN ERSTELLEN
+       ======================================================== */
+
+    function buildCategories() {
 
         const map =
             new Map();
 
 
-        state.apps.forEach(
-            app => {
+        /*
+         * Alle Apps zählen.
+         */
 
-                if (
-                    !app.visible
-                ) {
+        state.apps
+            .filter(
+                app =>
+                    app.visible !== false
+            )
+            .forEach(
+                app => {
 
-                    return;
-
-                }
-
-
-                if (
-                    !map.has(
-                        app.category
-                    )
-                ) {
-
-                    map.set(
-                        app.category,
-                        0
-                    );
-
-                }
+                    const id =
+                        app.category ||
+                        "other";
 
 
-                map.set(
-                    app.category,
+                    if (
+                        !map.has(id)
+                    ) {
+
+                        map.set(
+                            id,
+                            {
+                                id,
+
+                                name:
+                                    getCategoryName(
+                                        id
+                                    ),
+
+                                count:
+                                    0
+
+                            }
+                        );
+
+                    }
+
+
                     map.get(
-                        app.category
-                    ) + 1
-                );
+                        id
+                    ).count++;
 
-            }
-        );
+                }
+            );
 
 
-        state.categories = [
+        const categories = [
 
             {
-                id: "all",
-                name: "Alle",
+                id:
+                    "all",
+
+                name:
+                    "Alle Apps",
+
                 count:
                     state.apps.filter(
                         app =>
-                            app.visible
+                            app.visible !== false
                     ).length
+
             },
 
             {
-                id: "favorites",
-                name: "Favoriten",
+                id:
+                    "favorites",
+
+                name:
+                    "Favoriten",
+
                 count:
                     state.apps.filter(
                         app =>
+                            app.visible !== false &&
                             app.favorite
                     ).length
+
             }
 
         ];
 
 
         map.forEach(
-            (
-                count,
-                id
-            ) => {
+            category => {
 
-                state.categories.push({
-
-                    id,
-
-                    name:
-                        getCategoryName(
-                            id
-                        ),
-
-                    count
-
-                });
+                categories.push(
+                    category
+                );
 
             }
         );
 
 
+        state.categories =
+            categories;
+
+
         emit(
             "categories:updated",
-            state.categories
+            getCategories()
         );
 
     }
 
 
+    /* ========================================================
+       13 — KATEGORIENNAMEN
+       ======================================================== */
+
     function getCategoryName(
-        id
+        category
     ) {
 
         const names = {
 
             ai:
-                "KI & Assistenten",
+                "KI & AI",
 
             communication:
                 "Kommunikation",
@@ -791,44 +1054,32 @@
             productivity:
                 "Produktivität",
 
-            media:
-                "Medien",
-
-            creative:
-                "Kreativ",
-
-            education:
-                "Bildung",
-
-            development:
-                "Entwicklung",
-
-            system:
-                "System",
-
-            security:
-                "Sicherheit",
-
-            internet:
-                "Internet",
+            tools:
+                "Werkzeuge",
 
             files:
                 "Dateien",
 
-            tools:
-                "Werkzeuge",
+            media:
+                "Medien",
 
-            games:
-                "Spiele",
+            internet:
+                "Internet",
 
-            health:
-                "Gesundheit",
+            education:
+                "Lernen",
 
-            business:
-                "Business",
+            development:
+                "Entwicklung",
+
+            security:
+                "Sicherheit",
 
             settings:
                 "Einstellungen",
+
+            system:
+                "System",
 
             other:
                 "Weitere Apps"
@@ -837,35 +1088,77 @@
 
 
         return (
-            names[id] ||
-            id
+            names[category] ||
+            category
+                .replace(
+                    /-/g,
+                    " "
+                )
+                .replace(
+                    /\b\w/g,
+                    letter =>
+                        letter.toUpperCase()
+                )
         );
 
     }
 
 
     /* ========================================================
-       08 — APP ABFRAGEN
+       14 — ALLE APPS
        ======================================================== */
 
     function getAllApps() {
 
-        return [
-            ...state.apps
-        ];
+        return state.apps
+            .filter(
+                app =>
+                    app.visible !== false
+            )
+            .map(
+                app =>
+                    ({
+                        ...app,
+
+                        keywords:
+                            [
+                                ...app.keywords
+                            ],
+
+                        permissions:
+                            [
+                                ...app.permissions
+                            ],
+
+                        metadata:
+                            {
+                                ...app.metadata
+                            }
+
+                    })
+            );
 
     }
 
+
+    /* ========================================================
+       15 — APP ABFRAGEN
+       ======================================================== */
 
     function getApp(
         appId
     ) {
 
+        const id =
+            normalizeId(
+                appId
+            );
+
+
         return (
             state.apps.find(
                 app =>
-                    app.id ===
-                    appId
+                    app.id === id
             ) ||
             null
         );
@@ -873,123 +1166,99 @@
     }
 
 
-    function getVisibleApps() {
-
-        return state.apps.filter(
-            app =>
-                app.visible &&
-                app.enabled
-        );
-
-    }
-
+    /* ========================================================
+       16 — APPS NACH KATEGORIE
+       ======================================================== */
 
     function getAppsByCategory(
         category
     ) {
 
+        const categoryId =
+            normalizeId(
+                category
+            );
+
+
         if (
-            category ===
-            "all"
+            !categoryId ||
+            categoryId ===
+                "all"
         ) {
 
-            return getVisibleApps();
+            return getAllApps();
 
         }
 
 
         if (
-            category ===
-            "favorites"
+            categoryId ===
+                "favorites"
         ) {
 
-            return getVisibleApps()
-                .filter(
-                    app =>
-                        app.favorite
-                );
+            return getFavorites();
 
         }
 
 
-        return getVisibleApps()
+        return state.apps
             .filter(
                 app =>
+                    app.visible !== false &&
                     app.category ===
-                    category
-            );
-
-    }
-
-
-    /* ========================================================
-       09 — APP SUCHE
-       ======================================================== */
-
-    function searchApps(
-        term
-    ) {
-
-        const search =
-            String(
-                term || ""
+                        categoryId
             )
-            .trim()
-            .toLowerCase();
-
-
-        if (!search) {
-
-            return getVisibleApps();
-
-        }
-
-
-        return getVisibleApps()
-            .filter(
-                app => {
-
-                    const haystack = [
-
-                        app.name,
-
-                        app.title,
-
-                        app.description,
-
-                        app.category,
-
-                        ...app.keywords
-
-                    ]
-                    .join(" ")
-                    .toLowerCase();
-
-
-                    return haystack.includes(
-                        search
-                    );
-
-                }
+            .map(
+                app =>
+                    ({
+                        ...app
+                    })
             );
 
     }
 
 
     /* ========================================================
-       10 — FAVORITEN
+       17 — FAVORITEN
        ======================================================== */
 
-    function setFavorite(
-        appId,
-        value = true
+    function getFavorites() {
+
+        return state.apps
+            .filter(
+                app =>
+                    app.visible !== false &&
+                    app.favorite
+            )
+            .map(
+                app =>
+                    ({
+                        ...app
+                    })
+            );
+
+    }
+
+
+    function toggleFavorite(
+        appId
     ) {
+
+        const id =
+            normalizeId(
+                appId
+            );
+
 
         const app =
-            getApp(appId);
+            getApp(
+                id
+            );
 
 
-        if (!app) {
+        if (
+            !app
+        ) {
 
             return false;
 
@@ -997,40 +1266,31 @@
 
 
         app.favorite =
-            Boolean(value);
+            !app.favorite;
 
 
         if (
             app.favorite
         ) {
 
-            if (
-                !state.favorites.includes(
-                    appId
-                )
-            ) {
-
-                state.favorites.push(
-                    appId
-                );
-
-            }
+            state.favoriteIds.add(
+                id
+            );
 
         }
         else {
 
-            state.favorites =
-                state.favorites.filter(
-                    id =>
-                        id !== appId
-                );
+            state.favoriteIds.delete(
+                id
+            );
 
         }
 
 
-        saveState();
+        saveLocalState();
 
-        rebuildCategories();
+
+        buildCategories();
 
 
         emit(
@@ -1043,181 +1303,322 @@
         );
 
 
-        return true;
+        return app.favorite;
 
     }
 
 
-    function toggleFavorite(
-        appId
+    /* ========================================================
+       18 — SUCHEN
+       ======================================================== */
+
+    function searchApps(
+        query
     ) {
 
-        const app =
-            getApp(appId);
+        const term =
+            String(
+                query || ""
+            )
+            .trim()
+            .toLowerCase();
 
 
-        if (!app) {
+        state.search =
+            term;
 
-            return false;
+
+        saveLocalState();
+
+
+        if (
+            !term
+        ) {
+
+            return getAllApps();
 
         }
 
 
-        return setFavorite(
-            appId,
-            !app.favorite
-        );
-
-    }
-
-
-    function getFavorites() {
-
-        return getVisibleApps()
+        return state.apps
             .filter(
                 app =>
-                    app.favorite
+                    app.visible !== false
+            )
+            .filter(
+                app => {
+
+                    const searchable =
+                        [
+
+                            app.id,
+
+                            app.name,
+
+                            app.title,
+
+                            app.description,
+
+                            app.category,
+
+                            ...app.keywords
+
+                        ]
+                        .join(
+                            " "
+                        )
+                        .toLowerCase();
+
+
+                    return searchable.includes(
+                        term
+                    );
+
+                }
+            )
+            .map(
+                app =>
+                    ({
+                        ...app
+                    })
             );
 
     }
 
 
     /* ========================================================
-       11 — APP STARTEN
+       19 — SUCHSTATUS
        ======================================================== */
 
-    function openApp(
-        appId
+    function setSearch(
+        query
+    ) {
+
+        state.search =
+            String(
+                query || ""
+            )
+            .trim();
+
+
+        saveLocalState();
+
+
+        emit(
+            "search:changed",
+            state.search
+        );
+
+    }
+
+
+    function getSearch() {
+
+        return state.search;
+
+    }
+
+
+    /* ========================================================
+       20 — KATEGORIE SETZEN
+       ======================================================== */
+
+    function setCategory(
+        category
+    ) {
+
+        state.activeCategory =
+            normalizeId(
+                category
+            ) ||
+            "all";
+
+
+        saveLocalState();
+
+
+        emit(
+            "category:changed",
+            state.activeCategory
+        );
+
+
+        return state.activeCategory;
+
+    }
+
+
+    function getCategory() {
+
+        return state.activeCategory;
+
+    }
+
+
+    /* ========================================================
+       21 — KATEGORIEN ABFRAGEN
+       ======================================================== */
+
+    function getCategories() {
+
+        return state.categories.map(
+            category =>
+                ({
+                    ...category
+                })
+        );
+
+    }
+
+
+    /* ========================================================
+       22 — APP REGISTRIEREN
+       ======================================================== */
+
+    function registerApp(
+        appData
     ) {
 
         const app =
-            getApp(appId);
-
-
-        if (!app) {
-
-            log(
-                `App nicht gefunden: ${appId}`,
-                "warning"
+            normalizeApp(
+                appData,
+                state.apps.length
             );
-
-
-            return false;
-
-        }
 
 
         if (
-            app.enabled === false
+            !app
         ) {
 
-            log(
-                `App deaktiviert: ${app.name}`,
-                "warning"
-            );
-
-
-            return false;
+            return null;
 
         }
 
 
-        state.lastOpenedApp =
-            app.id;
+        const existingIndex =
+            state.apps.findIndex(
+                existing =>
+                    existing.id ===
+                    app.id
+            );
 
 
-        saveState();
+        if (
+            existingIndex >=
+            0
+        ) {
+
+            state.apps[
+                existingIndex
+            ] =
+                {
+                    ...state.apps[
+                        existingIndex
+                    ],
+
+                    ...app
+
+                };
+
+        }
+        else {
+
+            state.apps.push(
+                app
+            );
+
+        }
+
+
+        state.apps =
+            sortApps(
+                state.apps
+            );
+
+
+        if (
+            app.favorite
+        ) {
+
+            state.favoriteIds.add(
+                app.id
+            );
+
+        }
+
+
+        buildCategories();
 
 
         emit(
-            "app:opening",
-            {
-                app
-            }
+            "apps:registered",
+            app
         );
 
 
-        /*
-         * Interne App
-         */
+        return getApp(
+            app.id
+        );
+
+    }
+
+
+    /* ========================================================
+       23 — APP ENTFERNEN
+       ======================================================== */
+
+    function unregisterApp(
+        appId
+    ) {
+
+        const id =
+            normalizeId(
+                appId
+            );
+
+
+        const index =
+            state.apps.findIndex(
+                app =>
+                    app.id === id
+            );
+
 
         if (
-            app.type ===
-                "internal" ||
-            !app.type
+            index === -1
         ) {
 
-            if (
-                app.path
-            ) {
-
-                window.location.href =
-                    app.path;
-
-            }
-            else {
-
-                /*
-                 * Noch keine Seite vorhanden:
-                 * App-Event auslösen.
-                 */
-
-                emit(
-                    "app:launch",
-                    {
-                        app
-                    }
-                );
-
-
-                log(
-                    `App "${app.name}" ist registriert, besitzt aber noch keinen Pfad.`,
-                    "warning"
-                );
-
-            }
-
-
-            return true;
+            return false;
 
         }
 
 
-        /*
-         * Externe App / Website
-         */
-
-        if (
-            app.type ===
-                "external"
-        ) {
-
-            if (
-                app.url
-            ) {
-
-                window.open(
-                    app.url,
-                    "_blank",
-                    "noopener,noreferrer"
-                );
-
-                return true;
-
-            }
-
-        }
+        const removed =
+            state.apps.splice(
+                index,
+                1
+            )[0];
 
 
-        /*
-         * Spezial-App
-         */
+        state.favoriteIds.delete(
+            id
+        );
+
+
+        state.registeredModules.delete(
+            id
+        );
+
+
+        buildCategories();
+
+
+        saveLocalState();
+
 
         emit(
-            "app:launch",
-            {
-                app
-            }
+            "apps:unregistered",
+            removed
         );
 
 
@@ -1227,13 +1628,23 @@
 
 
     /* ========================================================
-       12 — JSON KONFIGURATION LADEN
+       24 — APP MODUL REGISTRIEREN
        ======================================================== */
 
-    async function loadConfig() {
+    function registerModule(
+        appId,
+        module
+    ) {
+
+        const id =
+            normalizeId(
+                appId
+            );
+
 
         if (
-            state.loading
+            !id ||
+            !module
         ) {
 
             return false;
@@ -1241,227 +1652,39 @@
         }
 
 
-        state.loading =
-            true;
-
-        state.error =
-            null;
-
-
-        setStartupStatus(
-            "App-Konfiguration wird geladen..."
-        );
-
-
-        try {
-
-            const response =
-                await fetch(
-                    APP_CONFIG_PATH,
-                    {
-                        cache:
-                            "no-store"
-                    }
-                );
-
-
-            if (
-                !response.ok
-            ) {
-
-                throw new Error(
-                    `HTTP ${response.status}`
-                );
-
-            }
-
-
-            const data =
-                await response.json();
-
-
-            /*
-             * Unterstützte Formate:
-             *
-             * {
-             *   "apps": []
-             * }
-             *
-             * oder direkt:
-             *
-             * []
-             */
-
-            let apps =
-                Array.isArray(data)
-                    ? data
-                    : data.apps;
-
-
-            if (
-                !Array.isArray(apps)
-            ) {
-
-                throw new Error(
-                    "apps.json enthält keine gültige App-Liste."
-                );
-
-            }
-
-
-            registerApps(
-                apps
-            );
-
-
-            state.configLoaded =
-                true;
-
-
-            state.ready =
-                true;
-
-
-            state.loading =
-                false;
-
-
-            emit(
-                "apps:loaded",
-                {
-                    apps:
-                        getAllApps()
-                }
-            );
-
-
-            log(
-                `${state.apps.length} Apps geladen.`
-            );
-
-
-            setStartupStatus(
-                "HalDo AI Apps wurden geladen."
-            );
-
-
-            return true;
-
-        }
-        catch (error) {
-
-            state.loading =
-                false;
-
-            state.error =
-                error;
-
-
-            log(
-                `App-Konfiguration konnte nicht geladen werden: ${error.message}`,
-                "error"
-            );
-
-
-            /*
-             * Wichtig:
-             *
-             * Ein Fehler bei apps.json darf das gesamte
-             * Betriebssystem NICHT komplett zerstören.
-             */
-
-            state.ready =
-                true;
-
-
-            emit(
-                "apps:load-error",
-                {
-                    error
-                }
-            );
-
-
-            setStartupStatus(
-                "HalDo AI App-System läuft im Grundmodus."
-            );
-
-
-            return false;
-
-        }
-
-    }
-
-
-    /* ========================================================
-       13 — APP MANAGER INITIALISIERUNG
-       ======================================================== */
-
-    async function init() {
-
-        if (
-            state.initialized
-        ) {
-
-            return true;
-
-        }
-
-
-        log(
-            "App Manager wird initialisiert."
-        );
-
-
-        loadSavedState();
-
-
-        state.initialized =
-            true;
-
-
-        emit(
-            "appmanager:initialized"
+        state.registeredModules.set(
+            id,
+            module
         );
 
 
         /*
-         * Konfiguration laden.
-         */
-
-        await loadConfig();
-
-
-        rebuildCategories();
-
-
-        /*
-         * Kernel informieren.
+         * Zusätzlich mit Router verbinden,
+         * sobald Router vorhanden ist.
          */
 
         if (
-            window.HalDoKernel &&
-            typeof
-                window.HalDoKernel.registerModule ===
+            window.HalDoAppRouter &&
+            typeof window.HalDoAppRouter.registerModule ===
                 "function"
         ) {
 
-            window.HalDoKernel.registerModule(
-                "app-manager",
-                api
+            window.HalDoAppRouter.registerModule(
+                id,
+                module
             );
 
         }
 
 
         emit(
-            "appmanager:ready"
-        );
+            "module:registered",
+            {
+                appId:
+                    id,
 
-
-        log(
-            "App Manager ist bereit."
+                module
+            }
         );
 
 
@@ -1471,20 +1694,46 @@
 
 
     /* ========================================================
-       14 — EVENT SYSTEM
+       25 — MODUL ABFRAGEN
        ======================================================== */
 
-    const listeners = {};
-
-
-    function on(
-        eventName,
-        callback
+    function getModule(
+        appId
     ) {
 
+        const id =
+            normalizeId(
+                appId
+            );
+
+
+        return (
+            state.registeredModules.get(
+                id
+            ) ||
+            null
+        );
+
+    }
+
+
+    /* ========================================================
+       26 — APP STATUS
+       ======================================================== */
+
+    function setEnabled(
+        appId,
+        enabled
+    ) {
+
+        const app =
+            getApp(
+                appId
+            );
+
+
         if (
-            typeof callback !==
-            "function"
+            !app
         ) {
 
             return false;
@@ -1492,17 +1741,22 @@
         }
 
 
-        if (
-            !listeners[eventName]
-        ) {
-
-            listeners[eventName] = [];
-
-        }
+        app.enabled =
+            Boolean(
+                enabled
+            );
 
 
-        listeners[eventName]
-            .push(callback);
+        emit(
+            "app:status",
+            {
+                app,
+
+                enabled:
+                    app.enabled
+
+            }
+        );
 
 
         return true;
@@ -1510,65 +1764,58 @@
     }
 
 
-    function emit(
-        eventName,
-        data = null
+    /* ========================================================
+       27 — SICHTBARKEIT
+       ======================================================== */
+
+    function setVisible(
+        appId,
+        visible
     ) {
 
-        const callbacks =
-            listeners[eventName];
+        const app =
+            getApp(
+                appId
+            );
 
 
         if (
-            callbacks
+            !app
         ) {
 
-            callbacks.forEach(
-                callback => {
-
-                    try {
-
-                        callback(data);
-
-                    }
-                    catch (error) {
-
-                        log(
-                            `Event-Fehler "${eventName}": ${error.message}`,
-                            "error"
-                        );
-
-                    }
-
-                }
-            );
+            return false;
 
         }
 
 
-        /*
-         * Zusätzlich Kernel-Event senden.
-         */
-
-        if (
-            window.HalDoKernel &&
-            typeof
-                window.HalDoKernel.emit ===
-                "function"
-        ) {
-
-            window.HalDoKernel.emit(
-                `appmanager:${eventName}`,
-                data
+        app.visible =
+            Boolean(
+                visible
             );
 
-        }
+
+        buildCategories();
+
+
+        emit(
+            "app:visibility",
+            {
+                app,
+
+                visible:
+                    app.visible
+
+            }
+        );
+
+
+        return true;
 
     }
 
 
     /* ========================================================
-       15 — STATUS
+       28 — STATE
        ======================================================== */
 
     function getState() {
@@ -1585,77 +1832,94 @@
                 state.loading,
 
             error:
-                state.error,
+                state.error
+                    ? state.error.message
+                    : null,
 
             appCount:
                 state.apps.length,
 
+            visibleAppCount:
+                state.apps.filter(
+                    app =>
+                        app.visible !== false
+                ).length,
+
             categoryCount:
                 state.categories.length,
 
-            favoriteCount:
-                state.favorites.length,
+            search:
+                state.search,
 
             activeCategory:
                 state.activeCategory,
 
-            searchTerm:
-                state.searchTerm,
+            favoriteCount:
+                state.favoriteIds.size,
 
-            configLoaded:
-                state.configLoaded,
-
-            lastOpenedApp:
-                state.lastOpenedApp
+            moduleCount:
+                state.registeredModules.size
 
         };
 
     }
 
 
-    function setCategory(
-        category
-    ) {
+    /* ========================================================
+       29 — INITIALISIERUNG
+       ======================================================== */
 
-        state.activeCategory =
-            category ||
-            "all";
+    async function init() {
 
+        if (
+            state.initialized
+        ) {
 
-        emit(
-            "category:changed",
-            {
-                category:
-                    state.activeCategory
-            }
-        );
+            return getState();
 
-    }
+        }
 
 
-    function setSearch(
-        term
-    ) {
+        state.initialized =
+            true;
 
-        state.searchTerm =
-            String(
-                term || ""
+
+        loadLocalState();
+
+
+        await loadApps();
+
+
+        /*
+         * Kernel verbinden.
+         */
+
+        if (
+            window.HalDoKernel &&
+            typeof window.HalDoKernel.registerModule ===
+                "function"
+        ) {
+
+            window.HalDoKernel.registerModule(
+                "app-manager",
+                api
             );
 
+        }
 
-        emit(
-            "search:changed",
-            {
-                term:
-                    state.searchTerm
-            }
+
+        log(
+            "App Manager ist initialisiert."
         );
+
+
+        return getState();
 
     }
 
 
     /* ========================================================
-       16 — PUBLIC API
+       30 — PUBLIC API
        ======================================================== */
 
     const api = {
@@ -1669,54 +1933,50 @@
 
         init,
 
-        loadConfig,
 
+        loadApps,
 
-        registerApp,
-
-        registerApps,
-
-        unregisterApp,
-
-
-        getApp,
 
         getAllApps,
 
-        getVisibleApps,
+        getApp,
 
         getAppsByCategory,
-
-
-        searchApps,
-
-
-        setFavorite,
-
-        toggleFavorite,
 
         getFavorites,
 
 
-        openApp,
+        toggleFavorite,
 
 
-        getCategories:
-            function () {
+        searchApps,
 
-                return [
-                    ...state.categories
-                ];
+        setSearch,
 
-            },
-
-
-        getCategoryName,
+        getSearch,
 
 
         setCategory,
 
-        setSearch,
+        getCategory,
+
+
+        getCategories,
+
+
+        registerApp,
+
+        unregisterApp,
+
+
+        registerModule,
+
+        getModule,
+
+
+        setEnabled,
+
+        setVisible,
 
 
         getState,
@@ -1724,16 +1984,13 @@
 
         on,
 
-        emit,
-
-
-        saveState
+        emit
 
     };
 
 
     /* ========================================================
-       17 — GLOBAL REGISTRATION
+       31 — GLOBAL
        ======================================================== */
 
     window.HalDoAppManager =
@@ -1750,65 +2007,22 @@
 
 
     /* ========================================================
-       18 — KERNEL CONNECTION
-       ======================================================== */
-
-    function connectToKernel() {
-
-        if (
-            !window.HalDoKernel
-        ) {
-
-            window.setTimeout(
-                connectToKernel,
-                100
-            );
-
-            return;
-
-        }
-
-
-        /*
-         * Auf Kernel Ready warten.
-         */
-
-        window.HalDoKernel.on(
-            "kernel:ready",
-            function () {
-
-                init();
-
-            }
-        );
-
-
-        /*
-         * Falls Kernel bereits fertig ist.
-         */
-
-        const kernelState =
-            window.HalDoKernel.getState();
-
-
-        if (
-            kernelState.ready
-        ) {
-
-            init();
-
-        }
-
-    }
-
-
-    /* ========================================================
-       19 — START
+       32 — START
        ======================================================== */
 
     function start() {
 
-        connectToKernel();
+        init()
+            .catch(
+                error => {
+
+                    log(
+                        `Initialisierungsfehler: ${error.message}`,
+                        "error"
+                    );
+
+                }
+            );
 
     }
 
