@@ -3,2139 +3,2023 @@
 
 <head>
 
-    <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-    >
-
-    <meta name="theme-color" content="#050914">
-
-    <title>HalDo AI OS 18 — Einstellungen</title>
-
-    <style>
-
-        /* =====================================================
-           HALDO AI OS 18
-           SETTINGS
-           ===================================================== */
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        html,
-        body {
-            min-height: 100%;
-        }
-
-        body {
-            background: #050914;
-            color: #ffffff;
-
-            font-family:
-                -apple-system,
-                BlinkMacSystemFont,
-                "Segoe UI",
-                Roboto,
-                Arial,
-                sans-serif;
-
-            overflow-x: hidden;
-        }
+<meta charset="UTF-8">
 
-        button {
-            font: inherit;
-            border: 0;
-        }
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+>
 
-        /* =====================================================
-           BACKGROUND
-           ===================================================== */
+<meta name="theme-color" content="#050914">
 
-        .background {
-            position: fixed;
-            inset: 0;
+<title>HalDo AI OS 18 — Einstellungen</title>
 
-            z-index: 0;
-            pointer-events: none;
-            overflow: hidden;
+<style>
 
-            background:
-                radial-gradient(
-                    circle at 50% 0%,
-                    rgba(0,126,255,.20),
-                    transparent 35%
-                ),
-                radial-gradient(
-                    circle at 0% 80%,
-                    rgba(0,210,255,.09),
-                    transparent 30%
-                ),
-                radial-gradient(
-                    circle at 100% 70%,
-                    rgba(120,50,255,.10),
-                    transparent 30%
-                ),
-                #050914;
-        }
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+}
 
-        .orb {
-            position: absolute;
+html,
+body {
+    min-height: 100%;
+}
 
-            border-radius: 50%;
+body {
 
-            filter: blur(65px);
+    min-height: 100vh;
 
-            opacity: .22;
+    background:
+        radial-gradient(
+            circle at 50% 0%,
+            rgba(0,126,255,.20),
+            transparent 35%
+        ),
+        radial-gradient(
+            circle at 100% 75%,
+            rgba(120,55,255,.11),
+            transparent 30%
+        ),
+        #050914;
 
-            animation:
-                floatOrb 9s ease-in-out infinite;
-        }
+    color: #fff;
 
-        .orb.one {
-            width: 190px;
-            height: 190px;
+    font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Arial,
+        sans-serif;
 
-            top: 5%;
-            left: -90px;
+    overflow-x: hidden;
+}
 
-            background: #007bff;
-        }
+button,
+input,
+select {
+    font: inherit;
+}
 
-        .orb.two {
-            width: 170px;
-            height: 170px;
+/* =====================================================
+   BACKGROUND
+===================================================== */
 
-            right: -80px;
-            bottom: 20%;
+.orb {
 
-            background: #783cff;
+    position: fixed;
 
-            animation-delay: -4s;
-        }
+    width: 190px;
+    height: 190px;
 
-        @keyframes floatOrb {
+    border-radius: 50%;
 
-            0%,
-            100% {
-                transform:
-                    translate(0,0)
-                    scale(1);
-            }
+    filter: blur(75px);
 
-            50% {
-                transform:
-                    translate(25px,-20px)
-                    scale(1.1);
-            }
+    opacity: .17;
 
-        }
+    pointer-events: none;
 
-        /* =====================================================
-           APP
-           ===================================================== */
+    z-index: 0;
+}
 
-        .app {
-            position: relative;
+.orb.one {
 
-            z-index: 1;
+    top: -80px;
+    left: -90px;
 
-            width: min(900px, 100%);
+    background: #087cff;
+}
 
-            min-height: 100vh;
+.orb.two {
 
-            margin: auto;
+    right: -90px;
+    bottom: 15%;
 
-            padding-bottom: 110px;
-        }
+    background: #773dff;
+}
 
-        /* =====================================================
-           HEADER
-           ===================================================== */
+/* =====================================================
+   APP
+===================================================== */
 
-        .header {
-            position: sticky;
+.app {
 
-            top: 0;
+    position: relative;
 
-            z-index: 20;
+    z-index: 1;
 
-            display: flex;
+    width: min(900px, 100%);
 
-            align-items: center;
-            justify-content: space-between;
+    min-height: 100vh;
 
-            padding: 10px 14px;
+    margin: auto;
 
-            background:
-                rgba(5,9,20,.88);
+    padding-bottom: 125px;
+}
 
-            border-bottom:
-                1px solid
-                rgba(255,255,255,.08);
+/* =====================================================
+   HEADER
+===================================================== */
 
-            backdrop-filter:
-                blur(22px);
+.header {
 
-            -webkit-backdrop-filter:
-                blur(22px);
-        }
+    position: sticky;
 
-        .brand {
-            display: flex;
+    top: 0;
 
-            align-items: center;
+    z-index: 50;
 
-            gap: 9px;
-        }
+    display: flex;
 
-        .logo {
-            width: 43px;
-            height: 43px;
+    align-items: center;
 
-            object-fit: contain;
+    justify-content: space-between;
 
-            animation:
-                logoRotate 9s linear infinite,
-                logoGlow 2.5s ease-in-out infinite;
-        }
+    padding: 9px 13px;
 
-        @keyframes logoRotate {
+    background:
+        rgba(5,9,20,.90);
 
-            from {
-                transform: rotate(0deg);
-            }
+    border-bottom:
+        1px solid
+        rgba(255,255,255,.08);
 
-            to {
-                transform: rotate(360deg);
-            }
+    backdrop-filter:
+        blur(22px);
 
-        }
+    -webkit-backdrop-filter:
+        blur(22px);
+}
 
-        @keyframes logoGlow {
+.brand {
 
-            0%,
-            100% {
-                filter:
-                    drop-shadow(
-                        0 0 3px
-                        rgba(255,255,255,.5)
-                    )
-                    drop-shadow(
-                        0 0 10px
-                        rgba(0,130,255,.5)
-                    );
-            }
+    display: flex;
 
-            50% {
-                filter:
-                    drop-shadow(
-                        0 0 8px
-                        rgba(255,255,255,.95)
-                    )
-                    drop-shadow(
-                        0 0 22px
-                        rgba(0,150,255,1)
-                    );
-            }
+    align-items: center;
 
-        }
+    gap: 9px;
+}
 
-        .brand-text strong {
-            display: block;
+.logo {
 
-            font-size: 14px;
-        }
+    width: 43px;
+    height: 43px;
 
-        .brand-text span {
-            display: block;
+    object-fit: contain;
 
-            margin-top: 2px;
+    animation:
+        logoRotate 9s linear infinite,
+        logoGlow 2.5s ease-in-out infinite;
+}
 
-            color: #71809a;
+@keyframes logoRotate {
 
-            font-size: 8px;
+    from {
+        transform: rotate(0deg);
+    }
 
-            letter-spacing: .7px;
-        }
+    to {
+        transform: rotate(360deg);
+    }
 
-        .back-button {
-            padding: 9px 13px;
+}
 
-            border-radius: 13px;
+@keyframes logoGlow {
 
-            background:
-                rgba(255,255,255,.06);
+    0%,
+    100% {
 
-            border:
-                1px solid
-                rgba(255,255,255,.08);
+        filter:
+            drop-shadow(
+                0 0 3px
+                rgba(255,255,255,.5)
+            )
+            drop-shadow(
+                0 0 10px
+                rgba(0,130,255,.5)
+            );
 
-            color: #9dccff;
+    }
 
-            cursor: pointer;
-        }
+    50% {
 
-        .back-button:active {
-            transform: scale(.94);
-        }
+        filter:
+            drop-shadow(
+                0 0 8px
+                rgba(255,255,255,.95)
+            )
+            drop-shadow(
+                0 0 22px
+                rgba(0,150,255,1)
+            );
 
-        /* =====================================================
-           HERO
-           ===================================================== */
+    }
 
-        .hero {
-            padding:
-                28px 16px 18px;
-        }
+}
 
-        .hero-badge {
-            display: inline-flex;
+.brand-text strong {
 
-            align-items: center;
+    display: block;
 
-            gap: 6px;
+    font-size: 14px;
+}
 
-            padding:
-                6px 10px;
+.brand-text span {
 
-            border-radius: 20px;
+    display: block;
 
-            background:
-                rgba(0,126,255,.08);
+    margin-top: 2px;
 
-            border:
-                1px solid
-                rgba(0,126,255,.13);
+    color: #71809a;
 
-            color: #73c4ff;
+    font-size: 8px;
 
-            font-size: 8px;
+    letter-spacing: .7px;
+}
 
-            letter-spacing: .7px;
-        }
+.back-button {
 
-        .hero-dot {
-            width: 6px;
-            height: 6px;
+    padding:
+        9px 13px;
 
-            border-radius: 50%;
+    border-radius: 13px;
 
-            background: #00ffad;
+    background:
+        rgba(255,255,255,.06);
 
-            box-shadow:
-                0 0 9px
-                rgba(0,255,173,.8);
-        }
+    border:
+        1px solid
+        rgba(255,255,255,.08);
 
-        .hero h1 {
-            margin-top: 12px;
+    color: #9dccff;
 
-            font-size: 28px;
+    cursor: pointer;
+}
 
-            font-weight: 800;
-        }
+.back-button:active {
 
-        .hero p {
-            margin-top: 7px;
+    transform:
+        scale(.94);
+}
 
-            color: #74829b;
+/* =====================================================
+   HERO
+===================================================== */
 
-            font-size: 10px;
+.hero {
 
-            line-height: 1.55;
-        }
+    padding:
+        27px 15px 18px;
+}
 
-        /* =====================================================
-           SECTION
-           ===================================================== */
+.badge {
 
-        .section {
-            padding:
-                0 16px 18px;
-        }
+    display: inline-flex;
 
-        .section-title {
-            margin-bottom: 9px;
+    align-items: center;
 
-            color: #8392aa;
+    gap: 6px;
 
-            font-size: 9px;
+    padding:
+        6px 10px;
 
-            font-weight: 700;
+    border-radius: 20px;
 
-            letter-spacing: .8px;
+    background:
+        rgba(0,126,255,.08);
 
-            text-transform: uppercase;
-        }
+    border:
+        1px solid
+        rgba(0,126,255,.13);
 
-        .settings-list {
-            overflow: hidden;
+    color: #75c4ff;
 
-            border-radius: 20px;
+    font-size: 8px;
 
-            background:
-                rgba(255,255,255,.045);
+    letter-spacing: .7px;
+}
 
-            border:
-                1px solid
-                rgba(255,255,255,.07);
-        }
+.dot {
 
-        /* =====================================================
-           SETTING ITEM
-           ===================================================== */
+    width: 6px;
+    height: 6px;
 
-        .setting {
-            width: 100%;
+    border-radius: 50%;
 
-            min-height: 62px;
+    background: #00ffad;
 
-            display: flex;
+    box-shadow:
+        0 0 9px
+        rgba(0,255,173,.8);
+}
 
-            align-items: center;
+.hero h1 {
 
-            gap: 11px;
+    margin-top: 12px;
 
-            padding:
-                10px 12px;
+    font-size: 27px;
 
-            background: transparent;
+    font-weight: 800;
+}
 
-            color: #ffffff;
+.hero p {
 
-            border-bottom:
-                1px solid
-                rgba(255,255,255,.055);
+    margin-top: 7px;
 
-            text-align: left;
+    color: #75839c;
 
-            cursor: pointer;
+    font-size: 10px;
 
-            transition: .18s ease;
-        }
+    line-height: 1.55;
+}
 
-        .setting:last-child {
-            border-bottom: 0;
-        }
+/* =====================================================
+   SECTION
+===================================================== */
 
-        .setting:active {
-            background:
-                rgba(0,126,255,.08);
-        }
+.section {
 
-        .setting-icon {
-            width: 38px;
-            height: 38px;
+    padding:
+        0 15px 18px;
+}
 
-            flex-shrink: 0;
+.section-title {
 
-            display: flex;
+    margin-bottom: 9px;
 
-            align-items: center;
-            justify-content: center;
+    color: #8190a8;
 
-            border-radius: 12px;
+    font-size: 9px;
 
-            background:
-                rgba(255,255,255,.055);
+    font-weight: 700;
 
-            border:
-                1px solid
-                rgba(255,255,255,.06);
+    letter-spacing: .8px;
 
-            font-size: 17px;
-        }
+    text-transform: uppercase;
+}
 
-        .setting-info {
-            flex: 1;
+/* =====================================================
+   PROFILE
+===================================================== */
 
-            min-width: 0;
-        }
+.profile {
 
-        .setting-info strong {
-            display: block;
+    display: flex;
 
-            font-size: 11px;
-        }
+    align-items: center;
 
-        .setting-info span {
-            display: block;
+    gap: 12px;
 
-            margin-top: 3px;
+    padding: 15px;
 
-            color: #697893;
+    border-radius: 20px;
 
-            font-size: 8px;
+    background:
+        linear-gradient(
+            135deg,
+            rgba(0,126,255,.10),
+            rgba(120,55,255,.07)
+        );
 
-            line-height: 1.4;
-        }
+    border:
+        1px solid
+        rgba(0,126,255,.14);
+}
 
-        .setting-arrow {
-            color: #52617a;
+.profile-logo {
 
-            font-size: 17px;
-        }
+    width: 52px;
+    height: 52px;
 
-        /* =====================================================
-           TOGGLE
-           ===================================================== */
+    object-fit: contain;
 
-        .switch {
-            position: relative;
+    animation:
+        logoGlow 2.5s ease-in-out infinite;
+}
 
-            width: 43px;
-            height: 25px;
+.profile-info {
 
-            flex-shrink: 0;
-        }
+    flex: 1;
+}
 
-        .switch input {
-            opacity: 0;
+.profile-info strong {
 
-            width: 0;
-            height: 0;
-        }
+    display: block;
 
-        .slider {
-            position: absolute;
+    font-size: 13px;
+}
 
-            inset: 0;
+.profile-info span {
 
-            cursor: pointer;
+    display: block;
 
-            border-radius: 30px;
+    margin-top: 4px;
 
-            background:
-                rgba(255,255,255,.12);
+    color: #71809a;
 
-            transition: .2s ease;
-        }
+    font-size: 8px;
+}
 
-        .slider::before {
-            content: "";
+.profile-status {
 
-            position: absolute;
+    display: inline-flex;
 
-            width: 19px;
-            height: 19px;
+    align-items: center;
 
-            left: 3px;
-            top: 3px;
+    gap: 5px;
 
-            border-radius: 50%;
+    margin-top: 8px;
 
-            background: #ffffff;
+    color: #61dfb0;
 
-            transition: .2s ease;
+    font-size: 7px;
+}
 
-            box-shadow:
-                0 2px 7px
-                rgba(0,0,0,.3);
-        }
+/* =====================================================
+   SETTING CARD
+===================================================== */
 
-        .switch input:checked + .slider {
-            background:
-                #087cff;
-        }
+.setting-list {
 
-        .switch input:checked + .slider::before {
-            transform:
-                translateX(18px);
-        }
+    display: flex;
 
-        /* =====================================================
-           SELECT
-           ===================================================== */
+    flex-direction: column;
 
-        .select-box {
-            max-width: 150px;
+    gap: 8px;
+}
 
-            padding:
-                7px 8px;
+.setting-card {
 
-            border-radius: 10px;
+    display: flex;
 
-            background:
-                rgba(255,255,255,.06);
+    align-items: center;
 
-            border:
-                1px solid
-                rgba(255,255,255,.08);
+    gap: 11px;
 
-            color: #a7b6cd;
+    min-height: 65px;
 
-            outline: none;
-        }
+    padding: 11px 13px;
 
-        /* =====================================================
-           PROFILE CARD
-           ===================================================== */
+    border-radius: 17px;
 
-        .profile-card {
-            display: flex;
+    background:
+        rgba(255,255,255,.045);
 
-            align-items: center;
+    border:
+        1px solid
+        rgba(255,255,255,.07);
+}
 
-            gap: 12px;
+.setting-icon {
 
-            padding: 16px;
+    width: 40px;
+    height: 40px;
 
-            border-radius: 21px;
+    display: flex;
 
-            background:
-                linear-gradient(
-                    135deg,
-                    rgba(0,126,255,.10),
-                    rgba(255,255,255,.035)
-                );
+    align-items: center;
+    justify-content: center;
 
-            border:
-                1px solid
-                rgba(0,126,255,.12);
-        }
+    flex-shrink: 0;
 
-        .profile-logo {
-            width: 55px;
-            height: 55px;
+    border-radius: 13px;
 
-            object-fit: contain;
+    background:
+        rgba(0,126,255,.08);
 
-            animation:
-                logoRotate 10s linear infinite,
-                logoGlow 2.5s ease-in-out infinite;
-        }
+    font-size: 18px;
+}
 
-        .profile-info {
-            flex: 1;
-        }
+.setting-info {
 
-        .profile-info strong {
-            display: block;
+    flex: 1;
 
-            font-size: 15px;
-        }
+    min-width: 0;
+}
 
-        .profile-info span {
-            display: block;
+.setting-info strong {
 
-            margin-top: 4px;
+    display: block;
 
-            color: #71809a;
+    font-size: 10px;
+}
 
-            font-size: 9px;
-        }
+.setting-info span {
 
-        /* =====================================================
-           DANGER
-           ===================================================== */
+    display: block;
 
-        .danger {
-            color: #ff8494;
-        }
+    margin-top: 4px;
 
-        .danger .setting-icon {
-            background:
-                rgba(255,50,80,.07);
+    color: #71809a;
 
-            border-color:
-                rgba(255,50,80,.12);
-        }
+    font-size: 8px;
 
-        /* =====================================================
-           SYSTEM INFO
-           ===================================================== */
+    line-height: 1.4;
+}
 
-        .system-card {
-            padding: 16px;
+/* =====================================================
+   SWITCH
+===================================================== */
 
-            border-radius: 20px;
+.switch {
 
-            background:
-                rgba(255,255,255,.04);
+    position: relative;
 
-            border:
-                1px solid
-                rgba(255,255,255,.065);
-        }
+    width: 43px;
+    height: 25px;
 
-        .system-row {
-            display: flex;
+    flex-shrink: 0;
 
-            justify-content: space-between;
+    border-radius: 30px;
 
-            padding:
-                8px 0;
+    background:
+        rgba(255,255,255,.12);
 
-            border-bottom:
-                1px solid
-                rgba(255,255,255,.045);
+    cursor: pointer;
 
-            font-size: 9px;
-        }
+    transition:
+        background .2s ease;
+}
 
-        .system-row:last-child {
-            border-bottom: 0;
-        }
+.switch input {
 
-        .system-row span:first-child {
-            color: #65748c;
-        }
+    position: absolute;
 
-        .system-row span:last-child {
-            color: #b7c4d8;
-        }
+    opacity: 0;
 
-        /* =====================================================
-           BOTTOM NAV
-           ===================================================== */
+    pointer-events: none;
+}
 
-        .bottom-nav {
-            position: fixed;
+.slider {
 
-            z-index: 100;
+    position: absolute;
 
-            left: 10px;
-            right: 10px;
-            bottom: 10px;
+    top: 3px;
+    left: 3px;
 
-            display: grid;
+    width: 19px;
+    height: 19px;
 
-            grid-template-columns:
-                repeat(4,1fr);
+    border-radius: 50%;
 
-            gap: 5px;
+    background:
+        #8190a8;
 
-            padding: 7px;
+    transition:
+        transform .2s ease,
+        background .2s ease;
+}
 
-            border-radius: 21px;
+.switch input:checked
++ .slider {
 
-            background:
-                rgba(7,12,25,.92);
+    transform:
+        translateX(18px);
 
-            border:
-                1px solid
-                rgba(255,255,255,.09);
+    background:
+        #6dc8ff;
+}
 
-            backdrop-filter:
-                blur(20px);
+.switch:has(
+    input:checked
+) {
 
-            -webkit-backdrop-filter:
-                blur(20px);
+    background:
+        rgba(0,126,255,.27);
+}
 
-            box-shadow:
-                0 15px 45px
-                rgba(0,0,0,.42);
-        }
+/* =====================================================
+   SELECT
+===================================================== */
 
-        .nav-item {
-            min-height: 45px;
+.select-wrap {
 
-            display: flex;
+    position: relative;
 
-            flex-direction: column;
+    flex-shrink: 0;
+}
 
-            align-items: center;
-            justify-content: center;
+.select {
 
-            gap: 2px;
+    min-width: 105px;
 
-            border-radius: 14px;
+    padding:
+        8px 9px;
 
-            background: transparent;
+    border-radius: 11px;
 
-            color: #687791;
+    outline: none;
 
-            cursor: pointer;
-        }
+    color: #a9c4df;
 
-        .nav-item.active {
-            color: #7cc8ff;
+    background:
+        rgba(0,0,0,.18);
 
-            background:
-                rgba(0,126,255,.11);
-        }
+    border:
+        1px solid
+        rgba(255,255,255,.08);
 
-        .nav-icon {
-            font-size: 17px;
-        }
+    font-size: 8px;
+}
 
-        .nav-label {
-            font-size: 8px;
-        }
+/* =====================================================
+   QUICK ACTIONS
+===================================================== */
 
-        /* =====================================================
-           TOAST
-           ===================================================== */
+.actions {
 
-        .toast {
-            position: fixed;
+    display: grid;
 
-            z-index: 200;
+    grid-template-columns:
+        repeat(2, 1fr);
 
-            left: 50%;
+    gap: 8px;
+}
 
-            bottom: 83px;
+.action {
 
-            width: max-content;
+    min-height: 49px;
 
-            max-width: calc(100% - 30px);
+    border-radius: 14px;
 
-            padding:
-                10px 14px;
+    color: #a9c4df;
 
-            border-radius: 14px;
+    background:
+        rgba(255,255,255,.05);
 
-            background:
-                rgba(20,29,48,.96);
+    border:
+        1px solid
+        rgba(255,255,255,.07);
 
-            border:
-                1px solid
-                rgba(255,255,255,.10);
+    cursor: pointer;
+}
 
-            color: #dce8f8;
+.action.primary {
 
-            font-size: 9px;
+    color: #8dd0ff;
 
-            opacity: 0;
+    background:
+        rgba(0,126,255,.10);
 
-            pointer-events: none;
+    border-color:
+        rgba(0,126,255,.17);
+}
 
-            transform:
-                translate(-50%, 10px);
+.action:active {
 
-            transition: .25s ease;
-        }
+    transform:
+        scale(.97);
+}
 
-        .toast.show {
-            opacity: 1;
+/* =====================================================
+   DANGER
+===================================================== */
 
-            transform:
-                translate(-50%, 0);
-        }
+.danger {
 
-        @media (min-width: 700px) {
+    padding: 15px;
 
-            .bottom-nav {
-                width: 480px;
+    border-radius: 18px;
 
-                left: 50%;
-                right: auto;
+    background:
+        rgba(255,65,90,.045);
 
-                transform:
-                    translateX(-50%);
-            }
+    border:
+        1px solid
+        rgba(255,65,90,.10);
+}
 
-        }
+.danger strong {
 
-    </style>
+    display: block;
+
+    font-size: 10px;
+}
+
+.danger p {
+
+    margin-top: 5px;
+
+    color: #8a7080;
+
+    font-size: 8px;
+
+    line-height: 1.5;
+}
+
+.danger-button {
+
+    width: 100%;
+
+    margin-top: 11px;
+
+    min-height: 43px;
+
+    border-radius: 13px;
+
+    color: #ff9eac;
+
+    background:
+        rgba(255,65,90,.07);
+
+    border:
+        1px solid
+        rgba(255,65,90,.12);
+
+    cursor: pointer;
+}
+
+.danger-button:active {
+
+    transform:
+        scale(.98);
+}
+
+/* =====================================================
+   BOTTOM NAV
+===================================================== */
+
+.bottom-nav {
+
+    position: fixed;
+
+    z-index: 100;
+
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, 1fr);
+
+    gap: 5px;
+
+    padding: 7px;
+
+    border-radius: 21px;
+
+    background:
+        rgba(7,12,25,.93);
+
+    border:
+        1px solid
+        rgba(255,255,255,.09);
+
+    backdrop-filter:
+        blur(20px);
+
+    -webkit-backdrop-filter:
+        blur(20px);
+
+    box-shadow:
+        0 15px 45px
+        rgba(0,0,0,.42);
+}
+
+.nav-item {
+
+    min-height: 45px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 2px;
+
+    border-radius: 14px;
+
+    background: transparent;
+
+    color: #687791;
+
+    cursor: pointer;
+}
+
+.nav-item.active {
+
+    color: #7cc8ff;
+
+    background:
+        rgba(0,126,255,.11);
+}
+
+.nav-icon {
+
+    font-size: 17px;
+}
+
+.nav-label {
+
+    font-size: 8px;
+}
+
+/* =====================================================
+   TOAST
+===================================================== */
+
+.toast {
+
+    position: fixed;
+
+    z-index: 300;
+
+    left: 50%;
+
+    bottom: 82px;
+
+    max-width:
+        calc(100% - 30px);
+
+    padding:
+        10px 14px;
+
+    border-radius: 14px;
+
+    background:
+        rgba(18,28,47,.96);
+
+    border:
+        1px solid
+        rgba(255,255,255,.10);
+
+    color: #dceaff;
+
+    font-size: 9px;
+
+    opacity: 0;
+
+    pointer-events: none;
+
+    transform:
+        translate(-50%, 10px);
+
+    transition: .22s ease;
+}
+
+.toast.show {
+
+    opacity: 1;
+
+    transform:
+        translate(-50%, 0);
+}
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media (min-width: 700px) {
+
+    .bottom-nav {
+
+        width: 480px;
+
+        left: 50%;
+        right: auto;
+
+        transform:
+            translateX(-50%);
+    }
+
+}
+
+</style>
 
 </head>
 
 
 <body>
 
+<div class="orb one"></div>
+<div class="orb two"></div>
 
-    <!-- =====================================================
-         BACKGROUND
-         ===================================================== -->
 
-    <div class="background">
+<main class="app">
 
-        <div class="orb one"></div>
-        <div class="orb two"></div>
+
+<!-- =====================================================
+     HEADER
+===================================================== -->
+
+<header class="header">
+
+    <div class="brand">
+
+        <img
+            class="logo"
+            src="assets/logo/logo.png"
+            alt="HalDo AI Logo"
+        >
+
+        <div class="brand-text">
+
+            <strong>
+                HalDo AI
+            </strong>
+
+            <span>
+                OS 18 • SETTINGS CENTER
+            </span>
+
+        </div>
 
     </div>
 
 
-    <!-- =====================================================
-         MAIN
-         ===================================================== -->
+    <button
+        class="back-button"
+        onclick="goBack()"
+    >
+        ← Zurück
+    </button>
 
-    <main class="app">
+</header>
 
 
-        <!-- HEADER -->
+<!-- =====================================================
+     HERO
+===================================================== -->
 
-        <header class="header">
+<section class="hero">
 
-            <div class="brand">
+    <div class="badge">
 
-                <img
-                    class="logo"
-                    src="assets/logo/logo.png"
-                    alt="HalDo AI Logo"
-                >
+        <span class="dot"></span>
 
-                <div class="brand-text">
+        HALDO CONTROL CENTER
 
-                    <strong>
-                        HalDo AI
-                    </strong>
+    </div>
 
-                    <span>
-                        OS 18 • SETTINGS
-                    </span>
 
-                </div>
+    <h1>
+        Einstellungen
+    </h1>
+
+
+    <p>
+        Zentrale Steuerung für HalDo AI OS 18.
+        Einstellungen werden lokal auf diesem Gerät
+        gespeichert.
+    </p>
+
+</section>
+
+
+<!-- =====================================================
+     PROFILE
+===================================================== -->
+
+<section class="section">
+
+    <div class="section-title">
+        HalDo AI
+    </div>
+
+
+    <div class="profile">
+
+        <img
+            class="profile-logo"
+            src="assets/logo/logo.png"
+            alt="HalDo AI"
+        >
+
+
+        <div class="profile-info">
+
+            <strong>
+                HalDo AI OS 18
+            </strong>
+
+            <span>
+                Professional Ultimate Foundation
+            </span>
+
+            <div class="profile-status">
+
+                <span class="dot"></span>
+
+                SYSTEM BEREIT
 
             </div>
 
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     SYSTEM
+===================================================== -->
+
+<section class="section">
+
+    <div class="section-title">
+        System
+    </div>
+
+
+    <div class="setting-list">
+
+
+        <div class="setting-card">
+
+            <div class="setting-icon">
+                ⚙
+            </div>
+
+            <div class="setting-info">
+
+                <strong>
+                    Systemzentrale
+                </strong>
+
+                <span>
+                    Module, Laufzeit und Geräteinformationen
+                </span>
+
+            </div>
 
             <button
-                class="back-button"
-                onclick="goBack()"
+                class="action"
+                style="min-height:34px;padding:0 10px;"
+                onclick="openPage('system.html')"
             >
-                ← Zurück
+                Öffnen
             </button>
 
-        </header>
+        </div>
 
 
-        <!-- HERO -->
+        <div class="setting-card">
 
-        <section class="hero">
-
-            <div class="hero-badge">
-
-                <span class="hero-dot"></span>
-
-                SYSTEM SETTINGS
-
-            </div>
-
-
-            <h1>
-                Einstellungen
-            </h1>
-
-
-            <p>
-                Passe HalDo AI OS 18 an und verwalte
-                deine Systemoptionen.
-            </p>
-
-        </section>
-
-
-        <!-- PROFILE -->
-
-        <section class="section">
-
-            <div class="section-title">
-                Profil
-            </div>
-
-
-            <div class="profile-card">
-
-                <img
-                    class="profile-logo"
-                    src="assets/logo/logo.png"
-                    alt="HalDo AI"
-                >
-
-
-                <div class="profile-info">
-
-                    <strong>
-                        HalDo AI Benutzer
-                    </strong>
-
-                    <span>
-                        Persönliche OS-Konfiguration
-                    </span>
-
-                </div>
-
-            </div>
-
-        </section>
-
-
-        <!-- APPEARANCE -->
-
-        <section class="section">
-
-            <div class="section-title">
-                Darstellung
-            </div>
-
-
-            <div class="settings-list">
-
-
-                <button
-                    class="setting"
-                    onclick="toggleTheme()"
-                >
-
-                    <div class="setting-icon">
-                        ◐
-                    </div>
-
-
-                    <div class="setting-info">
-
-                        <strong>
-                            Dunkler Modus
-                        </strong>
-
-                        <span>
-                            Optimierte Darstellung für HalDo AI OS
-                        </span>
-
-                    </div>
-
-
-                    <label
-                        class="switch"
-                        onclick="event.stopPropagation()"
-                    >
-
-                        <input
-                            id="darkMode"
-                            type="checkbox"
-                            checked
-                            onchange="saveToggle('darkMode')"
-                        >
-
-                        <span class="slider"></span>
-
-                    </label>
-
-                </button>
-
-
-                <button
-                    class="setting"
-                    onclick="toggleAnimations()"
-                >
-
-                    <div class="setting-icon">
-                        ✦
-                    </div>
-
-
-                    <div class="setting-info">
-
-                        <strong>
-                            Animationen
-                        </strong>
-
-                        <span>
-                            Logo- und Systemanimationen aktivieren
-                        </span>
-
-                    </div>
-
-
-                    <label
-                        class="switch"
-                        onclick="event.stopPropagation()"
-                    >
-
-                        <input
-                            id="animations"
-                            type="checkbox"
-                            checked
-                            onchange="saveToggle('animations')"
-                        >
-
-                        <span class="slider"></span>
-
-                    </label>
-
-                </button>
-
-
-                <button
-                    class="setting"
-                    onclick="showToast('Farbschema wird als nächstes erweitert.')"
-                >
-
-                    <div class="setting-icon">
-                        🎨
-                    </div>
-
-
-                    <div class="setting-info">
-
-                        <strong>
-                            Farbschema
-                        </strong>
-
-                        <span>
-                            HalDo Blue • System Theme
-                        </span>
-
-                    </div>
-
-
-                    <span class="setting-arrow">
-                        ›
-                    </span>
-
-                </button>
-
-
-            </div>
-
-        </section>
-
-
-        <!-- AI -->
-
-        <section class="section">
-
-            <div class="section-title">
-                HalDo AI
-            </div>
-
-
-            <div class="settings-list">
-
-
-                <button
-                    class="setting"
-                    onclick="openPage('chat.html')"
-                >
-
-                    <div class="setting-icon">
-                        ✦
-                    </div>
-
-
-                    <div class="setting-info">
-
-                        <strong>
-                            AI Chat
-                        </strong>
-
-                        <span>
-                            HalDo AI Chat öffnen
-                        </span>
-
-                    </div>
-
-
-                    <span class="setting-arrow">
-                        ›
-                    </span>
-
-                </button>
-
-
-                <button
-                    class="setting"
-                    onclick="showToast('AI-Sprache: Deutsch')"
-                >
-
-                    <div class="setting-icon">
-                        ◉
-                    </div>
-
-
-                    <div class="setting-info">
-
-                        <strong>
-                            AI Sprache
-                        </strong>
-
-                        <span>
-                            Sprache der HalDo AI Oberfläche
-                        </span>
-
-                    </div>
-
-
-                    <select
-                        class="select-box"
-                        id="language"
-                        onclick="event.stopPropagation()"
-                        onchange="saveLanguage()"
-                    >
-
-                        <option value="de">
-                            Deutsch
-                        </option>
-
-                        <option value="en">
-                            English
-                        </option>
-
-                    </select>
-
-                </button>
-
-
-                <button
-                    class="setting"
-                    onclick="showToast('Antwortmodus wird vorbereitet.')"
-                >
-
-                    <div class="setting-icon">
-                        ⚡
-                    </div>
-
-
-                    <div class="setting-info">
-
-                        <strong>
-                            Antwortmodus
-                        </strong>
-
-                        <span>
-                            Geschwindigkeit und Antwortverhalten
-                        </span>
-
-                    </div>
-
-
-                    <span class="setting-arrow">
-                        ›
-                    </span>
-
-                </button>
-
-
-            </div>
-
-        </section>
-
-
-        <!-- KEYBOARD -->
-
-        <section class="section">
-
-            <div class="section-title">
-                Eingabe
-            </div>
-
-
-            <div class="settings-list">
-
-
-                <button
-                    class="setting"
-                    onclick="openPage('keyboard.html')"
-                >
-
-                    <div class="setting-icon">
-                        ⌨
-                    </div>
-
-
-                    <div class="setting-info">
-
-                        <strong>
-                            HalDo Tastatur
-                        </strong>
-
-                        <span>
-                            Mehrsprachige und Êzîdî-Eingabe
-                        </span>
-
-                    </div>
-
-
-                    <span class="setting-arrow">
-                        ›
-                    </span>
-
-                </button>
-
-
-                <button
-                    class="setting"
-                    onclick="showToast('Spracheingabe wird vorbereitet.')"
-                >
-
-                    <div class="setting-icon">
-                        🎙
-                    </div>
-
-
-                    <div class="setting-info">
-
-                        <strong>
-                            Spracheingabe
-                        </strong>
-
-                        <span>
-                            Sprachsteuerung für AI-Eingaben
-                        </span>
-
-                    </div>
-
-
-                    <label
-                        class="switch"
-                        onclick="event.stopPropagation()"
-                    >
-
-                        <input
-                            id="voice"
-                            type="checkbox"
-                            onchange="saveToggle('voice')"
-                        >
-
-                        <span class="slider"></span>
-
-                    </label>
-
-                </button>
-
-
-            </div>
-
-        </section>
-
-
-        <!-- NOTIFICATIONS -->
-
-        <section class="section">
-
-            <div class="section-title">
-                Benachrichtigungen
-            </div>
-
-
-            <div class="settings-list">
-
-
-                <button
-                    class="setting"
-                    onclick="openPage('notifications.html')"
-                >
-
-                    <div class="setting-icon">
-                        🔔
-                    </div>
-
-
-                    <div class="setting-info">
-
-                        <strong>
-                            Benachrichtigungen
-                        </strong>
-
-                        <span>
-                            System- und AI-Mitteilungen verwalten
-                        </span>
-
-                    </div>
-
-
-                    <span class="setting-arrow">
-                        ›
-                    </span>
-
-                </button>
-
-
-                <button
-                    class="setting"
-                    onclick="showToast('Sounds werden vorbereitet.')"
-                >
-
-                    <div class="setting-icon">
-                        ♪
-                    </div>
-
-
-                    <div class="setting-info">
-
-                        <strong>
-                            System-Sounds
-                        </strong>
-
-                        <span>
-                            Sounds bei wichtigen Aktionen
-                        </span>
-
-                    </div>
-
-
-                    <label
-                        class="switch"
-                        onclick="event.stopPropagation()"
-                    >
-
-                        <input
-                            id="sounds"
-                            type="checkbox"
-                            checked
-                            onchange="saveToggle('sounds')"
-                        >
-
-                        <span class="slider"></span>
-
-                    </label>
-
-                </button>
-
-
-            </div>
-
-        </section>
-
-
-        <!-- STORAGE -->
-
-        <section class="section">
-
-            <div class="section-title">
-                Speicher
-            </div>
-
-
-            <div class="settings-list">
-
-
-                <button
-                    class="setting"
-                    onclick="openPage('storage.html')"
-                >
-
-                    <div class="setting-icon">
-                        ◉
-                    </div>
-
-
-                    <div class="setting-info">
-
-                        <strong>
-                            Lokaler Speicher
-                        </strong>
-
-                        <span>
-                            Gespeicherte HalDo-Daten verwalten
-                        </span>
-
-                    </div>
-
-
-                    <span class="setting-arrow">
-                        ›
-                    </span>
-
-                </button>
-
-
-                <button
-                    class="setting"
-                    onclick="clearTemporaryData()"
-                >
-
-                    <div class="setting-icon">
-                        ♻
-                    </div>
-
-
-                    <div class="setting-info">
-
-                        <strong>
-                            Temporäre Daten
-                        </strong>
-
-                        <span>
-                            Temporäre Browserdaten löschen
-                        </span>
-
-                    </div>
-
-
-                    <span class="setting-arrow">
-                        ›
-                    </span>
-
-                </button>
-
-
-            </div>
-
-        </section>
-
-
-        <!-- SYSTEM -->
-
-        <section class="section">
-
-            <div class="section-title">
-                System
-            </div>
-
-
-            <div class="system-card">
-
-
-                <div class="system-row">
-
-                    <span>
-                        Betriebssystem
-                    </span>
-
-                    <span>
-                        HalDo AI OS 18
-                    </span>
-
-                </div>
-
-
-                <div class="system-row">
-
-                    <span>
-                        Foundation
-                    </span>
-
-                    <span>
-                        Professional Ultimate
-                    </span>
-
-                </div>
-
-
-                <div class="system-row">
-
-                    <span>
-                        Version
-                    </span>
-
-                    <span>
-                        18.0
-                    </span>
-
-                </div>
-
-
-                <div class="system-row">
-
-                    <span>
-                        AI Interface
-                    </span>
-
-                    <span>
-                        Ready
-                    </span>
-
-                </div>
-
-
-                <div class="system-row">
-
-                    <span>
-                        Storage
-                    </span>
-
-                    <span>
-                        Local
-                    </span>
-
-                </div>
-
-
-            </div>
-
-        </section>
-
-
-        <!-- RESET -->
-
-        <section class="section">
-
-            <div class="settings-list">
-
-
-                <button
-                    class="setting danger"
-                    onclick="resetSettings()"
-                >
-
-                    <div class="setting-icon">
-                        ⚠
-                    </div>
-
-
-                    <div class="setting-info">
-
-                        <strong>
-                            Einstellungen zurücksetzen
-                        </strong>
-
-                        <span>
-                            Nur gespeicherte Einstellungen zurücksetzen
-                        </span>
-
-                    </div>
-
-
-                    <span class="setting-arrow">
-                        ›
-                    </span>
-
-                </button>
-
-
-            </div>
-
-        </section>
-
-
-    </main>
-
-
-    <!-- =====================================================
-         BOTTOM NAV
-         ===================================================== -->
-
-    <nav class="bottom-nav">
-
-
-        <button
-            class="nav-item"
-            onclick="goHome()"
-        >
-
-            <span class="nav-icon">
-                ⌂
-            </span>
-
-            <span class="nav-label">
-                Home
-            </span>
-
-        </button>
-
-
-        <button
-            class="nav-item"
-            onclick="openPage('chat.html')"
-        >
-
-            <span class="nav-icon">
-                ✦
-            </span>
-
-            <span class="nav-label">
-                AI
-            </span>
-
-        </button>
-
-
-        <button
-            class="nav-item"
-            onclick="openPage('apps.html')"
-        >
-
-            <span class="nav-icon">
+            <div class="setting-icon">
                 ◈
-            </span>
+            </div>
 
-            <span class="nav-label">
-                Apps
-            </span>
+            <div class="setting-info">
 
+                <strong>
+                    App Center
+                </strong>
+
+                <span>
+                    Installierte HalDo Anwendungen verwalten
+                </span>
+
+            </div>
+
+            <button
+                class="action"
+                style="min-height:34px;padding:0 10px;"
+                onclick="openPage('apps.html')"
+            >
+                Öffnen
+            </button>
+
+        </div>
+
+
+        <div class="setting-card">
+
+            <div class="setting-icon">
+                ◫
+            </div>
+
+            <div class="setting-info">
+
+                <strong>
+                    Speicher
+                </strong>
+
+                <span>
+                    Lokale HalDo Daten und Speicherplatz
+                </span>
+
+            </div>
+
+            <button
+                class="action"
+                style="min-height:34px;padding:0 10px;"
+                onclick="openPage('storage.html')"
+            >
+                Öffnen
+            </button>
+
+        </div>
+
+
+        <div class="setting-card">
+
+            <div class="setting-icon">
+                🔔
+            </div>
+
+            <div class="setting-info">
+
+                <strong>
+                    Benachrichtigungen
+                </strong>
+
+                <span>
+                    Meldungen und Systembenachrichtigungen
+                </span>
+
+            </div>
+
+            <button
+                class="action"
+                style="min-height:34px;padding:0 10px;"
+                onclick="openPage('notifications.html')"
+            >
+                Öffnen
+            </button>
+
+        </div>
+
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     AI
+===================================================== -->
+
+<section class="section">
+
+    <div class="section-title">
+        HalDo AI
+    </div>
+
+
+    <div class="setting-list">
+
+
+        <div class="setting-card">
+
+            <div class="setting-icon">
+                ✦
+            </div>
+
+            <div class="setting-info">
+
+                <strong>
+                    AI Chat
+                </strong>
+
+                <span>
+                    Zentrale HalDo AI Unterhaltung
+                </span>
+
+            </div>
+
+            <button
+                class="action"
+                style="min-height:34px;padding:0 10px;"
+                onclick="openPage('chat.html')"
+            >
+                Öffnen
+            </button>
+
+        </div>
+
+
+        <div class="setting-card">
+
+            <div class="setting-icon">
+                ⌨
+            </div>
+
+            <div class="setting-info">
+
+                <strong>
+                    Ezidi Keyboard
+                </strong>
+
+                <span>
+                    Eigene Zeichen und Tastatur-Layout
+                </span>
+
+            </div>
+
+            <button
+                class="action"
+                style="min-height:34px;padding:0 10px;"
+                onclick="openPage('keyboard.html')"
+            >
+                Öffnen
+            </button>
+
+        </div>
+
+
+        <div class="setting-card">
+
+            <div class="setting-icon">
+                ◉
+            </div>
+
+            <div class="setting-info">
+
+                <strong>
+                    AI Begrüßung
+                </strong>
+
+                <span>
+                    HalDo AI Startbegrüßung aktivieren
+                </span>
+
+            </div>
+
+
+            <label class="switch">
+
+                <input
+                    id="welcomeToggle"
+                    type="checkbox"
+                    checked
+                >
+
+                <span class="slider"></span>
+
+            </label>
+
+        </div>
+
+
+        <div class="setting-card">
+
+            <div class="setting-icon">
+                ✨
+            </div>
+
+            <div class="setting-info">
+
+                <strong>
+                    Logo Animation
+                </strong>
+
+                <span>
+                    Leuchtendes und drehendes HalDo Logo
+                </span>
+
+            </div>
+
+
+            <label class="switch">
+
+                <input
+                    id="logoToggle"
+                    type="checkbox"
+                    checked
+                >
+
+                <span class="slider"></span>
+
+            </label>
+
+        </div>
+
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     INTERFACE
+===================================================== -->
+
+<section class="section">
+
+    <div class="section-title">
+        Oberfläche
+    </div>
+
+
+    <div class="setting-list">
+
+
+        <div class="setting-card">
+
+            <div class="setting-icon">
+                🌐
+            </div>
+
+            <div class="setting-info">
+
+                <strong>
+                    Sprache
+                </strong>
+
+                <span>
+                    Sprache der HalDo Oberfläche
+                </span>
+
+            </div>
+
+
+            <select
+                id="languageSelect"
+                class="select"
+            >
+
+                <option value="de">
+                    Deutsch
+                </option>
+
+                <option value="en">
+                    English
+                </option>
+
+                <option value="ku">
+                    Kurdisch
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <div class="setting-card">
+
+            <div class="setting-icon">
+                🔊
+            </div>
+
+            <div class="setting-info">
+
+                <strong>
+                    Sound
+                </strong>
+
+                <span>
+                    Oberflächen-Sound aktivieren
+                </span>
+
+            </div>
+
+
+            <label class="switch">
+
+                <input
+                    id="soundToggle"
+                    type="checkbox"
+                    checked
+                >
+
+                <span class="slider"></span>
+
+            </label>
+
+        </div>
+
+
+        <div class="setting-card">
+
+            <div class="setting-icon">
+                📳
+            </div>
+
+            <div class="setting-info">
+
+                <strong>
+                    Vibration
+                </strong>
+
+                <span>
+                    Haptisches Feedback, wenn verfügbar
+                </span>
+
+            </div>
+
+
+            <label class="switch">
+
+                <input
+                    id="vibrationToggle"
+                    type="checkbox"
+                    checked
+                >
+
+                <span class="slider"></span>
+
+            </label>
+
+        </div>
+
+
+    </div>
+
+</section>
+
+
+<!-- =====================================================
+     QUICK ACTIONS
+===================================================== -->
+
+<section class="section">
+
+    <div class="section-title">
+        Schnellaktionen
+    </div>
+
+
+    <div class="actions">
+
+
+        <button
+            class="action primary"
+            onclick="saveSettings()"
+        >
+            ✓ Einstellungen speichern
         </button>
 
 
         <button
-            class="nav-item active"
-            onclick="window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            })"
+            class="action"
+            onclick="loadSettings(true)"
         >
-
-            <span class="nav-icon">
-                ⚙
-            </span>
-
-            <span class="nav-label">
-                Settings
-            </span>
-
+            ↻ Einstellungen laden
         </button>
 
 
-    </nav>
+    </div>
+
+</section>
 
 
-    <!-- =====================================================
-         TOAST
-         ===================================================== -->
+<!-- =====================================================
+     DANGER
+===================================================== -->
 
-    <div
-        class="toast"
-        id="toast"
-    ></div>
+<section class="section">
 
-
-    <script>
-
-        /* =====================================================
-           NAVIGATION
-           ===================================================== */
-
-        function goHome() {
-
-            window.location.href =
-                "index.html";
-
-        }
+    <div class="section-title">
+        Zurücksetzen
+    </div>
 
 
-        function goBack() {
+    <div class="danger">
 
-            if (
-                document.referrer &&
-                document.referrer.includes(
-                    window.location.hostname
-                )
-            ) {
+        <strong>
+            Lokale HalDo Einstellungen
+        </strong>
 
-                history.back();
-
-            } else {
-
-                window.location.href =
-                    "apps.html";
-
-            }
-
-        }
+        <p>
+            Dadurch werden nur die von dieser Seite
+            gespeicherten HalDo Einstellungen gelöscht.
+            Andere Browserdaten werden nicht verändert.
+        </p>
 
 
-        function openPage(page) {
+        <button
+            class="danger-button"
+            onclick="resetSettings()"
+        >
+            Einstellungen zurücksetzen
+        </button>
 
-            if (!page) {
-                return;
-            }
+    </div>
 
-            window.location.href =
-                page;
-
-        }
-
-
-        /* =====================================================
-           TOAST
-           ===================================================== */
-
-        let toastTimer = null;
+</section>
 
 
-        function showToast(message) {
-
-            const toast =
-                document.getElementById("toast");
+</main>
 
 
-            toast.textContent =
-                message;
+<!-- =====================================================
+     BOTTOM NAV
+===================================================== -->
+
+<nav class="bottom-nav">
 
 
-            toast.classList.add("show");
+    <button
+        class="nav-item"
+        onclick="goHome()"
+    >
+
+        <span class="nav-icon">
+            ⌂
+        </span>
+
+        <span class="nav-label">
+            Home
+        </span>
+
+    </button>
 
 
-            clearTimeout(toastTimer);
+    <button
+        class="nav-item"
+        onclick="openPage('chat.html')"
+    >
+
+        <span class="nav-icon">
+            ✦
+        </span>
+
+        <span class="nav-label">
+            AI
+        </span>
+
+    </button>
 
 
-            toastTimer =
-                setTimeout(
-                    function() {
+    <button
+        class="nav-item"
+        onclick="openPage('apps.html')"
+    >
 
-                        toast.classList.remove(
-                            "show"
-                        );
+        <span class="nav-icon">
+            ◈
+        </span>
 
-                    },
-                    2300
+        <span class="nav-label">
+            Apps
+        </span>
+
+    </button>
+
+
+    <button
+        class="nav-item active"
+        onclick="window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        })"
+    >
+
+        <span class="nav-icon">
+            ⚙
+        </span>
+
+        <span class="nav-label">
+            Setup
+        </span>
+
+    </button>
+
+
+</nav>
+
+
+<!-- =====================================================
+     TOAST
+===================================================== -->
+
+<div
+    class="toast"
+    id="toast"
+></div>
+
+
+<script>
+
+/* =====================================================
+   HALDO SETTINGS CORE
+===================================================== */
+
+const SETTINGS_KEY =
+    "haldo_settings";
+
+
+const DEFAULT_SETTINGS = {
+
+    welcome: true,
+
+    logoAnimation: true,
+
+    sound: true,
+
+    vibration: true,
+
+    language: "de"
+
+};
+
+
+/* =====================================================
+   NAVIGATION
+===================================================== */
+
+function goHome() {
+
+    window.location.href =
+        "index.html";
+
+}
+
+
+function goBack() {
+
+    if (
+        document.referrer &&
+        document.referrer.includes(
+            window.location.hostname
+        )
+    ) {
+
+        history.back();
+
+    } else {
+
+        goHome();
+
+    }
+
+}
+
+
+function openPage(page) {
+
+    if (!page) {
+        return;
+    }
+
+    window.location.href =
+        page;
+
+}
+
+
+/* =====================================================
+   TOAST
+===================================================== */
+
+let toastTimer;
+
+
+function showToast(message) {
+
+    const toast =
+        document.getElementById(
+            "toast"
+        );
+
+
+    toast.textContent =
+        message;
+
+
+    toast.classList.add(
+        "show"
+    );
+
+
+    clearTimeout(
+        toastTimer
+    );
+
+
+    toastTimer =
+        setTimeout(
+            function() {
+
+                toast.classList.remove(
+                    "show"
                 );
 
+            },
+            2200
+        );
+
+}
+
+
+/* =====================================================
+   GET SETTINGS
+===================================================== */
+
+function getSettings() {
+
+    try {
+
+        const raw =
+            localStorage.getItem(
+                SETTINGS_KEY
+            );
+
+
+        if (!raw) {
+
+            return {
+                ...DEFAULT_SETTINGS
+            };
+
         }
 
 
-        /* =====================================================
-           SETTINGS STORAGE
-           ===================================================== */
-
-        function saveToggle(id) {
-
-            const element =
-                document.getElementById(id);
-
-
-            if (!element) {
-                return;
-            }
-
-
-            localStorage.setItem(
-                "haldo_setting_" + id,
-                element.checked
-                    ? "true"
-                    : "false"
+        const saved =
+            JSON.parse(
+                raw
             );
 
+
+        return {
+
+            ...DEFAULT_SETTINGS,
+
+            ...saved
+
+        };
+
+    } catch (error) {
+
+        return {
+            ...DEFAULT_SETTINGS
+        };
+
+    }
+
+}
+
+
+/* =====================================================
+   SAVE
+===================================================== */
+
+function saveSettings(
+    showMessage = true
+) {
+
+    const settings = {
+
+        welcome:
+            document.getElementById(
+                "welcomeToggle"
+            ).checked,
+
+        logoAnimation:
+            document.getElementById(
+                "logoToggle"
+            ).checked,
+
+        sound:
+            document.getElementById(
+                "soundToggle"
+            ).checked,
+
+        vibration:
+            document.getElementById(
+                "vibrationToggle"
+            ).checked,
+
+        language:
+            document.getElementById(
+                "languageSelect"
+            ).value
+
+    };
+
+
+    try {
+
+        localStorage.setItem(
+
+            SETTINGS_KEY,
+
+            JSON.stringify(
+                settings
+            )
+
+        );
+
+
+        applySettings(
+            settings
+        );
+
+
+        if (showMessage) {
 
             showToast(
-                element.checked
-                    ? "Option aktiviert"
-                    : "Option deaktiviert"
+                "HalDo Einstellungen gespeichert"
             );
-
-
-            if (id === "animations") {
-
-                applyAnimations(
-                    element.checked
-                );
-
-            }
 
         }
 
+    } catch (error) {
 
-        function loadSettings() {
+        showToast(
+            "Speichern war nicht möglich"
+        );
 
-            [
-                "darkMode",
-                "animations",
-                "voice",
-                "sounds"
-            ].forEach(function(id) {
+    }
 
-                const saved =
-                    localStorage.getItem(
-                        "haldo_setting_" + id
-                    );
+}
 
 
-                const element =
-                    document.getElementById(id);
+/* =====================================================
+   LOAD
+===================================================== */
 
+function loadSettings(
+    showMessage = false
+) {
+
+    const settings =
+        getSettings();
+
+
+    document.getElementById(
+        "welcomeToggle"
+    ).checked =
+        settings.welcome;
+
+
+    document.getElementById(
+        "logoToggle"
+    ).checked =
+        settings.logoAnimation;
+
+
+    document.getElementById(
+        "soundToggle"
+    ).checked =
+        settings.sound;
+
+
+    document.getElementById(
+        "vibrationToggle"
+    ).checked =
+        settings.vibration;
+
+
+    document.getElementById(
+        "languageSelect"
+    ).value =
+        settings.language;
+
+
+    applySettings(
+        settings
+    );
+
+
+    if (showMessage) {
+
+        showToast(
+            "HalDo Einstellungen geladen"
+        );
+
+    }
+
+}
+
+
+/* =====================================================
+   APPLY
+===================================================== */
+
+function applySettings(
+    settings
+) {
+
+    document
+        .querySelectorAll(
+            ".logo, .profile-logo"
+        )
+        .forEach(
+            function(logo) {
 
                 if (
-                    saved !== null &&
-                    element
+                    settings.logoAnimation
                 ) {
 
-                    element.checked =
-                        saved === "true";
+                    logo.style.animation =
+                        "";
+
+                } else {
+
+                    logo.style.animation =
+                        "none";
 
                 }
 
-            });
-
-
-            const language =
-                localStorage.getItem(
-                    "haldo_language"
-                );
-
-
-            if (language) {
-
-                const select =
-                    document.getElementById(
-                        "language"
-                    );
-
-
-                if (select) {
-                    select.value =
-                        language;
-                }
-
             }
+        );
 
 
-            const animationElement =
-                document.getElementById(
-                    "animations"
-                );
+    document.documentElement
+        .setAttribute(
+            "lang",
+            settings.language
+        );
+
+}
 
 
-            if (animationElement) {
+/* =====================================================
+   RESET
+===================================================== */
 
-                applyAnimations(
-                    animationElement.checked
-                );
+function resetSettings() {
 
-            }
-
-        }
-
-
-        /* =====================================================
-           ANIMATIONEN
-           ===================================================== */
-
-        function toggleAnimations() {
-
-            const element =
-                document.getElementById(
-                    "animations"
-                );
+    const confirmed =
+        window.confirm(
+            "HalDo Einstellungen wirklich zurücksetzen?"
+        );
 
 
-            if (!element) {
-                return;
-            }
+    if (!confirmed) {
+
+        return;
+
+    }
 
 
-            element.checked =
-                !element.checked;
+    try {
+
+        localStorage.removeItem(
+            SETTINGS_KEY
+        );
 
 
-            saveToggle("animations");
-
-        }
-
-
-        function applyAnimations(enabled) {
-
-            if (enabled) {
-
-                document.body.classList.remove(
-                    "no-animations"
-                );
-
-                document.documentElement.style
-                    .removeProperty(
-                        "--animation-state"
-                    );
-
-            } else {
-
-                document.body.classList.add(
-                    "no-animations"
-                );
-
-                document.documentElement.style
-                    .setProperty(
-                        "--animation-state",
-                        "none"
-                    );
-
-            }
-
-        }
+        loadSettings(
+            false
+        );
 
 
-        /* =====================================================
-           THEME
-           ===================================================== */
+        showToast(
+            "Einstellungen zurückgesetzt"
+        );
 
-        function toggleTheme() {
+    } catch (error) {
 
-            const element =
-                document.getElementById(
-                    "darkMode"
-                );
+        showToast(
+            "Zurücksetzen war nicht möglich"
+        );
 
+    }
 
-            if (!element) {
-                return;
-            }
+}
 
 
-            element.checked =
-                !element.checked;
+/* =====================================================
+   AUTO SAVE
+===================================================== */
 
+[
+    "welcomeToggle",
+    "logoToggle",
+    "soundToggle",
+    "vibrationToggle",
+    "languageSelect"
+]
+.forEach(
+    function(id) {
 
-            saveToggle("darkMode");
-
-
-            showToast(
-                element.checked
-                    ? "Dunkler Modus aktiviert"
-                    : "Dunkler Modus bleibt Teil der Foundation"
-            );
-
-        }
-
-
-        /* =====================================================
-           LANGUAGE
-           ===================================================== */
-
-        function saveLanguage() {
-
-            const select =
-                document.getElementById(
-                    "language"
-                );
-
-
-            if (!select) {
-                return;
-            }
-
-
-            localStorage.setItem(
-                "haldo_language",
-                select.value
+        const element =
+            document.getElementById(
+                id
             );
 
 
-            showToast(
-                "Spracheinstellung gespeichert"
-            );
+        element.addEventListener(
+            "change",
+            function() {
 
-        }
-
-
-        /* =====================================================
-           TEMPORÄRE DATEN
-           ===================================================== */
-
-        function clearTemporaryData() {
-
-            const confirmed =
-                window.confirm(
-                    "Temporäre HalDo-Daten löschen?"
+                saveSettings(
+                    false
                 );
 
 
-            if (!confirmed) {
-                return;
+                showToast(
+                    "Einstellung gespeichert"
+                );
+
             }
+        );
+
+    }
+);
 
 
-            /*
-             * Wir löschen bewusst NICHT den gesamten
-             * localStorage, damit Chatverlauf und andere
-             * HalDo-Daten nicht versehentlich verloren gehen.
-             */
+/* =====================================================
+   START
+===================================================== */
 
-            const keysToRemove = [
+loadSettings(
+    false
+);
 
-                "haldo_temp_data",
-
-                "haldo_temp_cache",
-
-                "haldo_notifications_temp"
-
-            ];
-
-
-            keysToRemove.forEach(
-                function(key) {
-
-                    localStorage.removeItem(
-                        key
-                    );
-
-                }
-            );
-
-
-            showToast(
-                "Temporäre Daten wurden gelöscht"
-            );
-
-        }
-
-
-        /* =====================================================
-           RESET
-           ===================================================== */
-
-        function resetSettings() {
-
-            const confirmed =
-                window.confirm(
-                    "Nur die HalDo-Einstellungen zurücksetzen?"
-                );
-
-
-            if (!confirmed) {
-                return;
-            }
-
-
-            const prefixes = [
-
-                "haldo_setting_",
-
-                "haldo_language"
-
-            ];
-
-
-            Object.keys(
-                localStorage
-            ).forEach(
-                function(key) {
-
-                    if (
-                        prefixes.some(
-                            function(prefix) {
-                                return key.startsWith(
-                                    prefix
-                                );
-                            }
-                        )
-                    ) {
-
-                        localStorage.removeItem(
-                            key
-                        );
-
-                    }
-
-                }
-            );
-
-
-            loadSettings();
-
-
-            showToast(
-                "Einstellungen wurden zurückgesetzt"
-            );
-
-        }
-
-
-        /* =====================================================
-           START
-           ===================================================== */
-
-        loadSettings();
-
-
-        /* =====================================================
-           LOGO FEHLERKONTROLLE
-           ===================================================== */
-
-        document
-            .querySelectorAll("img")
-            .forEach(function(img) {
-
-                img.addEventListener(
-                    "error",
-                    function() {
-
-                        console.log(
-                            "HalDo Logo konnte nicht geladen werden:",
-                            img.src
-                        );
-
-                    }
-                );
-
-            });
-
-    </script>
+</script>
 
 </body>
 
