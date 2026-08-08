@@ -1,0 +1,386 @@
+{
+  "version": "18.0.0",
+
+  "identity": {
+    "name": "HalDo AI",
+    "brand": "HalDo",
+    "logoSource": "assets/logo/logo.png",
+    "fallbackSource": "assets/logo/logo-fallback.svg",
+    "altText": "HalDo AI Logo"
+  },
+
+  "system": {
+    "enabled": true,
+    "preload": true,
+    "useRealLogoAsset": true,
+    "allowFallback": true
+  },
+
+  "intro": {
+    "enabled": true,
+    "showOnMainMenuOpen": true,
+    "showOnSystemStartup": true,
+
+    "timing": {
+      "introDuration": 4200,
+      "logoRevealDuration": 1200,
+      "welcomeDelay": 900,
+      "transitionDuration": 700
+    },
+
+    "sequence": [
+      "background",
+      "logo-reveal",
+      "glow",
+      "orbit",
+      "particles",
+      "welcome",
+      "transition"
+    ],
+
+    "skip": {
+      "enabled": true,
+      "minimumDisplayTime": 1800,
+      "rememberPreference": true
+    }
+  },
+
+  "logo": {
+    "source": "assets/logo/logo.png",
+
+    "transform": {
+      "rotation": {
+        "enabled": false,
+        "speed": 0
+      },
+
+      "scale": {
+        "enabled": true,
+        "idle": 1,
+        "speaking": 1.015,
+        "listening": 1.01,
+        "thinking": 1.005
+      }
+    },
+
+    "appearance": {
+      "opacity": 1,
+      "sharpness": true,
+      "preserveAspectRatio": true,
+      "preserveOriginalImage": true
+    }
+  },
+
+  "light": {
+
+    "enabled": true,
+
+    "source": {
+      "type": "energy-orbit",
+      "continuous": true
+    },
+
+    "appearance": {
+      "glow": true,
+      "softGlow": true,
+      "outerGlow": true,
+      "energyTrail": true
+    },
+
+    "intensity": {
+      "minimum": 0.45,
+      "maximum": 1,
+      "default": 0.8,
+      "pulse": true,
+      "pulseSpeed": 2.5
+    },
+
+    "colors": {
+      "primary": "theme.logo.glow",
+      "secondary": "theme.logo.orbit",
+      "energy": "theme.logo.energy"
+    }
+  },
+
+  "orbit": {
+
+    "enabled": true,
+
+    "logoRotation": false,
+
+    "object": {
+      "type": "energy-light",
+      "shape": "orb",
+      "planetLike": true,
+      "visibleCore": true,
+      "trail": true
+    },
+
+    "movement": {
+      "enabled": true,
+      "continuous": true,
+      "direction": "clockwise",
+      "speed": 8,
+      "startAngle": -18,
+      "inclination": -12
+    },
+
+    "size": {
+      "relativeToLogo": 1.35,
+      "minimum": 0.9,
+      "maximum": 1.6
+    },
+
+    "distance": {
+      "minimum": 8,
+      "maximum": 20,
+      "default": 13
+    },
+
+    "variation": {
+      "enabled": true,
+      "speedVariation": 0.15,
+      "brightnessVariation": 0.2,
+      "distanceVariation": 0.08
+    }
+  },
+
+  "particles": {
+
+    "enabled": true,
+
+    "count": {
+      "desktop": 32,
+      "tablet": 24,
+      "mobile": 16
+    },
+
+    "movement": {
+      "orbit": true,
+      "float": true,
+      "drift": true,
+      "randomize": true
+    },
+
+    "appearance": {
+      "sizeMinimum": 1,
+      "sizeMaximum": 4,
+      "opacityMinimum": 0.25,
+      "opacityMaximum": 0.9,
+      "glow": true
+    },
+
+    "behavior": {
+      "reactToVoice": true,
+      "reactToThinking": true,
+      "reactToListening": true,
+      "reactToSystemState": true
+    }
+  },
+
+  "livingLogo": {
+
+    "enabled": true,
+
+    "states": {
+
+      "idle": {
+        "enabled": true,
+        "breathing": true,
+        "glowPulse": true,
+        "orbitActive": true
+      },
+
+      "listening": {
+        "enabled": true,
+        "breathing": true,
+        "glowPulse": true,
+        "orbitActive": true,
+        "reactionIntensity": 0.7
+      },
+
+      "thinking": {
+        "enabled": true,
+        "breathing": true,
+        "glowPulse": true,
+        "orbitActive": true,
+        "reactionIntensity": 0.85
+      },
+
+      "speaking": {
+        "enabled": true,
+        "breathing": true,
+        "glowPulse": true,
+        "orbitActive": true,
+        "reactionIntensity": 1
+      }
+    },
+
+    "breathing": {
+      "enabled": true,
+      "scaleMinimum": 0.995,
+      "scaleMaximum": 1.01,
+      "duration": 3200
+    }
+  },
+
+  "speech": {
+
+    "enabled": true,
+
+    "audioReactive": true,
+
+    "mouth": {
+
+      "enabled": true,
+
+      "mode": "audio-reactive",
+
+      "states": {
+        "idle": true,
+        "listening": true,
+        "thinking": true,
+        "speaking": true
+      },
+
+      "animation": {
+        "speed": 1,
+        "smoothing": 0.65,
+        "minimumMovement": 0.05,
+        "maximumMovement": 1
+      },
+
+      "audio": {
+        "frequencyAnalysis": true,
+        "volumeAnalysis": true,
+        "dynamicResponse": true
+      }
+    },
+
+    "face": {
+      "enabled": true,
+      "expressionLayer": true,
+      "eyeAnimation": true,
+      "subtleMovement": true
+    }
+  },
+
+  "systemStates": {
+
+    "booting": {
+      "logo": true,
+      "orbit": true,
+      "glow": true,
+      "particles": true,
+      "speech": false
+    },
+
+    "ready": {
+      "logo": true,
+      "orbit": true,
+      "glow": true,
+      "particles": true,
+      "speech": true
+    },
+
+    "loading": {
+      "logo": true,
+      "orbit": true,
+      "glow": true,
+      "particles": true,
+      "speech": false
+    },
+
+    "error": {
+      "logo": true,
+      "orbit": false,
+      "glow": true,
+      "particles": false,
+      "speech": false
+    },
+
+    "offline": {
+      "logo": true,
+      "orbit": true,
+      "glow": true,
+      "particles": true,
+      "speech": true
+    }
+  },
+
+  "accessibility": {
+
+    "reducedMotion": {
+
+      "enabled": true,
+
+      "behavior": {
+        "logoRotation": false,
+        "reduceOrbit": true,
+        "reduceParticles": true,
+        "reduceGlow": true,
+        "reduceBreathing": true,
+        "keepSpeechFeedback": true
+      }
+    },
+
+    "highContrast": {
+      "enabled": true
+    }
+  },
+
+  "customization": {
+
+    "enabled": true,
+
+    "allowOrbitSpeed": true,
+    "allowOrbitDistance": true,
+    "allowGlowIntensity": true,
+    "allowParticleAmount": true,
+    "allowParticleSpeed": true,
+    "allowAnimationSpeed": true,
+    "allowThemeColors": true,
+
+    "protected": {
+      "logoSource": true,
+      "logoRotation": true
+    }
+  },
+
+  "performance": {
+
+    "enabled": true,
+
+    "adaptiveQuality": true,
+
+    "mobile": {
+      "reduceParticles": true,
+      "reduceBlur": true,
+      "reduceGlow": true
+    },
+
+    "lowPower": {
+      "reduceParticles": true,
+      "reduceOrbit": true,
+      "reduceAnimations": true
+    }
+  },
+
+  "events": {
+
+    "enabled": true,
+
+    "events": [
+      "logo-intro-start",
+      "logo-reveal",
+      "logo-ready",
+      "logo-listening",
+      "logo-thinking",
+      "logo-speaking",
+      "logo-idle",
+      "logo-error",
+      "logo-intro-end"
+    ]
+  }
+
+}
