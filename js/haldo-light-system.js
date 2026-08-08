@@ -1,60 +1,95 @@
-/* ==========================================================
-   HalDo AI OS 18
-   HALDO LIGHT SYSTEM
-   Professional Ultimate Foundation
-   ==========================================================
+/*
+========================================================
 
-   Aufgabe:
-   - Lichtanimation dauerhaft steuern
-   - Logo selbst NICHT drehen
-   - Lichtkränze außen herum steuern
-   - Helligkeit und Geschwindigkeit kontrollieren
-   - AI-Zustände darstellen
-   - Vorbereitung für Chat / Voice / Speech / Settings
+HalDo AI OS 18
+HalDo Light System
 
-   Zustände:
-   idle
-   listening
-   input
-   thinking
-   answering
-   speaking
-   success
-   error
-   ========================================================== */
+Professional Ultimate Foundation
+Version 18.0.0
+
+Funktionen:
+- dauerhaftes Leuchten
+- dauerhaft rotierende Lichtbahnen
+- Logo bleibt still
+- automatische Logo-Pfad-Prüfung
+- Idle
+- Listening
+- Thinking
+- Answering
+- Speaking
+- Intensitätssteuerung
+- Geschwindigkeitsteuerung
+- Events für andere HalDo-Systeme
+
+========================================================
+*/
 
 (function (window, document) {
 
     "use strict";
 
 
-    /* ======================================================
-       SYSTEM
-       ====================================================== */
-
     const HalDoLight = {
 
-        enabled: true,
+        name:
+            "HalDo Light System",
 
-        speed: 1,
+        version:
+            "18.0.0",
 
-        brightness: 1,
+        status:
+            "ready",
 
-        state: "idle",
+        mode:
+            "idle",
 
-        initialized: false,
+        enabled:
+            true,
 
-        container: null,
+        intensity:
+            1,
 
-        outerOrbit: null,
+        speed:
+            1,
 
-        middleOrbit: null,
 
-        raysOne: null,
+        /* ==================================================
+           MODI
+           ================================================== */
 
-        raysTwo: null,
+        modes: {
 
-        sparks: [],
+            idle: {
+                intensity: 1,
+                speed: 1,
+                glow: 1
+            },
+
+            listening: {
+                intensity: 1.35,
+                speed: 1.35,
+                glow: 1.25
+            },
+
+            thinking: {
+                intensity: 1.55,
+                speed: 1.8,
+                glow: 1.5
+            },
+
+            answering: {
+                intensity: 1.75,
+                speed: 2,
+                glow: 1.7
+            },
+
+            speaking: {
+                intensity: 1.9,
+                speed: 1.6,
+                glow: 1.9
+            }
+
+        },
 
 
         /* ==================================================
@@ -63,77 +98,400 @@
 
         init: function () {
 
-            if (this.initialized) {
+            this.status =
+                "running";
 
-                return this;
+            this.findLogos();
+
+            this.ensureLightSystem();
+
+            this.applyMode();
+
+            console.log(
+                "HalDo Light System gestartet."
+            );
+
+            this.dispatch(
+                "ready"
+            );
+
+        },
+
+
+        /* ==================================================
+           LOGO FINDEN
+           
+           Unterstützt beide von dir genannten Pfade:
+           
+           assets/logo/logo.png
+           logo.png
+           ================================================== */
+
+        findLogos: function () {
+
+            const logos =
+                document.querySelectorAll(
+                    "img.haldo-startup-logo, " +
+                    "img.haldo-logo, " +
+                    "img.logo"
+                );
+
+            logos.forEach(
+                (logo) => {
+
+                    this.prepareLogo(
+                        logo
+                    );
+
+                }
+            );
+
+        },
+
+
+        /* ==================================================
+           LOGO VORBEREITEN
+           ================================================== */
+
+        prepareLogo: function (
+            logo
+        ) {
+
+            if (
+                !logo
+            ) {
+
+                return;
 
             }
 
 
-            this.container =
-                document.querySelector(
+            logo.dataset.originalSrc =
+                logo.getAttribute(
+                    "src"
+                ) || "";
+
+
+            /*
+             * Falls assets/logo/logo.png
+             * nicht geladen werden kann,
+             * wird automatisch logo.png
+             * versucht.
+             */
+
+            logo.addEventListener(
+                "error",
+                function () {
+
+                    if (
+                        logo.dataset.fallbackUsed
+                    ) {
+
+                        return;
+
+                    }
+
+
+                    logo.dataset.fallbackUsed =
+                        "true";
+
+
+                    logo.src =
+                        "logo.png";
+
+                },
+                {
+                    once:
+                        true
+                }
+            );
+
+
+            /*
+             * Das Logo selbst wird niemals
+             * durch das Light-System gedreht.
+             */
+
+            logo.style.animation =
+                "none";
+
+            logo.style.transform =
+                "none";
+
+        },
+
+
+        /* ==================================================
+           LICHTSYSTEM ERSTELLEN
+           ================================================== */
+
+        ensureLightSystem: function () {
+
+            const containers =
+                document.querySelectorAll(
                     ".haldo-sun-container"
                 );
 
 
-            if (!this.container) {
+            containers.forEach(
+                (container) => {
 
-                console.warn(
-                    "HalDo Light System: Sun Container nicht gefunden."
-                );
+                    this.prepareContainer(
+                        container
+                    );
 
-                return this;
+                }
+            );
+
+        },
+
+
+        /* ==================================================
+           CONTAINER VORBEREITEN
+           ================================================== */
+
+        prepareContainer: function (
+            container
+        ) {
+
+            if (
+                !container
+            ) {
+
+                return;
 
             }
 
 
-            this.outerOrbit =
-                document.querySelector(
-                    ".orbit-outer"
-                );
-
-
-            this.middleOrbit =
-                document.querySelector(
-                    ".orbit-middle"
-                );
-
-
-            this.raysOne =
-                document.querySelector(
-                    ".rays-one"
-                );
-
-
-            this.raysTwo =
-                document.querySelector(
-                    ".rays-two"
-                );
-
-
-            this.sparks =
-                Array.from(
-                    document.querySelectorAll(
-                        ".haldo-spark"
-                    )
-                );
-
-
-            this.initialized = true;
-
-
-            this.applySettings();
-
-
-            this.setState("idle");
-
-
-            console.log(
-                "🟢 HalDo Light System bereit."
+            container.classList.add(
+                "haldo-light-active"
             );
 
 
-            return this;
+            /*
+             * Permanente Animation.
+             */
+
+            container.style.setProperty(
+                "--haldo-light-running",
+                "running"
+            );
+
+
+            /*
+             * Logo ausdrücklich
+             * von der Rotation ausschließen.
+             */
+
+            const logo =
+                container.querySelector(
+                    "img"
+                );
+
+
+            if (
+                logo
+            ) {
+
+                logo.style.animation =
+                    "none";
+
+                logo.style.transform =
+                    "none";
+
+            }
+
+        },
+
+
+        /* ==================================================
+           MODUS SETZEN
+           ================================================== */
+
+        setMode: function (
+            mode
+        ) {
+
+            if (
+                !this.enabled
+            ) {
+
+                return;
+
+            }
+
+
+            if (
+                !this.modes[mode]
+            ) {
+
+                mode =
+                    "idle";
+
+            }
+
+
+            this.mode =
+                mode;
+
+
+            const settings =
+                this.modes[mode];
+
+
+            this.intensity =
+                settings.intensity;
+
+
+            this.speed =
+                settings.speed;
+
+
+            this.applyMode();
+
+
+            this.dispatch(
+                "mode",
+                {
+                    mode:
+                        mode,
+
+                    intensity:
+                        this.intensity,
+
+                    speed:
+                        this.speed
+
+                }
+            );
+
+
+        },
+
+
+        /* ==================================================
+           MODUS ANWENDEN
+           ================================================== */
+
+        applyMode: function () {
+
+            const containers =
+                document.querySelectorAll(
+                    ".haldo-sun-container"
+                );
+
+
+            const settings =
+                this.modes[
+                    this.mode
+                ] ||
+                this.modes.idle;
+
+
+            containers.forEach(
+                (container) => {
+
+                    container.classList
+                        .remove(
+                            "haldo-mode-idle",
+                            "haldo-mode-listening",
+                            "haldo-mode-thinking",
+                            "haldo-mode-answering",
+                            "haldo-mode-speaking"
+                        );
+
+
+                    container.classList.add(
+                        "haldo-mode-" +
+                        this.mode
+                    );
+
+
+                    container.style.setProperty(
+                        "--haldo-intensity",
+                        String(
+                            settings.intensity
+                        )
+                    );
+
+
+                    container.style.setProperty(
+                        "--haldo-speed",
+                        String(
+                            settings.speed
+                        )
+                    );
+
+
+                    container.style.setProperty(
+                        "--haldo-glow",
+                        String(
+                            settings.glow
+                        )
+                    );
+
+
+                    /*
+                     * WICHTIG:
+                     * Animation bleibt immer aktiv.
+                     */
+
+                    container.style.setProperty(
+                        "--haldo-animation-play-state",
+                        "running"
+                    );
+
+                }
+            );
+
+        },
+
+
+        /* ==================================================
+           VOREINGESTELLTE MODI
+           ================================================== */
+
+        idle: function () {
+
+            this.setMode(
+                "idle"
+            );
+
+        },
+
+
+        listening: function () {
+
+            this.setMode(
+                "listening"
+            );
+
+        },
+
+
+        thinking: function () {
+
+            this.setMode(
+                "thinking"
+            );
+
+        },
+
+
+        answering: function () {
+
+            this.setMode(
+                "answering"
+            );
+
+        },
+
+
+        speaking: function () {
+
+            this.setMode(
+                "speaking"
+            );
 
         },
 
@@ -142,664 +500,112 @@
            EIN / AUS
            ================================================== */
 
-        setEnabled: function (enabled) {
+        enable: function () {
 
             this.enabled =
-                Boolean(enabled);
+                true;
 
+            this.ensureLightSystem();
 
-            if (!this.container) {
-
-                return;
-
-            }
-
-
-            if (this.enabled) {
-
-                this.container.classList.remove(
-                    "haldo-light-disabled"
-                );
-
-                this.applySettings();
-
-                this.setState(
-                    this.state
-                );
-
-            } else {
-
-                this.container.classList.add(
-                    "haldo-light-disabled"
-                );
-
-            }
+            this.applyMode();
 
         },
 
 
-        /* ==================================================
-           GESCHWINDIGKEIT
-           ================================================== */
+        disable: function () {
 
-        setSpeed: function (value) {
+            /*
+             * Das System wird nicht dauerhaft
+             * zerstört. Beim nächsten enable()
+             * läuft die Animation wieder.
+             */
 
-            let speed =
-                Number(value);
+            this.enabled =
+                false;
 
-
-            if (!Number.isFinite(speed)) {
-
-                speed = 1;
-
-            }
-
-
-            speed =
-                Math.max(
-                    0.1,
-                    Math.min(
-                        5,
-                        speed
-                    )
+            const containers =
+                document.querySelectorAll(
+                    ".haldo-sun-container"
                 );
 
 
-            this.speed =
-                speed;
-
-
-            this.applySpeed();
-
-        },
-
-
-        /* ==================================================
-           HELLIGKEIT
-           ================================================== */
-
-        setBrightness: function (value) {
-
-            let brightness =
-                Number(value);
-
-
-            if (!Number.isFinite(brightness)) {
-
-                brightness = 1;
-
-            }
-
-
-            brightness =
-                Math.max(
-                    0,
-                    Math.min(
-                        2,
-                        brightness
-                    )
-                );
-
-
-            this.brightness =
-                brightness;
-
-
-            this.applyBrightness();
-
-        },
-
-
-        /* ==================================================
-           GESCHWINDIGKEIT ANWENDEN
-           ================================================== */
-
-        applySpeed: function () {
-
-            if (!this.container) {
-
-                return;
-
-            }
-
-
-            const outerDuration =
-                5 / this.speed;
-
-
-            const middleDuration =
-                3.4 / this.speed;
-
-
-            const raysOneDuration =
-                8 / this.speed;
-
-
-            const raysTwoDuration =
-                11 / this.speed;
-
-
-            if (this.outerOrbit) {
-
-                this.outerOrbit.style.animationDuration =
-                    outerDuration + "s";
-
-            }
-
-
-            if (this.middleOrbit) {
-
-                this.middleOrbit.style.animationDuration =
-                    middleDuration + "s";
-
-            }
-
-
-            if (this.raysOne) {
-
-                this.raysOne.style.animationDuration =
-                    raysOneDuration + "s";
-
-            }
-
-
-            if (this.raysTwo) {
-
-                this.raysTwo.style.animationDuration =
-                    raysTwoDuration + "s";
-
-            }
-
-        },
-
-
-        /* ==================================================
-           HELLIGKEIT ANWENDEN
-           ================================================== */
-
-        applyBrightness: function () {
-
-            if (!this.container) {
-
-                return;
-
-            }
-
-
-            this.container.style.setProperty(
-                "--haldo-light-brightness",
-                String(
-                    this.brightness
-                )
-            );
-
-
-            this.container.style.opacity =
-                this.enabled
-                    ? String(
-                        Math.max(
-                            0.15,
-                            Math.min(
-                                1,
-                                this.brightness
-                            )
-                    ))
-                    : "0";
-
-        },
-
-
-        /* ==================================================
-           EINSTELLUNGEN ANWENDEN
-           ================================================== */
-
-        applySettings: function () {
-
-            this.applySpeed();
-
-            this.applyBrightness();
-
-        },
-
-
-        /* ==================================================
-           NORMALER BEREITSCHAFTSMODUS
-           ================================================== */
-
-        idle: function () {
-
-            this.setState(
-                "idle"
-            );
-
-        },
-
-
-        /* ==================================================
-           MIKROFON / ZUHÖREN
-           ================================================== */
-
-        listening: function () {
-
-            this.setState(
-                "listening"
-            );
-
-        },
-
-
-        /* ==================================================
-           BENUTZER SCHREIBT
-           ================================================== */
-
-        input: function () {
-
-            this.setState(
-                "input"
-            );
-
-        },
-
-
-        /* ==================================================
-           AI VERARBEITET
-           ================================================== */
-
-        thinking: function () {
-
-            this.setState(
-                "thinking"
-            );
-
-        },
-
-
-        /* ==================================================
-           AI ANTWORTET
-           ================================================== */
-
-        answering: function () {
-
-            this.setState(
-                "answering"
-            );
-
-        },
-
-
-        /* ==================================================
-           AI SPRICHT
-           ================================================== */
-
-        speaking: function () {
-
-            this.setState(
-                "speaking"
-            );
-
-        },
-
-
-        /* ==================================================
-           ERFOLG
-           ================================================== */
-
-        success: function () {
-
-            this.setState(
-                "success"
-            );
-
-        },
-
-
-        /* ==================================================
-           FEHLER
-           ================================================== */
-
-        error: function () {
-
-            this.setState(
-                "error"
-            );
-
-        },
-
-
-        /* ==================================================
-           ZUSTAND
-           ================================================== */
-
-        setState: function (state) {
-
-            if (!state) {
-
-                state =
-                    "idle";
-
-            }
-
-
-            this.state =
-                String(state);
-
-
-            if (!this.container) {
-
-                return;
-
-            }
-
-
-            const allowedStates = [
-
-                "idle",
-                "listening",
-                "input",
-                "thinking",
-                "answering",
-                "speaking",
-                "success",
-                "error"
-
-            ];
-
-
-            if (
-                !allowedStates.includes(
-                    this.state
-                )
-            ) {
-
-                this.state =
-                    "idle";
-
-            }
-
-
-            /* --------------------------------------------
-               Alte Zustände entfernen
-               -------------------------------------------- */
-
-            allowedStates.forEach(
-                function (name) {
-
-                    this.container.classList.remove(
-                        "haldo-light-" + name
+            containers.forEach(
+                (container) => {
+
+                    container.classList.add(
+                        "haldo-light-disabled"
                     );
 
-                }.bind(this)
-            );
-
-
-            /* --------------------------------------------
-               Neuen Zustand setzen
-               -------------------------------------------- */
-
-            this.container.classList.add(
-                "haldo-light-" +
-                this.state
-            );
-
-
-            this.updateIntensity();
-
-        },
-
-
-        /* ==================================================
-           INTENSITÄT JE NACH AI-ZUSTAND
-           ================================================== */
-
-        updateIntensity: function () {
-
-            if (!this.container) {
-
-                return;
-
-            }
-
-
-            let intensity =
-                this.brightness;
-
-
-            switch (
-                this.state
-            ) {
-
-                case "idle":
-
-                    intensity =
-                        this.brightness;
-
-                    break;
-
-
-                case "listening":
-
-                    intensity =
-                        this.brightness *
-                        1.25;
-
-                    break;
-
-
-                case "input":
-
-                    intensity =
-                        this.brightness *
-                        1.35;
-
-                    break;
-
-
-                case "thinking":
-
-                    intensity =
-                        this.brightness *
-                        1.55;
-
-                    break;
-
-
-                case "answering":
-
-                    intensity =
-                        this.brightness *
-                        1.7;
-
-                    break;
-
-
-                case "speaking":
-
-                    intensity =
-                        this.brightness *
-                        1.6;
-
-                    break;
-
-
-                case "success":
-
-                    intensity =
-                        this.brightness *
-                        2;
-
-                    break;
-
-
-                case "error":
-
-                    intensity =
-                        this.brightness *
-                        1.8;
-
-                    break;
-
-
-                default:
-
-                    intensity =
-                        this.brightness;
-
-            }
-
-
-            this.container.style.setProperty(
-                "--haldo-state-intensity",
-                String(
-                    Math.min(
-                        2.5,
-                        intensity
-                    )
-                )
+                }
             );
 
         },
 
 
         /* ==================================================
-           KURZER LICHTIMPULS
+           STATUS
            ================================================== */
 
-        pulse: function (
-            duration
+        getStatus: function () {
+
+            return {
+
+                name:
+                    this.name,
+
+                version:
+                    this.version,
+
+                status:
+                    this.status,
+
+                enabled:
+                    this.enabled,
+
+                mode:
+                    this.mode,
+
+                intensity:
+                    this.intensity,
+
+                speed:
+                    this.speed
+
+            };
+
+        },
+
+
+        /* ==================================================
+           EVENTS
+           ================================================== */
+
+        dispatch: function (
+            name,
+            detail
         ) {
 
-            if (!this.container) {
+            try {
 
-                return;
+                window.dispatchEvent(
+                    new CustomEvent(
+                        "haldo-light-" +
+                        name,
+                        {
+                            detail:
+                                detail || {}
+                        }
+                    )
+                );
 
-            }
-
-
-            const time =
-                Number(duration) || 700;
-
-
-            this.container.classList.remove(
-                "haldo-light-pulse"
-            );
-
-
-            /* Reflow für erneuten Impuls */
-
-            void this.container.offsetWidth;
-
-
-            this.container.classList.add(
-                "haldo-light-pulse"
-            );
-
-
-            window.setTimeout(
-                function () {
-
-                    if (this.container) {
-
-                        this.container.classList.remove(
-                            "haldo-light-pulse"
-                        );
-
-                    }
-
-                }.bind(this),
-                time
-            );
-
-        },
-
-
-        /* ==================================================
-           AI-EVENT
-           ================================================== */
-
-        react: function (eventName) {
-
-            switch (
-                String(eventName).toLowerCase()
+            } catch (
+                error
             ) {
 
-                case "listen":
-
-                case "listening":
-
-                    this.listening();
-
-                    break;
-
-
-                case "input":
-
-                case "typing":
-
-                    this.input();
-
-                    break;
-
-
-                case "think":
-
-                case "thinking":
-
-                case "processing":
-
-                    this.thinking();
-
-                    break;
-
-
-                case "answer":
-
-                case "answering":
-
-                    this.answering();
-
-                    break;
-
-
-                case "speak":
-
-                case "speaking":
-
-                    this.speaking();
-
-                    break;
-
-
-                case "success":
-
-                case "done":
-
-                    this.success();
-
-                    this.pulse(
-                        900
-                    );
-
-                    break;
-
-
-                case "error":
-
-                case "failed":
-
-                    this.error();
-
-                    this.pulse(
-                        900
-                    );
-
-                    break;
-
-
-                case "idle":
-
-                default:
-
-                    this.idle();
+                console.warn(
+                    "HalDo Light Event Fehler:",
+                    error
+                );
 
             }
 
@@ -809,7 +615,7 @@
 
 
     /* ======================================================
-       GLOBAL VERFÜGBARKEIT
+       GLOBAL
        ====================================================== */
 
     window.HalDoLight =
@@ -817,19 +623,12 @@
 
 
     /* ======================================================
-       DOM READY
+       START
        ====================================================== */
 
-    function initializeLightSystem() {
+    function startLightSystem() {
 
-        window.setTimeout(
-            function () {
-
-                HalDoLight.init();
-
-            },
-            0
-        );
+        HalDoLight.init();
 
     }
 
@@ -841,15 +640,16 @@
 
         document.addEventListener(
             "DOMContentLoaded",
-            initializeLightSystem,
+            startLightSystem,
             {
-                once: true
+                once:
+                    true
             }
         );
 
     } else {
 
-        initializeLightSystem();
+        startLightSystem();
 
     }
 
