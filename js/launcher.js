@@ -4,16 +4,16 @@
    ------------------------------------------------------------
    Datei: js/launcher.js
 
-   Aufgabe:
-   - Zentrale Launcher-Steuerung
-   - App-Liste anzeigen
-   - Kategorien anzeigen
+   Version: 18.0.0
+
+   Aufgaben:
+   - App-Menü
+   - App-Kategorien
    - App-Suche
    - Favoriten
-   - App-Klicks
-   - 404-Schutz
-   - Verbindung mit HalDoAppManager
-   - Verbindung mit HalDoKernel
+   - App Router Verbindung
+   - Kein direkter 404-Navigationsweg
+   - sichere App-Auswahl
    ============================================================ */
 
 "use strict";
@@ -26,7 +26,9 @@
        01 — KONFIGURATION
        ======================================================== */
 
-    const VERSION = "18.0.0";
+    const VERSION =
+        "18.0.0";
+
 
     const SELECTORS = {
 
@@ -68,10 +70,7 @@
             "all",
 
         searchTerm:
-            "",
-
-        favoriteOnly:
-            false
+            ""
 
     };
 
@@ -162,7 +161,7 @@
 
 
     /* ========================================================
-       05 — SICHERES HTML
+       05 — HTML SICHERN
        ======================================================== */
 
     function escapeHTML(
@@ -206,51 +205,37 @@
 
         const icon =
             app.icon ||
-            "";
+            "◇";
 
+
+        /*
+         * Bild erkennen.
+         */
 
         if (
-            icon
+            /\.(png|jpg|jpeg|webp|gif|svg)(\?.*)?$/i
+                .test(icon)
         ) {
 
-            /*
-             * Normales Bild.
-             */
-
-            if (
-                /\.(png|jpg|jpeg|webp|gif|svg)(\?.*)?$/i
-                    .test(icon)
-            ) {
-
-                return `
-                    <img
-                        class="haldo-app-logo"
-                        src="${escapeHTML(icon)}"
-                        alt=""
-                        loading="lazy"
-                        onerror="this.style.display='none';this.nextElementSibling.hidden=false;"
-                    >
-                    <span
-                        class="haldo-app-icon-fallback"
-                        hidden
-                    >
-                        ◇
-                    </span>
-                `;
-
-            }
-
-
-            /*
-             * Emoji / Textsymbol.
-             */
-
             return `
+                <img
+                    class="haldo-app-logo"
+                    src="${escapeHTML(icon)}"
+                    alt=""
+                    loading="lazy"
+                    onerror="
+                        this.style.display='none';
+                        if(this.nextElementSibling){
+                            this.nextElementSibling.hidden=false;
+                        }
+                    "
+                >
+
                 <span
                     class="haldo-app-icon-fallback"
-                    aria-hidden="true"
+                    hidden
                 >
-                    ${escapeHTML(icon)}
+                    ◇
                 </span>
             `;
 
@@ -262,7 +247,7 @@
                 class="haldo-app-icon-fallback"
                 aria-hidden="true"
             >
-                ◇
+                ${escapeHTML(icon)}
             </span>
         `;
 
@@ -291,11 +276,6 @@
             "App";
 
 
-        const description =
-            app.description ||
-            "";
-
-
         return `
             <article
                 class="haldo-app-card"
@@ -308,12 +288,10 @@
                     data-app-id="${escapeHTML(app.id)}"
                     ${enabled ? "" : "disabled"}
                     aria-label="${escapeHTML(title)} öffnen"
-                    title="${escapeHTML(description || title)}"
                 >
 
                     <span
                         class="haldo-app-icon-wrapper"
-                        aria-hidden="true"
                     >
                         ${createIcon(app)}
                     </span>
@@ -329,10 +307,17 @@
                         data-favorite-id="${escapeHTML(app.id)}"
                         role="button"
                         tabindex="0"
-                        aria-label="${favorite ? "Favorit entfernen" : "Als Favorit markieren"}"
-                        title="${favorite ? "Favorit entfernen" : "Favorit"}"
+                        aria-label="${
+                            favorite
+                                ? "Favorit entfernen"
+                                : "Als Favorit markieren"
+                        }"
                     >
-                        ${favorite ? "★" : "☆"}
+                        ${
+                            favorite
+                                ? "★"
+                                : "☆"
+                        }
                     </span>
 
                 </button>
@@ -358,7 +343,7 @@
         if (!grid) {
 
             log(
-                "App-Grid wurde in index.html nicht gefunden.",
+                "Der App-Grid wurde nicht gefunden.",
                 "warning"
             );
 
@@ -372,7 +357,8 @@
             apps.length === 0
         ) {
 
-            grid.innerHTML = "";
+            grid.innerHTML =
+                "";
 
 
             showEmptyState(
@@ -408,24 +394,24 @@
        ======================================================== */
 
     function showEmptyState(
-        show
+        visible
     ) {
 
-        const empty =
+        const element =
             document.querySelector(
                 SELECTORS.empty
             );
 
 
-        if (!empty) {
+        if (!element) {
 
             return;
 
         }
 
 
-        empty.hidden =
-            !show;
+        element.hidden =
+            !visible;
 
     }
 
@@ -440,18 +426,12 @@
             getCategoryList();
 
 
-        if (!container) {
-
-            return;
-
-        }
-
-
         const manager =
             window.HalDoAppManager;
 
 
         if (
+            !container ||
             !manager
         ) {
 
@@ -477,14 +457,31 @@
                         return `
                             <button
                                 type="button"
-                                class="haldo-category-button ${active ? "active" : ""}"
-                                data-category="${escapeHTML(category.id)}"
+                                class="haldo-category-button ${
+                                    active
+                                        ? "active"
+                                        : ""
+                                }"
+                                data-category="${escapeHTML(
+                                    category.id
+                                )}"
                                 aria-pressed="${active}"
                             >
-                                ${escapeHTML(category.name)}
+
                                 <span>
-                                    ${Number(category.count) || 0}
+                                    ${escapeHTML(
+                                        category.name
+                                    )}
                                 </span>
+
+                                <span>
+                                    ${
+                                        Number(
+                                            category.count
+                                        ) || 0
+                                    }
+                                </span>
+
                             </button>
                         `;
 
@@ -499,7 +496,7 @@
 
 
     /* ========================================================
-       11 — AKTIVE APPS ERMITTELN
+       11 — APP FILTER
        ======================================================== */
 
     function getDisplayedApps() {
@@ -539,46 +536,52 @@
         }
 
 
+        /*
+         * Suchfilter.
+         */
+
         if (
             state.searchTerm
         ) {
 
-            apps =
+            const searched =
                 manager.searchApps(
                     state.searchTerm
                 );
 
 
             /*
-             * Suche mit Kategorie kombinieren.
+             * Kategorie weiterhin beachten.
              */
 
             if (
-                state.activeCategory !==
-                    "all" &&
-                state.activeCategory !==
-                    "favorites"
+                state.activeCategory ===
+                "all"
             ) {
 
                 apps =
-                    apps.filter(
+                    searched;
+
+            }
+            else if (
+                state.activeCategory ===
+                "favorites"
+            ) {
+
+                apps =
+                    searched.filter(
                         app =>
-                            app.category ===
-                            state.activeCategory
+                            app.favorite
                     );
 
             }
-
-
-            if (
-                state.activeCategory ===
-                    "favorites"
-            ) {
+            else {
 
                 apps =
-                    apps.filter(
+                    searched.filter(
                         app =>
-                            app.favorite
+                            app.category ===
+                            state.activeCategory
                     );
 
             }
@@ -592,7 +595,7 @@
 
 
     /* ========================================================
-       12 — GESAMTEN LAUNCHER AKTUALISIEREN
+       12 — RENDER
        ======================================================== */
 
     function render() {
@@ -604,11 +607,6 @@
         if (
             !manager
         ) {
-
-            log(
-                "HalDoAppManager ist noch nicht verfügbar.",
-                "warning"
-            );
 
             return;
 
@@ -627,16 +625,16 @@
         );
 
 
-        updateLauncherStatus();
+        updateStateAttributes();
 
     }
 
 
     /* ========================================================
-       13 — STATUS
+       13 — STATUS ATTRIBUTE
        ======================================================== */
 
-    function updateLauncherStatus() {
+    function updateStateAttributes() {
 
         const launcher =
             getLauncher();
@@ -666,7 +664,7 @@
 
 
     /* ========================================================
-       14 — KATEGORIE KLICK
+       14 — KATEGORIEN
        ======================================================== */
 
     function bindCategoryButtons() {
@@ -693,13 +691,9 @@
                         "click",
                         function () {
 
-                            const category =
-                                button.dataset.category ||
-                                "all";
-
-
                             setCategory(
-                                category
+                                button.dataset.category ||
+                                "all"
                             );
 
                         }
@@ -718,11 +712,6 @@
         state.activeCategory =
             category ||
             "all";
-
-
-        state.favoriteOnly =
-            state.activeCategory ===
-            "favorites";
 
 
         const manager =
@@ -828,6 +817,24 @@
                     state.searchTerm =
                         "";
 
+
+                    const manager =
+                        window.HalDoAppManager;
+
+
+                    if (
+                        manager &&
+                        typeof manager.setSearch ===
+                        "function"
+                    ) {
+
+                        manager.setSearch(
+                            ""
+                        );
+
+                    }
+
+
                     render();
 
                     input.blur();
@@ -857,6 +864,10 @@
         }
 
 
+        /*
+         * App öffnen.
+         */
+
         grid
             .querySelectorAll(
                 ".haldo-app-launch"
@@ -867,12 +878,6 @@
                     button.addEventListener(
                         "click",
                         function (event) {
-
-                            /*
-                             * Favoriten-Button innerhalb
-                             * der App-Karte darf nicht
-                             * gleichzeitig die App öffnen.
-                             */
 
                             if (
                                 event.target.closest(
@@ -890,17 +895,14 @@
 
 
                             if (
-                                !appId
+                                appId
                             ) {
 
-                                return;
+                                launchApp(
+                                    appId
+                                );
 
                             }
-
-
-                            launchApp(
-                                appId
-                            );
 
                         }
                     );
@@ -909,14 +911,18 @@
             );
 
 
+        /*
+         * Favoriten.
+         */
+
         grid
             .querySelectorAll(
                 ".haldo-app-favorite"
             )
             .forEach(
-                favoriteButton => {
+                button => {
 
-                    favoriteButton.addEventListener(
+                    button.addEventListener(
                         "click",
                         function (event) {
 
@@ -924,19 +930,15 @@
                             event.stopPropagation();
 
 
-                            const appId =
-                                favoriteButton.dataset.favoriteId;
-
-
                             toggleFavorite(
-                                appId
+                                button.dataset.favoriteId
                             );
 
                         }
                     );
 
 
-                    favoriteButton.addEventListener(
+                    button.addEventListener(
                         "keydown",
                         function (event) {
 
@@ -952,7 +954,7 @@
 
 
                                 toggleFavorite(
-                                    favoriteButton.dataset.favoriteId
+                                    button.dataset.favoriteId
                                 );
 
                             }
@@ -987,16 +989,6 @@
         }
 
 
-        if (
-            typeof manager.toggleFavorite !==
-            "function"
-        ) {
-
-            return;
-
-        }
-
-
         manager.toggleFavorite(
             appId
         );
@@ -1008,124 +1000,16 @@
 
 
     /* ========================================================
-       18 — 404-SCHUTZ
+       18 — APP ROUTER
        ======================================================== */
 
-    function isSafeInternalPath(
-        path
-    ) {
+    function getRouter() {
 
-        if (
-            !path
-        ) {
-
-            return false;
-
-        }
-
-
-        const value =
-            String(path)
-                .trim();
-
-
-        /*
-         * Absolute externe URLs
-         * nicht als interne Pfade behandeln.
-         */
-
-        if (
-            /^https?:\/\//i.test(
-                value
-            )
-        ) {
-
-            return false;
-
-        }
-
-
-        /*
-         * JavaScript-URLs verbieten.
-         */
-
-        if (
-            /^javascript:/i.test(
-                value
-            )
-        ) {
-
-            return false;
-
-        }
-
-
-        /*
-         * Leere oder offensichtliche
-         * Platzhalter nicht öffnen.
-         */
-
-        if (
-            value === "#" ||
-            value === "/" ||
-            value === "undefined" ||
-            value === "null"
-        ) {
-
-            return false;
-
-        }
-
-
-        return true;
+        return window.HalDoAppRouter ||
+            null;
 
     }
 
-
-    function showAppNotReady(
-        app
-    ) {
-
-        const name =
-            app?.name ||
-            "Diese App";
-
-
-        /*
-         * Kein 404.
-         *
-         * Stattdessen eine kleine
-         * HalDo-Systemmeldung.
-         */
-
-        if (
-            typeof window.HalDoNotify ===
-            "function"
-        ) {
-
-            window.HalDoNotify(
-                `${name} ist registriert, aber das App-Modul ist noch nicht verbunden.`
-            );
-
-            return;
-
-        }
-
-
-        /*
-         * Fallback für die Foundation.
-         */
-
-        window.alert(
-            `${name}\n\nDiese App ist bereits im HalDo AI OS registriert, aber ihr vollständiges Modul wird noch aufgebaut.`
-        );
-
-    }
-
-
-    /* ========================================================
-       19 — APP STARTEN
-       ======================================================== */
 
     function launchApp(
         appId
@@ -1140,11 +1024,11 @@
         ) {
 
             log(
-                "App Manager nicht verfügbar.",
+                "App Manager ist nicht verfügbar.",
                 "error"
             );
 
-            return;
+            return false;
 
         }
 
@@ -1155,197 +1039,271 @@
             );
 
 
-        if (!app) {
+        if (
+            !app
+        ) {
 
             log(
-                `App "${appId}" wurde nicht gefunden.`,
+                `App nicht gefunden: ${appId}`,
                 "warning"
             );
 
-            return;
+            return false;
 
         }
 
 
         /*
-         * Deaktivierte Apps nicht starten.
+         * Deaktivierte App.
          */
 
         if (
             app.enabled === false
         ) {
 
-            showAppNotReady(
-                app
+            showAppMessage(
+                app,
+                "Diese App ist momentan deaktiviert."
             );
 
-            return;
+            return false;
 
         }
 
 
+        const router =
+            getRouter();
+
+
         /*
-         * Spezieller App-Typ.
+         * Router vorhanden:
+         * IMMER den Router verwenden.
          */
 
         if (
-            app.type ===
-            "external"
-        ) {
-
-            if (
-                app.url &&
-                /^https?:\/\//i.test(
-                    app.url
-                )
-            ) {
-
-                window.open(
-                    app.url,
-                    "_blank",
-                    "noopener,noreferrer"
-                );
-
-                return;
-
-            }
-
-
-            showAppNotReady(
-                app
-            );
-
-            return;
-
-        }
-
-
-        /*
-         * Interne App.
-         */
-
-        const path =
-            app.path ||
-            app.url ||
-            "";
-
-
-        /*
-         * KEIN Pfad:
-         * niemals 404 erzeugen.
-         */
-
-        if (
-            !isSafeInternalPath(
-                path
-            )
-        ) {
-
-            showAppNotReady(
-                app
-            );
-
-            return;
-
-        }
-
-
-        /*
-         * Falls der App Manager seine eigene
-         * Startlogik besitzt, verwenden wir sie.
-         */
-
-        if (
-            typeof manager.openApp ===
+            router &&
+            typeof router.open ===
             "function"
         ) {
 
-            /*
-             * Vorher prüfen wir aber den Pfad.
-             * Dadurch wird kein leerer oder
-             * offensichtlicher Platzhalter geöffnet.
-             */
+            const launcher =
+                getLauncher();
 
-            manager.openApp(
-                appId
+
+            if (
+                launcher
+            ) {
+
+                launcher.hidden =
+                    true;
+
+            }
+
+
+            router.open(
+                app.id
             );
 
-            return;
+
+            return true;
 
         }
 
 
         /*
-         * Letzter Fallback.
+         * Router noch nicht geladen.
+         *
+         * Wir öffnen KEINEN Pfad.
+         * Dadurch entsteht kein 404.
          */
 
-        window.location.assign(
-            path
+        showAppMessage(
+            app,
+            "Der HalDo App Router wird noch geladen. Bitte kurz warten."
         );
+
+
+        return false;
 
     }
 
 
     /* ========================================================
-       20 — KERNEL VERBINDUNG
+       19 — SICHERE APP-MELDUNG
        ======================================================== */
 
-    function connectKernel() {
+    function showAppMessage(
+        app,
+        message
+    ) {
 
-        const kernel =
-            window.HalDoKernel;
+        const existing =
+            document.getElementById(
+                "haldo-launcher-message"
+            );
 
 
         if (
-            !kernel
+            existing
         ) {
 
-            window.setTimeout(
-                connectKernel,
-                100
+            existing.remove();
+
+        }
+
+
+        const box =
+            document.createElement(
+                "div"
             );
+
+
+        box.id =
+            "haldo-launcher-message";
+
+
+        box.className =
+            "haldo-launcher-message";
+
+
+        box.innerHTML = `
+
+            <div
+                class="haldo-launcher-message-inner"
+            >
+
+                <div
+                    class="haldo-launcher-message-icon"
+                >
+                    ${escapeHTML(
+                        app?.icon ||
+                        "◇"
+                    )}
+                </div>
+
+                <strong>
+                    ${escapeHTML(
+                        app?.name ||
+                        "HalDo AI OS"
+                    )}
+                </strong>
+
+                <p>
+                    ${escapeHTML(
+                        message
+                    )}
+                </p>
+
+                <button
+                    type="button"
+                    class="haldo-primary-button"
+                    data-close-launcher-message
+                >
+                    OK
+                </button>
+
+            </div>
+
+        `;
+
+
+        document.body.appendChild(
+            box
+        );
+
+
+        const close =
+            box.querySelector(
+                "[data-close-launcher-message]"
+            );
+
+
+        if (
+            close
+        ) {
+
+            close.addEventListener(
+                "click",
+                function () {
+
+                    box.remove();
+
+                }
+            );
+
+        }
+
+    }
+
+
+    /* ========================================================
+       20 — ROUTER EVENTS
+       ======================================================== */
+
+    function connectRouter() {
+
+        const router =
+            getRouter();
+
+
+        if (
+            !router
+        ) {
 
             return;
 
         }
 
 
-        /*
-         * Kernel bereit.
-         */
-
-        kernel.on(
-            "kernel:ready",
+        router.on(
+            "closed",
             function () {
 
-                connectAppManager();
+                const launcher =
+                    getLauncher();
+
+
+                if (
+                    launcher
+                ) {
+
+                    launcher.hidden =
+                        false;
+
+                }
+
+
+                render();
 
             }
         );
 
 
-        /*
-         * Kernel war eventuell bereits
-         * fertig, bevor wir verbunden wurden.
-         */
+        router.on(
+            "opened",
+            function () {
 
-        const kernelState =
-            kernel.getState();
+                const launcher =
+                    getLauncher();
 
 
-        if (
-            kernelState.ready
-        ) {
+                if (
+                    launcher
+                ) {
 
-            connectAppManager();
+                    launcher.hidden =
+                        true;
 
-        }
+                }
+
+            }
+        );
 
     }
 
 
     /* ========================================================
-       21 — APP MANAGER VERBINDEN
+       21 — APP MANAGER VERBINDUNG
        ======================================================== */
 
     function connectAppManager() {
@@ -1369,29 +1327,16 @@
 
 
         /*
-         * App Manager ist bereits bereit.
-         */
-
-        const managerState =
-            manager.getState();
-
-
-        if (
-            managerState.ready
-        ) {
-
-            finishInitialization();
-
-        }
-
-
-        /*
-         * Auf spätere Apps warten.
+         * Events.
          */
 
         manager.on(
             "apps:loaded",
             function () {
+
+                state.apps =
+                    manager.getAllApps();
+
 
                 finishInitialization();
 
@@ -1400,7 +1345,7 @@
 
 
         manager.on(
-            "app:favorite",
+            "apps:registered",
             function () {
 
                 render();
@@ -1420,13 +1365,30 @@
 
 
         manager.on(
-            "apps:registered",
+            "app:favorite",
             function () {
 
                 render();
 
             }
         );
+
+
+        /*
+         * Bereits geladen?
+         */
+
+        const managerState =
+            manager.getState();
+
+
+        if (
+            managerState.ready
+        ) {
+
+            finishInitialization();
+
+        }
 
     }
 
@@ -1458,6 +1420,9 @@
         bindSearch();
 
 
+        connectRouter();
+
+
         render();
 
 
@@ -1473,11 +1438,14 @@
                 "ready"
             );
 
+            launcher.hidden =
+                false;
+
         }
 
 
         /*
-         * Kernel-Modul registrieren.
+         * Kernel registrieren.
          */
 
         if (
@@ -1494,116 +1462,40 @@
         }
 
 
-        emit(
-            "launcher:ready"
-        );
-
-
         log(
-            "Launcher ist vollständig bereit."
+            "Launcher ist bereit."
         );
 
     }
 
 
     /* ========================================================
-       23 — EVENT SYSTEM
+       23 — STATUS
        ======================================================== */
 
-    const listeners = {};
+    function getState() {
 
+        return {
 
-    function on(
-        eventName,
-        callback
-    ) {
+            ...state,
 
-        if (
-            typeof callback !==
-            "function"
-        ) {
+            apps:
+                [
+                    ...state.apps
+                ],
 
-            return false;
+            categories:
+                [
+                    ...state.categories
+                ]
 
-        }
-
-
-        if (
-            !listeners[eventName]
-        ) {
-
-            listeners[eventName] = [];
-
-        }
-
-
-        listeners[eventName]
-            .push(callback);
-
-
-        return true;
-
-    }
-
-
-    function emit(
-        eventName,
-        data = null
-    ) {
-
-        const callbacks =
-            listeners[eventName];
-
-
-        if (
-            callbacks
-        ) {
-
-            callbacks.forEach(
-                callback => {
-
-                    try {
-
-                        callback(data);
-
-                    }
-                    catch (error) {
-
-                        log(
-                            `Launcher Event-Fehler: ${error.message}`,
-                            "error"
-                        );
-
-                    }
-
-                }
-            );
-
-        }
-
-
-        /*
-         * Event auch an Kernel weitergeben.
-         */
-
-        if (
-            window.HalDoKernel &&
-            typeof window.HalDoKernel.emit ===
-            "function"
-        ) {
-
-            window.HalDoKernel.emit(
-                eventName,
-                data
-            );
-
-        }
+        };
 
     }
 
 
     /* ========================================================
-       24 — ÖFFENTLICHE API
+       24 — PUBLIC API
        ======================================================== */
 
     const api = {
@@ -1618,45 +1510,19 @@
         init:
             finishInitialization,
 
-
         render,
-
 
         renderApps,
 
-
         renderCategories,
-
 
         setCategory,
 
-
         launchApp,
-
 
         toggleFavorite,
 
-
-        getState:
-            function () {
-
-                return {
-
-                    ...state,
-
-                    apps:
-                        [
-                            ...state.apps
-                        ]
-
-                };
-
-            },
-
-
-        on,
-
-        emit
+        getState
 
     };
 
@@ -1684,7 +1550,7 @@
 
     function start() {
 
-        connectKernel();
+        connectAppManager();
 
     }
 
