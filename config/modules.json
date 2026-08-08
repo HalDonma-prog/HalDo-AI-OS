@@ -1,0 +1,679 @@
+{
+  "version": "18.0.0",
+
+  "modules": [
+
+    {
+      "id": "core",
+      "name": "HalDo Core",
+      "category": "core",
+      "enabled": true,
+      "required": true,
+      "priority": 100,
+      "entry": "js/kernel.js",
+      "dependencies": []
+    },
+
+    {
+      "id": "system",
+      "name": "System Manager",
+      "category": "system",
+      "enabled": true,
+      "required": true,
+      "priority": 99,
+      "entry": "js/system.js",
+      "dependencies": [
+        "core"
+      ]
+    },
+
+    {
+      "id": "boot",
+      "name": "Boot Manager",
+      "category": "system",
+      "enabled": true,
+      "required": true,
+      "priority": 98,
+      "entry": "js/boot-manager.js",
+      "dependencies": [
+        "core",
+        "system"
+      ]
+    },
+
+    {
+      "id": "module-manager",
+      "name": "Module Manager",
+      "category": "system",
+      "enabled": true,
+      "required": true,
+      "priority": 97,
+      "entry": "js/module-manager.js",
+      "dependencies": [
+        "core",
+        "system"
+      ]
+    },
+
+    {
+      "id": "app-manager",
+      "name": "App Manager",
+      "category": "system",
+      "enabled": true,
+      "required": true,
+      "priority": 96,
+      "entry": "js/app-manager.js",
+      "dependencies": [
+        "core",
+        "system",
+        "module-manager"
+      ]
+    },
+
+    {
+      "id": "service-manager",
+      "name": "Service Manager",
+      "category": "system",
+      "enabled": true,
+      "required": true,
+      "priority": 95,
+      "entry": "js/service-manager.js",
+      "dependencies": [
+        "core",
+        "system",
+        "module-manager"
+      ]
+    },
+
+    {
+      "id": "process-manager",
+      "name": "Process Manager",
+      "category": "system",
+      "enabled": true,
+      "required": true,
+      "priority": 94,
+      "entry": "js/process-manager.js",
+      "dependencies": [
+        "core",
+        "system",
+        "service-manager"
+      ]
+    },
+
+    {
+      "id": "event-manager",
+      "name": "Event Manager",
+      "category": "system",
+      "enabled": true,
+      "required": true,
+      "priority": 93,
+      "entry": "js/event-manager.js",
+      "dependencies": [
+        "core"
+      ]
+    },
+
+    {
+      "id": "task-manager",
+      "name": "Task Manager",
+      "category": "system",
+      "enabled": true,
+      "required": true,
+      "priority": 92,
+      "entry": "js/task-manager.js",
+      "dependencies": [
+        "core",
+        "event-manager"
+      ]
+    },
+
+    {
+      "id": "storage",
+      "name": "Storage Manager",
+      "category": "storage",
+      "enabled": true,
+      "required": true,
+      "priority": 90,
+      "entry": "js/storage-manager.js",
+      "dependencies": [
+        "core",
+        "system"
+      ]
+    },
+
+    {
+      "id": "database",
+      "name": "Database Manager",
+      "category": "storage",
+      "enabled": true,
+      "required": true,
+      "priority": 89,
+      "entry": "js/database-manager.js",
+      "dependencies": [
+        "core",
+        "storage"
+      ]
+    },
+
+    {
+      "id": "backup",
+      "name": "Backup Manager",
+      "category": "storage",
+      "enabled": true,
+      "required": false,
+      "priority": 80,
+      "entry": "js/backup-manager.js",
+      "dependencies": [
+        "storage",
+        "database"
+      ]
+    },
+
+    {
+      "id": "network",
+      "name": "Network Manager",
+      "category": "network",
+      "enabled": true,
+      "required": false,
+      "priority": 85,
+      "entry": "js/network/network-manager.js",
+      "dependencies": [
+        "core"
+      ]
+    },
+
+    {
+      "id": "internet",
+      "name": "Internet Manager",
+      "category": "network",
+      "enabled": true,
+      "required": false,
+      "priority": 84,
+      "entry": "js/network/internet-manager.js",
+      "dependencies": [
+        "network"
+      ]
+    },
+
+    {
+      "id": "api",
+      "name": "API Manager",
+      "category": "network",
+      "enabled": true,
+      "required": false,
+      "priority": 83,
+      "entry": "js/network/api-manager.js",
+      "dependencies": [
+        "network"
+      ]
+    },
+
+    {
+      "id": "security",
+      "name": "Security Manager",
+      "category": "security",
+      "enabled": true,
+      "required": true,
+      "priority": 88,
+      "entry": "js/security-manager.js",
+      "dependencies": [
+        "core",
+        "storage"
+      ]
+    },
+
+    {
+      "id": "permissions",
+      "name": "Permission Manager",
+      "category": "security",
+      "enabled": true,
+      "required": true,
+      "priority": 87,
+      "entry": "js/permission-manager.js",
+      "dependencies": [
+        "security"
+      ]
+    },
+
+    {
+      "id": "sessions",
+      "name": "Session Manager",
+      "category": "security",
+      "enabled": true,
+      "required": true,
+      "priority": 86,
+      "entry": "js/session-manager.js",
+      "dependencies": [
+        "security",
+        "storage"
+      ]
+    },
+
+    {
+      "id": "ai-core",
+      "name": "HalDo AI Core",
+      "category": "ai",
+      "enabled": true,
+      "required": true,
+      "priority": 75,
+      "entry": "js/ai/ai-core.js",
+      "dependencies": [
+        "core",
+        "system",
+        "storage"
+      ]
+    },
+
+    {
+      "id": "ai-chat",
+      "name": "AI Chat",
+      "category": "ai",
+      "enabled": true,
+      "required": false,
+      "priority": 74,
+      "entry": "js/ai/ai-chat.js",
+      "dependencies": [
+        "ai-core"
+      ]
+    },
+
+    {
+      "id": "ai-memory",
+      "name": "AI Memory",
+      "category": "ai",
+      "enabled": true,
+      "required": false,
+      "priority": 73,
+      "entry": "js/ai/ai-memory.js",
+      "dependencies": [
+        "ai-core",
+        "storage"
+      ]
+    },
+
+    {
+      "id": "ai-context",
+      "name": "AI Context",
+      "category": "ai",
+      "enabled": true,
+      "required": false,
+      "priority": 72,
+      "entry": "js/ai/ai-context.js",
+      "dependencies": [
+        "ai-core",
+        "ai-memory"
+      ]
+    },
+
+    {
+      "id": "ai-tools",
+      "name": "AI Tools",
+      "category": "ai",
+      "enabled": true,
+      "required": false,
+      "priority": 71,
+      "entry": "js/ai/ai-tools.js",
+      "dependencies": [
+        "ai-core"
+      ]
+    },
+
+    {
+      "id": "ai-actions",
+      "name": "AI Actions",
+      "category": "ai",
+      "enabled": true,
+      "required": false,
+      "priority": 70,
+      "entry": "js/ai/ai-actions.js",
+      "dependencies": [
+        "ai-core",
+        "ai-tools"
+      ]
+    },
+
+    {
+      "id": "ai-model-manager",
+      "name": "AI Model Manager",
+      "category": "ai",
+      "enabled": true,
+      "required": false,
+      "priority": 69,
+      "entry": "js/ai/ai-model-manager.js",
+      "dependencies": [
+        "ai-core",
+        "network"
+      ]
+    },
+
+    {
+      "id": "ai-provider-manager",
+      "name": "AI Provider Manager",
+      "category": "ai",
+      "enabled": true,
+      "required": false,
+      "priority": 68,
+      "entry": "js/ai/ai-provider-manager.js",
+      "dependencies": [
+        "ai-core",
+        "network",
+        "security"
+      ]
+    },
+
+    {
+      "id": "speech-recognition",
+      "name": "Speech Recognition",
+      "category": "voice",
+      "enabled": true,
+      "required": false,
+      "priority": 65,
+      "entry": "js/ai/speech-recognition.js",
+      "dependencies": [
+        "ai-core"
+      ]
+    },
+
+    {
+      "id": "speech-synthesis",
+      "name": "Speech Synthesis",
+      "category": "voice",
+      "enabled": true,
+      "required": false,
+      "priority": 64,
+      "entry": "js/ai/speech-synthesis.js",
+      "dependencies": [
+        "ai-core"
+      ]
+    },
+
+    {
+      "id": "keyboard",
+      "name": "Keyboard Manager",
+      "category": "input",
+      "enabled": true,
+      "required": true,
+      "priority": 60,
+      "entry": "js/keyboard/keyboard-manager.js",
+      "dependencies": [
+        "core",
+        "system"
+      ]
+    },
+
+    {
+      "id": "keyboard-layouts",
+      "name": "Keyboard Layout Manager",
+      "category": "input",
+      "enabled": true,
+      "required": true,
+      "priority": 59,
+      "entry": "js/keyboard/keyboard-layout-manager.js",
+      "dependencies": [
+        "keyboard"
+      ]
+    },
+
+    {
+      "id": "ezidi-keyboard",
+      "name": "Êzîdî Keyboard",
+      "category": "input",
+      "enabled": true,
+      "required": false,
+      "priority": 58,
+      "entry": "js/keyboard/ezidi-keyboard.js",
+      "dependencies": [
+        "keyboard",
+        "keyboard-layouts"
+      ]
+    },
+
+    {
+      "id": "voice-input",
+      "name": "Voice Input",
+      "category": "input",
+      "enabled": true,
+      "required": false,
+      "priority": 57,
+      "entry": "js/keyboard/voice-input.js",
+      "dependencies": [
+        "keyboard",
+        "speech-recognition"
+      ]
+    },
+
+    {
+      "id": "shell",
+      "name": "HalDo Shell",
+      "category": "ui",
+      "enabled": true,
+      "required": true,
+      "priority": 50,
+      "entry": "js/shell-manager.js",
+      "dependencies": [
+        "core",
+        "system",
+        "app-manager",
+        "event-manager"
+      ]
+    },
+
+    {
+      "id": "navigation",
+      "name": "Navigation Manager",
+      "category": "ui",
+      "enabled": true,
+      "required": true,
+      "priority": 49,
+      "entry": "js/navigation-manager.js",
+      "dependencies": [
+        "shell"
+      ]
+    },
+
+    {
+      "id": "notifications",
+      "name": "Notification Manager",
+      "category": "ui",
+      "enabled": true,
+      "required": false,
+      "priority": 48,
+      "entry": "js/notification-manager.js",
+      "dependencies": [
+        "shell",
+        "event-manager"
+      ]
+    },
+
+    {
+      "id": "modal",
+      "name": "Modal Manager",
+      "category": "ui",
+      "enabled": true,
+      "required": false,
+      "priority": 47,
+      "entry": "js/modal-manager.js",
+      "dependencies": [
+        "shell"
+      ]
+    },
+
+    {
+      "id": "dialog",
+      "name": "Dialog Manager",
+      "category": "ui",
+      "enabled": true,
+      "required": false,
+      "priority": 46,
+      "entry": "js/dialog-manager.js",
+      "dependencies": [
+        "shell"
+      ]
+    },
+
+    {
+      "id": "theme",
+      "name": "Theme Manager",
+      "category": "ui",
+      "enabled": true,
+      "required": false,
+      "priority": 45,
+      "entry": "js/theme-manager.js",
+      "dependencies": [
+        "shell",
+        "storage"
+      ]
+    },
+
+    {
+      "id": "settings",
+      "name": "Settings Manager",
+      "category": "system",
+      "enabled": true,
+      "required": true,
+      "priority": 44,
+      "entry": "js/settings-manager.js",
+      "dependencies": [
+        "storage",
+        "security"
+      ]
+    },
+
+    {
+      "id": "logo-animation",
+      "name": "HalDo Logo Animation",
+      "category": "identity",
+      "enabled": true,
+      "required": false,
+      "priority": 35,
+      "entry": "js/logo-animation-manager.js",
+      "dependencies": [
+        "core"
+      ]
+    },
+
+    {
+      "id": "logo-intro",
+      "name": "HalDo Logo Intro",
+      "category": "identity",
+      "enabled": true,
+      "required": false,
+      "priority": 34,
+      "entry": "js/logo-intro-manager.js",
+      "dependencies": [
+        "logo-animation",
+        "shell"
+      ]
+    },
+
+    {
+      "id": "updates",
+      "name": "Update Manager",
+      "category": "maintenance",
+      "enabled": true,
+      "required": false,
+      "priority": 30,
+      "entry": "js/updates/update-manager.js",
+      "dependencies": [
+        "network",
+        "storage",
+        "security"
+      ]
+    },
+
+    {
+      "id": "version-manager",
+      "name": "Version Manager",
+      "category": "maintenance",
+      "enabled": true,
+      "required": false,
+      "priority": 29,
+      "entry": "js/updates/version-manager.js",
+      "dependencies": [
+        "updates"
+      ]
+    },
+
+    {
+      "id": "rollback",
+      "name": "Rollback Manager",
+      "category": "maintenance",
+      "enabled": true,
+      "required": false,
+      "priority": 28,
+      "entry": "js/updates/rollback-manager.js",
+      "dependencies": [
+        "updates",
+        "backup"
+      ]
+    },
+
+    {
+      "id": "plugins",
+      "name": "Plugin Manager",
+      "category": "extensions",
+      "enabled": true,
+      "required": false,
+      "priority": 25,
+      "entry": "js/updates/package-manager.js",
+      "dependencies": [
+        "app-manager",
+        "security",
+        "storage"
+      ]
+    },
+
+    {
+      "id": "developer",
+      "name": "Developer System",
+      "category": "developer",
+      "enabled": true,
+      "required": false,
+      "priority": 20,
+      "entry": "js/developer/developer-mode.js",
+      "dependencies": [
+        "core",
+        "system"
+      ]
+    },
+
+    {
+      "id": "diagnostics",
+      "name": "System Diagnostics",
+      "category": "diagnostics",
+      "enabled": true,
+      "required": true,
+      "priority": 18,
+      "entry": "js/diagnostics.js",
+      "dependencies": [
+        "core",
+        "system",
+        "event-manager",
+        "log-manager"
+      ]
+    },
+
+    {
+      "id": "logging",
+      "name": "Log Manager",
+      "category": "diagnostics",
+      "enabled": true,
+      "required": true,
+      "priority": 19,
+      "entry": "js/log-manager.js",
+      "dependencies": [
+        "core"
+      ]
+    }
+
+  ],
+
+  "loading": {
+    "validateDependencies": true,
+    "preventDuplicateLoading": true,
+    "continueOnOptionalFailure": true,
+    "stopOnRequiredFailure": true,
+    "emitModuleEvents": true,
+    "createLoadReport": true
+  }
+}
