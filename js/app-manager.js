@@ -5,22 +5,17 @@
    Datei:
    js/app-manager.js
 
-   Aufgabe:
-   - Zentrale App-Verwaltung
-   - Verbindung mit config/apps.js
+   AUFGABE:
+   - Zentrale Verwaltung aller HalDo Apps
+   - Nutzt ausschließlich HalDoAppRegistry
+   - Keine zweite App-Liste
    - Apps suchen
+   - Apps nach Kategorie filtern
+   - Favoriten verwalten
    - Apps aktivieren/deaktivieren
-   - Favoriten
-   - Kategorien
-   - App-Status
-   - sichere Kommunikation mit Launcher und Router
-
-   WICHTIG:
-   Diese Datei enthält KEINE eigene App-Liste.
-
-   Quelle der Apps:
-   config/apps.js
-   → window.HalDoAppRegistry
+   - App-Status verwalten
+   - Sichere App-Öffnung vorbereiten
+   - Keine 404 durch blindes Weiterleiten
    ============================================================ */
 
 "use strict";
@@ -36,7 +31,7 @@
     const CONFIG = {
 
         name:
-            "HalDo App Manager",
+            "HalDo AI OS App Manager",
 
         version:
             "18.0.0"
@@ -56,23 +51,31 @@
         ready:
             false,
 
-        appsLoaded:
-            false,
-
         appCount:
             0,
 
-        lastAction:
+        activeApp:
             null,
 
-        lastApp:
+        lastOpenedApp:
+            null,
+
+        lastError:
             null
 
     };
 
 
     /* ========================================================
-       03 — EVENTS
+       03 — APP STATUS
+       ======================================================== */
+
+    const appStates =
+        new Map();
+
+
+    /* ========================================================
+       04 — EVENT SYSTEM
        ======================================================== */
 
     const listeners = {};
@@ -146,12 +149,8 @@
         data = null
     ) {
 
-        const callbacks =
-            listeners[eventName];
-
-
         if (
-            !callbacks
+            !listeners[eventName]
         ) {
 
             return;
@@ -159,7 +158,7 @@
         }
 
 
-        callbacks
+        listeners[eventName]
             .slice()
             .forEach(
                 callback => {
@@ -189,240 +188,57 @@
 
 
     /* ========================================================
-       04 — LOG
-       ======================================================== */
-
-    function log(
-        message,
-        type = "info"
-    ) {
-
-        const prefix =
-            "[HalDo App Manager]";
-
-
-        if (
-            type ===
-            "error"
-        ) {
-
-            console.error(
-                prefix,
-                message
-            );
-
-        }
-        else if (
-            type ===
-            "warning"
-        ) {
-
-            console.warn(
-                prefix,
-                message
-            );
-
-        }
-        else {
-
-            console.log(
-                prefix,
-                message
-            );
-
-        }
-
-    }
-
-
-    /* ========================================================
-       05 — REGISTRY
+       05 — REGISTRY PRÜFEN
        ======================================================== */
 
     function getRegistry() {
 
-        return (
-            window.HalDoAppRegistry ||
-            null
-        );
+        if (
+            !window.HalDoAppRegistry
+        ) {
+
+            return null;
+
+        }
+
+
+        return window.HalDoAppRegistry;
 
     }
 
 
-    /* ========================================================
-       06 — REGISTRY PRÜFEN
-       ======================================================== */
-
-    function registryAvailable() {
-
-        const registry =
-            getRegistry();
-
-
-        return Boolean(
-            registry &&
-            typeof registry.getAllApps ===
-                "function"
-        );
-
-    }
-
-
-    /* ========================================================
-       07 — APPS LADEN
-       ======================================================== */
-
-    function loadApps() {
+    function registryReady() {
 
         const registry =
             getRegistry();
 
 
         if (
-            !registryAvailable()
+            !registry
         ) {
 
-            state.appsLoaded =
-                false;
-
-
-            state.appCount =
-                0;
-
-
-            log(
-                "HalDoAppRegistry wurde noch nicht geladen.",
-                "warning"
-            );
-
-
-            return [];
+            return false;
 
         }
-
-
-        let apps =
-            registry.getAllApps();
 
 
         if (
-            !Array.isArray(
-                apps
-            )
+            typeof registry.getAllApps !==
+            "function"
         ) {
 
-            apps =
-                [];
+            return false;
 
         }
 
 
-        /*
-         * Nur gültige Apps akzeptieren.
-         */
-
-        apps =
-            apps.filter(
-                app =>
-                    app &&
-                    typeof app.id ===
-                        "string" &&
-                    app.id.trim() !== ""
-            );
-
-
-        /*
-         * Nach order sortieren.
-         */
-
-        apps.sort(
-            (
-                a,
-                b
-            ) => {
-
-                const orderA =
-                    Number.isFinite(
-                        Number(
-                            a.order
-                        )
-                    )
-                        ? Number(
-                            a.order
-                        )
-                        : 999999;
-
-
-                const orderB =
-                    Number.isFinite(
-                        Number(
-                            b.order
-                        )
-                    )
-                        ? Number(
-                            b.order
-                        )
-                        : 999999;
-
-
-                return (
-                    orderA -
-                    orderB
-                );
-
-            }
-        );
-
-
-        state.appsLoaded =
-            true;
-
-
-        state.appCount =
-            apps.length;
-
-
-        emit(
-            "apps:loaded",
-            {
-                apps,
-                count:
-                    apps.length
-            }
-        );
-
-
-        return apps;
+        return true;
 
     }
 
 
     /* ========================================================
-       08 — ALLE APPS
-       ======================================================== */
-
-    function getAllApps() {
-
-        if (
-            !registryAvailable()
-        ) {
-
-            return [];
-
-        }
-
-
-        const apps =
-            loadApps();
-
-
-        return apps;
-
-    }
-
-
-    /* ========================================================
-       09 — EINZELNE APP
+       06 — APP HOLEN
        ======================================================== */
 
     function getApp(
@@ -434,9 +250,7 @@
 
 
         if (
-            !registry ||
-            typeof registry.getApp !==
-                "function"
+            !registry
         ) {
 
             return null;
@@ -444,35 +258,81 @@
         }
 
 
-        return registry.getApp(
-            appId
-        );
+        if (
+            typeof registry.findApp ===
+            "function"
+        ) {
+
+            return registry.findApp(
+                appId
+            );
+
+        }
+
+
+        if (
+            typeof registry.getApp ===
+            "function"
+        ) {
+
+            return registry.getApp(
+                appId
+            );
+
+        }
+
+
+        return null;
 
     }
 
 
     /* ========================================================
-       10 — APP EXISTIERT?
+       07 — ALLE APPS
        ======================================================== */
 
-    function hasApp(
-        appId
-    ) {
+    function getAllApps() {
 
-        return Boolean(
-            getApp(
-                appId
-            )
-        );
+        const registry =
+            getRegistry();
+
+
+        if (
+            !registry ||
+            typeof registry.getAllApps !==
+            "function"
+        ) {
+
+            return [];
+
+        }
+
+
+        return registry.getAllApps();
 
     }
 
 
     /* ========================================================
-       11 — AKTIVE APPS
+       08 — AKTIVE APPS
        ======================================================== */
 
     function getEnabledApps() {
+
+        const registry =
+            getRegistry();
+
+
+        if (
+            registry &&
+            typeof registry.getEnabledApps ===
+            "function"
+        ) {
+
+            return registry.getEnabledApps();
+
+        }
+
 
         return getAllApps()
             .filter(
@@ -485,26 +345,25 @@
 
 
     /* ========================================================
-       12 — DEAKTIVIERTE APPS
-       ======================================================== */
-
-    function getDisabledApps() {
-
-        return getAllApps()
-            .filter(
-                app =>
-                    app.enabled ===
-                    false
-            );
-
-    }
-
-
-    /* ========================================================
-       13 — FAVORITEN
+       09 — FAVORITEN
        ======================================================== */
 
     function getFavorites() {
+
+        const registry =
+            getRegistry();
+
+
+        if (
+            registry &&
+            typeof registry.getFavorites ===
+            "function"
+        ) {
+
+            return registry.getFavorites();
+
+        }
+
 
         return getAllApps()
             .filter(
@@ -517,7 +376,7 @@
 
 
     /* ========================================================
-       14 — KATEGORIEN
+       10 — KATEGORIEN
        ======================================================== */
 
     function getCategories() {
@@ -527,23 +386,23 @@
 
 
         if (
-            !registry ||
-            typeof registry.getCategories !==
-                "function"
+            registry &&
+            typeof registry.getCategories ===
+            "function"
         ) {
 
-            return [];
+            return registry.getCategories();
 
         }
 
 
-        return registry.getCategories();
+        return [];
 
     }
 
 
     /* ========================================================
-       15 — APPS NACH KATEGORIE
+       11 — APPS NACH KATEGORIE
        ======================================================== */
 
     function getAppsByCategory(
@@ -555,30 +414,52 @@
 
 
         if (
-            !registry ||
-            typeof registry.getAppsByCategory !==
-                "function"
+            registry &&
+            typeof registry.getAppsByCategory ===
+            "function"
         ) {
 
-            return [];
+            return registry.getAppsByCategory(
+                category
+            );
 
         }
 
 
-        return registry.getAppsByCategory(
-            category
-        );
+        return getAllApps()
+            .filter(
+                app =>
+                    app.category ===
+                    category
+            );
 
     }
 
 
     /* ========================================================
-       16 — APP SUCHEN
+       12 — APP SUCHE
        ======================================================== */
 
-    function searchApps(
+    function search(
         query
     ) {
+
+        const registry =
+            getRegistry();
+
+
+        if (
+            registry &&
+            typeof registry.searchApps ===
+            "function"
+        ) {
+
+            return registry.searchApps(
+                query
+            );
+
+        }
+
 
         const text =
             String(
@@ -602,14 +483,14 @@
             .filter(
                 app => {
 
-                    const searchable =
+                    const content =
                         [
 
                             app.id,
 
-                            app.title,
-
                             app.name,
+
+                            app.title,
 
                             app.description,
 
@@ -624,7 +505,7 @@
                         .toLowerCase();
 
 
-                    return searchable.includes(
+                    return content.includes(
                         text
                     );
 
@@ -635,10 +516,67 @@
 
 
     /* ========================================================
-       17 — FAVORIT UMSCHALTEN
+       13 — APP-STATUS INITIALISIEREN
        ======================================================== */
 
-    function toggleFavorite(
+    function initializeAppStates() {
+
+        const apps =
+            getAllApps();
+
+
+        apps.forEach(
+            app => {
+
+                if (
+                    !appStates.has(
+                        app.id
+                    )
+                ) {
+
+                    appStates.set(
+                        app.id,
+                        {
+
+                            id:
+                                app.id,
+
+                            enabled:
+                                app.enabled !==
+                                false,
+
+                            installed:
+                                true,
+
+                            loaded:
+                                false,
+
+                            running:
+                                false,
+
+                            error:
+                                null
+
+                        }
+                    );
+
+                }
+
+            }
+        );
+
+
+        state.appCount =
+            apps.length;
+
+    }
+
+
+    /* ========================================================
+       14 — APP-STATUS
+       ======================================================== */
+
+    function getAppState(
         appId
     ) {
 
@@ -652,386 +590,65 @@
             !app
         ) {
 
-            log(
-                `App nicht gefunden: ${appId}`,
-                "warning"
-            );
-
-
-            return false;
-
-        }
-
-
-        /*
-         * Da apps.js die zentrale Registry ist,
-         * müssen wir eine veränderbare Laufzeitkopie
-         * im Manager führen.
-         */
-
-        const runtimeApp =
-            getRuntimeApp(
-                app.id
-            );
-
-
-        if (
-            !runtimeApp
-        ) {
-
-            return false;
-
-        }
-
-
-        runtimeApp.favorite =
-            runtimeApp.favorite !==
-            true;
-
-
-        state.lastAction =
-            "favorite";
-
-
-        state.lastApp =
-            runtimeApp.id;
-
-
-        emit(
-            "app:favorite",
-            {
-                app:
-                    {
-                        ...runtimeApp
-                    },
-
-                favorite:
-                    runtimeApp.favorite
-            }
-        );
-
-
-        return runtimeApp.favorite;
-
-    }
-
-
-    /* ========================================================
-       18 — RUNTIME APPS
-       ======================================================== */
-
-    const runtimeApps =
-        new Map();
-
-
-    function initializeRuntimeApps() {
-
-        const apps =
-            getAllApps();
-
-
-        runtimeApps.clear();
-
-
-        apps.forEach(
-            app => {
-
-                runtimeApps.set(
-                    app.id,
-                    {
-                        ...app,
-
-                        keywords:
-                            [
-                                ...(app.keywords || [])
-                            ]
-                    }
-                );
-
-            }
-        );
-
-
-        return true;
-
-    }
-
-
-    /* ========================================================
-       19 — RUNTIME APP
-       ======================================================== */
-
-    function getRuntimeApp(
-        appId
-    ) {
-
-        const id =
-            String(
-                appId ||
-                ""
-            )
-            .trim()
-            .toLowerCase();
-
-
-        return (
-            runtimeApps.get(
-                id
-            ) ||
-            null
-        );
-
-    }
-
-
-    /* ========================================================
-       20 — ALLE RUNTIME APPS
-       ======================================================== */
-
-    function getRuntimeApps() {
-
-        return Array.from(
-            runtimeApps.values()
-        )
-        .map(
-            app =>
-                ({
-                    ...app,
-
-                    keywords:
-                        [
-                            ...(app.keywords || [])
-                        ]
-                })
-        );
-
-    }
-
-
-    /* ========================================================
-       21 — RUNTIME APP LADEN
-       ======================================================== */
-
-    function ensureRuntimeApps() {
-
-        if (
-            runtimeApps.size ===
-            0
-        ) {
-
-            initializeRuntimeApps();
-
-        }
-
-    }
-
-
-    /* ========================================================
-       22 — RUNTIME APP AKTUALISIEREN
-       ======================================================== */
-
-    function updateRuntimeApp(
-        appId,
-        changes
-    ) {
-
-        ensureRuntimeApps();
-
-
-        const app =
-            getRuntimeApp(
-                appId
-            );
-
-
-        if (
-            !app
-        ) {
-
-            return false;
-
-        }
-
-
-        if (
-            !changes ||
-            typeof changes !==
-                "object"
-        ) {
-
-            return false;
-
-        }
-
-
-        Object.assign(
-            app,
-            changes
-        );
-
-
-        state.lastAction =
-            "update";
-
-
-        state.lastApp =
-            app.id;
-
-
-        emit(
-            "app:updated",
-            {
-                app:
-                    {
-                        ...app
-                    }
-            }
-        );
-
-
-        return true;
-
-    }
-
-
-    /* ========================================================
-       23 — APP AKTIVIEREN
-       ======================================================== */
-
-    function enableApp(
-        appId
-    ) {
-
-        const success =
-            updateRuntimeApp(
-                appId,
-                {
-                    enabled:
-                        true
-                }
-            );
-
-
-        if (
-            success
-        ) {
-
-            emit(
-                "app:enabled",
-                {
-                    appId
-                }
-            );
-
-        }
-
-
-        return success;
-
-    }
-
-
-    /* ========================================================
-       24 — APP DEAKTIVIEREN
-       ======================================================== */
-
-    function disableApp(
-        appId
-    ) {
-
-        const success =
-            updateRuntimeApp(
-                appId,
-                {
-                    enabled:
-                        false
-                }
-            );
-
-
-        if (
-            success
-        ) {
-
-            emit(
-                "app:disabled",
-                {
-                    appId
-                }
-            );
-
-        }
-
-
-        return success;
-
-    }
-
-
-    /* ========================================================
-       25 — RUNTIME APP ABRUFEN
-       ======================================================== */
-
-    function getManagedApp(
-        appId
-    ) {
-
-        ensureRuntimeApps();
-
-
-        const app =
-            getRuntimeApp(
-                appId
-            );
-
-
-        if (
-            !app
-        ) {
-
             return null;
 
         }
 
 
+        if (
+            !appStates.has(
+                app.id
+            )
+        ) {
+
+            appStates.set(
+                app.id,
+                {
+
+                    id:
+                        app.id,
+
+                    enabled:
+                        app.enabled !==
+                        false,
+
+                    installed:
+                        true,
+
+                    loaded:
+                        false,
+
+                    running:
+                        false,
+
+                    error:
+                        null
+
+                }
+            );
+
+        }
+
+
         return {
-
-            ...app,
-
-            keywords:
-                [
-                    ...(app.keywords || [])
-                ]
-
+            ...appStates.get(
+                app.id
+            )
         };
 
     }
 
 
     /* ========================================================
-       26 — MANAGED APPS
+       15 — APP AKTIVIEREN
        ======================================================== */
 
-    function getManagedApps() {
-
-        ensureRuntimeApps();
-
-
-        return getRuntimeApps();
-
-    }
-
-
-    /* ========================================================
-       27 — APP STATUS
-       ======================================================== */
-
-    function getAppStatus(
+    function enableApp(
         appId
     ) {
 
         const app =
-            getManagedApp(
+            getApp(
                 appId
             );
 
@@ -1042,41 +659,59 @@
 
             return {
 
-                exists:
+                success:
                     false,
 
-                enabled:
-                    false,
-
-                favorite:
-                    false
+                error:
+                    "App nicht gefunden."
 
             };
 
         }
 
 
+        const current =
+            getAppState(
+                app.id
+            );
+
+
+        appStates.set(
+            app.id,
+            {
+
+                ...current,
+
+                enabled:
+                    true,
+
+                error:
+                    null
+
+            }
+        );
+
+
+        emit(
+            "app-enabled",
+            {
+                app:
+                    getAppState(
+                        app.id
+                    )
+            }
+        );
+
+
         return {
 
-            exists:
+            success:
                 true,
 
-            enabled:
-                app.enabled !==
-                false,
-
-            favorite:
-                app.favorite ===
-                true,
-
-            id:
-                app.id,
-
-            title:
-                app.title,
-
-            category:
-                app.category
+            app:
+                getAppState(
+                    app.id
+                )
 
         };
 
@@ -1084,68 +719,794 @@
 
 
     /* ========================================================
-       28 — DIAGNOSE
+       16 — APP DEAKTIVIEREN
+       ======================================================== */
+
+    function disableApp(
+        appId
+    ) {
+
+        const app =
+            getApp(
+                appId
+            );
+
+
+        if (
+            !app
+        ) {
+
+            return {
+
+                success:
+                    false,
+
+                error:
+                    "App nicht gefunden."
+
+            };
+
+        }
+
+
+        const current =
+            getAppState(
+                app.id
+            );
+
+
+        appStates.set(
+            app.id,
+            {
+
+                ...current,
+
+                enabled:
+                    false,
+
+                running:
+                    false
+
+            }
+        );
+
+
+        if (
+            state.activeApp ===
+            app.id
+        ) {
+
+            state.activeApp =
+                null;
+
+        }
+
+
+        emit(
+            "app-disabled",
+            {
+                app:
+                    getAppState(
+                        app.id
+                    )
+            }
+        );
+
+
+        return {
+
+            success:
+                true,
+
+            app:
+                getAppState(
+                    app.id
+                )
+
+        };
+
+    }
+
+
+    /* ========================================================
+       17 — APP AKTIV?
+       ======================================================== */
+
+    function isAppEnabled(
+        appId
+    ) {
+
+        const appState =
+            getAppState(
+                appId
+            );
+
+
+        if (
+            !appState
+        ) {
+
+            return false;
+
+        }
+
+
+        return (
+            appState.enabled ===
+            true
+        );
+
+    }
+
+
+    /* ========================================================
+       18 — APP VORBEREITEN
+       ======================================================== */
+
+    function prepareApp(
+        appId
+    ) {
+
+        const app =
+            getApp(
+                appId
+            );
+
+
+        if (
+            !app
+        ) {
+
+            const result = {
+
+                success:
+                    false,
+
+                status:
+                    "not-found",
+
+                error:
+                    "Die angeforderte App ist nicht registriert.",
+
+                appId:
+                    appId
+
+            };
+
+
+            state.lastError =
+                result.error;
+
+
+            emit(
+                "app-error",
+                result
+            );
+
+
+            return result;
+
+        }
+
+
+        const appState =
+            getAppState(
+                app.id
+            );
+
+
+        if (
+            !appState.enabled
+        ) {
+
+            const result = {
+
+                success:
+                    false,
+
+                status:
+                    "disabled",
+
+                error:
+                    "Diese App ist derzeit deaktiviert.",
+
+                app
+
+            };
+
+
+            state.lastError =
+                result.error;
+
+
+            emit(
+                "app-error",
+                result
+            );
+
+
+            return result;
+
+        }
+
+
+        return {
+
+            success:
+                true,
+
+            status:
+                "ready",
+
+            app,
+
+            appState
+
+        };
+
+    }
+
+
+    /* ========================================================
+       19 — APP ÖFFNEN
+       ======================================================== */
+
+    async function openApp(
+        appId
+    ) {
+
+        const prepared =
+            prepareApp(
+                appId
+            );
+
+
+        if (
+            !prepared.success
+        ) {
+
+            return prepared;
+
+        }
+
+
+        const app =
+            prepared.app;
+
+
+        /*
+         * Bereits laufende App stoppen.
+         */
+
+        if (
+            state.activeApp &&
+            state.activeApp !==
+            app.id
+        ) {
+
+            stopApp(
+                state.activeApp
+            );
+
+        }
+
+
+        const current =
+            getAppState(
+                app.id
+            );
+
+
+        appStates.set(
+            app.id,
+            {
+
+                ...current,
+
+                loaded:
+                    true,
+
+                running:
+                    true,
+
+                error:
+                    null
+
+            }
+        );
+
+
+        state.activeApp =
+            app.id;
+
+
+        state.lastOpenedApp =
+            app.id;
+
+
+        state.lastError =
+            null;
+
+
+        emit(
+            "app-opening",
+            {
+
+                app,
+
+                state:
+                    getAppState(
+                        app.id
+                    )
+
+            }
+        );
+
+
+        /*
+         * Wenn ein App-Modul existiert,
+         * kann es seine eigene Startfunktion
+         * bereitstellen.
+         */
+
+        const module =
+            findAppModule(
+                app.id
+            );
+
+
+        if (
+            module
+        ) {
+
+            try {
+
+                if (
+                    typeof module.open ===
+                    "function"
+                ) {
+
+                    await module.open(
+                        app
+                    );
+
+                }
+                else if (
+                    typeof module.start ===
+                    "function"
+                ) {
+
+                    await module.start(
+                        app
+                    );
+
+                }
+
+            }
+            catch (
+                error
+            ) {
+
+                appStates.set(
+                    app.id,
+                    {
+
+                        ...getAppState(
+                            app.id
+                        ),
+
+                        running:
+                            false,
+
+                        error:
+                            error.message
+
+                    }
+                );
+
+
+                state.lastError =
+                    error.message;
+
+
+                emit(
+                    "app-error",
+                    {
+
+                        app,
+
+                        error:
+                            error.message
+
+                    }
+                );
+
+
+                return {
+
+                    success:
+                        false,
+
+                    status:
+                        "module-error",
+
+                    app,
+
+                    error:
+                        error.message
+
+                };
+
+            }
+
+        }
+
+
+        /*
+         * Nur wenn kein Modul existiert,
+         * wird NICHT blind auf eine
+         * erfundene HTML-Datei weitergeleitet.
+         *
+         * Dadurch vermeiden wir den bisherigen
+         * 404-Fehler.
+         */
+
+        emit(
+            "app-opened",
+            {
+
+                app,
+
+                state:
+                    getAppState(
+                        app.id
+                    )
+
+            }
+        );
+
+
+        return {
+
+            success:
+                true,
+
+            status:
+                module
+                    ? "running"
+                    : "registered",
+
+            app,
+
+            moduleAvailable:
+                Boolean(
+                    module
+                )
+
+        };
+
+    }
+
+
+    /* ========================================================
+       20 — APP STOPPEN
+       ======================================================== */
+
+    function stopApp(
+        appId
+    ) {
+
+        const app =
+            getApp(
+                appId
+            );
+
+
+        if (
+            !app
+        ) {
+
+            return {
+
+                success:
+                    false,
+
+                error:
+                    "App nicht gefunden."
+
+            };
+
+        }
+
+
+        const current =
+            getAppState(
+                app.id
+            );
+
+
+        const module =
+            findAppModule(
+                app.id
+            );
+
+
+        if (
+            module &&
+            typeof module.close ===
+            "function"
+        ) {
+
+            try {
+
+                module.close(
+                    app
+                );
+
+            }
+            catch (
+                error
+            ) {
+
+                console.warn(
+                    "[HalDo App Manager] App-Close-Fehler:",
+                    error
+                );
+
+            }
+
+        }
+
+
+        appStates.set(
+            app.id,
+            {
+
+                ...current,
+
+                running:
+                    false
+
+            }
+        );
+
+
+        if (
+            state.activeApp ===
+            app.id
+        ) {
+
+            state.activeApp =
+                null;
+
+        }
+
+
+        emit(
+            "app-stopped",
+            {
+
+                app,
+
+                state:
+                    getAppState(
+                        app.id
+                    )
+
+            }
+        );
+
+
+        return {
+
+            success:
+                true,
+
+            app
+
+        };
+
+    }
+
+
+    /* ========================================================
+       21 — APP MODUL SUCHEN
+       ======================================================== */
+
+    function findAppModule(
+        appId
+    ) {
+
+        const normalized =
+            String(
+                appId ||
+                ""
+            )
+            .trim()
+            .replace(
+                /-([a-z])/g,
+                (
+                    _match,
+                    letter
+                ) =>
+                    letter.toUpperCase()
+            );
+
+
+        const candidates = [
+
+            window.HalDoApps &&
+                window.HalDoApps[
+                    appId
+                ],
+
+            window.HalDoApps &&
+                window.HalDoApps[
+                    normalized
+                ],
+
+            window.HalDoAppModules &&
+                window.HalDoAppModules[
+                    appId
+                ],
+
+            window.HalDoAppModules &&
+                window.HalDoAppModules[
+                    normalized
+                ]
+
+        ];
+
+
+        for (
+            const candidate
+            of candidates
+        ) {
+
+            if (
+                candidate
+            ) {
+
+                return candidate;
+
+            }
+
+        }
+
+
+        return null;
+
+    }
+
+
+    /* ========================================================
+       22 — AKTIVE APP
+       ======================================================== */
+
+    function getActiveApp() {
+
+        if (
+            !state.activeApp
+        ) {
+
+            return null;
+
+        }
+
+
+        return getApp(
+            state.activeApp
+        );
+
+    }
+
+
+    /* ========================================================
+       23 — SORTIERTE APPS
+       ======================================================== */
+
+    function getSortedApps() {
+
+        return getAllApps()
+            .slice()
+            .sort(
+                (
+                    a,
+                    b
+                ) => {
+
+                    const orderA =
+                        Number(
+                            a.order
+                        ) || 999999;
+
+
+                    const orderB =
+                        Number(
+                            b.order
+                        ) || 999999;
+
+
+                    return (
+                        orderA -
+                        orderB
+                    );
+
+                }
+            );
+
+    }
+
+
+    /* ========================================================
+       24 — FAVORITEN SORTIEREN
+       ======================================================== */
+
+    function getSortedFavorites() {
+
+        return getFavorites()
+            .slice()
+            .sort(
+                (
+                    a,
+                    b
+                ) => {
+
+                    return (
+                        (Number(a.order) || 999999) -
+                        (Number(b.order) || 999999)
+                    );
+
+                }
+            );
+
+    }
+
+
+    /* ========================================================
+       25 — APP COUNT
+       ======================================================== */
+
+    function getAppCount() {
+
+        return getAllApps().length;
+
+    }
+
+
+    /* ========================================================
+       26 — DIAGNOSE
        ======================================================== */
 
     function diagnose() {
 
-        const registry =
-            getRegistry();
-
-
         return {
 
-            manager: {
+            name:
+                CONFIG.name,
 
-                name:
-                    CONFIG.name,
+            version:
+                CONFIG.version,
 
-                version:
-                    CONFIG.version,
+            registryReady:
+                registryReady(),
 
-                initialized:
-                    state.initialized,
+            appCount:
+                getAppCount(),
 
-                ready:
-                    state.ready,
+            enabledCount:
+                getEnabledApps().length,
 
-                appsLoaded:
-                    state.appsLoaded,
+            favoriteCount:
+                getFavorites().length,
 
-                appCount:
-                    state.appCount,
+            activeApp:
+                getActiveApp(),
 
-                lastAction:
-                    state.lastAction,
-
-                lastApp:
-                    state.lastApp
-
-            },
-
-            registry: {
-
-                available:
-                    Boolean(
-                        registry
-                    ),
-
-                ready:
-                    Boolean(
-                        registry &&
-                        registry.ready
-                    )
-
-            },
-
-            runtime:
-
-                {
-
-                    count:
-                        runtimeApps.size
-
-                }
+            states:
+                Array.from(
+                    appStates.values()
+                )
 
         };
 
@@ -1153,7 +1514,7 @@
 
 
     /* ========================================================
-       29 — STATE
+       27 — SYSTEM STATUS
        ======================================================== */
 
     function getState() {
@@ -1166,20 +1527,17 @@
             ready:
                 state.ready,
 
-            appsLoaded:
-                state.appsLoaded,
-
             appCount:
                 state.appCount,
 
-            lastAction:
-                state.lastAction,
+            activeApp:
+                state.activeApp,
 
-            lastApp:
-                state.lastApp,
+            lastOpenedApp:
+                state.lastOpenedApp,
 
-            runtimeAppCount:
-                runtimeApps.size
+            lastError:
+                state.lastError
 
         };
 
@@ -1187,7 +1545,7 @@
 
 
     /* ========================================================
-       30 — INITIALISIERUNG
+       28 — INITIALISIERUNG
        ======================================================== */
 
     function init() {
@@ -1201,46 +1559,40 @@
         }
 
 
-        state.initialized =
-            true;
-
-
-        /*
-         * Registry laden.
-         */
-
         if (
-            !registryAvailable()
+            !registryReady()
         ) {
 
-            log(
-                "App Registry fehlt. Prüfe config/apps.js.",
-                "error"
+            state.lastError =
+                "HalDoAppRegistry ist noch nicht verfügbar.";
+
+            console.error(
+                "[HalDo App Manager]",
+                state.lastError
             );
 
 
-            state.ready =
-                false;
+            return {
 
+                initialized:
+                    false,
 
-            return getState();
+                ready:
+                    false,
+
+                error:
+                    state.lastError
+
+            };
 
         }
 
 
-        /*
-         * Runtime-Kopie erstellen.
-         */
-
-        initializeRuntimeApps();
+        initializeAppStates();
 
 
-        state.appsLoaded =
+        state.initialized =
             true;
-
-
-        state.appCount =
-            runtimeApps.size;
 
 
         state.ready =
@@ -1248,27 +1600,13 @@
 
 
         /*
-         * System registrieren.
+         * Verbindung zum Kernel.
          */
-
-        if (
-            window.HalDoSystem &&
-            typeof window.HalDoSystem.registerService ===
-                "function"
-        ) {
-
-            window.HalDoSystem.registerService(
-                "app-manager",
-                api
-            );
-
-        }
-
 
         if (
             window.HalDoKernel &&
             typeof window.HalDoKernel.registerModule ===
-                "function"
+            "function"
         ) {
 
             window.HalDoKernel.registerModule(
@@ -1279,7 +1617,7 @@
 
             if (
                 typeof window.HalDoKernel.setModuleReady ===
-                    "function"
+                "function"
             ) {
 
                 window.HalDoKernel.setModuleReady(
@@ -1292,14 +1630,32 @@
         }
 
 
+        /*
+         * Verbindung zum System.
+         */
+
+        if (
+            window.HalDoSystem &&
+            typeof window.HalDoSystem.registerService ===
+            "function"
+        ) {
+
+            window.HalDoSystem.registerService(
+                "app-manager",
+                api
+            );
+
+        }
+
+
         emit(
             "ready",
             getState()
         );
 
 
-        log(
-            `${state.appCount} Apps im App Manager verfügbar.`
+        console.log(
+            `[HalDo App Manager] ${state.appCount} Apps verwaltet.`
         );
 
 
@@ -1309,7 +1665,7 @@
 
 
     /* ========================================================
-       31 — PUBLIC API
+       29 — PUBLIC API
        ======================================================== */
 
     const api = {
@@ -1328,58 +1684,57 @@
 
         off,
 
-        emit,
-
-
-        getAllApps,
 
         getApp,
 
-        getManagedApp,
-
-        getManagedApps,
-
-        hasApp,
-
+        getAllApps,
 
         getEnabledApps,
 
-        getDisabledApps,
-
         getFavorites,
-
 
         getCategories,
 
         getAppsByCategory,
 
+        search,
 
-        searchApps,
 
-
-        toggleFavorite,
-
+        getAppState,
 
         enableApp,
 
         disableApp,
 
-
-        updateRuntimeApp,
-
-
-        getAppStatus,
+        isAppEnabled,
 
 
-        diagnose,
+        prepareApp,
 
-        getState
+        openApp,
+
+        stopApp,
+
+
+        getActiveApp,
+
+        getSortedApps,
+
+        getSortedFavorites,
+
+
+        getAppCount,
+
+
+        getState,
+
+        diagnose
 
     };
 
 
     /* ========================================================
-       32 — GLOBAL
+       30 — GLOBALE VERBINDUNG
        ======================================================== */
 
     window.HalDoAppManager =
@@ -1395,13 +1750,87 @@
         api;
 
 
+    window.HalDoApps =
+        window.HalDoApps ||
+        {};
+
+
+    window.HalDoAppModules =
+        window.HalDoAppModules ||
+        {};
+
+
     /* ========================================================
-       33 — START
+       31 — START
        ======================================================== */
 
-    function start() {
+    function boot() {
 
-        init();
+        /*
+         * Registry kann vor oder nach diesem
+         * Script initialisiert werden.
+         *
+         * Deshalb prüfen wir kurz verzögert.
+         */
+
+        if (
+            registryReady()
+        ) {
+
+            init();
+
+            return;
+
+        }
+
+
+        let attempts =
+            0;
+
+
+        const timer =
+            window.setInterval(
+                function () {
+
+                    attempts++;
+
+
+                    if (
+                        registryReady()
+                    ) {
+
+                        window.clearInterval(
+                            timer
+                        );
+
+
+                        init();
+
+
+                        return;
+
+                    }
+
+
+                    if (
+                        attempts >=
+                        100
+                    ) {
+
+                        window.clearInterval(
+                            timer
+                        );
+
+
+                        console.error(
+                            "[HalDo App Manager] App Registry konnte nicht gefunden werden."
+                        );
+
+                    }
+
+                },
+                50
+            );
 
     }
 
@@ -1413,7 +1842,7 @@
 
         document.addEventListener(
             "DOMContentLoaded",
-            start,
+            boot,
             {
                 once:
                     true
@@ -1423,7 +1852,7 @@
     }
     else {
 
-        start();
+        boot();
 
     }
 
