@@ -1,0 +1,1913 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    >
+
+    <meta name="theme-color" content="#050914">
+
+    <title>HalDo AI Chat — OS 18</title>
+
+
+    <style>
+
+        /* =====================================================
+           HALDO AI OS 18
+           CHAT
+           ===================================================== */
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+
+            background: #050914;
+            color: #ffffff;
+
+            font-family:
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                Roboto,
+                Arial,
+                sans-serif;
+        }
+
+
+        body {
+            overflow: hidden;
+        }
+
+
+        button,
+        textarea {
+            font: inherit;
+        }
+
+
+        button {
+            border: 0;
+        }
+
+
+        /* =====================================================
+           BACKGROUND
+           ===================================================== */
+
+        .background {
+            position: fixed;
+            inset: 0;
+
+            z-index: 0;
+
+            overflow: hidden;
+            pointer-events: none;
+
+            background:
+                radial-gradient(
+                    circle at 50% 0%,
+                    rgba(0,126,255,.20),
+                    transparent 35%
+                ),
+                radial-gradient(
+                    circle at 0% 80%,
+                    rgba(0,210,255,.10),
+                    transparent 30%
+                ),
+                radial-gradient(
+                    circle at 100% 70%,
+                    rgba(130,50,255,.10),
+                    transparent 30%
+                ),
+                #050914;
+        }
+
+
+        .orb {
+            position: absolute;
+
+            border-radius: 50%;
+
+            filter: blur(65px);
+
+            opacity: .22;
+
+            animation:
+                floatOrb 9s ease-in-out infinite;
+        }
+
+
+        .orb.one {
+            width: 190px;
+            height: 190px;
+
+            background: #007bff;
+
+            top: 4%;
+            left: -90px;
+        }
+
+
+        .orb.two {
+            width: 170px;
+            height: 170px;
+
+            background: #783cff;
+
+            right: -80px;
+            bottom: 20%;
+
+            animation-delay: -4s;
+        }
+
+
+        @keyframes floatOrb {
+
+            0%,
+            100% {
+                transform:
+                    translate3d(0,0,0)
+                    scale(1);
+            }
+
+            50% {
+                transform:
+                    translate3d(25px,-20px,0)
+                    scale(1.1);
+            }
+
+        }
+
+
+        /* =====================================================
+           APP
+           ===================================================== */
+
+        .app {
+            position: relative;
+
+            z-index: 1;
+
+            width: 100%;
+            height: 100dvh;
+
+            display: flex;
+            flex-direction: column;
+
+            margin: 0 auto;
+        }
+
+
+        /* =====================================================
+           HEADER
+           ===================================================== */
+
+        .header {
+
+            flex-shrink: 0;
+
+            min-height: 64px;
+
+            display: flex;
+
+            align-items: center;
+            justify-content: space-between;
+
+            padding:
+                9px 12px;
+
+            background:
+                rgba(5,9,20,.84);
+
+            border-bottom:
+                1px solid rgba(255,255,255,.08);
+
+            backdrop-filter:
+                blur(22px);
+
+            -webkit-backdrop-filter:
+                blur(22px);
+        }
+
+
+        .brand {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 9px;
+
+            min-width: 0;
+        }
+
+
+        .logo-box {
+
+            width: 42px;
+            height: 42px;
+
+            flex-shrink: 0;
+
+            display: flex;
+
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 14px;
+
+            background:
+                rgba(255,255,255,.05);
+
+            border:
+                1px solid rgba(255,255,255,.08);
+        }
+
+
+        .logo-box img {
+
+            width: 34px;
+            height: 34px;
+
+            object-fit: contain;
+
+            animation:
+                logoRotate 9s linear infinite,
+                logoGlow 2.4s ease-in-out infinite;
+        }
+
+
+        @keyframes logoRotate {
+
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+
+        }
+
+
+        @keyframes logoGlow {
+
+            0%,
+            100% {
+                filter:
+                    drop-shadow(
+                        0 0 3px
+                        rgba(255,255,255,.5)
+                    )
+                    drop-shadow(
+                        0 0 10px
+                        rgba(0,130,255,.5)
+                    );
+            }
+
+            50% {
+                filter:
+                    drop-shadow(
+                        0 0 7px
+                        rgba(255,255,255,.95)
+                    )
+                    drop-shadow(
+                        0 0 20px
+                        rgba(0,150,255,.95)
+                    );
+            }
+
+        }
+
+
+        .brand-text {
+            min-width: 0;
+        }
+
+
+        .brand-text strong {
+
+            display: block;
+
+            font-size: 14px;
+
+            white-space: nowrap;
+        }
+
+
+        .brand-text span {
+
+            display: block;
+
+            margin-top: 2px;
+
+            color: #71809a;
+
+            font-size: 8px;
+
+            letter-spacing: .7px;
+
+            white-space: nowrap;
+        }
+
+
+        .header-actions {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 6px;
+        }
+
+
+        .header-button {
+
+            min-width: 38px;
+            height: 38px;
+
+            padding: 0 10px;
+
+            display: flex;
+
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 13px;
+
+            background:
+                rgba(255,255,255,.06);
+
+            border:
+                1px solid rgba(255,255,255,.08);
+
+            color: #a9b8d0;
+
+            cursor: pointer;
+
+            transition: .18s ease;
+        }
+
+
+        .header-button:active {
+
+            transform:
+                scale(.92);
+        }
+
+
+        /* =====================================================
+           CHAT TITLE
+           ===================================================== */
+
+        .chat-title {
+
+            flex-shrink: 0;
+
+            padding:
+                13px 16px 10px;
+
+            border-bottom:
+                1px solid rgba(255,255,255,.05);
+        }
+
+
+        .chat-title-row {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 8px;
+        }
+
+
+        .online-dot {
+
+            width: 7px;
+            height: 7px;
+
+            border-radius: 50%;
+
+            background: #00ffad;
+
+            box-shadow:
+                0 0 6px #00ffad,
+                0 0 15px rgba(0,255,173,.55);
+
+            animation:
+                onlinePulse 1.6s infinite;
+        }
+
+
+        @keyframes onlinePulse {
+
+            50% {
+                opacity: .4;
+                transform: scale(.75);
+            }
+
+        }
+
+
+        .chat-title h1 {
+
+            font-size: 16px;
+        }
+
+
+        .chat-title p {
+
+            margin-top: 4px;
+
+            color: #697891;
+
+            font-size: 9px;
+        }
+
+
+        /* =====================================================
+           CHAT AREA
+           ===================================================== */
+
+        .messages {
+
+            flex: 1;
+
+            min-height: 0;
+
+            overflow-y: auto;
+
+            padding:
+                18px 14px 14px;
+
+            scroll-behavior: smooth;
+
+            overscroll-behavior: contain;
+        }
+
+
+        .messages::-webkit-scrollbar {
+
+            width: 4px;
+        }
+
+
+        .messages::-webkit-scrollbar-thumb {
+
+            background:
+                rgba(255,255,255,.12);
+
+            border-radius: 20px;
+        }
+
+
+        .message {
+
+            display: flex;
+
+            width: 100%;
+
+            margin-bottom: 13px;
+
+            animation:
+                messageIn .25s ease;
+        }
+
+
+        @keyframes messageIn {
+
+            from {
+                opacity: 0;
+                transform:
+                    translateY(7px);
+            }
+
+            to {
+                opacity: 1;
+                transform:
+                    translateY(0);
+            }
+
+        }
+
+
+        .message.user {
+
+            justify-content: flex-end;
+        }
+
+
+        .message.ai {
+
+            justify-content: flex-start;
+        }
+
+
+        .bubble {
+
+            max-width:
+                min(82%, 620px);
+
+            padding:
+                11px 13px;
+
+            border-radius: 17px;
+
+            font-size: 13px;
+
+            line-height: 1.5;
+
+            white-space: pre-wrap;
+
+            overflow-wrap: anywhere;
+        }
+
+
+        .message.user .bubble {
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #087cff,
+                    #0756c7
+                );
+
+            border-bottom-right-radius: 5px;
+
+            box-shadow:
+                0 8px 25px
+                rgba(0,100,255,.20);
+        }
+
+
+        .message.ai .bubble {
+
+            background:
+                rgba(255,255,255,.065);
+
+            border:
+                1px solid
+                rgba(255,255,255,.075);
+
+            border-bottom-left-radius: 5px;
+
+            color: #dbe4f3;
+        }
+
+
+        .ai-label {
+
+            display: block;
+
+            margin-bottom: 5px;
+
+            color: #68bfff;
+
+            font-size: 8px;
+
+            font-weight: 700;
+
+            letter-spacing: .5px;
+        }
+
+
+        /* =====================================================
+           EMPTY / WELCOME
+           ===================================================== */
+
+        .welcome-card {
+
+            max-width: 550px;
+
+            margin:
+                15px auto 20px;
+
+            padding: 20px;
+
+            text-align: center;
+
+            border-radius: 22px;
+
+            background:
+                linear-gradient(
+                    145deg,
+                    rgba(0,126,255,.09),
+                    rgba(255,255,255,.035)
+                );
+
+            border:
+                1px solid
+                rgba(0,126,255,.12);
+        }
+
+
+        .welcome-logo {
+
+            width: 64px;
+            height: 64px;
+
+            object-fit: contain;
+
+            margin-bottom: 10px;
+
+            animation:
+                welcomeRotate 10s linear infinite,
+                welcomeGlow 2.5s ease-in-out infinite;
+        }
+
+
+        @keyframes welcomeRotate {
+
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+
+        }
+
+
+        @keyframes welcomeGlow {
+
+            0%,
+            100% {
+                filter:
+                    drop-shadow(
+                        0 0 4px
+                        rgba(255,255,255,.55)
+                    )
+                    drop-shadow(
+                        0 0 13px
+                        rgba(0,140,255,.5)
+                    );
+            }
+
+            50% {
+                filter:
+                    drop-shadow(
+                        0 0 8px
+                        rgba(255,255,255,.95)
+                    )
+                    drop-shadow(
+                        0 0 25px
+                        rgba(0,140,255,1)
+                    );
+            }
+
+        }
+
+
+        .welcome-card h2 {
+
+            font-size: 18px;
+        }
+
+
+        .welcome-card p {
+
+            margin-top: 7px;
+
+            color: #7d8ba5;
+
+            font-size: 10px;
+
+            line-height: 1.55;
+        }
+
+
+        /* =====================================================
+           QUICK PROMPTS
+           ===================================================== */
+
+        .quick-prompts {
+
+            display: flex;
+
+            gap: 7px;
+
+            overflow-x: auto;
+
+            padding:
+                0 14px 9px;
+        }
+
+
+        .quick-prompts::-webkit-scrollbar {
+            display: none;
+        }
+
+
+        .prompt {
+
+            flex-shrink: 0;
+
+            padding:
+                8px 11px;
+
+            border-radius: 20px;
+
+            background:
+                rgba(255,255,255,.05);
+
+            border:
+                1px solid
+                rgba(255,255,255,.07);
+
+            color: #8fa1bc;
+
+            font-size: 9px;
+
+            cursor: pointer;
+        }
+
+
+        .prompt:active {
+
+            transform:
+                scale(.95);
+        }
+
+
+        /* =====================================================
+           COMPOSER
+           ===================================================== */
+
+        .composer {
+
+            flex-shrink: 0;
+
+            padding:
+                9px 10px
+                calc(9px + env(safe-area-inset-bottom))
+                10px;
+
+            background:
+                rgba(5,9,20,.88);
+
+            border-top:
+                1px solid
+                rgba(255,255,255,.08);
+
+            backdrop-filter:
+                blur(22px);
+
+            -webkit-backdrop-filter:
+                blur(22px);
+        }
+
+
+        .composer-row {
+
+            display: flex;
+
+            align-items: flex-end;
+
+            gap: 7px;
+        }
+
+
+        .input-wrap {
+
+            flex: 1;
+
+            min-width: 0;
+
+            display: flex;
+
+            align-items: flex-end;
+
+            border-radius: 18px;
+
+            background:
+                rgba(255,255,255,.06);
+
+            border:
+                1px solid
+                rgba(255,255,255,.08);
+        }
+
+
+        .input-wrap:focus-within {
+
+            border-color:
+                rgba(0,145,255,.45);
+
+            box-shadow:
+                0 0 0 3px
+                rgba(0,126,255,.07);
+        }
+
+
+        #messageInput {
+
+            width: 100%;
+
+            min-height: 43px;
+            max-height: 125px;
+
+            padding:
+                12px 13px;
+
+            resize: none;
+
+            outline: none;
+
+            border: 0;
+
+            background: transparent;
+
+            color: #ffffff;
+
+            font-size: 13px;
+
+            line-height: 1.4;
+        }
+
+
+        #messageInput::placeholder {
+
+            color: #62718a;
+        }
+
+
+        .send-button {
+
+            width: 45px;
+            height: 45px;
+
+            flex-shrink: 0;
+
+            display: flex;
+
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 16px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #0785ff,
+                    #0754d1
+                );
+
+            color: white;
+
+            cursor: pointer;
+
+            box-shadow:
+                0 7px 25px
+                rgba(0,100,255,.25);
+
+            transition: .18s ease;
+        }
+
+
+        .send-button:active {
+
+            transform:
+                scale(.91);
+        }
+
+
+        .send-button:disabled {
+
+            opacity: .45;
+
+            cursor: default;
+        }
+
+
+        .composer-hint {
+
+            margin-top: 5px;
+
+            text-align: center;
+
+            color: #48566f;
+
+            font-size: 7px;
+        }
+
+
+        /* =====================================================
+           TYPING
+           ===================================================== */
+
+        .typing {
+
+            display: inline-flex;
+
+            align-items: center;
+
+            gap: 4px;
+
+            padding:
+                12px 15px;
+
+            border-radius: 17px;
+
+            background:
+                rgba(255,255,255,.065);
+
+            border:
+                1px solid
+                rgba(255,255,255,.075);
+        }
+
+
+        .typing span {
+
+            width: 5px;
+            height: 5px;
+
+            border-radius: 50%;
+
+            background: #70bfff;
+
+            animation:
+                typingBounce 1s infinite;
+        }
+
+
+        .typing span:nth-child(2) {
+            animation-delay: .15s;
+        }
+
+
+        .typing span:nth-child(3) {
+            animation-delay: .30s;
+        }
+
+
+        @keyframes typingBounce {
+
+            0%,
+            60%,
+            100% {
+                transform: translateY(0);
+                opacity: .45;
+            }
+
+            30% {
+                transform: translateY(-5px);
+                opacity: 1;
+            }
+
+        }
+
+
+        /* =====================================================
+           DESKTOP
+           ===================================================== */
+
+        @media (min-width: 800px) {
+
+            .app {
+
+                max-width: 1000px;
+
+                border-left:
+                    1px solid
+                    rgba(255,255,255,.04);
+
+                border-right:
+                    1px solid
+                    rgba(255,255,255,.04);
+            }
+
+            .messages {
+
+                padding-left: 30px;
+                padding-right: 30px;
+            }
+
+            .quick-prompts {
+
+                padding-left: 30px;
+                padding-right: 30px;
+            }
+
+            .composer {
+
+                padding-left: 30px;
+                padding-right: 30px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- =====================================================
+         BACKGROUND
+         ===================================================== -->
+
+    <div class="background">
+
+        <div class="orb one"></div>
+        <div class="orb two"></div>
+
+    </div>
+
+
+    <!-- =====================================================
+         APP
+         ===================================================== -->
+
+    <main class="app">
+
+
+        <!-- HEADER -->
+
+        <header class="header">
+
+
+            <div class="brand">
+
+                <div class="logo-box">
+
+                    <img
+                        src="assets/logo/logo.png"
+                        alt="HalDo AI Logo"
+                    >
+
+                </div>
+
+
+                <div class="brand-text">
+
+                    <strong>HalDo AI</strong>
+
+                    <span>
+                        OS 18 • INTELLIGENT CHAT
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div class="header-actions">
+
+                <button
+                    class="header-button"
+                    onclick="clearChat()"
+                    title="Chat löschen"
+                >
+                    ×
+                </button>
+
+
+                <button
+                    class="header-button"
+                    onclick="goApps()"
+                    title="Apps"
+                >
+                    ◈
+                </button>
+
+            </div>
+
+        </header>
+
+
+        <!-- CHAT TITLE -->
+
+        <section class="chat-title">
+
+            <div class="chat-title-row">
+
+                <span class="online-dot"></span>
+
+                <h1>HalDo AI Chat</h1>
+
+            </div>
+
+
+            <p>
+                Dein zentraler AI-Eingabebereich
+            </p>
+
+        </section>
+
+
+        <!-- MESSAGES -->
+
+        <section
+            class="messages"
+            id="messages"
+        >
+
+
+            <div
+                class="welcome-card"
+                id="welcomeCard"
+            >
+
+                <img
+                    class="welcome-logo"
+                    src="assets/logo/logo.png"
+                    alt="HalDo AI"
+                >
+
+
+                <h2>
+                    Willkommen bei HalDo AI
+                </h2>
+
+
+                <p>
+                    Schreibe deine Frage, Idee oder Aufgabe
+                    unten in das Eingabefeld. Diese Chat-Oberfläche
+                    ist bereits funktionierend vorbereitet und
+                    kann später mit der eigentlichen HalDo-AI-
+                    Schnittstelle verbunden werden.
+                </p>
+
+            </div>
+
+
+        </section>
+
+
+        <!-- QUICK PROMPTS -->
+
+        <div class="quick-prompts">
+
+            <button
+                class="prompt"
+                onclick="usePrompt('Hallo HalDo AI!')"
+            >
+                👋 Hallo HalDo AI
+            </button>
+
+
+            <button
+                class="prompt"
+                onclick="usePrompt('Hilf mir bei einer Idee.')"
+            >
+                💡 Idee
+            </button>
+
+
+            <button
+                class="prompt"
+                onclick="usePrompt('Erkläre mir etwas einfach.')"
+            >
+                🧠 Erklären
+            </button>
+
+
+            <button
+                class="prompt"
+                onclick="usePrompt('Hilf mir beim Programmieren.')"
+            >
+                💻 Programmieren
+            </button>
+
+        </div>
+
+
+        <!-- COMPOSER -->
+
+        <form
+            class="composer"
+            id="composer"
+        >
+
+            <div class="composer-row">
+
+
+                <div class="input-wrap">
+
+                    <textarea
+                        id="messageInput"
+                        rows="1"
+                        maxlength="4000"
+                        placeholder="Schreibe an HalDo AI..."
+                        autocomplete="off"
+                    ></textarea>
+
+                </div>
+
+
+                <button
+                    class="send-button"
+                    id="sendButton"
+                    type="submit"
+                    aria-label="Nachricht senden"
+                >
+                    ➤
+                </button>
+
+
+            </div>
+
+
+            <div class="composer-hint">
+
+                Enter = senden • Shift + Enter = neue Zeile
+
+            </div>
+
+        </form>
+
+
+    </main>
+
+
+    <script>
+
+        /* =====================================================
+           ELEMENTE
+           ===================================================== */
+
+        const messages =
+            document.getElementById("messages");
+
+        const input =
+            document.getElementById("messageInput");
+
+        const composer =
+            document.getElementById("composer");
+
+        const sendButton =
+            document.getElementById("sendButton");
+
+        const welcomeCard =
+            document.getElementById("welcomeCard");
+
+
+        /* =====================================================
+           CHAT DATEN
+           ===================================================== */
+
+        const STORAGE_KEY =
+            "haldo_ai_os18_chat";
+
+
+        let chatHistory = [];
+
+
+        /* =====================================================
+           START
+           ===================================================== */
+
+        loadChat();
+
+        autoResize();
+
+
+        /* =====================================================
+           CHAT LADEN
+           ===================================================== */
+
+        function loadChat() {
+
+            try {
+
+                const saved =
+                    localStorage.getItem(
+                        STORAGE_KEY
+                    );
+
+
+                if (!saved) {
+                    return;
+                }
+
+
+                const parsed =
+                    JSON.parse(saved);
+
+
+                if (!Array.isArray(parsed)) {
+                    return;
+                }
+
+
+                chatHistory = parsed;
+
+
+                chatHistory.forEach(function(item) {
+
+                    addMessageToScreen(
+                        item.text,
+                        item.sender,
+                        false
+                    );
+
+                });
+
+
+                if (chatHistory.length > 0) {
+
+                    if (welcomeCard) {
+                        welcomeCard.remove();
+                    }
+
+                }
+
+            } catch (error) {
+
+                console.log(
+                    "HalDo Chat konnte Verlauf nicht laden:",
+                    error
+                );
+
+            }
+
+        }
+
+
+        /* =====================================================
+           SPEICHERN
+           ===================================================== */
+
+        function saveChat() {
+
+            try {
+
+                localStorage.setItem(
+                    STORAGE_KEY,
+                    JSON.stringify(chatHistory)
+                );
+
+            } catch (error) {
+
+                console.log(
+                    "HalDo Chat konnte Verlauf nicht speichern:",
+                    error
+                );
+
+            }
+
+        }
+
+
+        /* =====================================================
+           NACHRICHT HINZUFÜGEN
+           ===================================================== */
+
+        function addMessageToScreen(
+            text,
+            sender,
+            animate = true
+        ) {
+
+            const wrapper =
+                document.createElement("div");
+
+
+            wrapper.className =
+                "message " +
+                (sender === "user"
+                    ? "user"
+                    : "ai");
+
+
+            if (!animate) {
+                wrapper.style.animation = "none";
+            }
+
+
+            const bubble =
+                document.createElement("div");
+
+
+            bubble.className =
+                "bubble";
+
+
+            if (sender === "ai") {
+
+                const label =
+                    document.createElement("span");
+
+
+                label.className =
+                    "ai-label";
+
+
+                label.textContent =
+                    "HALDO AI";
+
+
+                bubble.appendChild(label);
+
+            }
+
+
+            const content =
+                document.createElement("span");
+
+
+            content.textContent =
+                text;
+
+
+            bubble.appendChild(content);
+
+
+            wrapper.appendChild(bubble);
+
+
+            messages.appendChild(wrapper);
+
+
+            scrollToBottom();
+
+
+            return wrapper;
+
+        }
+
+
+        /* =====================================================
+           SENDEN
+           ===================================================== */
+
+        composer.addEventListener(
+            "submit",
+            function(event) {
+
+                event.preventDefault();
+
+                sendMessage();
+
+            }
+        );
+
+
+        function sendMessage() {
+
+            const text =
+                input.value.trim();
+
+
+            if (!text) {
+                return;
+            }
+
+
+            if (sendButton.disabled) {
+                return;
+            }
+
+
+            if (welcomeCard) {
+
+                welcomeCard.remove();
+
+            }
+
+
+            addMessageToScreen(
+                text,
+                "user"
+            );
+
+
+            chatHistory.push({
+
+                sender: "user",
+
+                text: text,
+
+                time:
+                    new Date().toISOString()
+
+            });
+
+
+            saveChat();
+
+
+            input.value = "";
+
+            autoResize();
+
+
+            showTyping();
+
+
+            /*
+             * ==================================================
+             * VORLÄUFIGE HALDO-AI-ANTWORT
+             *
+             * Die echte KI-Schnittstelle wird später hier
+             * angeschlossen.
+             * ==================================================
+             */
+
+            setTimeout(
+                function() {
+
+                    hideTyping();
+
+                    const response =
+                        createLocalResponse(text);
+
+
+                    addMessageToScreen(
+                        response,
+                        "ai"
+                    );
+
+
+                    chatHistory.push({
+
+                        sender: "ai",
+
+                        text: response,
+
+                        time:
+                            new Date().toISOString()
+
+                    });
+
+
+                    saveChat();
+
+                },
+                700
+            );
+
+        }
+
+
+        /* =====================================================
+           VORLÄUFIGE AI-LOGIK
+           ===================================================== */
+
+        function createLocalResponse(text) {
+
+            const lower =
+                text.toLowerCase();
+
+
+            if (
+                lower.includes("hallo") ||
+                lower.includes("hi") ||
+                lower.includes("hey")
+            ) {
+
+                return (
+                    "Hallo! 💙❤️ Ich bin HalDo AI. " +
+                    "Die Chat-Oberfläche funktioniert bereits. " +
+                    "Die echte KI-Verbindung können wir als " +
+                    "nächsten Systembaustein anschließen."
+                );
+
+            }
+
+
+            if (
+                lower.includes("programm") ||
+                lower.includes("code")
+            ) {
+
+                return (
+                    "Sehr gerne. 🚀 HalDo AI kann später " +
+                    "direkt mit den Programmier- und " +
+                    "Entwicklungsmodulen verbunden werden."
+                );
+
+            }
+
+
+            if (
+                lower.includes("idee") ||
+                lower.includes("projekt")
+            ) {
+
+                return (
+                    "Eine gute Idee ist der erste Schritt. 💡 " +
+                    "Wir können sie anschließend als echtes " +
+                    "HalDo-AI-Modul strukturieren."
+                );
+
+            }
+
+
+            if (
+                lower.includes("wer bist") ||
+                lower.includes("was bist")
+            ) {
+
+                return (
+                    "Ich bin HalDo AI – die intelligente " +
+                    "KI-Oberfläche des HalDo AI OS 18. 💙❤️🚀"
+                );
+
+            }
+
+
+            return (
+                "Deine Nachricht ist angekommen. 💙❤️ " +
+                "Die HalDo-AI-Chatoberfläche funktioniert. " +
+                "Als nächstes kann die echte KI-Engine " +
+                "angeschlossen werden."
+            );
+
+        }
+
+
+        /* =====================================================
+           TYPING
+           ===================================================== */
+
+        let typingElement = null;
+
+
+        function showTyping() {
+
+            sendButton.disabled = true;
+
+
+            const wrapper =
+                document.createElement("div");
+
+
+            wrapper.className =
+                "message ai";
+
+
+            wrapper.id =
+                "typingMessage";
+
+
+            typingElement =
+                document.createElement("div");
+
+
+            typingElement.className =
+                "typing";
+
+
+            for (
+                let i = 0;
+                i < 3;
+                i++
+            ) {
+
+                const dot =
+                    document.createElement("span");
+
+
+                typingElement.appendChild(dot);
+
+            }
+
+
+            wrapper.appendChild(
+                typingElement
+            );
+
+
+            messages.appendChild(
+                wrapper
+            );
+
+
+            scrollToBottom();
+
+        }
+
+
+        function hideTyping() {
+
+            const typing =
+                document.getElementById(
+                    "typingMessage"
+                );
+
+
+            if (typing) {
+
+                typing.remove();
+
+            }
+
+
+            typingElement = null;
+
+
+            sendButton.disabled = false;
+
+        }
+
+
+        /* =====================================================
+           SCROLL
+           ===================================================== */
+
+        function scrollToBottom() {
+
+            requestAnimationFrame(
+                function() {
+
+                    messages.scrollTop =
+                        messages.scrollHeight;
+
+                }
+            );
+
+        }
+
+
+        /* =====================================================
+           INPUT AUTO RESIZE
+           ===================================================== */
+
+        input.addEventListener(
+            "input",
+            autoResize
+        );
+
+
+        function autoResize() {
+
+            input.style.height =
+                "auto";
+
+
+            input.style.height =
+                Math.min(
+                    input.scrollHeight,
+                    125
+                ) + "px";
+
+        }
+
+
+        /* =====================================================
+           ENTER / SHIFT + ENTER
+           ===================================================== */
+
+        input.addEventListener(
+            "keydown",
+            function(event) {
+
+                if (
+                    event.key === "Enter" &&
+                    !event.shiftKey
+                ) {
+
+                    event.preventDefault();
+
+                    sendMessage();
+
+                }
+
+            }
+        );
+
+
+        /* =====================================================
+           SCHNELLPROMPT
+           ===================================================== */
+
+        function usePrompt(text) {
+
+            input.value = text;
+
+            autoResize();
+
+            input.focus();
+
+        }
+
+
+        /* =====================================================
+           CHAT LÖSCHEN
+           ===================================================== */
+
+        function clearChat() {
+
+            const confirmed =
+                window.confirm(
+                    "Möchtest du den HalDo-AI-Chat wirklich löschen?"
+                );
+
+
+            if (!confirmed) {
+                return;
+            }
+
+
+            localStorage.removeItem(
+                STORAGE_KEY
+            );
+
+
+            chatHistory = [];
+
+
+            messages.innerHTML = "";
+
+
+            const welcome =
+                document.createElement("div");
+
+
+            welcome.className =
+                "welcome-card";
+
+
+            welcome.id =
+                "welcomeCard";
+
+
+            welcome.innerHTML = `
+
+                <img
+                    class="welcome-logo"
+                    src="assets/logo/logo.png"
+                    alt="HalDo AI"
+                >
+
+                <h2>
+                    Willkommen bei HalDo AI
+                </h2>
+
+                <p>
+                    Dein Chat wurde zurückgesetzt.
+                    Schreibe unten eine neue Nachricht.
+                </p>
+
+            `;
+
+
+            messages.appendChild(
+                welcome
+            );
+
+
+            scrollToBottom();
+
+        }
+
+
+        /* =====================================================
+           NAVIGATION
+           ===================================================== */
+
+        function goApps() {
+
+            window.location.href =
+                "apps.html";
+
+        }
+
+
+        /* =====================================================
+           LOGO FEHLER ABSICHERN
+           ===================================================== */
+
+        document.querySelectorAll(
+            "img"
+        ).forEach(function(img) {
+
+            img.addEventListener(
+                "error",
+                function() {
+
+                    console.log(
+                        "HalDo Logo konnte nicht geladen werden:",
+                        img.src
+                    );
+
+                }
+            );
+
+        });
+
+    </script>
+
+</body>
+
+</html>
