@@ -3,1017 +3,1094 @@
 
 <head>
 
-    <meta charset="UTF-8">
+<meta charset="UTF-8">
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-    >
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+>
 
-    <meta name="theme-color" content="#050914">
+<meta
+    name="theme-color"
+    content="#050914"
+>
 
-    <title>HalDo AI Chat — OS 18</title>
+<title>HalDo AI OS 18 — AI Chat</title>
 
 
-    <style>
+<style>
 
-        /* =====================================================
-           HALDO AI OS 18
-           CHAT
-           ===================================================== */
+/* =====================================================
+   HALDO AI OS 18
+   AI CHAT
+===================================================== */
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            -webkit-tap-highlight-color: transparent;
-        }
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+}
 
+html,
+body {
+    width: 100%;
+    min-height: 100%;
+}
 
-        html,
-        body {
-            width: 100%;
-            height: 100%;
+body {
 
-            background: #050914;
-            color: #ffffff;
+    min-height: 100vh;
 
-            font-family:
-                -apple-system,
-                BlinkMacSystemFont,
-                "Segoe UI",
-                Roboto,
-                Arial,
-                sans-serif;
-        }
+    color: #fff;
 
+    background:
+        radial-gradient(
+            circle at 50% -10%,
+            rgba(0,126,255,.18),
+            transparent 35%
+        ),
+        radial-gradient(
+            circle at 100% 80%,
+            rgba(125,55,255,.12),
+            transparent 30%
+        ),
+        #050914;
 
-        body {
-            overflow: hidden;
-        }
+    font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Arial,
+        sans-serif;
 
+    overflow: hidden;
+}
 
-        button,
-        textarea {
-            font: inherit;
-        }
 
+/* =====================================================
+   BACKGROUND
+===================================================== */
 
-        button {
-            border: 0;
-        }
+.background {
 
+    position: fixed;
 
-        /* =====================================================
-           BACKGROUND
-           ===================================================== */
+    inset: 0;
 
-        .background {
-            position: fixed;
-            inset: 0;
+    pointer-events: none;
 
-            z-index: 0;
+    overflow: hidden;
 
-            overflow: hidden;
-            pointer-events: none;
+    z-index: 0;
+}
 
-            background:
-                radial-gradient(
-                    circle at 50% 0%,
-                    rgba(0,126,255,.20),
-                    transparent 35%
-                ),
-                radial-gradient(
-                    circle at 0% 80%,
-                    rgba(0,210,255,.10),
-                    transparent 30%
-                ),
-                radial-gradient(
-                    circle at 100% 70%,
-                    rgba(130,50,255,.10),
-                    transparent 30%
-                ),
-                #050914;
-        }
+.orb {
 
+    position: absolute;
 
-        .orb {
-            position: absolute;
+    width: 240px;
+    height: 240px;
 
-            border-radius: 50%;
+    border-radius: 50%;
 
-            filter: blur(65px);
+    filter: blur(90px);
 
-            opacity: .22;
+    opacity: .13;
+}
 
-            animation:
-                floatOrb 9s ease-in-out infinite;
-        }
+.orb.one {
 
+    top: -130px;
+    left: -100px;
 
-        .orb.one {
-            width: 190px;
-            height: 190px;
+    background: #087cff;
+}
 
-            background: #007bff;
+.orb.two {
 
-            top: 4%;
-            left: -90px;
-        }
+    right: -120px;
+    bottom: 5%;
 
+    background: #793dff;
+}
 
-        .orb.two {
-            width: 170px;
-            height: 170px;
 
-            background: #783cff;
+/* =====================================================
+   APP
+===================================================== */
 
-            right: -80px;
-            bottom: 20%;
+.app {
 
-            animation-delay: -4s;
-        }
+    position: relative;
 
+    z-index: 1;
 
-        @keyframes floatOrb {
+    width: min(950px,100%);
 
-            0%,
-            100% {
-                transform:
-                    translate3d(0,0,0)
-                    scale(1);
-            }
+    height: 100vh;
 
-            50% {
-                transform:
-                    translate3d(25px,-20px,0)
-                    scale(1.1);
-            }
+    margin: auto;
 
-        }
+    display: flex;
 
+    flex-direction: column;
+}
 
-        /* =====================================================
-           APP
-           ===================================================== */
 
-        .app {
-            position: relative;
+/* =====================================================
+   HEADER
+===================================================== */
 
-            z-index: 1;
+.header {
 
-            width: 100%;
-            height: 100dvh;
+    flex-shrink: 0;
 
-            display: flex;
-            flex-direction: column;
+    display: flex;
 
-            margin: 0 auto;
-        }
+    align-items: center;
 
+    justify-content: space-between;
 
-        /* =====================================================
-           HEADER
-           ===================================================== */
+    padding:
+        8px 12px;
 
-        .header {
+    background:
+        rgba(5,9,20,.90);
 
-            flex-shrink: 0;
+    border-bottom:
+        1px solid
+        rgba(255,255,255,.08);
 
-            min-height: 64px;
+    backdrop-filter:
+        blur(22px);
 
-            display: flex;
+    -webkit-backdrop-filter:
+        blur(22px);
+}
 
-            align-items: center;
-            justify-content: space-between;
+.brand {
 
-            padding:
-                9px 12px;
+    display: flex;
 
-            background:
-                rgba(5,9,20,.84);
+    align-items: center;
 
-            border-bottom:
-                1px solid rgba(255,255,255,.08);
+    gap: 9px;
+}
 
-            backdrop-filter:
-                blur(22px);
+.logo {
 
-            -webkit-backdrop-filter:
-                blur(22px);
-        }
+    width: 43px;
+    height: 43px;
 
+    object-fit: contain;
 
-        .brand {
+    animation:
+        logoRotate 10s linear infinite,
+        logoGlow 2.4s ease-in-out infinite;
+}
 
-            display: flex;
+@keyframes logoRotate {
 
-            align-items: center;
+    from {
+        transform: rotate(0deg);
+    }
 
-            gap: 9px;
+    to {
+        transform: rotate(360deg);
+    }
+}
 
-            min-width: 0;
-        }
+@keyframes logoGlow {
 
+    0%,
+    100% {
 
-        .logo-box {
+        filter:
+            drop-shadow(
+                0 0 5px
+                rgba(255,255,255,.5)
+            )
+            drop-shadow(
+                0 0 12px
+                rgba(0,126,255,.5)
+            );
 
-            width: 42px;
-            height: 42px;
+    }
 
-            flex-shrink: 0;
+    50% {
 
-            display: flex;
+        filter:
+            drop-shadow(
+                0 0 10px
+                rgba(255,255,255,1)
+            )
+            drop-shadow(
+                0 0 25px
+                rgba(0,150,255,.9)
+            );
 
-            align-items: center;
-            justify-content: center;
+    }
+}
 
-            border-radius: 14px;
+.brand-name strong {
 
-            background:
-                rgba(255,255,255,.05);
+    display: block;
 
-            border:
-                1px solid rgba(255,255,255,.08);
-        }
+    font-size: 14px;
+}
 
+.brand-name span {
 
-        .logo-box img {
+    display: block;
 
-            width: 34px;
-            height: 34px;
+    margin-top: 2px;
 
-            object-fit: contain;
+    color: #73829a;
 
-            animation:
-                logoRotate 9s linear infinite,
-                logoGlow 2.4s ease-in-out infinite;
-        }
+    font-size: 8px;
 
+    letter-spacing: .6px;
+}
 
-        @keyframes logoRotate {
+.header-actions {
 
-            from {
-                transform: rotate(0deg);
-            }
+    display: flex;
 
-            to {
-                transform: rotate(360deg);
-            }
+    gap: 6px;
+}
 
-        }
+.header-button {
 
+    width: 35px;
+    height: 35px;
 
-        @keyframes logoGlow {
+    border-radius: 11px;
 
-            0%,
-            100% {
-                filter:
-                    drop-shadow(
-                        0 0 3px
-                        rgba(255,255,255,.5)
-                    )
-                    drop-shadow(
-                        0 0 10px
-                        rgba(0,130,255,.5)
-                    );
-            }
+    color: #9bb0c9;
 
-            50% {
-                filter:
-                    drop-shadow(
-                        0 0 7px
-                        rgba(255,255,255,.95)
-                    )
-                    drop-shadow(
-                        0 0 20px
-                        rgba(0,150,255,.95)
-                    );
-            }
+    background:
+        rgba(255,255,255,.045);
 
-        }
+    border:
+        1px solid
+        rgba(255,255,255,.07);
 
+    cursor: pointer;
+}
 
-        .brand-text {
-            min-width: 0;
-        }
 
+/* =====================================================
+   STATUS
+===================================================== */
 
-        .brand-text strong {
+.status-bar {
 
-            display: block;
+    flex-shrink: 0;
 
-            font-size: 14px;
+    display: flex;
 
-            white-space: nowrap;
-        }
+    align-items: center;
 
+    gap: 7px;
 
-        .brand-text span {
+    padding:
+        7px 14px;
 
-            display: block;
+    color: #75849c;
 
-            margin-top: 2px;
+    font-size: 8px;
 
-            color: #71809a;
+    background:
+        rgba(255,255,255,.018);
 
-            font-size: 8px;
+    border-bottom:
+        1px solid
+        rgba(255,255,255,.05);
+}
 
-            letter-spacing: .7px;
+.status-dot {
 
-            white-space: nowrap;
-        }
+    width: 6px;
+    height: 6px;
 
+    border-radius: 50%;
 
-        .header-actions {
+    background: #00e7a2;
 
-            display: flex;
+    box-shadow:
+        0 0 10px
+        rgba(0,231,162,.9);
 
-            align-items: center;
+    animation:
+        pulse 1.8s infinite;
+}
 
-            gap: 6px;
-        }
+@keyframes pulse {
 
+    0%,
+    100% {
+        opacity: .45;
+    }
 
-        .header-button {
+    50% {
+        opacity: 1;
+    }
+}
 
-            min-width: 38px;
-            height: 38px;
 
-            padding: 0 10px;
+/* =====================================================
+   CHAT
+===================================================== */
 
-            display: flex;
+.chat {
 
-            align-items: center;
-            justify-content: center;
+    flex: 1;
 
-            border-radius: 13px;
+    min-height: 0;
 
-            background:
-                rgba(255,255,255,.06);
+    overflow-y: auto;
 
-            border:
-                1px solid rgba(255,255,255,.08);
+    padding:
+        16px 12px 15px;
 
-            color: #a9b8d0;
+    scroll-behavior: smooth;
 
-            cursor: pointer;
+    scrollbar-width: thin;
+}
 
-            transition: .18s ease;
-        }
+.chat::-webkit-scrollbar {
 
+    width: 4px;
+}
 
-        .header-button:active {
+.chat::-webkit-scrollbar-thumb {
 
-            transform:
-                scale(.92);
-        }
+    background:
+        rgba(255,255,255,.12);
 
+    border-radius: 10px;
+}
 
-        /* =====================================================
-           CHAT TITLE
-           ===================================================== */
 
-        .chat-title {
+/* =====================================================
+   WELCOME
+===================================================== */
 
-            flex-shrink: 0;
+.welcome {
 
-            padding:
-                13px 16px 10px;
+    max-width: 600px;
 
-            border-bottom:
-                1px solid rgba(255,255,255,.05);
-        }
+    margin:
+        15px auto 25px;
 
+    padding:
+        21px;
 
-        .chat-title-row {
+    text-align: center;
 
-            display: flex;
+    border-radius: 23px;
 
-            align-items: center;
+    background:
+        linear-gradient(
+            145deg,
+            rgba(0,126,255,.08),
+            rgba(120,55,255,.06)
+        );
 
-            gap: 8px;
-        }
+    border:
+        1px solid
+        rgba(255,255,255,.07);
+}
 
+.welcome-logo {
 
-        .online-dot {
+    width: 72px;
+    height: 72px;
 
-            width: 7px;
-            height: 7px;
+    object-fit: contain;
 
-            border-radius: 50%;
+    animation:
+        logoRotate 13s linear infinite,
+        logoGlow 2.4s ease-in-out infinite;
+}
 
-            background: #00ffad;
+.welcome h1 {
 
-            box-shadow:
-                0 0 6px #00ffad,
-                0 0 15px rgba(0,255,173,.55);
+    margin-top: 10px;
 
-            animation:
-                onlinePulse 1.6s infinite;
-        }
+    font-size: 21px;
+}
 
+.welcome p {
 
-        @keyframes onlinePulse {
+    margin-top: 7px;
 
-            50% {
-                opacity: .4;
-                transform: scale(.75);
-            }
+    color: #77879f;
 
-        }
+    font-size: 9px;
 
+    line-height: 1.6;
+}
 
-        .chat-title h1 {
 
-            font-size: 16px;
-        }
+/* =====================================================
+   QUICK ACTIONS
+===================================================== */
 
+.quick-actions {
 
-        .chat-title p {
+    display: grid;
 
-            margin-top: 4px;
+    grid-template-columns:
+        repeat(2,1fr);
 
-            color: #697891;
+    gap: 7px;
 
-            font-size: 9px;
-        }
+    margin-top: 15px;
+}
 
+.quick {
 
-        /* =====================================================
-           CHAT AREA
-           ===================================================== */
+    min-height: 42px;
 
-        .messages {
+    padding: 8px;
 
-            flex: 1;
+    border-radius: 12px;
 
-            min-height: 0;
+    color: #91b9dc;
 
-            overflow-y: auto;
+    background:
+        rgba(255,255,255,.04);
 
-            padding:
-                18px 14px 14px;
+    border:
+        1px solid
+        rgba(255,255,255,.07);
 
-            scroll-behavior: smooth;
+    font-size: 8px;
 
-            overscroll-behavior: contain;
-        }
+    cursor: pointer;
+}
 
 
-        .messages::-webkit-scrollbar {
+/* =====================================================
+   MESSAGE
+===================================================== */
 
-            width: 4px;
-        }
+.message-row {
 
+    display: flex;
 
-        .messages::-webkit-scrollbar-thumb {
+    margin:
+        8px 0;
+}
 
-            background:
-                rgba(255,255,255,.12);
+.message-row.user {
 
-            border-radius: 20px;
-        }
+    justify-content: flex-end;
+}
 
+.message {
 
-        .message {
+    max-width:
+        min(78%,620px);
 
-            display: flex;
+    padding:
+        10px 12px;
 
-            width: 100%;
+    border-radius: 16px;
 
-            margin-bottom: 13px;
+    font-size: 9px;
 
-            animation:
-                messageIn .25s ease;
-        }
+    line-height: 1.6;
 
+    word-break: break-word;
+}
 
-        @keyframes messageIn {
+.message.ai {
 
-            from {
-                opacity: 0;
-                transform:
-                    translateY(7px);
-            }
+    background:
+        rgba(255,255,255,.045);
 
-            to {
-                opacity: 1;
-                transform:
-                    translateY(0);
-            }
+    border:
+        1px solid
+        rgba(255,255,255,.065);
 
-        }
+    border-bottom-left-radius: 5px;
+}
 
+.message.user {
 
-        .message.user {
+    background:
+        rgba(0,126,255,.14);
 
-            justify-content: flex-end;
-        }
+    border:
+        1px solid
+        rgba(0,126,255,.18);
 
+    border-bottom-right-radius: 5px;
+}
 
-        .message.ai {
+.message-meta {
 
-            justify-content: flex-start;
-        }
+    margin-bottom: 4px;
 
+    color: #68809d;
 
-        .bubble {
+    font-size: 7px;
+}
 
-            max-width:
-                min(82%, 620px);
 
-            padding:
-                11px 13px;
+/* =====================================================
+   TYPING
+===================================================== */
 
-            border-radius: 17px;
+.typing {
 
-            font-size: 13px;
+    display: none;
 
-            line-height: 1.5;
+    width: fit-content;
 
-            white-space: pre-wrap;
+    margin:
+        7px 0;
 
-            overflow-wrap: anywhere;
-        }
+    padding:
+        10px 12px;
 
+    border-radius: 15px;
 
-        .message.user .bubble {
+    background:
+        rgba(255,255,255,.04);
 
-            background:
-                linear-gradient(
-                    135deg,
-                    #087cff,
-                    #0756c7
-                );
+    border:
+        1px solid
+        rgba(255,255,255,.06);
+}
 
-            border-bottom-right-radius: 5px;
+.typing.show {
 
-            box-shadow:
-                0 8px 25px
-                rgba(0,100,255,.20);
-        }
+    display: flex;
 
+    gap: 4px;
+}
 
-        .message.ai .bubble {
+.typing span {
 
-            background:
-                rgba(255,255,255,.065);
+    width: 5px;
+    height: 5px;
 
-            border:
-                1px solid
-                rgba(255,255,255,.075);
+    border-radius: 50%;
 
-            border-bottom-left-radius: 5px;
+    background: #80a9cc;
 
-            color: #dbe4f3;
-        }
+    animation:
+        typing 1.1s infinite;
+}
 
+.typing span:nth-child(2) {
 
-        .ai-label {
+    animation-delay: .15s;
+}
 
-            display: block;
+.typing span:nth-child(3) {
 
-            margin-bottom: 5px;
+    animation-delay: .30s;
+}
 
-            color: #68bfff;
+@keyframes typing {
 
-            font-size: 8px;
+    0%,
+    60%,
+    100% {
+        opacity: .25;
+        transform: translateY(0);
+    }
 
-            font-weight: 700;
+    30% {
+        opacity: 1;
+        transform: translateY(-3px);
+    }
+}
 
-            letter-spacing: .5px;
-        }
 
+/* =====================================================
+   INPUT AREA
+===================================================== */
 
-        /* =====================================================
-           EMPTY / WELCOME
-           ===================================================== */
+.input-zone {
 
-        .welcome-card {
+    flex-shrink: 0;
 
-            max-width: 550px;
+    padding:
+        8px 10px
+        calc(8px + env(safe-area-inset-bottom));
 
-            margin:
-                15px auto 20px;
+    background:
+        rgba(5,9,20,.94);
 
-            padding: 20px;
+    border-top:
+        1px solid
+        rgba(255,255,255,.08);
 
-            text-align: center;
+    backdrop-filter:
+        blur(20px);
 
-            border-radius: 22px;
+    -webkit-backdrop-filter:
+        blur(20px);
+}
 
-            background:
-                linear-gradient(
-                    145deg,
-                    rgba(0,126,255,.09),
-                    rgba(255,255,255,.035)
-                );
+.input-tools {
 
-            border:
-                1px solid
-                rgba(0,126,255,.12);
-        }
+    display: flex;
 
+    gap: 5px;
 
-        .welcome-logo {
+    margin-bottom: 6px;
 
-            width: 64px;
-            height: 64px;
+    overflow-x: auto;
 
-            object-fit: contain;
+    scrollbar-width: none;
+}
 
-            margin-bottom: 10px;
+.input-tools::-webkit-scrollbar {
 
-            animation:
-                welcomeRotate 10s linear infinite,
-                welcomeGlow 2.5s ease-in-out infinite;
-        }
+    display: none;
+}
 
+.tool {
 
-        @keyframes welcomeRotate {
+    flex-shrink: 0;
 
-            from {
-                transform: rotate(0deg);
-            }
+    min-height: 28px;
 
-            to {
-                transform: rotate(360deg);
-            }
+    padding:
+        0 9px;
 
-        }
+    border-radius: 10px;
 
+    color: #7187a1;
 
-        @keyframes welcomeGlow {
+    background:
+        rgba(255,255,255,.035);
 
-            0%,
-            100% {
-                filter:
-                    drop-shadow(
-                        0 0 4px
-                        rgba(255,255,255,.55)
-                    )
-                    drop-shadow(
-                        0 0 13px
-                        rgba(0,140,255,.5)
-                    );
-            }
+    border:
+        1px solid
+        rgba(255,255,255,.06);
 
-            50% {
-                filter:
-                    drop-shadow(
-                        0 0 8px
-                        rgba(255,255,255,.95)
-                    )
-                    drop-shadow(
-                        0 0 25px
-                        rgba(0,140,255,1)
-                    );
-            }
+    font-size: 7px;
 
-        }
+    cursor: pointer;
+}
 
+.input-row {
 
-        .welcome-card h2 {
+    display: flex;
 
-            font-size: 18px;
-        }
+    align-items: flex-end;
 
+    gap: 6px;
+}
 
-        .welcome-card p {
+.text-wrap {
 
-            margin-top: 7px;
+    flex: 1;
 
-            color: #7d8ba5;
+    position: relative;
+}
 
-            font-size: 10px;
+#messageInput {
 
-            line-height: 1.55;
-        }
+    width: 100%;
 
+    min-height: 44px;
 
-        /* =====================================================
-           QUICK PROMPTS
-           ===================================================== */
+    max-height: 130px;
 
-        .quick-prompts {
+    resize: none;
 
-            display: flex;
+    overflow-y: auto;
 
-            gap: 7px;
+    padding:
+        12px 42px 12px 12px;
 
-            overflow-x: auto;
+    border-radius: 15px;
 
-            padding:
-                0 14px 9px;
-        }
+    outline: none;
 
+    color: #e6f1ff;
 
-        .quick-prompts::-webkit-scrollbar {
-            display: none;
-        }
+    background:
+        rgba(255,255,255,.045);
 
+    border:
+        1px solid
+        rgba(255,255,255,.08);
 
-        .prompt {
+    font-size: 10px;
 
-            flex-shrink: 0;
+    line-height: 1.4;
+}
 
-            padding:
-                8px 11px;
+#messageInput::placeholder {
 
-            border-radius: 20px;
+    color: #63738b;
+}
 
-            background:
-                rgba(255,255,255,.05);
+.keyboard-button {
 
-            border:
-                1px solid
-                rgba(255,255,255,.07);
+    position: absolute;
 
-            color: #8fa1bc;
+    right: 7px;
+    bottom: 7px;
 
-            font-size: 9px;
+    width: 30px;
+    height: 30px;
 
-            cursor: pointer;
-        }
+    border-radius: 9px;
 
+    color: #8bc9f4;
 
-        .prompt:active {
+    background:
+        rgba(0,126,255,.08);
 
-            transform:
-                scale(.95);
-        }
+    border:
+        1px solid
+        rgba(0,126,255,.12);
 
+    cursor: pointer;
+}
 
-        /* =====================================================
-           COMPOSER
-           ===================================================== */
+.send {
 
-        .composer {
+    flex-shrink: 0;
 
-            flex-shrink: 0;
+    width: 45px;
+    height: 45px;
 
-            padding:
-                9px 10px
-                calc(9px + env(safe-area-inset-bottom))
-                10px;
+    border-radius: 14px;
 
-            background:
-                rgba(5,9,20,.88);
+    color: #eaf7ff;
 
-            border-top:
-                1px solid
-                rgba(255,255,255,.08);
+    background:
+        rgba(0,126,255,.16);
 
-            backdrop-filter:
-                blur(22px);
+    border:
+        1px solid
+        rgba(0,126,255,.20);
 
-            -webkit-backdrop-filter:
-                blur(22px);
-        }
+    cursor: pointer;
 
+    font-size: 16px;
+}
 
-        .composer-row {
+.send:active {
 
-            display: flex;
+    transform: scale(.94);
+}
 
-            align-items: flex-end;
 
-            gap: 7px;
-        }
+/* =====================================================
+   EZIDI KEYBOARD
+===================================================== */
 
+.keyboard-panel {
 
-        .input-wrap {
+    position: fixed;
 
-            flex: 1;
+    z-index: 200;
 
-            min-width: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
 
-            display: flex;
+    padding:
+        12px 10px
+        calc(12px + env(safe-area-inset-bottom));
 
-            align-items: flex-end;
+    background:
+        rgba(7,12,25,.98);
 
-            border-radius: 18px;
+    border-top:
+        1px solid
+        rgba(255,255,255,.10);
 
-            background:
-                rgba(255,255,255,.06);
+    box-shadow:
+        0 -15px 45px
+        rgba(0,0,0,.42);
 
-            border:
-                1px solid
-                rgba(255,255,255,.08);
-        }
+    transform:
+        translateY(110%);
 
+    transition:
+        transform .22s ease;
+}
 
-        .input-wrap:focus-within {
+.keyboard-panel.open {
 
-            border-color:
-                rgba(0,145,255,.45);
+    transform:
+        translateY(0);
+}
 
-            box-shadow:
-                0 0 0 3px
-                rgba(0,126,255,.07);
-        }
+.keyboard-head {
 
+    display: flex;
 
-        #messageInput {
+    align-items: center;
 
-            width: 100%;
+    justify-content: space-between;
 
-            min-height: 43px;
-            max-height: 125px;
+    margin-bottom: 9px;
+}
 
-            padding:
-                12px 13px;
+.keyboard-head strong {
 
-            resize: none;
+    font-size: 10px;
+}
 
-            outline: none;
+.keyboard-head span {
 
-            border: 0;
+    color: #687991;
 
-            background: transparent;
+    font-size: 7px;
+}
 
-            color: #ffffff;
+.keyboard-close {
 
-            font-size: 13px;
+    width: 30px;
+    height: 30px;
 
-            line-height: 1.4;
-        }
+    border-radius: 9px;
 
+    color: #9ab0c8;
 
-        #messageInput::placeholder {
+    background:
+        rgba(255,255,255,.05);
 
-            color: #62718a;
-        }
+    border:
+        1px solid
+        rgba(255,255,255,.07);
+}
 
+.keyboard-grid {
 
-        .send-button {
+    display: grid;
 
-            width: 45px;
-            height: 45px;
+    grid-template-columns:
+        repeat(8,1fr);
 
-            flex-shrink: 0;
+    gap: 5px;
+}
 
-            display: flex;
+.key {
 
-            align-items: center;
-            justify-content: center;
+    min-height: 38px;
 
-            border-radius: 16px;
+    border-radius: 10px;
 
-            background:
-                linear-gradient(
-                    135deg,
-                    #0785ff,
-                    #0754d1
-                );
+    color: #c8e6ff;
 
-            color: white;
+    background:
+        rgba(255,255,255,.045);
 
-            cursor: pointer;
+    border:
+        1px solid
+        rgba(255,255,255,.07);
 
-            box-shadow:
-                0 7px 25px
-                rgba(0,100,255,.25);
+    font-size: 13px;
 
-            transition: .18s ease;
-        }
+    cursor: pointer;
+}
 
+.key:active {
 
-        .send-button:active {
+    transform: scale(.94);
 
-            transform:
-                scale(.91);
-        }
+    background:
+        rgba(0,126,255,.14);
+}
 
 
-        .send-button:disabled {
+/* =====================================================
+   MODAL
+===================================================== */
 
-            opacity: .45;
+.overlay {
 
-            cursor: default;
-        }
+    position: fixed;
 
+    inset: 0;
 
-        .composer-hint {
+    z-index: 300;
 
-            margin-top: 5px;
+    display: flex;
 
-            text-align: center;
+    align-items: flex-end;
 
-            color: #48566f;
+    justify-content: center;
 
-            font-size: 7px;
-        }
+    padding: 10px;
 
+    background:
+        rgba(0,0,0,.52);
 
-        /* =====================================================
-           TYPING
-           ===================================================== */
+    backdrop-filter:
+        blur(7px);
 
-        .typing {
+    -webkit-backdrop-filter:
+        blur(7px);
 
-            display: inline-flex;
+    opacity: 0;
 
-            align-items: center;
+    visibility: hidden;
 
-            gap: 4px;
+    pointer-events: none;
 
-            padding:
-                12px 15px;
+    transition: .2s ease;
+}
 
-            border-radius: 17px;
+.overlay.open {
 
-            background:
-                rgba(255,255,255,.065);
+    opacity: 1;
 
-            border:
-                1px solid
-                rgba(255,255,255,.075);
-        }
+    visibility: visible;
 
+    pointer-events: auto;
+}
 
-        .typing span {
+.panel {
 
-            width: 5px;
-            height: 5px;
+    width:
+        min(580px,100%);
 
-            border-radius: 50%;
+    padding: 17px;
 
-            background: #70bfff;
+    border-radius:
+        22px 22px 16px 16px;
 
-            animation:
-                typingBounce 1s infinite;
-        }
+    background:
+        #0a1222;
 
+    border:
+        1px solid
+        rgba(255,255,255,.09);
+}
 
-        .typing span:nth-child(2) {
-            animation-delay: .15s;
-        }
+.panel-head {
 
+    display: flex;
 
-        .typing span:nth-child(3) {
-            animation-delay: .30s;
-        }
+    align-items: center;
 
+    justify-content: space-between;
+}
 
-        @keyframes typingBounce {
+.panel-head strong {
 
-            0%,
-            60%,
-            100% {
-                transform: translateY(0);
-                opacity: .45;
-            }
+    font-size: 12px;
+}
 
-            30% {
-                transform: translateY(-5px);
-                opacity: 1;
-            }
+.panel-close {
 
-        }
+    width: 32px;
+    height: 32px;
 
+    border-radius: 10px;
 
-        /* =====================================================
-           DESKTOP
-           ===================================================== */
+    color: #9eb1c7;
 
-        @media (min-width: 800px) {
+    background:
+        rgba(255,255,255,.05);
 
-            .app {
+    border:
+        1px solid
+        rgba(255,255,255,.07);
+}
 
-                max-width: 1000px;
+.panel-content {
 
-                border-left:
-                    1px solid
-                    rgba(255,255,255,.04);
+    margin-top: 14px;
 
-                border-right:
-                    1px solid
-                    rgba(255,255,255,.04);
-            }
+    color: #8190a7;
 
-            .messages {
+    font-size: 9px;
 
-                padding-left: 30px;
-                padding-right: 30px;
-            }
+    line-height: 1.7;
+}
 
-            .quick-prompts {
 
-                padding-left: 30px;
-                padding-right: 30px;
-            }
+/* =====================================================
+   TOAST
+===================================================== */
 
-            .composer {
+.toast {
 
-                padding-left: 30px;
-                padding-right: 30px;
-            }
+    position: fixed;
 
-        }
+    z-index: 500;
 
-    </style>
+    left: 50%;
+
+    bottom: 75px;
+
+    padding:
+        9px 13px;
+
+    border-radius: 12px;
+
+    color: #dcecff;
+
+    background:
+        rgba(18,28,47,.96);
+
+    border:
+        1px solid
+        rgba(255,255,255,.09);
+
+    font-size: 8px;
+
+    opacity: 0;
+
+    pointer-events: none;
+
+    transform:
+        translate(-50%,10px);
+
+    transition: .2s ease;
+}
+
+.toast.show {
+
+    opacity: 1;
+
+    transform:
+        translate(-50%,0);
+}
+
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media (min-width:700px) {
+
+    .quick-actions {
+
+        grid-template-columns:
+            repeat(4,1fr);
+
+    }
+
+    .keyboard-grid {
+
+        grid-template-columns:
+            repeat(12,1fr);
+
+    }
+
+}
+
+</style>
 
 </head>
 
@@ -1021,892 +1098,1240 @@
 <body>
 
 
-    <!-- =====================================================
-         BACKGROUND
-         ===================================================== -->
+<div class="background">
 
-    <div class="background">
+    <div class="orb one"></div>
 
-        <div class="orb one"></div>
-        <div class="orb two"></div>
+    <div class="orb two"></div>
+
+</div>
+
+
+<main class="app">
+
+
+<!-- =====================================================
+     HEADER
+===================================================== -->
+
+<header class="header">
+
+
+    <div class="brand">
+
+        <img
+            class="logo"
+            src="assets/logo/logo.png"
+            alt="HalDo AI"
+        >
+
+        <div class="brand-name">
+
+            <strong>
+                HalDo AI
+            </strong>
+
+            <span>
+                AI CHAT • OS 18
+            </span>
+
+        </div>
 
     </div>
 
 
-    <!-- =====================================================
-         APP
-         ===================================================== -->
-
-    <main class="app">
+    <div class="header-actions">
 
 
-        <!-- HEADER -->
-
-        <header class="header">
-
-
-            <div class="brand">
-
-                <div class="logo-box">
-
-                    <img
-                        src="assets/logo/logo.png"
-                        alt="HalDo AI Logo"
-                    >
-
-                </div>
+        <button
+            class="header-button"
+            onclick="clearChat()"
+            title="Chat löschen"
+        >
+            ⌫
+        </button>
 
 
-                <div class="brand-text">
-
-                    <strong>HalDo AI</strong>
-
-                    <span>
-                        OS 18 • INTELLIGENT CHAT
-                    </span>
-
-                </div>
-
-            </div>
+        <button
+            class="header-button"
+            onclick="openHome()"
+            title="Home"
+        >
+            ⌂
+        </button>
 
 
-            <div class="header-actions">
-
-                <button
-                    class="header-button"
-                    onclick="clearChat()"
-                    title="Chat löschen"
-                >
-                    ×
-                </button>
+    </div>
 
 
-                <button
-                    class="header-button"
-                    onclick="goApps()"
-                    title="Apps"
-                >
-                    ◈
-                </button>
-
-            </div>
-
-        </header>
+</header>
 
 
-        <!-- CHAT TITLE -->
+<!-- =====================================================
+     STATUS
+===================================================== -->
 
-        <section class="chat-title">
+<div class="status-bar">
 
-            <div class="chat-title-row">
+    <span class="status-dot"></span>
 
-                <span class="online-dot"></span>
+    HalDo AI Core bereit
 
-                <h1>HalDo AI Chat</h1>
+    <span>
+        •
+    </span>
 
-            </div>
+    lokale Chat-Funktion aktiv
 
-
-            <p>
-                Dein zentraler AI-Eingabebereich
-            </p>
-
-        </section>
+</div>
 
 
-        <!-- MESSAGES -->
+<!-- =====================================================
+     CHAT
+===================================================== -->
 
-        <section
-            class="messages"
-            id="messages"
+<section
+    class="chat"
+    id="chat"
+>
+
+
+    <div
+        class="welcome"
+        id="welcome"
+    >
+
+
+        <img
+            class="welcome-logo"
+            src="assets/logo/logo.png"
+            alt="HalDo AI"
         >
 
 
-            <div
-                class="welcome-card"
-                id="welcomeCard"
-            >
-
-                <img
-                    class="welcome-logo"
-                    src="assets/logo/logo.png"
-                    alt="HalDo AI"
-                >
+        <h1>
+            Willkommen bei HalDo AI
+        </h1>
 
 
-                <h2>
-                    Willkommen bei HalDo AI
-                </h2>
+        <p>
+
+            Deine HalDo-AI-Eingabe ist bereit.
+            Du kannst schreiben, Fragen stellen
+            oder die vorbereiteten Werkzeuge öffnen.
+
+        </p>
 
 
-                <p>
-                    Schreibe deine Frage, Idee oder Aufgabe
-                    unten in das Eingabefeld. Diese Chat-Oberfläche
-                    ist bereits funktionierend vorbereitet und
-                    kann später mit der eigentlichen HalDo-AI-
-                    Schnittstelle verbunden werden.
-                </p>
+        <div class="quick-actions">
 
-            </div>
-
-
-        </section>
-
-
-        <!-- QUICK PROMPTS -->
-
-        <div class="quick-prompts">
 
             <button
-                class="prompt"
-                onclick="usePrompt('Hallo HalDo AI!')"
+                class="quick"
+                onclick="quickMessage(
+                    'Was kannst du alles?'
+                )"
             >
-                👋 Hallo HalDo AI
+                ✦ Was kannst du?
             </button>
 
 
             <button
-                class="prompt"
-                onclick="usePrompt('Hilf mir bei einer Idee.')"
+                class="quick"
+                onclick="quickMessage(
+                    'Hilf mir mit HalDo AI OS 18'
+                )"
             >
-                💡 Idee
+                ◈ OS 18 Hilfe
             </button>
 
 
             <button
-                class="prompt"
-                onclick="usePrompt('Erkläre mir etwas einfach.')"
+                class="quick"
+                onclick="quickMessage(
+                    'Schreibe mir eine Idee'
+                )"
             >
-                🧠 Erklären
+                ✎ Idee schreiben
             </button>
 
 
             <button
-                class="prompt"
-                onclick="usePrompt('Hilf mir beim Programmieren.')"
+                class="quick"
+                onclick="quickMessage(
+                    'Zeige mir die verfügbaren Module'
+                )"
             >
-                💻 Programmieren
+                ◇ Module
             </button>
+
 
         </div>
 
 
-        <!-- COMPOSER -->
+    </div>
 
-        <form
-            class="composer"
-            id="composer"
+
+    <div id="messages"></div>
+
+
+    <div
+        class="typing"
+        id="typing"
+    >
+
+        <span></span>
+        <span></span>
+        <span></span>
+
+    </div>
+
+
+</section>
+
+
+<!-- =====================================================
+     INPUT
+===================================================== -->
+
+<section class="input-zone">
+
+
+    <div class="input-tools">
+
+
+        <button
+            class="tool"
+            onclick="insertText('Hallo HalDo AI! ')"
         >
-
-            <div class="composer-row">
-
-
-                <div class="input-wrap">
-
-                    <textarea
-                        id="messageInput"
-                        rows="1"
-                        maxlength="4000"
-                        placeholder="Schreibe an HalDo AI..."
-                        autocomplete="off"
-                    ></textarea>
-
-                </div>
+            👋 Hallo
+        </button>
 
 
-                <button
-                    class="send-button"
-                    id="sendButton"
-                    type="submit"
-                    aria-label="Nachricht senden"
-                >
-                    ➤
-                </button>
+        <button
+            class="tool"
+            onclick="insertText('Bitte erkläre mir ')"
+        >
+            💡 Erklären
+        </button>
 
 
-            </div>
+        <button
+            class="tool"
+            onclick="insertText('Bitte erstelle ')"
+        >
+            ✎ Erstellen
+        </button>
 
 
-            <div class="composer-hint">
-
-                Enter = senden • Shift + Enter = neue Zeile
-
-            </div>
-
-        </form>
-
-
-    </main>
+        <button
+            class="tool"
+            onclick="insertText('Bitte verbessere ')"
+        >
+            ✨ Verbessern
+        </button>
 
 
-    <script>
-
-        /* =====================================================
-           ELEMENTE
-           ===================================================== */
-
-        const messages =
-            document.getElementById("messages");
-
-        const input =
-            document.getElementById("messageInput");
-
-        const composer =
-            document.getElementById("composer");
-
-        const sendButton =
-            document.getElementById("sendButton");
-
-        const welcomeCard =
-            document.getElementById("welcomeCard");
+        <button
+            class="tool"
+            onclick="toggleKeyboard()"
+        >
+            ⌨ Êzîdî
+        </button>
 
 
-        /* =====================================================
-           CHAT DATEN
-           ===================================================== */
-
-        const STORAGE_KEY =
-            "haldo_ai_os18_chat";
+    </div>
 
 
-        let chatHistory = [];
+    <div class="input-row">
 
 
-        /* =====================================================
-           START
-           ===================================================== */
+        <div class="text-wrap">
+
+
+            <textarea
+                id="messageInput"
+                rows="1"
+                placeholder="Schreibe an HalDo AI …"
+                autocomplete="off"
+            ></textarea>
+
+
+            <button
+                class="keyboard-button"
+                onclick="toggleKeyboard()"
+                title="Êzîdî Tastatur"
+            >
+                ⌨
+            </button>
+
+
+        </div>
+
+
+        <button
+            class="send"
+            onclick="sendMessage()"
+            title="Senden"
+        >
+            ➤
+        </button>
+
+
+    </div>
+
+
+</section>
+
+
+</main>
+
+
+<!-- =====================================================
+     EZIDI KEYBOARD
+===================================================== -->
+
+<section
+    class="keyboard-panel"
+    id="keyboardPanel"
+>
+
+
+    <div class="keyboard-head">
+
+
+        <div>
+
+            <strong>
+                Êzîdî Tastatur
+            </strong>
+
+            <span>
+                HalDo AI Eingabe
+            </span>
+
+        </div>
+
+
+        <button
+            class="keyboard-close"
+            onclick="toggleKeyboard()"
+        >
+            ×
+        </button>
+
+
+    </div>
+
+
+    <div class="keyboard-grid">
+
+
+        <button class="key" onclick="keyInsert('ê')">ê</button>
+        <button class="key" onclick="keyInsert('Ê')">Ê</button>
+        <button class="key" onclick="keyInsert('î')">î</button>
+        <button class="key" onclick="keyInsert('Î')">Î</button>
+        <button class="key" onclick="keyInsert('û')">û</button>
+        <button class="key" onclick="keyInsert('Û')">Û</button>
+        <button class="key" onclick="keyInsert('ş')">ş</button>
+        <button class="key" onclick="keyInsert('Ş')">Ş</button>
+
+        <button class="key" onclick="keyInsert('ç')">ç</button>
+        <button class="key" onclick="keyInsert('Ç')">Ç</button>
+        <button class="key" onclick="keyInsert('ḧ')">ḧ</button>
+        <button class="key" onclick="keyInsert('Ḧ')">Ḧ</button>
+        <button class="key" onclick="keyInsert('ẍ')">ẍ</button>
+        <button class="key" onclick="keyInsert('Ẍ')">Ẍ</button>
+        <button class="key" onclick="keyInsert('’')">’</button>
+        <button class="key" onclick="keyInsert(' ')">␠</button>
+
+    </div>
+
+
+</section>
+
+
+<!-- =====================================================
+     PANEL
+===================================================== -->
+
+<div
+    class="overlay"
+    id="overlay"
+    onclick="closePanelOutside(event)"
+>
+
+
+    <div class="panel">
+
+
+        <div class="panel-head">
+
+
+            <strong id="panelTitle">
+                HalDo AI
+            </strong>
+
+
+            <button
+                class="panel-close"
+                onclick="closePanel()"
+            >
+                ×
+            </button>
+
+
+        </div>
+
+
+        <div
+            class="panel-content"
+            id="panelContent"
+        >
+        </div>
+
+
+    </div>
+
+
+</div>
+
+
+<div
+    class="toast"
+    id="toast"
+>
+</div>
+
+
+<script>
+
+/* =====================================================
+   HALDO AI CHAT CORE
+===================================================== */
+
+const STORAGE_KEY =
+    "haldo_ai_chat_os18";
+
+
+const input =
+    document.getElementById(
+        "messageInput"
+    );
+
+
+const messages =
+    document.getElementById(
+        "messages"
+    );
+
+
+const chat =
+    document.getElementById(
+        "chat"
+    );
+
+
+const typing =
+    document.getElementById(
+        "typing"
+    );
+
+
+const welcome =
+    document.getElementById(
+        "welcome"
+    );
+
+
+/* =====================================================
+   START
+===================================================== */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function() {
 
         loadChat();
 
-        autoResize();
+        resizeInput();
+
+        input.focus();
+
+    }
+);
 
 
-        /* =====================================================
-           CHAT LADEN
-           ===================================================== */
+/* =====================================================
+   INPUT
+===================================================== */
 
-        function loadChat() {
-
-            try {
-
-                const saved =
-                    localStorage.getItem(
-                        STORAGE_KEY
-                    );
+input.addEventListener(
+    "input",
+    resizeInput
+);
 
 
-                if (!saved) {
-                    return;
-                }
+input.addEventListener(
+    "keydown",
+    function(event) {
 
-
-                const parsed =
-                    JSON.parse(saved);
-
-
-                if (!Array.isArray(parsed)) {
-                    return;
-                }
-
-
-                chatHistory = parsed;
-
-
-                chatHistory.forEach(function(item) {
-
-                    addMessageToScreen(
-                        item.text,
-                        item.sender,
-                        false
-                    );
-
-                });
-
-
-                if (chatHistory.length > 0) {
-
-                    if (welcomeCard) {
-                        welcomeCard.remove();
-                    }
-
-                }
-
-            } catch (error) {
-
-                console.log(
-                    "HalDo Chat konnte Verlauf nicht laden:",
-                    error
-                );
-
-            }
-
-        }
-
-
-        /* =====================================================
-           SPEICHERN
-           ===================================================== */
-
-        function saveChat() {
-
-            try {
-
-                localStorage.setItem(
-                    STORAGE_KEY,
-                    JSON.stringify(chatHistory)
-                );
-
-            } catch (error) {
-
-                console.log(
-                    "HalDo Chat konnte Verlauf nicht speichern:",
-                    error
-                );
-
-            }
-
-        }
-
-
-        /* =====================================================
-           NACHRICHT HINZUFÜGEN
-           ===================================================== */
-
-        function addMessageToScreen(
-            text,
-            sender,
-            animate = true
+        if (
+            event.key === "Enter"
+            &&
+            !event.shiftKey
         ) {
 
-            const wrapper =
-                document.createElement("div");
+            event.preventDefault();
 
-
-            wrapper.className =
-                "message " +
-                (sender === "user"
-                    ? "user"
-                    : "ai");
-
-
-            if (!animate) {
-                wrapper.style.animation = "none";
-            }
-
-
-            const bubble =
-                document.createElement("div");
-
-
-            bubble.className =
-                "bubble";
-
-
-            if (sender === "ai") {
-
-                const label =
-                    document.createElement("span");
-
-
-                label.className =
-                    "ai-label";
-
-
-                label.textContent =
-                    "HALDO AI";
-
-
-                bubble.appendChild(label);
-
-            }
-
-
-            const content =
-                document.createElement("span");
-
-
-            content.textContent =
-                text;
-
-
-            bubble.appendChild(content);
-
-
-            wrapper.appendChild(bubble);
-
-
-            messages.appendChild(wrapper);
-
-
-            scrollToBottom();
-
-
-            return wrapper;
+            sendMessage();
 
         }
 
+    }
+);
 
-        /* =====================================================
-           SENDEN
-           ===================================================== */
 
-        composer.addEventListener(
-            "submit",
-            function(event) {
+function resizeInput() {
 
-                event.preventDefault();
+    input.style.height =
+        "auto";
 
-                sendMessage();
+    input.style.height =
+        Math.min(
+            input.scrollHeight,
+            130
+        ) + "px";
 
-            }
+}
+
+
+/* =====================================================
+   SEND
+===================================================== */
+
+function sendMessage() {
+
+    const text =
+        input.value.trim();
+
+
+    if (!text) {
+
+        showToast(
+            "Bitte zuerst eine Nachricht eingeben."
         );
 
+        return;
 
-        function sendMessage() {
-
-            const text =
-                input.value.trim();
+    }
 
 
-            if (!text) {
-                return;
-            }
+    addMessage(
+        "user",
+        text
+    );
 
 
-            if (sendButton.disabled) {
-                return;
-            }
+    input.value = "";
+
+    resizeInput();
 
 
-            if (welcomeCard) {
-
-                welcomeCard.remove();
-
-            }
+    hideWelcome();
 
 
-            addMessageToScreen(
-                text,
-                "user"
+    saveChat();
+
+
+    showTyping();
+
+
+    setTimeout(
+        function() {
+
+            hideTyping();
+
+            addMessage(
+                "ai",
+                createLocalResponse(
+                    text
+                )
             );
-
-
-            chatHistory.push({
-
-                sender: "user",
-
-                text: text,
-
-                time:
-                    new Date().toISOString()
-
-            });
-
 
             saveChat();
 
+        },
+        650
+    );
 
-            input.value = "";
+}
 
-            autoResize();
 
+/* =====================================================
+   QUICK MESSAGE
+===================================================== */
 
-            showTyping();
+function quickMessage(
+    text
+) {
 
+    input.value =
+        text;
 
-            /*
-             * ==================================================
-             * VORLÄUFIGE HALDO-AI-ANTWORT
-             *
-             * Die echte KI-Schnittstelle wird später hier
-             * angeschlossen.
-             * ==================================================
-             */
+    resizeInput();
 
-            setTimeout(
-                function() {
+    sendMessage();
 
-                    hideTyping();
+}
 
-                    const response =
-                        createLocalResponse(text);
 
+/* =====================================================
+   INSERT
+===================================================== */
 
-                    addMessageToScreen(
-                        response,
-                        "ai"
-                    );
+function insertText(
+    text
+) {
 
+    input.focus();
 
-                    chatHistory.push({
 
-                        sender: "ai",
+    const start =
+        input.selectionStart;
 
-                        text: response,
+    const end =
+        input.selectionEnd;
 
-                        time:
-                            new Date().toISOString()
 
-                    });
-
-
-                    saveChat();
-
-                },
-                700
-            );
-
-        }
-
-
-        /* =====================================================
-           VORLÄUFIGE AI-LOGIK
-           ===================================================== */
-
-        function createLocalResponse(text) {
-
-            const lower =
-                text.toLowerCase();
-
-
-            if (
-                lower.includes("hallo") ||
-                lower.includes("hi") ||
-                lower.includes("hey")
-            ) {
-
-                return (
-                    "Hallo! 💙❤️ Ich bin HalDo AI. " +
-                    "Die Chat-Oberfläche funktioniert bereits. " +
-                    "Die echte KI-Verbindung können wir als " +
-                    "nächsten Systembaustein anschließen."
-                );
-
-            }
-
-
-            if (
-                lower.includes("programm") ||
-                lower.includes("code")
-            ) {
-
-                return (
-                    "Sehr gerne. 🚀 HalDo AI kann später " +
-                    "direkt mit den Programmier- und " +
-                    "Entwicklungsmodulen verbunden werden."
-                );
-
-            }
-
-
-            if (
-                lower.includes("idee") ||
-                lower.includes("projekt")
-            ) {
-
-                return (
-                    "Eine gute Idee ist der erste Schritt. 💡 " +
-                    "Wir können sie anschließend als echtes " +
-                    "HalDo-AI-Modul strukturieren."
-                );
-
-            }
-
-
-            if (
-                lower.includes("wer bist") ||
-                lower.includes("was bist")
-            ) {
-
-                return (
-                    "Ich bin HalDo AI – die intelligente " +
-                    "KI-Oberfläche des HalDo AI OS 18. 💙❤️🚀"
-                );
-
-            }
-
-
-            return (
-                "Deine Nachricht ist angekommen. 💙❤️ " +
-                "Die HalDo-AI-Chatoberfläche funktioniert. " +
-                "Als nächstes kann die echte KI-Engine " +
-                "angeschlossen werden."
-            );
-
-        }
-
-
-        /* =====================================================
-           TYPING
-           ===================================================== */
-
-        let typingElement = null;
-
-
-        function showTyping() {
-
-            sendButton.disabled = true;
-
-
-            const wrapper =
-                document.createElement("div");
-
-
-            wrapper.className =
-                "message ai";
-
-
-            wrapper.id =
-                "typingMessage";
-
-
-            typingElement =
-                document.createElement("div");
-
-
-            typingElement.className =
-                "typing";
-
-
-            for (
-                let i = 0;
-                i < 3;
-                i++
-            ) {
-
-                const dot =
-                    document.createElement("span");
-
-
-                typingElement.appendChild(dot);
-
-            }
-
-
-            wrapper.appendChild(
-                typingElement
-            );
-
-
-            messages.appendChild(
-                wrapper
-            );
-
-
-            scrollToBottom();
-
-        }
-
-
-        function hideTyping() {
-
-            const typing =
-                document.getElementById(
-                    "typingMessage"
-                );
-
-
-            if (typing) {
-
-                typing.remove();
-
-            }
-
-
-            typingElement = null;
-
-
-            sendButton.disabled = false;
-
-        }
-
-
-        /* =====================================================
-           SCROLL
-           ===================================================== */
-
-        function scrollToBottom() {
-
-            requestAnimationFrame(
-                function() {
-
-                    messages.scrollTop =
-                        messages.scrollHeight;
-
-                }
-            );
-
-        }
-
-
-        /* =====================================================
-           INPUT AUTO RESIZE
-           ===================================================== */
-
-        input.addEventListener(
-            "input",
-            autoResize
+    input.value =
+        input.value.substring(
+            0,
+            start
+        )
+        +
+        text
+        +
+        input.value.substring(
+            end
         );
 
 
-        function autoResize() {
+    input.selectionStart =
+        input.selectionEnd =
+            start +
+            text.length;
 
-            input.style.height =
-                "auto";
+
+    resizeInput();
+
+}
 
 
-            input.style.height =
-                Math.min(
-                    input.scrollHeight,
-                    125
-                ) + "px";
+/* =====================================================
+   ADD MESSAGE
+===================================================== */
+
+function addMessage(
+    type,
+    text
+) {
+
+    const row =
+        document.createElement(
+            "div"
+        );
+
+    row.className =
+        "message-row " +
+        (
+            type === "user"
+                ? "user"
+                : ""
+        );
+
+
+    const bubble =
+        document.createElement(
+            "div"
+        );
+
+    bubble.className =
+        "message " +
+        (
+            type === "user"
+                ? "user"
+                : "ai"
+        );
+
+
+    const meta =
+        document.createElement(
+            "div"
+        );
+
+    meta.className =
+        "message-meta";
+
+
+    meta.textContent =
+        type === "user"
+            ? "DU"
+            : "HALDO AI";
+
+
+    const content =
+        document.createElement(
+            "div"
+        );
+
+
+    content.textContent =
+        text;
+
+
+    bubble.appendChild(
+        meta
+    );
+
+    bubble.appendChild(
+        content
+    );
+
+    row.appendChild(
+        bubble
+    );
+
+    messages.appendChild(
+        row
+    );
+
+
+    scrollBottom();
+
+}
+
+
+/* =====================================================
+   LOCAL RESPONSE
+===================================================== */
+
+function createLocalResponse(
+    text
+) {
+
+    const lower =
+        text.toLowerCase();
+
+
+    if (
+        lower.includes("hallo")
+        ||
+        lower.includes("hi")
+        ||
+        lower.includes("hey")
+    ) {
+
+        return (
+            "Hallo Bruder! 💙❤️🚀 " +
+            "HalDo AI ist bereit. " +
+            "Was möchtest du als Nächstes aufbauen?"
+        );
+
+    }
+
+
+    if (
+        lower.includes("was kannst")
+        ||
+        lower.includes("funktionen")
+    ) {
+
+        return (
+            "Im aktuellen HalDo AI OS 18 " +
+            "Foundation-Aufbau sind unter anderem " +
+            "Dashboard, App Center, AI Chat, " +
+            "Systemmodule, Einstellungen, " +
+            "Werkzeuge und die Êzîdî-Tastatur " +
+            "vorbereitet."
+        );
+
+    }
+
+
+    if (
+        lower.includes("404")
+    ) {
+
+        return (
+            "404 bedeutet normalerweise, dass " +
+            "eine verlinkte Datei nicht existiert " +
+            "oder der Dateiname/Pfad nicht stimmt. " +
+            "Genau deshalb bauen wir die nächsten " +
+            "Module so, dass sie zuerst wirklich " +
+            "vorhanden und erreichbar sind."
+        );
+
+    }
+
+
+    if (
+        lower.includes("dashboard")
+    ) {
+
+        return (
+            "Das Dashboard ist die zentrale " +
+            "Übersichtsseite. Von dort können " +
+            "wir später die Module, Systemstatus, " +
+            "AI und Apps miteinander verbinden."
+        );
+
+    }
+
+
+    if (
+        lower.includes("tastatur")
+        ||
+        lower.includes("ezidi")
+        ||
+        lower.includes("êzîdî")
+    ) {
+
+        return (
+            "Die Êzîdî-Tastatur ist bereits direkt " +
+            "in dieser Chat-Eingabe vorbereitet. " +
+            "Tippe unten auf ⌨ und füge eigene " +
+            "Zeichen direkt in das Eingabefeld ein."
+        );
+
+    }
+
+
+    if (
+        lower.includes("hilfe")
+    ) {
+
+        return (
+            "Natürlich. Schreib mir einfach, " +
+            "welches HalDo-Modul wir als Nächstes " +
+            "bauen sollen. Wir erweitern die " +
+            "bestehenden Dateien, statt funktionierende " +
+            "Teile unnötig zu entfernen."
+        );
+
+    }
+
+
+    return (
+        "Ich habe deine Nachricht empfangen. " +
+        "Das aktuelle Chat-Modul arbeitet lokal " +
+        "und speichert den Verlauf auf diesem Gerät. " +
+        "Die echte externe KI-Anbindung können wir " +
+        "anschließend als eigenes Core-Modul " +
+        "sauber integrieren."
+    );
+
+}
+
+
+/* =====================================================
+   WELCOME
+===================================================== */
+
+function hideWelcome() {
+
+    welcome.style.display =
+        "none";
+
+}
+
+
+/* =====================================================
+   TYPING
+===================================================== */
+
+function showTyping() {
+
+    typing.classList.add(
+        "show"
+    );
+
+    scrollBottom();
+
+}
+
+
+function hideTyping() {
+
+    typing.classList.remove(
+        "show"
+    );
+
+}
+
+
+/* =====================================================
+   SCROLL
+===================================================== */
+
+function scrollBottom() {
+
+    requestAnimationFrame(
+        function() {
+
+            chat.scrollTop =
+                chat.scrollHeight;
 
         }
+    );
+
+}
 
 
-        /* =====================================================
-           ENTER / SHIFT + ENTER
-           ===================================================== */
+/* =====================================================
+   SAVE
+===================================================== */
 
-        input.addEventListener(
-            "keydown",
-            function(event) {
+function saveChat() {
 
-                if (
-                    event.key === "Enter" &&
-                    !event.shiftKey
-                ) {
+    const data = [];
 
-                    event.preventDefault();
 
-                    sendMessage();
+    document
+        .querySelectorAll(
+            ".message-row"
+        )
+        .forEach(
+            function(row) {
 
-                }
+                const bubble =
+                    row.querySelector(
+                        ".message"
+                    );
+
+                const content =
+                    bubble.lastElementChild;
+
+
+                data.push({
+
+                    type:
+                        bubble.classList.contains(
+                            "user"
+                        )
+                            ? "user"
+                            : "ai",
+
+                    text:
+                        content.textContent
+
+                });
 
             }
         );
 
 
-        /* =====================================================
-           SCHNELLPROMPT
-           ===================================================== */
+    try {
 
-        function usePrompt(text) {
+        localStorage.setItem(
+            STORAGE_KEY,
+            JSON.stringify(
+                data
+            )
+        );
 
-            input.value = text;
+    } catch {
 
-            autoResize();
+        showToast(
+            "Chat konnte nicht gespeichert werden."
+        );
 
-            input.focus();
+    }
 
-        }
+}
 
 
-        /* =====================================================
-           CHAT LÖSCHEN
-           ===================================================== */
+/* =====================================================
+   LOAD
+===================================================== */
 
-        function clearChat() {
+function loadChat() {
 
-            const confirmed =
-                window.confirm(
-                    "Möchtest du den HalDo-AI-Chat wirklich löschen?"
+    let data = [];
+
+
+    try {
+
+        data =
+            JSON.parse(
+                localStorage.getItem(
+                    STORAGE_KEY
+                ) || "[]"
+            );
+
+    } catch {
+
+        data = [];
+
+    }
+
+
+    if (
+        !Array.isArray(data)
+        ||
+        data.length === 0
+    ) {
+
+        return;
+
+    }
+
+
+    hideWelcome();
+
+
+    data.forEach(
+        function(item) {
+
+            if (
+                item &&
+                (
+                    item.type === "user"
+                    ||
+                    item.type === "ai"
+                )
+            ) {
+
+                addMessage(
+                    item.type,
+                    String(
+                        item.text || ""
+                    )
                 );
 
-
-            if (!confirmed) {
-                return;
             }
 
+        }
+    );
 
-            localStorage.removeItem(
-                STORAGE_KEY
+}
+
+
+/* =====================================================
+   CLEAR
+===================================================== */
+
+function clearChat() {
+
+    if (
+        !confirm(
+            "Den gesamten HalDo AI Chat löschen?"
+        )
+    ) {
+
+        return;
+
+    }
+
+
+    messages.innerHTML =
+        "";
+
+
+    localStorage.removeItem(
+        STORAGE_KEY
+    );
+
+
+    welcome.style.display =
+        "";
+
+
+    showToast(
+        "Chat wurde gelöscht."
+    );
+
+}
+
+
+/* =====================================================
+   EZIDI KEYBOARD
+===================================================== */
+
+const keyboardPanel =
+    document.getElementById(
+        "keyboardPanel"
+    );
+
+
+function toggleKeyboard() {
+
+    keyboardPanel.classList.toggle(
+        "open"
+    );
+
+}
+
+
+function keyInsert(
+    character
+) {
+
+    insertText(
+        character
+    );
+
+}
+
+
+/* =====================================================
+   PANEL
+===================================================== */
+
+const overlay =
+    document.getElementById(
+        "overlay"
+    );
+
+
+const panelTitle =
+    document.getElementById(
+        "panelTitle"
+    );
+
+
+const panelContent =
+    document.getElementById(
+        "panelContent"
+    );
+
+
+function openPanel(
+    title,
+    content
+) {
+
+    panelTitle.textContent =
+        title;
+
+    panelContent.textContent =
+        content;
+
+    overlay.classList.add(
+        "open"
+    );
+
+}
+
+
+function closePanel() {
+
+    overlay.classList.remove(
+        "open"
+    );
+
+}
+
+
+function closePanelOutside(
+    event
+) {
+
+    if (
+        event.target === overlay
+    ) {
+
+        closePanel();
+
+    }
+
+}
+
+
+/* =====================================================
+   HOME
+===================================================== */
+
+function openHome() {
+
+    window.location.href =
+        "index.html";
+
+}
+
+
+/* =====================================================
+   TOAST
+===================================================== */
+
+let toastTimer;
+
+
+function showToast(
+    text
+) {
+
+    const toast =
+        document.getElementById(
+            "toast"
+        );
+
+
+    toast.textContent =
+        text;
+
+
+    toast.classList.add(
+        "show"
+    );
+
+
+    clearTimeout(
+        toastTimer
+    );
+
+
+    toastTimer =
+        setTimeout(
+            function() {
+
+                toast.classList.remove(
+                    "show"
+                );
+
+            },
+            2200
+        );
+
+}
+
+
+/* =====================================================
+   ESC
+===================================================== */
+
+document.addEventListener(
+    "keydown",
+    function(event) {
+
+        if (
+            event.key ===
+            "Escape"
+        ) {
+
+            keyboardPanel.classList.remove(
+                "open"
             );
 
-
-            chatHistory = [];
-
-
-            messages.innerHTML = "";
-
-
-            const welcome =
-                document.createElement("div");
-
-
-            welcome.className =
-                "welcome-card";
-
-
-            welcome.id =
-                "welcomeCard";
-
-
-            welcome.innerHTML = `
-
-                <img
-                    class="welcome-logo"
-                    src="assets/logo/logo.png"
-                    alt="HalDo AI"
-                >
-
-                <h2>
-                    Willkommen bei HalDo AI
-                </h2>
-
-                <p>
-                    Dein Chat wurde zurückgesetzt.
-                    Schreibe unten eine neue Nachricht.
-                </p>
-
-            `;
-
-
-            messages.appendChild(
-                welcome
-            );
-
-
-            scrollToBottom();
+            closePanel();
 
         }
 
+    }
+);
 
-        /* =====================================================
-           NAVIGATION
-           ===================================================== */
+</script>
 
-        function goApps() {
-
-            window.location.href =
-                "apps.html";
-
-        }
-
-
-        /* =====================================================
-           LOGO FEHLER ABSICHERN
-           ===================================================== */
-
-        document.querySelectorAll(
-            "img"
-        ).forEach(function(img) {
-
-            img.addEventListener(
-                "error",
-                function() {
-
-                    console.log(
-                        "HalDo Logo konnte nicht geladen werden:",
-                        img.src
-                    );
-
-                }
-            );
-
-        });
-
-    </script>
 
 </body>
 
