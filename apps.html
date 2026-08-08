@@ -3,1881 +3,2839 @@
 
 <head>
 
-    <meta charset="UTF-8">
+<meta charset="UTF-8">
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-    >
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+>
 
-    <meta name="theme-color" content="#050914">
+<meta
+    name="theme-color"
+    content="#050914"
+>
 
-    <title>HalDo AI OS 18 — Apps</title>
+<title>
+    HalDo AI OS 18 — App Center
+</title>
 
-    <style>
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            -webkit-tap-highlight-color: transparent;
-        }
+<style>
 
-        html,
-        body {
-            min-height: 100%;
-        }
+/* =====================================================
+   HALDO AI OS 18
+   APP CENTER
+===================================================== */
 
-        body {
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+}
 
-            min-height: 100vh;
+html,
+body {
+    min-height: 100%;
+}
 
-            color: #fff;
+body {
 
-            font-family:
-                -apple-system,
-                BlinkMacSystemFont,
-                "Segoe UI",
-                Roboto,
-                Arial,
-                sans-serif;
+    min-height: 100vh;
 
-            background:
+    color: #ffffff;
 
-                radial-gradient(
-                    circle at 50% 0%,
-                    rgba(0,126,255,.20),
-                    transparent 35%
-                ),
+    background:
 
-                radial-gradient(
-                    circle at 100% 75%,
-                    rgba(120,55,255,.11),
-                    transparent 30%
-                ),
+        radial-gradient(
+            circle at 50% 0%,
+            rgba(0,126,255,.18),
+            transparent 35%
+        ),
 
-                #050914;
+        radial-gradient(
+            circle at 100% 80%,
+            rgba(120,55,255,.11),
+            transparent 30%
+        ),
 
-            overflow-x: hidden;
-        }
+        #050914;
 
-        button {
-            font: inherit;
-            border: 0;
-        }
+    font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Arial,
+        sans-serif;
 
-        /* =====================================================
-           BACKGROUND
-           ===================================================== */
+    overflow-x: hidden;
+}
 
-        .orb {
+button,
+input {
 
-            position: fixed;
+    font: inherit;
 
-            width: 190px;
-            height: 190px;
+}
 
-            border-radius: 50%;
 
-            filter: blur(75px);
+/* =====================================================
+   BACKGROUND
+===================================================== */
 
-            opacity: .17;
+.background {
 
-            pointer-events: none;
+    position: fixed;
+    inset: 0;
 
-            z-index: 0;
-        }
+    overflow: hidden;
 
-        .orb.one {
+    pointer-events: none;
 
-            top: -80px;
-            left: -90px;
+    z-index: 0;
+}
 
-            background: #087cff;
-        }
+.orb {
 
-        .orb.two {
+    position: absolute;
 
-            right: -90px;
-            bottom: 15%;
+    width: 220px;
+    height: 220px;
 
-            background: #773dff;
-        }
+    border-radius: 50%;
 
-        /* =====================================================
-           APP CONTAINER
-           ===================================================== */
+    filter: blur(85px);
 
-        .app {
+    opacity: .15;
+}
 
-            position: relative;
+.orb.one {
 
-            z-index: 1;
+    top: -100px;
+    left: -110px;
 
-            width: min(950px, 100%);
+    background: #087cff;
+}
 
-            min-height: 100vh;
+.orb.two {
 
-            margin: auto;
+    right: -110px;
+    bottom: 10%;
 
-            padding-bottom: 125px;
-        }
+    background: #783cff;
+}
 
-        /* =====================================================
-           HEADER
-           ===================================================== */
 
-        .header {
+/* =====================================================
+   APP
+===================================================== */
 
-            position: sticky;
+.app {
 
-            top: 0;
+    position: relative;
 
-            z-index: 50;
+    z-index: 1;
 
-            display: flex;
+    width: min(950px,100%);
 
-            align-items: center;
+    min-height: 100vh;
 
-            justify-content: space-between;
+    margin: auto;
 
-            padding: 9px 13px;
+    padding-bottom: 110px;
+}
 
-            background:
-                rgba(5,9,20,.90);
 
-            border-bottom:
-                1px solid
-                rgba(255,255,255,.08);
+/* =====================================================
+   HEADER
+===================================================== */
 
-            backdrop-filter:
-                blur(22px);
+.header {
 
-            -webkit-backdrop-filter:
-                blur(22px);
-        }
+    position: sticky;
 
-        .brand {
+    top: 0;
 
-            display: flex;
+    z-index: 50;
 
-            align-items: center;
+    display: flex;
 
-            gap: 9px;
-        }
+    align-items: center;
 
-        .logo {
+    justify-content: space-between;
 
-            width: 43px;
-            height: 43px;
+    padding: 9px 13px;
 
-            object-fit: contain;
+    background:
+        rgba(5,9,20,.91);
 
-            animation:
-                logoRotate 9s linear infinite,
-                logoGlow 2.5s ease-in-out infinite;
-        }
+    border-bottom:
+        1px solid
+        rgba(255,255,255,.08);
 
-        @keyframes logoRotate {
+    backdrop-filter:
+        blur(22px);
 
-            from {
-                transform: rotate(0deg);
-            }
+    -webkit-backdrop-filter:
+        blur(22px);
+}
 
-            to {
-                transform: rotate(360deg);
-            }
+.brand {
 
-        }
+    display: flex;
 
-        @keyframes logoGlow {
+    align-items: center;
 
-            0%,
-            100% {
+    gap: 9px;
+}
 
-                filter:
+.logo {
 
-                    drop-shadow(
-                        0 0 3px
-                        rgba(255,255,255,.5)
-                    )
+    width: 43px;
+    height: 43px;
 
-                    drop-shadow(
-                        0 0 10px
-                        rgba(0,130,255,.5)
-                    );
-            }
+    object-fit: contain;
 
-            50% {
+    animation:
+        logoRotate 9s linear infinite,
+        logoGlow 2.5s ease-in-out infinite;
+}
 
-                filter:
+@keyframes logoRotate {
 
-                    drop-shadow(
-                        0 0 8px
-                        rgba(255,255,255,.95)
-                    )
+    from {
+        transform: rotate(0deg);
+    }
 
-                    drop-shadow(
-                        0 0 22px
-                        rgba(0,150,255,1)
-                    );
-            }
+    to {
+        transform: rotate(360deg);
+    }
 
-        }
+}
 
-        .brand-text strong {
+@keyframes logoGlow {
 
-            display: block;
+    0%,
+    100% {
 
-            font-size: 14px;
-        }
+        filter:
+            drop-shadow(
+                0 0 4px
+                rgba(255,255,255,.55)
+            )
+            drop-shadow(
+                0 0 10px
+                rgba(0,126,255,.55)
+            );
 
-        .brand-text span {
+    }
 
-            display: block;
+    50% {
 
-            margin-top: 2px;
-
-            color: #71809a;
-
-            font-size: 8px;
-
-            letter-spacing: .7px;
-        }
-
-        .back-button {
-
-            padding:
-                9px 13px;
-
-            border-radius: 13px;
-
-            background:
-                rgba(255,255,255,.06);
-
-            border:
-                1px solid
-                rgba(255,255,255,.08);
-
-            color: #9dccff;
-
-            cursor: pointer;
-        }
-
-        .back-button:active {
-
-            transform:
-                scale(.94);
-        }
-
-        /* =====================================================
-           HERO
-           ===================================================== */
-
-        .hero {
-
-            padding:
-                27px 15px 18px;
-        }
-
-        .badge {
-
-            display: inline-flex;
-
-            align-items: center;
-
-            gap: 6px;
-
-            padding:
-                6px 10px;
-
-            border-radius: 20px;
-
-            background:
-                rgba(0,126,255,.08);
-
-            border:
-                1px solid
-                rgba(0,126,255,.13);
-
-            color: #75c4ff;
-
-            font-size: 8px;
-
-            letter-spacing: .7px;
-        }
-
-        .dot {
-
-            width: 6px;
-            height: 6px;
-
-            border-radius: 50%;
-
-            background: #00ffad;
-
-            box-shadow:
+        filter:
+            drop-shadow(
                 0 0 9px
-                rgba(0,255,173,.8);
-        }
+                rgba(255,255,255,1)
+            )
+            drop-shadow(
+                0 0 24px
+                rgba(0,150,255,.95)
+            );
 
-        .hero h1 {
+    }
 
-            margin-top: 12px;
+}
 
-            font-size: 27px;
+.brand-text strong {
 
-            font-weight: 800;
-        }
+    display: block;
 
-        .hero p {
+    font-size: 14px;
+}
 
-            margin-top: 7px;
+.brand-text span {
 
-            color: #75839c;
+    display: block;
 
-            font-size: 10px;
+    margin-top: 2px;
 
-            line-height: 1.55;
-        }
+    color: #71809a;
 
-        /* =====================================================
-           SEARCH
-           ===================================================== */
+    font-size: 8px;
 
-        .search-wrap {
+    letter-spacing: .7px;
+}
 
-            padding:
-                0 15px 15px;
-        }
+.back {
 
-        .search-box {
+    min-height: 34px;
 
-            display: flex;
+    padding: 0 12px;
 
-            align-items: center;
+    border-radius: 12px;
 
-            gap: 9px;
+    color: #9dccff;
 
-            padding:
-                11px 13px;
+    background:
+        rgba(255,255,255,.05);
 
-            border-radius: 16px;
+    border:
+        1px solid
+        rgba(255,255,255,.08);
 
-            background:
-                rgba(255,255,255,.045);
+    cursor: pointer;
+}
 
-            border:
-                1px solid
-                rgba(255,255,255,.08);
-        }
 
-        .search-icon {
+/* =====================================================
+   HERO
+===================================================== */
 
-            color: #667892;
+.hero {
 
-            font-size: 15px;
-        }
+    padding:
+        27px 15px 17px;
+}
 
-        .search-box input {
+.badge {
 
-            width: 100%;
+    display: inline-flex;
 
-            border: 0;
+    align-items: center;
 
-            outline: 0;
+    gap: 6px;
 
-            background: transparent;
+    padding:
+        6px 10px;
 
-            color: #fff;
+    border-radius: 20px;
 
-            font-size: 10px;
-        }
+    color: #73e7b5;
 
-        .search-box input::placeholder {
+    background:
+        rgba(0,255,173,.05);
 
-            color: #59687e;
-        }
+    border:
+        1px solid
+        rgba(0,255,173,.10);
 
-        /* =====================================================
-           CATEGORIES
-           ===================================================== */
+    font-size: 8px;
 
-        .category-bar {
+    letter-spacing: .7px;
+}
 
-            display: flex;
+.dot {
 
-            gap: 7px;
+    width: 6px;
+    height: 6px;
 
-            padding:
-                0 15px 17px;
+    border-radius: 50%;
 
-            overflow-x: auto;
+    background: #00efaa;
 
-            scrollbar-width: none;
-        }
+    box-shadow:
+        0 0 9px
+        rgba(0,239,170,.9);
+}
 
-        .category-bar::-webkit-scrollbar {
+.hero h1 {
 
-            display: none;
-        }
+    margin-top: 12px;
 
-        .category {
+    font-size: 27px;
 
-            flex-shrink: 0;
+    font-weight: 800;
+}
 
-            padding:
-                8px 11px;
+.hero p {
 
-            border-radius: 20px;
+    margin-top: 7px;
 
-            background:
-                rgba(255,255,255,.045);
+    color: #75839b;
 
-            border:
-                1px solid
-                rgba(255,255,255,.07);
+    font-size: 10px;
 
-            color: #71809a;
+    line-height: 1.6;
+}
 
-            font-size: 8px;
 
-            cursor: pointer;
-        }
+/* =====================================================
+   SEARCH
+===================================================== */
 
-        .category.active {
+.search-box {
 
-            color: #8dd0ff;
+    padding:
+        0 15px 15px;
+}
 
-            background:
-                rgba(0,126,255,.10);
+.search {
 
-            border-color:
-                rgba(0,126,255,.17);
-        }
+    width: 100%;
 
-        /* =====================================================
-           SECTION
-           ===================================================== */
+    min-height: 44px;
 
-        .section {
+    padding:
+        0 14px;
 
-            padding:
-                0 15px 18px;
-        }
+    border-radius: 14px;
 
-        .section-title {
+    outline: none;
 
-            margin-bottom: 9px;
+    color: #dceaff;
 
-            color: #8190a8;
+    background:
+        rgba(255,255,255,.045);
 
-            font-size: 9px;
+    border:
+        1px solid
+        rgba(255,255,255,.08);
 
-            font-weight: 700;
+}
 
-            letter-spacing: .8px;
+.search::placeholder {
 
-            text-transform: uppercase;
-        }
+    color: #65748d;
+}
 
-        /* =====================================================
-           APP GRID
-           ===================================================== */
 
-        .app-grid {
+/* =====================================================
+   CATEGORIES
+===================================================== */
 
-            display: grid;
+.categories {
 
-            grid-template-columns:
-                repeat(2, 1fr);
+    display: flex;
 
-            gap: 9px;
-        }
+    gap: 7px;
 
-        .app-card {
+    padding:
+        0 15px 15px;
 
-            position: relative;
+    overflow-x: auto;
 
-            min-height: 145px;
+    scrollbar-width: none;
+}
 
-            display: flex;
+.categories::-webkit-scrollbar {
 
-            flex-direction: column;
+    display: none;
+}
 
-            align-items: flex-start;
+.category {
 
-            justify-content: space-between;
+    flex-shrink: 0;
 
-            padding: 14px;
+    min-height: 34px;
 
-            border-radius: 20px;
+    padding:
+        0 12px;
 
-            background:
-                rgba(255,255,255,.045);
+    border-radius: 20px;
 
-            border:
-                1px solid
-                rgba(255,255,255,.07);
+    color: #78879e;
 
-            overflow: hidden;
+    background:
+        rgba(255,255,255,.045);
 
-            cursor: pointer;
+    border:
+        1px solid
+        rgba(255,255,255,.07);
 
-            transition:
-                transform .18s ease,
-                border-color .18s ease,
-                background .18s ease;
-        }
+    cursor: pointer;
 
-        .app-card::after {
+}
 
-            content: "";
+.category.active {
 
-            position: absolute;
+    color: #9cd7ff;
 
-            width: 100px;
-            height: 100px;
+    background:
+        rgba(0,126,255,.11);
 
-            right: -50px;
-            bottom: -50px;
+    border-color:
+        rgba(0,126,255,.17);
+}
 
-            border-radius: 50%;
 
-            background:
-                rgba(0,126,255,.08);
+/* =====================================================
+   SECTION
+===================================================== */
 
-            filter: blur(10px);
+.section {
 
-            pointer-events: none;
-        }
+    padding:
+        0 15px 18px;
+}
 
-        .app-card:active {
+.section-title {
 
-            transform:
-                scale(.965);
-        }
+    margin-bottom: 9px;
 
-        .app-card:hover {
+    color: #8190a8;
 
-            border-color:
-                rgba(0,126,255,.22);
+    font-size: 9px;
 
-            background:
-                rgba(255,255,255,.06);
-        }
+    font-weight: 700;
 
-        .app-icon {
+    letter-spacing: .8px;
 
-            width: 49px;
-            height: 49px;
+    text-transform: uppercase;
+}
 
-            display: flex;
 
-            align-items: center;
-            justify-content: center;
+/* =====================================================
+   APP GRID
+===================================================== */
 
-            border-radius: 16px;
+.app-grid {
 
-            background:
-                rgba(0,126,255,.10);
+    display: grid;
 
-            border:
-                1px solid
-                rgba(0,126,255,.10);
+    grid-template-columns:
+        repeat(2,1fr);
 
-            font-size: 22px;
-        }
+    gap: 8px;
+}
 
-        .app-info {
+.app-card {
 
-            width: 100%;
+    position: relative;
 
-            margin-top: 13px;
-        }
+    min-height: 155px;
 
-        .app-name {
+    padding: 13px;
 
-            display: block;
+    border-radius: 18px;
 
-            font-size: 11px;
+    background:
+        rgba(255,255,255,.045);
 
-            font-weight: 700;
-        }
+    border:
+        1px solid
+        rgba(255,255,255,.07);
 
-        .app-description {
+    cursor: pointer;
 
-            display: block;
+    transition:
+        transform .18s ease,
+        background .18s ease,
+        border-color .18s ease;
+}
 
-            margin-top: 5px;
+.app-card:active {
 
-            color: #71809a;
+    transform: scale(.965);
+}
 
-            font-size: 8px;
+.app-card:hover {
 
-            line-height: 1.45;
-        }
+    background:
+        rgba(255,255,255,.065);
 
-        .app-footer {
+    border-color:
+        rgba(0,126,255,.20);
+}
 
-            width: 100%;
+.app-icon {
 
-            display: flex;
+    width: 44px;
+    height: 44px;
 
-            align-items: center;
+    display: flex;
 
-            justify-content: space-between;
+    align-items: center;
+    justify-content: center;
 
-            gap: 8px;
+    border-radius: 13px;
 
-            margin-top: 12px;
-        }
+    background:
+        rgba(0,126,255,.09);
 
-        .app-status {
+    font-size: 20px;
+}
 
-            display: inline-flex;
+.app-card strong {
 
-            align-items: center;
+    display: block;
 
-            gap: 5px;
+    margin-top: 10px;
 
-            color: #60dfb0;
+    font-size: 10px;
+}
 
-            font-size: 7px;
-        }
+.app-card p {
 
-        .status-dot {
+    margin-top: 5px;
 
-            width: 5px;
-            height: 5px;
+    min-height: 29px;
 
-            border-radius: 50%;
+    color: #71809a;
 
-            background: #00e99d;
-        }
+    font-size: 7.5px;
 
-        .open-arrow {
+    line-height: 1.45;
+}
 
-            color: #5e9dce;
+.app-status {
 
-            font-size: 12px;
-        }
+    position: absolute;
 
-        /* =====================================================
-           FEATURED
-           ===================================================== */
+    left: 13px;
 
-        .featured {
+    bottom: 12px;
 
-            padding: 16px;
+    display: flex;
 
-            border-radius: 21px;
+    align-items: center;
 
-            background:
+    gap: 5px;
 
-                linear-gradient(
-                    135deg,
-                    rgba(0,126,255,.12),
-                    rgba(120,55,255,.08)
-                );
+    color: #67dcae;
 
-            border:
-                1px solid
-                rgba(0,126,255,.14);
-        }
+    font-size: 7px;
+}
 
-        .featured-head {
+.app-status .dot {
 
-            display: flex;
+    width: 5px;
+    height: 5px;
+}
 
-            align-items: center;
 
-            gap: 11px;
-        }
+/* =====================================================
+   FEATURED
+===================================================== */
 
-        .featured-logo {
+.featured {
 
-            width: 47px;
-            height: 47px;
+    padding: 15px;
 
-            object-fit: contain;
+    border-radius: 20px;
 
-            animation:
-                logoGlow 2.5s ease-in-out infinite;
-        }
+    background:
 
-        .featured-info {
+        linear-gradient(
+            135deg,
+            rgba(0,126,255,.12),
+            rgba(120,55,255,.08)
+        );
 
-            flex: 1;
-        }
+    border:
+        1px solid
+        rgba(0,126,255,.15);
+}
 
-        .featured-info strong {
+.featured-top {
 
-            display: block;
+    display: flex;
 
-            font-size: 12px;
-        }
+    align-items: center;
 
-        .featured-info span {
+    gap: 12px;
+}
 
-            display: block;
+.featured-logo {
 
-            margin-top: 4px;
+    width: 55px;
+    height: 55px;
 
-            color: #71809a;
+    object-fit: contain;
 
-            font-size: 8px;
-        }
+    animation:
+        logoGlow 2.5s ease-in-out infinite;
+}
 
-        .featured-button {
+.featured-info {
 
-            width: 100%;
+    flex: 1;
+}
 
-            margin-top: 13px;
+.featured-info strong {
 
-            min-height: 44px;
+    display: block;
 
-            border-radius: 13px;
+    font-size: 13px;
+}
 
-            color: #9ad8ff;
+.featured-info span {
 
-            background:
-                rgba(0,126,255,.11);
+    display: block;
 
-            border:
-                1px solid
-                rgba(0,126,255,.16);
+    margin-top: 4px;
 
-            cursor: pointer;
-        }
+    color: #71809a;
 
-        .featured-button:active {
+    font-size: 8px;
+}
 
-            transform:
-                scale(.98);
-        }
+.launch {
 
-        /* =====================================================
-           EMPTY
-           ===================================================== */
+    width: 100%;
 
-        .empty {
+    min-height: 44px;
 
-            grid-column:
-                1 / -1;
+    margin-top: 13px;
 
-            padding:
-                30px 20px;
+    border-radius: 13px;
 
-            text-align: center;
+    color: #dff4ff;
 
-            border-radius: 19px;
+    background:
+        rgba(0,126,255,.12);
 
-            background:
-                rgba(255,255,255,.035);
+    border:
+        1px solid
+        rgba(0,126,255,.18);
 
-            border:
-                1px solid
-                rgba(255,255,255,.06);
-        }
+    cursor: pointer;
+}
 
-        .empty-icon {
 
-            font-size: 27px;
+/* =====================================================
+   MODAL
+===================================================== */
 
-            opacity: .65;
-        }
+.modal {
 
-        .empty strong {
+    position: fixed;
 
-            display: block;
+    inset: 0;
 
-            margin-top: 9px;
+    z-index: 500;
 
-            font-size: 11px;
-        }
+    display: flex;
 
-        .empty p {
+    align-items: flex-end;
 
-            margin-top: 5px;
+    justify-content: center;
 
-            color: #66748c;
+    padding: 12px;
 
-            font-size: 8px;
+    background:
+        rgba(0,0,0,.55);
 
-            line-height: 1.5;
-        }
+    backdrop-filter:
+        blur(8px);
 
-        /* =====================================================
-           BOTTOM NAV
-           ===================================================== */
+    -webkit-backdrop-filter:
+        blur(8px);
 
-        .bottom-nav {
+    opacity: 0;
 
-            position: fixed;
+    visibility: hidden;
 
-            z-index: 100;
+    pointer-events: none;
 
-            left: 10px;
-            right: 10px;
-            bottom: 10px;
+    transition:
+        opacity .2s ease,
+        visibility .2s ease;
+}
 
-            display: grid;
+.modal.open {
 
-            grid-template-columns:
-                repeat(4, 1fr);
+    opacity: 1;
 
-            gap: 5px;
+    visibility: visible;
 
-            padding: 7px;
+    pointer-events: auto;
+}
 
-            border-radius: 21px;
+.modal-card {
 
-            background:
-                rgba(7,12,25,.93);
+    width:
+        min(560px,100%);
 
-            border:
-                1px solid
-                rgba(255,255,255,.09);
+    max-height:
+        82vh;
 
-            backdrop-filter:
-                blur(20px);
+    overflow-y:
+        auto;
 
-            -webkit-backdrop-filter:
-                blur(20px);
+    padding: 18px;
 
-            box-shadow:
-                0 15px 45px
-                rgba(0,0,0,.42);
-        }
+    border-radius:
+        24px 24px 18px 18px;
 
-        .nav-item {
+    background:
+        #0a1222;
 
-            min-height: 45px;
+    border:
+        1px solid
+        rgba(255,255,255,.10);
 
-            display: flex;
+    box-shadow:
+        0 -15px 50px
+        rgba(0,0,0,.45);
 
-            flex-direction: column;
+    transform:
+        translateY(25px);
 
-            align-items: center;
-            justify-content: center;
+    transition:
+        transform .22s ease;
+}
 
-            gap: 2px;
+.modal.open .modal-card {
 
-            border-radius: 14px;
+    transform:
+        translateY(0);
+}
 
-            background: transparent;
+.modal-head {
 
-            color: #687791;
+    display: flex;
 
-            cursor: pointer;
-        }
+    align-items: center;
 
-        .nav-item.active {
+    justify-content: space-between;
+}
 
-            color: #7cc8ff;
+.modal-title {
 
-            background:
-                rgba(0,126,255,.11);
-        }
+    display: flex;
 
-        .nav-icon {
+    align-items: center;
 
-            font-size: 17px;
-        }
+    gap: 10px;
+}
 
-        .nav-label {
+.modal-icon {
 
-            font-size: 8px;
-        }
+    width: 44px;
+    height: 44px;
 
-        /* =====================================================
-           TOAST
-           ===================================================== */
+    display: flex;
 
-        .toast {
+    align-items: center;
+    justify-content: center;
 
-            position: fixed;
+    border-radius: 13px;
 
-            z-index: 300;
+    background:
+        rgba(0,126,255,.09);
 
-            left: 50%;
+    font-size: 20px;
+}
 
-            bottom: 82px;
+.modal-title strong {
 
-            max-width:
-                calc(100% - 30px);
+    display: block;
 
-            padding:
-                10px 14px;
+    font-size: 13px;
+}
 
-            border-radius: 14px;
+.modal-title span {
 
-            background:
-                rgba(18,28,47,.96);
+    display: block;
 
-            border:
-                1px solid
-                rgba(255,255,255,.10);
+    margin-top: 3px;
 
-            color: #dceaff;
+    color: #71809a;
 
-            font-size: 9px;
+    font-size: 7px;
+}
 
-            opacity: 0;
+.close {
 
-            pointer-events: none;
+    width: 34px;
+    height: 34px;
 
-            transform:
-                translate(-50%, 10px);
+    border-radius: 50%;
 
-            transition: .22s ease;
-        }
+    color: #a8bad0;
 
-        .toast.show {
+    background:
+        rgba(255,255,255,.05);
 
-            opacity: 1;
+    border:
+        1px solid
+        rgba(255,255,255,.07);
 
-            transform:
-                translate(-50%, 0);
-        }
+    cursor: pointer;
+}
 
-        /* =====================================================
-           RESPONSIVE
-           ===================================================== */
+.modal-body {
 
-        @media (max-width: 380px) {
+    margin-top: 17px;
 
-            .app-grid {
+    color: #8797ad;
 
-                grid-template-columns:
-                    1fr;
-            }
+    font-size: 9px;
 
-        }
+    line-height: 1.7;
+}
 
-        @media (min-width: 700px) {
+.tool-area {
 
-            .app-grid {
+    margin-top: 14px;
 
-                grid-template-columns:
-                    repeat(3, 1fr);
-            }
+    padding: 13px;
 
-            .bottom-nav {
+    min-height: 100px;
 
-                width: 480px;
+    border-radius: 15px;
 
-                left: 50%;
-                right: auto;
+    background:
+        rgba(0,0,0,.18);
 
-                transform:
-                    translateX(-50%);
-            }
+    border:
+        1px solid
+        rgba(255,255,255,.06);
+}
 
-        }
+.tool-button {
 
-    </style>
+    min-height: 40px;
+
+    padding: 0 12px;
+
+    margin:
+        4px 4px 4px 0;
+
+    border-radius: 11px;
+
+    color: #9ed8ff;
+
+    background:
+        rgba(0,126,255,.08);
+
+    border:
+        1px solid
+        rgba(0,126,255,.13);
+
+    cursor: pointer;
+}
+
+
+/* =====================================================
+   BOTTOM NAV
+===================================================== */
+
+.bottom-nav {
+
+    position: fixed;
+
+    z-index: 100;
+
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(4,1fr);
+
+    gap: 5px;
+
+    padding: 7px;
+
+    border-radius: 21px;
+
+    background:
+        rgba(7,12,25,.93);
+
+    border:
+        1px solid
+        rgba(255,255,255,.09);
+
+    backdrop-filter:
+        blur(20px);
+
+    -webkit-backdrop-filter:
+        blur(20px);
+
+    box-shadow:
+        0 15px 45px
+        rgba(0,0,0,.42);
+}
+
+.nav-item {
+
+    min-height: 45px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+    justify-content: center;
+
+    gap: 2px;
+
+    border: 0;
+
+    border-radius: 14px;
+
+    background: transparent;
+
+    color: #687791;
+
+    cursor: pointer;
+}
+
+.nav-item.active {
+
+    color: #7cc8ff;
+
+    background:
+        rgba(0,126,255,.11);
+}
+
+.nav-icon {
+
+    font-size: 17px;
+}
+
+.nav-label {
+
+    font-size: 8px;
+}
+
+
+/* =====================================================
+   TOAST
+===================================================== */
+
+.toast {
+
+    position: fixed;
+
+    z-index: 700;
+
+    left: 50%;
+
+    bottom: 82px;
+
+    max-width:
+        calc(100% - 30px);
+
+    padding:
+        10px 14px;
+
+    border-radius: 14px;
+
+    color: #dceaff;
+
+    background:
+        rgba(18,28,47,.96);
+
+    border:
+        1px solid
+        rgba(255,255,255,.10);
+
+    font-size: 9px;
+
+    opacity: 0;
+
+    pointer-events: none;
+
+    transform:
+        translate(-50%,10px);
+
+    transition: .22s ease;
+}
+
+.toast.show {
+
+    opacity: 1;
+
+    transform:
+        translate(-50%,0);
+}
+
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media (min-width:700px) {
+
+    .app-grid {
+
+        grid-template-columns:
+            repeat(4,1fr);
+
+    }
+
+    .bottom-nav {
+
+        width: 480px;
+
+        left: 50%;
+        right: auto;
+
+        transform:
+            translateX(-50%);
+    }
+
+}
+
+</style>
 
 </head>
 
 
 <body>
 
+
+<div class="background">
+
     <div class="orb one"></div>
     <div class="orb two"></div>
 
+</div>
 
-    <main class="app">
+
+<main class="app">
 
 
-        <!-- =================================================
-             HEADER
-        ================================================== -->
+<!-- =====================================================
+     HEADER
+===================================================== -->
 
-        <header class="header">
+<header class="header">
 
-            <div class="brand">
 
-                <img
-                    class="logo"
-                    src="assets/logo/logo.png"
-                    alt="HalDo AI Logo"
+    <div class="brand">
+
+        <img
+            class="logo"
+            src="assets/logo/logo.png"
+            alt="HalDo AI"
+        >
+
+        <div class="brand-text">
+
+            <strong>
+                HalDo AI
+            </strong>
+
+            <span>
+                OS 18 • APP CENTER
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <button
+        class="back"
+        onclick="goBack()"
+    >
+
+        ← Zurück
+
+    </button>
+
+
+</header>
+
+
+<!-- =====================================================
+     HERO
+===================================================== -->
+
+<section class="hero">
+
+
+    <div class="badge">
+
+        <span class="dot"></span>
+
+        HALDO APP CENTER
+
+    </div>
+
+
+    <h1>
+        Anwendungen
+    </h1>
+
+
+    <p>
+
+        Deine zentrale Sammlung für HalDo AI
+        Anwendungen und Werkzeuge.
+
+    </p>
+
+
+</section>
+
+
+<!-- =====================================================
+     SEARCH
+===================================================== -->
+
+<div class="search-box">
+
+    <input
+        id="searchInput"
+        class="search"
+        type="search"
+        placeholder="Apps durchsuchen …"
+        autocomplete="off"
+    >
+
+</div>
+
+
+<!-- =====================================================
+     CATEGORIES
+===================================================== -->
+
+<div class="categories">
+
+
+    <button
+        class="category active"
+        data-category="all"
+    >
+        Alle
+    </button>
+
+
+    <button
+        class="category"
+        data-category="ai"
+    >
+        AI
+    </button>
+
+
+    <button
+        class="category"
+        data-category="system"
+    >
+        System
+    </button>
+
+
+    <button
+        class="category"
+        data-category="tools"
+    >
+        Werkzeuge
+    </button>
+
+
+    <button
+        class="category"
+        data-category="communication"
+    >
+        Kommunikation
+    </button>
+
+
+</div>
+
+
+<!-- =====================================================
+     FEATURED
+===================================================== -->
+
+<section class="section">
+
+
+    <div class="section-title">
+        Empfohlen
+    </div>
+
+
+    <div class="featured">
+
+
+        <div class="featured-top">
+
+
+            <img
+                class="featured-logo"
+                src="assets/logo/logo.png"
+                alt="HalDo AI"
+            >
+
+
+            <div class="featured-info">
+
+                <strong>
+                    HalDo AI
+                </strong>
+
+                <span>
+                    Zentrale künstliche Intelligenz
+                </span>
+
+            </div>
+
+
+        </div>
+
+
+        <button
+            class="launch"
+            onclick="openApp('HalDo AI','✦','ai')"
+        >
+
+            ✦ HalDo AI öffnen
+
+        </button>
+
+
+    </div>
+
+
+</section>
+
+
+<!-- =====================================================
+     APP LIST
+===================================================== -->
+
+<section class="section">
+
+
+    <div class="section-title">
+        Alle Anwendungen
+    </div>
+
+
+    <div
+        class="app-grid"
+        id="appGrid"
+    >
+
+
+        <!-- AI -->
+
+        <article
+            class="app-card"
+            data-name="HalDo AI Chat"
+            data-category="ai"
+            onclick="openApp(
+                'HalDo AI Chat',
+                '✦',
+                'ai'
+            )"
+        >
+
+            <div class="app-icon">
+                ✦
+            </div>
+
+            <strong>
+                AI Chat
+            </strong>
+
+            <p>
+                HalDo AI Unterhaltung und
+                intelligente Eingabe.
+            </p>
+
+            <div class="app-status">
+
+                <span class="dot"></span>
+
+                BEREIT
+
+            </div>
+
+        </article>
+
+
+        <article
+            class="app-card"
+            data-name="AI Assistant"
+            data-category="ai"
+            onclick="openApp(
+                'AI Assistant',
+                '◉',
+                'ai'
+            )"
+        >
+
+            <div class="app-icon">
+                ◉
+            </div>
+
+            <strong>
+                AI Assistant
+            </strong>
+
+            <p>
+                Hilfreiche AI-Werkzeuge für
+                verschiedene Aufgaben.
+            </p>
+
+            <div class="app-status">
+
+                <span class="dot"></span>
+
+                BEREIT
+
+            </div>
+
+        </article>
+
+
+        <article
+            class="app-card"
+            data-name="AI Writer"
+            data-category="ai"
+            onclick="openApp(
+                'AI Writer',
+                '✎',
+                'ai'
+            )"
+        >
+
+            <div class="app-icon">
+                ✎
+            </div>
+
+            <strong>
+                AI Writer
+            </strong>
+
+            <p>
+                Texte, Ideen und Dokumente
+                vorbereiten.
+            </p>
+
+            <div class="app-status">
+
+                <span class="dot"></span>
+
+                BEREIT
+
+            </div>
+
+        </article>
+
+
+        <article
+            class="app-card"
+            data-name="AI Translator"
+            data-category="ai"
+            onclick="openApp(
+                'AI Translator',
+                '文',
+                'ai'
+            )"
+        >
+
+            <div class="app-icon">
+                文
+            </div>
+
+            <strong>
+                AI Translator
+            </strong>
+
+            <p>
+                Mehrsprachige Übersetzungs-
+                werkzeuge.
+            </p>
+
+            <div class="app-status">
+
+                <span class="dot"></span>
+
+                BEREIT
+
+            </div>
+
+        </article>
+
+
+        <!-- SYSTEM -->
+
+        <article
+            class="app-card"
+            data-name="System Center"
+            data-category="system"
+            onclick="openPage('system.html')"
+        >
+
+            <div class="app-icon">
+                ⚙
+            </div>
+
+            <strong>
+                System Center
+            </strong>
+
+            <p>
+                Kernmodule und Systemstatus
+                kontrollieren.
+            </p>
+
+            <div class="app-status">
+
+                <span class="dot"></span>
+
+                ONLINE
+
+            </div>
+
+        </article>
+
+
+        <article
+            class="app-card"
+            data-name="Dashboard"
+            data-category="system"
+            onclick="openPage('dashboard.html')"
+        >
+
+            <div class="app-icon">
+                ▦
+            </div>
+
+            <strong>
+                Dashboard
+            </strong>
+
+            <p>
+                Zentrale Übersicht des
+                HalDo Systems.
+            </p>
+
+            <div class="app-status">
+
+                <span class="dot"></span>
+
+                ONLINE
+
+            </div>
+
+        </article>
+
+
+        <article
+            class="app-card"
+            data-name="Settings"
+            data-category="system"
+            onclick="openPage('settings.html')"
+        >
+
+            <div class="app-icon">
+                ⚙
+            </div>
+
+            <strong>
+                Settings
+            </strong>
+
+            <p>
+                Einstellungen und
+                Systemoptionen.
+            </p>
+
+            <div class="app-status">
+
+                <span class="dot"></span>
+
+                ONLINE
+
+            </div>
+
+        </article>
+
+
+        <article
+            class="app-card"
+            data-name="Notifications"
+            data-category="system"
+            onclick="openApp(
+                'Notifications',
+                '🔔',
+                'system'
+            )"
+        >
+
+            <div class="app-icon">
+                🔔
+            </div>
+
+            <strong>
+                Notifications
+            </strong>
+
+            <p>
+                HalDo Systemmeldungen und
+                Benachrichtigungen.
+            </p>
+
+            <div class="app-status">
+
+                <span class="dot"></span>
+
+                BEREIT
+
+            </div>
+
+        </article>
+
+
+        <!-- TOOLS -->
+
+        <article
+            class="app-card"
+            data-name="Calculator"
+            data-category="tools"
+            onclick="openApp(
+                'Calculator',
+                '＋',
+                'tools'
+            )"
+        >
+
+            <div class="app-icon">
+                ＋
+            </div>
+
+            <strong>
+                Rechner
+            </strong>
+
+            <p>
+                Einfacher Rechner direkt
+                im HalDo App Center.
+            </p>
+
+            <div class="app-status">
+
+                <span class="dot"></span>
+
+                BEREIT
+
+            </div>
+
+        </article>
+
+
+        <article
+            class="app-card"
+            data-name="Notes"
+            data-category="tools"
+            onclick="openApp(
+                'Notes',
+                '▤',
+                'tools'
+            )"
+        >
+
+            <div class="app-icon">
+                ▤
+            </div>
+
+            <strong>
+                Notizen
+            </strong>
+
+            <p>
+                Lokale Notizen speichern
+                und verwalten.
+            </p>
+
+            <div class="app-status">
+
+                <span class="dot"></span>
+
+                BEREIT
+
+            </div>
+
+        </article>
+
+
+        <article
+            class="app-card"
+            data-name="Files"
+            data-category="tools"
+            onclick="openApp(
+                'Files',
+                '▣',
+                'tools'
+            )"
+        >
+
+            <div class="app-icon">
+                ▣
+            </div>
+
+            <strong>
+                Dateien
+            </strong>
+
+            <p>
+                Zentrale Übersicht für
+                zukünftige Dateienmodule.
+            </p>
+
+            <div class="app-status">
+
+                <span class="dot"></span>
+
+                BEREIT
+
+            </div>
+
+        </article>
+
+
+        <article
+            class="app-card"
+            data-name="Keyboard"
+            data-category="tools"
+            onclick="openApp(
+                'Ezidi Keyboard',
+                '⌨',
+                'tools'
+            )"
+        >
+
+            <div class="app-icon">
+                ⌨
+            </div>
+
+            <strong>
+                Ezidi Keyboard
+            </strong>
+
+            <p>
+                Eigene Zeichen und
+                HalDo Eingabelayout.
+            </p>
+
+            <div class="app-status">
+
+                <span class="dot"></span>
+
+                BEREIT
+
+            </div>
+
+        </article>
+
+
+        <!-- COMMUNICATION -->
+
+        <article
+            class="app-card"
+            data-name="Messages"
+            data-category="communication"
+            onclick="openApp(
+                'Messages',
+                '☵',
+                'communication'
+            )"
+        >
+
+            <div class="app-icon">
+                ☵
+            </div>
+
+            <strong>
+                Messages
+            </strong>
+
+            <p>
+                Zukünftige HalDo
+                Kommunikationszentrale.
+            </p>
+
+            <div class="app-status">
+
+                <span class="dot"></span>
+
+                BEREIT
+
+            </div>
+
+        </article>
+
+
+        <article
+            class="app-card"
+            data-name="Contacts"
+            data-category="communication"
+            onclick="openApp(
+                'Contacts',
+                '♙',
+                'communication'
+            )"
+        >
+
+            <div class="app-icon">
+                ♙
+            </div>
+
+            <strong>
+                Kontakte
+            </strong>
+
+            <p>
+                Zukünftige Kontaktverwaltung
+                innerhalb des HalDo OS.
+            </p>
+
+            <div class="app-status">
+
+                <span class="dot"></span>
+
+                BEREIT
+
+            </div>
+
+        </article>
+
+
+        <article
+            class="app-card"
+            data-name="Calendar"
+            data-category="system"
+            onclick="openApp(
+                'Calendar',
+                '□',
+                'system'
+            )"
+        >
+
+            <div class="app-icon">
+                □
+            </div>
+
+            <strong>
+                Kalender
+            </strong>
+
+            <p>
+                Zentrale Termin- und
+                Zeitplanung.
+            </p>
+
+            <div class="app-status">
+
+                <span class="dot"></span>
+
+                BEREIT
+
+            </div>
+
+        </article>
+
+
+        <article
+            class="app-card"
+            data-name="Help"
+            data-category="system"
+            onclick="openApp(
+                'HalDo Help',
+                '?',
+                'system'
+            )"
+        >
+
+            <div class="app-icon">
+                ?
+            </div>
+
+            <strong>
+                HalDo Help
+            </strong>
+
+            <p>
+                Hilfe und Informationen
+                zum HalDo AI OS.
+            </p>
+
+            <div class="app-status">
+
+                <span class="dot"></span>
+
+                BEREIT
+
+            </div>
+
+        </article>
+
+
+    </div>
+
+
+</section>
+
+
+</main>
+
+
+<!-- =====================================================
+     MODAL
+===================================================== -->
+
+<div
+    class="modal"
+    id="appModal"
+    onclick="closeModalOutside(event)"
+>
+
+
+    <div class="modal-card">
+
+
+        <div class="modal-head">
+
+
+            <div class="modal-title">
+
+
+                <div
+                    class="modal-icon"
+                    id="modalIcon"
                 >
+                    ✦
+                </div>
 
-                <div class="brand-text">
 
-                    <strong>
-                        HalDo AI
+                <div>
+
+                    <strong
+                        id="modalTitle"
+                    >
+                        HalDo App
                     </strong>
 
                     <span>
-                        OS 18 • APP CENTER
+                        HALDO APPLICATION
                     </span>
 
                 </div>
 
+
             </div>
 
 
             <button
-                class="back-button"
-                onclick="goBack()"
+                class="close"
+                onclick="closeModal()"
             >
-                ← Zurück
+                ×
             </button>
 
-        </header>
-
-
-        <!-- =================================================
-             HERO
-        ================================================== -->
-
-        <section class="hero">
-
-            <div class="badge">
-
-                <span class="dot"></span>
-
-                HALDO APPLICATION CENTER
-
-            </div>
-
-
-            <h1>
-                Apps
-            </h1>
-
-
-            <p>
-                Deine HalDo Anwendungen an einem zentralen Ort.
-                Nur bereits vorhandene und verbundene Module
-                werden als direkt öffnbar angezeigt.
-            </p>
-
-        </section>
-
-
-        <!-- =================================================
-             SEARCH
-        ================================================== -->
-
-        <div class="search-wrap">
-
-            <div class="search-box">
-
-                <span class="search-icon">
-                    ⌕
-                </span>
-
-                <input
-                    id="appSearch"
-                    type="search"
-                    autocomplete="off"
-                    placeholder="Apps durchsuchen …"
-                >
-
-            </div>
 
         </div>
 
-
-        <!-- =================================================
-             CATEGORIES
-        ================================================== -->
 
         <div
-            class="category-bar"
-            id="categoryBar"
+            class="modal-body"
+            id="modalBody"
         >
-
-            <button
-                class="category active"
-                data-category="all"
-            >
-                Alle
-            </button>
-
-            <button
-                class="category"
-                data-category="ai"
-            >
-                AI
-            </button>
-
-            <button
-                class="category"
-                data-category="system"
-            >
-                System
-            </button>
-
-            <button
-                class="category"
-                data-category="tools"
-            >
-                Tools
-            </button>
-
-            <button
-                class="category"
-                data-category="personal"
-            >
-                Persönlich
-            </button>
-
         </div>
 
 
-        <!-- =================================================
-             FEATURED
-        ================================================== -->
-
-        <section class="section">
-
-            <div class="section-title">
-                Empfohlen
-            </div>
-
-
-            <div class="featured">
-
-                <div class="featured-head">
-
-                    <img
-                        class="featured-logo"
-                        src="assets/logo/logo.png"
-                        alt="HalDo AI"
-                    >
-
-                    <div class="featured-info">
-
-                        <strong>
-                            HalDo AI
-                        </strong>
-
-                        <span>
-                            Zentrale AI-Eingabe und Chat
-                        </span>
-
-                    </div>
-
-                </div>
-
-
-                <button
-                    class="featured-button"
-                    onclick="openExisting('chat.html')"
-                >
-                    HalDo AI öffnen →
-                </button>
-
-            </div>
-
-        </section>
-
-
-        <!-- =================================================
-             INSTALLED APPS
-        ================================================== -->
-
-        <section class="section">
-
-            <div class="section-title">
-                Verfügbare Apps
-            </div>
-
-
-            <div
-                class="app-grid"
-                id="appGrid"
-            ></div>
-
-        </section>
-
-
-    </main>
-
-
-    <!-- =====================================================
-         BOTTOM NAV
-    ====================================================== -->
-
-    <nav class="bottom-nav">
-
-
-        <button
-            class="nav-item"
-            onclick="goHome()"
+        <div
+            class="tool-area"
+            id="toolArea"
         >
+        </div>
 
-            <span class="nav-icon">
-                ⌂
-            </span>
 
-            <span class="nav-label">
-                Home
-            </span>
+    </div>
 
-        </button>
 
+</div>
 
-        <button
-            class="nav-item"
-            onclick="openExisting('chat.html')"
-        >
 
-            <span class="nav-icon">
-                ✦
-            </span>
+<!-- =====================================================
+     BOTTOM NAV
+===================================================== -->
 
-            <span class="nav-label">
-                AI
-            </span>
+<nav class="bottom-nav">
 
-        </button>
 
+    <button
+        class="nav-item"
+        onclick="openPage('index.html')"
+    >
 
-        <button
-            class="nav-item active"
-            onclick="window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            })"
-        >
+        <span class="nav-icon">
+            ⌂
+        </span>
 
-            <span class="nav-icon">
-                ◈
-            </span>
+        <span class="nav-label">
+            Home
+        </span>
 
-            <span class="nav-label">
-                Apps
-            </span>
+    </button>
 
-        </button>
 
+    <button
+        class="nav-item"
+        onclick="openPage('chat.html')"
+    >
 
-        <button
-            class="nav-item"
-            onclick="openExisting('settings.html')"
-        >
+        <span class="nav-icon">
+            ✦
+        </span>
 
-            <span class="nav-icon">
-                ⚙
-            </span>
+        <span class="nav-label">
+            AI
+        </span>
 
-            <span class="nav-label">
-                Setup
-            </span>
+    </button>
 
-        </button>
 
+    <button
+        class="nav-item active"
+        onclick="window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        })"
+    >
 
-    </nav>
+        <span class="nav-icon">
+            ◈
+        </span>
 
+        <span class="nav-label">
+            Apps
+        </span>
 
-    <!-- =====================================================
-         TOAST
-    ====================================================== -->
+    </button>
 
-    <div
-        class="toast"
-        id="toast"
-    ></div>
 
+    <button
+        class="nav-item"
+        onclick="openPage('settings.html')"
+    >
 
-    <script>
+        <span class="nav-icon">
+            ⚙
+        </span>
 
-        /* =====================================================
-           HALDO APP CENTER
-        ===================================================== */
+        <span class="nav-label">
+            Setup
+        </span>
 
-        /*
-         * WICHTIG:
-         *
-         * Jede hier eingetragene Seite entspricht einer
-         * bereits vorgesehenen Datei.
-         *
-         * Wir verwenden KEINE erfundenen URLs.
-         *
-         * Neue Apps kommen erst hier hinein, wenn ihre
-         * echte Datei gebaut wurde.
-         */
+    </button>
 
 
-        const HALDO_APPS = [
+</nav>
 
-            {
-                id: "chat",
 
-                name: "HalDo AI",
+<!-- =====================================================
+     TOAST
+===================================================== -->
 
-                description:
-                    "AI-Chat und zentrale Eingabe",
+<div
+    class="toast"
+    id="toast"
+></div>
 
-                icon: "✦",
 
-                category: "ai",
+<script>
 
-                page: "chat.html",
+/* =====================================================
+   HALDO APP CENTER CORE
+===================================================== */
 
-                status: "ONLINE"
-            },
 
+/* -----------------------------------------------------
+   NAVIGATION
+----------------------------------------------------- */
 
-            {
-                id: "dashboard",
+function openPage(page) {
 
-                name: "Dashboard",
+    if (!page) {
+        return;
+    }
 
-                description:
-                    "Zentrale Übersicht von HalDo AI",
+    window.location.href = page;
 
-                icon: "▦",
+}
 
-                category: "system",
 
-                page: "dashboard.html",
+function goBack() {
 
-                status: "READY"
-            },
+    if (
+        document.referrer &&
+        document.referrer.includes(
+            window.location.hostname
+        )
+    ) {
 
+        history.back();
 
-            {
-                id: "keyboard",
+    } else {
 
-                name: "Ezidi Keyboard",
+        openPage(
+            "index.html"
+        );
 
-                description:
-                    "HalDo Tastatur mit eigenen Zeichen",
+    }
 
-                icon: "⌨",
+}
 
-                category: "tools",
 
-                page: "keyboard.html",
+/* -----------------------------------------------------
+   TOAST
+----------------------------------------------------- */
 
-                status: "READY"
-            },
+let toastTimer;
 
 
-            {
-                id: "notifications",
+function showToast(message) {
 
-                name: "Benachrichtigungen",
+    const toast =
+        document.getElementById(
+            "toast"
+        );
 
-                description:
-                    "HalDo Meldungen und Systemalerts",
+    toast.textContent =
+        message;
 
-                icon: "🔔",
+    toast.classList.add(
+        "show"
+    );
 
-                category: "system",
+    clearTimeout(
+        toastTimer
+    );
 
-                page: "notifications.html",
+    toastTimer =
+        setTimeout(
+            function() {
 
-                status: "READY"
-            },
-
-
-            {
-                id: "storage",
-
-                name: "Speicher",
-
-                description:
-                    "Lokale HalDo Daten verwalten",
-
-                icon: "◫",
-
-                category: "system",
-
-                page: "storage.html",
-
-                status: "READY"
-            },
-
-
-            {
-                id: "system",
-
-                name: "Systemzentrale",
-
-                description:
-                    "Core, Module und Systemstatus",
-
-                icon: "⚙",
-
-                category: "system",
-
-                page: "system.html",
-
-                status: "ONLINE"
-            },
-
-
-            {
-                id: "settings",
-
-                name: "Einstellungen",
-
-                description:
-                    "HalDo AI OS Einstellungen",
-
-                icon: "☷",
-
-                category: "personal",
-
-                page: "settings.html",
-
-                status: "READY"
-            },
-
-
-            {
-                id: "apps",
-
-                name: "App Center",
-
-                description:
-                    "Alle HalDo Anwendungen",
-
-                icon: "◈",
-
-                category: "tools",
-
-                page: "apps.html",
-
-                status: "ONLINE"
-            }
-
-        ];
-
-
-        let currentCategory =
-            "all";
-
-
-        let currentSearch =
-            "";
-
-
-        /* =====================================================
-           NAVIGATION
-        ===================================================== */
-
-        function goHome() {
-
-            window.location.href =
-                "index.html";
-
-        }
-
-
-        function goBack() {
-
-            if (
-                document.referrer &&
-                document.referrer.includes(
-                    window.location.hostname
-                )
-            ) {
-
-                history.back();
-
-            } else {
-
-                goHome();
-
-            }
-
-        }
-
-
-        /*
-         * Direkter Link nur für bekannte vorhandene Seiten.
-         */
-
-        function openExisting(page) {
-
-            const exists =
-                HALDO_APPS.some(
-                    function(app) {
-
-                        return app.page === page;
-
-                    }
+                toast.classList.remove(
+                    "show"
                 );
 
+            },
+            2200
+        );
 
-            /*
-             * Die Sonderfälle der bereits vorhandenen
-             * Hauptnavigation erlauben wir ebenfalls.
-             */
+}
 
-            const allowed =
-                exists ||
-                page === "index.html";
 
+/* -----------------------------------------------------
+   MODAL
+----------------------------------------------------- */
 
-            if (!allowed) {
+const modal =
+    document.getElementById(
+        "appModal"
+    );
 
-                showToast(
-                    "Diese App ist noch nicht installiert."
-                );
 
-                return;
+const modalTitle =
+    document.getElementById(
+        "modalTitle"
+    );
 
-            }
 
+const modalIcon =
+    document.getElementById(
+        "modalIcon"
+    );
 
-            window.location.href =
-                page;
 
-        }
+const modalBody =
+    document.getElementById(
+        "modalBody"
+    );
 
 
-        /* =====================================================
-           TOAST
-        ===================================================== */
+const toolArea =
+    document.getElementById(
+        "toolArea"
+    );
 
-        let toastTimer;
 
+function openApp(
+    name,
+    icon,
+    category
+) {
 
-        function showToast(message) {
+    modalTitle.textContent =
+        name;
 
-            const toast =
-                document.getElementById(
-                    "toast"
-                );
+    modalIcon.textContent =
+        icon;
 
 
-            toast.textContent =
-                message;
+    modalBody.innerHTML =
 
+        "<strong>" +
+        escapeHtml(name) +
+        "</strong> ist Teil des " +
+        "HalDo AI OS 18 App Centers." +
+        "<br><br>" +
+        "Diese App wird bereits innerhalb " +
+        "des zentralen App Centers geöffnet. " +
+        "Dadurch entsteht kein 404-Fehler, " +
+        "auch wenn die eigenständige App-Datei " +
+        "noch nicht gebaut wurde.";
 
-            toast.classList.add(
-                "show"
-            );
 
+    buildTool(
+        name,
+        category
+    );
 
-            clearTimeout(
-                toastTimer
-            );
 
+    modal.classList.add(
+        "open"
+    );
 
-            toastTimer =
-                setTimeout(
-                    function() {
+}
 
-                        toast.classList.remove(
-                            "show"
-                        );
 
-                    },
-                    2200
-                );
+function closeModal() {
 
-        }
+    modal.classList.remove(
+        "open"
+    );
 
+}
 
-        /* =====================================================
-           ESCAPE
-        ===================================================== */
 
-        function escapeHTML(value) {
+function closeModalOutside(
+    event
+) {
 
-            return String(value)
+    if (
+        event.target === modal
+    ) {
 
-                .replace(
-                    /&/g,
-                    "&amp;"
-                )
+        closeModal();
 
-                .replace(
-                    /</g,
-                    "&lt;"
-                )
+    }
 
-                .replace(
-                    />/g,
-                    "&gt;"
-                )
+}
 
-                .replace(
-                    /"/g,
-                    "&quot;"
-                )
 
-                .replace(
-                    /'/g,
-                    "&#039;"
-                );
+/* -----------------------------------------------------
+   TOOL CONTENT
+----------------------------------------------------- */
 
-        }
+function buildTool(
+    name,
+    category
+) {
 
+    toolArea.innerHTML =
+        "";
 
-        /* =====================================================
-           FILTER
-        ===================================================== */
 
-        function getFilteredApps() {
+    if (
+        name ===
+        "Calculator"
+        ||
+        name ===
+        "Rechner"
+    ) {
 
-            return HALDO_APPS.filter(
-                function(app) {
+        buildCalculator();
 
-                    const categoryMatch =
-                        currentCategory ===
-                        "all" ||
-                        app.category ===
-                        currentCategory;
+        return;
 
+    }
 
-                    const searchText =
-                        currentSearch
-                            .trim()
-                            .toLowerCase();
 
+    if (
+        name ===
+        "Notes"
+    ) {
 
-                    const searchMatch =
-                        !searchText ||
+        buildNotes();
 
-                        app.name
-                            .toLowerCase()
-                            .includes(
-                                searchText
-                            ) ||
+        return;
 
-                        app.description
-                            .toLowerCase()
-                            .includes(
-                                searchText
-                            );
+    }
 
 
-                    return (
-                        categoryMatch &&
-                        searchMatch
-                    );
+    if (
+        name ===
+        "HalDo AI"
+        ||
+        name ===
+        "HalDo AI Chat"
+        ||
+        name ===
+        "AI Assistant"
+    ) {
 
-                }
-            );
+        buildAIStarter();
 
-        }
+        return;
 
+    }
 
-        /* =====================================================
-           RENDER
-        ===================================================== */
 
-        function renderApps() {
+    if (
+        name ===
+        "AI Writer"
+    ) {
 
-            const grid =
-                document.getElementById(
-                    "appGrid"
-                );
+        buildWriter();
 
+        return;
 
-            const apps =
-                getFilteredApps();
+    }
 
 
-            grid.innerHTML = "";
+    if (
+        name ===
+        "AI Translator"
+    ) {
 
+        buildTranslator();
 
-            if (
-                apps.length === 0
-            ) {
+        return;
 
-                grid.innerHTML = `
+    }
 
-                    <div class="empty">
 
-                        <div class="empty-icon">
-                            ⌕
-                        </div>
+    buildGenericTool(
+        name
+    );
 
-                        <strong>
-                            Keine App gefunden
-                        </strong>
+}
 
-                        <p>
-                            Versuche einen anderen Suchbegriff
-                            oder wähle eine andere Kategorie.
-                        </p>
 
-                    </div>
+/* -----------------------------------------------------
+   GENERIC
+----------------------------------------------------- */
 
-                `;
+function buildGenericTool(
+    name
+) {
 
-                return;
+    toolArea.innerHTML =
 
-            }
+        "<p style='margin-bottom:10px'>" +
+        "Modulstatus: <strong>" +
+        "BEREIT" +
+        "</strong>" +
+        "</p>" +
 
+        "<button class='tool-button' " +
+        "onclick='showToast(\"" +
+        escapeAttribute(
+            name
+        ) +
+        " ist bereit\")'>" +
 
-            apps.forEach(
-                function(app) {
+        "✓ Modul prüfen" +
 
-                    const card =
-                        document.createElement(
-                            "article"
-                        );
+        "</button>" +
 
+        "<button class='tool-button' " +
+        "onclick='showToast(\"" +
+        escapeAttribute(
+            name
+        ) +
+        " wurde gestartet\")'>" +
 
-                    card.className =
-                        "app-card";
+        "▶ Starten" +
 
+        "</button>";
 
-                    card.setAttribute(
-                        "data-app-id",
-                        app.id
-                    );
+}
 
 
-                    card.innerHTML = `
+/* -----------------------------------------------------
+   AI STARTER
+----------------------------------------------------- */
 
-                        <div class="app-icon">
-                            ${escapeHTML(
-                                app.icon
-                            )}
-                        </div>
+function buildAIStarter() {
 
-                        <div class="app-info">
+    toolArea.innerHTML =
 
-                            <strong class="app-name">
-                                ${escapeHTML(
-                                    app.name
-                                )}
-                            </strong>
+        "<p>" +
+        "HalDo AI ist bereit. " +
+        "Für den vollständigen Chat kannst du " +
+        "den zentralen AI Chat öffnen." +
+        "</p>" +
 
-                            <span class="app-description">
-                                ${escapeHTML(
-                                    app.description
-                                )}
-                            </span>
+        "<button class='tool-button' " +
+        "onclick=\"openPage('chat.html')\">" +
 
-                        </div>
+        "✦ AI Chat öffnen" +
 
-                        <div class="app-footer">
+        "</button>";
 
-                            <span class="app-status">
+}
 
-                                <span class="status-dot"></span>
 
-                                ${escapeHTML(
-                                    app.status
-                                )}
+/* -----------------------------------------------------
+   WRITER
+----------------------------------------------------- */
 
-                            </span>
+function buildWriter() {
 
-                            <span class="open-arrow">
-                                →
-                            </span>
+    toolArea.innerHTML =
 
-                        </div>
+        "<textarea id='writerInput' " +
+        "placeholder='Deinen Text hier eingeben …' " +
+        "style='width:100%;min-height:90px;" +
+        "resize:vertical;padding:10px;" +
+        "border-radius:12px;" +
+        "background:rgba(255,255,255,.04);" +
+        "border:1px solid rgba(255,255,255,.08);" +
+        "color:white;outline:none;'>" +
+        "</textarea>" +
 
-                    `;
+        "<button class='tool-button' " +
+        "onclick='showToast(\"Text vorbereitet\")'>" +
 
+        "✎ Text vorbereiten" +
 
-                    card.addEventListener(
-                        "click",
-                        function() {
+        "</button>";
 
-                            openExisting(
-                                app.page
-                            );
+}
 
-                        }
-                    );
 
+/* -----------------------------------------------------
+   TRANSLATOR
+----------------------------------------------------- */
 
-                    grid.appendChild(
-                        card
-                    );
+function buildTranslator() {
 
-                }
-            );
+    toolArea.innerHTML =
 
-        }
+        "<textarea id='translatorInput' " +
+        "placeholder='Text eingeben …' " +
+        "style='width:100%;min-height:90px;" +
+        "resize:vertical;padding:10px;" +
+        "border-radius:12px;" +
+        "background:rgba(255,255,255,.04);" +
+        "border:1px solid rgba(255,255,255,.08);" +
+        "color:white;outline:none;'>" +
+        "</textarea>" +
 
+        "<button class='tool-button' " +
+        "onclick='showToast(\"Übersetzungsmodul bereit\")'>" +
 
-        /* =====================================================
-           CATEGORY EVENTS
-        ===================================================== */
+        "文 Übersetzen" +
 
-        document
-            .querySelectorAll(
-                ".category"
+        "</button>";
+
+}
+
+
+/* -----------------------------------------------------
+   CALCULATOR
+----------------------------------------------------- */
+
+function buildCalculator() {
+
+    toolArea.innerHTML =
+
+        "<input id='calcInput' " +
+        "type='text' " +
+        "inputmode='decimal' " +
+        "placeholder='z. B. 25*4+10' " +
+        "style='width:100%;padding:11px;" +
+        "border-radius:11px;" +
+        "background:rgba(255,255,255,.04);" +
+        "border:1px solid rgba(255,255,255,.08);" +
+        "color:white;outline:none;'>" +
+
+        "<button class='tool-button' " +
+        "onclick='calculate()'>" +
+
+        "= Berechnen" +
+
+        "</button>" +
+
+        "<div id='calcResult' " +
+        "style='margin-top:10px;color:#8fd4ff'>" +
+        "Ergebnis erscheint hier." +
+        "</div>";
+
+}
+
+
+function calculate() {
+
+    const input =
+        document.getElementById(
+            "calcInput"
+        );
+
+
+    const result =
+        document.getElementById(
+            "calcResult"
+        );
+
+
+    const expression =
+        input.value.trim();
+
+
+    if (!expression) {
+
+        result.textContent =
+            "Bitte Rechnung eingeben.";
+
+        return;
+
+    }
+
+
+    if (
+        !/^[0-9+\-*/().%\s]+$/.test(
+            expression
+        )
+    ) {
+
+        result.textContent =
+            "Nur mathematische Zeichen erlaubt.";
+
+        return;
+
+    }
+
+
+    try {
+
+        const value =
+            Function(
+                '"use strict"; return (' +
+                expression +
+                ')'
+            )();
+
+
+        if (
+            !Number.isFinite(
+                value
             )
-            .forEach(
-                function(button) {
+        ) {
 
-                    button.addEventListener(
-                        "click",
-                        function() {
+            throw new Error();
 
-                            document
-                                .querySelectorAll(
-                                    ".category"
-                                )
-                                .forEach(
-                                    function(item) {
+        }
 
-                                        item.classList.remove(
-                                            "active"
-                                        );
 
-                                    }
+        result.textContent =
+            "Ergebnis: " +
+            value;
+
+    } catch {
+
+        result.textContent =
+            "Rechnung konnte nicht berechnet werden.";
+
+    }
+
+}
+
+
+/* -----------------------------------------------------
+   NOTES
+----------------------------------------------------- */
+
+function buildNotes() {
+
+    const saved =
+        localStorage.getItem(
+            "haldo_notes"
+        ) || "";
+
+
+    toolArea.innerHTML =
+
+        "<textarea id='notesInput' " +
+        "placeholder='HalDo Notiz …' " +
+        "style='width:100%;min-height:120px;" +
+        "resize:vertical;padding:10px;" +
+        "border-radius:12px;" +
+        "background:rgba(255,255,255,.04);" +
+        "border:1px solid rgba(255,255,255,.08);" +
+        "color:white;outline:none;'>" +
+
+        escapeHtml(
+            saved
+        ) +
+
+        "</textarea>" +
+
+        "<button class='tool-button' " +
+        "onclick='saveNotes()'>" +
+
+        "✓ Notiz speichern" +
+
+        "</button>" +
+
+        "<button class='tool-button' " +
+        "onclick='clearNotes()'>" +
+
+        "× Löschen" +
+
+        "</button>";
+
+}
+
+
+function saveNotes() {
+
+    const input =
+        document.getElementById(
+            "notesInput"
+        );
+
+
+    localStorage.setItem(
+        "haldo_notes",
+        input.value
+    );
+
+
+    showToast(
+        "Notiz gespeichert"
+    );
+
+}
+
+
+function clearNotes() {
+
+    const input =
+        document.getElementById(
+            "notesInput"
+        );
+
+
+    input.value =
+        "";
+
+
+    localStorage.removeItem(
+        "haldo_notes"
+    );
+
+
+    showToast(
+        "Notiz gelöscht"
+    );
+
+}
+
+
+/* -----------------------------------------------------
+   SEARCH
+----------------------------------------------------- */
+
+const searchInput =
+    document.getElementById(
+        "searchInput"
+    );
+
+
+searchInput.addEventListener(
+    "input",
+    filterApps
+);
+
+
+function filterApps() {
+
+    const query =
+        searchInput.value
+            .trim()
+            .toLowerCase();
+
+
+    document
+        .querySelectorAll(
+            ".app-card"
+        )
+        .forEach(
+            function(card) {
+
+                const name =
+                    (
+                        card.dataset.name ||
+                        ""
+                    ).toLowerCase();
+
+
+                const matches =
+                    !query ||
+                    name.includes(
+                        query
+                    );
+
+
+                card.style.display =
+                    matches
+                        ? ""
+                        : "none";
+
+            }
+        );
+
+}
+
+
+/* -----------------------------------------------------
+   CATEGORIES
+----------------------------------------------------- */
+
+document
+    .querySelectorAll(
+        ".category"
+    )
+    .forEach(
+        function(button) {
+
+            button.addEventListener(
+                "click",
+                function() {
+
+                    document
+                        .querySelectorAll(
+                            ".category"
+                        )
+                        .forEach(
+                            function(item) {
+
+                                item.classList.remove(
+                                    "active"
                                 );
 
-
-                            button.classList.add(
-                                "active"
-                            );
+                            }
+                        );
 
 
-                            currentCategory =
-                                button.dataset.category;
-
-
-                            renderApps();
-
-                        }
+                    button.classList.add(
+                        "active"
                     );
 
+
+                    const category =
+                        button.dataset.category;
+
+
+                    document
+                        .querySelectorAll(
+                            ".app-card"
+                        )
+                        .forEach(
+                            function(card) {
+
+                                const matches =
+                                    category ===
+                                    "all"
+                                    ||
+                                    card.dataset.category ===
+                                    category;
+
+
+                                card.style.display =
+                                    matches
+                                        ? ""
+                                        : "none";
+
+                            }
+                        );
+
+
+                    searchInput.value =
+                        "";
+
                 }
             );
 
-
-        /* =====================================================
-           SEARCH
-        ===================================================== */
-
-        document
-            .getElementById(
-                "appSearch"
-            )
-            .addEventListener(
-                "input",
-                function(event) {
-
-                    currentSearch =
-                        event.target.value;
+        }
+    );
 
 
-                    renderApps();
+/* -----------------------------------------------------
+   ESCAPE
+----------------------------------------------------- */
 
-                }
-            );
+function escapeHtml(
+    value
+) {
+
+    return String(value)
+
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+
+        .replace(
+            /</g,
+            "&lt;"
+        )
+
+        .replace(
+            />/g,
+            "&gt;"
+        )
+
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+
+        .replace(
+            /'/g,
+            "&#039;"
+        );
+
+}
 
 
-        /* =====================================================
-           START
-        ===================================================== */
+function escapeAttribute(
+    value
+) {
 
-        renderApps();
+    return String(value)
+        .replace(
+            /\\/g,
+            "\\\\"
+        )
+        .replace(
+            /"/g,
+            '\\"'
+        );
 
-    </script>
+}
+
+
+/* -----------------------------------------------------
+   KEYBOARD
+----------------------------------------------------- */
+
+document.addEventListener(
+    "keydown",
+    function(event) {
+
+        if (
+            event.key ===
+            "Escape"
+        ) {
+
+            closeModal();
+
+        }
+
+    }
+);
+
+</script>
+
 
 </body>
 
