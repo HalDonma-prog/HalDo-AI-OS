@@ -4,135 +4,76 @@
    ------------------------------------------------------------
    Datei: js/kernel.js
 
-   Aufgabe:
-   - Zentraler System-Kernel
-   - Startsequenz
-   - Systemstatus
+   Zentrale System-Kernel-Schicht
+
+   Aufgaben:
+   - Systemzustand
    - Modulverwaltung
-   - Event-System
+   - Event-Bus
+   - Startsequenz
    - Fehlerbehandlung
-   - Verbindung zu App Manager / Launcher
+   - Systemdiagnose
+   - globale HalDo OS API
    ============================================================ */
 
 "use strict";
 
 
-/* ============================================================
-   01 — HALDO KERNEL
-   ============================================================ */
-
 (function (window, document) {
 
+
+    /* ========================================================
+       01 — KONFIGURATION
+       ======================================================== */
+
     const VERSION = "18.0.0";
-    const SYSTEM_NAME = "HalDo AI OS";
-    const BUILD_NAME =
+
+    const SYSTEM_NAME =
+        "HalDo AI OS";
+
+    const SYSTEM_EDITION =
         "Professional Ultimate Foundation";
 
 
     /* ========================================================
-       Kernel State
+       02 — KERNEL STATE
        ======================================================== */
 
     const state = {
 
         initialized: false,
 
-        booted: false,
+        starting: false,
 
         ready: false,
 
-        error: false,
+        failed: false,
 
-        bootTime: null,
+        startTime: null,
 
-        version: VERSION,
+        readyTime: null,
 
-        modules: {},
+        uptime: 0,
 
-        events: {},
+        modules: new Map(),
 
-        logs: []
+        moduleStatus: new Map(),
+
+        errors: [],
+
+        warnings: [],
+
+        events: 0
 
     };
 
 
     /* ========================================================
-       Logger
+       03 — EVENT BUS
        ======================================================== */
 
-    function log(
-        message,
-        type = "info"
-    ) {
+    const listeners = {};
 
-        const entry = {
-
-            time:
-                new Date().toISOString(),
-
-            type,
-
-            message
-
-        };
-
-
-        state.logs.push(entry);
-
-
-        /*
-         * Logs begrenzen,
-         * damit der Speicher nicht unnötig wächst.
-         */
-
-        if (
-            state.logs.length > 200
-        ) {
-
-            state.logs.shift();
-
-        }
-
-
-        const prefix =
-            `[${SYSTEM_NAME} ${VERSION}]`;
-
-
-        if (
-            type === "error"
-        ) {
-
-            console.error(
-                prefix,
-                message
-            );
-
-        }
-        else if (
-            type === "warning"
-        ) {
-
-            console.warn(
-                prefix,
-                message
-            );
-
-        }
-        else {
-
-            console.log(
-                prefix,
-                message
-            );
-
-        }
-
-    }
-
-
-    /* ========================================================
-       Event System
-       ======================================================== */
 
     function on(
         eventName,
@@ -150,16 +91,17 @@
 
 
         if (
-            !state.events[eventName]
+            !listeners[eventName]
         ) {
 
-            state.events[eventName] = [];
+            listeners[eventName] = [];
 
         }
 
 
-        state.events[eventName]
-            .push(callback);
+        listeners[eventName].push(
+            callback
+        );
 
 
         return true;
@@ -173,7 +115,7 @@
     ) {
 
         if (
-            !state.events[eventName]
+            !listeners[eventName]
         ) {
 
             return false;
@@ -181,11 +123,11 @@
         }
 
 
-        state.events[eventName] =
-            state.events[eventName]
-                .filter(
-                    fn => fn !== callback
-                );
+        listeners[eventName] =
+            listeners[eventName].filter(
+                listener =>
+                    listener !== callback
+            );
 
 
         return true;
@@ -198,12 +140,15 @@
         data = null
     ) {
 
-        const listeners =
-            state.events[eventName];
+        state.events++;
+
+
+        const callbacks =
+            listeners[eventName];
 
 
         if (
-            !listeners
+            !callbacks
         ) {
 
             return;
@@ -211,23 +156,108 @@
         }
 
 
-        listeners.forEach(
-            callback => {
+        callbacks
+            .slice()
+            .forEach(
+                callback => {
 
-                try {
+                    try {
 
-                    callback(data);
+                        callback(
+                            data
+                        );
+
+                    }
+                    catch (
+                        error
+                    ) {
+
+                        reportError(
+                            error,
+                            `Event: ${eventName}`
+                        );
+
+                    }
 
                 }
-                catch (error) {
+            );
 
-                    log(
-                        `Fehler im Event "${eventName}": ${error.message}`,
-                        "error"
-                    );
+    }
 
+
+    /* ========================================================
+       04 — LOGGING
+       ======================================================== */
+
+    function timestamp() {
+
+        return new Date()
+            .toLocaleTimeString(
+                "de-DE",
+                {
+                    hour:
+                        "2-digit",
+
+                    minute:
+                        "2-digit",
+
+                    second:
+                        "2-digit"
                 }
+            );
 
+    }
+
+
+    function log(
+        message,
+        type = "info"
+    ) {
+
+        const prefix =
+            `[${SYSTEM_NAME}]`;
+
+
+        const output =
+            `${prefix} [${timestamp()}] ${message}`;
+
+
+        if (
+            type ===
+            "error"
+        ) {
+
+            console.error(
+                output
+            );
+
+        }
+        else if (
+            type ===
+            "warning"
+        ) {
+
+            console.warn(
+                output
+            );
+
+        }
+        else {
+
+            console.log(
+                output
+            );
+
+        }
+
+
+        emit(
+            "kernel:log",
+            {
+                message,
+                type,
+                time:
+                    Date.now()
             }
         );
 
@@ -235,7 +265,139 @@
 
 
     /* ========================================================
-       Module Registry
+       05 — FEHLER
+       ======================================================== */
+
+    function reportError(
+        error,
+        context = "Unknown"
+    ) {
+
+        const normalized =
+            error instanceof Error
+                ? error
+                : new Error(
+                    String(
+                        error
+                    )
+                );
+
+
+        const record = {
+
+            message:
+                normalized.message,
+
+            name:
+                normalized.name,
+
+            stack:
+                normalized.stack ||
+                "",
+
+            context,
+
+            time:
+                Date.now()
+
+        };
+
+
+        state.errors.push(
+            record
+        );
+
+
+        /*
+         * Nur die letzten 100 Fehler
+         * behalten.
+         */
+
+        if (
+            state.errors.length >
+            100
+        ) {
+
+            state.errors.shift();
+
+        }
+
+
+        log(
+            `${context}: ${normalized.message}`,
+            "error"
+        );
+
+
+        emit(
+            "kernel:error",
+            record
+        );
+
+
+        return record;
+
+    }
+
+
+    /* ========================================================
+       06 — WARNUNG
+       ======================================================== */
+
+    function reportWarning(
+        message,
+        context = "System"
+    ) {
+
+        const record = {
+
+            message:
+                String(
+                    message
+                ),
+
+            context,
+
+            time:
+                Date.now()
+
+        };
+
+
+        state.warnings.push(
+            record
+        );
+
+
+        if (
+            state.warnings.length >
+            100
+        ) {
+
+            state.warnings.shift();
+
+        }
+
+
+        log(
+            `${context}: ${message}`,
+            "warning"
+        );
+
+
+        emit(
+            "kernel:warning",
+            record
+        );
+
+
+        return record;
+
+    }
+
+
+    /* ========================================================
+       07 — MODUL REGISTRIEREN
        ======================================================== */
 
     function registerModule(
@@ -247,70 +409,74 @@
             !name
         ) {
 
+            reportWarning(
+                "Ein Modul ohne Namen wurde abgelehnt.",
+                "Module"
+            );
+
+
             return false;
 
         }
 
 
-        state.modules[name] = {
-
-            name,
-
-            module,
-
-            registeredAt:
-                Date.now(),
-
-            ready: true
-
-        };
+        const moduleName =
+            String(
+                name
+            )
+            .trim()
+            .toLowerCase();
 
 
-        log(
-            `Modul registriert: ${name}`
+        if (
+            !module
+        ) {
+
+            reportWarning(
+                `Modul '${moduleName}' ist leer.`,
+                "Module"
+            );
+
+
+            return false;
+
+        }
+
+
+        state.modules.set(
+            moduleName,
+            module
+        );
+
+
+        state.moduleStatus.set(
+            moduleName,
+            {
+                registered:
+                    true,
+
+                ready:
+                    false,
+
+                registeredAt:
+                    Date.now()
+            }
         );
 
 
         emit(
             "module:registered",
             {
-                name,
+                name:
+                    moduleName,
+
                 module
             }
         );
 
 
-        return true;
-
-    }
-
-
-    function unregisterModule(
-        name
-    ) {
-
-        if (
-            !state.modules[name]
-        ) {
-
-            return false;
-
-        }
-
-
-        delete state.modules[name];
-
-
         log(
-            `Modul entfernt: ${name}`
-        );
-
-
-        emit(
-            "module:unregistered",
-            {
-                name
-            }
+            `Modul registriert: ${moduleName}`
         );
 
 
@@ -318,13 +484,17 @@
 
     }
 
+
+    /* ========================================================
+       08 — MODUL ABFRAGEN
+       ======================================================== */
 
     function getModule(
         name
     ) {
 
         if (
-            !state.modules[name]
+            !name
         ) {
 
             return null;
@@ -332,550 +502,439 @@
         }
 
 
-        return state.modules[name].module;
-
-    }
-
-
-    function hasModule(
-        name
-    ) {
-
-        return Boolean(
-            state.modules[name]
+        return (
+            state.modules.get(
+                String(
+                    name
+                )
+                .trim()
+                .toLowerCase()
+            ) ||
+            null
         );
 
     }
 
 
     /* ========================================================
-       System Information
+       09 — MODULSTATUS
        ======================================================== */
 
-    function getSystemInfo() {
+    function setModuleReady(
+        name,
+        ready = true
+    ) {
+
+        const moduleName =
+            String(
+                name
+            )
+            .trim()
+            .toLowerCase();
+
+
+        const current =
+            state.moduleStatus.get(
+                moduleName
+            ) ||
+            {};
+
+
+        state.moduleStatus.set(
+            moduleName,
+            {
+                ...current,
+
+                registered:
+                    true,
+
+                ready:
+                    Boolean(
+                        ready
+                    ),
+
+                readyAt:
+                    ready
+                        ? Date.now()
+                        : null
+
+            }
+        );
+
+
+        emit(
+            "module:status",
+            {
+                name:
+                    moduleName,
+
+                ready:
+                    Boolean(
+                        ready
+                    )
+            }
+        );
+
+    }
+
+
+    /* ========================================================
+       10 — MODULE ALLE
+       ======================================================== */
+
+    function getModules() {
+
+        return [
+            ...state.modules.entries()
+        ]
+        .map(
+            ([name, module]) => ({
+
+                name,
+
+                module,
+
+                status:
+                    state.moduleStatus.get(
+                        name
+                    ) ||
+                    null
+
+            })
+        );
+
+    }
+
+
+    /* ========================================================
+       11 — MODUL ENTFERNEN
+       ======================================================== */
+
+    function unregisterModule(
+        name
+    ) {
+
+        const moduleName =
+            String(
+                name
+            )
+            .trim()
+            .toLowerCase();
+
+
+        const existed =
+            state.modules.delete(
+                moduleName
+            );
+
+
+        state.moduleStatus.delete(
+            moduleName
+        );
+
+
+        if (
+            existed
+        ) {
+
+            emit(
+                "module:unregistered",
+                {
+                    name:
+                        moduleName
+                }
+            );
+
+        }
+
+
+        return existed;
+
+    }
+
+
+    /* ========================================================
+       12 — UPTIME
+       ======================================================== */
+
+    function updateUptime() {
+
+        if (
+            !state.startTime
+        ) {
+
+            state.uptime =
+                0;
+
+            return;
+
+        }
+
+
+        state.uptime =
+            Date.now() -
+            state.startTime;
+
+    }
+
+
+    /* ========================================================
+       13 — SYSTEM STATUS
+       ======================================================== */
+
+    function getStatus() {
+
+        updateUptime();
+
+
+        const modules =
+            getModules();
+
 
         return {
 
-            name:
+            system:
                 SYSTEM_NAME,
 
             version:
                 VERSION,
 
-            build:
-                BUILD_NAME,
+            edition:
+                SYSTEM_EDITION,
 
             initialized:
                 state.initialized,
 
-            booted:
-                state.booted,
+            starting:
+                state.starting,
 
             ready:
                 state.ready,
 
-            error:
-                state.error,
+            failed:
+                state.failed,
 
-            bootTime:
-                state.bootTime,
+            startTime:
+                state.startTime,
+
+            readyTime:
+                state.readyTime,
+
+            uptime:
+                state.uptime,
 
             moduleCount:
-                Object.keys(
-                    state.modules
+                modules.length,
+
+            readyModules:
+                modules.filter(
+                    item =>
+                        item.status &&
+                        item.status.ready
                 ).length,
 
+            errorCount:
+                state.errors.length,
+
+            warningCount:
+                state.warnings.length,
+
+            eventCount:
+                state.events
+
+        };
+
+    }
+
+
+    /* ========================================================
+       14 — DIAGNOSE
+       ======================================================== */
+
+    function diagnose() {
+
+        const status =
+            getStatus();
+
+
+        const diagnostics = {
+
+            browser:
+                {
+                    userAgent:
+                        navigator.userAgent,
+
+                    language:
+                        navigator.language,
+
+                    online:
+                        navigator.onLine,
+
+                    cookies:
+                        navigator.cookieEnabled
+
+                },
+
+
+            display:
+                {
+                    width:
+                        window.innerWidth,
+
+                    height:
+                        window.innerHeight,
+
+                    pixelRatio:
+                        window.devicePixelRatio ||
+                        1
+
+                },
+
+
+            storage:
+                {
+                    localStorage:
+                        testStorage()
+                },
+
+
+            kernel:
+                status,
+
             modules:
-                Object.keys(
-                    state.modules
-                )
+                getModules()
+                    .map(
+                        item => ({
+                            name:
+                                item.name,
+
+                            ready:
+                                Boolean(
+                                    item.status &&
+                                    item.status.ready
+                                )
+                        })
+                    )
 
         };
+
+
+        emit(
+            "kernel:diagnostics",
+            diagnostics
+        );
+
+
+        return diagnostics;
 
     }
 
 
     /* ========================================================
-       Device Information
+       15 — STORAGE TEST
        ======================================================== */
 
-    function getDeviceInfo() {
-
-        const ua =
-            navigator.userAgent ||
-            "";
-
-
-        return {
-
-            userAgent:
-                ua,
-
-            language:
-                navigator.language ||
-                "de-DE",
-
-            languages:
-                Array.isArray(
-                    navigator.languages
-                )
-                    ? navigator.languages
-                    : [],
-
-            online:
-                navigator.onLine,
-
-            platform:
-                navigator.platform ||
-                "",
-
-            screen: {
-
-                width:
-                    window.screen
-                        ? window.screen.width
-                        : 0,
-
-                height:
-                    window.screen
-                        ? window.screen.height
-                        : 0
-
-            },
-
-            viewport: {
-
-                width:
-                    window.innerWidth,
-
-                height:
-                    window.innerHeight
-
-            },
-
-            touch:
-
-                "ontouchstart"
-                in window
-
-        };
-
-    }
-
-
-    /* ========================================================
-       Environment Check
-       ======================================================== */
-
-    function checkEnvironment() {
-
-        const checks = {
-
-            document:
-                Boolean(document),
-
-            window:
-                Boolean(window),
-
-            localStorage:
-                false,
-
-            sessionStorage:
-                false,
-
-            fetch:
-                typeof window.fetch ===
-                "function",
-
-            promises:
-                typeof Promise ===
-                "function",
-
-            json:
-                typeof JSON ===
-                "object"
-
-        };
-
+    function testStorage() {
 
         try {
 
-            const testKey =
-                "__haldo_test__";
+            const key =
+                "__haldo_kernel_test__";
 
 
             window.localStorage.setItem(
-                testKey,
+                key,
                 "1"
             );
 
 
             window.localStorage.removeItem(
-                testKey
+                key
             );
 
 
-            checks.localStorage =
-                true;
+            return true;
 
         }
-        catch (error) {
+        catch (
+            error
+        ) {
 
-            log(
-                "localStorage ist nicht verfügbar.",
-                "warning"
-            );
+            return false;
+
+        }
+
+    }
+
+
+    /* ========================================================
+       16 — SAFE MODULE INIT
+       ======================================================== */
+
+    async function initializeModule(
+        name,
+        module
+    ) {
+
+        if (
+            !module
+        ) {
+
+            return false;
 
         }
 
 
         try {
 
-            const testKey =
-                "__haldo_session_test__";
+            /*
+             * Manche Module besitzen init().
+             */
 
+            if (
+                typeof module.init ===
+                "function"
+            ) {
 
-            window.sessionStorage.setItem(
-                testKey,
-                "1"
-            );
-
-
-            window.sessionStorage.removeItem(
-                testKey
-            );
-
-
-            checks.sessionStorage =
-                true;
-
-        }
-        catch (error) {
-
-            log(
-                "sessionStorage ist nicht verfügbar.",
-                "warning"
-            );
-
-        }
-
-
-        return checks;
-
-    }
-
-
-    /* ========================================================
-       Storage Helper
-       ======================================================== */
-
-    const storage = {
-
-        get(
-            key,
-            fallback = null
-        ) {
-
-            try {
-
-                const value =
-                    localStorage.getItem(
-                        key
-                    );
+                const result =
+                    module.init();
 
 
                 if (
-                    value === null
+                    result &&
+                    typeof result.then ===
+                    "function"
                 ) {
 
-                    return fallback;
+                    await result;
 
                 }
 
-
-                return JSON.parse(
-                    value
-                );
-
-            }
-            catch (error) {
-
-                return fallback;
-
             }
 
-        },
 
-
-        set(
-            key,
-            value
-        ) {
-
-            try {
-
-                localStorage.setItem(
-                    key,
-                    JSON.stringify(
-                        value
-                    )
-                );
-
-                return true;
-
-            }
-            catch (error) {
-
-                log(
-                    `Storage-Fehler bei "${key}".`,
-                    "warning"
-                );
-
-                return false;
-
-            }
-
-        },
-
-
-        remove(
-            key
-        ) {
-
-            try {
-
-                localStorage.removeItem(
-                    key
-                );
-
-                return true;
-
-            }
-            catch (error) {
-
-                return false;
-
-            }
-
-        }
-
-    };
-
-
-    /* ========================================================
-       Safe Async Helper
-       ======================================================== */
-
-    function wait(
-        milliseconds
-    ) {
-
-        return new Promise(
-            resolve => {
-
-                window.setTimeout(
-                    resolve,
-                    milliseconds
-                );
-
-            }
-        );
-
-    }
-
-
-    /* ========================================================
-       Startup Status
-       ======================================================== */
-
-    function setStartupStatus(
-        message
-    ) {
-
-        if (
-            window.HalDoStartup &&
-            typeof
-                window.HalDoStartup.setStatus ===
-                "function"
-        ) {
-
-            window.HalDoStartup.setStatus(
-                message
-            );
-
-        }
-
-    }
-
-
-    /* ========================================================
-       BOOT SEQUENCE
-       ======================================================== */
-
-    async function boot() {
-
-        if (
-            state.booted
-        ) {
-
-            return true;
-
-        }
-
-
-        state.bootTime =
-            Date.now();
-
-
-        log(
-            "Kernel startet."
-        );
-
-
-        emit(
-            "kernel:boot:start"
-        );
-
-
-        try {
-
-            /* ----------------------------------------------
-               Schritt 1
-               ---------------------------------------------- */
-
-            setStartupStatus(
-                "HalDo AI Kernel wird initialisiert..."
-            );
-
-
-            await wait(120);
-
-
-            state.initialized =
-                true;
-
-
-            log(
-                "Kernel initialisiert."
-            );
-
-
-            emit(
-                "kernel:initialized"
-            );
-
-
-            /* ----------------------------------------------
-               Schritt 2
-               ---------------------------------------------- */
-
-            setStartupStatus(
-                "Systemumgebung wird geprüft..."
-            );
-
-
-            await wait(120);
-
-
-            const environment =
-                checkEnvironment();
-
-
-            state.environment =
-                environment;
-
-
-            emit(
-                "environment:checked",
-                environment
-            );
-
-
-            /* ----------------------------------------------
-               Schritt 3
-               ---------------------------------------------- */
-
-            setStartupStatus(
-                "HalDo AI Systemmodule werden vorbereitet..."
-            );
-
-
-            await wait(120);
-
-
-            registerModule(
-                "kernel",
-                api
-            );
-
-
-            /* ----------------------------------------------
-               Schritt 4
-               ---------------------------------------------- */
-
-            setStartupStatus(
-                "HalDo AI App-System wird verbunden..."
-            );
-
-
-            await wait(100);
-
-
-            state.booted =
-                true;
-
-
-            emit(
-                "kernel:booted"
-            );
-
-
-            /* ----------------------------------------------
-               Schritt 5
-               ---------------------------------------------- */
-
-            setStartupStatus(
-                "HalDo AI OS 18 ist bereit."
-            );
-
-
-            state.ready =
-                true;
-
-
-            emit(
-                "kernel:ready"
-            );
-
-
-            log(
-                "HalDo AI OS 18 erfolgreich gestartet."
+            setModuleReady(
+                name,
+                true
             );
 
 
             return true;
 
         }
-        catch (error) {
+        catch (
+            error
+        ) {
 
-            state.error =
-                true;
-
-
-            log(
-                `Kernel-Fehler: ${error.message}`,
-                "error"
+            setModuleReady(
+                name,
+                false
             );
 
 
-            emit(
-                "kernel:error",
-                error
-            );
-
-
-            setStartupStatus(
-                "HalDo AI OS konnte nicht vollständig gestartet werden."
+            reportError(
+                error,
+                `Modul '${name}'`
             );
 
 
@@ -887,33 +946,189 @@
 
 
     /* ========================================================
-       SYSTEM SHUTDOWN
+       17 — KERNEL START
        ======================================================== */
 
-    function shutdown() {
+    async function start() {
 
-        log(
-            "HalDo AI OS wird beendet.",
-            "warning"
-        );
+        if (
+            state.ready
+        ) {
+
+            return getStatus();
+
+        }
 
 
-        state.ready =
+        if (
+            state.starting
+        ) {
+
+            return getStatus();
+
+        }
+
+
+        state.starting =
+            true;
+
+        state.failed =
             false;
 
-        state.booted =
-            false;
+        state.startTime =
+            Date.now();
 
 
         emit(
-            "kernel:shutdown"
+            "kernel:starting",
+            getStatus()
+        );
+
+
+        log(
+            `${SYSTEM_NAME} ${VERSION} startet…`
+        );
+
+
+        /*
+         * Kernel selbst initialisiert.
+         */
+
+        state.initialized =
+            true;
+
+
+        emit(
+            "kernel:initialized",
+            getStatus()
+        );
+
+
+        /*
+         * Warten, damit defer-Skripte
+         * ihre globalen APIs registrieren
+         * können.
+         */
+
+        await wait(
+            0
+        );
+
+
+        /*
+         * Bekannte Kernmodule prüfen.
+         */
+
+        const moduleNames = [
+
+            "app-manager",
+
+            "app-router",
+
+            "launcher",
+
+            "system"
+
+        ];
+
+
+        for (
+            const moduleName of moduleNames
+        ) {
+
+            const module =
+                getModule(
+                    moduleName
+                );
+
+
+            if (
+                module
+            ) {
+
+                await initializeModule(
+                    moduleName,
+                    module
+                );
+
+            }
+
+        }
+
+
+        state.ready =
+            true;
+
+        state.starting =
+            false;
+
+        state.failed =
+            false;
+
+        state.readyTime =
+            Date.now();
+
+
+        emit(
+            "kernel:ready",
+            getStatus()
+        );
+
+
+        log(
+            `${SYSTEM_NAME} ist bereit.`
+        );
+
+
+        return getStatus();
+
+    }
+
+
+    /* ========================================================
+       18 — WAIT
+       ======================================================== */
+
+    function wait(
+        milliseconds
+    ) {
+
+        return new Promise(
+            resolve =>
+                window.setTimeout(
+                    resolve,
+                    milliseconds
+                )
         );
 
     }
 
 
     /* ========================================================
-       PUBLIC API
+       19 — RESET FEHLER
+       ======================================================== */
+
+    function clearDiagnostics() {
+
+        state.errors =
+            [];
+
+        state.warnings =
+            [];
+
+
+        emit(
+            "kernel:diagnostics:cleared"
+        );
+
+
+        return true;
+
+    }
+
+
+    /* ========================================================
+       20 — PUBLIC API
        ======================================================== */
 
     const api = {
@@ -924,53 +1139,12 @@
         version:
             VERSION,
 
-        build:
-            BUILD_NAME,
+        edition:
+            SYSTEM_EDITION,
 
 
-        /* Kernel */
+        start,
 
-        boot,
-
-        shutdown,
-
-
-        /* Status */
-
-        getState:
-            function () {
-
-                return {
-
-                    initialized:
-                        state.initialized,
-
-                    booted:
-                        state.booted,
-
-                    ready:
-                        state.ready,
-
-                    error:
-                        state.error
-
-                };
-
-            },
-
-
-        getSystemInfo,
-
-
-        getDeviceInfo,
-
-
-        /* Environment */
-
-        checkEnvironment,
-
-
-        /* Events */
 
         on,
 
@@ -979,7 +1153,12 @@
         emit,
 
 
-        /* Modules */
+        log,
+
+        reportError,
+
+        reportWarning,
+
 
         registerModule,
 
@@ -987,53 +1166,27 @@
 
         getModule,
 
-        hasModule,
+        getModules,
+
+        setModuleReady,
 
 
-        /* Storage */
+        getStatus,
 
-        storage,
+        diagnose,
 
-
-        /* Utility */
-
-        wait,
-
-
-        /* Logs */
-
-        getLogs:
-            function () {
-
-                return [
-                    ...state.logs
-                ];
-
-            },
-
-
-        clearLogs:
-            function () {
-
-                state.logs.length =
-                    0;
-
-            }
+        clearDiagnostics
 
     };
 
 
     /* ========================================================
-       GLOBAL REGISTRATION
+       21 — GLOBALE HALDO API
        ======================================================== */
 
     window.HalDoKernel =
         api;
 
-
-    /* ========================================================
-       LEGACY / COMPATIBILITY ALIASES
-       ======================================================== */
 
     window.HalDoOS =
         window.HalDoOS ||
@@ -1044,31 +1197,43 @@
         api;
 
 
+    window.HalDoOS.version =
+        VERSION;
+
+
+    window.HalDoOS.system =
+        SYSTEM_NAME;
+
+
     /* ========================================================
-       GLOBAL ERROR HANDLING
+       22 — GLOBALER FEHLERFÄNGER
        ======================================================== */
 
     window.addEventListener(
         "error",
         function (event) {
 
-            /*
-             * Nicht jeden Browserfehler als
-             * vollständigen Systemabsturz behandeln.
-             */
+            if (
+                event.error
+            ) {
 
-            log(
-                event.message ||
-                "Unbekannter JavaScript-Fehler.",
-                "error"
-            );
+                reportError(
+                    event.error,
+                    "Global JavaScript Error"
+                );
 
+            }
+            else {
 
-            emit(
-                "system:error",
-                event.error ||
-                event
-            );
+                reportError(
+                    new Error(
+                        event.message ||
+                        "Unbekannter JavaScript-Fehler"
+                    ),
+                    "Global JavaScript Error"
+                );
+
+            }
 
         }
     );
@@ -1078,15 +1243,12 @@
         "unhandledrejection",
         function (event) {
 
-            log(
-                "Unbehandelte Promise-Ablehnung.",
-                "error"
-            );
-
-
-            emit(
-                "system:promise-error",
-                event.reason
+            reportError(
+                event.reason ||
+                new Error(
+                    "Unbehandelte Promise-Ablehnung"
+                ),
+                "Unhandled Promise Rejection"
             );
 
         }
@@ -1094,20 +1256,20 @@
 
 
     /* ========================================================
-       ONLINE / OFFLINE
+       23 — ONLINE / OFFLINE
        ======================================================== */
 
     window.addEventListener(
         "online",
         function () {
 
-            log(
-                "Internetverbindung hergestellt."
+            emit(
+                "system:online"
             );
 
 
-            emit(
-                "network:online"
+            log(
+                "Internetverbindung verfügbar."
             );
 
         }
@@ -1118,14 +1280,14 @@
         "offline",
         function () {
 
-            log(
-                "Internetverbindung verloren.",
-                "warning"
+            emit(
+                "system:offline"
             );
 
 
-            emit(
-                "network:offline"
+            reportWarning(
+                "Keine Internetverbindung.",
+                "Network"
             );
 
         }
@@ -1133,25 +1295,39 @@
 
 
     /* ========================================================
-       AUTOMATISCHER START
+       24 — START NACH DOM
        ======================================================== */
 
-    function startKernel() {
+    function boot() {
 
         /*
-         * Kleine Verzögerung,
-         * damit defer-Skripte und DOM
-         * sauber initialisiert werden.
+         * Kernel startet bewusst zuerst.
          */
 
-        window.setTimeout(
-            function () {
+        start()
+            .catch(
+                error => {
 
-                boot();
+                    state.starting =
+                        false;
 
-            },
-            50
-        );
+                    state.failed =
+                        true;
+
+
+                    reportError(
+                        error,
+                        "Kernel Start"
+                    );
+
+
+                    emit(
+                        "kernel:failed",
+                        getStatus()
+                    );
+
+                }
+            );
 
     }
 
@@ -1163,16 +1339,17 @@
 
         document.addEventListener(
             "DOMContentLoaded",
-            startKernel,
+            boot,
             {
-                once: true
+                once:
+                    true
             }
         );
 
     }
     else {
 
-        startKernel();
+        boot();
 
     }
 
