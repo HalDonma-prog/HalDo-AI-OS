@@ -1,29 +1,892 @@
 <!DOCTYPE html>
-
 <html lang="de">
 
 <head>
+    <meta charset="UTF-8">
 
-<meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    >
 
-<meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
->
+    <meta name="theme-color" content="#050914">
 
-<title>
-HalDo AI OS 18 – Dashboard
-</title>
+    <title>HalDo AI OS 18 — Dashboard</title>
 
-<link
-    rel="stylesheet"
-    href="style.css"
->
+    <style>
 
-<meta
-    name="theme-color"
-    content="#090D18"
->
+        /* =====================================================
+           HALDO AI OS 18
+           DASHBOARD
+           ===================================================== */
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html,
+        body {
+            min-height: 100%;
+        }
+
+        body {
+            background: #050914;
+            color: #ffffff;
+
+            font-family:
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                Roboto,
+                Arial,
+                sans-serif;
+
+            overflow-x: hidden;
+        }
+
+        button {
+            font: inherit;
+            border: 0;
+        }
+
+        /* =====================================================
+           BACKGROUND
+           ===================================================== */
+
+        .background {
+            position: fixed;
+            inset: 0;
+
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+
+            background:
+                radial-gradient(
+                    circle at 50% 0%,
+                    rgba(0,126,255,.20),
+                    transparent 35%
+                ),
+                radial-gradient(
+                    circle at 0% 80%,
+                    rgba(0,210,255,.10),
+                    transparent 30%
+                ),
+                radial-gradient(
+                    circle at 100% 70%,
+                    rgba(130,50,255,.10),
+                    transparent 30%
+                ),
+                #050914;
+        }
+
+        .orb {
+            position: absolute;
+
+            border-radius: 50%;
+
+            filter: blur(65px);
+
+            opacity: .22;
+
+            animation:
+                floatOrb 9s ease-in-out infinite;
+        }
+
+        .orb.one {
+            width: 190px;
+            height: 190px;
+
+            background: #007bff;
+
+            top: 5%;
+            left: -90px;
+        }
+
+        .orb.two {
+            width: 170px;
+            height: 170px;
+
+            background: #783cff;
+
+            right: -80px;
+            bottom: 20%;
+
+            animation-delay: -4s;
+        }
+
+        @keyframes floatOrb {
+
+            0%,
+            100% {
+                transform:
+                    translate(0,0)
+                    scale(1);
+            }
+
+            50% {
+                transform:
+                    translate(25px,-20px)
+                    scale(1.1);
+            }
+        }
+
+        /* =====================================================
+           MAIN
+           ===================================================== */
+
+        .app {
+            position: relative;
+
+            z-index: 1;
+
+            width: min(1100px, 100%);
+
+            min-height: 100vh;
+
+            margin: auto;
+
+            padding-bottom: 105px;
+        }
+
+        /* =====================================================
+           HEADER
+           ===================================================== */
+
+        .header {
+            position: sticky;
+            top: 0;
+
+            z-index: 20;
+
+            display: flex;
+
+            align-items: center;
+            justify-content: space-between;
+
+            padding: 10px 14px;
+
+            background:
+                rgba(5,9,20,.86);
+
+            border-bottom:
+                1px solid
+                rgba(255,255,255,.08);
+
+            backdrop-filter:
+                blur(22px);
+
+            -webkit-backdrop-filter:
+                blur(22px);
+        }
+
+        .brand {
+            display: flex;
+
+            align-items: center;
+
+            gap: 9px;
+        }
+
+        .logo {
+            width: 43px;
+            height: 43px;
+
+            object-fit: contain;
+
+            animation:
+                logoRotate 9s linear infinite,
+                logoGlow 2.5s ease-in-out infinite;
+        }
+
+        @keyframes logoRotate {
+
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes logoGlow {
+
+            0%,
+            100% {
+                filter:
+                    drop-shadow(
+                        0 0 3px
+                        rgba(255,255,255,.5)
+                    )
+                    drop-shadow(
+                        0 0 10px
+                        rgba(0,130,255,.5)
+                    );
+            }
+
+            50% {
+                filter:
+                    drop-shadow(
+                        0 0 8px
+                        rgba(255,255,255,.95)
+                    )
+                    drop-shadow(
+                        0 0 22px
+                        rgba(0,150,255,1)
+                    );
+            }
+        }
+
+        .brand-text strong {
+            display: block;
+
+            font-size: 14px;
+        }
+
+        .brand-text span {
+            display: block;
+
+            margin-top: 2px;
+
+            color: #71809a;
+
+            font-size: 8px;
+
+            letter-spacing: .7px;
+        }
+
+        .home-button {
+            padding: 9px 13px;
+
+            border-radius: 13px;
+
+            color: #9dccff;
+
+            background:
+                rgba(255,255,255,.06);
+
+            border:
+                1px solid
+                rgba(255,255,255,.08);
+
+            cursor: pointer;
+        }
+
+        .home-button:active {
+            transform: scale(.94);
+        }
+
+        /* =====================================================
+           HERO
+           ===================================================== */
+
+        .hero {
+            padding:
+                30px 16px 20px;
+        }
+
+        .hero-label {
+            display: inline-flex;
+
+            align-items: center;
+
+            gap: 6px;
+
+            padding:
+                6px 10px;
+
+            border-radius: 20px;
+
+            background:
+                rgba(0,126,255,.08);
+
+            border:
+                1px solid
+                rgba(0,126,255,.13);
+
+            color: #75c4ff;
+
+            font-size: 8px;
+
+            letter-spacing: .7px;
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+
+            border-radius: 50%;
+
+            background: #00ffad;
+
+            box-shadow:
+                0 0 8px
+                rgba(0,255,173,.8);
+        }
+
+        .hero h1 {
+            margin-top: 13px;
+
+            font-size: 29px;
+
+            font-weight: 800;
+
+            background:
+                linear-gradient(
+                    90deg,
+                    #ffffff,
+                    #72c7ff,
+                    #ffffff
+                );
+
+            background-size: 200% auto;
+
+            -webkit-background-clip: text;
+            background-clip: text;
+
+            color: transparent;
+
+            animation:
+                shine 4s linear infinite;
+        }
+
+        @keyframes shine {
+
+            to {
+                background-position:
+                    200% center;
+            }
+        }
+
+        .hero p {
+            max-width: 650px;
+
+            margin-top: 8px;
+
+            color: #75839d;
+
+            font-size: 11px;
+
+            line-height: 1.55;
+        }
+
+        /* =====================================================
+           SYSTEM STATUS
+           ===================================================== */
+
+        .section {
+            padding:
+                0 16px 20px;
+        }
+
+        .section-title {
+            display: flex;
+
+            align-items: center;
+            justify-content: space-between;
+
+            margin-bottom: 11px;
+        }
+
+        .section-title h2 {
+            font-size: 16px;
+        }
+
+        .section-title span {
+            color: #56647c;
+
+            font-size: 8px;
+
+            letter-spacing: .5px;
+        }
+
+        .status-grid {
+            display: grid;
+
+            grid-template-columns:
+                repeat(2, minmax(0,1fr));
+
+            gap: 10px;
+        }
+
+        .status-card {
+            padding: 15px;
+
+            border-radius: 19px;
+
+            background:
+                linear-gradient(
+                    145deg,
+                    rgba(255,255,255,.075),
+                    rgba(255,255,255,.03)
+                );
+
+            border:
+                1px solid
+                rgba(255,255,255,.075);
+        }
+
+        .status-top {
+            display: flex;
+
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .status-icon {
+            width: 38px;
+            height: 38px;
+
+            display: flex;
+
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 12px;
+
+            background:
+                rgba(0,126,255,.10);
+
+            border:
+                1px solid
+                rgba(0,126,255,.13);
+
+            font-size: 17px;
+        }
+
+        .status-state {
+            color: #00e99b;
+
+            font-size: 8px;
+
+            font-weight: 700;
+        }
+
+        .status-card h3 {
+            margin-top: 12px;
+
+            font-size: 12px;
+        }
+
+        .status-card p {
+            margin-top: 4px;
+
+            color: #65748d;
+
+            font-size: 9px;
+
+            line-height: 1.4;
+        }
+
+        /* =====================================================
+           SYSTEM OVERVIEW
+           ===================================================== */
+
+        .overview {
+            display: grid;
+
+            gap: 10px;
+        }
+
+        .overview-card {
+            padding: 16px;
+
+            border-radius: 20px;
+
+            background:
+                rgba(255,255,255,.045);
+
+            border:
+                1px solid
+                rgba(255,255,255,.07);
+        }
+
+        .overview-header {
+            display: flex;
+
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .overview-header h3 {
+            font-size: 13px;
+        }
+
+        .overview-header span {
+            color: #687792;
+
+            font-size: 8px;
+        }
+
+        .progress {
+            width: 100%;
+            height: 7px;
+
+            margin-top: 13px;
+
+            overflow: hidden;
+
+            border-radius: 20px;
+
+            background:
+                rgba(255,255,255,.06);
+        }
+
+        .progress-bar {
+            width: 72%;
+            height: 100%;
+
+            border-radius: inherit;
+
+            background:
+                linear-gradient(
+                    90deg,
+                    #087cff,
+                    #55c8ff
+                );
+
+            box-shadow:
+                0 0 12px
+                rgba(0,140,255,.45);
+
+            animation:
+                progressPulse 2.5s ease-in-out infinite;
+        }
+
+        @keyframes progressPulse {
+
+            0%,
+            100% {
+                opacity: .75;
+            }
+
+            50% {
+                opacity: 1;
+            }
+        }
+
+        .overview-info {
+            display: flex;
+
+            justify-content: space-between;
+
+            margin-top: 8px;
+
+            color: #60708a;
+
+            font-size: 8px;
+        }
+
+        /* =====================================================
+           QUICK ACTIONS
+           ===================================================== */
+
+        .actions {
+            display: grid;
+
+            grid-template-columns:
+                repeat(2, minmax(0,1fr));
+
+            gap: 10px;
+        }
+
+        .action {
+            min-height: 82px;
+
+            padding: 13px;
+
+            display: flex;
+
+            flex-direction: column;
+
+            justify-content: space-between;
+
+            text-align: left;
+
+            border-radius: 18px;
+
+            color: #ffffff;
+
+            background:
+                linear-gradient(
+                    145deg,
+                    rgba(255,255,255,.07),
+                    rgba(255,255,255,.03)
+                );
+
+            border:
+                1px solid
+                rgba(255,255,255,.075);
+
+            cursor: pointer;
+
+            transition:
+                .18s ease;
+        }
+
+        .action:hover {
+            border-color:
+                rgba(0,140,255,.35);
+
+            transform:
+                translateY(-2px);
+        }
+
+        .action:active {
+            transform:
+                scale(.96);
+        }
+
+        .action-icon {
+            font-size: 20px;
+        }
+
+        .action strong {
+            font-size: 11px;
+        }
+
+        .action span {
+            margin-top: 3px;
+
+            color: #697893;
+
+            font-size: 8px;
+        }
+
+        /* =====================================================
+           MODULES
+           ===================================================== */
+
+        .modules {
+            display: grid;
+
+            gap: 8px;
+        }
+
+        .module {
+            display: flex;
+
+            align-items: center;
+
+            gap: 11px;
+
+            padding: 11px 12px;
+
+            border-radius: 16px;
+
+            background:
+                rgba(255,255,255,.045);
+
+            border:
+                1px solid
+                rgba(255,255,255,.065);
+        }
+
+        .module-icon {
+            width: 35px;
+            height: 35px;
+
+            flex-shrink: 0;
+
+            display: flex;
+
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 11px;
+
+            background:
+                rgba(255,255,255,.05);
+
+            font-size: 15px;
+        }
+
+        .module-info {
+            flex: 1;
+        }
+
+        .module-info strong {
+            display: block;
+
+            font-size: 10px;
+        }
+
+        .module-info span {
+            display: block;
+
+            margin-top: 3px;
+
+            color: #65738c;
+
+            font-size: 8px;
+        }
+
+        .module-status {
+            color: #00e99b;
+
+            font-size: 8px;
+
+            font-weight: 700;
+        }
+
+        /* =====================================================
+           SYSTEM MESSAGE
+           ===================================================== */
+
+        .system-message {
+            padding: 16px;
+
+            border-radius: 20px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    rgba(0,126,255,.09),
+                    rgba(120,50,255,.07)
+                );
+
+            border:
+                1px solid
+                rgba(0,126,255,.12);
+        }
+
+        .system-message h3 {
+            font-size: 13px;
+        }
+
+        .system-message p {
+            margin-top: 6px;
+
+            color: #74829c;
+
+            font-size: 9px;
+
+            line-height: 1.55;
+        }
+
+        /* =====================================================
+           BOTTOM NAV
+           ===================================================== */
+
+        .bottom-nav {
+            position: fixed;
+
+            z-index: 100;
+
+            left: 10px;
+            right: 10px;
+            bottom: 10px;
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(4,1fr);
+
+            gap: 5px;
+
+            padding: 7px;
+
+            border-radius: 21px;
+
+            background:
+                rgba(7,12,25,.91);
+
+            border:
+                1px solid
+                rgba(255,255,255,.09);
+
+            backdrop-filter:
+                blur(20px);
+
+            -webkit-backdrop-filter:
+                blur(20px);
+
+            box-shadow:
+                0 15px 45px
+                rgba(0,0,0,.42);
+        }
+
+        .nav-item {
+            min-height: 45px;
+
+            display: flex;
+
+            flex-direction: column;
+
+            align-items: center;
+            justify-content: center;
+
+            gap: 2px;
+
+            border-radius: 14px;
+
+            background: transparent;
+
+            color: #687791;
+
+            cursor: pointer;
+        }
+
+        .nav-item.active {
+            color: #7cc8ff;
+
+            background:
+                rgba(0,126,255,.11);
+        }
+
+        .nav-item:active {
+            transform:
+                scale(.92);
+        }
+
+        .nav-icon {
+            font-size: 17px;
+        }
+
+        .nav-label {
+            font-size: 8px;
+        }
+
+        /* =====================================================
+           RESPONSIVE
+           ===================================================== */
+
+        @media (min-width: 600px) {
+
+            .status-grid {
+                grid-template-columns:
+                    repeat(4,1fr);
+            }
+
+            .actions {
+                grid-template-columns:
+                    repeat(4,1fr);
+            }
+
+            .modules {
+                grid-template-columns:
+                    repeat(2,1fr);
+            }
+        }
+
+        @media (min-width: 900px) {
+
+            .bottom-nav {
+                width: 480px;
+
+                left: 50%;
+                right: auto;
+
+                transform:
+                    translateX(-50%);
+            }
+        }
+
+    </style>
 
 </head>
 
@@ -31,761 +894,765 @@ HalDo AI OS 18 – Dashboard
 <body>
 
 
-<section class="screen">
+    <!-- =====================================================
+         BACKGROUND
+         ===================================================== -->
 
+    <div class="background">
 
-<!-- =====================================
-     HEADER
-===================================== -->
+        <div class="orb one"></div>
+        <div class="orb two"></div>
 
-<header class="header">
+    </div>
 
 
-    <img
-        src="assets/logo/logo.png"
-        class="logo small"
-        alt="HalDo AI OS Logo"
-    >
+    <!-- =====================================================
+         MAIN
+         ===================================================== -->
 
+    <main class="app">
 
-    <h1>
-        📊 HalDo AI OS 18
-    </h1>
 
+        <!-- HEADER -->
 
-    <p>
-        Professional Ultimate Foundation
-    </p>
+        <header class="header">
 
+            <div class="brand">
 
-</header>
+                <img
+                    class="logo"
+                    src="assets/logo/logo.png"
+                    alt="HalDo AI Logo"
+                >
 
+                <div class="brand-text">
 
+                    <strong>
+                        HalDo AI
+                    </strong>
 
+                    <span>
+                        OS 18 • DASHBOARD
+                    </span>
 
-<!-- =====================================
-     LANGUAGE
-===================================== -->
+                </div>
 
-<div class="settings-card">
+            </div>
 
 
-    <h2>
-        🌍
-        <span data-i18n="language">
-            Sprache
-        </span>
-    </h2>
+            <button
+                class="home-button"
+                onclick="goHome()"
+            >
+                ← Home
+            </button>
 
+        </header>
 
-    <select
-        id="language-select"
-        aria-label="Sprache"
-    ></select>
 
+        <!-- HERO -->
 
-</div>
+        <section class="hero">
 
+            <div class="hero-label">
 
+                <span class="status-dot"></span>
 
+                SYSTEM ONLINE
 
-<!-- =====================================
-     SYSTEM OVERVIEW
-===================================== -->
+            </div>
 
-<div class="settings-card">
 
+            <h1>
+                HalDo AI Dashboard
+            </h1>
 
-    <h2>
-        📡
-        <span data-i18n="status">
-            System Status
-        </span>
-    </h2>
 
+            <p>
+                Zentrale Übersicht über den aktuellen
+                Zustand und die verfügbaren Module
+                deines HalDo AI OS 18.
+            </p>
 
-    <p>
+        </section>
 
-        Betriebssystem:
 
-        <strong>
-            🟢 HalDo AI OS 18
-        </strong>
+        <!-- SYSTEM STATUS -->
 
-    </p>
+        <section class="section">
 
+            <div class="section-title">
 
-    <p>
+                <h2>
+                    Systemstatus
+                </h2>
 
-        System:
+                <span>
+                    LIVE
+                </span>
 
-        <strong id="system-state">
-            🟡 Wird geprüft...
-        </strong>
+            </div>
 
-    </p>
 
+            <div class="status-grid">
 
-    <p>
 
-        AI Engine:
+                <article class="status-card">
 
-        <strong id="ai-state">
-            🟡 Wird geprüft...
-        </strong>
+                    <div class="status-top">
 
-    </p>
+                        <div class="status-icon">
+                            ✦
+                        </div>
 
+                        <span class="status-state">
+                            AKTIV
+                        </span>
 
-    <p>
+                    </div>
 
-        Memory:
+                    <h3>
+                        HalDo AI
+                    </h3>
 
-        <strong id="memory-state">
-            🟡 Wird geprüft...
-        </strong>
+                    <p>
+                        AI-Oberfläche bereit
+                    </p>
 
-    </p>
+                </article>
 
 
-</div>
+                <article class="status-card">
 
+                    <div class="status-top">
 
+                        <div class="status-icon">
+                            ◈
+                        </div>
 
+                        <span class="status-state">
+                            AKTIV
+                        </span>
 
-<!-- =====================================
-     AI
-===================================== -->
+                    </div>
 
-<div class="settings-card">
+                    <h3>
+                        Apps
+                    </h3>
 
+                    <p>
+                        App-Zentrale verfügbar
+                    </p>
 
-    <h2>
-        🧠 AI Core
-    </h2>
+                </article>
 
 
-    <p>
-        HalDo AI ist bereit.
-    </p>
+                <article class="status-card">
 
+                    <div class="status-top">
 
-    <button
-        onclick="openPage('ai-core.html')"
-    >
+                        <div class="status-icon">
+                            ◉
+                        </div>
 
-        🧠 AI Core öffnen
+                        <span class="status-state">
+                            AKTIV
+                        </span>
 
-    </button>
+                    </div>
 
+                    <h3>
+                        Speicher
+                    </h3>
 
-</div>
+                    <p>
+                        Lokaler Speicher bereit
+                    </p>
 
+                </article>
 
 
+                <article class="status-card">
 
-<!-- =====================================
-     MODULES
-===================================== -->
+                    <div class="status-top">
 
-<div class="settings-card">
+                        <div class="status-icon">
+                            ⚙
+                        </div>
 
+                        <span class="status-state">
+                            BEREIT
+                        </span>
 
-    <h2>
-        🧩 Module
-    </h2>
+                    </div>
 
+                    <h3>
+                        System
+                    </h3>
 
-    <p>
-        Systemmodule verwalten und überwachen.
-    </p>
+                    <p>
+                        OS-Struktur bereit
+                    </p>
 
+                </article>
 
-    <button
-        onclick="openPage('modules.html')"
-    >
 
-        🧩 Module öffnen
+            </div>
 
-    </button>
+        </section>
 
 
-</div>
+        <!-- OVERVIEW -->
 
+        <section class="section">
 
+            <div class="section-title">
 
+                <h2>
+                    OS-Fortschritt
+                </h2>
 
-<!-- =====================================
-     APPS
-===================================== -->
+                <span>
+                    FOUNDATION
+                </span>
 
-<div class="settings-card">
+            </div>
 
 
-    <h2>
-        📱 Apps
-    </h2>
+            <div class="overview">
 
 
-    <p>
-        HalDo AI OS Anwendungen.
-    </p>
+                <article class="overview-card">
 
+                    <div class="overview-header">
 
-    <button
-        onclick="openPage('apps.html')"
-    >
+                        <h3>
+                            HalDo AI OS 18 Foundation
+                        </h3>
 
-        📱 Apps öffnen
+                        <span>
+                            72%
+                        </span>
 
-    </button>
+                    </div>
 
 
-</div>
+                    <div class="progress">
 
+                        <div class="progress-bar"></div>
 
+                    </div>
 
 
-<!-- =====================================
-     SETTINGS
-===================================== -->
+                    <div class="overview-info">
 
-<div class="settings-card">
+                        <span>
+                            Module werden aufgebaut
+                        </span>
 
+                        <span>
+                            LIVE
+                        </span>
 
-    <h2>
-        ⚙️
-        <span data-i18n="settings">
-            Einstellungen
-        </span>
-    </h2>
+                    </div>
 
+                </article>
 
-    <p>
-        Sprache, Stimme, AI, Speicher und Design.
-    </p>
 
+            </div>
 
-    <button
-        onclick="openPage('settings.html')"
-    >
+        </section>
 
-        ⚙️ Einstellungen öffnen
 
-    </button>
+        <!-- QUICK ACTIONS -->
 
+        <section class="section">
 
-</div>
+            <div class="section-title">
 
+                <h2>
+                    Schnellzugriff
+                </h2>
 
+                <span>
+                    ACTIONS
+                </span>
 
+            </div>
 
-<!-- =====================================
-     SYSTEM INFORMATION
-===================================== -->
 
-<div class="settings-card">
+            <div class="actions">
 
 
-    <h2>
-        💻 Systeminformationen
-    </h2>
+                <button
+                    class="action"
+                    onclick="openPage('chat.html')"
+                >
 
+                    <span class="action-icon">
+                        ✦
+                    </span>
 
-    <p>
+                    <div>
 
-        Version:
+                        <strong>
+                            HalDo AI Chat
+                        </strong>
 
-        <strong>
-            18.0.0
-        </strong>
+                        <span>
+                            Chat öffnen
+                        </span>
 
-    </p>
+                    </div>
 
+                </button>
 
-    <p>
 
-        Foundation:
+                <button
+                    class="action"
+                    onclick="openPage('apps.html')"
+                >
 
-        <strong>
-            Professional Ultimate
-        </strong>
+                    <span class="action-icon">
+                        ◈
+                    </span>
 
-    </p>
+                    <div>
 
+                        <strong>
+                            Apps
+                        </strong>
 
-    <p>
+                        <span>
+                            App-Zentrale
+                        </span>
 
-        Plattform:
+                    </div>
 
-        <strong id="platform-info">
-            Wird erkannt...
-        </strong>
+                </button>
 
-    </p>
 
+                <button
+                    class="action"
+                    onclick="showSystemMessage()"
+                >
 
-    <p>
+                    <span class="action-icon">
+                        ⚙
+                    </span>
 
-        Browser:
+                    <div>
 
-        <strong id="browser-info">
-            Wird erkannt...
-        </strong>
+                        <strong>
+                            System
+                        </strong>
 
-    </p>
+                        <span>
+                            Status prüfen
+                        </span>
 
+                    </div>
 
-</div>
+                </button>
 
 
+                <button
+                    class="action"
+                    onclick="showStorageInfo()"
+                >
 
+                    <span class="action-icon">
+                        ◉
+                    </span>
 
-<!-- =====================================
-     CLOCK
-===================================== -->
+                    <div>
 
-<div class="settings-card">
+                        <strong>
+                            Speicher
+                        </strong>
 
+                        <span>
+                            Lokale Daten
+                        </span>
 
-    <h2>
-        🕒 Systemzeit
-    </h2>
+                    </div>
 
+                </button>
 
-    <p id="dashboard-clock">
-        Wird geladen...
-    </p>
 
+            </div>
 
-</div>
+        </section>
 
 
+        <!-- MODULE -->
 
+        <section class="section">
 
-<!-- =====================================
-     BACK
-===================================== -->
+            <div class="section-title">
 
-<br>
+                <h2>
+                    HalDo Module
+                </h2>
 
+                <span>
+                    FOUNDATION
+                </span>
 
-<button
-    onclick="goBack()"
->
+            </div>
 
-    ⬅️
 
-    <span data-i18n="back">
-        Zurück
-    </span>
+            <div class="modules">
 
-</button>
 
+                <article class="module">
 
-</section>
+                    <div class="module-icon">
+                        ✦
+                    </div>
 
+                    <div class="module-info">
 
+                        <strong>
+                            AI Core
+                        </strong>
 
+                        <span>
+                            Zentrale KI-Schnittstelle
+                        </span>
 
-<!-- =====================================
-     SYSTEM SCRIPTS
-===================================== -->
+                    </div>
 
-<script src="js/boot.js"></script>
+                    <span class="module-status">
+                        READY
+                    </span>
 
-<script src="js/kernel.js"></script>
+                </article>
 
-<script src="js/system.js"></script>
 
-<script src="js/system-status.js"></script>
+                <article class="module">
 
-<script src="js/ai-core.js"></script>
+                    <div class="module-icon">
+                        ⌨
+                    </div>
 
-<script src="js/ai-engine.js"></script>
+                    <div class="module-info">
 
-<script src="js/ai-memory.js"></script>
+                        <strong>
+                            Keyboard
+                        </strong>
 
-<script src="js/language-system.js"></script>
+                        <span>
+                            Mehrsprachige Eingabe
+                        </span>
 
-<script src="js/language-manager.js"></script>
+                    </div>
 
+                    <span class="module-status">
+                        READY
+                    </span>
 
+                </article>
 
 
-<!-- =====================================
-     DASHBOARD CONTROLLER
-===================================== -->
+                <article class="module">
 
-<script>
+                    <div class="module-icon">
+                        ◈
+                    </div>
 
-(function () {
+                    <div class="module-info">
 
-    "use strict";
+                        <strong>
+                            App Manager
+                        </strong>
 
+                        <span>
+                            Verwaltung der OS-Apps
+                        </span>
 
+                    </div>
 
-    /* ==================================
-       NAVIGATION
-    ================================== */
+                    <span class="module-status">
+                        READY
+                    </span>
 
+                </article>
 
-    window.openPage = function(page) {
 
-        if (!page) {
+                <article class="module">
 
-            return;
+                    <div class="module-icon">
+                        ◉
+                    </div>
+
+                    <div class="module-info">
+
+                        <strong>
+                            Local Storage
+                        </strong>
+
+                        <span>
+                            Lokale Einstellungen und Daten
+                        </span>
+
+                    </div>
+
+                    <span class="module-status">
+                        READY
+                    </span>
+
+                </article>
+
+
+            </div>
+
+        </section>
+
+
+        <!-- SYSTEM MESSAGE -->
+
+        <section class="section">
+
+            <div
+                class="system-message"
+                id="systemMessage"
+            >
+
+                <h3>
+                    💙 HalDo AI OS 18
+                </h3>
+
+                <p>
+                    Die Foundation wird Schritt für Schritt
+                    aufgebaut. Funktionen werden erst als
+                    echte Seiten und Module integriert,
+                    damit keine unnötigen 404-Verbindungen
+                    entstehen.
+                </p>
+
+            </div>
+
+        </section>
+
+
+    </main>
+
+
+    <!-- =====================================================
+         BOTTOM NAVIGATION
+         ===================================================== -->
+
+    <nav class="bottom-nav">
+
+
+        <button
+            class="nav-item"
+            onclick="goHome()"
+        >
+
+            <span class="nav-icon">
+                ⌂
+            </span>
+
+            <span class="nav-label">
+                Home
+            </span>
+
+        </button>
+
+
+        <button
+            class="nav-item"
+            onclick="openPage('chat.html')"
+        >
+
+            <span class="nav-icon">
+                ✦
+            </span>
+
+            <span class="nav-label">
+                AI
+            </span>
+
+        </button>
+
+
+        <button
+            class="nav-item"
+            onclick="openPage('apps.html')"
+        >
+
+            <span class="nav-icon">
+                ◈
+            </span>
+
+            <span class="nav-label">
+                Apps
+            </span>
+
+        </button>
+
+
+        <button
+            class="nav-item active"
+            onclick="window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            })"
+        >
+
+            <span class="nav-icon">
+                ▦
+            </span>
+
+            <span class="nav-label">
+                System
+            </span>
+
+        </button>
+
+
+    </nav>
+
+
+    <script>
+
+        /* =====================================================
+           NAVIGATION
+           ===================================================== */
+
+        function goHome() {
+
+            window.location.href =
+                "index.html";
 
         }
 
 
-        window.location.href = page;
+        function openPage(page) {
 
-    };
+            if (!page) {
+                return;
+            }
 
-
-
-    window.goBack = function() {
-
-        window.location.href =
-            "index.html";
-
-    };
-
-
-
-    /* ==================================
-       LANGUAGE
-    ================================== */
-
-
-    function loadLanguages() {
-
-        const select =
-            document.getElementById(
-                "language-select"
-            );
-
-
-        if (
-            !select ||
-            !window.HalDoLanguageSystem
-        ) {
-
-            return;
+            window.location.href =
+                page;
 
         }
 
 
-        const languages =
-            HalDoLanguageSystem
-                .getLanguages();
+        /* =====================================================
+           SYSTEM MESSAGE
+           ===================================================== */
 
+        function showSystemMessage() {
 
-        select.innerHTML = "";
-
-
-        languages.forEach(
-            function(language) {
-
-                const option =
-                    document.createElement(
-                        "option"
-                    );
-
-
-                option.value =
-                    language.id;
-
-
-                option.textContent =
-                    language.native;
-
-
-                select.appendChild(
-                    option
+            const message =
+                document.getElementById(
+                    "systemMessage"
                 );
 
+
+            message.innerHTML = `
+
+                <h3>
+                    🟢 Systemstatus: Bereit
+                </h3>
+
+                <p>
+                    HalDo AI OS 18 Foundation ist aktiv.
+                    Die vorhandenen Dashboard-Module
+                    reagieren korrekt. Weitere System-
+                    funktionen werden als echte Module
+                    ergänzt.
+                </p>
+
+            `;
+
+            message.scrollIntoView({
+                behavior: "smooth",
+                block: "center"
+            });
+
+        }
+
+
+        /* =====================================================
+           STORAGE INFO
+           ===================================================== */
+
+        function showStorageInfo() {
+
+            let storageCount = 0;
+
+
+            try {
+
+                storageCount =
+                    localStorage.length;
+
+            } catch (error) {
+
+                storageCount = 0;
+
             }
-        );
 
 
-        select.value =
-            HalDoLanguageSystem.current;
-
-
-        select.addEventListener(
-            "change",
-            function() {
-
-                HalDoLanguageSystem
-                    .setLanguage(
-                        this.value
-                    );
-
-            }
-        );
-
-    }
-
-
-
-    /* ==================================
-       SYSTEM STATUS
-    ================================== */
-
-
-    function updateSystemStatus() {
-
-        const system =
-            document.getElementById(
-                "system-state"
-            );
-
-
-        if (!system) {
-
-            return;
-
-        }
-
-
-        if (
-            window.HalDoSystemStatus
-        ) {
-
-            system.textContent =
-                "🟢 Online";
-
-        }
-        else {
-
-            system.textContent =
-                "🟡 Bereit";
-
-        }
-
-    }
-
-
-
-    /* ==================================
-       AI STATUS
-    ================================== */
-
-
-    function updateAIStatus() {
-
-        const ai =
-            document.getElementById(
-                "ai-state"
-            );
-
-
-        if (!ai) {
-
-            return;
-
-        }
-
-
-        if (
-            window.HalDoAI
-        ) {
-
-            ai.textContent =
-                "🟢 "
-                +
-                (
-                    HalDoAI.status
-                    ||
-                    "Bereit"
+            const message =
+                document.getElementById(
+                    "systemMessage"
                 );
 
-        }
-        else {
 
-            ai.textContent =
-                "🟡 Nicht geladen";
+            message.innerHTML = `
 
-        }
+                <h3>
+                    ◉ Lokaler Speicher
+                </h3>
 
-    }
+                <p>
+                    Im Browser sind aktuell
+                    ${storageCount}
+                    lokale Einträge vorhanden.
+                    Der Speicher wird später von
+                    weiteren HalDo-Modulen genutzt.
+                </p>
 
-
-
-    /* ==================================
-       MEMORY STATUS
-    ================================== */
-
-
-    function updateMemoryStatus() {
-
-        const memory =
-            document.getElementById(
-                "memory-state"
-            );
+            `;
 
 
-        if (!memory) {
-
-            return;
+            message.scrollIntoView({
+                behavior: "smooth",
+                block: "center"
+            });
 
         }
 
 
-        if (
-            window.HalDoMemory
-        ) {
+        /* =====================================================
+           LOGO ABSICHERUNG
+           ===================================================== */
 
-            const conversations =
-                HalDoMemory
-                    .getConversations();
+        document
+            .querySelectorAll("img")
+            .forEach(function(img) {
 
+                img.addEventListener(
+                    "error",
+                    function() {
 
-            memory.textContent =
-                "🟢 "
-                +
-                conversations.length
-                +
-                " Gespräche";
+                        console.log(
+                            "HalDo Logo konnte nicht geladen werden:",
+                            img.src
+                        );
 
-        }
-        else {
+                    }
+                );
 
-            memory.textContent =
-                "🟡 Nicht geladen";
+            });
 
-        }
-
-    }
-
-
-
-    /* ==================================
-       DEVICE INFORMATION
-    ================================== */
-
-
-    function updateDeviceInfo() {
-
-        const platform =
-            document.getElementById(
-                "platform-info"
-            );
-
-
-        const browser =
-            document.getElementById(
-                "browser-info"
-            );
-
-
-        if (platform) {
-
-            platform.textContent =
-                navigator.platform
-                ||
-                "Unbekannt";
-
-        }
-
-
-        if (browser) {
-
-            browser.textContent =
-                navigator.userAgent;
-
-        }
-
-    }
-
-
-
-    /* ==================================
-       CLOCK
-    ================================== */
-
-
-    function updateClock() {
-
-        const clock =
-            document.getElementById(
-                "dashboard-clock"
-            );
-
-
-        if (!clock) {
-
-            return;
-
-        }
-
-
-        const now =
-            new Date();
-
-
-        clock.textContent =
-            now.toLocaleString(
-                "de-DE"
-            );
-
-    }
-
-
-
-    /* ==================================
-       START
-    ================================== */
-
-
-    window.addEventListener(
-        "DOMContentLoaded",
-        function() {
-
-
-            setTimeout(
-                function() {
-
-
-                    loadLanguages();
-
-
-                    updateSystemStatus();
-
-
-                    updateAIStatus();
-
-
-                    updateMemoryStatus();
-
-
-                    updateDeviceInfo();
-
-
-                    updateClock();
-
-
-                },
-                300
-            );
-
-
-        }
-    );
-
-
-    setInterval(
-        updateClock,
-        1000
-    );
-
-
-})();
-
-</script>
-
+    </script>
 
 </body>
 
