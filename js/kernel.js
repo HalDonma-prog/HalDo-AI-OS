@@ -3,704 +3,1183 @@
    Professional Ultimate Foundation
    ------------------------------------------------------------
    Datei: js/kernel.js
+
    Aufgabe:
-   - Zentraler Systemkern
-   - Bootstrapping
-   - Modul-/Service-Initialisierung
-   - Systemzustand
-   - Ereignisse
+   - Zentraler System-Kernel
+   - Startsequenz
+   - Systemstatus
+   - Modulverwaltung
+   - Event-System
    - Fehlerbehandlung
-   - globale HalDo API
+   - Verbindung zu App Manager / Launcher
+   ============================================================ */
+
+"use strict";
+
+
+/* ============================================================
+   01 — HALDO KERNEL
    ============================================================ */
 
 (function (window, document) {
-    "use strict";
 
     const VERSION = "18.0.0";
     const SYSTEM_NAME = "HalDo AI OS";
-    const EDITION = "Professional Ultimate Foundation";
+    const BUILD_NAME =
+        "Professional Ultimate Foundation";
+
+
+    /* ========================================================
+       Kernel State
+       ======================================================== */
 
     const state = {
-        booting: false,
+
+        initialized: false,
+
+        booted: false,
+
         ready: false,
+
         error: false,
 
-        status: "idle",
+        bootTime: null,
 
         version: VERSION,
-        systemName: SYSTEM_NAME,
-        edition: EDITION,
-
-        startTime: null,
-        readyTime: null,
 
         modules: {},
-        services: {},
-        apps: {},
 
         events: {},
-        errors: [],
 
-        config: {
-            system: null,
-            apps: null,
-            modules: null,
-            permissions: null,
-            keyboard: null,
-            ai: null,
-            themes: null,
-            logo: null
-        }
+        logs: []
+
     };
 
-    const listeners = new Map();
 
-    /* =========================================================
-       LOGGING
-       ========================================================= */
+    /* ========================================================
+       Logger
+       ======================================================== */
 
-    function timestamp() {
-        return new Date().toISOString();
-    }
+    function log(
+        message,
+        type = "info"
+    ) {
 
-    function log(message, data) {
-        console.info(
-            `[HalDo Kernel ${VERSION}] ${message}`,
-            data !== undefined ? data : ""
-        );
-    }
-
-    function warn(message, data) {
-        console.warn(
-            `[HalDo Kernel ${VERSION}] ${message}`,
-            data !== undefined ? data : ""
-        );
-    }
-
-    function error(message, details) {
         const entry = {
-            time: timestamp(),
-            message,
-            details: details || null
+
+            time:
+                new Date().toISOString(),
+
+            type,
+
+            message
+
         };
 
-        state.errors.push(entry);
-        state.error = true;
 
-        console.error(
-            `[HalDo Kernel ${VERSION}] ${message}`,
-            details || ""
-        );
+        state.logs.push(entry);
 
-        emit("kernel:error", entry);
-    }
 
-    /* =========================================================
-       EVENTS
-       ========================================================= */
+        /*
+         * Logs begrenzen,
+         * damit der Speicher nicht unnötig wächst.
+         */
 
-    function on(eventName, callback) {
-        if (typeof callback !== "function") {
-            return function () {};
+        if (
+            state.logs.length > 200
+        ) {
+
+            state.logs.shift();
+
         }
 
-        if (!listeners.has(eventName)) {
-            listeners.set(eventName, new Set());
-        }
 
-        listeners.get(eventName).add(callback);
+        const prefix =
+            `[${SYSTEM_NAME} ${VERSION}]`;
 
-        return function unsubscribe() {
-            off(eventName, callback);
-        };
-    }
 
-    function off(eventName, callback) {
-        const eventListeners = listeners.get(eventName);
+        if (
+            type === "error"
+        ) {
 
-        if (!eventListeners) {
-            return;
-        }
-
-        eventListeners.delete(callback);
-
-        if (eventListeners.size === 0) {
-            listeners.delete(eventName);
-        }
-    }
-
-    function emit(eventName, payload) {
-        const eventListeners = listeners.get(eventName);
-
-        if (!eventListeners) {
-            return;
-        }
-
-        eventListeners.forEach(function (callback) {
-            try {
-                callback(payload);
-            } catch (callbackError) {
-                console.error(
-                    `[HalDo Kernel] Event listener error: ${eventName}`,
-                    callbackError
-                );
-            }
-        });
-    }
-
-    /* =========================================================
-       STATE
-       ========================================================= */
-
-    function setStatus(status) {
-        state.status = status;
-
-        emit("kernel:status", {
-            status,
-            time: timestamp()
-        });
-
-        updateSystemStatusElement(status);
-    }
-
-    function updateSystemStatusElement(status) {
-        const element = document.querySelector(
-            "[data-haldo-system-status]"
-        );
-
-        if (!element) {
-            return;
-        }
-
-        element.textContent = status;
-        element.dataset.status = status;
-    }
-
-    function getState() {
-        return {
-            ...state,
-            modules: { ...state.modules },
-            services: { ...state.services },
-            apps: { ...state.apps },
-            errors: [...state.errors]
-        };
-    }
-
-    /* =========================================================
-       CONFIGURATION
-       ========================================================= */
-
-    async function loadJSON(path) {
-        const response = await fetch(path, {
-            cache: "no-store"
-        });
-
-        if (!response.ok) {
-            throw new Error(
-                `Konfiguration konnte nicht geladen werden: ${path} (${response.status})`
+            console.error(
+                prefix,
+                message
             );
+
+        }
+        else if (
+            type === "warning"
+        ) {
+
+            console.warn(
+                prefix,
+                message
+            );
+
+        }
+        else {
+
+            console.log(
+                prefix,
+                message
+            );
+
         }
 
-        return response.json();
     }
 
-    async function loadConfigurations() {
-        setStatus("loading-config");
 
-        const configurationFiles = {
-            system: "config/system.json",
-            apps: "config/apps.json",
-            modules: "config/modules.json",
-            permissions: "config/permissions.json",
-            keyboard: "config/keyboard.json",
-            ai: "config/ai.json",
-            themes: "config/themes.json",
-            logo: "config/logo.json"
-        };
+    /* ========================================================
+       Event System
+       ======================================================== */
 
-        const entries = Object.entries(configurationFiles);
+    function on(
+        eventName,
+        callback
+    ) {
 
-        for (const [key, path] of entries) {
-            try {
-                state.config[key] = await loadJSON(path);
+        if (
+            typeof callback !==
+            "function"
+        ) {
 
-                log(`Konfiguration geladen: ${path}`);
+            return false;
 
-                emit("config:loaded", {
-                    key,
-                    path,
-                    config: state.config[key]
-                });
-            } catch (loadError) {
-                error(
-                    `Fehler beim Laden der Konfiguration: ${path}`,
-                    loadError
+        }
+
+
+        if (
+            !state.events[eventName]
+        ) {
+
+            state.events[eventName] = [];
+
+        }
+
+
+        state.events[eventName]
+            .push(callback);
+
+
+        return true;
+
+    }
+
+
+    function off(
+        eventName,
+        callback
+    ) {
+
+        if (
+            !state.events[eventName]
+        ) {
+
+            return false;
+
+        }
+
+
+        state.events[eventName] =
+            state.events[eventName]
+                .filter(
+                    fn => fn !== callback
                 );
 
-                throw loadError;
-            }
-        }
-
-        setStatus("configuration-ready");
-
-        return state.config;
-    }
-
-    /* =========================================================
-       CONFIGURATION ACCESS
-       ========================================================= */
-
-    function getConfig(name) {
-        if (!Object.prototype.hasOwnProperty.call(
-            state.config,
-            name
-        )) {
-            return null;
-        }
-
-        return state.config[name];
-    }
-
-    /* =========================================================
-       MODULE REGISTRATION
-       ========================================================= */
-
-    function registerModule(id, moduleData) {
-        if (!id) {
-            throw new Error("Module-ID fehlt.");
-        }
-
-        if (state.modules[id]) {
-            warn(`Modul bereits registriert: ${id}`);
-            return false;
-        }
-
-        state.modules[id] = {
-            id,
-            ...moduleData,
-            registeredAt: timestamp()
-        };
-
-        emit("module:registered", state.modules[id]);
 
         return true;
+
     }
 
-    function unregisterModule(id) {
-        if (!state.modules[id]) {
-            return false;
+
+    function emit(
+        eventName,
+        data = null
+    ) {
+
+        const listeners =
+            state.events[eventName];
+
+
+        if (
+            !listeners
+        ) {
+
+            return;
+
         }
 
-        delete state.modules[id];
 
-        emit("module:unregistered", {
-            id
-        });
+        listeners.forEach(
+            callback => {
 
-        return true;
-    }
+                try {
 
-    function getModule(id) {
-        return state.modules[id] || null;
-    }
+                    callback(data);
 
-    /* =========================================================
-       SERVICE REGISTRATION
-       ========================================================= */
-
-    function registerService(id, serviceData) {
-        if (!id) {
-            throw new Error("Service-ID fehlt.");
-        }
-
-        if (state.services[id]) {
-            warn(`Service bereits registriert: ${id}`);
-            return false;
-        }
-
-        state.services[id] = {
-            id,
-            ...serviceData,
-            registeredAt: timestamp()
-        };
-
-        emit("service:registered", state.services[id]);
-
-        return true;
-    }
-
-    function unregisterService(id) {
-        if (!state.services[id]) {
-            return false;
-        }
-
-        delete state.services[id];
-
-        emit("service:unregistered", {
-            id
-        });
-
-        return true;
-    }
-
-    function getService(id) {
-        return state.services[id] || null;
-    }
-
-    /* =========================================================
-       APP REGISTRATION
-       ========================================================= */
-
-    function registerApp(id, appData) {
-        if (!id) {
-            throw new Error("App-ID fehlt.");
-        }
-
-        if (state.apps[id]) {
-            warn(`App bereits registriert: ${id}`);
-            return false;
-        }
-
-        state.apps[id] = {
-            id,
-            ...appData,
-            registeredAt: timestamp()
-        };
-
-        emit("app:registered", state.apps[id]);
-
-        return true;
-    }
-
-    function unregisterApp(id) {
-        if (!state.apps[id]) {
-            return false;
-        }
-
-        delete state.apps[id];
-
-        emit("app:unregistered", {
-            id
-        });
-
-        return true;
-    }
-
-    function getApp(id) {
-        return state.apps[id] || null;
-    }
-
-    /* =========================================================
-       DEPENDENCY CHECK
-       ========================================================= */
-
-    function checkDependencies() {
-        const moduleConfig = state.config.modules;
-
-        if (!moduleConfig || !Array.isArray(moduleConfig.modules)) {
-            throw new Error(
-                "Keine gültige Modulkonfiguration vorhanden."
-            );
-        }
-
-        const moduleIds = new Set(
-            moduleConfig.modules.map(function (module) {
-                return module.id;
-            })
-        );
-
-        const problems = [];
-
-        moduleConfig.modules.forEach(function (module) {
-            const dependencies = Array.isArray(module.dependencies)
-                ? module.dependencies
-                : [];
-
-            dependencies.forEach(function (dependency) {
-                if (!moduleIds.has(dependency)) {
-                    problems.push({
-                        module: module.id,
-                        missingDependency: dependency
-                    });
                 }
-            });
-        });
+                catch (error) {
 
-        if (problems.length > 0) {
-            problems.forEach(function (problem) {
-                warn(
-                    `Fehlende Modulabhängigkeit: ${problem.module} → ${problem.missingDependency}`
-                );
-            });
+                    log(
+                        `Fehler im Event "${eventName}": ${error.message}`,
+                        "error"
+                    );
+
+                }
+
+            }
+        );
+
+    }
+
+
+    /* ========================================================
+       Module Registry
+       ======================================================== */
+
+    function registerModule(
+        name,
+        module
+    ) {
+
+        if (
+            !name
+        ) {
 
             return false;
+
         }
 
-        emit("dependencies:valid");
+
+        state.modules[name] = {
+
+            name,
+
+            module,
+
+            registeredAt:
+                Date.now(),
+
+            ready: true
+
+        };
+
+
+        log(
+            `Modul registriert: ${name}`
+        );
+
+
+        emit(
+            "module:registered",
+            {
+                name,
+                module
+            }
+        );
+
 
         return true;
+
     }
 
-    /* =========================================================
-       MODULE LOAD ORDER
-       ========================================================= */
 
-    function getModuleLoadOrder() {
-        const moduleConfig = state.config.modules;
+    function unregisterModule(
+        name
+    ) {
 
-        if (!moduleConfig || !Array.isArray(moduleConfig.modules)) {
-            return [];
+        if (
+            !state.modules[name]
+        ) {
+
+            return false;
+
         }
 
-        return [...moduleConfig.modules]
-            .filter(function (module) {
-                return module.enabled !== false;
-            })
-            .sort(function (a, b) {
-                return (b.priority || 0) - (a.priority || 0);
-            });
+
+        delete state.modules[name];
+
+
+        log(
+            `Modul entfernt: ${name}`
+        );
+
+
+        emit(
+            "module:unregistered",
+            {
+                name
+            }
+        );
+
+
+        return true;
+
     }
 
-    /* =========================================================
-       MODULE STATUS
-       ========================================================= */
 
-    function markModuleStatus(id, status, details) {
-        if (!state.modules[id]) {
-            state.modules[id] = {
-                id
-            };
+    function getModule(
+        name
+    ) {
+
+        if (
+            !state.modules[name]
+        ) {
+
+            return null;
+
         }
 
-        state.modules[id].status = status;
-        state.modules[id].updatedAt = timestamp();
 
-        if (details !== undefined) {
-            state.modules[id].details = details;
-        }
+        return state.modules[name].module;
 
-        emit("module:status", {
-            id,
-            status,
-            details: details || null
-        });
     }
 
-    /* =========================================================
-       SYSTEM TEST
-       ========================================================= */
 
-    function runFoundationCheck() {
-        const checks = {
-            document: !!document,
-            window: !!window,
-            fetch: typeof fetch === "function",
-            configuration: Object.values(state.config)
-                .every(function (value) {
-                    return value !== null;
-                }),
-            dependencies: false
-        };
+    function hasModule(
+        name
+    ) {
 
-        try {
-            checks.dependencies = checkDependencies();
-        } catch (checkError) {
-            checks.dependencies = false;
-            warn(
-                "Dependency-Check konnte nicht vollständig ausgeführt werden.",
-                checkError
-            );
-        }
+        return Boolean(
+            state.modules[name]
+        );
 
-        const passed = Object.values(checks)
-            .every(Boolean);
+    }
 
-        emit("diagnostics:foundation", {
-            passed,
-            checks
-        });
+
+    /* ========================================================
+       System Information
+       ======================================================== */
+
+    function getSystemInfo() {
 
         return {
-            passed,
-            checks
+
+            name:
+                SYSTEM_NAME,
+
+            version:
+                VERSION,
+
+            build:
+                BUILD_NAME,
+
+            initialized:
+                state.initialized,
+
+            booted:
+                state.booted,
+
+            ready:
+                state.ready,
+
+            error:
+                state.error,
+
+            bootTime:
+                state.bootTime,
+
+            moduleCount:
+                Object.keys(
+                    state.modules
+                ).length,
+
+            modules:
+                Object.keys(
+                    state.modules
+                )
+
         };
+
     }
 
-    /* =========================================================
-       GLOBAL API
-       ========================================================= */
 
-    function createGlobalAPI() {
-        window.HalDo = {
-            version: VERSION,
+    /* ========================================================
+       Device Information
+       ======================================================== */
 
-            system: {
-                name: SYSTEM_NAME,
-                edition: EDITION
+    function getDeviceInfo() {
+
+        const ua =
+            navigator.userAgent ||
+            "";
+
+
+        return {
+
+            userAgent:
+                ua,
+
+            language:
+                navigator.language ||
+                "de-DE",
+
+            languages:
+                Array.isArray(
+                    navigator.languages
+                )
+                    ? navigator.languages
+                    : [],
+
+            online:
+                navigator.onLine,
+
+            platform:
+                navigator.platform ||
+                "",
+
+            screen: {
+
+                width:
+                    window.screen
+                        ? window.screen.width
+                        : 0,
+
+                height:
+                    window.screen
+                        ? window.screen.height
+                        : 0
+
             },
 
-            kernel: {
-                getState,
-                setStatus,
-                getConfig,
+            viewport: {
 
-                on,
-                off,
-                emit,
+                width:
+                    window.innerWidth,
 
-                registerModule,
-                unregisterModule,
-                getModule,
+                height:
+                    window.innerHeight
 
-                registerService,
-                unregisterService,
-                getService,
+            },
 
-                registerApp,
-                unregisterApp,
-                getApp,
+            touch:
 
-                checkDependencies,
-                getModuleLoadOrder,
-                runFoundationCheck
-            }
+                "ontouchstart"
+                in window
+
         };
 
-        emit("kernel:api-ready", window.HalDo);
     }
 
-    /* =========================================================
-       READY STATE
-       ========================================================= */
 
-    function markReady() {
-        state.ready = true;
-        state.booting = false;
-        state.error = false;
-        state.status = "ready";
-        state.readyTime = Date.now();
+    /* ========================================================
+       Environment Check
+       ======================================================== */
 
-        updateSystemStatusElement("ready");
+    function checkEnvironment() {
 
-        emit("kernel:ready", getState());
+        const checks = {
 
-        log("HalDo AI OS Kernel ist bereit.");
-    }
+            document:
+                Boolean(document),
 
-    /* =========================================================
-       BOOTSTRAP
-       ========================================================= */
+            window:
+                Boolean(window),
 
-    async function start() {
-        if (state.booting) {
-            warn("Kernel wird bereits gestartet.");
-            return;
-        }
+            localStorage:
+                false,
 
-        if (state.ready) {
-            warn("Kernel ist bereits bereit.");
-            return;
-        }
+            sessionStorage:
+                false,
 
-        state.booting = true;
-        state.startTime = Date.now();
-        state.status = "booting";
+            fetch:
+                typeof window.fetch ===
+                "function",
 
-        emit("kernel:starting", {
-            version: VERSION,
-            time: timestamp()
-        });
+            promises:
+                typeof Promise ===
+                "function",
 
-        updateSystemStatusElement("booting");
+            json:
+                typeof JSON ===
+                "object"
 
-        log("HalDo AI OS Kernel startet...");
+        };
+
 
         try {
-            createGlobalAPI();
 
-            await loadConfigurations();
+            const testKey =
+                "__haldo_test__";
 
-            const foundation = runFoundationCheck();
 
-            if (!foundation.passed) {
-                throw new Error(
-                    "Die HalDo AI OS Foundation-Prüfung ist fehlgeschlagen."
+            window.localStorage.setItem(
+                testKey,
+                "1"
+            );
+
+
+            window.localStorage.removeItem(
+                testKey
+            );
+
+
+            checks.localStorage =
+                true;
+
+        }
+        catch (error) {
+
+            log(
+                "localStorage ist nicht verfügbar.",
+                "warning"
+            );
+
+        }
+
+
+        try {
+
+            const testKey =
+                "__haldo_session_test__";
+
+
+            window.sessionStorage.setItem(
+                testKey,
+                "1"
+            );
+
+
+            window.sessionStorage.removeItem(
+                testKey
+            );
+
+
+            checks.sessionStorage =
+                true;
+
+        }
+        catch (error) {
+
+            log(
+                "sessionStorage ist nicht verfügbar.",
+                "warning"
+            );
+
+        }
+
+
+        return checks;
+
+    }
+
+
+    /* ========================================================
+       Storage Helper
+       ======================================================== */
+
+    const storage = {
+
+        get(
+            key,
+            fallback = null
+        ) {
+
+            try {
+
+                const value =
+                    localStorage.getItem(
+                        key
+                    );
+
+
+                if (
+                    value === null
+                ) {
+
+                    return fallback;
+
+                }
+
+
+                return JSON.parse(
+                    value
                 );
+
+            }
+            catch (error) {
+
+                return fallback;
+
             }
 
-            setStatus("kernel-ready");
+        },
 
-            emit("kernel:foundation-ready", {
-                config: getState().config,
-                modules: getModuleLoadOrder()
-            });
 
-            markReady();
-
-        } catch (startError) {
-            state.booting = false;
-            state.ready = false;
-            state.error = true;
-            state.status = "error";
-
-            error(
-                "HalDo AI OS Kernel konnte nicht vollständig gestartet werden.",
-                startError
-            );
-
-            updateSystemStatusElement("error");
-
-            emit("kernel:failed", {
-                error: startError,
-                state: getState()
-            });
-        }
-    }
-
-    /* =========================================================
-       DOM READY
-       ========================================================= */
-
-    function initialize() {
-        if (
-            document.readyState === "loading"
+        set(
+            key,
+            value
         ) {
-            document.addEventListener(
-                "DOMContentLoaded",
-                start,
-                { once: true }
-            );
-        } else {
-            start();
+
+            try {
+
+                localStorage.setItem(
+                    key,
+                    JSON.stringify(
+                        value
+                    )
+                );
+
+                return true;
+
+            }
+            catch (error) {
+
+                log(
+                    `Storage-Fehler bei "${key}".`,
+                    "warning"
+                );
+
+                return false;
+
+            }
+
+        },
+
+
+        remove(
+            key
+        ) {
+
+            try {
+
+                localStorage.removeItem(
+                    key
+                );
+
+                return true;
+
+            }
+            catch (error) {
+
+                return false;
+
+            }
+
         }
-    }
 
-    /* =========================================================
-       PUBLIC KERNEL OBJECT
-       ========================================================= */
-
-    window.HalDoKernel = {
-        version: VERSION,
-        start,
-        getState,
-        getConfig,
-        on,
-        off,
-        emit,
-        registerModule,
-        unregisterModule,
-        getModule,
-        registerService,
-        unregisterService,
-        getService,
-        registerApp,
-        unregisterApp,
-        getApp,
-        checkDependencies,
-        getModuleLoadOrder,
-        runFoundationCheck
     };
 
-    initialize();
+
+    /* ========================================================
+       Safe Async Helper
+       ======================================================== */
+
+    function wait(
+        milliseconds
+    ) {
+
+        return new Promise(
+            resolve => {
+
+                window.setTimeout(
+                    resolve,
+                    milliseconds
+                );
+
+            }
+        );
+
+    }
+
+
+    /* ========================================================
+       Startup Status
+       ======================================================== */
+
+    function setStartupStatus(
+        message
+    ) {
+
+        if (
+            window.HalDoStartup &&
+            typeof
+                window.HalDoStartup.setStatus ===
+                "function"
+        ) {
+
+            window.HalDoStartup.setStatus(
+                message
+            );
+
+        }
+
+    }
+
+
+    /* ========================================================
+       BOOT SEQUENCE
+       ======================================================== */
+
+    async function boot() {
+
+        if (
+            state.booted
+        ) {
+
+            return true;
+
+        }
+
+
+        state.bootTime =
+            Date.now();
+
+
+        log(
+            "Kernel startet."
+        );
+
+
+        emit(
+            "kernel:boot:start"
+        );
+
+
+        try {
+
+            /* ----------------------------------------------
+               Schritt 1
+               ---------------------------------------------- */
+
+            setStartupStatus(
+                "HalDo AI Kernel wird initialisiert..."
+            );
+
+
+            await wait(120);
+
+
+            state.initialized =
+                true;
+
+
+            log(
+                "Kernel initialisiert."
+            );
+
+
+            emit(
+                "kernel:initialized"
+            );
+
+
+            /* ----------------------------------------------
+               Schritt 2
+               ---------------------------------------------- */
+
+            setStartupStatus(
+                "Systemumgebung wird geprüft..."
+            );
+
+
+            await wait(120);
+
+
+            const environment =
+                checkEnvironment();
+
+
+            state.environment =
+                environment;
+
+
+            emit(
+                "environment:checked",
+                environment
+            );
+
+
+            /* ----------------------------------------------
+               Schritt 3
+               ---------------------------------------------- */
+
+            setStartupStatus(
+                "HalDo AI Systemmodule werden vorbereitet..."
+            );
+
+
+            await wait(120);
+
+
+            registerModule(
+                "kernel",
+                api
+            );
+
+
+            /* ----------------------------------------------
+               Schritt 4
+               ---------------------------------------------- */
+
+            setStartupStatus(
+                "HalDo AI App-System wird verbunden..."
+            );
+
+
+            await wait(100);
+
+
+            state.booted =
+                true;
+
+
+            emit(
+                "kernel:booted"
+            );
+
+
+            /* ----------------------------------------------
+               Schritt 5
+               ---------------------------------------------- */
+
+            setStartupStatus(
+                "HalDo AI OS 18 ist bereit."
+            );
+
+
+            state.ready =
+                true;
+
+
+            emit(
+                "kernel:ready"
+            );
+
+
+            log(
+                "HalDo AI OS 18 erfolgreich gestartet."
+            );
+
+
+            return true;
+
+        }
+        catch (error) {
+
+            state.error =
+                true;
+
+
+            log(
+                `Kernel-Fehler: ${error.message}`,
+                "error"
+            );
+
+
+            emit(
+                "kernel:error",
+                error
+            );
+
+
+            setStartupStatus(
+                "HalDo AI OS konnte nicht vollständig gestartet werden."
+            );
+
+
+            return false;
+
+        }
+
+    }
+
+
+    /* ========================================================
+       SYSTEM SHUTDOWN
+       ======================================================== */
+
+    function shutdown() {
+
+        log(
+            "HalDo AI OS wird beendet.",
+            "warning"
+        );
+
+
+        state.ready =
+            false;
+
+        state.booted =
+            false;
+
+
+        emit(
+            "kernel:shutdown"
+        );
+
+    }
+
+
+    /* ========================================================
+       PUBLIC API
+       ======================================================== */
+
+    const api = {
+
+        name:
+            SYSTEM_NAME,
+
+        version:
+            VERSION,
+
+        build:
+            BUILD_NAME,
+
+
+        /* Kernel */
+
+        boot,
+
+        shutdown,
+
+
+        /* Status */
+
+        getState:
+            function () {
+
+                return {
+
+                    initialized:
+                        state.initialized,
+
+                    booted:
+                        state.booted,
+
+                    ready:
+                        state.ready,
+
+                    error:
+                        state.error
+
+                };
+
+            },
+
+
+        getSystemInfo,
+
+
+        getDeviceInfo,
+
+
+        /* Environment */
+
+        checkEnvironment,
+
+
+        /* Events */
+
+        on,
+
+        off,
+
+        emit,
+
+
+        /* Modules */
+
+        registerModule,
+
+        unregisterModule,
+
+        getModule,
+
+        hasModule,
+
+
+        /* Storage */
+
+        storage,
+
+
+        /* Utility */
+
+        wait,
+
+
+        /* Logs */
+
+        getLogs:
+            function () {
+
+                return [
+                    ...state.logs
+                ];
+
+            },
+
+
+        clearLogs:
+            function () {
+
+                state.logs.length =
+                    0;
+
+            }
+
+    };
+
+
+    /* ========================================================
+       GLOBAL REGISTRATION
+       ======================================================== */
+
+    window.HalDoKernel =
+        api;
+
+
+    /* ========================================================
+       LEGACY / COMPATIBILITY ALIASES
+       ======================================================== */
+
+    window.HalDoOS =
+        window.HalDoOS ||
+        {};
+
+
+    window.HalDoOS.kernel =
+        api;
+
+
+    /* ========================================================
+       GLOBAL ERROR HANDLING
+       ======================================================== */
+
+    window.addEventListener(
+        "error",
+        function (event) {
+
+            /*
+             * Nicht jeden Browserfehler als
+             * vollständigen Systemabsturz behandeln.
+             */
+
+            log(
+                event.message ||
+                "Unbekannter JavaScript-Fehler.",
+                "error"
+            );
+
+
+            emit(
+                "system:error",
+                event.error ||
+                event
+            );
+
+        }
+    );
+
+
+    window.addEventListener(
+        "unhandledrejection",
+        function (event) {
+
+            log(
+                "Unbehandelte Promise-Ablehnung.",
+                "error"
+            );
+
+
+            emit(
+                "system:promise-error",
+                event.reason
+            );
+
+        }
+    );
+
+
+    /* ========================================================
+       ONLINE / OFFLINE
+       ======================================================== */
+
+    window.addEventListener(
+        "online",
+        function () {
+
+            log(
+                "Internetverbindung hergestellt."
+            );
+
+
+            emit(
+                "network:online"
+            );
+
+        }
+    );
+
+
+    window.addEventListener(
+        "offline",
+        function () {
+
+            log(
+                "Internetverbindung verloren.",
+                "warning"
+            );
+
+
+            emit(
+                "network:offline"
+            );
+
+        }
+    );
+
+
+    /* ========================================================
+       AUTOMATISCHER START
+       ======================================================== */
+
+    function startKernel() {
+
+        /*
+         * Kleine Verzögerung,
+         * damit defer-Skripte und DOM
+         * sauber initialisiert werden.
+         */
+
+        window.setTimeout(
+            function () {
+
+                boot();
+
+            },
+            50
+        );
+
+    }
+
+
+    if (
+        document.readyState ===
+        "loading"
+    ) {
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            startKernel,
+            {
+                once: true
+            }
+        );
+
+    }
+    else {
+
+        startKernel();
+
+    }
+
 
 })(window, document);
+
+
+/* ============================================================
+   ENDE — HALDO AI OS 18 KERNEL
+   ============================================================ */
