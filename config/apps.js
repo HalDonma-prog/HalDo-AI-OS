@@ -7,14 +7,23 @@
 
    Zentrale App Registry
 
-   Diese Datei enthält die komplette App-Liste von HalDo AI OS 18.
-
    WICHTIG:
-   - Keine direkten .html-Links
-   - Keine window.location.href
-   - Keine zufälligen Dateipfade
-   - Jede App besitzt eine eindeutige ID
-   - Der App Router entscheidet später, wie die App geöffnet wird
+   Diese Datei enthält die zentrale App-Liste.
+   Andere Dateien sollen keine eigene App-Liste führen.
+
+   Architektur:
+
+   config/apps.js
+          ↓
+   HalDoAppRegistry
+          ↓
+   app-manager.js
+          ↓
+   launcher.js
+          ↓
+   app-router.js
+          ↓
+   App-Module
    ============================================================ */
 
 "use strict";
@@ -24,106 +33,214 @@
 
 
     /* ========================================================
-       01 — APP DATEN
+       01 — REGISTRY INFORMATION
        ======================================================== */
 
-    const APPS = [
+    const REGISTRY_NAME =
+        "HalDo AI OS 18 App Registry";
+
+    const REGISTRY_VERSION =
+        "18.0.0";
+
+
+    /* ========================================================
+       02 — APP DATABASE
+       ======================================================== */
+
+    const apps = [
 
         /* ====================================================
-           AI & ASSISTANT
+           KI & AI
            ==================================================== */
 
         {
-            id: "ai-chat",
-            title: "HalDo AI Chat",
-            name: "AI Chat",
-            description: "Intelligenter HalDo AI Chat und persönlicher Assistent.",
-            category: "ai",
-            icon: "assets/logo/logo.png",
+            id:
+                "ai-chat",
+
+            title:
+                "HalDo AI Chat",
+
+            name:
+                "HalDo AI Chat",
+
+            description:
+                "Intelligenter HalDo AI Chat für Fragen, Antworten und Gespräche.",
+
+            category:
+                "ai",
+
+            icon:
+                "assets/logo/logo.png",
+
             keywords: [
                 "ai",
                 "ki",
                 "chat",
-                "assistent",
+                "assistant",
                 "haldo",
                 "künstliche intelligenz"
             ],
-            favorite: true,
-            enabled: true,
-            order: 1
+
+            enabled:
+                true,
+
+            favorite:
+                true,
+
+            order:
+                10
         },
 
+
         {
-            id: "ai-voice",
-            title: "HalDo Voice",
-            name: "Voice AI",
-            description: "Sprachsteuerung und Sprachkommunikation mit HalDo AI.",
-            category: "ai",
-            icon: "🎙️",
+            id:
+                "ai-assistant",
+
+            title:
+                "AI Assistant",
+
+            name:
+                "AI Assistant",
+
+            description:
+                "Zentrale persönliche KI-Unterstützung innerhalb von HalDo AI OS.",
+
+            category:
+                "ai",
+
+            icon:
+                "assets/logo/logo.png",
+
+            keywords: [
+                "assistant",
+                "ki",
+                "ai",
+                "hilfe",
+                "assistent"
+            ],
+
+            enabled:
+                true,
+
+            favorite:
+                false,
+
+            order:
+                20
+        },
+
+
+        {
+            id:
+                "ai-voice",
+
+            title:
+                "AI Voice",
+
+            name:
+                "AI Voice",
+
+            description:
+                "Sprachsteuerung und Sprachinteraktion für HalDo AI.",
+
+            category:
+                "ai",
+
+            icon:
+                "🎙️",
+
             keywords: [
                 "voice",
                 "sprache",
-                "mikrofon",
-                "sprechen",
-                "sprachsteuerung"
+                "sprachsteuerung",
+                "microfon",
+                "mikrofon"
             ],
-            favorite: false,
-            enabled: true,
-            order: 2
+
+            enabled:
+                true,
+
+            favorite:
+                false,
+
+            order:
+                30
         },
 
+
         {
-            id: "ai-vision",
-            title: "HalDo Vision",
-            name: "Vision AI",
-            description: "Bildanalyse und visuelle KI-Funktionen.",
-            category: "ai",
-            icon: "👁️",
+            id:
+                "ai-vision",
+
+            title:
+                "AI Vision",
+
+            name:
+                "AI Vision",
+
+            description:
+                "Bild- und visuelle KI-Funktionen.",
+
+            category:
+                "ai",
+
+            icon:
+                "👁️",
+
             keywords: [
                 "vision",
                 "bild",
                 "kamera",
-                "analyse",
-                "foto"
+                "foto",
+                "analyse"
             ],
-            favorite: false,
-            enabled: true,
-            order: 3
+
+            enabled:
+                true,
+
+            favorite:
+                false,
+
+            order:
+                40
         },
 
-        {
-            id: "ai-memory",
-            title: "HalDo Memory",
-            name: "Memory",
-            description: "Persönliche und systemweite KI-Erinnerungen.",
-            category: "ai",
-            icon: "🧠",
-            keywords: [
-                "memory",
-                "gedächtnis",
-                "erinnerung",
-                "wissen"
-            ],
-            favorite: false,
-            enabled: true,
-            order: 4
-        },
 
         {
-            id: "ai-tools",
-            title: "AI Tools",
-            name: "AI Tools",
-            description: "Zentrale Sammlung intelligenter KI-Werkzeuge.",
-            category: "ai",
-            icon: "✦",
+            id:
+                "ai-translator",
+
+            title:
+                "AI Übersetzer",
+
+            name:
+                "AI Übersetzer",
+
+            description:
+                "Übersetzungsfunktionen für verschiedene Sprachen.",
+
+            category:
+                "ai",
+
+            icon:
+                "🌐",
+
             keywords: [
-                "ai tools",
-                "ki tools",
-                "werkzeuge"
+                "übersetzer",
+                "translation",
+                "sprache",
+                "translator",
+                "language"
             ],
-            favorite: false,
-            enabled: true,
-            order: 5
+
+            enabled:
+                true,
+
+            favorite:
+                false,
+
+            order:
+                50
         },
 
 
@@ -132,72 +249,150 @@
            ==================================================== */
 
         {
-            id: "messages",
-            title: "Nachrichten",
-            name: "Messages",
-            description: "Nachrichten und Kommunikation.",
-            category: "communication",
-            icon: "💬",
+            id:
+                "messages",
+
+            title:
+                "Nachrichten",
+
+            name:
+                "Nachrichten",
+
+            description:
+                "Zentrale Nachrichten- und Kommunikationsoberfläche.",
+
+            category:
+                "communication",
+
+            icon:
+                "💬",
+
             keywords: [
                 "nachrichten",
                 "messages",
-                "chat"
+                "chat",
+                "kommunikation"
             ],
-            favorite: false,
-            enabled: true,
-            order: 10
+
+            enabled:
+                true,
+
+            favorite:
+                false,
+
+            order:
+                100
         },
 
+
         {
-            id: "contacts",
-            title: "Kontakte",
-            name: "Contacts",
-            description: "Kontakte verwalten und organisieren.",
-            category: "communication",
-            icon: "👥",
+            id:
+                "contacts",
+
+            title:
+                "Kontakte",
+
+            name:
+                "Kontakte",
+
+            description:
+                "Kontakte verwalten und schnell erreichen.",
+
+            category:
+                "communication",
+
+            icon:
+                "👥",
+
             keywords: [
                 "kontakte",
-                "telefonbuch",
-                "personen"
+                "contacts",
+                "personen",
+                "telefonbuch"
             ],
-            favorite: false,
-            enabled: true,
-            order: 11
+
+            enabled:
+                true,
+
+            favorite:
+                false,
+
+            order:
+                110
         },
 
-        {
-            id: "mail",
-            title: "E-Mail",
-            name: "Mail",
-            description: "E-Mails verwalten und organisieren.",
-            category: "communication",
-            icon: "✉️",
-            keywords: [
-                "email",
-                "mail",
-                "e-mail"
-            ],
-            favorite: false,
-            enabled: true,
-            order: 12
-        },
 
         {
-            id: "video-call",
-            title: "Video Call",
-            name: "Video Call",
-            description: "Video- und Audio-Kommunikation.",
-            category: "communication",
-            icon: "📹",
+            id:
+                "phone",
+
+            title:
+                "Telefon",
+
+            name:
+                "Telefon",
+
+            description:
+                "Telefon- und Anruffunktionen.",
+
+            category:
+                "communication",
+
+            icon:
+                "📞",
+
             keywords: [
-                "video",
+                "telefon",
                 "anruf",
                 "call",
-                "kamera"
+                "phone"
             ],
-            favorite: false,
-            enabled: true,
-            order: 13
+
+            enabled:
+                true,
+
+            favorite:
+                false,
+
+            order:
+                120
+        },
+
+
+        {
+            id:
+                "email",
+
+            title:
+                "E-Mail",
+
+            name:
+                "E-Mail",
+
+            description:
+                "E-Mail-Verwaltung und Kommunikation.",
+
+            category:
+                "communication",
+
+            icon:
+                "✉️",
+
+            keywords: [
+                "email",
+                "e-mail",
+                "mail",
+                "postfach"
+            ],
+
+            enabled:
+                true,
+
+            favorite:
+                false,
+
+            order:
+                130
         },
 
 
@@ -206,91 +401,190 @@
            ==================================================== */
 
         {
-            id: "calendar",
-            title: "Kalender",
-            name: "Calendar",
-            description: "Termine, Veranstaltungen und Erinnerungen.",
-            category: "productivity",
-            icon: "📅",
+            id:
+                "calendar",
+
+            title:
+                "Kalender",
+
+            name:
+                "Kalender",
+
+            description:
+                "Termine, Ereignisse und Kalender verwalten.",
+
+            category:
+                "productivity",
+
+            icon:
+                "📅",
+
             keywords: [
                 "kalender",
+                "calendar",
                 "termine",
-                "event",
-                "erinnerung"
+                "ereignisse",
+                "event"
             ],
-            favorite: true,
-            enabled: true,
-            order: 20
+
+            enabled:
+                true,
+
+            favorite:
+                false,
+
+            order:
+                200
         },
 
+
         {
-            id: "notes",
-            title: "Notizen",
-            name: "Notes",
-            description: "Notizen erstellen, bearbeiten und organisieren.",
-            category: "productivity",
-            icon: "📝",
+            id:
+                "tasks",
+
+            title:
+                "Aufgaben",
+
+            name:
+                "Aufgaben",
+
+            description:
+                "Aufgaben erstellen, organisieren und verfolgen.",
+
+            category:
+                "productivity",
+
+            icon:
+                "☑️",
+
+            keywords: [
+                "aufgaben",
+                "tasks",
+                "todo",
+                "to-do",
+                "liste"
+            ],
+
+            enabled:
+                true,
+
+            favorite:
+                false,
+
+            order:
+                210
+        },
+
+
+        {
+            id:
+                "notes",
+
+            title:
+                "Notizen",
+
+            name:
+                "Notizen",
+
+            description:
+                "Notizen schreiben, bearbeiten und organisieren.",
+
+            category:
+                "productivity",
+
+            icon:
+                "📝",
+
             keywords: [
                 "notizen",
                 "notes",
-                "text"
+                "notiz",
+                "memo"
             ],
-            favorite: false,
-            enabled: true,
-            order: 21
+
+            enabled:
+                true,
+
+            favorite:
+                false,
+
+            order:
+                220
         },
 
-        {
-            id: "tasks",
-            title: "Aufgaben",
-            name: "Tasks",
-            description: "Aufgaben und To-do-Listen verwalten.",
-            category: "productivity",
-            icon: "☑️",
-            keywords: [
-                "aufgaben",
-                "todo",
-                "tasks"
-            ],
-            favorite: false,
-            enabled: true,
-            order: 22
-        },
 
         {
-            id: "calculator",
-            title: "Rechner",
-            name: "Calculator",
-            description: "Leistungsfähiger Taschenrechner.",
-            category: "tools",
-            icon: "🧮",
+            id:
+                "calculator",
+
+            title:
+                "Taschenrechner",
+
+            name:
+                "Taschenrechner",
+
+            description:
+                "Rechner für alltägliche und wissenschaftliche Berechnungen.",
+
+            category:
+                "productivity",
+
+            icon:
+                "🧮",
+
             keywords: [
                 "rechner",
                 "calculator",
-                "mathematik"
+                "mathe",
+                "rechnung"
             ],
-            favorite: false,
-            enabled: true,
-            order: 23
+
+            enabled:
+                true,
+
+            favorite:
+                false,
+
+            order:
+                230
         },
 
+
         {
-            id: "clock",
-            title: "Uhr",
-            name: "Clock",
-            description: "Uhrzeit, Timer, Stoppuhr und Wecker.",
-            category: "productivity",
-            icon: "🕐",
+            id:
+                "clock",
+
+            title:
+                "Uhr",
+
+            name:
+                "Uhr",
+
+            description:
+                "Uhrzeit, Timer, Stoppuhr und Wecker.",
+
+            category:
+                "productivity",
+
+            icon:
+                "🕒",
+
             keywords: [
                 "uhr",
-                "zeit",
+                "clock",
                 "timer",
                 "stoppuhr",
                 "wecker"
             ],
-            favorite: false,
-            enabled: true,
-            order: 24
+
+            enabled:
+                true,
+
+            favorite:
+                false,
+
+            order:
+                240
         },
 
 
@@ -299,55 +593,113 @@
            ==================================================== */
 
         {
-            id: "files",
-            title: "Dateien",
-            name: "File Manager",
-            description: "Dateien und Ordner verwalten.",
-            category: "files",
-            icon: "📁",
+            id:
+                "files",
+
+            title:
+                "Dateien",
+
+            name:
+                "Dateien",
+
+            description:
+                "Dateien durchsuchen, organisieren und verwalten.",
+
+            category:
+                "files",
+
+            icon:
+                "📁",
+
             keywords: [
                 "dateien",
                 "files",
                 "ordner",
-                "file manager"
+                "file manager",
+                "dokumente"
             ],
-            favorite: true,
-            enabled: true,
-            order: 30
+
+            enabled:
+                true,
+
+            favorite:
+                true,
+
+            order:
+                300
         },
 
-        {
-            id: "downloads",
-            title: "Downloads",
-            name: "Downloads",
-            description: "Heruntergeladene Dateien verwalten.",
-            category: "files",
-            icon: "⬇️",
-            keywords: [
-                "downloads",
-                "download"
-            ],
-            favorite: false,
-            enabled: true,
-            order: 31
-        },
 
         {
-            id: "documents",
-            title: "Dokumente",
-            name: "Documents",
-            description: "Dokumente anzeigen und organisieren.",
-            category: "files",
-            icon: "📄",
+            id:
+                "documents",
+
+            title:
+                "Dokumente",
+
+            name:
+                "Dokumente",
+
+            description:
+                "Dokumente erstellen und bearbeiten.",
+
+            category:
+                "files",
+
+            icon:
+                "📄",
+
             keywords: [
                 "dokumente",
                 "documents",
-                "pdf",
-                "dateien"
+                "text",
+                "datei"
             ],
-            favorite: false,
-            enabled: true,
-            order: 32
+
+            enabled:
+                true,
+
+            favorite:
+                false,
+
+            order:
+                310
+        },
+
+
+        {
+            id:
+                "downloads",
+
+            title:
+                "Downloads",
+
+            name:
+                "Downloads",
+
+            description:
+                "Heruntergeladene Dateien verwalten.",
+
+            category:
+                "files",
+
+            icon:
+                "⬇️",
+
+            keywords: [
+                "downloads",
+                "download",
+                "herunterladen"
+            ],
+
+            enabled:
+                true,
+
+            favorite:
+                false,
+
+            order:
+                320
         },
 
 
@@ -356,72 +708,151 @@
            ==================================================== */
 
         {
-            id: "photos",
-            title: "Fotos",
-            name: "Photos",
-            description: "Bilder und Fotos verwalten.",
-            category: "media",
-            icon: "🖼️",
+            id:
+                "gallery",
+
+            title:
+                "Galerie",
+
+            name:
+                "Galerie",
+
+            description:
+                "Bilder und visuelle Inhalte verwalten.",
+
+            category:
+                "media",
+
+            icon:
+                "🖼️",
+
             keywords: [
-                "fotos",
-                "bilder",
                 "galerie",
+                "gallery",
+                "bilder",
+                "fotos",
                 "photos"
             ],
-            favorite: false,
-            enabled: true,
-            order: 40
+
+            enabled:
+                true,
+
+            favorite:
+                false,
+
+            order:
+                400
         },
 
+
         {
-            id: "camera",
-            title: "Kamera",
-            name: "Camera",
-            description: "Kamera und Bildaufnahme.",
-            category: "media",
-            icon: "📷",
+            id:
+                "camera",
+
+            title:
+                "Kamera",
+
+            name:
+                "Kamera",
+
+            description:
+                "Kameraoberfläche für Foto- und Videoaufnahmen.",
+
+            category:
+                "media",
+
+            icon:
+                "📷",
+
             keywords: [
                 "kamera",
+                "camera",
                 "foto",
                 "video"
             ],
-            favorite: false,
-            enabled: true,
-            order: 41
+
+            enabled:
+                true,
+
+            favorite:
+                false,
+
+            order:
+                410
         },
 
+
         {
-            id: "music",
-            title: "Musik",
-            name: "Music",
-            description: "Musik und Audio verwalten.",
-            category: "media",
-            icon: "🎵",
+            id:
+                "music",
+
+            title:
+                "Musik",
+
+            name:
+                "Musik",
+
+            description:
+                "Musik und Audioinhalte verwalten.",
+
+            category:
+                "media",
+
+            icon:
+                "🎵",
+
             keywords: [
                 "musik",
+                "music",
                 "audio",
                 "songs"
             ],
-            favorite: false,
-            enabled: true,
-            order: 42
+
+            enabled:
+                true,
+
+            favorite:
+                false,
+
+            order:
+                420
         },
 
+
         {
-            id: "video",
-            title: "Video",
-            name: "Video",
-            description: "Videos verwalten und abspielen.",
-            category: "media",
-            icon: "🎬",
+            id:
+                "video",
+
+            title:
+                "Video",
+
+            name:
+                "Video",
+
+            description:
+                "Videos verwalten und wiedergeben.",
+
+            category:
+                "media",
+
+            icon:
+                "🎬",
+
             keywords: [
                 "video",
                 "filme",
-                "media"
+                "movies",
+                "player"
             ],
-            favorite: false,
-            enabled: true,
-            order: 43
+
+            enabled:
+                true,
+
+            favorite:
+                false,
+
+            order:
+                430
         },
 
 
@@ -430,98 +861,155 @@
            ==================================================== */
 
         {
-            id: "browser",
-            title: "Browser",
-            name: "HalDo Browser",
-            description: "Webseiten und Internetdienste öffnen.",
-            category: "internet",
-            icon: "🌐",
+            id:
+                "browser",
+
+            title:
+                "Browser",
+
+            name:
+                "Browser",
+
+            description:
+                "Webseiten und Internetinhalte öffnen.",
+
+            category:
+                "internet",
+
+            icon:
+                "🌐",
+
             keywords: [
                 "browser",
                 "internet",
                 "web",
                 "www"
             ],
-            favorite: true,
-            enabled: true,
-            order: 50
+
+            enabled:
+                true,
+
+            favorite:
+                true,
+
+            order:
+                500
         },
 
+
         {
-            id: "search",
-            title: "Suche",
-            name: "Search",
-            description: "HalDo System- und Websuche.",
-            category: "internet",
-            icon: "🔎",
+            id:
+                "bookmarks",
+
+            title:
+                "Lesezeichen",
+
+            name:
+                "Lesezeichen",
+
+            description:
+                "Gespeicherte Webseiten und Favoriten verwalten.",
+
+            category:
+                "internet",
+
+            icon:
+                "🔖",
+
             keywords: [
-                "suche",
-                "search",
-                "finden"
+                "lesezeichen",
+                "bookmarks",
+                "favoriten",
+                "web"
             ],
-            favorite: false,
-            enabled: true,
-            order: 51
+
+            enabled:
+                true,
+
+            favorite:
+                false,
+
+            order:
+                510
         },
 
 
         /* ====================================================
-           BILDUNG
+           LERNEN
            ==================================================== */
 
         {
-            id: "translator",
-            title: "Übersetzer",
-            name: "Translator",
-            description: "Texte und Sprachen übersetzen.",
-            category: "education",
-            icon: "🌍",
+            id:
+                "education",
+
+            title:
+                "Lernen",
+
+            name:
+                "Lernen",
+
+            description:
+                "Lernwerkzeuge und Wissensfunktionen.",
+
+            category:
+                "education",
+
+            icon:
+                "🎓",
+
             keywords: [
-                "übersetzer",
-                "translation",
-                "sprache",
-                "übersetzen"
+                "lernen",
+                "bildung",
+                "education",
+                "schule",
+                "wissen"
             ],
-            favorite: false,
-            enabled: true,
-            order: 60
+
+            enabled:
+                true,
+
+            favorite:
+                false,
+
+            order:
+                600
         },
 
+
         {
-            id: "dictionary",
-            title: "Wörterbuch",
-            name: "Dictionary",
-            description: "Wörter, Bedeutungen und Definitionen.",
-            category: "education",
-            icon: "📚",
+            id:
+                "dictionary",
+
+            title:
+                "Wörterbuch",
+
+            name:
+                "Wörterbuch",
+
+            description:
+                "Wörter, Begriffe und Bedeutungen nachschlagen.",
+
+            category:
+                "education",
+
+            icon:
+                "📚",
+
             keywords: [
                 "wörterbuch",
                 "dictionary",
-                "definition"
+                "wörter",
+                "bedeutung"
             ],
-            favorite: false,
-            enabled: true,
-            order: 61
-        },
 
-        {
-            id: "ezidi-keyboard",
-            title: "Êzîdî Tastatur",
-            name: "Êzîdî Keyboard",
-            description: "Êzîdî-Tastatur mit eigenen Zeichen und Layouts.",
-            category: "education",
-            icon: "⌨️",
-            keywords: [
-                "ezidi",
-                "êzîdî",
-                "tastatur",
-                "keyboard",
-                "zeichen",
-                "layout"
-            ],
-            favorite: true,
-            enabled: true,
-            order: 62
+            enabled:
+                true,
+
+            favorite:
+                false,
+
+            order:
+                610
         },
 
 
@@ -530,56 +1018,192 @@
            ==================================================== */
 
         {
-            id: "code-editor",
-            title: "Code Editor",
-            name: "Code Editor",
-            description: "Code schreiben und bearbeiten.",
-            category: "development",
-            icon: "💻",
+            id:
+                "code-editor",
+
+            title:
+                "Code Editor",
+
+            name:
+                "Code Editor",
+
+            description:
+                "Code schreiben, bearbeiten und verwalten.",
+
+            category:
+                "development",
+
+            icon:
+                "💻",
+
             keywords: [
                 "code",
-                "programmieren",
                 "editor",
-                "entwicklung"
+                "programmieren",
+                "entwicklung",
+                "developer"
             ],
-            favorite: false,
-            enabled: true,
-            order: 70
+
+            enabled:
+                true,
+
+            favorite:
+                false,
+
+            order:
+                700
         },
 
+
         {
-            id: "developer-tools",
-            title: "Developer Tools",
-            name: "Developer Tools",
-            description: "Werkzeuge für Entwicklung und Diagnose.",
-            category: "development",
-            icon: "🛠️",
+            id:
+                "developer-tools",
+
+            title:
+                "Developer Tools",
+
+            name:
+                "Developer Tools",
+
+            description:
+                "Werkzeuge für Entwicklung und Systemdiagnose.",
+
+            category:
+                "development",
+
+            icon:
+                "🛠️",
+
             keywords: [
                 "developer",
+                "tools",
                 "entwicklung",
                 "debug",
-                "tools"
+                "diagnose"
             ],
-            favorite: false,
-            enabled: true,
-            order: 71
+
+            enabled:
+                true,
+
+            favorite:
+                false,
+
+            order:
+                710
         },
 
+
+        /* ====================================================
+           WERKZEUGE
+           ==================================================== */
+
         {
-            id: "api-center",
-            title: "API Center",
-            name: "API Center",
-            description: "APIs und Systemintegrationen verwalten.",
-            category: "development",
-            icon: "🔌",
+            id:
+                "weather",
+
+            title:
+                "Wetter",
+
+            name:
+                "Wetter",
+
+            description:
+                "Wetterinformationen und Vorhersagen.",
+
+            category:
+                "tools",
+
+            icon:
+                "☁️",
+
             keywords: [
-                "api",
-                "schnittstelle",
-                "integration"
+                "wetter",
+                "weather",
+                "temperatur",
+                "vorhersage"
             ],
-            favorite: false,
-            enabled: true,
-            order: 72
+
+            enabled:
+                true,
+
+            favorite:
+                false,
+
+            order:
+                800
+        },
+
+
+        {
+            id:
+                "maps",
+
+            title:
+                "Karten",
+
+            name:
+                "Karten",
+
+            description:
+                "Karten- und Navigationsfunktionen.",
+
+            category:
+                "tools",
+
+            icon:
+                "🗺️",
+
+            keywords: [
+                "karten",
+                "maps",
+                "navigation",
+                "ort"
+            ],
+
+            enabled:
+                true,
+
+            favorite:
+                false,
+
+            order:
+                810
+        },
+
+
+        {
+            id:
+                "scanner",
+
+            title:
+                "Scanner",
+
+            name:
+                "Scanner",
+
+            description:
+                "Dokumente und Inhalte digital erfassen.",
+
+            category:
+                "tools",
+
+            icon:
+                "📠",
+
+            keywords: [
+                "scanner",
+                "scan",
+                "dokument"
+            ],
+
+            enabled:
+                true,
+
+            favorite:
+                false,
+
+            order:
+                820
         },
 
 
@@ -588,37 +1212,76 @@
            ==================================================== */
 
         {
-            id: "security",
-            title: "Sicherheit",
-            name: "Security Center",
-            description: "Sicherheitsstatus und Schutzfunktionen.",
-            category: "security",
-            icon: "🛡️",
+            id:
+                "security",
+
+            title:
+                "Sicherheit",
+
+            name:
+                "Sicherheit",
+
+            description:
+                "Sicherheitsstatus und Schutzfunktionen.",
+
+            category:
+                "security",
+
+            icon:
+                "🛡️",
+
             keywords: [
                 "sicherheit",
                 "security",
-                "schutz"
+                "schutz",
+                "privacy"
             ],
-            favorite: false,
-            enabled: true,
-            order: 80
+
+            enabled:
+                true,
+
+            favorite:
+                false,
+
+            order:
+                900
         },
 
+
         {
-            id: "privacy",
-            title: "Datenschutz",
-            name: "Privacy",
-            description: "Datenschutz- und Berechtigungseinstellungen.",
-            category: "security",
-            icon: "🔐",
+            id:
+                "privacy",
+
+            title:
+                "Datenschutz",
+
+            name:
+                "Datenschutz",
+
+            description:
+                "Datenschutz- und Privatsphäre-Einstellungen.",
+
+            category:
+                "security",
+
+            icon:
+                "🔒",
+
             keywords: [
                 "datenschutz",
                 "privacy",
-                "berechtigungen"
+                "privatsphäre",
+                "schutz"
             ],
-            favorite: false,
-            enabled: true,
-            order: 81
+
+            enabled:
+                true,
+
+            favorite:
+                false,
+
+            order:
+                910
         },
 
 
@@ -627,406 +1290,504 @@
            ==================================================== */
 
         {
-            id: "settings",
-            title: "Einstellungen",
-            name: "Settings",
-            description: "HalDo AI OS Einstellungen.",
-            category: "settings",
-            icon: "⚙️",
+            id:
+                "dashboard",
+
+            title:
+                "Dashboard",
+
+            name:
+                "Dashboard",
+
+            description:
+                "Zentrale Übersicht über HalDo AI OS 18.",
+
+            category:
+                "system",
+
+            icon:
+                "▦",
+
+            keywords: [
+                "dashboard",
+                "übersicht",
+                "start",
+                "system"
+            ],
+
+            enabled:
+                true,
+
+            favorite:
+                true,
+
+            order:
+                1000
+        },
+
+
+        {
+            id:
+                "system-monitor",
+
+            title:
+                "System Monitor",
+
+            name:
+                "System Monitor",
+
+            description:
+                "Systemstatus und laufende Komponenten überwachen.",
+
+            category:
+                "system",
+
+            icon:
+                "📊",
+
+            keywords: [
+                "system",
+                "monitor",
+                "status",
+                "module"
+            ],
+
+            enabled:
+                true,
+
+            favorite:
+                false,
+
+            order:
+                1010
+        },
+
+
+        {
+            id:
+                "settings",
+
+            title:
+                "Einstellungen",
+
+            name:
+                "Einstellungen",
+
+            description:
+                "HalDo AI OS Einstellungen verwalten.",
+
+            category:
+                "settings",
+
+            icon:
+                "⚙️",
+
             keywords: [
                 "einstellungen",
                 "settings",
-                "system"
+                "optionen",
+                "konfiguration"
             ],
-            favorite: true,
-            enabled: true,
-            order: 90
+
+            enabled:
+                true,
+
+            favorite:
+                true,
+
+            order:
+                1100
         },
 
+
         {
-            id: "system-info",
-            title: "Systeminfo",
-            name: "System Info",
-            description: "Informationen über HalDo AI OS.",
-            category: "system",
-            icon: "ℹ️",
+            id:
+                "app-manager",
+
+            title:
+                "App Manager",
+
+            name:
+                "App Manager",
+
+            description:
+                "Installierte und verfügbare HalDo Apps verwalten.",
+
+            category:
+                "settings",
+
+            icon:
+                "▦",
+
             keywords: [
+                "app manager",
+                "apps",
+                "verwaltung",
+                "anwendungen"
+            ],
+
+            enabled:
+                true,
+
+            favorite:
+                false,
+
+            order:
+                1110
+        },
+
+
+        /* ====================================================
+           HALDO SPEZIAL
+           ==================================================== */
+
+        {
+            id:
+                "haldo-home",
+
+            title:
+                "HalDo Home",
+
+            name:
+                "HalDo Home",
+
+            description:
+                "Zentrale HalDo AI OS Startoberfläche.",
+
+            category:
                 "system",
-                "info",
-                "version",
-                "status"
+
+            icon:
+                "assets/logo/logo.png",
+
+            keywords: [
+                "haldo",
+                "home",
+                "startseite",
+                "start"
             ],
-            favorite: false,
-            enabled: true,
-            order: 91
+
+            enabled:
+                true,
+
+            favorite:
+                true,
+
+            order:
+                1
         },
 
-        {
-            id: "system-monitor",
-            title: "System Monitor",
-            name: "System Monitor",
-            description: "Systemstatus und laufende Dienste überwachen.",
-            category: "system",
-            icon: "📊",
-            keywords: [
-                "monitor",
-                "system",
-                "status",
-                "diagnose"
-            ],
-            favorite: false,
-            enabled: true,
-            order: 92
-        },
 
         {
-            id: "notifications",
-            title: "Benachrichtigungen",
-            name: "Notifications",
-            description: "System- und App-Benachrichtigungen.",
-            category: "system",
-            icon: "🔔",
-            keywords: [
-                "benachrichtigungen",
-                "notifications",
-                "meldungen"
-            ],
-            favorite: false,
-            enabled: true,
-            order: 93
-        },
+            id:
+                "haldo-ai",
 
-        {
-            id: "help",
-            title: "Hilfe",
-            name: "Help Center",
-            description: "Hilfe, Dokumentation und Informationen.",
-            category: "system",
-            icon: "❔",
+            title:
+                "HalDo AI",
+
+            name:
+                "HalDo AI",
+
+            description:
+                "Zentrale künstliche Intelligenz von HalDo AI OS 18.",
+
+            category:
+                "ai",
+
+            icon:
+                "assets/logo/logo.png",
+
             keywords: [
-                "hilfe",
-                "help",
-                "support"
+                "haldo",
+                "ai",
+                "ki",
+                "assistant"
             ],
-            favorite: false,
-            enabled: true,
-            order: 94
+
+            enabled:
+                true,
+
+            favorite:
+                true,
+
+            order:
+                5
         }
 
     ];
 
 
     /* ========================================================
-       02 — KATEGORIEN
+       03 — DUPLIKATE VERHINDERN
        ======================================================== */
 
-    const CATEGORY_NAMES = {
+    const uniqueApps =
+        [];
 
-        all:
-            "Alle Apps",
+    const usedIds =
+        new Set();
 
-        favorites:
-            "Favoriten",
 
-        ai:
-            "KI & AI",
+    apps.forEach(
+        app => {
 
-        communication:
-            "Kommunikation",
+            if (
+                !app ||
+                !app.id
+            ) {
 
-        productivity:
-            "Produktivität",
+                return;
 
-        tools:
-            "Werkzeuge",
+            }
 
-        files:
-            "Dateien",
 
-        media:
-            "Medien",
+            const id =
+                String(
+                    app.id
+                )
+                .trim()
+                .toLowerCase();
 
-        internet:
-            "Internet",
 
-        education:
-            "Lernen",
+            if (
+                usedIds.has(
+                    id
+                )
+            ) {
 
-        development:
-            "Entwicklung",
+                console.warn(
+                    "[HalDo App Registry] Doppelte App-ID ignoriert:",
+                    id
+                );
 
-        security:
-            "Sicherheit",
 
-        settings:
-            "Einstellungen",
+                return;
 
-        system:
-            "System",
+            }
 
-        other:
-            "Weitere Apps"
 
-    };
+            usedIds.add(
+                id
+            );
+
+
+            uniqueApps.push(
+                {
+                    ...app,
+
+                    id
+                }
+            );
+
+        }
+    );
 
 
     /* ========================================================
-       03 — REGISTRY API
+       04 — SICHERE KOPIE
+       ======================================================== */
+
+    function cloneApp(
+        app
+    ) {
+
+        if (
+            !app
+        ) {
+
+            return null;
+
+        }
+
+
+        return {
+
+            ...app,
+
+            keywords:
+                [
+                    ...(app.keywords || [])
+                ]
+
+        };
+
+    }
+
+
+    /* ========================================================
+       05 — ALLE APPS
        ======================================================== */
 
     function getAllApps() {
 
-        return APPS
-            .filter(
-                app =>
-                    app.enabled !==
-                    false
-            )
-            .sort(
-                (a, b) =>
-                    (
-                        a.order || 9999
-                    ) -
-                    (
-                        b.order || 9999
-                    )
-            )
+        return uniqueApps
             .map(
-                app => ({
-                    ...app,
-
-                    keywords:
-                        [
-                            ...(app.keywords || [])
-                        ]
-
-                })
+                cloneApp
             );
 
     }
 
+
+    /* ========================================================
+       06 — APP SUCHEN
+       ======================================================== */
 
     function getApp(
         appId
     ) {
 
         const id =
-            normalizeId(
-                appId
-            );
+            String(
+                appId ||
+                ""
+            )
+            .trim()
+            .toLowerCase();
 
 
         const app =
-            APPS.find(
+            uniqueApps.find(
                 item =>
                     item.id ===
                     id
             );
 
 
-        return app
-            ? {
-                ...app,
-
-                keywords:
-                    [
-                        ...(app.keywords || [])
-                    ]
-            }
-            : null;
-
-    }
-
-
-    function getCategories() {
-
-        const categories = [
-
-            {
-                id:
-                    "all",
-
-                name:
-                    CATEGORY_NAMES.all,
-
-                count:
-                    getAllApps().length
-            },
-
-            {
-                id:
-                    "favorites",
-
-                name:
-                    CATEGORY_NAMES.favorites,
-
-                count:
-                    getAllApps()
-                        .filter(
-                            app =>
-                                app.favorite
-                        )
-                        .length
-            }
-
-        ];
-
-
-        Object.keys(
-            CATEGORY_NAMES
-        )
-        .filter(
-            id =>
-                id !==
-                "all" &&
-                id !==
-                "favorites"
-        )
-        .forEach(
-            id => {
-
-                const count =
-                    getAllApps()
-                        .filter(
-                            app =>
-                                app.category ===
-                                id
-                        )
-                        .length;
-
-
-                if (
-                    count >
-                    0
-                ) {
-
-                    categories.push({
-
-                        id,
-
-                        name:
-                            CATEGORY_NAMES[id],
-
-                        count
-
-                    });
-
-                }
-
-            }
-        );
-
-
-        return categories;
-
-    }
-
-
-    function getCategory(
-        categoryId
-    ) {
-
-        const id =
-            normalizeId(
-                categoryId
-            );
-
-
-        return getAllApps()
-            .filter(
-                app =>
-                    app.category ===
-                    id
-            );
-
-    }
-
-
-    function search(
-        query
-    ) {
-
-        const value =
-            String(
-                query || ""
-            )
-            .trim()
-            .toLowerCase();
-
-
-        if (
-            !value
-        ) {
-
-            return getAllApps();
-
-        }
-
-
-        return getAllApps()
-            .filter(
-                app => {
-
-                    const searchable =
-                        [
-
-                            app.id,
-
-                            app.title,
-
-                            app.name,
-
-                            app.description,
-
-                            app.category,
-
-                            ...(app.keywords || [])
-
-                        ]
-                        .join(
-                            " "
-                        )
-                        .toLowerCase();
-
-
-                    return searchable.includes(
-                        value
-                    );
-
-                }
-            );
-
-    }
-
-
-    function normalizeId(
-        value
-    ) {
-
-        return String(
-            value || ""
-        )
-        .trim()
-        .toLowerCase()
-        .replace(
-            /\s+/g,
-            "-"
+        return cloneApp(
+            app
         );
 
     }
 
 
     /* ========================================================
-       04 — PUBLIC API
+       07 — KATEGORIEN
        ======================================================== */
 
-    const api = {
+    function getCategories() {
+
+        const categories =
+            new Map();
+
+
+        uniqueApps.forEach(
+            app => {
+
+                const category =
+                    app.category ||
+                    "other";
+
+
+                if (
+                    !categories.has(
+                        category
+                    )
+                ) {
+
+                    categories.set(
+                        category,
+                        {
+                            id:
+                                category,
+
+                            name:
+                                category,
+
+                            count:
+                                0
+                        }
+                    );
+
+                }
+
+
+                categories.get(
+                    category
+                ).count++;
+
+            }
+        );
+
+
+        return Array.from(
+            categories.values()
+        );
+
+    }
+
+
+    /* ========================================================
+       08 — APPS NACH KATEGORIE
+       ======================================================== */
+
+    function getAppsByCategory(
+        category
+    ) {
+
+        const id =
+            String(
+                category ||
+                ""
+            )
+            .trim()
+            .toLowerCase();
+
+
+        return uniqueApps
+            .filter(
+                app =>
+                    app.category ===
+                    id
+            )
+            .map(
+                cloneApp
+            );
+
+    }
+
+
+    /* ========================================================
+       09 — REGISTRY STATUS
+       ======================================================== */
+
+    function getState() {
+
+        return {
+
+            name:
+                REGISTRY_NAME,
+
+            version:
+                REGISTRY_VERSION,
+
+            count:
+                uniqueApps.length,
+
+            categories:
+                getCategories().length,
+
+            ready:
+                true
+
+        };
+
+    }
+
+
+    /* ========================================================
+       10 — PUBLIC API
+       ======================================================== */
+
+    const registry = {
 
         name:
-            "HalDo App Registry",
+            REGISTRY_NAME,
 
         version:
-            "18.0.0",
+            REGISTRY_VERSION,
+
+        ready:
+            true,
 
 
         getAllApps,
@@ -1035,27 +1796,19 @@
 
         getCategories,
 
-        getCategory,
+        getAppsByCategory,
 
-        search,
-
-
-        getCount:
-            function () {
-
-                return getAllApps().length;
-
-            }
+        getState
 
     };
 
 
     /* ========================================================
-       05 — GLOBAL
+       11 — GLOBAL REGISTRY
        ======================================================== */
 
     window.HalDoAppRegistry =
-        api;
+        registry;
 
 
     window.HalDoOS =
@@ -1063,25 +1816,22 @@
         {};
 
 
-    window.HalDoOS.apps =
-        api;
+    window.HalDoOS.appRegistry =
+        registry;
 
 
     /* ========================================================
-       06 — AUTOMATISCHE REGISTRIERUNG
+       12 — DIAGNOSTIK
        ======================================================== */
 
-    if (
-        window.HalDoAppManager &&
-        typeof window.HalDoAppManager.registerApps ===
-            "function"
-    ) {
+    console.log(
+        `[HalDo App Registry] ${uniqueApps.length} Apps geladen.`
+    );
 
-        window.HalDoAppManager.registerApps(
-            getAllApps()
-        );
 
-    }
+    console.log(
+        `[HalDo App Registry] ${getCategories().length} Kategorien verfügbar.`
+    );
 
 
 })(window);
