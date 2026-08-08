@@ -6,14 +6,20 @@
 
    Zentrale App-Navigation
 
+   WICHTIG:
+   Dieser Router öffnet keine unbekannten .html-Dateien.
+   Dadurch werden 404-Fehler durch falsche App-Pfade
+   verhindert.
+
    Aufgaben:
-   - Apps ohne 404 öffnen
-   - interne Module verwalten
-   - zukünftige App-Module registrieren
-   - App-Ansichten dynamisch laden
-   - App-Zustand verwalten
-   - Zurück-Navigation
-   - Fehler abfangen
+   - Apps öffnen
+   - Apps schließen
+   - App-Module verwalten
+   - App-Ansichten verwalten
+   - sichere Fallback-Oberfläche
+   - Browser-History
+   - Back-Button
+   - Router-Events
    ============================================================ */
 
 "use strict";
@@ -26,85 +32,57 @@
        01 — KONFIGURATION
        ======================================================== */
 
-    const VERSION = "18.0.0";
+    const VERSION =
+        "18.0.0";
 
-    const ROOT_ID =
-        "haldo-app-root";
 
-    const EVENT_PREFIX =
-        "haldo-router:";
+    const ROOT_SELECTOR =
+        "#haldo-app-root";
+
+
+    const LAUNCHER_SELECTOR =
+        "#haldo-launcher";
+
+
+    const HOME_SELECTOR =
+        "#haldo-home";
 
 
     /* ========================================================
-       02 — ZUSTAND
+       02 — STATE
        ======================================================== */
 
     const state = {
 
-        initialized: false,
+        initialized:
+            false,
 
-        ready: false,
+        ready:
+            false,
 
-        currentApp: null,
+        currentApp:
+            null,
 
-        previousApp: null,
+        previousApp:
+            null,
 
-        history: [],
+        history:
+            [],
 
-        modules: new Map(),
+        modules:
+            new Map(),
 
-        loading: false
+        views:
+            new Map(),
+
+        navigationLocked:
+            false
 
     };
 
 
     /* ========================================================
-       03 — LOG
-       ======================================================== */
-
-    function log(
-        message,
-        type = "info"
-    ) {
-
-        const prefix =
-            "[HalDo App Router]";
-
-
-        if (
-            type === "error"
-        ) {
-
-            console.error(
-                prefix,
-                message
-            );
-
-        }
-        else if (
-            type === "warning"
-        ) {
-
-            console.warn(
-                prefix,
-                message
-            );
-
-        }
-        else {
-
-            console.log(
-                prefix,
-                message
-            );
-
-        }
-
-    }
-
-
-    /* ========================================================
-       04 — EVENT SYSTEM
+       03 — EVENTS
        ======================================================== */
 
     const listeners = {};
@@ -129,13 +107,43 @@
             !listeners[eventName]
         ) {
 
-            listeners[eventName] = [];
+            listeners[eventName] =
+                [];
 
         }
 
 
-        listeners[eventName]
-            .push(callback);
+        listeners[eventName].push(
+            callback
+        );
+
+
+        return true;
+
+    }
+
+
+    function off(
+        eventName,
+        callback
+    ) {
+
+        if (
+            !listeners[eventName]
+        ) {
+
+            return false;
+
+        }
+
+
+        listeners[eventName] =
+            listeners[eventName]
+                .filter(
+                    listener =>
+                        listener !==
+                        callback
+                );
 
 
         return true;
@@ -153,22 +161,33 @@
 
 
         if (
-            callbacks
+            !callbacks
         ) {
 
-            callbacks.forEach(
+            return;
+
+        }
+
+
+        callbacks
+            .slice()
+            .forEach(
                 callback => {
 
                     try {
 
-                        callback(data);
+                        callback(
+                            data
+                        );
 
                     }
-                    catch (error) {
+                    catch (
+                        error
+                    ) {
 
-                        log(
-                            `Event-Fehler: ${error.message}`,
-                            "error"
+                        console.error(
+                            "[HalDo App Router] Event-Fehler:",
+                            error
                         );
 
                     }
@@ -176,22 +195,49 @@
                 }
             );
 
-        }
+    }
 
 
-        /*
-         * Zusätzlich an Kernel senden.
-         */
+    /* ========================================================
+       04 — LOG
+       ======================================================== */
+
+    function log(
+        message,
+        type = "info"
+    ) {
+
+        const prefix =
+            "[HalDo App Router]";
+
 
         if (
-            window.HalDoKernel &&
-            typeof window.HalDoKernel.emit ===
-            "function"
+            type ===
+            "error"
         ) {
 
-            window.HalDoKernel.emit(
-                `${EVENT_PREFIX}${eventName}`,
-                data
+            console.error(
+                prefix,
+                message
+            );
+
+        }
+        else if (
+            type ===
+            "warning"
+        ) {
+
+            console.warn(
+                prefix,
+                message
+            );
+
+        }
+        else {
+
+            console.log(
+                prefix,
+                message
             );
 
         }
@@ -200,89 +246,38 @@
 
 
     /* ========================================================
-       05 — APP ROOT ERSTELLEN
+       05 — DOM
        ======================================================== */
 
     function getRoot() {
 
-        let root =
-            document.getElementById(
-                ROOT_ID
-            );
-
-
-        if (
-            root
-        ) {
-
-            return root;
-
-        }
-
-
-        /*
-         * Wenn index.html bereits einen
-         * App-Container besitzt, verwenden.
-         */
-
-        root =
-            document.querySelector(
-                "[data-haldo-app-root]"
-            );
-
-
-        if (
-            root
-        ) {
-
-            root.id =
-                ROOT_ID;
-
-            return root;
-
-        }
-
-
-        /*
-         * Sonst automatisch erstellen.
-         */
-
-        root =
-            document.createElement(
-                "main"
-            );
-
-
-        root.id =
-            ROOT_ID;
-
-
-        root.className =
-            "haldo-app-root";
-
-
-        root.setAttribute(
-            "aria-live",
-            "polite"
+        return document.querySelector(
+            ROOT_SELECTOR
         );
 
+    }
 
-        /*
-         * Vor Footer / vor Body-Ende einfügen.
-         */
 
-        document.body.appendChild(
-            root
+    function getLauncher() {
+
+        return document.querySelector(
+            LAUNCHER_SELECTOR
         );
 
+    }
 
-        return root;
+
+    function getHome() {
+
+        return document.querySelector(
+            HOME_SELECTOR
+        );
 
     }
 
 
     /* ========================================================
-       06 — HTML SICHERN
+       06 — HTML ESCAPEN
        ======================================================== */
 
     function escapeHTML(
@@ -317,7 +312,45 @@
 
 
     /* ========================================================
-       07 — APP MODUL REGISTRIEREN
+       07 — APP MANAGER
+       ======================================================== */
+
+    function getAppManager() {
+
+        return (
+            window.HalDoAppManager ||
+            null
+        );
+
+    }
+
+
+    function getApp(
+        appId
+    ) {
+
+        const manager =
+            getAppManager();
+
+
+        if (
+            !manager
+        ) {
+
+            return null;
+
+        }
+
+
+        return manager.getApp(
+            appId
+        );
+
+    }
+
+
+    /* ========================================================
+       08 — APP MODUL REGISTRIEREN
        ======================================================== */
 
     function registerModule(
@@ -325,16 +358,14 @@
         module
     ) {
 
-        if (
-            !appId
-        ) {
-
-            return false;
-
-        }
+        const id =
+            normalizeId(
+                appId
+            );
 
 
         if (
+            !id ||
             !module
         ) {
 
@@ -344,22 +375,24 @@
 
 
         state.modules.set(
-            appId,
+            id,
             module
         );
 
 
-        log(
-            `App-Modul registriert: ${appId}`
+        emit(
+            "module:registered",
+            {
+                appId:
+                    id,
+
+                module
+            }
         );
 
 
-        emit(
-            "module-registered",
-            {
-                appId,
-                module
-            }
+        log(
+            `App-Modul registriert: ${id}`
         );
 
 
@@ -369,16 +402,43 @@
 
 
     /* ========================================================
-       08 — APP MODUL ABFRAGEN
+       09 — APP MODUL ENTFERNEN
+       ======================================================== */
+
+    function unregisterModule(
+        appId
+    ) {
+
+        const id =
+            normalizeId(
+                appId
+            );
+
+
+        return state.modules.delete(
+            id
+        );
+
+    }
+
+
+    /* ========================================================
+       10 — MODUL ABFRAGEN
        ======================================================== */
 
     function getModule(
         appId
     ) {
 
+        const id =
+            normalizeId(
+                appId
+            );
+
+
         return (
             state.modules.get(
-                appId
+                id
             ) ||
             null
         );
@@ -386,330 +446,43 @@
     }
 
 
-    function hasModule(
-        appId
+    /* ========================================================
+       11 — ID NORMALISIEREN
+       ======================================================== */
+
+    function normalizeId(
+        value
     ) {
 
-        return state.modules.has(
-            appId
+        return String(
+            value || ""
+        )
+        .trim()
+        .toLowerCase()
+        .replace(
+            /\s+/g,
+            "-"
         );
 
     }
 
 
     /* ========================================================
-       09 — APP AUS MANAGER HOLEN
+       12 — HOME VERSTECKEN
        ======================================================== */
 
-    function getApp(
-        appId
-    ) {
+    function hideHome() {
 
-        if (
-            !window.HalDoAppManager
-        ) {
-
-            return null;
-
-        }
-
-
-        return window.HalDoAppManager
-            .getApp(
-                appId
-            );
-
-    }
-
-
-    /* ========================================================
-       10 — APP HEADER
-       ======================================================== */
-
-    function renderHeader(
-        app
-    ) {
-
-        const icon =
-            app.icon || "◇";
-
-
-        let iconHTML;
+        const home =
+            getHome();
 
 
         if (
-            /\.(png|jpg|jpeg|webp|gif|svg)(\?.*)?$/i
-                .test(icon)
+            home
         ) {
 
-            iconHTML = `
-                <img
-                    src="${escapeHTML(icon)}"
-                    alt=""
-                    class="haldo-router-app-icon"
-                >
-            `;
-
-        }
-        else {
-
-            iconHTML = `
-                <span
-                    class="haldo-router-app-icon-text"
-                >
-                    ${escapeHTML(icon)}
-                </span>
-            `;
-
-        }
-
-
-        return `
-            <header
-                class="haldo-router-header"
-            >
-
-                <button
-                    type="button"
-                    class="haldo-router-back"
-                    id="haldo-router-back"
-                    aria-label="Zurück"
-                >
-                    ←
-                </button>
-
-                <div
-                    class="haldo-router-title"
-                >
-
-                    <div
-                        class="haldo-router-icon"
-                    >
-                        ${iconHTML}
-                    </div>
-
-                    <div>
-
-                        <h1>
-                            ${escapeHTML(
-                                app.title ||
-                                app.name
-                            )}
-                        </h1>
-
-                        <p>
-                            ${escapeHTML(
-                                app.description ||
-                                "HalDo AI OS App"
-                            )}
-                        </p>
-
-                    </div>
-
-                </div>
-
-            </header>
-        `;
-
-    }
-
-
-    /* ========================================================
-       11 — APP PLACEHOLDER
-       ======================================================== */
-
-    function renderComingSoon(
-        app
-    ) {
-
-        const root =
-            getRoot();
-
-
-        root.innerHTML = `
-
-            ${renderHeader(app)}
-
-            <section
-                class="haldo-app-placeholder"
-            >
-
-                <div
-                    class="haldo-app-placeholder-orb"
-                    aria-hidden="true"
-                >
-                    ${escapeHTML(
-                        app.icon ||
-                        "◇"
-                    )}
-                </div>
-
-                <h2>
-                    ${escapeHTML(
-                        app.title ||
-                        app.name
-                    )}
-                </h2>
-
-                <p>
-                    Diese App ist bereits Bestandteil
-                    der HalDo AI OS 18 Foundation.
-                </p>
-
-                <p>
-                    Das vollständige Funktionsmodul
-                    wird als nächster Entwicklungsschritt
-                    angeschlossen.
-                </p>
-
-                <div
-                    class="haldo-app-status"
-                >
-                    <span></span>
-                    Modul vorbereitet
-                </div>
-
-                <button
-                    type="button"
-                    id="haldo-placeholder-back"
-                    class="haldo-primary-button"
-                >
-                    Zurück zum Menü
-                </button>
-
-            </section>
-
-        `;
-
-
-        bindBackButtons();
-
-    }
-
-
-    /* ========================================================
-       12 — MODUL AUSFÜHREN
-       ======================================================== */
-
-    async function executeModule(
-        app,
-        module
-    ) {
-
-        const root =
-            getRoot();
-
-
-        /*
-         * Modul kann unterschiedliche
-         * Schnittstellen anbieten.
-         */
-
-        try {
-
-            if (
-                typeof module ===
-                "function"
-            ) {
-
-                await module(
-                    root,
-                    app,
-                    api
-                );
-
-                return true;
-
-            }
-
-
-            if (
-                typeof module.mount ===
-                "function"
-            ) {
-
-                await module.mount(
-                    root,
-                    app,
-                    api
-                );
-
-                return true;
-
-            }
-
-
-            if (
-                typeof module.open ===
-                "function"
-            ) {
-
-                await module.open(
-                    root,
-                    app,
-                    api
-                );
-
-                return true;
-
-            }
-
-
-            if (
-                typeof module.render ===
-                "function"
-            ) {
-
-                const result =
-                    await module.render(
-                        root,
-                        app,
-                        api
-                    );
-
-
-                if (
-                    typeof result ===
-                    "string"
-                ) {
-
-                    root.innerHTML =
-                        result;
-
-                    bindBackButtons();
-
-                }
-
-
-                return true;
-
-            }
-
-
-            log(
-                `App-Modul "${app.id}" besitzt keine gültige mount/open/render-Funktion.`,
-                "warning"
-            );
-
-
-            return false;
-
-        }
-        catch (error) {
-
-            log(
-                `Fehler beim Öffnen von "${app.name}": ${error.message}`,
-                "error"
-            );
-
-
-            renderModuleError(
-                app,
-                error
-            );
-
-
-            return false;
+            home.hidden =
+                true;
 
         }
 
@@ -717,375 +490,35 @@
 
 
     /* ========================================================
-       13 — MODUL FEHLER
+       13 — HOME ZEIGEN
        ======================================================== */
 
-    function renderModuleError(
-        app,
-        error
-    ) {
+    function showHome() {
 
-        const root =
-            getRoot();
-
-
-        root.innerHTML = `
-
-            ${renderHeader(app)}
-
-            <section
-                class="haldo-app-error"
-            >
-
-                <div
-                    class="haldo-app-error-icon"
-                >
-                    !
-                </div>
-
-                <h2>
-                    App konnte nicht geöffnet werden
-                </h2>
-
-                <p>
-                    Das App-Modul von
-                    <strong>
-                        ${escapeHTML(
-                            app.name
-                        )}
-                    </strong>
-                    hat einen Fehler gemeldet.
-                </p>
-
-                <details>
-                    <summary>
-                        Technische Information
-                    </summary>
-
-                    <pre>${escapeHTML(
-                        error?.message ||
-                        "Unbekannter Fehler"
-                    )}</pre>
-
-                </details>
-
-                <button
-                    type="button"
-                    id="haldo-error-back"
-                    class="haldo-primary-button"
-                >
-                    Zurück zum Menü
-                </button>
-
-            </section>
-
-        `;
-
-
-        bindBackButtons();
-
-    }
-
-
-    /* ========================================================
-       14 — ZURÜCK
-       ======================================================== */
-
-    function bindBackButtons() {
-
-        const buttons =
-            document.querySelectorAll(
-                "#haldo-router-back, #haldo-placeholder-back, #haldo-error-back"
-            );
-
-
-        buttons.forEach(
-            button => {
-
-                button.addEventListener(
-                    "click",
-                    function () {
-
-                        back();
-
-                    }
-                );
-
-            }
-        );
-
-    }
-
-
-    function back() {
-
-        const previous =
-            state.history.pop();
+        const home =
+            getHome();
 
 
         if (
-            previous
+            home
         ) {
 
-            open(
-                previous,
-                false
-            );
-
-            return true;
-
-        }
-
-
-        close();
-
-        return true;
-
-    }
-
-
-    /* ========================================================
-       15 — APP ÖFFNEN
-       ======================================================== */
-
-    async function open(
-        appId,
-        saveHistory = true
-    ) {
-
-        const app =
-            getApp(
-                appId
-            );
-
-
-        if (
-            !app
-        ) {
-
-            log(
-                `App nicht gefunden: ${appId}`,
-                "warning"
-            );
-
-
-            return false;
-
-        }
-
-
-        if (
-            app.enabled === false
-        ) {
-
-            renderComingSoon(
-                app
-            );
-
-            return false;
-
-        }
-
-
-        if (
-            saveHistory &&
-            state.currentApp &&
-            state.currentApp.id !==
-                app.id
-        ) {
-
-            state.history.push(
-                state.currentApp.id
-            );
-
-        }
-
-
-        state.previousApp =
-            state.currentApp;
-
-
-        state.currentApp =
-            app;
-
-
-        state.loading =
-            true;
-
-
-        emit(
-            "before-open",
-            {
-                app
-            }
-        );
-
-
-        const root =
-            getRoot();
-
-
-        root.hidden =
-            false;
-
-
-        /*
-         * Vorherigen Inhalt entfernen.
-         */
-
-        root.innerHTML = "";
-
-
-        /*
-         * Echtes Modul vorhanden?
-         */
-
-        const module =
-            getModule(
-                app.id
-            );
-
-
-        if (
-            module
-        ) {
-
-            const success =
-                await executeModule(
-                    app,
-                    module
-                );
-
-
-            if (
-                !success
-            ) {
-
-                renderComingSoon(
-                    app
-                );
-
-            }
-
-        }
-        else {
-
-            /*
-             * Ganz wichtig:
-             *
-             * KEIN window.location.href
-             * KEIN erfundener Pfad
-             * KEIN 404.
-             */
-
-            renderComingSoon(
-                app
-            );
-
-        }
-
-
-        state.loading =
-            false;
-
-
-        state.ready =
-            true;
-
-
-        emit(
-            "opened",
-            {
-                app
-            }
-        );
-
-
-        log(
-            `App geöffnet: ${app.name}`
-        );
-
-
-        return true;
-
-    }
-
-
-    /* ========================================================
-       16 — APP SCHLIESSEN
-       ======================================================== */
-
-    function close() {
-
-        const root =
-            getRoot();
-
-
-        root.innerHTML =
-            "";
-
-
-        root.hidden =
-            true;
-
-
-        const previous =
-            state.currentApp;
-
-
-        state.currentApp =
-            null;
-
-
-        emit(
-            "closed",
-            {
-                app:
-                    previous
-            }
-        );
-
-
-        /*
-         * Launcher wieder anzeigen.
-         */
-
-        const launcher =
-            document.querySelector(
-                "#haldo-launcher"
-            );
-
-
-        if (
-            launcher
-        ) {
-
-            launcher.hidden =
+            home.hidden =
                 false;
 
         }
 
-
-        log(
-            "App geschlossen."
-        );
-
-
-        return true;
-
     }
 
 
     /* ========================================================
-       17 — LAUNCHER VERSTECKEN
+       14 — LAUNCHER VERSTECKEN
        ======================================================== */
 
     function hideLauncher() {
 
         const launcher =
-            document.querySelector(
-                "#haldo-launcher"
-            );
+            getLauncher();
 
 
         if (
@@ -1101,7 +534,998 @@
 
 
     /* ========================================================
-       18 — ROUTER STATE
+       15 — LAUNCHER ZEIGEN
+       ======================================================== */
+
+    function showLauncher() {
+
+        const launcher =
+            getLauncher();
+
+
+        if (
+            launcher
+        ) {
+
+            launcher.hidden =
+                false;
+
+        }
+
+    }
+
+
+    /* ========================================================
+       16 — ROOT SICHTBAR
+       ======================================================== */
+
+    function showRoot() {
+
+        const root =
+            getRoot();
+
+
+        if (
+            root
+        ) {
+
+            root.hidden =
+                false;
+
+        }
+
+    }
+
+
+    /* ========================================================
+       17 — ROOT VERSTECKEN
+       ======================================================== */
+
+    function hideRoot() {
+
+        const root =
+            getRoot();
+
+
+        if (
+            root
+        ) {
+
+            root.hidden =
+                true;
+
+        }
+
+    }
+
+
+    /* ========================================================
+       18 — APP ÖFFNEN
+       ======================================================== */
+
+    async function open(
+        appId,
+        options = {}
+    ) {
+
+        if (
+            state.navigationLocked
+        ) {
+
+            return false;
+
+        }
+
+
+        const id =
+            normalizeId(
+                appId
+            );
+
+
+        if (
+            !id
+        ) {
+
+            return false;
+
+        }
+
+
+        const app =
+            getApp(
+                id
+            );
+
+
+        if (
+            !app
+        ) {
+
+            log(
+                `App '${id}' wurde nicht gefunden.`,
+                "warning"
+            );
+
+
+            openFallback(
+                id,
+                "Die angeforderte App ist noch nicht registriert."
+            );
+
+
+            return false;
+
+        }
+
+
+        if (
+            app.enabled ===
+            false
+        ) {
+
+            openFallback(
+                id,
+                "Diese App ist momentan deaktiviert."
+            );
+
+
+            return false;
+
+        }
+
+
+        state.navigationLocked =
+            true;
+
+
+        try {
+
+            /*
+             * Vorherige App merken.
+             */
+
+            if (
+                state.currentApp &&
+                state.currentApp.id !==
+                    app.id
+            ) {
+
+                state.previousApp =
+                    state.currentApp;
+
+            }
+
+
+            state.currentApp =
+                app;
+
+
+            /*
+             * History.
+             */
+
+            if (
+                options.addHistory !==
+                false
+            ) {
+
+                pushHistory(
+                    app.id
+                );
+
+            }
+
+
+            hideHome();
+            hideLauncher();
+            showRoot();
+
+
+            /*
+             * Registriertes Modul?
+             */
+
+            const module =
+                getModule(
+                    app.id
+                );
+
+
+            if (
+                module
+            ) {
+
+                await openModule(
+                    app,
+                    module,
+                    options
+                );
+
+            }
+            else {
+
+                /*
+                 * Kein Modul:
+                 * sichere interne Ansicht.
+                 *
+                 * KEIN window.location.href.
+                 * KEIN blindes .html.
+                 */
+
+                await openFallback(
+                    app.id,
+                    null,
+                    app
+                );
+
+            }
+
+
+            updateDocumentState(
+                app
+            );
+
+
+            emit(
+                "opened",
+                {
+                    app,
+
+                    options
+
+                }
+            );
+
+
+            return true;
+
+        }
+        catch (
+            error
+        ) {
+
+            console.error(
+                "[HalDo App Router]",
+                error
+            );
+
+
+            openFallback(
+                app.id,
+                "Beim Öffnen der App ist ein Fehler aufgetreten.",
+                app
+            );
+
+
+            emit(
+                "error",
+                {
+                    app,
+
+                    error
+
+                }
+            );
+
+
+            return false;
+
+        }
+        finally {
+
+            state.navigationLocked =
+                false;
+
+        }
+
+    }
+
+
+    /* ========================================================
+       19 — MODUL ÖFFNEN
+       ======================================================== */
+
+    async function openModule(
+        app,
+        module,
+        options
+    ) {
+
+        const root =
+            getRoot();
+
+
+        if (
+            !root
+        ) {
+
+            throw new Error(
+                "HalDo App Root wurde nicht gefunden."
+            );
+
+        }
+
+
+        /*
+         * Vorherige Ansicht leeren.
+         */
+
+        root.innerHTML =
+            "";
+
+
+        /*
+         * Modul kann open() besitzen.
+         */
+
+        if (
+            typeof module.open ===
+            "function"
+        ) {
+
+            const result =
+                module.open(
+                    {
+                        app,
+
+                        root,
+
+                        options,
+
+                        router:
+                            api
+
+                    }
+                );
+
+
+            if (
+                result &&
+                typeof result.then ===
+                "function"
+            ) {
+
+                await result;
+
+            }
+
+
+            return;
+
+        }
+
+
+        /*
+         * Modul kann render() besitzen.
+         */
+
+        if (
+            typeof module.render ===
+            "function"
+        ) {
+
+            const result =
+                module.render(
+                    root,
+                    {
+                        app,
+
+                        options,
+
+                        router:
+                            api
+
+                    }
+                );
+
+
+            if (
+                result &&
+                typeof result.then ===
+                "function"
+            ) {
+
+                await result;
+
+            }
+
+
+            return;
+
+        }
+
+
+        /*
+         * Modul besitzt nur element().
+         */
+
+        if (
+            typeof module.create ===
+            "function"
+        ) {
+
+            const element =
+                module.create(
+                    {
+                        app,
+
+                        options,
+
+                        router:
+                            api
+
+                    }
+                );
+
+
+            if (
+                element instanceof
+                Node
+            ) {
+
+                root.appendChild(
+                    element
+                );
+
+            }
+
+
+            return;
+
+        }
+
+
+        /*
+         * Kein passendes Modul.
+         */
+
+        openFallback(
+            app.id,
+            "Das App-Modul ist noch nicht vollständig initialisiert.",
+            app
+        );
+
+    }
+
+
+    /* ========================================================
+       20 — FALLBACK
+       ======================================================== */
+
+    function openFallback(
+        appId,
+        message = null,
+        app = null
+    ) {
+
+        const root =
+            getRoot();
+
+
+        if (
+            !root
+        ) {
+
+            return false;
+
+        }
+
+
+        showRoot();
+        hideHome();
+        hideLauncher();
+
+
+        const currentApp =
+            app ||
+            getApp(
+                appId
+            );
+
+
+        const title =
+            currentApp?.title ||
+            currentApp?.name ||
+            "HalDo AI App";
+
+
+        const description =
+            currentApp?.description ||
+            "Diese HalDo AI Anwendung wird vorbereitet.";
+
+
+        const icon =
+            currentApp?.icon ||
+            "◇";
+
+
+        const statusText =
+            message ||
+            "Die App ist registriert und wartet auf ihr Modul.";
+
+
+        root.innerHTML = `
+
+            <section
+                class="haldo-app-fallback"
+                data-app-id="${escapeHTML(
+                    appId
+                )}"
+            >
+
+                <div
+                    class="haldo-app-fallback-card"
+                >
+
+                    <div
+                        class="haldo-app-fallback-icon"
+                    >
+                        ${
+                            isImageIcon(icon)
+                                ? `
+                                    <img
+                                        src="${escapeHTML(icon)}"
+                                        alt=""
+                                    >
+                                `
+                                : escapeHTML(
+                                    icon
+                                )
+                        }
+                    </div>
+
+
+                    <div
+                        class="haldo-app-fallback-content"
+                    >
+
+                        <p
+                            class="haldo-section-label"
+                        >
+                            HALDO AI OS
+                        </p>
+
+                        <h1>
+                            ${escapeHTML(
+                                title
+                            )}
+                        </h1>
+
+                        <p>
+                            ${escapeHTML(
+                                description
+                            )}
+                        </p>
+
+                        <div
+                            class="haldo-app-fallback-status"
+                        >
+                            <span>
+                                ●
+                            </span>
+
+                            ${escapeHTML(
+                                statusText
+                            )}
+                        </div>
+
+                        <div
+                            class="haldo-app-fallback-actions"
+                        >
+
+                            <button
+                                type="button"
+                                class="haldo-primary-button"
+                                data-router-back
+                            >
+                                Zurück
+                            </button>
+
+                            <button
+                                type="button"
+                                class="haldo-secondary-button"
+                                data-router-apps
+                            >
+                                Alle Apps
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+        `;
+
+
+        bindFallbackButtons();
+
+
+        return true;
+
+    }
+
+
+    /* ========================================================
+       21 — ICON PRÜFEN
+       ======================================================== */
+
+    function isImageIcon(
+        icon
+    ) {
+
+        return /\.(png|jpg|jpeg|webp|gif|svg)(\?.*)?$/i
+            .test(
+                String(
+                    icon || ""
+                )
+            );
+
+    }
+
+
+    /* ========================================================
+       22 — FALLBACK BUTTONS
+       ======================================================== */
+
+    function bindFallbackButtons() {
+
+        const root =
+            getRoot();
+
+
+        if (
+            !root
+        ) {
+
+            return;
+
+        }
+
+
+        const back =
+            root.querySelector(
+                "[data-router-back]"
+            );
+
+
+        const apps =
+            root.querySelector(
+                "[data-router-apps]"
+            );
+
+
+        if (
+            back
+        ) {
+
+            back.addEventListener(
+                "click",
+                function () {
+
+                    backNavigation();
+
+                }
+            );
+
+        }
+
+
+        if (
+            apps
+        ) {
+
+            apps.addEventListener(
+                "click",
+                function () {
+
+                    close();
+
+                }
+            );
+
+        }
+
+    }
+
+
+    /* ========================================================
+       23 — HISTORY
+       ======================================================== */
+
+    function pushHistory(
+        appId
+    ) {
+
+        const id =
+            normalizeId(
+                appId
+            );
+
+
+        if (
+            !id
+        ) {
+
+            return;
+
+        }
+
+
+        const last =
+            state.history[
+                state.history.length - 1
+            ];
+
+
+        if (
+            last === id
+        ) {
+
+            return;
+
+        }
+
+
+        state.history.push(
+            id
+        );
+
+
+        /*
+         * History begrenzen.
+         */
+
+        if (
+            state.history.length >
+            50
+        ) {
+
+            state.history.shift();
+
+        }
+
+    }
+
+
+    /* ========================================================
+       24 — ZURÜCK
+       ======================================================== */
+
+    async function backNavigation() {
+
+        if (
+            state.navigationLocked
+        ) {
+
+            return false;
+
+        }
+
+
+        /*
+         * Aktuellen Eintrag entfernen.
+         */
+
+        if (
+            state.history.length >
+            0
+        ) {
+
+            state.history.pop();
+
+        }
+
+
+        const previousId =
+            state.history[
+                state.history.length - 1
+            ];
+
+
+        if (
+            previousId
+        ) {
+
+            return open(
+                previousId,
+                {
+                    addHistory:
+                        false
+                }
+            );
+
+        }
+
+
+        close();
+
+
+        return true;
+
+    }
+
+
+    /* ========================================================
+       25 — APP SCHLIESSEN
+       ======================================================== */
+
+    function close(
+        options = {}
+    ) {
+
+        const oldApp =
+            state.currentApp;
+
+
+        state.previousApp =
+            state.currentApp;
+
+
+        state.currentApp =
+            null;
+
+
+        state.history =
+            [];
+
+
+        hideRoot();
+        showHome();
+        showLauncher();
+
+
+        updateDocumentState(
+            null
+        );
+
+
+        if (
+            options.clearRoot !==
+            false
+        ) {
+
+            const root =
+                getRoot();
+
+
+            if (
+                root
+            ) {
+
+                root.innerHTML =
+                    "";
+
+            }
+
+        }
+
+
+        emit(
+            "closed",
+            {
+                app:
+                    oldApp
+            }
+        );
+
+
+        return true;
+
+    }
+
+
+    /* ========================================================
+       26 — HOME
+       ======================================================== */
+
+    function goHome() {
+
+        return close();
+
+    }
+
+
+    /* ========================================================
+       27 — ALLE APPS
+       ======================================================== */
+
+    function goApps() {
+
+        const launcher =
+            getLauncher();
+
+
+        if (
+            launcher
+        ) {
+
+            launcher.hidden =
+                false;
+
+            launcher.scrollIntoView(
+                {
+                    behavior:
+                        "smooth",
+
+                    block:
+                        "start"
+                }
+            );
+
+        }
+
+
+        hideHome();
+        hideRoot();
+
+
+        emit(
+            "apps",
+            {}
+        );
+
+
+        return true;
+
+    }
+
+
+    /* ========================================================
+       28 — DOKUMENT STATUS
+       ======================================================== */
+
+    function updateDocumentState(
+        app
+    ) {
+
+        if (
+            app
+        ) {
+
+            document.body.dataset.activeApp =
+                app.id;
+
+
+            document.title =
+                `${app.title || app.name} — HalDo AI OS 18`;
+
+        }
+        else {
+
+            delete document.body.dataset.activeApp;
+
+
+            document.title =
+                "HalDo AI OS 18";
+
+        }
+
+    }
+
+
+    /* ========================================================
+       29 — AKTUELLE APP
+       ======================================================== */
+
+    function getCurrentApp() {
+
+        return (
+            state.currentApp
+                ? {
+                    ...state.currentApp
+                }
+                : null
+        );
+
+    }
+
+
+    /* ========================================================
+       30 — STATUS
        ======================================================== */
 
     function getState() {
@@ -1114,14 +1538,15 @@
             ready:
                 state.ready,
 
-            loading:
-                state.loading,
-
             currentApp:
-                state.currentApp,
+                getCurrentApp(),
 
             previousApp:
-                state.previousApp,
+                state.previousApp
+                    ? {
+                        ...state.previousApp
+                    }
+                    : null,
 
             history:
                 [
@@ -1129,7 +1554,10 @@
                 ],
 
             moduleCount:
-                state.modules.size
+                state.modules.size,
+
+            navigationLocked:
+                state.navigationLocked
 
         };
 
@@ -1137,7 +1565,7 @@
 
 
     /* ========================================================
-       19 — INITIALISIERUNG
+       31 — INITIALISIERUNG
        ======================================================== */
 
     function init() {
@@ -1146,16 +1574,62 @@
             state.initialized
         ) {
 
-            return true;
+            return getState();
 
         }
 
 
-        getRoot();
-
-
         state.initialized =
             true;
+
+
+        /*
+         * Browser Back Button.
+         *
+         * Wir verhindern bewusst,
+         * dass der Browser plötzlich
+         * eine falsche .html-Datei lädt.
+         */
+
+        window.addEventListener(
+            "popstate",
+            function () {
+
+                backNavigation();
+
+            }
+        );
+
+
+        /*
+         * Escape schließt die aktuelle App.
+         */
+
+        document.addEventListener(
+            "keydown",
+            function (event) {
+
+                if (
+                    event.key !==
+                    "Escape"
+                ) {
+
+                    return;
+
+                }
+
+
+                if (
+                    state.currentApp
+                ) {
+
+                    close();
+
+                }
+
+            }
+        );
+
 
         state.ready =
             true;
@@ -1168,7 +1642,7 @@
         if (
             window.HalDoKernel &&
             typeof window.HalDoKernel.registerModule ===
-            "function"
+                "function"
         ) {
 
             window.HalDoKernel.registerModule(
@@ -1176,11 +1650,17 @@
                 api
             );
 
+            window.HalDoKernel.setModuleReady(
+                "app-router",
+                true
+            );
+
         }
 
 
         emit(
-            "ready"
+            "ready",
+            getState()
         );
 
 
@@ -1189,38 +1669,13 @@
         );
 
 
-        return true;
+        return getState();
 
     }
 
 
     /* ========================================================
-       20 — KERNEL VERBINDEN
-       ======================================================== */
-
-    function connectKernel() {
-
-        if (
-            window.HalDoKernel
-        ) {
-
-            init();
-
-            return;
-
-        }
-
-
-        window.setTimeout(
-            connectKernel,
-            100
-        );
-
-    }
-
-
-    /* ========================================================
-       21 — PUBLIC API
+       32 — PUBLIC API
        ======================================================== */
 
     const api = {
@@ -1234,26 +1689,34 @@
 
         init,
 
+
         open,
 
         close,
 
-        back,
+        goHome,
+
+        goApps,
+
+        back:
+            backNavigation,
 
 
         registerModule,
 
+        unregisterModule,
+
         getModule,
 
-        hasModule,
 
-
-        getApp,
+        getCurrentApp,
 
         getState,
 
 
         on,
+
+        off,
 
         emit
 
@@ -1261,7 +1724,7 @@
 
 
     /* ========================================================
-       22 — GLOBAL
+       33 — GLOBAL
        ======================================================== */
 
     window.HalDoAppRouter =
@@ -1273,17 +1736,17 @@
         {};
 
 
-    window.HalDoOS.appRouter =
+    window.HalDoOS.router =
         api;
 
 
     /* ========================================================
-       23 — START
+       34 — START
        ======================================================== */
 
     function start() {
 
-        connectKernel();
+        init();
 
     }
 
@@ -1297,7 +1760,8 @@
             "DOMContentLoaded",
             start,
             {
-                once: true
+                once:
+                    true
             }
         );
 
