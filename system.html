@@ -1,0 +1,2101 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    >
+
+    <meta name="theme-color" content="#050914">
+
+    <title>HalDo AI OS 18 — System</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html,
+        body {
+            min-height: 100%;
+        }
+
+        body {
+            min-height: 100vh;
+
+            background:
+                radial-gradient(
+                    circle at 50% 0%,
+                    rgba(0,126,255,.20),
+                    transparent 35%
+                ),
+                radial-gradient(
+                    circle at 100% 75%,
+                    rgba(115,55,255,.10),
+                    transparent 30%
+                ),
+                #050914;
+
+            color: #fff;
+
+            font-family:
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                Roboto,
+                Arial,
+                sans-serif;
+
+            overflow-x: hidden;
+        }
+
+        button {
+            font: inherit;
+            border: 0;
+        }
+
+        /* =====================================================
+           BACKGROUND
+           ===================================================== */
+
+        .orb {
+            position: fixed;
+
+            width: 190px;
+            height: 190px;
+
+            border-radius: 50%;
+
+            filter: blur(75px);
+
+            opacity: .17;
+
+            pointer-events: none;
+
+            z-index: 0;
+        }
+
+        .orb.one {
+            top: -80px;
+            left: -90px;
+
+            background: #087cff;
+        }
+
+        .orb.two {
+            right: -90px;
+            bottom: 15%;
+
+            background: #773dff;
+        }
+
+        /* =====================================================
+           APP
+           ===================================================== */
+
+        .app {
+            position: relative;
+
+            z-index: 1;
+
+            width: min(900px, 100%);
+
+            min-height: 100vh;
+
+            margin: auto;
+
+            padding-bottom: 125px;
+        }
+
+        /* =====================================================
+           HEADER
+           ===================================================== */
+
+        .header {
+            position: sticky;
+
+            top: 0;
+
+            z-index: 50;
+
+            display: flex;
+
+            align-items: center;
+            justify-content: space-between;
+
+            padding: 9px 13px;
+
+            background:
+                rgba(5,9,20,.90);
+
+            border-bottom:
+                1px solid
+                rgba(255,255,255,.08);
+
+            backdrop-filter:
+                blur(22px);
+
+            -webkit-backdrop-filter:
+                blur(22px);
+        }
+
+        .brand {
+            display: flex;
+
+            align-items: center;
+
+            gap: 9px;
+        }
+
+        .logo {
+            width: 43px;
+            height: 43px;
+
+            object-fit: contain;
+
+            animation:
+                logoRotate 9s linear infinite,
+                logoGlow 2.5s ease-in-out infinite;
+        }
+
+        @keyframes logoRotate {
+
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+
+        }
+
+        @keyframes logoGlow {
+
+            0%,
+            100% {
+                filter:
+                    drop-shadow(
+                        0 0 3px
+                        rgba(255,255,255,.5)
+                    )
+                    drop-shadow(
+                        0 0 10px
+                        rgba(0,130,255,.5)
+                    );
+            }
+
+            50% {
+                filter:
+                    drop-shadow(
+                        0 0 8px
+                        rgba(255,255,255,.95)
+                    )
+                    drop-shadow(
+                        0 0 22px
+                        rgba(0,150,255,1)
+                    );
+            }
+
+        }
+
+        .brand-text strong {
+            display: block;
+
+            font-size: 14px;
+        }
+
+        .brand-text span {
+            display: block;
+
+            margin-top: 2px;
+
+            color: #71809a;
+
+            font-size: 8px;
+
+            letter-spacing: .7px;
+        }
+
+        .back-button {
+            padding: 9px 13px;
+
+            border-radius: 13px;
+
+            background:
+                rgba(255,255,255,.06);
+
+            border:
+                1px solid
+                rgba(255,255,255,.08);
+
+            color: #9dccff;
+
+            cursor: pointer;
+        }
+
+        .back-button:active {
+            transform: scale(.94);
+        }
+
+        /* =====================================================
+           HERO
+           ===================================================== */
+
+        .hero {
+            padding:
+                27px 15px 18px;
+        }
+
+        .badge {
+            display: inline-flex;
+
+            align-items: center;
+
+            gap: 6px;
+
+            padding:
+                6px 10px;
+
+            border-radius: 20px;
+
+            background:
+                rgba(0,126,255,.08);
+
+            border:
+                1px solid
+                rgba(0,126,255,.13);
+
+            color: #75c4ff;
+
+            font-size: 8px;
+
+            letter-spacing: .7px;
+        }
+
+        .dot {
+            width: 6px;
+            height: 6px;
+
+            border-radius: 50%;
+
+            background: #00ffad;
+
+            box-shadow:
+                0 0 9px
+                rgba(0,255,173,.8);
+        }
+
+        .hero h1 {
+            margin-top: 12px;
+
+            font-size: 27px;
+
+            font-weight: 800;
+        }
+
+        .hero p {
+            margin-top: 7px;
+
+            color: #75839c;
+
+            font-size: 10px;
+
+            line-height: 1.55;
+        }
+
+        /* =====================================================
+           SECTIONS
+           ===================================================== */
+
+        .section {
+            padding:
+                0 15px 17px;
+        }
+
+        .section-title {
+            margin-bottom: 9px;
+
+            color: #8190a8;
+
+            font-size: 9px;
+
+            font-weight: 700;
+
+            letter-spacing: .8px;
+
+            text-transform: uppercase;
+        }
+
+        /* =====================================================
+           SYSTEM STATUS
+           ===================================================== */
+
+        .status-card {
+            padding: 17px;
+
+            border-radius: 22px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    rgba(0,126,255,.10),
+                    rgba(120,55,255,.07)
+                );
+
+            border:
+                1px solid
+                rgba(0,126,255,.14);
+        }
+
+        .status-head {
+            display: flex;
+
+            align-items: center;
+
+            gap: 12px;
+        }
+
+        .status-icon {
+            width: 50px;
+            height: 50px;
+
+            display: flex;
+
+            align-items: center;
+            justify-content: center;
+
+            flex-shrink: 0;
+
+            border-radius: 16px;
+
+            background:
+                rgba(0,255,173,.09);
+
+            font-size: 23px;
+        }
+
+        .status-info {
+            flex: 1;
+        }
+
+        .status-info strong {
+            display: block;
+
+            font-size: 14px;
+        }
+
+        .status-info span {
+            display: block;
+
+            margin-top: 4px;
+
+            color: #71809a;
+
+            font-size: 8px;
+        }
+
+        .status-online {
+            display: inline-flex;
+
+            align-items: center;
+
+            gap: 6px;
+
+            margin-top: 14px;
+
+            padding: 6px 9px;
+
+            border-radius: 20px;
+
+            color: #65e9b7;
+
+            background:
+                rgba(0,255,173,.07);
+
+            border:
+                1px solid
+                rgba(0,255,173,.12);
+
+            font-size: 8px;
+        }
+
+        /* =====================================================
+           SYSTEM METRICS
+           ===================================================== */
+
+        .metrics {
+            display: grid;
+
+            grid-template-columns:
+                repeat(2, 1fr);
+
+            gap: 8px;
+        }
+
+        .metric {
+            padding: 14px;
+
+            border-radius: 18px;
+
+            background:
+                rgba(255,255,255,.045);
+
+            border:
+                1px solid
+                rgba(255,255,255,.07);
+        }
+
+        .metric-icon {
+            font-size: 17px;
+        }
+
+        .metric strong {
+            display: block;
+
+            margin-top: 8px;
+
+            font-size: 11px;
+        }
+
+        .metric span {
+            display: block;
+
+            margin-top: 4px;
+
+            color: #71809a;
+
+            font-size: 8px;
+
+            line-height: 1.4;
+        }
+
+        /* =====================================================
+           MODULES
+           ===================================================== */
+
+        .module-list {
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 8px;
+        }
+
+        .module {
+            display: flex;
+
+            align-items: center;
+
+            gap: 11px;
+
+            padding: 13px;
+
+            border-radius: 17px;
+
+            background:
+                rgba(255,255,255,.045);
+
+            border:
+                1px solid
+                rgba(255,255,255,.07);
+        }
+
+        .module-icon {
+            width: 39px;
+            height: 39px;
+
+            display: flex;
+
+            align-items: center;
+            justify-content: center;
+
+            flex-shrink: 0;
+
+            border-radius: 12px;
+
+            background:
+                rgba(255,255,255,.055);
+
+            font-size: 17px;
+        }
+
+        .module-info {
+            flex: 1;
+
+            min-width: 0;
+        }
+
+        .module-info strong {
+            display: block;
+
+            font-size: 10px;
+        }
+
+        .module-info span {
+            display: block;
+
+            margin-top: 4px;
+
+            color: #71809a;
+
+            font-size: 8px;
+        }
+
+        .module-status {
+            display: inline-flex;
+
+            align-items: center;
+
+            gap: 5px;
+
+            padding:
+                5px 8px;
+
+            border-radius: 20px;
+
+            background:
+                rgba(0,255,173,.06);
+
+            color: #62ddb0;
+
+            font-size: 7px;
+
+            white-space: nowrap;
+        }
+
+        .module-status .small-dot {
+            width: 5px;
+            height: 5px;
+
+            border-radius: 50%;
+
+            background: #00e99d;
+        }
+
+        /* =====================================================
+           DEVICE INFO
+           ===================================================== */
+
+        .device-list {
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 8px;
+        }
+
+        .device-row {
+            display: flex;
+
+            align-items: center;
+
+            justify-content: space-between;
+
+            gap: 15px;
+
+            padding: 12px 13px;
+
+            border-radius: 15px;
+
+            background:
+                rgba(255,255,255,.035);
+
+            border:
+                1px solid
+                rgba(255,255,255,.06);
+        }
+
+        .device-row span {
+            color: #71809a;
+
+            font-size: 8px;
+        }
+
+        .device-row strong {
+            color: #c9d9eb;
+
+            font-size: 8px;
+
+            text-align: right;
+
+            max-width: 65%;
+
+            word-break: break-word;
+        }
+
+        /* =====================================================
+           ACTIONS
+           ===================================================== */
+
+        .actions {
+            display: grid;
+
+            grid-template-columns:
+                repeat(2, 1fr);
+
+            gap: 8px;
+        }
+
+        .action {
+            min-height: 48px;
+
+            border-radius: 14px;
+
+            color: #a9c4df;
+
+            background:
+                rgba(255,255,255,.05);
+
+            border:
+                1px solid
+                rgba(255,255,255,.07);
+
+            cursor: pointer;
+        }
+
+        .action.primary {
+            color: #8dd0ff;
+
+            background:
+                rgba(0,126,255,.10);
+
+            border-color:
+                rgba(0,126,255,.17);
+        }
+
+        .action:active {
+            transform: scale(.97);
+        }
+
+        /* =====================================================
+           SCAN
+           ===================================================== */
+
+        .scan-card {
+            display: none;
+
+            margin-top: 10px;
+
+            padding: 14px;
+
+            border-radius: 17px;
+
+            background:
+                rgba(0,126,255,.06);
+
+            border:
+                1px solid
+                rgba(0,126,255,.12);
+        }
+
+        .scan-card.show {
+            display: block;
+        }
+
+        .scan-title {
+            font-size: 10px;
+
+            font-weight: 700;
+        }
+
+        .scan-bar {
+            height: 7px;
+
+            margin-top: 10px;
+
+            overflow: hidden;
+
+            border-radius: 20px;
+
+            background:
+                rgba(255,255,255,.07);
+        }
+
+        .scan-progress {
+            width: 0%;
+
+            height: 100%;
+
+            border-radius: inherit;
+
+            background:
+                linear-gradient(
+                    90deg,
+                    #087cff,
+                    #55d4ff
+                );
+
+            transition:
+                width .18s linear;
+        }
+
+        .scan-text {
+            margin-top: 7px;
+
+            color: #71809a;
+
+            font-size: 8px;
+        }
+
+        /* =====================================================
+           BOTTOM NAV
+           ===================================================== */
+
+        .bottom-nav {
+            position: fixed;
+
+            z-index: 100;
+
+            left: 10px;
+            right: 10px;
+            bottom: 10px;
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(4, 1fr);
+
+            gap: 5px;
+
+            padding: 7px;
+
+            border-radius: 21px;
+
+            background:
+                rgba(7,12,25,.93);
+
+            border:
+                1px solid
+                rgba(255,255,255,.09);
+
+            backdrop-filter:
+                blur(20px);
+
+            -webkit-backdrop-filter:
+                blur(20px);
+
+            box-shadow:
+                0 15px 45px
+                rgba(0,0,0,.42);
+        }
+
+        .nav-item {
+            min-height: 45px;
+
+            display: flex;
+
+            flex-direction: column;
+
+            align-items: center;
+            justify-content: center;
+
+            gap: 2px;
+
+            border-radius: 14px;
+
+            background: transparent;
+
+            color: #687791;
+
+            cursor: pointer;
+        }
+
+        .nav-item.active {
+            color: #7cc8ff;
+
+            background:
+                rgba(0,126,255,.11);
+        }
+
+        .nav-icon {
+            font-size: 17px;
+        }
+
+        .nav-label {
+            font-size: 8px;
+        }
+
+        /* =====================================================
+           TOAST
+           ===================================================== */
+
+        .toast {
+            position: fixed;
+
+            z-index: 300;
+
+            left: 50%;
+
+            bottom: 82px;
+
+            max-width:
+                calc(100% - 30px);
+
+            padding:
+                10px 14px;
+
+            border-radius: 14px;
+
+            background:
+                rgba(18,28,47,.96);
+
+            border:
+                1px solid
+                rgba(255,255,255,.10);
+
+            color: #dceaff;
+
+            font-size: 9px;
+
+            opacity: 0;
+
+            pointer-events: none;
+
+            transform:
+                translate(-50%, 10px);
+
+            transition: .22s ease;
+        }
+
+        .toast.show {
+            opacity: 1;
+
+            transform:
+                translate(-50%, 0);
+        }
+
+        @media (min-width: 700px) {
+
+            .bottom-nav {
+                width: 480px;
+
+                left: 50%;
+                right: auto;
+
+                transform:
+                    translateX(-50%);
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+    <div class="orb one"></div>
+    <div class="orb two"></div>
+
+
+    <main class="app">
+
+
+        <!-- HEADER -->
+
+        <header class="header">
+
+            <div class="brand">
+
+                <img
+                    class="logo"
+                    src="assets/logo/logo.png"
+                    alt="HalDo AI Logo"
+                >
+
+                <div class="brand-text">
+
+                    <strong>
+                        HalDo AI
+                    </strong>
+
+                    <span>
+                        OS 18 • SYSTEM CENTER
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <button
+                class="back-button"
+                onclick="goBack()"
+            >
+                ← Zurück
+            </button>
+
+        </header>
+
+
+        <!-- HERO -->
+
+        <section class="hero">
+
+            <div class="badge">
+
+                <span class="dot"></span>
+
+                HALDO SYSTEM CORE
+
+            </div>
+
+
+            <h1>
+                Systemzentrale
+            </h1>
+
+
+            <p>
+                Zentrale Übersicht über den aktuellen
+                Zustand der HalDo AI OS 18 Foundation.
+            </p>
+
+        </section>
+
+
+        <!-- STATUS -->
+
+        <section class="section">
+
+            <div class="section-title">
+                Systemstatus
+            </div>
+
+
+            <div class="status-card">
+
+                <div class="status-head">
+
+                    <div class="status-icon">
+                        ◉
+                    </div>
+
+
+                    <div class="status-info">
+
+                        <strong>
+                            HalDo AI OS 18
+                        </strong>
+
+                        <span>
+                            Professional Ultimate Foundation
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="status-online">
+
+                    <span class="dot"></span>
+
+                    SYSTEM ONLINE
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- METRICS -->
+
+        <section class="section">
+
+            <div class="section-title">
+                Systemdaten
+            </div>
+
+
+            <div class="metrics">
+
+
+                <div class="metric">
+
+                    <div class="metric-icon">
+                        ⏱
+                    </div>
+
+                    <strong id="runtime">
+                        00:00:00
+                    </strong>
+
+                    <span>
+                        Seiten-Laufzeit
+                    </span>
+
+                </div>
+
+
+                <div class="metric">
+
+                    <div class="metric-icon">
+                        ◈
+                    </div>
+
+                    <strong id="moduleCount">
+                        0
+                    </strong>
+
+                    <span>
+                        aktive Module
+                    </span>
+
+                </div>
+
+
+                <div class="metric">
+
+                    <div class="metric-icon">
+                        ◫
+                    </div>
+
+                    <strong id="storageSize">
+                        0 KB
+                    </strong>
+
+                    <span>
+                        lokale HalDo-Daten
+                    </span>
+
+                </div>
+
+
+                <div class="metric">
+
+                    <div class="metric-icon">
+                        ✓
+                    </div>
+
+                    <strong id="systemState">
+                        READY
+                    </strong>
+
+                    <span>
+                        Foundation Status
+                    </span>
+
+                </div>
+
+
+            </div>
+
+        </section>
+
+
+        <!-- MODULES -->
+
+        <section class="section">
+
+            <div class="section-title">
+                Core-Module
+            </div>
+
+
+            <div
+                class="module-list"
+                id="moduleList"
+            ></div>
+
+        </section>
+
+
+        <!-- DEVICE -->
+
+        <section class="section">
+
+            <div class="section-title">
+                Geräteinformationen
+            </div>
+
+
+            <div class="device-list">
+
+
+                <div class="device-row">
+
+                    <span>
+                        Browser
+                    </span>
+
+                    <strong id="browserInfo">
+                        Wird erkannt …
+                    </strong>
+
+                </div>
+
+
+                <div class="device-row">
+
+                    <span>
+                        Plattform
+                    </span>
+
+                    <strong id="platformInfo">
+                        Wird erkannt …
+                    </strong>
+
+                </div>
+
+
+                <div class="device-row">
+
+                    <span>
+                        Sprache
+                    </span>
+
+                    <strong id="languageInfo">
+                        Wird erkannt …
+                    </strong>
+
+                </div>
+
+
+                <div class="device-row">
+
+                    <span>
+                        Bildschirm
+                    </span>
+
+                    <strong id="screenInfo">
+                        Wird erkannt …
+                    </strong>
+
+                </div>
+
+
+                <div class="device-row">
+
+                    <span>
+                        Verbindung
+                    </span>
+
+                    <strong id="connectionInfo">
+                        Wird erkannt …
+                    </strong>
+
+                </div>
+
+
+            </div>
+
+        </section>
+
+
+        <!-- ACTIONS -->
+
+        <section class="section">
+
+            <div class="section-title">
+                Systemaktionen
+            </div>
+
+
+            <div class="actions">
+
+
+                <button
+                    class="action primary"
+                    onclick="runSystemScan()"
+                >
+                    ◉ System prüfen
+                </button>
+
+
+                <button
+                    class="action"
+                    onclick="refreshSystem()"
+                >
+                    ↻ Aktualisieren
+                </button>
+
+
+            </div>
+
+
+            <div
+                class="scan-card"
+                id="scanCard"
+            >
+
+                <div class="scan-title">
+                    HalDo System Scan
+                </div>
+
+
+                <div class="scan-bar">
+
+                    <div
+                        class="scan-progress"
+                        id="scanProgress"
+                    ></div>
+
+                </div>
+
+
+                <div
+                    class="scan-text"
+                    id="scanText"
+                >
+                    Vorbereitung …
+                </div>
+
+            </div>
+
+        </section>
+
+
+    </main>
+
+
+    <!-- BOTTOM NAV -->
+
+    <nav class="bottom-nav">
+
+
+        <button
+            class="nav-item"
+            onclick="goHome()"
+        >
+
+            <span class="nav-icon">
+                ⌂
+            </span>
+
+            <span class="nav-label">
+                Home
+            </span>
+
+        </button>
+
+
+        <button
+            class="nav-item"
+            onclick="openPage('chat.html')"
+        >
+
+            <span class="nav-icon">
+                ✦
+            </span>
+
+            <span class="nav-label">
+                AI
+            </span>
+
+        </button>
+
+
+        <button
+            class="nav-item"
+            onclick="openPage('apps.html')"
+        >
+
+            <span class="nav-icon">
+                ◈
+            </span>
+
+            <span class="nav-label">
+                Apps
+            </span>
+
+        </button>
+
+
+        <button
+            class="nav-item active"
+            onclick="window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            })"
+        >
+
+            <span class="nav-icon">
+                ⚙
+            </span>
+
+            <span class="nav-label">
+                System
+            </span>
+
+        </button>
+
+
+    </nav>
+
+
+    <!-- TOAST -->
+
+    <div
+        class="toast"
+        id="toast"
+    ></div>
+
+
+    <script>
+
+        /* =====================================================
+           HALDO SYSTEM CORE
+           ===================================================== */
+
+        const startTime =
+            Date.now();
+
+
+        const HALDO_MODULES = [
+
+            {
+                icon: "◉",
+                name: "HalDo Core",
+                description:
+                    "Zentrale Foundation und Laufzeit",
+                status: "ONLINE"
+            },
+
+            {
+                icon: "✦",
+                name: "AI Interface",
+                description:
+                    "HalDo AI Chat Foundation",
+                status: "READY"
+            },
+
+            {
+                icon: "⌨",
+                name: "Ezidi Keyboard",
+                description:
+                    "Tastatur- und Zeichensatz Foundation",
+                status: "READY"
+            },
+
+            {
+                icon: "◈",
+                name: "App Manager",
+                description:
+                    "Verwaltung der HalDo Anwendungen",
+                status: "READY"
+            },
+
+            {
+                icon: "🔔",
+                name: "Notification Center",
+                description:
+                    "Lokale Benachrichtigungen",
+                status: "ONLINE"
+            },
+
+            {
+                icon: "◫",
+                name: "Storage Manager",
+                description:
+                    "Lokale Datenverwaltung",
+                status: "ONLINE"
+            },
+
+            {
+                icon: "🛡",
+                name: "Security Foundation",
+                description:
+                    "Grundlegende Browser-Sicherheitsprüfung",
+                status: "READY"
+            },
+
+            {
+                icon: "☁",
+                name: "Cloud Foundation",
+                description:
+                    "Vorbereitet für spätere Cloud-Dienste",
+                status: "READY"
+            }
+
+        ];
+
+
+        /* =====================================================
+           NAVIGATION
+           ===================================================== */
+
+        function goHome() {
+
+            window.location.href =
+                "index.html";
+
+        }
+
+
+        function goBack() {
+
+            if (
+                document.referrer &&
+                document.referrer.includes(
+                    window.location.hostname
+                )
+            ) {
+
+                history.back();
+
+            } else {
+
+                window.location.href =
+                    "settings.html";
+
+            }
+
+        }
+
+
+        function openPage(page) {
+
+            if (!page) {
+                return;
+            }
+
+            window.location.href =
+                page;
+
+        }
+
+
+        /* =====================================================
+           TOAST
+           ===================================================== */
+
+        let toastTimer;
+
+
+        function showToast(message) {
+
+            const toast =
+                document.getElementById(
+                    "toast"
+                );
+
+
+            toast.textContent =
+                message;
+
+
+            toast.classList.add(
+                "show"
+            );
+
+
+            clearTimeout(
+                toastTimer
+            );
+
+
+            toastTimer =
+                setTimeout(
+                    function() {
+
+                        toast.classList.remove(
+                            "show"
+                        );
+
+                    },
+                    2200
+                );
+
+        }
+
+
+        /* =====================================================
+           MODULES
+           ===================================================== */
+
+        function renderModules() {
+
+            const list =
+                document.getElementById(
+                    "moduleList"
+                );
+
+
+            list.innerHTML = "";
+
+
+            HALDO_MODULES.forEach(
+                function(module) {
+
+                    const item =
+                        document.createElement(
+                            "div"
+                        );
+
+
+                    item.className =
+                        "module";
+
+
+                    item.innerHTML = `
+
+                        <div class="module-icon">
+                            ${module.icon}
+                        </div>
+
+                        <div class="module-info">
+
+                            <strong>
+                                ${escapeHTML(
+                                    module.name
+                                )}
+                            </strong>
+
+                            <span>
+                                ${escapeHTML(
+                                    module.description
+                                )}
+                            </span>
+
+                        </div>
+
+                        <div class="module-status">
+
+                            <span class="small-dot"></span>
+
+                            ${escapeHTML(
+                                module.status
+                            )}
+
+                        </div>
+
+                    `;
+
+
+                    list.appendChild(
+                        item
+                    );
+
+                }
+            );
+
+
+            document.getElementById(
+                "moduleCount"
+            ).textContent =
+                HALDO_MODULES.length;
+
+        }
+
+
+        /* =====================================================
+           ESCAPE
+           ===================================================== */
+
+        function escapeHTML(value) {
+
+            return String(value)
+                .replace(
+                    /&/g,
+                    "&amp;"
+                )
+                .replace(
+                    /</g,
+                    "&lt;"
+                )
+                .replace(
+                    />/g,
+                    "&gt;"
+                )
+                .replace(
+                    /"/g,
+                    "&quot;"
+                )
+                .replace(
+                    /'/g,
+                    "&#039;"
+                );
+
+        }
+
+
+        /* =====================================================
+           RUNTIME
+           ===================================================== */
+
+        function updateRuntime() {
+
+            const elapsed =
+                Date.now() -
+                startTime;
+
+
+            const totalSeconds =
+                Math.floor(
+                    elapsed / 1000
+                );
+
+
+            const hours =
+                Math.floor(
+                    totalSeconds / 3600
+                );
+
+
+            const minutes =
+                Math.floor(
+                    (totalSeconds % 3600) / 60
+                );
+
+
+            const seconds =
+                totalSeconds % 60;
+
+
+            const formatted =
+                String(hours).padStart(
+                    2,
+                    "0"
+                ) +
+                ":" +
+                String(minutes).padStart(
+                    2,
+                    "0"
+                ) +
+                ":" +
+                String(seconds).padStart(
+                    2,
+                    "0"
+                );
+
+
+            document.getElementById(
+                "runtime"
+            ).textContent =
+                formatted;
+
+        }
+
+
+        /* =====================================================
+           STORAGE
+           ===================================================== */
+
+        function calculateStorage() {
+
+            let bytes = 0;
+
+
+            for (
+                let i = 0;
+                i < localStorage.length;
+                i++
+            ) {
+
+                const key =
+                    localStorage.key(i);
+
+
+                const value =
+                    localStorage.getItem(
+                        key
+                    );
+
+
+                if (
+                    key &&
+                    key.startsWith(
+                        "haldo_"
+                    )
+                ) {
+
+                    bytes +=
+                        (
+                            key.length +
+                            (
+                                value || ""
+                            ).length
+                        ) * 2;
+
+                }
+
+            }
+
+
+            if (
+                bytes < 1024
+            ) {
+
+                return bytes + " B";
+
+            }
+
+
+            if (
+                bytes < 1024 * 1024
+            ) {
+
+                return (
+                    bytes / 1024
+                ).toFixed(1) +
+                    " KB";
+
+            }
+
+
+            return (
+                bytes /
+                (1024 * 1024)
+            ).toFixed(2) +
+                " MB";
+
+        }
+
+
+        /* =====================================================
+           DEVICE INFORMATION
+           ===================================================== */
+
+        function updateDeviceInfo() {
+
+            const userAgent =
+                navigator.userAgent ||
+                "Unbekannt";
+
+
+            let browser =
+                "Unbekannter Browser";
+
+
+            if (
+                /Edg/i.test(
+                    userAgent
+                )
+            ) {
+
+                browser =
+                    "Microsoft Edge";
+
+            } else if (
+                /CriOS/i.test(
+                    userAgent
+                )
+            ) {
+
+                browser =
+                    "Chrome iOS";
+
+            } else if (
+                /Chrome/i.test(
+                    userAgent
+                )
+            ) {
+
+                browser =
+                    "Google Chrome";
+
+            } else if (
+                /FxiOS/i.test(
+                    userAgent
+                )
+            ) {
+
+                browser =
+                    "Firefox iOS";
+
+            } else if (
+                /Firefox/i.test(
+                    userAgent
+                )
+            ) {
+
+                browser =
+                    "Mozilla Firefox";
+
+            } else if (
+                /Safari/i.test(
+                    userAgent
+                )
+            ) {
+
+                browser =
+                    "Safari";
+
+            }
+
+
+            document.getElementById(
+                "browserInfo"
+            ).textContent =
+                browser;
+
+
+            document.getElementById(
+                "platformInfo"
+            ).textContent =
+                navigator.platform ||
+                "Unbekannt";
+
+
+            document.getElementById(
+                "languageInfo"
+            ).textContent =
+                navigator.language ||
+                "Unbekannt";
+
+
+            document.getElementById(
+                "screenInfo"
+            ).textContent =
+                window.screen.width +
+                " × " +
+                window.screen.height +
+                " px";
+
+
+            let connection =
+                "Unbekannt";
+
+
+            if (
+                navigator.onLine === false
+            ) {
+
+                connection =
+                    "Offline";
+
+            } else if (
+                navigator.connection &&
+                navigator.connection.effectiveType
+            ) {
+
+                connection =
+                    "Online • " +
+                    navigator.connection.effectiveType;
+
+            } else {
+
+                connection =
+                    "Online";
+
+            }
+
+
+            document.getElementById(
+                "connectionInfo"
+            ).textContent =
+                connection;
+
+        }
+
+
+        /* =====================================================
+           REFRESH
+           ===================================================== */
+
+        function refreshSystem() {
+
+            updateDeviceInfo();
+
+            document.getElementById(
+                "storageSize"
+            ).textContent =
+                calculateStorage();
+
+
+            document.getElementById(
+                "systemState"
+            ).textContent =
+                navigator.onLine
+                    ? "READY"
+                    : "OFFLINE";
+
+
+            showToast(
+                "Systemdaten aktualisiert"
+            );
+
+        }
+
+
+        /* =====================================================
+           SYSTEM SCAN
+           ===================================================== */
+
+        let scanTimer = null;
+
+
+        function runSystemScan() {
+
+            const card =
+                document.getElementById(
+                    "scanCard"
+                );
+
+
+            const progress =
+                document.getElementById(
+                    "scanProgress"
+                );
+
+
+            const text =
+                document.getElementById(
+                    "scanText"
+                );
+
+
+            card.classList.add(
+                "show"
+            );
+
+
+            if (scanTimer) {
+
+                clearInterval(
+                    scanTimer
+                );
+
+            }
+
+
+            let value = 0;
+
+
+            progress.style.width =
+                "0%";
+
+
+            text.textContent =
+                "HalDo Core wird geprüft …";
+
+
+            const messages = [
+
+                "HalDo Core wird geprüft …",
+
+                "Module werden geprüft …",
+
+                "Lokaler Speicher wird geprüft …",
+
+                "Navigation Foundation wird geprüft …",
+
+                "AI Foundation wird geprüft …",
+
+                "Systemstatus wird geprüft …",
+
+                "Prüfung abgeschlossen."
+
+            ];
+
+
+            scanTimer =
+                setInterval(
+                    function() {
+
+                        value += 5;
+
+
+                        progress.style.width =
+                            value + "%";
+
+
+                        const index =
+                            Math.min(
+                                Math.floor(
+                                    value / 16
+                                ),
+                                messages.length - 1
+                            );
+
+
+                        text.textContent =
+                            messages[index];
+
+
+                        if (
+                            value >= 100
+                        ) {
+
+                            clearInterval(
+                                scanTimer
+                            );
+
+
+                            document.getElementById(
+                                "systemState"
+                            ).textContent =
+                                "HEALTHY";
+
+
+                            showToast(
+                                "Systemprüfung abgeschlossen"
+                            );
+
+                        }
+
+                    },
+                    80
+                );
+
+        }
+
+
+        /* =====================================================
+           ONLINE / OFFLINE
+           ===================================================== */
+
+        window.addEventListener(
+            "online",
+            function() {
+
+                document.getElementById(
+                    "systemState"
+                ).textContent =
+                    "READY";
+
+                refreshSystem();
+
+            }
+        );
+
+
+        window.addEventListener(
+            "offline",
+            function() {
+
+                document.getElementById(
+                    "systemState"
+                ).textContent =
+                    "OFFLINE";
+
+                refreshSystem();
+
+            }
+        );
+
+
+        /* =====================================================
+           START
+           ===================================================== */
+
+        renderModules();
+
+        updateDeviceInfo();
+
+        refreshSystem();
+
+        updateRuntime();
+
+
+        setInterval(
+            updateRuntime,
+            1000
+        );
+
+    </script>
+
+</body>
+
+</html>
