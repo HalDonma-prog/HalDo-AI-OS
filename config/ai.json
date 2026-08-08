@@ -1,0 +1,304 @@
+{
+  "version": "18.0.0",
+
+  "identity": {
+    "name": "HalDo AI",
+    "systemName": "HalDo AI OS 18",
+    "assistantRole": "AI Assistant",
+    "defaultLanguage": "de-DE",
+    "supportedLanguages": [
+      "de-DE",
+      "en-US",
+      "ku",
+      "ar",
+      "x-ezidi"
+    ]
+  },
+
+  "core": {
+    "enabled": true,
+    "conversationEngine": true,
+    "contextEngine": true,
+    "memoryEngine": true,
+    "toolEngine": true,
+    "actionEngine": true,
+    "responseEngine": true,
+    "safetyEngine": true
+  },
+
+  "chat": {
+    "enabled": true,
+    "streaming": true,
+    "markdown": true,
+    "codeBlocks": true,
+    "attachments": true,
+    "imageInput": true,
+    "voiceInput": true,
+    "voiceOutput": true,
+    "conversationHistory": true,
+    "conversationSearch": true,
+    "conversationExport": true,
+    "conversationDelete": true
+  },
+
+  "context": {
+    "enabled": true,
+    "maximumMessages": 100,
+    "includeSystemState": true,
+    "includeAppContext": true,
+    "includeLanguage": true,
+    "includeTime": true,
+    "includeUserPreferences": true,
+    "includeCurrentTask": true
+  },
+
+  "memory": {
+    "enabled": true,
+    "persistent": true,
+    "userControlled": true,
+    "allowSave": true,
+    "allowForget": true,
+    "allowView": true,
+    "allowEdit": true,
+    "allowDisable": true,
+    "localStorage": true
+  },
+
+  "tools": {
+    "enabled": true,
+
+    "system": {
+      "enabled": true,
+      "readSystemStatus": true,
+      "readAppStatus": true,
+      "readModuleStatus": true
+    },
+
+    "productivity": {
+      "enabled": true,
+      "calendar": true,
+      "tasks": true,
+      "reminders": true,
+      "notes": true
+    },
+
+    "files": {
+      "enabled": true,
+      "read": true,
+      "write": true,
+      "search": true,
+      "organize": true
+    },
+
+    "web": {
+      "enabled": true,
+      "search": true,
+      "openPages": true
+    },
+
+    "translation": {
+      "enabled": true
+    },
+
+    "calculator": {
+      "enabled": true
+    }
+  },
+
+  "actions": {
+    "enabled": true,
+    "requireConfirmationForSensitiveActions": true,
+
+    "allowed": [
+      "open-app",
+      "close-app",
+      "search",
+      "create-note",
+      "create-task",
+      "create-reminder",
+      "change-theme",
+      "change-language",
+      "change-keyboard",
+      "open-settings"
+    ],
+
+    "sensitive": [
+      "delete-file",
+      "delete-data",
+      "install-app",
+      "uninstall-app",
+      "change-security-settings",
+      "change-system-settings",
+      "modify-permissions"
+    ]
+  },
+
+  "voice": {
+
+    "enabled": true,
+
+    "recognition": {
+      "enabled": true,
+      "continuous": false,
+      "languageDetection": true,
+      "noiseReduction": true,
+      "requiresMicrophonePermission": true
+    },
+
+    "synthesis": {
+      "enabled": true,
+      "languageDetection": true,
+      "requiresAudioPermission": true,
+      "speed": 1,
+      "pitch": 1
+    },
+
+    "wakeWord": {
+      "enabled": false,
+      "customizable": true
+    }
+  },
+
+  "personality": {
+
+    "enabled": true,
+
+    "default": {
+      "friendly": true,
+      "helpful": true,
+      "respectful": true,
+      "clear": true,
+      "concise": false,
+      "professional": true
+    },
+
+    "customizable": true
+  },
+
+  "models": {
+
+    "managerEnabled": true,
+
+    "default": {
+      "provider": "local",
+      "model": "default"
+    },
+
+    "fallback": {
+      "enabled": true,
+      "provider": "local",
+      "model": "fallback"
+    },
+
+    "selection": {
+      "automatic": true,
+      "allowManualSelection": true
+    }
+  },
+
+  "providers": {
+
+    "managerEnabled": true,
+
+    "local": {
+      "enabled": true,
+      "name": "Local Provider"
+    },
+
+    "remote": {
+      "enabled": false,
+      "requiresConfiguration": true
+    }
+  },
+
+  "safety": {
+
+    "enabled": true,
+
+    "protectSystem": true,
+    "protectUserData": true,
+    "protectPermissions": true,
+    "confirmSensitiveActions": true,
+
+    "limits": {
+      "maximumToolCalls": 20,
+      "maximumActionCalls": 10
+    }
+  },
+
+  "privacy": {
+
+    "enabled": true,
+
+    "sendDataExternallyByDefault": false,
+    "allowExternalProviders": false,
+    "showExternalDataWarning": true,
+    "allowConversationExport": true,
+    "allowConversationDeletion": true
+  },
+
+  "speechAnimation": {
+
+    "enabled": true,
+
+    "logo": {
+      "enabled": true,
+      "source": "assets/logo/logo.png",
+      "doNotRotateLogo": true
+    },
+
+    "mouth": {
+      "enabled": true,
+      "audioReactive": true,
+      "intensity": 0.7,
+      "smoothing": 0.65
+    },
+
+    "expression": {
+      "enabled": true,
+      "idle": true,
+      "speaking": true,
+      "listening": true,
+      "thinking": true
+    }
+  },
+
+  "events": {
+
+    "enabled": true,
+
+    "events": [
+      "ai-ready",
+      "ai-thinking",
+      "ai-listening",
+      "ai-speaking",
+      "ai-response-start",
+      "ai-response-end",
+      "ai-error",
+      "ai-action-request",
+      "ai-action-complete"
+    ]
+  },
+
+  "logging": {
+
+    "enabled": true,
+
+    "logRequests": false,
+    "logResponses": false,
+    "logErrors": true,
+    "logActions": true,
+
+    "removeSensitiveData": true
+  },
+
+  "offline": {
+
+    "enabled": true,
+
+    "showOfflineStatus": true,
+    "allowLocalFunctions": true,
+    "allowCachedData": true
+  }
+
+}
