@@ -1,151 +1,398 @@
 /*
-==========================================
-HalDo AI OS 18
-KERNEL
-Professional Ultimate Foundation
-Version 18.0.0
-==========================================
+============================================================
+ HALDO AI OS 18
+ KERNEL
+ Professional Ultimate Foundation
+============================================================
+
+ Datei:
+ js/kernel.js
+
+ Aufgabe:
+ - zentraler Systemkern
+ - Systemstatus
+ - Boot-/Runtime-Verwaltung
+ - Modulregistrierung
+ - Event-System
+ - Fehlerbehandlung
+ - Systeminformationen
+ - sichere Kommunikation zwischen zukünftigen Modulen
+
+ WICHTIG:
+ Diese Datei ist eigenständig aufgebaut und erwartet keine
+ weiteren Dateien, damit beim Aufbau keine Abhängigkeiten
+ fehlen.
+============================================================
 */
 
-(function () {
+"use strict";
 
-    "use strict";
+
+/* =========================================================
+   HALDO KERNEL
+   ========================================================= */
+
+(function (window) {
+
 
     const HalDoKernel = {
 
-        name: "HalDo Kernel",
-        version: "18.0.0",
 
-        status: "starting",
+        /* =====================================================
+           SYSTEM INFORMATION
+           ===================================================== */
 
-        startedAt: null,
+        name:
+            "HalDo AI OS",
 
-        modules: {},
+        version:
+            "18.0.0",
 
-        events: {},
+        edition:
+            "Professional Ultimate Foundation",
+
+        kernelVersion:
+            "18.0.0",
+
+        build:
+            "HALDO-OS18-FOUNDATION",
 
 
-        init() {
+        /* =====================================================
+           STATUS
+           ===================================================== */
 
-            if (this.status === "running") {
-                return true;
-            }
+        status:
+            "INITIALIZING",
 
-            this.startedAt = new Date();
-            this.status = "running";
+        ready:
+            false,
 
-            console.log(
-                "🔵 HalDo Kernel gestartet"
-            );
+        booted:
+            false,
+
+
+        /* =====================================================
+           TIMING
+           ===================================================== */
+
+        startedAt:
+            null,
+
+        readyAt:
+            null,
+
+
+        /* =====================================================
+           MODULE STORAGE
+           ===================================================== */
+
+        modules:
+            new Map(),
+
+
+        /* =====================================================
+           EVENT STORAGE
+           ===================================================== */
+
+        events:
+            new Map(),
+
+
+        /* =====================================================
+           ERROR STORAGE
+           ===================================================== */
+
+        errors:
+            [],
+
+
+        /* =====================================================
+           SYSTEM DATA
+           ===================================================== */
+
+        data: {
+
+            environment:
+                "web",
+
+            platform:
+                "unknown",
+
+            language:
+                "de",
+
+            online:
+                false,
+
+            storage:
+                false,
+
+            touch:
+                false
+
+        },
+
+
+        /* =====================================================
+           INITIALIZE
+           ===================================================== */
+
+        initialize() {
+
+            this.startedAt =
+                Date.now();
+
+
+            this.status =
+                "INITIALIZING";
+
+
+            this.detectEnvironment();
+
+            this.registerCoreEvents();
+
+            this.status =
+                "READY";
+
+            this.ready =
+                true;
+
+            this.readyAt =
+                Date.now();
+
 
             this.emit(
                 "kernel:ready",
-                this.getStatus()
+                this.getSystemInfo()
             );
+
+
+            this.log(
+                "Kernel",
+                "HalDo Kernel ist bereit."
+            );
+
 
             return true;
         },
 
 
-        registerModule(
-            name,
-            module
-        ) {
+        /* =====================================================
+           ENVIRONMENT DETECTION
+           ===================================================== */
 
-            if (!name) {
-                return false;
+        detectEnvironment() {
+
+            try {
+
+                this.data.platform =
+                    this.detectPlatform();
+
+
+                this.data.language =
+                    (
+                        navigator.language ||
+                        "de"
+                    ).toLowerCase();
+
+
+                this.data.touch =
+                    (
+                        "ontouchstart" in window
+                    ) ||
+                    (
+                        navigator.maxTouchPoints > 0
+                    );
+
+
+                this.data.online =
+                    navigator.onLine;
+
+
+                this.data.storage =
+                    this.checkStorage();
+
+
+            } catch (error) {
+
+                this.handleError(
+                    error,
+                    "Environment detection"
+                );
+
             }
 
-            this.modules[name] =
-                module || {};
+        },
 
-            console.log(
-                "🧩 Kernel Modul registriert:",
-                name
-            );
 
-            this.emit(
-                "module:registered",
-                {
-                    name: name,
-                    module: module
+        /* =====================================================
+           PLATFORM
+           ===================================================== */
+
+        detectPlatform() {
+
+            const userAgent =
+                navigator.userAgent ||
+                "";
+
+
+            if (
+                /iPhone|iPad|iPod/i.test(
+                    userAgent
+                )
+            ) {
+
+                return "iOS";
+
+            }
+
+
+            if (
+                /Android/i.test(
+                    userAgent
+                )
+            ) {
+
+                return "Android";
+
+            }
+
+
+            if (
+                /Windows/i.test(
+                    userAgent
+                )
+            ) {
+
+                return "Windows";
+
+            }
+
+
+            if (
+                /Macintosh|Mac OS X/i.test(
+                    userAgent
+                )
+            ) {
+
+                return "macOS";
+
+            }
+
+
+            if (
+                /Linux/i.test(
+                    userAgent
+                )
+            ) {
+
+                return "Linux";
+
+            }
+
+
+            return "Unknown";
+
+        },
+
+
+        /* =====================================================
+           STORAGE TEST
+           ===================================================== */
+
+        checkStorage() {
+
+            try {
+
+                const testKey =
+                    "__haldo_storage_test__";
+
+
+                localStorage.setItem(
+                    testKey,
+                    "1"
+                );
+
+
+                localStorage.removeItem(
+                    testKey
+                );
+
+
+                return true;
+
+            } catch (error) {
+
+                return false;
+
+            }
+
+        },
+
+
+        /* =====================================================
+           CORE EVENTS
+           ===================================================== */
+
+        registerCoreEvents() {
+
+
+            window.addEventListener(
+                "online",
+                () => {
+
+                    this.data.online =
+                        true;
+
+
+                    this.emit(
+                        "network:online"
+                    );
+
+
+                    this.log(
+                        "Network",
+                        "Online"
+                    );
+
                 }
             );
 
-            return true;
-        },
+
+            window.addEventListener(
+                "offline",
+                () => {
+
+                    this.data.online =
+                        false;
 
 
-        unregisterModule(name) {
+                    this.emit(
+                        "network:offline"
+                    );
 
-            if (!this.modules[name]) {
-                return false;
-            }
 
-            delete this.modules[name];
+                    this.log(
+                        "Network",
+                        "Offline"
+                    );
 
-            this.emit(
-                "module:unregistered",
-                name
+                }
             );
 
-            return true;
-        },
 
+            window.addEventListener(
+                "error",
+                (event) => {
 
-        getModule(name) {
+                    if (
+                        event.error
+                    ) {
 
-            return (
-                this.modules[name] ||
-                null
-            );
-        },
-
-
-        hasModule(name) {
-
-            return !!this.modules[name];
-        },
-
-
-        on(event, callback) {
-
-            if (
-                typeof callback !==
-                "function"
-            ) {
-                return false;
-            }
-
-            if (!this.events[event]) {
-                this.events[event] = [];
-            }
-
-            this.events[event].push(
-                callback
-            );
-
-            return true;
-        },
-
-
-        emit(event, data) {
-
-            const listeners =
-                this.events[event] || [];
-
-            listeners.forEach(
-                function (callback) {
-
-                    try {
-
-                        callback(data);
-
-                    } catch (error) {
-
-                        console.error(
-                            "HalDo Kernel Event Error:",
-                            error
+                        this.handleError(
+                            event.error,
+                            "Window error"
                         );
 
                     }
@@ -153,57 +400,893 @@ Version 18.0.0
                 }
             );
 
+
+            window.addEventListener(
+                "unhandledrejection",
+                (event) => {
+
+                    this.handleError(
+                        event.reason,
+                        "Unhandled promise rejection"
+                    );
+
+                }
+            );
+
         },
 
 
-        getStatus() {
+        /* =====================================================
+           MODULE REGISTRATION
+           ===================================================== */
+
+        registerModule(
+            name,
+            module,
+            options = {}
+        ) {
+
+
+            if (
+                !name ||
+                typeof name !==
+                "string"
+            ) {
+
+                throw new Error(
+                    "Module benötigt einen gültigen Namen."
+                );
+
+            }
+
+
+            if (
+                this.modules.has(
+                    name
+                )
+            ) {
+
+                this.log(
+                    "Module",
+                    `Modul "${name}" ist bereits registriert.`
+                );
+
+
+                return false;
+
+            }
+
+
+            const moduleRecord = {
+
+                name,
+
+                module,
+
+                version:
+                    options.version ||
+                    "1.0.0",
+
+                enabled:
+                    options.enabled !== false,
+
+                initialized:
+                    false,
+
+                registeredAt:
+                    Date.now()
+
+            };
+
+
+            this.modules.set(
+                name,
+                moduleRecord
+            );
+
+
+            this.emit(
+                "module:registered",
+                moduleRecord
+            );
+
+
+            this.log(
+                "Module",
+                `Modul registriert: ${name}`
+            );
+
+
+            return true;
+
+        },
+
+
+        /* =====================================================
+           MODULE INITIALIZATION
+           ===================================================== */
+
+        initializeModule(
+            name
+        ) {
+
+
+            const record =
+                this.modules.get(
+                    name
+                );
+
+
+            if (
+                !record
+            ) {
+
+                this.handleError(
+                    new Error(
+                        `Modul nicht gefunden: ${name}`
+                    ),
+                    "Module initialization"
+                );
+
+
+                return false;
+
+            }
+
+
+            if (
+                !record.enabled
+            ) {
+
+                this.log(
+                    "Module",
+                    `Modul deaktiviert: ${name}`
+                );
+
+
+                return false;
+
+            }
+
+
+            if (
+                record.initialized
+            ) {
+
+                return true;
+
+            }
+
+
+            try {
+
+                if (
+                    record.module &&
+                    typeof record.module.initialize ===
+                    "function"
+                ) {
+
+                    record.module.initialize(
+                        this
+                    );
+
+                }
+
+
+                record.initialized =
+                    true;
+
+
+                this.emit(
+                    "module:initialized",
+                    record
+                );
+
+
+                this.log(
+                    "Module",
+                    `Modul initialisiert: ${name}`
+                );
+
+
+                return true;
+
+            } catch (error) {
+
+                this.handleError(
+                    error,
+                    `Module initialization: ${name}`
+                );
+
+
+                return false;
+
+            }
+
+        },
+
+
+        /* =====================================================
+           INITIALIZE ALL MODULES
+           ===================================================== */
+
+        initializeModules() {
+
+            let initialized =
+                0;
+
+
+            this.modules.forEach(
+                (record) => {
+
+                    if (
+                        this.initializeModule(
+                            record.name
+                        )
+                    ) {
+
+                        initialized++;
+
+                    }
+
+                }
+            );
+
+
+            this.emit(
+                "modules:initialized",
+                {
+                    count:
+                        initialized
+                }
+            );
+
+
+            return initialized;
+
+        },
+
+
+        /* =====================================================
+           REMOVE MODULE
+           ===================================================== */
+
+        unregisterModule(
+            name
+        ) {
+
+
+            if (
+                !this.modules.has(
+                    name
+                )
+            ) {
+
+                return false;
+
+            }
+
+
+            const record =
+                this.modules.get(
+                    name
+                );
+
+
+            try {
+
+                if (
+                    record.module &&
+                    typeof record.module.destroy ===
+                    "function"
+                ) {
+
+                    record.module.destroy(
+                        this
+                    );
+
+                }
+
+            } catch (error) {
+
+                this.handleError(
+                    error,
+                    `Module destroy: ${name}`
+                );
+
+            }
+
+
+            this.modules.delete(
+                name
+            );
+
+
+            this.emit(
+                "module:unregistered",
+                {
+                    name
+                }
+            );
+
+
+            return true;
+
+        },
+
+
+        /* =====================================================
+           EVENT: ON
+           ===================================================== */
+
+        on(
+            eventName,
+            callback
+        ) {
+
+
+            if (
+                typeof callback !==
+                "function"
+            ) {
+
+                return false;
+
+            }
+
+
+            if (
+                !this.events.has(
+                    eventName
+                )
+            ) {
+
+                this.events.set(
+                    eventName,
+                    []
+                );
+
+            }
+
+
+            this.events
+                .get(eventName)
+                .push(callback);
+
+
+            return true;
+
+        },
+
+
+        /* =====================================================
+           EVENT: OFF
+           ===================================================== */
+
+        off(
+            eventName,
+            callback
+        ) {
+
+
+            const listeners =
+                this.events.get(
+                    eventName
+                );
+
+
+            if (
+                !listeners
+            ) {
+
+                return false;
+
+            }
+
+
+            const index =
+                listeners.indexOf(
+                    callback
+                );
+
+
+            if (
+                index === -1
+            ) {
+
+                return false;
+
+            }
+
+
+            listeners.splice(
+                index,
+                1
+            );
+
+
+            return true;
+
+        },
+
+
+        /* =====================================================
+           EVENT: EMIT
+           ===================================================== */
+
+        emit(
+            eventName,
+            data = null
+        ) {
+
+
+            const listeners =
+                this.events.get(
+                    eventName
+                );
+
+
+            if (
+                !listeners
+            ) {
+
+                return;
+
+            }
+
+
+            listeners
+                .slice()
+                .forEach(
+                    (callback) => {
+
+                        try {
+
+                            callback(
+                                data
+                            );
+
+                        } catch (error) {
+
+                            this.handleError(
+                                error,
+                                `Event: ${eventName}`
+                            );
+
+                        }
+
+                    }
+                );
+
+        },
+
+
+        /* =====================================================
+           ERROR HANDLING
+           ===================================================== */
+
+        handleError(
+            error,
+            source = "Unknown"
+        ) {
+
+
+            const errorObject = {
+
+                message:
+                    error &&
+                    error.message
+                        ? error.message
+                        : String(error),
+
+                source,
+
+                timestamp:
+                    new Date()
+                        .toISOString(),
+
+                stack:
+                    error &&
+                    error.stack
+                        ? error.stack
+                        : null
+
+            };
+
+
+            this.errors.push(
+                errorObject
+            );
+
+
+            /*
+               Keep only the most recent
+               100 errors.
+            */
+
+            if (
+                this.errors.length >
+                100
+            ) {
+
+                this.errors.shift();
+
+            }
+
+
+            console.error(
+                "[HalDo Kernel]",
+                errorObject
+            );
+
+
+            this.emit(
+                "system:error",
+                errorObject
+            );
+
+
+            return errorObject;
+
+        },
+
+
+        /* =====================================================
+           LOG
+           ===================================================== */
+
+        log(
+            source,
+            message,
+            data = null
+        ) {
+
+
+            const prefix =
+                `[HalDo ${source}]`;
+
+
+            if (
+                data !== null
+            ) {
+
+                console.log(
+                    prefix,
+                    message,
+                    data
+                );
+
+            } else {
+
+                console.log(
+                    prefix,
+                    message
+                );
+
+            }
+
+        },
+
+
+        /* =====================================================
+           SYSTEM INFORMATION
+           ===================================================== */
+
+        getSystemInfo() {
 
             return {
 
-                name: this.name,
+                name:
+                    this.name,
 
-                version: this.version,
+                version:
+                    this.version,
 
-                status: this.status,
+                edition:
+                    this.edition,
+
+                kernelVersion:
+                    this.kernelVersion,
+
+                build:
+                    this.build,
+
+                status:
+                    this.status,
+
+                ready:
+                    this.ready,
+
+                booted:
+                    this.booted,
 
                 startedAt:
                     this.startedAt,
 
-                moduleCount:
-                    Object.keys(
-                        this.modules
-                    ).length,
+                readyAt:
+                    this.readyAt,
 
-                modules:
-                    Object.keys(
-                        this.modules
-                    )
+                platform:
+                    this.data.platform,
+
+                language:
+                    this.data.language,
+
+                online:
+                    this.data.online,
+
+                storage:
+                    this.data.storage,
+
+                touch:
+                    this.data.touch,
+
+                moduleCount:
+                    this.modules.size,
+
+                errorCount:
+                    this.errors.length
 
             };
+
+        },
+
+
+        /* =====================================================
+           STATUS
+           ===================================================== */
+
+        setStatus(
+            status
+        ) {
+
+            const oldStatus =
+                this.status;
+
+
+            this.status =
+                String(status);
+
+
+            this.emit(
+                "system:status",
+                {
+
+                    oldStatus,
+
+                    newStatus:
+                        this.status
+
+                }
+            );
+
+
+            this.log(
+                "System",
+                `Status: ${this.status}`
+            );
+
+
+            return this.status;
+
+        },
+
+
+        /* =====================================================
+           MARK BOOT COMPLETE
+           ===================================================== */
+
+        markBootComplete() {
+
+            this.booted =
+                true;
+
+            this.ready =
+                true;
+
+            this.status =
+                "ONLINE";
+
+
+            this.emit(
+                "system:boot-complete",
+                this.getSystemInfo()
+            );
+
+
+            this.log(
+                "Kernel",
+                "HalDo AI OS Boot abgeschlossen."
+            );
+
+
+            return true;
+
+        },
+
+
+        /* =====================================================
+           SHUTDOWN
+           ===================================================== */
+
+        shutdown() {
+
+            this.setStatus(
+                "SHUTTING_DOWN"
+            );
+
+
+            this.modules.forEach(
+                (record) => {
+
+                    try {
+
+                        if (
+                            record.module &&
+                            typeof record.module.shutdown ===
+                            "function"
+                        ) {
+
+                            record.module.shutdown(
+                                this
+                            );
+
+                        }
+
+                    } catch (error) {
+
+                        this.handleError(
+                            error,
+                            `Shutdown: ${record.name}`
+                        );
+
+                    }
+
+                }
+            );
+
+
+            this.emit(
+                "system:shutdown"
+            );
+
+
+            this.setStatus(
+                "OFFLINE"
+            );
+
+
+            return true;
+
+        },
+
+
+        /* =====================================================
+           RESET
+           ===================================================== */
+
+        reset() {
+
+            this.status =
+                "RESETTING";
+
+
+            this.modules.forEach(
+                (record) => {
+
+                    record.initialized =
+                        false;
+
+                }
+            );
+
+
+            this.errors =
+                [];
+
+
+            this.emit(
+                "system:reset"
+            );
+
+
+            this.status =
+                "READY";
+
+
+            this.log(
+                "Kernel",
+                "Kernel wurde zurückgesetzt."
+            );
+
+
+            return true;
 
         }
 
     };
 
 
+    /* =========================================================
+       PUBLIC GLOBAL API
+       ========================================================= */
+
     window.HalDoKernel =
         HalDoKernel;
 
 
-    window.addEventListener(
-        "DOMContentLoaded",
-        function () {
+    /*
+       Compatibility alias.
+       Future modules may use either:
+       HalDoKernel
+       or
+       HalDo.kernel
+    */
 
-            setTimeout(
-                function () {
+    if (
+        !window.HalDo
+    ) {
 
-                    HalDoKernel.init();
+        window.HalDo = {};
 
-                },
-                25
-            );
+    }
 
-        }
+
+    window.HalDo.kernel =
+        HalDoKernel;
+
+
+    /* =========================================================
+       AUTO INITIALIZATION
+       ========================================================= */
+
+    if (
+        document.readyState ===
+        "loading"
+    ) {
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            function() {
+
+                HalDoKernel.initialize();
+
+            },
+            {
+                once: true
+            }
+        );
+
+    } else {
+
+        HalDoKernel.initialize();
+
+    }
+
+
+    /* =========================================================
+       FINAL CONSOLE MESSAGE
+       ========================================================= */
+
+    console.log(
+        "=============================================="
     );
 
-})();
+    console.log(
+        "HalDo AI OS 18 Kernel"
+    );
+
+    console.log(
+        "Professional Ultimate Foundation"
+    );
+
+    console.log(
+        "Kernel loaded successfully."
+    );
+
+    console.log(
+        "=============================================="
+    );
+
+
+})(window);
