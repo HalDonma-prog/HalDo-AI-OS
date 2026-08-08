@@ -1,322 +1,497 @@
-/* =========================================================
-   HALDO AI OS 18
-   PERMANENT HALDO LIGHT ENGINE
-   ========================================================= */
-
 /*
-   WICHTIG:
+========================================================
 
-   Das Logo selbst:
-   - dreht sich NICHT
-   - bleibt in der Mitte
-   - bleibt sichtbar
+HalDo AI OS 18
+Modern Interface Design System
 
-   Nur:
-   - Lichtbahnen
-   - Strahlen
-   - Lichtpartikel
+Professional Ultimate Foundation
 
-   drehen sich dauerhaft darum.
+Version:
+18.0.0
+
+Design:
+- Modern
+- Compact
+- Responsive
+- Touch friendly
+- iPhone / Tablet
+- Dark UI
+- Blue / Red HalDo accents
+- Glass interface
+- Logo glow support
+- Animated controls
+
+========================================================
 */
 
 
-.haldo-sun-container {
+/* ======================================================
+   ROOT
+   ====================================================== */
 
-    --haldo-intensity: 1;
-    --haldo-speed: 1;
-    --haldo-glow: 1;
-    --haldo-animation-play-state: running;
+:root {
 
-    position: relative;
+    --haldo-bg:
+        #070b14;
 
-    width: 230px;
-    height: 230px;
+    --haldo-bg-soft:
+        #0b1120;
 
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    --haldo-panel:
+        rgba(15, 23, 42, 0.82);
 
-    isolation: isolate;
+    --haldo-panel-soft:
+        rgba(20, 30, 52, 0.72);
 
-}
+    --haldo-border:
+        rgba(255, 255, 255, 0.09);
 
+    --haldo-text:
+        #f4f7ff;
 
-/* =========================================================
-   LOGO
-   ========================================================= */
+    --haldo-text-soft:
+        #aab5ca;
 
-.haldo-logo-still {
+    --haldo-blue:
+        #3182ff;
 
-    position: absolute;
+    --haldo-blue-light:
+        #61a0ff;
 
-    inset: 0;
+    --haldo-red:
+        #ff3658;
 
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    --haldo-red-light:
+        #ff667f;
 
-    z-index: 20;
+    --haldo-cyan:
+        #38d9ff;
 
-    pointer-events: none;
+    --haldo-green:
+        #38e6a5;
 
-}
+    --haldo-shadow:
+        0 15px 45px
+        rgba(0, 0, 0, 0.35);
 
+    --haldo-radius:
+        18px;
 
-/*
-   Das eigene HalDo Logo bleibt ruhig.
-*/
+    --haldo-radius-small:
+        12px;
 
-.haldo-logo-still img,
-.haldo-startup-logo,
-.haldo-sun-container > img {
-
-    position: relative;
-
-    z-index: 20;
-
-    display: block;
-
-    width: 150px;
-    max-width: 65%;
-
-    height: auto;
-
-    object-fit: contain;
-
-    transform: none !important;
-
-    animation: none !important;
-
-    rotate: none !important;
-
-    scale: 1;
+    --haldo-transition:
+        180ms ease;
 
 }
 
 
-/* =========================================================
-   ZENTRALES LEUCHTEN
-   ========================================================= */
+/* ======================================================
+   RESET
+   ====================================================== */
 
-.haldo-sun-container::before {
+* {
 
-    content: "";
+    box-sizing:
+        border-box;
 
-    position: absolute;
+    margin:
+        0;
 
-    width: 105px;
-    height: 105px;
+    padding:
+        0;
 
-    border-radius: 50%;
+}
+
+
+html {
+
+    min-height:
+        100%;
+
+    background:
+        var(--haldo-bg);
+
+}
+
+
+body {
+
+    min-height:
+        100vh;
+
+    margin:
+        0;
+
+    padding:
+        0;
+
+    font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "SF Pro Display",
+        "SF Pro Text",
+        "Segoe UI",
+        sans-serif;
+
+    color:
+        var(--haldo-text);
 
     background:
         radial-gradient(
-            circle,
-            rgba(255,255,255,.32) 0%,
-            rgba(97,160,255,.20) 25%,
-            rgba(49,130,255,.10) 48%,
-            transparent 75%
-        );
+            circle at 50% 0%,
+            rgba(49, 130, 255, 0.10),
+            transparent 35%
+        ),
+        radial-gradient(
+            circle at 100% 100%,
+            rgba(255, 54, 88, 0.07),
+            transparent 35%
+        ),
+        var(--haldo-bg);
 
-    filter:
-        blur(
-            calc(8px * var(--haldo-glow))
-        );
-
-    opacity:
-        calc(
-            .48 * var(--haldo-intensity)
-        );
-
-    z-index: 5;
-
-    animation:
-        haldoCorePulse
-        calc(
-            2.8s / var(--haldo-speed)
-        )
-        ease-in-out
-        infinite;
-
-    animation-play-state:
-        var(--haldo-animation-play-state);
+    overflow-x:
+        hidden;
 
 }
 
 
-@keyframes haldoCorePulse {
+/* ======================================================
+   TEXT
+   ====================================================== */
 
-    0%,
-    100% {
+h1,
+h2,
+h3,
+h4 {
 
-        transform:
-            scale(.88);
+    font-weight:
+        700;
 
-        opacity:
-            .40;
-
-    }
-
-    50% {
-
-        transform:
-            scale(1.16);
-
-        opacity:
-            .90;
-
-    }
+    letter-spacing:
+        -0.025em;
 
 }
 
 
-/* =========================================================
-   ÄUSSERE LICHTBAHN
-   ========================================================= */
+p {
+
+    color:
+        var(--haldo-text-soft);
+
+    line-height:
+        1.6;
+
+}
+
+
+/* ======================================================
+   LINKS
+   ====================================================== */
+
+a {
+
+    color:
+        var(--haldo-blue-light);
+
+    text-decoration:
+        none;
+
+}
+
+
+a:hover {
+
+    text-decoration:
+        underline;
+
+}
+
+
+/* ======================================================
+   SCREEN SYSTEM
+   ====================================================== */
+
+.screen {
+
+    min-height:
+        100vh;
+
+    width:
+        100%;
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    text-align:
+        center;
+
+    padding:
+        24px;
+
+}
+
+
+.hidden {
+
+    display:
+        none !important;
+
+}
+
+
+/* ======================================================
+   STARTUP
+   ====================================================== */
+
+.startup-screen {
+
+    position:
+        relative;
+
+    overflow:
+        hidden;
+
+    background:
+        radial-gradient(
+            circle at center,
+            rgba(49, 130, 255, 0.11),
+            transparent 40%
+        );
+
+}
+
+
+.startup-screen h1 {
+
+    margin-top:
+        25px;
+
+    font-size:
+        clamp(
+            1.8rem,
+            5vw,
+            2.7rem
+        );
+
+}
+
+
+.startup-screen p {
+
+    margin-top:
+        8px;
+
+    font-size:
+        0.95rem;
+
+}
+
+
+/* ======================================================
+   LOGO
+   ====================================================== */
+
+.logo {
+
+    width:
+        min(
+            170px,
+            45vw
+        );
+
+    height:
+        auto;
+
+    object-fit:
+        contain;
+
+}
+
+
+.logo.small {
+
+    width:
+        54px;
+
+}
+
+
+/*
+----------------------------------------------------------
+Logo selbst bleibt ruhig.
+----------------------------------------------------------
+*/
+
+.haldo-startup-logo {
+
+    width:
+        150px;
+
+    max-width:
+        42vw;
+
+    height:
+        auto;
+
+    display:
+        block;
+
+    object-fit:
+        contain;
+
+    position:
+        relative;
+
+    z-index:
+        10;
+
+}
+
+
+/* ======================================================
+   HALDO LIGHT SYSTEM
+   ====================================================== */
+
+.haldo-sun-container {
+
+    position:
+        relative;
+
+    width:
+        220px;
+
+    height:
+        220px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+}
+
+
+/*
+----------------------------------------------------------
+Das Logo selbst dreht NICHT.
+----------------------------------------------------------
+*/
+
+.haldo-logo-still {
+
+    position:
+        absolute;
+
+    inset:
+        0;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    z-index:
+        10;
+
+}
+
+
+/*
+----------------------------------------------------------
+Äußere Lichtbahnen
+----------------------------------------------------------
+*/
 
 .haldo-light-orbit {
 
-    position: absolute;
+    position:
+        absolute;
 
-    border-radius: 50%;
+    inset:
+        10px;
 
-    pointer-events: none;
+    border-radius:
+        50%;
 
-    z-index: 4;
+    pointer-events:
+        none;
 
 }
 
-
-/* =========================================================
-   ÄUSSERE ORBIT-BAHN
-   ========================================================= */
 
 .orbit-outer {
 
-    inset: 4px;
-
     border:
         2px solid
-        rgba(
-            49,
-            130,
-            255,
-            .38
-        );
+        rgba(49, 130, 255, 0.30);
 
     box-shadow:
-
-        0 0
-        calc(
-            10px * var(--haldo-glow)
-        )
-        rgba(
-            49,
-            130,
-            255,
-            .40
-        ),
-
-        0 0
-        calc(
-            30px * var(--haldo-glow)
-        )
-        rgba(
-            49,
-            130,
-            255,
-            .18
-        );
+        0 0 18px
+        rgba(49, 130, 255, 0.30);
 
     animation:
-        haldoOuterOrbit
-        calc(
-            8s / var(--haldo-speed)
-        )
-        linear
-        infinite;
-
-    animation-play-state:
-        var(--haldo-animation-play-state);
+        haldoOrbit 7s linear infinite;
 
 }
 
-
-@keyframes haldoOuterOrbit {
-
-    from {
-
-        transform:
-            rotate(0deg);
-
-    }
-
-    to {
-
-        transform:
-            rotate(360deg);
-
-    }
-
-}
-
-
-/* =========================================================
-   MITTLERE ORBIT-BAHN
-   ========================================================= */
 
 .orbit-middle {
 
-    inset: 22px;
+    inset:
+        25px;
 
     border:
         2px solid
-        rgba(
-            255,
-            54,
-            88,
-            .34
-        );
+        rgba(255, 54, 88, 0.28);
 
     box-shadow:
-
-        0 0
-        calc(
-            9px * var(--haldo-glow)
-        )
-        rgba(
-            255,
-            54,
-            88,
-            .35
-        ),
-
-        0 0
-        calc(
-            25px * var(--haldo-glow)
-        )
-        rgba(
-            255,
-            54,
-            88,
-            .16
-        );
+        0 0 16px
+        rgba(255, 54, 88, 0.25);
 
     animation:
-        haldoMiddleOrbit
-        calc(
-            5.2s / var(--haldo-speed)
-        )
-        linear
-        infinite;
-
-    animation-play-state:
-        var(--haldo-animation-play-state);
+        haldoOrbitReverse 4.5s linear infinite;
 
 }
 
 
-@keyframes haldoMiddleOrbit {
+@keyframes haldoOrbit {
+
+    from {
+
+        transform:
+            rotate(0deg);
+
+    }
+
+    to {
+
+        transform:
+            rotate(360deg);
+
+    }
+
+}
+
+
+@keyframes haldoOrbitReverse {
 
     from {
 
@@ -335,510 +510,812 @@
 }
 
 
-/* =========================================================
+/* ======================================================
    LICHTSTRAHLEN
-   ========================================================= */
+   ====================================================== */
 
 .haldo-rays {
 
-    position: absolute;
+    position:
+        absolute;
 
-    inset: 0;
+    inset:
+        0;
 
-    border-radius: 50%;
+    border-radius:
+        50%;
 
-    pointer-events: none;
-
-    z-index: 3;
+    pointer-events:
+        none;
 
 }
 
-
-/* =========================================================
-   ERSTE STRAHLEN-EBENE
-   ========================================================= */
 
 .rays-one {
 
     background:
-
         conic-gradient(
-
             from 0deg,
-
             transparent 0deg,
-
-            rgba(
-                49,
-                130,
-                255,
-                .80
-            ) 6deg,
-
-            transparent 14deg,
-
-            transparent 28deg,
-
-            rgba(
-                255,
-                54,
-                88,
-                .72
-            ) 36deg,
-
-            transparent 45deg,
-
-            transparent 62deg,
-
-            rgba(
-                56,
-                217,
-                255,
-                .72
-            ) 70deg,
-
-            transparent 79deg,
-
-            transparent 100deg,
-
-            rgba(
-                255,
-                255,
-                255,
-                .42
-            ) 106deg,
-
-            transparent 115deg,
-
-            transparent 142deg,
-
-            rgba(
-                49,
-                130,
-                255,
-                .65
-            ) 150deg,
-
-            transparent 160deg,
-
-            transparent 185deg,
-
-            rgba(
-                255,
-                54,
-                88,
-                .65
-            ) 194deg,
-
-            transparent 204deg,
-
-            transparent 225deg,
-
-            rgba(
-                56,
-                217,
-                255,
-                .70
-            ) 233deg,
-
-            transparent 244deg,
-
-            transparent 270deg,
-
-            rgba(
-                255,
-                255,
-                255,
-                .38
-            ) 278deg,
-
-            transparent 289deg,
-
-            transparent 310deg,
-
-            rgba(
-                49,
-                130,
-                255,
-                .72
-            ) 318deg,
-
-            transparent 330deg,
-
+            rgba(49,130,255,.7) 7deg,
+            transparent 15deg,
+            transparent 35deg,
+            rgba(255,54,88,.65) 42deg,
+            transparent 52deg,
+            transparent 75deg,
+            rgba(56,217,255,.65) 83deg,
+            transparent 94deg,
             transparent 360deg
-
         );
 
     filter:
-        blur(4px);
-
-    opacity:
-        calc(
-            .70 * var(--haldo-intensity)
-        );
+        blur(5px);
 
     animation:
-        haldoRaysRotate
-        calc(
-            5s / var(--haldo-speed)
-        )
-        linear
-        infinite;
-
-    animation-play-state:
-        var(--haldo-animation-play-state);
+        haldoOrbit 5s linear infinite;
 
 }
 
-
-@keyframes haldoRaysRotate {
-
-    from {
-
-        transform:
-            rotate(0deg);
-
-    }
-
-    to {
-
-        transform:
-            rotate(360deg);
-
-    }
-
-}
-
-
-/* =========================================================
-   ZWEITE STRAHLEN-EBENE
-   ========================================================= */
 
 .rays-two {
 
-    inset: 16px;
+    inset:
+        18px;
 
     background:
-
         conic-gradient(
-
             from 180deg,
-
             transparent 0deg,
-
-            rgba(
-                255,
-                255,
-                255,
-                .45
-            ) 7deg,
-
-            transparent 15deg,
-
-            transparent 42deg,
-
-            rgba(
-                49,
-                130,
-                255,
-                .62
-            ) 50deg,
-
-            transparent 61deg,
-
-            transparent 88deg,
-
-            rgba(
-                255,
-                54,
-                88,
-                .60
-            ) 96deg,
-
-            transparent 108deg,
-
-            transparent 138deg,
-
-            rgba(
-                56,
-                217,
-                255,
-                .55
-            ) 146deg,
-
-            transparent 157deg,
-
-            transparent 188deg,
-
-            rgba(
-                255,
-                255,
-                255,
-                .40
-            ) 197deg,
-
-            transparent 208deg,
-
-            transparent 240deg,
-
-            rgba(
-                49,
-                130,
-                255,
-                .60
-            ) 248deg,
-
-            transparent 260deg,
-
-            transparent 290deg,
-
-            rgba(
-                255,
-                54,
-                88,
-                .55
-            ) 298deg,
-
-            transparent 310deg,
-
+            rgba(255,255,255,.35) 8deg,
+            transparent 18deg,
+            transparent 52deg,
+            rgba(49,130,255,.45) 60deg,
+            transparent 72deg,
             transparent 360deg
-
         );
 
     filter:
         blur(7px);
 
-    opacity:
-        calc(
-            .58 * var(--haldo-intensity)
-        );
-
     animation:
-        haldoRaysReverse
-        calc(
-            3.4s / var(--haldo-speed)
-        )
-        linear
-        infinite;
-
-    animation-play-state:
-        var(--haldo-animation-play-state);
+        haldoOrbitReverse 3s linear infinite;
 
 }
 
 
-@keyframes haldoRaysReverse {
-
-    from {
-
-        transform:
-            rotate(360deg);
-
-    }
-
-    to {
-
-        transform:
-            rotate(0deg);
-
-    }
-
-}
-
-
-/* =========================================================
-   GLITZER / LICHTPARTIKEL
-   ========================================================= */
+/* ======================================================
+   SPARKS
+   ====================================================== */
 
 .haldo-spark {
 
-    position: absolute;
+    position:
+        absolute;
 
-    z-index: 15;
+    color:
+        white;
 
-    color: white;
-
-    font-size: 18px;
-
-    line-height: 1;
-
-    pointer-events: none;
+    font-size:
+        18px;
 
     text-shadow:
-
-        0 0 7px
-        rgba(
-            255,
-            255,
-            255,
-            .95
-        ),
-
-        0 0 18px
-        rgba(
-            49,
-            130,
-            255,
-            .85
-        ),
-
-        0 0 30px
-        rgba(
-            255,
-            54,
-            88,
-            .45
-        );
+        0 0 10px
+        rgba(255,255,255,.9),
+        0 0 25px
+        rgba(49,130,255,.8);
 
     animation:
-        haldoSparkPulse
-        calc(
-            2.2s / var(--haldo-speed)
-        )
-        ease-in-out
-        infinite;
-
-    animation-play-state:
-        var(--haldo-animation-play-state);
+        haldoSpark 2s ease-in-out infinite;
 
 }
 
 
-@keyframes haldoSparkPulse {
+.spark-1 {
+
+    top:
+        5%;
+
+    left:
+        48%;
+
+}
+
+
+.spark-2 {
+
+    right:
+        10%;
+
+    top:
+        30%;
+
+    animation-delay:
+        .4s;
+
+}
+
+
+.spark-3 {
+
+    right:
+        18%;
+
+    bottom:
+        10%;
+
+    animation-delay:
+        .8s;
+
+}
+
+
+.spark-4 {
+
+    left:
+        15%;
+
+    bottom:
+        14%;
+
+    animation-delay:
+        1.2s;
+
+}
+
+
+.spark-5 {
+
+    left:
+        6%;
+
+    top:
+        34%;
+
+    animation-delay:
+        1.6s;
+
+}
+
+
+.spark-6 {
+
+    right:
+        42%;
+
+    top:
+        1%;
+
+    animation-delay:
+        2s;
+
+}
+
+
+@keyframes haldoSpark {
 
     0%,
     100% {
 
         opacity:
-            .25;
+            .35;
 
         transform:
-            scale(.70);
+            scale(.75)
+            rotate(0deg);
 
     }
 
     50% {
 
         opacity:
-            calc(
-                .80 * var(--haldo-intensity)
-            );
+            1;
 
         transform:
-            scale(1.45);
+            scale(1.35)
+            rotate(45deg);
 
     }
 
 }
 
 
-/* =========================================================
-   LICHTINTENSITÄT
-   ========================================================= */
+/* ======================================================
+   WELCOME
+   ====================================================== */
 
-.haldo-mode-idle {
+.welcome-screen {
 
-    filter:
-        brightness(
-            calc(
-                1 * var(--haldo-intensity)
+    gap:
+        10px;
+
+}
+
+
+.welcome-screen h1 {
+
+    font-size:
+        clamp(
+            1.8rem,
+            5vw,
+            2.6rem
+        );
+
+    line-height:
+        1.15;
+
+}
+
+
+.welcome-screen button {
+
+    margin-top:
+        18px;
+
+}
+
+
+/* ======================================================
+   HEADER
+   ====================================================== */
+
+.header {
+
+    width:
+        min(
+            100%,
+            1000px
+        );
+
+    margin:
+        0 auto;
+
+    padding:
+        22px 18px 8px;
+
+    text-align:
+        center;
+
+}
+
+
+.header h1 {
+
+    margin-top:
+        8px;
+
+    font-size:
+        1.45rem;
+
+}
+
+
+.header p {
+
+    font-size:
+        .82rem;
+
+    margin-top:
+        4px;
+
+}
+
+
+/* ======================================================
+   MAIN MENU
+   ====================================================== */
+
+.main-menu {
+
+    min-height:
+        100vh;
+
+    padding:
+        12px;
+
+}
+
+
+.menu-container {
+
+    width:
+        min(
+            100%,
+            720px
+        );
+
+    margin:
+        20px auto;
+
+    padding:
+        18px;
+
+}
+
+
+.menu-container h2 {
+
+    text-align:
+        center;
+
+    font-size:
+        1.25rem;
+
+    margin-bottom:
+        16px;
+
+}
+
+
+/* ======================================================
+   MODERN BUTTON GRID
+   ====================================================== */
+
+.menu-grid {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(
+            2,
+            minmax(
+                0,
+                1fr
             )
+        );
+
+    gap:
+        10px;
+
+}
+
+
+/* ======================================================
+   MODERN BUTTON
+   ====================================================== */
+
+button {
+
+    appearance:
+        none;
+
+    border:
+        1px solid
+        rgba(255,255,255,.10);
+
+    border-radius:
+        14px;
+
+    min-height:
+        46px;
+
+    padding:
+        10px 14px;
+
+    color:
+        #ffffff;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(49,130,255,.16),
+            rgba(255,54,88,.10)
+        );
+
+    box-shadow:
+        0 8px 22px
+        rgba(0,0,0,.20);
+
+    backdrop-filter:
+        blur(12px);
+
+    -webkit-backdrop-filter:
+        blur(12px);
+
+    font-size:
+        .88rem;
+
+    font-weight:
+        650;
+
+    cursor:
+        pointer;
+
+    transition:
+        transform var(--haldo-transition),
+        border-color var(--haldo-transition),
+        box-shadow var(--haldo-transition),
+        background var(--haldo-transition);
+
+}
+
+
+button:hover {
+
+    transform:
+        translateY(-2px);
+
+    border-color:
+        rgba(49,130,255,.45);
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(49,130,255,.28),
+            rgba(255,54,88,.17)
+        );
+
+    box-shadow:
+        0 10px 28px
+        rgba(49,130,255,.18);
+
+}
+
+
+button:active {
+
+    transform:
+        translateY(1px)
+        scale(.97);
+
+    box-shadow:
+        0 4px 12px
+        rgba(0,0,0,.25);
+
+}
+
+
+button:focus-visible {
+
+    outline:
+        2px solid
+        var(--haldo-cyan);
+
+    outline-offset:
+        3px;
+
+}
+
+
+/* ======================================================
+   PRIMARY BUTTON
+   ====================================================== */
+
+.haldo-primary {
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--haldo-blue),
+            #245edb
+        );
+
+    border-color:
+        rgba(255,255,255,.18);
+
+}
+
+
+.haldo-primary:hover {
+
+    background:
+        linear-gradient(
+            135deg,
+            #4b94ff,
+            #ff3658
         );
 
 }
 
 
-.haldo-mode-listening {
+/* ======================================================
+   RED BUTTON
+   ====================================================== */
 
-    filter:
-        brightness(
-            calc(
-                1.08 * var(--haldo-intensity)
-            )
+.haldo-danger {
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255,54,88,.8),
+            rgba(180,25,50,.8)
         );
 
 }
 
 
-.haldo-mode-thinking {
+/* ======================================================
+   GLASS PANEL
+   ====================================================== */
+
+.haldo-panel {
+
+    background:
+        var(--haldo-panel);
+
+    border:
+        1px solid
+        var(--haldo-border);
+
+    border-radius:
+        var(--haldo-radius);
+
+    box-shadow:
+        var(--haldo-shadow);
+
+    backdrop-filter:
+        blur(18px);
+
+    -webkit-backdrop-filter:
+        blur(18px);
+
+}
+
+
+/* ======================================================
+   INPUTS
+   ====================================================== */
+
+input,
+textarea,
+select {
+
+    width:
+        100%;
+
+    border:
+        1px solid
+        rgba(255,255,255,.10);
+
+    border-radius:
+        13px;
+
+    background:
+        rgba(6,10,20,.72);
+
+    color:
+        white;
+
+    padding:
+        11px 13px;
+
+    font-family:
+        inherit;
+
+    font-size:
+        .9rem;
+
+    outline:
+        none;
+
+    transition:
+        border-color var(--haldo-transition),
+        box-shadow var(--haldo-transition);
+
+}
+
+
+input:focus,
+textarea:focus,
+select:focus {
+
+    border-color:
+        rgba(49,130,255,.7);
+
+    box-shadow:
+        0 0 0 3px
+        rgba(49,130,255,.12);
+
+}
+
+
+textarea {
+
+    min-height:
+        110px;
+
+    resize:
+        vertical;
+
+}
+
+
+/* ======================================================
+   STATUS
+   ====================================================== */
+
+.status-online {
+
+    color:
+        var(--haldo-green);
+
+}
+
+
+.status-warning {
+
+    color:
+        #ffd166;
+
+}
+
+
+.status-error {
+
+    color:
+        var(--haldo-red-light);
+
+}
+
+
+/* ======================================================
+   AI GLOW STATES
+   ====================================================== */
+
+.haldo-ai-listening
+.haldo-sun-container {
 
     filter:
-        brightness(
-            calc(
-                1.14 * var(--haldo-intensity)
-            )
-        );
+        brightness(1.25);
 
 }
 
 
-.haldo-mode-answering {
+.haldo-ai-thinking
+.haldo-sun-container {
 
     filter:
-        brightness(
-            calc(
-                1.20 * var(--haldo-intensity)
-            )
-        );
+        brightness(1.45);
 
 }
 
 
-.haldo-mode-speaking {
+.haldo-ai-answering
+.haldo-sun-container {
 
     filter:
-        brightness(
-            calc(
-                1.28 * var(--haldo-intensity)
-            )
-        );
+        brightness(1.65);
 
 }
 
 
-/* =========================================================
-   DEAKTIVIERT
-   ========================================================= */
+.haldo-ai-speaking
+.haldo-sun-container {
 
-.haldo-light-disabled {
-
-    --haldo-intensity: 0;
+    filter:
+        brightness(1.85);
 
 }
 
 
-/* =========================================================
-   MOBILE
-   ========================================================= */
+/* ======================================================
+   RESPONSIVE
+   ====================================================== */
 
-@media (max-width: 600px) {
+@media (
+    max-width: 600px
+) {
+
+    .screen {
+
+        padding:
+            18px;
+
+    }
+
 
     .haldo-sun-container {
 
-        width: 200px;
-        height: 200px;
+        width:
+            190px;
+
+        height:
+            190px;
 
     }
 
 
-    .haldo-logo-still img,
-    .haldo-startup-logo,
-    .haldo-sun-container > img {
+    .haldo-startup-logo {
 
-        width: 128px;
+        width:
+            125px;
 
     }
 
 
-    .haldo-spark {
+    .menu-grid {
 
-        font-size: 15px;
+        grid-template-columns:
+            repeat(
+                2,
+                minmax(
+                    0,
+                    1fr
+                )
+            );
+
+        gap:
+            8px;
+
+    }
+
+
+    button {
+
+        min-height:
+            43px;
+
+        padding:
+            9px 10px;
+
+        font-size:
+            .82rem;
+
+        border-radius:
+            12px;
+
+    }
+
+
+    .menu-container {
+
+        padding:
+            12px;
 
     }
 
 }
 
 
-/* =========================================================
-   ENDE HALDO LIGHT ENGINE
-   ========================================================= */
+@media (
+    min-width: 601px
+) {
+
+    .menu-grid {
+
+        grid-template-columns:
+            repeat(
+                3,
+                minmax(
+                    0,
+                    1fr
+                )
+            );
+
+    }
+
+}
+
+
+/* ======================================================
+   REDUCED MOTION
+   ====================================================== */
+
+@media (
+    prefers-reduced-motion: reduce
+) {
+
+    *,
+    *::before,
+    *::after {
+
+        animation-duration:
+            .01ms !important;
+
+        animation-iteration-count:
+            1 !important;
+
+        scroll-behavior:
+            auto !important;
+
+        transition-duration:
+            .01ms !important;
+
+    }
+
+}
+
+
+/* ======================================================
+   END
+   ====================================================== */
