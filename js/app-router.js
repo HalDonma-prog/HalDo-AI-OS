@@ -2394,3 +2394,1682 @@
     /* ========================================================
        ENDE TEIL 2
        ======================================================== */
+    /* ========================================================
+       36 — ROUTE-INFO
+       ======================================================== */
+
+    function getRouteInfo(
+        route = state.currentRoute
+    ) {
+
+        const parsed =
+            parseRoute(
+                route
+            );
+
+
+        return {
+
+            route:
+                parsed.route,
+
+            type:
+                parsed.type,
+
+            appId:
+                parsed.appId,
+
+            params:
+                {
+                    ...parsed.params
+                },
+
+            query:
+                {
+                    ...parsed.query
+                }
+
+        };
+
+    }
+
+
+    /* ========================================================
+       37 — ROUTE AKTIV?
+       ======================================================== */
+
+    function isCurrentRoute(
+        route
+    ) {
+
+        return (
+            normalizeRoute(
+                route
+            ) ===
+            state.currentRoute
+        );
+
+    }
+
+
+    /* ========================================================
+       38 — APP AKTIV?
+       ======================================================== */
+
+    function isCurrentApp(
+        appId
+    ) {
+
+        const normalized =
+            normalizeAppId(
+                appId
+            );
+
+
+        return (
+            Boolean(
+                normalized
+            ) &&
+            normalized ===
+            state.currentApp
+        );
+
+    }
+
+
+    /* ========================================================
+       39 — VORHERIGE ROUTE
+       ======================================================== */
+
+    function getPreviousRoute() {
+
+        return (
+            state.previousRoute ||
+            null
+        );
+
+    }
+
+
+    /* ========================================================
+       40 — VORHERIGE APP
+       ======================================================== */
+
+    function getPreviousApp() {
+
+        if (
+            !state.previousApp
+        ) {
+
+            return null;
+
+        }
+
+
+        const manager =
+            getAppManager();
+
+
+        if (
+            manager &&
+            typeof manager.getApp ===
+            "function"
+        ) {
+
+            return manager.getApp(
+                state.previousApp
+            );
+
+        }
+
+
+        return null;
+
+    }
+
+
+    /* ========================================================
+       41 — ROUTE ZURÜCK
+       ======================================================== */
+
+    async function navigateBack(
+        fallbackRoute = CONFIG.homeRoute
+    ) {
+
+        const previous =
+            state.previousRoute;
+
+
+        if (
+            previous
+        ) {
+
+            return navigate(
+                previous,
+                {
+
+                    source:
+                        "navigate-back",
+
+                    replace:
+                        true
+
+                }
+            );
+
+        }
+
+
+        return navigate(
+            fallbackRoute,
+            {
+
+                source:
+                    "navigate-back-fallback"
+
+            }
+        );
+
+    }
+
+
+    /* ========================================================
+       42 — APP SCHLIESSEN UND HOME
+       ======================================================== */
+
+    async function closeCurrentApp() {
+
+        const manager =
+            getAppManager();
+
+
+        if (
+            !manager
+        ) {
+
+            return {
+
+                success:
+                    false,
+
+                error:
+                    "HalDoAppManager ist nicht verfügbar."
+
+            };
+
+        }
+
+
+        const activeApp =
+            typeof manager.getActiveApp ===
+            "function"
+                ? manager.getActiveApp()
+                : null;
+
+
+        if (
+            activeApp &&
+            typeof manager.stopApp ===
+            "function"
+        ) {
+
+            try {
+
+                await manager.stopApp(
+                    activeApp.id
+                );
+
+            }
+            catch (
+                error
+            ) {
+
+                const message =
+                    error &&
+                    error.message
+                        ? error.message
+                        : String(
+                            error
+                        );
+
+
+                state.lastError =
+                    message;
+
+
+                return {
+
+                    success:
+                        false,
+
+                    error:
+                        message
+
+                };
+
+            }
+
+        }
+
+
+        return navigate(
+            CONFIG.homeRoute,
+            {
+
+                source:
+                    "close-app"
+
+            }
+        );
+
+    }
+
+
+    /* ========================================================
+       43 — ROUTE AUS APP-ID
+       ======================================================== */
+
+    function routeForApp(
+        appId,
+        options = {}
+    ) {
+
+        return createAppRoute(
+            appId,
+            options
+        );
+
+    }
+
+
+    /* ========================================================
+       44 — ROUTE VERGLEICHEN
+       ======================================================== */
+
+    function compareRoutes(
+        firstRoute,
+        secondRoute
+    ) {
+
+        const first =
+            parseRoute(
+                firstRoute
+            );
+
+
+        const second =
+            parseRoute(
+                secondRoute
+            );
+
+
+        return {
+
+            sameRoute:
+                first.route ===
+                second.route,
+
+            sameType:
+                first.type ===
+                second.type,
+
+            sameApp:
+                first.appId ===
+                second.appId,
+
+            first,
+
+            second
+
+        };
+
+    }
+
+
+    /* ========================================================
+       45 — APP-ROUTE MIT PARAMETERN
+       ======================================================== */
+
+    function navigateWithParams(
+        appId,
+        params = [],
+        query = {},
+        options = {}
+    ) {
+
+        return navigateToApp(
+            appId,
+            {
+
+                ...options,
+
+                params,
+
+                query
+
+            }
+        );
+
+    }
+
+
+    /* ========================================================
+       46 — QUERY-PARAMETER AKTUALISIEREN
+       ======================================================== */
+
+    async function updateQuery(
+        query = {},
+        options = {}
+    ) {
+
+        const current =
+            parseRoute(
+                state.currentRoute
+            );
+
+
+        if (
+            current.type !==
+            "app" ||
+            !current.appId
+        ) {
+
+            return {
+
+                success:
+                    false,
+
+                error:
+                    "Die aktuelle Route ist keine App-Route."
+
+            };
+
+        }
+
+
+        const route =
+            createAppRoute(
+                current.appId,
+                {
+
+                    params:
+                        Object.values(
+                            current.params
+                        ),
+
+                    query
+
+                }
+            );
+
+
+        return navigate(
+            route,
+            {
+
+                ...options,
+
+                source:
+                    options.source ||
+                    "query-update"
+
+            }
+        );
+
+    }
+
+
+    /* ========================================================
+       47 — EINZELNEN QUERY-PARAMETER SETZEN
+       ======================================================== */
+
+    async function setQueryParameter(
+        key,
+        value,
+        options = {}
+    ) {
+
+        const current =
+            parseRoute(
+                state.currentRoute
+            );
+
+
+        if (
+            current.type !==
+            "app" ||
+            !current.appId
+        ) {
+
+            return {
+
+                success:
+                    false,
+
+                error:
+                    "Die aktuelle Route ist keine App-Route."
+
+            };
+
+        }
+
+
+        const query = {
+
+            ...current.query
+
+        };
+
+
+        query[
+            String(
+                key
+            )
+        ] =
+            value;
+
+
+        return updateQuery(
+            query,
+            {
+
+                ...options,
+
+                source:
+                    options.source ||
+                    "query-parameter"
+
+            }
+        );
+
+    }
+
+
+    /* ========================================================
+       48 — QUERY-PARAMETER ENTFERNEN
+       ======================================================== */
+
+    async function removeQueryParameter(
+        key,
+        options = {}
+    ) {
+
+        const current =
+            parseRoute(
+                state.currentRoute
+            );
+
+
+        if (
+            current.type !==
+            "app" ||
+            !current.appId
+        ) {
+
+            return {
+
+                success:
+                    false,
+
+                error:
+                    "Die aktuelle Route ist keine App-Route."
+
+            };
+
+        }
+
+
+        const query = {
+
+            ...current.query
+
+        };
+
+
+        delete query[
+            String(
+                key
+            )
+        ];
+
+
+        return updateQuery(
+            query,
+            {
+
+                ...options,
+
+                source:
+                    options.source ||
+                    "query-remove"
+
+            }
+        );
+
+    }
+
+
+    /* ========================================================
+       49 — ROUTE-SUCHE
+       ======================================================== */
+
+    function searchRoutes(
+        query
+    ) {
+
+        const text =
+            String(
+                query ||
+                ""
+            )
+            .trim()
+            .toLowerCase();
+
+
+        if (
+            !text
+        ) {
+
+            return [];
+
+        }
+
+
+        const manager =
+            getAppManager();
+
+
+        if (
+            !manager ||
+            typeof manager.search !==
+            "function"
+        ) {
+
+            return [];
+
+        }
+
+
+        const apps =
+            manager.search(
+                text
+            );
+
+
+        if (
+            !Array.isArray(
+                apps
+            )
+        ) {
+
+            return [];
+
+        }
+
+
+        return apps.map(
+            app => ({
+
+                app,
+
+                route:
+                    createAppRoute(
+                        app.id
+                    )
+
+            })
+        );
+
+    }
+
+
+    /* ========================================================
+       50 — ERSTE PASSENDE APP-ROUTE
+       ======================================================== */
+
+    function findRouteForApp(
+        appId
+    ) {
+
+        const normalized =
+            normalizeAppId(
+                appId
+            );
+
+
+        if (
+            !normalized
+        ) {
+
+            return null;
+
+        }
+
+
+        const manager =
+            getAppManager();
+
+
+        if (
+            manager &&
+            typeof manager.getApp ===
+            "function"
+        ) {
+
+            const app =
+                manager.getApp(
+                    normalized
+                );
+
+
+            if (
+                app
+            ) {
+
+                return {
+
+                    app,
+
+                    route:
+                        createAppRoute(
+                            app.id
+                        )
+
+                };
+
+            }
+
+        }
+
+
+        const registry =
+            getAppRegistry();
+
+
+        if (
+            registry
+        ) {
+
+            try {
+
+                if (
+                    typeof registry.getApp ===
+                    "function"
+                ) {
+
+                    const app =
+                        registry.getApp(
+                            normalized
+                        );
+
+
+                    if (
+                        app
+                    ) {
+
+                        return {
+
+                            app,
+
+                            route:
+                                createAppRoute(
+                                    app.id
+                                )
+
+                        };
+
+                    }
+
+                }
+
+
+                if (
+                    typeof registry.findApp ===
+                    "function"
+                ) {
+
+                    const app =
+                        registry.findApp(
+                            normalized
+                        );
+
+
+                    if (
+                        app
+                    ) {
+
+                        return {
+
+                            app,
+
+                            route:
+                                createAppRoute(
+                                    app.id
+                                )
+
+                        };
+
+                    }
+
+                }
+
+            }
+            catch (
+                error
+            ) {
+
+                log(
+                    `Route-Suche fehlgeschlagen: ${error.message}`,
+                    "warning"
+                );
+
+            }
+
+        }
+
+
+        return null;
+
+    }
+
+
+    /* ========================================================
+       51 — APP-MANAGER VERBINDEN
+       ======================================================== */
+
+    function connectAppManager() {
+
+        const manager =
+            getAppManager();
+
+
+        if (
+            !manager
+        ) {
+
+            state.managerReady =
+                false;
+
+
+            return false;
+
+        }
+
+
+        if (
+            !isManagerReady()
+        ) {
+
+            state.managerReady =
+                false;
+
+
+            return false;
+
+        }
+
+
+        state.managerReady =
+            true;
+
+
+        /*
+         * App-Manager-Ereignisse beobachten.
+         */
+
+        if (
+            typeof manager.on ===
+            "function"
+        ) {
+
+            manager.on(
+                "app-opened",
+                handleManagerAppOpened
+            );
+
+
+            manager.on(
+                "app-stopped",
+                handleManagerAppStopped
+            );
+
+
+            manager.on(
+                "app-error",
+                handleManagerAppError
+            );
+
+        }
+
+
+        return true;
+
+    }
+
+
+    /* ========================================================
+       52 — MANAGER APP GEÖFFNET
+       ======================================================== */
+
+    function handleManagerAppOpened(
+        data
+    ) {
+
+        if (
+            !data ||
+            !data.app ||
+            !data.app.id
+        ) {
+
+            return;
+
+        }
+
+
+        const appId =
+            normalizeAppId(
+                data.app.id
+            );
+
+
+        state.currentApp =
+            appId;
+
+
+        /*
+         * Nur aktualisieren, wenn der
+         * Router nicht bereits dieselbe
+         * Navigation ausgelöst hat.
+         */
+
+        if (
+            !state.currentRoute.startsWith(
+                CONFIG.routePrefix
+            ) ||
+            getAppIdFromRoute(
+                state.currentRoute
+            ) !== appId
+        ) {
+
+            state.currentRoute =
+                createAppRoute(
+                    appId
+                );
+
+        }
+
+
+        emit(
+            "manager-app-opened",
+            {
+
+                app:
+                    data.app,
+
+                route:
+                    state.currentRoute,
+
+                data
+
+            }
+        );
+
+    }
+
+
+    /* ========================================================
+       53 — MANAGER APP GESTOPPT
+       ======================================================== */
+
+    function handleManagerAppStopped(
+        data
+    ) {
+
+        if (
+            !data ||
+            !data.app
+        ) {
+
+            return;
+
+        }
+
+
+        const appId =
+            normalizeAppId(
+                data.app.id
+            );
+
+
+        if (
+            state.currentApp ===
+            appId
+        ) {
+
+            state.previousApp =
+                appId;
+
+            state.currentApp =
+                null;
+
+        }
+
+
+        emit(
+            "manager-app-stopped",
+            {
+
+                app:
+                    data.app,
+
+                route:
+                    state.currentRoute,
+
+                data
+
+            }
+        );
+
+    }
+
+
+    /* ========================================================
+       54 — MANAGER APP FEHLER
+       ======================================================== */
+
+    function handleManagerAppError(
+        data
+    ) {
+
+        state.lastError =
+            data &&
+            data.error
+                ? data.error
+                : "Unbekannter App-Fehler.";
+
+
+        emit(
+            "manager-app-error",
+            {
+
+                route:
+                    state.currentRoute,
+
+                error:
+                    state.lastError,
+
+                data
+
+            }
+        );
+
+    }
+
+
+    /* ========================================================
+       55 — BROWSER-EVENTS
+       ======================================================== */
+
+    function handleHashChange() {
+
+        handleCurrentRoute(
+            {
+
+                source:
+                    "hashchange"
+
+            }
+        );
+
+    }
+
+
+    function handlePopState() {
+
+        handleCurrentRoute(
+            {
+
+                source:
+                    "popstate"
+
+            }
+        );
+
+    }
+
+
+    /* ========================================================
+       56 — ROUTER-EVENT DISPATCH
+       ======================================================== */
+
+    function dispatchRouterEvent(
+        name,
+        detail = {}
+    ) {
+
+        try {
+
+            window.dispatchEvent(
+                new CustomEvent(
+                    `haldo:router:${name}`,
+                    {
+
+                        detail
+
+                    }
+                )
+            );
+
+        }
+        catch (
+            error
+        ) {
+
+            log(
+                `Router-Event konnte nicht gesendet werden: ${error.message}`,
+                "warning"
+            );
+
+        }
+
+    }
+
+
+    /* ========================================================
+       57 — ROUTER-EVENT BRÜCKE
+       ======================================================== */
+
+    function bridgeEvent(
+        eventName,
+        data
+    ) {
+
+        emit(
+            eventName,
+            data
+        );
+
+
+        dispatchRouterEvent(
+            eventName,
+            data
+        );
+
+    }
+
+
+    /* ========================================================
+       58 — ROUTER STATUS
+       ======================================================== */
+
+    function getState() {
+
+        return {
+
+            initialized:
+                state.initialized,
+
+            ready:
+                state.ready,
+
+            managerReady:
+                state.managerReady,
+
+            registryReady:
+                state.registryReady,
+
+            currentRoute:
+                state.currentRoute,
+
+            previousRoute:
+                state.previousRoute,
+
+            currentApp:
+                state.currentApp,
+
+            previousApp:
+                state.previousApp,
+
+            navigationCount:
+                state.navigationCount,
+
+            historyCount:
+                routeHistory.length,
+
+            lastError:
+                state.lastError,
+
+            startTime:
+                state.startTime
+
+        };
+
+    }
+
+
+    /* ========================================================
+       59 — DIAGNOSE
+       ======================================================== */
+
+    function diagnose() {
+
+        return {
+
+            name:
+                CONFIG.name,
+
+            version:
+                CONFIG.version,
+
+            state:
+                getState(),
+
+            currentRoute:
+                getRouteInfo(),
+
+            history:
+                getRouteHistory(),
+
+            browserHash:
+                getHashRoute(),
+
+            managerAvailable:
+                Boolean(
+                    getAppManager()
+                ),
+
+            registryAvailable:
+                Boolean(
+                    getAppRegistry()
+                )
+
+        };
+
+    }
+
+
+    /* ========================================================
+       60 — INITIALISIERUNG
+       ======================================================== */
+
+    function init() {
+
+        if (
+            state.initialized
+        ) {
+
+            return getState();
+
+        }
+
+
+        state.startTime =
+            Date.now();
+
+
+        state.registryReady =
+            isRegistryReady();
+
+
+        state.managerReady =
+            isManagerReady();
+
+
+        /*
+         * Der Router darf auch dann
+         * starten, wenn Registry oder
+         * Manager noch nicht geladen sind.
+         *
+         * Die Boot-Logik wartet anschließend
+         * auf die benötigten Module.
+         */
+
+
+        window.addEventListener(
+            "hashchange",
+            handleHashChange
+        );
+
+
+        window.addEventListener(
+            "popstate",
+            handlePopState
+        );
+
+
+        connectAppManager();
+
+
+        state.initialized =
+            true;
+
+
+        state.ready =
+            true;
+
+
+        /*
+         * Kernel-Verbindung.
+         */
+
+        if (
+            window.HalDoKernel &&
+            typeof window.HalDoKernel.registerModule ===
+            "function"
+        ) {
+
+            window.HalDoKernel.registerModule(
+                "app-router",
+                api
+            );
+
+
+            if (
+                typeof window.HalDoKernel.setModuleReady ===
+                "function"
+            ) {
+
+                window.HalDoKernel.setModuleReady(
+                    "app-router",
+                    true
+                );
+
+            }
+
+        }
+
+
+        /*
+         * System-Verbindung.
+         */
+
+        if (
+            window.HalDoSystem &&
+            typeof window.HalDoSystem.registerService ===
+            "function"
+        ) {
+
+            window.HalDoSystem.registerService(
+                "app-router",
+                api
+            );
+
+        }
+
+
+        bridgeEvent(
+            "ready",
+            getState()
+        );
+
+
+        return getState();
+
+    }
+
+
+    /* ========================================================
+       61 — ROUTER PUBLIC API
+       ======================================================== */
+
+    const api = {
+
+        name:
+            CONFIG.name,
+
+        version:
+            CONFIG.version,
+
+
+        init,
+
+
+        on,
+
+        off,
+
+
+        normalizeAppId,
+
+        normalizeRoute,
+
+        parseRoute,
+
+        parseQueryString,
+
+        buildQueryString,
+
+        createAppRoute,
+
+
+        isHomeRoute,
+
+        isAppRoute,
+
+        getAppIdFromRoute,
+
+
+        getCurrentRoute,
+
+        getCurrentApp,
+
+        getRouteInfo,
+
+        isCurrentRoute,
+
+        isCurrentApp,
+
+
+        getPreviousRoute,
+
+        getPreviousApp,
+
+
+        getRouteHistory,
+
+        getLastHistoryEntry,
+
+        clearHistory,
+
+
+        validateRoute,
+
+        prepareNavigation,
+
+
+        navigate,
+
+        navigateToApp,
+
+        navigateWithParams,
+
+        goHome,
+
+        closeCurrentApp,
+
+        navigateBack,
+
+
+        back,
+
+        forward,
+
+
+        setRoute,
+
+        routeForApp,
+
+        compareRoutes,
+
+
+        updateQuery,
+
+        setQueryParameter,
+
+        removeQueryParameter,
+
+
+        searchRoutes,
+
+        findRouteForApp,
+
+
+        handleCurrentRoute,
+
+
+        connectAppManager,
+
+
+        getState,
+
+        diagnose
+
+    };
+
+
+    /* ========================================================
+       62 — GLOBALE ROUTER-API
+       ======================================================== */
+
+    window.HalDoAppRouter =
+        api;
+
+
+    window.HalDoOS =
+        window.HalDoOS ||
+        {};
+
+
+    window.HalDoOS.appRouter =
+        api;
+
+
+    /* ========================================================
+       63 — ROUTER BOOT
+       ======================================================== */
+
+    function boot() {
+
+        /*
+         * Wenn der Router bereits
+         * initialisiert wurde, nichts
+         * erneut starten.
+         */
+
+        if (
+            state.initialized
+        ) {
+
+            return;
+
+        }
+
+
+        /*
+         * Manager und Registry können
+         * später geladen werden.
+         *
+         * Deshalb warten wir kurz
+         * und verbinden danach erneut.
+         */
+
+        let attempts =
+            0;
+
+
+        const maxAttempts =
+            CONFIG.moduleWaitAttempts;
+
+
+        const timer =
+            window.setInterval(
+                async function () {
+
+                    attempts++;
+
+
+                    state.managerReady =
+                        isManagerReady();
+
+
+                    state.registryReady =
+                        isRegistryReady();
+
+
+                    if (
+                        state.managerReady
+                    ) {
+
+                        connectAppManager();
+
+                    }
+
+
+                    /*
+                     * Sobald der Manager
+                     * verfügbar ist, kann
+                     * der Router initialisiert
+                     * werden.
+                     */
+
+                    if (
+                        state.managerReady
+                    ) {
+
+                        window.clearInterval(
+                            timer
+                        );
+
+
+                        init();
+
+
+                        /*
+                         * Bereits vorhandene
+                         * Browser-Route verarbeiten.
+                         */
+
+                        const currentHash =
+                            window.location.hash;
+
+
+                        if (
+                            currentHash
+                        ) {
+
+                            await handleCurrentRoute(
+                                {
+
+                                    source:
+                                        "startup"
+
+                                }
+                            );
+
+                        }
+                        else {
+
+                            await navigate(
+                                CONFIG.homeRoute,
+                                {
+
+                                    replace:
+                                        true,
+
+                                    source:
+                                        "startup"
+
+                                }
+                            );
+
+                        }
+
+
+                        return;
+
+                    }
+
+
+                    if (
+                        attempts >=
+                        maxAttempts
+                    ) {
+
+                        window.clearInterval(
+                            timer
+                        );
+
+
+                        /*
+                         * Router kann grundsätzlich
+                         * auch ohne Manager bereit
+                         * sein.
+                         */
+
+                        state.lastError =
+                            "HalDoAppManager konnte beim Router-Start nicht gefunden werden.";
+
+
+                        log(
+                            state.lastError,
+                            "warning"
+                        );
+
+
+                        init();
+
+                    }
+
+                },
+                CONFIG.moduleWaitInterval
+            );
+
+    }
+
+
+    /* ========================================================
+       64 — DOM START
+       ======================================================== */
+
+    if (
+        document.readyState ===
+        "loading"
+    ) {
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            boot,
+            {
+
+                once:
+                    true
+
+            }
+        );
+
+    }
+    else {
+
+        boot();
+
+    }
+
+
+    /* ========================================================
+       65 — ÖFFENTLICHE BROWSER-EVENTS
+       ======================================================== */
+
+    window.addEventListener(
+        "haldo:app-manager-ready",
+        function () {
+
+            state.managerReady =
+                isManagerReady();
+
+
+            state.registryReady =
+                isRegistryReady();
+
+
+            if (
+                state.managerReady
+            ) {
+
+                connectAppManager();
+
+            }
+
+        }
+    );
+
+
+    /* ========================================================
+       66 — ENDE ROUTER
+       ======================================================== */
+
+})(window, document);
+
+
+/* ============================================================
+   ENDE — HALDO AI OS 18 APP ROUTER
+   ============================================================ */
