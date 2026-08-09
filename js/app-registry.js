@@ -1,32 +1,39 @@
-/*
-============================================================
- HALDO AI OS 18
- PROFESSIONAL ULTIMATE FOUNDATION
- -----------------------------------------------------------
- Datei:
- js/app-registry.js
+/* ============================================================
+   HALDO AI OS 18
+   PROFESSIONAL ULTIMATE FOUNDATION
+   ------------------------------------------------------------
+   Datei:
+   js/app-registry.js
 
- ZENTRALE APP-REGISTRY
+   ZENTRALE APP-REGISTRY
 
- WICHTIG:
- - Diese Datei besitzt die zentrale App-Liste.
- - app-manager.js besitzt KEINE zweite App-Liste.
- - app-router.js besitzt KEINE zweite App-Liste.
- - Alle Apps erhalten stabile Metadaten.
- - Für zukünftige echte App-Module vorbereitet.
- - Unterstützt Kategorien.
- - Unterstützt Favoriten.
- - Unterstützt Suche.
- - Unterstützt Abhängigkeiten.
- - Unterstützt Berechtigungen.
- - Unterstützt System-Apps.
- - Unterstützt kritische Apps.
- - Unterstützt Auto-Start.
- - Unterstützt App-Versionen.
- - Unterstützt Modulnamen.
- - Unterstützt zukünftige App-Dateien.
-============================================================
-*/
+   Architektur:
+
+       index.html
+            ↓
+       kernel.js
+            ↓
+       system.js
+            ↓
+       app-registry.js
+            ↓
+       app-manager.js
+            ↓
+       app-router.js
+            ↓
+       echte App-Module
+            ↓
+       App UI
+
+   WICHTIG:
+   - Diese Datei besitzt die zentrale App-Liste.
+   - App Manager besitzt KEINE zweite App-Liste.
+   - Router besitzt KEINE zweite App-Liste.
+   - Apps werden hier definiert.
+   - Echte Module können später registriert werden.
+   - Keine blinden HTML-Weiterleitungen.
+   - Erweiterbar für zukünftige HalDo Apps.
+   ============================================================ */
 
 "use strict";
 
@@ -46,33 +53,63 @@
         version:
             "18.0.0",
 
-        platform:
-            "HalDo AI OS",
+        system:
+            "HalDo AI OS 18",
+
+        edition:
+            "Professional Ultimate Foundation",
 
         defaultApp:
-            "haldo-home",
+            "home",
 
-        fallbackApp:
-            "dashboard"
+        maximumSearchResults:
+            500
 
     };
 
 
     /* ========================================================
-       02 — INTERNE REGISTRY
+       02 — STATUS
        ======================================================== */
 
-    const definitions = [];
+    const state = {
 
-    const definitionMap =
-        new Map();
+        initialized:
+            false,
 
-    const listeners = {};
+        ready:
+            false,
+
+        definitionCount:
+            0,
+
+        moduleCount:
+            0,
+
+        lastError:
+            null
+
+    };
 
 
     /* ========================================================
-       03 — EVENT SYSTEM
+       03 — INTERNE REGISTRY
        ======================================================== */
+
+    const definitions =
+        new Map();
+
+
+    const modules =
+        new Map();
+
+
+    /* ========================================================
+       04 — EVENT SYSTEM
+       ======================================================== */
+
+    const listeners = {};
+
 
     function on(
         eventName,
@@ -185,7 +222,64 @@
 
 
     /* ========================================================
-       04 — APP-DEFINITION
+       05 — ID NORMALISIEREN
+       ======================================================== */
+
+    function normalizeId(
+        value
+    ) {
+
+        return String(
+            value ||
+            ""
+        )
+        .trim()
+        .toLowerCase()
+        .replace(
+            /_/g,
+            "-"
+        )
+        .replace(
+            /\s+/g,
+            "-"
+        )
+        .replace(
+            /[^a-z0-9äöüßîêûç\-]/gi,
+            ""
+        )
+        .replace(
+            /-+/g,
+            "-"
+        )
+        .replace(
+            /^-|-$/g,
+            ""
+        );
+
+    }
+
+
+    /* ========================================================
+       06 — ARRAY SICHERHEIT
+       ======================================================== */
+
+    function safeArray(
+        value
+    ) {
+
+        return Array.isArray(
+            value
+        )
+            ? [
+                ...value
+            ]
+            : [];
+
+    }
+
+
+    /* ========================================================
+       07 — APP-DEFINITION
        ======================================================== */
 
     function create(
@@ -198,254 +292,13 @@
     ) {
 
         const normalizedId =
-            String(
-                id ||
-                ""
-            )
-            .trim()
-            .toLowerCase();
+            normalizeId(
+                id
+            );
 
 
         if (
             !normalizedId
-        ) {
-
-            throw new Error(
-                "App-ID darf nicht leer sein."
-            );
-
-        }
-
-
-        return {
-
-            id:
-                normalizedId,
-
-            name:
-                name ||
-                normalizedId,
-
-            title:
-                options.title ||
-                name ||
-                normalizedId,
-
-            category:
-                category ||
-                "system",
-
-            icon:
-                icon ||
-                "◉",
-
-            description:
-                description ||
-                "",
-
-            enabled:
-                options.enabled !== false,
-
-            favorite:
-                options.favorite === true,
-
-            autoStart:
-                options.autoStart === true,
-
-            system:
-                options.system === true,
-
-            critical:
-                options.critical === true,
-
-            order:
-                Number.isFinite(
-                    Number(
-                        options.order
-                    )
-                )
-                    ? Number(
-                        options.order
-                    )
-                    : 999999,
-
-            version:
-                options.version ||
-                "18.0.0",
-
-            module:
-                options.module ||
-                null,
-
-            moduleName:
-                options.moduleName ||
-                null,
-
-            path:
-                options.path ||
-                null,
-
-            route:
-                options.route ||
-                null,
-
-            permissions:
-                Array.isArray(
-                    options.permissions
-                )
-                    ? [
-                        ...options.permissions
-                    ]
-                    : [],
-
-            dependencies:
-                Array.isArray(
-                    options.dependencies
-                )
-                    ? [
-                        ...options.dependencies
-                    ]
-                    : [],
-
-            keywords:
-                Array.isArray(
-                    options.keywords
-                )
-                    ? [
-                        ...options.keywords
-                    ]
-                    : [],
-
-            tags:
-                Array.isArray(
-                    options.tags
-                )
-                    ? [
-                        ...options.tags
-                    ]
-                    : [],
-
-            platform:
-                options.platform ||
-                "haldo-ai-os-18",
-
-            created:
-                options.created ||
-                "18.0.0",
-
-            metadata:
-                options.metadata &&
-                typeof options.metadata ===
-                    "object"
-                    ? {
-                        ...options.metadata
-                    }
-                    : {}
-
-        };
-
-    }
-
-
-    /* ========================================================
-       05 — APP REGISTRIEREN
-       ======================================================== */
-
-    function register(
-        app
-    ) {
-
-        if (
-            !app ||
-            typeof app !==
-                "object"
-        ) {
-
-            return false;
-
-        }
-
-
-        if (
-            !app.id
-        ) {
-
-            return false;
-
-        }
-
-
-        const id =
-            String(
-                app.id
-            )
-            .trim()
-            .toLowerCase();
-
-
-        /*
-         * Keine doppelten Apps.
-         */
-
-        if (
-            definitionMap.has(
-                id
-            )
-        ) {
-
-            return false;
-
-        }
-
-
-        const normalized =
-            {
-                ...app,
-
-                id
-
-            };
-
-
-        definitions.push(
-            normalized
-        );
-
-
-        definitionMap.set(
-            id,
-            normalized
-        );
-
-
-        emit(
-            "app-registered",
-            normalized
-        );
-
-
-        return true;
-
-    }
-
-
-    /* ========================================================
-       06 — APP AKTUALISIEREN
-       ======================================================== */
-
-    function update(
-        appId,
-        changes = {}
-    ) {
-
-        const app =
-            findApp(
-                appId
-            );
-
-
-        if (
-            !app
         ) {
 
             return null;
@@ -453,50 +306,131 @@
         }
 
 
-        Object.assign(
-            app,
-            changes
-        );
+        const app = {
 
+            id:
+                normalizedId,
 
-        emit(
-            "app-updated",
-            app
-        );
+            name:
+                String(
+                    name ||
+                    normalizedId
+                ),
 
+            title:
+                String(
+                    options.title ||
+                    name ||
+                    normalizedId
+                ),
 
-        return {
-            ...app
+            category:
+                String(
+                    category ||
+                    "system"
+                ),
+
+            icon:
+                String(
+                    icon ||
+                    "◉"
+                ),
+
+            description:
+                String(
+                    description ||
+                    ""
+                ),
+
+            keywords:
+                safeArray(
+                    options.keywords
+                ),
+
+            enabled:
+                options.enabled !==
+                false,
+
+            favorite:
+                options.favorite ===
+                true,
+
+            autoStart:
+                options.autoStart ===
+                true,
+
+            system:
+                options.system ===
+                true,
+
+            critical:
+                options.critical ===
+                true,
+
+            visible:
+                options.visible !==
+                false,
+
+            order:
+                Number(
+                    options.order
+                ) || 999999,
+
+            version:
+                String(
+                    options.version ||
+                    CONFIG.version
+                ),
+
+            permissions:
+                safeArray(
+                    options.permissions
+                ),
+
+            dependencies:
+                safeArray(
+                    options.dependencies
+                ),
+
+            module:
+                options.module ||
+                null,
+
+            route:
+                options.route ||
+                null,
+
+            status:
+                options.status ||
+                "registered",
+
+            metadata:
+                {
+                    ...(
+                        options.metadata ||
+                        {}
+                    )
+                }
+
         };
+
+
+        return app;
 
     }
 
 
     /* ========================================================
-       07 — APP ENTFERNEN
+       08 — APP REGISTRIEREN
        ======================================================== */
 
-    function unregister(
-        appId
+    function register(
+        definition
     ) {
 
-        const id =
-            String(
-                appId ||
-                ""
-            )
-            .trim()
-            .toLowerCase();
-
-
-        const app =
-            definitionMap.get(
-                id
-            );
-
-
         if (
-            !app
+            !definition ||
+            !definition.id
         ) {
 
             return false;
@@ -504,36 +438,66 @@
         }
 
 
-        const index =
-            definitions.indexOf(
-                app
+        const id =
+            normalizeId(
+                definition.id
             );
 
 
         if (
-            index >=
-            0
+            !id
         ) {
 
-            definitions.splice(
-                index,
-                1
-            );
+            return false;
 
         }
 
 
-        definitionMap.delete(
-            id
+        const app = {
+
+            ...definition,
+
+            id,
+
+            keywords:
+                safeArray(
+                    definition.keywords
+                ),
+
+            permissions:
+                safeArray(
+                    definition.permissions
+                ),
+
+            dependencies:
+                safeArray(
+                    definition.dependencies
+                ),
+
+            metadata:
+                {
+                    ...(
+                        definition.metadata ||
+                        {}
+                    )
+                }
+
+        };
+
+
+        definitions.set(
+            id,
+            app
         );
 
 
-        emit(
-            "app-unregistered",
-            {
-                appId:
-                    id,
+        state.definitionCount =
+            definitions.size;
 
+
+        emit(
+            "app-registered",
+            {
                 app
             }
         );
@@ -545,7 +509,105 @@
 
 
     /* ========================================================
-       08 — APP FINDEN
+       09 — MEHRERE APPS REGISTRIEREN
+       ======================================================== */
+
+    function registerMany(
+        apps
+    ) {
+
+        if (
+            !Array.isArray(
+                apps
+            )
+        ) {
+
+            return 0;
+
+        }
+
+
+        let count =
+            0;
+
+
+        apps.forEach(
+            app => {
+
+                if (
+                    register(
+                        app
+                    )
+                ) {
+
+                    count++;
+
+                }
+
+            }
+        );
+
+
+        return count;
+
+    }
+
+
+    /* ========================================================
+       10 — APP ENTFERNEN
+       ======================================================== */
+
+    function unregister(
+        appId
+    ) {
+
+        const id =
+            normalizeId(
+                appId
+            );
+
+
+        if (
+            !definitions.has(
+                id
+            )
+        ) {
+
+            return false;
+
+        }
+
+
+        const app =
+            definitions.get(
+                id
+            );
+
+
+        definitions.delete(
+            id
+        );
+
+
+        state.definitionCount =
+            definitions.size;
+
+
+        emit(
+            "app-unregistered",
+            {
+                app
+            }
+        );
+
+
+        return true;
+
+    }
+
+
+    /* ========================================================
+       11 — APP SUCHEN
        ======================================================== */
 
     function findApp(
@@ -553,16 +615,13 @@
     ) {
 
         const id =
-            String(
-                appId ||
-                ""
-            )
-            .trim()
-            .toLowerCase();
+            normalizeId(
+                appId
+            );
 
 
         return (
-            definitionMap.get(
+            definitions.get(
                 id
             ) ||
             null
@@ -572,25 +631,41 @@
 
 
     /* ========================================================
-       09 — ALLE APPS
+       12 — ALLE APPS
        ======================================================== */
 
     function getAllApps() {
 
-        return [
-            ...definitions
-        ];
+        return Array.from(
+            definitions.values()
+        );
 
     }
 
 
     /* ========================================================
-       10 — AKTIVE APPS
+       13 — SICHTBARE APPS
+       ======================================================== */
+
+    function getVisibleApps() {
+
+        return getAllApps()
+            .filter(
+                app =>
+                    app.visible !==
+                    false
+            );
+
+    }
+
+
+    /* ========================================================
+       14 — AKTIVE APPS
        ======================================================== */
 
     function getEnabledApps() {
 
-        return definitions
+        return getAllApps()
             .filter(
                 app =>
                     app.enabled !==
@@ -601,12 +676,28 @@
 
 
     /* ========================================================
-       11 — FAVORITEN
+       15 — DEAKTIVIERTE APPS
+       ======================================================== */
+
+    function getDisabledApps() {
+
+        return getAllApps()
+            .filter(
+                app =>
+                    app.enabled ===
+                    false
+            );
+
+    }
+
+
+    /* ========================================================
+       16 — FAVORITEN
        ======================================================== */
 
     function getFavorites() {
 
-        return definitions
+        return getAllApps()
             .filter(
                 app =>
                     app.favorite ===
@@ -617,59 +708,14 @@
 
 
     /* ========================================================
-       12 — FAVORIT SETZEN
-       ======================================================== */
-
-    function setFavorite(
-        appId,
-        favorite = true
-    ) {
-
-        const app =
-            findApp(
-                appId
-            );
-
-
-        if (
-            !app
-        ) {
-
-            return false;
-
-        }
-
-
-        app.favorite =
-            Boolean(
-                favorite
-            );
-
-
-        emit(
-            "favorite-changed",
-            {
-                app,
-                favorite:
-                    app.favorite
-            }
-        );
-
-
-        return true;
-
-    }
-
-
-    /* ========================================================
-       13 — KATEGORIEN
+       17 — KATEGORIEN
        ======================================================== */
 
     function getCategories() {
 
         return [
             ...new Set(
-                definitions
+                getAllApps()
                     .map(
                         app =>
                             app.category
@@ -684,7 +730,7 @@
 
 
     /* ========================================================
-       14 — APPS NACH KATEGORIE
+       18 — APPS NACH KATEGORIE
        ======================================================== */
 
     function getAppsByCategory(
@@ -700,11 +746,12 @@
             .toLowerCase();
 
 
-        return definitions
+        return getAllApps()
             .filter(
                 app =>
                     String(
-                        app.category
+                        app.category ||
+                        ""
                     )
                     .toLowerCase() ===
                     value
@@ -714,7 +761,7 @@
 
 
     /* ========================================================
-       15 — APP SUCHE
+       19 — APP-SUCHE
        ======================================================== */
 
     function searchApps(
@@ -734,60 +781,379 @@
             !text
         ) {
 
-            return getAllApps();
+            return getVisibleApps();
 
         }
 
 
-        return definitions
-            .filter(
-                app => {
+        const results =
+            getAllApps()
+                .filter(
+                    app => {
 
-                    const content =
-                        [
+                        const content =
+                            [
 
-                            app.id,
+                                app.id,
 
-                            app.name,
+                                app.name,
 
-                            app.title,
+                                app.title,
 
-                            app.description,
+                                app.category,
 
-                            app.category,
+                                app.description,
 
-                            app.module,
+                                ...safeArray(
+                                    app.keywords
+                                )
 
-                            app.moduleName,
-
-                            ...(app.keywords || []),
-
-                            ...(app.tags || [])
-
-                        ]
-                        .join(
-                            " "
-                        )
-                        .toLowerCase();
+                            ]
+                            .join(
+                                " "
+                            )
+                            .toLowerCase();
 
 
-                    return content.includes(
-                        text
-                    );
+                        return content.includes(
+                            text
+                        );
 
-                }
-            );
+                    }
+                );
+
+
+        return results.slice(
+            0,
+            CONFIG.maximumSearchResults
+        );
 
     }
 
 
     /* ========================================================
-       16 — SORTIERTE APPS
+       20 — APP AKTIVIEREN
+       ======================================================== */
+
+    function enableApp(
+        appId
+    ) {
+
+        const app =
+            findApp(
+                appId
+            );
+
+
+        if (
+            !app
+        ) {
+
+            return false;
+
+        }
+
+
+        app.enabled =
+            true;
+
+
+        emit(
+            "app-enabled",
+            {
+                app
+            }
+        );
+
+
+        return true;
+
+    }
+
+
+    /* ========================================================
+       21 — APP DEAKTIVIEREN
+       ======================================================== */
+
+    function disableApp(
+        appId
+    ) {
+
+        const app =
+            findApp(
+                appId
+            );
+
+
+        if (
+            !app
+        ) {
+
+            return false;
+
+        }
+
+
+        /*
+         * Kritische System-Apps dürfen
+         * nicht versehentlich deaktiviert
+         * werden.
+         */
+
+        if (
+            app.critical ===
+            true
+        ) {
+
+            return false;
+
+        }
+
+
+        app.enabled =
+            false;
+
+
+        emit(
+            "app-disabled",
+            {
+                app
+            }
+        );
+
+
+        return true;
+
+    }
+
+
+    /* ========================================================
+       22 — FAVORIT SETZEN
+       ======================================================== */
+
+    function setFavorite(
+        appId,
+        value = true
+    ) {
+
+        const app =
+            findApp(
+                appId
+            );
+
+
+        if (
+            !app
+        ) {
+
+            return false;
+
+        }
+
+
+        app.favorite =
+            Boolean(
+                value
+            );
+
+
+        emit(
+            "app-favorite-changed",
+            {
+                app,
+
+                favorite:
+                    app.favorite
+            }
+        );
+
+
+        return true;
+
+    }
+
+
+    /* ========================================================
+       23 — FAVORIT UMSCHALTEN
+       ======================================================== */
+
+    function toggleFavorite(
+        appId
+    ) {
+
+        const app =
+            findApp(
+                appId
+            );
+
+
+        if (
+            !app
+        ) {
+
+            return false;
+
+        }
+
+
+        return setFavorite(
+            appId,
+            !app.favorite
+        );
+
+    }
+
+
+    /* ========================================================
+       24 — APP-MODUL REGISTRIEREN
+       ======================================================== */
+
+    function registerModule(
+        appId,
+        module
+    ) {
+
+        const app =
+            findApp(
+                appId
+            );
+
+
+        if (
+            !app ||
+            !module
+        ) {
+
+            return false;
+
+        }
+
+
+        modules.set(
+            app.id,
+            module
+        );
+
+
+        app.module =
+            app.id;
+
+
+        app.status =
+            "module-ready";
+
+
+        state.moduleCount =
+            modules.size;
+
+
+        emit(
+            "module-registered",
+            {
+
+                app,
+
+                module
+
+            }
+        );
+
+
+        return true;
+
+    }
+
+
+    /* ========================================================
+       25 — APP-MODUL HOLEN
+       ======================================================== */
+
+    function getModule(
+        appId
+    ) {
+
+        const id =
+            normalizeId(
+                appId
+            );
+
+
+        return (
+            modules.get(
+                id
+            ) ||
+            null
+        );
+
+    }
+
+
+    /* ========================================================
+       26 — APP-MODUL ENTFERNEN
+       ======================================================== */
+
+    function unregisterModule(
+        appId
+    ) {
+
+        const id =
+            normalizeId(
+                appId
+            );
+
+
+        if (
+            !modules.has(
+                id
+            )
+        ) {
+
+            return false;
+
+        }
+
+
+        modules.delete(
+            id
+        );
+
+
+        state.moduleCount =
+            modules.size;
+
+
+        const app =
+            findApp(
+                id
+            );
+
+
+        if (
+            app
+        ) {
+
+            app.module =
+                null;
+
+            app.status =
+                "registered";
+
+        }
+
+
+        return true;
+
+    }
+
+
+    /* ========================================================
+       27 — SORTIERTE APPS
        ======================================================== */
 
     function getSortedApps() {
 
         return getAllApps()
+            .slice()
             .sort(
                 (
                     a,
@@ -836,12 +1202,75 @@
 
 
     /* ========================================================
-       17 — SYSTEM APPS
+       28 — SORTIERTE FAVORITEN
+       ======================================================== */
+
+    function getSortedFavorites() {
+
+        return getFavorites()
+            .slice()
+            .sort(
+                (
+                    a,
+                    b
+                ) => {
+
+                    return (
+                        (
+                            Number(
+                                a.order
+                            ) ||
+                            999999
+                        ) -
+                        (
+                            Number(
+                                b.order
+                            ) ||
+                            999999
+                        )
+                    );
+
+                }
+            );
+
+    }
+
+
+    /* ========================================================
+       29 — APP COUNT
+       ======================================================== */
+
+    function getAppCount() {
+
+        return definitions.size;
+
+    }
+
+
+    /* ========================================================
+       30 — APP EXISTIERT
+       ======================================================== */
+
+    function has(
+        appId
+    ) {
+
+        return Boolean(
+            findApp(
+                appId
+            )
+        );
+
+    }
+
+
+    /* ========================================================
+       31 — SYSTEM APPS
        ======================================================== */
 
     function getSystemApps() {
 
-        return definitions
+        return getAllApps()
             .filter(
                 app =>
                     app.system ===
@@ -852,12 +1281,12 @@
 
 
     /* ========================================================
-       18 — KRITISCHE APPS
+       32 — KRITISCHE APPS
        ======================================================== */
 
     function getCriticalApps() {
 
-        return definitions
+        return getAllApps()
             .filter(
                 app =>
                     app.critical ===
@@ -868,26 +1297,28 @@
 
 
     /* ========================================================
-       19 — AUTO-START APPS
+       33 — AUTOSTART APPS
        ======================================================== */
 
     function getAutoStartApps() {
 
-        return definitions
+        return getAllApps()
             .filter(
                 app =>
                     app.autoStart ===
-                    true
+                    true &&
+                    app.enabled !==
+                    false
             );
 
     }
 
 
     /* ========================================================
-       20 — APP MODUL-INFORMATION
+       34 — APP-STATUS
        ======================================================== */
 
-    function getModuleInfo(
+    function getAppStatus(
         appId
     ) {
 
@@ -911,17 +1342,31 @@
             id:
                 app.id,
 
-            module:
-                app.module,
+            enabled:
+                app.enabled !==
+                false,
 
-            moduleName:
-                app.moduleName,
+            visible:
+                app.visible !==
+                false,
 
-            path:
-                app.path,
+            system:
+                app.system ===
+                true,
 
-            route:
-                app.route
+            critical:
+                app.critical ===
+                true,
+
+            moduleAvailable:
+                Boolean(
+                    getModule(
+                        app.id
+                    )
+                ),
+
+            status:
+                app.status
 
         };
 
@@ -929,384 +1374,71 @@
 
 
     /* ========================================================
-       21 — REGISTRY AUFBAUEN
+       35 — APP DEFINITIONEN
        ======================================================== */
 
-    function build() {
+    function buildDefinitions() {
 
-        /*
-         * Schutz gegen doppeltes Bauen.
-         */
+        return [
 
-        if (
-            definitions.length >
-            0
-        ) {
+            /* =================================================
+               AI
+               ================================================= */
 
-            return getAllApps();
-
-        }
-
-
-        /* ====================================================
-           HOME / SYSTEM
-           ==================================================== */
-
-        register(
-            create(
-                "haldo-home",
-                "HalDo Home",
-                "system",
-                "assets/logo/logo.png",
-                "Zentrale Startoberfläche von HalDo AI OS 18.",
-                {
-                    system:
-                        true,
-
-                    critical:
-                        true,
-
-                    favorite:
-                        true,
-
-                    autoStart:
-                        true,
-
-                    order:
-                        1,
-
-                    module:
-                        "haldo-home",
-
-                    moduleName:
-                        "HalDoHomeApp",
-
-                    route:
-                        "haldo-home",
-
-                    keywords:
-                        [
-                            "home",
-                            "start",
-                            "desktop",
-                            "hauptseite"
-                        ]
-                }
-            )
-        );
-
-
-        register(
-            create(
-                "dashboard",
-                "Dashboard",
-                "system",
-                "assets/logo/logo.png",
-                "Zentrale Übersicht des HalDo AI OS.",
-                {
-                    system:
-                        true,
-
-                    favorite:
-                        true,
-
-                    order:
-                        2,
-
-                    module:
-                        "dashboard",
-
-                    moduleName:
-                        "HalDoDashboardApp",
-
-                    route:
-                        "dashboard",
-
-                    keywords:
-                        [
-                            "dashboard",
-                            "übersicht",
-                            "start"
-                        ]
-                }
-            )
-        );
-
-
-        register(
-            create(
-                "control-center",
-                "Kontrollzentrum",
-                "system",
-                "🎛️",
-                "Schnellzugriff auf wichtige Systemeinstellungen.",
-                {
-                    system:
-                        true,
-
-                    order:
-                        3,
-
-                    module:
-                        "control-center",
-
-                    moduleName:
-                        "HalDoControlCenterApp",
-
-                    route:
-                        "control-center"
-                }
-            )
-        );
-
-
-        register(
-            create(
-                "app-center",
-                "App Center",
-                "system",
-                "▦",
-                "Zentrale Verwaltung aller HalDo Apps.",
-                {
-                    system:
-                        true,
-
-                    order:
-                        4,
-
-                    module:
-                        "app-center",
-
-                    moduleName:
-                        "HalDoAppCenterApp",
-
-                    route:
-                        "app-center",
-
-                    keywords:
-                        [
-                            "apps",
-                            "application",
-                            "programme"
-                        ]
-                }
-            )
-        );
-
-
-        register(
-            create(
-                "startup",
-                "Systemstart",
-                "system",
-                "🚀",
-                "Informationen und Steuerung des Systemstarts.",
-                {
-                    system:
-                        true,
-
-                    order:
-                        5,
-
-                    module:
-                        "startup",
-
-                    moduleName:
-                        "HalDoStartupApp",
-
-                    route:
-                        "startup"
-                }
-            )
-        );
-
-
-        register(
-            create(
-                "settings",
-                "Einstellungen",
-                "system",
-                "⚙️",
-                "Zentrale Einstellungen von HalDo AI OS.",
-                {
-                    system:
-                        true,
-
-                    favorite:
-                        true,
-
-                    order:
-                        6,
-
-                    module:
-                        "settings",
-
-                    moduleName:
-                        "HalDoSettingsApp",
-
-                    route:
-                        "settings"
-                }
-            )
-        );
-
-
-        register(
-            create(
-                "notifications",
-                "Benachrichtigungen",
-                "system",
-                "🔔",
-                "Zentrale Verwaltung von System- und App-Benachrichtigungen.",
-                {
-                    system:
-                        true,
-
-                    order:
-                        7,
-
-                    module:
-                        "notifications",
-
-                    moduleName:
-                        "HalDoNotificationsApp",
-
-                    route:
-                        "notifications"
-                }
-            )
-        );
-
-
-        register(
-            create(
-                "system-status",
-                "Systemstatus",
-                "system",
-                "📊",
-                "Live-Informationen über den Zustand des Betriebssystems.",
-                {
-                    system:
-                        true,
-
-                    order:
-                        8,
-
-                    module:
-                        "system-status",
-
-                    moduleName:
-                        "HalDoSystemStatusApp",
-
-                    route:
-                        "system-status"
-                }
-            )
-        );
-
-
-        /* ====================================================
-           AI
-           ==================================================== */
-
-        register(
             create(
                 "ai-assistant",
-                "HalDo AI Assistent",
+                "AI Assistent",
                 "ai",
                 "assets/logo/logo.png",
                 "Zentrale intelligente HalDo AI Assistenz.",
                 {
-                    system:
-                        true,
-
-                    favorite:
-                        true,
-
-                    order:
-                        10,
-
-                    module:
-                        "ai-assistant",
-
-                    moduleName:
-                        "HalDoAIAssistantApp",
-
-                    route:
-                        "ai-assistant",
-
-                    permissions:
-                        [
-                            "ai",
-                            "storage",
-                            "speech"
-                        ],
-
-                    keywords:
-                        [
-                            "ai",
-                            "ki",
-                            "assistant",
-                            "assistent",
-                            "chat"
-                        ]
+                    system: true,
+                    critical: true,
+                    favorite: true,
+                    order: 10,
+                    keywords: [
+                        "ai",
+                        "assistant",
+                        "assistent",
+                        "chat",
+                        "haldo"
+                    ]
                 }
-            )
-        );
+            ),
 
-
-        register(
             create(
                 "ai-chat",
                 "AI Chat",
                 "ai",
                 "💬",
-                "Intelligenter HalDo AI Chat.",
+                "Intelligenter KI-Chat.",
                 {
-                    favorite:
-                        true,
-
-                    order:
-                        11,
-
-                    module:
-                        "ai-chat",
-
-                    moduleName:
-                        "HalDoAIChatApp",
-
-                    route:
-                        "ai-chat"
+                    order: 11,
+                    keywords: [
+                        "chat",
+                        "ki",
+                        "conversation"
+                    ]
                 }
-            )
-        );
+            ),
 
-
-        register(
             create(
                 "ai-image",
                 "AI Bilder",
                 "ai",
                 "🖼️",
-                "AI-Bildfunktionen und kreative Bildwerkzeuge.",
+                "AI-Bildfunktionen und Bildbearbeitung.",
                 {
-                    order:
-                        12,
-
-                    module:
-                        "ai-image",
-
-                    moduleName:
-                        "HalDoAIImageApp",
-
-                    route:
-                        "ai-image"
+                    order: 12,
+                    keywords: [
+                        "image",
+                        "bilder",
+                        "bild",
+                        "generate"
+                    ]
                 }
-            )
-        );
+            ),
 
-
-        register(
             create(
                 "ai-writing",
                 "AI Schreiben",
@@ -1314,23 +1446,15 @@
                 "✍️",
                 "Schreiben, Bearbeiten und Erstellen mit AI.",
                 {
-                    order:
-                        13,
-
-                    module:
-                        "ai-writing",
-
-                    moduleName:
-                        "HalDoAIWritingApp",
-
-                    route:
-                        "ai-writing"
+                    order: 13,
+                    keywords: [
+                        "writing",
+                        "text",
+                        "schreiben"
+                    ]
                 }
-            )
-        );
+            ),
 
-
-        register(
             create(
                 "ai-code",
                 "AI Code",
@@ -1338,47 +1462,31 @@
                 "💻",
                 "Unterstützung beim Programmieren und Entwickeln.",
                 {
-                    order:
-                        14,
-
-                    module:
-                        "ai-code",
-
-                    moduleName:
-                        "HalDoAICodeApp",
-
-                    route:
-                        "ai-code"
+                    order: 14,
+                    keywords: [
+                        "code",
+                        "programmieren",
+                        "developer"
+                    ]
                 }
-            )
-        );
+            ),
 
-
-        register(
             create(
                 "ai-translate",
                 "AI Übersetzung",
                 "ai",
                 "🌐",
-                "Intelligente Übersetzung von Texten.",
+                "Intelligente Übersetzungsfunktionen.",
                 {
-                    order:
-                        15,
-
-                    module:
-                        "ai-translate",
-
-                    moduleName:
-                        "HalDoAITranslateApp",
-
-                    route:
-                        "ai-translate"
+                    order: 15,
+                    keywords: [
+                        "translate",
+                        "translation",
+                        "übersetzung"
+                    ]
                 }
-            )
-        );
+            ),
 
-
-        register(
             create(
                 "ai-search",
                 "AI Suche",
@@ -1386,75 +1494,241 @@
                 "🔎",
                 "Intelligente Suche und Informationsverarbeitung.",
                 {
-                    order:
-                        16,
-
-                    module:
-                        "ai-search",
-
-                    moduleName:
-                        "HalDoAISearchApp",
-
-                    route:
-                        "ai-search"
+                    order: 16,
+                    keywords: [
+                        "search",
+                        "suche",
+                        "web"
+                    ]
                 }
-            )
-        );
+            ),
 
+            create(
+                "ai-memory",
+                "AI Memory",
+                "ai",
+                "🧠",
+                "Verwaltung des HalDo AI Langzeitgedächtnisses.",
+                {
+                    order: 17,
+                    keywords: [
+                        "memory",
+                        "gedächtnis",
+                        "wissen"
+                    ]
+                }
+            ),
 
-        register(
             create(
                 "ai-voice",
                 "AI Stimme",
                 "ai",
                 "🎙️",
-                "Sprachsteuerung und AI-Stimme.",
+                "AI-Sprach- und Stimmeinstellungen.",
                 {
-                    order:
-                        17,
-
-                    module:
-                        "ai-voice",
-
-                    moduleName:
-                        "HalDoAIVoiceApp",
-
-                    route:
-                        "ai-voice"
+                    order: 18,
+                    keywords: [
+                        "voice",
+                        "stimme",
+                        "sprache"
+                    ]
                 }
-            )
-        );
+            ),
 
 
-        /* ====================================================
-           DATEIEN
-           ==================================================== */
+            /* =================================================
+               HOME & SYSTEM
+               ================================================= */
 
-        register(
+            create(
+                "home",
+                "Startseite",
+                "system",
+                "assets/logo/logo.png",
+                "Zentrale HalDo AI OS Startseite.",
+                {
+                    system: true,
+                    critical: true,
+                    favorite: true,
+                    order: 1,
+                    keywords: [
+                        "home",
+                        "start",
+                        "desktop"
+                    ]
+                }
+            ),
+
+            create(
+                "dashboard",
+                "Dashboard",
+                "system",
+                "▦",
+                "Zentrale Übersicht des HalDo AI OS.",
+                {
+                    system: true,
+                    favorite: true,
+                    order: 2,
+                    keywords: [
+                        "dashboard",
+                        "übersicht"
+                    ]
+                }
+            ),
+
+            create(
+                "control-center",
+                "Kontrollzentrum",
+                "system",
+                "🎛️",
+                "Schnellzugriff auf wichtige Systemeinstellungen.",
+                {
+                    system: true,
+                    favorite: true,
+                    order: 3,
+                    keywords: [
+                        "control",
+                        "settings",
+                        "kontrolle"
+                    ]
+                }
+            ),
+
+            create(
+                "app-center",
+                "App Center",
+                "system",
+                "▦",
+                "Zentrale Verwaltung aller HalDo Apps.",
+                {
+                    system: true,
+                    favorite: true,
+                    order: 4,
+                    keywords: [
+                        "apps",
+                        "app center",
+                        "verwaltung"
+                    ]
+                }
+            ),
+
+            create(
+                "launcher",
+                "Launcher",
+                "system",
+                "🚀",
+                "Startprogramm für HalDo Apps.",
+                {
+                    system: true,
+                    order: 5,
+                    keywords: [
+                        "launcher",
+                        "start"
+                    ]
+                }
+            ),
+
+            create(
+                "startup",
+                "Systemstart",
+                "system",
+                "🚀",
+                "Informationen und Steuerung des Systemstarts.",
+                {
+                    system: true,
+                    order: 6,
+                    keywords: [
+                        "boot",
+                        "startup",
+                        "systemstart"
+                    ]
+                }
+            ),
+
+            create(
+                "system-status",
+                "Systemstatus",
+                "system",
+                "📊",
+                "Live-Systemstatus und Diagnose.",
+                {
+                    system: true,
+                    order: 7,
+                    keywords: [
+                        "status",
+                        "system",
+                        "diagnose"
+                    ]
+                }
+            ),
+
+            create(
+                "notifications",
+                "Benachrichtigungen",
+                "system",
+                "🔔",
+                "Zentrale Verwaltung von Systembenachrichtigungen.",
+                {
+                    system: true,
+                    order: 8,
+                    keywords: [
+                        "notifications",
+                        "benachrichtigungen"
+                    ]
+                }
+            ),
+
+            create(
+                "settings",
+                "Einstellungen",
+                "system",
+                "⚙️",
+                "Zentrale HalDo AI OS Einstellungen.",
+                {
+                    system: true,
+                    favorite: true,
+                    order: 9,
+                    keywords: [
+                        "settings",
+                        "einstellungen"
+                    ]
+                }
+            ),
+
+
+            /* =================================================
+               DATEIEN
+               ================================================= */
+
+            create(
+                "files",
+                "Dateien",
+                "files",
+                "📁",
+                "Zentrale Datei- und Ordnerverwaltung.",
+                {
+                    favorite: true,
+                    order: 100,
+                    keywords: [
+                        "file",
+                        "files",
+                        "dateien",
+                        "ordner"
+                    ]
+                }
+            ),
+
             create(
                 "file-manager",
                 "Dateimanager",
                 "files",
-                "📁",
+                "🗂️",
                 "Dateien und Ordner verwalten.",
                 {
-                    order:
-                        20,
-
-                    module:
-                        "file-manager",
-
-                    moduleName:
-                        "HalDoFileManagerApp",
-
-                    route:
-                        "file-manager"
+                    order: 101
                 }
-            )
-        );
+            ),
 
-
-        register(
             create(
                 "downloads",
                 "Downloads",
@@ -1462,47 +1736,21 @@
                 "⬇️",
                 "Heruntergeladene Dateien.",
                 {
-                    order:
-                        21,
-
-                    module:
-                        "downloads",
-
-                    moduleName:
-                        "HalDoDownloadsApp",
-
-                    route:
-                        "downloads"
+                    order: 102
                 }
-            )
-        );
+            ),
 
-
-        register(
             create(
                 "recent-files",
-                "Zuletzt verwendete Dateien",
+                "Zuletzt verwendet",
                 "files",
                 "🕘",
                 "Schneller Zugriff auf zuletzt verwendete Dateien.",
                 {
-                    order:
-                        22,
-
-                    module:
-                        "recent-files",
-
-                    moduleName:
-                        "HalDoRecentFilesApp",
-
-                    route:
-                        "recent-files"
+                    order: 103
                 }
-            )
-        );
+            ),
 
-
-        register(
             create(
                 "favorites-files",
                 "Datei-Favoriten",
@@ -1510,51 +1758,59 @@
                 "⭐",
                 "Favorisierte Dateien und Ordner.",
                 {
-                    order:
-                        23,
-
-                    module:
-                        "favorites-files",
-
-                    moduleName:
-                        "HalDoFavoriteFilesApp",
-
-                    route:
-                        "favorites-files"
+                    order: 104
                 }
-            )
-        );
+            ),
 
-
-        register(
             create(
-                "storage",
-                "Speicher",
+                "documents",
+                "Dokumente",
                 "files",
-                "💽",
-                "Lokalen Speicher und Speicherplatz verwalten.",
+                "📄",
+                "Dokumente verwalten.",
                 {
-                    order:
-                        24,
-
-                    module:
-                        "storage",
-
-                    moduleName:
-                        "HalDoStorageApp",
-
-                    route:
-                        "storage"
+                    order: 105
                 }
-            )
-        );
+            ),
+
+            create(
+                "images",
+                "Bilder",
+                "files",
+                "🖼️",
+                "Bilddateien verwalten.",
+                {
+                    order: 106
+                }
+            ),
+
+            create(
+                "videos",
+                "Videos",
+                "files",
+                "🎬",
+                "Videodateien verwalten.",
+                {
+                    order: 107
+                }
+            ),
+
+            create(
+                "audio-files",
+                "Audiodateien",
+                "files",
+                "🎵",
+                "Audiodateien verwalten.",
+                {
+                    order: 108
+                }
+            ),
 
 
-        /* ====================================================
-           OFFICE
-           ==================================================== */
+            /* =================================================
+               OFFICE
+               ================================================= */
 
-        register(
             create(
                 "text-editor",
                 "Texteditor",
@@ -1562,23 +1818,27 @@
                 "📄",
                 "Texte erstellen und bearbeiten.",
                 {
-                    order:
-                        30,
-
-                    module:
-                        "text-editor",
-
-                    moduleName:
-                        "HalDoTextEditorApp",
-
-                    route:
-                        "text-editor"
+                    favorite: true,
+                    order: 200,
+                    keywords: [
+                        "text",
+                        "editor",
+                        "schreiben"
+                    ]
                 }
-            )
-        );
+            ),
 
+            create(
+                "word-processor",
+                "Dokumente",
+                "office",
+                "📝",
+                "Dokumente erstellen und bearbeiten.",
+                {
+                    order: 201
+                }
+            ),
 
-        register(
             create(
                 "spreadsheet",
                 "Tabellen",
@@ -1586,23 +1846,10 @@
                 "📊",
                 "Tabellen und Daten bearbeiten.",
                 {
-                    order:
-                        31,
-
-                    module:
-                        "spreadsheet",
-
-                    moduleName:
-                        "HalDoSpreadsheetApp",
-
-                    route:
-                        "spreadsheet"
+                    order: 202
                 }
-            )
-        );
+            ),
 
-
-        register(
             create(
                 "presentation",
                 "Präsentationen",
@@ -1610,23 +1857,10 @@
                 "📽️",
                 "Präsentationen erstellen.",
                 {
-                    order:
-                        32,
-
-                    module:
-                        "presentation",
-
-                    moduleName:
-                        "HalDoPresentationApp",
-
-                    route:
-                        "presentation"
+                    order: 203
                 }
-            )
-        );
+            ),
 
-
-        register(
             create(
                 "pdf-reader",
                 "PDF Reader",
@@ -1634,51 +1868,38 @@
                 "📕",
                 "PDF-Dokumente anzeigen.",
                 {
-                    order:
-                        33,
-
-                    module:
-                        "pdf-reader",
-
-                    moduleName:
-                        "HalDoPDFReaderApp",
-
-                    route:
-                        "pdf-reader"
+                    order: 204
                 }
-            )
-        );
+            ),
 
-
-        register(
             create(
-                "document-scanner",
-                "Dokumentenscanner",
+                "pdf-tools",
+                "PDF Werkzeuge",
                 "office",
-                "📷",
-                "Dokumente digitalisieren und verwalten.",
+                "🛠️",
+                "PDF-Dateien bearbeiten und verwalten.",
                 {
-                    order:
-                        34,
-
-                    module:
-                        "document-scanner",
-
-                    moduleName:
-                        "HalDoDocumentScannerApp",
-
-                    route:
-                        "document-scanner"
+                    order: 205
                 }
-            )
-        );
+            ),
+
+            create(
+                "notes",
+                "Notizen",
+                "productivity",
+                "🗒️",
+                "Schnelle Notizen erstellen und verwalten.",
+                {
+                    favorite: true,
+                    order: 206
+                }
+            ),
 
 
-        /* ====================================================
-           KOMMUNIKATION
-           ==================================================== */
+            /* =================================================
+               KOMMUNIKATION
+               ================================================= */
 
-        register(
             create(
                 "messages",
                 "Nachrichten",
@@ -1686,47 +1907,22 @@
                 "💬",
                 "Nachrichten und Chats.",
                 {
-                    order:
-                        40,
-
-                    module:
-                        "messages",
-
-                    moduleName:
-                        "HalDoMessagesApp",
-
-                    route:
-                        "messages"
+                    favorite: true,
+                    order: 300
                 }
-            )
-        );
+            ),
 
-
-        register(
             create(
                 "calls",
                 "Anrufe",
                 "communication",
                 "📞",
-                "Anruf-Funktionen.",
+                "Anruffunktionen.",
                 {
-                    order:
-                        41,
-
-                    module:
-                        "calls",
-
-                    moduleName:
-                        "HalDoCallsApp",
-
-                    route:
-                        "calls"
+                    order: 301
                 }
-            )
-        );
+            ),
 
-
-        register(
             create(
                 "video-calls",
                 "Videoanrufe",
@@ -1734,23 +1930,10 @@
                 "📹",
                 "Video-Kommunikation.",
                 {
-                    order:
-                        42,
-
-                    module:
-                        "video-calls",
-
-                    moduleName:
-                        "HalDoVideoCallsApp",
-
-                    route:
-                        "video-calls"
+                    order: 302
                 }
-            )
-        );
+            ),
 
-
-        register(
             create(
                 "contacts",
                 "Kontakte",
@@ -1758,23 +1941,10 @@
                 "👤",
                 "Kontakte verwalten.",
                 {
-                    order:
-                        43,
-
-                    module:
-                        "contacts",
-
-                    moduleName:
-                        "HalDoContactsApp",
-
-                    route:
-                        "contacts"
+                    order: 303
                 }
-            )
-        );
+            ),
 
-
-        register(
             create(
                 "chat-groups",
                 "Gruppen",
@@ -1782,54 +1952,43 @@
                 "👥",
                 "Kommunikationsgruppen.",
                 {
-                    order:
-                        44,
-
-                    module:
-                        "chat-groups",
-
-                    moduleName:
-                        "HalDoChatGroupsApp",
-
-                    route:
-                        "chat-groups"
+                    order: 304
                 }
-            )
-        );
+            ),
+
+            create(
+                "mail",
+                "Mail",
+                "communication",
+                "✉️",
+                "E-Mail-Verwaltung.",
+                {
+                    order: 305
+                }
+            ),
 
 
-        /* ====================================================
-           INTERNET
-           ==================================================== */
+            /* =================================================
+               INTERNET
+               ================================================= */
 
-        register(
             create(
                 "browser",
                 "Browser",
                 "internet",
                 "🌐",
-                "Webseiten und Internetinhalte.",
+                "Internetbrowser für HalDo AI OS.",
                 {
-                    favorite:
-                        true,
-
-                    order:
-                        50,
-
-                    module:
-                        "browser",
-
-                    moduleName:
-                        "HalDoBrowserApp",
-
-                    route:
+                    favorite: true,
+                    order: 400,
+                    keywords: [
+                        "internet",
+                        "web",
                         "browser"
+                    ]
                 }
-            )
-        );
+            ),
 
-
-        register(
             create(
                 "bookmarks",
                 "Lesezeichen",
@@ -1837,23 +1996,10 @@
                 "🔖",
                 "Gespeicherte Webseiten.",
                 {
-                    order:
-                        51,
-
-                    module:
-                        "bookmarks",
-
-                    moduleName:
-                        "HalDoBookmarksApp",
-
-                    route:
-                        "bookmarks"
+                    order: 401
                 }
-            )
-        );
+            ),
 
-
-        register(
             create(
                 "history",
                 "Verlauf",
@@ -1861,577 +2007,37 @@
                 "🕘",
                 "Browser-Verlauf.",
                 {
-                    order:
-                        52,
-
-                    module:
-                        "history",
-
-                    moduleName:
-                        "HalDoHistoryApp",
-
-                    route:
-                        "history"
+                    order: 402
                 }
-            )
-        );
+            ),
 
-
-        register(
             create(
-                "password-manager",
-                "Passwortverwaltung",
-                "security",
-                "🔐",
-                "Lokale Verwaltung von Zugangsdaten.",
+                "downloads-browser",
+                "Browser Downloads",
+                "internet",
+                "⬇️",
+                "Browser-Downloads.",
                 {
-                    order:
-                        53,
-
-                    module:
-                        "password-manager",
-
-                    moduleName:
-                        "HalDoPasswordManagerApp",
-
-                    route:
-                        "password-manager"
+                    order: 403
                 }
-            )
-        );
+            ),
 
-
-        /* ====================================================
-           MEDIA
-           ==================================================== */
-
-        register(
             create(
-                "gallery",
-                "Galerie",
-                "media",
-                "🖼️",
-                "Bildergalerie.",
+                "web-search",
+                "Websuche",
+                "internet",
+                "🔎",
+                "Websuche und Informationsrecherche.",
                 {
-                    order:
-                        60,
-
-                    module:
-                        "gallery",
-
-                    moduleName:
-                        "HalDoGalleryApp",
-
-                    route:
-                        "gallery"
+                    order: 404
                 }
-            )
-        );
+            ),
 
 
-        register(
-            create(
-                "camera",
-                "Kamera",
-                "media",
-                "📷",
-                "Kamera und Fotoaufnahme.",
-                {
-                    order:
-                        61,
+            /* =================================================
+               SICHERHEIT
+               ================================================= */
 
-                    module:
-                        "camera",
-
-                    moduleName:
-                        "HalDoCameraApp",
-
-                    route:
-                        "camera"
-                }
-            )
-        );
-
-
-        register(
-            create(
-                "audio-recorder",
-                "Audiorekorder",
-                "media",
-                "🎙️",
-                "Audioaufnahmen.",
-                {
-                    order:
-                        62,
-
-                    module:
-                        "audio-recorder",
-
-                    moduleName:
-                        "HalDoAudioRecorderApp",
-
-                    route:
-                        "audio-recorder"
-                }
-            )
-        );
-
-
-        register(
-            create(
-                "video-recorder",
-                "Videorekorder",
-                "media",
-                "🎥",
-                "Videoaufnahmen.",
-                {
-                    order:
-                        63,
-
-                    module:
-                        "video-recorder",
-
-                    moduleName:
-                        "HalDoVideoRecorderApp",
-
-                    route:
-                        "video-recorder"
-                }
-            )
-        );
-
-
-        register(
-            create(
-                "media-player",
-                "Media Player",
-                "media",
-                "▶️",
-                "Zentrale Medienwiedergabe.",
-                {
-                    order:
-                        64,
-
-                    module:
-                        "media-player",
-
-                    moduleName:
-                        "HalDoMediaPlayerApp",
-
-                    route:
-                        "media-player"
-                }
-            )
-        );
-
-
-        /* ====================================================
-           PRODUKTIVITÄT
-           ==================================================== */
-
-        register(
-            create(
-                "calendar",
-                "Kalender",
-                "productivity",
-                "📅",
-                "Termine und Kalender verwalten.",
-                {
-                    favorite:
-                        true,
-
-                    order:
-                        70,
-
-                    module:
-                        "calendar",
-
-                    moduleName:
-                        "HalDoCalendarApp",
-
-                    route:
-                        "calendar"
-                }
-            )
-        );
-
-
-        register(
-            create(
-                "todo",
-                "Aufgaben",
-                "productivity",
-                "☑️",
-                "Aufgaben verwalten.",
-                {
-                    favorite:
-                        true,
-
-                    order:
-                        71,
-
-                    module:
-                        "todo",
-
-                    moduleName:
-                        "HalDoTodoApp",
-
-                    route:
-                        "todo"
-                }
-            )
-        );
-
-
-        register(
-            create(
-                "notes",
-                "Notizen",
-                "productivity",
-                "📝",
-                "Notizen erstellen und verwalten.",
-                {
-                    favorite:
-                        true,
-
-                    order:
-                        72,
-
-                    module:
-                        "notes",
-
-                    moduleName:
-                        "HalDoNotesApp",
-
-                    route:
-                        "notes"
-                }
-            )
-        );
-
-
-        register(
-            create(
-                "calculator",
-                "Rechner",
-                "productivity",
-                "🧮",
-                "Berechnungen durchführen.",
-                {
-                    order:
-                        73,
-
-                    module:
-                        "calculator",
-
-                    moduleName:
-                        "HalDoCalculatorApp",
-
-                    route:
-                        "calculator"
-                }
-            )
-        );
-
-
-        register(
-            create(
-                "clock",
-                "Uhr",
-                "productivity",
-                "🕐",
-                "Uhrzeit und Weltzeit.",
-                {
-                    order:
-                        74,
-
-                    module:
-                        "clock",
-
-                    moduleName:
-                        "HalDoClockApp",
-
-                    route:
-                        "clock"
-                }
-            )
-        );
-
-
-        register(
-            create(
-                "stopwatch",
-                "Stoppuhr",
-                "productivity",
-                "⏱️",
-                "Stoppuhr.",
-                {
-                    order:
-                        75,
-
-                    module:
-                        "stopwatch",
-
-                    moduleName:
-                        "HalDoStopwatchApp",
-
-                    route:
-                        "stopwatch"
-                }
-            )
-        );
-
-
-        register(
-            create(
-                "timer",
-                "Timer",
-                "productivity",
-                "⏲️",
-                "Timer.",
-                {
-                    order:
-                        76,
-
-                    module:
-                        "timer",
-
-                    moduleName:
-                        "HalDoTimerApp",
-
-                    route:
-                        "timer"
-                }
-            )
-        );
-
-
-        register(
-            create(
-                "habits",
-                "Gewohnheiten",
-                "productivity",
-                "📈",
-                "Persönliche Routinen verwalten.",
-                {
-                    order:
-                        77,
-
-                    module:
-                        "habits",
-
-                    moduleName:
-                        "HalDoHabitsApp",
-
-                    route:
-                        "habits"
-                }
-            )
-        );
-
-
-        /* ====================================================
-           SPRACHE
-           ==================================================== */
-
-        register(
-            create(
-                "speech-to-text",
-                "Sprache zu Text",
-                "language",
-                "🎙️",
-                "Gesprochene Sprache in Text umwandeln.",
-                {
-                    order:
-                        80,
-
-                    module:
-                        "speech-to-text",
-
-                    moduleName:
-                        "HalDoSpeechToTextApp",
-
-                    route:
-                        "speech-to-text",
-
-                    permissions:
-                        [
-                            "microphone"
-                        ]
-                }
-            )
-        );
-
-
-        register(
-            create(
-                "text-to-speech",
-                "Text zu Sprache",
-                "language",
-                "🔊",
-                "Text vorlesen lassen.",
-                {
-                    order:
-                        81,
-
-                    module:
-                        "text-to-speech",
-
-                    moduleName:
-                        "HalDoTextToSpeechApp",
-
-                    route:
-                        "text-to-speech"
-                }
-            )
-        );
-
-
-        register(
-            create(
-                "language-center",
-                "Sprachzentrum",
-                "language",
-                "🌍",
-                "Sprach- und Übersetzungsfunktionen.",
-                {
-                    order:
-                        82,
-
-                    module:
-                        "language-center",
-
-                    moduleName:
-                        "HalDoLanguageCenterApp",
-
-                    route:
-                        "language-center"
-                }
-            )
-        );
-
-
-        /* ====================================================
-           ÊZÎDÎ
-           ==================================================== */
-
-        register(
-            create(
-                "ezidi-language",
-                "Êzîdî Sprache",
-                "ezidi",
-                "𐺀",
-                "Êzîdî-Sprachfunktionen.",
-                {
-                    favorite:
-                        true,
-
-                    order:
-                        90,
-
-                    module:
-                        "ezidi-language",
-
-                    moduleName:
-                        "HalDoEzidiLanguageApp",
-
-                    route:
-                        "ezidi-language",
-
-                    keywords:
-                        [
-                            "ezidi",
-                            "êzîdî",
-                            "kurdisch",
-                            "sprache"
-                        ]
-                }
-            )
-        );
-
-
-        register(
-            create(
-                "ezidi-dictionary",
-                "Êzîdî Wörterbuch",
-                "ezidi",
-                "📖",
-                "Êzîdî-Wörterbuch.",
-                {
-                    order:
-                        91,
-
-                    module:
-                        "ezidi-dictionary",
-
-                    moduleName:
-                        "HalDoEzidiDictionaryApp",
-
-                    route:
-                        "ezidi-dictionary"
-                }
-            )
-        );
-
-
-        register(
-            create(
-                "ezidi-input",
-                "Êzîdî Eingabe",
-                "ezidi",
-                "⌨️",
-                "Spezielle Êzîdî-Tastatur und Eingabe.",
-                {
-                    order:
-                        92,
-
-                    module:
-                        "ezidi-input",
-
-                    moduleName:
-                        "HalDoEzidiInputApp",
-
-                    route:
-                        "ezidi-input",
-
-                    dependencies:
-                        [
-                            "ezidi-keyboard"
-                        ]
-                }
-            )
-        );
-
-
-        register(
-            create(
-                "ezidi-keyboard",
-                "Êzîdî Tastatur",
-                "ezidi",
-                "⌨️",
-                "Eigene Êzîdî-Zeichen und Tastaturlayouts.",
-                {
-                    order:
-                        93,
-
-                    module:
-                        "ezidi-keyboard",
-
-                    moduleName:
-                        "HalDoEzidiKeyboardApp",
-
-                    route:
-                        "ezidi-keyboard"
-                }
-            )
-        );
-
-
-        /* ====================================================
-           SICHERHEIT
-           ==================================================== */
-
-        register(
             create(
                 "security-center",
                 "Security Center",
@@ -2439,29 +2045,13 @@
                 "🛡️",
                 "Zentrale Sicherheitsfunktionen.",
                 {
-                    system:
-                        true,
-
-                    critical:
-                        true,
-
-                    order:
-                        100,
-
-                    module:
-                        "security-center",
-
-                    moduleName:
-                        "HalDoSecurityCenterApp",
-
-                    route:
-                        "security-center"
+                    system: true,
+                    critical: true,
+                    favorite: true,
+                    order: 500
                 }
-            )
-        );
+            ),
 
-
-        register(
             create(
                 "permissions",
                 "Berechtigungen",
@@ -2469,23 +2059,22 @@
                 "🔑",
                 "App-Berechtigungen verwalten.",
                 {
-                    order:
-                        101,
-
-                    module:
-                        "permissions",
-
-                    moduleName:
-                        "HalDoPermissionsApp",
-
-                    route:
-                        "permissions"
+                    system: true,
+                    order: 501
                 }
-            )
-        );
+            ),
 
+            create(
+                "password-manager",
+                "Passwortverwaltung",
+                "security",
+                "🔐",
+                "Lokale Verwaltung von Zugangsdaten.",
+                {
+                    order: 502
+                }
+            ),
 
-        register(
             create(
                 "privacy",
                 "Datenschutz",
@@ -2493,79 +2082,378 @@
                 "🔒",
                 "Datenschutz- und Privatsphäre-Einstellungen.",
                 {
-                    order:
-                        102,
-
-                    module:
-                        "privacy",
-
-                    moduleName:
-                        "HalDoPrivacyApp",
-
-                    route:
-                        "privacy"
+                    order: 503
                 }
-            )
-        );
+            ),
+
+            create(
+                "security-log",
+                "Sicherheitsprotokoll",
+                "security",
+                "📋",
+                "Sicherheitsereignisse und Protokolle.",
+                {
+                    order: 504
+                }
+            ),
 
 
-        /* ====================================================
-           BACKUP
-           ==================================================== */
+            /* =================================================
+               MULTIMEDIA
+               ================================================= */
 
-        register(
+            create(
+                "gallery",
+                "Galerie",
+                "media",
+                "🖼️",
+                "Bildergalerie.",
+                {
+                    favorite: true,
+                    order: 600
+                }
+            ),
+
+            create(
+                "camera",
+                "Kamera",
+                "media",
+                "📷",
+                "Kamera-Funktionen.",
+                {
+                    order: 601
+                }
+            ),
+
+            create(
+                "audio-recorder",
+                "Audiorekorder",
+                "media",
+                "🎙️",
+                "Audioaufnahmen.",
+                {
+                    order: 602
+                }
+            ),
+
+            create(
+                "video-recorder",
+                "Videorekorder",
+                "media",
+                "🎥",
+                "Videoaufnahmen.",
+                {
+                    order: 603
+                }
+            ),
+
+            create(
+                "media-player",
+                "Media Player",
+                "media",
+                "▶️",
+                "Zentrale Medienwiedergabe.",
+                {
+                    favorite: true,
+                    order: 604
+                }
+            ),
+
+            create(
+                "music",
+                "Musik",
+                "media",
+                "🎵",
+                "Musikverwaltung und Wiedergabe.",
+                {
+                    order: 605
+                }
+            ),
+
+            create(
+                "video-player",
+                "Video Player",
+                "media",
+                "🎬",
+                "Videowiedergabe.",
+                {
+                    order: 606
+                }
+            ),
+
+
+            /* =================================================
+               PRODUKTIVITÄT
+               ================================================= */
+
+            create(
+                "todo",
+                "Aufgaben",
+                "productivity",
+                "☑️",
+                "Aufgaben verwalten.",
+                {
+                    favorite: true,
+                    order: 700
+                }
+            ),
+
+            create(
+                "calendar",
+                "Kalender",
+                "productivity",
+                "📅",
+                "Termine und Kalender verwalten.",
+                {
+                    favorite: true,
+                    order: 701
+                }
+            ),
+
+            create(
+                "reminders",
+                "Erinnerungen",
+                "productivity",
+                "🔔",
+                "Erinnerungen verwalten.",
+                {
+                    order: 702
+                }
+            ),
+
+            create(
+                "habits",
+                "Gewohnheiten",
+                "productivity",
+                "📈",
+                "Persönliche Routinen verwalten.",
+                {
+                    order: 703
+                }
+            ),
+
+            create(
+                "stopwatch",
+                "Stoppuhr",
+                "productivity",
+                "⏱️",
+                "Stoppuhr.",
+                {
+                    order: 704
+                }
+            ),
+
+            create(
+                "timer",
+                "Timer",
+                "productivity",
+                "⏲️",
+                "Timer.",
+                {
+                    order: 705
+                }
+            ),
+
+            create(
+                "calculator",
+                "Rechner",
+                "productivity",
+                "🧮",
+                "Mathematischer Rechner.",
+                {
+                    order: 706
+                }
+            ),
+
+            create(
+                "clock",
+                "Uhr",
+                "productivity",
+                "🕐",
+                "Uhrzeit und Weltzeiten.",
+                {
+                    order: 707
+                }
+            ),
+
+
+            /* =================================================
+               SPRACHE
+               ================================================= */
+
+            create(
+                "speech-to-text",
+                "Sprache zu Text",
+                "language",
+                "🎙️",
+                "Gesprochene Sprache in Text umwandeln.",
+                {
+                    order: 800
+                }
+            ),
+
+            create(
+                "text-to-speech",
+                "Text zu Sprache",
+                "language",
+                "🔊",
+                "Text vorlesen lassen.",
+                {
+                    order: 801
+                }
+            ),
+
+            create(
+                "language-center",
+                "Sprachzentrum",
+                "language",
+                "🌍",
+                "Sprach- und Übersetzungsfunktionen.",
+                {
+                    order: 802
+                }
+            ),
+
+            create(
+                "translator",
+                "Übersetzer",
+                "language",
+                "🌐",
+                "Mehrsprachige Übersetzungen.",
+                {
+                    order: 803
+                }
+            ),
+
+            create(
+                "dictionary",
+                "Wörterbuch",
+                "language",
+                "📖",
+                "Wörterbücher und Begriffe.",
+                {
+                    order: 804
+                }
+            ),
+
+
+            /* =================================================
+               ÊZÎDÎ
+               ================================================= */
+
+            create(
+                "ezidi-language",
+                "Êzîdî Sprache",
+                "ezidi",
+                "𐺀",
+                "Êzîdî-Sprachfunktionen.",
+                {
+                    favorite: true,
+                    order: 900,
+                    keywords: [
+                        "ezidi",
+                        "êzîdî",
+                        "sprache"
+                    ]
+                }
+            ),
+
+            create(
+                "ezidi-dictionary",
+                "Êzîdî Wörterbuch",
+                "ezidi",
+                "📖",
+                "Êzîdî-Wörterbuch.",
+                {
+                    order: 901
+                }
+            ),
+
+            create(
+                "ezidi-input",
+                "Êzîdî Eingabe",
+                "ezidi",
+                "⌨️",
+                "Spezielle Êzîdî-Eingabe.",
+                {
+                    order: 902
+                }
+            ),
+
+            create(
+                "ezidi-keyboard",
+                "Êzîdî Tastatur",
+                "ezidi",
+                "⌨️",
+                "Spezielle Êzîdî-Tastatur mit eigenen Zeichen und Layouts.",
+                {
+                    favorite: true,
+                    order: 903,
+                    keywords: [
+                        "keyboard",
+                        "tastatur",
+                        "ezidi",
+                        "êzîdî"
+                    ]
+                }
+            ),
+
+            create(
+                "ezidi-translator",
+                "Êzîdî Übersetzer",
+                "ezidi",
+                "🌍",
+                "Übersetzung mit Êzîdî-Unterstützung.",
+                {
+                    order: 904
+                }
+            ),
+
+
+            /* =================================================
+               BACKUP & WIEDERHERSTELLUNG
+               ================================================= */
+
             create(
                 "backup",
                 "Backup",
-                "system",
+                "backup",
                 "💾",
                 "Lokale Sicherungen.",
                 {
-                    order:
-                        110,
-
-                    module:
-                        "backup",
-
-                    moduleName:
-                        "HalDoBackupApp",
-
-                    route:
-                        "backup"
+                    system: true,
+                    order: 1000
                 }
-            )
-        );
+            ),
 
-
-        register(
             create(
                 "restore",
                 "Wiederherstellung",
-                "system",
+                "backup",
                 "♻️",
                 "Wiederherstellung von Systemdaten.",
                 {
-                    order:
-                        111,
-
-                    module:
-                        "restore",
-
-                    moduleName:
-                        "HalDoRestoreApp",
-
-                    route:
-                        "restore"
+                    system: true,
+                    order: 1001
                 }
-            )
-        );
+            ),
+
+            create(
+                "backup-manager",
+                "Backup Manager",
+                "backup",
+                "🗄️",
+                "Sicherungen verwalten.",
+                {
+                    order: 1002
+                }
+            ),
 
 
-        /* ====================================================
-           ENTWICKLER
-           ==================================================== */
+            /* =================================================
+               ENTWICKLER
+               ================================================= */
 
-        register(
             create(
                 "console",
                 "Konsole",
@@ -2573,23 +2461,22 @@
                 "⌘",
                 "Entwicklerkonsole.",
                 {
-                    order:
-                        120,
-
-                    module:
-                        "console",
-
-                    moduleName:
-                        "HalDoConsoleApp",
-
-                    route:
-                        "console"
+                    system: true,
+                    order: 1100
                 }
-            )
-        );
+            ),
 
+            create(
+                "developer-tools",
+                "Developer Tools",
+                "developer",
+                "🛠️",
+                "Werkzeuge für die Entwicklung.",
+                {
+                    order: 1101
+                }
+            ),
 
-        register(
             create(
                 "module-center",
                 "Module",
@@ -2597,172 +2484,228 @@
                 "🧩",
                 "Verwaltung von Systemmodulen.",
                 {
-                    order:
-                        121,
-
-                    module:
-                        "module-center",
-
-                    moduleName:
-                        "HalDoModuleCenterApp",
-
-                    route:
-                        "module-center"
+                    system: true,
+                    order: 1102
                 }
-            )
-        );
+            ),
 
-
-        register(
             create(
                 "app-developer",
                 "App Entwickler",
                 "developer",
                 "🧑‍💻",
-                "Entwicklung eigener HalDo Apps.",
+                "Werkzeuge für eigene HalDo Apps.",
                 {
-                    order:
-                        122,
-
-                    module:
-                        "app-developer",
-
-                    moduleName:
-                        "HalDoAppDeveloperApp",
-
-                    route:
-                        "app-developer"
+                    order: 1103
                 }
-            )
-        );
+            ),
+
+            create(
+                "app-inspector",
+                "App Inspector",
+                "developer",
+                "🔍",
+                "Untersuchung registrierter Apps und Module.",
+                {
+                    order: 1104
+                }
+            ),
+
+            create(
+                "system-console",
+                "Systemkonsole",
+                "developer",
+                "💻",
+                "Systemdiagnose und Kernel-Kommunikation.",
+                {
+                    order: 1105
+                }
+            ),
 
 
-        register(
+            /* =================================================
+               SYSTEMWERKZEUGE
+               ================================================= */
+
+            create(
+                "storage",
+                "Speicher",
+                "system-tools",
+                "💽",
+                "Lokale Speicherverwaltung.",
+                {
+                    system: true,
+                    order: 1200
+                }
+            ),
+
+            create(
+                "storage-manager",
+                "Speicherverwaltung",
+                "system-tools",
+                "🗄️",
+                "Verwaltung des HalDo Speichers.",
+                {
+                    system: true,
+                    order: 1201
+                }
+            ),
+
+            create(
+                "configuration",
+                "Konfiguration",
+                "system-tools",
+                "⚙️",
+                "Systemkonfiguration.",
+                {
+                    system: true,
+                    order: 1202
+                }
+            ),
+
             create(
                 "diagnostics",
                 "Diagnose",
-                "developer",
+                "system-tools",
                 "🩺",
-                "Systemdiagnose und Fehleranalyse.",
+                "Systemdiagnose und Fehlerprüfung.",
                 {
-                    order:
-                        123,
-
-                    module:
-                        "diagnostics",
-
-                    moduleName:
-                        "HalDoDiagnosticsApp",
-
-                    route:
-                        "diagnostics"
+                    system: true,
+                    order: 1203
                 }
-            )
-        );
+            ),
 
-
-        /* ====================================================
-           NETZWERK
-           ==================================================== */
-
-        register(
-            create(
-                "network",
-                "Netzwerk",
-                "system",
-                "📡",
-                "Netzwerk- und Verbindungsstatus.",
-                {
-                    order:
-                        130,
-
-                    module:
-                        "network",
-
-                    moduleName:
-                        "HalDoNetworkApp",
-
-                    route:
-                        "network"
-                }
-            )
-        );
-
-
-        register(
-            create(
-                "wifi",
-                "WLAN",
-                "system",
-                "📶",
-                "WLAN-Verbindung und Status.",
-                {
-                    order:
-                        131,
-
-                    module:
-                        "wifi",
-
-                    moduleName:
-                        "HalDoWiFiApp",
-
-                    route:
-                        "wifi"
-                }
-            )
-        );
-
-
-        /* ====================================================
-           WEITERE SYSTEMWERKZEUGE
-           ==================================================== */
-
-        register(
-            create(
-                "tasks",
-                "Systemaufgaben",
-                "system",
-                "📋",
-                "Laufende System- und Hintergrundaufgaben.",
-                {
-                    order:
-                        140,
-
-                    module:
-                        "tasks",
-
-                    moduleName:
-                        "HalDoTasksApp",
-
-                    route:
-                        "tasks"
-                }
-            )
-        );
-
-
-        register(
             create(
                 "system-information",
                 "Systeminformationen",
+                "system-tools",
+                "ℹ️",
+                "Informationen über HalDo AI OS.",
+                {
+                    system: true,
+                    order: 1204
+                }
+            ),
+
+
+            /* =================================================
+               ZUKÜNFTIGE ERWEITERUNGEN
+               ================================================= */
+
+            create(
+                "automation",
+                "Automatisierung",
+                "automation",
+                "⚡",
+                "Automatisierung von HalDo Aufgaben.",
+                {
+                    order: 1300
+                }
+            ),
+
+            create(
+                "workflows",
+                "Workflows",
+                "automation",
+                "🔄",
+                "Automatisierte Arbeitsabläufe.",
+                {
+                    order: 1301
+                }
+            ),
+
+            create(
+                "smart-home",
+                "Smart Home",
+                "automation",
+                "🏠",
+                "Vorbereitung für Smart-Home-Steuerung.",
+                {
+                    order: 1302
+                }
+            ),
+
+            create(
+                "cloud",
+                "Cloud",
+                "cloud",
+                "☁️",
+                "Vorbereitung für Cloud-Dienste.",
+                {
+                    order: 1400
+                }
+            ),
+
+            create(
+                "sync",
+                "Synchronisierung",
+                "cloud",
+                "🔄",
+                "Vorbereitung für Datensynchronisierung.",
+                {
+                    order: 1401
+                }
+            ),
+
+            create(
+                "account",
+                "HalDo Konto",
+                "account",
+                "👤",
+                "Vorbereitung für HalDo Benutzerkonten.",
+                {
+                    order: 1500
+                }
+            ),
+
+            create(
+                "help",
+                "Hilfe",
+                "system",
+                "❓",
+                "Hilfe und Informationen zu HalDo AI OS.",
+                {
+                    order: 1600
+                }
+            ),
+
+            create(
+                "about",
+                "Über HalDo AI OS",
                 "system",
                 "ℹ️",
-                "Technische Informationen über HalDo AI OS.",
+                "Informationen über HalDo AI OS 18.",
                 {
-                    order:
-                        141,
-
-                    module:
-                        "system-information",
-
-                    moduleName:
-                        "HalDoSystemInformationApp",
-
-                    route:
-                        "system-information"
+                    system: true,
+                    order: 1601
                 }
             )
+
+        ];
+
+    }
+
+
+    /* ========================================================
+       36 — REGISTRY AUFBAUEN
+       ======================================================== */
+
+    function build() {
+
+        definitions.clear();
+
+
+        const apps =
+            buildDefinitions();
+
+
+        registerMany(
+            apps
         );
+
+
+        state.definitionCount =
+            definitions.size;
 
 
         return getAllApps();
@@ -2771,28 +2714,335 @@
 
 
     /* ========================================================
-       22 — REGISTRY STATUS
+       37 — MODUL AUS GLOBALEN SYSTEMEN ERKENNEN
        ======================================================== */
 
-    const state = {
+    function discoverModules() {
 
-        initialized:
-            false,
+        const containers = [
 
-        ready:
-            false,
+            window.HalDoApps,
 
-        appCount:
-            0,
+            window.HalDoAppModules
 
-        lastError:
-            null
+        ];
 
-    };
+
+        let discovered =
+            0;
+
+
+        containers.forEach(
+            container => {
+
+                if (
+                    !container ||
+                    typeof container !==
+                    "object"
+                ) {
+
+                    return;
+
+                }
+
+
+                Object.keys(
+                    container
+                )
+                .forEach(
+                    key => {
+
+                        const module =
+                            container[key];
+
+
+                        if (
+                            !module
+                        ) {
+
+                            return;
+
+                        }
+
+
+                        const normalized =
+                            normalizeId(
+                                key
+                            );
+
+
+                        if (
+                            definitions.has(
+                                normalized
+                            )
+                        ) {
+
+                            if (
+                                !modules.has(
+                                    normalized
+                                )
+                            ) {
+
+                                modules.set(
+                                    normalized,
+                                    module
+                                );
+
+
+                                const app =
+                                    definitions.get(
+                                        normalized
+                                    );
+
+
+                                app.module =
+                                    normalized;
+
+
+                                app.status =
+                                    "module-ready";
+
+
+                                discovered++;
+
+                            }
+
+                        }
+
+                    }
+                );
+
+            }
+        );
+
+
+        state.moduleCount =
+            modules.size;
+
+
+        return discovered;
+
+    }
 
 
     /* ========================================================
-       23 — INITIALISIERUNG
+       38 — MANAGER VERBINDEN
+       ======================================================== */
+
+    function connectManager() {
+
+        const manager =
+            window.HalDoAppManager;
+
+
+        if (
+            !manager
+        ) {
+
+            return false;
+
+        }
+
+
+        /*
+         * Der aktuelle App Manager liest
+         * die Registry direkt.
+         *
+         * Deshalb registrieren wir die Apps
+         * NICHT erneut beim Manager.
+         *
+         * Dadurch existiert nur EINE zentrale
+         * App-Liste.
+         */
+
+        state.ready =
+            true;
+
+
+        emit(
+            "manager-connected",
+            {
+                manager
+            }
+        );
+
+
+        return true;
+
+    }
+
+
+    /* ========================================================
+       39 — SYSTEM VERBINDEN
+       ======================================================== */
+
+    function connectSystem() {
+
+        if (
+            window.HalDoSystem &&
+            typeof window.HalDoSystem.registerService ===
+            "function"
+        ) {
+
+            window.HalDoSystem.registerService(
+                "app-registry",
+                api
+            );
+
+
+            return true;
+
+        }
+
+
+        return false;
+
+    }
+
+
+    /* ========================================================
+       40 — KERNEL VERBINDEN
+       ======================================================== */
+
+    function connectKernel() {
+
+        if (
+            window.HalDoKernel &&
+            typeof window.HalDoKernel.registerModule ===
+            "function"
+        ) {
+
+            window.HalDoKernel.registerModule(
+                "app-registry",
+                api
+            );
+
+
+            if (
+                typeof window.HalDoKernel.setModuleReady ===
+                "function"
+            ) {
+
+                window.HalDoKernel.setModuleReady(
+                    "app-registry",
+                    true
+                );
+
+            }
+
+
+            return true;
+
+        }
+
+
+        return false;
+
+    }
+
+
+    /* ========================================================
+       41 — DIAGNOSE
+       ======================================================== */
+
+    function diagnose() {
+
+        return {
+
+            name:
+                CONFIG.name,
+
+            version:
+                CONFIG.version,
+
+            initialized:
+                state.initialized,
+
+            ready:
+                state.ready,
+
+            definitionCount:
+                definitions.size,
+
+            moduleCount:
+                modules.size,
+
+            categories:
+                getCategories(),
+
+            systemApps:
+                getSystemApps()
+                    .length,
+
+            criticalApps:
+                getCriticalApps()
+                    .length,
+
+            enabledApps:
+                getEnabledApps()
+                    .length,
+
+            disabledApps:
+                getDisabledApps()
+                    .length,
+
+            favoriteApps:
+                getFavorites()
+                    .length,
+
+            managerConnected:
+                Boolean(
+                    window.HalDoAppManager
+                ),
+
+            kernelConnected:
+                Boolean(
+                    window.HalDoKernel
+                ),
+
+            systemConnected:
+                Boolean(
+                    window.HalDoSystem
+                ),
+
+            lastError:
+                state.lastError
+
+        };
+
+    }
+
+
+    /* ========================================================
+       42 — STATUS
+       ======================================================== */
+
+    function getState() {
+
+        return {
+
+            initialized:
+                state.initialized,
+
+            ready:
+                state.ready,
+
+            definitionCount:
+                definitions.size,
+
+            moduleCount:
+                modules.size,
+
+            lastError:
+                state.lastError
+
+        };
+
+    }
+
+
+    /* ========================================================
+       43 — INITIALISIERUNG
        ======================================================== */
 
     function initialize() {
@@ -2811,20 +3061,20 @@
             build();
 
 
-            state.appCount =
-                definitions.length;
+            discoverModules();
 
 
             state.initialized =
                 true;
 
 
-            state.ready =
-                true;
+            connectManager();
 
 
-            state.lastError =
-                null;
+            connectSystem();
+
+
+            connectKernel();
 
 
             emit(
@@ -2833,30 +3083,12 @@
             );
 
 
-            /*
-             * App Manager benachrichtigen,
-             * falls dieser bereits vorhanden ist.
-             */
-
-            if (
-                window.HalDoAppManager
-            ) {
-
-                emit(
-                    "app-manager-ready",
-                    {
-                        manager:
-                            window.HalDoAppManager
-                    }
-                );
-
-            }
-
-
             console.log(
-                `[HalDo App Registry] ${state.appCount} Apps registriert.`
+                `[HalDo App Registry] ${definitions.size} Apps registriert.`
             );
 
+
+            return getState();
 
         }
         catch (
@@ -2864,10 +3096,12 @@
         ) {
 
             state.lastError =
-                error.message ||
-                String(
-                    error
-                );
+                error &&
+                error.message
+                    ? error.message
+                    : String(
+                        error
+                    );
 
 
             console.error(
@@ -2875,95 +3109,23 @@
                 error
             );
 
+
+            return {
+
+                ...getState(),
+
+                error:
+                    state.lastError
+
+            };
+
         }
 
-
-        return getState();
-
     }
 
 
     /* ========================================================
-       24 — STATE
-       ======================================================== */
-
-    function getState() {
-
-        return {
-
-            name:
-                CONFIG.name,
-
-            version:
-                CONFIG.version,
-
-            initialized:
-                state.initialized,
-
-            ready:
-                state.ready,
-
-            appCount:
-                definitions.length,
-
-            defaultApp:
-                CONFIG.defaultApp,
-
-            fallbackApp:
-                CONFIG.fallbackApp,
-
-            lastError:
-                state.lastError
-
-        };
-
-    }
-
-
-    /* ========================================================
-       25 — DIAGNOSE
-       ======================================================== */
-
-    function diagnose() {
-
-        return {
-
-            registry:
-                getState(),
-
-            categories:
-                getCategories(),
-
-            systemApps:
-                getSystemApps().length,
-
-            criticalApps:
-                getCriticalApps().length,
-
-            enabledApps:
-                getEnabledApps().length,
-
-            favorites:
-                getFavorites().length,
-
-            modules:
-                definitions.filter(
-                    app =>
-                        Boolean(
-                            app.module
-                        )
-                ).length,
-
-            apps:
-                getAllApps()
-
-        };
-
-    }
-
-
-    /* ========================================================
-       26 — PUBLIC API
+       44 — PUBLIC API
        ======================================================== */
 
     const api = {
@@ -2974,11 +3136,11 @@
         version:
             CONFIG.version,
 
-        defaultApp:
-            CONFIG.defaultApp,
 
-        fallbackApp:
-            CONFIG.fallbackApp,
+        init:
+            initialize,
+
+        initialize,
 
 
         on,
@@ -2988,39 +3150,71 @@
 
         create,
 
+        build,
+
+
         register,
 
-        update,
+        registerMany,
 
         unregister,
 
 
-        build,
-
-        initialize,
-
-
         findApp,
+
+        getApp:
+            findApp,
+
+        has,
+
 
         getAllApps,
 
+        getAll:
+            getAllApps,
+
+        getVisibleApps,
+
         getEnabledApps,
+
+        getDisabledApps,
+
 
         getFavorites,
 
-        setFavorite,
+        getSortedApps,
+
+        getSortedFavorites,
 
 
         getCategories,
 
+        getAppsByCategory,
+
         getCategory:
             getAppsByCategory,
 
-        getAppsByCategory,
 
         searchApps,
 
-        getSortedApps,
+        search:
+            searchApps,
+
+
+        enableApp,
+
+        disableApp,
+
+        setFavorite,
+
+        toggleFavorite,
+
+
+        registerModule,
+
+        unregisterModule,
+
+        getModule,
 
 
         getSystemApps,
@@ -3030,7 +3224,12 @@
         getAutoStartApps,
 
 
-        getModuleInfo,
+        getAppStatus,
+
+        getAppCount,
+
+
+        discoverModules,
 
 
         getState,
@@ -3041,7 +3240,7 @@
 
 
     /* ========================================================
-       27 — GLOBALE API
+       45 — GLOBALE API
        ======================================================== */
 
     window.HalDoAppRegistry =
@@ -3057,11 +3256,6 @@
         api;
 
 
-    /*
-     * Kompatibilität mit älteren
-     * HalDo-Projektteilen.
-     */
-
     window.HalDo =
         window.HalDo ||
         {};
@@ -3071,8 +3265,26 @@
         api;
 
 
+    /*
+     * Gemeinsamer Modul-Speicher.
+     *
+     * Wichtig:
+     * Diese Objekte sind keine zweite App-Liste.
+     * Sie enthalten ausschließlich echte Module.
+     */
+
+    window.HalDoApps =
+        window.HalDoApps ||
+        {};
+
+
+    window.HalDoAppModules =
+        window.HalDoAppModules ||
+        {};
+
+
     /* ========================================================
-       28 — START
+       46 — START
        ======================================================== */
 
     function boot() {
@@ -3104,9 +3316,30 @@
     }
 
 
+    console.log(
+        "=============================================="
+    );
+
+    console.log(
+        "HalDo AI OS 18 App Registry"
+    );
+
+    console.log(
+        "Professional Ultimate Foundation"
+    );
+
+    console.log(
+        "Zentrale App-Registry geladen."
+    );
+
+    console.log(
+        "=============================================="
+    );
+
+
 })(window, document);
 
 
 /* ============================================================
    ENDE — HALDO AI OS 18 APP REGISTRY
-============================================================ */
+   ============================================================ */
