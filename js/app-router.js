@@ -1077,3 +1077,1320 @@
     /* ========================================================
        ENDE TEIL 1
        ======================================================== */
+    /* ========================================================
+       21 — ROUTE-HISTORY EINTRAG
+       ======================================================== */
+
+    function addHistoryEntry(
+        route,
+        options = {}
+    ) {
+
+        const normalized =
+            normalizeRoute(
+                route
+            );
+
+
+        const entry = {
+
+            route:
+                normalized,
+
+            timestamp:
+                Date.now(),
+
+            source:
+                options.source ||
+                "router",
+
+            appId:
+                getAppIdFromRoute(
+                    normalized
+                )
+
+        };
+
+
+        routeHistory.push(
+            entry
+        );
+
+
+        /*
+         * History begrenzen,
+         * damit der Speicher nicht
+         * unbegrenzt wächst.
+         */
+
+        if (
+            routeHistory.length >
+            CONFIG.maxHistoryEntries
+        ) {
+
+            routeHistory.splice(
+                0,
+                routeHistory.length -
+                CONFIG.maxHistoryEntries
+            );
+
+        }
+
+
+        state.historyCount =
+            routeHistory.length;
+
+
+        return entry;
+
+    }
+
+
+    /* ========================================================
+       22 — ROUTE-HISTORY ABRUFEN
+       ======================================================== */
+
+    function getRouteHistory() {
+
+        return routeHistory.map(
+            entry => ({
+                ...entry
+            })
+        );
+
+    }
+
+
+    /* ========================================================
+       23 — LETZTEN HISTORY-EINTRAG
+       ======================================================== */
+
+    function getLastHistoryEntry() {
+
+        if (
+            !routeHistory.length
+        ) {
+
+            return null;
+
+        }
+
+
+        return {
+            ...routeHistory[
+                routeHistory.length - 1
+            ]
+        };
+
+    }
+
+
+    /* ========================================================
+       24 — HISTORY LÖSCHEN
+       ======================================================== */
+
+    function clearHistory() {
+
+        routeHistory.length =
+            0;
+
+
+        state.historyCount =
+            0;
+
+
+        emit(
+            "history-cleared",
+            {
+
+                history:
+                    []
+
+            }
+        );
+
+
+        return true;
+
+    }
+
+
+    /* ========================================================
+       25 — HASH AUSLESEN
+       ======================================================== */
+
+    function getHashRoute() {
+
+        const hash =
+            window.location.hash;
+
+
+        if (
+            !hash
+        ) {
+
+            return CONFIG.homeRoute;
+
+        }
+
+
+        return normalizeRoute(
+            hash
+        );
+
+    }
+
+
+    /* ========================================================
+       26 — HASH SETZEN
+       ======================================================== */
+
+    function setHashRoute(
+        route,
+        replace = false
+    ) {
+
+        const normalized =
+            normalizeRoute(
+                route
+            );
+
+
+        /*
+         * Browser-History verwenden.
+         */
+
+        if (
+            replace
+        ) {
+
+            const url =
+                window.location.pathname +
+                window.location.search +
+                normalized;
+
+
+            window.history.replaceState(
+                {
+                    haldoRoute:
+                        normalized
+                },
+                "",
+                url
+            );
+
+
+            return normalized;
+
+        }
+
+
+        const url =
+            window.location.pathname +
+            window.location.search +
+            normalized;
+
+
+        window.history.pushState(
+            {
+                haldoRoute:
+                    normalized
+            },
+            "",
+            url
+        );
+
+
+        return normalized;
+
+    }
+
+
+    /* ========================================================
+       27 — ROUTE VALIDIEREN
+       ======================================================== */
+
+    function validateRoute(
+        route
+    ) {
+
+        const parsed =
+            parseRoute(
+                route
+            );
+
+
+        /*
+         * HOME ist immer gültig.
+         */
+
+        if (
+            parsed.type ===
+            "home"
+        ) {
+
+            return {
+
+                valid:
+                    true,
+
+                route:
+                    parsed.route,
+
+                parsed
+
+            };
+
+        }
+
+
+        /*
+         * Nur echte App-Routen
+         * benötigen eine Registry-Prüfung.
+         */
+
+        if (
+            parsed.type !==
+            "app"
+        ) {
+
+            return {
+
+                valid:
+                    false,
+
+                route:
+                    parsed.route,
+
+                parsed,
+
+                error:
+                    "Unbekannte Route."
+
+            };
+
+        }
+
+
+        if (
+            !parsed.appId
+        ) {
+
+            return {
+
+                valid:
+                    false,
+
+                route:
+                    parsed.route,
+
+                parsed,
+
+                error:
+                    "Keine App-ID in der Route."
+
+            };
+
+        }
+
+
+        const manager =
+            getAppManager();
+
+
+        /*
+         * App Manager ist die
+         * zentrale Abfrageinstanz.
+         */
+
+        if (
+            manager &&
+            typeof manager.getApp ===
+            "function"
+        ) {
+
+            const app =
+                manager.getApp(
+                    parsed.appId
+                );
+
+
+            if (
+                !app
+            ) {
+
+                return {
+
+                    valid:
+                        false,
+
+                    route:
+                        parsed.route,
+
+                    parsed,
+
+                    error:
+                        `App "${parsed.appId}" ist nicht registriert.`
+
+                };
+
+            }
+
+
+            return {
+
+                valid:
+                    true,
+
+                route:
+                    parsed.route,
+
+                parsed,
+
+                app
+
+            };
+
+        }
+
+
+        /*
+         * Direkter Registry-Fallback.
+         */
+
+        const registry =
+            getAppRegistry();
+
+
+        if (
+            registry
+        ) {
+
+            try {
+
+                if (
+                    typeof registry.getApp ===
+                    "function"
+                ) {
+
+                    const app =
+                        registry.getApp(
+                            parsed.appId
+                        );
+
+
+                    if (
+                        app
+                    ) {
+
+                        return {
+
+                            valid:
+                                true,
+
+                            route:
+                                parsed.route,
+
+                            parsed,
+
+                            app
+
+                        };
+
+                    }
+
+                }
+
+
+                if (
+                    typeof registry.findApp ===
+                    "function"
+                ) {
+
+                    const app =
+                        registry.findApp(
+                            parsed.appId
+                        );
+
+
+                    if (
+                        app
+                    ) {
+
+                        return {
+
+                            valid:
+                                true,
+
+                            route:
+                                parsed.route,
+
+                            parsed,
+
+                            app
+
+                        };
+
+                    }
+
+                }
+
+            }
+            catch (
+                error
+            ) {
+
+                return {
+
+                    valid:
+                        false,
+
+                    route:
+                        parsed.route,
+
+                    parsed,
+
+                    error:
+                        error.message
+
+                };
+
+            }
+
+        }
+
+
+        return {
+
+            valid:
+                false,
+
+            route:
+                parsed.route,
+
+            parsed,
+
+            error:
+                "App Registry ist noch nicht verfügbar."
+
+        };
+
+    }
+
+
+    /* ========================================================
+       28 — NAVIGATION VORBEREITEN
+       ======================================================== */
+
+    function prepareNavigation(
+        route,
+        options = {}
+    ) {
+
+        const normalized =
+            normalizeRoute(
+                route
+            );
+
+
+        const validation =
+            validateRoute(
+                normalized
+            );
+
+
+        if (
+            !validation.valid
+        ) {
+
+            state.lastError =
+                validation.error ||
+                "Route konnte nicht validiert werden.";
+
+
+            emit(
+                "navigation-error",
+                {
+
+                    route:
+                        normalized,
+
+                    error:
+                        state.lastError,
+
+                    options
+
+                }
+            );
+
+
+            return {
+
+                success:
+                    false,
+
+                route:
+                    normalized,
+
+                error:
+                    state.lastError
+
+            };
+
+        }
+
+
+        return {
+
+            success:
+                true,
+
+            route:
+                normalized,
+
+            parsed:
+                validation.parsed,
+
+            app:
+                validation.app ||
+                null,
+
+            options
+
+        };
+
+    }
+
+
+    /* ========================================================
+       29 — HOME NAVIGIEREN
+       ======================================================== */
+
+    async function goHome(
+        options = {}
+    ) {
+
+        return navigate(
+            CONFIG.homeRoute,
+            {
+
+                ...options,
+
+                source:
+                    options.source ||
+                    "home"
+
+            }
+        );
+
+    }
+
+
+    /* ========================================================
+       30 — APP NAVIGIEREN
+       ======================================================== */
+
+    async function navigateToApp(
+        appId,
+        options = {}
+    ) {
+
+        const route =
+            createAppRoute(
+                appId,
+                options
+            );
+
+
+        return navigate(
+            route,
+            {
+
+                ...options,
+
+                source:
+                    options.source ||
+                    "app"
+
+            }
+        );
+
+    }
+
+
+    /* ========================================================
+       31 — ALLGEMEINE NAVIGATION
+       ======================================================== */
+
+    async function navigate(
+        route,
+        options = {}
+    ) {
+
+        const prepared =
+            prepareNavigation(
+                route,
+                options
+            );
+
+
+        if (
+            !prepared.success
+        ) {
+
+            return prepared;
+
+        }
+
+
+        const normalized =
+            prepared.route;
+
+
+        const parsed =
+            prepared.parsed;
+
+
+        const previousRoute =
+            state.currentRoute;
+
+
+        const previousApp =
+            state.currentApp;
+
+
+        /*
+         * Doppelte Navigation vermeiden,
+         * sofern nicht ausdrücklich erzwungen.
+         */
+
+        if (
+            previousRoute ===
+                normalized &&
+            options.force !==
+                true
+        ) {
+
+            return {
+
+                success:
+                    true,
+
+                status:
+                    "already-active",
+
+                route:
+                    normalized,
+
+                parsed,
+
+                app:
+                    prepared.app ||
+                    null
+
+            };
+
+        }
+
+
+        state.previousRoute =
+            previousRoute;
+
+
+        state.previousApp =
+            previousApp;
+
+
+        state.lastError =
+            null;
+
+
+        emit(
+            "before-navigate",
+            {
+
+                from:
+                    previousRoute,
+
+                to:
+                    normalized,
+
+                parsed,
+
+                app:
+                    prepared.app ||
+                    null,
+
+                options
+
+            }
+        );
+
+
+        /*
+         * APP ROUTE
+         */
+
+        if (
+            parsed.type ===
+            "app"
+        ) {
+
+            const manager =
+                getAppManager();
+
+
+            if (
+                !manager ||
+                typeof manager.openApp !==
+                "function"
+            ) {
+
+                const error =
+                    "HalDoAppManager ist für die Navigation noch nicht verfügbar.";
+
+
+                state.lastError =
+                    error;
+
+
+                emit(
+                    "navigation-error",
+                    {
+
+                        route:
+                            normalized,
+
+                        error
+
+                    }
+                );
+
+
+                return {
+
+                    success:
+                        false,
+
+                    status:
+                        "manager-unavailable",
+
+                    route:
+                        normalized,
+
+                    error
+
+                };
+
+            }
+
+
+            let result;
+
+
+            try {
+
+                result =
+                    await manager.openApp(
+                        parsed.appId
+                    );
+
+            }
+            catch (
+                error
+            ) {
+
+                const message =
+                    error &&
+                    error.message
+                        ? error.message
+                        : String(
+                            error
+                        );
+
+
+                state.lastError =
+                    message;
+
+
+                emit(
+                    "navigation-error",
+                    {
+
+                        route:
+                            normalized,
+
+                        error:
+                            message
+
+                    }
+                );
+
+
+                return {
+
+                    success:
+                        false,
+
+                    status:
+                        "open-error",
+
+                    route:
+                        normalized,
+
+                    error:
+                        message
+
+                };
+
+            }
+
+
+            if (
+                !result ||
+                result.success !==
+                true
+            ) {
+
+                const error =
+                    result &&
+                    result.error
+                        ? result.error
+                        : "Die App konnte nicht geöffnet werden.";
+
+
+                state.lastError =
+                    error;
+
+
+                emit(
+                    "navigation-error",
+                    {
+
+                        route:
+                            normalized,
+
+                        error,
+
+                        result
+
+                    }
+                );
+
+
+                return {
+
+                    success:
+                        false,
+
+                    status:
+                        "app-error",
+
+                    route:
+                        normalized,
+
+                    result,
+
+                    error
+
+                };
+
+            }
+
+
+            state.currentRoute =
+                normalized;
+
+
+            state.currentApp =
+                parsed.appId;
+
+
+            state.navigationCount++;
+
+
+            addHistoryEntry(
+                normalized,
+                options
+            );
+
+
+            if (
+                options.updateBrowser !==
+                false
+            ) {
+
+                setHashRoute(
+                    normalized,
+                    options.replace ===
+                        true
+                );
+
+            }
+
+
+            emit(
+                "navigated",
+                {
+
+                    from:
+                        previousRoute,
+
+                    to:
+                        normalized,
+
+                    route:
+                        normalized,
+
+                    parsed,
+
+                    app:
+                        prepared.app ||
+                        result.app ||
+                        null,
+
+                    result,
+
+                    options
+
+                }
+            );
+
+
+            emit(
+                "app-route-changed",
+                {
+
+                    appId:
+                        parsed.appId,
+
+                    route:
+                        normalized,
+
+                    params:
+                        parsed.params,
+
+                    query:
+                        parsed.query
+
+                }
+            );
+
+
+            return {
+
+                success:
+                    true,
+
+                status:
+                    "navigated",
+
+                route:
+                    normalized,
+
+                parsed,
+
+                app:
+                    prepared.app ||
+                    result.app ||
+                    null,
+
+                result
+
+            };
+
+        }
+
+
+        /* ====================================================
+           HOME ROUTE
+           ==================================================== */
+
+        if (
+            parsed.type ===
+            "home"
+        ) {
+
+            const manager =
+                getAppManager();
+
+
+            /*
+             * Aktive App sauber stoppen.
+             */
+
+            if (
+                manager &&
+                typeof manager.getActiveApp ===
+                "function" &&
+                typeof manager.stopApp ===
+                "function"
+            ) {
+
+                const activeApp =
+                    manager.getActiveApp();
+
+
+                if (
+                    activeApp
+                ) {
+
+                    try {
+
+                        await manager.stopApp(
+                            activeApp.id
+                        );
+
+                    }
+                    catch (
+                        error
+                    ) {
+
+                        log(
+                            `Aktive App konnte beim Wechsel zu Home nicht sauber geschlossen werden: ${error.message}`,
+                            "warning"
+                        );
+
+                    }
+
+                }
+
+            }
+
+
+            state.currentRoute =
+                CONFIG.homeRoute;
+
+
+            state.currentApp =
+                null;
+
+
+            state.navigationCount++;
+
+
+            addHistoryEntry(
+                CONFIG.homeRoute,
+                options
+            );
+
+
+            if (
+                options.updateBrowser !==
+                false
+            ) {
+
+                setHashRoute(
+                    CONFIG.homeRoute,
+                    options.replace ===
+                        true
+                );
+
+            }
+
+
+            emit(
+                "navigated",
+                {
+
+                    from:
+                        previousRoute,
+
+                    to:
+                        CONFIG.homeRoute,
+
+                    route:
+                        CONFIG.homeRoute,
+
+                    parsed,
+
+                    app:
+                        null,
+
+                    options
+
+                }
+            );
+
+
+            emit(
+                "home-route-changed",
+                {
+
+                    route:
+                        CONFIG.homeRoute
+
+                }
+            );
+
+
+            return {
+
+                success:
+                    true,
+
+                status:
+                    "home",
+
+                route:
+                    CONFIG.homeRoute,
+
+                parsed,
+
+                app:
+                    null
+
+            };
+
+        }
+
+
+        /* ====================================================
+           UNBEKANNTE ROUTE
+           ==================================================== */
+
+        const error =
+            "Unbekannte Route.";
+
+
+        state.lastError =
+            error;
+
+
+        emit(
+            "navigation-error",
+            {
+
+                route:
+                    normalized,
+
+                error
+
+            }
+        );
+
+
+        return {
+
+            success:
+                false,
+
+            status:
+                "unknown-route",
+
+            route:
+                normalized,
+
+            error
+
+        };
+
+    }
+
+
+    /* ========================================================
+       32 — AKTUELLE ROUTE VERARBEITEN
+       ======================================================== */
+
+    async function handleCurrentRoute(
+        options = {}
+    ) {
+
+        const route =
+            getHashRoute();
+
+
+        /*
+         * Direkte Verarbeitung der
+         * Browser-Route.
+         */
+
+        return navigate(
+            route,
+            {
+
+                ...options,
+
+                updateBrowser:
+                    false,
+
+                source:
+                    options.source ||
+                    "browser"
+
+            }
+        );
+
+    }
+
+
+    /* ========================================================
+       33 — BROWSER BACK
+       ======================================================== */
+
+    function back() {
+
+        window.history.back();
+
+
+        emit(
+            "back-requested",
+            {
+
+                route:
+                    state.currentRoute
+
+            }
+        );
+
+
+        return true;
+
+    }
+
+
+    /* ========================================================
+       34 — BROWSER FORWARD
+       ======================================================== */
+
+    function forward() {
+
+        window.history.forward();
+
+
+        emit(
+            "forward-requested",
+            {
+
+                route:
+                    state.currentRoute
+
+            }
+        );
+
+
+        return true;
+
+    }
+
+
+    /* ========================================================
+       35 — ROUTE SETZEN
+       ======================================================== */
+
+    async function setRoute(
+        route,
+        options = {}
+    ) {
+
+        return navigate(
+            route,
+            options
+        );
+
+    }
+
+
+    /* ========================================================
+       ENDE TEIL 2
+       ======================================================== */
