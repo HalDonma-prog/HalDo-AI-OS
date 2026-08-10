@@ -3,26 +3,27 @@
 HalDo AI OS 18
 AI CORE SERVICE
 Professional Ultimate Foundation
-========================================================
+Version 18.0.0
 
-Zentrale AI-Core-Schicht von HalDo AI OS 18.
+Zentrale AI-Orchestrierung
 
-Verbindungen:
+Verbindet:
+- AI Engine
+- AI Chat
+- AI Memory
+- Conversation State
+- AI Language
+- AI Commands
+- AI Speech
+- AI Voice
 - Kernel
 - System
-- Storage
-- Memory
-- Language
-- Voice
-- Chat
-- Commands
-- Engine
-- Conversation State
+- Events
+- UI
 
 Wichtig:
-Der Core besitzt keine eigene Benutzeroberfläche.
-Er stellt APIs und Events für die anderen Module bereit.
-
+Bestehende Module werden NICHT entfernt.
+Der Core arbeitet kompatibel mit vorhandenen APIs.
 ========================================================
 */
 
@@ -32,105 +33,132 @@ Er stellt APIs und Events für die anderen Module bereit.
     const VERSION = "18.0.0";
 
     const state = {
-        name: "HalDo AI Core",
-        version: VERSION,
-        status: "created",
+        status: "idle",
         initialized: false,
         running: false,
-        requests: 0,
+        processing: false,
+        requestCount: 0,
         lastRequest: null,
         lastResponse: null,
-        lastError: null,
-        startedAt: null
+        language: "de",
+        conversationId: null,
+        errors: []
     };
 
-    const features = [
-        "AI Assistant",
-        "Learning Engine",
-        "Code Builder",
-        "Knowledge System",
-        "Language System",
-        "Êzîdî Keyboard",
-        "Voice Interface",
-        "Conversation System",
-        "AI Memory",
-        "Command System",
-        "Live Light Interface",
-        "System Integration"
-    ];
+    const listeners = new Map();
 
-    const listeners = {};
+    /*
+    ====================================================
+    EVENT SYSTEM
+    ====================================================
+    */
 
-    /* ==================================================
-       EVENT SYSTEM
-    ================================================== */
-
-    function on(event, callback) {
-        if (typeof callback !== "function") {
-            return function () {};
+    function on(eventName, callback) {
+        if (
+            typeof callback !== "function"
+        ) {
+            return () => {};
         }
 
-        if (!listeners[event]) {
-            listeners[event] = [];
+        if (
+            !listeners.has(eventName)
+        ) {
+            listeners.set(
+                eventName,
+                new Set()
+            );
         }
 
-        listeners[event].push(callback);
+        listeners
+            .get(eventName)
+            .add(callback);
 
-        return function unsubscribe() {
-            off(event, callback);
-        };
-    }
-
-    function off(event, callback) {
-        if (!listeners[event]) {
-            return;
-        }
-
-        listeners[event] = listeners[event].filter(
-            fn => fn !== callback
+        return () => off(
+            eventName,
+            callback
         );
     }
 
-    function emit(event, data) {
-        const callbacks = listeners[event] || [];
+    function off(eventName, callback) {
+        const set =
+            listeners.get(eventName);
 
-        callbacks.forEach(callback => {
-            try {
-                callback(data);
-            } catch (error) {
-                console.error(
-                    "[HalDo AI Core] Event error:",
-                    event,
-                    error
-                );
-            }
-        });
+        if (!set) {
+            return;
+        }
+
+        set.delete(callback);
+
+        if (set.size === 0) {
+            listeners.delete(
+                eventName
+            );
+        }
+    }
+
+    function emit(eventName, detail = {}) {
+        const set =
+            listeners.get(eventName);
+
+        if (set) {
+            set.forEach(
+                callback => {
+                    try {
+                        callback(detail);
+                    } catch (error) {
+                        console.error(
+                            "[HalDo AI Core] Listener error:",
+                            error
+                        );
+                    }
+                }
+            );
+        }
+
+        try {
+            window.dispatchEvent(
+                new CustomEvent(
+                    "haldo:ai:" + eventName,
+                    {
+                        detail
+                    }
+                )
+            );
+        } catch (error) {
+            console.warn(
+                "[HalDo AI Core] Event error:",
+                error
+            );
+        }
 
         /*
-         * Zusätzlich mit dem zentralen Kernel verbinden,
-         * falls dieser bereits verfügbar ist.
+         * Kernel Event-Bus verbinden.
          */
+
         try {
             if (
                 window.HalDoKernel &&
-                typeof window.HalDoKernel.emit === "function"
+                typeof window.HalDoKernel.emit ===
+                    "function"
             ) {
                 window.HalDoKernel.emit(
-                    `ai:${event}`,
-                    data
+                    "ai:" + eventName,
+                    detail
                 );
             }
         } catch (error) {
             console.warn(
-                "[HalDo AI Core] Kernel event failed:",
+                "[HalDo AI Core] Kernel event error:",
                 error
             );
         }
     }
 
-    /* ==================================================
-       LOGGING
-    ================================================== */
+    /*
+    ====================================================
+    LOGGING
+    ====================================================
+    */
 
     function log(...args) {
         console.log(
@@ -146,638 +174,1150 @@ Er stellt APIs und Events für die anderen Module bereit.
         );
     }
 
-    function error(...args) {
+    function fail(error) {
         console.error(
             "[HalDo AI Core]",
-            ...args
+            error
+        );
+
+        state.errors.push({
+            time:
+                new Date().toISOString(),
+
+            message:
+                error?.message ||
+                String(error)
+        });
+
+        if (
+            state.errors.length > 50
+        ) {
+            state.errors.shift();
+        }
+
+        emit(
+            "error",
+            {
+                error
+            }
         );
     }
 
-    /* ==================================================
-       DEPENDENCY LOOKUP
-    ================================================== */
+    /*
+    ====================================================
+    MODULE LOOKUP
+    ====================================================
+    */
 
-    function getModule(name) {
-        if (!name) {
-            return null;
+    function getModule(names) {
+        const candidates =
+            Array.isArray(names)
+                ? names
+                : [names];
+
+        for (
+            const name of candidates
+        ) {
+            if (
+                window[name]
+            ) {
+                return window[name];
+            }
         }
 
-        /*
-         * Direkter globaler Zugriff auf bekannte HalDo-Systeme.
-         */
-        const globals = {
-            kernel: window.HalDoKernel,
-            system: window.HalDoSystem,
-            storage: window.HalDoStorage,
-            memory: window.HalDoAIMemory,
-            language: window.HalDoAILanguage,
-            languageManager: window.HalDoLanguageManager,
-            speech: window.HalDoAISpeech,
-            voice: window.HalDoAIVoice,
-            chat: window.HalDoAIChat,
-            commands: window.HalDoAICommands,
-            engine: window.HalDoAIEngine,
-            conversation: window.HalDoConversationState,
-            keyboard: window.HalDoEzidiKeyboard
+        return null;
+    }
+
+    /*
+    ====================================================
+    MODULE REFERENCES
+    ====================================================
+    */
+
+    function modules() {
+        return {
+            engine:
+                getModule([
+                    "HalDoAIEngine",
+                    "HalDoEngine"
+                ]),
+
+            chat:
+                getModule([
+                    "HalDoAIChat",
+                    "HalDoChat"
+                ]),
+
+            memory:
+                getModule([
+                    "HalDoAIMemory",
+                    "HalDoMemory"
+                ]),
+
+            conversation:
+                getModule([
+                    "HalDoConversationState",
+                    "HalDoConversation"
+                ]),
+
+            language:
+                getModule([
+                    "HalDoAILanguage",
+                    "HalDoLanguage"
+                ]),
+
+            commands:
+                getModule([
+                    "HalDoAICommands",
+                    "HalDoCommands"
+                ]),
+
+            speech:
+                getModule([
+                    "HalDoAISpeech",
+                    "HalDoSpeech"
+                ]),
+
+            voice:
+                getModule([
+                    "HalDoAIVoice",
+                    "HalDoVoice"
+                ])
         };
+    }
 
-        if (globals[name]) {
-            return globals[name];
+    /*
+    ====================================================
+    LANGUAGE
+    ====================================================
+    */
+
+    function detectLanguage(text) {
+        const input =
+            String(text || "")
+                .trim();
+
+        if (!input) {
+            return state.language;
         }
 
         /*
-         * Modul-Manager prüfen.
+         * Vorhandenes Language-Modul bevorzugen.
          */
+
+        const language =
+            modules().language;
+
+        if (language) {
+            try {
+                if (
+                    typeof language.detect ===
+                    "function"
+                ) {
+                    const detected =
+                        language.detect(
+                            input
+                        );
+
+                    if (
+                        detected
+                    ) {
+                        return String(
+                            detected
+                        );
+                    }
+                }
+
+                if (
+                    typeof language.detectLanguage ===
+                    "function"
+                ) {
+                    const detected =
+                        language.detectLanguage(
+                            input
+                        );
+
+                    if (
+                        detected
+                    ) {
+                        return String(
+                            detected
+                        );
+                    }
+                }
+            } catch (error) {
+                warn(
+                    "Spracherkennung des Language-Moduls fehlgeschlagen.",
+                    error
+                );
+            }
+        }
+
+        /*
+         * Einfache Fallback-Erkennung.
+         */
+
+        if (
+            /\b(der|die|das|und|ich|du|wir|bitte|was|wie)\b/i
+                .test(input)
+        ) {
+            return "de";
+        }
+
+        if (
+            /\b(the|and|you|what|how|please|this|that)\b/i
+                .test(input)
+        ) {
+            return "en";
+        }
+
+        if (
+            /[êîşçÊÎŞÇ]/i.test(input)
+        ) {
+            return "ku";
+        }
+
+        return state.language;
+    }
+
+    /*
+    ====================================================
+    CONVERSATION ID
+    ====================================================
+    */
+
+    function createConversationId() {
+        return (
+            "haldo-" +
+            Date.now().toString(36) +
+            "-" +
+            Math.random()
+                .toString(36)
+                .slice(2, 8)
+        );
+    }
+
+    /*
+    ====================================================
+    CONVERSATION STATE
+    ====================================================
+    */
+
+    function ensureConversation() {
+        if (
+            state.conversationId
+        ) {
+            return state.conversationId;
+        }
+
+        const conversation =
+            modules().conversation;
+
         try {
             if (
-                window.HalDoModuleManager &&
-                typeof window.HalDoModuleManager.get === "function"
+                conversation &&
+                typeof conversation.create ===
+                    "function"
             ) {
-                return window.HalDoModuleManager.get(name);
+                const result =
+                    conversation.create();
+
+                if (result) {
+                    state.conversationId =
+                        String(result);
+
+                    return state.conversationId;
+                }
             }
-        } catch (moduleError) {
+        } catch (error) {
             warn(
-                "Module Manager konnte nicht abgefragt werden:",
-                moduleError
+                "Conversation State konnte nicht erstellt werden.",
+                error
             );
         }
 
-        /*
-         * Kernel prüfen.
-         */
+        state.conversationId =
+            createConversationId();
+
+        return state.conversationId;
+    }
+
+    /*
+    ====================================================
+    MEMORY
+    ====================================================
+    */
+
+    function rememberUserMessage(
+        message
+    ) {
+        const memory =
+            modules().memory;
+
+        if (!memory) {
+            return;
+        }
+
         try {
             if (
-                window.HalDoKernel &&
-                typeof window.HalDoKernel.getModule === "function"
+                typeof memory.add ===
+                "function"
             ) {
-                return window.HalDoKernel.getModule(name);
+                memory.add({
+                    type: "user",
+                    role: "user",
+                    content: message,
+                    conversationId:
+                        state.conversationId,
+                    timestamp:
+                        Date.now()
+                });
+
+                return;
             }
-        } catch (kernelError) {
+
+            if (
+                typeof memory.remember ===
+                "function"
+            ) {
+                memory.remember(
+                    message
+                );
+            }
+
+        } catch (error) {
             warn(
-                "Kernel-Modul konnte nicht abgefragt werden:",
-                kernelError
+                "User-Nachricht konnte nicht gespeichert werden.",
+                error
+            );
+        }
+    }
+
+    function rememberAIMessage(
+        message
+    ) {
+        const memory =
+            modules().memory;
+
+        if (!memory) {
+            return;
+        }
+
+        try {
+            if (
+                typeof memory.add ===
+                "function"
+            ) {
+                memory.add({
+                    type: "assistant",
+                    role: "assistant",
+                    content: message,
+                    conversationId:
+                        state.conversationId,
+                    timestamp:
+                        Date.now()
+                });
+
+                return;
+            }
+
+            if (
+                typeof memory.remember ===
+                "function"
+            ) {
+                memory.remember(
+                    message
+                );
+            }
+
+        } catch (error) {
+            warn(
+                "AI-Antwort konnte nicht gespeichert werden.",
+                error
+            );
+        }
+    }
+
+    /*
+    ====================================================
+    CHAT HISTORY
+    ====================================================
+    */
+
+    function updateConversation(
+        role,
+        content
+    ) {
+        const conversation =
+            modules().conversation;
+
+        if (!conversation) {
+            return;
+        }
+
+        try {
+            if (
+                typeof conversation.addMessage ===
+                "function"
+            ) {
+                conversation.addMessage({
+                    role,
+                    content,
+                    conversationId:
+                        state.conversationId,
+                    timestamp:
+                        Date.now()
+                });
+
+                return;
+            }
+
+            if (
+                typeof conversation.push ===
+                "function"
+            ) {
+                conversation.push(
+                    role,
+                    content
+                );
+            }
+        } catch (error) {
+            warn(
+                "Conversation konnte nicht aktualisiert werden.",
+                error
+            );
+        }
+    }
+
+    /*
+    ====================================================
+    COMMAND PROCESSING
+    ====================================================
+    */
+
+    async function processCommand(
+        message
+    ) {
+        const commands =
+            modules().commands;
+
+        if (!commands) {
+            return {
+                handled: false
+            };
+        }
+
+        try {
+            if (
+                typeof commands.execute ===
+                "function"
+            ) {
+                const result =
+                    await commands.execute(
+                        message
+                    );
+
+                if (
+                    result !== undefined &&
+                    result !== null
+                ) {
+                    return {
+                        handled: true,
+                        result
+                    };
+                }
+            }
+
+            if (
+                typeof commands.handle ===
+                "function"
+            ) {
+                const result =
+                    await commands.handle(
+                        message
+                    );
+
+                if (
+                    result !== undefined &&
+                    result !== null
+                ) {
+                    return {
+                        handled: true,
+                        result
+                    };
+                }
+            }
+
+        } catch (error) {
+            warn(
+                "AI Command konnte nicht ausgeführt werden.",
+                error
+            );
+        }
+
+        return {
+            handled: false
+        };
+    }
+
+    /*
+    ====================================================
+    ENGINE PROCESSING
+    ====================================================
+    */
+
+    async function processEngine(
+        message,
+        context
+    ) {
+        const engine =
+            modules().engine;
+
+        if (!engine) {
+            return null;
+        }
+
+        try {
+            if (
+                typeof engine.process ===
+                "function"
+            ) {
+                return await engine.process(
+                    message,
+                    context
+                );
+            }
+
+            if (
+                typeof engine.generate ===
+                "function"
+            ) {
+                return await engine.generate(
+                    message,
+                    context
+                );
+            }
+
+            if (
+                typeof engine.ask ===
+                "function"
+            ) {
+                return await engine.ask(
+                    message,
+                    context
+                );
+            }
+
+        } catch (error) {
+            warn(
+                "AI Engine konnte Anfrage nicht verarbeiten.",
+                error
             );
         }
 
         return null;
     }
 
-    /* ==================================================
-       STATUS
-    ================================================== */
+    /*
+    ====================================================
+    RESPONSE NORMALIZATION
+    ====================================================
+    */
 
-    function getStatus() {
-        return {
-            name: state.name,
-            version: state.version,
-            status: state.status,
-            initialized: state.initialized,
-            running: state.running,
-            requests: state.requests,
-            lastRequest: state.lastRequest,
-            lastResponse: state.lastResponse,
-            lastError: state.lastError,
-            startedAt: state.startedAt,
-            features: [...features]
-        };
-    }
-
-    /* ==================================================
-       DEPENDENCY STATUS
-    ================================================== */
-
-    function getDependencies() {
-        return {
-            kernel: !!getModule("kernel"),
-            system: !!getModule("system"),
-            storage: !!getModule("storage"),
-            memory: !!getModule("memory"),
-            language: !!getModule("language"),
-            languageManager: !!getModule("languageManager"),
-            speech: !!getModule("speech"),
-            voice: !!getModule("voice"),
-            chat: !!getModule("chat"),
-            commands: !!getModule("commands"),
-            engine: !!getModule("engine"),
-            conversation: !!getModule("conversation"),
-            keyboard: !!getModule("keyboard")
-        };
-    }
-
-    /* ==================================================
-       INITIALIZE
-    ================================================== */
-
-    function initialize() {
-        if (state.initialized) {
-            return getStatus();
+    function normalizeResponse(
+        response,
+        input
+    ) {
+        if (
+            response === null ||
+            response === undefined
+        ) {
+            return null;
         }
 
-        state.status = "initializing";
-
-        emit("initializing", {
-            version: VERSION
-        });
-
-        try {
-            state.initialized = true;
-            state.status = "ready";
-
-            emit("ready", getStatus());
-
-            log(
-                "AI Core initialisiert.",
-                VERSION
-            );
-
-            return getStatus();
-
-        } catch (initError) {
-            state.status = "error";
-            state.lastError = initError.message;
-
-            emit("error", {
-                error: initError
-            });
-
-            error(
-                "Initialisierung fehlgeschlagen:",
-                initError
-            );
-
-            return getStatus();
-        }
-    }
-
-    /* ==================================================
-       START
-    ================================================== */
-
-    function start() {
-        if (!state.initialized) {
-            initialize();
-        }
-
-        if (state.running) {
-            return getStatus();
-        }
-
-        state.running = true;
-        state.status = "running";
-        state.startedAt = new Date().toISOString();
-
-        emit("started", getStatus());
-
-        log("HalDo AI Core gestartet.");
-
-        return getStatus();
-    }
-
-    /* ==================================================
-       STOP
-    ================================================== */
-
-    function stop() {
-        if (!state.running) {
-            return getStatus();
-        }
-
-        state.running = false;
-        state.status = "stopped";
-
-        emit("stopped", getStatus());
-
-        log("HalDo AI Core gestoppt.");
-
-        return getStatus();
-    }
-
-    /* ==================================================
-       RESET
-    ================================================== */
-
-    function reset() {
-        state.status = "created";
-        state.initialized = false;
-        state.running = false;
-        state.requests = 0;
-        state.lastRequest = null;
-        state.lastResponse = null;
-        state.lastError = null;
-        state.startedAt = null;
-
-        emit("reset", getStatus());
-
-        return getStatus();
-    }
-
-    /* ==================================================
-       REQUEST NORMALIZATION
-    ================================================== */
-
-    function normalizeRequest(message, options = {}) {
-        return {
-            id:
-                `haldo-ai-${Date.now()}-${Math.random()
-                    .toString(36)
-                    .slice(2, 9)}`,
-
-            message:
-                String(message || "").trim(),
-
-            language:
-                options.language ||
-                null,
-
-            mode:
-                options.mode ||
-                "assistant",
-
-            timestamp:
-                new Date().toISOString(),
-
-            options: {
-                ...options
-            }
-        };
-    }
-
-    /* ==================================================
-       LOCAL RESPONSE
-    ================================================== */
-
-    function createFoundationResponse(request) {
-        if (!request.message) {
+        if (
+            typeof response === "string"
+        ) {
             return {
-                text:
-                    "Bitte schreibe eine Anfrage.",
-
-                type:
-                    "empty",
-
-                source:
-                    "haldo-ai-core"
+                text: response,
+                raw: response
             };
         }
 
+        if (
+            typeof response === "object"
+        ) {
+            const text =
+                response.text ??
+                response.message ??
+                response.answer ??
+                response.content ??
+                response.response;
+
+            if (
+                text !== undefined
+            ) {
+                return {
+                    text: String(text),
+                    raw: response
+                };
+            }
+        }
+
         return {
-            text:
-                "HalDo AI Core hat deine Anfrage empfangen und ist mit der Foundation verbunden.",
-
-            type:
-                "foundation",
-
-            source:
-                "haldo-ai-core",
-
-            requestId:
-                request.id
+            text: String(response),
+            raw: response,
+            input
         };
     }
 
-    /* ==================================================
-       ASK
-    ================================================== */
+    /*
+    ====================================================
+    FALLBACK RESPONSE
+    ====================================================
+    */
 
-    async function ask(message, options = {}) {
-        if (!state.initialized) {
-            initialize();
+    function fallbackResponse(
+        input
+    ) {
+        const normalized =
+            String(input || "")
+                .trim();
+
+        if (!normalized) {
+            return "Bitte schreibe eine Anfrage.";
         }
 
-        if (!state.running) {
-            start();
-        }
-
-        const request =
-            normalizeRequest(
-                message,
-                options
-            );
-
-        state.requests += 1;
-        state.lastRequest = request;
-        state.lastError = null;
-
-        emit(
-            "request:start",
-            request
+        return (
+            "HalDo AI Core ist verbunden und hat deine Anfrage empfangen. " +
+            "Die AI-Engine kann jetzt weitere spezialisierte Module verwenden."
         );
-
-        setAIVisualMode("thinking");
-
-        try {
-            /*
-             * Zuerst prüfen wir, ob die eigentliche
-             * AI-Engine bereits verfügbar ist.
-             */
-            const engine =
-                getModule("engine");
-
-            let response = null;
-
-            if (
-                engine &&
-                typeof engine.ask === "function"
-            ) {
-                response =
-                    await engine.ask(
-                        request.message,
-                        request.options
-                    );
-            }
-
-            /*
-             * Falls die Engine noch nicht vollständig
-             * implementiert ist, bleibt die Foundation
-             * trotzdem funktionsfähig.
-             */
-            if (!response) {
-                response =
-                    createFoundationResponse(
-                        request
-                    );
-            }
-
-            const normalizedResponse =
-                typeof response === "string"
-                    ? {
-                        text: response,
-                        type: "engine",
-                        source: "haldo-ai-engine"
-                    }
-                    : response;
-
-            state.lastResponse =
-                normalizedResponse;
-
-            emit(
-                "request:complete",
-                {
-                    request,
-                    response:
-                        normalizedResponse
-                }
-            );
-
-            setAIVisualMode("answering");
-
-            window.setTimeout(
-                () => setAIVisualMode("idle"),
-                650
-            );
-
-            return normalizedResponse;
-
-        } catch (requestError) {
-            state.lastError =
-                requestError.message;
-
-            emit(
-                "request:error",
-                {
-                    request,
-                    error:
-                        requestError
-                }
-            );
-
-            setAIVisualMode("idle");
-
-            error(
-                "AI-Anfrage fehlgeschlagen:",
-                requestError
-            );
-
-            return {
-                text:
-                    "HalDo AI konnte die Anfrage gerade nicht verarbeiten.",
-
-                type:
-                    "error",
-
-                source:
-                    "haldo-ai-core",
-
-                error:
-                    requestError.message,
-
-                requestId:
-                    request.id
-            };
-        }
     }
 
-    /* ==================================================
-       SYNCHRONOUS FOUNDATION ASK
-    ================================================== */
+    /*
+    ====================================================
+    SPEECH
+    ====================================================
+    */
 
-    function askSync(message) {
-        if (!state.initialized) {
-            initialize();
-        }
+    function speak(text) {
+        const voice =
+            modules().voice;
 
-        if (!state.running) {
-            start();
-        }
+        const speech =
+            modules().speech;
 
-        const request =
-            normalizeRequest(
-                message
-            );
-
-        state.requests += 1;
-        state.lastRequest = request;
-
-        const response =
-            createFoundationResponse(
-                request
-            );
-
-        state.lastResponse =
-            response;
-
-        emit(
-            "request:complete",
-            {
-                request,
-                response
-            }
-        );
-
-        return response;
-    }
-
-    /* ==================================================
-       VISUAL AI STATE
-    ================================================== */
-
-    function setAIVisualMode(mode) {
         try {
             if (
-                window.HalDoLight &&
-                typeof window.HalDoLight.setMode === "function"
+                voice &&
+                typeof voice.speak ===
+                    "function"
             ) {
-                window.HalDoLight.setMode(
-                    mode
+                return voice.speak(
+                    text
                 );
             }
-        } catch (lightError) {
+
+            if (
+                speech &&
+                typeof speech.speak ===
+                    "function"
+            ) {
+                return speech.speak(
+                    text
+                );
+            }
+        } catch (error) {
             warn(
-                "Light-System konnte nicht aktualisiert werden:",
-                lightError
-            );
-        }
-
-        emit(
-            "visual:mode",
-            {
-                mode
-            }
-        );
-    }
-
-    /* ==================================================
-       MEMORY CONNECTION
-    ================================================== */
-
-    function remember(key, value) {
-        const memory =
-            getModule("memory");
-
-        if (!memory) {
-            return false;
-        }
-
-        try {
-            if (
-                typeof memory.set === "function"
-            ) {
-                memory.set(
-                    key,
-                    value
-                );
-
-                return true;
-            }
-
-            if (
-                typeof memory.remember === "function"
-            ) {
-                memory.remember(
-                    key,
-                    value
-                );
-
-                return true;
-            }
-
-        } catch (memoryError) {
-            warn(
-                "Memory konnte nicht gespeichert werden:",
-                memoryError
+                "Sprachausgabe fehlgeschlagen.",
+                error
             );
         }
 
         return false;
     }
 
-    function recall(key) {
-        const memory =
-            getModule("memory");
+    /*
+    ====================================================
+    MAIN ASK FUNCTION
+    ====================================================
+    */
 
-        if (!memory) {
-            return null;
+    async function ask(message, options = {}) {
+        const input =
+            String(message || "")
+                .trim();
+
+        if (!input) {
+            return {
+                ok: false,
+                text:
+                    "Bitte schreibe eine Anfrage.",
+                input: "",
+                language:
+                    state.language
+            };
         }
-
-        try {
-            if (
-                typeof memory.get === "function"
-            ) {
-                return memory.get(
-                    key
-                );
-            }
-
-            if (
-                typeof memory.recall === "function"
-            ) {
-                return memory.recall(
-                    key
-                );
-            }
-
-        } catch (memoryError) {
-            warn(
-                "Memory konnte nicht gelesen werden:",
-                memoryError
-            );
-        }
-
-        return null;
-    }
-
-    /* ==================================================
-       SYSTEM INFORMATION
-    ================================================== */
-
-    function getSystemInfo() {
-        const system =
-            getModule("system");
 
         if (
-            system &&
-            typeof system.getStatus === "function"
+            state.processing
         ) {
-            try {
-                return system.getStatus();
-            } catch (systemError) {
-                warn(
-                    "Systemstatus konnte nicht gelesen werden:",
-                    systemError
-                );
-            }
+            return {
+                ok: false,
+                busy: true,
+                text:
+                    "HalDo AI verarbeitet bereits eine Anfrage.",
+                input
+            };
         }
 
-        return null;
+        state.processing = true;
+        state.status = "thinking";
+        state.requestCount++;
+
+        const started =
+            Date.now();
+
+        state.lastRequest = {
+            input,
+            timestamp:
+                new Date().toISOString()
+        };
+
+        ensureConversation();
+
+        state.language =
+            options.language ||
+            detectLanguage(
+                input
+            );
+
+        emit(
+            "thinking",
+            {
+                input,
+                language:
+                    state.language,
+                conversationId:
+                    state.conversationId
+            }
+        );
+
+        try {
+            rememberUserMessage(
+                input
+            );
+
+            updateConversation(
+                "user",
+                input
+            );
+
+            /*
+             * Zuerst Commands prüfen.
+             */
+
+            const commandResult =
+                await processCommand(
+                    input
+                );
+
+            if (
+                commandResult.handled
+            ) {
+                const commandResponse =
+                    normalizeResponse(
+                        commandResult.result,
+                        input
+                    );
+
+                const text =
+                    commandResponse?.text ||
+                    fallbackResponse(
+                        input
+                    );
+
+                rememberAIMessage(
+                    text
+                );
+
+                updateConversation(
+                    "assistant",
+                    text
+                );
+
+                state.lastResponse = {
+                    text,
+                    timestamp:
+                        new Date().toISOString(),
+                    duration:
+                        Date.now() -
+                        started,
+                    source:
+                        "command"
+                };
+
+                state.status =
+                    "answering";
+
+                emit(
+                    "response",
+                    {
+                        text,
+                        source:
+                            "command",
+                        input
+                    }
+                );
+
+                return {
+                    ok: true,
+                    text,
+                    source:
+                        "command",
+                    input,
+                    language:
+                        state.language
+                };
+            }
+
+            /*
+             * Danach AI Engine.
+             */
+
+            const context = {
+                version:
+                    VERSION,
+
+                language:
+                    state.language,
+
+                conversationId:
+                    state.conversationId,
+
+                requestCount:
+                    state.requestCount,
+
+                timestamp:
+                    Date.now()
+            };
+
+            const engineResult =
+                await processEngine(
+                    input,
+                    context
+                );
+
+            const normalized =
+                normalizeResponse(
+                    engineResult,
+                    input
+                );
+
+            const text =
+                normalized?.text ||
+                fallbackResponse(
+                    input
+                );
+
+            rememberAIMessage(
+                text
+            );
+
+            updateConversation(
+                "assistant",
+                text
+            );
+
+            state.lastResponse = {
+                text,
+                timestamp:
+                    new Date().toISOString(),
+                duration:
+                    Date.now() -
+                    started,
+                source:
+                    normalized
+                        ? "engine"
+                        : "fallback"
+            };
+
+            state.status =
+                "answering";
+
+            emit(
+                "response",
+                {
+                    text,
+                    source:
+                        state.lastResponse
+                            .source,
+                    input,
+                    language:
+                        state.language
+                }
+            );
+
+            return {
+                ok: true,
+                text,
+                source:
+                    state.lastResponse
+                        .source,
+                input,
+                language:
+                    state.language,
+                conversationId:
+                    state.conversationId
+            };
+
+        } catch (error) {
+            fail(error);
+
+            state.status =
+                "error";
+
+            const text =
+                "HalDo AI konnte die Anfrage nicht vollständig verarbeiten.";
+
+            emit(
+                "response:error",
+                {
+                    text,
+                    error
+                }
+            );
+
+            return {
+                ok: false,
+                text,
+                error:
+                    error?.message ||
+                    String(error),
+                input
+            };
+
+        } finally {
+            state.processing =
+                false;
+
+            if (
+                state.status ===
+                "thinking"
+            ) {
+                state.status =
+                    "idle";
+            }
+
+            emit(
+                "idle",
+                {
+                    requestCount:
+                        state.requestCount
+                }
+            );
+        }
     }
 
-    /* ==================================================
-       PUBLIC API
-    ================================================== */
+    /*
+    ====================================================
+    START / STOP
+    ====================================================
+    */
 
-    const api = {
+    function start() {
+        if (
+            state.running
+        ) {
+            return getStatus();
+        }
 
+        state.running =
+            true;
+
+        state.initialized =
+            true;
+
+        state.status =
+            "idle";
+
+        ensureConversation();
+
+        emit(
+            "start",
+            getStatus()
+        );
+
+        log(
+            "HalDo AI Core gestartet."
+        );
+
+        return getStatus();
+    }
+
+    function stop() {
+        state.running =
+            false;
+
+        state.status =
+            "stopped";
+
+        emit(
+            "stop",
+            getStatus()
+        );
+
+        log(
+            "HalDo AI Core gestoppt."
+        );
+
+        return getStatus();
+    }
+
+    /*
+    ====================================================
+    STATUS
+    ====================================================
+    */
+
+    function getStatus() {
+        const refs =
+            modules();
+
+        return {
+            name:
+                "HalDo AI Core",
+
+            version:
+                VERSION,
+
+            status:
+                state.status,
+
+            running:
+                state.running,
+
+            initialized:
+                state.initialized,
+
+            processing:
+                state.processing,
+
+            requestCount:
+                state.requestCount,
+
+            language:
+                state.language,
+
+            conversationId:
+                state.conversationId,
+
+            modules: {
+                engine:
+                    Boolean(refs.engine),
+
+                chat:
+                    Boolean(refs.chat),
+
+                memory:
+                    Boolean(refs.memory),
+
+                conversation:
+                    Boolean(refs.conversation),
+
+                language:
+                    Boolean(refs.language),
+
+                commands:
+                    Boolean(refs.commands),
+
+                speech:
+                    Boolean(refs.speech),
+
+                voice:
+                    Boolean(refs.voice)
+            },
+
+            errors:
+                state.errors.length,
+
+            lastRequest:
+                state.lastRequest,
+
+            lastResponse:
+                state.lastResponse
+        };
+    }
+
+    /*
+    ====================================================
+    RESET
+    ====================================================
+    */
+
+    function resetConversation() {
+        state.conversationId =
+            createConversationId();
+
+        state.lastRequest =
+            null;
+
+        state.lastResponse =
+            null;
+
+        emit(
+            "conversation:reset",
+            {
+                conversationId:
+                    state.conversationId
+            }
+        );
+
+        return state.conversationId;
+    }
+
+    /*
+    ====================================================
+    PUBLIC API
+    ====================================================
+    */
+
+    const HalDoAICore = {
         name:
-            state.name,
+            "HalDo AI Core",
 
         version:
             VERSION,
 
-        features,
-
-        initialize,
+        features: [
+            "AI Assistant",
+            "AI Engine",
+            "Conversation System",
+            "AI Memory",
+            "Knowledge Integration",
+            "Language System",
+            "AI Commands",
+            "Êzîdî Keyboard Integration",
+            "Voice Interface",
+            "Speech Interface",
+            "Live Light Interface",
+            "Kernel Integration",
+            "System Integration"
+        ],
 
         start,
 
         stop,
 
-        reset,
-
         ask,
 
-        askSync,
+        speak,
 
         getStatus,
 
-        getDependencies,
+        resetConversation,
 
-        getSystemInfo,
-
-        getModule,
-
-        remember,
-
-        recall,
+        detectLanguage,
 
         on,
 
@@ -786,60 +1326,76 @@ Er stellt APIs und Events für die anderen Module bereit.
         emit
     };
 
-    /* ==================================================
-       GLOBAL REGISTRATION
-    ================================================== */
+    /*
+    ====================================================
+    GLOBAL REGISTRATION
+    ====================================================
+    */
 
     window.HalDoAICore =
-        api;
+        HalDoAICore;
 
-    /*
-     * Einheitlicher OS-Zugriff.
-     */
     window.HalDoOS =
         window.HalDoOS || {};
 
     window.HalDoOS.ai =
-        api;
+        HalDoAICore;
 
     /*
-     * Optionales Kernel-Modul registrieren,
-     * wenn der bestehende Kernel dies unterstützt.
-     */
+    ====================================================
+    KERNEL REGISTRATION
+    ====================================================
+    */
+
     function registerWithKernel() {
         try {
-            const kernel =
-                window.HalDoKernel;
-
             if (
-                kernel &&
-                typeof kernel.registerModule === "function"
+                window.HalDoKernel &&
+                typeof window.HalDoKernel.registerModule ===
+                    "function"
             ) {
-                kernel.registerModule(
+                window.HalDoKernel.registerModule(
                     "ai-core",
-                    api
+                    HalDoAICore
                 );
             }
-        } catch (kernelError) {
+        } catch (error) {
             warn(
-                "AI Core konnte nicht beim Kernel registriert werden:",
-                kernelError
+                "AI Core konnte nicht beim Kernel registriert werden.",
+                error
             );
         }
     }
 
-    /* ==================================================
-       BOOT CONNECTION
-    ================================================== */
+    /*
+    ====================================================
+    AUTO INIT
+    ====================================================
+    */
 
-    function bootConnection() {
+    function init() {
         registerWithKernel();
 
         /*
-         * Der Core initialisiert sich,
-         * ohne das gesamte OS zu blockieren.
+         * Nur initialisieren.
+         * Der Boot-Prozess entscheidet über
+         * den tatsächlichen Start.
          */
-        initialize();
+
+        state.initialized =
+            true;
+
+        emit(
+            "ready",
+            {
+                version:
+                    VERSION
+            }
+        );
+
+        log(
+            "HalDo AI Core bereit."
+        );
     }
 
     if (
@@ -848,13 +1404,13 @@ Er stellt APIs und Events für die anderen Module bereit.
     ) {
         document.addEventListener(
             "DOMContentLoaded",
-            bootConnection,
+            init,
             {
                 once: true
             }
         );
     } else {
-        bootConnection();
+        init();
     }
 
 })();
