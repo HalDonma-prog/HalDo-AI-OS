@@ -1,30 +1,41 @@
 // ============================================================
-// HALDO AI OS 18
+
+// HalDo AI OS 18
+
 // SOFTWARE UPDATE SYSTEM
+
 // Version 18.0.0
+
 // Professional Ultimate Foundation
+
 //
+
 // Datei:
+
 // js/software-update.js
+
 //
-// Aufgabe:
-// Zentrales Software-, System-, Modul- und App-Update-System.
-//
-// Dieses Modul:
-// - verwaltet die installierte OS-Version
-// - verwaltet Komponenten-Versionen
-// - prüft Update-Zustände
-// - speichert Update-Historie
-// - verwaltet Update-Status
-// - führt Systemprüfungen durch
-// - erkennt vorhandene HalDo-Module
-// - stellt globale Update-APIs bereit
-// - verbindet sich mit HalDoOS.events
-// - ist für spätere echte Online-Updates vorbereitet
-//
-// WICHTIG:
-// Dieses Modul ersetzt NICHT Kernel, System, App Manager,
-// App Registry, App Router oder System Loader.
+
+// Zweck:
+
+// - Software-Version verwalten
+
+// - Update-System zentral bereitstellen
+
+// - Update-Prüfungen durchführen
+
+// - Update-Historie speichern
+
+// - Update-Status an Kernel/System/AI melden
+
+// - zukünftige echte Update-Server vorbereiten
+
+// - Offline-Betrieb unterstützen
+
+// - Events bereitstellen
+
+// - Diagnose ermöglichen
+
 // ============================================================
 
 (function (window, document) {
@@ -32,606 +43,422 @@
     "use strict";
 
     // ========================================================
-    // BASISKONFIGURATION
+
+    // KONFIGURATION
+
     // ========================================================
 
     const CONFIG = {
 
-        name: "HalDo Software Update System",
+        name: "HalDo AI OS",
 
         version: "18.0.0",
 
-        systemVersion: "18.0.0",
-
         edition:
+
             "Professional Ultimate Foundation",
 
+        build:
+
+            "180000",
+
+        channel:
+
+            "stable",
+
+        environment:
+
+            "production",
+
+        updateCheckInterval:
+
+            6 * 60 * 60 * 1000,
+
         storageKey:
+
             "haldo_os18_software_update",
 
-        historyLimit: 50,
+        historyLimit:
 
-        updateEndpoint: null,
+            50,
 
-        checkTimeout: 8000,
+        // ----------------------------------------------------
 
-        autoCheck: false,
+        // Später kann hier ein echter Update-Server
 
-        autoCheckInterval:
-            1000 * 60 * 60 * 24,
+        // eingetragen werden.
 
-        developmentMode: true
+        // ----------------------------------------------------
+
+        updateServer:
+
+            null,
+
+        manifestPath:
+
+            "update-manifest.json",
+
+        requestTimeout:
+
+            8000
 
     };
 
-
     // ========================================================
-    // GLOBALE HALDO-OBJEKTE
+
+    // GLOBAL HALDO OBJECT
+
     // ========================================================
 
     window.HalDoOS =
+
         window.HalDoOS || {};
 
-
-    // ========================================================
-    // EVENT SYSTEM VERBINDUNG
     // ========================================================
 
-    function getEventSystem() {
-
-        if (
-            window.HalDoOS &&
-            window.HalDoOS.events
-        ) {
-
-            return window.HalDoOS.events;
-
-        }
-
-        return null;
-
-    }
-
-
-    function emit(eventName, data) {
-
-        const events =
-            getEventSystem();
-
-        if (
-            events &&
-            typeof events.emit === "function"
-        ) {
-
-            try {
-
-                events.emit(
-                    eventName,
-                    data
-                );
-
-            } catch (error) {
-
-                console.warn(
-                    "[HalDo Update] Event konnte nicht gesendet werden:",
-                    eventName,
-                    error
-                );
-
-            }
-
-        }
-
-        // Zusätzlich eigenes DOM Event
-        try {
-
-            document.dispatchEvent(
-                new CustomEvent(
-                    "haldo:" + eventName,
-                    {
-                        detail: data
-                    }
-                )
-            );
-
-        } catch (error) {
-
-            // Kein kritischer Fehler.
-        }
-
-    }
-
+    // INTERNAL STATE
 
     // ========================================================
-    // INTERNE STATES
-    // ========================================================
 
-    const STATUS = {
+    const state = {
 
-        IDLE:
-            "idle",
+        initialized:
 
-        CHECKING:
-            "checking",
+            false,
 
-        CURRENT:
-            "current",
+        checking:
 
-        AVAILABLE:
-            "available",
+            false,
 
-        DOWNLOADING:
-            "downloading",
+        installing:
 
-        INSTALLING:
-            "installing",
+            false,
 
-        COMPLETED:
-            "completed",
+        available:
 
-        ERROR:
-            "error"
+            false,
+
+        currentVersion:
+
+            CONFIG.version,
+
+        latestVersion:
+
+            CONFIG.version,
+
+        lastCheck:
+
+            null,
+
+        lastResult:
+
+            "not_checked",
+
+        lastError:
+
+            null,
+
+        history:
+
+            [],
+
+        listeners:
+
+            {},
+
+        timer:
+
+            null
 
     };
 
-
-    let currentStatus =
-        STATUS.IDLE;
-
-
-    let lastCheck =
-        null;
-
-
-    let availableUpdate =
-        null;
-
-
-    let checkInProgress =
-        false;
-
-
-    // ========================================================
-    // KOMPONENTEN
     // ========================================================
 
-    const COMPONENT_DEFINITIONS = [
+    // EVENT SYSTEM
 
-        {
-            id: "operating-system",
-            name: "HalDo AI OS",
-            type: "system",
-            version: "18.0.0",
-            required: true
-        },
+    // ========================================================
 
-        {
-            id: "kernel",
-            name: "HalDo Kernel",
-            type: "core",
-            version: "18.0.0",
-            required: true
-        },
+    function on(eventName, callback) {
 
-        {
-            id: "system",
-            name: "HalDo System",
-            type: "core",
-            version: "18.0.0",
-            required: true
-        },
+        if (
 
-        {
-            id: "ai-core",
-            name: "HalDo AI Core",
-            type: "ai",
-            version: "18.0.0",
-            required: true
-        },
+            typeof callback !==
 
-        {
-            id: "ai-engine",
-            name: "HalDo AI Engine",
-            type: "ai",
-            version: "18.0.0",
-            required: true
-        },
+            "function"
 
-        {
-            id: "ai-chat",
-            name: "HalDo AI Chat",
-            type: "ai",
-            version: "18.0.0",
-            required: true
-        },
+        ) {
 
-        {
-            id: "ai-memory",
-            name: "HalDo AI Memory",
-            type: "ai",
-            version: "18.0.0",
-            required: true
-        },
+            return function () {};
 
-        {
-            id: "ai-language",
-            name: "HalDo AI Language",
-            type: "language",
-            version: "18.0.0",
-            required: false
-        },
-
-        {
-            id: "ai-speech",
-            name: "HalDo AI Speech",
-            type: "voice",
-            version: "18.0.0",
-            required: false
-        },
-
-        {
-            id: "ai-voice",
-            name: "HalDo AI Voice",
-            type: "voice",
-            version: "18.0.0",
-            required: false
-        },
-
-        {
-            id: "voice",
-            name: "HalDo Voice",
-            type: "voice",
-            version: "18.0.0",
-            required: false
-        },
-
-        {
-            id: "ezidi-keyboard",
-            name: "Êzîdî Keyboard",
-            type: "input",
-            version: "18.0.0",
-            required: false
-        },
-
-        {
-            id: "language-manager",
-            name: "Language Manager",
-            type: "language",
-            version: "18.0.0",
-            required: false
-        },
-
-        {
-            id: "language-system",
-            name: "Language System",
-            type: "language",
-            version: "18.0.0",
-            required: false
-        },
-
-        {
-            id: "storage",
-            name: "HalDo Storage",
-            type: "storage",
-            version: "18.0.0",
-            required: true
-        },
-
-        {
-            id: "storage-manager",
-            name: "Storage Manager",
-            type: "storage",
-            version: "18.0.0",
-            required: false
-        },
-
-        {
-            id: "window-manager",
-            name: "Window Manager",
-            type: "interface",
-            version: "18.0.0",
-            required: false
-        },
-
-        {
-            id: "app-system",
-            name: "HalDo App System",
-            type: "apps",
-            version: "18.0.0",
-            required: true
-        },
-
-        {
-            id: "app-manager",
-            name: "App Manager",
-            type: "apps",
-            version: "18.0.0",
-            required: true
-        },
-
-        {
-            id: "app-registry",
-            name: "App Registry",
-            type: "apps",
-            version: "18.0.0",
-            required: true
-        },
-
-        {
-            id: "app-router",
-            name: "App Router",
-            type: "apps",
-            version: "18.0.0",
-            required: true
-        },
-
-        {
-            id: "app-launcher",
-            name: "App Launcher",
-            type: "apps",
-            version: "18.0.0",
-            required: false
-        },
-
-        {
-            id: "launcher",
-            name: "HalDo Launcher",
-            type: "interface",
-            version: "18.0.0",
-            required: false
-        },
-
-        {
-            id: "dashboard",
-            name: "HalDo Dashboard",
-            type: "app",
-            version: "18.0.0",
-            required: false
-        },
-
-        {
-            id: "settings",
-            name: "HalDo Settings",
-            type: "app",
-            version: "18.0.0",
-            required: false
-        },
-
-        {
-            id: "diagnostics",
-            name: "HalDo Diagnostics",
-            type: "system",
-            version: "18.0.0",
-            required: false
         }
 
-    ];
+        if (
 
+            !state.listeners[eventName]
 
-    // ========================================================
-    // UPDATE-DATEN
-    // ========================================================
+        ) {
 
-    function createDefaultState() {
+            state.listeners[eventName] =
 
-        return {
+                [];
 
-            schemaVersion:
-                1,
+        }
 
-            installedVersion:
-                CONFIG.systemVersion,
+        state.listeners[eventName]
 
-            installedEdition:
-                CONFIG.edition,
+            .push(callback);
 
-            status:
-                STATUS.IDLE,
+        return function () {
 
-            lastCheck:
-                null,
+            off(
 
-            lastSuccessfulCheck:
-                null,
+                eventName,
 
-            lastUpdate:
-                null,
+                callback
 
-            updateAvailable:
-                false,
-
-            availableVersion:
-                null,
-
-            updateHistory:
-                [],
-
-            components:
-                COMPONENT_DEFINITIONS.map(
-                    function (component) {
-
-                        return {
-                            id:
-                                component.id,
-
-                            name:
-                                component.name,
-
-                            type:
-                                component.type,
-
-                            version:
-                                component.version,
-
-                            required:
-                                component.required,
-
-                            state:
-                                "installed"
-                        };
-
-                    }
-                )
+            );
 
         };
 
     }
 
+    function off(eventName, callback) {
 
-    // ========================================================
-    // STORAGE LADEN
-    // ========================================================
+        const listeners =
 
-    function loadState() {
+            state.listeners[eventName];
 
-        try {
+        if (!listeners) {
 
-            const raw =
-                localStorage.getItem(
-                    CONFIG.storageKey
-                );
-
-            if (!raw) {
-
-                return createDefaultState();
-
-            }
-
-            const parsed =
-                JSON.parse(raw);
-
-            if (
-                !parsed ||
-                typeof parsed !== "object"
-            ) {
-
-                return createDefaultState();
-
-            }
-
-            const defaults =
-                createDefaultState();
-
-            return Object.assign(
-                defaults,
-                parsed
-            );
-
-        } catch (error) {
-
-            console.warn(
-                "[HalDo Update] Storage konnte nicht geladen werden.",
-                error
-            );
-
-            return createDefaultState();
+            return;
 
         }
 
+        state.listeners[eventName] =
+
+            listeners.filter(
+
+                function (listener) {
+
+                    return listener !==
+
+                        callback;
+
+                }
+
+            );
+
     }
 
+    function emit(eventName, data) {
 
-    let state =
-        loadState();
+        const listeners =
 
+            state.listeners[eventName];
 
-    // ========================================================
-    // STORAGE SPEICHERN
-    // ========================================================
+        if (!listeners) {
 
-    function saveState() {
-
-        try {
-
-            localStorage.setItem(
-                CONFIG.storageKey,
-                JSON.stringify(state)
-            );
-
-            return true;
-
-        } catch (error) {
-
-            console.warn(
-                "[HalDo Update] Storage konnte nicht gespeichert werden.",
-                error
-            );
-
-            return false;
+            return;
 
         }
 
+        listeners.slice().forEach(
+
+            function (listener) {
+
+                try {
+
+                    listener(data);
+
+                } catch (error) {
+
+                    console.error(
+
+                        "[HalDo Update] Event error:",
+
+                        error
+
+                    );
+
+                }
+
+            }
+
+        );
+
     }
 
+    // ========================================================
+
+    // LOGGING
 
     // ========================================================
-    // VERSION VERGLEICH
+
+    function log() {
+
+        const args =
+
+            Array.from(arguments);
+
+        console.log(
+
+            "[HalDo Software Update]",
+
+            ...args
+
+        );
+
+    }
+
+    function warn() {
+
+        const args =
+
+            Array.from(arguments);
+
+        console.warn(
+
+            "[HalDo Software Update]",
+
+            ...args
+
+        );
+
+    }
+
+    function errorLog() {
+
+        const args =
+
+            Array.from(arguments);
+
+        console.error(
+
+            "[HalDo Software Update]",
+
+            ...args
+
+        );
+
+    }
+
+    // ========================================================
+
+    // VERSION PARSER
+
     // ========================================================
 
     function parseVersion(version) {
 
         if (
-            typeof version !== "string"
+
+            typeof version !==
+
+            "string"
+
         ) {
 
             return [0, 0, 0];
 
         }
 
-        return version
-            .replace(/^v/i, "")
-            .split(".")
-            .map(
-                function (part) {
+        const clean =
 
-                    const value =
-                        parseInt(
-                            part,
-                            10
-                        );
+            version
 
-                    return Number.isFinite(value)
-                        ? value
-                        : 0;
+                .trim()
 
-                }
-            )
-            .concat([0, 0, 0])
-            .slice(0, 3);
+                .replace(/^v/i, "")
+
+                .split("-")[0];
+
+        const parts =
+
+            clean
+
+                .split(".")
+
+                .map(
+
+                    function (value) {
+
+                        const number =
+
+                            parseInt(
+
+                                value,
+
+                                10
+
+                            );
+
+                        return Number.isFinite(
+
+                            number
+
+                        )
+
+                            ? number
+
+                            : 0;
+
+                    }
+
+                );
+
+        while (
+
+            parts.length < 3
+
+        ) {
+
+            parts.push(0);
+
+        }
+
+        return parts.slice(0, 3);
 
     }
 
+    // ========================================================
+
+    // VERSION COMPARISON
+
+    // ========================================================
 
     function compareVersions(
-        first,
-        second
+
+        versionA,
+
+        versionB
+
     ) {
 
         const a =
-            parseVersion(first);
+
+            parseVersion(versionA);
 
         const b =
-            parseVersion(second);
+
+            parseVersion(versionB);
 
         for (
-            let index = 0;
-            index < 3;
-            index++
+
+            let i = 0;
+
+            i < 3;
+
+            i++
+
         ) {
 
-            if (
-                a[index] >
-                b[index]
-            ) {
+            if (a[i] > b[i]) {
 
                 return 1;
 
             }
 
-            if (
-                a[index] <
-                b[index]
-            ) {
+            if (a[i] < b[i]) {
 
                 return -1;
 
@@ -643,1487 +470,1815 @@
 
     }
 
+    function isNewerVersion(
 
-    // ========================================================
-    // KOMPONENTEN ERKENNEN
-    // ========================================================
+        candidate,
 
-    function detectRuntimeComponents() {
+        current
 
-        const runtime =
-            [];
-
-        const checks = [
-
-            {
-                id: "kernel",
-                name: "HalDo Kernel",
-                object:
-                    window.HalDoKernel
-            },
-
-            {
-                id: "system",
-                name: "HalDo System",
-                object:
-                    window.HalDoSystem
-            },
-
-            {
-                id: "ai-core",
-                name: "HalDo AI Core",
-                object:
-                    window.HalDoAICore
-            },
-
-            {
-                id: "ai-engine",
-                name: "HalDo AI Engine",
-                object:
-                    window.HalDoAIEngine
-            },
-
-            {
-                id: "ai-chat",
-                name: "HalDo AI Chat",
-                object:
-                    window.HalDoAIChat
-            },
-
-            {
-                id: "ai-memory",
-                name: "HalDo AI Memory",
-                object:
-                    window.HalDoAIMemory
-            },
-
-            {
-                id: "app-manager",
-                name: "App Manager",
-                object:
-                    window.HalDoAppManager
-            },
-
-            {
-                id: "app-registry",
-                name: "App Registry",
-                object:
-                    window.HalDoAppRegistry
-            },
-
-            {
-                id: "app-router",
-                name: "App Router",
-                object:
-                    window.HalDoAppRouter
-            },
-
-            {
-                id: "window-manager",
-                name: "Window Manager",
-                object:
-                    window.HalDoWindowManager
-            },
-
-            {
-                id: "storage",
-                name: "HalDo Storage",
-                object:
-                    window.HalDoStorage
-            }
-
-        ];
-
-
-        checks.forEach(
-            function (item) {
-
-                if (item.object) {
-
-                    runtime.push({
-
-                        id:
-                            item.id,
-
-                        name:
-                            item.name,
-
-                        connected:
-                            true,
-
-                        state:
-                            "connected"
-
-                    });
-
-                }
-
-            }
-        );
-
-
-        return runtime;
-
-    }
-
-
-    // ========================================================
-    // STATUS SETZEN
-    // ========================================================
-
-    function setStatus(
-        status
     ) {
 
-        currentStatus =
-            status;
+        return (
 
-        state.status =
-            status;
-
-        saveState();
-
-        emit(
-            "software:update-status",
-            {
-                status:
-                    status,
-
-                version:
-                    state.installedVersion,
-
-                availableVersion:
-                    state.availableVersion
-            }
-        );
-
-    }
-
-
-    // ========================================================
-    // UPDATE STATUS ABFRAGEN
-    // ========================================================
-
-    function getStatus() {
-
-        return {
-
-            status:
-                currentStatus,
-
-            installedVersion:
-                state.installedVersion,
-
-            installedEdition:
-                state.installedEdition,
-
-            updateAvailable:
-                Boolean(
-                    state.updateAvailable
-                ),
-
-            availableVersion:
-                state.availableVersion,
-
-            lastCheck:
-                state.lastCheck,
-
-            lastUpdate:
-                state.lastUpdate,
-
-            lastSuccessfulCheck:
-                state.lastSuccessfulCheck
-
-        };
-
-    }
-
-
-    // ========================================================
-    // LOKALE SYSTEMPRÜFUNG
-    // ========================================================
-
-    function runLocalSystemCheck() {
-
-        const results =
-            [];
-
-        function check(
-            name,
-            condition,
-            details
-        ) {
-
-            results.push({
-
-                name:
-                    name,
-
-                passed:
-                    Boolean(condition),
-
-                details:
-                    details || ""
-
-            });
-
-        }
-
-
-        check(
-            "Browser DOM",
-            Boolean(document),
-            "DOM verfügbar"
-        );
-
-
-        check(
-            "Local Storage",
-            testStorage(),
-            "Lokaler Speicher"
-        );
-
-
-        check(
-            "HalDoOS",
-            Boolean(window.HalDoOS),
-            "HalDoOS API"
-        );
-
-
-        check(
-            "Online Status",
-            navigator.onLine !== false,
-            navigator.onLine
-                ? "Online"
-                : "Offline"
-        );
-
-
-        check(
-            "Software Update API",
-            true,
-            "Update-System aktiv"
-        );
-
-
-        const runtime =
-            detectRuntimeComponents();
-
-
-        runtime.forEach(
-            function (component) {
-
-                check(
-                    component.name,
-                    component.connected,
-                    component.state
-                );
-
-            }
-        );
-
-
-        const passed =
-            results.filter(
-                function (item) {
-                    return item.passed;
-                }
-            ).length;
-
-
-        return {
-
-            success:
-                results.every(
-                    function (item) {
-                        return item.passed;
-                    }
-                ),
-
-            total:
-                results.length,
-
-            passed:
-                passed,
-
-            failed:
-                results.length -
-                passed,
-
-            results:
-                results,
-
-            runtimeComponents:
-                runtime
-
-        };
-
-    }
-
-
-    // ========================================================
-    // STORAGE TEST
-    // ========================================================
-
-    function testStorage() {
-
-        try {
-
-            const key =
-                "__haldo_update_test__";
-
-            localStorage.setItem(
-                key,
-                "ok"
-            );
-
-            const value =
-                localStorage.getItem(
-                    key
-                );
-
-            localStorage.removeItem(
-                key
-            );
-
-            return value === "ok";
-
-        } catch (error) {
-
-            return false;
-
-        }
-
-    }
-
-
-    // ========================================================
-    // UPDATE-MANIFEST
-    //
-    // Für spätere echte Online-Updates.
-    // ========================================================
-
-    function createLocalManifest() {
-
-        return {
-
-            product:
-                CONFIG.name,
-
-            system:
-                "HalDo AI OS",
-
-            version:
-                CONFIG.systemVersion,
-
-            edition:
-                CONFIG.edition,
-
-            channel:
-                "stable",
-
-            generatedAt:
-                new Date().toISOString(),
-
-            components:
-                state.components.map(
-                    function (component) {
-
-                        return {
-
-                            id:
-                                component.id,
-
-                            name:
-                                component.name,
-
-                            version:
-                                component.version,
-
-                            type:
-                                component.type,
-
-                            required:
-                                component.required
-
-                        };
-
-                    }
-                )
-
-        };
-
-    }
-
-
-    // ========================================================
-    // ONLINE MANIFEST ABRUFEN
-    // ========================================================
-
-    async function fetchRemoteManifest() {
-
-        if (
-            !CONFIG.updateEndpoint
-        ) {
-
-            return null;
-
-        }
-
-
-        const controller =
-            new AbortController();
-
-
-        const timeout =
-            window.setTimeout(
-                function () {
-
-                    controller.abort();
-
-                },
-                CONFIG.checkTimeout
-            );
-
-
-        try {
-
-            const response =
-                await fetch(
-                    CONFIG.updateEndpoint,
-                    {
-                        method: "GET",
-                        cache: "no-store",
-                        headers: {
-                            "Accept":
-                                "application/json"
-                        },
-                        signal:
-                            controller.signal
-                    }
-                );
-
-
-            if (!response.ok) {
-
-                throw new Error(
-                    "HTTP " +
-                    response.status
-                );
-
-            }
-
-
-            return await response.json();
-
-        } finally {
-
-            window.clearTimeout(
-                timeout
-            );
-
-        }
-
-    }
-
-
-    // ========================================================
-    // UPDATE-MANIFEST AUSWERTEN
-    // ========================================================
-
-    function evaluateManifest(
-        manifest
-    ) {
-
-        if (
-            !manifest ||
-            typeof manifest !== "object"
-        ) {
-
-            return {
-
-                available:
-                    false,
-
-                reason:
-                    "Keine Update-Manifest-Daten verfügbar.",
-
-                currentVersion:
-                    state.installedVersion,
-
-                remoteVersion:
-                    null
-
-            };
-
-        }
-
-
-        const remoteVersion =
-            manifest.version ||
-            manifest.systemVersion ||
-            null;
-
-
-        if (!remoteVersion) {
-
-            return {
-
-                available:
-                    false,
-
-                reason:
-                    "Manifest enthält keine Version.",
-
-                currentVersion:
-                    state.installedVersion,
-
-                remoteVersion:
-                    null
-
-            };
-
-        }
-
-
-        const comparison =
             compareVersions(
-                remoteVersion,
-                state.installedVersion
-            );
 
+                candidate,
 
-        if (comparison > 0) {
+                current
 
-            return {
+            ) > 0
 
-                available:
-                    true,
-
-                reason:
-                    "Neue Version verfügbar.",
-
-                currentVersion:
-                    state.installedVersion,
-
-                remoteVersion:
-                    remoteVersion,
-
-                manifest:
-                    manifest
-
-            };
-
-        }
-
-
-        return {
-
-            available:
-                false,
-
-            reason:
-                "System ist aktuell.",
-
-            currentVersion:
-                state.installedVersion,
-
-            remoteVersion:
-                remoteVersion,
-
-            manifest:
-                manifest
-
-        };
+        );
 
     }
 
-
-    // ========================================================
-    // UPDATE PRÜFEN
     // ========================================================
 
-    async function checkForUpdates(
-        options
-    ) {
+    // STORAGE
 
-        options =
-            options || {};
+    // ========================================================
 
-
-        if (checkInProgress) {
-
-            return {
-
-                success:
-                    false,
-
-                status:
-                    STATUS.CHECKING,
-
-                message:
-                    "Eine Update-Prüfung läuft bereits."
-
-            };
-
-        }
-
-
-        checkInProgress =
-            true;
-
-
-        setStatus(
-            STATUS.CHECKING
-        );
-
-
-        emit(
-            "software:update-check-start",
-            {
-                version:
-                    state.installedVersion
-            }
-        );
-
+    function getStorageData() {
 
         try {
 
-            const localCheck =
-                runLocalSystemCheck();
+            const raw =
 
+                localStorage.getItem(
 
-            let remoteManifest =
-                null;
+                    CONFIG.storageKey
 
+                );
 
-            if (
-                options.manifest
-            ) {
+            if (!raw) {
 
-                remoteManifest =
-                    options.manifest;
+                return {
 
-            } else {
+                    history: [],
 
-                try {
+                    lastCheck: null,
 
-                    remoteManifest =
-                        await fetchRemoteManifest();
+                    lastResult:
 
-                } catch (error) {
+                        "not_checked",
 
-                    console.info(
-                        "[HalDo Update] Kein Online-Manifest verfügbar.",
-                        error
-                    );
+                    latestVersion:
 
-                }
-
-            }
-
-
-            let evaluation;
-
-
-            if (remoteManifest) {
-
-                evaluation =
-                    evaluateManifest(
-                        remoteManifest
-                    );
-
-            } else {
-
-                evaluation = {
-
-                    available:
-                        false,
-
-                    reason:
-                        "Lokale Foundation ist aktuell. Kein Online-Update-Server konfiguriert.",
-
-                    currentVersion:
-                        state.installedVersion,
-
-                    remoteVersion:
-                        null
+                        CONFIG.version
 
                 };
 
             }
 
+            const parsed =
 
-            lastCheck =
-                new Date().toISOString();
+                JSON.parse(raw);
 
+            return {
 
-            state.lastCheck =
-                lastCheck;
+                history:
 
+                    Array.isArray(
 
-            state.lastSuccessfulCheck =
-                lastCheck;
+                        parsed.history
 
+                    )
 
-            state.updateAvailable =
-                Boolean(
-                    evaluation.available
+                        ? parsed.history
+
+                        : [],
+
+                lastCheck:
+
+                    parsed.lastCheck ||
+
+                    null,
+
+                lastResult:
+
+                    parsed.lastResult ||
+
+                    "not_checked",
+
+                latestVersion:
+
+                    parsed.latestVersion ||
+
+                    CONFIG.version
+
+            };
+
+        } catch (storageError) {
+
+            warn(
+
+                "Storage konnte nicht gelesen werden.",
+
+                storageError
+
+            );
+
+            return {
+
+                history: [],
+
+                lastCheck: null,
+
+                lastResult:
+
+                    "storage_error",
+
+                latestVersion:
+
+                    CONFIG.version
+
+            };
+
+        }
+
+    }
+
+    function saveStorageData() {
+
+        try {
+
+            localStorage.setItem(
+
+                CONFIG.storageKey,
+
+                JSON.stringify({
+
+                    history:
+
+                        state.history
+
+                            .slice(
+
+                                0,
+
+                                CONFIG.historyLimit
+
+                            ),
+
+                    lastCheck:
+
+                        state.lastCheck,
+
+                    lastResult:
+
+                        state.lastResult,
+
+                    latestVersion:
+
+                        state.latestVersion
+
+                })
+
+            );
+
+        } catch (storageError) {
+
+            warn(
+
+                "Update-Daten konnten nicht gespeichert werden.",
+
+                storageError
+
+            );
+
+        }
+
+    }
+
+    function loadStorageData() {
+
+        const data =
+
+            getStorageData();
+
+        state.history =
+
+            data.history;
+
+        state.lastCheck =
+
+            data.lastCheck;
+
+        state.lastResult =
+
+            data.lastResult;
+
+        state.latestVersion =
+
+            data.latestVersion ||
+
+            CONFIG.version;
+
+        state.available =
+
+            isNewerVersion(
+
+                state.latestVersion,
+
+                state.currentVersion
+
+            );
+
+    }
+
+    // ========================================================
+
+    // HISTORY
+
+    // ========================================================
+
+    function addHistory(
+
+        type,
+
+        data
+
+    ) {
+
+        const entry = {
+
+            id:
+
+                "update-" +
+
+                Date.now() +
+
+                "-" +
+
+                Math.random()
+
+                    .toString(36)
+
+                    .slice(2, 8),
+
+            type:
+
+                type,
+
+            timestamp:
+
+                new Date().toISOString(),
+
+            version:
+
+                state.currentVersion,
+
+            data:
+
+                data || {}
+
+        };
+
+        state.history.unshift(
+
+            entry
+
+        );
+
+        if (
+
+            state.history.length >
+
+            CONFIG.historyLimit
+
+        ) {
+
+            state.history =
+
+                state.history.slice(
+
+                    0,
+
+                    CONFIG.historyLimit
+
                 );
 
+        }
 
-            state.availableVersion =
-                evaluation.remoteVersion ||
-                null;
+        saveStorageData();
 
+        emit(
 
-            availableUpdate =
-                evaluation.available
-                    ? evaluation
-                    : null;
+            "history",
 
+            entry
 
-            if (
-                evaluation.available
-            ) {
+        );
 
-                setStatus(
-                    STATUS.AVAILABLE
+    }
+
+    // ========================================================
+
+    // UPDATE MANIFEST
+
+    // ========================================================
+
+    function getLocalManifest() {
+
+        return {
+
+            name:
+
+                CONFIG.name,
+
+            version:
+
+                CONFIG.version,
+
+            edition:
+
+                CONFIG.edition,
+
+            build:
+
+                CONFIG.build,
+
+            channel:
+
+                CONFIG.channel,
+
+            environment:
+
+                CONFIG.environment,
+
+            updateAvailable:
+
+                false,
+
+            modules: [
+
+                "kernel",
+
+                "system",
+
+                "app-manager",
+
+                "app-router",
+
+                "app-registry",
+
+                "launcher",
+
+                "ai-core",
+
+                "ai-engine",
+
+                "ai-chat",
+
+                "ai-language",
+
+                "ai-memory",
+
+                "ai-speech",
+
+                "ai-voice",
+
+                "voice",
+
+                "ezidi-keyboard",
+
+                "language-manager",
+
+                "language-system",
+
+                "storage",
+
+                "storage-manager",
+
+                "config-manager",
+
+                "window-manager",
+
+                "module-manager",
+
+                "shell-manager",
+
+                "system-status",
+
+                "system-loader",
+
+                "startup",
+
+                "boot",
+
+                "logo-animation-manager",
+
+                "logo-intro-manager",
+
+                "haldo-light-system",
+
+                "software-update"
+
+            ],
+
+            timestamp:
+
+                new Date().toISOString()
+
+        };
+
+    }
+
+    // ========================================================
+
+    // REQUEST WITH TIMEOUT
+
+    // ========================================================
+
+    async function fetchWithTimeout(
+
+        url,
+
+        options
+
+    ) {
+
+        const controller =
+
+            typeof AbortController !==
+
+            "undefined"
+
+                ? new AbortController()
+
+                : null;
+
+        let timeoutId =
+
+            null;
+
+        if (controller) {
+
+            timeoutId =
+
+                window.setTimeout(
+
+                    function () {
+
+                        controller.abort();
+
+                    },
+
+                    CONFIG.requestTimeout
+
                 );
 
-            } else {
+        }
 
-                setStatus(
-                    STATUS.CURRENT
+        try {
+
+            const finalOptions =
+
+                Object.assign(
+
+                    {},
+
+                    options || {}
+
+                );
+
+            if (controller) {
+
+                finalOptions.signal =
+
+                    controller.signal;
+
+            }
+
+            return await fetch(
+
+                url,
+
+                finalOptions
+
+            );
+
+        } finally {
+
+            if (timeoutId) {
+
+                clearTimeout(
+
+                    timeoutId
+
                 );
 
             }
 
+        }
+
+    }
+
+    // ========================================================
+
+    // EXTERNAL MANIFEST
+
+    // ========================================================
+
+    async function fetchRemoteManifest() {
+
+        let url =
+
+            CONFIG.updateServer;
+
+        if (!url) {
+
+            url =
+
+                CONFIG.manifestPath;
+
+        }
+
+        try {
+
+            const response =
+
+                await fetchWithTimeout(
+
+                    url,
+
+                    {
+
+                        method:
+
+                            "GET",
+
+                        cache:
+
+                            "no-store",
+
+                        headers: {
+
+                            "Accept":
+
+                                "application/json"
+
+                        }
+
+                    }
+
+                );
+
+            if (!response.ok) {
+
+                throw new Error(
+
+                    "HTTP " +
+
+                    response.status
+
+                );
+
+            }
+
+            const manifest =
+
+                await response.json();
+
+            return manifest;
+
+        } catch (requestError) {
+
+            throw requestError;
+
+        }
+
+    }
+
+    // ========================================================
+
+    // VALIDATE MANIFEST
+
+    // ========================================================
+
+    function validateManifest(
+
+        manifest
+
+    ) {
+
+        if (
+
+            !manifest ||
+
+            typeof manifest !==
+
+                "object"
+
+        ) {
+
+            return false;
+
+        }
+
+        if (
+
+            typeof manifest.version !==
+
+            "string"
+
+        ) {
+
+            return false;
+
+        }
+
+        if (
+
+            !/^\d+\.\d+\.\d+/.test(
+
+                manifest.version
+
+            )
+
+        ) {
+
+            return false;
+
+        }
+
+        return true;
+
+    }
+
+    // ========================================================
+
+    // CHECK UPDATE
+
+    // ========================================================
+
+    async function check(options) {
+
+        if (state.checking) {
+
+            return {
+
+                success:
+
+                    false,
+
+                status:
+
+                    "already_checking",
+
+                version:
+
+                    state.currentVersion
+
+            };
+
+        }
+
+        state.checking =
+
+            true;
+
+        state.lastError =
+
+            null;
+
+        emit(
+
+            "check:start",
+
+            {
+
+                version:
+
+                    state.currentVersion
+
+            }
+
+        );
+
+        let remoteManifest =
+
+            null;
+
+        let source =
+
+            "local";
+
+        try {
+
+            // ------------------------------------------------
+
+            // Falls ein Update-Server vorhanden ist:
+
+            // echten Manifest abrufen.
+
+            // ------------------------------------------------
+
+            if (
+
+                CONFIG.updateServer ||
+
+                (
+
+                    options &&
+
+                    options.manifestUrl
+
+                )
+
+            ) {
+
+                const original =
+
+                    CONFIG.updateServer;
+
+                if (
+
+                    options &&
+
+                    options.manifestUrl
+
+                ) {
+
+                    CONFIG.updateServer =
+
+                        options.manifestUrl;
+
+                }
+
+                try {
+
+                    remoteManifest =
+
+                        await fetchRemoteManifest();
+
+                    source =
+
+                        "remote";
+
+                } finally {
+
+                    CONFIG.updateServer =
+
+                        original;
+
+                }
+
+            }
+
+            // ------------------------------------------------
+
+            // Lokale Foundation
+
+            // ------------------------------------------------
+
+            if (
+
+                !remoteManifest
+
+            ) {
+
+                remoteManifest =
+
+                    getLocalManifest();
+
+                source =
+
+                    "local";
+
+            }
+
+            if (
+
+                !validateManifest(
+
+                    remoteManifest
+
+                )
+
+            ) {
+
+                throw new Error(
+
+                    "Ungültiges Update-Manifest."
+
+                );
+
+            }
+
+            state.lastCheck =
+
+                new Date().toISOString();
+
+            state.latestVersion =
+
+                remoteManifest.version;
+
+            state.available =
+
+                isNewerVersion(
+
+                    remoteManifest.version,
+
+                    state.currentVersion
+
+                );
+
+            state.lastResult =
+
+                state.available
+
+                    ? "update_available"
+
+                    : "current";
+
+            saveStorageData();
 
             const result = {
 
                 success:
+
                     true,
 
                 status:
-                    currentStatus,
 
-                updateAvailable:
-                    evaluation.available,
+                    state.lastResult,
 
                 currentVersion:
-                    state.installedVersion,
 
-                availableVersion:
-                    evaluation.remoteVersion,
+                    state.currentVersion,
 
-                reason:
-                    evaluation.reason,
+                latestVersion:
 
-                systemCheck:
-                    localCheck,
+                    state.latestVersion,
+
+                available:
+
+                    state.available,
+
+                source:
+
+                    source,
 
                 manifest:
+
                     remoteManifest
 
             };
 
-
             addHistory(
 
-                evaluation.available
-                    ? "update-available"
-                    : "check",
+                "check",
 
-                result
+                {
+
+                    status:
+
+                        result.status,
+
+                    source:
+
+                        source,
+
+                    currentVersion:
+
+                        result.currentVersion,
+
+                    latestVersion:
+
+                        result.latestVersion
+
+                }
 
             );
-
 
             emit(
-                "software:update-check-complete",
+
+                "check:complete",
+
                 result
+
             );
 
+            if (
+
+                state.available
+
+            ) {
+
+                emit(
+
+                    "update:available",
+
+                    result
+
+                );
+
+            } else {
+
+                emit(
+
+                    "update:current",
+
+                    result
+
+                );
+
+            }
 
             return result;
 
+        } catch (checkError) {
 
-        } catch (error) {
+            state.lastError =
 
-            setStatus(
-                STATUS.ERROR
-            );
+                checkError;
 
+            state.lastCheck =
+
+                new Date().toISOString();
+
+            state.lastResult =
+
+                "check_error";
+
+            saveStorageData();
 
             const result = {
 
                 success:
+
                     false,
 
                 status:
-                    STATUS.ERROR,
+
+                    "check_error",
+
+                currentVersion:
+
+                    state.currentVersion,
+
+                latestVersion:
+
+                    state.currentVersion,
+
+                available:
+
+                    false,
+
+                source:
+
+                    source,
 
                 error:
-                    error.message ||
-                    String(error)
+
+                    checkError.message ||
+
+                    String(checkError)
 
             };
 
-
             addHistory(
-                "check-error",
-                result
-            );
 
+                "check_error",
+
+                {
+
+                    error:
+
+                        result.error
+
+                }
+
+            );
 
             emit(
-                "software:update-error",
+
+                "check:error",
+
                 result
+
             );
 
+            warn(
+
+                "Update-Prüfung fehlgeschlagen:",
+
+                checkError
+
+            );
 
             return result;
 
-
         } finally {
 
-            checkInProgress =
+            state.checking =
+
                 false;
 
         }
 
     }
 
-
-    // ========================================================
-    // UPDATE HISTORIE
     // ========================================================
 
-    function addHistory(
-        type,
-        data
-    ) {
+    // INSTALL UPDATE FOUNDATION
 
-        const entry = {
+    // ========================================================
 
-            id:
-                "update-" +
-                Date.now() +
-                "-" +
-                Math.random()
-                    .toString(36)
-                    .slice(2, 8),
+    async function install(update) {
 
-            type:
-                type,
+        if (state.installing) {
 
-            timestamp:
-                new Date().toISOString(),
+            return {
 
-            data:
-                data || {}
+                success:
 
-        };
+                    false,
 
+                status:
 
-        state.updateHistory =
-            Array.isArray(
-                state.updateHistory
+                    "already_installing"
+
+            };
+
+        }
+
+        if (
+
+            !update ||
+
+            typeof update !==
+
+                "object"
+
+        ) {
+
+            return {
+
+                success:
+
+                    false,
+
+                status:
+
+                    "invalid_update"
+
+            };
+
+        }
+
+        const targetVersion =
+
+            update.version ||
+
+            state.latestVersion;
+
+        if (
+
+            !isNewerVersion(
+
+                targetVersion,
+
+                state.currentVersion
+
             )
-                ? state.updateHistory
-                : [];
 
-
-        state.updateHistory.unshift(
-            entry
-        );
-
-
-        if (
-            state.updateHistory.length >
-            CONFIG.historyLimit
         ) {
 
-            state.updateHistory =
-                state.updateHistory.slice(
-                    0,
-                    CONFIG.historyLimit
-                );
+            return {
+
+                success:
+
+                    false,
+
+                status:
+
+                    "no_newer_version",
+
+                version:
+
+                    state.currentVersion
+
+            };
 
         }
 
+        state.installing =
 
-        saveState();
-
-    }
-
-
-    function getHistory() {
-
-        return [
-            ...(state.updateHistory || [])
-        ];
-
-    }
-
-
-    function clearHistory() {
-
-        state.updateHistory =
-            [];
-
-        saveState();
+            true;
 
         emit(
-            "software:update-history-cleared"
+
+            "install:start",
+
+            {
+
+                version:
+
+                    targetVersion
+
+            }
+
         );
-
-    }
-
-
-    // ========================================================
-    // UPDATE INSTALLATION
-    //
-    // Foundation für zukünftige echte Updates.
-    // ========================================================
-
-    async function installUpdate(
-        update
-    ) {
-
-        if (!update) {
-
-            update =
-                availableUpdate;
-
-        }
-
-
-        if (!update) {
-
-            return {
-
-                success:
-                    false,
-
-                message:
-                    "Kein Update zur Installation vorhanden."
-
-            };
-
-        }
-
-
-        if (
-            !update.remoteVersion
-        ) {
-
-            return {
-
-                success:
-                    false,
-
-                message:
-                    "Keine gültige Zielversion vorhanden."
-
-            };
-
-        }
-
-
-        const comparison =
-            compareVersions(
-                update.remoteVersion,
-                state.installedVersion
-            );
-
-
-        if (
-            comparison <= 0
-        ) {
-
-            return {
-
-                success:
-                    false,
-
-                message:
-                    "Die installierte Version ist bereits aktuell."
-
-            };
-
-        }
-
-
-        setStatus(
-            STATUS.INSTALLING
-        );
-
-
-        emit(
-            "software:update-install-start",
-            update
-        );
-
 
         try {
 
-            /*
-             * Aktuell ist noch kein echter Download-
-             * und Installationsserver hinterlegt.
-             *
-             * Deshalb wird hier NICHT einfach eine
-             * Version vorgetäuscht.
-             *
-             * Sobald ein echter Update-Server
-             * angeschlossen wird, kommt hier:
-             *
-             * 1. Manifest prüfen
-             * 2. Dateien herunterladen
-             * 3. Integrität prüfen
-             * 4. Backup erstellen
-             * 5. Dateien aktualisieren
-             * 6. Module neu laden
-             * 7. Systemprüfung
-             */
+            // ------------------------------------------------
 
-            throw new Error(
-                "Echte Online-Installation ist noch nicht konfiguriert."
-            );
+            // Sicherheitsprüfung
 
+            // ------------------------------------------------
 
-        } catch (error) {
+            if (
 
-            setStatus(
-                STATUS.ERROR
-            );
+                !validateManifest(
 
+                    update
+
+                )
+
+            ) {
+
+                throw new Error(
+
+                    "Update-Manifest ist ungültig."
+
+                );
+
+            }
+
+            // ------------------------------------------------
+
+            // Diese Foundation führt absichtlich
+
+            // KEIN blindes Überschreiben von Dateien aus.
+
+            //
+
+            // Für echte Updates wird später ein dediziertes
+
+            // Update-Paket / Service angeschlossen.
+
+            // ------------------------------------------------
 
             const result = {
 
                 success:
-                    false,
+
+                    true,
 
                 status:
-                    STATUS.ERROR,
 
-                message:
-                    error.message ||
-                    String(error),
+                    "prepared",
+
+                currentVersion:
+
+                    state.currentVersion,
 
                 targetVersion:
-                    update.remoteVersion
+
+                    targetVersion,
+
+                message:
+
+                    "Update-Paket wurde geprüft und für die Installation vorbereitet.",
+
+                manifest:
+
+                    update
 
             };
 
-
             addHistory(
-                "install-error",
-                result
-            );
 
+                "install_prepared",
+
+                {
+
+                    targetVersion:
+
+                        targetVersion
+
+                }
+
+            );
 
             emit(
-                "software:update-install-error",
-                result
-            );
 
+                "install:prepared",
+
+                result
+
+            );
 
             return result;
 
-        }
+        } catch (installError) {
 
-    }
+            const result = {
 
+                success:
 
-    // ========================================================
-    // SIMULIERTER TESTLAUF
-    //
-    // Nur für Entwicklung/Diagnose.
-    // Er verändert NICHT die installierte Version.
-    // ========================================================
+                    false,
 
-    async function runUpdateTest() {
+                status:
 
-        setStatus(
-            STATUS.CHECKING
-        );
+                    "install_error",
 
+                error:
 
-        emit(
-            "software:update-test-start"
-        );
+                    installError.message ||
 
+                    String(installError)
 
-        await wait(350);
+            };
 
+            addHistory(
 
-        const systemCheck =
-            runLocalSystemCheck();
+                "install_error",
 
+                {
 
-        await wait(350);
+                    error:
 
-
-        const result = {
-
-            success:
-                systemCheck.success,
-
-            type:
-                "foundation-test",
-
-            version:
-                state.installedVersion,
-
-            systemCheck:
-                systemCheck,
-
-            timestamp:
-                new Date().toISOString()
-
-        };
-
-
-        setStatus(
-            systemCheck.success
-                ? STATUS.CURRENT
-                : STATUS.ERROR
-        );
-
-
-        addHistory(
-            "foundation-test",
-            result
-        );
-
-
-        emit(
-            "software:update-test-complete",
-            result
-        );
-
-
-        return result;
-
-    }
-
-
-    // ========================================================
-    // HILFSFUNKTION
-    // ========================================================
-
-    function wait(
-        milliseconds
-    ) {
-
-        return new Promise(
-            function (resolve) {
-
-                window.setTimeout(
-                    resolve,
-                    milliseconds
-                );
-
-            }
-        );
-
-    }
-
-
-    // ========================================================
-    // KOMPONENTEN ABFRAGEN
-    // ========================================================
-
-    function getComponents() {
-
-        return state.components.map(
-            function (component) {
-
-                return {
-                    ...component
-                };
-
-            }
-        );
-
-    }
-
-
-    // ========================================================
-    // KOMPONENTEN AKTUALISIEREN
-    // ========================================================
-
-    function registerComponent(
-        component
-    ) {
-
-        if (
-            !component ||
-            !component.id
-        ) {
-
-            return false;
-
-        }
-
-
-        const existingIndex =
-            state.components.findIndex(
-                function (item) {
-
-                    return (
-                        item.id ===
-                        component.id
-                    );
+                        result.error
 
                 }
+
             );
 
+            emit(
 
-        const normalized = {
+                "install:error",
 
-            id:
-                component.id,
+                result
 
-            name:
-                component.name ||
-                component.id,
-
-            type:
-                component.type ||
-                "module",
-
-            version:
-                component.version ||
-                "18.0.0",
-
-            required:
-                Boolean(
-                    component.required
-                ),
-
-            state:
-                component.state ||
-                "installed"
-
-        };
-
-
-        if (
-            existingIndex >= 0
-        ) {
-
-            state.components[
-                existingIndex
-            ] =
-                Object.assign(
-                    {},
-                    state.components[
-                        existingIndex
-                    ],
-                    normalized
-                );
-
-        } else {
-
-            state.components.push(
-                normalized
             );
 
-        }
+            return result;
 
+        } finally {
 
-        saveState();
+            state.installing =
 
-
-        emit(
-            "software:component-registered",
-            normalized
-        );
-
-
-        return true;
-
-    }
-
-
-    // ========================================================
-    // INSTALLIERTE VERSION
-    // ========================================================
-
-    function getInstalledVersion() {
-
-        return state.installedVersion;
-
-    }
-
-
-    function getEdition() {
-
-        return state.installedEdition;
-
-    }
-
-
-    // ========================================================
-    // MANIFEST ERSTELLEN
-    // ========================================================
-
-    function getManifest() {
-
-        return createLocalManifest();
-
-    }
-
-
-    // ========================================================
-    // UPDATE ENDPOINT SETZEN
-    // ========================================================
-
-    function setUpdateEndpoint(
-        endpoint
-    ) {
-
-        if (
-            endpoint === null ||
-            endpoint === ""
-        ) {
-
-            CONFIG.updateEndpoint =
-                null;
-
-            return true;
+                false;
 
         }
 
-
-        if (
-            typeof endpoint !==
-            "string"
-        ) {
-
-            return false;
-
-        }
-
-
-        CONFIG.updateEndpoint =
-            endpoint.trim();
-
-
-        return true;
-
     }
 
-
-    // ========================================================
-    // KONFIGURATION
     // ========================================================
 
-    function getConfig() {
+    // UPDATE STATUS
+
+    // ========================================================
+
+    function getStatus() {
 
         return {
 
-            ...CONFIG,
+            name:
 
-            updateEndpoint:
-                CONFIG.updateEndpoint
+                CONFIG.name,
+
+            version:
+
+                state.currentVersion,
+
+            latestVersion:
+
+                state.latestVersion,
+
+            edition:
+
+                CONFIG.edition,
+
+            build:
+
+                CONFIG.build,
+
+            channel:
+
+                CONFIG.channel,
+
+            environment:
+
+                CONFIG.environment,
+
+            checking:
+
+                state.checking,
+
+            installing:
+
+                state.installing,
+
+            available:
+
+                state.available,
+
+            lastCheck:
+
+                state.lastCheck,
+
+            lastResult:
+
+                state.lastResult,
+
+            lastError:
+
+                state.lastError
+
+                    ? (
+
+                        state.lastError.message ||
+
+                        String(state.lastError)
+
+                    )
+
+                    : null
 
         };
 
     }
 
-
-    // ========================================================
-    // RESET
     // ========================================================
 
-    function reset() {
+    // VERSION API
 
-        state =
-            createDefaultState();
+    // ========================================================
 
-        currentStatus =
-            STATUS.IDLE;
+    function getVersion() {
 
-        lastCheck =
-            null;
-
-        availableUpdate =
-            null;
-
-        checkInProgress =
-            false;
-
-        saveState();
-
-
-        emit(
-            "software:update-reset"
-        );
-
-
-        return true;
+        return state.currentVersion;
 
     }
 
+    function getLatestVersion() {
+
+        return state.latestVersion;
+
+    }
 
     // ========================================================
-    // ÖFFENTLICHE API
+
+    // HISTORY API
+
     // ========================================================
 
-    const SoftwareUpdate = {
+    function getHistory() {
+
+        return state.history.map(
+
+            function (entry) {
+
+                return Object.assign(
+
+                    {},
+
+                    entry
+
+                );
+
+            }
+
+        );
+
+    }
+
+    function clearHistory() {
+
+        state.history =
+
+            [];
+
+        saveStorageData();
+
+        emit(
+
+            "history:cleared"
+
+        );
+
+    }
+
+    // ========================================================
+
+    // MODULE REGISTRATION
+
+    // ========================================================
+
+    function registerWithKernel() {
+
+        const kernel =
+
+            window.HalDoKernel ||
+
+            (
+
+                window.HalDoOS &&
+
+                window.HalDoOS.kernel
+
+            );
+
+        if (!kernel) {
+
+            return false;
+
+        }
+
+        try {
+
+            if (
+
+                typeof kernel.registerModule ===
+
+                "function"
+
+            ) {
+
+                kernel.registerModule(
+
+                    "software-update",
+
+                    api
+
+                );
+
+            }
+
+            if (
+
+                typeof kernel.setModuleReady ===
+
+                "function"
+
+            ) {
+
+                kernel.setModuleReady(
+
+                    "software-update"
+
+                );
+
+            }
+
+            return true;
+
+        } catch (kernelError) {
+
+            warn(
+
+                "Kernel-Verbindung konnte nicht hergestellt werden.",
+
+                kernelError
+
+            );
+
+            return false;
+
+        }
+
+    }
+
+    // ========================================================
+
+    // SYSTEM REGISTRATION
+
+    // ========================================================
+
+    function registerWithSystem() {
+
+        const system =
+
+            window.HalDoSystem ||
+
+            (
+
+                window.HalDoOS &&
+
+                window.HalDoOS.system
+
+            );
+
+        if (!system) {
+
+            return false;
+
+        }
+
+        try {
+
+            if (
+
+                typeof system.registerService ===
+
+                "function"
+
+            ) {
+
+                system.registerService(
+
+                    "software-update",
+
+                    api
+
+                );
+
+            }
+
+            return true;
+
+        } catch (systemError) {
+
+            warn(
+
+                "System-Verbindung konnte nicht hergestellt werden.",
+
+                systemError
+
+            );
+
+            return false;
+
+        }
+
+    }
+
+    // ========================================================
+
+    // GLOBAL HALDO EVENTS
+
+    // ========================================================
+
+    function connectGlobalEvents() {
+
+        const globalEvents =
+
+            window.HalDoOS &&
+
+            window.HalDoOS.events;
+
+        if (
+
+            !globalEvents ||
+
+            typeof globalEvents.on !==
+
+                "function"
+
+        ) {
+
+            return;
+
+        }
+
+        globalEvents.on(
+
+            "kernel:ready",
+
+            function () {
+
+                registerWithKernel();
+
+            }
+
+        );
+
+        globalEvents.on(
+
+            "system:ready",
+
+            function () {
+
+                registerWithSystem();
+
+            }
+
+        );
+
+    }
+
+    // ========================================================
+
+    // AUTO CHECK
+
+    // ========================================================
+
+    function startAutoCheck() {
+
+        stopAutoCheck();
+
+        if (
+
+            !CONFIG.updateCheckInterval
+
+        ) {
+
+            return;
+
+        }
+
+        state.timer =
+
+            window.setInterval(
+
+                function () {
+
+                    check();
+
+                },
+
+                CONFIG.updateCheckInterval
+
+            );
+
+    }
+
+    function stopAutoCheck() {
+
+        if (state.timer) {
+
+            window.clearInterval(
+
+                state.timer
+
+            );
+
+            state.timer =
+
+                null;
+
+        }
+
+    }
+
+    // ========================================================
+
+    // INITIALIZATION
+
+    // ========================================================
+
+    function init() {
+
+        if (
+
+            state.initialized
+
+        ) {
+
+            return api;
+
+        }
+
+        loadStorageData();
+
+        connectGlobalEvents();
+
+        registerWithKernel();
+
+        registerWithSystem();
+
+        startAutoCheck();
+
+        state.initialized =
+
+            true;
+
+        emit(
+
+            "ready",
+
+            getStatus()
+
+        );
+
+        log(
+
+            "Software Update System bereit.",
+
+            getStatus()
+
+        );
+
+        return api;
+
+    }
+
+    // ========================================================
+
+    // SHUTDOWN
+
+    // ========================================================
+
+    function destroy() {
+
+        stopAutoCheck();
+
+        state.initialized =
+
+            false;
+
+        emit(
+
+            "destroy"
+
+        );
+
+    }
+
+    // ========================================================
+
+    // PUBLIC API
+
+    // ========================================================
+
+    const api = {
+
+        // ----------------------------------------------------
+
+        // Core
+
+        // ----------------------------------------------------
 
         name:
+
             CONFIG.name,
 
         version:
+
             CONFIG.version,
 
-        status:
+        edition:
 
-            function () {
-                return getStatus();
-            },
+            CONFIG.edition,
+
+        build:
+
+            CONFIG.build,
+
+        init:
+
+            init,
+
+        destroy:
+
+            destroy,
+
+        // ----------------------------------------------------
+
+        // Update
+
+        // ----------------------------------------------------
 
         check:
 
-            checkForUpdates,
+            check,
 
         install:
 
-            installUpdate,
+            install,
 
-        test:
+        // ----------------------------------------------------
 
-            runUpdateTest,
+        // Status
 
-        diagnostics:
+        // ----------------------------------------------------
 
-            runLocalSystemCheck,
+        getStatus:
+
+            getStatus,
 
         getVersion:
 
-            getInstalledVersion,
+            getVersion,
 
-        getEdition:
+        getLatestVersion:
 
-            getEdition,
+            getLatestVersion,
 
-        getComponents:
+        // ----------------------------------------------------
 
-            getComponents,
+        // Version
 
-        registerComponent:
+        // ----------------------------------------------------
 
-            registerComponent,
+        compareVersions:
 
-        getManifest:
+            compareVersions,
 
-            getManifest,
+        isNewerVersion:
+
+            isNewerVersion,
+
+        // ----------------------------------------------------
+
+        // History
+
+        // ----------------------------------------------------
 
         getHistory:
 
@@ -2133,277 +2288,154 @@
 
             clearHistory,
 
-        setEndpoint:
+        // ----------------------------------------------------
 
-            setUpdateEndpoint,
+        // Events
+
+        // ----------------------------------------------------
+
+        on:
+
+            on,
+
+        off:
+
+            off,
+
+        emit:
+
+            emit,
+
+        // ----------------------------------------------------
+
+        // Configuration
+
+        // ----------------------------------------------------
 
         getConfig:
 
-            getConfig,
+            function () {
 
-        reset:
+                return Object.assign(
 
-            reset,
+                    {},
 
-        states:
-            {
-                ...STATUS
+                    CONFIG
+
+                );
+
+            },
+
+        setUpdateServer:
+
+            function (url) {
+
+                if (
+
+                    url === null ||
+
+                    url === ""
+
+                ) {
+
+                    CONFIG.updateServer =
+
+                        null;
+
+                    return true;
+
+                }
+
+                if (
+
+                    typeof url !==
+
+                    "string"
+
+                ) {
+
+                    return false;
+
+                }
+
+                CONFIG.updateServer =
+
+                    url;
+
+                return true;
+
             }
 
     };
 
-
     // ========================================================
-    // GLOBALE API
+
+    // GLOBAL EXPORTS
+
     // ========================================================
 
     window.HalDoSoftwareUpdate =
-        SoftwareUpdate;
 
+        api;
 
     window.HalDoOS.softwareUpdate =
-        SoftwareUpdate;
 
+        api;
+
+    // ========================================================
+
+    // LEGACY / EASY ACCESS
+
+    // ========================================================
 
     window.HalDoOS.update =
-        SoftwareUpdate;
 
+        api;
 
-    // ========================================================
-    // KOMPONENTEN AUS BESTEHENDER HALDO-UMGEBUNG
-    // REGISTRIEREN
-    // ========================================================
+    window.HalDoOS.checkForUpdates =
 
-    function registerKnownRuntimeComponents() {
-
-        const runtime =
-            detectRuntimeComponents();
-
-
-        runtime.forEach(
-            function (component) {
-
-                registerComponent({
-
-                    id:
-                        component.id,
-
-                    name:
-                        component.name,
-
-                    type:
-                        "runtime",
-
-                    version:
-                        state.installedVersion,
-
-                    required:
-                        false,
-
-                    state:
-                        component.state
-
-                });
-
-            }
-        );
-
-    }
-
-
-    // ========================================================
-    // EVENTS FÜR ONLINE/OFFLINE
-    // ========================================================
-
-    window.addEventListener(
-        "online",
         function () {
 
-            emit(
-                "software:network-online"
-            );
+            return api.check();
 
-        }
-    );
-
-
-    window.addEventListener(
-        "offline",
-        function () {
-
-            emit(
-                "software:network-offline"
-            );
-
-        }
-    );
-
+        };
 
     // ========================================================
-    // AUTO CHECK
-    // ========================================================
 
-    let autoCheckTimer =
-        null;
+    // START
 
-
-    function startAutoCheck() {
-
-        if (
-            autoCheckTimer
-        ) {
-
-            return;
-
-        }
-
-
-        if (
-            !CONFIG.autoCheck
-        ) {
-
-            return;
-
-        }
-
-
-        autoCheckTimer =
-            window.setInterval(
-                function () {
-
-                    if (
-                        navigator.onLine === false
-                    ) {
-
-                        return;
-
-                    }
-
-
-                    checkForUpdates();
-
-                },
-                CONFIG.autoCheckInterval
-            );
-
-    }
-
-
-    function stopAutoCheck() {
-
-        if (
-            autoCheckTimer
-        ) {
-
-            window.clearInterval(
-                autoCheckTimer
-            );
-
-            autoCheckTimer =
-                null;
-
-        }
-
-    }
-
-
-    SoftwareUpdate.startAutoCheck =
-        startAutoCheck;
-
-
-    SoftwareUpdate.stopAutoCheck =
-        stopAutoCheck;
-
-
-    // ========================================================
-    // INITIALISIERUNG
-    // ========================================================
-
-    function initialize() {
-
-        registerKnownRuntimeComponents();
-
-        currentStatus =
-            state.status ||
-            STATUS.IDLE;
-
-
-        emit(
-            "software:update-ready",
-            {
-                version:
-                    state.installedVersion,
-
-                status:
-                    currentStatus,
-
-                components:
-                    state.components.length
-            }
-        );
-
-
-        if (
-            CONFIG.autoCheck
-        ) {
-
-            startAutoCheck();
-
-        }
-
-    }
-
-
-    // ========================================================
-    // DOM READY
     // ========================================================
 
     if (
+
         document.readyState ===
+
         "loading"
+
     ) {
 
         document.addEventListener(
+
             "DOMContentLoaded",
-            initialize,
+
+            function () {
+
+                init();
+
+            },
+
             {
+
                 once: true
+
             }
+
         );
 
     } else {
 
-        initialize();
+        init();
 
     }
-
-
-    // ========================================================
-    // DEBUG API
-    // ========================================================
-
-    if (
-        CONFIG.developmentMode
-    ) {
-
-        window.HalDoOS.debug =
-            window.HalDoOS.debug ||
-            {};
-
-        window.HalDoOS.debug.softwareUpdate =
-            SoftwareUpdate;
-
-    }
-
-
-    // ========================================================
-    // ENDE
-    // ========================================================
-
-    console.log(
-        "[HalDo AI OS 18] Software Update System bereit.",
-        CONFIG.version
-    );
-
 
 })(window, document);
