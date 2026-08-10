@@ -1,1092 +1,1396 @@
-// ============================================================
+// ==========================================
 // HalDo AI OS 18
-// js/app-router.js
 // Professional Ultimate Foundation
-// ============================================================
+// APP ROUTER
+// Version 18.0.0
+// ==========================================
 
 (function (window, document) {
-
     "use strict";
 
-    // --------------------------------------------------------
-    // GRUNDKONFIGURATION
-    // --------------------------------------------------------
-
     const VERSION = "18.0.0";
-    const MODULE_NAME = "app-router";
+    const NAME = "HalDo App Router";
 
-    const HalDoOS = window.HalDoOS =
-        window.HalDoOS || {};
-
-    // --------------------------------------------------------
-    // INTERNER ZUSTAND
-    // --------------------------------------------------------
-
-    const routes = new Map();
-    const history = [];
-
-    let currentRoute = null;
-    let initialized = false;
-
-    const listeners = {
-        beforeNavigate: [],
-        navigate: [],
-        afterNavigate: [],
-        error: []
+    const state = {
+        initialized: false,
+        currentApp: null,
+        previousApp: null,
+        history: [],
+        routes: new Map(),
+        aliases: new Map(),
+        listeners: new Map()
     };
 
-    // --------------------------------------------------------
-    // HILFSFUNKTIONEN
-    // --------------------------------------------------------
-
-    function log() {
-
-        if (
-            window.HalDoKernel &&
-            typeof window.HalDoKernel.log === "function"
-        ) {
-            window.HalDoKernel.log(
-                MODULE_NAME,
-                ...arguments
-            );
-            return;
-        }
-
-        console.log(
-            "[HalDoOS][" + MODULE_NAME + "]",
-            ...arguments
-        );
-    }
-
-    function warn() {
-
-        console.warn(
-            "[HalDoOS][" + MODULE_NAME + "]",
-            ...arguments
-        );
-
-    }
-
-    function error(err) {
-
-        console.error(
-            "[HalDoOS][" + MODULE_NAME + "]",
-            err
-        );
-
-        emit(
-            "error",
-            err
-        );
-
-    }
-
-    function emit(event, data) {
-
-        const callbacks =
-            listeners[event] || [];
-
-        callbacks.forEach(function (callback) {
-
-            try {
-                callback(data);
-            } catch (err) {
-                console.error(
-                    "[HalDoOS][app-router] Listener error:",
-                    err
-                );
-            }
-
-        });
-
-        // Verbindung zum globalen HalDoOS-Event-System
-        if (
-            HalDoOS.events &&
-            typeof HalDoOS.events.emit === "function"
-        ) {
-
-            try {
-
-                HalDoOS.events.emit(
-                    "app-router:" + event,
-                    data
-                );
-
-            } catch (err) {
-
-                console.warn(
-                    "[HalDoOS][app-router] Global event error:",
-                    err
-                );
-
-            }
-
-        }
-
-    }
+    // ==========================================
+    // EVENT SYSTEM
+    // ==========================================
 
     function on(event, callback) {
-
-        if (
-            !listeners[event] ||
-            typeof callback !== "function"
-        ) {
+        if (typeof callback !== "function") {
             return function () {};
         }
 
-        listeners[event].push(
-            callback
-        );
+        if (!state.listeners.has(event)) {
+            state.listeners.set(event, new Set());
+        }
+
+        state.listeners.get(event).add(callback);
 
         return function () {
-
-            off(
-                event,
-                callback
-            );
-
+            off(event, callback);
         };
-
     }
 
     function off(event, callback) {
+        const listeners = state.listeners.get(event);
 
-        if (!listeners[event]) {
+        if (!listeners) {
             return;
         }
 
-        const index =
-            listeners[event].indexOf(
-                callback
-            );
+        listeners.delete(callback);
 
-        if (index !== -1) {
-
-            listeners[event].splice(
-                index,
-                1
-            );
-
+        if (listeners.size === 0) {
+            state.listeners.delete(event);
         }
-
     }
 
-    // --------------------------------------------------------
-    // ROUTE NORMALISIERUNG
-    // --------------------------------------------------------
+    function emit(event, data) {
+        const listeners = state.listeners.get(event);
 
-    function normalizeRoute(route) {
-
-        if (route === null ||
-            route === undefined) {
-
-            return "/";
-
+        if (!listeners) {
+            return;
         }
 
-        let value =
-            String(route).trim();
-
-        if (!value) {
-            return "/";
-        }
-
-        // URL-Hash entfernen
-        if (value.charAt(0) === "#") {
-            value = value.substring(1);
-        }
-
-        // Query getrennt behandeln
-        const queryIndex =
-            value.indexOf("?");
-
-        let path = value;
-        let query = "";
-
-        if (queryIndex !== -1) {
-
-            path =
-                value.substring(
-                    0,
-                    queryIndex
+        listeners.forEach(function (callback) {
+            try {
+                callback(data);
+            } catch (error) {
+                console.error(
+                    "[HalDo App Router] Event-Fehler:",
+                    error
                 );
-
-            query =
-                value.substring(
-                    queryIndex + 1
-                );
-
-        }
-
-        // Slash vereinheitlichen
-        if (!path.startsWith("/")) {
-            path = "/" + path;
-        }
-
-        // Doppelte Slashes entfernen
-        path =
-            path.replace(
-                /\/{2,}/g,
-                "/"
-            );
-
-        // Abschluss-Slash entfernen,
-        // außer bei Root
-        if (
-            path.length > 1 &&
-            path.endsWith("/")
-        ) {
-            path =
-                path.substring(
-                    0,
-                    path.length - 1
-                );
-        }
-
-        return {
-            path: path,
-            query: query,
-            full:
-                query
-                    ? path + "?" + query
-                    : path
-        };
-
-    }
-
-    // --------------------------------------------------------
-    // QUERY PARAMETER
-    // --------------------------------------------------------
-
-    function parseQuery(query) {
-
-        const params = {};
-
-        if (!query) {
-            return params;
-        }
-
-        query
-            .split("&")
-            .forEach(function (part) {
-
-                if (!part) {
-                    return;
-                }
-
-                const pair =
-                    part.split("=");
-
-                const key =
-                    decodeURIComponent(
-                        pair[0] || ""
-                    );
-
-                const value =
-                    decodeURIComponent(
-                        pair
-                            .slice(1)
-                            .join("=") || ""
-                    );
-
-                if (key) {
-                    params[key] = value;
-                }
-
-            });
-
-        return params;
-
-    }
-
-    // --------------------------------------------------------
-    // ROUTE REGISTRIEREN
-    // --------------------------------------------------------
-
-    function register(path, handler, options) {
-
-        const normalized =
-            normalizeRoute(path);
-
-        const routePath =
-            typeof normalized === "string"
-                ? normalized
-                : normalized.path;
-
-        if (!routePath) {
-            return false;
-        }
-
-        options =
-            options || {};
-
-        routes.set(
-            routePath,
-            {
-                path: routePath,
-                handler:
-                    typeof handler === "function"
-                        ? handler
-                        : null,
-
-                app:
-                    options.app ||
-                    options.appId ||
-                    null,
-
-                title:
-                    options.title ||
-                    null,
-
-                metadata:
-                    options.metadata ||
-                    {},
-
-                before:
-                    typeof options.before === "function"
-                        ? options.before
-                        : null,
-
-                after:
-                    typeof options.after === "function"
-                        ? options.after
-                        : null
             }
-        );
-
-        log(
-            "Route registriert:",
-            routePath
-        );
-
-        return true;
-
+        });
     }
 
-    // --------------------------------------------------------
-    // ROUTE ENTFERNEN
-    // --------------------------------------------------------
+    // ==========================================
+    // HELPERS
+    // ==========================================
 
-    function unregister(path) {
-
-        const normalized =
-            normalizeRoute(path);
-
-        const routePath =
-            typeof normalized === "string"
-                ? normalized
-                : normalized.path;
-
-        return routes.delete(
-            routePath
-        );
-
+    function normalize(value) {
+        return String(value || "")
+            .trim()
+            .toLowerCase()
+            .replace(/\s+/g, "-");
     }
-
-    // --------------------------------------------------------
-    // ROUTE ABRUFEN
-    // --------------------------------------------------------
-
-    function getRoute(path) {
-
-        const normalized =
-            normalizeRoute(path);
-
-        const routePath =
-            typeof normalized === "string"
-                ? normalized
-                : normalized.path;
-
-        return (
-            routes.get(
-                routePath
-            ) || null
-        );
-
-    }
-
-    // --------------------------------------------------------
-    // ALLE ROUTES
-    // --------------------------------------------------------
-
-    function getRoutes() {
-
-        return Array.from(
-            routes.values()
-        );
-
-    }
-
-    // --------------------------------------------------------
-    // ROUTE EXISTIERT?
-    // --------------------------------------------------------
-
-    function hasRoute(path) {
-
-        return !!getRoute(
-            path
-        );
-
-    }
-
-    // --------------------------------------------------------
-    // APP MANAGER ERMITTELN
-    // --------------------------------------------------------
 
     function getAppManager() {
-
-        if (
-            window.HalDoAppManager
-        ) {
-            return window.HalDoAppManager;
-        }
-
-        if (
-            HalDoOS.appManager
-        ) {
-            return HalDoOS.appManager;
-        }
-
-        return null;
-
+        return (
+            window.HalDoAppManager ||
+            (
+                window.HalDoOS &&
+                window.HalDoOS.appManager
+            ) ||
+            null
+        );
     }
-
-    // --------------------------------------------------------
-    // APP REGISTRY ERMITTELN
-    // --------------------------------------------------------
 
     function getAppRegistry() {
-
-        if (
-            window.HalDoAppRegistry
-        ) {
-            return window.HalDoAppRegistry;
-        }
-
-        if (
-            HalDoOS.appRegistry
-        ) {
-            return HalDoOS.appRegistry;
-        }
-
-        return null;
-
-    }
-
-    // --------------------------------------------------------
-    // APP ÖFFNEN
-    // --------------------------------------------------------
-
-    async function openApp(appId, data) {
-
-        const manager =
-            getAppManager();
-
-        if (
-            manager &&
-            typeof manager.openApp === "function"
-        ) {
-
-            return manager.openApp(
-                appId,
-                data
-            );
-
-        }
-
-        if (
-            manager &&
-            typeof manager.launch === "function"
-        ) {
-
-            return manager.launch(
-                appId,
-                data
-            );
-
-        }
-
-        if (
-            window.HalDoLauncher &&
-            typeof window.HalDoLauncher.open === "function"
-        ) {
-
-            return window.HalDoLauncher.open(
-                appId,
-                data
-            );
-
-        }
-
-        warn(
-            "Kein App Manager/Launcher für:",
-            appId
+        return (
+            window.HalDoAppRegistry ||
+            (
+                window.HalDoOS &&
+                window.HalDoOS.appRegistry
+            ) ||
+            null
         );
-
-        return false;
-
     }
 
-    // --------------------------------------------------------
-    // APP SCHLIESSEN
-    // --------------------------------------------------------
-
-    async function closeApp(appId) {
-
-        const manager =
-            getAppManager();
-
-        if (
-            manager &&
-            typeof manager.closeApp === "function"
-        ) {
-
-            return manager.closeApp(
-                appId
-            );
-
-        }
-
-        if (
-            manager &&
-            typeof manager.close === "function"
-        ) {
-
-            return manager.close(
-                appId
-            );
-
-        }
-
-        return false;
-
-    }
-
-    // --------------------------------------------------------
-    // NAVIGATION
-    // --------------------------------------------------------
-
-    async function navigate(target, options) {
-
-        options =
-            options || {};
-
-        const normalized =
-            normalizeRoute(target);
-
-        const path =
-            typeof normalized === "string"
-                ? normalized
-                : normalized.path;
-
-        const full =
-            typeof normalized === "string"
-                ? normalized
-                : normalized.full;
-
-        const query =
-            typeof normalized === "string"
-                ? ""
-                : normalized.query;
-
-        const params =
-            parseQuery(
-                query
-            );
-
-        const route =
-            routes.get(
-                path
-            );
-
-        const context = {
-
-            path: path,
-            full: full,
-            query: query,
-            params: params,
-
-            from:
-                currentRoute
-                    ? currentRoute.path
-                    : null,
-
-            options: options,
-
-            timestamp:
-                Date.now()
-
-        };
-
-        emit(
-            "beforeNavigate",
-            context
+    function getLauncher() {
+        return (
+            window.HalDoAppLauncher ||
+            window.HalDoLauncher ||
+            (
+                window.HalDoOS &&
+                window.HalDoOS.launcher
+            ) ||
+            null
         );
+    }
 
-        // Route nicht registriert:
-        // App-Registry prüfen.
-        if (!route) {
+    function getWindowManager() {
+        return (
+            window.HalDoWindowManager ||
+            (
+                window.HalDoOS &&
+                window.HalDoOS.windowManager
+            ) ||
+            null
+        );
+    }
 
-            const registry =
-                getAppRegistry();
+    // ==========================================
+    // ROUTE REGISTRATION
+    // ==========================================
 
-            if (
-                registry &&
-                typeof registry.getApp === "function"
-            ) {
+    function register(route, config) {
+        const normalizedRoute = normalize(route);
 
-                const app =
-                    registry.getApp(
-                        path
-                    );
-
-                if (app) {
-
-                    context.app =
-                        app;
-
-                    const result =
-                        await openApp(
-                            app.id ||
-                            path,
-                            context
-                        );
-
-                    if (result !== false) {
-
-                        updateHistory(
-                            context,
-                            options
-                        );
-
-                        currentRoute =
-                            context;
-
-                        emit(
-                            "navigate",
-                            context
-                        );
-
-                        emit(
-                            "afterNavigate",
-                            context
-                        );
-
-                        return result;
-
-                    }
-
-                }
-
-            }
-
-            // Direkt als App-ID versuchen
-            if (
-                options.openApp !== false
-            ) {
-
-                const result =
-                    await openApp(
-                        path.replace(
-                            /^\//,
-                            ""
-                        ),
-                        context
-                    );
-
-                if (result !== false) {
-
-                    updateHistory(
-                        context,
-                        options
-                    );
-
-                    currentRoute =
-                        context;
-
-                    emit(
-                        "navigate",
-                        context
-                    );
-
-                    emit(
-                        "afterNavigate",
-                        context
-                    );
-
-                    return result;
-
-                }
-
-            }
-
-            warn(
-                "Route nicht gefunden:",
-                path
-            );
-
-            return false;
-
-        }
-
-        // Route-Before-Hook
-        if (route.before) {
-
-            const allowed =
-                await route.before(
-                    context
-                );
-
-            if (allowed === false) {
-
-                return false;
-
-            }
-
-        }
-
-        // Handler ausführen
-        let result = true;
-
-        if (
-            typeof route.handler ===
-            "function"
-        ) {
-
-            result =
-                await route.handler(
-                    context
-                );
-
-        } else if (route.app) {
-
-            result =
-                await openApp(
-                    route.app,
-                    context
-                );
-
-        }
-
-        if (result === false) {
+        if (!normalizedRoute) {
             return false;
         }
 
-        // History
-        updateHistory(
-            context,
-            options
+        const definition =
+            typeof config === "function"
+                ? {
+                    handler: config
+                }
+                : Object.assign(
+                    {},
+                    config || {}
+                );
+
+        definition.route = normalizedRoute;
+
+        state.routes.set(
+            normalizedRoute,
+            definition
         );
 
-        currentRoute =
-            context;
+        if (Array.isArray(definition.aliases)) {
+            definition.aliases.forEach(function (alias) {
+                const normalizedAlias = normalize(alias);
 
-        // Route-After-Hook
-        if (route.after) {
-
-            await route.after(
-                context
-            );
-
+                if (normalizedAlias) {
+                    state.aliases.set(
+                        normalizedAlias,
+                        normalizedRoute
+                    );
+                }
+            });
         }
 
         emit(
-            "navigate",
-            context
-        );
-
-        emit(
-            "afterNavigate",
-            context
+            "route:registered",
+            definition
         );
 
         return true;
-
     }
 
-    // --------------------------------------------------------
-    // HISTORY
-    // --------------------------------------------------------
+    function unregister(route) {
+        const normalizedRoute = normalize(route);
 
-    function updateHistory(context, options) {
-
-        if (
-            options.replace === true &&
-            history.length
-        ) {
-
-            history[
-                history.length - 1
-            ] = context;
-
-            return;
-
+        if (!state.routes.has(normalizedRoute)) {
+            return false;
         }
 
-        if (
-            options.skipHistory === true
-        ) {
-            return;
-        }
+        state.routes.delete(normalizedRoute);
 
-        history.push(
-            context
+        state.aliases.forEach(
+            function (target, alias) {
+                if (target === normalizedRoute) {
+                    state.aliases.delete(alias);
+                }
+            }
         );
 
-        // History begrenzen
-        if (
-            history.length > 100
-        ) {
+        emit(
+            "route:unregistered",
+            normalizedRoute
+        );
 
-            history.shift();
-
-        }
-
+        return true;
     }
 
-    // --------------------------------------------------------
-    // ZURÜCK
-    // --------------------------------------------------------
+    function resolve(route) {
+        const normalizedRoute = normalize(route);
+
+        if (state.routes.has(normalizedRoute)) {
+            return state.routes.get(normalizedRoute);
+        }
+
+        const aliasTarget =
+            state.aliases.get(normalizedRoute);
+
+        if (aliasTarget) {
+            return state.routes.get(aliasTarget);
+        }
+
+        return null;
+    }
+
+    function has(route) {
+        return !!resolve(route);
+    }
+
+    // ==========================================
+    // APP RESOLUTION
+    // ==========================================
+
+    function resolveApp(appId) {
+        const normalizedId = normalize(appId);
+
+        const manager = getAppManager();
+
+        if (manager) {
+
+            if (
+                typeof manager.getApp ===
+                "function"
+            ) {
+                try {
+                    const app =
+                        manager.getApp(normalizedId);
+
+                    if (app) {
+                        return app;
+                    }
+                } catch (error) {
+                    console.warn(
+                        "[HalDo App Router] App Manager getApp Fehler:",
+                        error
+                    );
+                }
+            }
+
+            if (
+                typeof manager.get ===
+                "function"
+            ) {
+                try {
+                    const app =
+                        manager.get(normalizedId);
+
+                    if (app) {
+                        return app;
+                    }
+                } catch (error) {
+                    console.warn(
+                        "[HalDo App Router] App Manager get Fehler:",
+                        error
+                    );
+                }
+            }
+        }
+
+        const registry = getAppRegistry();
+
+        if (registry) {
+
+            if (
+                typeof registry.getApp ===
+                "function"
+            ) {
+                try {
+                    const app =
+                        registry.getApp(normalizedId);
+
+                    if (app) {
+                        return app;
+                    }
+                } catch (error) {
+                    console.warn(
+                        "[HalDo App Router] Registry getApp Fehler:",
+                        error
+                    );
+                }
+            }
+
+            if (
+                typeof registry.get ===
+                "function"
+            ) {
+                try {
+                    const app =
+                        registry.get(normalizedId);
+
+                    if (app) {
+                        return app;
+                    }
+                } catch (error) {
+                    console.warn(
+                        "[HalDo App Router] Registry get Fehler:",
+                        error
+                    );
+                }
+            }
+        }
+
+        return null;
+    }
+
+    // ==========================================
+    // APP OPENING
+    // ==========================================
+
+    async function open(appId, options) {
+
+        const id = normalize(appId);
+        const settings = Object.assign(
+            {
+                addHistory: true,
+                focus: true,
+                createWindow: true
+            },
+            options || {}
+        );
+
+        if (!id) {
+            return {
+                success: false,
+                error: "APP_ID_MISSING"
+            };
+        }
+
+        const route =
+            resolve(id);
+
+        if (route) {
+
+            if (
+                typeof route.handler ===
+                "function"
+            ) {
+                try {
+
+                    const result =
+                        await route.handler(
+                            settings
+                        );
+
+                    if (
+                        result !== false
+                    ) {
+                        setCurrentApp(id);
+                    }
+
+                    return {
+                        success: result !== false,
+                        route: id,
+                        result: result
+                    };
+
+                } catch (error) {
+
+                    reportError(
+                        "ROUTE_HANDLER_ERROR",
+                        error
+                    );
+
+                    return {
+                        success: false,
+                        error: error
+                    };
+                }
+            }
+        }
+
+        const app =
+            resolveApp(id);
+
+        if (!app) {
+
+            emit(
+                "app:not-found",
+                {
+                    id: id
+                }
+            );
+
+            return {
+                success: false,
+                error: "APP_NOT_FOUND",
+                appId: id
+            };
+        }
+
+        const manager =
+            getAppManager();
+
+        let result = null;
+
+        try {
+
+            if (
+                manager &&
+                typeof manager.openApp ===
+                "function"
+            ) {
+
+                result =
+                    await manager.openApp(
+                        id,
+                        settings
+                    );
+
+            } else if (
+                manager &&
+                typeof manager.launch ===
+                "function"
+            ) {
+
+                result =
+                    await manager.launch(
+                        id,
+                        settings
+                    );
+
+            } else if (
+                manager &&
+                typeof manager.open ===
+                "function"
+            ) {
+
+                result =
+                    await manager.open(
+                        id,
+                        settings
+                    );
+
+            } else {
+
+                const launcher =
+                    getLauncher();
+
+                if (
+                    launcher &&
+                    typeof launcher.launch ===
+                    "function"
+                ) {
+
+                    result =
+                        await launcher.launch(
+                            id,
+                            settings
+                        );
+
+                } else if (
+                    typeof app.open ===
+                    "function"
+                ) {
+
+                    result =
+                        await app.open(
+                            settings
+                        );
+
+                } else if (
+                    typeof app.start ===
+                    "function"
+                ) {
+
+                    result =
+                        await app.start(
+                            settings
+                        );
+
+                } else {
+
+                    result = true;
+
+                }
+            }
+
+        } catch (error) {
+
+            reportError(
+                "APP_OPEN_ERROR",
+                error
+            );
+
+            return {
+                success: false,
+                error: error,
+                appId: id
+            };
+        }
+
+        if (settings.createWindow) {
+            ensureWindow(
+                id,
+                app,
+                settings
+            );
+        }
+
+        if (settings.focus) {
+            focusApp(id);
+        }
+
+        if (settings.addHistory) {
+
+            if (
+                state.currentApp &&
+                state.currentApp !== id
+            ) {
+                state.history.push(
+                    state.currentApp
+                );
+
+                if (
+                    state.history.length >
+                    50
+                ) {
+                    state.history.shift();
+                }
+            }
+        }
+
+        setCurrentApp(id);
+
+        emit(
+            "app:opened",
+            {
+                id: id,
+                app: app,
+                result: result
+            }
+        );
+
+        return {
+            success: true,
+            appId: id,
+            app: app,
+            result: result
+        };
+    }
+
+    // ==========================================
+    // APP CLOSE
+    // ==========================================
+
+    async function close(appId, options) {
+
+        const id =
+            normalize(
+                appId ||
+                state.currentApp
+            );
+
+        if (!id) {
+            return false;
+        }
+
+        const app =
+            resolveApp(id);
+
+        const manager =
+            getAppManager();
+
+        try {
+
+            if (
+                manager &&
+                typeof manager.closeApp ===
+                "function"
+            ) {
+
+                await manager.closeApp(
+                    id,
+                    options || {}
+                );
+
+            } else if (
+                manager &&
+                typeof manager.close ===
+                "function"
+            ) {
+
+                await manager.close(
+                    id,
+                    options || {}
+                );
+
+            } else if (
+                app &&
+                typeof app.close ===
+                "function"
+            ) {
+
+                await app.close(
+                    options || {}
+                );
+
+            }
+
+        } catch (error) {
+
+            reportError(
+                "APP_CLOSE_ERROR",
+                error
+            );
+
+            return false;
+        }
+
+        closeWindow(id);
+
+        emit(
+            "app:closed",
+            {
+                id: id
+            }
+        );
+
+        if (
+            state.currentApp === id
+        ) {
+
+            state.previousApp =
+                id;
+
+            state.currentApp =
+                null;
+        }
+
+        return true;
+    }
+
+    // ==========================================
+    // FOCUS
+    // ==========================================
+
+    function focusApp(appId) {
+
+        const id =
+            normalize(appId);
+
+        if (!id) {
+            return false;
+        }
+
+        const manager =
+            getAppManager();
+
+        try {
+
+            if (
+                manager &&
+                typeof manager.focusApp ===
+                "function"
+            ) {
+                manager.focusApp(id);
+            }
+
+            const windowManager =
+                getWindowManager();
+
+            if (
+                windowManager &&
+                typeof windowManager.focusWindow ===
+                "function"
+            ) {
+                windowManager.focusWindow(id);
+            }
+
+            if (
+                windowManager &&
+                typeof windowManager.focus ===
+                "function"
+            ) {
+                windowManager.focus(id);
+            }
+
+        } catch (error) {
+
+            reportError(
+                "APP_FOCUS_ERROR",
+                error
+            );
+
+            return false;
+        }
+
+        emit(
+            "app:focused",
+            {
+                id: id
+            }
+        );
+
+        return true;
+    }
+
+    // ==========================================
+    // WINDOW CONNECTION
+    // ==========================================
+
+    function ensureWindow(
+        appId,
+        app,
+        options
+    ) {
+
+        const manager =
+            getWindowManager();
+
+        if (!manager) {
+            return;
+        }
+
+        try {
+
+            if (
+                typeof manager.createWindow ===
+                "function"
+            ) {
+
+                manager.createWindow(
+                    appId,
+                    Object.assign(
+                        {},
+                        app || {},
+                        options || {}
+                    )
+                );
+
+            } else if (
+                typeof manager.create ===
+                "function"
+            ) {
+
+                manager.create(
+                    appId,
+                    Object.assign(
+                        {},
+                        app || {},
+                        options || {}
+                    )
+                );
+            }
+
+        } catch (error) {
+
+            console.warn(
+                "[HalDo App Router] Fenster konnte nicht erstellt werden:",
+                error
+            );
+        }
+    }
+
+    function closeWindow(appId) {
+
+        const manager =
+            getWindowManager();
+
+        if (!manager) {
+            return;
+        }
+
+        try {
+
+            if (
+                typeof manager.closeWindow ===
+                "function"
+            ) {
+                manager.closeWindow(appId);
+            } else if (
+                typeof manager.close ===
+                "function"
+            ) {
+                manager.close(appId);
+            }
+
+        } catch (error) {
+
+            console.warn(
+                "[HalDo App Router] Fenster konnte nicht geschlossen werden:",
+                error
+            );
+        }
+    }
+
+    // ==========================================
+    // CURRENT APP
+    // ==========================================
+
+    function setCurrentApp(appId) {
+
+        const id =
+            normalize(appId);
+
+        if (
+            state.currentApp &&
+            state.currentApp !== id
+        ) {
+            state.previousApp =
+                state.currentApp;
+        }
+
+        state.currentApp =
+            id || null;
+
+        emit(
+            "app:changed",
+            {
+                current:
+                    state.currentApp,
+                previous:
+                    state.previousApp
+            }
+        );
+    }
+
+    function getCurrentApp() {
+        return state.currentApp;
+    }
+
+    function getPreviousApp() {
+        return state.previousApp;
+    }
+
+    // ==========================================
+    // BACK
+    // ==========================================
 
     async function back() {
 
         if (
-            history.length < 2
+            state.history.length === 0
         ) {
 
-            return false;
+            if (
+                state.previousApp &&
+                state.previousApp !==
+                state.currentApp
+            ) {
 
+                return open(
+                    state.previousApp,
+                    {
+                        addHistory: false
+                    }
+                );
+
+            }
+
+            return false;
         }
 
-        // Aktuellen Eintrag entfernen
-        history.pop();
-
         const previous =
-            history[
-                history.length - 1
-            ];
+            state.history.pop();
 
         if (!previous) {
             return false;
         }
 
-        return navigate(
-            previous.full,
+        return open(
+            previous,
             {
-                skipHistory: true,
-                fromHistory: true
+                addHistory: false
             }
         );
-
     }
 
-    // --------------------------------------------------------
-    // AKTUELLE ROUTE
-    // --------------------------------------------------------
+    function clearHistory() {
+        state.history = [];
 
-    function getCurrentRoute() {
-
-        return currentRoute
-            ? {
-                ...currentRoute
-            }
-            : null;
-
+        emit(
+            "history:cleared"
+        );
     }
 
-    // --------------------------------------------------------
-    // ROUTE ZUM BROWSER-HASH
-    // --------------------------------------------------------
+    function getHistory() {
+        return [
+            ...state.history
+        ];
+    }
 
-    function handleHashChange() {
+    // ==========================================
+    // ROUTER NAVIGATION
+    // ==========================================
 
-        const hash =
-            window.location.hash;
+    async function navigate(route, options) {
 
-        if (!hash) {
-            return;
+        const normalized =
+            normalize(route);
+
+        const definition =
+            resolve(normalized);
+
+        if (!definition) {
+
+            return open(
+                normalized,
+                options
+            );
         }
 
-        const route =
-            hash.substring(1);
+        if (
+            typeof definition.handler ===
+            "function"
+        ) {
 
-        navigate(
-            route,
-            {
-                fromHash: true
-            }
-        );
+            return open(
+                normalized,
+                options
+            );
+        }
 
+        if (definition.app) {
+
+            return open(
+                definition.app,
+                options
+            );
+        }
+
+        return {
+            success: false,
+            error: "ROUTE_INVALID"
+        };
     }
 
-    // --------------------------------------------------------
-    // STANDARD-ROUTES
-    // --------------------------------------------------------
+    // ==========================================
+    // BUILT-IN ROUTES
+    // ==========================================
 
     function registerDefaultRoutes() {
 
         register(
-            "/",
-            function () {
-
-                if (
-                    typeof window.scrollTo ===
-                    "function"
-                ) {
-
-                    window.scrollTo({
-                        top: 0,
-                        behavior: "smooth"
-                    });
-
-                }
-
-                return true;
-
-            },
+            "home",
             {
-                title: "HalDo AI Home"
-            }
-        );
+                aliases: [
+                    "start",
+                    "main",
+                    "dashboard-home"
+                ],
 
-        register(
-            "/home",
-            function () {
+                handler: function () {
 
-                return navigate(
-                    "/",
-                    {
-                        replace: true
+                    const mainApp =
+                        document.getElementById(
+                            "mainApp"
+                        );
+
+                    if (mainApp) {
+
+                        window.scrollTo({
+                            top: 0,
+                            behavior: "smooth"
+                        });
                     }
-                );
 
-            },
-            {
-                title: "Home"
+                    return true;
+                }
             }
         );
 
         register(
-            "/ai",
-            function (context) {
-
-                return openApp(
-                    "chat",
-                    context
-                );
-
-            },
+            "chat",
             {
-                title: "HalDo AI"
+                aliases: [
+                    "ai",
+                    "assistant",
+                    "haldo-ai"
+                ],
+
+                handler: function () {
+
+                    if (
+                        window.HalDoOS &&
+                        typeof window.HalDoOS.openChat ===
+                        "function"
+                    ) {
+                        return window.HalDoOS.openChat();
+                    }
+
+                    return openExistingAction(
+                        "chat"
+                    );
+                }
             }
         );
 
         register(
-            "/chat",
-            function (context) {
-
-                return openApp(
-                    "chat",
-                    context
-                );
-
-            },
+            "settings",
             {
-                title: "HalDo AI Chat",
-                app: "chat"
+                aliases: [
+                    "setup",
+                    "config"
+                ],
+
+                handler: function () {
+                    return openExistingAction(
+                        "settings"
+                    );
+                }
             }
         );
 
         register(
-            "/apps",
-            function (context) {
-
-                return openApp(
-                    "apps",
-                    context
-                );
-
-            },
+            "apps",
             {
-                title: "Apps",
-                app: "apps"
+                aliases: [
+                    "applications",
+                    "application-center"
+                ],
+
+                handler: function () {
+                    return openExistingAction(
+                        "apps"
+                    );
+                }
             }
         );
 
         register(
-            "/settings",
-            function (context) {
-
-                return openApp(
-                    "settings",
-                    context
-                );
-
-            },
+            "modules",
             {
-                title: "Einstellungen",
-                app: "settings"
+                aliases: [
+                    "module-manager"
+                ],
+
+                handler: function () {
+                    return openExistingAction(
+                        "modules"
+                    );
+                }
             }
         );
 
         register(
-            "/dashboard",
-            function (context) {
-
-                return openApp(
-                    "dashboard",
-                    context
-                );
-
-            },
+            "dashboard",
             {
-                title: "Dashboard",
-                app: "dashboard"
+                aliases: [
+                    "control-center",
+                    "overview"
+                ],
+
+                handler: function () {
+                    return openExistingAction(
+                        "dashboard"
+                    );
+                }
             }
         );
 
         register(
-            "/modules",
-            function (context) {
-
-                return openApp(
-                    "modules",
-                    context
-                );
-
-            },
+            "diagnostics",
             {
-                title: "Module",
-                app: "modules"
+                aliases: [
+                    "diagnostic",
+                    "system-diagnostics"
+                ],
+
+                handler: function () {
+                    return openExistingAction(
+                        "diagnostics"
+                    );
+                }
             }
         );
 
         register(
-            "/keyboard",
-            function (context) {
-
-                return openApp(
-                    "keyboard",
-                    context
-                );
-
-            },
+            "storage",
             {
-                title: "Êzîdî Keyboard",
-                app: "keyboard"
+                aliases: [
+                    "files",
+                    "data"
+                ],
+
+                handler: function () {
+                    return openExistingAction(
+                        "storage"
+                    );
+                }
             }
         );
 
+        register(
+            "voice",
+            {
+                aliases: [
+                    "microphone",
+                    "speech"
+                ],
+
+                handler: function () {
+                    return openExistingAction(
+                        "voice"
+                    );
+                }
+            }
+        );
+
+        register(
+            "knowledge",
+            {
+                aliases: [
+                    "wissen",
+                    "knowledge-base"
+                ],
+
+                handler: function () {
+                    return openExistingAction(
+                        "knowledge"
+                    );
+                }
+            }
+        );
+
+        register(
+            "code",
+            {
+                aliases: [
+                    "code-builder",
+                    "developer"
+                ],
+
+                handler: function () {
+                    return openExistingAction(
+                        "code"
+                    );
+                }
+            }
+        );
+
+        register(
+            "keyboard",
+            {
+                aliases: [
+                    "ezidi-keyboard",
+                    "ezîdî-keyboard"
+                ],
+
+                handler: function () {
+                    return openExistingAction(
+                        "keyboard"
+                    );
+                }
+            }
+        );
+
+        register(
+            "languages",
+            {
+                aliases: [
+                    "language",
+                    "language-system"
+                ],
+
+                handler: function () {
+                    return openExistingAction(
+                        "languages"
+                    );
+                }
+            }
+        );
     }
 
-    // --------------------------------------------------------
-    // KERNEL-REGISTRIERUNG
-    // --------------------------------------------------------
+    function openExistingAction(action) {
 
-    function registerWithKernel() {
+        try {
+
+            if (
+                window.HalDoOS &&
+                typeof window.HalDoOS.open ===
+                "function"
+            ) {
+
+                return window.HalDoOS.open(
+                    action
+                );
+            }
+
+            const element =
+                document.querySelector(
+                    '[data-open="' +
+                    action +
+                    '"]'
+                );
+
+            if (element) {
+
+                element.click();
+
+                return true;
+            }
+
+        } catch (error) {
+
+            reportError(
+                "EXISTING_ACTION_ERROR",
+                error
+            );
+
+        }
+
+        return false;
+    }
+
+    // ==========================================
+    // ERROR HANDLING
+    // ==========================================
+
+    function reportError(
+        code,
+        error
+    ) {
+
+        const payload = {
+            code: code,
+            error: error,
+            timestamp:
+                new Date().toISOString()
+        };
+
+        console.error(
+            "[HalDo App Router]",
+            code,
+            error
+        );
+
+        emit(
+            "router:error",
+            payload
+        );
+
+        if (
+            window.HalDoOS &&
+            window.HalDoOS.events &&
+            typeof window.HalDoOS.events.emit ===
+            "function"
+        ) {
+
+            try {
+
+                window.HalDoOS.events.emit(
+                    "app-router:error",
+                    payload
+                );
+
+            } catch (_) {}
+
+        }
+    }
+
+    // ==========================================
+    // PUBLIC API
+    // ==========================================
+
+    const router = {
+
+        name: NAME,
+        version: VERSION,
+
+        init: function () {
+
+            if (state.initialized) {
+                return this;
+            }
+
+            registerDefaultRoutes();
+
+            state.initialized = true;
+
+            emit(
+                "router:ready",
+                this
+            );
+
+            return this;
+        },
+
+        start: function () {
+            return this.init();
+        },
+
+        register: register,
+
+        unregister: unregister,
+
+        resolve: resolve,
+
+        has: has,
+
+        navigate: navigate,
+
+        open: open,
+
+        launch: open,
+
+        close: close,
+
+        focus: focusApp,
+
+        back: back,
+
+        clearHistory:
+            clearHistory,
+
+        getHistory:
+            getHistory,
+
+        getCurrentApp:
+            getCurrentApp,
+
+        getPreviousApp:
+            getPreviousApp,
+
+        on: on,
+
+        off: off,
+
+        emit: emit,
+
+        getState: function () {
+
+            return {
+                initialized:
+                    state.initialized,
+
+                currentApp:
+                    state.currentApp,
+
+                previousApp:
+                    state.previousApp,
+
+                history:
+                    [...state.history],
+
+                routes:
+                    Array.from(
+                        state.routes.keys()
+                    )
+            };
+        },
+
+        getRoutes: function () {
+
+            return Array.from(
+                state.routes.keys()
+            );
+        }
+    };
+
+    // ==========================================
+    // GLOBAL REGISTRATION
+    // ==========================================
+
+    window.HalDoAppRouter =
+        router;
+
+    window.HalDoOS =
+        window.HalDoOS || {};
+
+    window.HalDoOS.appRouter =
+        router;
+
+    // ==========================================
+    // KERNEL CONNECTION
+    // ==========================================
+
+    function connectKernel() {
 
         const kernel =
-            window.HalDoKernel;
+            window.HalDoKernel ||
+            (
+                window.HalDoOS &&
+                window.HalDoOS.kernel
+            );
 
         if (!kernel) {
             return;
@@ -1100,166 +1404,48 @@
             ) {
 
                 kernel.registerModule(
-                    MODULE_NAME,
-                    api
+                    "app-router",
+                    router
                 );
 
             }
 
-        } catch (err) {
+            if (
+                typeof kernel.setModuleReady ===
+                "function"
+            ) {
 
-            warn(
-                "Kernel-Registrierung fehlgeschlagen:",
-                err
+                kernel.setModuleReady(
+                    "app-router",
+                    true
+                );
+
+            }
+
+        } catch (error) {
+
+            console.warn(
+                "[HalDo App Router] Kernel-Verbindung fehlgeschlagen:",
+                error
             );
-
         }
-
     }
 
-    // --------------------------------------------------------
-    // INITIALISIERUNG
-    // --------------------------------------------------------
+    // ==========================================
+    // INITIALIZATION
+    // ==========================================
 
-    function init() {
+    function initialize() {
 
-        if (initialized) {
-            return api;
-        }
+        router.init();
 
-        registerDefaultRoutes();
-
-        window.addEventListener(
-            "hashchange",
-            handleHashChange
-        );
-
-        initialized = true;
-
-        registerWithKernel();
-
-        HalDoOS.appRouter =
-            api;
-
-        window.HalDoAppRouter =
-            api;
+        connectKernel();
 
         emit(
-            "navigate",
-            {
-                type: "router-ready",
-                version: VERSION
-            }
+            "initialized",
+            router
         );
-
-        log(
-            "App Router bereit:",
-            VERSION
-        );
-
-        return api;
-
     }
-
-    // --------------------------------------------------------
-    // ÖFFENTLICHE API
-    // --------------------------------------------------------
-
-    const api = {
-
-        name:
-            MODULE_NAME,
-
-        version:
-            VERSION,
-
-        init:
-
-            init,
-
-        register:
-
-            register,
-
-        unregister:
-
-            unregister,
-
-        getRoute:
-
-            getRoute,
-
-        getRoutes:
-
-            getRoutes,
-
-        hasRoute:
-
-            hasRoute,
-
-        navigate:
-
-            navigate,
-
-        openApp:
-
-            openApp,
-
-        closeApp:
-
-            closeApp,
-
-        back:
-
-            back,
-
-        getCurrentRoute:
-
-            getCurrentRoute,
-
-        on:
-
-            on,
-
-        off:
-
-            off,
-
-        getHistory:
-
-            function () {
-
-                return history.map(
-                    function (item) {
-                        return {
-                            ...item
-                        };
-                    }
-                );
-
-            },
-
-        isReady:
-
-            function () {
-                return initialized;
-            }
-
-    };
-
-    // --------------------------------------------------------
-    // GLOBAL ZUGÄNGE
-    // --------------------------------------------------------
-
-    HalDoOS.appRouter =
-        api;
-
-    window.HalDoAppRouter =
-        api;
-
-    // --------------------------------------------------------
-    // DOM READY
-    // --------------------------------------------------------
 
     if (
         document.readyState ===
@@ -1268,7 +1454,7 @@
 
         document.addEventListener(
             "DOMContentLoaded",
-            init,
+            initialize,
             {
                 once: true
             }
@@ -1276,7 +1462,7 @@
 
     } else {
 
-        init();
+        initialize();
 
     }
 
