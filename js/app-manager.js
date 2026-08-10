@@ -1,392 +1,330 @@
-/*
-========================================================
-HalDo AI OS 18
-Application Manager
-Professional Ultimate Foundation
-BUILD SYSTEM UPDATE
-========================================================
+/* =========================================================
 
-Zentrale Aufgabe:
+   HALDO AI OS 18
 
-Kernel
-   ↓
-App Manager
-   ↓
-App Registry
-   ↓
-App Router
-   ↓
-Launcher
-   ↓
-UI / Applications
+   APP MANAGER
 
-Der App Manager ist die aktive Laufzeitverwaltung
-des HalDo AI OS.
+   Version 18.0.0
 
-Funktionen:
-- Apps registrieren
-- Apps aktualisieren
-- Apps suchen
-- Apps starten
-- Apps stoppen
-- Apps neu starten
-- Apps aktivieren/deaktivieren
-- App-Zustände verwalten
-- App Registry verbinden
-- App Router verbinden
-- Launcher verbinden
-- Kernel verbinden
-- Routen verwalten
-- App-History
-- Events
-- Diagnose
-- Fehlerbehandlung
-- Reconnect
-- Foundation Apps
-- Erweiterbare App-Struktur
+   Professional Ultimate Foundation
 
-Bestehende globale APIs bleiben erhalten:
+   ZENTRALE APP-VERWALTUNG
 
-window.HalDoAppManager
-window.HalDoOS.appManager
-========================================================
-*/
+   Verantwortlich für:
 
-(function () {
+   - App-Registrierung
+
+   - App-Lebenszyklus
+
+   - App-Start
+
+   - App-Schließen
+
+   - App-Aktivierung
+
+   - App-Minimierung
+
+   - App-Zustände
+
+   - App-Events
+
+   - Verbindung zu Registry / Router / Launcher
+
+   - zentrale zukünftige App-Liste
+
+   Bestehende Systeme werden NICHT blind ersetzt.
+
+   Vorhandene globale APIs werden erkannt und verbunden.
+
+   ========================================================= */
+
+(function (window, document) {
 
     "use strict";
 
+    /* =====================================================
 
-    /* ==================================================
-       VERSION
-    ================================================== */
+       GLOBAL FOUNDATION
+
+       ===================================================== */
+
+    window.HalDoOS = window.HalDoOS || {};
+
+    const HalDoOS = window.HalDoOS;
 
     const VERSION = "18.0.0";
 
+    const MANAGER_NAME =
 
-    /* ==================================================
+        "HalDo AI OS App Manager";
+
+    /* =====================================================
+
        INTERNAL STATE
-    ================================================== */
 
-    const state = {
+       ===================================================== */
 
-        initialized:
-            false,
+    const apps = new Map();
 
-        running:
-            false,
+    const runningApps = new Map();
 
-        apps:
-            new Map(),
+    const minimizedApps = new Set();
 
-        activeApp:
-            null,
+    let activeAppId = null;
 
-        history:
-            [],
+    let initialized = false;
 
-        errors:
-            [],
+    /* =====================================================
 
-        startCount:
-            0,
+       EVENT BUS
 
-        stopCount:
-            0,
+       ===================================================== */
 
-        reconnectCount:
-            0,
+    const listeners = {};
 
-        lastAction:
-            null,
-
-        lastActionTime:
-            null
-
-    };
-
-
-    /* ==================================================
-       EVENT SYSTEM
-    ================================================== */
-
-    const listeners =
-        new Map();
-
-
-    function on(
-        event,
-        callback
-    ) {
+    function on(event, callback) {
 
         if (
-            typeof callback !==
-            "function"
+
+            typeof callback !== "function"
+
         ) {
 
             return function () {};
 
         }
 
+        if (!listeners[event]) {
 
-        if (
-            !listeners.has(event)
-        ) {
-
-            listeners.set(
-                event,
-                new Set()
-            );
+            listeners[event] = [];
 
         }
 
+        listeners[event].push(callback);
 
-        listeners
-            .get(event)
-            .add(callback);
-
-
-        return function () {
+        return function unsubscribe() {
 
             off(
+
                 event,
+
                 callback
+
             );
 
         };
 
     }
 
+    function off(event, callback) {
 
-    function off(
-        event,
-        callback
-    ) {
-
-        const set =
-            listeners.get(event);
-
-
-        if (!set) {
+        if (!listeners[event]) {
 
             return;
 
         }
 
+        listeners[event] =
 
-        set.delete(
-            callback
-        );
+            listeners[event].filter(
 
+                function (item) {
 
-        if (
-            set.size ===
-            0
-        ) {
-
-            listeners.delete(
-                event
-            );
-
-        }
-
-    }
-
-
-    function emit(
-        event,
-        payload = {}
-    ) {
-
-        const set =
-            listeners.get(event);
-
-
-        if (!set) {
-
-            return;
-
-        }
-
-
-        set.forEach(
-            function (callback) {
-
-                try {
-
-                    callback(
-                        payload
-                    );
-
-                } catch (error) {
-
-                    recordError(
-                        error,
-                        "event:" + event
-                    );
+                    return item !== callback;
 
                 }
 
-            }
-        );
+            );
 
     }
 
+    function emit(event, data) {
 
-    /* ==================================================
-       ERROR SYSTEM
-    ================================================== */
+        if (listeners[event]) {
 
-    function recordError(
-        error,
-        source = "app-manager"
-    ) {
+            listeners[event].forEach(
 
-        const entry = {
+                function (callback) {
 
-            time:
-                new Date()
-                    .toISOString(),
+                    try {
 
-            source:
+                        callback(data);
 
-                source,
+                    } catch (error) {
 
-            message:
+                        console.error(
 
-                error instanceof Error
+                            "[HalDo App Manager] Event error:",
 
-                    ? error.message
+                            error
 
-                    : String(error)
+                        );
 
-        };
-
-
-        state.errors.push(
-            entry
-        );
-
-
-        if (
-            state.errors.length >
-            100
-        ) {
-
-            state.errors.shift();
-
-        }
-
-
-        console.error(
-            "[HalDo App Manager] " +
-            source,
-            error
-        );
-
-
-        emit(
-            "error",
-            entry
-        );
-
-
-        return entry;
-
-    }
-
-
-    /* ==================================================
-       SAFE CLONE
-    ================================================== */
-
-    function cloneApp(
-        app
-    ) {
-
-        if (!app) {
-
-            return null;
-
-        }
-
-
-        return {
-
-            ...app,
-
-            permissions:
-                Array.isArray(
-                    app.permissions
-                )
-                    ? [
-                        ...app.permissions
-                    ]
-                    : [],
-
-            dependencies:
-                Array.isArray(
-                    app.dependencies
-                )
-                    ? [
-                        ...app.dependencies
-                    ]
-                    : [],
-
-            keywords:
-                Array.isArray(
-                    app.keywords
-                )
-                    ? [
-                        ...app.keywords
-                    ]
-                    : [],
-
-            metadata:
-
-                app.metadata &&
-                typeof app.metadata ===
-                "object"
-
-                    ? {
-                        ...app.metadata
                     }
 
-                    : {}
+                }
 
-        };
+            );
+
+        }
+
+        /*
+
+         * Zusätzlich mit dem zentralen
+
+         * HalDoOS Event-System verbinden.
+
+         */
+
+        if (
+
+            HalDoOS.events &&
+
+            typeof HalDoOS.events.emit ===
+
+                "function"
+
+        ) {
+
+            try {
+
+                HalDoOS.events.emit(
+
+                    "app:" + event,
+
+                    data
+
+                );
+
+            } catch (error) {
+
+                console.warn(
+
+                    "[HalDo App Manager] Global event error:",
+
+                    error
+
+                );
+
+            }
+
+        }
 
     }
 
+    /* =====================================================
 
-    /* ==================================================
-       NORMALIZE APP
-    ================================================== */
+       UTILITIES
 
-    function normalizeApp(
-        app
+       ===================================================== */
+
+    function normalizeId(value) {
+
+        return String(
+
+            value || ""
+
+        )
+
+        .trim()
+
+        .toLowerCase()
+
+        .replace(
+
+            /[^a-z0-9-_]/g,
+
+            "-"
+
+        );
+
+    }
+
+    function createId(value) {
+
+        return normalizeId(
+
+            value
+
+        );
+
+    }
+
+    function safeFunction(
+
+        object,
+
+        method,
+
+        args
+
     ) {
 
         if (
-            !app ||
-            typeof app !==
-            "object"
+
+            !object ||
+
+            typeof object[method] !==
+
+                "function"
+
         ) {
 
             return null;
 
         }
 
+        try {
 
-        const id = String(
+            return object[method].apply(
 
-            app.id ||
-            app.appId ||
-            app.name ||
-            ""
+                object,
 
-        ).trim();
+                args || []
 
+            );
+
+        } catch (error) {
+
+            console.error(
+
+                "[HalDo App Manager]",
+
+                method,
+
+                error
+
+            );
+
+            return null;
+
+        }
+
+    }
+
+    /* =====================================================
+
+       APPLICATION FACTORY
+
+       ===================================================== */
+
+    function normalizeApp(config) {
+
+        config =
+
+            config ||
+
+            {};
+
+        const id =
+
+            createId(
+
+                config.id ||
+
+                config.name
+
+            );
 
         if (!id) {
 
@@ -394,2798 +332,3596 @@ window.HalDoOS.appManager
 
         }
 
-
         return {
 
-            id:
-
-                id,
-
-
-            appId:
-
-                String(
-                    app.appId ||
-                    id
-                ),
-
+            id,
 
             name:
 
-                String(
-                    app.name ||
-                    id
-                ),
+                config.name ||
 
+                id,
 
             title:
 
-                String(
-                    app.title ||
-                    app.name ||
-                    id
-                ),
+                config.title ||
 
+                config.name ||
 
-            version:
-
-                String(
-                    app.version ||
-                    VERSION
-                ),
-
+                id,
 
             description:
 
-                String(
-                    app.description ||
-                    ""
-                ),
+                config.description ||
 
-
-            icon:
-
-                String(
-                    app.icon ||
-                    ""
-                ),
-
+                "",
 
             category:
 
-                String(
-                    app.category ||
-                    "system"
-                ),
+                config.category ||
 
+                "system",
 
-            path:
+            icon:
 
-                app.path ||
-                app.url ||
-                null,
+                config.icon ||
 
+                "◈",
 
-            url:
+            version:
 
-                app.url ||
-                app.path ||
-                null,
+                config.version ||
 
+                VERSION,
+
+            status:
+
+                config.status ||
+
+                "registered",
+
+            enabled:
+
+                config.enabled !== false,
+
+            system:
+
+                config.system === true,
+
+            singleton:
+
+                config.singleton !== false,
 
             route:
 
-                app.route ||
+                config.route ||
+
                 null,
 
+            entry:
 
-            module:
+                config.entry ||
 
-                app.module ||
                 null,
-
 
             permissions:
 
                 Array.isArray(
-                    app.permissions
-                )
-                    ? [
-                        ...app.permissions
-                    ]
-                    : [],
 
+                    config.permissions
+
+                )
+
+                    ? [
+
+                        ...config.permissions
+
+                    ]
+
+                    : [],
 
             dependencies:
 
                 Array.isArray(
-                    app.dependencies
+
+                    config.dependencies
+
                 )
+
                     ? [
-                        ...app.dependencies
+
+                        ...config.dependencies
+
                     ]
+
                     : [],
-
-
-            keywords:
-
-                Array.isArray(
-                    app.keywords
-                )
-                    ? [
-                        ...app.keywords
-                    ]
-                    : [],
-
-
-            enabled:
-
-                app.enabled !== false,
-
-
-            installed:
-
-                app.installed !== false,
-
-
-            running:
-                Boolean(
-                    app.running
-                ),
-
-
-            loaded:
-                Boolean(
-                    app.loaded
-                ),
-
-
-            createdAt:
-
-                app.createdAt ||
-                new Date()
-                    .toISOString(),
-
-
-            updatedAt:
-
-                new Date()
-                    .toISOString(),
-
 
             metadata:
 
-                app.metadata &&
-                typeof app.metadata ===
-                "object"
+                config.metadata ||
 
-                    ? {
-                        ...app.metadata
-                    }
+                {},
 
-                    : {},
+            api:
 
+                config.api ||
+
+                {},
 
             init:
 
-                typeof app.init ===
+                typeof config.init ===
+
                 "function"
 
-                    ? app.init
+                    ? config.init
 
                     : null,
-
 
             start:
 
-                typeof app.start ===
+                typeof config.start ===
+
                 "function"
 
-                    ? app.start
+                    ? config.start
 
                     : null,
-
 
             stop:
 
-                typeof app.stop ===
+                typeof config.stop ===
+
                 "function"
 
-                    ? app.stop
+                    ? config.stop
 
                     : null,
 
+            minimize:
+
+                typeof config.minimize ===
+
+                "function"
+
+                    ? config.minimize
+
+                    : null,
+
+            restore:
+
+                typeof config.restore ===
+
+                "function"
+
+                    ? config.restore
+
+                    : null,
 
             destroy:
 
-                typeof app.destroy ===
+                typeof config.destroy ===
+
                 "function"
 
-                    ? app.destroy
+                    ? config.destroy
 
-                    : null
+                    : null,
+
+            onActivate:
+
+                typeof config.onActivate ===
+
+                "function"
+
+                    ? config.onActivate
+
+                    : null,
+
+            onDeactivate:
+
+                typeof config.onDeactivate ===
+
+                "function"
+
+                    ? config.onDeactivate
+
+                    : null,
+
+            createdAt:
+
+                config.createdAt ||
+
+                Date.now(),
+
+            updatedAt:
+
+                Date.now()
 
         };
 
     }
 
+    /* =====================================================
 
-    /* ==================================================
        REGISTER APP
-    ================================================== */
 
-    function register(
-        app
-    ) {
+       ===================================================== */
 
-        const normalized =
-            normalizeApp(app);
-
-
-        if (!normalized) {
-
-            recordError(
-                "Ungültige App-Definition.",
-                "register"
-            );
-
-            return false;
-
-        }
-
-
-        const existing =
-            state.apps.get(
-                normalized.id
-            );
-
-
-        if (existing) {
-
-            state.apps.set(
-                normalized.id,
-                {
-
-                    ...existing,
-
-                    ...normalized,
-
-                    running:
-                        existing.running,
-
-                    loaded:
-                        existing.loaded
-
-                }
-            );
-
-
-            emit(
-                "app:updated",
-                {
-                    app:
-                        get(
-                            normalized.id
-                        )
-                }
-            );
-
-
-            syncConnections();
-
-
-            return true;
-
-        }
-
-
-        state.apps.set(
-            normalized.id,
-            normalized
-        );
-
-
-        emit(
-            "app:registered",
-            {
-                app:
-                    get(
-                        normalized.id
-                    )
-            }
-        );
-
-
-        syncConnections();
-
-
-        return true;
-
-    }
-
-
-    /* ==================================================
-       REGISTER MANY
-    ================================================== */
-
-    function registerMany(
-        apps
-    ) {
-
-        if (
-            !Array.isArray(apps)
-        ) {
-
-            return 0;
-
-        }
-
-
-        let count = 0;
-
-
-        apps.forEach(
-            function (app) {
-
-                if (
-                    register(app)
-                ) {
-
-                    count++;
-
-                }
-
-            }
-        );
-
-
-        return count;
-
-    }
-
-
-    /* ==================================================
-       UPDATE APP
-    ================================================== */
-
-    function update(
-        id,
-        changes = {}
-    ) {
-
-        const current =
-            state.apps.get(id);
-
-
-        if (!current) {
-
-            return false;
-
-        }
-
-
-        const merged =
-            normalizeApp({
-
-                ...current,
-
-                ...changes,
-
-                id
-
-            });
-
-
-        if (!merged) {
-
-            return false;
-
-        }
-
-
-        merged.running =
-            current.running;
-
-
-        merged.loaded =
-            current.loaded;
-
-
-        state.apps.set(
-            id,
-            merged
-        );
-
-
-        emit(
-            "app:updated",
-            {
-                app:
-                    get(id)
-            }
-        );
-
-
-        syncConnections();
-
-
-        return true;
-
-    }
-
-
-    /* ==================================================
-       UNREGISTER APP
-    ================================================== */
-
-    async function unregister(
-        id
-    ) {
+    function registerApp(config) {
 
         const app =
-            state.apps.get(id);
 
+            normalizeApp(
+
+                config
+
+            );
 
         if (!app) {
 
-            return false;
+            console.warn(
 
-        }
+                "[HalDo App Manager] Ungültige App."
 
-
-        if (
-            app.running
-        ) {
-
-            await stop(id);
-
-        }
-
-
-        try {
-
-            if (
-                typeof app.destroy ===
-                "function"
-            ) {
-
-                await app.destroy();
-
-            }
-
-        } catch (error) {
-
-            recordError(
-                error,
-                "destroy:" + id
             );
 
+            return null;
+
         }
 
+        const existing =
 
-        state.apps.delete(
-            id
+            apps.get(
+
+                app.id
+
+            );
+
+        if (existing) {
+
+            const merged = {
+
+                ...existing,
+
+                ...app,
+
+                metadata: {
+
+                    ...existing.metadata,
+
+                    ...app.metadata
+
+                },
+
+                api: {
+
+                    ...existing.api,
+
+                    ...app.api
+
+                },
+
+                updatedAt:
+
+                    Date.now()
+
+            };
+
+            apps.set(
+
+                app.id,
+
+                merged
+
+            );
+
+            emit(
+
+                "updated",
+
+                merged
+
+            );
+
+            return merged;
+
+        }
+
+        apps.set(
+
+            app.id,
+
+            app
+
         );
-
-
-        if (
-            state.activeApp ===
-            id
-        ) {
-
-            state.activeApp =
-                null;
-
-        }
-
 
         emit(
-            "app:unregistered",
-            {
-                id
-            }
+
+            "registered",
+
+            app
+
         );
 
+        connectRegistry(
 
-        syncConnections();
+            app
 
-
-        return true;
-
-    }
-
-
-    /* ==================================================
-       GET APP
-    ================================================== */
-
-    function get(
-        id
-    ) {
-
-        return cloneApp(
-            state.apps.get(id)
         );
 
-    }
-
-
-    /* ==================================================
-       GET ALL
-    ================================================== */
-
-    function getAll() {
-
-        return Array
-            .from(
-                state.apps.values()
-            )
-            .map(
-                cloneApp
-            );
+        return app;
 
     }
 
+    /* =====================================================
 
-    /* ==================================================
-       GET ENABLED
-    ================================================== */
+       REGISTER MANY
 
-    function getEnabled() {
+       ===================================================== */
 
-        return getAll()
-            .filter(
-                function (app) {
+    function registerApps(list) {
 
-                    return (
-                        app.enabled
-                    );
-
-                }
-            );
-
-    }
-
-
-    /* ==================================================
-       GET INSTALLED
-    ================================================== */
-
-    function getInstalled() {
-
-        return getAll()
-            .filter(
-                function (app) {
-
-                    return (
-                        app.installed
-                    );
-
-                }
-            );
-
-    }
-
-
-    /* ==================================================
-       GET RUNNING
-    ================================================== */
-
-    function getRunning() {
-
-        return getAll()
-            .filter(
-                function (app) {
-
-                    return (
-                        app.running
-                    );
-
-                }
-            );
-
-    }
-
-
-    /* ==================================================
-       FIND / SEARCH
-    ================================================== */
-
-    function find(
-        query
-    ) {
-
-        const value =
-            String(
-                query || ""
-            )
-            .trim()
-            .toLowerCase();
-
-
-        if (!value) {
+        if (!Array.isArray(list)) {
 
             return [];
 
         }
 
+        return list
 
-        return getAll()
+            .map(
+
+                registerApp
+
+            )
+
             .filter(
-                function (app) {
 
-                    const searchable = [
+                Boolean
 
-                        app.id,
-
-                        app.appId,
-
-                        app.name,
-
-                        app.title,
-
-                        app.description,
-
-                        app.category,
-
-                        app.path,
-
-                        app.route,
-
-                        ...app.keywords
-
-                    ]
-                    .join(" ")
-                    .toLowerCase();
-
-
-                    return searchable
-                        .includes(
-                            value
-                        );
-
-                }
             );
 
     }
 
+    /* =====================================================
 
-    const search =
-        find;
+       GET APP
 
+       ===================================================== */
 
-    /* ==================================================
-       HAS APP
-    ================================================== */
+    function getApp(id) {
 
-    function has(
-        id
-    ) {
+        return apps.get(
 
-        return state.apps.has(
-            id
+            createId(id)
+
+        ) || null;
+
+    }
+
+    /* =====================================================
+
+       GET ALL APPS
+
+       ===================================================== */
+
+    function getApps() {
+
+        return Array.from(
+
+            apps.values()
+
         );
 
     }
 
+    /* =====================================================
 
-    /* ==================================================
-       INITIALIZE APP
-    ================================================== */
+       GET ENABLED APPS
 
-    async function initializeApp(
-        id
+       ===================================================== */
+
+    function getEnabledApps() {
+
+        return getApps().filter(
+
+            function (app) {
+
+                return app.enabled !== false;
+
+            }
+
+        );
+
+    }
+
+    /* =====================================================
+
+       GET RUNNING APPS
+
+       ===================================================== */
+
+    function getRunningApps() {
+
+        return Array.from(
+
+            runningApps.values()
+
+        );
+
+    }
+
+    /* =====================================================
+
+       IS REGISTERED
+
+       ===================================================== */
+
+    function hasApp(id) {
+
+        return apps.has(
+
+            createId(id)
+
+        );
+
+    }
+
+    /* =====================================================
+
+       IS RUNNING
+
+       ===================================================== */
+
+    function isRunning(id) {
+
+        return runningApps.has(
+
+            createId(id)
+
+        );
+
+    }
+
+    /* =====================================================
+
+       IS MINIMIZED
+
+       ===================================================== */
+
+    function isMinimized(id) {
+
+        return minimizedApps.has(
+
+            createId(id)
+
+        );
+
+    }
+
+    /* =====================================================
+
+       START APP
+
+       ===================================================== */
+
+    async function startApp(
+
+        id,
+
+        options
+
     ) {
 
         const app =
-            state.apps.get(id);
 
+            getApp(id);
 
         if (!app) {
 
-            recordError(
-                `App "${id}" wurde nicht gefunden.`,
-                "initialize"
+            console.warn(
+
+                "[HalDo App Manager] App nicht gefunden:",
+
+                id
+
             );
 
-            return false;
+            emit(
+
+                "error",
+
+                {
+
+                    type:
+
+                        "APP_NOT_FOUND",
+
+                    appId:
+
+                        createId(id)
+
+                }
+
+            );
+
+            return null;
 
         }
-
 
         if (
-            app.loaded
+
+            app.enabled === false
+
         ) {
 
-            return true;
+            console.warn(
+
+                "[HalDo App Manager] App deaktiviert:",
+
+                app.id
+
+            );
+
+            emit(
+
+                "error",
+
+                {
+
+                    type:
+
+                        "APP_DISABLED",
+
+                    appId:
+
+                        app.id
+
+                }
+
+            );
+
+            return null;
 
         }
 
+        /*
+
+         * Singleton:
+
+         * Bereits laufende App wird
+
+         * nur aktiviert.
+
+         */
+
+        if (
+
+            app.singleton &&
+
+            isRunning(app.id)
+
+        ) {
+
+            activateApp(
+
+                app.id
+
+            );
+
+            return runningApps.get(
+
+                app.id
+
+            );
+
+        }
+
+        /*
+
+         * Dependencies prüfen
+
+         */
+
+        const dependenciesReady =
+
+            checkDependencies(
+
+                app
+
+            );
+
+        if (!dependenciesReady) {
+
+            emit(
+
+                "error",
+
+                {
+
+                    type:
+
+                        "DEPENDENCY_ERROR",
+
+                    appId:
+
+                        app.id,
+
+                    dependencies:
+
+                        app.dependencies
+
+                }
+
+            );
+
+            return null;
+
+        }
+
+        const context = {
+
+            app,
+
+            options:
+
+                options ||
+
+                {},
+
+            manager:
+
+                api,
+
+            os:
+
+                HalDoOS,
+
+            document,
+
+            window,
+
+            startedAt:
+
+                Date.now()
+
+        };
+
+        let instance =
+
+            null;
 
         try {
 
             if (
+
                 typeof app.init ===
-                "function"
+
+                    "function"
+
             ) {
 
-                await app.init({
+                await app.init(
 
-                    app,
+                    context
 
-                    manager:
-                        api,
-
-                    kernel:
-                        window.HalDoKernel,
-
-                    os:
-                        window.HalDoOS
-
-                });
+                );
 
             }
 
+            if (
 
-            app.loaded =
-                true;
+                typeof app.start ===
 
+                    "function"
 
-            emit(
-                "app:initialized",
-                {
-                    app:
-                        get(id)
-                }
-            );
+            ) {
 
+                instance =
 
-            return true;
+                    await app.start(
+
+                        context
+
+                    );
+
+            }
 
         } catch (error) {
 
-            recordError(
-                error,
-                "init:" + id
-            );
+            app.status =
 
+                "error";
 
             emit(
-                "app:initialization-failed",
+
+                "error",
+
                 {
-                    id,
+
+                    type:
+
+                        "START_ERROR",
+
+                    appId:
+
+                        app.id,
+
                     error
+
                 }
+
             );
 
+            console.error(
 
-            return false;
+                "[HalDo App Manager] App start error:",
+
+                app.id,
+
+                error
+
+            );
+
+            return null;
 
         }
 
+        const runtime = {
+
+            id:
+
+                app.id,
+
+            app,
+
+            instance,
+
+            context,
+
+            startedAt:
+
+                Date.now(),
+
+            status:
+
+                "running",
+
+            minimized:
+
+                false
+
+        };
+
+        runningApps.set(
+
+            app.id,
+
+            runtime
+
+        );
+
+        minimizedApps.delete(
+
+            app.id
+
+        );
+
+        app.status =
+
+            "running";
+
+        activeAppId =
+
+            app.id;
+
+        emit(
+
+            "started",
+
+            runtime
+
+        );
+
+        emit(
+
+            "activated",
+
+            runtime
+
+        );
+
+        connectRouter(
+
+            "open",
+
+            app
+
+        );
+
+        connectWindowManager(
+
+            "open",
+
+            runtime
+
+        );
+
+        return runtime;
+
     }
 
+    /* =====================================================
 
-    /* ==================================================
-       ROUTER NAVIGATION
-    ================================================== */
+       ACTIVATE APP
 
-    async function navigateToApp(
-        app,
-        options = {}
-    ) {
+       ===================================================== */
 
-        const router =
-            window.HalDoAppRouter ||
-            (
-                window.HalDoOS &&
-                window.HalDoOS.appRouter
+    function activateApp(id) {
+
+        const appId =
+
+            createId(id);
+
+        const runtime =
+
+            runningApps.get(
+
+                appId
+
             );
 
+        if (!runtime) {
 
-        const target =
-            options.route ||
-            app.route ||
-            null;
+            return startApp(
 
+                appId
+
+            );
+
+        }
 
         if (
-            router &&
-            target
+
+            activeAppId &&
+
+            activeAppId !== appId
+
+        ) {
+
+            const previous =
+
+                runningApps.get(
+
+                    activeAppId
+
+                );
+
+            if (previous) {
+
+                deactivateRuntime(
+
+                    previous
+
+                );
+
+            }
+
+        }
+
+        if (
+
+            runtime.minimized
+
+        ) {
+
+            restoreApp(
+
+                appId
+
+            );
+
+        }
+
+        activeAppId =
+
+            appId;
+
+        runtime.status =
+
+            "active";
+
+        runtime.app.status =
+
+            "active";
+
+        if (
+
+            typeof runtime.app.onActivate ===
+
+            "function"
+
         ) {
 
             try {
 
-                if (
-                    typeof router.navigate ===
-                    "function"
-                ) {
+                runtime.app.onActivate(
 
-                    await router.navigate(
-                        target
-                    );
+                    runtime.context
 
-                    return true;
-
-                }
-
-
-                if (
-                    typeof router.go ===
-                    "function"
-                ) {
-
-                    await router.go(
-                        target
-                    );
-
-                    return true;
-
-                }
-
-
-                if (
-                    typeof router.open ===
-                    "function"
-                ) {
-
-                    await router.open(
-                        target
-                    );
-
-                    return true;
-
-                }
+                );
 
             } catch (error) {
 
-                recordError(
-                    error,
-                    "router-navigation"
+                console.warn(
+
+                    "[HalDo App Manager] Activation error:",
+
+                    error
+
                 );
 
             }
 
         }
 
-
-        return false;
-
-    }
-
-
-    /* ==================================================
-       OPEN APP PATH
-    ================================================== */
-
-    function openAppPath(
-        app,
-        options = {}
-    ) {
-
-        if (
-            options.navigate ===
-            false
-        ) {
-
-            return false;
-
-        }
-
-
-        const path =
-            options.path ||
-            app.path ||
-            app.url ||
-            null;
-
-
-        if (!path) {
-
-            return false;
-
-        }
-
-
-        try {
-
-            window.location.href =
-                path;
-
-            return true;
-
-        } catch (error) {
-
-            recordError(
-                error,
-                "path:" + app.id
-            );
-
-            return false;
-
-        }
-
-    }
-
-
-    /* ==================================================
-       START APP
-    ================================================== */
-
-    async function start(
-        id,
-        options = {}
-    ) {
-
-        const app =
-            state.apps.get(id);
-
-
-        if (!app) {
-
-            recordError(
-                `App "${id}" wurde nicht gefunden.`,
-                "start"
-            );
-
-            return false;
-
-        }
-
-
-        if (
-            !app.enabled
-        ) {
-
-            recordError(
-                `App "${id}" ist deaktiviert.`,
-                "start"
-            );
-
-            return false;
-
-        }
-
-
-        if (
-            !app.installed
-        ) {
-
-            recordError(
-                `App "${id}" ist nicht installiert.`,
-                "start"
-            );
-
-            return false;
-
-        }
-
-
-        if (
-            app.running
-        ) {
-
-            state.activeApp =
-                id;
-
-
-            emit(
-                "app:focused",
-                {
-                    app:
-                        get(id)
-                }
-            );
-
-
-            return true;
-
-        }
-
-
-        const initialized =
-            await initializeApp(id);
-
-
-        if (!initialized) {
-
-            return false;
-
-        }
-
-
-        /*
-        --------------------------------------------------
-        Router
-        --------------------------------------------------
-        */
-
-        if (
-            options.useRouter !==
-            false
-        ) {
-
-            await navigateToApp(
-                app,
-                options
-            );
-
-        }
-
-
-        /*
-        --------------------------------------------------
-        App Start Hook
-        --------------------------------------------------
-        */
-
-        try {
-
-            if (
-                typeof app.start ===
-                "function"
-            ) {
-
-                await app.start({
-
-                    app,
-
-                    manager:
-                        api,
-
-                    options,
-
-                    kernel:
-                        window.HalDoKernel,
-
-                    os:
-                        window.HalDoOS
-
-                });
-
-            }
-
-
-            app.running =
-                true;
-
-
-            state.activeApp =
-                id;
-
-
-            state.running =
-                true;
-
-
-            state.startCount++;
-
-
-            const historyEntry = {
-
-                id,
-
-                action:
-                    "start",
-
-                time:
-                    new Date()
-                        .toISOString(),
-
-                route:
-                    options.route ||
-                    app.route ||
-                    null,
-
-                path:
-                    options.path ||
-                    app.path ||
-                    null
-
-            };
-
-
-            state.history.push(
-                historyEntry
-            );
-
-
-            if (
-                state.history.length >
-                200
-            ) {
-
-                state.history.shift();
-
-            }
-
-
-            state.lastAction =
-                "start";
-
-
-            state.lastActionTime =
-                historyEntry.time;
-
-
-            emit(
-                "app:started",
-                {
-                    app:
-                        get(id),
-
-                    options
-                }
-            );
-
-
-            syncLauncher();
-
-
-            /*
-            ------------------------------------------------
-            Fallback-Navigation
-            ------------------------------------------------
-            Nur wenn ausdrücklich gewünscht.
-            Standardmäßig verhindert der Manager damit,
-            dass Router + window.location gleichzeitig
-            ausgelöst werden.
-            ------------------------------------------------
-            */
-
-            if (
-                options.fallbackPath ===
-                true
-            ) {
-
-                openAppPath(
-                    app,
-                    options
-                );
-
-            }
-
-
-            return true;
-
-        } catch (error) {
-
-            recordError(
-                error,
-                "start:" + id
-            );
-
-
-            return false;
-
-        }
-
-    }
-
-
-    /* ==================================================
-       STOP APP
-    ================================================== */
-
-    async function stop(
-        id
-    ) {
-
-        const app =
-            state.apps.get(id);
-
-
-        if (!app) {
-
-            return false;
-
-        }
-
-
-        if (
-            !app.running
-        ) {
-
-            return true;
-
-        }
-
-
-        try {
-
-            if (
-                typeof app.stop ===
-                "function"
-            ) {
-
-                await app.stop({
-
-                    app,
-
-                    manager:
-                        api,
-
-                    kernel:
-                        window.HalDoKernel,
-
-                    os:
-                        window.HalDoOS
-
-                });
-
-            }
-
-
-            app.running =
-                false;
-
-
-            if (
-                state.activeApp ===
-                id
-            ) {
-
-                state.activeApp =
-                    null;
-
-            }
-
-
-            state.stopCount++;
-
-
-            const historyEntry = {
-
-                id,
-
-                action:
-                    "stop",
-
-                time:
-                    new Date()
-                        .toISOString()
-
-            };
-
-
-            state.history.push(
-                historyEntry
-            );
-
-
-            if (
-                state.history.length >
-                200
-            ) {
-
-                state.history.shift();
-
-            }
-
-
-            state.lastAction =
-                "stop";
-
-
-            state.lastActionTime =
-                historyEntry.time;
-
-
-            emit(
-                "app:stopped",
-                {
-                    app:
-                        get(id)
-                }
-            );
-
-
-            syncLauncher();
-
-
-            return true;
-
-        } catch (error) {
-
-            recordError(
-                error,
-                "stop:" + id
-            );
-
-
-            return false;
-
-        }
-
-    }
-
-
-    /* ==================================================
-       RESTART
-    ================================================== */
-
-    async function restart(
-        id,
-        options = {}
-    ) {
-
-        const stopped =
-            await stop(id);
-
-
-        if (
-            !stopped
-        ) {
-
-            return false;
-
-        }
-
-
-        return start(
-            id,
-            options
-        );
-
-    }
-
-
-    /* ==================================================
-       ENABLE
-    ================================================== */
-
-    function enable(
-        id
-    ) {
-
-        const app =
-            state.apps.get(id);
-
-
-        if (!app) {
-
-            return false;
-
-        }
-
-
-        app.enabled =
-            true;
-
-
         emit(
-            "app:enabled",
-            {
-                app:
-                    get(id)
-            }
+
+            "activated",
+
+            runtime
+
         );
 
+        connectWindowManager(
 
-        syncConnections();
+            "activate",
 
+            runtime
 
-        return true;
+        );
+
+        return runtime;
 
     }
 
+    /* =====================================================
 
-    /* ==================================================
-       DISABLE
-    ================================================== */
+       DEACTIVATE
 
-    async function disable(
-        id
+       ===================================================== */
+
+    function deactivateRuntime(
+
+        runtime
+
     ) {
 
-        const app =
-            state.apps.get(id);
+        if (!runtime) {
 
-
-        if (!app) {
-
-            return false;
+            return;
 
         }
 
+        runtime.status =
+
+            "running";
 
         if (
-            app.running
+
+            runtime.app
+
         ) {
 
-            await stop(id);
+            runtime.app.status =
 
-        }
-
-
-        app.enabled =
-            false;
-
-
-        emit(
-            "app:disabled",
-            {
-                app:
-                    get(id)
-            }
-        );
-
-
-        syncConnections();
-
-
-        return true;
-
-    }
-
-
-    /* ==================================================
-       CLOSE ACTIVE APP
-    ================================================== */
-
-    async function closeActive() {
-
-        if (
-            !state.activeApp
-        ) {
-
-            return true;
-
-        }
-
-
-        return stop(
-            state.activeApp
-        );
-
-    }
-
-
-    /* ==================================================
-       REGISTRY CONNECTION
-    ================================================== */
-
-    function connectRegistry() {
-
-        const registry =
-            window.HalDoAppRegistry ||
-            (
-                window.HalDoOS &&
-                window.HalDoOS.appRegistry
-            );
-
-
-        if (!registry) {
-
-            return false;
-
-        }
-
-
-        try {
+                "running";
 
             if (
-                typeof registry.init ===
+
+                typeof runtime.app.onDeactivate ===
+
                 "function"
+
             ) {
 
-                registry.init();
+                try {
 
-            }
+                    runtime.app.onDeactivate(
 
+                        runtime.context
 
-            if (
-                typeof registry.getAll ===
-                "function"
-            ) {
+                    );
 
-                const registered =
-                    registry.getAll();
+                } catch (error) {
 
+                    console.warn(
 
-                if (
-                    Array.isArray(
-                        registered
-                    )
-                ) {
+                        "[HalDo App Manager] Deactivation error:",
 
-                    registerMany(
-                        registered
+                        error
+
                     );
 
                 }
 
             }
 
+        }
 
-            emit(
-                "registry:connected",
-                {
-                    count:
-                        state.apps.size
-                }
+        emit(
+
+            "deactivated",
+
+            runtime
+
+        );
+
+    }
+
+    /* =====================================================
+
+       MINIMIZE APP
+
+       ===================================================== */
+
+    function minimizeApp(id) {
+
+        const appId =
+
+            createId(id);
+
+        const runtime =
+
+            runningApps.get(
+
+                appId
+
             );
 
-
-            return true;
-
-        } catch (error) {
-
-            recordError(
-                error,
-                "registry-connect"
-            );
-
+        if (!runtime) {
 
             return false;
 
         }
 
+        runtime.minimized =
+
+            true;
+
+        runtime.status =
+
+            "minimized";
+
+        runtime.app.status =
+
+            "minimized";
+
+        minimizedApps.add(
+
+            appId
+
+        );
+
+        if (
+
+            typeof runtime.app.minimize ===
+
+            "function"
+
+        ) {
+
+            try {
+
+                runtime.app.minimize(
+
+                    runtime.context
+
+                );
+
+            } catch (error) {
+
+                console.warn(
+
+                    "[HalDo App Manager] Minimize error:",
+
+                    error
+
+                );
+
+            }
+
+        }
+
+        if (
+
+            activeAppId ===
+
+            appId
+
+        ) {
+
+            activeAppId =
+
+                null;
+
+        }
+
+        emit(
+
+            "minimized",
+
+            runtime
+
+        );
+
+        connectWindowManager(
+
+            "minimize",
+
+            runtime
+
+        );
+
+        return true;
+
     }
 
+    /* =====================================================
 
-    /* ==================================================
-       ROUTER CONNECTION
-    ================================================== */
+       RESTORE APP
 
-    function connectRouter() {
+       ===================================================== */
 
-        const router =
-            window.HalDoAppRouter ||
-            (
-                window.HalDoOS &&
-                window.HalDoOS.appRouter
+    function restoreApp(id) {
+
+        const appId =
+
+            createId(id);
+
+        const runtime =
+
+            runningApps.get(
+
+                appId
+
             );
 
+        if (!runtime) {
+
+            return false;
+
+        }
+
+        runtime.minimized =
+
+            false;
+
+        runtime.status =
+
+            "running";
+
+        runtime.app.status =
+
+            "running";
+
+        minimizedApps.delete(
+
+            appId
+
+        );
+
+        if (
+
+            typeof runtime.app.restore ===
+
+            "function"
+
+        ) {
+
+            try {
+
+                runtime.app.restore(
+
+                    runtime.context
+
+                );
+
+            } catch (error) {
+
+                console.warn(
+
+                    "[HalDo App Manager] Restore error:",
+
+                    error
+
+                );
+
+            }
+
+        }
+
+        emit(
+
+            "restored",
+
+            runtime
+
+        );
+
+        return activateApp(
+
+            appId
+
+        );
+
+    }
+
+    /* =====================================================
+
+       CLOSE APP
+
+       ===================================================== */
+
+    async function closeApp(id) {
+
+        const appId =
+
+            createId(id);
+
+        const runtime =
+
+            runningApps.get(
+
+                appId
+
+            );
+
+        if (!runtime) {
+
+            return false;
+
+        }
+
+        try {
+
+            if (
+
+                typeof runtime.app.stop ===
+
+                    "function"
+
+            ) {
+
+                await runtime.app.stop(
+
+                    runtime.context
+
+                );
+
+            }
+
+            if (
+
+                typeof runtime.app.destroy ===
+
+                    "function"
+
+            ) {
+
+                await runtime.app.destroy(
+
+                    runtime.context
+
+                );
+
+            }
+
+        } catch (error) {
+
+            console.warn(
+
+                "[HalDo App Manager] Close error:",
+
+                error
+
+            );
+
+        }
+
+        runningApps.delete(
+
+            appId
+
+        );
+
+        minimizedApps.delete(
+
+            appId
+
+        );
+
+        runtime.app.status =
+
+            "registered";
+
+        if (
+
+            activeAppId ===
+
+            appId
+
+        ) {
+
+            activeAppId =
+
+                null;
+
+        }
+
+        emit(
+
+            "closed",
+
+            runtime
+
+        );
+
+        connectRouter(
+
+            "close",
+
+            runtime.app
+
+        );
+
+        connectWindowManager(
+
+            "close",
+
+            runtime
+
+        );
+
+        return true;
+
+    }
+
+    /* =====================================================
+
+       CLOSE ALL
+
+       ===================================================== */
+
+    async function closeAllApps() {
+
+        const ids =
+
+            Array.from(
+
+                runningApps.keys()
+
+            );
+
+        for (
+
+            const id of ids
+
+        ) {
+
+            await closeApp(
+
+                id
+
+            );
+
+        }
+
+        activeAppId =
+
+            null;
+
+        emit(
+
+            "all-closed"
+
+        );
+
+    }
+
+    /* =====================================================
+
+       DEPENDENCY SYSTEM
+
+       ===================================================== */
+
+    function checkDependencies(
+
+        app
+
+    ) {
+
+        if (
+
+            !app.dependencies ||
+
+            !app.dependencies.length
+
+        ) {
+
+            return true;
+
+        }
+
+        return app.dependencies.every(
+
+            function (dependency) {
+
+                return (
+
+                    hasApp(
+
+                        dependency
+
+                    ) &&
+
+                    getApp(
+
+                        dependency
+
+                    ).enabled !== false
+
+                );
+
+            }
+
+        );
+
+    }
+
+    /* =====================================================
+
+       REMOVE APP
+
+       ===================================================== */
+
+    async function unregisterApp(
+
+        id
+
+    ) {
+
+        const appId =
+
+            createId(id);
+
+        if (
+
+            isRunning(appId)
+
+        ) {
+
+            await closeApp(
+
+                appId
+
+            );
+
+        }
+
+        const app =
+
+            apps.get(
+
+                appId
+
+            );
+
+        if (!app) {
+
+            return false;
+
+        }
+
+        apps.delete(
+
+            appId
+
+        );
+
+        emit(
+
+            "unregistered",
+
+            app
+
+        );
+
+        return true;
+
+    }
+
+    /* =====================================================
+
+       ENABLE / DISABLE
+
+       ===================================================== */
+
+    function enableApp(id) {
+
+        const app =
+
+            getApp(id);
+
+        if (!app) {
+
+            return false;
+
+        }
+
+        app.enabled =
+
+            true;
+
+        app.status =
+
+            "registered";
+
+        emit(
+
+            "enabled",
+
+            app
+
+        );
+
+        return true;
+
+    }
+
+    function disableApp(id) {
+
+        const app =
+
+            getApp(id);
+
+        if (!app) {
+
+            return false;
+
+        }
+
+        if (
+
+            isRunning(app.id)
+
+        ) {
+
+            closeApp(
+
+                app.id
+
+            );
+
+        }
+
+        app.enabled =
+
+            false;
+
+        app.status =
+
+            "disabled";
+
+        emit(
+
+            "disabled",
+
+            app
+
+        );
+
+        return true;
+
+    }
+
+    /* =====================================================
+
+       SEARCH
+
+       ===================================================== */
+
+    function search(query) {
+
+        const value =
+
+            String(
+
+                query || ""
+
+            )
+
+            .trim()
+
+            .toLowerCase();
+
+        if (!value) {
+
+            return getApps();
+
+        }
+
+        return getApps().filter(
+
+            function (app) {
+
+                return (
+
+                    app.id
+
+                        .toLowerCase()
+
+                        .includes(value)
+
+                    ||
+
+                    app.name
+
+                        .toLowerCase()
+
+                        .includes(value)
+
+                    ||
+
+                    app.title
+
+                        .toLowerCase()
+
+                        .includes(value)
+
+                    ||
+
+                    app.description
+
+                        .toLowerCase()
+
+                        .includes(value)
+
+                    ||
+
+                    app.category
+
+                        .toLowerCase()
+
+                        .includes(value)
+
+                );
+
+            }
+
+        );
+
+    }
+
+    /* =====================================================
+
+       CATEGORY
+
+       ===================================================== */
+
+    function getByCategory(
+
+        category
+
+    ) {
+
+        const value =
+
+            String(
+
+                category || ""
+
+            )
+
+            .trim()
+
+            .toLowerCase();
+
+        return getApps().filter(
+
+            function (app) {
+
+                return (
+
+                    String(
+
+                        app.category
+
+                    ).toLowerCase() ===
+
+                    value
+
+                );
+
+            }
+
+        );
+
+    }
+
+    /* =====================================================
+
+       ACTIVE APP
+
+       ===================================================== */
+
+    function getActiveApp() {
+
+        if (!activeAppId) {
+
+            return null;
+
+        }
+
+        return (
+
+            runningApps.get(
+
+                activeAppId
+
+            ) || null
+
+        );
+
+    }
+
+    /* =====================================================
+
+       REGISTRY CONNECTION
+
+       ===================================================== */
+
+    function connectRegistry(
+
+        app
+
+    ) {
+
+        const registry =
+
+            window.HalDoAppRegistry ||
+
+            HalDoOS.appRegistry;
+
+        if (!registry) {
+
+            return;
+
+        }
+
+        try {
+
+            if (
+
+                typeof registry.register ===
+
+                "function"
+
+            ) {
+
+                /*
+
+                 * Nur registrieren, wenn die Registry
+
+                 * diese App noch nicht kennt.
+
+                 */
+
+                if (
+
+                    typeof registry.has !==
+
+                    "function" ||
+
+                    !registry.has(
+
+                        app.id
+
+                    )
+
+                ) {
+
+                    registry.register(
+
+                        app
+
+                    );
+
+                }
+
+            }
+
+        } catch (error) {
+
+            console.warn(
+
+                "[HalDo App Manager] Registry connection failed:",
+
+                error
+
+            );
+
+        }
+
+    }
+
+    /* =====================================================
+
+       ROUTER CONNECTION
+
+       ===================================================== */
+
+    function connectRouter(
+
+        action,
+
+        app
+
+    ) {
+
+        const router =
+
+            window.HalDoAppRouter ||
+
+            HalDoOS.appRouter;
 
         if (!router) {
 
-            return false;
+            return;
 
         }
-
 
         try {
 
             if (
-                typeof router.registerApp ===
+
+                action === "open" &&
+
+                typeof router.open ===
+
                 "function"
+
             ) {
 
-                getAll().forEach(
-                    function (app) {
+                router.open(
 
-                        try {
+                    app.id,
 
-                            router.registerApp(
-                                app
-                            );
+                    {
 
-                        } catch (error) {
+                        source:
 
-                            recordError(
-                                error,
-                                "router-register:" +
-                                app.id
-                            );
-
-                        }
+                            "app-manager"
 
                     }
+
                 );
 
             }
 
+            if (
 
-            emit(
-                "router:connected"
-            );
+                action === "close" &&
 
+                typeof router.close ===
 
-            return true;
+                "function"
+
+            ) {
+
+                router.close(
+
+                    app.id
+
+                );
+
+            }
 
         } catch (error) {
 
-            recordError(
-                error,
-                "router-connect"
+            console.warn(
+
+                "[HalDo App Manager] Router connection failed:",
+
+                error
+
             );
-
-
-            return false;
 
         }
 
     }
 
+    /* =====================================================
 
-    /* ==================================================
-       LAUNCHER CONNECTION
-    ================================================== */
+       WINDOW MANAGER CONNECTION
 
-    function syncLauncher() {
+       ===================================================== */
 
-        const launcher =
-            window.HalDoLauncher ||
-            (
-                window.HalDoOS &&
-                window.HalDoOS.launcher
-            );
+    function connectWindowManager(
 
+        action,
 
-        if (!launcher) {
+        runtime
 
-            return false;
+    ) {
+
+        const manager =
+
+            window.HalDoWindowManager ||
+
+            HalDoOS.windowManager;
+
+        if (!manager) {
+
+            return;
 
         }
-
 
         try {
 
-            if (
-                typeof launcher.updateApps ===
-                "function"
-            ) {
+            switch (action) {
 
-                launcher.updateApps(
-                    getAll()
-                );
+                case "open":
 
-            }
+                    if (
 
+                        typeof manager.open ===
 
-            if (
-                typeof launcher.setApps ===
-                "function"
-            ) {
+                        "function"
 
-                launcher.setApps(
-                    getAll()
-                );
-
-            }
-
-
-            if (
-                typeof launcher.setActiveApp ===
-                "function"
-            ) {
-
-                launcher.setActiveApp(
-                    state.activeApp
-                );
-
-            }
-
-
-            emit(
-                "launcher:synced",
-                {
-                    appCount:
-                        state.apps.size
-                }
-            );
-
-
-            return true;
-
-        } catch (error) {
-
-            recordError(
-                error,
-                "launcher-sync"
-            );
-
-
-            return false;
-
-        }
-
-    }
-
-
-    /* ==================================================
-       KERNEL CONNECTION
-    ================================================== */
-
-    function connectKernel() {
-
-        const kernel =
-            window.HalDoKernel;
-
-
-        if (!kernel) {
-
-            return false;
-
-        }
-
-
-        try {
-
-            if (
-                typeof kernel.on ===
-                "function"
-            ) {
-
-                kernel.on(
-                    "kernel:ready",
-                    function (
-                        payload
                     ) {
 
-                        emit(
-                            "kernel:ready",
-                            payload
+                        manager.open(
+
+                            runtime
+
                         );
 
                     }
-                );
 
+                    break;
 
-                kernel.on(
-                    "kernel:error",
-                    function (
-                        payload
+                case "activate":
+
+                    if (
+
+                        typeof manager.activate ===
+
+                        "function"
+
                     ) {
 
-                        emit(
-                            "kernel:error",
-                            payload
+                        manager.activate(
+
+                            runtime.id
+
                         );
 
                     }
-                );
+
+                    break;
+
+                case "minimize":
+
+                    if (
+
+                        typeof manager.minimize ===
+
+                        "function"
+
+                    ) {
+
+                        manager.minimize(
+
+                            runtime.id
+
+                        );
+
+                    }
+
+                    break;
+
+                case "close":
+
+                    if (
+
+                        typeof manager.close ===
+
+                        "function"
+
+                    ) {
+
+                        manager.close(
+
+                            runtime.id
+
+                        );
+
+                    }
+
+                    break;
 
             }
 
-
-            if (
-                typeof kernel.registerModule ===
-                "function"
-            ) {
-
-                kernel.registerModule(
-                    "app-manager",
-                    api
-                );
-
-            }
-
-
-            emit(
-                "kernel:connected"
-            );
-
-
-            return true;
-
         } catch (error) {
 
-            recordError(
-                error,
-                "kernel-connect"
+            console.warn(
+
+                "[HalDo App Manager] Window manager connection failed:",
+
+                error
+
             );
-
-
-            return false;
 
         }
 
     }
 
+    /* =====================================================
 
-    /* ==================================================
-       SYSTEM CONNECTION
-    ================================================== */
+       CENTRAL APP LIST
 
-    function connectSystem() {
+       =====================================================
 
-        const system =
-            window.HalDoSystem ||
-            (
-                window.HalDoOS &&
-                window.HalDoOS.system
-            );
+       Diese Liste ist bewusst größer angelegt.
 
+       Die Apps werden registriert und erhalten
 
-        if (!system) {
+       echte System-IDs.
 
-            return false;
+       Die eigentlichen UI-/Funktionsmodule werden
+
+       anschließend an diese IDs angeschlossen.
+
+       */
+
+    const CORE_APPS = [
+
+        /* -----------------------------
+
+           AI
+
+           ----------------------------- */
+
+        {
+
+            id: "ai-chat",
+
+            name: "AI Chat",
+
+            title: "HalDo AI Gespräch",
+
+            description:
+
+                "Intelligenter HalDo AI Chat.",
+
+            category: "ai",
+
+            icon: "✦",
+
+            dependencies: [
+
+                "ai-core"
+
+            ],
+
+            route: "chat"
+
+        },
+
+        {
+
+            id: "ai-core",
+
+            name: "AI Core",
+
+            title: "HalDo AI Core",
+
+            description:
+
+                "Zentrale AI-Systembasis.",
+
+            category: "ai",
+
+            icon: "◆",
+
+            system: true,
+
+            route: "ai-core"
+
+        },
+
+        {
+
+            id: "ai-engine",
+
+            name: "AI Engine",
+
+            title: "HalDo AI Engine",
+
+            description:
+
+                "Verarbeitung und AI Engine.",
+
+            category: "ai",
+
+            icon: "◇",
+
+            dependencies: [
+
+                "ai-core"
+
+            ],
+
+            route: "ai-engine"
+
+        },
+
+        {
+
+            id: "ai-memory",
+
+            name: "AI Memory",
+
+            title: "HalDo AI Memory",
+
+            description:
+
+                "AI-Speicher und Kontextsystem.",
+
+            category: "ai",
+
+            icon: "◫",
+
+            dependencies: [
+
+                "ai-core"
+
+            ],
+
+            route: "ai-memory"
+
+        },
+
+        {
+
+            id: "ai-language",
+
+            name: "AI Language",
+
+            title: "AI Language System",
+
+            description:
+
+                "Sprachverarbeitung für HalDo AI.",
+
+            category: "ai",
+
+            icon: "文",
+
+            dependencies: [
+
+                "ai-core"
+
+            ],
+
+            route: "ai-language"
+
+        },
+
+        {
+
+            id: "ai-commands",
+
+            name: "AI Commands",
+
+            title: "AI Commands",
+
+            description:
+
+                "Befehle und Systemaktionen.",
+
+            category: "ai",
+
+            icon: "⌘",
+
+            dependencies: [
+
+                "ai-core"
+
+            ],
+
+            route: "ai-commands"
+
+        },
+
+        /* -----------------------------
+
+           VOICE
+
+           ----------------------------- */
+
+        {
+
+            id: "voice",
+
+            name: "Voice",
+
+            title: "Sprache & Mikrofon",
+
+            description:
+
+                "Sprachsteuerung und Mikrofon.",
+
+            category: "voice",
+
+            icon: "◉",
+
+            route: "voice"
+
+        },
+
+        {
+
+            id: "ai-speech",
+
+            name: "AI Speech",
+
+            title: "AI Speech",
+
+            description:
+
+                "Sprachverarbeitung.",
+
+            category: "voice",
+
+            icon: "◉",
+
+            dependencies: [
+
+                "ai-core"
+
+            ],
+
+            route: "ai-speech"
+
+        },
+
+        {
+
+            id: "ai-voice",
+
+            name: "AI Voice",
+
+            title: "AI Voice",
+
+            description:
+
+                "AI-Stimmensystem.",
+
+            category: "voice",
+
+            icon: "◎",
+
+            dependencies: [
+
+                "ai-core"
+
+            ],
+
+            route: "ai-voice"
+
+        },
+
+        /* -----------------------------
+
+           LANGUAGE
+
+           ----------------------------- */
+
+        {
+
+            id: "languages",
+
+            name: "Languages",
+
+            title: "Sprachen",
+
+            description:
+
+                "Zentrale Sprachverwaltung.",
+
+            category: "language",
+
+            icon: "文",
+
+            route: "languages"
+
+        },
+
+        {
+
+            id: "language-manager",
+
+            name: "Language Manager",
+
+            title: "Language Manager",
+
+            description:
+
+                "Verwaltung installierter Sprachen.",
+
+            category: "language",
+
+            icon: "A",
+
+            route: "language-manager"
+
+        },
+
+        {
+
+            id: "language-system",
+
+            name: "Language System",
+
+            title: "Language System",
+
+            description:
+
+                "Zentrale Sprachsystem-Engine.",
+
+            category: "language",
+
+            icon: "文",
+
+            route: "language-system"
+
+        },
+
+        /* -----------------------------
+
+           ÊZÎDÎ
+
+           ----------------------------- */
+
+        {
+
+            id: "ezidi-keyboard",
+
+            name: "Êzîdî Keyboard",
+
+            title: "Êzîdî Keyboard",
+
+            description:
+
+                "Eigene Êzîdî-Tastatur und Zeichen.",
+
+            category: "tools",
+
+            icon: "⌨",
+
+            route: "keyboard"
+
+        },
+
+        /* -----------------------------
+
+           APPS
+
+           ----------------------------- */
+
+        {
+
+            id: "apps",
+
+            name: "Apps",
+
+            title: "HalDo Apps",
+
+            description:
+
+                "Zentrale App-Übersicht.",
+
+            category: "apps",
+
+            icon: "◈",
+
+            system: true,
+
+            route: "apps"
+
+        },
+
+        {
+
+            id: "app-launcher",
+
+            name: "App Launcher",
+
+            title: "App Launcher",
+
+            description:
+
+                "Startet HalDo Apps.",
+
+            category: "apps",
+
+            icon: "▦",
+
+            system: true,
+
+            dependencies: [
+
+                "apps"
+
+            ],
+
+            route: "launcher"
+
+        },
+
+        /* -----------------------------
+
+           SYSTEM
+
+           ----------------------------- */
+
+        {
+
+            id: "dashboard",
+
+            name: "Dashboard",
+
+            title: "HalDo Dashboard",
+
+            description:
+
+                "Zentrale Systemübersicht.",
+
+            category: "system",
+
+            icon: "▦",
+
+            system: true,
+
+            route: "dashboard"
+
+        },
+
+        {
+
+            id: "modules",
+
+            name: "Modules",
+
+            title: "HalDo Module",
+
+            description:
+
+                "Systemmodule verwalten.",
+
+            category: "system",
+
+            icon: "◈",
+
+            system: true,
+
+            route: "modules"
+
+        },
+
+        {
+
+            id: "system",
+
+            name: "System",
+
+            title: "HalDo System",
+
+            description:
+
+                "Zentrale Systemverwaltung.",
+
+            category: "system",
+
+            icon: "◆",
+
+            system: true,
+
+            route: "system"
+
+        },
+
+        {
+
+            id: "kernel",
+
+            name: "Kernel",
+
+            title: "HalDo Kernel",
+
+            description:
+
+                "Zentrale Kernel-Funktionen.",
+
+            category: "system",
+
+            icon: "⬢",
+
+            system: true,
+
+            route: "kernel"
+
+        },
+
+        {
+
+            id: "shell",
+
+            name: "Shell",
+
+            title: "HalDo Shell",
+
+            description:
+
+                "System-Shell.",
+
+            category: "system",
+
+            icon: ">_",
+
+            system: true,
+
+            route: "shell"
+
+        },
+
+        /* -----------------------------
+
+           DESKTOP / WINDOWS
+
+           ----------------------------- */
+
+        {
+
+            id: "desktop",
+
+            name: "Desktop",
+
+            title: "HalDo Desktop",
+
+            description:
+
+                "Zentrale Desktop-Oberfläche.",
+
+            category: "system",
+
+            icon: "▣",
+
+            system: true,
+
+            route: "desktop"
+
+        },
+
+        {
+
+            id: "window-manager",
+
+            name: "Window Manager",
+
+            title: "Window Manager",
+
+            description:
+
+                "Fensterverwaltung.",
+
+            category: "system",
+
+            icon: "□",
+
+            system: true,
+
+            route: "windows"
+
+        },
+
+        /* -----------------------------
+
+           STORAGE
+
+           ----------------------------- */
+
+        {
+
+            id: "storage",
+
+            name: "Storage",
+
+            title: "HalDo Speicher",
+
+            description:
+
+                "Lokaler Datenspeicher.",
+
+            category: "system",
+
+            icon: "◫",
+
+            system: true,
+
+            route: "storage"
+
+        },
+
+        {
+
+            id: "storage-manager",
+
+            name: "Storage Manager",
+
+            title: "Storage Manager",
+
+            description:
+
+                "Verwaltung lokaler Daten.",
+
+            category: "system",
+
+            icon: "◫",
+
+            dependencies: [
+
+                "storage"
+
+            ],
+
+            route: "storage-manager"
+
+        },
+
+        /* -----------------------------
+
+           SETTINGS
+
+           ----------------------------- */
+
+        {
+
+            id: "settings",
+
+            name: "Settings",
+
+            title: "Einstellungen",
+
+            description:
+
+                "HalDo OS Einstellungen.",
+
+            category: "system",
+
+            icon: "⚙",
+
+            route: "settings"
+
+        },
+
+        {
+
+            id: "config-manager",
+
+            name: "Config Manager",
+
+            title: "Configuration Manager",
+
+            description:
+
+                "Zentrale Konfiguration.",
+
+            category: "system",
+
+            icon: "⚙",
+
+            system: true,
+
+            route: "config"
+
+        },
+
+        /* -----------------------------
+
+           DIAGNOSTICS
+
+           ----------------------------- */
+
+        {
+
+            id: "diagnostics",
+
+            name: "Diagnostics",
+
+            title: "System Diagnose",
+
+            description:
+
+                "Systemprüfung und Diagnose.",
+
+            category: "system",
+
+            icon: "✓",
+
+            route: "diagnostics"
+
+        },
+
+        {
+
+            id: "system-status",
+
+            name: "System Status",
+
+            title: "System Status",
+
+            description:
+
+                "Laufzeitstatus des Systems.",
+
+            category: "system",
+
+            icon: "●",
+
+            system: true,
+
+            route: "status"
+
+        },
+
+        /* -----------------------------
+
+           SOFTWARE UPDATE
+
+           ----------------------------- */
+
+        {
+
+            id: "software-update",
+
+            name: "Software Update",
+
+            title: "Software Update Center",
+
+            description:
+
+                "Softwareprüfung und Updates.",
+
+            category: "software",
+
+            icon: "↻",
+
+            route: "updates"
+
+        },
+
+        /* -----------------------------
+
+           BOOT / STARTUP
+
+           ----------------------------- */
+
+        {
+
+            id: "boot",
+
+            name: "Boot",
+
+            title: "HalDo Boot System",
+
+            description:
+
+                "Boot- und Startsystem.",
+
+            category: "system",
+
+            icon: "▶",
+
+            system: true,
+
+            route: "boot"
+
+        },
+
+        {
+
+            id: "startup",
+
+            name: "Startup",
+
+            title: "HalDo Startup",
+
+            description:
+
+                "Systemstart und Initialisierung.",
+
+            category: "system",
+
+            icon: "⚡",
+
+            system: true,
+
+            route: "startup"
+
+        },
+
+        /* -----------------------------
+
+           LOGO / LIGHT
+
+           ----------------------------- */
+
+        {
+
+            id: "logo-intro",
+
+            name: "Logo Intro",
+
+            title: "HalDo Logo Intro",
+
+            description:
+
+                "HalDo Logo Startanimation.",
+
+            category: "visual",
+
+            icon: "✦",
+
+            system: true,
+
+            route: "logo-intro"
+
+        },
+
+        {
+
+            id: "logo-animation",
+
+            name: "Logo Animation",
+
+            title: "HalDo Logo Animation",
+
+            description:
+
+                "Lebendiges Logo- und Lichtsystem.",
+
+            category: "visual",
+
+            icon: "✦",
+
+            system: true,
+
+            route: "logo-animation"
+
+        },
+
+        {
+
+            id: "haldo-light-system",
+
+            name: "Light System",
+
+            title: "HalDo Light System",
+
+            description:
+
+                "Licht-, Glow- und Visual-System.",
+
+            category: "visual",
+
+            icon: "☀",
+
+            system: true,
+
+            route: "light-system"
+
+        },
+
+        /* -----------------------------
+
+           CODE
+
+           ----------------------------- */
+
+        {
+
+            id: "code-builder",
+
+            name: "Code Builder",
+
+            title: "HalDo Code Builder",
+
+            description:
+
+                "Software- und Code-Entwicklung.",
+
+            category: "developer",
+
+            icon: "</>",
+
+            route: "code"
+
+        },
+
+        {
+
+            id: "module-manager",
+
+            name: "Module Manager",
+
+            title: "Module Manager",
+
+            description:
+
+                "Verwaltung aller Systemmodule.",
+
+            category: "developer",
+
+            icon: "◈",
+
+            system: true,
+
+            route: "module-manager"
 
         }
 
+    ];
 
-        try {
+    /* =====================================================
 
-            emit(
-                "system:connected",
-                {
-                    system
-                }
-            );
+       INITIALIZE CORE APPS
 
+       ===================================================== */
 
-            return true;
+    function registerCoreApps() {
 
-        } catch (error) {
+        registerApps(
 
-            recordError(
-                error,
-                "system-connect"
-            );
+            CORE_APPS
 
-
-            return false;
-
-        }
+        );
 
     }
 
+    /* =====================================================
 
-    /* ==================================================
-       ALL CONNECTIONS
-    ================================================== */
+       CONNECT EXISTING MODULE APIs
 
-    function syncConnections() {
+       =====================================================
 
-        connectRegistry();
+       Hier werden die bereits vorhandenen globalen
 
-        connectRouter();
+       HalDo-Dateien erkannt.
 
-        syncLauncher();
+       Dadurch müssen wir die vorhandenen Module
 
-        connectSystem();
+       nicht löschen oder neu erfinden.
 
-    }
+       */
 
+    function connectExistingApis() {
 
-    /* ==================================================
-       FOUNDATION APPS
-    ================================================== */
-
-    function registerFoundationApps() {
-
-        const foundationApps = [
+        const connections = [
 
             {
-                id:
-                    "haldo-ai",
 
-                name:
-                    "HalDo AI",
+                app:
 
-                title:
-                    "HalDo AI Gespräch",
+                    "ai-core",
 
-                version:
-                    VERSION,
+                api:
 
-                description:
-                    "Zentrale HalDo AI Gesprächsoberfläche.",
-
-                category:
-                    "ai",
-
-                path:
-                    "chat.html",
-
-                route:
-                    "/chat",
-
-                keywords:
-                    [
-                        "ai",
-                        "chat",
-                        "assistant",
-                        "gespräch"
-                    ]
+                    "HalDoAICore"
 
             },
 
-
             {
-                id:
-                    "dashboard",
 
-                name:
-                    "Dashboard",
+                app:
 
-                title:
-                    "HalDo Dashboard",
+                    "ai-memory",
 
-                version:
-                    VERSION,
+                api:
 
-                description:
-                    "Zentrale Systemübersicht.",
-
-                category:
-                    "system",
-
-                path:
-                    "dashboard.html",
-
-                route:
-                    "/dashboard",
-
-                keywords:
-                    [
-                        "dashboard",
-                        "system",
-                        "status"
-                    ]
+                    "HalDoAIMemory"
 
             },
 
-
             {
-                id:
-                    "apps",
 
-                name:
-                    "Apps",
+                app:
 
-                title:
-                    "HalDo Apps",
+                    "ai-engine",
 
-                version:
-                    VERSION,
+                api:
 
-                description:
-                    "Zentrale App-Verwaltung.",
-
-                category:
-                    "system",
-
-                path:
-                    "apps.html",
-
-                route:
-                    "/apps",
-
-                keywords:
-                    [
-                        "apps",
-                        "applications",
-                        "programme"
-                    ]
+                    "HalDoAIEngine"
 
             },
 
-
             {
-                id:
-                    "settings",
 
-                name:
-                    "Einstellungen",
+                app:
 
-                title:
-                    "HalDo Einstellungen",
+                    "ai-language",
 
-                version:
-                    VERSION,
+                api:
 
-                description:
-                    "System- und Benutzerkonfiguration.",
-
-                category:
-                    "system",
-
-                path:
-                    "settings.html",
-
-                route:
-                    "/settings",
-
-                keywords:
-                    [
-                        "settings",
-                        "einstellungen",
-                        "config"
-                    ]
+                    "HalDoAILanguage"
 
             },
 
-
             {
-                id:
-                    "knowledge",
 
-                name:
-                    "Wissen",
+                app:
 
-                title:
-                    "HalDo Knowledge",
-
-                version:
-                    VERSION,
-
-                description:
-                    "Wissens- und Lernsystem.",
-
-                category:
-                    "ai",
-
-                path:
-                    "knowledge.html",
-
-                route:
-                    "/knowledge",
-
-                keywords:
-                    [
-                        "wissen",
-                        "knowledge",
-                        "learning",
-                        "lernen"
-                    ]
-
-            },
-
-
-            {
-                id:
-                    "code-builder",
-
-                name:
-                    "Code Builder",
-
-                title:
-                    "HalDo Code Builder",
-
-                version:
-                    VERSION,
-
-                description:
-                    "Code-Erstellung und Entwicklungswerkzeuge.",
-
-                category:
-                    "development",
-
-                path:
-                    "code.html",
-
-                route:
-                    "/code",
-
-                keywords:
-                    [
-                        "code",
-                        "builder",
-                        "entwicklung",
-                        "programmierung"
-                    ]
-
-            },
-
-
-            {
-                id:
-                    "languages",
-
-                name:
-                    "Sprachen",
-
-                title:
-                    "HalDo Sprachen",
-
-                version:
-                    VERSION,
-
-                description:
-                    "Sprach- und Übersetzungssystem.",
-
-                category:
-                    "language",
-
-                path:
-                    "languages.html",
-
-                route:
-                    "/languages",
-
-                keywords:
-                    [
-                        "sprache",
-                        "languages",
-                        "translation",
-                        "übersetzung"
-                    ]
-
-            },
-
-
-            {
-                id:
-                    "ezidi-keyboard",
-
-                name:
-                    "Êzîdî Keyboard",
-
-                title:
-                    "Êzîdî Tastatur",
-
-                version:
-                    VERSION,
-
-                description:
-                    "HalDo Tastatur mit eigenen Êzîdî-Zeichen.",
-
-                category:
-                    "input",
-
-                path:
-                    "keyboard.html",
-
-                route:
-                    "/keyboard",
-
-                keywords:
-                    [
-                        "ezidi",
-                        "êzîdî",
-                        "keyboard",
-                        "tastatur",
-                        "input"
-                    ]
-
-            },
-
-
-            {
-                id:
                     "voice",
 
-                name:
-                    "Voice",
+                api:
 
-                title:
-                    "Sprache / Mikrofon",
-
-                version:
-                    VERSION,
-
-                description:
-                    "Sprachschnittstelle und Mikrofon.",
-
-                category:
-                    "ai",
-
-                path:
-                    "voice.html",
-
-                route:
-                    "/voice",
-
-                keywords:
-                    [
-                        "voice",
-                        "sprache",
-                        "mikrofon",
-                        "speech"
-                    ]
+                    "HalDoVoice"
 
             },
 
-
             {
-                id:
-                    "system",
 
-                name:
-                    "System",
+                app:
 
-                title:
-                    "HalDo Systemzentrale",
+                    "ezidi-keyboard",
 
-                version:
-                    VERSION,
+                api:
 
-                description:
-                    "Systemkern und Modulverwaltung.",
-
-                category:
-                    "system",
-
-                path:
-                    "system.html",
-
-                route:
-                    "/system",
-
-                keywords:
-                    [
-                        "system",
-                        "kernel",
-                        "core",
-                        "module"
-                    ]
+                    "HalDoEzidiKeyboard"
 
             },
 
-
             {
-                id:
+
+                app:
+
                     "storage",
 
-                name:
-                    "Storage",
+                api:
 
-                title:
-                    "HalDo Speicher",
-
-                version:
-                    VERSION,
-
-                description:
-                    "Lokale Daten und Speicherverwaltung.",
-
-                category:
-                    "system",
-
-                path:
-                    "storage.html",
-
-                route:
-                    "/storage",
-
-                keywords:
-                    [
-                        "storage",
-                        "speicher",
-                        "daten",
-                        "local"
-                    ]
+                    "HalDoStorage"
 
             },
 
+            {
+
+                app:
+
+                    "storage-manager",
+
+                api:
+
+                    "HalDoStorageManager"
+
+            },
 
             {
-                id:
-                    "notifications",
 
-                name:
-                    "Notifications",
+                app:
 
-                title:
-                    "HalDo Benachrichtigungen",
+                    "settings",
 
-                version:
-                    VERSION,
+                api:
 
-                description:
-                    "Systemmeldungen und Benachrichtigungen.",
+                    "HalDoSettings"
 
-                category:
+            },
+
+            {
+
+                app:
+
+                    "window-manager",
+
+                api:
+
+                    "HalDoWindowManager"
+
+            },
+
+            {
+
+                app:
+
                     "system",
 
-                path:
-                    "notifications.html",
+                api:
 
-                route:
-                    "/notifications",
+                    "HalDoSystem"
 
-                keywords:
-                    [
-                        "notifications",
-                        "benachrichtigungen",
-                        "meldungen"
-                    ]
+            },
+
+            {
+
+                app:
+
+                    "kernel",
+
+                api:
+
+                    "HalDoKernel"
 
             }
 
         ];
 
+        connections.forEach(
 
-        registerMany(
-            foundationApps
-        );
+            function (connection) {
 
-    }
+                const apiObject =
 
+                    window[
 
-    /* ==================================================
-       DIAGNOSTICS
-    ================================================== */
+                        connection.api
 
-    function diagnose() {
+                    ];
 
-        return {
+                if (!apiObject) {
 
-            name:
-                "HalDo Application Manager",
+                    return;
 
-            version:
-                VERSION,
+                }
 
-            initialized:
-                state.initialized,
+                const app =
 
-            running:
-                state.running,
+                    getApp(
 
-            appCount:
-                state.apps.size,
+                        connection.app
 
-            enabledCount:
-                getEnabled().length,
+                    );
 
-            installedCount:
-                getInstalled().length,
+                if (!app) {
 
-            runningCount:
-                getRunning().length,
+                    return;
 
-            activeApp:
-                state.activeApp,
+                }
 
-            startCount:
-                state.startCount,
+                app.api =
 
-            stopCount:
-                state.stopCount,
+                    apiObject;
 
-            reconnectCount:
-                state.reconnectCount,
+                app.metadata.connected =
 
-            registryConnected:
-                Boolean(
-                    window.HalDoAppRegistry ||
-                    (
-                        window.HalDoOS &&
-                        window.HalDoOS.appRegistry
-                    )
-                ),
+                    true;
 
-            routerConnected:
-                Boolean(
-                    window.HalDoAppRouter ||
-                    (
-                        window.HalDoOS &&
-                        window.HalDoOS.appRouter
-                    )
-                ),
+                app.metadata.globalApi =
 
-            launcherConnected:
-                Boolean(
-                    window.HalDoLauncher ||
-                    (
-                        window.HalDoOS &&
-                        window.HalDoOS.launcher
-                    )
-                ),
+                    connection.api;
 
-            kernelConnected:
-                Boolean(
-                    window.HalDoKernel
-                ),
+                emit(
 
-            systemConnected:
-                Boolean(
-                    window.HalDoSystem ||
-                    (
-                        window.HalDoOS &&
-                        window.HalDoOS.system
-                    )
-                ),
+                    "api-connected",
 
-            errors:
-                state.errors.length,
+                    {
 
-            lastAction:
-                state.lastAction,
+                        app,
 
-            lastActionTime:
-                state.lastActionTime
+                        api:
 
-        };
+                            apiObject,
 
-    }
+                        globalName:
 
+                            connection.api
 
-    /* ==================================================
-       RESET RUNTIME
-    ================================================== */
+                    }
 
-    async function resetRuntime() {
-
-        const running =
-            getRunning();
-
-
-        for (
-            const app of running
-        ) {
-
-            try {
-
-                await stop(
-                    app.id
-                );
-
-            } catch (error) {
-
-                recordError(
-                    error,
-                    "reset:" +
-                    app.id
                 );
 
             }
 
-        }
-
-
-        state.activeApp =
-            null;
-
-
-        state.running =
-            false;
-
-
-        emit(
-            "runtime:reset"
         );
-
-
-        return true;
 
     }
 
+    /* =====================================================
 
-    /* ==================================================
-       INITIALIZE
-    ================================================== */
+       MODULE STATUS REFRESH
 
-    function init() {
+       ===================================================== */
 
-        if (
-            state.initialized
-        ) {
+    function refreshStatuses() {
+
+        getApps().forEach(
+
+            function (app) {
+
+                if (
+
+                    runningApps.has(
+
+                        app.id
+
+                    )
+
+                ) {
+
+                    const runtime =
+
+                        runningApps.get(
+
+                            app.id
+
+                        );
+
+                    app.status =
+
+                        runtime.status;
+
+                } else if (
+
+                    app.enabled === false
+
+                ) {
+
+                    app.status =
+
+                        "disabled";
+
+                } else {
+
+                    app.status =
+
+                        "registered";
+
+                }
+
+            }
+
+        );
+
+    }
+
+    /* =====================================================
+
+       INITIALIZATION
+
+       ===================================================== */
+
+    function initialize() {
+
+        if (initialized) {
 
             return api;
 
         }
 
+        registerCoreApps();
 
-        /*
-        --------------------------------------------------
-        Foundation zuerst.
-        --------------------------------------------------
-        */
+        connectExistingApis();
 
-        registerFoundationApps();
+        refreshStatuses();
 
+        initialized =
 
-        /*
-        --------------------------------------------------
-        Danach externe Systeme.
-        --------------------------------------------------
-        */
-
-        connectKernel();
-
-        connectRegistry();
-
-        connectRouter();
-
-        connectSystem();
-
-        syncLauncher();
-
-
-        state.initialized =
             true;
-
-
-        state.running =
-            true;
-
 
         emit(
+
             "ready",
+
             {
+
+                version:
+
+                    VERSION,
+
                 manager:
-                    diagnose()
+
+                    MANAGER_NAME,
+
+                appCount:
+
+                    apps.size
+
             }
+
         );
-
-
-        console.log(
-            "HalDo Application Manager " +
-            VERSION +
-            " bereit."
-        );
-
 
         return api;
 
     }
 
+    /* =====================================================
 
-    /* ==================================================
        PUBLIC API
-    ================================================== */
+
+       ===================================================== */
 
     const api = {
 
         name:
-            "HalDo Application Manager",
+
+            MANAGER_NAME,
 
         version:
+
             VERSION,
 
-        state,
+        initialize,
 
         on,
+
         off,
+
         emit,
 
-        init,
+        register:
 
-        register,
+            registerApp,
 
-        registerApp:
-            register,
+        registerApp,
 
-        registerMany,
+        registerApps,
 
-        update,
+        unregister:
 
-        updateApp:
-            update,
+            unregisterApp,
 
-        unregister,
+        unregisterApp,
 
-        unregisterApp:
-            unregister,
+        get:
 
-        get,
+            getApp,
 
-        getApp:
-            get,
+        getApp,
 
-        getAll,
+        getAll:
 
-        getApps:
-            getAll,
+            getApps,
 
-        getEnabled,
+        getApps,
 
-        getInstalled,
+        getEnabled:
 
-        getRunning,
+            getEnabledApps,
 
-        find,
+        getEnabledApps,
+
+        getRunning:
+
+            getRunningApps,
+
+        getRunningApps,
+
+        has:
+
+            hasApp,
+
+        hasApp,
+
+        isRunning,
+
+        isMinimized,
+
+        start:
+
+            startApp,
+
+        startApp,
+
+        open:
+
+            startApp,
+
+        activate:
+
+            activateApp,
+
+        activateApp,
+
+        minimize:
+
+            minimizeApp,
+
+        minimizeApp,
+
+        restore:
+
+            restoreApp,
+
+        restoreApp,
+
+        close:
+
+            closeApp,
+
+        closeApp,
+
+        closeAll:
+
+            closeAllApps,
+
+        closeAllApps,
+
+        enable:
+
+            enableApp,
+
+        enableApp,
+
+        disable:
+
+            disableApp,
+
+        disableApp,
 
         search,
 
-        has,
+        getByCategory,
 
-        initializeApp,
+        getActive:
 
-        start,
+            getActiveApp,
 
-        startApp:
-            start,
+        getActiveApp,
 
-        stop,
+        checkDependencies,
 
-        stopApp:
-            stop,
+        connectExistingApis,
 
-        restart,
+        refreshStatuses,
 
-        restartApp:
-            restart,
+        getState:
 
-        enable,
+            function () {
 
-        disable,
+                return {
 
-        closeActive,
+                    initialized,
 
-        connectRegistry,
+                    version:
 
-        connectRouter,
+                        VERSION,
 
-        syncLauncher,
+                    totalApps:
 
-        connectKernel,
+                        apps.size,
 
-        connectSystem,
+                    runningApps:
 
-        syncConnections,
+                        runningApps.size,
 
-        navigateToApp,
+                    minimizedApps:
 
-        openAppPath,
+                        minimizedApps.size,
 
-        diagnose,
+                    activeApp:
 
-        resetRuntime,
+                        activeAppId,
 
+                    apps:
 
-        getActiveApp() {
+                        getApps()
 
-            return state.activeApp
+                };
 
-                ? get(
-                    state.activeApp
-                )
-
-                : null;
-
-        },
-
-
-        getHistory() {
-
-            return [
-                ...state.history
-            ];
-
-        },
-
-
-        clearHistory() {
-
-            state.history.length =
-                0;
-
-        },
-
-
-        getErrors() {
-
-            return [
-                ...state.errors
-            ];
-
-        },
-
-
-        clearErrors() {
-
-            state.errors.length =
-                0;
-
-        }
+            }
 
     };
 
+    /* =====================================================
 
-    /* ==================================================
-       GLOBAL API
-    ================================================== */
+       GLOBAL REGISTRATION
+
+       ===================================================== */
 
     window.HalDoAppManager =
+
         api;
 
+    HalDoOS.appManager =
 
-    window.HalDoOS =
-        window.HalDoOS ||
+        api;
+
+    /*
+
+     * Kompatibilität mit älteren Aufrufen.
+
+     */
+
+    HalDoOS.apps =
+
+        HalDoOS.apps ||
+
         {};
 
+    HalDoOS.apps.manager =
 
-    window.HalDoOS.appManager =
         api;
 
+    /* =====================================================
 
-    /* ==================================================
-       AUTO BOOT
-    ================================================== */
+       AUTO INITIALIZATION
 
-    function boot() {
+       ===================================================== */
+
+    function bootInitialize() {
 
         try {
 
-            init();
+            initialize();
 
         } catch (error) {
 
-            recordError(
-                error,
-                "boot"
+            console.error(
+
+                "[HalDo App Manager] Initialization failed:",
+
+                error
+
+            );
+
+            emit(
+
+                "error",
+
+                {
+
+                    type:
+
+                        "INITIALIZATION_ERROR",
+
+                    error
+
+                }
+
             );
 
         }
 
-
-        /*
-        --------------------------------------------------
-        Zweite Verbindung nach DOM / anderen Modulen.
-        --------------------------------------------------
-        */
-
-        setTimeout(
-            function () {
-
-                state.reconnectCount++;
-
-
-                syncConnections();
-
-
-            },
-            0
-        );
-
-
-        /*
-        --------------------------------------------------
-        Dritte Verbindung für Module,
-        die später geladen werden.
-        --------------------------------------------------
-        */
-
-        setTimeout(
-            function () {
-
-                state.reconnectCount++;
-
-
-                syncConnections();
-
-
-            },
-            500
-        );
-
-
-        /*
-        --------------------------------------------------
-        Letzte Foundation-Verbindung.
-        --------------------------------------------------
-        */
-
-        setTimeout(
-            function () {
-
-                state.reconnectCount++;
-
-
-                syncConnections();
-
-
-                emit(
-                    "system:app-manager-ready",
-                    {
-                        manager:
-                            diagnose()
-                    }
-                );
-
-
-            },
-            1500
-        );
-
     }
 
-
     if (
+
         document.readyState ===
+
         "loading"
+
     ) {
 
         document.addEventListener(
+
             "DOMContentLoaded",
-            boot,
+
+            bootInitialize,
+
             {
-                once:
-                    true
+
+                once: true
+
             }
+
         );
 
     } else {
 
-        boot();
+        bootInitialize();
 
     }
 
-
-})();
+})(window, document);
