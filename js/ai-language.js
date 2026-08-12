@@ -1,38 +1,12 @@
 // ============================================================
 // HALDO AI OS 18
 // AI LANGUAGE ENGINE
-// PART 77
-// ============================================================
-// Zentrale Sprachverwaltung für HalDo AI.
-//
-// Verantwortlich für:
-//
-// • Spracherkennung
-// • Sprachprofile
-// • Übersetzungsgrundlagen
-// • Sprachwechsel
-// • Text-Normalisierung
-// • Sprach-Erkennung
-// • AI-Kommandos
-// • Chat-Verbindung
-// • Êzîdî-/Ezidi-Vorbereitung
-// • RTL/LTR-Unterstützung
-// • Sprachereignisse
-//
-// Öffentliche APIs:
-//
-// window.HalDoAILanguage
-// window.HalDoOS.aiLanguage
-//
+// PART 82
 // ============================================================
 
 (function (window, document) {
 
     "use strict";
-
-    // --------------------------------------------------------
-    // Duplicate Guard
-    // --------------------------------------------------------
 
     if (
         window.HalDoAILanguage &&
@@ -43,10 +17,6 @@
 
     window.HalDoOS =
         window.HalDoOS || {};
-
-    // --------------------------------------------------------
-    // Configuration
-    // --------------------------------------------------------
 
     const CONFIG = {
 
@@ -62,12 +32,14 @@
         fallbackLanguage:
             "en",
 
+        storageKey:
+            "haldo-ai-language",
+
         supportedLanguages: [
 
             "de",
             "en",
             "ku",
-            "ckb",
             "ar",
             "tr",
             "fr",
@@ -75,365 +47,37 @@
             "it",
             "nl",
             "ru",
-            "fa"
+            "fa",
+            "ja",
+            "ko",
+            "zh"
 
         ],
 
-        ezidiLanguages: [
+        /*
+         * Êzîdî / Ezidi wird als eigener
+         * Sprach-/Tastaturkontext vorbereitet.
+         */
+        ezidi: {
 
-            "ku",
-            "ckb"
-
-        ],
-
-        directionMap: {
-
-            de: "ltr",
-            en: "ltr",
-            ku: "ltr",
-            ckb: "rtl",
-            ar: "rtl",
-            tr: "ltr",
-            fr: "ltr",
-            es: "ltr",
-            it: "ltr",
-            nl: "ltr",
-            ru: "ltr",
-            fa: "rtl"
-
-        },
-
-        persistLanguage:
-            true,
-
-        storageKey:
-            "haldo.ai.language"
-
-    };
-
-    // --------------------------------------------------------
-    // Language Profiles
-    // --------------------------------------------------------
-
-    const LANGUAGE_PROFILES = {
-
-        de: {
-
-            code:
-                "de",
-
-            locale:
-                "de-DE",
-
-            name:
-                "Deutsch",
-
-            nativeName:
-                "Deutsch",
-
-            direction:
-                "ltr",
-
-            family:
-                "Germanic",
-
-            ezidi:
-                false
-
-        },
-
-        en: {
-
-            code:
-                "en",
-
-            locale:
-                "en-US",
-
-            name:
-                "English",
-
-            nativeName:
-                "English",
-
-            direction:
-                "ltr",
-
-            family:
-                "Germanic",
-
-            ezidi:
-                false
-
-        },
-
-        ku: {
-
-            code:
-                "ku",
-
-            locale:
-                "ku-TR",
-
-            name:
-                "Kurdisch",
-
-            nativeName:
-                "Kurdî",
-
-            direction:
-                "ltr",
-
-            family:
-                "Kurdish",
-
-            ezidi:
+            enabled:
                 true,
 
-            variants: [
-
-                "Kurmanji",
-                "Kurmancî"
-
-            ]
-
-        },
-
-        ckb: {
-
             code:
-                "ckb",
-
-            locale:
-                "ckb-IQ",
+                "ez",
 
             name:
-                "Zentralkurdisch",
+                "Êzîdî",
 
-            nativeName:
-                "کوردی",
-
-            direction:
-                "rtl",
-
-            family:
-                "Kurdish",
-
-            ezidi:
-                true,
-
-            variants: [
-
-                "Sorani"
-
-            ]
-
-        },
-
-        ar: {
-
-            code:
-                "ar",
-
-            locale:
-                "ar-SA",
-
-            name:
-                "Arabisch",
-
-            nativeName:
-                "العربية",
-
-            direction:
-                "rtl",
-
-            family:
-                "Semitic",
-
-            ezidi:
-                false
-
-        },
-
-        tr: {
-
-            code:
-                "tr",
-
-            locale:
-                "tr-TR",
-
-            name:
-                "Türkisch",
-
-            nativeName:
-                "Türkçe",
-
-            direction:
-                "ltr",
-
-            family:
-                "Turkic",
-
-            ezidi:
-                false
-
-        },
-
-        fr: {
-
-            code:
-                "fr",
-
-            locale:
-                "fr-FR",
-
-            name:
-                "Französisch",
-
-            nativeName:
-                "Français",
-
-            direction:
-                "ltr",
-
-            family:
-                "Romance",
-
-            ezidi:
-                false
-
-        },
-
-        es: {
-
-            code:
-                "es",
-
-            locale:
-                "es-ES",
-
-            name:
-                "Spanisch",
-
-            nativeName:
-                "Español",
-
-            direction:
-                "ltr",
-
-            family:
-                "Romance",
-
-            ezidi:
-                false
-
-        },
-
-        it: {
-
-            code:
-                "it",
-
-            locale:
-                "it-IT",
-
-            name:
-                "Italienisch",
-
-            nativeName:
-                "Italiano",
-
-            direction:
-                "ltr",
-
-            family:
-                "Romance",
-
-            ezidi:
-                false
-
-        },
-
-        nl: {
-
-            code:
-                "nl",
-
-            locale:
-                "nl-NL",
-
-            name:
-                "Niederländisch",
-
-            nativeName:
-                "Nederlands",
-
-            direction:
-                "ltr",
-
-            family:
-                "Germanic",
-
-            ezidi:
-                false
-
-        },
-
-        ru: {
-
-            code:
-                "ru",
-
-            locale:
-                "ru-RU",
-
-            name:
-                "Russisch",
-
-            nativeName:
-                "Русский",
-
-            direction:
-                "ltr",
-
-            family:
-                "Slavic",
-
-            ezidi:
-                false
-
-        },
-
-        fa: {
-
-            code:
-                "fa",
-
-            locale:
-                "fa-IR",
-
-            name:
-                "Persisch",
-
-            nativeName:
-                "فارسی",
-
-            direction:
-                "rtl",
-
-            family:
-                "Indo-Iranian",
-
-            ezidi:
-                false
+            keyboard:
+                true
 
         }
 
     };
 
     // --------------------------------------------------------
-    // State
+    // STATE
     // --------------------------------------------------------
 
     const state = {
@@ -444,49 +88,37 @@
         ready:
             false,
 
-        currentLanguage:
+        language:
             CONFIG.defaultLanguage,
 
         previousLanguage:
             null,
 
-        detectedLanguage:
-            null,
-
         direction:
             "ltr",
 
-        inputLanguage:
+        detectedLanguage:
             null,
 
-        outputLanguage:
-            null,
-
-        languageChanges:
+        confidence:
             0,
 
-        detectionCount:
-            0,
-
-        translationCount:
-            0,
+        available:
+            [],
 
         history:
             [],
 
-        aliases:
-            new Map(),
+        translations:
+            {},
 
-        customProfiles:
-            new Map(),
-
-        dictionary:
-            new Map()
+        errors:
+            []
 
     };
 
     // --------------------------------------------------------
-    // Event System
+    // EVENTS
     // --------------------------------------------------------
 
     const listeners =
@@ -507,7 +139,9 @@
         }
 
         if (
-            !listeners.has(event)
+            !listeners.has(
+                event
+            )
         ) {
 
             listeners.set(
@@ -569,7 +203,8 @@
         if (set) {
 
             for (
-                const callback of set
+                const callback of
+                set
             ) {
 
                 try {
@@ -611,21 +246,8 @@
     }
 
     // --------------------------------------------------------
-    // Utility
+    // UTILITIES
     // --------------------------------------------------------
-
-    function normalize(
-        value
-    ) {
-
-        return String(
-            value ??
-            ""
-        )
-        .trim()
-        .toLowerCase();
-
-    }
 
     function clean(
         value
@@ -634,452 +256,452 @@
         return String(
             value ??
             ""
-        )
-        .trim();
+        ).trim();
 
     }
 
-    // --------------------------------------------------------
-    // Language Aliases
-    // --------------------------------------------------------
+    function normalizeCode(
+        language
+    ) {
 
-    function registerDefaultAliases() {
+        const value =
+            clean(
+                language
+            )
+            .toLowerCase()
+            .replace(
+                "_",
+                "-"
+            );
 
         const aliases = {
 
-            de: [
-
+            german:
                 "de",
-                "deutsch",
-                "german",
-                "de-de"
 
-            ],
+            deutsch:
+                "de",
 
-            en: [
-
+            english:
                 "en",
-                "english",
-                "englisch",
-                "en-us",
-                "en-gb"
 
-            ],
+            englisch:
+                "en",
 
-            ku: [
-
+            kurdish:
                 "ku",
-                "kurdish",
-                "kurdisch",
-                "kurdî",
-                "kurmanci",
-                "kurmanji",
-                "kirmanci",
-                "ku-tr"
 
-            ],
+            kurmanci:
+                "ku",
 
-            ckb: [
+            kurmanji:
+                "ku",
 
-                "ckb",
-                "sorani",
-                "central kurdish",
-                "zentralkurdisch",
-                "kurdî",
-                "کوردی"
-
-            ],
-
-            ar: [
-
+            arabic:
                 "ar",
-                "arabic",
-                "arabisch",
-                "العربية"
 
-            ],
+            arabisch:
+                "ar",
 
-            tr: [
-
+            turkish:
                 "tr",
-                "turkish",
-                "türkisch",
-                "türkçe"
 
-            ],
+            türkisch:
+                "tr",
 
-            fr: [
-
+            french:
                 "fr",
-                "french",
-                "französisch",
-                "français"
 
-            ],
+            französisch:
+                "fr",
 
-            es: [
-
+            spanish:
                 "es",
-                "spanish",
-                "spanisch",
-                "español"
 
-            ],
+            spanisch:
+                "es",
 
-            it: [
-
+            italian:
                 "it",
-                "italian",
-                "italienisch",
-                "italiano"
 
-            ],
+            italienisch:
+                "it",
 
-            nl: [
-
+            dutch:
                 "nl",
-                "dutch",
-                "niederländisch",
-                "nederlands"
 
-            ],
+            niederländisch:
+                "nl",
 
-            ru: [
-
+            russian:
                 "ru",
-                "russian",
-                "russisch",
-                "русский"
 
-            ],
+            russisch:
+                "ru",
 
-            fa: [
-
+            persian:
                 "fa",
-                "persian",
-                "persisch",
-                "فارسی"
 
-            ]
+            farsi:
+                "fa",
+
+            japanese:
+                "ja",
+
+            korean:
+                "ko",
+
+            chinese:
+                "zh",
+
+            ezidi:
+                "ez",
+
+            yezidi:
+                "ez",
+
+            yazidi:
+                "ez",
+
+            êzîdî:
+                "ez",
+
+            ezidî:
+                "ez"
 
         };
 
-        Object.entries(
-            aliases
-        ).forEach(
-            ([code, values]) => {
-
-                values.forEach(
-                    alias => {
-
-                        state.aliases.set(
-                            normalize(
-                                alias
-                            ),
-                            code
-                        );
-
-                    }
-                );
-
-            }
+        return (
+            aliases[value] ||
+            value
         );
 
     }
 
-    // --------------------------------------------------------
-    // Resolve Language
-    // --------------------------------------------------------
-
-    function resolveLanguage(
-        value
-    ) {
-
-        const input =
-            normalize(
-                value
-            );
-
-        if (!input) {
-
-            return null;
-
-        }
-
-        if (
-            CONFIG.supportedLanguages
-                .includes(input)
-        ) {
-
-            return input;
-
-        }
-
-        if (
-            state.aliases.has(
-                input
-            )
-        ) {
-
-            return state.aliases.get(
-                input
-            );
-
-        }
-
-        /*
-         * Locale wie de-DE.
-         */
-
-        const base =
-            input.split(
-                "-"
-            )[0];
-
-        if (
-            CONFIG.supportedLanguages
-                .includes(base)
-        ) {
-
-            return base;
-
-        }
-
-        if (
-            state.aliases.has(
-                base
-            )
-        ) {
-
-            return state.aliases.get(
-                base
-            );
-
-        }
-
-        return null;
-
-    }
-
-    // --------------------------------------------------------
-    // Get Profile
-    // --------------------------------------------------------
-
-    function getProfile(
+    function getDirection(
         language
     ) {
 
         const code =
-            resolveLanguage(
+            normalizeCode(
                 language
             );
 
-        if (!code) {
-
-            return null;
-
-        }
-
         if (
-            LANGUAGE_PROFILES[code]
-        ) {
-
-            return {
-                ...LANGUAGE_PROFILES[code]
-            };
-
-        }
-
-        if (
-            state.customProfiles.has(
+            [
+                "ar",
+                "fa"
+            ].includes(
                 code
             )
         ) {
 
-            return {
-                ...state.customProfiles.get(
-                    code
-                )
-            };
+            return "rtl";
 
         }
 
-        return null;
+        return "ltr";
 
     }
 
     // --------------------------------------------------------
-    // Supported Languages
+    // LANGUAGE INFO
     // --------------------------------------------------------
 
-    function getSupportedLanguages() {
+    const LANGUAGE_INFO = {
 
-        return CONFIG
-            .supportedLanguages
-            .map(
-                code =>
-                    getProfile(
-                        code
-                    )
-            )
-            .filter(
-                Boolean
-            );
+        de: {
 
-    }
+            code:
+                "de",
 
-    // --------------------------------------------------------
-    // Direction
-    // --------------------------------------------------------
+            name:
+                "Deutsch",
 
-    function getDirection(
-        language =
-            state.currentLanguage
-    ) {
+            nativeName:
+                "Deutsch",
 
-        const profile =
-            getProfile(
-                language
-            );
+            direction:
+                "ltr"
 
-        return profile?.direction ||
-            "ltr";
+        },
 
-    }
+        en: {
 
-    // --------------------------------------------------------
-    // Apply Language To DOM
-    // --------------------------------------------------------
+            code:
+                "en",
 
-    function applyToDocument(
-        language
-    ) {
+            name:
+                "English",
 
-        const profile =
-            getProfile(
-                language
-            );
+            nativeName:
+                "English",
 
-        if (!profile) {
+            direction:
+                "ltr"
 
-            return false;
+        },
+
+        ku: {
+
+            code:
+                "ku",
+
+            name:
+                "Kurdî",
+
+            nativeName:
+                "Kurdî",
+
+            direction:
+                "ltr"
+
+        },
+
+        ar: {
+
+            code:
+                "ar",
+
+            name:
+                "Arabic",
+
+            nativeName:
+                "العربية",
+
+            direction:
+                "rtl"
+
+        },
+
+        tr: {
+
+            code:
+                "tr",
+
+            name:
+                "Türkçe",
+
+            nativeName:
+                "Türkçe",
+
+            direction:
+                "ltr"
+
+        },
+
+        fr: {
+
+            code:
+                "fr",
+
+            name:
+                "Français",
+
+            nativeName:
+                "Français",
+
+            direction:
+                "ltr"
+
+        },
+
+        es: {
+
+            code:
+                "es",
+
+            name:
+                "Español",
+
+            nativeName:
+                "Español",
+
+            direction:
+                "ltr"
+
+        },
+
+        it: {
+
+            code:
+                "it",
+
+            name:
+                "Italiano",
+
+            nativeName:
+                "Italiano",
+
+            direction:
+                "ltr"
+
+        },
+
+        nl: {
+
+            code:
+                "nl",
+
+            name:
+                "Nederlands",
+
+            nativeName:
+                "Nederlands",
+
+            direction:
+                "ltr"
+
+        },
+
+        ru: {
+
+            code:
+                "ru",
+
+            name:
+                "Русский",
+
+            nativeName:
+                "Русский",
+
+            direction:
+                "ltr"
+
+        },
+
+        fa: {
+
+            code:
+                "fa",
+
+            name:
+                "فارسی",
+
+            nativeName:
+                "فارسی",
+
+            direction:
+                "rtl"
+
+        },
+
+        ja: {
+
+            code:
+                "ja",
+
+            name:
+                "Japanese",
+
+            nativeName:
+                "日本語",
+
+            direction:
+                "ltr"
+
+        },
+
+        ko: {
+
+            code:
+                "ko",
+
+            name:
+                "Korean",
+
+            nativeName:
+                "한국어",
+
+            direction:
+                "ltr"
+
+        },
+
+        zh: {
+
+            code:
+                "zh",
+
+            name:
+                "Chinese",
+
+            nativeName:
+                "中文",
+
+            direction:
+                "ltr"
+
+        },
+
+        ez: {
+
+            code:
+                "ez",
+
+            name:
+                "Êzîdî",
+
+            nativeName:
+                "Êzîdî",
+
+            direction:
+                "ltr",
+
+            keyboard:
+                true
 
         }
 
-        const html =
-            document.documentElement;
-
-        if (!html) {
-
-            return false;
-
-        }
-
-        html.lang =
-            profile.locale ||
-            profile.code;
-
-        html.dir =
-            profile.direction ||
-            "ltr";
-
-        html.dataset.haldoLanguage =
-            profile.code;
-
-        html.dataset.haldoDirection =
-            profile.direction;
-
-        document.body?.setAttribute(
-            "data-haldo-language",
-            profile.code
-        );
-
-        document.body?.setAttribute(
-            "dir",
-            profile.direction
-        );
-
-        emit(
-            "dom-updated",
-            {
-                language:
-                    profile.code,
-
-                direction:
-                    profile.direction
-            }
-        );
-
-        return true;
-
-    }
+    };
 
     // --------------------------------------------------------
-    // Storage Resolver
+    // STORAGE
     // --------------------------------------------------------
 
-    function getStorageModule() {
+    function getStorage() {
 
         return (
-            window.HalDoStorageManager ||
             window.HalDoStorage ||
-            window.HalDoOS?.storageManager ||
+            window.HalDoStorageManager ||
             window.HalDoOS?.storage ||
+            window.HalDoOS?.storageManager ||
             null
         );
 
     }
 
-    // --------------------------------------------------------
-    // Persist Language
-    // --------------------------------------------------------
-
-    async function persistLanguage(
-        language
+    async function storageSet(
+        key,
+        value
     ) {
 
-        if (
-            !CONFIG.persistLanguage
-        ) {
-
-            return false;
-
-        }
-
         const storage =
-            getStorageModule();
+            getStorage();
 
-        if (
-            storage
-        ) {
-
-            const methods = [
-
-                "set",
-                "save",
-                "setItem",
-                "store"
-
-            ];
+        if (storage) {
 
             for (
-                const method of methods
+                const method of [
+                    "set",
+                    "save",
+                    "write",
+                    "store"
+                ]
             ) {
 
                 if (
                     typeof storage[method] !==
                     "function"
                 ) {
-
                     continue;
-
                 }
 
                 try {
 
                     await storage[method](
-                        CONFIG.storageKey,
-                        language
+                        key,
+                        value
                     );
 
                     return true;
@@ -1095,8 +717,10 @@
         try {
 
             localStorage.setItem(
-                CONFIG.storageKey,
-                language
+                key,
+                JSON.stringify(
+                    value
+                )
             );
 
             return true;
@@ -1111,40 +735,148 @@
 
     }
 
-    // --------------------------------------------------------
-    // Load Persisted Language
-    // --------------------------------------------------------
+    async function storageGet(
+        key,
+        fallback = null
+    ) {
 
-    function loadPersistedLanguage() {
+        const storage =
+            getStorage();
 
-        try {
+        if (storage) {
 
-            const stored =
-                localStorage.getItem(
-                    CONFIG.storageKey
-                );
+            for (
+                const method of [
+                    "get",
+                    "load",
+                    "read",
+                    "retrieve"
+                ]
+            ) {
 
-            const resolved =
-                resolveLanguage(
-                    stored
-                );
+                if (
+                    typeof storage[method] !==
+                    "function"
+                ) {
+                    continue;
+                }
 
-            if (resolved) {
+                try {
 
-                return resolved;
+                    const value =
+                        await storage[method](
+                            key
+                        );
+
+                    if (
+                        value !==
+                        undefined &&
+                        value !==
+                        null
+                    ) {
+
+                        return value;
+
+                    }
+
+                } catch (
+                    error
+                ) {}
 
             }
 
+        }
+
+        try {
+
+            const raw =
+                localStorage.getItem(
+                    key
+                );
+
+            if (!raw) {
+                return fallback;
+            }
+
+            return JSON.parse(
+                raw
+            );
+
         } catch (
             error
-        ) {}
+        ) {
 
-        return null;
+            return fallback;
+
+        }
 
     }
 
     // --------------------------------------------------------
-    // Set Language
+    // LANGUAGE INFO
+    // --------------------------------------------------------
+
+    function getLanguageInfo(
+        language =
+            state.language
+    ) {
+
+        const code =
+            normalizeCode(
+                language
+            );
+
+        return (
+            LANGUAGE_INFO[code] ||
+            {
+
+                code,
+
+                name:
+                    code,
+
+                nativeName:
+                    code,
+
+                direction:
+                    getDirection(
+                        code
+                    )
+
+            }
+        );
+
+    }
+
+    function getSupportedLanguages() {
+
+        return Object.values(
+            LANGUAGE_INFO
+        ).map(
+            language => ({
+                ...language
+            })
+        );
+
+    }
+
+    function isSupported(
+        language
+    ) {
+
+        const code =
+            normalizeCode(
+                language
+            );
+
+        return Boolean(
+            LANGUAGE_INFO[code]
+        );
+
+    }
+
+    // --------------------------------------------------------
+    // SET LANGUAGE
     // --------------------------------------------------------
 
     async function setLanguage(
@@ -1153,33 +885,47 @@
     ) {
 
         const code =
-            resolveLanguage(
+            normalizeCode(
                 language
             );
 
-        if (!code) {
+        if (
+            !isSupported(
+                code
+            )
+        ) {
 
-            return {
+            /*
+             * Êzîdî darf über die
+             * Tastatur-/Erweiterungsschicht
+             * trotzdem vorbereitet werden.
+             */
 
-                ok:
-                    false,
+            if (
+                code !==
+                "ez"
+            ) {
 
-                error:
-                    "UNSUPPORTED_LANGUAGE",
+                return {
 
-                requested:
-                    language
+                    ok:
+                        false,
 
-            };
+                    error:
+                        "LANGUAGE_NOT_SUPPORTED",
+
+                    language:
+                        code
+
+                };
+
+            }
 
         }
 
-        const previous =
-            state.currentLanguage;
-
         if (
-            previous === code &&
-            !options.force
+            state.language ===
+            code
         ) {
 
             return {
@@ -1191,21 +937,16 @@
                     false,
 
                 language:
-                    code,
-
-                profile:
-                    getProfile(
-                        code
-                    )
+                    code
 
             };
 
         }
 
         state.previousLanguage =
-            previous;
+            state.language;
 
-        state.currentLanguage =
+        state.language =
             code;
 
         state.direction =
@@ -1213,137 +954,22 @@
                 code
             );
 
-        state.languageChanges++;
+        state.history.push({
 
-        applyToDocument(
-            code
-        );
+            from:
+                state.previousLanguage,
 
-        await persistLanguage(
-            code
-        );
-
-        /*
-         * Vorhandenes Language-System informieren.
-         */
-
-        const languageManager =
-            window.HalDoLanguageManager ||
-            window.HalDoOS?.languageManager;
-
-        if (
-            languageManager &&
-            languageManager !== api
-        ) {
-
-            const methods = [
-
-                "setLanguage",
-                "changeLanguage",
-                "switchLanguage"
-
-            ];
-
-            for (
-                const method of methods
-            ) {
-
-                if (
-                    typeof languageManager[method] !==
-                    "function"
-                ) {
-
-                    continue;
-
-                }
-
-                try {
-
-                    await languageManager[method](
-                        code
-                    );
-
-                    break;
-
-                } catch (
-                    error
-                ) {}
-
-            }
-
-        }
-
-        /*
-         * Vorhandenes Language-System informieren.
-         */
-
-        const languageSystem =
-            window.HalDoLanguageSystem ||
-            window.HalDoOS?.languageSystem;
-
-        if (
-            languageSystem &&
-            languageSystem !== api
-        ) {
-
-            const methods = [
-
-                "setLanguage",
-                "changeLanguage",
-                "switchLanguage"
-
-            ];
-
-            for (
-                const method of methods
-            ) {
-
-                if (
-                    typeof languageSystem[method] !==
-                    "function"
-                ) {
-
-                    continue;
-
-                }
-
-                try {
-
-                    await languageSystem[method](
-                        code
-                    );
-
-                    break;
-
-                } catch (
-                    error
-                ) {}
-
-            }
-
-        }
-
-        const detail = {
-
-            language:
+            to:
                 code,
 
-            previousLanguage:
-                previous,
+            timestamp:
+                Date.now(),
 
-            direction:
-                state.direction,
+            source:
+                options.source ||
+                "system"
 
-            profile:
-                getProfile(
-                    code
-                )
-
-        };
-
-        state.history.push(
-            detail
-        );
+        });
 
         if (
             state.history.length >
@@ -1354,14 +980,93 @@
 
         }
 
-        emit(
-            "language-changed",
-            detail
+        await storageSet(
+            CONFIG.storageKey,
+            {
+
+                language:
+                    state.language,
+
+                direction:
+                    state.direction,
+
+                updatedAt:
+                    Date.now()
+
+            }
         );
 
+        /*
+         * Conversation State aktualisieren.
+         */
+
+        const conversationState =
+            window.HalDoConversationState ||
+            window.HalDoOS?.conversationState;
+
+        if (
+            conversationState &&
+            typeof conversationState.setLanguage ===
+            "function"
+        ) {
+
+            try {
+
+                conversationState.setLanguage(
+                    code
+                );
+
+            } catch (
+                error
+            ) {}
+
+        }
+
+        /*
+         * HTML-Sprachstatus aktualisieren.
+         */
+
+        try {
+
+            document.documentElement
+                .setAttribute(
+                    "lang",
+                    code
+                );
+
+            document.documentElement
+                .setAttribute(
+                    "dir",
+                    state.direction
+                );
+
+        } catch (
+            error
+        ) {}
+
         emit(
-            "changed",
-            detail
+            "language-changed",
+            {
+
+                language:
+                    code,
+
+                previousLanguage:
+                    state.previousLanguage,
+
+                direction:
+                    state.direction,
+
+                info:
+                    getLanguageInfo(
+                        code
+                    ),
+
+                source:
+                    options.source ||
+                    "system"
+
+            }
         );
 
         return {
@@ -1372,76 +1077,35 @@
             changed:
                 true,
 
-            ...detail
+            language:
+                code,
+
+            previousLanguage:
+                state.previousLanguage,
+
+            direction:
+                state.direction
 
         };
 
     }
 
-    // --------------------------------------------------------
-    // Get Current Language
-    // --------------------------------------------------------
-
     function getLanguage() {
 
-        return state.currentLanguage;
+        return state.language;
+
+    }
+
+    function getCurrentLanguage() {
+
+        return getLanguageInfo(
+            state.language
+        );
 
     }
 
     // --------------------------------------------------------
-    // Browser Language Detection
-    // --------------------------------------------------------
-
-    function detectBrowserLanguage() {
-
-        const candidates = [];
-
-        if (
-            navigator.language
-        ) {
-
-            candidates.push(
-                navigator.language
-            );
-
-        }
-
-        if (
-            Array.isArray(
-                navigator.languages
-            )
-        ) {
-
-            candidates.push(
-                ...navigator.languages
-            );
-
-        }
-
-        for (
-            const candidate of
-            candidates
-        ) {
-
-            const resolved =
-                resolveLanguage(
-                    candidate
-                );
-
-            if (resolved) {
-
-                return resolved;
-
-            }
-
-        }
-
-        return CONFIG.fallbackLanguage;
-
-    }
-
-    // --------------------------------------------------------
-    // Text Language Detection
+    // LANGUAGE DETECTION
     // --------------------------------------------------------
 
     function detectLanguage(
@@ -1458,106 +1122,62 @@
             return {
 
                 language:
-                    null,
+                    state.language,
 
                 confidence:
-                    0,
-
-                reason:
-                    "EMPTY"
+                    0
 
             };
 
         }
 
-        const normalized =
+        const lower =
             input.toLowerCase();
 
         const scores = {};
 
-        CONFIG.supportedLanguages
-            .forEach(
-                language => {
-
-                    scores[language] =
-                        0;
-
-                }
-            );
-
-        /*
-         * Character detection.
-         */
-
-        if (
-            /[\u0600-\u06FF]/.test(
-                input
+        for (
+            const code of
+            Object.keys(
+                LANGUAGE_INFO
             )
         ) {
 
-            scores.ar += 5;
-            scores.ckb += 5;
-            scores.fa += 4;
-
-        }
-
-        if (
-            /[پچژگێۆڵڕڤ]/i.test(
-                input
-            )
-        ) {
-
-            scores.ku += 6;
-            scores.ckb += 5;
-
-        }
-
-        if (
-            /[äöüß]/i.test(
-                input
-            )
-        ) {
-
-            scores.de += 5;
+            scores[code] =
+                0;
 
         }
 
         /*
-         * German keywords.
+         * Deutsche Marker.
          */
 
-        const germanWords = [
-
-            "ich",
-            "du",
-            "und",
+        [
             "der",
             "die",
             "das",
-            "ist",
+            "und",
+            "ich",
             "nicht",
+            "ist",
+            "für",
+            "mit",
+            "eine",
+            "einen",
             "bitte",
             "öffne",
-            "schließe",
-            "hilfe",
-            "sprache",
-            "system"
-
-        ];
-
-        germanWords.forEach(
+            "öffnen"
+        ].forEach(
             word => {
 
                 if (
-                    new RegExp(
-                        `\\b${word}\\b`,
-                        "i"
-                    ).test(
-                        normalized
+                    lower.includes(
+                        word
                     )
                 ) {
 
-                    scores.de += 2;
+                    scores.de +=
+                        2;
 
                 }
 
@@ -1565,39 +1185,31 @@
         );
 
         /*
-         * English keywords.
+         * English.
          */
 
-        const englishWords = [
-
+        [
             "the",
             "and",
             "you",
-            "are",
-            "is",
-            "not",
+            "this",
+            "that",
+            "what",
+            "how",
             "please",
             "open",
-            "close",
-            "help",
-            "system",
-            "language"
-
-        ];
-
-        englishWords.forEach(
+            "show"
+        ].forEach(
             word => {
 
                 if (
-                    new RegExp(
-                        `\\b${word}\\b`,
-                        "i"
-                    ).test(
-                        normalized
+                    lower.includes(
+                        word
                     )
                 ) {
 
-                    scores.en += 2;
+                    scores.en +=
+                        2;
 
                 }
 
@@ -1605,42 +1217,138 @@
         );
 
         /*
-         * Kurmanji / Kurdish keywords.
+         * Türkçe.
          */
 
-        const kurdishWords = [
+        [
+            "bir",
+            "ve",
+            "ben",
+            "sen",
+            "için",
+            "değil",
+            "nasıl",
+            "aç",
+            "göster"
+        ].forEach(
+            word => {
 
+                if (
+                    lower.includes(
+                        word
+                    )
+                ) {
+
+                    scores.tr +=
+                        2;
+
+                }
+
+            }
+        );
+
+        /*
+         * العربية.
+         */
+
+        if (
+            /[\u0600-\u06ff]/.test(
+                input
+            )
+        ) {
+
+            scores.ar +=
+                10;
+
+            scores.fa +=
+                4;
+
+        }
+
+        /*
+         * Русский.
+         */
+
+        if (
+            /[\u0400-\u04ff]/.test(
+                input
+            )
+        ) {
+
+            scores.ru +=
+                10;
+
+        }
+
+        /*
+         * 日本語.
+         */
+
+        if (
+            /[\u3040-\u30ff]/.test(
+                input
+            )
+        ) {
+
+            scores.ja +=
+                10;
+
+        }
+
+        /*
+         * 한국어.
+         */
+
+        if (
+            /[\uac00-\ud7af]/.test(
+                input
+            )
+        ) {
+
+            scores.ko +=
+                10;
+
+        }
+
+        /*
+         * 中文.
+         */
+
+        if (
+            /[\u4e00-\u9fff]/.test(
+                input
+            )
+        ) {
+
+            scores.zh +=
+                10;
+
+        }
+
+        /*
+         * Kurdische Marker.
+         */
+
+        [
             "ez",
-            "tu",
             "em",
-            "ew",
-            "ji",
-            "bi",
-            "ev",
+            "tu",
             "çawa",
             "baş",
             "spas",
-            "heval",
-            "kî",
-            "çima",
-            "dikim",
-            "dike"
-
-        ];
-
-        kurdishWords.forEach(
+            "kurdî",
+            "xweş"
+        ].forEach(
             word => {
 
                 if (
-                    new RegExp(
-                        `\\b${word}\\b`,
-                        "i"
-                    ).test(
-                        normalized
+                    lower.includes(
+                        word
                     )
                 ) {
 
-                    scores.ku += 3;
+                    scores.ku +=
+                        3;
 
                 }
 
@@ -1648,94 +1356,60 @@
         );
 
         /*
-         * Turkish.
+         * Êzîdî-/Ezidi-Kontext.
          */
 
-        const turkishWords = [
-
-            "ben",
-            "sen",
-            "ve",
-            "bir",
-            "bu",
-            "için",
-            "aç",
-            "kapat",
-            "yardım",
-            "sistem"
-
-        ];
-
-        turkishWords.forEach(
+        [
+            "êzîdî",
+            "ezidî",
+            "ezidi",
+            "yezidi",
+            "ezîdî"
+        ].forEach(
             word => {
 
                 if (
-                    new RegExp(
-                        `\\b${word}\\b`,
-                        "i"
-                    ).test(
-                        normalized
+                    lower.includes(
+                        word
                     )
                 ) {
 
-                    scores.tr += 2;
+                    scores.ez +=
+                        8;
 
                 }
 
             }
         );
-
-        /*
-         * Best score.
-         */
 
         let bestLanguage =
-            null;
+            state.language;
 
         let bestScore =
-            0;
+            scores[
+                bestLanguage
+            ] || 0;
 
-        Object.entries(
+        Object.keys(
             scores
         ).forEach(
-            ([language, score]) => {
+            code => {
 
                 if (
-                    score >
+                    scores[code] >
                     bestScore
                 ) {
 
                     bestScore =
-                        score;
+                        scores[code];
 
                     bestLanguage =
-                        language;
+                        code;
 
                 }
 
             }
         );
-
-        /*
-         * Browser fallback.
-         */
-
-        if (
-            !bestLanguage
-        ) {
-
-            bestLanguage =
-                detectBrowserLanguage();
-
-            bestScore =
-                1;
-
-        }
-
-        state.detectedLanguage =
-            bestLanguage;
-
-        state.detectionCount++;
 
         const confidence =
             Math.min(
@@ -1744,147 +1418,94 @@
                 10
             );
 
-        const result = {
+        state.detectedLanguage =
+            bestLanguage;
+
+        state.confidence =
+            confidence;
+
+        emit(
+            "language-detected",
+            {
+
+                text:
+                    input,
+
+                language:
+                    bestLanguage,
+
+                confidence,
+
+                scores
+
+            }
+        );
+
+        return {
 
             language:
                 bestLanguage,
 
             confidence,
 
-            score:
-                bestScore,
-
             scores
 
         };
 
-        emit(
-            "language-detected",
-            result
-        );
-
-        return result;
-
     }
 
     // --------------------------------------------------------
-    // Normalize Text
+    // TRANSLATION DICTIONARY
     // --------------------------------------------------------
 
-    function normalizeText(
-        text,
-        options = {}
-    ) {
-
-        let result =
-            clean(
-                text
-            );
-
-        if (!result) {
-
-            return "";
-
-        }
-
-        /*
-         * Unicode normalisieren.
-         */
-
-        try {
-
-            result =
-                result.normalize(
-                    "NFC"
-                );
-
-        } catch (
-            error
-        ) {}
-
-        /*
-         * Mehrere Leerzeichen.
-         */
-
-        if (
-            options.collapseWhitespace !==
-            false
-        ) {
-
-            result =
-                result.replace(
-                    /\s+/g,
-                    " "
-                );
-
-        }
-
-        /*
-         * Unsichtbare Steuerzeichen.
-         */
-
-        result =
-            result.replace(
-                /[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g,
-                ""
-            );
-
-        return result.trim();
-
-    }
-
-    // --------------------------------------------------------
-    // Translation Dictionary
-    // --------------------------------------------------------
-
-    function registerTranslation(
-        key,
+    function registerTranslations(
         language,
-        value
+        dictionary
     ) {
 
         const code =
-            resolveLanguage(
+            normalizeCode(
                 language
             );
 
         if (
-            !code ||
-            !key
+            !dictionary ||
+            typeof dictionary !==
+            "object"
         ) {
 
             return false;
 
         }
 
-        const translationKey =
-            normalize(
-                key
-            );
+        state.translations[
+            code
+        ] = {
 
-        if (
-            !state.dictionary.has(
-                translationKey
-            )
-        ) {
+            ...(
+                state.translations[
+                    code
+                ] || {}
+            ),
 
-            state.dictionary.set(
-                translationKey,
-                new Map()
-            );
+            ...dictionary
 
-        }
+        };
 
-        state.dictionary
-            .get(
-                translationKey
-            )
-            .set(
-                code,
-                String(
-                    value
-                )
-            );
+        emit(
+            "translations-registered",
+            {
+
+                language:
+                    code,
+
+                count:
+                    Object.keys(
+                        dictionary
+                    ).length
+
+            }
+        );
 
         return true;
 
@@ -1893,313 +1514,73 @@
     function translate(
         key,
         language =
-            state.currentLanguage,
-        fallback =
-            CONFIG.fallbackLanguage
+            state.language,
+        fallback = null
     ) {
 
-        const translationKey =
-            normalize(
-                key
+        const code =
+            normalizeCode(
+                language
             );
 
-        const translations =
-            state.dictionary.get(
-                translationKey
-            );
+        const dictionary =
+            state.translations[
+                code
+            ];
 
-        if (!translations) {
+        if (
+            dictionary &&
+            dictionary[key] !==
+            undefined
+        ) {
 
-            return key;
+            return dictionary[key];
 
         }
 
-        const code =
-            resolveLanguage(
-                language
-            );
+        if (
+            fallback !==
+            null
+        ) {
 
-        const fallbackCode =
-            resolveLanguage(
-                fallback
-            );
+            return fallback;
 
-        state.translationCount++;
+        }
 
-        return (
-            translations.get(
-                code
-            ) ??
-            translations.get(
-                fallbackCode
-            ) ??
-            key
-        );
+        return key;
 
     }
 
     // --------------------------------------------------------
-    // Core UI Dictionary
+    // UI LANGUAGE
     // --------------------------------------------------------
 
-    function registerCoreTranslations() {
-
-        const entries = {
-
-            "haldo.ai": {
-
-                de:
-                    "HalDo AI",
-
-                en:
-                    "HalDo AI",
-
-                ku:
-                    "HalDo AI",
-
-                ckb:
-                    "HalDo AI"
-
-            },
-
-            "welcome": {
-
-                de:
-                    "Willkommen bei HalDo AI",
-
-                en:
-                    "Welcome to HalDo AI",
-
-                ku:
-                    "Bi xêr hatî HalDo AI",
-
-                ckb:
-                    "بەخێربێیت بۆ HalDo AI"
-
-            },
-
-            "home": {
-
-                de:
-                    "Startseite",
-
-                en:
-                    "Home",
-
-                ku:
-                    "Mal",
-
-                ckb:
-                    "ماڵەوە"
-
-            },
-
-            "settings": {
-
-                de:
-                    "Einstellungen",
-
-                en:
-                    "Settings",
-
-                ku:
-                    "Mîheng",
-
-                ckb:
-                    "ڕێکخستنەکان"
-
-            },
-
-            "help": {
-
-                de:
-                    "Hilfe",
-
-                en:
-                    "Help",
-
-                ku:
-                    "Alîkarî",
-
-                ckb:
-                    "یارمەتی"
-
-            },
-
-            "open": {
-
-                de:
-                    "Öffnen",
-
-                en:
-                    "Open",
-
-                ku:
-                    "Veke",
-
-                ckb:
-                    "بکەرەوە"
-
-            },
-
-            "close": {
-
-                de:
-                    "Schließen",
-
-                en:
-                    "Close",
-
-                ku:
-                    "Bigire",
-
-                ckb:
-                    "دابخە"
-
-            },
-
-            "chat": {
-
-                de:
-                    "Chat",
-
-                en:
-                    "Chat",
-
-                ku:
-                    "Chat",
-
-                ckb:
-                    "گفتوگۆ"
-
-            },
-
-            "system": {
-
-                de:
-                    "System",
-
-                en:
-                    "System",
-
-                ku:
-                    "Sîstem",
-
-                ckb:
-                    "سیستەم"
-
-            },
-
-            "language": {
-
-                de:
-                    "Sprache",
-
-                en:
-                    "Language",
-
-                ku:
-                    "Ziman",
-
-                ckb:
-                    "زمان"
-
-            },
-
-            "voice": {
-
-                de:
-                    "Stimme",
-
-                en:
-                    "Voice",
-
-                ku:
-                    "Deng",
-
-                ckb:
-                    "دەنگ"
-
-            }
-
-        };
-
-        Object.entries(
-            entries
-        ).forEach(
-            ([key, translations]) => {
-
-                Object.entries(
-                    translations
-                ).forEach(
-                    ([language, value]) => {
-
-                        registerTranslation(
-                            key,
-                            language,
-                            value
-                        );
-
-                    }
-                );
-
-            }
-        );
-
-    }
-
-    // --------------------------------------------------------
-    // Êzîdî Language Support
-    // --------------------------------------------------------
-    // Die konkrete Êzîdî-Tastatur bleibt in
-    // ezidi-keyboard.js.
-    //
-    // Diese Schicht stellt dafür Sprache,
-    // Zeichen-Normalisierung und Events bereit.
-    // --------------------------------------------------------
-
-    function isEzidiLanguage(
-        language =
-            state.currentLanguage
-    ) {
-
-        const code =
-            resolveLanguage(
-                language
-            );
-
-        return Boolean(
-            code &&
-            CONFIG.ezidiLanguages
-                .includes(
-                    code
-                )
-        );
-
-    }
-
-    function prepareEzidiInput(
-        text
-    ) {
-
-        let result =
-            normalizeText(
-                text
-            );
-
-        /*
-         * Unicode bewusst erhalten.
-         *
-         * Keine ASCII-Konvertierung,
-         * damit Ê, î, ş, ç und weitere
-         * Zeichen nicht zerstört werden.
-         */
+    function applyToDocument() {
 
         try {
 
-            result =
-                result.normalize(
-                    "NFC"
+            document.documentElement
+                .setAttribute(
+                    "lang",
+                    state.language
+                );
+
+            document.documentElement
+                .setAttribute(
+                    "dir",
+                    state.direction
+                );
+
+            document.body
+                ?.setAttribute(
+                    "data-language",
+                    state.language
+                );
+
+            document.body
+                ?.setAttribute(
+                    "data-direction",
+                    state.direction
                 );
 
         } catch (
@@ -2207,214 +1588,129 @@
         ) {}
 
         emit(
-            "ezidi-input",
+            "document-updated",
             {
-                text:
-                    result,
 
                 language:
-                    state.currentLanguage,
+                    state.language,
 
-                ezidi:
-                    isEzidiLanguage()
+                direction:
+                    state.direction
 
             }
         );
+
+        return true;
+
+    }
+
+    // --------------------------------------------------------
+    // ÊZÎDÎ KEYBOARD CONNECTION
+    // --------------------------------------------------------
+
+    function getEzidiKeyboard() {
+
+        return (
+            window.HalDoEzidiKeyboard ||
+            window.HalDoOS?.ezidiKeyboard ||
+            null
+        );
+
+    }
+
+    function enableEzidiMode() {
+
+        const keyboard =
+            getEzidiKeyboard();
+
+        if (
+            keyboard &&
+            typeof keyboard.enable ===
+            "function"
+        ) {
+
+            try {
+
+                keyboard.enable();
+
+            } catch (
+                error
+            ) {}
+
+        }
+
+        emit(
+            "ezidi-mode-enabled"
+        );
+
+        return true;
+
+    }
+
+    function disableEzidiMode() {
+
+        const keyboard =
+            getEzidiKeyboard();
+
+        if (
+            keyboard &&
+            typeof keyboard.disable ===
+            "function"
+        ) {
+
+            try {
+
+                keyboard.disable();
+
+            } catch (
+                error
+            ) {}
+
+        }
+
+        emit(
+            "ezidi-mode-disabled"
+        );
+
+        return true;
+
+    }
+
+    async function setEzidiLanguage(
+        options = {}
+    ) {
+
+        const result =
+            await setLanguage(
+                "ez",
+                {
+
+                    ...options,
+
+                    source:
+                        options.source ||
+                        "ezidi-keyboard"
+
+                }
+            );
+
+        if (
+            result.ok
+        ) {
+
+            enableEzidiMode();
+
+        }
 
         return result;
 
     }
 
     // --------------------------------------------------------
-    // Connect To AI Core
-    // --------------------------------------------------------
-
-    function connectAI() {
-
-        const core =
-            window.HalDoAICore ||
-            window.HalDoOS?.aiCore;
-
-        if (!core) {
-
-            return false;
-
-        }
-
-        /*
-         * Module registrieren.
-         */
-
-        if (
-            typeof core.registerModule ===
-            "function"
-        ) {
-
-            try {
-
-                core.registerModule(
-                    "language",
-                    api
-                );
-
-            } catch (
-                error
-            ) {}
-
-        }
-
-        return true;
-
-    }
-
-    // --------------------------------------------------------
-    // Connect To AI Commands
-    // --------------------------------------------------------
-
-    function connectCommands() {
-
-        const commands =
-            window.HalDoAICommands ||
-            window.HalDoOS?.aiCommands;
-
-        if (
-            !commands
-        ) {
-
-            return false;
-
-        }
-
-        /*
-         * Sprachwechsel als Kommando verfügbar machen,
-         * falls ai-commands.js bereits geladen wurde.
-         */
-
-        if (
-            typeof commands.registerCustomCommand ===
-            "function"
-        ) {
-
-            try {
-
-                commands.registerCustomCommand(
-                    "set-language-ai",
-                    argument =>
-                        setLanguage(
-                            argument
-                        ),
-                    {
-
-                        name:
-                            "AI-Sprache ändern",
-
-                        description:
-                            "Ändert die Sprache der HalDo AI.",
-
-                        category:
-                            "language",
-
-                        aliases:
-                            [
-                                "ai-language"
-                            ]
-
-                    }
-                );
-
-            } catch (
-                error
-            ) {}
-
-        }
-
-        return true;
-
-    }
-
-    // --------------------------------------------------------
-    // Connect Chat
-    // --------------------------------------------------------
-
-    function connectChat() {
-
-        const chat =
-            window.HalDoAIChat ||
-            window.HalDoOS?.aiChat;
-
-        if (!chat) {
-
-            return false;
-
-        }
-
-        /*
-         * Falls Chat ein Sprach-API erwartet,
-         * stellen wir sie über globale Events bereit.
-         */
-
-        emit(
-            "chat-language-ready",
-            {
-
-                language:
-                    state.currentLanguage,
-
-                profile:
-                    getProfile(
-                        state.currentLanguage
-                    )
-
-            }
-        );
-
-        return true;
-
-    }
-
-    // --------------------------------------------------------
-    // Connect Keyboard
-    // --------------------------------------------------------
-
-    function connectKeyboard() {
-
-        const keyboard =
-            window.HalDoEzidiKeyboard ||
-            window.HalDoOS?.ezidiKeyboard;
-
-        if (!keyboard) {
-
-            return false;
-
-        }
-
-        emit(
-            "keyboard-language-ready",
-            {
-
-                language:
-                    state.currentLanguage,
-
-                ezidi:
-                    isEzidiLanguage()
-
-            }
-        );
-
-        return true;
-
-    }
-
-    // --------------------------------------------------------
-    // Runtime Status
+    // STATUS
     // --------------------------------------------------------
 
     function getStatus() {
-
-        const profile =
-            getProfile(
-                state.currentLanguage
-            );
 
         return {
 
@@ -2430,218 +1726,89 @@
             ready:
                 state.ready,
 
-            currentLanguage:
-                state.currentLanguage,
+            language:
+                state.language,
 
             previousLanguage:
                 state.previousLanguage,
 
-            detectedLanguage:
-                state.detectedLanguage,
-
             direction:
                 state.direction,
 
-            profile,
+            detectedLanguage:
+                state.detectedLanguage,
 
-            isEzidi:
-                isEzidiLanguage(),
+            confidence:
+                state.confidence,
 
             supportedLanguages:
-                CONFIG.supportedLanguages
-                    .slice(),
+                getSupportedLanguages(),
 
-            languageChanges:
-                state.languageChanges,
+            ezidi: {
 
-            detectionCount:
-                state.detectionCount,
+                enabled:
+                    CONFIG.ezidi.enabled,
 
-            translationCount:
-                state.translationCount,
+                code:
+                    CONFIG.ezidi.code,
 
-            translations:
-                state.dictionary.size,
-
-            connections: {
-
-                aiCore:
+                keyboard:
                     Boolean(
-                        window.HalDoAICore ||
-                        window.HalDoOS?.aiCore
-                    ),
-
-                aiChat:
-                    Boolean(
-                        window.HalDoAIChat ||
-                        window.HalDoOS?.aiChat
-                    ),
-
-                aiCommands:
-                    Boolean(
-                        window.HalDoAICommands ||
-                        window.HalDoOS?.aiCommands
-                    ),
-
-                languageManager:
-                    Boolean(
-                        window.HalDoLanguageManager ||
-                        window.HalDoOS?.languageManager
-                    ),
-
-                languageSystem:
-                    Boolean(
-                        window.HalDoLanguageSystem ||
-                        window.HalDoOS?.languageSystem
-                    ),
-
-                ezidiKeyboard:
-                    Boolean(
-                        window.HalDoEzidiKeyboard ||
-                        window.HalDoOS?.ezidiKeyboard
+                        getEzidiKeyboard()
                     )
 
-            }
+            },
+
+            errors:
+                state.errors.length
 
         };
 
     }
 
     // --------------------------------------------------------
-    // History
+    // ERROR
     // --------------------------------------------------------
 
-    function getHistory() {
-
-        return state.history
-            .map(
-                entry => ({
-                    ...entry
-                })
-            );
-
-    }
-
-    function clearHistory() {
-
-        state.history =
-            [];
-
-        emit(
-            "history-cleared"
-        );
-
-    }
-
-    // --------------------------------------------------------
-    // Register Custom Language
-    // --------------------------------------------------------
-
-    function registerLanguage(
-        profile
+    function recordError(
+        error
     ) {
 
-        if (
-            !profile ||
-            !profile.code
-        ) {
+        const entry = {
 
-            return false;
+            timestamp:
+                Date.now(),
 
-        }
+            message:
+                error?.message ||
+                String(
+                    error
+                )
 
-        const code =
-            normalize(
-                profile.code
-            );
+        };
 
-        if (!code) {
-
-            return false;
-
-        }
-
-        state.customProfiles.set(
-            code,
-            {
-
-                code,
-
-                locale:
-                    profile.locale ||
-                    code,
-
-                name:
-                    profile.name ||
-                    code,
-
-                nativeName:
-                    profile.nativeName ||
-                    profile.name ||
-                    code,
-
-                direction:
-                    profile.direction ||
-                    "ltr",
-
-                family:
-                    profile.family ||
-                    "custom",
-
-                ezidi:
-                    Boolean(
-                        profile.ezidi
-                    )
-
-            }
+        state.errors.push(
+            entry
         );
 
         if (
-            !CONFIG.supportedLanguages
-                .includes(code)
+            state.errors.length >
+            100
         ) {
 
-            CONFIG.supportedLanguages.push(
-                code
-            );
-
-        }
-
-        if (
-            profile.aliases
-        ) {
-
-            profile.aliases.forEach(
-                alias => {
-
-                    state.aliases.set(
-                        normalize(
-                            alias
-                        ),
-                        code
-                    );
-
-                }
-            );
+            state.errors.shift();
 
         }
 
         emit(
-            "language-registered",
-            {
-                profile:
-                    getProfile(
-                        code
-                    )
-            }
+            "error",
+            entry
         );
-
-        return true;
 
     }
 
     // --------------------------------------------------------
-    // Initialize
+    // INITIALIZE
     // --------------------------------------------------------
 
     async function initialize() {
@@ -2657,76 +1824,193 @@
         state.initialized =
             true;
 
-        registerDefaultAliases();
-
-        registerCoreTranslations();
-
         /*
-         * Gespeicherte Sprache zuerst.
+         * Gespeicherte Sprache laden.
          */
 
         const stored =
-            loadPersistedLanguage();
+            await storageGet(
+                CONFIG.storageKey,
+                null
+            );
 
-        /*
-         * Danach Browser-Sprache.
-         */
+        if (
+            stored?.language &&
+            isSupported(
+                stored.language
+            )
+        ) {
 
-        const detected =
-            stored ||
-            detectBrowserLanguage();
+            state.language =
+                normalizeCode(
+                    stored.language
+                );
 
-        state.detectedLanguage =
-            detected;
-
-        state.currentLanguage =
-            resolveLanguage(
-                detected
-            ) ||
-            CONFIG.defaultLanguage;
+        }
 
         state.direction =
-            getDirection();
+            getDirection(
+                state.language
+            );
 
-        applyToDocument(
-            state.currentLanguage
+        /*
+         * Grundübersetzungen.
+         */
+
+        registerTranslations(
+            "de",
+            {
+
+                welcome:
+                    "Willkommen bei HalDo AI.",
+
+                loading:
+                    "HalDo AI wird geladen…",
+
+                ready:
+                    "HalDo AI ist bereit.",
+
+                error:
+                    "Es ist ein Fehler aufgetreten.",
+
+                thinking:
+                    "HalDo AI denkt…",
+
+                listening:
+                    "HalDo AI hört zu…"
+
+            }
         );
 
-        connectAI();
-
-        connectCommands();
-
-        connectChat();
-
-        connectKeyboard();
-
-        emit(
-            "initialized",
+        registerTranslations(
+            "en",
             {
-                language:
-                    state.currentLanguage,
 
-                profile:
-                    getProfile(
-                        state.currentLanguage
-                    )
+                welcome:
+                    "Welcome to HalDo AI.",
+
+                loading:
+                    "HalDo AI is loading…",
+
+                ready:
+                    "HalDo AI is ready.",
+
+                error:
+                    "An error occurred.",
+
+                thinking:
+                    "HalDo AI is thinking…",
+
+                listening:
+                    "HalDo AI is listening…"
+
+            }
+        );
+
+        registerTranslations(
+            "ez",
+            {
+
+                welcome:
+                    "Bi xêr hatî HalDo AI.",
+
+                loading:
+                    "HalDo AI tê barkirin…",
+
+                ready:
+                    "HalDo AI amade ye.",
+
+                error:
+                    "Çewtiyek çêbû.",
+
+                thinking:
+                    "HalDo AI difikire…",
+
+                listening:
+                    "HalDo AI guhdarî dike…"
+
             }
         );
 
         /*
-         * Nach DOM-/Modul-Ladevorgang erneut verbinden.
+         * Dokument aktualisieren.
          */
+
+        applyToDocument();
+
+        /*
+         * Conversation State verbinden.
+         */
+
+        const conversationState =
+            window.HalDoConversationState ||
+            window.HalDoOS?.conversationState;
+
+        if (
+            conversationState &&
+            typeof conversationState.on ===
+            "function"
+        ) {
+
+            conversationState.on(
+                "language-changed",
+                detail => {
+
+                    if (
+                        detail?.language &&
+                        detail.language !==
+                        state.language
+                    ) {
+
+                        setLanguage(
+                            detail.language,
+                            {
+                                source:
+                                    "conversation-state"
+                            }
+                        );
+
+                    }
+
+                }
+            );
+
+        }
+
+        /*
+         * Kernel registrieren.
+         */
+
+        const kernel =
+            window.HalDoKernel ||
+            window.HalDoOS?.kernel;
+
+        if (
+            kernel &&
+            typeof kernel.registerModule ===
+            "function"
+        ) {
+
+            try {
+
+                kernel.registerModule(
+                    "ai-language",
+                    api
+                );
+
+            } catch (
+                error
+            ) {}
+
+        }
+
+        emit(
+            "initialized",
+            getStatus()
+        );
 
         window.setTimeout(
             () => {
-
-                connectAI();
-
-                connectCommands();
-
-                connectChat();
-
-                connectKeyboard();
 
                 state.ready =
                     true;
@@ -2745,7 +2029,7 @@
     }
 
     // --------------------------------------------------------
-    // Public API
+    // PUBLIC API
     // --------------------------------------------------------
 
     const api = {
@@ -2755,9 +2039,6 @@
 
         config:
             CONFIG,
-
-        profiles:
-            LANGUAGE_PROFILES,
 
         state,
 
@@ -2769,46 +2050,43 @@
 
         emit,
 
-        resolveLanguage,
+        getLanguage,
 
-        getProfile,
+        getCurrentLanguage,
+
+        getLanguageInfo,
 
         getSupportedLanguages,
 
-        getLanguage,
+        isSupported,
 
         setLanguage,
 
-        getDirection,
-
-        applyToDocument,
-
-        detectBrowserLanguage,
+        changeLanguage:
+            setLanguage,
 
         detectLanguage,
 
-        normalizeText,
-
-        registerTranslation,
+        registerTranslations,
 
         translate,
 
-        isEzidiLanguage,
+        applyToDocument,
 
-        prepareEzidiInput,
+        getDirection,
 
-        registerLanguage,
+        enableEzidiMode,
 
-        getHistory,
+        disableEzidiMode,
 
-        clearHistory,
+        setEzidiLanguage,
 
         getStatus
 
     };
 
     // --------------------------------------------------------
-    // Global API
+    // GLOBAL REGISTRATION
     // --------------------------------------------------------
 
     window.HalDoAILanguage =
@@ -2818,23 +2096,30 @@
         api;
 
     // --------------------------------------------------------
-    // DOM Boot
+    // BOOT
     // --------------------------------------------------------
 
-    function boot() {
+    async function boot() {
 
-        initialize()
-            .catch(
-                error => {
+        try {
 
-                    console.error(
-                        "[HalDoAILanguage] " +
-                        "Initialization failed:",
-                        error
-                    );
+            await initialize();
 
-                }
+        } catch (
+            error
+        ) {
+
+            recordError(
+                error
             );
+
+            console.error(
+                "[HalDoAILanguage] " +
+                "Initialization failed:",
+                error
+            );
+
+        }
 
     }
 
@@ -2861,5 +2146,5 @@
 })(window, document);
 
 // ============================================================
-// END OF PART 77
+// END OF PART 82
 // ============================================================
