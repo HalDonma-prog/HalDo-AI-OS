@@ -1,682 +1,2191 @@
-/*
-========================================================
-HalDo AI OS 18
-AI Core Service
-Professional Ultimate Foundation
-========================================================
-*/
+// ============================================================
+// HALDO AI OS 18
+// AI CORE
+// PART 84
+// ============================================================
 
-(function () {
-  "use strict";
+(function (window, document) {
 
-  const VERSION = "18.0.0";
+    "use strict";
 
-  const state = {
-    status: "idle",
-    initialized: false,
-    startedAt: null,
-    requestCount: 0,
-    lastRequest: null,
-    lastResponse: null,
-    errors: []
-  };
-
-  const listeners = new Map();
-
-  const features = [
-    "AI Assistant",
-    "AI Engine",
-    "Learning Engine",
-    "Code Builder",
-    "Knowledge System",
-    "Memory System",
-    "Language System",
-    "Êzîdî Keyboard",
-    "Voice Interface",
-    "Speech Interface",
-    "Command System",
-    "Conversation State",
-    "System Integration",
-    "Storage Integration",
-    "Live Light Interface"
-  ];
-
-  /* ====================================================
-     EVENTS
-  ==================================================== */
-
-  function on(event, callback) {
-    if (typeof callback !== "function") return () => {};
-
-    if (!listeners.has(event)) {
-      listeners.set(event, new Set());
+    if (
+        window.HalDoAICore &&
+        window.HalDoAICore.__haldoAI18
+    ) {
+        return;
     }
 
-    listeners.get(event).add(callback);
+    window.HalDoOS =
+        window.HalDoOS || {};
 
-    return () => off(event, callback);
-  }
+    const CONFIG = {
 
-  function off(event, callback) {
-    const set = listeners.get(event);
-    if (!set) return;
+        name:
+            "HalDo AI Core",
 
-    set.delete(callback);
+        version:
+            "18.0.0",
 
-    if (set.size === 0) {
-      listeners.delete(event);
-    }
-  }
+        mode:
+            "Professional Ultimate Foundation",
 
-  function emit(event, payload = {}) {
-    const set = listeners.get(event);
-    if (!set) return;
+        maxRequests:
+            1000,
 
-    set.forEach(callback => {
-      try {
-        callback(payload);
-      } catch (error) {
-        recordError(error);
-      }
-    });
-  }
+        commandThreshold:
+            0.55,
 
-  /* ====================================================
-     ERROR HANDLING
-  ==================================================== */
+        autoDetectLanguage:
+            true,
 
-  function recordError(error) {
-    const entry = {
-      message: error?.message || String(error),
-      time: new Date().toISOString()
+        rememberConversation:
+            true,
+
+        enableCommands:
+            true,
+
+        enableMemory:
+            true,
+
+        enableSpeech:
+            true
+
     };
 
-    state.errors.push(entry);
+    // --------------------------------------------------------
+    // STATE
+    // --------------------------------------------------------
 
-    if (state.errors.length > 50) {
-      state.errors.shift();
-    }
+    const state = {
 
-    console.error("[HalDo AI Core]", entry.message);
+        initialized:
+            false,
 
-    emit("error", entry);
-  }
+        ready:
+            false,
 
-  /* ====================================================
-     MODULE LOOKUP
-  ==================================================== */
+        processing:
+            false,
 
-  function getModule(name) {
-    if (!name) return null;
+        requestCount:
+            0,
 
-    const kernel = window.HalDoKernel;
+        successfulRequests:
+            0,
 
-    if (kernel && typeof kernel.getModule === "function") {
-      try {
-        const module = kernel.getModule(name);
+        failedRequests:
+            0,
 
-        if (module) return module;
-      } catch (error) {
-        recordError(error);
-      }
-    }
+        lastRequest:
+            null,
 
-    const os = window.HalDoOS;
+        lastResponse:
+            null,
 
-    if (os && os[name]) {
-      return os[name];
-    }
+        currentLanguage:
+            "de",
 
-    return null;
-  }
+        errors:
+            [],
 
-  /* ====================================================
-     SYSTEM CONNECTION
-  ==================================================== */
+        history:
+            []
 
-  function notifyLight(mode) {
-    try {
-      if (
-        window.HalDoLight &&
-        typeof window.HalDoLight.setMode === "function"
-      ) {
-        window.HalDoLight.setMode(mode);
-      }
-    } catch (error) {
-      recordError(error);
-    }
-  }
+    };
 
-  /* ====================================================
-     STORAGE
-  ==================================================== */
+    // --------------------------------------------------------
+    // EVENTS
+    // --------------------------------------------------------
 
-  function saveConversation(request, response) {
-    try {
-      const memory =
-        window.HalDoAIMemory ||
-        getModule("ai-memory") ||
-        getModule("memory");
+    const listeners =
+        new Map();
 
-      if (memory) {
-        if (typeof memory.remember === "function") {
-          memory.remember({
-            type: "conversation",
-            user: request,
-            assistant: response,
-            time: new Date().toISOString()
-          });
+    function on(
+        event,
+        callback
+    ) {
 
-          return true;
+        if (
+            typeof callback !==
+            "function"
+        ) {
+            return () => {};
         }
 
-        if (typeof memory.add === "function") {
-          memory.add({
-            type: "conversation",
-            user: request,
-            assistant: response,
-            time: new Date().toISOString()
-          });
+        if (
+            !listeners.has(event)
+        ) {
 
-          return true;
-        }
-      }
-
-      const storage =
-        window.HalDoStorage ||
-        getModule("storage") ||
-        getModule("storage-manager");
-
-      if (storage) {
-        const key = "haldo_ai_conversations";
-
-        let conversations = [];
-
-        if (typeof storage.get === "function") {
-          conversations = storage.get(key) || [];
-        } else {
-          try {
-            conversations = JSON.parse(
-              localStorage.getItem(key) || "[]"
+            listeners.set(
+                event,
+                new Set()
             );
-          } catch {
-            conversations = [];
-          }
+
         }
 
-        conversations.push({
-          user: request,
-          assistant: response,
-          time: new Date().toISOString()
-        });
+        listeners
+            .get(event)
+            .add(callback);
 
-        conversations = conversations.slice(-100);
+        return () =>
+            off(
+                event,
+                callback
+            );
 
-        if (typeof storage.set === "function") {
-          storage.set(key, conversations);
-        } else {
-          localStorage.setItem(
-            key,
-            JSON.stringify(conversations)
-          );
+    }
+
+    function off(
+        event,
+        callback
+    ) {
+
+        const set =
+            listeners.get(event);
+
+        if (!set) {
+            return;
         }
 
-        return true;
-      }
-    } catch (error) {
-      recordError(error);
-    }
-
-    return false;
-  }
-
-  /* ====================================================
-     COMMAND CONNECTION
-  ==================================================== */
-
-  async function executeCommand(input) {
-    const commands =
-      window.HalDoAICommands ||
-      getModule("ai-commands") ||
-      getModule("commands");
-
-    if (!commands) return null;
-
-    try {
-      if (typeof commands.execute === "function") {
-        return await commands.execute(input);
-      }
-
-      if (typeof commands.handle === "function") {
-        return await commands.handle(input);
-      }
-
-      if (typeof commands.run === "function") {
-        return await commands.run(input);
-      }
-    } catch (error) {
-      recordError(error);
-    }
-
-    return null;
-  }
-
-  /* ====================================================
-     AI ENGINE CONNECTION
-  ==================================================== */
-
-  async function executeEngine(input, context = {}) {
-    const engine =
-      window.HalDoAIEngine ||
-      getModule("ai-engine") ||
-      getModule("engine");
-
-    if (!engine) return null;
-
-    try {
-      if (typeof engine.process === "function") {
-        return await engine.process(input, context);
-      }
-
-      if (typeof engine.generate === "function") {
-        return await engine.generate(input, context);
-      }
-
-      if (typeof engine.ask === "function") {
-        return await engine.ask(input, context);
-      }
-
-      if (typeof engine.respond === "function") {
-        return await engine.respond(input, context);
-      }
-    } catch (error) {
-      recordError(error);
-    }
-
-    return null;
-  }
-
-  /* ====================================================
-     FALLBACK RESPONSE
-  ==================================================== */
-
-  function fallbackResponse(input) {
-    const normalized = input.toLowerCase();
-
-    if (
-      normalized.includes("hallo") ||
-      normalized.includes("hi") ||
-      normalized.includes("hey")
-    ) {
-      return "Hallo! Ich bin HalDo AI. Wie kann ich dir helfen?";
-    }
-
-    if (
-      normalized.includes("wer bist du") ||
-      normalized.includes("was bist du")
-    ) {
-      return (
-        "Ich bin HalDo AI, der zentrale KI-Dienst " +
-        "des HalDo AI OS 18."
-      );
-    }
-
-    if (
-      normalized.includes("status") ||
-      normalized.includes("system")
-    ) {
-      return (
-        "HalDo AI OS 18 ist aktiv. " +
-        "Der AI Core läuft und ist bereit."
-      );
-    }
-
-    if (
-      normalized.includes("hilfe") ||
-      normalized.includes("help")
-    ) {
-      return (
-        "Ich kann Gespräche führen, Befehle verarbeiten, " +
-        "Systemmodule ansprechen, Wissen verwalten und " +
-        "weitere HalDo AI Funktionen koordinieren."
-      );
-    }
-
-    return (
-      "HalDo AI hat deine Anfrage empfangen. " +
-      "Der zentrale AI Core ist verbunden und bereit, " +
-      "weitere AI-Module zu verwenden."
-    );
-  }
-
-  /* ====================================================
-     MAIN ASK
-  ==================================================== */
-
-  async function ask(message, context = {}) {
-    const input = String(message || "").trim();
-
-    if (!input) {
-      return {
-        success: false,
-        input: "",
-        response: "Bitte schreibe eine Anfrage.",
-        source: "validation"
-      };
-    }
-
-    state.requestCount++;
-    state.lastRequest = input;
-    state.status = "thinking";
-
-    notifyLight("thinking");
-
-    emit("request:start", {
-      input,
-      context
-    });
-
-    try {
-      /*
-       * 1. Command System
-       */
-
-      const commandResult =
-        await executeCommand(input);
-
-      if (commandResult !== null &&
-          commandResult !== undefined) {
-
-        const response =
-          typeof commandResult === "string"
-            ? commandResult
-            : commandResult.response ||
-              commandResult.message ||
-              JSON.stringify(commandResult);
-
-        return finishResponse(
-          input,
-          response,
-          "command",
-          context
-        );
-      }
-
-      /*
-       * 2. AI Engine
-       */
-
-      const engineResult =
-        await executeEngine(
-          input,
-          context
+        set.delete(
+            callback
         );
 
-      if (engineResult !== null &&
-          engineResult !== undefined) {
+        if (
+            set.size ===
+            0
+        ) {
 
-        const response =
-          typeof engineResult === "string"
-            ? engineResult
-            : engineResult.response ||
-              engineResult.message ||
-              engineResult.text ||
-              JSON.stringify(engineResult);
+            listeners.delete(
+                event
+            );
 
-        return finishResponse(
-          input,
-          response,
-          "engine",
-          context
+        }
+
+    }
+
+    function emit(
+        event,
+        detail = {}
+    ) {
+
+        const set =
+            listeners.get(event);
+
+        if (set) {
+
+            for (
+                const callback of set
+            ) {
+
+                try {
+
+                    callback(
+                        detail
+                    );
+
+                } catch (error) {
+
+                    console.error(
+                        "[HalDoAICore]",
+                        error
+                    );
+
+                }
+
+            }
+
+        }
+
+        try {
+
+            document.dispatchEvent(
+                new CustomEvent(
+                    `haldo:ai-core:${event}`,
+                    {
+                        detail
+                    }
+                )
+            );
+
+        } catch (error) {}
+
+    }
+
+    // --------------------------------------------------------
+    // UTILITIES
+    // --------------------------------------------------------
+
+    function clean(
+        value
+    ) {
+
+        return String(
+            value ?? ""
+        ).trim();
+
+    }
+
+    function createId(
+        prefix = "ai"
+    ) {
+
+        return (
+            prefix +
+            "-" +
+            Date.now().toString(36) +
+            "-" +
+            Math.random()
+                .toString(36)
+                .slice(2, 9)
         );
-      }
 
-      /*
-       * 3. Foundation fallback
-       */
+    }
 
-      return finishResponse(
+    // --------------------------------------------------------
+    // MODULE CONNECTIONS
+    // --------------------------------------------------------
+
+    function getLanguage() {
+
+        return (
+            window.HalDoAILanguage ||
+            window.HalDoOS?.aiLanguage ||
+            null
+        );
+
+    }
+
+    function getCommands() {
+
+        return (
+            window.HalDoAICommands ||
+            window.HalDoOS?.aiCommands ||
+            null
+        );
+
+    }
+
+    function getMemory() {
+
+        return (
+            window.HalDoAIMemory ||
+            window.HalDoOS?.aiMemory ||
+            null
+        );
+
+    }
+
+    function getConversation() {
+
+        return (
+            window.HalDoConversationState ||
+            window.HalDoOS?.conversationState ||
+            null
+        );
+
+    }
+
+    function getChat() {
+
+        return (
+            window.HalDoAIChat ||
+            window.HalDoOS?.aiChat ||
+            null
+        );
+
+    }
+
+    function getEngine() {
+
+        return (
+            window.HalDoAIEngine ||
+            window.HalDoOS?.aiEngine ||
+            null
+        );
+
+    }
+
+    function getSpeech() {
+
+        return (
+            window.HalDoAISpeech ||
+            window.HalDoOS?.aiSpeech ||
+            null
+        );
+
+    }
+
+    function getVoice() {
+
+        return (
+            window.HalDoAIVoice ||
+            window.HalDoOS?.aiVoice ||
+            null
+        );
+
+    }
+
+    function getKernel() {
+
+        return (
+            window.HalDoKernel ||
+            window.HalDoOS?.kernel ||
+            null
+        );
+
+    }
+
+    // --------------------------------------------------------
+    // LANGUAGE
+    // --------------------------------------------------------
+
+    function detectLanguage(
+        text
+    ) {
+
+        const language =
+            getLanguage();
+
+        if (
+            !CONFIG.autoDetectLanguage ||
+            !language ||
+            typeof language.detectLanguage !==
+            "function"
+        ) {
+
+            return {
+
+                language:
+                    state.currentLanguage,
+
+                confidence:
+                    0
+
+            };
+
+        }
+
+        try {
+
+            const result =
+                language.detectLanguage(
+                    text
+                );
+
+            if (
+                result?.language
+            ) {
+
+                state.currentLanguage =
+                    result.language;
+
+            }
+
+            return result;
+
+        } catch (error) {
+
+            recordError(
+                error
+            );
+
+            return {
+
+                language:
+                    state.currentLanguage,
+
+                confidence:
+                    0
+
+            };
+
+        }
+
+    }
+
+    async function setLanguage(
+        language,
+        options = {}
+    ) {
+
+        const manager =
+            getLanguage();
+
+        if (
+            !manager ||
+            typeof manager.setLanguage !==
+            "function"
+        ) {
+
+            return {
+
+                ok:
+                    false,
+
+                error:
+                    "LANGUAGE_ENGINE_UNAVAILABLE"
+
+            };
+
+        }
+
+        try {
+
+            const result =
+                await manager.setLanguage(
+                    language,
+                    options
+                );
+
+            if (
+                result?.ok
+            ) {
+
+                state.currentLanguage =
+                    result.language ||
+                    language;
+
+            }
+
+            return result;
+
+        } catch (error) {
+
+            recordError(
+                error
+            );
+
+            return {
+
+                ok:
+                    false,
+
+                error:
+                    error.message
+
+            };
+
+        }
+
+    }
+
+    // --------------------------------------------------------
+    // COMMAND PROCESSING
+    // --------------------------------------------------------
+
+    function detectCommand(
+        text
+    ) {
+
+        const commands =
+            getCommands();
+
+        if (
+            !CONFIG.enableCommands ||
+            !commands ||
+            typeof commands.detectCommand !==
+            "function"
+        ) {
+
+            return {
+
+                command:
+                    null,
+
+                confidence:
+                    0
+
+            };
+
+        }
+
+        try {
+
+            return commands.detectCommand(
+                text
+            );
+
+        } catch (error) {
+
+            recordError(
+                error
+            );
+
+            return {
+
+                command:
+                    null,
+
+                confidence:
+                    0
+
+            };
+
+        }
+
+    }
+
+    async function executeCommand(
+        text,
+        options = {}
+    ) {
+
+        const commands =
+            getCommands();
+
+        if (
+            !CONFIG.enableCommands ||
+            !commands ||
+            typeof commands.execute !==
+            "function"
+        ) {
+
+            return {
+
+                ok:
+                    false,
+
+                handled:
+                    false,
+
+                error:
+                    "COMMAND_ENGINE_UNAVAILABLE"
+
+            };
+
+        }
+
+        try {
+
+            const result =
+                await commands.execute(
+                    text,
+                    options
+                );
+
+            return {
+
+                ...result,
+
+                handled:
+                    Boolean(
+                        result?.command ||
+                        result?.result?.type
+                    )
+
+            };
+
+        } catch (error) {
+
+            recordError(
+                error
+            );
+
+            return {
+
+                ok:
+                    false,
+
+                handled:
+                    false,
+
+                error:
+                    error.message
+
+            };
+
+        }
+
+    }
+
+    // --------------------------------------------------------
+    // MEMORY
+    // --------------------------------------------------------
+
+    async function remember(
+        data
+    ) {
+
+        if (
+            !CONFIG.enableMemory
+        ) {
+
+            return false;
+
+        }
+
+        const memory =
+            getMemory();
+
+        if (!memory) {
+            return false;
+        }
+
+        const methods = [
+
+            "remember",
+            "add",
+            "store",
+            "save",
+            "rememberMessage"
+
+        ];
+
+        for (
+            const method of methods
+        ) {
+
+            if (
+                typeof memory[method] !==
+                "function"
+            ) {
+                continue;
+            }
+
+            try {
+
+                await memory[method](
+                    data
+                );
+
+                return true;
+
+            } catch (error) {}
+
+        }
+
+        return false;
+
+    }
+
+    async function recall(
+        query,
+        options = {}
+    ) {
+
+        if (
+            !CONFIG.enableMemory
+        ) {
+
+            return [];
+
+        }
+
+        const memory =
+            getMemory();
+
+        if (!memory) {
+            return [];
+        }
+
+        const methods = [
+
+            "recall",
+            "search",
+            "find",
+            "query",
+            "retrieve"
+
+        ];
+
+        for (
+            const method of methods
+        ) {
+
+            if (
+                typeof memory[method] !==
+                "function"
+            ) {
+                continue;
+            }
+
+            try {
+
+                const result =
+                    await memory[method](
+                        query,
+                        options
+                    );
+
+                return Array.isArray(
+                    result
+                )
+                    ? result
+                    : result
+                        ? [result]
+                        : [];
+
+            } catch (error) {}
+
+        }
+
+        return [];
+
+    }
+
+    // --------------------------------------------------------
+    // CONVERSATION
+    // --------------------------------------------------------
+
+    async function addMessage(
+        message
+    ) {
+
+        if (
+            !CONFIG.rememberConversation
+        ) {
+            return false;
+        }
+
+        const conversation =
+            getConversation();
+
+        if (!conversation) {
+            return false;
+        }
+
+        const methods = [
+
+            "addMessage",
+            "add",
+            "pushMessage",
+            "appendMessage"
+
+        ];
+
+        for (
+            const method of methods
+        ) {
+
+            if (
+                typeof conversation[method] !==
+                "function"
+            ) {
+                continue;
+            }
+
+            try {
+
+                await conversation[method](
+                    message
+                );
+
+                return true;
+
+            } catch (error) {}
+
+        }
+
+        return false;
+
+    }
+
+    function getMessages(
+        limit = 50
+    ) {
+
+        const conversation =
+            getConversation();
+
+        if (!conversation) {
+            return [];
+        }
+
+        const methods = [
+
+            "getMessages",
+            "getHistory",
+            "getConversation"
+
+        ];
+
+        for (
+            const method of methods
+        ) {
+
+            if (
+                typeof conversation[method] !==
+                "function"
+            ) {
+                continue;
+            }
+
+            try {
+
+                const result =
+                    conversation[method](
+                        limit
+                    );
+
+                if (
+                    Array.isArray(
+                        result
+                    )
+                ) {
+
+                    return result;
+
+                }
+
+            } catch (error) {}
+
+        }
+
+        return [];
+
+    }
+
+    // --------------------------------------------------------
+    // AI ENGINE
+    // --------------------------------------------------------
+
+    async function generateResponse(
         input,
-        fallbackResponse(input),
-        "foundation",
-        context
-      );
+        context = {}
+    ) {
 
-    } catch (error) {
-      recordError(error);
+        /*
+         * Bereits vorhandene AI Engine verwenden.
+         */
 
-      return finishResponse(
+        const engine =
+            getEngine();
+
+        if (
+            engine
+        ) {
+
+            const methods = [
+
+                "generate",
+                "generateResponse",
+                "respond",
+                "process",
+                "ask",
+                "complete"
+
+            ];
+
+            for (
+                const method of methods
+            ) {
+
+                if (
+                    typeof engine[method] !==
+                    "function"
+                ) {
+                    continue;
+                }
+
+                try {
+
+                    const result =
+                        await engine[method](
+                            input,
+                            context
+                        );
+
+                    if (
+                        result !==
+                        undefined &&
+                        result !==
+                        null
+                    ) {
+
+                        return normalizeAIResult(
+                            result
+                        );
+
+                    }
+
+                } catch (error) {
+
+                    recordError(
+                        error
+                    );
+
+                }
+
+            }
+
+        }
+
+        /*
+         * Vorhandenen AI Chat verwenden.
+         */
+
+        const chat =
+            getChat();
+
+        if (
+            chat
+        ) {
+
+            const methods = [
+
+                "sendMessage",
+                "send",
+                "ask",
+                "respond",
+                "processMessage"
+
+            ];
+
+            for (
+                const method of methods
+            ) {
+
+                if (
+                    typeof chat[method] !==
+                    "function"
+                ) {
+                    continue;
+                }
+
+                try {
+
+                    const result =
+                        await chat[method](
+                            input,
+                            context
+                        );
+
+                    if (
+                        result !==
+                        undefined &&
+                        result !==
+                        null
+                    ) {
+
+                        return normalizeAIResult(
+                            result
+                        );
+
+                    }
+
+                } catch (error) {
+
+                    recordError(
+                        error
+                    );
+
+                }
+
+            }
+
+        }
+
+        /*
+         * Kein Backend vorhanden:
+         * Core meldet sauber zurück,
+         * statt einen falschen AI-Response
+         * zu erfinden.
+         */
+
+        return {
+
+            ok:
+                false,
+
+            type:
+                "no-ai-provider",
+
+            message:
+                "Kein aktiver AI-Provider ist momentan verbunden.",
+
+            provider:
+                null
+
+        };
+
+    }
+
+    function normalizeAIResult(
+        result
+    ) {
+
+        if (
+            typeof result ===
+            "string"
+        ) {
+
+            return {
+
+                ok:
+                    true,
+
+                type:
+                    "text",
+
+                text:
+                    result,
+
+                content:
+                    result
+
+            };
+
+        }
+
+        if (
+            typeof result !==
+            "object"
+        ) {
+
+            return {
+
+                ok:
+                    true,
+
+                type:
+                    "value",
+
+                value:
+                    result
+
+            };
+
+        }
+
+        return {
+
+            ok:
+                result.ok !== false,
+
+            ...result,
+
+            text:
+                result.text ??
+                result.content ??
+                result.message ??
+                ""
+
+        };
+
+    }
+
+    // --------------------------------------------------------
+    // MAIN REQUEST PIPELINE
+    // --------------------------------------------------------
+
+    async function process(
         input,
-        "HalDo AI konnte die Anfrage nicht vollständig verarbeiten.",
-        "error",
-        context
-      );
+        options = {}
+    ) {
+
+        const text =
+            clean(
+                input
+            );
+
+        if (!text) {
+
+            return {
+
+                ok:
+                    false,
+
+                error:
+                    "EMPTY_INPUT",
+
+                text:
+                    ""
+
+            };
+
+        }
+
+        const requestId =
+            createId(
+                "request"
+            );
+
+        const startedAt =
+            Date.now();
+
+        state.processing =
+            true;
+
+        state.requestCount++;
+
+        const request = {
+
+            id:
+                requestId,
+
+            input:
+                text,
+
+            timestamp:
+                startedAt,
+
+            language:
+                state.currentLanguage,
+
+            options
+
+        };
+
+        state.lastRequest =
+            request;
+
+        emit(
+            "request-start",
+            {
+                request
+            }
+        );
+
+        try {
+
+            /*
+             * 1. Sprache erkennen
+             */
+
+            const language =
+                detectLanguage(
+                    text
+                );
+
+            request.language =
+                language?.language ||
+                state.currentLanguage;
+
+            /*
+             * 2. Eingabe speichern
+             */
+
+            await addMessage({
+
+                role:
+                    "user",
+
+                content:
+                    text,
+
+                text:
+                    text,
+
+                language:
+                    request.language,
+
+                timestamp:
+                    Date.now()
+
+            });
+
+            /*
+             * 3. Relevante Erinnerungen
+             */
+
+            const memories =
+                await recall(
+                    text,
+                    {
+                        limit:
+                            options.memoryLimit ||
+                            10
+                    }
+                );
+
+            /*
+             * 4. Befehl erkennen
+             */
+
+            const detectedCommand =
+                detectCommand(
+                    text
+                );
+
+            emit(
+                "command-detected",
+                {
+
+                    input:
+                        text,
+
+                    detection:
+                        detectedCommand
+
+                }
+            );
+
+            /*
+             * 5. Wenn klarer Systembefehl:
+             * Befehl ausführen.
+             */
+
+            if (
+                CONFIG.enableCommands &&
+                detectedCommand?.command &&
+                detectedCommand.confidence >=
+                    CONFIG.commandThreshold &&
+                !options.forceAI
+            ) {
+
+                const commandResult =
+                    await executeCommand(
+                        text,
+                        options
+                    );
+
+                if (
+                    commandResult &&
+                    (
+                        commandResult.ok ||
+                        commandResult.result ||
+                        commandResult.requiresConfirmation
+                    )
+                ) {
+
+                    const response = {
+
+                        ok:
+                            commandResult.ok !==
+                            false,
+
+                        type:
+                            "command",
+
+                        requestId,
+
+                        input:
+                            text,
+
+                        language:
+                            request.language,
+
+                        command:
+                            detectedCommand.command.id,
+
+                        confidence:
+                            detectedCommand.confidence,
+
+                        result:
+                            commandResult,
+
+                        timestamp:
+                            Date.now(),
+
+                        duration:
+                            Date.now() -
+                            startedAt
+
+                    };
+
+                    state.lastResponse =
+                        response;
+
+                    state.successfulRequests++;
+
+                    await addMessage({
+
+                        role:
+                            "system",
+
+                        type:
+                            "command-result",
+
+                        command:
+                            detectedCommand.command.id,
+
+                        content:
+                            response,
+
+                        timestamp:
+                            Date.now()
+
+                    });
+
+                    await remember({
+
+                        type:
+                            "command",
+
+                        input:
+                            text,
+
+                        command:
+                            detectedCommand.command.id,
+
+                        result:
+                            commandResult,
+
+                        timestamp:
+                            Date.now()
+
+                    });
+
+                    emit(
+                        "response",
+                        {
+                            response
+                        }
+                    );
+
+                    return response;
+
+                }
+
+            }
+
+            /*
+             * 6. AI-Kontext vorbereiten
+             */
+
+            const context = {
+
+                requestId,
+
+                language:
+                    request.language,
+
+                detectedLanguage:
+                    language,
+
+                memories,
+
+                messages:
+                    getMessages(
+                        options.historyLimit ||
+                        50
+                    ),
+
+                command:
+                    detectedCommand,
+
+                system:
+                    {
+
+                        mode:
+                            CONFIG.mode,
+
+                        version:
+                            CONFIG.version
+
+                    }
+
+            };
+
+            /*
+             * 7. AI Engine / Chat
+             */
+
+            const aiResult =
+                await generateResponse(
+                    text,
+                    context
+                );
+
+            /*
+             * 8. AI Antwort speichern
+             */
+
+            const response = {
+
+                ok:
+                    aiResult.ok !==
+                    false,
+
+                type:
+                    aiResult.type ||
+                    "text",
+
+                requestId,
+
+                input:
+                    text,
+
+                language:
+                    request.language,
+
+                text:
+                    aiResult.text ||
+                    "",
+
+                content:
+                    aiResult.content ||
+                    aiResult.text ||
+                    "",
+
+                result:
+                    aiResult,
+
+                timestamp:
+                    Date.now(),
+
+                duration:
+                    Date.now() -
+                    startedAt
+
+            };
+
+            state.lastResponse =
+                response;
+
+            if (
+                response.ok
+            ) {
+
+                state.successfulRequests++;
+
+            } else {
+
+                state.failedRequests++;
+
+            }
+
+            await addMessage({
+
+                role:
+                    "assistant",
+
+                content:
+                    response.text,
+
+                text:
+                    response.text,
+
+                language:
+                    request.language,
+
+                requestId,
+
+                timestamp:
+                    Date.now()
+
+            });
+
+            await remember({
+
+                type:
+                    "conversation",
+
+                requestId,
+
+                language:
+                    request.language,
+
+                user:
+                    text,
+
+                assistant:
+                    response.text,
+
+                timestamp:
+                    Date.now()
+
+            });
+
+            emit(
+                "response",
+                {
+                    response
+                }
+            );
+
+            return response;
+
+        } catch (error) {
+
+            state.failedRequests++;
+
+            recordError(
+                error
+            );
+
+            const response = {
+
+                ok:
+                    false,
+
+                type:
+                    "error",
+
+                requestId,
+
+                input:
+                    text,
+
+                language:
+                    state.currentLanguage,
+
+                error:
+                    error.message ||
+                    String(
+                        error
+                    ),
+
+                timestamp:
+                    Date.now(),
+
+                duration:
+                    Date.now() -
+                    startedAt
+
+            };
+
+            state.lastResponse =
+                response;
+
+            emit(
+                "response-error",
+                {
+                    response,
+
+                    error
+
+                }
+            );
+
+            return response;
+
+        } finally {
+
+            state.processing =
+                false;
+
+            const finishedAt =
+                Date.now();
+
+            request.finishedAt =
+                finishedAt;
+
+            request.duration =
+                finishedAt -
+                startedAt;
+
+            state.history.push(
+                request
+            );
+
+            if (
+                state.history.length >
+                CONFIG.maxRequests
+            ) {
+
+                state.history.shift();
+
+            }
+
+            emit(
+                "request-end",
+                {
+                    request
+                }
+            );
+
+        }
+
     }
-  }
 
-  /* ====================================================
-     RESPONSE FINALIZATION
-  ==================================================== */
+    // --------------------------------------------------------
+    // CONVENIENCE METHODS
+    // --------------------------------------------------------
 
-  function finishResponse(
-    input,
-    response,
-    source,
-    context
-  ) {
-    const result = {
-      success: true,
-      input,
-      response: String(response),
-      source,
-      context,
-      time: new Date().toISOString()
-    };
+    async function ask(
+        input,
+        options = {}
+    ) {
 
-    state.lastResponse = result;
-    state.status = "answering";
+        return process(
+            input,
+            options
+        );
 
-    saveConversation(
-      input,
-      result.response
-    );
-
-    emit("request:complete", result);
-
-    notifyLight("answering");
-
-    window.setTimeout(() => {
-      state.status = "idle";
-      notifyLight("idle");
-
-      emit("status", getStatus());
-    }, 350);
-
-    return result;
-  }
-
-  /* ====================================================
-     START / STOP
-  ==================================================== */
-
-  function start() {
-    if (state.initialized) {
-      state.status = "running";
-
-      return getStatus();
     }
 
-    state.initialized = true;
-    state.startedAt = new Date().toISOString();
-    state.status = "running";
+    async function send(
+        input,
+        options = {}
+    ) {
 
-    emit("start", getStatus());
+        return process(
+            input,
+            options
+        );
 
-    console.log(
-      "HalDo AI Core 18.0.0 gestartet"
-    );
+    }
 
-    return getStatus();
-  }
+    async function execute(
+        input,
+        options = {}
+    ) {
 
-  function stop() {
-    state.status = "stopped";
+        return process(
+            input,
+            options
+        );
 
-    emit("stop", getStatus());
+    }
 
-    return getStatus();
-  }
+    // --------------------------------------------------------
+    // SPEECH
+    // --------------------------------------------------------
 
-  /* ====================================================
-     STATUS
-  ==================================================== */
+    async function speak(
+        text,
+        options = {}
+    ) {
 
-  function getStatus() {
-    return {
-      name: "HalDo AI Core",
-      version: VERSION,
-      status: state.status,
-      initialized: state.initialized,
-      startedAt: state.startedAt,
-      requestCount: state.requestCount,
-      lastRequest: state.lastRequest,
-      lastResponse: state.lastResponse,
-      errorCount: state.errors.length,
-      features: [...features]
+        if (
+            !CONFIG.enableSpeech
+        ) {
+
+            return {
+
+                ok:
+                    false,
+
+                error:
+                    "SPEECH_DISABLED"
+
+            };
+
+        }
+
+        const voice =
+            getVoice();
+
+        const speech =
+            getSpeech();
+
+        const target =
+            voice ||
+            speech;
+
+        if (!target) {
+
+            return {
+
+                ok:
+                    false,
+
+                error:
+                    "VOICE_ENGINE_UNAVAILABLE"
+
+            };
+
+        }
+
+        const methods = [
+
+            "speak",
+            "say",
+            "synthesize"
+
+        ];
+
+        for (
+            const method of methods
+        ) {
+
+            if (
+                typeof target[method] !==
+                "function"
+            ) {
+                continue;
+            }
+
+            try {
+
+                const result =
+                    await target[method](
+                        text,
+                        options
+                    );
+
+                return {
+
+                    ok:
+                        result !==
+                        false,
+
+                    result
+
+                };
+
+            } catch (error) {
+
+                recordError(
+                    error
+                );
+
+            }
+
+        }
+
+        return {
+
+            ok:
+                false,
+
+            error:
+                "SPEAK_METHOD_UNAVAILABLE"
+
+        };
+
+    }
+
+    // --------------------------------------------------------
+    // STATUS
+    // --------------------------------------------------------
+
+    function getStatus() {
+
+        const language =
+            getLanguage();
+
+        const commands =
+            getCommands();
+
+        const memory =
+            getMemory();
+
+        const conversation =
+            getConversation();
+
+        const engine =
+            getEngine();
+
+        return {
+
+            name:
+                CONFIG.name,
+
+            version:
+                CONFIG.version,
+
+            mode:
+                CONFIG.mode,
+
+            initialized:
+                state.initialized,
+
+            ready:
+                state.ready,
+
+            processing:
+                state.processing,
+
+            requestCount:
+                state.requestCount,
+
+            successfulRequests:
+                state.successfulRequests,
+
+            failedRequests:
+                state.failedRequests,
+
+            currentLanguage:
+                state.currentLanguage,
+
+            modules: {
+
+                language:
+                    Boolean(
+                        language
+                    ),
+
+                commands:
+                    Boolean(
+                        commands
+                    ),
+
+                memory:
+                    Boolean(
+                        memory
+                    ),
+
+                conversation:
+                    Boolean(
+                        conversation
+                    ),
+
+                engine:
+                    Boolean(
+                        engine
+                    ),
+
+                chat:
+                    Boolean(
+                        getChat()
+                    ),
+
+                speech:
+                    Boolean(
+                        getSpeech()
+                    ),
+
+                voice:
+                    Boolean(
+                        getVoice()
+                    )
+
+            },
+
+            lastRequest:
+                state.lastRequest,
+
+            lastResponse:
+                state.lastResponse,
+
+            errors:
+                state.errors.length
+
+        };
+
+    }
+
+    // --------------------------------------------------------
+    // ERROR
+    // --------------------------------------------------------
+
+    function recordError(
+        error
+    ) {
+
+        const entry = {
+
+            timestamp:
+                Date.now(),
+
+            message:
+                error?.message ||
+                String(
+                    error
+                )
+
+        };
+
+        state.errors.push(
+            entry
+        );
+
+        if (
+            state.errors.length >
+            100
+        ) {
+
+            state.errors.shift();
+
+        }
+
+        emit(
+            "error",
+            entry
+        );
+
+    }
+
+    // --------------------------------------------------------
+    // INITIALIZE
+    // --------------------------------------------------------
+
+    async function initialize() {
+
+        if (
+            state.initialized
+        ) {
+
+            return getStatus();
+
+        }
+
+        state.initialized =
+            true;
+
+        /*
+         * Aktuelle Sprache übernehmen.
+         */
+
+        const language =
+            getLanguage();
+
+        if (
+            language &&
+            typeof language.getLanguage ===
+            "function"
+        ) {
+
+            try {
+
+                state.currentLanguage =
+                    language.getLanguage();
+
+            } catch (error) {}
+
+        }
+
+        /*
+         * Sprachwechsel beobachten.
+         */
+
+        if (
+            language &&
+            typeof language.on ===
+            "function"
+        ) {
+
+            language.on(
+                "language-changed",
+                detail => {
+
+                    if (
+                        detail?.language
+                    ) {
+
+                        state.currentLanguage =
+                            detail.language;
+
+                    }
+
+                    emit(
+                        "language-changed",
+                        detail
+                    );
+
+                }
+            );
+
+        }
+
+        /*
+         * Command Events verbinden.
+         */
+
+        const commands =
+            getCommands();
+
+        if (
+            commands &&
+            typeof commands.on ===
+            "function"
+        ) {
+
+            commands.on(
+                "executed",
+                detail => {
+
+                    emit(
+                        "command-executed",
+                        detail
+                    );
+
+                }
+            );
+
+            commands.on(
+                "error",
+                detail => {
+
+                    emit(
+                        "command-error",
+                        detail
+                    );
+
+                }
+            );
+
+        }
+
+        /*
+         * Kernel registrieren.
+         */
+
+        const kernel =
+            getKernel();
+
+        if (
+            kernel &&
+            typeof kernel.registerModule ===
+            "function"
+        ) {
+
+            try {
+
+                kernel.registerModule(
+                    "ai-core",
+                    api
+                );
+
+            } catch (error) {}
+
+        }
+
+        emit(
+            "initialized",
+            getStatus()
+        );
+
+        window.setTimeout(
+            () => {
+
+                state.ready =
+                    true;
+
+                emit(
+                    "ready",
+                    getStatus()
+                );
+
+            },
+            0
+        );
+
+        return getStatus();
+
+    }
+
+    // --------------------------------------------------------
+    // PUBLIC API
+    // --------------------------------------------------------
+
+    const api = {
+
+        __haldoAI18:
+            true,
+
+        config:
+            CONFIG,
+
+        state,
+
+        initialize,
+
+        on,
+
+        off,
+
+        emit,
+
+        process,
+
+        ask,
+
+        send,
+
+        execute,
+
+        generateResponse,
+
+        detectLanguage,
+
+        setLanguage,
+
+        detectCommand,
+
+        executeCommand,
+
+        remember,
+
+        recall,
+
+        addMessage,
+
+        getMessages,
+
+        speak,
+
+        getStatus,
+
+        getModules: () => ({
+
+            language:
+                getLanguage(),
+
+            commands:
+                getCommands(),
+
+            memory:
+                getMemory(),
+
+            conversation:
+                getConversation(),
+
+            chat:
+                getChat(),
+
+            engine:
+                getEngine(),
+
+            speech:
+                getSpeech(),
+
+            voice:
+                getVoice()
+
+        })
+
     };
-  }
 
-  /* ====================================================
-     DIAGNOSTICS
-  ==================================================== */
+    // --------------------------------------------------------
+    // GLOBAL REGISTRATION
+    // --------------------------------------------------------
 
-  function diagnostics() {
-    return {
-      core: getStatus(),
+    window.HalDoAICore =
+        api;
 
-      modules: {
-        engine: !!(
-          window.HalDoAIEngine ||
-          getModule("ai-engine")
-        ),
+    window.HalDoOS.aiCore =
+        api;
 
-        memory: !!(
-          window.HalDoAIMemory ||
-          getModule("ai-memory")
-        ),
+    /*
+     * Kompatibilitätsalias.
+     */
 
-        commands: !!(
-          window.HalDoAICommands ||
-          getModule("ai-commands")
-        ),
+    window.HalDoAI =
+        window.HalDoAI ||
+        api;
 
-        language: !!(
-          window.HalDoAILanguage ||
-          getModule("ai-language")
-        ),
+    // --------------------------------------------------------
+    // BOOT
+    // --------------------------------------------------------
 
-        speech: !!(
-          window.HalDoAISpeech ||
-          getModule("ai-speech")
-        ),
+    async function boot() {
 
-        voice: !!(
-          window.HalDoAIVoice ||
-          getModule("ai-voice")
-        ),
+        try {
 
-        storage: !!(
-          window.HalDoStorage ||
-          getModule("storage")
-        ),
+            await initialize();
 
-        system: !!(
-          window.HalDoSystem ||
-          getModule("system")
-        )
-      },
+        } catch (error) {
 
-      browser: {
-        online: navigator.onLine,
-        localStorage: !!window.localStorage,
-        speechRecognition:
-          !!(
-            window.SpeechRecognition ||
-            window.webkitSpeechRecognition
-          ),
-        speechSynthesis:
-          "speechSynthesis" in window
-      },
+            recordError(
+                error
+            );
 
-      time: new Date().toISOString()
-    };
-  }
+            console.error(
+                "[HalDoAICore] " +
+                "Initialization failed:",
+                error
+            );
 
-  /* ====================================================
-     PUBLIC API
-  ==================================================== */
+        }
 
-  const HalDoAICore = {
+    }
 
-    name: "HalDo AI Core",
+    if (
+        document.readyState ===
+        "loading"
+    ) {
 
-    version: VERSION,
+        document.addEventListener(
+            "DOMContentLoaded",
+            boot,
+            {
+                once:
+                    true
+            }
+        );
 
-    features,
+    } else {
 
-    start,
+        boot();
 
-    stop,
+    }
 
-    ask,
+})(window, document);
 
-    getStatus,
-
-    diagnostics,
-
-    on,
-
-    off,
-
-    emit,
-
-    getModule
-  };
-
-  /*
-   * Global AI API
-   */
-
-  window.HalDoAICore = HalDoAICore;
-
-  /*
-   * OS namespace
-   */
-
-  window.HalDoOS =
-    window.HalDoOS || {};
-
-  window.HalDoOS.ai =
-    HalDoAICore;
-
-  /*
-   * Automatic initialization
-   */
-
-  if (
-    document.readyState === "loading"
-  ) {
-
-    document.addEventListener(
-      "DOMContentLoaded",
-      () => start(),
-      { once: true }
-    );
-
-  } else {
-
-    start();
-
-  }
-
-})();
+// ============================================================
+// END OF PART 84
+// ============================================================
