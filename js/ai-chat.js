@@ -1,7 +1,8 @@
 // ============================================================
 // HALDO AI OS 18
-// AI CHAT ENGINE
-// PART 79
+// AI CHAT SYSTEM
+// PART 86
+// Professional Ultimate Foundation
 // ============================================================
 
 (function (window, document) {
@@ -18,37 +19,53 @@
     window.HalDoOS =
         window.HalDoOS || {};
 
+    // ========================================================
+    // CONFIG
+    // ========================================================
+
     const CONFIG = {
 
         name:
-            "HalDo AI Chat Engine",
+            "HalDo AI Chat",
 
         version:
             "18.0.0",
 
+        mode:
+            "Professional Ultimate Foundation",
+
         maxMessages:
             500,
 
-        maxConversations:
+        historyLimit:
             50,
 
-        defaultRole:
-            "assistant",
+        memoryLimit:
+            10,
 
-        autoDetectLanguage:
+        autoScroll:
             true,
 
-        rememberConversation:
+        autoSave:
             true,
 
         enableCommands:
+            true,
+
+        enableMemory:
+            true,
+
+        enableLanguage:
+            true,
+
+        enableVoice:
             true
 
     };
 
-    // --------------------------------------------------------
+    // ========================================================
     // STATE
-    // --------------------------------------------------------
+    // ========================================================
 
     const state = {
 
@@ -58,37 +75,31 @@
         ready:
             false,
 
-        open:
-            false,
-
         processing:
             false,
 
-        conversationId:
-            null,
+        typing:
+            false,
 
         messageCount:
             0,
 
-        userMessages:
-            0,
+        conversationId:
+            null,
 
-        assistantMessages:
-            0,
-
-        commandMessages:
-            0,
-
-        conversations:
-            [],
+        currentLanguage:
+            "de",
 
         messages:
             [],
 
-        currentLanguage:
+        pendingRequest:
             null,
 
-        lastInput:
+        lastUserMessage:
+            null,
+
+        lastAssistantMessage:
             null,
 
         lastResponse:
@@ -99,9 +110,9 @@
 
     };
 
-    // --------------------------------------------------------
+    // ========================================================
     // EVENTS
-    // --------------------------------------------------------
+    // ========================================================
 
     const listeners =
         new Map();
@@ -119,7 +130,9 @@
         }
 
         if (
-            !listeners.has(event)
+            !listeners.has(
+                event
+            )
         ) {
 
             listeners.set(
@@ -131,7 +144,9 @@
 
         listeners
             .get(event)
-            .add(callback);
+            .add(
+                callback
+            );
 
         return () =>
             off(
@@ -147,7 +162,9 @@
     ) {
 
         const set =
-            listeners.get(event);
+            listeners.get(
+                event
+            );
 
         if (!set) {
             return;
@@ -176,7 +193,9 @@
     ) {
 
         const set =
-            listeners.get(event);
+            listeners.get(
+                event
+            );
 
         if (set) {
 
@@ -190,9 +209,7 @@
                         detail
                     );
 
-                } catch (
-                    error
-                ) {
+                } catch (error) {
 
                     console.error(
                         "[HalDoAIChat]",
@@ -216,21 +233,59 @@
                 )
             );
 
-        } catch (
-            error
-        ) {}
+        } catch (error) {}
 
     }
 
-    // --------------------------------------------------------
-    // MODULE ACCESS
-    // --------------------------------------------------------
+    // ========================================================
+    // UTILITIES
+    // ========================================================
 
-    function getLanguage() {
+    function clean(
+        value
+    ) {
+
+        return String(
+            value ?? ""
+        ).trim();
+
+    }
+
+    function createId(
+        prefix = "message"
+    ) {
 
         return (
-            window.HalDoAILanguage ||
-            window.HalDoOS?.aiLanguage ||
+            prefix +
+            "-" +
+            Date.now().toString(36) +
+            "-" +
+            Math.random()
+                .toString(36)
+                .slice(2, 9)
+        );
+
+    }
+
+    // ========================================================
+    // MODULE ACCESS
+    // ========================================================
+
+    function getCore() {
+
+        return (
+            window.HalDoAICore ||
+            window.HalDoOS?.aiCore ||
+            null
+        );
+
+    }
+
+    function getEngine() {
+
+        return (
+            window.HalDoAIEngine ||
+            window.HalDoOS?.aiEngine ||
             null
         );
 
@@ -246,16 +301,6 @@
 
     }
 
-    function getCore() {
-
-        return (
-            window.HalDoAICore ||
-            window.HalDoOS?.aiCore ||
-            null
-        );
-
-    }
-
     function getMemory() {
 
         return (
@@ -266,7 +311,7 @@
 
     }
 
-    function getConversationState() {
+    function getConversation() {
 
         return (
             window.HalDoConversationState ||
@@ -276,240 +321,100 @@
 
     }
 
-    function getVoice() {
+    function getLanguage() {
 
         return (
-            window.HalDoAIVoice ||
-            window.HalDoVoice ||
-            window.HalDoOS?.aiVoice ||
-            window.HalDoOS?.voice ||
+            window.HalDoAILanguage ||
+            window.HalDoOS?.aiLanguage ||
             null
         );
 
     }
 
-    // --------------------------------------------------------
-    // UTILITIES
-    // --------------------------------------------------------
-
-    function clean(
-        value
-    ) {
-
-        return String(
-            value ??
-            ""
-        ).trim();
-
-    }
-
-    function createId(
-        prefix
-    ) {
+    function getSpeech() {
 
         return (
-            prefix +
-            "-" +
-            Date.now().toString(36) +
-            "-" +
-            Math.random()
-                .toString(36)
-                .slice(2, 9)
+            window.HalDoAISpeech ||
+            window.HalDoOS?.aiSpeech ||
+            null
         );
 
     }
 
-    // --------------------------------------------------------
-    // CONVERSATION
-    // --------------------------------------------------------
+    function getVoice() {
 
-    function createConversation(
-        options = {}
-    ) {
-
-        const conversation = {
-
-            id:
-                createId(
-                    "conv"
-                ),
-
-            title:
-                options.title ||
-                "Neue Unterhaltung",
-
-            language:
-                options.language ||
-                state.currentLanguage,
-
-            createdAt:
-                Date.now(),
-
-            updatedAt:
-                Date.now(),
-
-            messageCount:
-                0
-
-        };
-
-        state.conversations.push(
-            conversation
+        return (
+            window.HalDoAIVoice ||
+            window.HalDoOS?.aiVoice ||
+            null
         );
 
-        state.conversationId =
-            conversation.id;
-
-        state.messages =
-            [];
-
-        emit(
-            "conversation-created",
-            conversation
-        );
-
-        return conversation;
-
     }
 
-    function getConversation(
-        id =
-            state.conversationId
-    ) {
+    // ========================================================
+    // MESSAGE CREATION
+    // ========================================================
 
-        if (!id) {
-            return null;
-        }
-
-        return state.conversations.find(
-            conversation =>
-                conversation.id ===
-                id
-        ) || null;
-
-    }
-
-    function ensureConversation() {
-
-        if (
-            state.conversationId &&
-            getConversation()
-        ) {
-
-            return getConversation();
-
-        }
-
-        return createConversation();
-
-    }
-
-    function clearConversation() {
-
-        state.messages =
-            [];
-
-        const conversation =
-            getConversation();
-
-        if (conversation) {
-
-            conversation.messageCount =
-                0;
-
-            conversation.updatedAt =
-                Date.now();
-
-        }
-
-        emit(
-            "conversation-cleared",
-            {
-                conversation
-            }
-        );
-
-        return true;
-
-    }
-
-    // --------------------------------------------------------
-    // MESSAGES
-    // --------------------------------------------------------
-
-    function addMessage(
+    function createMessage(
         role,
         content,
         metadata = {}
     ) {
 
-        const text =
-            clean(
-                content
-            );
-
-        if (!text) {
-            return null;
-        }
-
-        const conversation =
-            ensureConversation();
-
-        const message = {
+        return {
 
             id:
                 createId(
-                    "msg"
+                    "message"
                 ),
 
-            conversationId:
-                conversation.id,
-
             role:
-                role ||
-                CONFIG.defaultRole,
+                role,
 
             content:
-                text,
+                clean(
+                    content
+                ),
+
+            text:
+                clean(
+                    content
+                ),
+
+            timestamp:
+                Date.now(),
+
+            conversationId:
+                state.conversationId,
 
             language:
                 metadata.language ||
                 state.currentLanguage,
 
-            timestamp:
-                Date.now(),
-
             ...metadata
 
         };
+
+    }
+
+    // ========================================================
+    // LOCAL MESSAGE STORE
+    // ========================================================
+
+    function addLocalMessage(
+        message
+    ) {
+
+        if (!message) {
+            return null;
+        }
 
         state.messages.push(
             message
         );
 
-        state.messageCount++;
-
-        conversation.messageCount++;
-        conversation.updatedAt =
-            Date.now();
-
-        if (
-            message.role ===
-            "user"
-        ) {
-
-            state.userMessages++;
-
-        }
-
-        if (
-            message.role ===
-            "assistant"
-        ) {
-
-            state.assistantMessages++;
-
-        }
+        state.messageCount =
+            state.messages.length;
 
         if (
             state.messages.length >
@@ -522,7 +427,9 @@
 
         emit(
             "message-added",
-            message
+            {
+                message
+            }
         );
 
         return message;
@@ -530,71 +437,332 @@
     }
 
     function getMessages(
+        limit = CONFIG.historyLimit
+    ) {
+
+        const amount =
+            Math.max(
+                1,
+                Number(
+                    limit
+                ) || CONFIG.historyLimit
+            );
+
+        return state.messages
+            .slice(
+                -amount
+            );
+
+    }
+
+    function clearLocalMessages() {
+
+        state.messages =
+            [];
+
+        state.messageCount =
+            0;
+
+        emit(
+            "messages-cleared"
+        );
+
+    }
+
+    // ========================================================
+    // CONVERSATION CONNECTION
+    // ========================================================
+
+    async function saveToConversation(
+        message
+    ) {
+
+        if (
+            !CONFIG.autoSave
+        ) {
+            return false;
+        }
+
+        const conversation =
+            getConversation();
+
+        if (!conversation) {
+            return false;
+        }
+
+        const methods = [
+
+            "addMessage",
+            "add",
+            "pushMessage",
+            "appendMessage"
+
+        ];
+
+        for (
+            const method of methods
+        ) {
+
+            if (
+                typeof conversation[
+                    method
+                ] !==
+                "function"
+            ) {
+                continue;
+            }
+
+            try {
+
+                await conversation[
+                    method
+                ](
+                    message
+                );
+
+                return true;
+
+            } catch (error) {}
+
+        }
+
+        return false;
+
+    }
+
+    async function loadConversation() {
+
+        const conversation =
+            getConversation();
+
+        if (!conversation) {
+            return [];
+        }
+
+        const methods = [
+
+            "getMessages",
+            "getHistory",
+            "getConversation"
+
+        ];
+
+        for (
+            const method of methods
+        ) {
+
+            if (
+                typeof conversation[
+                    method
+                ] !==
+                "function"
+            ) {
+                continue;
+            }
+
+            try {
+
+                const result =
+                    await conversation[
+                        method
+                    ](
+                        CONFIG.historyLimit
+                    );
+
+                if (
+                    Array.isArray(
+                        result
+                    )
+                ) {
+
+                    state.messages =
+                        result.slice(
+                            -CONFIG.maxMessages
+                        );
+
+                    state.messageCount =
+                        state.messages.length;
+
+                    return state.messages;
+
+                }
+
+            } catch (error) {}
+
+        }
+
+        return [];
+
+    }
+
+    // ========================================================
+    // MEMORY
+    // ========================================================
+
+    async function rememberMessage(
+        message
+    ) {
+
+        if (
+            !CONFIG.enableMemory
+        ) {
+            return false;
+        }
+
+        const memory =
+            getMemory();
+
+        if (!memory) {
+            return false;
+        }
+
+        const methods = [
+
+            "rememberMessage",
+            "remember",
+            "add",
+            "store",
+            "save"
+
+        ];
+
+        for (
+            const method of methods
+        ) {
+
+            if (
+                typeof memory[
+                    method
+                ] !==
+                "function"
+            ) {
+                continue;
+            }
+
+            try {
+
+                await memory[
+                    method
+                ](
+                    message
+                );
+
+                return true;
+
+            } catch (error) {}
+
+        }
+
+        return false;
+
+    }
+
+    async function recallMemory(
+        query,
         options = {}
     ) {
 
-        let messages =
-            state.messages.slice();
-
         if (
-            options.role
+            !CONFIG.enableMemory
+        ) {
+            return [];
+        }
+
+        const memory =
+            getMemory();
+
+        if (!memory) {
+            return [];
+        }
+
+        const methods = [
+
+            "recall",
+            "search",
+            "find",
+            "query",
+            "retrieve"
+
+        ];
+
+        for (
+            const method of methods
         ) {
 
-            messages =
-                messages.filter(
-                    message =>
-                        message.role ===
-                        options.role
-                );
+            if (
+                typeof memory[
+                    method
+                ] !==
+                "function"
+            ) {
+                continue;
+            }
+
+            try {
+
+                const result =
+                    await memory[
+                        method
+                    ](
+                        query,
+                        {
+                            limit:
+                                options.limit ||
+                                CONFIG.memoryLimit
+                        }
+                    );
+
+                if (
+                    Array.isArray(
+                        result
+                    )
+                ) {
+
+                    return result;
+
+                }
+
+                if (
+                    result
+                ) {
+
+                    return [
+                        result
+                    ];
+
+                }
+
+            } catch (error) {}
 
         }
 
-        if (
-            Number.isInteger(
-                options.limit
-            )
-        ) {
-
-            messages =
-                messages.slice(
-                    -options.limit
-                );
-
-        }
-
-        return messages;
+        return [];
 
     }
 
-    // --------------------------------------------------------
+    // ========================================================
     // LANGUAGE
-    // --------------------------------------------------------
+    // ========================================================
 
-    function updateLanguage() {
-
-        const language =
-            getLanguage();
-
-        if (
-            language &&
-            typeof language.getLanguage ===
-            "function"
-        ) {
-
-            state.currentLanguage =
-                language.getLanguage();
-
-            return state.currentLanguage;
-
-        }
-
-        return state.currentLanguage;
-
-    }
-
-    function detectInputLanguage(
+    function detectLanguage(
         text
     ) {
+
+        if (
+            !CONFIG.enableLanguage
+        ) {
+
+            return {
+
+                language:
+                    state.currentLanguage,
+
+                confidence:
+                    0
+
+            };
+
+        }
 
         const language =
             getLanguage();
@@ -605,64 +773,137 @@
             "function"
         ) {
 
-            return null;
+            return {
+
+                language:
+                    state.currentLanguage,
+
+                confidence:
+                    0
+
+            };
 
         }
 
         try {
 
-            return language.detectLanguage(
-                text
+            const result =
+                language.detectLanguage(
+                    text
+                );
+
+            if (
+                result?.language
+            ) {
+
+                state.currentLanguage =
+                    result.language;
+
+            }
+
+            return result;
+
+        } catch (error) {
+
+            recordError(
+                error
             );
 
-        } catch (
-            error
-        ) {
+            return {
 
-            return null;
+                language:
+                    state.currentLanguage,
+
+                confidence:
+                    0
+
+            };
 
         }
 
     }
 
-    // --------------------------------------------------------
+    // ========================================================
     // COMMAND DETECTION
-    // --------------------------------------------------------
+    // ========================================================
 
-    function looksLikeCommand(
+    function detectCommand(
         text
     ) {
+
+        if (
+            !CONFIG.enableCommands
+        ) {
+
+            return {
+
+                command:
+                    null,
+
+                confidence:
+                    0
+
+            };
+
+        }
 
         const commands =
             getCommands();
 
         if (
             !commands ||
-            typeof commands.findCommand !==
+            typeof commands.detectCommand !==
             "function"
         ) {
 
-            return false;
+            return {
+
+                command:
+                    null,
+
+                confidence:
+                    0
+
+            };
 
         }
 
-        return Boolean(
-            commands.findCommand(
+        try {
+
+            return commands.detectCommand(
                 text
-            )
-        );
+            );
+
+        } catch (error) {
+
+            recordError(
+                error
+            );
+
+            return {
+
+                command:
+                    null,
+
+                confidence:
+                    0
+
+            };
+
+        }
 
     }
 
     async function executeCommand(
         text,
-        context = {}
+        options = {}
     ) {
 
         const commands =
             getCommands();
 
         if (
+            !CONFIG.enableCommands ||
             !commands ||
             typeof commands.execute !==
             "function"
@@ -673,6 +914,9 @@
                 ok:
                     false,
 
+                handled:
+                    false,
+
                 error:
                     "COMMAND_ENGINE_UNAVAILABLE"
 
@@ -680,244 +924,254 @@
 
         }
 
-        state.commandMessages++;
+        try {
 
-        return commands.execute(
-            text,
-            {
-
-                ...context,
-
-                source:
-                    "ai-chat",
-
-                conversationId:
-                    state.conversationId
-
-            }
-        );
-
-    }
-
-    // --------------------------------------------------------
-    // MEMORY
-    // --------------------------------------------------------
-
-    async function rememberMessage(
-        message
-    ) {
-
-        if (
-            !CONFIG.rememberConversation
-        ) {
-            return false;
-        }
-
-        const memory =
-            getMemory();
-
-        if (!memory) {
-            return false;
-        }
-
-        const methods = [
-
-            "remember",
-            "store",
-            "add",
-            "save",
-            "rememberMessage"
-
-        ];
-
-        for (
-            const method of
-            methods
-        ) {
-
-            if (
-                typeof memory[method] !==
-                "function"
-            ) {
-                continue;
-            }
-
-            try {
-
-                await memory[method](
-                    message
+            const result =
+                await commands.execute(
+                    text,
+                    options
                 );
 
-                return true;
+            return {
 
-            } catch (
+                ...result,
+
+                handled:
+                    Boolean(
+                        result?.command ||
+                        result?.result
+                    )
+
+            };
+
+        } catch (error) {
+
+            recordError(
                 error
-            ) {}
-
-        }
-
-        return false;
-
-    }
-
-    async function loadMemoryContext(
-        text
-    ) {
-
-        const memory =
-            getMemory();
-
-        if (!memory) {
-            return null;
-        }
-
-        const methods = [
-
-            "recall",
-            "search",
-            "retrieve",
-            "getRelevant",
-            "getContext"
-
-        ];
-
-        for (
-            const method of
-            methods
-        ) {
-
-            if (
-                typeof memory[method] !==
-                "function"
-            ) {
-                continue;
-            }
-
-            try {
-
-                return await memory[method](
-                    text
-                );
-
-            } catch (
-                error
-            ) {}
-
-        }
-
-        return null;
-
-    }
-
-    // --------------------------------------------------------
-    // CORE AI
-    // --------------------------------------------------------
-
-    async function askCore(
-        text,
-        context = {}
-    ) {
-
-        const core =
-            getCore();
-
-        if (!core) {
+            );
 
             return {
 
                 ok:
                     false,
 
+                handled:
+                    false,
+
                 error:
-                    "AI_CORE_UNAVAILABLE"
+                    error.message
 
             };
 
         }
 
-        const methods = [
+    }
 
-            "process",
-            "ask",
-            "chat",
-            "respond",
-            "generate",
-            "handle"
+    // ========================================================
+    // CONTEXT BUILDING
+    // ========================================================
 
-        ];
+    async function buildContext(
+        text,
+        options = {}
+    ) {
 
-        const payload = {
+        const language =
+            detectLanguage(
+                text
+            );
+
+        const memories =
+            await recallMemory(
+                text,
+                {
+                    limit:
+                        options.memoryLimit ||
+                        CONFIG.memoryLimit
+                }
+            );
+
+        const context = {
 
             input:
                 text,
 
-            message:
-                text,
-
-            prompt:
-                text,
-
             language:
+                language?.language ||
                 state.currentLanguage,
+
+            languageDetection:
+                language,
+
+            messages:
+                getMessages(
+                    options.historyLimit ||
+                    CONFIG.historyLimit
+                ),
+
+            memories,
 
             conversationId:
                 state.conversationId,
 
-            messages:
-                getMessages(),
-
-            memory:
-                context.memory ||
-                null,
-
-            context
+            metadata:
+                options.metadata ||
+                {}
 
         };
 
-        for (
-            const method of
-            methods
+        return context;
+
+    }
+
+    // ========================================================
+    // AI REQUEST
+    // ========================================================
+
+    async function requestAI(
+        text,
+        context,
+        options = {}
+    ) {
+
+        /*
+         * AI Core bevorzugen.
+         */
+
+        const core =
+            getCore();
+
+        if (
+            core
         ) {
 
-            if (
-                typeof core[method] !==
-                "function"
+            const methods = [
+
+                "process",
+                "ask",
+                "send",
+                "execute"
+
+            ];
+
+            for (
+                const method of methods
             ) {
-                continue;
-            }
 
-            try {
+                if (
+                    typeof core[
+                        method
+                    ] !==
+                    "function"
+                ) {
+                    continue;
+                }
 
-                const result =
-                    await core[method](
-                        payload
+                try {
+
+                    const result =
+                        await core[
+                            method
+                        ](
+                            text,
+                            {
+                                ...options,
+
+                                ...context
+                            }
+                        );
+
+                    if (
+                        result !==
+                        undefined &&
+                        result !==
+                        null
+                    ) {
+
+                        return normalizeResponse(
+                            result
+                        );
+
+                    }
+
+                } catch (error) {
+
+                    recordError(
+                        error
                     );
 
-                return {
+                }
 
-                    ok:
-                        true,
+            }
 
-                    result
+        }
 
-                };
+        /*
+         * Direkter AI Engine Fallback.
+         */
 
-            } catch (
-                error
+        const engine =
+            getEngine();
+
+        if (
+            engine
+        ) {
+
+            const methods = [
+
+                "smartAsk",
+                "generate",
+                "ask",
+                "respond",
+                "process",
+                "complete"
+
+            ];
+
+            for (
+                const method of methods
             ) {
 
-                return {
+                if (
+                    typeof engine[
+                        method
+                    ] !==
+                    "function"
+                ) {
+                    continue;
+                }
 
-                    ok:
-                        false,
+                try {
 
-                    error:
-                        error?.message ||
-                        String(
-                            error
-                        )
+                    const result =
+                        await engine[
+                            method
+                        ](
+                            text,
+                            context,
+                            options
+                        );
 
-                };
+                    if (
+                        result !==
+                        undefined &&
+                        result !==
+                        null
+                    ) {
+
+                        return normalizeResponse(
+                            result
+                        );
+
+                    }
+
+                } catch (error) {
+
+                    recordError(
+                        error
+                    );
+
+                }
 
             }
 
@@ -928,20 +1182,52 @@
             ok:
                 false,
 
+            type:
+                "ai-unavailable",
+
             error:
-                "AI_CORE_METHOD_NOT_FOUND"
+                "AI_ENGINE_UNAVAILABLE",
+
+            text:
+                "",
+
+            content:
+                ""
 
         };
 
     }
 
-    // --------------------------------------------------------
-    // EXTRACT RESPONSE
-    // --------------------------------------------------------
+    // ========================================================
+    // RESPONSE NORMALIZATION
+    // ========================================================
 
-    function extractResponse(
+    function normalizeResponse(
         result
     ) {
+
+        if (
+            typeof result ===
+            "string"
+        ) {
+
+            return {
+
+                ok:
+                    true,
+
+                type:
+                    "text",
+
+                text:
+                    result,
+
+                content:
+                    result
+
+            };
+
+        }
 
         if (
             result ===
@@ -950,185 +1236,104 @@
             undefined
         ) {
 
-            return "";
-
-        }
-
-        if (
-            typeof result ===
-            "string"
-        ) {
-
-            return result;
-
-        }
-
-        if (
-            typeof result.text ===
-            "string"
-        ) {
-
-            return result.text;
-
-        }
-
-        if (
-            typeof result.response ===
-            "string"
-        ) {
-
-            return result.response;
-
-        }
-
-        if (
-            typeof result.message ===
-            "string"
-        ) {
-
-            return result.message;
-
-        }
-
-        if (
-            typeof result.content ===
-            "string"
-        ) {
-
-            return result.content;
-
-        }
-
-        if (
-            result.result
-        ) {
-
-            return extractResponse(
-                result.result
-            );
-
-        }
-
-        return "";
-
-    }
-
-    // --------------------------------------------------------
-    // VOICE OUTPUT
-    // --------------------------------------------------------
-
-    async function speak(
-        text,
-        options = {}
-    ) {
-
-        const voice =
-            getVoice();
-
-        if (
-            !voice ||
-            !text
-        ) {
-
             return {
 
                 ok:
                     false,
 
+                type:
+                    "empty",
+
+                text:
+                    "",
+
+                content:
+                    "",
+
                 error:
-                    "VOICE_UNAVAILABLE"
+                    "EMPTY_RESPONSE"
 
             };
 
         }
 
-        const methods = [
-
-            "speak",
-            "say",
-            "synthesize"
-
-        ];
-
-        for (
-            const method of
-            methods
+        if (
+            typeof result !==
+            "object"
         ) {
 
-            if (
-                typeof voice[method] !==
-                "function"
-            ) {
-                continue;
-            }
+            return {
 
-            try {
+                ok:
+                    true,
 
-                return {
+                type:
+                    "value",
 
-                    ok:
-                        true,
+                value:
+                    result,
 
-                    value:
-                        await voice[method](
-                            text,
-                            {
+                text:
+                    String(
+                        result
+                    ),
 
-                                language:
-                                    state.currentLanguage,
+                content:
+                    String(
+                        result
+                    )
 
-                                ...options
-
-                            }
-                        )
-
-                };
-
-            } catch (
-                error
-            ) {
-
-                return {
-
-                    ok:
-                        false,
-
-                    error:
-                        error?.message ||
-                        String(
-                            error
-                        )
-
-                };
-
-            }
+            };
 
         }
 
+        const text =
+            result.text ??
+            result.content ??
+            result.message ??
+            result.output ??
+            "";
+
         return {
 
+            ...result,
+
             ok:
+                result.ok !==
                 false,
 
-            error:
-                "VOICE_METHOD_NOT_FOUND"
+            text:
+                typeof text ===
+                "string"
+                    ? text
+                    : String(
+                        text
+                    ),
+
+            content:
+                typeof text ===
+                "string"
+                    ? text
+                    : String(
+                        text
+                    )
 
         };
 
     }
 
-    // --------------------------------------------------------
-    // MAIN SEND
-    // --------------------------------------------------------
+    // ========================================================
+    // SEND MESSAGE
+    // ========================================================
 
-    async function send(
-        input,
+    async function sendMessage(
+        content,
         options = {}
     ) {
 
         const text =
             clean(
-                input
+                content
             );
 
         if (!text) {
@@ -1149,118 +1354,178 @@
             state.processing
         ) {
 
-            return {
+            if (
+                options.allowConcurrent !==
+                true
+            ) {
 
-                ok:
-                    false,
+                return {
 
-                error:
-                    "CHAT_BUSY"
+                    ok:
+                        false,
 
-            };
+                    error:
+                        "CHAT_BUSY",
+
+                    message:
+                        "HalDo AI verarbeitet bereits eine Anfrage."
+
+                };
+
+            }
 
         }
 
         state.processing =
             true;
 
-        state.lastInput =
-            text;
+        state.typing =
+            true;
 
-        updateLanguage();
+        const requestId =
+            createId(
+                "chat"
+            );
 
-        ensureConversation();
+        state.pendingRequest =
+            {
+
+                id:
+                    requestId,
+
+                input:
+                    text,
+
+                timestamp:
+                    Date.now()
+
+            };
 
         emit(
-            "processing-start",
+            "typing-start",
             {
-                input:
-                    text
+                requestId
+            }
+        );
+
+        emit(
+            "send-start",
+            {
+                requestId,
+
+                text
             }
         );
 
         try {
 
             /*
-             * Eingabesprache erkennen.
+             * Sprache bestimmen.
              */
 
-            let detected =
-                null;
-
-            if (
-                CONFIG.autoDetectLanguage
-            ) {
-
-                detected =
-                    detectInputLanguage(
-                        text
-                    );
-
-            }
+            const language =
+                detectLanguage(
+                    text
+                );
 
             /*
-             * User message.
+             * User Message.
              */
 
             const userMessage =
-                addMessage(
+                createMessage(
                     "user",
                     text,
                     {
 
-                        detectedLanguage:
-                            detected?.language ||
-                            null,
+                        requestId,
 
                         language:
-                            detected?.language ||
+                            language?.language ||
                             state.currentLanguage
 
                     }
                 );
+
+            state.lastUserMessage =
+                userMessage;
+
+            addLocalMessage(
+                userMessage
+            );
+
+            await saveToConversation(
+                userMessage
+            );
 
             await rememberMessage(
                 userMessage
             );
 
             /*
-             * Command zuerst prüfen.
+             * Command Detection.
              */
 
-            const forceAI =
-                options.forceAI ===
-                true;
+            const detection =
+                detectCommand(
+                    text
+                );
+
+            emit(
+                "command-detected",
+                {
+                    requestId,
+
+                    detection
+                }
+            );
+
+            /*
+             * Klare Commands direkt ausführen.
+             */
 
             if (
                 CONFIG.enableCommands &&
-                !forceAI &&
-                looksLikeCommand(
-                    text
-                )
+                detection?.command &&
+                detection.confidence >=
+                    0.55 &&
+                options.forceAI !==
+                    true
             ) {
 
                 const commandResult =
                     await executeCommand(
                         text,
-                        {
-
-                            detectedLanguage:
-                                detected,
-
-                            options
-
-                        }
+                        options
                     );
 
-                const commandText =
-                    formatCommandResult(
+                /*
+                 * Nur echte Command-Ergebnisse
+                 * als Command-Antwort behandeln.
+                 */
+
+                if (
+                    commandResult &&
+                    (
+                        commandResult.ok ||
+                        commandResult.result ||
+                        commandResult.requiresConfirmation
+                    )
+                ) {
+
+                    const commandText =
                         commandResult
-                    );
+                            ?.result
+                            ?.message ||
+                        (
+                            commandResult
+                                .requiresConfirmation
+                                ? "Bitte bestätige diesen Befehl."
+                                : "Befehl ausgeführt."
+                        );
 
-                const assistantMessage =
-                    commandText
-                        ? addMessage(
+                    const assistantMessage =
+                        createMessage(
                             "assistant",
                             commandText,
                             {
@@ -1268,176 +1533,160 @@
                                 type:
                                     "command-result",
 
-                                command:
-                                    commandResult
-                                        .command ||
-                                    null,
+                                requestId,
 
-                                language:
-                                    state.currentLanguage
+                                command:
+                                    detection.command.id,
+
+                                commandResult
 
                             }
-                        )
-                        : null;
+                        );
 
-                if (
-                    assistantMessage
-                ) {
+                    state.lastAssistantMessage =
+                        assistantMessage;
 
-                    await rememberMessage(
+                    addLocalMessage(
                         assistantMessage
                     );
 
-                }
-
-                state.lastResponse =
-                    commandText;
-
-                emit(
-                    "response",
-                    {
-
-                        type:
-                            "command",
-
-                        input:
-                            text,
-
-                        commandResult,
-
-                        message:
-                            assistantMessage
-
-                    }
-                );
-
-                if (
-                    options.speak &&
-                    commandText
-                ) {
-
-                    await speak(
-                        commandText,
-                        options
+                    await saveToConversation(
+                        assistantMessage
                     );
 
+                    state.lastResponse =
+                        {
+
+                            ok:
+                                commandResult.ok !==
+                                false,
+
+                            type:
+                                "command",
+
+                            requestId,
+
+                            command:
+                                detection.command.id,
+
+                            confidence:
+                                detection.confidence,
+
+                            result:
+                                commandResult,
+
+                            text:
+                                commandText,
+
+                            content:
+                                commandText
+
+                        };
+
+                    emit(
+                        "response",
+                        {
+                            response:
+                                state.lastResponse,
+
+                            message:
+                                assistantMessage
+
+                        }
+                    );
+
+                    return state.lastResponse;
+
                 }
-
-                return {
-
-                    ok:
-                        commandResult.ok,
-
-                    type:
-                        "command",
-
-                    command:
-                        commandResult.command ||
-                        null,
-
-                    response:
-                        commandText,
-
-                    result:
-                        commandResult,
-
-                    message:
-                        assistantMessage
-
-                };
 
             }
 
             /*
-             * Memory laden.
+             * AI Context.
              */
 
-            const memory =
-                await loadMemoryContext(
-                    text
-                );
-
-            /*
-             * AI Core.
-             */
-
-            const aiResult =
-                await askCore(
+            const context =
+                await buildContext(
                     text,
+                    options
+                );
+
+            /*
+             * AI Engine.
+             */
+
+            const result =
+                await requestAI(
+                    text,
+                    context,
                     {
 
-                        memory,
+                        ...options,
 
-                        detectedLanguage:
-                            detected,
-
-                        options
+                        requestId
 
                     }
                 );
-
-            if (
-                !aiResult.ok
-            ) {
-
-                throw new Error(
-                    aiResult.error ||
-                    "AI_PROCESSING_FAILED"
-                );
-
-            }
 
             const response =
-                extractResponse(
-                    aiResult.result
+                normalizeResponse(
+                    result
                 );
 
-            if (!response) {
+            response.requestId =
+                requestId;
 
-                throw new Error(
-                    "AI_EMPTY_RESPONSE"
-                );
+            response.language =
+                context.language;
 
-            }
+            response.timestamp =
+                Date.now();
 
             /*
-             * Assistant message.
+             * Assistant Message.
              */
 
             const assistantMessage =
-                addMessage(
+                createMessage(
                     "assistant",
-                    response,
+                    response.text,
                     {
 
+                        requestId,
+
                         type:
-                            "ai-response",
+                            response.type ||
+                            "text",
 
                         language:
-                            state.currentLanguage,
+                            context.language,
 
-                        source:
-                            "ai-core"
+                        response
 
                     }
                 );
+
+            state.lastAssistantMessage =
+                assistantMessage;
+
+            state.lastResponse =
+                response;
+
+            addLocalMessage(
+                assistantMessage
+            );
+
+            await saveToConversation(
+                assistantMessage
+            );
 
             await rememberMessage(
                 assistantMessage
             );
 
-            state.lastResponse =
-                response;
-
             emit(
                 "response",
                 {
-
-                    type:
-                        "ai",
-
-                    input:
-                        text,
 
                     response,
 
@@ -1447,83 +1696,292 @@
                 }
             );
 
-            /*
-             * Optionale Stimme.
-             */
+            return response;
 
-            if (
-                options.speak
-            ) {
+        } catch (error) {
 
-                await speak(
-                    response,
-                    options
-                );
+            recordError(
+                error
+            );
 
-            }
-
-            return {
+            const response = {
 
                 ok:
-                    true,
+                    false,
 
                 type:
-                    "ai",
+                    "error",
 
-                response,
+                requestId,
 
-                message:
-                    assistantMessage,
+                error:
+                    error.message ||
+                    String(
+                        error
+                    ),
 
-                result:
-                    aiResult.result
+                text:
+                    "",
+
+                content:
+                    ""
 
             };
 
-        } catch (
-            error
-        ) {
-
-            const message =
-                error?.message ||
-                String(
-                    error
-                );
-
-            state.errors.push({
-
-                timestamp:
-                    Date.now(),
-
-                input:
-                    text,
-
-                error:
-                    message
-
-            });
-
-            if (
-                state.errors.length >
-                100
-            ) {
-
-                state.errors.shift();
-
-            }
+            state.lastResponse =
+                response;
 
             emit(
-                "error",
+                "response-error",
                 {
+                    response,
 
-                    input:
-                        text,
-
-                    error:
-                        message
+                    error
 
                 }
             );
+
+            return response;
+
+        } finally {
+
+            state.processing =
+                false;
+
+            state.typing =
+                false;
+
+            state.pendingRequest =
+                null;
+
+            emit(
+                "typing-end",
+                {
+                    requestId
+                }
+            );
+
+            emit(
+                "send-end",
+                {
+                    requestId
+                }
+            );
+
+        }
+
+    }
+
+    // ========================================================
+    // ALIASES
+    // ========================================================
+
+    async function send(
+        content,
+        options = {}
+    ) {
+
+        return sendMessage(
+            content,
+            options
+        );
+
+    }
+
+    async function ask(
+        content,
+        options = {}
+    ) {
+
+        return sendMessage(
+            content,
+            options
+        );
+
+    }
+
+    async function processMessage(
+        content,
+        options = {}
+    ) {
+
+        return sendMessage(
+            content,
+            options
+        );
+
+    }
+
+    // ========================================================
+    // NEW CONVERSATION
+    // ========================================================
+
+    async function newConversation(
+        options = {}
+    ) {
+
+        const conversation =
+            getConversation();
+
+        state.conversationId =
+            createId(
+                "conversation"
+            );
+
+        clearLocalMessages();
+
+        if (
+            conversation
+        ) {
+
+            const methods = [
+
+                "createConversation",
+                "newConversation",
+                "startConversation",
+                "reset"
+
+            ];
+
+            for (
+                const method of methods
+            ) {
+
+                if (
+                    typeof conversation[
+                        method
+                    ] !==
+                    "function"
+                ) {
+                    continue;
+                }
+
+                try {
+
+                    const result =
+                        await conversation[
+                            method
+                        ](
+                            {
+                                id:
+                                    state.conversationId,
+
+                                ...options
+
+                            }
+                        );
+
+                    if (
+                        result?.id
+                    ) {
+
+                        state.conversationId =
+                            result.id;
+
+                    }
+
+                    break;
+
+                } catch (error) {}
+
+            }
+
+        }
+
+        emit(
+            "conversation-new",
+            {
+                conversationId:
+                    state.conversationId
+            }
+        );
+
+        return {
+
+            ok:
+                true,
+
+            conversationId:
+                state.conversationId
+
+        };
+
+    }
+
+    // ========================================================
+    // CLEAR CHAT
+    // ========================================================
+
+    async function clearMessages(
+        options = {}
+    ) {
+
+        clearLocalMessages();
+
+        const conversation =
+            getConversation();
+
+        if (
+            conversation
+        ) {
+
+            for (
+                const method of [
+                    "clearMessages",
+                    "clear",
+                    "clearConversation"
+                ]
+            ) {
+
+                if (
+                    typeof conversation[
+                        method
+                    ] !==
+                    "function"
+                ) {
+                    continue;
+                }
+
+                try {
+
+                    await conversation[
+                        method
+                    ](
+                        options
+                    );
+
+                    break;
+
+                } catch (error) {}
+
+            }
+
+        }
+
+        emit(
+            "chat-cleared"
+        );
+
+        return {
+
+            ok:
+                true
+
+        };
+
+    }
+
+    // ========================================================
+    // VOICE INPUT
+    // ========================================================
+
+    async function startVoiceInput(
+        options = {}
+    ) {
+
+        if (
+            !CONFIG.enableVoice
+        ) {
 
             return {
 
@@ -1531,236 +1989,253 @@
                     false,
 
                 error:
-                    message
+                    "VOICE_DISABLED"
 
             };
 
-        } finally {
+        }
 
-            state.processing =
-                false;
+        const voice =
+            getVoice();
 
-            emit(
-                "processing-end",
-                {
+        const speech =
+            getSpeech();
 
-                    input:
-                        text
+        const target =
+            voice ||
+            speech;
 
-                }
-            );
+        if (!target) {
+
+            return {
+
+                ok:
+                    false,
+
+                error:
+                    "VOICE_ENGINE_UNAVAILABLE"
+
+            };
 
         }
 
-    }
+        const methods = [
 
-    // --------------------------------------------------------
-    // COMMAND RESULT FORMATTER
-    // --------------------------------------------------------
+            "startListening",
+            "listen",
+            "start",
+            "recognize"
 
-    function formatCommandResult(
-        result
-    ) {
+        ];
 
-        if (!result) {
-            return "";
-        }
-
-        if (
-            typeof result.value ===
-            "string"
+        for (
+            const method of methods
         ) {
-
-            return result.value;
-
-        }
-
-        if (
-            result.value?.value &&
-            typeof result.value.value ===
-            "string"
-        ) {
-
-            return result.value.value;
-
-        }
-
-        if (
-            result.ok &&
-            result.command ===
-            "set-language-ai"
-        ) {
-
-            const language =
-                result.value;
 
             if (
-                language?.language
+                typeof target[
+                    method
+                ] !==
+                "function"
             ) {
-
-                return (
-                    "Sprache geändert: " +
-                    language.language
-                );
-
+                continue;
             }
-
-            if (
-                typeof language ===
-                "string"
-            ) {
-
-                return (
-                    "Sprache geändert: " +
-                    language
-                );
-
-            }
-
-        }
-
-        if (
-            !result.ok
-        ) {
-
-            return (
-                "Der Befehl konnte nicht ausgeführt werden: " +
-                (
-                    result.error ||
-                    "Unbekannter Fehler"
-                )
-            );
-
-        }
-
-        if (
-            result.value !==
-            undefined
-        ) {
 
             try {
 
-                return JSON.stringify(
-                    result.value,
-                    null,
-                    2
+                const result =
+                    await target[
+                        method
+                    ](
+                        options
+                    );
+
+                emit(
+                    "voice-start",
+                    {
+                        result
+                    }
                 );
 
-            } catch (
-                error
-            ) {}
+                return {
+
+                    ok:
+                        result !==
+                        false,
+
+                    result
+
+                };
+
+            } catch (error) {
+
+                recordError(
+                    error
+                );
+
+            }
 
         }
 
-        return (
-            "Befehl erfolgreich ausgeführt."
-        );
+        return {
+
+            ok:
+                false,
+
+            error:
+                "VOICE_INPUT_UNAVAILABLE"
+
+        };
 
     }
 
-    // --------------------------------------------------------
-    // OPEN / CLOSE
-    // --------------------------------------------------------
+    // ========================================================
+    // TEXT TO SPEECH
+    // ========================================================
 
-    function open() {
-
-        state.open =
-            true;
-
-        ensureConversation();
-
-        emit(
-            "opened",
-            {
-
-                conversationId:
-                    state.conversationId
-
-            }
-        );
-
-        return true;
-
-    }
-
-    function close() {
-
-        state.open =
-            false;
-
-        emit(
-            "closed"
-        );
-
-        return true;
-
-    }
-
-    function toggle() {
-
-        return state.open
-            ? close()
-            : open();
-
-    }
-
-    // --------------------------------------------------------
-    // NEW CHAT
-    // --------------------------------------------------------
-
-    function newChat(
+    async function speak(
+        text,
         options = {}
     ) {
 
         if (
-            state.conversationId
+            !CONFIG.enableVoice
         ) {
 
-            const old =
-                getConversation();
+            return {
 
-            if (old) {
+                ok:
+                    false,
 
-                old.updatedAt =
-                    Date.now();
+                error:
+                    "VOICE_DISABLED"
+
+            };
+
+        }
+
+        const voice =
+            getVoice();
+
+        const speech =
+            getSpeech();
+
+        const target =
+            voice ||
+            speech;
+
+        if (!target) {
+
+            return {
+
+                ok:
+                    false,
+
+                error:
+                    "SPEECH_ENGINE_UNAVAILABLE"
+
+            };
+
+        }
+
+        for (
+            const method of [
+                "speak",
+                "say",
+                "synthesize"
+            ]
+        ) {
+
+            if (
+                typeof target[
+                    method
+                ] !==
+                "function"
+            ) {
+                continue;
+            }
+
+            try {
+
+                const result =
+                    await target[
+                        method
+                    ](
+                        text,
+                        options
+                    );
+
+                emit(
+                    "speech",
+                    {
+                        text,
+
+                        result
+                    }
+                );
+
+                return {
+
+                    ok:
+                        result !==
+                        false,
+
+                    result
+
+                };
+
+            } catch (error) {
+
+                recordError(
+                    error
+                );
 
             }
 
         }
 
-        return createConversation(
-            options
-        );
+        return {
+
+            ok:
+                false,
+
+            error:
+                "SPEECH_METHOD_UNAVAILABLE"
+
+        };
 
     }
 
-    // --------------------------------------------------------
+    // ========================================================
     // EXPORT / IMPORT
-    // --------------------------------------------------------
+    // ========================================================
 
     function exportConversation() {
-
-        const conversation =
-            getConversation();
 
         return {
 
             version:
                 CONFIG.version,
 
-            exportedAt:
-                Date.now(),
+            conversationId:
+                state.conversationId,
 
-            conversation,
+            language:
+                state.currentLanguage,
 
             messages:
-                getMessages()
+                getMessages(
+                    CONFIG.maxMessages
+                ),
+
+            exportedAt:
+                Date.now()
 
         };
 
     }
 
-    function importConversation(
+    async function importConversation(
         data
     ) {
 
@@ -1777,41 +2252,36 @@
                     false,
 
                 error:
-                    "INVALID_CONVERSATION"
+                    "INVALID_CONVERSATION_DATA"
 
             };
 
         }
 
-        const conversation =
-            data.conversation ||
-            createConversation();
-
         state.conversationId =
-            conversation.id;
+            data.conversationId ||
+            createId(
+                "conversation"
+            );
+
+        state.currentLanguage =
+            data.language ||
+            state.currentLanguage;
 
         state.messages =
-            data.messages.map(
-                message => ({
-                    ...message
-                })
-            );
+            data.messages
+                .slice(
+                    -CONFIG.maxMessages
+                );
 
-        const existing =
-            getConversation();
-
-        if (!existing) {
-
-            state.conversations.push(
-                conversation
-            );
-
-        }
+        state.messageCount =
+            state.messages.length;
 
         emit(
             "conversation-imported",
             {
-                conversation
+                conversationId:
+                    state.conversationId
             }
         );
 
@@ -1820,18 +2290,19 @@
             ok:
                 true,
 
-            conversation,
+            conversationId:
+                state.conversationId,
 
-            messages:
-                state.messages
+            messageCount:
+                state.messageCount
 
         };
 
     }
 
-    // --------------------------------------------------------
+    // ========================================================
     // STATUS
-    // --------------------------------------------------------
+    // ========================================================
 
     function getStatus() {
 
@@ -1843,17 +2314,23 @@
             version:
                 CONFIG.version,
 
+            mode:
+                CONFIG.mode,
+
             initialized:
                 state.initialized,
 
             ready:
                 state.ready,
 
-            open:
-                state.open,
-
             processing:
                 state.processing,
+
+            typing:
+                state.typing,
+
+            messageCount:
+                state.messageCount,
 
             conversationId:
                 state.conversationId,
@@ -1861,32 +2338,16 @@
             currentLanguage:
                 state.currentLanguage,
 
-            messageCount:
-                state.messageCount,
+            modules: {
 
-            userMessages:
-                state.userMessages,
-
-            assistantMessages:
-                state.assistantMessages,
-
-            commandMessages:
-                state.commandMessages,
-
-            conversations:
-                state.conversations.length,
-
-            currentConversationMessages:
-                state.messages.length,
-
-            errors:
-                state.errors.length,
-
-            connections: {
-
-                language:
+                core:
                     Boolean(
-                        getLanguage()
+                        getCore()
+                    ),
+
+                engine:
+                    Boolean(
+                        getEngine()
                     ),
 
                 commands:
@@ -1894,19 +2355,24 @@
                         getCommands()
                     ),
 
-                aiCore:
-                    Boolean(
-                        getCore()
-                    ),
-
                 memory:
                     Boolean(
                         getMemory()
                     ),
 
-                conversationState:
+                conversation:
                     Boolean(
-                        getConversationState()
+                        getConversation()
+                    ),
+
+                language:
+                    Boolean(
+                        getLanguage()
+                    ),
+
+                speech:
+                    Boolean(
+                        getSpeech()
                     ),
 
                 voice:
@@ -1914,17 +2380,82 @@
                         getVoice()
                     )
 
-            }
+            },
+
+            lastUserMessage:
+                state.lastUserMessage,
+
+            lastAssistantMessage:
+                state.lastAssistantMessage,
+
+            lastResponse:
+                state.lastResponse,
+
+            errors:
+                state.errors.length
 
         };
 
     }
 
-    // --------------------------------------------------------
-    // INITIALIZE
-    // --------------------------------------------------------
+    // ========================================================
+    // ERROR
+    // ========================================================
 
-    function initialize() {
+    function recordError(
+        error
+    ) {
+
+        const entry = {
+
+            id:
+                createId(
+                    "chat-error"
+                ),
+
+            timestamp:
+                Date.now(),
+
+            message:
+                error?.message ||
+                String(
+                    error
+                )
+
+        };
+
+        state.errors.push(
+            entry
+        );
+
+        if (
+            state.errors.length >
+            100
+        ) {
+
+            state.errors.shift();
+
+        }
+
+        emit(
+            "error",
+            entry
+        );
+
+    }
+
+    function clearErrors() {
+
+        state.errors =
+            [];
+
+    }
+
+    // ========================================================
+    // INITIALIZATION
+    // ========================================================
+
+    async function initialize() {
 
         if (
             state.initialized
@@ -1937,16 +2468,42 @@
         state.initialized =
             true;
 
-        updateLanguage();
-
-        ensureConversation();
+        state.conversationId =
+            createId(
+                "conversation"
+            );
 
         /*
-         * Sprachänderungen übernehmen.
+         * Vorhandene Unterhaltung laden.
+         */
+
+        await loadConversation();
+
+        /*
+         * Sprache übernehmen.
          */
 
         const language =
             getLanguage();
+
+        if (
+            language &&
+            typeof language.getLanguage ===
+            "function"
+        ) {
+
+            try {
+
+                state.currentLanguage =
+                    language.getLanguage();
+
+            } catch (error) {}
+
+        }
+
+        /*
+         * Language Events.
+         */
 
         if (
             language &&
@@ -1958,8 +2515,14 @@
                 "language-changed",
                 detail => {
 
-                    state.currentLanguage =
-                        detail.language;
+                    if (
+                        detail?.language
+                    ) {
+
+                        state.currentLanguage =
+                            detail.language;
+
+                    }
 
                     emit(
                         "language-changed",
@@ -1972,45 +2535,40 @@
         }
 
         /*
-         * Conversation State anbinden.
+         * AI Core Events.
          */
 
-        const conversationState =
-            getConversationState();
+        const core =
+            getCore();
 
         if (
-            conversationState &&
-            typeof conversationState.on ===
+            core &&
+            typeof core.on ===
             "function"
         ) {
 
-            try {
+            core.on(
+                "response",
+                detail => {
 
-                conversationState.on(
-                    "changed",
-                    detail => {
+                    emit(
+                        "core-response",
+                        detail
+                    );
 
-                        emit(
-                            "conversation-state-changed",
-                            detail
-                        );
-
-                    }
-                );
-
-            } catch (
-                error
-            ) {}
+                }
+            );
 
         }
 
         /*
-         * Kernel registrieren.
+         * Kernel Registrierung.
          */
 
         const kernel =
             window.HalDoKernel ||
-            window.HalDoOS?.kernel;
+            window.HalDoOS?.kernel ||
+            null;
 
         if (
             kernel &&
@@ -2025,9 +2583,7 @@
                     api
                 );
 
-            } catch (
-                error
-            ) {}
+            } catch (error) {}
 
         }
 
@@ -2055,9 +2611,9 @@
 
     }
 
-    // --------------------------------------------------------
+    // ========================================================
     // PUBLIC API
-    // --------------------------------------------------------
+    // ========================================================
 
     const api = {
 
@@ -2077,53 +2633,55 @@
 
         emit,
 
-        open,
-
-        close,
-
-        toggle,
+        sendMessage,
 
         send,
 
-        ask:
-            send,
+        ask,
 
-        message:
-            send,
+        processMessage,
 
-        createConversation,
+        newConversation,
 
-        newChat,
-
-        getConversation,
-
-        clearConversation,
-
-        addMessage,
+        clearMessages,
 
         getMessages,
 
-        getStatus,
+        loadConversation,
 
-        getHistory:
-            () =>
-                state.messages.slice(),
+        buildContext,
+
+        detectLanguage,
+
+        detectCommand,
+
+        executeCommand,
+
+        recallMemory,
+
+        rememberMessage,
+
+        startVoiceInput,
+
+        speak,
 
         exportConversation,
 
         importConversation,
 
-        detectInputLanguage,
+        normalizeResponse,
 
-        executeCommand,
+        getStatus,
 
-        speak
+        recordError,
+
+        clearErrors
 
     };
 
-    // --------------------------------------------------------
+    // ========================================================
     // GLOBAL REGISTRATION
-    // --------------------------------------------------------
+    // ========================================================
 
     window.HalDoAIChat =
         api;
@@ -2131,19 +2689,21 @@
     window.HalDoOS.aiChat =
         api;
 
-    // --------------------------------------------------------
+    // ========================================================
     // BOOT
-    // --------------------------------------------------------
+    // ========================================================
 
-    function boot() {
+    async function boot() {
 
         try {
 
-            initialize();
+            await initialize();
 
-        } catch (
-            error
-        ) {
+        } catch (error) {
+
+            recordError(
+                error
+            );
 
             console.error(
                 "[HalDoAIChat] " +
@@ -2178,5 +2738,5 @@
 })(window, document);
 
 // ============================================================
-// END OF PART 79
+// END OF PART 86
 // ============================================================
