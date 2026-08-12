@@ -1,35 +1,12 @@
 // ============================================================
 // HALDO AI OS 18
-// AI MEMORY SYSTEM
-// PART 75
-// ============================================================
-// Zentrales Gedächtnis der HalDo AI.
-//
-// Verbindung:
-//
-// ai-chat.js
-//      ↓
-// ai-core.js
-//      ↓
-// ai-memory.js
-//      ↓
-// storage.js / storage-manager.js
-//
-// Öffentliche APIs:
-//
-// window.HalDoAIMemory
-// window.HalDoOS.aiMemory
-//
-// Bestehende Storage-Systeme werden erkannt und genutzt.
+// AI MEMORY ENGINE
+// PART 80
 // ============================================================
 
 (function (window, document) {
 
     "use strict";
-
-    // --------------------------------------------------------
-    // Duplicate Guard
-    // --------------------------------------------------------
 
     if (
         window.HalDoAIMemory &&
@@ -38,56 +15,43 @@
         return;
     }
 
-    // --------------------------------------------------------
-    // Namespace
-    // --------------------------------------------------------
-
     window.HalDoOS =
         window.HalDoOS || {};
 
     // --------------------------------------------------------
-    // Configuration
+    // CONFIGURATION
     // --------------------------------------------------------
 
     const CONFIG = {
 
         name:
-            "HalDo AI Memory",
+            "HalDo AI Memory Engine",
 
         version:
             "18.0.0",
 
         storageKey:
-            "haldo.ai.memory.v18",
+            "haldo-ai-memory",
 
         conversationKey:
-            "haldo.ai.conversations.v18",
-
-        settingsKey:
-            "haldo.ai.memory.settings.v18",
+            "haldo-ai-conversations",
 
         maxMemories:
+            2000,
+
+        maxContext:
+            20,
+
+        maxHistory:
             1000,
 
-        maxConversations:
-            100,
-
-        maxMessageLength:
-            12000,
-
-        autoSave:
-            true,
-
-        persistent:
-            true,
-
-        debug:
-            false
+        autoPersist:
+            true
 
     };
 
     // --------------------------------------------------------
-    // State
+    // STATE
     // --------------------------------------------------------
 
     const state = {
@@ -98,53 +62,37 @@
         ready:
             false,
 
-        persistent:
-            false,
-
-        saving:
-            false,
-
-        loading:
-            false,
-
         memories:
             [],
 
+        history:
+            [],
+
         conversations:
-            {},
+            new Map(),
 
-        settings: {
+        searches:
+            0,
 
-            enabled:
-                true,
+        stores:
+            0,
 
-            autoSave:
-                true,
-
-            rememberConversations:
-                true,
-
-            maxMemories:
-                CONFIG.maxMemories,
-
-            maxConversations:
-                CONFIG.maxConversations
-
-        },
+        recalls:
+            0,
 
         errors:
             [],
 
-        lastSaved:
+        lastSearch:
             null,
 
-        lastLoaded:
+        lastRecall:
             null
 
     };
 
     // --------------------------------------------------------
-    // Event Bus
+    // EVENTS
     // --------------------------------------------------------
 
     const listeners =
@@ -159,7 +107,9 @@
             typeof callback !==
             "function"
         ) {
+
             return () => {};
+
         }
 
         if (
@@ -202,7 +152,8 @@
         );
 
         if (
-            set.size === 0
+            set.size ===
+            0
         ) {
 
             listeners.delete(
@@ -238,7 +189,7 @@
                 ) {
 
                     console.error(
-                        "[HalDoAIMemory] Event error:",
+                        "[HalDoAIMemory]",
                         error
                     );
 
@@ -266,192 +217,280 @@
     }
 
     // --------------------------------------------------------
-    // Logging
+    // UTILITIES
     // --------------------------------------------------------
 
-    function log(
-        ...args
+    function clean(
+        value
     ) {
 
-        if (
-            CONFIG.debug
-        ) {
-
-            console.log(
-                "[HalDoAIMemory]",
-                ...args
-            );
-
-        }
+        return String(
+            value ??
+            ""
+        ).trim();
 
     }
 
-    // --------------------------------------------------------
-    // Error Handling
-    // --------------------------------------------------------
-
-    function recordError(
-        error,
-        context = {}
+    function normalize(
+        value
     ) {
 
-        const entry = {
-
-            timestamp:
-                Date.now(),
-
-            message:
-                error instanceof Error
-                    ? error.message
-                    : String(error),
-
-            context
-
-        };
-
-        state.errors.push(
-            entry
+        return clean(
+            value
+        )
+        .toLowerCase()
+        .replace(
+            /\s+/g,
+            " "
         );
-
-        if (
-            state.errors.length >
-            50
-        ) {
-
-            state.errors.shift();
-
-        }
-
-        emit(
-            "error",
-            entry
-        );
-
-        return entry;
 
     }
-
-    // --------------------------------------------------------
-    // Utility
-    // --------------------------------------------------------
 
     function createId(
-        prefix = "memory"
+        prefix =
+            "memory"
     ) {
 
         return (
+
             prefix +
             "-" +
-            Date.now() +
+            Date.now().toString(36) +
             "-" +
             Math.random()
                 .toString(36)
                 .slice(2, 10)
+
         );
 
     }
 
-    function normalizeText(
-        value
-    ) {
+    function now() {
 
-        let text =
-            String(
-                value ??
-                ""
-            ).trim();
-
-        if (
-            text.length >
-            CONFIG.maxMessageLength
-        ) {
-
-            text =
-                text.slice(
-                    0,
-                    CONFIG.maxMessageLength
-                );
-
-        }
-
-        return text;
+        return Date.now();
 
     }
 
-    function clone(
+    // --------------------------------------------------------
+    // STORAGE ACCESS
+    // --------------------------------------------------------
+
+    function getStorage() {
+
+        return (
+            window.HalDoStorage ||
+            window.HalDoStorageManager ||
+            window.HalDoOS?.storage ||
+            window.HalDoOS?.storageManager ||
+            null
+        );
+
+    }
+
+    async function storageSet(
+        key,
         value
     ) {
 
+        const storage =
+            getStorage();
+
+        if (storage) {
+
+            const methods = [
+
+                "set",
+                "save",
+                "write",
+                "store"
+
+            ];
+
+            for (
+                const method of
+                methods
+            ) {
+
+                if (
+                    typeof storage[method] !==
+                    "function"
+                ) {
+                    continue;
+                }
+
+                try {
+
+                    await storage[method](
+                        key,
+                        value
+                    );
+
+                    return true;
+
+                } catch (
+                    error
+                ) {}
+
+            }
+
+        }
+
+        /*
+         * Fallback auf localStorage.
+         */
+
         try {
 
-            return JSON.parse(
+            localStorage.setItem(
+                key,
                 JSON.stringify(
                     value
                 )
+            );
+
+            return true;
+
+        } catch (
+            error
+        ) {
+
+            return false;
+
+        }
+
+    }
+
+    async function storageGet(
+        key,
+        fallback = null
+    ) {
+
+        const storage =
+            getStorage();
+
+        if (storage) {
+
+            const methods = [
+
+                "get",
+                "load",
+                "read",
+                "retrieve"
+
+            ];
+
+            for (
+                const method of
+                methods
+            ) {
+
+                if (
+                    typeof storage[method] !==
+                    "function"
+                ) {
+                    continue;
+                }
+
+                try {
+
+                    const value =
+                        await storage[method](
+                            key
+                        );
+
+                    if (
+                        value !==
+                        undefined &&
+                        value !==
+                        null
+                    ) {
+
+                        return value;
+
+                    }
+
+                } catch (
+                    error
+                ) {}
+
+            }
+
+        }
+
+        try {
+
+            const raw =
+                localStorage.getItem(
+                    key
+                );
+
+            if (!raw) {
+                return fallback;
+            }
+
+            return JSON.parse(
+                raw
             );
 
         } catch (
             error
         ) {
 
-            return value;
+            return fallback;
 
         }
 
     }
 
-    // --------------------------------------------------------
-    // Storage Resolver
-    // --------------------------------------------------------
+    async function storageRemove(
+        key
+    ) {
 
-    function getStorageModules() {
+        const storage =
+            getStorage();
 
-        return [
+        if (storage) {
 
-            window.HalDoStorageManager,
+            const methods = [
 
-            window.HalDoStorage,
+                "remove",
+                "delete",
+                "clearKey"
 
-            window.HalDoOS?.storageManager,
+            ];
 
-            window.HalDoOS?.storage,
-
-            window.storageManager,
-
-            window.storage
-
-        ].filter(
-            Boolean
-        );
-
-    }
-
-    // --------------------------------------------------------
-    // Native LocalStorage
-    // --------------------------------------------------------
-
-    function nativeStorageAvailable() {
-
-        try {
-
-            if (
-                !window.localStorage
+            for (
+                const method of
+                methods
             ) {
 
-                return false;
+                if (
+                    typeof storage[method] !==
+                    "function"
+                ) {
+                    continue;
+                }
+
+                try {
+
+                    await storage[method](
+                        key
+                    );
+
+                    return true;
+
+                } catch (
+                    error
+                ) {}
 
             }
 
-            const testKey =
-                "__haldo_memory_test__";
+        }
 
-            window.localStorage.setItem(
-                testKey,
-                "1"
-            );
+        try {
 
-            window.localStorage.removeItem(
-                testKey
+            localStorage.removeItem(
+                key
             );
 
             return true;
@@ -467,835 +506,481 @@
     }
 
     // --------------------------------------------------------
-    // Storage Write
+    // MEMORY NORMALIZATION
     // --------------------------------------------------------
 
-    async function storageSet(
-        key,
-        value
+    function normalizeMemory(
+        input
     ) {
 
-        const modules =
-            getStorageModules();
-
-        for (
-            const storage of modules
-        ) {
-
-            const methods = [
-
-                "set",
-
-                "save",
-
-                "setItem",
-
-                "store",
-
-                "write"
-
-            ];
-
-            for (
-                const method of methods
-            ) {
-
-                if (
-                    typeof storage[method] !==
-                    "function"
-                ) {
-
-                    continue;
-
-                }
-
-                try {
-
-                    const result =
-                        storage[method](
-                            key,
-                            value
-                        );
-
-                    return (
-                        result &&
-                        typeof result.then ===
-                        "function"
-                            ? await result
-                            : result
-                    );
-
-                } catch (
-                    error
-                ) {
-
-                    log(
-                        "Storage module failed:",
-                        method,
-                        error
-                    );
-
-                }
-
-            }
-
-        }
-
         if (
-            nativeStorageAvailable()
+            typeof input ===
+            "string"
         ) {
 
-            window.localStorage.setItem(
-                key,
-                JSON.stringify(
-                    value
-                )
-            );
+            return {
 
-            return true;
+                id:
+                    createId(),
 
-        }
+                type:
+                    "text",
 
-        return false;
+                content:
+                    clean(
+                        input
+                    ),
 
-    }
+                tags:
+                    [],
 
-    // --------------------------------------------------------
-    // Storage Read
-    // --------------------------------------------------------
+                importance:
+                    1,
 
-    async function storageGet(
-        key,
-        fallback = null
-    ) {
+                createdAt:
+                    now(),
 
-        const modules =
-            getStorageModules();
+                updatedAt:
+                    now(),
 
-        for (
-            const storage of modules
-        ) {
+                accessCount:
+                    0,
 
-            const methods = [
-
-                "get",
-
-                "load",
-
-                "getItem",
-
-                "read",
-
-                "retrieve"
-
-            ];
-
-            for (
-                const method of methods
-            ) {
-
-                if (
-                    typeof storage[method] !==
-                    "function"
-                ) {
-
-                    continue;
-
-                }
-
-                try {
-
-                    const result =
-                        storage[method](
-                            key
-                        );
-
-                    const value =
-                        result &&
-                        typeof result.then ===
-                        "function"
-                            ? await result
-                            : result;
-
-                    if (
-                        value !==
-                        undefined &&
-                        value !==
-                        null
-                    ) {
-
-                        return value;
-
-                    }
-
-                } catch (
-                    error
-                ) {
-
-                    log(
-                        "Storage read failed:",
-                        method,
-                        error
-                    );
-
-                }
-
-            }
-
-        }
-
-        if (
-            nativeStorageAvailable()
-        ) {
-
-            try {
-
-                const raw =
-                    window.localStorage.getItem(
-                        key
-                    );
-
-                if (
-                    raw ===
+                lastAccessedAt:
                     null
-                ) {
 
-                    return fallback;
-
-                }
-
-                return JSON.parse(
-                    raw
-                );
-
-            } catch (
-                error
-            ) {
-
-                recordError(
-                    error,
-                    {
-                        phase:
-                            "native-storage-read",
-                        key
-                    }
-                );
-
-            }
-
-        }
-
-        return fallback;
-
-    }
-
-    // --------------------------------------------------------
-    // Storage Delete
-    // --------------------------------------------------------
-
-    async function storageDelete(
-        key
-    ) {
-
-        const modules =
-            getStorageModules();
-
-        for (
-            const storage of modules
-        ) {
-
-            const methods = [
-
-                "remove",
-
-                "delete",
-
-                "removeItem",
-
-                "clearKey"
-
-            ];
-
-            for (
-                const method of methods
-            ) {
-
-                if (
-                    typeof storage[method] !==
-                    "function"
-                ) {
-
-                    continue;
-
-                }
-
-                try {
-
-                    const result =
-                        storage[method](
-                            key
-                        );
-
-                    return (
-                        result &&
-                        typeof result.then ===
-                        "function"
-                            ? await result
-                            : result
-                    );
-
-                } catch (
-                    error
-                ) {}
-
-            }
-
-        }
-
-        if (
-            nativeStorageAvailable()
-        ) {
-
-            window.localStorage.removeItem(
-                key
-            );
-
-            return true;
-
-        }
-
-        return false;
-
-    }
-
-    // --------------------------------------------------------
-    // Memory Object
-    // --------------------------------------------------------
-
-    function createMemory(
-        data = {}
-    ) {
-
-        return {
-
-            id:
-                data.id ||
-                createId(
-                    "memory"
-                ),
-
-            type:
-                data.type ||
-                "conversation",
-
-            role:
-                data.role ||
-                "unknown",
-
-            content:
-                normalizeText(
-                    data.content
-                ),
-
-            conversationId:
-                data.conversationId ||
-                null,
-
-            messageId:
-                data.messageId ||
-                null,
-
-            importance:
-                Number(
-                    data.importance ??
-                    1
-                ),
-
-            tags:
-                Array.isArray(
-                    data.tags
-                )
-                    ? [
-                        ...new Set(
-                            data.tags
-                        )
-                    ]
-                    : [],
-
-            metadata:
-                data.metadata ||
-                {},
-
-            timestamp:
-                Number(
-                    data.timestamp
-                ) ||
-                Date.now(),
-
-            updatedAt:
-                Date.now()
-
-        };
-
-    }
-
-    // --------------------------------------------------------
-    // Conversation Object
-    // --------------------------------------------------------
-
-    function createConversation(
-        data = {}
-    ) {
-
-        const id =
-            data.id ||
-            data.conversationId ||
-            createId(
-                "conversation"
-            );
-
-        return {
-
-            id,
-
-            title:
-                normalizeText(
-                    data.title
-                ) ||
-                "Neue Unterhaltung",
-
-            createdAt:
-                data.createdAt ||
-                Date.now(),
-
-            updatedAt:
-                Date.now(),
-
-            messages:
-                Array.isArray(
-                    data.messages
-                )
-                    ? data.messages
-                    : [],
-
-            metadata:
-                data.metadata ||
-                {}
-
-        };
-
-    }
-
-    // --------------------------------------------------------
-    // Add Memory
-    // --------------------------------------------------------
-
-    async function addMemory(
-        data
-    ) {
-
-        if (
-            !state.settings.enabled
-        ) {
-
-            return null;
+            };
 
         }
 
         const memory =
-            createMemory(
-                data
+            input || {};
+
+        return {
+
+            id:
+                memory.id ||
+                createId(),
+
+            type:
+                memory.type ||
+                "text",
+
+            content:
+                clean(
+                    memory.content ??
+                    memory.text ??
+                    memory.value ??
+                    ""
+                ),
+
+            title:
+                memory.title ||
+                "",
+
+            tags:
+                Array.isArray(
+                    memory.tags
+                )
+                    ? memory.tags
+                    : [],
+
+            category:
+                memory.category ||
+                "general",
+
+            language:
+                memory.language ||
+                null,
+
+            importance:
+                Number(
+                    memory.importance ??
+                    1
+                ),
+
+            source:
+                memory.source ||
+                "ai",
+
+            conversationId:
+                memory.conversationId ||
+                null,
+
+            metadata:
+                memory.metadata ||
+                {},
+
+            createdAt:
+                memory.createdAt ||
+                now(),
+
+            updatedAt:
+                now(),
+
+            accessCount:
+                Number(
+                    memory.accessCount ||
+                    0
+                ),
+
+            lastAccessedAt:
+                memory.lastAccessedAt ||
+                null
+
+        };
+
+    }
+
+    // --------------------------------------------------------
+    // SAVE MEMORY DATABASE
+    // --------------------------------------------------------
+
+    async function persist() {
+
+        if (
+            !CONFIG.autoPersist
+        ) {
+
+            return false;
+
+        }
+
+        const result =
+            await storageSet(
+                CONFIG.storageKey,
+                {
+
+                    version:
+                        CONFIG.version,
+
+                    updatedAt:
+                        now(),
+
+                    memories:
+                        state.memories
+
+                }
             );
+
+        emit(
+            "persisted",
+            {
+                ok:
+                    result
+            }
+        );
+
+        return result;
+
+    }
+
+    async function persistConversations() {
+
+        const conversations =
+            Array.from(
+                state.conversations.values()
+            );
+
+        return storageSet(
+            CONFIG.conversationKey,
+            {
+
+                version:
+                    CONFIG.version,
+
+                updatedAt:
+                    now(),
+
+                conversations
+
+            }
+        );
+
+    }
+
+    // --------------------------------------------------------
+    // LOAD
+    // --------------------------------------------------------
+
+    async function load() {
+
+        try {
+
+            const data =
+                await storageGet(
+                    CONFIG.storageKey,
+                    null
+                );
+
+            if (
+                data &&
+                Array.isArray(
+                    data.memories
+                )
+            ) {
+
+                state.memories =
+                    data.memories.map(
+                        memory =>
+                            normalizeMemory(
+                                memory
+                            )
+                    );
+
+            }
+
+            const conversations =
+                await storageGet(
+                    CONFIG.conversationKey,
+                    null
+                );
+
+            if (
+                conversations &&
+                Array.isArray(
+                    conversations.conversations
+                )
+            ) {
+
+                state.conversations =
+                    new Map(
+                        conversations.conversations.map(
+                            conversation => [
+
+                                conversation.id,
+
+                                conversation
+
+                            ]
+                        )
+                    );
+
+            }
+
+            emit(
+                "loaded",
+                {
+
+                    memories:
+                        state.memories.length,
+
+                    conversations:
+                        state.conversations.size
+
+                }
+            );
+
+            return true;
+
+        } catch (
+            error
+        ) {
+
+            recordError(
+                error
+            );
+
+            return false;
+
+        }
+
+    }
+
+    // --------------------------------------------------------
+    // STORE
+    // --------------------------------------------------------
+
+    async function store(
+        input,
+        options = {}
+    ) {
+
+        const memory =
+            normalizeMemory({
+
+                ...(
+                    typeof input ===
+                    "object"
+                        ? input
+                        : {}
+                ),
+
+                content:
+                    typeof input ===
+                    "string"
+                        ? input
+                        : (
+                            input?.content ??
+                            input?.text ??
+                            input?.value
+                        ),
+
+                ...options
+
+            });
+
+        if (
+            !memory.content
+        ) {
+
+            return {
+
+                ok:
+                    false,
+
+                error:
+                    "EMPTY_MEMORY"
+
+            };
+
+        }
+
+        /*
+         * Duplikate vermeiden.
+         */
+
+        const duplicate =
+            state.memories.find(
+                existing =>
+
+                    normalize(
+                        existing.content
+                    ) ===
+                    normalize(
+                        memory.content
+                    )
+
+            );
+
+        if (duplicate) {
+
+            duplicate.updatedAt =
+                now();
+
+            duplicate.accessCount++;
+
+            await persist();
+
+            return {
+
+                ok:
+                    true,
+
+                duplicate:
+                    true,
+
+                memory:
+                    duplicate
+
+            };
+
+        }
 
         state.memories.push(
             memory
         );
 
-        trimMemories();
+        state.stores++;
+
+        /*
+         * Maximale Größe.
+         */
 
         if (
-            state.settings.autoSave
+            state.memories.length >
+            CONFIG.maxMemories
         ) {
 
-            await save();
+            state.memories.sort(
+                (
+                    a,
+                    b
+                ) => {
+
+                    const scoreA =
+                        Number(
+                            a.importance ||
+                            1
+                        );
+
+                    const scoreB =
+                        Number(
+                            b.importance ||
+                            1
+                        );
+
+                    return scoreB -
+                        scoreA;
+
+                }
+            );
+
+            state.memories =
+                state.memories.slice(
+                    0,
+                    CONFIG.maxMemories
+                );
 
         }
 
+        await persist();
+
         emit(
-            "memory-added",
+            "stored",
             {
-                memory:
-                    clone(
-                        memory
-                    )
+                memory
             }
         );
 
-        return memory;
+        return {
+
+            ok:
+                true,
+
+            memory
+
+        };
 
     }
 
     // --------------------------------------------------------
-    // Message Memory
-    // --------------------------------------------------------
-
-    async function addMessage(
-        message
-    ) {
-
-        if (!message) {
-
-            return null;
-
-        }
-
-        const memory =
-            await addMemory({
-
-                type:
-                    "conversation",
-
-                role:
-                    message.role ||
-                    "unknown",
-
-                content:
-                    message.content ??
-                    message.text ??
-                    "",
-
-                conversationId:
-                    message.conversationId ||
-                    null,
-
-                messageId:
-                    message.id ||
-                    null,
-
-                metadata:
-                    message.metadata ||
-                    {},
-
-                tags:
-                    [
-                        "chat",
-                        message.role ||
-                            "unknown"
-                    ]
-
-            });
-
-        if (
-            message.conversationId
-        ) {
-
-            await addConversationMessage(
-                message.conversationId,
-                message
-            );
-
-        }
-
-        return memory;
-
-    }
-
-    // --------------------------------------------------------
-    // Remember
+    // REMEMBER
     // --------------------------------------------------------
 
     async function remember(
-        data
+        input,
+        options = {}
     ) {
 
-        if (
-            typeof data ===
-            "string"
-        ) {
+        return store(
+            input,
+            {
 
-            return addMemory({
+                source:
+                    options.source ||
+                    "conversation",
 
-                type:
-                    "fact",
-
-                role:
-                    "user",
-
-                content:
-                    data,
+                category:
+                    options.category ||
+                    "conversation",
 
                 importance:
+                    options.importance ??
                     2,
 
-                tags:
-                    [
-                        "remembered"
-                    ]
-
-            });
-
-        }
-
-        return addMemory(
-            data
-        );
-
-    }
-
-    // --------------------------------------------------------
-    // Search
-    // --------------------------------------------------------
-
-    function search(
-        query,
-        options = {}
-    ) {
-
-        const text =
-            normalizeText(
-                query
-            ).toLowerCase();
-
-        if (!text) {
-
-            return [];
-
-        }
-
-        const limit =
-            Math.max(
-                1,
-                Number(
-                    options.limit ||
-                    50
-                )
-            );
-
-        const results =
-            state.memories
-                .map(
-                    memory => {
-
-                        const content =
-                            memory.content
-                                .toLowerCase();
-
-                        const index =
-                            content.indexOf(
-                                text
-                            );
-
-                        if (
-                            index ===
-                            -1
-                        ) {
-
-                            return null;
-
-                        }
-
-                        let score =
-                            1;
-
-                        if (
-                            index ===
-                            0
-                        ) {
-
-                            score +=
-                                2;
-
-                        }
-
-                        if (
-                            memory.importance >
-                            1
-                        ) {
-
-                            score +=
-                                memory.importance;
-
-                        }
-
-                        return {
-
-                            memory,
-
-                            score
-
-                        };
-
-                    }
-                )
-                .filter(
-                    Boolean
-                )
-                .sort(
-                    (a, b) =>
-                        b.score -
-                        a.score
-                )
-                .slice(
-                    0,
-                    limit
-                )
-                .map(
-                    item =>
-                        clone(
-                            item.memory
-                        )
-                );
-
-        return results;
-
-    }
-
-    // --------------------------------------------------------
-    // Search Conversations
-    // --------------------------------------------------------
-
-    function searchConversations(
-        query,
-        options = {}
-    ) {
-
-        const text =
-            normalizeText(
-                query
-            ).toLowerCase();
-
-        if (!text) {
-
-            return [];
-
-        }
-
-        const limit =
-            Math.max(
-                1,
-                Number(
-                    options.limit ||
-                    50
-                )
-            );
-
-        return Object.values(
-            state.conversations
-        )
-        .filter(
-            conversation => {
-
-                if (
-                    conversation.title
-                        .toLowerCase()
-                        .includes(
-                            text
-                        )
-                ) {
-
-                    return true;
-
-                }
-
-                return conversation.messages
-                    .some(
-                        message =>
-                            normalizeText(
-                                message.content
-                            )
-                            .toLowerCase()
-                            .includes(
-                                text
-                            )
-                    );
+                ...options
 
             }
-        )
-        .slice(
-            0,
-            limit
-        )
-        .map(
-            conversation =>
-                clone(
-                    conversation
-                )
         );
 
     }
 
     // --------------------------------------------------------
-    // Get Memories
+    // REMOVE
     // --------------------------------------------------------
 
-    function getMemories(
-        options = {}
-    ) {
-
-        const limit =
-            Math.max(
-                1,
-                Number(
-                    options.limit ||
-                    100
-                )
-            );
-
-        let result =
-            state.memories;
-
-        if (
-            options.type
-        ) {
-
-            result =
-                result.filter(
-                    memory =>
-                        memory.type ===
-                        options.type
-                );
-
-        }
-
-        if (
-            options.role
-        ) {
-
-            result =
-                result.filter(
-                    memory =>
-                        memory.role ===
-                        options.role
-                );
-
-        }
-
-        if (
-            options.conversationId
-        ) {
-
-            result =
-                result.filter(
-                    memory =>
-                        memory.conversationId ===
-                        options.conversationId
-                );
-
-        }
-
-        return clone(
-            result.slice(
-                -limit
-            )
-        );
-
-    }
-
-    // --------------------------------------------------------
-    // Remove Memory
-    // --------------------------------------------------------
-
-    async function removeMemory(
+    async function remove(
         id
     ) {
 
@@ -1321,15 +1006,13 @@
                 1
             )[0];
 
-        await save();
+        await persist();
 
         emit(
-            "memory-removed",
+            "removed",
             {
                 memory:
-                    clone(
-                        removed
-                    )
+                    removed
             }
         );
 
@@ -1338,35 +1021,21 @@
     }
 
     // --------------------------------------------------------
-    // Clear Memories
+    // CLEAR
     // --------------------------------------------------------
 
-    async function clearMemories(
-        options = {}
-    ) {
+    async function clear() {
 
-        if (
-            options.type
-        ) {
+        state.memories =
+            [];
 
-            state.memories =
-                state.memories.filter(
-                    memory =>
-                        memory.type !==
-                        options.type
-                );
+        state.history =
+            [];
 
-        } else {
-
-            state.memories =
-                [];
-
-        }
-
-        await save();
+        await persist();
 
         emit(
-            "memories-cleared"
+            "cleared"
         );
 
         return true;
@@ -1374,310 +1043,490 @@
     }
 
     // --------------------------------------------------------
-    // Trim Memories
+    // SEARCH
     // --------------------------------------------------------
 
-    function trimMemories() {
+    function scoreMemory(
+        memory,
+        queryTokens
+    ) {
 
-        const limit =
-            Math.max(
-                1,
-                Number(
-                    state.settings.maxMemories ||
-                    CONFIG.maxMemories
+        const text =
+            normalize(
+                [
+
+                    memory.content,
+
+                    memory.title,
+
+                    memory.category,
+
+                    memory.source,
+
+                    ...(memory.tags || [])
+
+                ].join(
+                    " "
                 )
             );
 
-        if (
-            state.memories.length >
-            limit
+        if (!text) {
+            return 0;
+        }
+
+        let score =
+            0;
+
+        for (
+            const token of
+            queryTokens
         ) {
 
-            /*
-             * Wichtigere Erinnerungen bleiben
-             * möglichst lange erhalten.
-             */
+            if (!token) {
+                continue;
+            }
 
-            state.memories.sort(
-                (a, b) => {
+            if (
+                text.includes(
+                    token
+                )
+            ) {
 
-                    const scoreA =
-                        a.importance +
-                        (
-                            a.timestamp /
-                            1000000000000000
-                        );
+                score +=
+                    token.length;
 
-                    const scoreB =
-                        b.importance +
-                        (
-                            b.timestamp /
-                            1000000000000000
-                        );
+            }
 
-                    return scoreB -
-                        scoreA;
+            if (
+                normalize(
+                    memory.title
+                ).includes(
+                    token
+                )
+            ) {
 
-                }
+                score +=
+                    10;
+
+            }
+
+            if (
+                (
+                    memory.tags ||
+                    []
+                )
+                .map(
+                    tag =>
+                        normalize(
+                            tag
+                        )
+                )
+                .includes(
+                    token
+                )
+            ) {
+
+                score +=
+                    15;
+
+            }
+
+        }
+
+        /*
+         * Wichtigkeit.
+         */
+
+        score +=
+            Number(
+                memory.importance ||
+                1
+            ) * 2;
+
+        /*
+         * Aktualität.
+         */
+
+        const age =
+            Math.max(
+                0,
+                now() -
+                Number(
+                    memory.updatedAt ||
+                    memory.createdAt ||
+                    now()
+                )
             );
 
-            state.memories =
-                state.memories.slice(
+        const days =
+            age /
+            86400000;
+
+        if (
+            days <
+            1
+        ) {
+
+            score +=
+                5;
+
+        } else if (
+            days <
+            7
+        ) {
+
+            score +=
+                2;
+
+        }
+
+        return score;
+
+    }
+
+    function search(
+        query,
+        options = {}
+    ) {
+
+        const text =
+            clean(
+                query
+            );
+
+        if (!text) {
+
+            return [];
+
+        }
+
+        state.searches++;
+
+        const tokens =
+            normalize(
+                text
+            )
+            .split(
+                /\s+/
+            )
+            .filter(
+                token =>
+                    token.length >
+                    1
+            );
+
+        const limit =
+            Number(
+                options.limit ||
+                CONFIG.maxContext
+            );
+
+        const results =
+            state.memories
+                .map(
+                    memory => ({
+
+                        memory,
+
+                        score:
+                            scoreMemory(
+                                memory,
+                                tokens
+                            )
+
+                    })
+                )
+                .filter(
+                    result =>
+                        result.score >
+                        0
+                )
+                .sort(
+                    (
+                        a,
+                        b
+                    ) =>
+                        b.score -
+                        a.score
+                )
+                .slice(
                     0,
                     limit
                 );
 
-            state.memories.sort(
-                (a, b) =>
-                    a.timestamp -
-                    b.timestamp
-            );
+        state.lastSearch = {
 
-        }
+            query:
+                text,
 
-    }
+            timestamp:
+                now(),
 
-    // --------------------------------------------------------
-    // Create Conversation
-    // --------------------------------------------------------
+            results:
+                results.length
 
-    async function createConversation(
-        data = {}
-    ) {
+        };
 
-        const conversation =
-            createConversation(
-                data
-            );
+        /*
+         * Zugriff aktualisieren.
+         */
 
-        state.conversations[
-            conversation.id
-        ] =
-            conversation;
+        results.forEach(
+            result => {
 
-        trimConversations();
+                result.memory.accessCount++;
 
-        await saveConversations();
+                result.memory.lastAccessedAt =
+                    now();
 
-        emit(
-            "conversation-created",
-            {
-                conversation:
-                    clone(
-                        conversation
-                    )
             }
         );
 
-        return conversation;
+        emit(
+            "searched",
+            {
+
+                query:
+                    text,
+
+                results
+
+            }
+        );
+
+        return results;
 
     }
 
     // --------------------------------------------------------
-    // Add Conversation Message
+    // RECALL
     // --------------------------------------------------------
 
-    async function addConversationMessage(
-        conversationId,
-        message
+    function recall(
+        query,
+        options = {}
     ) {
 
-        if (
-            !conversationId
-        ) {
+        const results =
+            search(
+                query,
+                options
+            );
 
-            return null;
+        state.recalls++;
 
-        }
+        state.lastRecall = {
 
-        let conversation =
-            state.conversations[
-                conversationId
-            ];
-
-        if (!conversation) {
-
-            conversation =
-                await createConversation(
-                    {
-                        id:
-                            conversationId
-                    }
-                );
-
-        }
-
-        conversation.messages.push({
-
-            id:
-                message.id ||
-                createId(
-                    "message"
-                ),
-
-            role:
-                message.role ||
-                "unknown",
-
-            content:
-                normalizeText(
-                    message.content ??
-                    message.text
+            query:
+                clean(
+                    query
                 ),
 
             timestamp:
-                message.timestamp ||
-                Date.now(),
+                now(),
 
-            metadata:
-                message.metadata ||
-                {}
+            results:
+                results.length
 
-        });
+        };
 
-        conversation.updatedAt =
-            Date.now();
-
-        /*
-         * Titel automatisch aus erster
-         * User-Nachricht erzeugen.
-         */
-
-        if (
-            conversation.title ===
-            "Neue Unterhaltung" &&
-            message.role ===
-            "user"
-        ) {
-
-            const title =
-                normalizeText(
-                    message.content ??
-                    message.text
-                );
-
-            conversation.title =
-                title.length > 50
-                    ? title.slice(
-                        0,
-                        50
-                    ) + "..."
-                    : title;
-
-        }
-
-        await saveConversations();
-
-        emit(
-            "conversation-message",
-            {
-                conversationId,
-
-                message:
-                    clone(
-                        message
-                    )
-            }
+        return results.map(
+            result =>
+                result.memory
         );
-
-        return conversation;
 
     }
 
     // --------------------------------------------------------
-    // Get Conversation
+    // GET RELEVANT CONTEXT
     // --------------------------------------------------------
+
+    function getRelevant(
+        query,
+        options = {}
+    ) {
+
+        const memories =
+            recall(
+                query,
+                {
+
+                    limit:
+                        options.limit ||
+                        CONFIG.maxContext
+
+                }
+            );
+
+        return memories.map(
+            memory => ({
+
+                id:
+                    memory.id,
+
+                content:
+                    memory.content,
+
+                title:
+                    memory.title,
+
+                category:
+                    memory.category,
+
+                importance:
+                    memory.importance,
+
+                source:
+                    memory.source
+
+            })
+        );
+
+    }
+
+    // --------------------------------------------------------
+    // GET CONTEXT TEXT
+    // --------------------------------------------------------
+
+    function getContext(
+        query,
+        options = {}
+    ) {
+
+        const relevant =
+            getRelevant(
+                query,
+                options
+            );
+
+        if (
+            !relevant.length
+        ) {
+
+            return "";
+
+        }
+
+        return relevant
+            .map(
+                (
+                    memory,
+                    index
+                ) =>
+                    `[Memory ${index + 1}] ` +
+                    memory.content
+            )
+            .join(
+                "\n"
+            );
+
+    }
+
+    // --------------------------------------------------------
+    // CONVERSATION MEMORY
+    // --------------------------------------------------------
+
+    async function rememberConversation(
+        conversationId,
+        messages
+    ) {
+
+        if (
+            !conversationId ||
+            !Array.isArray(
+                messages
+            )
+        ) {
+
+            return {
+
+                ok:
+                    false,
+
+                error:
+                    "INVALID_CONVERSATION"
+
+            };
+
+        }
+
+        const conversation = {
+
+            id:
+                conversationId,
+
+            messages:
+                messages.map(
+                    message => ({
+                        ...message
+                    })
+                ),
+
+            updatedAt:
+                now()
+
+        };
+
+        state.conversations.set(
+            conversationId,
+            conversation
+        );
+
+        await persistConversations();
+
+        emit(
+            "conversation-stored",
+            {
+                conversation
+            }
+        );
+
+        return {
+
+            ok:
+                true,
+
+            conversation
+
+        };
+
+    }
 
     function getConversation(
         conversationId
     ) {
 
-        const conversation =
-            state.conversations[
+        return (
+            state.conversations.get(
                 conversationId
-            ];
-
-        return conversation
-            ? clone(
-                conversation
-            )
-            : null;
-
-    }
-
-    // --------------------------------------------------------
-    // Get Conversations
-    // --------------------------------------------------------
-
-    function getConversations(
-        options = {}
-    ) {
-
-        const limit =
-            Math.max(
-                1,
-                Number(
-                    options.limit ||
-                    CONFIG.maxConversations
-                )
-            );
-
-        return Object.values(
-            state.conversations
-        )
-        .sort(
-            (a, b) =>
-                b.updatedAt -
-                a.updatedAt
-        )
-        .slice(
-            0,
-            limit
-        )
-        .map(
-            conversation =>
-                clone(
-                    conversation
-                )
+            ) ||
+            null
         );
 
     }
 
-    // --------------------------------------------------------
-    // Delete Conversation
-    // --------------------------------------------------------
-
-    async function deleteConversation(
+    async function removeConversation(
         conversationId
     ) {
 
         if (
-            !state.conversations[
+            !state.conversations.has(
                 conversationId
-            ]
+            )
         ) {
 
             return false;
 
         }
 
-        delete state.conversations[
+        state.conversations.delete(
             conversationId
-        ];
+        );
 
-        state.memories =
-            state.memories.filter(
-                memory =>
-                    memory.conversationId !==
-                    conversationId
-            );
-
-        await save();
-
-        await saveConversations();
+        await persistConversations();
 
         emit(
-            "conversation-deleted",
+            "conversation-removed",
             {
                 conversationId
             }
@@ -1688,443 +1537,38 @@
     }
 
     // --------------------------------------------------------
-    // Clear Conversations
-    // --------------------------------------------------------
-
-    async function clearConversations() {
-
-        state.conversations =
-            {};
-
-        await saveConversations();
-
-        emit(
-            "conversations-cleared"
-        );
-
-        return true;
-
-    }
-
-    // --------------------------------------------------------
-    // Trim Conversations
-    // --------------------------------------------------------
-
-    function trimConversations() {
-
-        const limit =
-            Math.max(
-                1,
-                Number(
-                    state.settings.maxConversations ||
-                    CONFIG.maxConversations
-                )
-            );
-
-        const conversations =
-            Object.values(
-                state.conversations
-            )
-            .sort(
-                (a, b) =>
-                    b.updatedAt -
-                    a.updatedAt
-            )
-            .slice(
-                0,
-                limit
-            );
-
-        state.conversations =
-            {};
-
-        for (
-            const conversation of
-            conversations
-        ) {
-
-            state.conversations[
-                conversation.id
-            ] =
-                conversation;
-
-        }
-
-    }
-
-    // --------------------------------------------------------
-    // Save Memory
-    // --------------------------------------------------------
-
-    async function save() {
-
-        if (
-            state.saving
-        ) {
-
-            return false;
-
-        }
-
-        state.saving =
-            true;
-
-        try {
-
-            trimMemories();
-
-            const data = {
-
-                version:
-                    CONFIG.version,
-
-                savedAt:
-                    Date.now(),
-
-                memories:
-                    state.memories,
-
-                settings:
-                    state.settings
-
-            };
-
-            const result =
-                await storageSet(
-                    CONFIG.storageKey,
-                    data
-                );
-
-            if (
-                result !== false
-            ) {
-
-                state.persistent =
-                    true;
-
-                state.lastSaved =
-                    Date.now();
-
-                emit(
-                    "saved",
-                    {
-                        count:
-                            state.memories.length
-                    }
-                );
-
-                return true;
-
-            }
-
-            return false;
-
-        } catch (
-            error
-        ) {
-
-            recordError(
-                error,
-                {
-                    phase:
-                        "save"
-                }
-            );
-
-            return false;
-
-        } finally {
-
-            state.saving =
-                false;
-
-        }
-
-    }
-
-    // --------------------------------------------------------
-    // Save Conversations
-    // --------------------------------------------------------
-
-    async function saveConversations() {
-
-        try {
-
-            trimConversations();
-
-            const data = {
-
-                version:
-                    CONFIG.version,
-
-                savedAt:
-                    Date.now(),
-
-                conversations:
-                    state.conversations
-
-            };
-
-            return (
-                await storageSet(
-                    CONFIG.conversationKey,
-                    data
-                )
-            );
-
-        } catch (
-            error
-        ) {
-
-            recordError(
-                error,
-                {
-                    phase:
-                        "save-conversations"
-                }
-            );
-
-            return false;
-
-        }
-
-    }
-
-    // --------------------------------------------------------
-    // Load Memory
-    // --------------------------------------------------------
-
-    async function load() {
-
-        if (
-            state.loading
-        ) {
-
-            return false;
-
-        }
-
-        state.loading =
-            true;
-
-        try {
-
-            const data =
-                await storageGet(
-                    CONFIG.storageKey,
-                    null
-                );
-
-            if (
-                data &&
-                Array.isArray(
-                    data.memories
-                )
-            ) {
-
-                state.memories =
-                    data.memories
-                        .map(
-                            memory =>
-                                createMemory(
-                                    memory
-                                )
-                        );
-
-            }
-
-            if (
-                data?.settings
-            ) {
-
-                state.settings = {
-
-                    ...state.settings,
-
-                    ...data.settings
-
-                };
-
-            }
-
-            trimMemories();
-
-            state.lastLoaded =
-                Date.now();
-
-            state.persistent =
-                nativeStorageAvailable() ||
-                getStorageModules().length >
-                0;
-
-            emit(
-                "loaded",
-                {
-                    count:
-                        state.memories.length
-                }
-            );
-
-            return true;
-
-        } catch (
-            error
-        ) {
-
-            recordError(
-                error,
-                {
-                    phase:
-                        "load"
-                }
-            );
-
-            return false;
-
-        } finally {
-
-            state.loading =
-                false;
-
-        }
-
-    }
-
-    // --------------------------------------------------------
-    // Load Conversations
-    // --------------------------------------------------------
-
-    async function loadConversations() {
-
-        try {
-
-            const data =
-                await storageGet(
-                    CONFIG.conversationKey,
-                    null
-                );
-
-            if (
-                data?.conversations
-            ) {
-
-                state.conversations =
-                    data.conversations;
-
-            }
-
-            trimConversations();
-
-            return true;
-
-        } catch (
-            error
-        ) {
-
-            recordError(
-                error,
-                {
-                    phase:
-                        "load-conversations"
-                }
-            );
-
-            return false;
-
-        }
-
-    }
-
-    // --------------------------------------------------------
-    // Settings
-    // --------------------------------------------------------
-
-    async function setSetting(
-        key,
-        value
-    ) {
-
-        if (
-            !Object.prototype.hasOwnProperty.call(
-                state.settings,
-                key
-            )
-        ) {
-
-            return false;
-
-        }
-
-        state.settings[key] =
-            value;
-
-        await storageSet(
-            CONFIG.settingsKey,
-            state.settings
-        );
-
-        emit(
-            "settings-changed",
-            {
-                key,
-                value
-            }
-        );
-
-        return true;
-
-    }
-
-    function getSettings() {
-
-        return clone(
-            state.settings
-        );
-
-    }
-
-    // --------------------------------------------------------
-    // Export
+    // IMPORT / EXPORT
     // --------------------------------------------------------
 
     function exportData() {
 
         return {
 
-            system:
-                "HalDo AI OS 18",
-
-            module:
-                CONFIG.name,
-
             version:
                 CONFIG.version,
 
             exportedAt:
-                Date.now(),
+                now(),
 
             memories:
-                clone(
-                    state.memories
+                state.memories.map(
+                    memory => ({
+                        ...memory
+                    })
                 ),
 
             conversations:
-                clone(
-                    state.conversations
-                ),
-
-            settings:
-                clone(
-                    state.settings
+                Array.from(
+                    state.conversations.values()
+                ).map(
+                    conversation => ({
+                        ...conversation
+                    })
                 )
 
         };
 
     }
-
-    // --------------------------------------------------------
-    // Import
-    // --------------------------------------------------------
 
     async function importData(
         data,
@@ -2137,7 +1581,28 @@
             "object"
         ) {
 
-            return false;
+            return {
+
+                ok:
+                    false,
+
+                error:
+                    "INVALID_MEMORY_DATA"
+
+            };
+
+        }
+
+        if (
+            options.replace ===
+            true
+        ) {
+
+            state.memories =
+                [];
+
+            state.conversations =
+                new Map();
 
         }
 
@@ -2147,114 +1612,138 @@
             )
         ) {
 
-            if (
-                options.replace
-            ) {
-
-                state.memories =
-                    [];
-
-            }
-
             for (
                 const memory of
                 data.memories
             ) {
 
-                state.memories.push(
-                    createMemory(
+                const normalized =
+                    normalizeMemory(
                         memory
-                    )
-                );
+                    );
+
+                if (
+                    normalized.content
+                ) {
+
+                    state.memories.push(
+                        normalized
+                    );
+
+                }
 
             }
 
         }
 
         if (
-            data.conversations
+            Array.isArray(
+                data.conversations
+            )
         ) {
 
-            if (
-                options.replace
+            for (
+                const conversation of
+                data.conversations
             ) {
 
-                state.conversations =
-                    {};
+                if (
+                    conversation.id
+                ) {
+
+                    state.conversations.set(
+                        conversation.id,
+                        conversation
+                    );
+
+                }
 
             }
 
-            Object.assign(
-                state.conversations,
-                data.conversations
-            );
-
         }
 
-        if (
-            data.settings
-        ) {
-
-            state.settings = {
-
-                ...state.settings,
-
-                ...data.settings
-
-            };
-
-        }
-
-        trimMemories();
-
-        trimConversations();
-
-        await save();
-
-        await saveConversations();
-
-        emit(
-            "imported"
-        );
-
-        return true;
-
-    }
-
-    // --------------------------------------------------------
-    // Wipe Everything
-    // --------------------------------------------------------
-
-    async function wipe() {
+        /*
+         * Limits anwenden.
+         */
 
         state.memories =
-            [];
+            state.memories.slice(
+                -CONFIG.maxMemories
+            );
 
-        state.conversations =
-            {};
-
-        await storageDelete(
-            CONFIG.storageKey
-        );
-
-        await storageDelete(
-            CONFIG.conversationKey
-        );
-
-        await storageDelete(
-            CONFIG.settingsKey
-        );
+        await persist();
+        await persistConversations();
 
         emit(
-            "wiped"
+            "imported",
+            {
+                memories:
+                    state.memories.length,
+
+                conversations:
+                    state.conversations.size
+
+            }
         );
 
-        return true;
+        return {
+
+            ok:
+                true,
+
+            memories:
+                state.memories.length,
+
+            conversations:
+                state.conversations.size
+
+        };
 
     }
 
     // --------------------------------------------------------
-    // Status
+    // ERROR HANDLING
+    // --------------------------------------------------------
+
+    function recordError(
+        error
+    ) {
+
+        const entry = {
+
+            timestamp:
+                now(),
+
+            message:
+                error?.message ||
+                String(
+                    error
+                )
+
+        };
+
+        state.errors.push(
+            entry
+        );
+
+        if (
+            state.errors.length >
+            100
+        ) {
+
+            state.errors.shift();
+
+        }
+
+        emit(
+            "error",
+            entry
+        );
+
+    }
+
+    // --------------------------------------------------------
+    // STATUS
     // --------------------------------------------------------
 
     function getStatus() {
@@ -2273,73 +1762,41 @@
             ready:
                 state.ready,
 
-            persistent:
-                state.persistent,
-
-            saving:
-                state.saving,
-
-            loading:
-                state.loading,
-
-            memoryCount:
+            memories:
                 state.memories.length,
 
-            conversationCount:
-                Object.keys(
-                    state.conversations
-                ).length,
+            conversations:
+                state.conversations.size,
 
-            errorCount:
+            searches:
+                state.searches,
+
+            stores:
+                state.stores,
+
+            recalls:
+                state.recalls,
+
+            errors:
                 state.errors.length,
 
-            autoSave:
-                state.settings.autoSave,
+            lastSearch:
+                state.lastSearch,
 
-            enabled:
-                state.settings.enabled,
+            lastRecall:
+                state.lastRecall,
 
-            lastSaved:
-                state.lastSaved,
-
-            lastLoaded:
-                state.lastLoaded
+            storage:
+                Boolean(
+                    getStorage()
+                )
 
         };
 
     }
 
     // --------------------------------------------------------
-    // Reset Runtime
-    // --------------------------------------------------------
-
-    function resetRuntime() {
-
-        state.memories =
-            [];
-
-        state.conversations =
-            {};
-
-        state.errors =
-            [];
-
-        state.lastSaved =
-            null;
-
-        state.lastLoaded =
-            null;
-
-        emit(
-            "runtime-reset"
-        );
-
-        return true;
-
-    }
-
-    // --------------------------------------------------------
-    // Initialize
+    // INITIALIZE
     // --------------------------------------------------------
 
     async function initialize() {
@@ -2355,166 +1812,38 @@
         state.initialized =
             true;
 
-        /*
-         * Zuerst gespeicherte Daten laden.
-         */
-
         await load();
 
-        await loadConversations();
-
         /*
-         * Core registrieren.
+         * Kernel registrieren.
          */
 
-        const core =
-            window.HalDoAICore ||
-            window.HalDoOS?.aiCore;
+        const kernel =
+            window.HalDoKernel ||
+            window.HalDoOS?.kernel;
 
         if (
-            core &&
-            typeof core.registerModule ===
+            kernel &&
+            typeof kernel.registerModule ===
             "function"
         ) {
 
             try {
 
-                core.registerModule(
-                    "memory",
+                kernel.registerModule(
+                    "ai-memory",
                     api
                 );
 
             } catch (
                 error
-            ) {
-
-                recordError(
-                    error,
-                    {
-                        phase:
-                            "core-registration"
-                    }
-                );
-
-            }
+            ) {}
 
         }
 
-        /*
-         * Chat-Events beobachten.
-         */
-
-        document.addEventListener(
-            "haldo:ai-chat:message-added",
-            event => {
-
-                const message =
-                    event.detail?.message;
-
-                if (
-                    message &&
-                    state.settings.autoSave
-                ) {
-
-                    /*
-                     * Das Chat-Modul speichert
-                     * bereits selbst. Hier wird
-                     * nur eine zusätzliche
-                     * Synchronisierung angestoßen.
-                     */
-
-                    save();
-
-                }
-
-            }
-        );
-
-        /*
-         * Core History beobachten.
-         */
-
-        document.addEventListener(
-            "haldo:ai:history",
-            event => {
-
-                const entry =
-                    event.detail;
-
-                if (
-                    entry &&
-                    entry.content &&
-                    state.settings.enabled
-                ) {
-
-                    /*
-                     * Nur speichern, wenn das
-                     * Element noch nicht vorhanden ist.
-                     */
-
-                    const exists =
-                        state.memories.some(
-                            memory =>
-                                memory.messageId ===
-                                    entry.metadata?.messageId ||
-                                (
-                                    memory.content ===
-                                        entry.content &&
-                                    memory.role ===
-                                        entry.role &&
-                                    Math.abs(
-                                        memory.timestamp -
-                                        (
-                                            entry.timestamp ||
-                                            Date.now()
-                                        )
-                                    ) < 2000
-                                )
-                        );
-
-                    if (
-                        !exists
-                    ) {
-
-                        addMemory({
-                            type:
-                                "core-history",
-
-                            role:
-                                entry.role,
-
-                            content:
-                                entry.content,
-
-                            conversationId:
-                                entry.metadata
-                                    ?.conversationId ||
-                                null,
-
-                            messageId:
-                                entry.metadata
-                                    ?.messageId ||
-                                null,
-
-                            metadata:
-                                entry.metadata ||
-                                {}
-
-                        });
-
-                    }
-
-                }
-
-            }
-        );
-
         emit(
             "initialized",
-            {
-                status:
-                    getStatus()
-            }
+            getStatus()
         );
 
         window.setTimeout(
@@ -2525,15 +1854,7 @@
 
                 emit(
                     "ready",
-                    {
-                        status:
-                            getStatus()
-                    }
-                );
-
-                console.log(
-                    "[HalDoAIMemory] " +
-                    "HalDo AI Memory 18 bereit."
+                    getStatus()
                 );
 
             },
@@ -2545,7 +1866,7 @@
     }
 
     // --------------------------------------------------------
-    // Public API
+    // PUBLIC API
     // --------------------------------------------------------
 
     const api = {
@@ -2566,60 +1887,54 @@
 
         emit,
 
-        addMemory,
+        store,
 
-        addMessage,
+        save:
+            store,
 
         remember,
 
+        add:
+            store,
+
+        remove,
+
+        delete:
+            remove,
+
+        clear,
+
         search,
 
-        searchConversations,
+        recall,
 
-        getMemories,
+        retrieve:
+            recall,
 
-        removeMemory,
+        getRelevant,
 
-        clearMemories,
+        getContext,
 
-        createConversation,
-
-        addConversationMessage,
+        rememberConversation,
 
         getConversation,
 
-        getConversations,
-
-        deleteConversation,
-
-        clearConversations,
-
-        save,
-
-        load,
-
-        saveConversations,
-
-        loadConversations,
-
-        setSetting,
-
-        getSettings,
+        removeConversation,
 
         exportData,
 
         importData,
 
-        wipe,
+        load,
 
-        getStatus,
+        persist,
 
-        resetRuntime
+        getStatus
 
     };
 
     // --------------------------------------------------------
-    // Global APIs
+    // GLOBAL REGISTRATION
     // --------------------------------------------------------
 
     window.HalDoAIMemory =
@@ -2629,12 +1944,30 @@
         api;
 
     // --------------------------------------------------------
-    // DOM Ready
+    // BOOT
     // --------------------------------------------------------
 
-    function boot() {
+    async function boot() {
 
-        initialize();
+        try {
+
+            await initialize();
+
+        } catch (
+            error
+        ) {
+
+            recordError(
+                error
+            );
+
+            console.error(
+                "[HalDoAIMemory] " +
+                "Initialization failed:",
+                error
+            );
+
+        }
 
     }
 
@@ -2661,5 +1994,5 @@
 })(window, document);
 
 // ============================================================
-// END OF PART 75
+// END OF PART 80
 // ============================================================
