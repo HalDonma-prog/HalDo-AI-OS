@@ -1,2177 +1,2263 @@
-/*
+// ============================================================
+// HALDO AI OS 18
+// LOGO INTRO MANAGER
+// PART 87
+// Professional Ultimate Foundation
+// ============================================================
 
-============================================================
+(function (window, document) {
 
- HALDO AI OS 18
+    "use strict";
 
- LOGO INTRO MANAGER
+    if (
+        window.HalDoLogoIntroManager &&
+        window.HalDoLogoIntroManager.__haldoAI18
+    ) {
+        return;
+    }
 
- Professional Ultimate Foundation
+    window.HalDoOS =
+        window.HalDoOS || {};
 
-============================================================
+    // ========================================================
+    // CONFIGURATION
+    // ========================================================
 
- Datei:
-
- js/logo-intro-manager.js
-
- Aufgabe:
-
- - Logo-Intro steuern
-
- - HalDo Logo Animation starten
-
- - Begrüßung anzeigen
-
- - Sprachstatus verwalten
-
- - Intro überspringen
-
- - Systemstatus anzeigen
-
- - Übergang zur HalDo Shell
-
- - Verbindung mit Logo Animation Manager
-
- - Verbindung mit Shell Manager
-
- - Verbindung mit Speech System vorbereiten
-
- WICHTIG:
-
- Das Logo selbst wird NICHT gedreht.
-
- Nur die Licht-/Energieeffekte bewegen sich.
-
-============================================================
-
-*/
-
-"use strict";
-
-(function (window) {
-
-    /* ========================================================
-
-       HALDO LOGO INTRO MANAGER
-
-       ======================================================== */
-
-    const HalDoLogoIntroManager = {
-
-        /* ====================================================
-
-           INFORMATION
-
-           ==================================================== */
+    const CONFIG = {
 
         name:
-
             "HalDo Logo Intro Manager",
 
         version:
-
             "18.0.0",
 
-        status:
+        mode:
+            "Solar Galaxy",
 
-            "CREATED",
+        enabled:
+            true,
+
+        autoStart:
+            true,
+
+        duration:
+            7200,
+
+        logoPath:
+            "logo.png",
+
+        alternateLogoPath:
+            "assets/logo/logo.png",
+
+        solarSystem:
+            true,
+
+        stars:
+            true,
+
+        planets:
+            true,
+
+        galaxy:
+            true,
+
+        sunlight:
+            true,
+
+        sound:
+            true,
+
+        voice:
+            true,
+
+        skipOnRepeat:
+            false
+
+    };
+
+    // ========================================================
+    // STATE
+    // ========================================================
+
+    const state = {
 
         initialized:
-
             false,
 
         running:
-
             false,
 
-        finished:
-
+        completed:
             false,
 
         skipped:
-
             false,
 
-        /* ====================================================
-
-           ELEMENTE
-
-           ==================================================== */
-
-        intro:
-
+        startTime:
             null,
 
-        title:
-
+        endTime:
             null,
 
-        subtitle:
-
+        container:
             null,
 
-        speechStatus:
-
+        logo:
             null,
 
-        speechStatusText:
-
+        solarLayer:
             null,
 
-        speechIndicator:
-
+        galaxyLayer:
             null,
 
-        systemStatus:
-
+        starsLayer:
             null,
 
-        systemStatusText:
-
+        planetsLayer:
             null,
 
-        systemStatusDot:
-
+        sunlightLayer:
             null,
 
-        skipButton:
-
+        animationFrame:
             null,
-
-        /* ====================================================
-
-           SYSTEMVERBINDUNGEN
-
-           ==================================================== */
-
-        logoManager:
-
-            null,
-
-        shellManager:
-
-            null,
-
-        kernel:
-
-            null,
-
-        system:
-
-            null,
-
-        bootManager:
-
-            null,
-
-        /* ====================================================
-
-           EINSTELLUNGEN
-
-           ==================================================== */
-
-        settings: {
-
-            autoStart:
-
-                true,
-
-            duration:
-
-                4200,
-
-            fadeOutDuration:
-
-                700,
-
-            showWelcome:
-
-                true,
-
-            showStatus:
-
-                true,
-
-            allowSkip:
-
-                true,
-
-            speechEnabled:
-
-                true,
-
-            transitionToShell:
-
-                true
-
-        },
-
-        /* ====================================================
-
-           TIMER
-
-           ==================================================== */
 
         timers:
+            [],
 
-            new Set(),
+        introId:
+            null
 
-        /* ====================================================
+    };
 
-           EVENTS
+    // ========================================================
+    // EVENTS
+    // ========================================================
 
-           ==================================================== */
+    const listeners =
+        new Map();
 
-        listeners:
+    function on(
+        event,
+        callback
+    ) {
 
-            new Map(),
+        if (
+            typeof callback !==
+            "function"
+        ) {
+            return () => {};
+        }
 
-        /* ====================================================
+        if (
+            !listeners.has(
+                event
+            )
+        ) {
 
-           INITIALIZE
-
-           ==================================================== */
-
-        initialize() {
-
-            if (
-
-                this.initialized
-
-            ) {
-
-                return true;
-
-            }
-
-            this.status =
-
-                "INITIALIZING";
-
-            this.connectSystems();
-
-            this.findElements();
-
-            this.bindEvents();
-
-            this.initialized =
-
-                true;
-
-            this.status =
-
-                "READY";
-
-            this.emit(
-
-                "ready",
-
-                this.getStatus()
-
+            listeners.set(
+                event,
+                new Set()
             );
 
-            /*
-
-            ----------------------------------------------------
-
-            Auto Start
-
-            ----------------------------------------------------
-
-            */
-
-            if (
-
-                this.settings.autoStart
-
-            ) {
-
-                this.schedule(
-
-                    () => {
-
-                        this.start();
-
-                    },
-
-                    80
-
-                );
-
-            }
-
-            return true;
-
-        },
-
-        /* ====================================================
-
-           SYSTEME VERBINDEN
-
-           ==================================================== */
-
-        connectSystems() {
-
-            this.logoManager =
-
-                window.HalDoLogoAnimationManager ||
-
-                window.HalDo?.logo ||
-
-                null;
-
-            this.shellManager =
-
-                window.HalDoShellManager ||
-
-                window.HalDo?.shell ||
-
-                null;
-
-            this.kernel =
-
-                window.HalDoKernel ||
-
-                null;
-
-            this.system =
-
-                window.HalDoSystem ||
-
-                null;
-
-            this.bootManager =
-
-                window.HalDoBootManager ||
-
-                null;
-
-            return true;
-
-        },
-
-        /* ====================================================
-
-           ELEMENTE FINDEN
-
-           ==================================================== */
-
-        findElements() {
-
-            this.intro =
-
-                document.querySelector(
-
-                    "[data-haldo-logo-intro]"
-
-                );
-
-            if (
-
-                !this.intro
-
-            ) {
-
-                this.createFallbackIntro();
-
-            }
-
-            this.title =
-
-                this.intro?.querySelector(
-
-                    "[data-haldo-intro-title]"
-
-                ) ||
-
-                null;
-
-            this.subtitle =
-
-                this.intro?.querySelector(
-
-                    "[data-haldo-intro-subtitle]"
-
-                ) ||
-
-                null;
-
-            this.speechStatus =
-
-                this.intro?.querySelector(
-
-                    "[data-haldo-speech-status]"
-
-                ) ||
-
-                null;
-
-            this.speechStatusText =
-
-                this.intro?.querySelector(
-
-                    "[data-haldo-speech-status-text]"
-
-                ) ||
-
-                null;
-
-            this.speechIndicator =
-
-                this.intro?.querySelector(
-
-                    "[data-haldo-speech-indicator]"
-
-                ) ||
-
-                null;
-
-            this.systemStatus =
-
-                this.intro?.querySelector(
-
-                    "[data-haldo-intro-system-status]"
-
-                ) ||
-
-                null;
-
-            this.systemStatusText =
-
-                this.intro?.querySelector(
-
-                    "[data-haldo-intro-status-text]"
-
-                ) ||
-
-                null;
-
-            this.systemStatusDot =
-
-                this.intro?.querySelector(
-
-                    "[data-haldo-intro-status-dot]"
-
-                ) ||
-
-                null;
-
-            this.skipButton =
-
-                this.intro?.querySelector(
-
-                    "[data-haldo-intro-skip]"
-
-                ) ||
-
-                null;
-
-            return true;
-
-        },
-
-        /* ====================================================
-
-           FALLBACK INTRO
-
-           ==================================================== */
-
-        createFallbackIntro() {
-
-            const intro =
-
-                document.createElement(
-
-                    "section"
-
-                );
-
-            intro.id =
-
-                "haldo-logo-intro";
-
-            intro.className =
-
-                "haldo-logo-intro";
-
-            intro.setAttribute(
-
-                "data-haldo-logo-intro",
-
-                "true"
-
+        }
+
+        listeners
+            .get(event)
+            .add(callback);
+
+        return () =>
+            off(
+                event,
+                callback
             );
 
-            intro.innerHTML = `
-
-                <div
-
-                    class="haldo-logo-container"
-
-                    data-haldo-logo-container
-
-                >
-
-                    <div
-
-                        class="haldo-logo-stage"
-
-                        data-haldo-logo-stage
-
-                    >
-
-                        <div
-
-                            class="haldo-logo-glow"
-
-                            data-haldo-logo-glow
-
-                        ></div>
-
-                        <div
-
-                            class="haldo-logo-orbit"
-
-                            data-haldo-logo-orbit
-
-                        ></div>
-
-                        <div
-
-                            class="haldo-logo-particles"
-
-                            data-haldo-logo-particles
-
-                        ></div>
-
-                        <img
-
-                            src="assets/logo/logo.png"
-
-                            alt="HalDo AI"
-
-                            class="haldo-logo-image"
-
-                            data-haldo-logo-image
-
-                        >
-
-                        <div
-
-                            class="haldo-logo-speech-layer"
-
-                            data-haldo-logo-speech
-
-                        ></div>
-
-                    </div>
-
-                </div>
-
-                <div
-
-                    class="haldo-intro-welcome"
-
-                >
-
-                    <div
-
-                        class="haldo-intro-brand"
-
-                    >
-
-                        <span
-
-                            class="haldo-intro-brand-name"
-
-                        >
-
-                            HalDo AI
-
-                        </span>
-
-                    </div>
-
-                    <h1
-
-                        class="haldo-intro-title"
-
-                        data-haldo-intro-title
-
-                    >
-
-                        Willkommen bei HalDo AI
-
-                    </h1>
-
-                    <p
-
-                        class="haldo-intro-subtitle"
-
-                        data-haldo-intro-subtitle
-
-                    >
-
-                        HalDo AI OS 18
-
-                    </p>
-
-                    <div
-
-                        class="haldo-intro-speech-status"
-
-                        data-haldo-speech-status
-
-                    >
-
-                        <span
-
-                            class="haldo-speech-indicator"
-
-                            data-haldo-speech-indicator
-
-                        ></span>
-
-                        <span
-
-                            class="haldo-speech-status-text"
-
-                            data-haldo-speech-status-text
-
-                        >
-
-                            HalDo AI wird gestartet…
-
-                        </span>
-
-                    </div>
-
-                </div>
-
-                <div
-
-                    class="haldo-intro-controls"
-
-                >
-
-                    <button
-
-                        type="button"
-
-                        class="haldo-intro-skip"
-
-                        data-haldo-intro-skip
-
-                    >
-
-                        Überspringen
-
-                    </button>
-
-                </div>
-
-                <div
-
-                    class="haldo-intro-system-status"
-
-                    data-haldo-intro-system-status
-
-                >
-
-                    <span
-
-                        class="haldo-intro-status-dot"
-
-                        data-haldo-intro-status-dot
-
-                    ></span>
-
-                    <span
-
-                        data-haldo-intro-status-text
-
-                    >
-
-                        System wird geladen…
-
-                    </span>
-
-                </div>
-
-            `;
-
-            document.body.prepend(
-
-                intro
-
+    }
+
+    function off(
+        event,
+        callback
+    ) {
+
+        const set =
+            listeners.get(
+                event
             );
 
-            this.intro =
+        if (!set) {
+            return;
+        }
 
-                intro;
+        set.delete(
+            callback
+        );
 
-            return intro;
+    }
 
-        },
+    function emit(
+        event,
+        detail = {}
+    ) {
 
-        /* ====================================================
+        const set =
+            listeners.get(
+                event
+            );
 
-           EVENTS BINDEN
+        if (set) {
 
-           ==================================================== */
-
-        bindEvents() {
-
-            if (
-
-                this.skipButton
-
+            for (
+                const callback of set
             ) {
 
-                this.skipButton.addEventListener(
+                try {
 
-                    "click",
+                    callback(
+                        detail
+                    );
 
-                    () => {
+                } catch (error) {
 
-                        this.skip();
-
-                    }
-
-                );
-
-            }
-
-            /*
-
-            ----------------------------------------------------
-
-            Kernel Ready
-
-            ----------------------------------------------------
-
-            */
-
-            window.addEventListener(
-
-                "haldo:kernel-ready",
-
-                () => {
-
-                    this.connectSystems();
-
-                    this.setSystemStatus(
-
-                        "Kernel bereit."
-
+                    console.error(
+                        "[HalDoLogoIntro]",
+                        error
                     );
 
                 }
 
-            );
-
-            /*
-
-            ----------------------------------------------------
-
-            System Ready
-
-            ----------------------------------------------------
-
-            */
-
-            window.addEventListener(
-
-                "haldo:system-ready",
-
-                () => {
-
-                    this.connectSystems();
-
-                    this.setSystemStatus(
-
-                        "System bereit."
-
-                    );
-
-                }
-
-            );
-
-            /*
-
-            ----------------------------------------------------
-
-            Boot Ready
-
-            ----------------------------------------------------
-
-            */
-
-            window.addEventListener(
-
-                "haldo:boot-complete",
-
-                () => {
-
-                    this.setSystemStatus(
-
-                        "HalDo AI OS ist bereit."
-
-                    );
-
-                }
-
-            );
-
-            /*
-
-            ----------------------------------------------------
-
-            Logo Animation Ready
-
-            ----------------------------------------------------
-
-            */
-
-            window.addEventListener(
-
-                "haldo:logo-animation-ready",
-
-                () => {
-
-                    this.connectSystems();
-
-                }
-
-            );
-
-            return true;
-
-        },
-
-        /* ====================================================
-
-           START
-
-           ==================================================== */
-
-        async start() {
-
-            if (
-
-                this.running
-
-            ) {
-
-                return false;
-
             }
 
-            if (
+        }
 
-                this.finished
+        try {
 
-            ) {
-
-                return false;
-
-            }
-
-            this.connectSystems();
-
-            this.findElements();
-
-            this.running =
-
-                true;
-
-            this.finished =
-
-                false;
-
-            this.skipped =
-
-                false;
-
-            this.status =
-
-                "RUNNING";
-
-            /*
-
-            ----------------------------------------------------
-
-            Intro sichtbar machen
-
-            ----------------------------------------------------
-
-            */
-
-            this.show();
-
-            /*
-
-            ----------------------------------------------------
-
-            Startstatus
-
-            ----------------------------------------------------
-
-            */
-
-            this.setSystemStatus(
-
-                "HalDo AI wird gestartet…"
-
-            );
-
-            this.setSpeechStatus(
-
-                "HalDo AI wird gestartet…"
-
-            );
-
-            /*
-
-            ----------------------------------------------------
-
-            Logo Animation starten
-
-            ----------------------------------------------------
-
-            */
-
-            if (
-
-                this.logoManager
-
-            ) {
-
-                this.logoManager.start();
-
-                this.logoManager.startIntro(
-
+            document.dispatchEvent(
+                new CustomEvent(
+                    `haldo:logo-intro:${event}`,
                     {
-
-                        duration:
-
-                            this.settings.duration
-
+                        detail
                     }
-
-                );
-
-            }
-
-            /*
-
-            ----------------------------------------------------
-
-            Begrüßung
-
-            ----------------------------------------------------
-
-            */
-
-            if (
-
-                this.settings.showWelcome
-
-            ) {
-
-                this.schedule(
-
-                    () => {
-
-                        this.showWelcome();
-
-                    },
-
-                    900
-
-                );
-
-            }
-
-            /*
-
-            ----------------------------------------------------
-
-            Sprachbewegung vorbereiten
-
-            ----------------------------------------------------
-
-            */
-
-            if (
-
-                this.settings.speechEnabled
-
-            ) {
-
-                this.schedule(
-
-                    () => {
-
-                        this.startSpeechAnimation();
-
-                    },
-
-                    1200
-
-                );
-
-            }
-
-            /*
-
-            ----------------------------------------------------
-
-            Systemstatus
-
-            ----------------------------------------------------
-
-            */
-
-            this.schedule(
-
-                () => {
-
-                    this.setSystemStatus(
-
-                        "HalDo AI OS lädt Module…"
-
-                    );
-
-                },
-
-                1800
-
+                )
             );
 
-            this.schedule(
+        } catch (error) {}
 
-                () => {
+    }
 
-                    this.setSystemStatus(
+    // ========================================================
+    // UTILITY
+    // ========================================================
 
-                        "Module werden geladen…"
+    function createId(
+        prefix = "intro"
+    ) {
 
-                    );
+        return (
+            prefix +
+            "-" +
+            Date.now().toString(36) +
+            "-" +
+            Math.random()
+                .toString(36)
+                .slice(2, 8)
+        );
 
-                },
+    }
 
-                2700
+    function createElement(
+        tag,
+        className,
+        parent
+    ) {
 
+        const element =
+            document.createElement(
+                tag
             );
 
-            this.schedule(
+        if (className) {
 
-                () => {
+            element.className =
+                className;
 
-                    this.setSystemStatus(
+        }
 
-                        "HalDo AI OS ist bereit."
+        if (parent) {
 
-                    );
+            parent.appendChild(
+                element
+            );
 
-                },
+        }
 
-                Math.max(
+        return element;
 
-                    3000,
+    }
 
-                    this.settings.duration - 900
+    // ========================================================
+    // STYLE
+    // ========================================================
 
+    function injectStyles() {
+
+        if (
+            document.getElementById(
+                "haldo-logo-intro-style"
+            )
+        ) {
+            return;
+        }
+
+        const style =
+            document.createElement(
+                "style"
+            );
+
+        style.id =
+            "haldo-logo-intro-style";
+
+        style.textContent = `
+
+        /* ================================================
+           HALDO SOLAR GALAXY INTRO
+        ================================================= */
+
+        .haldo-logo-intro {
+
+            position: fixed;
+
+            inset: 0;
+
+            width: 100vw;
+            height: 100vh;
+
+            overflow: hidden;
+
+            z-index: 999999;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            background:
+                radial-gradient(
+                    circle at center,
+                    rgba(255, 205, 80, 0.18),
+                    rgba(8, 12, 32, 0.92) 42%,
+                    rgba(1, 3, 12, 1) 100%
+                );
+
+            opacity: 0;
+
+            pointer-events: auto;
+
+            transition:
+                opacity 900ms ease;
+
+            isolation: isolate;
+
+        }
+
+        .haldo-logo-intro.is-visible {
+
+            opacity: 1;
+
+        }
+
+        .haldo-logo-intro.is-leaving {
+
+            opacity: 0;
+
+            pointer-events: none;
+
+        }
+
+        .haldo-intro-galaxy {
+
+            position: absolute;
+
+            inset: -20%;
+
+            z-index: 0;
+
+            background:
+
+                radial-gradient(
+                    ellipse at center,
+                    rgba(255, 210, 90, 0.08),
+                    transparent 42%
+                ),
+
+                radial-gradient(
+                    ellipse at 30% 40%,
+                    rgba(120, 160, 255, 0.09),
+                    transparent 38%
+                ),
+
+                radial-gradient(
+                    ellipse at 70% 65%,
+                    rgba(180, 100, 255, 0.08),
+                    transparent 35%
+                );
+
+            animation:
+                haldoGalaxyDrift 24s
+                ease-in-out infinite alternate;
+
+        }
+
+        .haldo-intro-stars {
+
+            position: absolute;
+
+            inset: 0;
+
+            z-index: 1;
+
+            overflow: hidden;
+
+        }
+
+        .haldo-intro-star {
+
+            position: absolute;
+
+            width: 2px;
+            height: 2px;
+
+            border-radius: 50%;
+
+            background:
+                rgba(255,255,255,0.92);
+
+            box-shadow:
+                0 0 6px
+                rgba(255,255,255,0.75);
+
+            animation:
+                haldoStarPulse
+                var(--star-duration)
+                ease-in-out infinite;
+
+            animation-delay:
+                var(--star-delay);
+
+        }
+
+        .haldo-intro-solar-system {
+
+            position: absolute;
+
+            inset: 0;
+
+            z-index: 2;
+
+            pointer-events: none;
+
+        }
+
+        .haldo-intro-sun {
+
+            position: absolute;
+
+            width: min(
+                25vw,
+                260px
+            );
+
+            height: min(
+                25vw,
+                260px
+            );
+
+            min-width: 130px;
+            min-height: 130px;
+
+            left: 50%;
+            top: 50%;
+
+            transform:
+                translate(
+                    -50%,
+                    -50%
+                );
+
+            border-radius: 50%;
+
+            background:
+
+                radial-gradient(
+                    circle at 38% 35%,
+                    #fff9c9 0%,
+                    #fff0a0 18%,
+                    #ffd34f 42%,
+                    #ff9d24 70%,
+                    rgba(255,110,20,0.1) 100%
+                );
+
+            box-shadow:
+
+                0 0 30px
+                rgba(255,220,90,0.95),
+
+                0 0 80px
+                rgba(255,180,45,0.72),
+
+                0 0 150px
+                rgba(255,145,20,0.42);
+
+            animation:
+                haldoSunPulse
+                4s
+                ease-in-out infinite;
+
+            opacity: 0.62;
+
+        }
+
+        .haldo-intro-sun-rays {
+
+            position: absolute;
+
+            width: 48vw;
+            height: 48vw;
+
+            min-width: 300px;
+            min-height: 300px;
+
+            max-width: 680px;
+            max-height: 680px;
+
+            left: 50%;
+            top: 50%;
+
+            transform:
+                translate(
+                    -50%,
+                    -50%
+                );
+
+            border-radius: 50%;
+
+            background:
+
+                repeating-conic-gradient(
+                    from 0deg,
+                    rgba(255,220,100,0.00)
+                        0deg 7deg,
+                    rgba(255,220,100,0.22)
+                        7deg 9deg,
+                    rgba(255,220,100,0.00)
+                        9deg 18deg
+                );
+
+            filter:
+                blur(2px);
+
+            opacity: 0.5;
+
+            animation:
+                haldoSunRays
+                30s
+                linear infinite;
+
+        }
+
+        .haldo-intro-orbit {
+
+            position: absolute;
+
+            left: 50%;
+            top: 50%;
+
+            width:
+                var(--orbit-size);
+
+            height:
+                var(--orbit-height);
+
+            border:
+                1px solid
+                rgba(255,225,145,0.25);
+
+            border-radius: 50%;
+
+            transform:
+                translate(
+                    -50%,
+                    -50%
+                )
+                rotate(
+                    var(--orbit-angle)
+                );
+
+            animation:
+                haldoOrbitRotate
+                var(--orbit-speed)
+                linear infinite;
+
+        }
+
+        .haldo-intro-planet {
+
+            position: absolute;
+
+            width:
+                var(--planet-size);
+
+            height:
+                var(--planet-size);
+
+            border-radius: 50%;
+
+            top: 50%;
+
+            left: 0;
+
+            transform:
+                translate(
+                    -50%,
+                    -50%
+                );
+
+            background:
+                radial-gradient(
+                    circle at 35% 30%,
+                    var(--planet-light),
+                    var(--planet-main) 55%,
+                    var(--planet-dark) 100%
+                );
+
+            box-shadow:
+                0 0 14px
+                var(--planet-glow);
+
+        }
+
+        .haldo-intro-logo-stage {
+
+            position: absolute;
+
+            left: 50%;
+            top: 50%;
+
+            width:
+                min(52vw, 430px);
+
+            height:
+                min(52vw, 430px);
+
+            transform:
+                translate(
+                    -50%,
+                    -50%
+                );
+
+            z-index: 10;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+        }
+
+        .haldo-intro-logo-aura {
+
+            position: absolute;
+
+            width: 92%;
+            height: 92%;
+
+            border-radius: 50%;
+
+            background:
+                radial-gradient(
+                    circle,
+                    rgba(255,240,170,0.25),
+                    rgba(255,185,45,0.13)
+                        35%,
+                    transparent
+                        70%
+                );
+
+            filter:
+                blur(12px);
+
+            animation:
+                haldoLogoAura
+                3s
+                ease-in-out infinite;
+
+        }
+
+        .haldo-intro-logo-orbit {
+
+            position: absolute;
+
+            width: 112%;
+            height: 112%;
+
+            border:
+                2px solid
+                rgba(255,225,130,0.25);
+
+            border-left-color:
+                rgba(255,255,255,0.75);
+
+            border-radius: 50%;
+
+            transform:
+                rotateX(65deg);
+
+            animation:
+                haldoLogoOrbit
+                9s
+                linear infinite;
+
+            box-shadow:
+                0 0 18px
+                rgba(255,220,100,0.28);
+
+        }
+
+        .haldo-intro-logo {
+
+            position: relative;
+
+            width: 76%;
+            height: 76%;
+
+            object-fit: contain;
+
+            border-radius: 50%;
+
+            z-index: 3;
+
+            display: block;
+
+            filter:
+
+                drop-shadow(
+                    0 0 8px
+                    rgba(255,255,255,0.75)
                 )
 
-            );
+                drop-shadow(
+                    0 0 24px
+                    rgba(255,190,50,0.65)
+                )
 
-            /*
-
-            ----------------------------------------------------
-
-            Ende
-
-            ----------------------------------------------------
-
-            */
-
-            this.schedule(
-
-                () => {
-
-                    this.finish();
-
-                },
-
-                this.settings.duration
-
-            );
-
-            this.emit(
-
-                "started",
-
-                this.getStatus()
-
-            );
-
-            return true;
-
-        },
-
-        /* ====================================================
-
-           WELCOME
-
-           ==================================================== */
-
-        showWelcome() {
-
-            if (
-
-                this.title
-
-            ) {
-
-                this.title.classList.add(
-
-                    "is-visible"
-
+                drop-shadow(
+                    0 0 60px
+                    rgba(255,155,20,0.35)
                 );
 
-            }
+            animation:
+                haldoLogoLiving
+                5s
+                ease-in-out infinite;
 
-            if (
+            transform-origin:
+                center center;
 
-                this.subtitle
+        }
 
-            ) {
+        .haldo-intro-message {
 
-                this.subtitle.classList.add(
+            position: absolute;
 
-                    "is-visible"
+            left: 50%;
 
+            bottom:
+                max(7vh, 45px);
+
+            transform:
+                translateX(-50%);
+
+            width:
+                min(90vw, 700px);
+
+            text-align:
+                center;
+
+            z-index: 30;
+
+            font-family:
+                system-ui,
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                sans-serif;
+
+            color:
+                rgba(255,255,255,0.96);
+
+            text-shadow:
+                0 0 14px
+                rgba(255,220,120,0.7),
+
+                0 0 32px
+                rgba(255,160,30,0.35);
+
+            opacity: 0;
+
+            transform:
+                translate(
+                    -50%,
+                    15px
                 );
 
-            }
+            transition:
+                opacity 900ms ease,
+                transform 900ms ease;
 
-            this.setSpeechStatus(
+        }
 
-                "Willkommen bei HalDo AI."
+        .haldo-intro-message.is-visible {
 
-            );
+            opacity: 1;
 
-            this.emit(
-
-                "welcome",
-
-                this.getStatus()
-
-            );
-
-            return true;
-
-        },
-
-        /* ====================================================
-
-           SPEECH ANIMATION
-
-           ==================================================== */
-
-        startSpeechAnimation() {
-
-            if (
-
-                !this.logoManager
-
-            ) {
-
-                this.connectSystems();
-
-            }
-
-            if (
-
-                this.logoManager
-
-            ) {
-
-                this.logoManager.startSpeaking(
-
-                    0.72
-
+            transform:
+                translate(
+                    -50%,
+                    0
                 );
 
-            }
+        }
 
-            if (
+        .haldo-intro-title {
 
-                this.speechIndicator
-
-            ) {
-
-                this.speechIndicator.classList.add(
-
-                    "is-active"
-
+            font-size:
+                clamp(
+                    22px,
+                    4vw,
+                    38px
                 );
 
-            }
+            font-weight:
+                700;
 
-            this.setSpeechStatus(
+            letter-spacing:
+                0.04em;
 
-                "HalDo AI spricht…"
+            margin-bottom:
+                10px;
 
-            );
+        }
 
-            /*
+        .haldo-intro-subtitle {
 
-            ----------------------------------------------------
-
-            Nur kurze Demonstrationsphase.
-
-            Später wird diese Funktion mit echter
-
-            Audio-/Speech-Ausgabe verbunden.
-
-            ----------------------------------------------------
-
-            */
-
-            this.schedule(
-
-                () => {
-
-                    this.stopSpeechAnimation();
-
-                },
-
-                2600
-
-            );
-
-            return true;
-
-        },
-
-        /* ====================================================
-
-           SPEECH STOP
-
-           ==================================================== */
-
-        stopSpeechAnimation() {
-
-            if (
-
-                this.logoManager
-
-            ) {
-
-                this.logoManager.stopSpeaking();
-
-            }
-
-            if (
-
-                this.speechIndicator
-
-            ) {
-
-                this.speechIndicator.classList.remove(
-
-                    "is-active"
-
+            font-size:
+                clamp(
+                    14px,
+                    2.5vw,
+                    20px
                 );
 
-            }
+            opacity:
+                0.86;
 
-            this.setSpeechStatus(
+        }
 
-                "HalDo AI ist bereit."
+        @keyframes haldoSunPulse {
 
-            );
+            0%, 100% {
 
-            return true;
-
-        },
-
-        /* ====================================================
-
-           SPEECH STATUS
-
-           ==================================================== */
-
-        setSpeechStatus(
-
-            text
-
-        ) {
-
-            if (
-
-                this.speechStatusText
-
-            ) {
-
-                this.speechStatusText.textContent =
-
-                    text;
-
-            }
-
-            return true;
-
-        },
-
-        /* ====================================================
-
-           SYSTEM STATUS
-
-           ==================================================== */
-
-        setSystemStatus(
-
-            text
-
-        ) {
-
-            if (
-
-                this.systemStatusText
-
-            ) {
-
-                this.systemStatusText.textContent =
-
-                    text;
-
-            }
-
-            if (
-
-                this.systemStatusDot
-
-            ) {
-
-                this.systemStatusDot.classList.toggle(
-
-                    "ready",
-
-                    /bereit/i.test(
-
-                        text
-
+                transform:
+                    translate(
+                        -50%,
+                        -50%
                     )
+                    scale(0.96);
 
-                );
-
-            }
-
-            this.emit(
-
-                "system-status",
-
-                {
-
-                    text
-
-                }
-
-            );
-
-            return true;
-
-        },
-
-        /* ====================================================
-
-           SHOW
-
-           ==================================================== */
-
-        show() {
-
-            if (
-
-                !this.intro
-
-            ) {
-
-                this.findElements();
+                opacity:
+                    0.52;
 
             }
 
-            if (
+            50% {
 
-                !this.intro
+                transform:
+                    translate(
+                        -50%,
+                        -50%
+                    )
+                    scale(1.05);
 
-            ) {
-
-                return false;
-
-            }
-
-            this.intro.classList.remove(
-
-                "is-hidden"
-
-            );
-
-            this.intro.classList.add(
-
-                "is-visible"
-
-            );
-
-            this.intro.setAttribute(
-
-                "aria-hidden",
-
-                "false"
-
-            );
-
-            return true;
-
-        },
-
-        /* ====================================================
-
-           HIDE
-
-           ==================================================== */
-
-        hide() {
-
-            if (
-
-                !this.intro
-
-            ) {
-
-                return false;
+                opacity:
+                    0.72;
 
             }
 
-            this.intro.classList.remove(
+        }
 
-                "is-visible"
+        @keyframes haldoSunRays {
 
-            );
+            from {
 
-            this.intro.classList.add(
-
-                "is-hidden"
-
-            );
-
-            this.intro.setAttribute(
-
-                "aria-hidden",
-
-                "true"
-
-            );
-
-            return true;
-
-        },
-
-        /* ====================================================
-
-           FINISH
-
-           ==================================================== */
-
-        finish() {
-
-            if (
-
-                !this.running
-
-            ) {
-
-                return false;
+                transform:
+                    translate(
+                        -50%,
+                        -50%
+                    )
+                    rotate(0deg);
 
             }
 
-            this.running =
+            to {
 
-                false;
-
-            this.finished =
-
-                true;
-
-            this.status =
-
-                "FINISHING";
-
-            this.stopSpeechAnimation();
-
-            this.setSystemStatus(
-
-                "HalDo AI OS ist bereit."
-
-            );
-
-            /*
-
-            ----------------------------------------------------
-
-            Fade Out
-
-            ----------------------------------------------------
-
-            */
-
-            if (
-
-                this.intro
-
-            ) {
-
-                this.intro.classList.add(
-
-                    "is-finishing"
-
-                );
+                transform:
+                    translate(
+                        -50%,
+                        -50%
+                    )
+                    rotate(360deg);
 
             }
 
-            this.schedule(
+        }
 
-                () => {
+        @keyframes haldoGalaxyDrift {
 
-                    this.completeTransition();
+            from {
 
-                },
-
-                this.settings.fadeOutDuration
-
-            );
-
-            this.emit(
-
-                "finishing",
-
-                this.getStatus()
-
-            );
-
-            return true;
-
-        },
-
-        /* ====================================================
-
-           SKIP
-
-           ==================================================== */
-
-        skip() {
-
-            if (
-
-                !this.settings.allowSkip
-
-            ) {
-
-                return false;
+                transform:
+                    scale(1)
+                    rotate(0deg);
 
             }
 
-            if (
+            to {
 
-                !this.running
-
-            ) {
-
-                return false;
+                transform:
+                    scale(1.08)
+                    rotate(3deg);
 
             }
 
-            this.skipped =
+        }
 
-                true;
+        @keyframes haldoStarPulse {
 
-            this.clearTimers();
+            0%, 100% {
 
-            this.stopSpeechAnimation();
+                opacity:
+                    0.25;
 
-            this.setSystemStatus(
-
-                "HalDo AI OS wird geöffnet…"
-
-            );
-
-            this.status =
-
-                "SKIPPED";
-
-            this.completeTransition();
-
-            this.emit(
-
-                "skipped",
-
-                this.getStatus()
-
-            );
-
-            return true;
-
-        },
-
-        /* ====================================================
-
-           COMPLETE TRANSITION
-
-           ==================================================== */
-
-        completeTransition() {
-
-            this.clearTimers();
-
-            if (
-
-                this.logoManager
-
-            ) {
-
-                this.logoManager.stop();
+                transform:
+                    scale(0.7);
 
             }
 
-            this.hide();
+            50% {
 
-            /*
+                opacity:
+                    1;
 
-            ----------------------------------------------------
-
-            Shell öffnen
-
-            ----------------------------------------------------
-
-            */
-
-            if (
-
-                this.settings.transitionToShell
-
-            ) {
-
-                this.connectSystems();
-
-                if (
-
-                    this.shellManager
-
-                ) {
-
-                    this.shellManager.show();
-
-                    this.shellManager.setReady();
-
-                }
+                transform:
+                    scale(1.45);
 
             }
 
-            this.status =
+        }
 
-                "COMPLETED";
+        @keyframes haldoOrbitRotate {
 
-            this.emit(
+            from {
 
-                "completed",
-
-                this.getStatus()
-
-            );
-
-            return true;
-
-        },
-
-        /* ====================================================
-
-           TIMER
-
-           ==================================================== */
-
-        schedule(
-
-            callback,
-
-            delay
-
-        ) {
-
-            const timer =
-
-                window.setTimeout(
-
-                    () => {
-
-                        this.timers.delete(
-
-                            timer
-
-                        );
-
-                        try {
-
-                            callback();
-
-                        } catch (
-
-                            error
-
-                        ) {
-
-                            console.error(
-
-                                "[HalDo Intro Manager]",
-
-                                error
-
-                            );
-
-                        }
-
-                    },
-
-                    delay
-
-                );
-
-            this.timers.add(
-
-                timer
-
-            );
-
-            return timer;
-
-        },
-
-        /* ====================================================
-
-           TIMER LÖSCHEN
-
-           ==================================================== */
-
-        clearTimers() {
-
-            this.timers.forEach(
-
-                timer => {
-
-                    window.clearTimeout(
-
-                        timer
-
+                transform:
+                    translate(
+                        -50%,
+                        -50%
+                    )
+                    rotate(
+                        var(--orbit-angle)
                     );
 
-                }
+            }
 
-            );
+            to {
 
-            this.timers.clear();
-
-            return true;
-
-        },
-
-        /* ====================================================
-
-           CONFIG
-
-           ==================================================== */
-
-        configure(
-
-            values = {}
-
-        ) {
-
-            Object.keys(
-
-                values
-
-            ).forEach(
-
-                key => {
-
-                    if (
-
-                        Object.prototype.hasOwnProperty.call(
-
-                            this.settings,
-
-                            key
-
+                transform:
+                    translate(
+                        -50%,
+                        -50%
+                    )
+                    rotate(
+                        calc(
+                            var(--orbit-angle)
+                            + 360deg
                         )
+                    );
 
-                    ) {
+            }
 
-                        this.settings[key] =
+        }
 
-                            values[key];
+        @keyframes haldoLogoAura {
 
-                    }
+            0%, 100% {
 
-                }
+                opacity:
+                    0.65;
 
+                transform:
+                    scale(0.94);
+
+            }
+
+            50% {
+
+                opacity:
+                    1;
+
+                transform:
+                    scale(1.06);
+
+            }
+
+        }
+
+        @keyframes haldoLogoOrbit {
+
+            from {
+
+                transform:
+                    rotateX(65deg)
+                    rotateZ(0deg);
+
+            }
+
+            to {
+
+                transform:
+                    rotateX(65deg)
+                    rotateZ(360deg);
+
+            }
+
+        }
+
+        @keyframes haldoLogoLiving {
+
+            0%, 100% {
+
+                transform:
+                    rotate(0deg)
+                    scale(0.98);
+
+            }
+
+            25% {
+
+                transform:
+                    rotate(1deg)
+                    scale(1.015);
+
+            }
+
+            50% {
+
+                transform:
+                    rotate(0deg)
+                    scale(1.035);
+
+            }
+
+            75% {
+
+                transform:
+                    rotate(-1deg)
+                    scale(1.015);
+
+            }
+
+        }
+
+        @media (
+            prefers-reduced-motion: reduce
+        ) {
+
+            .haldo-logo-intro *,
+            .haldo-logo-intro {
+
+                animation-duration:
+                    0.001ms !important;
+
+                animation-iteration-count:
+                    1 !important;
+
+                transition-duration:
+                    0.001ms !important;
+
+            }
+
+        }
+
+        `;
+
+        document.head.appendChild(
+            style
+        );
+
+    }
+
+    // ========================================================
+    // CONTAINER
+    // ========================================================
+
+    function createContainer() {
+
+        if (
+            state.container &&
+            document.body.contains(
+                state.container
+            )
+        ) {
+
+            return state.container;
+
+        }
+
+        const container =
+            createElement(
+                "div",
+                "haldo-logo-intro",
+                document.body
             );
 
-            return true;
+        container.id =
+            "haldo-logo-intro";
 
-        },
+        container.setAttribute(
+            "aria-label",
+            "HalDo AI OS Start"
+        );
 
-        /* ====================================================
+        container.setAttribute(
+            "role",
+            "presentation"
+        );
 
-           EVENT ON
+        state.container =
+            container;
 
-           ==================================================== */
+        return container;
 
-        on(
+    }
 
-            eventName,
+    // ========================================================
+    // GALAXY
+    // ========================================================
 
-            callback
+    function createGalaxy() {
 
-        ) {
-
-            if (
-
-                typeof callback !==
-
-                "function"
-
-            ) {
-
-                return false;
-
-            }
-
-            if (
-
-                !this.listeners.has(
-
-                    eventName
-
-                )
-
-            ) {
-
-                this.listeners.set(
-
-                    eventName,
-
-                    []
-
-                );
-
-            }
-
-            this.listeners
-
-                .get(
-
-                    eventName
-
-                )
-
-                .push(
-
-                    callback
-
-                );
-
-            return true;
-
-        },
-
-        /* ====================================================
-
-           EVENT OFF
-
-           ==================================================== */
-
-        off(
-
-            eventName,
-
-            callback
-
-        ) {
-
-            const listeners =
-
-                this.listeners.get(
-
-                    eventName
-
-                );
-
-            if (
-
-                !listeners
-
-            ) {
-
-                return false;
-
-            }
-
-            const index =
-
-                listeners.indexOf(
-
-                    callback
-
-                );
-
-            if (
-
-                index ===
-
-                -1
-
-            ) {
-
-                return false;
-
-            }
-
-            listeners.splice(
-
-                index,
-
-                1
-
+        const galaxy =
+            createElement(
+                "div",
+                "haldo-intro-galaxy",
+                state.container
             );
 
-            return true;
+        state.galaxyLayer =
+            galaxy;
 
-        },
+    }
 
-        /* ====================================================
+    // ========================================================
+    // STARS
+    // ========================================================
 
-           EVENT EMIT
+    function createStars(
+        count = 90
+    ) {
 
-           ==================================================== */
+        if (
+            !CONFIG.stars
+        ) {
+            return;
+        }
 
-        emit(
+        const layer =
+            createElement(
+                "div",
+                "haldo-intro-stars",
+                state.container
+            );
 
-            eventName,
+        state.starsLayer =
+            layer;
 
-            data = null
-
+        for (
+            let i = 0;
+            i < count;
+            i++
         ) {
 
-            const listeners =
-
-                this.listeners.get(
-
-                    eventName
-
+            const star =
+                createElement(
+                    "span",
+                    "haldo-intro-star",
+                    layer
                 );
 
+            star.style.left =
+                `${Math.random() * 100}%`;
+
+            star.style.top =
+                `${Math.random() * 100}%`;
+
+            const size =
+                Math.random() *
+                    2.5 +
+                1;
+
+            star.style.width =
+                `${size}px`;
+
+            star.style.height =
+                `${size}px`;
+
+            star.style.setProperty(
+                "--star-duration",
+                `${2 + Math.random() * 5}s`
+            );
+
+            star.style.setProperty(
+                "--star-delay",
+                `${Math.random() * 5}s`
+            );
+
+        }
+
+    }
+
+    // ========================================================
+    // SOLAR SYSTEM
+    // ========================================================
+
+    function createSolarSystem() {
+
+        if (
+            !CONFIG.solarSystem
+        ) {
+            return;
+        }
+
+        const layer =
+            createElement(
+                "div",
+                "haldo-intro-solar-system",
+                state.container
+            );
+
+        state.solarLayer =
+            layer;
+
+        if (
+            CONFIG.sunlight
+        ) {
+
+            const rays =
+                createElement(
+                    "div",
+                    "haldo-intro-sun-rays",
+                    layer
+                );
+
+            state.sunlightLayer =
+                rays;
+
+        }
+
+        const sun =
+            createElement(
+                "div",
+                "haldo-intro-sun",
+                layer
+            );
+
+        // -----------------------------------------------
+        // ORBIT 1
+        // -----------------------------------------------
+
+        createOrbit(
+            layer,
+            "32vw",
+            "14vw",
+            "12deg",
+            "18s",
+            "#9fe7ff",
+            "#4c9dcc",
+            "#153b66",
+            "rgba(80,180,255,0.6)",
+            "10px"
+        );
+
+        // -----------------------------------------------
+        // ORBIT 2
+        // -----------------------------------------------
+
+        createOrbit(
+            layer,
+            "46vw",
+            "20vw",
+            "-22deg",
+            "27s",
+            "#ffd98a",
+            "#c47b35",
+            "#5b3218",
+            "rgba(255,180,80,0.6)",
+            "14px"
+        );
+
+        // -----------------------------------------------
+        // ORBIT 3
+        // -----------------------------------------------
+
+        createOrbit(
+            layer,
+            "62vw",
+            "28vw",
+            "35deg",
+            "38s",
+            "#d6b6ff",
+            "#8d58c7",
+            "#39205c",
+            "rgba(190,120,255,0.6)",
+            "18px"
+        );
+
+        void sun;
+
+    }
+
+    function createOrbit(
+        parent,
+        size,
+        height,
+        angle,
+        speed,
+        light,
+        main,
+        dark,
+        glow,
+        planetSize
+    ) {
+
+        const orbit =
+            createElement(
+                "div",
+                "haldo-intro-orbit",
+                parent
+            );
+
+        orbit.style.setProperty(
+            "--orbit-size",
+            size
+        );
+
+        orbit.style.setProperty(
+            "--orbit-height",
+            height
+        );
+
+        orbit.style.setProperty(
+            "--orbit-angle",
+            angle
+        );
+
+        orbit.style.setProperty(
+            "--orbit-speed",
+            speed
+        );
+
+        const planet =
+            createElement(
+                "div",
+                "haldo-intro-planet",
+                orbit
+            );
+
+        planet.style.setProperty(
+            "--planet-size",
+            planetSize
+        );
+
+        planet.style.setProperty(
+            "--planet-light",
+            light
+        );
+
+        planet.style.setProperty(
+            "--planet-main",
+            main
+        );
+
+        planet.style.setProperty(
+            "--planet-dark",
+            dark
+        );
+
+        planet.style.setProperty(
+            "--planet-glow",
+            glow
+        );
+
+    }
+
+    // ========================================================
+    // LOGO
+    // ========================================================
+
+    function resolveLogoPath() {
+
+        const candidates = [
+
+            CONFIG.logoPath,
+
+            CONFIG.alternateLogoPath
+
+        ];
+
+        /*
+         * Das erste vorhandene Bild wird über
+         * die Browser-Ladeprüfung gewählt.
+         */
+
+        return candidates;
+
+    }
+
+    function createLogo() {
+
+        const stage =
+            createElement(
+                "div",
+                "haldo-intro-logo-stage",
+                state.container
+            );
+
+        const aura =
+            createElement(
+                "div",
+                "haldo-intro-logo-aura",
+                stage
+            );
+
+        const orbit =
+            createElement(
+                "div",
+                "haldo-intro-logo-orbit",
+                stage
+            );
+
+        const logo =
+            createElement(
+                "img",
+                "haldo-intro-logo",
+                stage
+            );
+
+        logo.alt =
+            "HalDo AI OS Logo";
+
+        const paths =
+            resolveLogoPath();
+
+        let current =
+            0;
+
+        function tryNext() {
+
             if (
-
-                !listeners
-
+                current >=
+                paths.length
             ) {
+
+                console.warn(
+                    "[HalDoLogoIntro] " +
+                    "Kein Logo gefunden."
+                );
 
                 return;
 
             }
 
-            listeners
+            logo.src =
+                paths[
+                    current
+                ];
 
-                .slice()
+            current++;
 
-                .forEach(
+        }
 
-                    callback => {
+        logo.addEventListener(
+            "error",
+            tryNext
+        );
 
-                        try {
+        tryNext();
 
-                            callback(
+        state.logo =
+            logo;
 
-                                data
+        void aura;
+        void orbit;
 
-                            );
+    }
 
-                        } catch (
+    // ========================================================
+    // MESSAGE
+    // ========================================================
 
-                            error
+    function createMessage() {
 
-                        ) {
+        const wrapper =
+            createElement(
+                "div",
+                "haldo-intro-message",
+                state.container
+            );
 
-                            console.error(
+        const title =
+            createElement(
+                "div",
+                "haldo-intro-title",
+                wrapper
+            );
 
-                                "[HalDo Logo Intro]",
+        title.textContent =
+            "HalDo AI OS";
 
-                                error
+        const subtitle =
+            createElement(
+                "div",
+                "haldo-intro-subtitle",
+                wrapper
+            );
 
-                            );
+        subtitle.textContent =
+            "Willkommen bei HalDo AI.";
 
-                        }
+        state.message =
+            wrapper;
 
-                    }
+    }
 
-                );
+    // ========================================================
+    // BUILD
+    // ========================================================
 
-        },
+    function build() {
 
-        /* ====================================================
+        if (
+            !document.body
+        ) {
+            return false;
+        }
 
-           STATUS
+        injectStyles();
 
-           ==================================================== */
+        createContainer();
 
-        getStatus() {
+        /*
+         * Alte Inhalte entfernen, falls die Intro
+         * erneut gestartet wird.
+         */
+
+        state.container.innerHTML =
+            "";
+
+        createGalaxy();
+
+        createStars(
+            110
+        );
+
+        createSolarSystem();
+
+        createLogo();
+
+        createMessage();
+
+        return true;
+
+    }
+
+    // ========================================================
+    // SHOW MESSAGE
+    // ========================================================
+
+    function showMessage(
+        title,
+        subtitle
+    ) {
+
+        if (
+            !state.message
+        ) {
+            return;
+        }
+
+        const titleElement =
+            state.message.querySelector(
+                ".haldo-intro-title"
+            );
+
+        const subtitleElement =
+            state.message.querySelector(
+                ".haldo-intro-subtitle"
+            );
+
+        if (
+            titleElement
+        ) {
+
+            titleElement.textContent =
+                title ||
+                "HalDo AI OS";
+
+        }
+
+        if (
+            subtitleElement
+        ) {
+
+            subtitleElement.textContent =
+                subtitle ||
+                "Willkommen bei HalDo AI.";
+
+        }
+
+        state.message.classList.add(
+            "is-visible"
+        );
+
+    }
+
+    // ========================================================
+    // HIDE MESSAGE
+    // ========================================================
+
+    function hideMessage() {
+
+        if (
+            state.message
+        ) {
+
+            state.message.classList.remove(
+                "is-visible"
+            );
+
+        }
+
+    }
+
+    // ========================================================
+    // START
+    // ========================================================
+
+    async function start(
+        options = {}
+    ) {
+
+        if (
+            state.running
+        ) {
 
             return {
 
-                name:
+                ok:
+                    true,
 
-                    this.name,
-
-                version:
-
-                    this.version,
-
-                status:
-
-                    this.status,
-
-                initialized:
-
-                    this.initialized,
-
-                running:
-
-                    this.running,
-
-                finished:
-
-                    this.finished,
-
-                skipped:
-
-                    this.skipped,
-
-                settings:
-
-                    {
-
-                        ...this.settings
-
-                    }
+                alreadyRunning:
+                    true
 
             };
 
         }
 
+        if (
+            !CONFIG.enabled &&
+            options.force !==
+                true
+        ) {
+
+            return {
+
+                ok:
+                    true,
+
+                skipped:
+                    true
+
+            };
+
+        }
+
+        if (
+            !build()
+        ) {
+
+            return {
+
+                ok:
+                    false,
+
+                error:
+                    "DOM_UNAVAILABLE"
+
+            };
+
+        }
+
+        state.running =
+            true;
+
+        state.completed =
+            false;
+
+        state.skipped =
+            false;
+
+        state.startTime =
+            Date.now();
+
+        state.introId =
+            createId();
+
+        emit(
+            "start",
+            {
+                introId:
+                    state.introId
+            }
+        );
+
+        /*
+         * Sichtbar machen.
+         */
+
+        requestAnimationFrame(
+            () => {
+
+                if (
+                    state.container
+                ) {
+
+                    state.container.classList.add(
+                        "is-visible"
+                    );
+
+                }
+
+            }
+        );
+
+        /*
+         * Begrüßung zeitversetzt.
+         */
+
+        const messageTimer =
+            window.setTimeout(
+                () => {
+
+                    showMessage(
+                        options.title ||
+                            "HalDo AI OS",
+
+                        options.subtitle ||
+                            "Willkommen. Schön, dass du da bist."
+                    );
+
+                    emit(
+                        "greeting",
+                        {
+                            title:
+                                options.title ||
+                                "HalDo AI OS",
+
+                            subtitle:
+                                options.subtitle ||
+                                "Willkommen. Schön, dass du da bist."
+                        }
+                    );
+
+                },
+                options.messageDelay ||
+                    1900
+            );
+
+        state.timers.push(
+            messageTimer
+        );
+
+        /*
+         * Automatisches Ende.
+         */
+
+        const duration =
+            Number(
+                options.duration ||
+                CONFIG.duration
+            );
+
+        const endTimer =
+            window.setTimeout(
+                () => {
+
+                    finish();
+
+                },
+                duration
+            );
+
+        state.timers.push(
+            endTimer
+        );
+
+        return {
+
+            ok:
+                true,
+
+            introId:
+                state.introId,
+
+            duration
+
+        };
+
+    }
+
+    // ========================================================
+    // FINISH
+    // ========================================================
+
+    function finish() {
+
+        if (
+            !state.running
+        ) {
+            return;
+        }
+
+        state.running =
+            false;
+
+        state.completed =
+            true;
+
+        state.endTime =
+            Date.now();
+
+        if (
+            state.container
+        ) {
+
+            state.container.classList.add(
+                "is-leaving"
+            );
+
+        }
+
+        emit(
+            "finish",
+            {
+
+                introId:
+                    state.introId,
+
+                duration:
+                    state.endTime -
+                    state.startTime
+
+            }
+        );
+
+        const removeTimer =
+            window.setTimeout(
+                () => {
+
+                    remove();
+
+                },
+                1000
+            );
+
+        state.timers.push(
+            removeTimer
+        );
+
+    }
+
+    // ========================================================
+    // SKIP
+    // ========================================================
+
+    function skip() {
+
+        if (
+            !state.running
+        ) {
+            return false;
+        }
+
+        state.skipped =
+            true;
+
+        emit(
+            "skip",
+            {
+                introId:
+                    state.introId
+            }
+        );
+
+        finish();
+
+        return true;
+
+    }
+
+    // ========================================================
+    // REMOVE
+    // ========================================================
+
+    function remove() {
+
+        for (
+            const timer of state.timers
+        ) {
+
+            try {
+
+                window.clearTimeout(
+                    timer
+                );
+
+            } catch (error) {}
+
+        }
+
+        state.timers =
+            [];
+
+        if (
+            state.animationFrame
+        ) {
+
+            cancelAnimationFrame(
+                state.animationFrame
+            );
+
+            state.animationFrame =
+                null;
+
+        }
+
+        if (
+            state.container &&
+            state.container.parentNode
+        ) {
+
+            state.container.parentNode.removeChild(
+                state.container
+            );
+
+        }
+
+        state.container =
+            null;
+
+        state.logo =
+            null;
+
+        state.message =
+            null;
+
+        state.solarLayer =
+            null;
+
+        state.galaxyLayer =
+            null;
+
+        state.starsLayer =
+            null;
+
+        state.planetsLayer =
+            null;
+
+        state.sunlightLayer =
+            null;
+
+    }
+
+    // ========================================================
+    // DESTROY
+    // ========================================================
+
+    function destroy() {
+
+        if (
+            state.running
+        ) {
+
+            finish();
+
+        }
+
+        remove();
+
+        state.initialized =
+            false;
+
+    }
+
+    // ========================================================
+    // STATUS
+    // ========================================================
+
+    function getStatus() {
+
+        return {
+
+            name:
+                CONFIG.name,
+
+            version:
+                CONFIG.version,
+
+            mode:
+                CONFIG.mode,
+
+            enabled:
+                CONFIG.enabled,
+
+            initialized:
+                state.initialized,
+
+            running:
+                state.running,
+
+            completed:
+                state.completed,
+
+            skipped:
+                state.skipped,
+
+            startTime:
+                state.startTime,
+
+            endTime:
+                state.endTime,
+
+            introId:
+                state.introId
+
+        };
+
+    }
+
+    // ========================================================
+    // INITIALIZE
+    // ========================================================
+
+    function initialize() {
+
+        if (
+            state.initialized
+        ) {
+
+            return getStatus();
+
+        }
+
+        state.initialized =
+            true;
+
+        /*
+         * Skip-Taste.
+         */
+
+        document.addEventListener(
+            "keydown",
+            event => {
+
+                if (
+                    !state.running
+                ) {
+                    return;
+                }
+
+                if (
+                    event.key ===
+                    "Escape"
+                ) {
+
+                    skip();
+
+                }
+
+            }
+        );
+
+        /*
+         * Global API.
+         */
+
+        const kernel =
+            window.HalDoKernel ||
+            window.HalDoOS?.kernel ||
+            null;
+
+        if (
+            kernel &&
+            typeof kernel.registerModule ===
+            "function"
+        ) {
+
+            try {
+
+                kernel.registerModule(
+                    "logo-intro-manager",
+                    api
+                );
+
+            } catch (error) {}
+
+        }
+
+        emit(
+            "initialized",
+            getStatus()
+        );
+
+        return getStatus();
+
+    }
+
+    // ========================================================
+    // PUBLIC API
+    // ========================================================
+
+    const api = {
+
+        __haldoAI18:
+            true,
+
+        config:
+            CONFIG,
+
+        state,
+
+        initialize,
+
+        start,
+
+        finish,
+
+        skip,
+
+        remove,
+
+        destroy,
+
+        showMessage,
+
+        hideMessage,
+
+        getStatus,
+
+        on,
+
+        off,
+
+        emit
+
     };
 
-    /* ========================================================
-
-       GLOBALE API
-
-       ======================================================== */
+    // ========================================================
+    // GLOBAL REGISTRATION
+    // ========================================================
 
     window.HalDoLogoIntroManager =
+        api;
 
-        HalDoLogoIntroManager;
+    window.HalDoOS.logoIntro =
+        api;
 
-    if (
+    // ========================================================
+    // BOOT
+    // ========================================================
 
-        !window.HalDo
+    function boot() {
 
-    ) {
+        initialize();
 
-        window.HalDo = {};
+        if (
+            CONFIG.autoStart
+        ) {
+
+            /*
+             * Der Start wird bewusst leicht verzögert,
+             * damit Kernel / System zuerst ihre
+             * Initialisierung beginnen können.
+             */
+
+            window.setTimeout(
+                () => {
+
+                    /*
+                     * Nur starten, wenn kein anderer
+                     * Intro-Manager bereits aktiv ist.
+                     */
+
+                    if (
+                        !state.running
+                    ) {
+
+                        start();
+
+                    }
+
+                },
+                120
+            );
+
+        }
 
     }
 
-    window.HalDo.logoIntro =
-
-        HalDoLogoIntroManager;
-
-    /* ========================================================
-
-       START
-
-       ======================================================== */
-
-    function start() {
-
-        HalDoLogoIntroManager.initialize();
-
-    }
-
     if (
-
         document.readyState ===
-
         "loading"
-
     ) {
 
         document.addEventListener(
-
             "DOMContentLoaded",
-
-            start,
-
+            boot,
             {
-
                 once:
-
                     true
-
             }
-
         );
 
     } else {
 
-        start();
+        boot();
 
     }
 
-    console.log(
+})(window, document);
 
-        "=============================================="
-
-    );
-
-    console.log(
-
-        "HalDo AI OS 18 Logo Intro Manager"
-
-    );
-
-    console.log(
-
-        "Intro-System geladen."
-
-    );
-
-    console.log(
-
-        "=============================================="
-
-    );
-
-})(window);
+// ============================================================
+// END OF PART 87
+// ============================================================
