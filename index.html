@@ -51803,76 +51803,53 @@
         <!-- =========================================================
      HALDO AI OS 18
      INDEX.HTML
-     PART 34
+     PART 36
 
-     APP WINDOW HOST
+     CENTRAL APP BRIDGE
      ---------------------------------------------------------
-     Aufgabe:
+     Zweck:
 
-     • echter Desktop-Fensterbereich für Apps
-     • Verbindung mit window-manager.js
-     • Verbindung mit app-manager.js
-     • Verbindung mit app-router.js
-     • Verbindung mit HalDoAppCenter
-     • Öffnen / Minimieren / Maximieren / Schließen
-     • mehrere Apps gleichzeitig
-     • aktive App erkennen
-     • keine leeren App-Karten
-     • vorbereitet für zukünftige vollständige Apps
+     • App Registry
+     • App Manager
+     • App Router
+     • App Launcher
+     • Window Host
+     • Control Center
+
+     werden miteinander verbunden.
+
+     Keine bestehende App wird gelöscht.
+     Keine bestehende API wird blind überschrieben.
+
+     Die Bridge erkennt vorhandene APIs und verwendet
+     nur die Methoden, die tatsächlich vorhanden sind.
      ========================================================= -->
 
 
 <style>
 
 /* ============================================================
-   HALDO WINDOW HOST
+   APP RUNTIME NOTIFICATION
    ============================================================ */
 
-#haldoAppWindowHost {
+#haldoRuntimeNotifications {
 
     position:
         fixed;
 
-    inset:
-        0;
+    right:
+        16px;
+
+    bottom:
+        16px;
 
     z-index:
-        7000;
-
-    pointer-events:
-        none;
-
-    overflow:
-        hidden;
-
-}
-
-
-/* ============================================================
-   APP WINDOW
-   ============================================================ */
-
-.haldo-runtime-window {
-
-    position:
-        absolute;
-
-    min-width:
-        280px;
-
-    min-height:
-        180px;
+        9800;
 
     width:
         min(
-            760px,
-            calc(100vw - 30px)
-        );
-
-    height:
-        min(
-            560px,
-            calc(100vh - 100px)
+            320px,
+            calc(100vw - 32px)
         );
 
     display:
@@ -51881,108 +51858,90 @@
     flex-direction:
         column;
 
-    overflow:
-        hidden;
-
-    border:
-        1px solid
-        rgba(255,255,255,.10);
-
-    border-radius:
-        18px;
-
-    background:
-        rgba(7,11,21,.96);
-
-    box-shadow:
-        0 30px 100px
-        rgba(0,0,0,.58);
+    gap:
+        8px;
 
     pointer-events:
-        auto;
-
-    opacity:
-        0;
-
-    transform:
-        scale(.96)
-        translateY(10px);
-
-    transition:
-        opacity .16s ease,
-        transform .16s ease,
-        box-shadow .16s ease;
-
-}
-
-
-.haldo-runtime-window.open {
-
-    opacity:
-        1;
-
-    transform:
-        scale(1)
-        translateY(0);
-
-}
-
-
-.haldo-runtime-window.active {
-
-    box-shadow:
-        0 35px 110px
-        rgba(0,0,0,.68),
-        0 0 0 1px
-        rgba(255,255,255,.045);
-
-}
-
-
-/* ============================================================
-   WINDOW HEADER
-   ============================================================ */
-
-.haldo-runtime-titlebar {
-
-    height:
-        44px;
-
-    min-height:
-        44px;
-
-    display:
-        flex;
-
-    align-items:
-        center;
-
-    gap:
-        9px;
-
-    padding:
-        0 10px;
-
-    border-bottom:
-        1px solid
-        rgba(255,255,255,.06);
-
-    background:
-        rgba(255,255,255,.018);
-
-    user-select:
         none;
 
 }
 
 
-.haldo-runtime-icon {
+/* ============================================================
+   NOTIFICATION
+   ============================================================ */
+
+.haldo-runtime-notification {
+
+    display:
+        flex;
+
+    align-items:
+        flex-start;
+
+    gap:
+        10px;
+
+    padding:
+        12px;
+
+    border:
+        1px solid
+        rgba(255,255,255,.09);
+
+    border-radius:
+        14px;
+
+    background:
+        rgba(8,12,22,.94);
+
+    backdrop-filter:
+        blur(20px);
+
+    -webkit-backdrop-filter:
+        blur(20px);
+
+    box-shadow:
+        0 18px 50px
+        rgba(0,0,0,.38);
+
+    color:
+        rgba(255,255,255,.78);
+
+    opacity:
+        0;
+
+    transform:
+        translateY(8px);
+
+    transition:
+        opacity .18s ease,
+        transform .18s ease;
+
+}
+
+
+.haldo-runtime-notification.show {
+
+    opacity:
+        1;
+
+    transform:
+        translateY(0);
+
+}
+
+
+.haldo-runtime-notification-icon {
 
     width:
-        27px;
+        28px;
 
     height:
-        27px;
+        28px;
+
+    flex:
+        0 0 28px;
 
     display:
         flex;
@@ -51993,18 +51952,14 @@
     justify-content:
         center;
 
-    border:
-        1px solid
-        rgba(255,255,255,.07);
-
     border-radius:
-        8px;
+        9px;
 
     background:
-        rgba(255,255,255,.035);
+        rgba(255,255,255,.05);
 
     color:
-        rgba(255,255,255,.75);
+        rgba(255,255,255,.72);
 
     font-size:
         12px;
@@ -52012,56 +51967,64 @@
 }
 
 
-.haldo-runtime-title {
-
-    flex:
-        1;
+.haldo-runtime-notification-content {
 
     min-width:
         0;
 
-    overflow:
-        hidden;
-
-    white-space:
-        nowrap;
-
-    text-overflow:
-        ellipsis;
-
-    color:
-        rgba(255,255,255,.78);
-
-    font-size:
-        9px;
-
-    font-weight:
-        800;
+    flex:
+        1;
 
 }
 
 
-.haldo-runtime-controls {
+.haldo-runtime-notification-title {
 
     display:
-        flex;
+        block;
 
-    align-items:
-        center;
+    color:
+        rgba(255,255,255,.88);
 
-    gap:
-        4px;
+    font-size:
+        8px;
+
+    font-weight:
+        850;
 
 }
 
 
-.haldo-runtime-control {
+.haldo-runtime-notification-message {
+
+    display:
+        block;
+
+    margin-top:
+        3px;
+
+    color:
+        rgba(255,255,255,.35);
+
+    font-size:
+        7px;
+
+    line-height:
+        1.45;
+
+}
+
+
+.haldo-runtime-notification-close {
 
     width:
-        28px;
+        22px;
 
     height:
-        28px;
+        22px;
+
+    padding:
+        0;
 
     border:
         0;
@@ -52073,192 +52036,10 @@
         transparent;
 
     color:
-        rgba(255,255,255,.35);
+        rgba(255,255,255,.28);
 
     cursor:
         pointer;
-
-    font-size:
-        11px;
-
-}
-
-
-.haldo-runtime-control:hover {
-
-    background:
-        rgba(255,255,255,.07);
-
-    color:
-        rgba(255,255,255,.85);
-
-}
-
-
-.haldo-runtime-control.close:hover {
-
-    background:
-        rgba(255,75,95,.16);
-
-    color:
-        #ff7080;
-
-}
-
-
-/* ============================================================
-   WINDOW BODY
-   ============================================================ */
-
-.haldo-runtime-body {
-
-    position:
-        relative;
-
-    flex:
-        1;
-
-    min-height:
-        0;
-
-    overflow:
-        auto;
-
-    background:
-        rgba(2,5,12,.30);
-
-}
-
-
-.haldo-runtime-body::-webkit-scrollbar {
-
-    width:
-        5px;
-
-}
-
-
-.haldo-runtime-body::-webkit-scrollbar-thumb {
-
-    background:
-        rgba(255,255,255,.08);
-
-    border-radius:
-        99px;
-
-}
-
-
-/* ============================================================
-   APP PLACEHOLDER / LOADING
-   ============================================================ */
-
-.haldo-runtime-loading {
-
-    position:
-        absolute;
-
-    inset:
-        0;
-
-    display:
-        flex;
-
-    align-items:
-        center;
-
-    justify-content:
-        center;
-
-    flex-direction:
-        column;
-
-    gap:
-        10px;
-
-    color:
-        rgba(255,255,255,.35);
-
-    font-size:
-        8px;
-
-}
-
-
-.haldo-runtime-loading-logo {
-
-    width:
-        50px;
-
-    height:
-        50px;
-
-    border-radius:
-        50%;
-
-    object-fit:
-        cover;
-
-    animation:
-        haldoRuntimeLogoSpin
-        2.2s linear infinite;
-
-}
-
-
-@keyframes haldoRuntimeLogoSpin {
-
-    from {
-
-        transform:
-            rotate(0deg);
-
-    }
-
-    to {
-
-        transform:
-            rotate(360deg);
-
-    }
-
-}
-
-
-/* ============================================================
-   ERROR
-   ============================================================ */
-
-.haldo-runtime-error {
-
-    padding:
-        30px;
-
-    color:
-        rgba(255,255,255,.62);
-
-    font-size:
-        9px;
-
-    line-height:
-        1.6;
-
-}
-
-
-.haldo-runtime-error strong {
-
-    display:
-        block;
-
-    margin-bottom:
-        8px;
-
-    color:
-        #ff7382;
-
-    font-size:
-        12px;
 
 }
 
@@ -52271,76 +52052,16 @@
     max-width: 600px
 ) {
 
-    .haldo-runtime-window {
+    #haldoRuntimeNotifications {
 
-        left:
-            8px !important;
+        right:
+            10px;
 
-        top:
-            70px !important;
-
-        width:
-            calc(100vw - 16px) !important;
-
-        height:
-            calc(100vh - 82px) !important;
-
-        min-width:
-            0;
-
-        min-height:
-            0;
-
-        border-radius:
-            16px;
-
-    }
-
-
-    .haldo-runtime-titlebar {
-
-        height:
-            48px;
-
-        min-height:
-            48px;
-
-    }
-
-
-    .haldo-runtime-control {
+        bottom:
+            10px;
 
         width:
-            31px;
-
-        height:
-            31px;
-
-    }
-
-}
-
-
-/* ============================================================
-   REDUCED MOTION
-   ============================================================ */
-
-@media (
-    prefers-reduced-motion: reduce
-) {
-
-    .haldo-runtime-window {
-
-        transition:
-            none;
-
-    }
-
-
-    .haldo-runtime-loading-logo {
-
-        animation:
-            none;
+            calc(100vw - 20px);
 
     }
 
@@ -52350,11 +52071,11 @@
 
 
 <!-- ============================================================
-     WINDOW HOST
+     NOTIFICATION HOST
      ============================================================ -->
 
 <div
-    id="haldoAppWindowHost"
+    id="haldoRuntimeNotifications"
     aria-live="polite"
 ></div>
 
@@ -52371,8 +52092,8 @@
        ======================================================== */
 
     if (
-        window.HalDoWindowHost &&
-        window.HalDoWindowHost.__initialized
+        window.HalDoAppBridge &&
+        window.HalDoAppBridge.__initialized
     ) {
 
         return;
@@ -52386,40 +52107,44 @@
 
     const state = {
 
-        windows:
+        initialized:
+            false,
+
+        apps:
             new Map(),
 
-        activeId:
-            null,
+        aliases:
+            new Map(),
 
-        zIndex:
-            7010,
+        launching:
+            new Set(),
 
-        initialized:
-            false
+        opened:
+            new Set(),
+
+        failed:
+            new Set()
 
     };
 
 
-    let host;
-
-
     /* ========================================================
-       SYSTEM ACCESS
+       API ACCESS
        ======================================================== */
 
-    function getWindowManager() {
+    function registry() {
 
         return (
-            window.HalDoWindowManager ||
-            window.HalDoOS?.windowManager ||
+            window.HalDoAppRegistry ||
+            window.HalDoOS?.appRegistry ||
+            window.HalDoOS?.registry ||
             null
         );
 
     }
 
 
-    function getAppManager() {
+    function manager() {
 
         return (
             window.HalDoAppManager ||
@@ -52430,7 +52155,7 @@
     }
 
 
-    function getRouter() {
+    function router() {
 
         return (
             window.HalDoAppRouter ||
@@ -52441,7 +52166,29 @@
     }
 
 
-    function getKernel() {
+    function launcher() {
+
+        return (
+            window.HalDoAppLauncher ||
+            window.HalDoOS?.appLauncher ||
+            null
+        );
+
+    }
+
+
+    function windowHost() {
+
+        return (
+            window.HalDoWindowHost ||
+            window.HalDoOS?.windowHost ||
+            null
+        );
+
+    }
+
+
+    function kernel() {
 
         return (
             window.HalDoKernel ||
@@ -52477,41 +52224,34 @@
         ) {
 
             console.warn(
-                "[HalDo Window Host] Event:",
+                "[HalDo App Bridge] Event:",
                 error
             );
 
         }
 
 
-        const kernel =
-            getKernel();
+        const k =
+            kernel();
 
 
         if (
-            kernel &&
+            k &&
             typeof
-            kernel.emit ===
+            k.emit ===
             "function"
         ) {
 
             try {
 
-                kernel.emit(
+                k.emit(
                     name,
                     detail
                 );
 
             } catch (
                 error
-            ) {
-
-                console.warn(
-                    "[HalDo Window Host] Kernel:",
-                    error
-                );
-
-            }
+            ) {}
 
         }
 
@@ -52519,36 +52259,238 @@
 
 
     /* ========================================================
-       SAFE ID
+       NOTIFICATION
        ======================================================== */
 
-    function safeId(
-        value
+    function notify(
+        title,
+        message,
+        icon = "◈",
+        duration = 2600
     ) {
 
-        return String(
-            value ||
-            "app"
-        )
-        .replace(
-            /[^a-zA-Z0-9_-]/g,
-            "-"
+        const host =
+            document.getElementById(
+                "haldoRuntimeNotifications"
+            );
+
+
+        if (
+            !host
+        ) {
+
+            return;
+
+        }
+
+
+        const item =
+            document.createElement(
+                "div"
+            );
+
+
+        item.className =
+            "haldo-runtime-notification";
+
+
+        const iconElement =
+            document.createElement(
+                "div"
+            );
+
+
+        iconElement.className =
+            "haldo-runtime-notification-icon";
+
+
+        iconElement.textContent =
+            icon;
+
+
+        const content =
+            document.createElement(
+                "div"
+            );
+
+
+        content.className =
+            "haldo-runtime-notification-content";
+
+
+        const titleElement =
+            document.createElement(
+                "strong"
+            );
+
+
+        titleElement.className =
+            "haldo-runtime-notification-title";
+
+
+        titleElement.textContent =
+            title;
+
+
+        const messageElement =
+            document.createElement(
+                "span"
+            );
+
+
+        messageElement.className =
+            "haldo-runtime-notification-message";
+
+
+        messageElement.textContent =
+            message;
+
+
+        content.appendChild(
+            titleElement
+        );
+
+
+        content.appendChild(
+            messageElement
+        );
+
+
+        const close =
+            document.createElement(
+                "button"
+            );
+
+
+        close.className =
+            "haldo-runtime-notification-close";
+
+
+        close.type =
+            "button";
+
+
+        close.textContent =
+            "×";
+
+
+        close.setAttribute(
+            "aria-label",
+            "Meldung schließen"
+        );
+
+
+        item.appendChild(
+            iconElement
+        );
+
+
+        item.appendChild(
+            content
+        );
+
+
+        item.appendChild(
+            close
+        );
+
+
+        host.appendChild(
+            item
+        );
+
+
+        requestAnimationFrame(
+            () => {
+
+                item.classList.add(
+                    "show"
+                );
+
+            }
+        );
+
+
+        let timer =
+            setTimeout(
+                remove,
+                duration
+            );
+
+
+        function remove() {
+
+            clearTimeout(
+                timer
+            );
+
+
+            item.classList.remove(
+                "show"
+            );
+
+
+            setTimeout(
+                () => {
+
+                    item.remove();
+
+                },
+                190
+            );
+
+        }
+
+
+        close.addEventListener(
+            "click",
+            remove
         );
 
     }
 
 
     /* ========================================================
-       CREATE WINDOW
+       NORMALIZE APP
        ======================================================== */
 
-    function createWindow(
+    function normalizeApp(
         app
     ) {
 
         if (
-            !app ||
-            !app.id
+            !app
+        ) {
+
+            return null;
+
+        }
+
+
+        if (
+            typeof app ===
+            "string"
+        ) {
+
+            return {
+
+                id:
+                    app,
+
+                title:
+                    app,
+
+                icon:
+                    "◈"
+
+            };
+
+        }
+
+
+        if (
+            typeof app !==
+            "object"
         ) {
 
             return null;
@@ -52557,796 +52499,1380 @@
 
 
         const id =
-            safeId(
-                app.id
-            );
+            app.id ||
+            app.appId ||
+            app.name ||
+            app.key;
 
-
-        /*
-         * Bereits geöffnet?
-         */
 
         if (
-            state.windows.has(
-                id
-            )
+            !id
         ) {
 
-            const existing =
-                state.windows.get(
-                    id
-                );
-
-
-            focusWindow(
-                id
-            );
-
-
-            return existing;
+            return null;
 
         }
 
 
-        const windowElement =
-            document.createElement(
-                "section"
-            );
-
-
-        windowElement.className =
-            "haldo-runtime-window";
-
-
-        windowElement.dataset.appId =
-            id;
-
-
-        windowElement.setAttribute(
-            "role",
-            "application"
-        );
-
-
-        windowElement.setAttribute(
-            "aria-label",
-            app.title ||
-            app.id
-        );
-
-
-        /* ====================================================
-           POSITION
-           ==================================================== */
-
-        const index =
-            state.windows.size;
-
-
-        const offset =
-            Math.min(
-                index * 26,
-                150
-            );
-
-
-        windowElement.style.left =
-            `calc(50% - 380px + ${offset}px)`;
-
-
-        windowElement.style.top =
-            `calc(50% - 280px + ${offset}px)`;
-
-
-        windowElement.style.zIndex =
-            ++state.zIndex;
-
-
-        /* ====================================================
-           TITLE BAR
-           ==================================================== */
-
-        const titlebar =
-            document.createElement(
-                "header"
-            );
-
-
-        titlebar.className =
-            "haldo-runtime-titlebar";
-
-
-        const icon =
-            document.createElement(
-                "div"
-            );
-
-
-        icon.className =
-            "haldo-runtime-icon";
-
-
-        icon.textContent =
-            app.icon ||
-            "◈";
-
-
-        const title =
-            document.createElement(
-                "div"
-            );
-
-
-        title.className =
-            "haldo-runtime-title";
-
-
-        title.textContent =
-            app.title ||
-            app.id;
-
-
-        const controls =
-            document.createElement(
-                "div"
-            );
-
-
-        controls.className =
-            "haldo-runtime-controls";
-
-
-        const minimize =
-            createControl(
-                "−",
-                "Minimieren"
-            );
-
-
-        const maximize =
-            createControl(
-                "□",
-                "Maximieren"
-            );
-
-
-        const close =
-            createControl(
-                "×",
-                "Schließen"
-            );
-
-
-        close.classList.add(
-            "close"
-        );
-
-
-        controls.appendChild(
-            minimize
-        );
-
-
-        controls.appendChild(
-            maximize
-        );
-
-
-        controls.appendChild(
-            close
-        );
-
-
-        titlebar.appendChild(
-            icon
-        );
-
-
-        titlebar.appendChild(
-            title
-        );
-
-
-        titlebar.appendChild(
-            controls
-        );
-
-
-        /* ====================================================
-           BODY
-           ==================================================== */
-
-        const body =
-            document.createElement(
-                "div"
-            );
-
-
-        body.className =
-            "haldo-runtime-body";
-
-
-        const loading =
-            document.createElement(
-                "div"
-            );
-
-
-        loading.className =
-            "haldo-runtime-loading";
-
-
-        const logo =
-            document.createElement(
-                "img"
-            );
-
-
-        logo.className =
-            "haldo-runtime-loading-logo";
-
-
-        logo.src =
-            "logo.png";
-
-
-        logo.alt =
-            "HalDo";
-
-
-        const loadingText =
-            document.createElement(
-                "span"
-            );
-
-
-        loadingText.textContent =
-            `${app.title || app.id} wird geöffnet …`;
-
-
-        loading.appendChild(
-            logo
-        );
-
-
-        loading.appendChild(
-            loadingText
-        );
-
-
-        body.appendChild(
-            loading
-        );
-
-
-        windowElement.appendChild(
-            titlebar
-        );
-
-
-        windowElement.appendChild(
-            body
-        );
-
-
-        host.appendChild(
-            windowElement
-        );
-
-
-        /* ====================================================
-           WINDOW OBJECT
-           ==================================================== */
-
-        const record = {
-
-            id,
-
-            app,
-
-            element:
-                windowElement,
-
-            body,
-
-            titlebar,
-
-            loading,
-
-            minimized:
-                false,
-
-            maximized:
-                false,
-
-            createdAt:
-                Date.now()
+        return {
+
+            ...app,
+
+            id:
+                String(id),
+
+            title:
+                app.title ||
+                app.label ||
+                app.name ||
+                String(id),
+
+            icon:
+                app.icon ||
+                app.symbol ||
+                "◈"
 
         };
 
-
-        state.windows.set(
-            id,
-            record
-        );
+    }
 
 
-        /* ====================================================
-           EVENTS
-           ==================================================== */
+    /* ========================================================
+       REGISTER INTERNAL APP
+       ======================================================== */
 
-        windowElement.addEventListener(
-            "pointerdown",
-            () => {
+    function registerInternal(
+        app
+    ) {
 
-                focusWindow(
-                    id
-                );
-
-            }
-        );
-
-
-        minimize.addEventListener(
-            "click",
-            event => {
-
-                event.stopPropagation();
-
-                minimizeWindow(
-                    id
-                );
-
-            }
-        );
-
-
-        maximize.addEventListener(
-            "click",
-            event => {
-
-                event.stopPropagation();
-
-                maximizeWindow(
-                    id
-                );
-
-            }
-        );
-
-
-        close.addEventListener(
-            "click",
-            event => {
-
-                event.stopPropagation();
-
-                closeWindow(
-                    id
-                );
-
-            }
-        );
-
-
-        /*
-         * einfache Drag-Funktion
-         */
-
-        enableDragging(
-            record
-        );
-
-
-        requestAnimationFrame(
-            () => {
-
-                windowElement.classList.add(
-                    "open"
-                );
-
-            }
-        );
-
-
-        focusWindow(
-            id
-        );
-
-
-        emit(
-            "haldo:window-created",
-            {
-
-                appId:
-                    id,
-
+        const normalized =
+            normalizeApp(
                 app
-
-            }
-        );
-
-
-        return record;
-
-    }
-
-
-    /* ========================================================
-       CONTROL
-       ======================================================== */
-
-    function createControl(
-        symbol,
-        label
-    ) {
-
-        const button =
-            document.createElement(
-                "button"
-            );
-
-
-        button.type =
-            "button";
-
-
-        button.className =
-            "haldo-runtime-control";
-
-
-        button.textContent =
-            symbol;
-
-
-        button.title =
-            label;
-
-
-        button.setAttribute(
-            "aria-label",
-            label
-        );
-
-
-        return button;
-
-    }
-
-
-    /* ========================================================
-       FOCUS
-       ======================================================== */
-
-    function focusWindow(
-        id
-    ) {
-
-        const record =
-            state.windows.get(
-                id
             );
 
 
         if (
-            !record
+            !normalized
         ) {
 
-            return false;
+            return null;
 
         }
 
 
-        state.activeId =
-            id;
-
-
-        record.element.style.zIndex =
-            ++state.zIndex;
-
-
-        state.windows.forEach(
-            item => {
-
-                item.element.classList.toggle(
-                    "active",
-                    item.id ===
-                    id
-                );
-
-            }
-        );
-
-
-        emit(
-            "haldo:window-focused",
-            {
-
-                appId:
-                    id
-
-            }
+        state.apps.set(
+            normalized.id,
+            normalized
         );
 
 
         /*
-         * Bestehenden Window Manager informieren
+         * Häufige alternative Namen.
          */
 
-        const manager =
-            getWindowManager();
+        const aliases = [
+
+            normalized.id,
+
+            normalized.id
+                .toLowerCase(),
+
+            normalized.title
+                .toLowerCase()
+                .replace(
+                    /\s+/g,
+                    "-"
+                )
+
+        ];
 
 
         if (
-            manager
+            normalized.aliases
         ) {
 
-            const methods = [
-
-                "focusWindow",
-
-                "activateWindow",
-
-                "bringToFront"
-
-            ];
-
-
-            for (
-                const method
-                of methods
+            if (
+                Array.isArray(
+                    normalized.aliases
+                )
             ) {
 
+                aliases.push(
+                    ...normalized.aliases
+                );
+
+            }
+
+        }
+
+
+        aliases.forEach(
+            alias => {
+
                 if (
-                    typeof
-                    manager[method] ===
-                    "function"
+                    alias
                 ) {
 
-                    try {
-
-                        manager[method](
-                            id
-                        );
-
-                        break;
-
-                    } catch (
-                        error
-                    ) {
-
-                        console.warn(
-                            "[HalDo Window Host] " +
-                            method +
-                            ":",
-                            error
-                        );
-
-                    }
+                    state.aliases.set(
+                        String(alias)
+                            .toLowerCase(),
+                        normalized.id
+                    );
 
                 }
 
             }
+        );
 
-        }
 
-
-        return true;
+        return normalized;
 
     }
 
 
     /* ========================================================
-       MINIMIZE
+       IMPORT REGISTRY
        ======================================================== */
 
-    function minimizeWindow(
-        id
-    ) {
+    function importRegistry() {
 
-        const record =
-            state.windows.get(
-                id
-            );
+        const r =
+            registry();
 
 
         if (
-            !record
+            !r
         ) {
 
-            return false;
-
-        }
-
-
-        record.minimized =
-            !record.minimized;
-
-
-        record.element.style.display =
-            record.minimized
-                ? "none"
-                : "flex";
-
-
-        if (
-            !record.minimized
-        ) {
-
-            focusWindow(
-                id
-            );
-
-        }
-
-
-        emit(
-            "haldo:window-minimized",
-            {
-
-                appId:
-                    id,
-
-                minimized:
-                    record.minimized
-
-            }
-        );
-
-
-        return true;
-
-    }
-
-
-    /* ========================================================
-       MAXIMIZE
-       ======================================================== */
-
-    function maximizeWindow(
-        id
-    ) {
-
-        const record =
-            state.windows.get(
-                id
-            );
-
-
-        if (
-            !record
-        ) {
-
-            return false;
-
-        }
-
-
-        if (
-            record.maximized
-        ) {
-
-            record.element.style.left =
-                record.previous?.left ||
-                "calc(50% - 380px)";
-
-
-            record.element.style.top =
-                record.previous?.top ||
-                "calc(50% - 280px)";
-
-
-            record.element.style.width =
-                record.previous?.width ||
-                "min(760px, calc(100vw - 30px))";
-
-
-            record.element.style.height =
-                record.previous?.height ||
-                "min(560px, calc(100vh - 100px))";
-
-
-            record.maximized =
-                false;
-
-        } else {
-
-            record.previous = {
-
-                left:
-                    record.element.style.left,
-
-                top:
-                    record.element.style.top,
-
-                width:
-                    record.element.style.width,
-
-                height:
-                    record.element.style.height
-
-            };
-
-
-            record.element.style.left =
-                "8px";
-
-
-            record.element.style.top =
-                "62px";
-
-
-            record.element.style.width =
-                "calc(100vw - 16px)";
-
-
-            record.element.style.height =
-                "calc(100vh - 70px)";
-
-
-            record.maximized =
-                true;
-
-        }
-
-
-        focusWindow(
-            id
-        );
-
-
-        emit(
-            "haldo:window-maximized",
-            {
-
-                appId:
-                    id,
-
-                maximized:
-                    record.maximized
-
-            }
-        );
-
-
-        return true;
-
-    }
-
-
-    /* ========================================================
-       CLOSE
-       ======================================================== */
-
-    function closeWindow(
-        id
-    ) {
-
-        const record =
-            state.windows.get(
-                id
-            );
-
-
-        if (
-            !record
-        ) {
-
-            return false;
+            return;
 
         }
 
 
         /*
-         * App Manager informieren
+         * getApps()
          */
 
-        const manager =
-            getAppManager();
+        if (
+            typeof
+            r.getApps ===
+            "function"
+        ) {
+
+            try {
+
+                const apps =
+                    r.getApps();
+
+
+                if (
+                    Array.isArray(
+                        apps
+                    )
+                ) {
+
+                    apps.forEach(
+                        registerInternal
+                    );
+
+                }
+
+            } catch (
+                error
+            ) {
+
+                console.warn(
+                    "[HalDo App Bridge] " +
+                    "Registry getApps:",
+                    error
+                );
+
+            }
+
+        }
+
+
+        /*
+         * apps property
+         */
+
+        if (
+            Array.isArray(
+                r.apps
+            )
+        ) {
+
+            r.apps.forEach(
+                registerInternal
+            );
+
+        }
+
+
+        /*
+         * registry map/object
+         */
+
+        if (
+            r.registry &&
+            typeof
+            r.registry ===
+            "object"
+        ) {
+
+            Object.values(
+                r.registry
+            ).forEach(
+                registerInternal
+            );
+
+        }
+
+    }
+
+
+    /* ========================================================
+       INTERNAL CORE APPS
+       ======================================================== */
+
+    function registerCoreApps() {
+
+        const coreApps = [
+
+            {
+
+                id:
+                    "app-center",
+
+                title:
+                    "Alle Apps",
+
+                icon:
+                    "◫",
+
+                aliases: [
+
+                    "apps",
+
+                    "appcenter",
+
+                    "app-center",
+
+                    "anwendungen"
+
+                ]
+
+            },
+
+            {
+
+                id:
+                    "ai-chat",
+
+                title:
+                    "HalDo AI",
+
+                icon:
+                    "✦",
+
+                aliases: [
+
+                    "ai",
+
+                    "chat",
+
+                    "haldo-ai"
+
+                ]
+
+            },
+
+            {
+
+                id:
+                    "settings",
+
+                title:
+                    "Einstellungen",
+
+                icon:
+                    "⚙",
+
+                aliases: [
+
+                    "setting",
+
+                    "system-settings"
+
+                ]
+
+            },
+
+            {
+
+                id:
+                    "file-manager",
+
+                title:
+                    "Dateien",
+
+                icon:
+                    "▱",
+
+                aliases: [
+
+                    "files",
+
+                    "filemanager",
+
+                    "dateien"
+
+                ]
+
+            },
+
+            {
+
+                id:
+                    "language",
+
+                title:
+                    "Sprache",
+
+                icon:
+                    "文",
+
+                aliases: [
+
+                    "languages",
+
+                    "language-manager"
+
+                ]
+
+            },
+
+            {
+
+                id:
+                    "ezidi-keyboard",
+
+                title:
+                    "Êzîdî-Tastatur",
+
+                icon:
+                    "⌨",
+
+                aliases: [
+
+                    "keyboard",
+
+                    "ezidi",
+
+                    "ezidi-keyboard"
+
+                ]
+
+            },
+
+            {
+
+                id:
+                    "voice",
+
+                title:
+                    "Stimme",
+
+                icon:
+                    "◉",
+
+                aliases: [
+
+                    "speech",
+
+                    "voice-control"
+
+                ]
+
+            },
+
+            {
+
+                id:
+                    "module-manager",
+
+                title:
+                    "Module",
+
+                icon:
+                    "◈",
+
+                aliases: [
+
+                    "modules",
+
+                    "module"
+
+                ]
+
+            },
+
+            {
+
+                id:
+                    "diagnostics",
+
+                title:
+                    "Systemdiagnose",
+
+                icon:
+                    "◌",
+
+                aliases: [
+
+                    "diagnostic",
+
+                    "diagnose"
+
+                ]
+
+            },
+
+            {
+
+                id:
+                    "system-status",
+
+                title:
+                    "Systemstatus",
+
+                icon:
+                    "◎",
+
+                aliases: [
+
+                    "status",
+
+                    "system-status"
+
+                ]
+
+            },
+
+            {
+
+                id:
+                    "ai-memory",
+
+                title:
+                    "AI-Speicher",
+
+                icon:
+                    "◎",
+
+                aliases: [
+
+                    "memory",
+
+                    "aimemory"
+
+                ]
+
+            }
+
+        ];
+
+
+        coreApps.forEach(
+            registerInternal
+        );
+
+    }
+
+
+    /* ========================================================
+       RESOLVE APP
+       ======================================================== */
+
+    function resolveApp(
+        value
+    ) {
+
+        if (
+            !value
+        ) {
+
+            return null;
+
+        }
 
 
         if (
-            manager
+            typeof value ===
+            "object"
+        ) {
+
+            return (
+                normalizeApp(
+                    value
+                ) ||
+                null
+            );
+
+        }
+
+
+        const raw =
+            String(value);
+
+
+        const direct =
+            state.apps.get(
+                raw
+            );
+
+
+        if (
+            direct
+        ) {
+
+            return direct;
+
+        }
+
+
+        const alias =
+            state.aliases.get(
+                raw.toLowerCase()
+            );
+
+
+        if (
+            alias
+        ) {
+
+            return (
+                state.apps.get(
+                    alias
+                ) ||
+                null
+            );
+
+        }
+
+
+        /*
+         * Noch nicht registriert:
+         * dynamische App erzeugen.
+         */
+
+        return registerInternal({
+
+            id:
+                raw,
+
+            title:
+                raw,
+
+            icon:
+                "◈"
+
+        });
+
+    }
+
+
+    /* ========================================================
+       CALL APP MANAGER
+       ======================================================== */
+
+    async function callManager(
+        app
+    ) {
+
+        const m =
+            manager();
+
+
+        if (
+            !m
+        ) {
+
+            return {
+
+                called:
+                    false,
+
+                result:
+                    null
+
+            };
+
+        }
+
+
+        const methods = [
+
+            "openApp",
+
+            "launchApp",
+
+            "startApp",
+
+            "activateApp"
+
+        ];
+
+
+        for (
+            const method
+            of methods
+        ) {
+
+            if (
+                typeof
+                m[method] !==
+                "function"
+            ) {
+
+                continue;
+
+            }
+
+
+            try {
+
+                const result =
+                    await m[method](
+                        app.id
+                    );
+
+
+                return {
+
+                    called:
+                        true,
+
+                    method,
+
+                    result
+
+                };
+
+            } catch (
+                error
+            ) {
+
+                console.warn(
+                    "[HalDo App Bridge] " +
+                    `Manager.${method}:`,
+                    error
+                );
+
+            }
+
+        }
+
+
+        return {
+
+            called:
+                false,
+
+            result:
+                null
+
+        };
+
+    }
+
+
+    /* ========================================================
+       CALL LAUNCHER
+       ======================================================== */
+
+    async function callLauncher(
+        app
+    ) {
+
+        const l =
+            launcher();
+
+
+        if (
+            !l
+        ) {
+
+            return {
+
+                called:
+                    false,
+
+                result:
+                    null
+
+            };
+
+        }
+
+
+        const methods = [
+
+            "launch",
+
+            "launchApp",
+
+            "openApp",
+
+            "start"
+
+        ];
+
+
+        for (
+            const method
+            of methods
+        ) {
+
+            if (
+                typeof
+                l[method] !==
+                "function"
+            ) {
+
+                continue;
+
+            }
+
+
+            try {
+
+                const result =
+                    await l[method](
+                        app.id
+                    );
+
+
+                return {
+
+                    called:
+                        true,
+
+                    method,
+
+                    result
+
+                };
+
+            } catch (
+                error
+            ) {
+
+                console.warn(
+                    "[HalDo App Bridge] " +
+                    `Launcher.${method}:`,
+                    error
+                );
+
+            }
+
+        }
+
+
+        return {
+
+            called:
+                false,
+
+            result:
+                null
+
+        };
+
+    }
+
+
+    /* ========================================================
+       CALL ROUTER
+       ======================================================== */
+
+    async function callRouter(
+        app
+    ) {
+
+        const r =
+            router();
+
+
+        if (
+            !r
+        ) {
+
+            return {
+
+                called:
+                    false,
+
+                result:
+                    null
+
+            };
+
+        }
+
+
+        const methods = [
+
+            "openApp",
+
+            "navigateToApp",
+
+            "routeToApp",
+
+            "goToApp"
+
+        ];
+
+
+        for (
+            const method
+            of methods
+        ) {
+
+            if (
+                typeof
+                r[method] !==
+                "function"
+            ) {
+
+                continue;
+
+            }
+
+
+            try {
+
+                const result =
+                    await r[method](
+                        app.id
+                    );
+
+
+                return {
+
+                    called:
+                        true,
+
+                    method,
+
+                    result
+
+                };
+
+            } catch (
+                error
+            ) {
+
+                console.warn(
+                    "[HalDo App Bridge] " +
+                    `Router.${method}:`,
+                    error
+                );
+
+            }
+
+        }
+
+
+        return {
+
+            called:
+                false,
+
+            result:
+                null
+
+        };
+
+    }
+
+
+    /* ========================================================
+       OPEN WINDOW
+       ======================================================== */
+
+    async function openWindow(
+        app
+    ) {
+
+        const host =
+            windowHost();
+
+
+        if (
+            !host ||
+            typeof
+            host.openApp !==
+            "function"
+        ) {
+
+            return {
+
+                called:
+                    false,
+
+                result:
+                    null
+
+            };
+
+        }
+
+
+        try {
+
+            const result =
+                await host.openApp(
+                    app
+                );
+
+
+            return {
+
+                called:
+                    true,
+
+                result
+
+            };
+
+        } catch (
+            error
+        ) {
+
+            console.warn(
+                "[HalDo App Bridge] " +
+                "Window Host:",
+                error
+            );
+
+
+            return {
+
+                called:
+                    false,
+
+                result:
+                    null,
+
+                error
+
+            };
+
+        }
+
+    }
+
+
+    /* ========================================================
+       LAUNCH
+       ======================================================== */
+
+    async function launch(
+        value,
+        options = {}
+    ) {
+
+        const app =
+            resolveApp(
+                value
+            );
+
+
+        if (
+            !app
+        ) {
+
+            notify(
+                "App nicht gefunden",
+                String(value),
+                "!"
+            );
+
+
+            return {
+
+                success:
+                    false,
+
+                reason:
+                    "not-found"
+
+            };
+
+        }
+
+
+        /*
+         * Doppelte Starts vermeiden.
+         */
+
+        if (
+            state.launching.has(
+                app.id
+            )
+        ) {
+
+            return {
+
+                success:
+                    true,
+
+                alreadyLaunching:
+                    true,
+
+                app
+
+            };
+
+        }
+
+
+        state.launching.add(
+            app.id
+        );
+
+
+        emit(
+            "haldo:app-launch-start",
+            {
+                app
+            }
+        );
+
+
+        try {
+
+            let managerResult =
+                null;
+
+            let launcherResult =
+                null;
+
+            let routerResult =
+                null;
+
+            let windowResult =
+                null;
+
+
+            /*
+             * 1.
+             * App Manager
+             */
+
+            if (
+                options.manager !==
+                false
+            ) {
+
+                managerResult =
+                    await callManager(
+                        app
+                    );
+
+            }
+
+
+            /*
+             * 2.
+             * App Launcher
+             *
+             * Nur wenn Manager nicht verfügbar war.
+             */
+
+            if (
+                !managerResult.called &&
+                options.launcher !==
+                false
+            ) {
+
+                launcherResult =
+                    await callLauncher(
+                        app
+                    );
+
+            }
+
+
+            /*
+             * 3.
+             * Router
+             */
+
+            if (
+                options.router !==
+                false
+            ) {
+
+                routerResult =
+                    await callRouter(
+                        app
+                    );
+
+            }
+
+
+            /*
+             * 4.
+             * Window Host
+             *
+             * Dadurch bekommt die App ein echtes
+             * Arbeitsfenster.
+             */
+
+            if (
+                options.window !==
+                false
+            ) {
+
+                windowResult =
+                    await openWindow(
+                        app
+                    );
+
+            }
+
+
+            const success =
+                managerResult.called ||
+                launcherResult.called ||
+                routerResult.called ||
+                windowResult.called;
+
+
+            if (
+                success
+            ) {
+
+                state.opened.add(
+                    app.id
+                );
+
+
+                state.failed.delete(
+                    app.id
+                );
+
+
+                notify(
+                    app.title,
+                    "Anwendung wurde geöffnet.",
+                    app.icon
+                );
+
+
+                emit(
+                    "haldo:app-launched",
+                    {
+
+                        app,
+
+                        manager:
+                            managerResult,
+
+                        launcher:
+                            launcherResult,
+
+                        router:
+                            routerResult,
+
+                        window:
+                            windowResult
+
+                    }
+                );
+
+
+                return {
+
+                    success:
+                        true,
+
+                    app,
+
+                    manager:
+                        managerResult,
+
+                    launcher:
+                        launcherResult,
+
+                    router:
+                        routerResult,
+
+                    window:
+                        windowResult
+
+                };
+
+            }
+
+
+            /*
+             * Keine API gefunden.
+             *
+             * Trotzdem kein harter Fehler:
+             * App bleibt registriert und wir geben
+             * eine klare Meldung aus.
+             */
+
+            state.failed.add(
+                app.id
+            );
+
+
+            notify(
+                app.title,
+                "Für diese App ist noch kein ausführbares Modul verbunden.",
+                "!"
+            );
+
+
+            emit(
+                "haldo:app-launch-failed",
+                {
+
+                    app,
+
+                    reason:
+                        "no-runtime-handler"
+
+                }
+            );
+
+
+            return {
+
+                success:
+                    false,
+
+                app,
+
+                reason:
+                    "no-runtime-handler"
+
+            };
+
+        } catch (
+            error
+        ) {
+
+            state.failed.add(
+                app.id
+            );
+
+
+            console.error(
+                "[HalDo App Bridge] " +
+                "App konnte nicht gestartet werden:",
+                error
+            );
+
+
+            notify(
+                app.title,
+                "Beim Starten der App ist ein Fehler aufgetreten.",
+                "!"
+            );
+
+
+            emit(
+                "haldo:app-launch-error",
+                {
+
+                    app,
+
+                    error
+
+                }
+            );
+
+
+            return {
+
+                success:
+                    false,
+
+                app,
+
+                error
+
+            };
+
+        } finally {
+
+            state.launching.delete(
+                app.id
+            );
+
+        }
+
+    }
+
+
+    /* ========================================================
+       CLOSE APP
+       ======================================================== */
+
+    async function close(
+        value
+    ) {
+
+        const app =
+            resolveApp(
+                value
+            );
+
+
+        if (
+            !app
+        ) {
+
+            return false;
+
+        }
+
+
+        const host =
+            windowHost();
+
+
+        if (
+            host &&
+            typeof
+            host.closeWindow ===
+            "function"
+        ) {
+
+            try {
+
+                host.closeWindow(
+                    app.id
+                );
+
+            } catch (
+                error
+            ) {}
+
+        }
+
+
+        const m =
+            manager();
+
+
+        if (
+            m
         ) {
 
             const methods = [
@@ -53367,30 +53893,21 @@
 
                 if (
                     typeof
-                    manager[method] ===
+                    m[method] ===
                     "function"
                 ) {
 
                     try {
 
-                        manager[method](
-                            id
+                        await m[method](
+                            app.id
                         );
 
                         break;
 
                     } catch (
                         error
-                    ) {
-
-                        console.warn(
-                            "[HalDo Window Host] " +
-                            method +
-                            ":",
-                            error
-                        );
-
-                    }
+                    ) {}
 
                 }
 
@@ -53399,44 +53916,18 @@
         }
 
 
-        record.element.classList.remove(
-            "open"
+        state.opened.delete(
+            app.id
         );
 
 
-        setTimeout(
-            () => {
+        emit(
+            "haldo:app-closed",
+            {
 
-                record.element.remove();
+                app
 
-                state.windows.delete(
-                    id
-                );
-
-
-                if (
-                    state.activeId ===
-                    id
-                ) {
-
-                    state.activeId =
-                        null;
-
-                }
-
-
-                emit(
-                    "haldo:window-closed",
-                    {
-
-                        appId:
-                            id
-
-                    }
-                );
-
-            },
-            170
+            }
         );
 
 
@@ -53446,654 +53937,217 @@
 
 
     /* ========================================================
-       DRAGGING
+       REGISTER
        ======================================================== */
 
-    function enableDragging(
-        record
-    ) {
-
-        const bar =
-            record.titlebar;
-
-
-        let dragging =
-            false;
-
-        let startX =
-            0;
-
-        let startY =
-            0;
-
-        let startLeft =
-            0;
-
-        let startTop =
-            0;
-
-
-        bar.addEventListener(
-            "pointerdown",
-            event => {
-
-                if (
-                    event.target.closest(
-                        "button"
-                    )
-                ) {
-
-                    return;
-
-                }
-
-
-                if (
-                    record.maximized
-                ) {
-
-                    return;
-
-                }
-
-
-                dragging =
-                    true;
-
-
-                focusWindow(
-                    record.id
-                );
-
-
-                startX =
-                    event.clientX;
-
-
-                startY =
-                    event.clientY;
-
-
-                const rect =
-                    record.element.getBoundingClientRect();
-
-
-                startLeft =
-                    rect.left;
-
-
-                startTop =
-                    rect.top;
-
-
-                try {
-
-                    bar.setPointerCapture(
-                        event.pointerId
-                    );
-
-                } catch (
-                    error
-                ) {}
-
-            }
-        );
-
-
-        bar.addEventListener(
-            "pointermove",
-            event => {
-
-                if (
-                    !dragging
-                ) {
-
-                    return;
-
-                }
-
-
-                const dx =
-                    event.clientX -
-                    startX;
-
-
-                const dy =
-                    event.clientY -
-                    startY;
-
-
-                const maxLeft =
-                    Math.max(
-                        8,
-                        window.innerWidth -
-                        record.element.offsetWidth -
-                        8
-                    );
-
-
-                const maxTop =
-                    Math.max(
-                        55,
-                        window.innerHeight -
-                        80
-                    );
-
-
-                const left =
-                    Math.min(
-                        Math.max(
-                            8,
-                            startLeft + dx
-                        ),
-                        maxLeft
-                    );
-
-
-                const top =
-                    Math.min(
-                        Math.max(
-                            55,
-                            startTop + dy
-                        ),
-                        maxTop
-                    );
-
-
-                record.element.style.left =
-                    `${left}px`;
-
-
-                record.element.style.top =
-                    `${top}px`;
-
-            }
-        );
-
-
-        bar.addEventListener(
-            "pointerup",
-            event => {
-
-                dragging =
-                    false;
-
-
-                try {
-
-                    bar.releasePointerCapture(
-                        event.pointerId
-                    );
-
-                } catch (
-                    error
-                ) {}
-
-            }
-        );
-
-    }
-
-
-    /* ========================================================
-       OPEN APP WINDOW
-       ======================================================== */
-
-    async function openApp(
+    function register(
         app
     ) {
 
-        const record =
-            createWindow(
+        const result =
+            registerInternal(
                 app
             );
 
 
         if (
-            !record
-        ) {
-
-            return false;
-
-        }
-
-
-        /*
-         * App Manager zuerst informieren.
-         */
-
-        const manager =
-            getAppManager();
-
-
-        let result =
-            null;
-
-
-        if (
-            manager
-        ) {
-
-            const methods = [
-
-                "openApp",
-
-                "launchApp",
-
-                "startApp"
-
-            ];
-
-
-            for (
-                const method
-                of methods
-            ) {
-
-                if (
-                    typeof
-                    manager[method] ===
-                    "function"
-                ) {
-
-                    try {
-
-                        result =
-                            await manager[method](
-                                app.id
-                            );
-
-
-                        if (
-                            result !==
-                            false
-                        ) {
-
-                            break;
-
-                        }
-
-                    } catch (
-                        error
-                    ) {
-
-                        console.warn(
-                            "[HalDo Window Host] " +
-                            method +
-                            ":",
-                            error
-                        );
-
-                    }
-
-                }
-
-            }
-
-        }
-
-
-        /*
-         * Wenn der App Manager ein HTMLElement,
-         * HTML oder eine App-Instanz zurückgibt,
-         * versuchen wir es in das Fenster einzusetzen.
-         */
-
-        if (
             result
         ) {
 
-            mountAppResult(
-                record,
-                result
+            emit(
+                "haldo:app-registered",
+                {
+
+                    app:
+                        result
+
+                }
             );
 
         }
 
 
-        /*
-         * Router informieren.
-         */
-
-        const router =
-            getRouter();
-
-
-        if (
-            router
-        ) {
-
-            const methods = [
-
-                "openAppWindow",
-
-                "attachAppWindow",
-
-                "navigateToApp"
-
-            ];
-
-
-            for (
-                const method
-                of methods
-            ) {
-
-                if (
-                    typeof
-                    router[method] ===
-                    "function"
-                ) {
-
-                    try {
-
-                        await router[method](
-                            app.id,
-                            record.element
-                        );
-
-                        break;
-
-                    } catch (
-                        error
-                    ) {
-
-                        console.warn(
-                            "[HalDo Window Host] Router:",
-                            error
-                        );
-
-                    }
-
-                }
-
-            }
-
-        }
-
-
-        /*
-         * Allgemeines Event für Apps.
-         */
-
-        emit(
-            "haldo:app-window-opened",
-            {
-
-                appId:
-                    app.id,
-
-                app,
-
-                window:
-                    record.element,
-
-                body:
-                    record.body
-
-            }
-        );
-
-
-        /*
-         * Falls niemand Inhalte eingesetzt hat,
-         * bleibt ein neutraler Runtime-Hinweis.
-         */
-
-        setTimeout(
-            () => {
-
-                if (
-                    record.loading &&
-                    record.loading.isConnected
-                ) {
-
-                    record.loading.remove();
-
-                }
-
-            },
-            450
-        );
-
-
-        return true;
+        return result;
 
     }
 
 
     /* ========================================================
-       MOUNT RESULT
+       GET APPS
        ======================================================== */
 
-    function mountAppResult(
-        record,
-        result
+    function getApps() {
+
+        return Array.from(
+            state.apps.values()
+        );
+
+    }
+
+
+    /* ========================================================
+       GET APP
+       ======================================================== */
+
+    function getApp(
+        value
     ) {
 
-        if (
-            !record ||
-            !record.body
-        ) {
-
-            return false;
-
-        }
-
-
-        record.loading?.remove();
-
-
-        if (
-            result instanceof
-            HTMLElement
-        ) {
-
-            record.body.appendChild(
-                result
-            );
-
-
-            return true;
-
-        }
-
-
-        if (
-            typeof result ===
-            "string"
-        ) {
-
-            record.body.innerHTML =
-                result;
-
-
-            return true;
-
-        }
-
-
-        if (
-            result &&
-            result.element instanceof
-            HTMLElement
-        ) {
-
-            record.body.appendChild(
-                result.element
-            );
-
-
-            return true;
-
-        }
-
-
-        if (
-            result &&
-            typeof
-            result.html ===
-            "string"
-        ) {
-
-            record.body.innerHTML =
-                result.html;
-
-
-            return true;
-
-        }
-
-
-        return false;
+        return resolveApp(
+            value
+        );
 
     }
 
 
     /* ========================================================
-       CONNECT APP CENTER
+       STATE
        ======================================================== */
 
-    function connectAppCenter() {
+    function getState() {
 
-        document.addEventListener(
-            "haldo:app-launch-requested",
-            async event => {
+        return {
 
-                const app =
-                    event.detail?.app;
+            initialized:
+                state.initialized,
+
+            appCount:
+                state.apps.size,
+
+            opened:
+                Array.from(
+                    state.opened
+                ),
+
+            launching:
+                Array.from(
+                    state.launching
+                ),
+
+            failed:
+                Array.from(
+                    state.failed
+                )
+
+        };
+
+    }
 
 
-                if (
-                    !app
-                ) {
+    /* ========================================================
+       GLOBAL LAUNCH EVENT
+       ======================================================== */
 
-                    return;
+    document.addEventListener(
+        "haldo:app-launch-requested",
+        event => {
+
+            const detail =
+                event.detail ||
+                {};
+
+
+            const app =
+                detail.app ||
+                detail.appId ||
+                null;
+
+
+            if (
+                !app
+            ) {
+
+                return;
+
+            }
+
+
+            /*
+             * Nur reagieren, wenn dieses Event nicht
+             * bereits von uns ausgelöst wurde.
+             */
+
+            if (
+                detail.__haldoBridge
+            ) {
+
+                return;
+
+            }
+
+
+            launch(
+                app,
+                {
+
+                    manager:
+                        true,
+
+                    launcher:
+                        true,
+
+                    router:
+                        true,
+
+                    window:
+                        true
 
                 }
+            );
+
+        }
+    );
 
 
-                /*
-                 * Nur wenn die App noch nicht
-                 * geöffnet wurde.
-                 */
+    /* ========================================================
+       DIRECT OPEN EVENT
+       ======================================================== */
 
-                if (
-                    event.detail?.opened
-                ) {
+    document.addEventListener(
+        "haldo:open-app",
+        event => {
 
-                    /*
-                     * Ein bestehender Manager kann
-                     * bereits ein Fenster erstellt haben.
-                     * Trotzdem stellen wir die Window API
-                     * bereit.
-                     */
-
-                }
+            const detail =
+                event.detail ||
+                {};
 
 
-                await openApp(
+            launch(
+                detail.app ||
+                detail.appId ||
+                detail.id,
+                detail.options ||
+                {}
+            );
+
+        }
+    );
+
+
+    /* ========================================================
+       APP REGISTRY EVENTS
+       ======================================================== */
+
+    document.addEventListener(
+        "haldo:app-registered",
+        event => {
+
+            const app =
+                event.detail?.app;
+
+
+            if (
+                app
+            ) {
+
+                registerInternal(
                     app
                 );
 
             }
-        );
 
-
-        document.addEventListener(
-            "haldo:open-app-window",
-            async event => {
-
-                const app =
-                    event.detail?.app ||
-                    {
-
-                        id:
-                            event.detail?.appId,
-
-                        title:
-                            event.detail?.title ||
-                            event.detail?.appId,
-
-                        icon:
-                            event.detail?.icon ||
-                            "◈"
-
-                    };
-
-
-                if (
-                    app.id
-                ) {
-
-                    await openApp(
-                        app
-                    );
-
-                }
-
-            }
-        );
-
-    }
-
-
-    /* ========================================================
-       PUBLIC API
-       ======================================================== */
-
-    const api = {
-
-        __initialized:
-            true,
-
-        version:
-            "18.0.0",
-
-        openApp,
-
-        closeWindow,
-
-        minimizeWindow,
-
-        maximizeWindow,
-
-        focusWindow,
-
-        getWindow:
-            id =>
-                state.windows.get(
-                    safeId(id)
-                ) || null,
-
-        getWindows:
-            () =>
-                Array.from(
-                    state.windows.values()
-                ),
-
-        getActiveWindow:
-            () =>
-                state.activeId
-                    ? state.windows.get(
-                        state.activeId
-                    ) || null
-                    : null
-
-    };
-
-
-    window.HalDoWindowHost =
-        api;
-
-
-    window.HalDoOS =
-        window.HalDoOS ||
-        {};
-
-
-    window.HalDoOS.windowHost =
-        api;
+        }
+    );
 
 
     /* ========================================================
@@ -54111,46 +54165,83 @@
         }
 
 
-        host =
-            document.getElementById(
-                "haldoAppWindowHost"
-            );
+        registerCoreApps();
 
 
-        if (
-            !host
-        ) {
-
-            console.warn(
-                "[HalDo Window Host] " +
-                "Host nicht gefunden."
-            );
-
-
-            return;
-
-        }
-
-
-        connectAppCenter();
+        importRegistry();
 
 
         state.initialized =
             true;
 
 
-        console.log(
-            "[HalDo Window Host] Bereit."
-        );
+        /*
+         * APIs bereitstellen.
+         */
+
+        const api = {
+
+            __initialized:
+                true,
+
+            version:
+                "18.0.0",
+
+            launch,
+
+            openApp:
+                launch,
+
+            close,
+
+            register,
+
+            getApp,
+
+            getApps,
+
+            getState,
+
+            notify
+
+        };
+
+
+        window.HalDoAppBridge =
+            api;
+
+
+        window.HalDoOS =
+            window.HalDoOS ||
+            {};
+
+
+        window.HalDoOS.appBridge =
+            api;
 
 
         emit(
-            "haldo:window-host-ready",
-            {}
+            "haldo:app-bridge-ready",
+            {
+
+                appCount:
+                    state.apps.size
+
+            }
+        );
+
+
+        console.log(
+            "[HalDo App Bridge] Bereit. Apps:",
+            state.apps.size
         );
 
     }
 
+
+    /* ========================================================
+       START
+       ======================================================== */
 
     if (
         document.readyState ===
@@ -54176,274 +54267,152 @@
 })();
 
 <!-- =========================================================
-     END PART 34
+     END PART 36
      ========================================================= -->
     <!-- =========================================================
      HALDO AI OS 18
      INDEX.HTML
-     PART 35
+     PART 37
 
-     HAUPTMENÜ / SYSTEM CONTROL CENTER
+     HALDO APP CENTER
      ---------------------------------------------------------
-     • kleiner Button oben links
-     • ordentliches Hauptmenü
-     • Apps
-     • Einstellungen
-     • System
-     • AI
-     • Tastatur
-     • Sprache
-     • Speicher
-     • Diagnose
-     • Fenster
-     • Ausschalten / Neustart
+     • vollständige App-Übersicht
      • Suche
-     • funktionierende Events
+     • Kategorien
+     • App-Kacheln
+     • Favoriten
+     • zuletzt verwendete Apps
+     • Start über HalDoAppBridge
+     • Verbindung mit App Registry
+     • Verbindung mit App Manager
+     • Verbindung mit Window Host
      ========================================================= -->
 
 
 <style>
 
 /* ============================================================
-   CONTROL CENTER BUTTON
+   APP CENTER HOST
    ============================================================ */
 
-#haldoControlButton {
+#haldoAppCenter {
 
     position:
         fixed;
 
-    top:
-        16px;
-
-    left:
-        16px;
+    inset:
+        0;
 
     z-index:
-        9100;
+        6500;
 
-    width:
-        42px;
+    display:
+        none;
 
-    height:
-        42px;
+    overflow:
+        hidden;
+
+    background:
+        rgba(3,6,13,.96);
+
+}
+
+
+#haldoAppCenter.open {
 
     display:
         flex;
 
-    align-items:
-        center;
-
-    justify-content:
-        center;
-
-    border:
-        1px solid
-        rgba(255,255,255,.13);
-
-    border-radius:
-        13px;
-
-    background:
-        rgba(7,11,20,.72);
-
-    backdrop-filter:
-        blur(18px);
-
-    -webkit-backdrop-filter:
-        blur(18px);
-
-    color:
-        rgba(255,255,255,.82);
-
-    cursor:
-        pointer;
-
-    box-shadow:
-        0 10px 35px
-        rgba(0,0,0,.28);
-
-    transition:
-        transform .18s ease,
-        background .18s ease,
-        border-color .18s ease;
-
 }
 
 
-#haldoControlButton:hover {
+/* ============================================================
+   BACKGROUND
+   ============================================================ */
 
-    transform:
-        translateY(-1px)
-        scale(1.03);
-
-    background:
-        rgba(255,255,255,.08);
-
-    border-color:
-        rgba(255,255,255,.24);
-
-}
-
-
-#haldoControlButton:active {
-
-    transform:
-        scale(.95);
-
-}
-
-
-#haldoControlButton .haldo-menu-symbol {
-
-    width:
-        19px;
-
-    height:
-        15px;
-
-    position:
-        relative;
-
-}
-
-
-#haldoControlButton .haldo-menu-symbol span {
+.haldo-app-center-background {
 
     position:
         absolute;
 
-    left:
+    inset:
         0;
+
+    overflow:
+        hidden;
+
+    pointer-events:
+        none;
+
+}
+
+
+.haldo-app-center-orb {
+
+    position:
+        absolute;
+
+    width:
+        420px;
+
+    height:
+        420px;
+
+    border-radius:
+        50%;
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(255,255,255,.055),
+            transparent 68%
+        );
+
+    filter:
+        blur(20px);
+
+}
+
+
+.haldo-app-center-orb.one {
+
+    top:
+        -190px;
+
+    right:
+        -130px;
+
+}
+
+
+.haldo-app-center-orb.two {
+
+    bottom:
+        -220px;
+
+    left:
+        -170px;
+
+}
+
+
+/* ============================================================
+   MAIN LAYOUT
+   ============================================================ */
+
+.haldo-app-center-layout {
+
+    position:
+        relative;
+
+    z-index:
+        1;
 
     width:
         100%;
 
     height:
-        2px;
-
-    border-radius:
-        99px;
-
-    background:
-        currentColor;
-
-    transition:
-        transform .18s ease,
-        opacity .18s ease;
-
-}
-
-
-#haldoControlButton .haldo-menu-symbol span:nth-child(1) {
-
-    top:
-        0;
-
-}
-
-
-#haldoControlButton .haldo-menu-symbol span:nth-child(2) {
-
-    top:
-        6px;
-
-}
-
-
-#haldoControlButton .haldo-menu-symbol span:nth-child(3) {
-
-    top:
-        12px;
-
-}
-
-
-/* ============================================================
-   CONTROL CENTER OVERLAY
-   ============================================================ */
-
-#haldoControlCenter {
-
-    position:
-        fixed;
-
-    inset:
-        0;
-
-    z-index:
-        9000;
-
-    pointer-events:
-        none;
-
-    opacity:
-        0;
-
-    transition:
-        opacity .18s ease;
-
-}
-
-
-#haldoControlCenter.open {
-
-    opacity:
-        1;
-
-    pointer-events:
-        auto;
-
-}
-
-
-/* ============================================================
-   BACKDROP
-   ============================================================ */
-
-#haldoControlBackdrop {
-
-    position:
-        absolute;
-
-    inset:
-        0;
-
-    background:
-        rgba(0,0,0,.42);
-
-    backdrop-filter:
-        blur(5px);
-
-    -webkit-backdrop-filter:
-        blur(5px);
-
-}
-
-
-/* ============================================================
-   PANEL
-   ============================================================ */
-
-#haldoControlPanel {
-
-    position:
-        absolute;
-
-    top:
-        66px;
-
-    left:
-        16px;
-
-    width:
-        min(
-            420px,
-            calc(100vw - 32px)
-        );
-
-    max-height:
-        calc(100vh - 82px);
+        100%;
 
     display:
         flex;
@@ -54451,66 +54420,17 @@
     flex-direction:
         column;
 
-    overflow:
-        hidden;
-
-    border:
-        1px solid
-        rgba(255,255,255,.12);
-
-    border-radius:
-        22px;
-
-    background:
-        rgba(8,12,22,.94);
-
-    backdrop-filter:
-        blur(28px);
-
-    -webkit-backdrop-filter:
-        blur(28px);
-
-    box-shadow:
-        0 30px 100px
-        rgba(0,0,0,.58);
-
-    transform:
-        translateY(-10px)
-        scale(.97);
-
-    transition:
-        transform .2s ease;
-
-}
-
-
-#haldoControlCenter.open
-#haldoControlPanel {
-
-    transform:
-        translateY(0)
-        scale(1);
-
 }
 
 
 /* ============================================================
-   PANEL HEADER
+   HEADER
    ============================================================ */
 
-.haldo-control-header {
+.haldo-app-center-header {
 
-    padding:
-        18px 18px 14px;
-
-    border-bottom:
-        1px solid
-        rgba(255,255,255,.07);
-
-}
-
-
-.haldo-control-header-top {
+    min-height:
+        72px;
 
     display:
         flex;
@@ -54519,18 +54439,37 @@
         center;
 
     gap:
-        11px;
+        12px;
+
+    padding:
+        14px 18px;
+
+    border-bottom:
+        1px solid
+        rgba(255,255,255,.07);
+
+    background:
+        rgba(5,8,16,.72);
+
+    backdrop-filter:
+        blur(20px);
+
+    -webkit-backdrop-filter:
+        blur(20px);
 
 }
 
 
-.haldo-control-mini-logo {
+.haldo-app-center-logo {
 
     width:
-        38px;
+        40px;
 
     height:
-        38px;
+        40px;
+
+    flex:
+        0 0 40px;
 
     border-radius:
         50%;
@@ -54539,30 +54478,30 @@
         cover;
 
     box-shadow:
-        0 0 22px
-        rgba(255,255,255,.16);
+        0 0 24px
+        rgba(255,255,255,.12);
 
 }
 
 
-.haldo-control-heading {
+.haldo-app-center-heading {
 
-    flex:
-        1;
+    min-width:
+        145px;
 
 }
 
 
-.haldo-control-heading strong {
+.haldo-app-center-heading strong {
 
     display:
         block;
 
     color:
-        rgba(255,255,255,.92);
+        rgba(255,255,255,.91);
 
     font-size:
-        13px;
+        12px;
 
     font-weight:
         850;
@@ -54570,7 +54509,7 @@
 }
 
 
-.haldo-control-heading span {
+.haldo-app-center-heading span {
 
     display:
         block;
@@ -54579,50 +54518,10 @@
         3px;
 
     color:
-        rgba(255,255,255,.38);
+        rgba(255,255,255,.32);
 
     font-size:
-        8px;
-
-}
-
-
-.haldo-control-close {
-
-    width:
-        32px;
-
-    height:
-        32px;
-
-    border:
-        0;
-
-    border-radius:
-        9px;
-
-    background:
-        rgba(255,255,255,.04);
-
-    color:
-        rgba(255,255,255,.48);
-
-    cursor:
-        pointer;
-
-    font-size:
-        17px;
-
-}
-
-
-.haldo-control-close:hover {
-
-    background:
-        rgba(255,255,255,.09);
-
-    color:
-        rgba(255,255,255,.9);
+        7px;
 
 }
 
@@ -54631,37 +54530,43 @@
    SEARCH
    ============================================================ */
 
-.haldo-control-search {
-
-    margin-top:
-        14px;
+.haldo-app-center-search {
 
     position:
         relative;
 
+    flex:
+        1;
+
+    max-width:
+        520px;
+
+    margin:
+        0 auto;
+
 }
 
 
-.haldo-control-search input {
+.haldo-app-center-search input {
 
     width:
         100%;
 
     height:
-        40px;
+        42px;
 
     box-sizing:
         border-box;
 
     padding:
-        0 13px 0 36px;
+        0 14px 0 38px;
 
     border:
         1px solid
-        rgba(255,255,255,.07);
+        rgba(255,255,255,.08);
 
     border-radius:
-        11px;
+        13px;
 
     outline:
         none;
@@ -54673,106 +54578,159 @@
         rgba(255,255,255,.88);
 
     font-size:
-        9px;
+        8px;
 
 }
 
 
-.haldo-control-search input::placeholder {
+.haldo-app-center-search input::placeholder {
 
     color:
-        rgba(255,255,255,.28);
+        rgba(255,255,255,.25);
 
 }
 
 
-.haldo-control-search input:focus {
+.haldo-app-center-search input:focus {
 
     border-color:
         rgba(255,255,255,.18);
 
     background:
-        rgba(255,255,255,.05);
+        rgba(255,255,255,.055);
 
 }
 
 
-.haldo-control-search-icon {
+.haldo-app-center-search-icon {
 
     position:
         absolute;
 
     left:
-        13px;
+        14px;
 
     top:
-        12px;
+        13px;
 
     color:
-        rgba(255,255,255,.35);
+        rgba(255,255,255,.32);
 
     font-size:
-        12px;
+        13px;
 
 }
 
 
 /* ============================================================
-   MENU BODY
+   HEADER ACTIONS
    ============================================================ */
 
-#haldoControlBody {
+.haldo-app-center-actions {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        6px;
+
+}
+
+
+.haldo-app-center-action {
+
+    width:
+        36px;
+
+    height:
+        36px;
+
+    border:
+        1px solid
+        rgba(255,255,255,.07);
+
+    border-radius:
+        10px;
+
+    background:
+        rgba(255,255,255,.025);
+
+    color:
+        rgba(255,255,255,.48);
+
+    cursor:
+        pointer;
+
+}
+
+
+.haldo-app-center-action:hover {
+
+    background:
+        rgba(255,255,255,.07);
+
+    color:
+        rgba(255,255,255,.86);
+
+}
+
+
+/* ============================================================
+   CONTENT
+   ============================================================ */
+
+.haldo-app-center-content {
 
     flex:
         1;
 
+    min-height:
+        0;
+
+    display:
+        flex;
+
     overflow:
-        auto;
-
-    padding:
-        12px;
-
-}
-
-
-#haldoControlBody::-webkit-scrollbar {
-
-    width:
-        5px;
-
-}
-
-
-#haldoControlBody::-webkit-scrollbar-thumb {
-
-    background:
-        rgba(255,255,255,.08);
-
-    border-radius:
-        99px;
+        hidden;
 
 }
 
 
 /* ============================================================
-   SECTION
+   SIDEBAR
    ============================================================ */
 
-.haldo-control-section {
+.haldo-app-center-sidebar {
 
-    margin-bottom:
-        14px;
+    width:
+        190px;
+
+    flex:
+        0 0 190px;
+
+    padding:
+        18px 12px;
+
+    border-right:
+        1px solid
+        rgba(255,255,255,.06);
+
+    overflow:
+        auto;
 
 }
 
 
-.haldo-control-section-title {
+.haldo-app-center-sidebar-title {
 
     margin:
-        5px 7px 7px;
+        3px 8px 9px;
 
     color:
-        rgba(255,255,255,.30);
+        rgba(255,255,255,.26);
 
     font-size:
         7px;
@@ -54789,31 +54747,13 @@
 }
 
 
-/* ============================================================
-   MENU GRID
-   ============================================================ */
+.haldo-app-category {
 
-.haldo-control-grid {
-
-    display:
-        grid;
-
-    grid-template-columns:
-        repeat(
-            2,
-            minmax(0, 1fr)
-        );
-
-    gap:
-        7px;
-
-}
-
-
-.haldo-control-item {
+    width:
+        100%;
 
     min-height:
-        64px;
+        38px;
 
     display:
         flex;
@@ -54822,23 +54762,25 @@
         center;
 
     gap:
-        10px;
-
-    padding:
         9px;
 
+    margin-bottom:
+        4px;
+
+    padding:
+        0 10px;
+
     border:
-        1px solid
-        rgba(255,255,255,.055);
+        0;
 
     border-radius:
-        13px;
+        10px;
 
     background:
-        rgba(255,255,255,.025);
+        transparent;
 
     color:
-        rgba(255,255,255,.76);
+        rgba(255,255,255,.42);
 
     cursor:
         pointer;
@@ -54846,46 +54788,95 @@
     text-align:
         left;
 
-    transition:
-        transform .15s ease,
-        background .15s ease,
-        border-color .15s ease;
+    font-size:
+        8px;
 
 }
 
 
-.haldo-control-item:hover {
-
-    transform:
-        translateY(-1px);
+.haldo-app-category:hover {
 
     background:
-        rgba(255,255,255,.065);
+        rgba(255,255,255,.045);
 
-    border-color:
-        rgba(255,255,255,.12);
-
-}
-
-
-.haldo-control-item:active {
-
-    transform:
-        scale(.98);
+    color:
+        rgba(255,255,255,.78);
 
 }
 
 
-.haldo-control-item-icon {
+.haldo-app-category.active {
+
+    background:
+        rgba(255,255,255,.07);
+
+    color:
+        rgba(255,255,255,.9);
+
+}
+
+
+.haldo-app-category-icon {
 
     width:
-        34px;
+        22px;
 
-    height:
-        34px;
+    text-align:
+        center;
+
+    font-size:
+        11px;
+
+}
+
+
+/* ============================================================
+   APP CONTENT
+   ============================================================ */
+
+.haldo-app-center-main {
 
     flex:
-        0 0 34px;
+        1;
+
+    min-width:
+        0;
+
+    overflow:
+        auto;
+
+    padding:
+        22px;
+
+}
+
+
+.haldo-app-center-main::-webkit-scrollbar,
+.haldo-app-center-sidebar::-webkit-scrollbar {
+
+    width:
+        5px;
+
+}
+
+
+.haldo-app-center-main::-webkit-scrollbar-thumb,
+.haldo-app-center-sidebar::-webkit-scrollbar-thumb {
+
+    background:
+        rgba(255,255,255,.08);
+
+    border-radius:
+        99px;
+
+}
+
+
+/* ============================================================
+   SECTION HEADER
+   ============================================================ */
+
+.haldo-app-section-header {
 
     display:
         flex;
@@ -54894,58 +54885,32 @@
         center;
 
     justify-content:
-        center;
+        space-between;
 
-    border-radius:
-        10px;
-
-    background:
-        rgba(255,255,255,.05);
-
-    color:
-        rgba(255,255,255,.72);
-
-    font-size:
+    margin-bottom:
         14px;
 
 }
 
 
-.haldo-control-item-text {
-
-    min-width:
-        0;
-
-}
-
-
-.haldo-control-item-text strong {
+.haldo-app-section-title strong {
 
     display:
         block;
 
-    overflow:
-        hidden;
-
-    white-space:
-        nowrap;
-
-    text-overflow:
-        ellipsis;
-
     color:
-        rgba(255,255,255,.82);
+        rgba(255,255,255,.85);
 
     font-size:
-        8px;
+        11px;
 
     font-weight:
-        800;
+        850;
 
 }
 
 
-.haldo-control-item-text span {
+.haldo-app-section-title span {
 
     display:
         block;
@@ -54957,19 +54922,109 @@
         rgba(255,255,255,.28);
 
     font-size:
-        6.5px;
-
-    line-height:
-        1.35;
+        7px;
 
 }
 
 
 /* ============================================================
-   SYSTEM BAR
+   APP GRID
    ============================================================ */
 
-.haldo-system-bar {
+#haldoAppGrid {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(
+            auto-fill,
+            minmax(
+                150px,
+                1fr
+            )
+        );
+
+    gap:
+        10px;
+
+}
+
+
+/* ============================================================
+   APP CARD
+   ============================================================ */
+
+.haldo-app-card {
+
+    position:
+        relative;
+
+    min-height:
+        124px;
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    padding:
+        13px;
+
+    border:
+        1px solid
+        rgba(255,255,255,.065);
+
+    border-radius:
+        16px;
+
+    background:
+        rgba(255,255,255,.025);
+
+    cursor:
+        pointer;
+
+    overflow:
+        hidden;
+
+    transition:
+        transform .16s ease,
+        background .16s ease,
+        border-color .16s ease;
+
+}
+
+
+.haldo-app-card:hover {
+
+    transform:
+        translateY(-2px);
+
+    background:
+        rgba(255,255,255,.055);
+
+    border-color:
+        rgba(255,255,255,.13);
+
+}
+
+
+.haldo-app-card:active {
+
+    transform:
+        scale(.98);
+
+}
+
+
+.haldo-app-card-icon {
+
+    width:
+        43px;
+
+    height:
+        43px;
 
     display:
         flex;
@@ -54977,78 +55032,184 @@
     align-items:
         center;
 
-    gap:
-        8px;
-
-    padding:
-        10px;
+    justify-content:
+        center;
 
     border:
         1px solid
-        rgba(255,255,255,.06);
+        rgba(255,255,255,.07);
 
     border-radius:
         13px;
 
     background:
-        rgba(255,255,255,.025);
+        rgba(255,255,255,.045);
+
+    color:
+        rgba(255,255,255,.78);
+
+    font-size:
+        18px;
 
 }
 
 
-.haldo-system-status-dot {
+.haldo-app-card-title {
+
+    margin-top:
+        13px;
+
+    color:
+        rgba(255,255,255,.82);
+
+    font-size:
+        9px;
+
+    font-weight:
+        800;
+
+}
+
+
+.haldo-app-card-description {
+
+    margin-top:
+        4px;
+
+    color:
+        rgba(255,255,255,.27);
+
+    font-size:
+        6.5px;
+
+    line-height:
+        1.45;
+
+}
+
+
+.haldo-app-card-status {
+
+    position:
+        absolute;
+
+    top:
+        12px;
+
+    right:
+        12px;
 
     width:
-        8px;
+        6px;
 
     height:
-        8px;
+        6px;
 
     border-radius:
         50%;
 
     background:
+        rgba(255,255,255,.18);
+
+}
+
+
+.haldo-app-card-status.ready {
+
+    background:
         #69e6a2;
 
     box-shadow:
-        0 0 12px
-        rgba(105,230,162,.5);
+        0 0 9px
+        rgba(105,230,162,.4);
 
 }
 
 
-.haldo-system-status-text {
+.haldo-app-card-status.failed {
 
-    flex:
-        1;
+    background:
+        #ff7181;
 
 }
 
 
-.haldo-system-status-text strong {
+/* ============================================================
+   EMPTY
+   ============================================================ */
+
+#haldoAppEmpty {
+
+    display:
+        none;
+
+    padding:
+        60px 20px;
+
+    text-align:
+        center;
+
+    color:
+        rgba(255,255,255,.30);
+
+}
+
+
+#haldoAppEmpty strong {
 
     display:
         block;
 
     color:
-        rgba(255,255,255,.75);
+        rgba(255,255,255,.60);
 
     font-size:
-        8px;
+        11px;
 
 }
 
 
-.haldo-system-status-text span {
+#haldoAppEmpty span {
 
     display:
         block;
 
     margin-top:
-        2px;
+        6px;
+
+    font-size:
+        7px;
+
+}
+
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+
+.haldo-app-center-footer {
+
+    min-height:
+        36px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    padding:
+        0 18px;
+
+    border-top:
+        1px solid
+        rgba(255,255,255,.05);
 
     color:
-        rgba(255,255,255,.27);
+        rgba(255,255,255,.23);
 
     font-size:
         6.5px;
@@ -55061,58 +55222,134 @@
    ============================================================ */
 
 @media (
-    max-width: 600px
+    max-width: 700px
 ) {
 
-    #haldoControlButton {
+    .haldo-app-center-header {
 
-        top:
+        flex-wrap:
+            wrap;
+
+        min-height:
+            auto;
+
+        padding:
             10px;
-
-        left:
-            10px;
-
-        width:
-            39px;
-
-        height:
-            39px;
 
     }
 
 
-    #haldoControlPanel {
+    .haldo-app-center-heading {
 
-        top:
-            58px;
-
-        left:
-            10px;
-
-        width:
-            calc(100vw - 20px);
-
-        max-height:
-            calc(100vh - 68px);
-
-        border-radius:
-            19px;
+        flex:
+            1;
 
     }
 
-}
 
+    .haldo-app-center-search {
 
-@media (
-    prefers-reduced-motion: reduce
-) {
+        order:
+            3;
 
-    #haldoControlCenter,
-    #haldoControlPanel,
-    #haldoControlButton {
+        flex:
+            0 0 100%;
 
-        transition:
+        max-width:
             none;
+
+    }
+
+
+    .haldo-app-center-content {
+
+        display:
+            block;
+
+        overflow:
+            auto;
+
+    }
+
+
+    .haldo-app-center-sidebar {
+
+        width:
+            auto;
+
+        display:
+            flex;
+
+        flex-wrap:
+            nowrap;
+
+        gap:
+            5px;
+
+        padding:
+            8px;
+
+        border-right:
+            0;
+
+        border-bottom:
+            1px solid
+            rgba(255,255,255,.06);
+
+        overflow-x:
+            auto;
+
+    }
+
+
+    .haldo-app-center-sidebar-title {
+
+        display:
+            none;
+
+    }
+
+
+    .haldo-app-category {
+
+        flex:
+            0 0 auto;
+
+        width:
+            auto;
+
+        margin:
+            0;
+
+        padding:
+            0 11px;
+
+    }
+
+
+    .haldo-app-category span:last-child {
+
+        white-space:
+            nowrap;
+
+    }
+
+
+    .haldo-app-center-main {
+
+        padding:
+            14px;
+
+    }
+
+
+    #haldoAppGrid {
+
+        grid-template-columns:
+            repeat(
+                2,
+                minmax(0, 1fr)
+            );
 
     }
 
@@ -55122,697 +55359,343 @@
 
 
 <!-- ============================================================
-     SMALL TOP-LEFT BUTTON
+     APP CENTER
      ============================================================ -->
 
-<button
-    id="haldoControlButton"
-    type="button"
-    aria-label="HalDo Hauptmenü öffnen"
-    aria-expanded="false"
-    title="HalDo Hauptmenü"
+<section
+    id="haldoAppCenter"
+    aria-hidden="true"
+    aria-label="HalDo App Center"
 >
 
-    <span
-        class="haldo-menu-symbol"
+
+    <!-- BACKGROUND -->
+
+    <div
+        class="haldo-app-center-background"
         aria-hidden="true"
     >
 
-        <span></span>
-        <span></span>
-        <span></span>
+        <div
+            class="haldo-app-center-orb one"
+        ></div>
 
-    </span>
+        <div
+            class="haldo-app-center-orb two"
+        ></div>
 
-</button>
+    </div>
 
 
-<!-- ============================================================
-     CONTROL CENTER
-     ============================================================ -->
-
-<div
-    id="haldoControlCenter"
-    aria-hidden="true"
->
+    <!-- LAYOUT -->
 
     <div
-        id="haldoControlBackdrop"
-    ></div>
-
-
-    <aside
-        id="haldoControlPanel"
-        role="dialog"
-        aria-label="HalDo Control Center"
+        class="haldo-app-center-layout"
     >
 
-        <!-- HEADER -->
+
+        <!-- ====================================================
+             HEADER
+             ==================================================== -->
 
         <header
-            class="haldo-control-header"
+            class="haldo-app-center-header"
         >
 
-            <div
-                class="haldo-control-header-top"
+            <img
+                class="haldo-app-center-logo"
+                src="logo.png"
+                alt="HalDo"
             >
 
-                <img
-                    class="haldo-control-mini-logo"
-                    src="logo.png"
-                    alt="HalDo"
-                >
 
+            <div
+                class="haldo-app-center-heading"
+            >
 
-                <div
-                    class="haldo-control-heading"
-                >
+                <strong>
+                    HalDo Apps
+                </strong>
 
-                    <strong>
-                        HalDo AI OS 18
-                    </strong>
-
-                    <span>
-                        Professional Ultimate Foundation
-                    </span>
-
-                </div>
-
-
-                <button
-                    class="haldo-control-close"
-                    id="haldoControlClose"
-                    type="button"
-                    aria-label="Menü schließen"
-                >
-                    ×
-                </button>
+                <span>
+                    Anwendungen &amp; Systemprogramme
+                </span>
 
             </div>
 
 
-            <!-- SEARCH -->
-
             <div
-                class="haldo-control-search"
+                class="haldo-app-center-search"
             >
 
                 <span
-                    class="haldo-control-search-icon"
+                    class="haldo-app-center-search-icon"
                 >
                     ⌕
                 </span>
 
 
                 <input
-                    id="haldoControlSearch"
+                    id="haldoAppSearch"
                     type="search"
                     autocomplete="off"
-                    placeholder="Funktionen, Apps und Einstellungen suchen …"
-                    aria-label="HalDo suchen"
+                    placeholder="Apps suchen …"
+                    aria-label="Apps suchen"
                 >
+
+            </div>
+
+
+            <div
+                class="haldo-app-center-actions"
+            >
+
+                <button
+                    class="haldo-app-center-action"
+                    id="haldoAppRefresh"
+                    type="button"
+                    title="Apps aktualisieren"
+                    aria-label="Apps aktualisieren"
+                >
+                    ↻
+                </button>
+
+
+                <button
+                    class="haldo-app-center-action"
+                    id="haldoAppClose"
+                    type="button"
+                    title="App Center schließen"
+                    aria-label="App Center schließen"
+                >
+                    ×
+                </button>
 
             </div>
 
         </header>
 
 
-        <!-- BODY -->
+        <!-- ====================================================
+             CONTENT
+             ==================================================== -->
 
         <div
-            id="haldoControlBody"
+            class="haldo-app-center-content"
         >
 
 
-            <!-- =================================================
-                 SYSTEM
-                 ================================================= -->
+            <!-- SIDEBAR -->
 
-            <section
-                class="haldo-control-section"
-                data-section="system"
+            <nav
+                class="haldo-app-center-sidebar"
+                aria-label="App Kategorien"
             >
 
                 <div
-                    class="haldo-control-section-title"
+                    class="haldo-app-center-sidebar-title"
                 >
-                    System
+                    Kategorien
                 </div>
 
 
-                <div
-                    class="haldo-system-bar"
+                <button
+                    class="haldo-app-category active"
+                    type="button"
+                    data-category="all"
                 >
 
                     <span
-                        class="haldo-system-status-dot"
-                        id="haldoSystemStatusDot"
-                    ></span>
+                        class="haldo-app-category-icon"
+                    >
+                        ◫
+                    </span>
 
+                    <span>
+                        Alle Apps
+                    </span>
+
+                </button>
+
+
+                <button
+                    class="haldo-app-category"
+                    type="button"
+                    data-category="ai"
+                >
+
+                    <span
+                        class="haldo-app-category-icon"
+                    >
+                        ✦
+                    </span>
+
+                    <span>
+                        KI &amp; AI
+                    </span>
+
+                </button>
+
+
+                <button
+                    class="haldo-app-category"
+                    type="button"
+                    data-category="system"
+                >
+
+                    <span
+                        class="haldo-app-category-icon"
+                    >
+                        ◈
+                    </span>
+
+                    <span>
+                        System
+                    </span>
+
+                </button>
+
+
+                <button
+                    class="haldo-app-category"
+                    type="button"
+                    data-category="tools"
+                >
+
+                    <span
+                        class="haldo-app-category-icon"
+                    >
+                        ⌘
+                    </span>
+
+                    <span>
+                        Werkzeuge
+                    </span>
+
+                </button>
+
+
+                <button
+                    class="haldo-app-category"
+                    type="button"
+                    data-category="language"
+                >
+
+                    <span
+                        class="haldo-app-category-icon"
+                    >
+                        文
+                    </span>
+
+                    <span>
+                        Sprache
+                    </span>
+
+                </button>
+
+
+                <button
+                    class="haldo-app-category"
+                    type="button"
+                    data-category="settings"
+                >
+
+                    <span
+                        class="haldo-app-category-icon"
+                    >
+                        ⚙
+                    </span>
+
+                    <span>
+                        Einstellungen
+                    </span>
+
+                </button>
+
+            </nav>
+
+
+            <!-- MAIN -->
+
+            <main
+                class="haldo-app-center-main"
+            >
+
+                <div
+                    class="haldo-app-section-header"
+                >
 
                     <div
-                        class="haldo-system-status-text"
+                        class="haldo-app-section-title"
                     >
 
                         <strong
-                            id="haldoSystemStatusTitle"
+                            id="haldoAppSectionTitle"
                         >
-                            HalDo AI OS läuft
+                            Alle Apps
                         </strong>
 
                         <span
-                            id="haldoSystemStatusDescription"
+                            id="haldoAppSectionDescription"
                         >
-                            System wird überwacht
+                            Alle verfügbaren HalDo-Anwendungen
                         </span>
 
                     </div>
 
                 </div>
 
-            </section>
 
-
-            <!-- =================================================
-                 APPS
-                 ================================================= -->
-
-            <section
-                class="haldo-control-section"
-                data-section="apps"
-            >
+                <!-- APP GRID -->
 
                 <div
-                    class="haldo-control-section-title"
-                >
-                    Apps
-                </div>
+                    id="haldoAppGrid"
+                    aria-live="polite"
+                ></div>
 
+
+                <!-- EMPTY -->
 
                 <div
-                    class="haldo-control-grid"
+                    id="haldoAppEmpty"
                 >
 
-                    <button
-                        class="haldo-control-item"
-                        type="button"
-                        data-control-action="apps"
-                        data-search="apps app center anwendungen"
-                    >
+                    <strong>
+                        Keine App gefunden
+                    </strong>
 
-                        <span
-                            class="haldo-control-item-icon"
-                        >
-                            ◫
-                        </span>
-
-                        <span
-                            class="haldo-control-item-text"
-                        >
-
-                            <strong>
-                                Alle Apps
-                            </strong>
-
-                            <span>
-                                Anwendungen öffnen
-                            </span>
-
-                        </span>
-
-                    </button>
-
-
-                    <button
-                        class="haldo-control-item"
-                        type="button"
-                        data-control-action="ai"
-                        data-search="ai künstliche intelligenz chat"
-                    >
-
-                        <span
-                            class="haldo-control-item-icon"
-                        >
-                            ✦
-                        </span>
-
-                        <span
-                            class="haldo-control-item-text"
-                        >
-
-                            <strong>
-                                HalDo AI
-                            </strong>
-
-                            <span>
-                                KI-Assistent öffnen
-                            </span>
-
-                        </span>
-
-                    </button>
-
-
-                    <button
-                        class="haldo-control-item"
-                        type="button"
-                        data-control-action="files"
-                        data-search="dateien dateimanager files"
-                    >
-
-                        <span
-                            class="haldo-control-item-icon"
-                        >
-                            ▱
-                        </span>
-
-                        <span
-                            class="haldo-control-item-text"
-                        >
-
-                            <strong>
-                                Dateien
-                            </strong>
-
-                            <span>
-                                Speicher und Dateien
-                            </span>
-
-                        </span>
-
-                    </button>
-
-
-                    <button
-                        class="haldo-control-item"
-                        type="button"
-                        data-control-action="windows"
-                        data-search="fenster offene apps windows"
-                    >
-
-                        <span
-                            class="haldo-control-item-icon"
-                        >
-                            ▣
-                        </span>
-
-                        <span
-                            class="haldo-control-item-text"
-                        >
-
-                            <strong>
-                                Fenster
-                            </strong>
-
-                            <span>
-                                Geöffnete Apps verwalten
-                            </span>
-
-                        </span>
-
-                    </button>
+                    <span>
+                        Versuche einen anderen Suchbegriff.
+                    </span>
 
                 </div>
 
-            </section>
-
-
-            <!-- =================================================
-                 EINSTELLUNGEN
-                 ================================================= -->
-
-            <section
-                class="haldo-control-section"
-                data-section="settings"
-            >
-
-                <div
-                    class="haldo-control-section-title"
-                >
-                    Einstellungen
-                </div>
-
-
-                <div
-                    class="haldo-control-grid"
-                >
-
-                    <button
-                        class="haldo-control-item"
-                        type="button"
-                        data-control-action="settings"
-                        data-search="einstellungen settings system"
-                    >
-
-                        <span
-                            class="haldo-control-item-icon"
-                        >
-                            ⚙
-                        </span>
-
-                        <span
-                            class="haldo-control-item-text"
-                        >
-
-                            <strong>
-                                Einstellungen
-                            </strong>
-
-                            <span>
-                                HalDo konfigurieren
-                            </span>
-
-                        </span>
-
-                    </button>
-
-
-                    <button
-                        class="haldo-control-item"
-                        type="button"
-                        data-control-action="language"
-                        data-search="sprache language deutsch english ezidi"
-                    >
-
-                        <span
-                            class="haldo-control-item-icon"
-                        >
-                            文
-                        </span>
-
-                        <span
-                            class="haldo-control-item-text"
-                        >
-
-                            <strong>
-                                Sprache
-                            </strong>
-
-                            <span>
-                                Sprache und Region
-                            </span>
-
-                        </span>
-
-                    </button>
-
-
-                    <button
-                        class="haldo-control-item"
-                        type="button"
-                        data-control-action="keyboard"
-                        data-search="tastatur keyboard ezidi"
-                    >
-
-                        <span
-                            class="haldo-control-item-icon"
-                        >
-                            ⌨
-                        </span>
-
-                        <span
-                            class="haldo-control-item-text"
-                        >
-
-                            <strong>
-                                Tastatur
-                            </strong>
-
-                            <span>
-                                Eingabe und Êzîdî-Layout
-                            </span>
-
-                        </span>
-
-                    </button>
-
-
-                    <button
-                        class="haldo-control-item"
-                        type="button"
-                        data-control-action="voice"
-                        data-search="sprache stimme voice mikrofon"
-                    >
-
-                        <span
-                            class="haldo-control-item-icon"
-                        >
-                            ◉
-                        </span>
-
-                        <span
-                            class="haldo-control-item-text"
-                        >
-
-                            <strong>
-                                Stimme
-                            </strong>
-
-                            <span>
-                                Sprachsteuerung
-                            </span>
-
-                        </span>
-
-                    </button>
-
-                </div>
-
-            </section>
-
-
-            <!-- =================================================
-                 VERWALTUNG
-                 ================================================= -->
-
-            <section
-                class="haldo-control-section"
-                data-section="management"
-            >
-
-                <div
-                    class="haldo-control-section-title"
-                >
-                    Verwaltung
-                </div>
-
-
-                <div
-                    class="haldo-control-grid"
-                >
-
-                    <button
-                        class="haldo-control-item"
-                        type="button"
-                        data-control-action="modules"
-                        data-search="module module manager system module"
-                    >
-
-                        <span
-                            class="haldo-control-item-icon"
-                        >
-                            ◈
-                        </span>
-
-                        <span
-                            class="haldo-control-item-text"
-                        >
-
-                            <strong>
-                                Module
-                            </strong>
-
-                            <span>
-                                Systemmodule verwalten
-                            </span>
-
-                        </span>
-
-                    </button>
-
-
-                    <button
-                        class="haldo-control-item"
-                        type="button"
-                        data-control-action="diagnostics"
-                        data-search="diagnose diagnose fehler system test"
-                    >
-
-                        <span
-                            class="haldo-control-item-icon"
-                        >
-                            ◌
-                        </span>
-
-                        <span
-                            class="haldo-control-item-text"
-                        >
-
-                            <strong>
-                                Diagnose
-                            </strong>
-
-                            <span>
-                                System prüfen
-                            </span>
-
-                        </span>
-
-                    </button>
-
-
-                    <button
-                        class="haldo-control-item"
-                        type="button"
-                        data-control-action="status"
-                        data-search="status systemstatus system information"
-                    >
-
-                        <span
-                            class="haldo-control-item-icon"
-                        >
-                            ◉
-                        </span>
-
-                        <span
-                            class="haldo-control-item-text"
-                        >
-
-                            <strong>
-                                Systemstatus
-                            </strong>
-
-                            <span>
-                                Laufzeitinformationen
-                            </span>
-
-                        </span>
-
-                    </button>
-
-
-                    <button
-                        class="haldo-control-item"
-                        type="button"
-                        data-control-action="memory"
-                        data-search="speicher memory ai memory daten"
-                    >
-
-                        <span
-                            class="haldo-control-item-icon"
-                        >
-                            ◎
-                        </span>
-
-                        <span
-                            class="haldo-control-item-text"
-                        >
-
-                            <strong>
-                                Speicher
-                            </strong>
-
-                            <span>
-                                HalDo-Daten verwalten
-                            </span>
-
-                        </span>
-
-                    </button>
-
-                </div>
-
-            </section>
-
-
-            <!-- =================================================
-                 SYSTEMAKTIONEN
-                 ================================================= -->
-
-            <section
-                class="haldo-control-section"
-                data-section="power"
-            >
-
-                <div
-                    class="haldo-control-section-title"
-                >
-                    Systemaktionen
-                </div>
-
-
-                <div
-                    class="haldo-control-grid"
-                >
-
-                    <button
-                        class="haldo-control-item"
-                        type="button"
-                        data-control-action="restart"
-                        data-search="neustart restart reboot"
-                    >
-
-                        <span
-                            class="haldo-control-item-icon"
-                        >
-                            ↻
-                        </span>
-
-                        <span
-                            class="haldo-control-item-text"
-                        >
-
-                            <strong>
-                                Neu starten
-                            </strong>
-
-                            <span>
-                                HalDo-System neu laden
-                            </span>
-
-                        </span>
-
-                    </button>
-
-
-                    <button
-                        class="haldo-control-item"
-                        type="button"
-                        data-control-action="close-menu"
-                        data-search="schließen close menu"
-                    >
-
-                        <span
-                            class="haldo-control-item-icon"
-                        >
-                            ×
-                        </span>
-
-                        <span
-                            class="haldo-control-item-text"
-                        >
-
-                            <strong>
-                                Schließen
-                            </strong>
-
-                            <span>
-                                Hauptmenü schließen
-                            </span>
-
-                        </span>
-
-                    </button>
-
-                </div>
-
-            </section>
+            </main>
 
         </div>
 
-    </aside>
 
-</div>
+        <!-- FOOTER -->
+
+        <footer
+            class="haldo-app-center-footer"
+        >
+
+            <span
+                id="haldoAppCount"
+            >
+                0 Apps
+            </span>
+
+            <span>
+                HalDo AI OS 18
+            </span>
+
+        </footer>
+
+    </div>
+
+</section>
 
 
 <script>
@@ -55827,8 +55710,8 @@
        ======================================================== */
 
     if (
-        window.HalDoControlCenter &&
-        window.HalDoControlCenter.__initialized
+        window.HalDoAppCenter &&
+        window.HalDoAppCenter.__initialized
     ) {
 
         return;
@@ -55840,51 +55723,67 @@
        ELEMENTS
        ======================================================== */
 
-    const button =
-        document.getElementById(
-            "haldoControlButton"
-        );
-
-
     const center =
         document.getElementById(
-            "haldoControlCenter"
+            "haldoAppCenter"
         );
 
 
-    const backdrop =
+    const grid =
         document.getElementById(
-            "haldoControlBackdrop"
-        );
-
-
-    const closeButton =
-        document.getElementById(
-            "haldoControlClose"
+            "haldoAppGrid"
         );
 
 
     const search =
         document.getElementById(
-            "haldoControlSearch"
+            "haldoAppSearch"
         );
 
 
-    const body =
+    const empty =
         document.getElementById(
-            "haldoControlBody"
+            "haldoAppEmpty"
+        );
+
+
+    const count =
+        document.getElementById(
+            "haldoAppCount"
+        );
+
+
+    const closeButton =
+        document.getElementById(
+            "haldoAppClose"
+        );
+
+
+    const refreshButton =
+        document.getElementById(
+            "haldoAppRefresh"
+        );
+
+
+    const sectionTitle =
+        document.getElementById(
+            "haldoAppSectionTitle"
+        );
+
+
+    const sectionDescription =
+        document.getElementById(
+            "haldoAppSectionDescription"
         );
 
 
     if (
-        !button ||
         !center ||
-        !backdrop ||
-        !closeButton
+        !grid
     ) {
 
         console.warn(
-            "[HalDo Control Center] " +
+            "[HalDo App Center] " +
             "DOM nicht vollständig."
         );
 
@@ -55898,30 +55797,35 @@
        STATE
        ======================================================== */
 
-    let opened =
-        false;
+    let apps = [];
+
+    let category =
+        "all";
+
+    let query =
+        "";
 
 
     /* ========================================================
-       SYSTEM API
+       BRIDGE
        ======================================================== */
 
-    function getSystem() {
+    function getBridge() {
 
         return (
-            window.HalDoSystem ||
-            window.HalDoOS?.system ||
+            window.HalDoAppBridge ||
+            window.HalDoOS?.appBridge ||
             null
         );
 
     }
 
 
-    function getKernel() {
+    function getRegistry() {
 
         return (
-            window.HalDoKernel ||
-            window.HalDoOS?.kernel ||
+            window.HalDoAppRegistry ||
+            window.HalDoOS?.appRegistry ||
             null
         );
 
@@ -55946,30 +55850,965 @@
             )
         );
 
+    }
 
-        const kernel =
-            getKernel();
+
+    /* ========================================================
+       NORMALIZE
+       ======================================================== */
+
+    function normalize(
+        app
+    ) {
+
+        if (
+            !app
+        ) {
+
+            return null;
+
+        }
 
 
         if (
-            kernel &&
+            typeof app ===
+            "string"
+        ) {
+
+            return {
+
+                id:
+                    app,
+
+                title:
+                    app,
+
+                description:
+                    "HalDo Anwendung",
+
+                icon:
+                    "◈",
+
+                category:
+                    "system"
+
+            };
+
+        }
+
+
+        const id =
+            app.id ||
+            app.appId ||
+            app.name ||
+            app.key;
+
+
+        if (
+            !id
+        ) {
+
+            return null;
+
+        }
+
+
+        return {
+
+            ...app,
+
+            id:
+                String(id),
+
+            title:
+                app.title ||
+                app.label ||
+                app.name ||
+                String(id),
+
+            description:
+                app.description ||
+                app.desc ||
+                "HalDo Anwendung",
+
+            icon:
+                app.icon ||
+                app.symbol ||
+                "◈",
+
+            category:
+                app.category ||
+                "system"
+
+        };
+
+    }
+
+
+    /* ========================================================
+       LOAD APPS
+       ======================================================== */
+
+    function loadApps() {
+
+        const bridge =
+            getBridge();
+
+
+        const registry =
+            getRegistry();
+
+
+        const collected =
+            new Map();
+
+
+        /*
+         * Bridge
+         */
+
+        if (
+            bridge &&
             typeof
-            kernel.emit ===
+            bridge.getApps ===
             "function"
         ) {
 
             try {
 
-                kernel.emit(
-                    name,
-                    detail
+                const list =
+                    bridge.getApps();
+
+
+                if (
+                    Array.isArray(
+                        list
+                    )
+                ) {
+
+                    list.forEach(
+                        app => {
+
+                            const normalized =
+                                normalize(
+                                    app
+                                );
+
+
+                            if (
+                                normalized
+                            ) {
+
+                                collected.set(
+                                    normalized.id,
+                                    normalized
+                                );
+
+                            }
+
+                        }
+                    );
+
+                }
+
+            } catch (
+                error
+            ) {
+
+                console.warn(
+                    "[HalDo App Center] Bridge:",
+                    error
                 );
+
+            }
+
+        }
+
+
+        /*
+         * Registry
+         */
+
+        if (
+            registry
+        ) {
+
+            if (
+                typeof
+                registry.getApps ===
+                "function"
+            ) {
+
+                try {
+
+                    const list =
+                        registry.getApps();
+
+
+                    if (
+                        Array.isArray(
+                            list
+                        )
+                    ) {
+
+                        list.forEach(
+                            app => {
+
+                                const normalized =
+                                    normalize(
+                                        app
+                                    );
+
+
+                                if (
+                                    normalized
+                                ) {
+
+                                    collected.set(
+                                        normalized.id,
+                                        normalized
+                                    );
+
+                                }
+
+                            }
+                        );
+
+                    }
+
+                } catch (
+                    error
+                ) {}
+
+            }
+
+
+            if (
+                Array.isArray(
+                    registry.apps
+                )
+            ) {
+
+                registry.apps.forEach(
+                    app => {
+
+                        const normalized =
+                            normalize(
+                                app
+                            );
+
+
+                        if (
+                            normalized
+                        ) {
+
+                            collected.set(
+                                normalized.id,
+                                normalized
+                            );
+
+                        }
+
+                    }
+                );
+
+            }
+
+        }
+
+
+        apps =
+            Array.from(
+                collected.values()
+            );
+
+
+        /*
+         * Falls noch keine Registry erreichbar ist,
+         * Core-Apps sichtbar machen.
+         */
+
+        if (
+            apps.length ===
+            0
+        ) {
+
+            apps = [
+
+                {
+
+                    id:
+                        "app-center",
+
+                    title:
+                        "Alle Apps",
+
+                    description:
+                        "HalDo Anwendungen verwalten",
+
+                    icon:
+                        "◫",
+
+                    category:
+                        "system"
+
+                },
+
+                {
+
+                    id:
+                        "ai-chat",
+
+                    title:
+                        "HalDo AI",
+
+                    description:
+                        "KI-Assistent und Chat",
+
+                    icon:
+                        "✦",
+
+                    category:
+                        "ai"
+
+                },
+
+                {
+
+                    id:
+                        "settings",
+
+                    title:
+                        "Einstellungen",
+
+                    description:
+                        "HalDo konfigurieren",
+
+                    icon:
+                        "⚙",
+
+                    category:
+                        "settings"
+
+                },
+
+                {
+
+                    id:
+                        "file-manager",
+
+                    title:
+                        "Dateien",
+
+                    description:
+                        "Dateien und Speicher",
+
+                    icon:
+                        "▱",
+
+                    category:
+                        "tools"
+
+                },
+
+                {
+
+                    id:
+                        "ezidi-keyboard",
+
+                    title:
+                        "Êzîdî-Tastatur",
+
+                    description:
+                        "Eigene Zeichen und Layouts",
+
+                    icon:
+                        "⌨",
+
+                    category:
+                        "language"
+
+                },
+
+                {
+
+                    id:
+                        "language",
+
+                    title:
+                        "Sprache",
+
+                    description:
+                        "Sprache und Region",
+
+                    icon:
+                        "文",
+
+                    category:
+                        "language"
+
+                },
+
+                {
+
+                    id:
+                        "voice",
+
+                    title:
+                        "Stimme",
+
+                    description:
+                        "Sprachsteuerung",
+
+                    icon:
+                        "◉",
+
+                    category:
+                        "ai"
+
+                },
+
+                {
+
+                    id:
+                        "diagnostics",
+
+                    title:
+                        "Systemdiagnose",
+
+                    description:
+                        "HalDo System überprüfen",
+
+                    icon:
+                        "◌",
+
+                    category:
+                        "system"
+
+                }
+
+            ];
+
+        }
+
+
+        render();
+
+    }
+
+
+    /* ========================================================
+       FILTER
+       ======================================================== */
+
+    function filteredApps() {
+
+        const normalizedQuery =
+            query
+                .trim()
+                .toLowerCase();
+
+
+        return apps.filter(
+            app => {
+
+                const matchesCategory =
+                    category ===
+                    "all" ||
+                    app.category ===
+                    category;
+
+
+                if (
+                    !matchesCategory
+                ) {
+
+                    return false;
+
+                }
+
+
+                if (
+                    !normalizedQuery
+                ) {
+
+                    return true;
+
+                }
+
+
+                const searchable =
+                    [
+
+                        app.id,
+
+                        app.title,
+
+                        app.description,
+
+                        app.category,
+
+                        ...(Array.isArray(
+                            app.aliases
+                        )
+                            ? app.aliases
+                            : [])
+
+                    ]
+                    .join(
+                        " "
+                    )
+                    .toLowerCase();
+
+
+                return searchable.includes(
+                    normalizedQuery
+                );
+
+            }
+        );
+
+    }
+
+
+    /* ========================================================
+       STATUS
+       ======================================================== */
+
+    function appStatus(
+        app
+    ) {
+
+        const bridge =
+            getBridge();
+
+
+        if (
+            bridge &&
+            typeof
+            bridge.getState ===
+            "function"
+        ) {
+
+            try {
+
+                const state =
+                    bridge.getState();
+
+
+                if (
+                    state.failed?.includes(
+                        app.id
+                    )
+                ) {
+
+                    return "failed";
+
+                }
 
             } catch (
                 error
             ) {}
 
         }
+
+
+        /*
+         * Ist ein App-Modul vorhanden,
+         * betrachten wir die App als verfügbar.
+         */
+
+        if (
+            app.module ||
+            app.script ||
+            app.path ||
+            app.runtime
+        ) {
+
+            return "ready";
+
+        }
+
+
+        /*
+         * Core Apps sind vorbereitet.
+         */
+
+        const coreIds = [
+
+            "app-center",
+
+            "ai-chat",
+
+            "settings",
+
+            "file-manager",
+
+            "language",
+
+            "ezidi-keyboard",
+
+            "voice",
+
+            "module-manager",
+
+            "diagnostics",
+
+            "system-status",
+
+            "ai-memory"
+
+        ];
+
+
+        if (
+            coreIds.includes(
+                app.id
+            )
+        ) {
+
+            return "ready";
+
+        }
+
+
+        return "";
+
+    }
+
+
+    /* ========================================================
+       RENDER
+       ======================================================== */
+
+    function render() {
+
+        const visible =
+            filteredApps();
+
+
+        grid.innerHTML =
+            "";
+
+
+        visible.forEach(
+            app => {
+
+                grid.appendChild(
+                    createCard(
+                        app
+                    )
+                );
+
+            }
+        );
+
+
+        const hasResults =
+            visible.length >
+            0;
+
+
+        empty.style.display =
+            hasResults
+                ? "none"
+                : "block";
+
+
+        grid.style.display =
+            hasResults
+                ? "grid"
+                : "none";
+
+
+        count.textContent =
+            `${visible.length} ${
+                visible.length === 1
+                    ? "App"
+                    : "Apps"
+            }`;
+
+
+        updateSectionText();
+
+    }
+
+
+    /* ========================================================
+       CARD
+       ======================================================== */
+
+    function createCard(
+        app
+    ) {
+
+        const card =
+            document.createElement(
+                "button"
+            );
+
+
+        card.type =
+            "button";
+
+
+        card.className =
+            "haldo-app-card";
+
+
+        card.dataset.appId =
+            app.id;
+
+
+        card.setAttribute(
+            "aria-label",
+            `${app.title} öffnen`
+        );
+
+
+        const icon =
+            document.createElement(
+                "span"
+            );
+
+
+        icon.className =
+            "haldo-app-card-icon";
+
+
+        icon.textContent =
+            app.icon;
+
+
+        const title =
+            document.createElement(
+                "strong"
+            );
+
+
+        title.className =
+            "haldo-app-card-title";
+
+
+        title.textContent =
+            app.title;
+
+
+        const description =
+            document.createElement(
+                "span"
+            );
+
+
+        description.className =
+            "haldo-app-card-description";
+
+
+        description.textContent =
+            app.description;
+
+
+        const status =
+            document.createElement(
+                "span"
+            );
+
+
+        status.className =
+            "haldo-app-card-status";
+
+
+        const statusValue =
+            appStatus(
+                app
+            );
+
+
+        if (
+            statusValue
+        ) {
+
+            status.classList.add(
+                statusValue
+            );
+
+        }
+
+
+        card.appendChild(
+            icon
+        );
+
+
+        card.appendChild(
+            title
+        );
+
+
+        card.appendChild(
+            description
+        );
+
+
+        card.appendChild(
+            status
+        );
+
+
+        card.addEventListener(
+            "click",
+            () => {
+
+                launchApp(
+                    app
+                );
+
+            }
+        );
+
+
+        return card;
+
+    }
+
+
+    /* ========================================================
+       LAUNCH
+       ======================================================== */
+
+    async function launchApp(
+        app
+    ) {
+
+        const bridge =
+            getBridge();
+
+
+        if (
+            bridge &&
+            typeof
+            bridge.launch ===
+            "function"
+        ) {
+
+            const result =
+                await bridge.launch(
+                    app
+                );
+
+
+            if (
+                result?.success
+            ) {
+
+                emit(
+                    "haldo:app-center-app-opened",
+                    {
+
+                        app
+
+                    }
+                );
+
+
+                return result;
+
+            }
+
+
+            return result;
+
+        }
+
+
+        /*
+         * Fallback:
+         * direktes Event.
+         */
+
+        emit(
+            "haldo:app-launch-requested",
+            {
+
+                app
+
+            }
+        );
+
+
+        return {
+
+            success:
+                true,
+
+            fallback:
+                true
+
+        };
+
+    }
+
+
+    /* ========================================================
+       CATEGORY TEXT
+       ======================================================== */
+
+    function updateSectionText() {
+
+        const descriptions = {
+
+            all:
+                "Alle verfügbaren HalDo-Anwendungen",
+
+            ai:
+                "Künstliche Intelligenz und Assistenz",
+
+            system:
+                "Systemverwaltung und Diagnose",
+
+            tools:
+                "Werkzeuge und Dateien",
+
+            language:
+                "Sprache, Tastatur und Eingabe",
+
+            settings:
+                "Konfiguration und Einstellungen"
+
+        };
+
+
+        const titles = {
+
+            all:
+                "Alle Apps",
+
+            ai:
+                "KI & AI",
+
+            system:
+                "System",
+
+            tools:
+                "Werkzeuge",
+
+            language:
+                "Sprache",
+
+            settings:
+                "Einstellungen"
+
+        };
+
+
+        sectionTitle.textContent =
+            titles[category] ||
+            titles.all;
+
+
+        sectionDescription.textContent =
+            descriptions[category] ||
+            descriptions.all;
 
     }
 
@@ -55980,8 +56819,7 @@
 
     function open() {
 
-        opened =
-            true;
+        loadApps();
 
 
         center.classList.add(
@@ -55995,17 +56833,18 @@
         );
 
 
-        button.setAttribute(
-            "aria-expanded",
-            "true"
+        setTimeout(
+            () => {
+
+                search?.focus();
+
+            },
+            40
         );
 
 
-        search?.focus();
-
-
         emit(
-            "haldo:control-center-opened"
+            "haldo:app-center-opened"
         );
 
     }
@@ -56016,10 +56855,6 @@
        ======================================================== */
 
     function close() {
-
-        opened =
-            false;
-
 
         center.classList.remove(
             "open"
@@ -56032,14 +56867,8 @@
         );
 
 
-        button.setAttribute(
-            "aria-expanded",
-            "false"
-        );
-
-
         emit(
-            "haldo:control-center-closed"
+            "haldo:app-center-closed"
         );
 
     }
@@ -56052,7 +56881,9 @@
     function toggle() {
 
         if (
-            opened
+            center.classList.contains(
+                "open"
+            )
         ) {
 
             close();
@@ -56067,499 +56898,61 @@
 
 
     /* ========================================================
-       OPEN EXISTING APP
-       ======================================================== */
-
-    function openApp(
-        id,
-        title
-    ) {
-
-        /*
-         * Erstes Event:
-         * Der bestehende App Manager / App Center
-         * kann darauf reagieren.
-         */
-
-        emit(
-            "haldo:app-launch-requested",
-            {
-
-                app: {
-
-                    id,
-
-                    title
-
-                }
-
-            }
-        );
-
-
-        /*
-         * Zusätzlich direkt an vorhandene APIs.
-         */
-
-        const manager =
-            window.HalDoAppManager ||
-            window.HalDoOS?.appManager ||
-            null;
-
-
-        if (
-            manager
-        ) {
-
-            const methods = [
-
-                "openApp",
-
-                "launchApp",
-
-                "startApp"
-
-            ];
-
-
-            for (
-                const method
-                of methods
-            ) {
-
-                if (
-                    typeof
-                    manager[method] ===
-                    "function"
-                ) {
-
-                    try {
-
-                        const result =
-                            manager[method](
-                                id
-                            );
-
-
-                        /*
-                         * Promise nicht blockieren.
-                         */
-
-                        if (
-                            result &&
-                            typeof
-                            result.catch ===
-                            "function"
-                        ) {
-
-                            result.catch(
-                                error => {
-
-                                    console.warn(
-                                        "[HalDo Control Center]",
-                                        error
-                                    );
-
-                                }
-                            );
-
-                        }
-
-
-                        break;
-
-                    } catch (
-                        error
-                    ) {
-
-                        console.warn(
-                            "[HalDo Control Center]",
-                            error
-                        );
-
-                    }
-
-                }
-
-            }
-
-        }
-
-
-        close();
-
-    }
-
-
-    /* ========================================================
-       ACTIONS
-       ======================================================== */
-
-    function executeAction(
-        action
-    ) {
-
-        switch (
-            action
-        ) {
-
-            case "apps":
-
-                openApp(
-                    "app-center",
-                    "Alle Apps"
-                );
-
-                break;
-
-
-            case "ai":
-
-                openApp(
-                    "ai-chat",
-                    "HalDo AI"
-                );
-
-                break;
-
-
-            case "files":
-
-                openApp(
-                    "file-manager",
-                    "Dateien"
-                );
-
-                break;
-
-
-            case "windows":
-
-                emit(
-                    "haldo:show-windows"
-                );
-
-                close();
-
-                break;
-
-
-            case "settings":
-
-                openApp(
-                    "settings",
-                    "Einstellungen"
-                );
-
-                break;
-
-
-            case "language":
-
-                openApp(
-                    "language",
-                    "Sprache"
-                );
-
-                break;
-
-
-            case "keyboard":
-
-                openApp(
-                    "ezidi-keyboard",
-                    "Êzîdî-Tastatur"
-                );
-
-                break;
-
-
-            case "voice":
-
-                openApp(
-                    "voice",
-                    "Stimme"
-                );
-
-                break;
-
-
-            case "modules":
-
-                openApp(
-                    "module-manager",
-                    "Module"
-                );
-
-                break;
-
-
-            case "diagnostics":
-
-                openApp(
-                    "diagnostics",
-                    "Systemdiagnose"
-                );
-
-                break;
-
-
-            case "status":
-
-                openApp(
-                    "system-status",
-                    "Systemstatus"
-                );
-
-                break;
-
-
-            case "memory":
-
-                openApp(
-                    "ai-memory",
-                    "AI-Speicher"
-                );
-
-                break;
-
-
-            case "restart":
-
-                restartSystem();
-
-                break;
-
-
-            case "close-menu":
-
-                close();
-
-                break;
-
-        }
-
-    }
-
-
-    /* ========================================================
-       RESTART
-       ======================================================== */
-
-    function restartSystem() {
-
-        close();
-
-
-        emit(
-            "haldo:system-restart-requested"
-        );
-
-
-        const system =
-            getSystem();
-
-
-        /*
-         * Bestehende Reset-Funktionen versuchen.
-         */
-
-        if (
-            system
-        ) {
-
-            const methods = [
-
-                "restart",
-
-                "resetRuntime",
-
-                "reset"
-
-            ];
-
-
-            for (
-                const method
-                of methods
-            ) {
-
-                if (
-                    typeof
-                    system[method] ===
-                    "function"
-                ) {
-
-                    try {
-
-                        system[method]();
-
-                        return;
-
-                    } catch (
-                        error
-                    ) {
-
-                        console.warn(
-                            "[HalDo Control Center]",
-                            error
-                        );
-
-                    }
-
-                }
-
-            }
-
-        }
-
-
-        /*
-         * Fallback:
-         * Seite neu laden.
-         */
-
-        setTimeout(
-            () => {
-
-                window.location.reload();
-
-            },
-            250
-        );
-
-    }
-
-
-    /* ========================================================
-       ACTION EVENTS
-       ======================================================== */
-
-    body.addEventListener(
-        "click",
-        event => {
-
-            const item =
-                event.target.closest(
-                    "[data-control-action]"
-                );
-
-
-            if (
-                !item
-            ) {
-
-                return;
-
-            }
-
-
-            executeAction(
-                item.dataset.controlAction
-            );
-
-        }
-    );
-
-
-    /* ========================================================
        SEARCH
        ======================================================== */
 
-    if (
-        search
-    ) {
+    search?.addEventListener(
+        "input",
+        event => {
 
-        search.addEventListener(
-            "input",
-            () => {
-
-                const query =
-                    search.value
-                        .trim()
-                        .toLowerCase();
+            query =
+                event.target.value;
 
 
-                const sections =
-                    body.querySelectorAll(
-                        ".haldo-control-section"
-                    );
+            render();
+
+        }
+    );
 
 
-                sections.forEach(
-                    section => {
+    /* ========================================================
+       CATEGORY
+       ======================================================== */
 
-                        let visible =
-                            0;
+    document
+        .querySelectorAll(
+            ".haldo-app-category"
+        )
+        .forEach(
+            button => {
 
+                button.addEventListener(
+                    "click",
+                    () => {
 
-                        const items =
-                            section.querySelectorAll(
-                                ".haldo-control-item"
-                            );
-
-
-                        items.forEach(
-                            item => {
-
-                                const text =
-                                    (
-                                        item.textContent +
-                                        " " +
-                                        (
-                                            item.dataset.search ||
-                                            ""
-                                        )
-                                    )
-                                    .toLowerCase();
+                        category =
+                            button.dataset.category ||
+                            "all";
 
 
-                                const matches =
-                                    !query ||
-                                    text.includes(
-                                        query
+                        document
+                            .querySelectorAll(
+                                ".haldo-app-category"
+                            )
+                            .forEach(
+                                item => {
+
+                                    item.classList.toggle(
+                                        "active",
+                                        item ===
+                                        button
                                     );
 
-
-                                item.style.display =
-                                    matches
-                                        ? ""
-                                        : "none";
-
-
-                                if (
-                                    matches
-                                ) {
-
-                                    visible++;
-
                                 }
-
-                            }
-                        );
-
-
-                        const title =
-                            section.querySelector(
-                                ".haldo-control-section-title"
                             );
 
 
-                        /*
-                         * Systemstatus ohne Items
-                         * bleibt sichtbar.
-                         */
-
-                        if (
-                            items.length > 0
-                        ) {
-
-                            section.style.display =
-                                visible > 0
-                                    ? ""
-                                    : "none";
-
-                        }
+                        render();
 
                     }
                 );
@@ -56567,28 +56960,28 @@
             }
         );
 
-    }
+
+    /* ========================================================
+       CLOSE
+       ======================================================== */
+
+    closeButton?.addEventListener(
+        "click",
+        close
+    );
 
 
     /* ========================================================
-       BUTTON
+       REFRESH
        ======================================================== */
 
-    button.addEventListener(
+    refreshButton?.addEventListener(
         "click",
-        toggle
-    );
+        () => {
 
+            loadApps();
 
-    closeButton.addEventListener(
-        "click",
-        close
-    );
-
-
-    backdrop.addEventListener(
-        "click",
-        close
+        }
     );
 
 
@@ -56603,26 +56996,53 @@
             if (
                 event.key ===
                 "Escape" &&
-                opened
+                center.classList.contains(
+                    "open"
+                )
             ) {
 
                 close();
 
             }
 
+        }
+    );
+
+
+    /* ========================================================
+       CONTROL CENTER CONNECTION
+       ======================================================== */
+
+    document.addEventListener(
+        "haldo:app-launch-requested",
+        event => {
+
+            const app =
+                event.detail?.app;
+
 
             if (
-                event.key ===
-                "m" &&
-                (
-                    event.ctrlKey ||
-                    event.metaKey
-                )
+                !app
             ) {
 
-                event.preventDefault();
+                return;
 
-                toggle();
+            }
+
+
+            const id =
+                typeof app ===
+                "string"
+                    ? app
+                    : app.id;
+
+
+            if (
+                id ===
+                "app-center"
+            ) {
+
+                open();
 
             }
 
@@ -56631,81 +57051,34 @@
 
 
     /* ========================================================
-       SYSTEM STATUS
+       EXTERNAL OPEN EVENT
        ======================================================== */
 
-    function updateStatus() {
-
-        const system =
-            getSystem();
-
-
-        const title =
-            document.getElementById(
-                "haldoSystemStatusTitle"
-            );
-
-
-        const description =
-            document.getElementById(
-                "haldoSystemStatusDescription"
-            );
-
-
-        if (
-            !title ||
-            !description
-        ) {
-
-            return;
-
-        }
-
-
-        if (
-            system
-        ) {
-
-            title.textContent =
-                "HalDo AI OS läuft";
-
-
-            description.textContent =
-                "Kernel und Systemverwaltung aktiv";
-
-        } else {
-
-            title.textContent =
-                "HalDo AI OS wird geladen";
-
-
-            description.textContent =
-                "Systemmodule werden verbunden";
-
-        }
-
-    }
+    document.addEventListener(
+        "haldo:open-app-center",
+        open
+    );
 
 
     /* ========================================================
-       SYSTEM EVENTS
+       APP REGISTRY UPDATE
        ======================================================== */
 
     document.addEventListener(
-        "haldo:system-ready",
-        updateStatus
-    );
+        "haldo:app-registered",
+        () => {
 
+            if (
+                center.classList.contains(
+                    "open"
+                )
+            ) {
 
-    document.addEventListener(
-        "haldo:system-started",
-        updateStatus
-    );
+                loadApps();
 
+            }
 
-    document.addEventListener(
-        "haldo:kernel-ready",
-        updateStatus
+        }
     );
 
 
@@ -56727,14 +57100,39 @@
 
         toggle,
 
-        isOpen:
+        refresh:
+            loadApps,
+
+        getApps:
             () =>
-                opened
+                [...apps],
+
+        search:
+            value => {
+
+                query =
+                    String(
+                        value ||
+                        ""
+                    );
+
+                if (
+                    search
+                ) {
+
+                    search.value =
+                        query;
+
+                }
+
+                render();
+
+            }
 
     };
 
 
-    window.HalDoControlCenter =
+    window.HalDoAppCenter =
         api;
 
 
@@ -56743,25 +57141,24 @@
         {};
 
 
-    window.HalDoOS.controlCenter =
+    window.HalDoOS.appCenter =
         api;
 
 
     /* ========================================================
-       INITIAL STATUS
+       INITIAL LOAD
        ======================================================== */
 
-    updateStatus();
+    loadApps();
 
 
     console.log(
-        "[HalDo Control Center] Bereit."
+        "[HalDo App Center] Bereit."
     );
 
 
 })();
 
 <!-- =========================================================
-     END PART 35
+     END PART 37
      ========================================================= -->
-    
