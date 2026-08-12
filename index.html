@@ -51799,1327 +51799,273 @@
 
         /*
          * Haup tmenü sichtbar machen.
-         <!-- =========================================================
-     HALDO AI OS 18
-     INDEX.HTML
-     PART 71
-
-     HALDO AI CENTRAL INTERFACE
-     ---------------------------------------------------------
-     Verbindet die vorhandenen AI-Systeme:
-
-       ai-core.js
-       ai-engine.js
-       ai-chat.js
-       ai-commands.js
-       ai-language.js
-       ai-memory.js
-       ai-speech.js
-       ai-voice.js
-
-     Diese Oberfläche ersetzt keine dieser Dateien.
-     ========================================================= -->
-
-
-<style>
-
-/* ============================================================
-   AI OVERLAY
-   ============================================================ */
-
-#haldoAIInterface {
-
-    position:
-        fixed;
-
-    inset:
-        0;
-
-    z-index:
-        70000;
-
-    display:
-        flex;
-
-    align-items:
-        center;
-
-    justify-content:
-        center;
-
-    padding:
-        16px;
-
-    box-sizing:
-        border-box;
-
-    background:
-        rgba(0,0,0,.45);
-
-    backdrop-filter:
-        blur(20px);
-
-    -webkit-backdrop-filter:
-        blur(20px);
-
-    opacity:
-        0;
-
-    visibility:
-        hidden;
-
-    pointer-events:
-        none;
-
-    transition:
-        opacity .25s ease,
-        visibility .25s ease;
-
-}
-
-
-#haldoAIInterface.open {
-
-    opacity:
-        1;
-
-    visibility:
-        visible;
-
-    pointer-events:
-        auto;
-
-}
-
-
-/* ============================================================
-   AI PANEL
-   ============================================================ */
-
-#haldoAIPanel {
-
-    position:
-        relative;
-
-    width:
-        min(
-            900px,
-            100%
-        );
-
-    height:
-        min(
-            720px,
-            calc(100vh - 32px)
-        );
-
-    display:
-        flex;
-
-    flex-direction:
-        column;
-
-    overflow:
-        hidden;
-
-    border:
-        1px solid
-        rgba(255,255,255,.07);
-
-    border-radius:
-        26px;
-
-    background:
-        rgba(4,7,12,.96);
-
-    box-shadow:
-        0 40px 130px
-        rgba(0,0,0,.75);
-
-    transform:
-        translateY(20px)
-        scale(.97);
-
-    transition:
-        transform .28s
-        cubic-bezier(.2,.8,.2,1);
-
-}
-
-
-#haldoAIInterface.open
-#haldoAIPanel {
-
-    transform:
-        translateY(0)
-        scale(1);
-
-}
-
-
-/* ============================================================
-   AI HEADER
-   ============================================================ */
-
-#haldoAIHeader {
-
-    min-height:
-        70px;
-
-    display:
-        flex;
-
-    align-items:
-        center;
-
-    gap:
-        12px;
-
-    padding:
-        12px 16px;
-
-    box-sizing:
-        border-box;
-
-    border-bottom:
-        1px solid
-        rgba(255,255,255,.045);
-
-}
-
-
-/* ============================================================
-   AI LOGO
-   ============================================================ */
-
-#haldoAIHeaderLogo {
-
-    width:
-        44px;
-
-    height:
-        44px;
-
-    object-fit:
-        cover;
-
-    border-radius:
-        50%;
-
-    border:
-        1px solid
-        rgba(255,255,255,.07);
-
-    box-shadow:
-        0 0 28px
-        rgba(255,255,255,.07);
-
-    animation:
-        haldoAIOrb
-        4s
-        ease-in-out
-        infinite;
-
-}
-
-
-@keyframes haldoAIOrb {
-
-    0%,
-    100% {
-
-        transform:
-            scale(.97)
-            rotate(0deg);
-
-        filter:
-            brightness(.9);
-
-    }
-
-    50% {
-
-        transform:
-            scale(1.05)
-            rotate(180deg);
-
-        filter:
-            brightness(1.15);
-
-    }
-
-}
-
-
-/* ============================================================
-   TITLE
-   ============================================================ */
-
-#haldoAITitleArea {
-
-    flex:
-        1;
-
-}
-
-
-#haldoAITitle {
-
-    color:
-        rgba(255,255,255,.72);
-
-    font-size:
-        11px;
-
-    letter-spacing:
-        .12em;
-
-}
-
-
-#haldoAIStatus {
-
-    margin-top:
-        5px;
-
-    color:
-        rgba(255,255,255,.2);
-
-    font-size:
-        6px;
-
-}
-
-
-#haldoAIStatus.online {
-
-    color:
-        rgba(255,255,255,.48);
-
-}
-
-
-/* ============================================================
-   HEADER BUTTONS
-   ============================================================ */
-
-.haldo-ai-header-button {
-
-    width:
-        36px;
-
-    height:
-        36px;
-
-    display:
-        flex;
-
-    align-items:
-        center;
-
-    justify-content:
-        center;
-
-    border:
-        1px solid
-        rgba(255,255,255,.045);
-
-    border-radius:
-        10px;
-
-    background:
-        rgba(255,255,255,.018);
-
-    color:
-        rgba(255,255,255,.3);
-
-    cursor:
-        pointer;
-
-    font:
-        inherit;
-
-    font-size:
-        9px;
-
-}
-
-
-.haldo-ai-header-button:hover {
-
-    background:
-        rgba(255,255,255,.065);
-
-    color:
-        rgba(255,255,255,.75);
-
-}
-
-
-/* ============================================================
-   CHAT AREA
-   ============================================================ */
-
-#haldoAIChat {
-
-    flex:
-        1;
-
-    min-height:
-        0;
-
-    overflow:
-        auto;
-
-    padding:
-        20px;
-
-    box-sizing:
-        border-box;
-
-}
-
-
-/* ============================================================
-   WELCOME
-   ============================================================ */
-
-#haldoAIWelcome {
-
-    min-height:
-        100%;
-
-    display:
-        flex;
-
-    flex-direction:
-        column;
-
-    align-items:
-        center;
-
-    justify-content:
-        center;
-
-    text-align:
-        center;
-
-}
-
-
-#haldoAIWelcomeLogo {
-
-    width:
-        105px;
-
-    height:
-        105px;
-
-    object-fit:
-        cover;
-
-    border-radius:
-        50%;
-
-    opacity:
-        .72;
-
-    box-shadow:
-        0 0 70px
-        rgba(255,255,255,.07);
-
-    animation:
-        haldoAIWelcome
-        5s
-        ease-in-out
-        infinite;
-
-}
-
-
-@keyframes haldoAIWelcome {
-
-    0%,
-    100% {
-
-        transform:
-            scale(.96)
-            rotate(0deg);
-
-        filter:
-            brightness(.85);
-
-    }
-
-    50% {
-
-        transform:
-            scale(1.04)
-            rotate(180deg);
-
-        filter:
-            brightness(1.16);
-
-    }
-
-}
-
-
-#haldoAIWelcomeTitle {
-
-    margin-top:
-        22px;
-
-    color:
-        rgba(255,255,255,.66);
-
-    font-size:
-        15px;
-
-    letter-spacing:
-        .1em;
-
-}
-
-
-#haldoAIWelcomeText {
-
-    max-width:
-        430px;
-
-    margin-top:
-        10px;
-
-    color:
-        rgba(255,255,255,.22);
-
-    font-size:
-        7px;
-
-    line-height:
-        1.8;
-
-}
-
-
-/* ============================================================
-   MESSAGE
-   ============================================================ */
-
-.haldo-ai-message {
-
-    display:
-        flex;
-
-    margin-bottom:
-        14px;
-
-}
-
-
-.haldo-ai-message.user {
-
-    justify-content:
-        flex-end;
-
-}
-
-
-.haldo-ai-message.assistant {
-
-    justify-content:
-        flex-start;
-
-}
-
-
-.haldo-ai-bubble {
-
-    max-width:
-        min(
-            75%,
-            620px
-        );
-
-    padding:
-        11px 13px;
-
-    border:
-        1px solid
-        rgba(255,255,255,.045);
-
-    border-radius:
-        15px;
-
-    color:
-        rgba(255,255,255,.64);
-
-    font-size:
-        8px;
-
-    line-height:
-        1.65;
-
-    white-space:
-        pre-wrap;
-
-}
-
-
-.haldo-ai-message.user
-.haldo-ai-bubble {
-
-    background:
-        rgba(255,255,255,.045);
-
-    border-bottom-right-radius:
-        5px;
-
-}
-
-
-.haldo-ai-message.assistant
-.haldo-ai-bubble {
-
-    background:
-        rgba(255,255,255,.018);
-
-    border-bottom-left-radius:
-        5px;
-
-}
-
-
-/* ============================================================
-   TYPING
-   ============================================================ */
-
-#haldoAITyping {
-
-    display:
-        none;
-
-    align-items:
-        center;
-
-    gap:
-        5px;
-
-    padding:
-        8px 3px;
-
-}
-
-
-#haldoAITyping.visible {
-
-    display:
-        flex;
-
-}
-
-
-.haldo-ai-dot {
-
-    width:
-        4px;
-
-    height:
-        4px;
-
-    border-radius:
-        50%;
-
-    background:
-        rgba(255,255,255,.38);
-
-    animation:
-        haldoAIDot
-        1s
-        ease-in-out
-        infinite;
-
-}
-
-
-.haldo-ai-dot:nth-child(2) {
-
-    animation-delay:
-        .15s;
-
-}
-
-
-.haldo-ai-dot:nth-child(3) {
-
-    animation-delay:
-        .3s;
-
-}
-
-
-@keyframes haldoAIDot {
-
-    0%,
-    100% {
-
-        opacity:
-            .2;
-
-        transform:
-            translateY(0);
-
-    }
-
-    50% {
-
-        opacity:
-            .8;
-
-        transform:
-            translateY(-3px);
-
-    }
-
-}
-
-
-/* ============================================================
-   INPUT AREA
-   ============================================================ */
-
-#haldoAIInputArea {
-
-    padding:
-        12px;
-
-    border-top:
-        1px solid
-        rgba(255,255,255,.045);
-
-}
-
-
-#haldoAIQuickActions {
-
-    display:
-        flex;
-
-    gap:
-        6px;
-
-    margin-bottom:
-        8px;
-
-    overflow:
-        auto;
-
-}
-
-
-.haldo-ai-quick {
-
-    flex:
-        0 0 auto;
-
-    padding:
-        6px 9px;
-
-    border:
-        1px solid
-        rgba(255,255,255,.045);
-
-    border-radius:
-        8px;
-
-    background:
-        rgba(255,255,255,.018);
-
-    color:
-        rgba(255,255,255,.25);
-
-    cursor:
-        pointer;
-
-    font:
-        inherit;
-
-    font-size:
-        6px;
-
-}
-
-
-.haldo-ai-quick:hover {
-
-    background:
-        rgba(255,255,255,.06);
-
-    color:
-        rgba(255,255,255,.6);
-
-}
-
-
-/* ============================================================
-   INPUT ROW
-   ============================================================ */
-
-#haldoAIInputRow {
-
-    display:
-        flex;
-
-    align-items:
-        flex-end;
-
-    gap:
-        7px;
-
-}
-
-
-#haldoAIInput {
-
-    flex:
-        1;
-
-    min-height:
-        42px;
-
-    max-height:
-        130px;
-
-    resize:
-        none;
-
-    box-sizing:
-        border-box;
-
-    padding:
-        12px;
-
-    border:
-        1px solid
-        rgba(255,255,255,.05);
-
-    outline:
-        none;
-
-    border-radius:
-        12px;
-
-    background:
-        rgba(255,255,255,.025);
-
-    color:
-        rgba(255,255,255,.75);
-
-    font:
-        inherit;
-
-    font-size:
-        8px;
-
-    line-height:
-        1.5;
-
-}
-
-
-#haldoAIInput:focus {
-
-    border-color:
-        rgba(255,255,255,.11);
-
-}
-
-
-/* ============================================================
-   SEND
-   ============================================================ */
-
-#haldoAISend {
-
-    width:
-        48px;
-
-    height:
-        42px;
-
-    border:
-        1px solid
-        rgba(255,255,255,.06);
-
-    border-radius:
-        12px;
-
-    background:
-        rgba(255,255,255,.035);
-
-    color:
-        rgba(255,255,255,.48);
-
-    cursor:
-        pointer;
-
-    font:
-        inherit;
-
-    font-size:
-        7px;
-
-}
-
-
-#haldoAISend:hover {
-
-    background:
-        rgba(255,255,255,.08);
-
-    color:
-        rgba(255,255,255,.82);
-
-}
-
-
-/* ============================================================
-   MOBILE
-   ============================================================ */
-
-@media (
-    max-width: 650px
-) {
-
-    #haldoAIInterface {
-
-        padding:
-            7px;
-
-    }
-
-
-    #haldoAIPanel {
-
-        height:
-            calc(100vh - 14px);
-
-        border-radius:
-            19px;
-
-    }
-
-
-    #haldoAIChat {
-
-        padding:
-            14px;
-
-    }
-
-
-    .haldo-ai-bubble {
-
-        max-width:
-            88%;
-
-    }
-
-}
-
-
-/* ============================================================
-   REDUCED MOTION
-   ============================================================ */
-
-@media (
-    prefers-reduced-motion: reduce
-) {
-
-    #haldoAIHeaderLogo,
-    #haldoAIWelcomeLogo {
-
-        animation:
-            none;
-
-    }
-
-}
-
-</style>
-
-
-<!-- ============================================================
-     AI INTERFACE
-     ============================================================ -->
-
-<div
-    id="haldoAIInterface"
-    aria-hidden="true"
->
-
-
-    <section
-        id="haldoAIPanel"
-        role="dialog"
-        aria-label="HalDo AI"
-    >
-
-
-        <!-- ==================================================
-             HEADER
-             ================================================== -->
-
-        <header
-            id="haldoAIHeader"
-        >
-
-            <img
-                id="haldoAIHeaderLogo"
-                src="logo.png"
-                alt="HalDo AI"
-                onerror="
-                    this.onerror=null;
-                    this.src='assets/logo/logo.png';
-                "
-            >
-
-
-            <div
-                id="haldoAITitleArea"
-            >
-
-                <div
-                    id="haldoAITitle"
-                >
-                    HALDO AI
-                </div>
-
-
-                <div
-                    id="haldoAIStatus"
-                >
-                    System wird verbunden …
-                </div>
-
-            </div>
-
-
-            <button
-                class="haldo-ai-header-button"
-                id="haldoAIVoice"
-                type="button"
-                aria-label="Spracheingabe"
-            >
-                MIC
-            </button>
-
-
-            <button
-                class="haldo-ai-header-button"
-                id="haldoAIClear"
-                type="button"
-                aria-label="Chat löschen"
-            >
-                CLR
-            </button>
-
-
-            <button
-                class="haldo-ai-header-button"
-                id="haldoAIClose"
-                type="button"
-                aria-label="AI schließen"
-            >
-                ×
-            </button>
-
-        </header>
-
-
-        <!-- ==================================================
-             CHAT
-             ================================================== -->
-
-        <main
-            id="haldoAIChat"
-            aria-live="polite"
-        >
-
-
-            <section
-                id="haldoAIWelcome"
-            >
-
-                <img
-                    id="haldoAIWelcomeLogo"
-                    src="logo.png"
-                    alt="HalDo"
-                    onerror="
-                        this.onerror=null;
-                        this.src='assets/logo/logo.png';
-                    "
-                >
-
-
-                <div
-                    id="haldoAIWelcomeTitle"
-                >
-                    Willkommen bei HalDo AI
-                </div>
-
-
-                <div
-                    id="haldoAIWelcomeText"
-                >
-                    Deine zentrale KI-Zentrale von
-                    HalDo AI OS 18. Du kannst schreiben,
-                    sprechen, Befehle ausführen und
-                    später weitere AI-Module verbinden.
-                </div>
-
-            </section>
-
-
-            <div
-                id="haldoAITyping"
-            >
-
-                <span
-                    class="haldo-ai-dot"
-                ></span>
-
-                <span
-                    class="haldo-ai-dot"
-                ></span>
-
-                <span
-                    class="haldo-ai-dot"
-                ></span>
-
-            </div>
-
-
-        </main>
-
-
-        <!-- ==================================================
-             INPUT
-             ================================================== -->
-
-        <footer
-            id="haldoAIInputArea"
-        >
-
-
-            <div
-                id="haldoAIQuickActions"
-            >
-
-                <button
-                    class="haldo-ai-quick"
-                    type="button"
-                    data-command="help"
-                >
-                    Hilfe
-                </button>
-
-
-                <button
-                    class="haldo-ai-quick"
-                    type="button"
-                    data-command="system"
-                >
-                    Systemstatus
-                </button>
-
-
-                <button
-                    class="haldo-ai-quick"
-                    type="button"
-                    data-command="apps"
-                >
-                    Apps
-                </button>
-
-
-                <button
-                    class="haldo-ai-quick"
-                    type="button"
-                    data-command="language"
-                >
-                    Sprache
-                </button>
-
-
-                <button
-                    class="haldo-ai-quick"
-                    type="button"
-                    data-command="keyboard"
-                >
-                    Êzîdî
-                </button>
-
-            </div>
-
-
-            <div
-                id="haldoAIInputRow"
-            >
-
-                <textarea
-                    id="haldoAIInput"
-                    rows="1"
-                    autocomplete="off"
-                    spellcheck="true"
-                    placeholder="Schreibe etwas an HalDo AI …"
-                    aria-label="Nachricht an HalDo AI"
-                ></textarea>
-
-
-                <button
-                    id="haldoAISend"
-                    type="button"
-                >
-                    SEND
-                </button>
-
-            </div>
-
-        </footer>
-
-    </section>
-
-</div>
-
-
-<script>
-
-(() => {
+         // ============================================================
+// HALDO AI OS 18
+// AI CORE
+// PART 72
+// ============================================================
+// Zentrale AI-Schaltzentrale.
+//
+// Verbindet:
+//   ai-engine.js
+//   ai-chat.js
+//   ai-commands.js
+//   ai-language.js
+//   ai-memory.js
+//   ai-speech.js
+//   ai-voice.js
+//
+// Öffentliche APIs:
+//   window.HalDoAICore
+//   window.HalDoOS.aiCore
+//
+// Grundregel:
+// Bestehende Module werden nicht blind überschrieben.
+// Der Core erkennt vorhandene APIs und verbindet sie.
+// ============================================================
+
+(function (window, document) {
 
     "use strict";
 
-
-    /* ========================================================
-       DUPLICATE GUARD
-       ======================================================== */
-
-    if (
-        window.HalDoAIInterface &&
-        window.HalDoAIInterface.__initialized
-    ) {
-
-        return;
-
-    }
-
-
-    /* ========================================================
-       DOM
-       ======================================================== */
-
-    const root =
-        document.getElementById(
-            "haldoAIInterface"
-        );
-
-
-    const chat =
-        document.getElementById(
-            "haldoAIChat"
-        );
-
-
-    const input =
-        document.getElementById(
-            "haldoAIInput"
-        );
-
-
-    const sendButton =
-        document.getElementById(
-            "haldoAISend"
-        );
-
-
-    const closeButton =
-        document.getElementById(
-            "haldoAIClose"
-        );
-
-
-    const clearButton =
-        document.getElementById(
-            "haldoAIClear"
-        );
-
-
-    const voiceButton =
-        document.getElementById(
-            "haldoAIVoice"
-        );
-
-
-    const status =
-        document.getElementById(
-            "haldoAIStatus"
-        );
-
-
-    const welcome =
-        document.getElementById(
-            "haldoAIWelcome"
-        );
-
-
-    const typing =
-        document.getElementById(
-            "haldoAITyping"
-        );
-
+    // --------------------------------------------------------
+    // Duplicate Guard
+    // --------------------------------------------------------
 
     if (
-        !root ||
-        !chat ||
-        !input
+        window.HalDoAICore &&
+        window.HalDoAICore.__haldoAI18
     ) {
-
         return;
-
     }
 
+    // --------------------------------------------------------
+    // Namespace
+    // --------------------------------------------------------
 
-    /* ========================================================
-       STATE
-       ======================================================== */
+    window.HalDoOS = window.HalDoOS || {};
 
-    const state = {
+    // --------------------------------------------------------
+    // Configuration
+    // --------------------------------------------------------
 
-        __initialized:
-            true,
+    const CONFIG = {
 
-        open:
-            false,
+        name: "HalDo AI",
 
-        messages:
-            [],
+        version: "18.0.0",
 
-        busy:
-            false,
+        system: "HalDo AI OS 18",
 
-        voice:
-            false
+        edition: "Professional Ultimate Foundation",
+
+        language: "de-DE",
+
+        maxHistory: 100,
+
+        responseTimeout: 30000,
+
+        debug: false
 
     };
 
+    // --------------------------------------------------------
+    // State
+    // --------------------------------------------------------
 
-    /* ========================================================
-       FIND AI SYSTEMS
-       ======================================================== */
+    const state = {
 
-    function getAIObject(
-        names
-    ) {
+        initialized: false,
+
+        ready: false,
+
+        processing: false,
+
+        online: navigator.onLine,
+
+        language: CONFIG.language,
+
+        requestId: 0,
+
+        history: [],
+
+        errors: [],
+
+        modules: {},
+
+        lastRequest: null,
+
+        lastResponse: null,
+
+        startedAt: null
+
+    };
+
+    // --------------------------------------------------------
+    // Event Bus
+    // --------------------------------------------------------
+
+    const listeners = new Map();
+
+    function on(event, callback) {
+
+        if (
+            typeof callback !== "function"
+        ) {
+            return () => {};
+        }
+
+        if (
+            !listeners.has(event)
+        ) {
+            listeners.set(
+                event,
+                new Set()
+            );
+        }
+
+        listeners
+            .get(event)
+            .add(callback);
+
+        return () => off(
+            event,
+            callback
+        );
+    }
+
+    function off(event, callback) {
+
+        const set =
+            listeners.get(event);
+
+        if (!set) {
+            return;
+        }
+
+        set.delete(callback);
+
+        if (set.size === 0) {
+            listeners.delete(event);
+        }
+    }
+
+    function emit(event, detail = {}) {
+
+        const set =
+            listeners.get(event);
+
+        if (set) {
+
+            for (
+                const callback of set
+            ) {
+
+                try {
+
+                    callback(detail);
+
+                } catch (error) {
+
+                    console.error(
+                        "[HalDoAICore] Event listener error:",
+                        error
+                    );
+
+                }
+
+            }
+        }
+
+        try {
+
+            document.dispatchEvent(
+                new CustomEvent(
+                    `haldo:ai:${event}`,
+                    {
+                        detail
+                    }
+                )
+            );
+
+        } catch (error) {
+
+            // Browser ohne CustomEvent-Unterstützung
+            // werden nicht zum Absturz gebracht.
+
+        }
+    }
+
+    // --------------------------------------------------------
+    // Logging
+    // --------------------------------------------------------
+
+    function log(...args) {
+
+        if (CONFIG.debug) {
+
+            console.log(
+                "[HalDoAICore]",
+                ...args
+            );
+
+        }
+    }
+
+    function warn(...args) {
+
+        console.warn(
+            "[HalDoAICore]",
+            ...args
+        );
+
+    }
+
+    function recordError(error, context = {}) {
+
+        const entry = {
+
+            timestamp: Date.now(),
+
+            message:
+                error instanceof Error
+                    ? error.message
+                    : String(error),
+
+            context
+
+        };
+
+        state.errors.push(entry);
+
+        if (
+            state.errors.length >
+            50
+        ) {
+
+            state.errors.shift();
+
+        }
+
+        emit(
+            "error",
+            entry
+        );
+
+        return entry;
+    }
+
+    // --------------------------------------------------------
+    // Safe Object Resolver
+    // --------------------------------------------------------
+
+    function resolve(names) {
+
+        if (
+            typeof names === "string"
+        ) {
+            names = [names];
+        }
 
         for (
             const name of names
@@ -53133,7 +52079,6 @@
 
             }
 
-
             if (
                 window.HalDoOS &&
                 window.HalDoOS[name]
@@ -53145,396 +52090,173 @@
 
         }
 
-
         return null;
-
     }
 
+    // --------------------------------------------------------
+    // AI Module Registry
+    // --------------------------------------------------------
 
-    function getCore() {
-
-        return getAIObject([
-            "HalDoAICore",
-            "HalDoAI"
-        ]);
-
-    }
-
-
-    function getEngine() {
-
-        return getAIObject([
-            "HalDoAIEngine"
-        ]);
-
-    }
-
-
-    function getChatSystem() {
-
-        return getAIObject([
-            "HalDoAIChat"
-        ]);
-
-    }
-
-
-    function getCommands() {
-
-        return getAIObject([
-            "HalDoAICommands"
-        ]);
-
-    }
-
-
-    function getMemory() {
-
-        return getAIObject([
-            "HalDoAIMemory"
-        ]);
-
-    }
-
-
-    function getVoice() {
-
-        return getAIObject([
-            "HalDoAIVoice",
-            "HalDoVoice"
-        ]);
-
-    }
-
-
-    /* ========================================================
-       STATUS
-       ======================================================== */
-
-    function updateStatus(
-        text,
-        online = false
+    function registerModule(
+        name,
+        module
     ) {
 
         if (
-            !status
+            !name ||
+            !module
         ) {
-
-            return;
-
+            return false;
         }
 
-
-        status.textContent =
-            text;
-
-
-        status.classList.toggle(
-            "online",
-            online
-        );
-
-    }
-
-
-    /* ========================================================
-       ESCAPE
-       ======================================================== */
-
-    function escapeHtml(
-        value
-    ) {
-
-        return String(
-            value ?? ""
-        )
-        .replace(
-            /&/g,
-            "&amp;"
-        )
-        .replace(
-            /</g,
-            "&lt;"
-        )
-        .replace(
-            />/g,
-            "&gt;"
-        )
-        .replace(
-            /"/g,
-            "&quot;"
-        )
-        .replace(
-            /'/g,
-            "&#039;"
-        );
-
-    }
-
-
-    /* ========================================================
-       ADD MESSAGE
-       ======================================================== */
-
-    function addMessage(
-        role,
-        text
-    ) {
-
-        const message =
-            document.createElement(
-                "div"
-            );
-
-
-        message.className =
-            `haldo-ai-message ${role}`;
-
-
-        const bubble =
-            document.createElement(
-                "div"
-            );
-
-
-        bubble.className =
-            "haldo-ai-bubble";
-
-
-        bubble.textContent =
-            String(
-                text ||
-                ""
-            );
-
-
-        message.appendChild(
-            bubble
-        );
-
-
-        chat.insertBefore(
-            message,
-            typing
-        );
-
-
-        state.messages.push({
-
-            role:
-                role,
-
-            content:
-                String(
-                    text ||
-                    ""
-                ),
-
-            timestamp:
-                Date.now()
-
-        });
-
-
-        if (
-            welcome
-        ) {
-
-            welcome.style.display =
-                "none";
-
-        }
-
-
-        chat.scrollTop =
-            chat.scrollHeight;
-
-
-        return message;
-
-    }
-
-
-    /* ========================================================
-       TYPING
-       ======================================================== */
-
-    function setTyping(
-        value
-    ) {
-
-        state.busy =
-            Boolean(
-                value
-            );
-
-
-        if (
-            typing
-        ) {
-
-            typing.classList.toggle(
-                "visible",
-                state.busy
-            );
-
-        }
-
-
-        if (
-            state.busy
-        ) {
-
-            updateStatus(
-                "HalDo AI denkt …",
-                true
-            );
-
-        }
-
-    }
-
-
-    /* ========================================================
-       NORMALIZE RESPONSE
-       ======================================================== */
-
-    function normalizeResponse(
-        response
-    ) {
-
-        if (
-            response ===
-            null ||
-            response ===
-            undefined
-        ) {
-
-            return "";
-
-        }
-
-
-        if (
-            typeof response ===
-            "string"
-        ) {
-
-            return response;
-
-        }
-
-
-        if (
-            response.text
-        ) {
-
-            return String(
-                response.text
-            );
-
-        }
-
-
-        if (
-            response.content
-        ) {
-
-            return String(
-                response.content
-            );
-
-        }
-
-
-        if (
-            response.message
-        ) {
-
-            if (
-                typeof response.message ===
-                "string"
-            ) {
-
-                return response.message;
-
+        state.modules[name] =
+            module;
+
+        emit(
+            "module-registered",
+            {
+                name,
+                module
             }
+        );
 
+        return true;
+    }
 
-            if (
-                response.message.content
-            ) {
+    function getModule(name) {
 
-                return String(
-                    response.message.content
+        if (
+            state.modules[name]
+        ) {
+
+            return state.modules[name];
+
+        }
+
+        const aliases = {
+
+            engine: [
+                "HalDoAIEngine",
+                "aiEngine"
+            ],
+
+            chat: [
+                "HalDoAIChat",
+                "aiChat"
+            ],
+
+            commands: [
+                "HalDoAICommands",
+                "aiCommands"
+            ],
+
+            language: [
+                "HalDoAILanguage",
+                "aiLanguage"
+            ],
+
+            memory: [
+                "HalDoAIMemory",
+                "aiMemory"
+            ],
+
+            speech: [
+                "HalDoAISpeech",
+                "aiSpeech"
+            ],
+
+            voice: [
+                "HalDoAIVoice",
+                "HalDoVoice",
+                "aiVoice"
+            ]
+
+        };
+
+        if (
+            aliases[name]
+        ) {
+
+            const module =
+                resolve(
+                    aliases[name]
                 );
 
+            if (module) {
+
+                registerModule(
+                    name,
+                    module
+                );
+
+                return module;
+
             }
 
         }
 
-
-        try {
-
-            return JSON.stringify(
-                response,
-                null,
-                2
-            );
-
-        } catch (
-            error
-        ) {
-
-            return String(
-                response
-            );
-
-        }
-
+        return null;
     }
 
+    function discoverModules() {
 
-    /* ========================================================
-       CALL FUNCTION SAFELY
-       ======================================================== */
+        const names = [
+            "engine",
+            "chat",
+            "commands",
+            "language",
+            "memory",
+            "speech",
+            "voice"
+        ];
 
-    async function tryCall(
-        object,
-        methods,
-        args
-    ) {
+        const found = {};
 
-        if (
-            !object
+        for (
+            const name of names
         ) {
 
-            return null;
+            found[name] =
+                Boolean(
+                    getModule(name)
+                );
 
         }
 
+        return found;
+    }
+
+    // --------------------------------------------------------
+    // Generic Method Caller
+    // --------------------------------------------------------
+
+    async function callModule(
+        module,
+        methods,
+        args = []
+    ) {
+
+        if (!module) {
+            return null;
+        }
 
         for (
             const method of methods
         ) {
 
             if (
-                typeof object[method] !==
+                typeof module[method] !==
                 "function"
             ) {
-
                 continue;
-
             }
-
 
             try {
 
                 const result =
-                    object[method](
+                    module[method](
                         ...args
                     );
-
 
                 if (
                     result &&
@@ -53546,1118 +52268,1431 @@
 
                 }
 
-
                 return result;
 
-            } catch (
-                error
+            } catch (error) {
+
+                recordError(
+                    error,
+                    {
+                        module,
+                        method
+                    }
+                );
+
+                throw error;
+
+            }
+        }
+
+        return null;
+    }
+
+    // --------------------------------------------------------
+    // Normalize Response
+    // --------------------------------------------------------
+
+    function normalizeResponse(
+        result
+    ) {
+
+        if (
+            result === null ||
+            result === undefined
+        ) {
+
+            return null;
+
+        }
+
+        if (
+            typeof result === "string"
+        ) {
+
+            return {
+
+                text: result,
+
+                raw: result
+
+            };
+
+        }
+
+        if (
+            typeof result === "number" ||
+            typeof result === "boolean"
+        ) {
+
+            return {
+
+                text: String(result),
+
+                raw: result
+
+            };
+
+        }
+
+        if (
+            result.text !== undefined
+        ) {
+
+            return {
+
+                text:
+                    String(
+                        result.text
+                    ),
+
+                raw:
+                    result
+
+            };
+
+        }
+
+        if (
+            result.content !== undefined
+        ) {
+
+            return {
+
+                text:
+                    String(
+                        result.content
+                    ),
+
+                raw:
+                    result
+
+            };
+
+        }
+
+        if (
+            result.message !== undefined
+        ) {
+
+            if (
+                typeof result.message ===
+                "string"
             ) {
 
-                console.warn(
-                    "[HalDo AI Interface] " +
-                    `${method} fehlgeschlagen.`,
-                    error
-                );
+                return {
+
+                    text:
+                        result.message,
+
+                    raw:
+                        result
+
+                };
+
+            }
+
+            if (
+                result.message &&
+                result.message.content
+            ) {
+
+                return {
+
+                    text:
+                        String(
+                            result.message.content
+                        ),
+
+                    raw:
+                        result
+
+                };
 
             }
 
         }
 
+        try {
 
-        return null;
+            return {
+
+                text:
+                    JSON.stringify(
+                        result,
+                        null,
+                        2
+                    ),
+
+                raw:
+                    result
+
+            };
+
+        } catch (error) {
+
+            return {
+
+                text:
+                    String(result),
+
+                raw:
+                    result
+
+            };
+
+        }
+    }
+
+    // --------------------------------------------------------
+    // History
+    // --------------------------------------------------------
+
+    function addHistory(
+        role,
+        content,
+        metadata = {}
+    ) {
+
+        const entry = {
+
+            id:
+                `${Date.now()}-${Math.random()
+                    .toString(36)
+                    .slice(2, 9)}`,
+
+            role,
+
+            content:
+                String(
+                    content ?? ""
+                ),
+
+            timestamp:
+                Date.now(),
+
+            metadata
+
+        };
+
+        state.history.push(entry);
+
+        if (
+            state.history.length >
+            CONFIG.maxHistory
+        ) {
+
+            state.history =
+                state.history.slice(
+                    -CONFIG.maxHistory
+                );
+
+        }
+
+        emit(
+            "history",
+            entry
+        );
+
+        return entry;
+    }
+
+    function getHistory(
+        limit = CONFIG.maxHistory
+    ) {
+
+        return state.history.slice(
+            -Math.max(
+                1,
+                Number(limit) || 1
+            )
+        );
+    }
+
+    function clearHistory() {
+
+        state.history = [];
+
+        emit(
+            "history-cleared"
+        );
 
     }
 
+    // --------------------------------------------------------
+    // Memory Bridge
+    // --------------------------------------------------------
 
-    /* ========================================================
-       SEND TO EXISTING AI
-       ======================================================== */
+    async function remember(
+        entry
+    ) {
 
-    async function processMessage(
+        const memory =
+            getModule(
+                "memory"
+            );
+
+        if (!memory) {
+            return null;
+        }
+
+        try {
+
+            return await callModule(
+                memory,
+                [
+                    "addMessage",
+                    "remember",
+                    "storeMessage",
+                    "saveMessage"
+                ],
+                [entry]
+            );
+
+        } catch (error) {
+
+            warn(
+                "Memory konnte nicht aktualisiert werden.",
+                error
+            );
+
+            return null;
+
+        }
+    }
+
+    // --------------------------------------------------------
+    // Language Bridge
+    // --------------------------------------------------------
+
+    async function detectLanguage(
         text
     ) {
 
-        const core =
-            getCore();
+        const language =
+            getModule(
+                "language"
+            );
 
+        if (!language) {
 
-        const engine =
-            getEngine();
+            return state.language;
 
+        }
 
-        const chatSystem =
-            getChatSystem();
+        try {
 
+            const result =
+                await callModule(
+                    language,
+                    [
+                        "detect",
+                        "detectLanguage",
+                        "getLanguage"
+                    ],
+                    [text]
+                );
+
+            if (
+                result
+            ) {
+
+                return String(
+                    result
+                );
+
+            }
+
+        } catch (error) {
+
+            warn(
+                "Spracherkennung fehlgeschlagen.",
+                error
+            );
+
+        }
+
+        return state.language;
+    }
+
+    // --------------------------------------------------------
+    // Commands Bridge
+    // --------------------------------------------------------
+
+    async function executeCommand(
+        text,
+        context = {}
+    ) {
 
         const commands =
-            getCommands();
+            getModule(
+                "commands"
+            );
 
+        if (!commands) {
+            return null;
+        }
 
-        /*
-         * AI Commands zuerst erkennen.
-         */
+        try {
 
-        if (
-            commands
-        ) {
-
-            const commandResult =
-                await tryCall(
+            const result =
+                await callModule(
                     commands,
                     [
                         "execute",
                         "run",
                         "handle",
-                        "process"
+                        "process",
+                        "executeCommand"
                     ],
                     [
-                        text
+                        text,
+                        context
                     ]
                 );
 
+            return normalizeResponse(
+                result
+            );
 
-            if (
-                commandResult !==
-                null &&
-                commandResult !==
-                undefined
-            ) {
+        } catch (error) {
 
-                return normalizeResponse(
-                    commandResult
-                );
+            recordError(
+                error,
+                {
+                    phase:
+                        "command",
+                    text
+                }
+            );
 
-            }
+            return null;
 
         }
+    }
 
+    // --------------------------------------------------------
+    // Engine Bridge
+    // --------------------------------------------------------
 
-        /*
-         * AI Chat System.
-         */
+    async function executeEngine(
+        text,
+        context = {}
+    ) {
 
-        if (
-            chatSystem
-        ) {
+        const engine =
+            getModule(
+                "engine"
+            );
+
+        if (!engine) {
+            return null;
+        }
+
+        const history =
+            getHistory();
+
+        const payload = {
+
+            text,
+
+            message:
+                text,
+
+            input:
+                text,
+
+            language:
+                state.language,
+
+            history,
+
+            context,
+
+            system:
+                CONFIG.system,
+
+            version:
+                CONFIG.version
+
+        };
+
+        try {
 
             const result =
-                await tryCall(
-                    chatSystem,
+                await callModule(
+                    engine,
+                    [
+                        "generateResponse",
+                        "generate",
+                        "process",
+                        "ask",
+                        "respond",
+                        "run",
+                        "complete"
+                    ],
+                    [
+                        text,
+                        payload
+                    ]
+                );
+
+            return normalizeResponse(
+                result
+            );
+
+        } catch (error) {
+
+            recordError(
+                error,
+                {
+                    phase:
+                        "engine",
+                    text
+                }
+            );
+
+            return null;
+
+        }
+    }
+
+    // --------------------------------------------------------
+    // Chat Bridge
+    // --------------------------------------------------------
+
+    async function executeChat(
+        text,
+        context = {}
+    ) {
+
+        const chat =
+            getModule(
+                "chat"
+            );
+
+        if (!chat) {
+            return null;
+        }
+
+        try {
+
+            const result =
+                await callModule(
+                    chat,
                     [
                         "sendMessage",
                         "send",
                         "chat",
                         "ask",
-                        "process"
-                    ],
-                    [
-                        text
-                    ]
-                );
-
-
-            if (
-                result !==
-                null &&
-                result !==
-                undefined
-            ) {
-
-                return normalizeResponse(
-                    result
-                );
-
-            }
-
-        }
-
-
-        /*
-         * AI Engine.
-         */
-
-        if (
-            engine
-        ) {
-
-            const result =
-                await tryCall(
-                    engine,
-                    [
-                        "generate",
-                        "generateResponse",
                         "process",
-                        "ask",
-                        "run"
+                        "respond"
                     ],
                     [
-                        text
+                        text,
+                        context
                     ]
                 );
 
+            return normalizeResponse(
+                result
+            );
 
-            if (
-                result !==
-                null &&
-                result !==
-                undefined
-            ) {
+        } catch (error) {
 
-                return normalizeResponse(
-                    result
-                );
-
-            }
-
-        }
-
-
-        /*
-         * AI Core.
-         */
-
-        if (
-            core
-        ) {
-
-            const result =
-                await tryCall(
-                    core,
-                    [
-                        "ask",
-                        "chat",
-                        "process",
-                        "respond",
-                        "generate"
-                    ],
-                    [
-                        text
-                    ]
-                );
-
-
-            if (
-                result !==
-                null &&
-                result !==
-                undefined
-            ) {
-
-                return normalizeResponse(
-                    result
-                );
-
-            }
-
-        }
-
-
-        /*
-         * Event Bridge:
-         * vorhandene AI-Systeme können
-         * die Nachricht übernehmen.
-         */
-
-        const event =
-            new CustomEvent(
-                "haldo:ai-message",
+            recordError(
+                error,
                 {
-                    detail: {
+                    phase:
+                        "chat",
+                    text
+                }
+            );
 
-                        text:
-                            text,
+            return null;
 
-                        state:
-                            state
+        }
+    }
 
-                    }
+    // --------------------------------------------------------
+    // Main AI Pipeline
+    // --------------------------------------------------------
+
+    async function ask(
+        input,
+        options = {}
+    ) {
+
+        const text =
+            typeof input === "string"
+                ? input.trim()
+                : String(
+                    input?.text ??
+                    input?.message ??
+                    ""
+                ).trim();
+
+        if (!text) {
+
+            return {
+
+                ok: false,
+
+                text: "",
+
+                error:
+                    "EMPTY_INPUT"
+
+            };
+
+        }
+
+        const requestId =
+            ++state.requestId;
+
+        const started =
+            performance.now();
+
+        state.processing =
+            true;
+
+        state.lastRequest = {
+
+            id:
+                requestId,
+
+            text,
+
+            timestamp:
+                Date.now()
+
+        };
+
+        emit(
+            "request-start",
+            {
+                requestId,
+                text
+            }
+        );
+
+        addHistory(
+            "user",
+            text,
+            {
+                requestId
+            }
+        );
+
+        await remember({
+
+            role:
+                "user",
+
+            content:
+                text,
+
+            requestId,
+
+            timestamp:
+                Date.now()
+
+        });
+
+        try {
+
+            /*
+             * Sprache bestimmen.
+             */
+
+            if (
+                !options.skipLanguage
+            ) {
+
+                state.language =
+                    await detectLanguage(
+                        text
+                    );
+
+            }
+
+            /*
+             * 1. Commands
+             */
+
+            let response =
+                null;
+
+            if (
+                !options.skipCommands
+            ) {
+
+                response =
+                    await executeCommand(
+                        text,
+                        {
+                            requestId,
+                            source:
+                                "ai-core"
+                        }
+                    );
+
+            }
+
+            /*
+             * 2. Chat
+             */
+
+            if (
+                !response &&
+                !options.skipChat
+            ) {
+
+                response =
+                    await executeChat(
+                        text,
+                        {
+                            requestId,
+                            source:
+                                "ai-core"
+                        }
+                    );
+
+            }
+
+            /*
+             * 3. Engine
+             */
+
+            if (
+                !response &&
+                !options.skipEngine
+            ) {
+
+                response =
+                    await executeEngine(
+                        text,
+                        {
+                            requestId,
+                            source:
+                                "ai-core"
+                        }
+                    );
+
+            }
+
+            /*
+             * Kein Modul vorhanden.
+             */
+
+            if (!response) {
+
+                response = {
+
+                    text:
+                        fallback(
+                            text
+                        ),
+
+                    raw:
+                        null,
+
+                    fallback:
+                        true
+
+                };
+
+            }
+
+            const elapsed =
+                Math.round(
+                    performance.now() -
+                    started
+                );
+
+            const finalText =
+                String(
+                    response.text ??
+                    ""
+                );
+
+            state.lastResponse = {
+
+                requestId,
+
+                text:
+                    finalText,
+
+                elapsed,
+
+                timestamp:
+                    Date.now(),
+
+                fallback:
+                    Boolean(
+                        response.fallback
+                    )
+
+            };
+
+            addHistory(
+                "assistant",
+                finalText,
+                {
+                    requestId,
+                    elapsed,
+                    fallback:
+                        Boolean(
+                            response.fallback
+                        )
+                }
+            );
+
+            await remember({
+
+                role:
+                    "assistant",
+
+                content:
+                    finalText,
+
+                requestId,
+
+                timestamp:
+                    Date.now()
+
+            });
+
+            emit(
+                "response",
+                {
+                    requestId,
+
+                    text:
+                        finalText,
+
+                    response,
+
+                    elapsed
 
                 }
             );
 
+            return {
 
-        document.dispatchEvent(
-            event
-        );
+                ok: true,
 
+                requestId,
 
-        return null;
+                text:
+                    finalText,
 
+                response,
+
+                elapsed
+
+            };
+
+        } catch (error) {
+
+            recordError(
+                error,
+                {
+                    phase:
+                        "ask",
+                    requestId,
+                    text
+                }
+            );
+
+            const fallbackText =
+                fallback(
+                    text
+                );
+
+            addHistory(
+                "assistant",
+                fallbackText,
+                {
+                    requestId,
+                    error:
+                        true
+                }
+            );
+
+            emit(
+                "response",
+                {
+                    requestId,
+
+                    text:
+                        fallbackText,
+
+                    error:
+                        true
+                }
+            );
+
+            return {
+
+                ok: false,
+
+                requestId,
+
+                text:
+                    fallbackText,
+
+                error
+
+            };
+
+        } finally {
+
+            state.processing =
+                false;
+
+            emit(
+                "request-end",
+                {
+                    requestId
+                }
+            );
+
+        }
     }
 
+    // --------------------------------------------------------
+    // Fallback
+    // --------------------------------------------------------
 
-    /* ========================================================
-       FALLBACK RESPONSE
-       ======================================================== */
-
-    function fallbackResponse(
+    function fallback(
         text
     ) {
 
-        const lower =
-            text.toLowerCase();
-
+        const value =
+            String(
+                text
+            ).toLowerCase();
 
         if (
-            lower.includes(
+            value.includes(
                 "hallo"
             ) ||
-            lower.includes(
+            value.includes(
                 "hi"
             ) ||
-            lower.includes(
+            value.includes(
                 "hey"
             )
         ) {
 
             return (
                 "Hallo! Ich bin HalDo AI. " +
-                "Das zentrale AI-System von HalDo AI OS 18."
+                "Die zentrale KI von HalDo AI OS 18."
             );
 
         }
 
-
         if (
-            lower.includes(
+            value.includes(
                 "hilfe"
             )
         ) {
 
             return (
+                "Ich bin bereit. " +
                 "Du kannst mir Fragen stellen, " +
-                "Systembefehle geben oder später " +
-                "weitere HalDo-AI-Module verbinden."
+                "Befehle geben oder die vorhandenen " +
+                "HalDo-AI-Module verwenden."
             );
 
         }
 
-
         if (
-            lower.includes(
+            value.includes(
                 "system"
             )
         ) {
 
             return (
-                "HalDo AI OS 18 läuft über die " +
-                "zentrale Kernel-, System- und " +
-                "Modularchitektur."
+                "HalDo AI OS 18 ist über den " +
+                "zentralen Kernel und das Systemmodul " +
+                "organisiert."
             );
 
         }
 
-
         return (
-            "Deine Nachricht wurde von der " +
-            "HalDo-AI-Oberfläche empfangen. " +
-            "Die vorhandene AI-Engine wird verwendet, " +
-            "sobald sie verfügbar ist."
+            "Deine Anfrage wurde von HalDo AI " +
+            "empfangen. Die AI-Module werden " +
+            "automatisch verwendet, sobald sie " +
+            "bereitgestellt sind."
         );
-
     }
 
+    // --------------------------------------------------------
+    // Speech Bridge
+    // --------------------------------------------------------
 
-    /* ========================================================
-       SEND
-       ======================================================== */
-
-    async function send(
-        value
+    async function speak(
+        text,
+        options = {}
     ) {
 
-        if (
-            state.busy
-        ) {
+        const speech =
+            getModule(
+                "speech"
+            );
 
-            return;
+        const voice =
+            getModule(
+                "voice"
+            );
 
+        const target =
+            speech ||
+            voice;
+
+        if (!target) {
+
+            if (
+                "speechSynthesis" in
+                window
+            ) {
+
+                const utterance =
+                    new SpeechSynthesisUtterance(
+                        String(text)
+                    );
+
+                utterance.lang =
+                    options.language ||
+                    state.language;
+
+                window.speechSynthesis.speak(
+                    utterance
+                );
+
+                return true;
+
+            }
+
+            return false;
         }
-
-
-        const text =
-            String(
-                value !== undefined
-                    ? value
-                    : input.value
-            )
-            .trim();
-
-
-        if (
-            !text
-        ) {
-
-            return;
-
-        }
-
-
-        input.value =
-            "";
-
-
-        resizeInput();
-
-
-        addMessage(
-            "user",
-            text
-        );
-
-
-        setTyping(
-            true
-        );
-
 
         try {
 
-            /*
-             * Memory-System informieren,
-             * sofern vorhanden.
-             */
-
-            const memory =
-                getMemory();
-
-
-            if (
-                memory
-            ) {
-
-                await tryCall(
-                    memory,
+            const result =
+                await callModule(
+                    target,
                     [
-                        "addMessage",
-                        "remember",
-                        "storeMessage"
+                        "speak",
+                        "say",
+                        "speakText",
+                        "talk"
                     ],
                     [
-                        {
-                            role:
-                                "user",
-
-                            content:
-                                text
-                        }
+                        text,
+                        options
                     ]
                 );
 
-            }
-
-
-            let response =
-                await processMessage(
-                    text
-                );
-
-
-            if (
-                !response
-            ) {
-
-                response =
-                    fallbackResponse(
-                        text
-                    );
-
-            }
-
-
-            await new Promise(
-                resolve =>
-                    window.setTimeout(
-                        resolve,
-                        180
-                    )
+            return (
+                result !== false
             );
 
+        } catch (error) {
 
-            addMessage(
-                "assistant",
-                response
+            recordError(
+                error,
+                {
+                    phase:
+                        "speech"
+                }
             );
 
-
-            /*
-             * Memory Assistant Response
-             */
-
-            if (
-                memory
-            ) {
-
-                await tryCall(
-                    memory,
-                    [
-                        "addMessage",
-                        "remember",
-                        "storeMessage"
-                    ],
-                    [
-                        {
-                            role:
-                                "assistant",
-
-                            content:
-                                response
-                        }
-                    ]
-                );
-
-            }
-
-
-            updateStatus(
-                "HalDo AI ist bereit",
-                true
-            );
-
-
-        } catch (
-            error
-        ) {
-
-            console.error(
-                "[HalDo AI Interface]",
-                error
-            );
-
-
-            addMessage(
-                "assistant",
-                "Bei der Verarbeitung ist ein Fehler aufgetreten."
-            );
-
-
-            updateStatus(
-                "AI-System meldet einen Fehler",
-                false
-            );
-
-        } finally {
-
-            setTyping(
-                false
-            );
+            return false;
 
         }
-
     }
 
+    // --------------------------------------------------------
+    // System Status
+    // --------------------------------------------------------
 
-    /* ========================================================
-       CLEAR
-       ======================================================== */
+    function getStatus() {
 
-    function clearChat() {
+        const modules =
+            discoverModules();
 
-        state.messages =
+        const available =
+            Object.values(
+                modules
+            )
+            .filter(Boolean)
+            .length;
+
+        return {
+
+            name:
+                CONFIG.name,
+
+            version:
+                CONFIG.version,
+
+            system:
+                CONFIG.system,
+
+            edition:
+                CONFIG.edition,
+
+            initialized:
+                state.initialized,
+
+            ready:
+                state.ready,
+
+            processing:
+                state.processing,
+
+            online:
+                state.online,
+
+            language:
+                state.language,
+
+            modules,
+
+            availableModules:
+                available,
+
+            historyLength:
+                state.history.length,
+
+            errorCount:
+                state.errors.length,
+
+            requestId:
+                state.requestId
+
+        };
+    }
+
+    // --------------------------------------------------------
+    // Reset
+    // --------------------------------------------------------
+
+    function reset() {
+
+        state.processing =
+            false;
+
+        state.history =
             [];
 
+        state.errors =
+            [];
 
-        chat
-            .querySelectorAll(
-                ".haldo-ai-message"
-            )
-            .forEach(
-                message => {
+        state.lastRequest =
+            null;
 
-                    message.remove();
+        state.lastResponse =
+            null;
 
-                }
-            );
-
-
-        if (
-            welcome
-        ) {
-
-            welcome.style.display =
-                "flex";
-
-        }
-
-
-        updateStatus(
-            "HalDo AI ist bereit",
-            true
+        emit(
+            "reset"
         );
 
+        return true;
     }
 
-
-    /* ========================================================
-       VOICE
-       ======================================================== */
-
-    async function toggleVoice() {
-
-        const voice =
-            getVoice();
-
-
-        if (
-            voice
-        ) {
-
-            const result =
-                await tryCall(
-                    voice,
-                    [
-                        "toggle",
-                        "startListening",
-                        "listen",
-                        "start"
-                    ],
-                    []
-                );
-
-
-            if (
-                result !==
-                null
-            ) {
-
-                state.voice =
-                    !state.voice;
-
-
-                return;
-
-            }
-
-        }
-
-
-        /*
-         * Browser Speech Recognition
-         * nur als Fallback.
-         */
-
-        const Recognition =
-            window.SpeechRecognition ||
-            window.webkitSpeechRecognition;
-
-
-        if (
-            !Recognition
-        ) {
-
-            addMessage(
-                "assistant",
-                "Spracheingabe ist auf diesem Gerät momentan nicht verfügbar."
-            );
-
-            return;
-
-        }
-
-
-        const recognition =
-            new Recognition();
-
-
-        recognition.lang =
-            document.documentElement.lang ||
-            "de-DE";
-
-
-        recognition.interimResults =
-            false;
-
-
-        recognition.maxAlternatives =
-            1;
-
-
-        state.voice =
-            true;
-
-
-        updateStatus(
-            "Ich höre zu …",
-            true
-        );
-
-
-        recognition.onresult =
-            event => {
-
-                const transcript =
-                    event
-                        .results[0][0]
-                        .transcript;
-
-
-                input.value =
-                    transcript;
-
-
-                send(
-                    transcript
-                );
-
-            };
-
-
-        recognition.onerror =
-            () => {
-
-                state.voice =
-                    false;
-
-
-                updateStatus(
-                    "HalDo AI ist bereit",
-                    true
-                );
-
-            };
-
-
-        recognition.onend =
-            () => {
-
-                state.voice =
-                    false;
-
-
-                updateStatus(
-                    "HalDo AI ist bereit",
-                    true
-                );
-
-            };
-
-
-        recognition.start();
-
-    }
-
-
-    /* ========================================================
-       RESIZE INPUT
-       ======================================================== */
-
-    function resizeInput() {
-
-        input.style.height =
-            "auto";
-
-
-        input.style.height =
-            Math.min(
-                input.scrollHeight,
-                130
-            ) +
-            "px";
-
-    }
-
-
-    /* ========================================================
-       OPEN
-       ======================================================== */
-
-    function open() {
-
-        state.open =
-            true;
-
-
-        root.classList.add(
-            "open"
-        );
-
-
-        root.setAttribute(
-            "aria-hidden",
-            "false"
-        );
-
-
-        updateStatus(
-            "HalDo AI ist bereit",
-            true
-        );
-
-
-        window.setTimeout(
-            () => {
-
-                input.focus();
-
-            },
-            120
-        );
-
-
-        document.dispatchEvent(
-            new CustomEvent(
-                "haldo:ai-open",
-                {
-                    detail: {
-                        ai:
-                            api
-                    }
-                }
-            )
-        );
-
-    }
-
-
-    /* ========================================================
-       CLOSE
-       ======================================================== */
-
-    function close() {
-
-        state.open =
-            false;
-
-
-        root.classList.remove(
-            "open"
-        );
-
-
-        root.setAttribute(
-            "aria-hidden",
-            "true"
-        );
-
-
-        document.dispatchEvent(
-            new CustomEvent(
-                "haldo:ai-close",
-                {
-                    detail: {
-                        ai:
-                            api
-                    }
-                }
-            )
-        );
-
-    }
-
-
-    /* ========================================================
-       TOGGLE
-       ======================================================== */
-
-    function toggle() {
-
-        if (
-            state.open
-        ) {
-
-            close();
-
-        } else {
-
-            open();
-
-        }
-
-    }
-
-
-    /* ========================================================
-       EVENTS
-       ======================================================== */
-
-    sendButton.addEventListener(
-        "click",
-        () => {
-
-            send();
-
-        }
-    );
-
-
-    closeButton.addEventListener(
-        "click",
-        close
-    );
-
-
-    clearButton.addEventListener(
-        "click",
-        clearChat
-    );
-
-
-    voiceButton.addEventListener(
-        "click",
-        toggleVoice
-    );
-
-
-    input.addEventListener(
-        "input",
-        resizeInput
-    );
-
-
-    input.addEventListener(
-        "keydown",
-        event => {
-
-            if (
-                event.key ===
-                "Enter" &&
-                !event.shiftKey
-            ) {
-
-                event.preventDefault();
-
-                send();
-
-            }
-
-        }
-    );
-
-
-    /* ========================================================
-       QUICK ACTIONS
-       ======================================================== */
-
-    document
-        .querySelectorAll(
-            ".haldo-ai-quick"
-        )
-        .forEach(
-            button => {
-
-                button.addEventListener(
-                    "click",
-                    () => {
-
-                        const command =
-                            button.dataset.command ||
-                            button.textContent;
-
-
-                        send(
-                            command
-                        );
-
-                    }
-                );
-
-            }
-        );
-
-
-    /* ========================================================
-       OUTSIDE CLICK
-       ======================================================== */
-
-    root.addEventListener(
-        "pointerdown",
-        event => {
-
-            if (
-                event.target ===
-                root
-            ) {
-
-                close();
-
-            }
-
-        }
-    );
-
-
-    /* ========================================================
-       ESCAPE
-       ======================================================== */
-
-    document.addEventListener(
-        "keydown",
-        event => {
-
-            if (
-                event.key ===
-                "Escape" &&
-                state.open
-            ) {
-
-                close();
-
-            }
-
-
-            if (
-                (
-                    event.metaKey ||
-                    event.ctrlKey
-                ) &&
-                event.key.toLowerCase() ===
-                "j"
-            ) {
-
-                event.preventDefault();
-
-                toggle();
-
-            }
-
-        }
-    );
-
-
-    /* ========================================================
-       EXTERNAL OPEN EVENT
-       ======================================================== */
-
-    document.addEventListener(
-        "haldo:open-ai",
-        open
-    );
-
-
-    document.addEventListener(
-        "haldo:ai-ready",
-        () => {
-
-            updateStatus(
-                "HalDo AI ist bereit",
-                true
-            );
-
-        }
-    );
-
-
-    document.addEventListener(
-        "haldo:ai-error",
-        () => {
-
-            updateStatus(
-                "AI-System meldet einen Fehler",
-                false
-            );
-
-        }
-    );
-
-
-    /* ========================================================
-       PUBLIC API
-       ======================================================== */
-
-    const api = {
-
-        __initialized:
-            true,
-
-        state,
-
-        open,
-
-        close,
-
-        toggle,
-
-        send,
-
-        clearChat,
-
-        toggleVoice,
-
-        addMessage,
-
-        updateStatus
-
-    };
-
-
-    window.HalDoAIInterface =
-        api;
-
-
-    window.HalDoOS =
-        window.HalDoOS ||
-        {};
-
-
-    window.HalDoOS.aiInterface =
-        api;
-
-
-    /* ========================================================
-       INITIALIZE
-       ======================================================== */
+    // --------------------------------------------------------
+    // Initialize
+    // --------------------------------------------------------
 
     function initialize() {
 
-        updateStatus(
-            "HalDo AI wird verbunden …",
-            false
+        if (
+            state.initialized
+        ) {
+
+            return getStatus();
+
+        }
+
+        state.startedAt =
+            Date.now();
+
+        state.initialized =
+            true;
+
+        discoverModules();
+
+        emit(
+            "initialized",
+            {
+                status:
+                    getStatus()
+            }
         );
 
+        /*
+         * Kleine Verzögerung:
+         * Einige externe JS-Dateien können
+         * erst kurz danach geladen werden.
+         */
 
         window.setTimeout(
             () => {
 
-                const core =
-                    getCore();
+                discoverModules();
 
+                state.ready =
+                    true;
 
-                const engine =
-                    getEngine();
+                emit(
+                    "ready",
+                    {
+                        status:
+                            getStatus()
+                    }
+                );
 
-
-                const chatSystem =
-                    getChatSystem();
-
-
-                if (
-                    core ||
-                    engine ||
-                    chatSystem
-                ) {
-
-                    updateStatus(
-                        "HalDo AI ist bereit",
-                        true
-                    );
-
-                }
+                console.log(
+                    "[HalDoAICore] " +
+                    "HalDo AI Core 18 bereit."
+                );
 
             },
-            350
+            0
         );
 
-
-        document.dispatchEvent(
-            new CustomEvent(
-                "haldo:ai-interface-ready",
-                {
-                    detail: {
-                        ai:
-                            api
-                    }
-                }
-            )
-        );
-
-
-        console.log(
-            "[HalDo AI Interface] " +
-            "Zentrale AI-Oberfläche bereit."
-        );
-
+        return getStatus();
     }
 
+    // --------------------------------------------------------
+    // Online / Offline
+    // --------------------------------------------------------
+
+    window.addEventListener(
+        "online",
+        () => {
+
+            state.online =
+                true;
+
+            emit(
+                "online"
+            );
+
+        }
+    );
+
+    window.addEventListener(
+        "offline",
+        () => {
+
+            state.online =
+                false;
+
+            emit(
+                "offline"
+            );
+
+        }
+    );
+
+    // --------------------------------------------------------
+    // Public API
+    // --------------------------------------------------------
+
+    const api = {
+
+        __haldoAI18:
+            true,
+
+        config:
+            CONFIG,
+
+        state,
+
+        initialize,
+
+        on,
+
+        off,
+
+        emit,
+
+        ask,
+
+        chat:
+            ask,
+
+        process:
+            ask,
+
+        respond:
+            ask,
+
+        speak,
+
+        executeCommand,
+
+        executeEngine,
+
+        executeChat,
+
+        detectLanguage,
+
+        remember,
+
+        addHistory,
+
+        getHistory,
+
+        clearHistory,
+
+        registerModule,
+
+        getModule,
+
+        discoverModules,
+
+        getStatus,
+
+        reset
+
+    };
+
+    // --------------------------------------------------------
+    // Global APIs
+    // --------------------------------------------------------
+
+    window.HalDoAICore =
+        api;
+
+    window.HalDoOS.aiCore =
+        api;
+
+    /*
+     * Alias für ältere / kommende Module.
+     */
+
+    window.HalDoAI =
+        window.HalDoAI ||
+        api;
+
+    // --------------------------------------------------------
+    // Document Events
+    // --------------------------------------------------------
+
+    document.addEventListener(
+        "haldo:ai-message",
+        event => {
+
+            const text =
+                event.detail?.text;
+
+            if (
+                text
+            ) {
+
+                ask(
+                    text,
+                    {
+                        source:
+                            "document-event"
+                    }
+                );
+
+            }
+
+        }
+    );
+
+    // --------------------------------------------------------
+    // Kernel Integration
+    // --------------------------------------------------------
+
+    function connectKernel() {
+
+        const kernel =
+            window.HalDoKernel ||
+            window.HalDoOS?.kernel;
+
+        if (!kernel) {
+
+            return false;
+
+        }
+
+        try {
+
+            if (
+                typeof kernel.registerModule ===
+                "function"
+            ) {
+
+                kernel.registerModule(
+                    "ai-core",
+                    api
+                );
+
+            }
+
+            if (
+                typeof kernel.on ===
+                "function"
+            ) {
+
+                kernel.on(
+                    "kernel:ready",
+                    () => {
+
+                        discoverModules();
+
+                    }
+                );
+
+                kernel.on(
+                    "ready",
+                    () => {
+
+                        discoverModules();
+
+                    }
+                );
+
+            }
+
+            return true;
+
+        } catch (error) {
+
+            recordError(
+                error,
+                {
+                    phase:
+                        "kernel-connection"
+                }
+            );
+
+            return false;
+
+        }
+    }
+
+    // --------------------------------------------------------
+    // DOM Ready
+    // --------------------------------------------------------
+
+    function boot() {
+
+        initialize();
+
+        connectKernel();
+
+    }
 
     if (
         document.readyState ===
@@ -54666,7 +53701,7 @@
 
         document.addEventListener(
             "DOMContentLoaded",
-            initialize,
+            boot,
             {
                 once:
                     true
@@ -54675,13 +53710,12 @@
 
     } else {
 
-        initialize();
+        boot();
 
     }
 
+})(window, document);
 
-})();
-
-/* =========================================================
-   END PART 71
-   ========================================================= */
+// ============================================================
+// END OF PART 72
+// ============================================================
