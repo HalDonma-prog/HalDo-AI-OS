@@ -1,32 +1,29 @@
 // ============================================================
 // HALDO AI OS 18
-// AI COMMAND CENTER
-// PART 76
+// AI COMMAND ENGINE
+// PART 78
 // ============================================================
-// Zentrale Befehlssteuerung der HalDo AI.
+// Zentrale Kommando-Schicht von HalDo AI.
 //
-// Aufgabe:
+// Verbindet:
 //
-// Benutzer
-//    ↓
-// ai-chat.js
-//    ↓
-// ai-core.js
-//    ↓
-// ai-commands.js
-//    ↓
-// ┌──────────────┬──────────────┬──────────────┐
-// │ Apps         │ Navigation   │ System       │
-// │ Windows      │ Launcher     │ Storage      │
-// │ Voice        │ Language     │ Keyboard     │
-// └──────────────┴──────────────┴──────────────┘
+// • AI Core
+// • AI Chat
+// • AI Language
+// • App Manager
+// • App Router
+// • Launcher
+// • System
+// • Kernel
+// • Storage
+// • Voice
+// • Ezidi Keyboard
 //
 // Öffentliche APIs:
 //
 // window.HalDoAICommands
 // window.HalDoOS.aiCommands
 //
-// Bestehende Module werden dynamisch erkannt.
 // ============================================================
 
 (function (window, document) {
@@ -44,10 +41,6 @@
         return;
     }
 
-    // --------------------------------------------------------
-    // Namespace
-    // --------------------------------------------------------
-
     window.HalDoOS =
         window.HalDoOS || {};
 
@@ -58,31 +51,22 @@
     const CONFIG = {
 
         name:
-            "HalDo AI Command Center",
+            "HalDo AI Command Engine",
 
         version:
             "18.0.0",
 
-        debug:
+        maxHistory:
+            200,
+
+        caseSensitive:
             false,
 
-        allowSystemCommands:
+        enableAliases:
             true,
 
-        allowNavigation:
-            true,
-
-        allowAppCommands:
-            true,
-
-        allowWindowCommands:
-            true,
-
-        confirmationRequired:
-            true,
-
-        maxHistory:
-            200
+        enableNaturalLanguage:
+            true
 
     };
 
@@ -98,9 +82,6 @@
         ready:
             false,
 
-        executing:
-            false,
-
         commandCount:
             0,
 
@@ -110,19 +91,10 @@
         failedCommands:
             0,
 
-        lastCommand:
-            null,
-
-        lastResult:
-            null,
-
         history:
             [],
 
-        errors:
-            [],
-
-        customCommands:
+        commands:
             new Map(),
 
         aliases:
@@ -131,7 +103,7 @@
     };
 
     // --------------------------------------------------------
-    // Event System
+    // Events
     // --------------------------------------------------------
 
     const listeners =
@@ -146,7 +118,9 @@
             typeof callback !==
             "function"
         ) {
+
             return () => {};
+
         }
 
         if (
@@ -240,7 +214,7 @@
 
             document.dispatchEvent(
                 new CustomEvent(
-                    `haldo:ai-command:${event}`,
+                    `haldo:ai-commands:${event}`,
                     {
                         detail
                     }
@@ -254,530 +228,931 @@
     }
 
     // --------------------------------------------------------
-    // Logging
+    // Utility
     // --------------------------------------------------------
 
-    function log(
-        ...args
+    function clean(
+        value
     ) {
 
-        if (
-            CONFIG.debug
-        ) {
-
-            console.log(
-                "[HalDoAICommands]",
-                ...args
-            );
-
-        }
+        return String(
+            value ??
+            ""
+        ).trim();
 
     }
-
-    // --------------------------------------------------------
-    // Error Handling
-    // --------------------------------------------------------
-
-    function recordError(
-        error,
-        context = {}
-    ) {
-
-        const entry = {
-
-            timestamp:
-                Date.now(),
-
-            message:
-                error instanceof Error
-                    ? error.message
-                    : String(error),
-
-            context
-
-        };
-
-        state.errors.push(
-            entry
-        );
-
-        if (
-            state.errors.length >
-            50
-        ) {
-
-            state.errors.shift();
-
-        }
-
-        emit(
-            "error",
-            entry
-        );
-
-        return entry;
-
-    }
-
-    // --------------------------------------------------------
-    // Utilities
-    // --------------------------------------------------------
 
     function normalize(
         value
     ) {
 
-        return String(
-            value ??
-            ""
+        return clean(
+            value
         )
-        .trim()
-        .toLowerCase();
+        .toLowerCase()
+        .replace(
+            /\s+/g,
+            " "
+        );
 
     }
 
-    function cleanText(
-        value
-    ) {
+    // --------------------------------------------------------
+    // External Modules
+    // --------------------------------------------------------
 
-        return String(
-            value ??
-            ""
-        )
-        .trim();
-
-    }
-
-    function createId(
-        prefix =
-            "command"
-    ) {
+    function getAI() {
 
         return (
-            prefix +
-            "-" +
-            Date.now() +
-            "-" +
-            Math.random()
-                .toString(36)
-                .slice(2, 9)
+            window.HalDoAICore ||
+            window.HalDoOS?.aiCore ||
+            null
         );
 
     }
 
-    function clone(
-        value
-    ) {
+    function getChat() {
 
-        try {
-
-            return JSON.parse(
-                JSON.stringify(
-                    value
-                )
-            );
-
-        } catch (
-            error
-        ) {
-
-            return value;
-
-        }
-
-    }
-
-    // --------------------------------------------------------
-    // Module Resolver
-    // --------------------------------------------------------
-
-    function resolveModule(
-        names
-    ) {
-
-        if (
-            typeof names ===
-            "string"
-        ) {
-
-            names =
-                [names];
-
-        }
-
-        for (
-            const name of names
-        ) {
-
-            if (
-                window[name]
-            ) {
-
-                return window[name];
-
-            }
-
-            if (
-                window.HalDoOS &&
-                window.HalDoOS[name]
-            ) {
-
-                return window.HalDoOS[name];
-
-            }
-
-        }
-
-        return null;
-
-    }
-
-    // --------------------------------------------------------
-    // Module Accessors
-    // --------------------------------------------------------
-
-    function getAppManager() {
-
-        return resolveModule(
-            [
-                "HalDoAppManager",
-                "appManager",
-                "HalDoOSAppManager"
-            ]
-        );
-
-    }
-
-    function getAppLauncher() {
-
-        return resolveModule(
-            [
-                "HalDoAppLauncher",
-                "appLauncher"
-            ]
-        );
-
-    }
-
-    function getLauncher() {
-
-        return resolveModule(
-            [
-                "HalDoLauncher",
-                "launcher"
-            ]
-        );
-
-    }
-
-    function getRouter() {
-
-        return resolveModule(
-            [
-                "HalDoAppRouter",
-                "appRouter",
-                "router"
-            ]
-        );
-
-    }
-
-    function getWindowManager() {
-
-        return resolveModule(
-            [
-                "HalDoWindowManager",
-                "windowManager"
-            ]
-        );
-
-    }
-
-    function getSystem() {
-
-        return resolveModule(
-            [
-                "HalDoSystem",
-                "system"
-            ]
-        );
-
-    }
-
-    function getKernel() {
-
-        return resolveModule(
-            [
-                "HalDoKernel",
-                "kernel"
-            ]
-        );
-
-    }
-
-    function getStorage() {
-
-        return resolveModule(
-            [
-                "HalDoStorageManager",
-                "HalDoStorage",
-                "storageManager",
-                "storage"
-            ]
+        return (
+            window.HalDoAIChat ||
+            window.HalDoOS?.aiChat ||
+            null
         );
 
     }
 
     function getLanguage() {
 
-        return resolveModule(
-            [
-                "HalDoLanguageManager",
-                "HalDoLanguageSystem",
-                "languageManager",
-                "languageSystem"
-            ]
+        return (
+            window.HalDoAILanguage ||
+            window.HalDoOS?.aiLanguage ||
+            null
         );
 
     }
 
-    function getVoice() {
+    function getAppManager() {
 
-        return resolveModule(
-            [
-                "HalDoAIVoice",
-                "HalDoVoice",
-                "aiVoice",
-                "voice"
-            ]
+        return (
+            window.HalDoAppManager ||
+            window.HalDoOS?.appManager ||
+            null
         );
 
     }
 
-    function getSpeech() {
+    function getAppRouter() {
 
-        return resolveModule(
-            [
-                "HalDoAISpeech",
-                "HalDoSpeech",
-                "aiSpeech",
-                "speech"
-            ]
+        return (
+            window.HalDoAppRouter ||
+            window.HalDoOS?.appRouter ||
+            null
+        );
+
+    }
+
+    function getLauncher() {
+
+        return (
+            window.HalDoLauncher ||
+            window.HalDoOS?.launcher ||
+            null
+        );
+
+    }
+
+    function getSystem() {
+
+        return (
+            window.HalDoSystem ||
+            window.HalDoOS?.system ||
+            null
+        );
+
+    }
+
+    function getKernel() {
+
+        return (
+            window.HalDoKernel ||
+            window.HalDoOS?.kernel ||
+            null
+        );
+
+    }
+
+    function getStorage() {
+
+        return (
+            window.HalDoStorage ||
+            window.HalDoStorageManager ||
+            window.HalDoOS?.storage ||
+            window.HalDoOS?.storageManager ||
+            null
         );
 
     }
 
     // --------------------------------------------------------
-    // Command Registry
+    // Command Registration
     // --------------------------------------------------------
-
-    const commands =
-        new Map();
 
     function registerCommand(
-        name,
         definition
     ) {
 
+        if (
+            !definition ||
+            !definition.id
+        ) {
+
+            return {
+
+                ok:
+                    false,
+
+                error:
+                    "INVALID_COMMAND"
+
+            };
+
+        }
+
         const id =
             normalize(
-                name
+                definition.id
             );
 
         if (!id) {
-            return false;
+
+            return {
+
+                ok:
+                    false,
+
+                error:
+                    "INVALID_COMMAND_ID"
+
+            };
+
         }
 
-        commands.set(
-            id,
-            {
+        const command = {
 
+            id,
+
+            name:
+                definition.name ||
                 id,
 
-                name:
-                    definition.name ||
-                    id,
+            description:
+                definition.description ||
+                "",
 
-                description:
-                    definition.description ||
-                    "",
+            category:
+                definition.category ||
+                "general",
 
-                category:
-                    definition.category ||
-                    "general",
+            aliases:
+                Array.isArray(
+                    definition.aliases
+                )
+                    ? definition.aliases
+                    : [],
 
-                aliases:
-                    Array.isArray(
-                        definition.aliases
+            keywords:
+                Array.isArray(
+                    definition.keywords
+                )
+                    ? definition.keywords
+                    : [],
+
+            execute:
+                typeof definition.execute ===
+                "function"
+                    ? definition.execute
+                    : null,
+
+            enabled:
+                definition.enabled !==
+                false,
+
+            priority:
+                Number(
+                    definition.priority ||
+                    0
+                )
+
+        };
+
+        if (!command.execute) {
+
+            return {
+
+                ok:
+                    false,
+
+                error:
+                    "COMMAND_EXECUTOR_MISSING",
+
+                id
+
+            };
+
+        }
+
+        state.commands.set(
+            id,
+            command
+        );
+
+        if (
+            CONFIG.enableAliases
+        ) {
+
+            command.aliases.forEach(
+                alias => {
+
+                    const normalized =
+                        normalize(
+                            alias
+                        );
+
+                    if (normalized) {
+
+                        state.aliases.set(
+                            normalized,
+                            id
+                        );
+
+                    }
+
+                }
+            );
+
+        }
+
+        emit(
+            "command-registered",
+            {
+                command
+            }
+        );
+
+        return {
+
+            ok:
+                true,
+
+            command
+
+        };
+
+    }
+
+    // --------------------------------------------------------
+    // Compatibility API
+    // --------------------------------------------------------
+
+    function registerCustomCommand(
+        id,
+        execute,
+        options = {}
+    ) {
+
+        return registerCommand({
+
+            id,
+
+            execute,
+
+            ...options
+
+        });
+
+    }
+
+    // --------------------------------------------------------
+    // Unregister
+    // --------------------------------------------------------
+
+    function unregisterCommand(
+        id
+    ) {
+
+        const commandId =
+            normalize(
+                id
+            );
+
+        const command =
+            state.commands.get(
+                commandId
+            );
+
+        if (!command) {
+
+            return false;
+
+        }
+
+        state.commands.delete(
+            commandId
+        );
+
+        command.aliases.forEach(
+            alias => {
+
+                state.aliases.delete(
+                    normalize(
+                        alias
                     )
-                        ? definition.aliases
-                        : [],
-
-                confirmation:
-                    Boolean(
-                        definition.confirmation
-                    ),
-
-                execute:
-                    definition.execute
+                );
 
             }
         );
 
-        for (
-            const alias of
-            definition.aliases || []
-        ) {
-
-            state.aliases.set(
-                normalize(
-                    alias
-                ),
-                id
-            );
-
-        }
+        emit(
+            "command-unregistered",
+            {
+                id:
+                    commandId
+            }
+        );
 
         return true;
 
     }
 
-    function unregisterCommand(
-        name
+    // --------------------------------------------------------
+    // Find Command
+    // --------------------------------------------------------
+
+    function findCommand(
+        value
     ) {
 
-        const id =
-            resolveCommandName(
-                name
+        const input =
+            normalize(
+                value
             );
 
-        if (!id) {
-            return false;
+        if (!input) {
+
+            return null;
+
         }
 
-        return commands.delete(
-            id
-        );
-
-    }
-
-    function resolveCommandName(
-        name
-    ) {
-
-        const normalized =
-            normalize(
-                name
-            );
-
         if (
-            commands.has(
-                normalized
+            state.commands.has(
+                input
             )
         ) {
 
-            return normalized;
+            return state.commands.get(
+                input
+            );
 
         }
 
         if (
             state.aliases.has(
-                normalized
+                input
             )
         ) {
 
-            return state.aliases.get(
-                normalized
-            );
+            return state.commands.get(
+                state.aliases.get(
+                    input
+                )
+            ) || null;
 
         }
 
-        return null;
+        /*
+         * Prüfe längere Alias-/Keyword-Treffer.
+         */
 
-    }
+        let candidates = [];
 
-    function getCommand(
-        name
-    ) {
+        state.commands.forEach(
+            command => {
 
-        const id =
-            resolveCommandName(
-                name
-            );
+                if (!command.enabled) {
+                    return;
+                }
 
-        return id
-            ? commands.get(id)
-            : null;
+                const phrases = [
 
-    }
+                    command.id,
 
-    function getCommands(
-        category = null
-    ) {
+                    command.name,
 
-        const list =
-            Array.from(
-                commands.values()
-            );
+                    ...command.aliases,
 
-        if (!category) {
+                    ...command.keywords
 
-            return list;
+                ];
 
-        }
+                phrases.forEach(
+                    phrase => {
 
-        return list.filter(
-            command =>
-                command.category ===
-                category
+                        const normalized =
+                            normalize(
+                                phrase
+                            );
+
+                        if (
+                            normalized &&
+                            input.includes(
+                                normalized
+                            )
+                        ) {
+
+                            candidates.push(
+                                {
+                                    command,
+                                    score:
+                                        normalized.length +
+                                        command.priority
+                                }
+                            );
+
+                        }
+
+                    }
+                );
+
+            }
         );
 
+        candidates.sort(
+            (
+                a,
+                b
+            ) =>
+                b.score -
+                a.score
+        );
+
+        return candidates[0]?.command ||
+            null;
+
     }
 
     // --------------------------------------------------------
-    // Event-Based Module Command
+    // Parse Command
     // --------------------------------------------------------
 
-    function emitModuleCommand(
-        eventName,
-        detail = {}
+    function parse(
+        input
     ) {
+
+        const text =
+            clean(
+                input
+            );
+
+        if (!text) {
+
+            return {
+
+                command:
+                    null,
+
+                arguments:
+                    [],
+
+                raw:
+                    ""
+
+            };
+
+        }
+
+        const tokens =
+            text.split(
+                /\s+/
+            );
+
+        let command =
+            findCommand(
+                text
+            );
+
+        /*
+         * Falls kein kompletter Treffer:
+         * erstes Token prüfen.
+         */
+
+        if (!command) {
+
+            command =
+                findCommand(
+                    tokens[0]
+                );
+
+        }
+
+        if (!command) {
+
+            return {
+
+                command:
+                    null,
+
+                arguments:
+                    tokens,
+
+                raw:
+                    text
+
+            };
+
+        }
+
+        let commandToken =
+            command.id;
+
+        const index =
+            normalize(
+                text
+            ).indexOf(
+                commandToken
+            );
+
+        let argumentText =
+            "";
+
+        if (
+            index >= 0
+        ) {
+
+            argumentText =
+                text.slice(
+                    index +
+                    commandToken.length
+                ).trim();
+
+        }
+
+        /*
+         * Wenn ID nicht enthalten war,
+         * versuche Alias/Name.
+         */
+
+        if (
+            !argumentText
+        ) {
+
+            const possibleTokens =
+                [
+
+                    command.id,
+
+                    command.name,
+
+                    ...command.aliases
+
+                ];
+
+            for (
+                const token of
+                possibleTokens
+            ) {
+
+                const normalized =
+                    normalize(
+                        token
+                    );
+
+                const position =
+                    normalize(
+                        text
+                    ).indexOf(
+                        normalized
+                    );
+
+                if (
+                    position ===
+                    0
+                ) {
+
+                    argumentText =
+                        text.slice(
+                            token.length
+                        ).trim();
+
+                    commandToken =
+                        token;
+
+                    break;
+
+                }
+
+            }
+
+        }
+
+        const argumentsList =
+            argumentText
+                ? argumentText.split(
+                    /\s+/
+                )
+                : [];
+
+        return {
+
+            command,
+
+            arguments:
+                argumentsList,
+
+            argumentText,
+
+            commandToken,
+
+            raw:
+                text
+
+        };
+
+    }
+
+    // --------------------------------------------------------
+    // Execute
+    // --------------------------------------------------------
+
+    async function execute(
+        input,
+        context = {}
+    ) {
+
+        const raw =
+            clean(
+                input
+            );
+
+        if (!raw) {
+
+            return {
+
+                ok:
+                    false,
+
+                error:
+                    "EMPTY_COMMAND"
+
+            };
+
+        }
+
+        state.commandCount++;
+
+        const parsed =
+            parse(
+                raw
+            );
+
+        if (
+            !parsed.command
+        ) {
+
+            state.failedCommands++;
+
+            const result = {
+
+                ok:
+                    false,
+
+                error:
+                    "COMMAND_NOT_FOUND",
+
+                input:
+                    raw,
+
+                parsed
+
+            };
+
+            addHistory(
+                result
+            );
+
+            emit(
+                "command-failed",
+                result
+            );
+
+            return result;
+
+        }
+
+        const command =
+            parsed.command;
+
+        if (
+            command.enabled !==
+            true
+        ) {
+
+            state.failedCommands++;
+
+            const result = {
+
+                ok:
+                    false,
+
+                error:
+                    "COMMAND_DISABLED",
+
+                command:
+                    command.id
+
+            };
+
+            addHistory(
+                result
+            );
+
+            emit(
+                "command-failed",
+                result
+            );
+
+            return result;
+
+        }
+
+        const executionContext = {
+
+            ...context,
+
+            input:
+                raw,
+
+            command:
+                command.id,
+
+            commandDefinition:
+                command,
+
+            arguments:
+                parsed.arguments,
+
+            argumentText:
+                parsed.argumentText,
+
+            language:
+                getLanguage()?.getLanguage?.() ||
+                null,
+
+            timestamp:
+                Date.now()
+
+        };
+
+        emit(
+            "command-before-execute",
+            executionContext
+        );
 
         try {
 
-            document.dispatchEvent(
-                new CustomEvent(
-                    eventName,
-                    {
-                        detail
-                    }
-                )
+            const value =
+                await command.execute(
+                    executionContext
+                );
+
+            state.successfulCommands++;
+
+            const result = {
+
+                ok:
+                    true,
+
+                command:
+                    command.id,
+
+                value,
+
+                input:
+                    raw,
+
+                arguments:
+                    parsed.arguments
+
+            };
+
+            addHistory(
+                result
             );
 
-            return true;
+            emit(
+                "command-executed",
+                result
+            );
+
+            return result;
 
         } catch (
             error
         ) {
 
-            recordError(
-                error,
-                {
-                    eventName
-                }
+            state.failedCommands++;
+
+            const result = {
+
+                ok:
+                    false,
+
+                error:
+                    "COMMAND_EXECUTION_ERROR",
+
+                command:
+                    command.id,
+
+                message:
+                    error?.message ||
+                    String(
+                        error
+                    ),
+
+                exception:
+                    error
+
+            };
+
+            addHistory(
+                result
             );
 
-            return false;
+            emit(
+                "command-failed",
+                result
+            );
+
+            return result;
 
         }
 
     }
 
     // --------------------------------------------------------
-    // Generic Method Runner
+    // History
     // --------------------------------------------------------
 
-    async function callModuleMethod(
+    function addHistory(
+        result
+    ) {
+
+        state.history.push({
+
+            timestamp:
+                Date.now(),
+
+            ...result
+
+        });
+
+        if (
+            state.history.length >
+            CONFIG.maxHistory
+        ) {
+
+            state.history.shift();
+
+        }
+
+    }
+
+    function getHistory() {
+
+        return state.history
+            .map(
+                entry => ({
+                    ...entry
+                })
+            );
+
+    }
+
+    function clearHistory() {
+
+        state.history =
+            [];
+
+        emit(
+            "history-cleared"
+        );
+
+    }
+
+    // --------------------------------------------------------
+    // Helper: Call Module
+    // --------------------------------------------------------
+
+    async function callModule(
         module,
         methods,
         args = []
@@ -790,15 +1165,16 @@
                 ok:
                     false,
 
-                reason:
-                    "MODULE_NOT_FOUND"
+                error:
+                    "MODULE_NOT_AVAILABLE"
 
             };
 
         }
 
         for (
-            const method of methods
+            const method of
+            methods
         ) {
 
             if (
@@ -812,18 +1188,6 @@
 
             try {
 
-                const result =
-                    module[method](
-                        ...args
-                    );
-
-                const resolved =
-                    result &&
-                    typeof result.then ===
-                    "function"
-                        ? await result
-                        : result;
-
                 return {
 
                     ok:
@@ -831,30 +1195,27 @@
 
                     method,
 
-                    result:
-                        resolved
+                    value:
+                        await module[method](
+                            ...args
+                        )
 
                 };
 
             } catch (
                 error
             ) {
-
-                recordError(
-                    error,
-                    {
-                        method
-                    }
-                );
 
                 return {
 
                     ok:
                         false,
 
-                    method,
-
-                    error
+                    error:
+                        error?.message ||
+                        String(
+                            error
+                        )
 
                 };
 
@@ -867,2559 +1228,1064 @@
             ok:
                 false,
 
-            reason:
+            error:
                 "METHOD_NOT_FOUND"
 
         };
 
     }
 
-    // --------------------------------------------------------
-    // APP COMMANDS
-    // --------------------------------------------------------
-
-    async function openApp(
-        appName,
-        options = {}
-    ) {
-
-        const name =
-            cleanText(
-                appName
-            );
-
-        if (!name) {
-
-            return {
-
-                ok:
-                    false,
-
-                message:
-                    "Kein App-Name angegeben."
-
-            };
-
-        }
-
-        emit(
-            "app-open-request",
-            {
-                app:
-                    name,
-
-                options
-            }
-        );
-
-        const launcher =
-            getAppLauncher();
-
-        const manager =
-            getAppManager();
-
-        const appMethods = [
-
-            "openApp",
-
-            "launchApp",
-
-            "open",
-
-            "launch",
-
-            "start"
-
-        ];
-
-        let result =
-            await callModuleMethod(
-                launcher,
-                appMethods,
-                [
-                    name,
-                    options
-                ]
-            );
-
-        if (
-            result.ok
-        ) {
-
-            return {
-
-                ok:
-                    true,
-
-                action:
-                    "open-app",
-
-                app:
-                    name,
-
-                result:
-                    result.result
-
-            };
-
-        }
-
-        result =
-            await callModuleMethod(
-                manager,
-                appMethods,
-                [
-                    name,
-                    options
-                ]
-            );
-
-        if (
-            result.ok
-        ) {
-
-            return {
-
-                ok:
-                    true,
-
-                action:
-                    "open-app",
-
-                app:
-                    name,
-
-                result:
-                    result.result
-
-            };
-
-        }
-
-        /*
-         * Event-Fallback für Module,
-         * die über Events arbeiten.
-         */
-
-        emitModuleCommand(
-            "haldo:app:open",
-            {
-                app:
-                    name,
-
-                options
-            }
-        );
-
-        return {
-
-            ok:
-                true,
-
-            action:
-                "open-app",
-
-            app:
-                name,
-
-            fallback:
-                true
-
-        };
-
-    }
-
-    async function closeApp(
-        appName
-    ) {
-
-        const name =
-            cleanText(
-                appName
-            );
-
-        const manager =
-            getAppManager();
-
-        const result =
-            await callModuleMethod(
-                manager,
-                [
-                    "closeApp",
-                    "close",
-                    "stopApp",
-                    "stop"
-                ],
-                [
-                    name
-                ]
-            );
-
-        if (
-            result.ok
-        ) {
-
-            return {
-
-                ok:
-                    true,
-
-                action:
-                    "close-app",
-
-                app:
-                    name,
-
-                result:
-                    result.result
-
-            };
-
-        }
-
-        emitModuleCommand(
-            "haldo:app:close",
-            {
-                app:
-                    name
-            }
-        );
-
-        return {
-
-            ok:
-                true,
-
-            action:
-                "close-app",
-
-            app:
-                name,
-
-            fallback:
-                true
-
-        };
-
-    }
-
-    async function listApps() {
-
-        const manager =
-            getAppManager();
-
-        const result =
-            await callModuleMethod(
-                manager,
-                [
-                    "getApps",
-                    "listApps",
-                    "getRegisteredApps",
-                    "list"
-                ]
-            );
-
-        if (
-            result.ok
-        ) {
-
-            return {
-
-                ok:
-                    true,
-
-                action:
-                    "list-apps",
-
-                apps:
-                    result.result
-
-            };
-
-        }
-
-        return {
-
-            ok:
-                false,
-
-            action:
-                "list-apps",
-
-            apps:
-                []
-
-        };
-
-    }
-
-    // --------------------------------------------------------
-    // NAVIGATION COMMANDS
-    // --------------------------------------------------------
-
-    async function navigate(
-        target,
-        options = {}
-    ) {
-
-        const destination =
-            cleanText(
-                target
-            );
-
-        if (!destination) {
-
-            return {
-
-                ok:
-                    false,
-
-                message:
-                    "Kein Ziel angegeben."
-
-            };
-
-        }
-
-        emit(
-            "navigation-request",
-            {
-                target:
-                    destination,
-
-                options
-            }
-        );
-
-        const router =
-            getRouter();
-
-        const result =
-            await callModuleMethod(
-                router,
-                [
-                    "navigate",
-                    "go",
-                    "route",
-                    "open",
-                    "push"
-                ],
-                [
-                    destination,
-                    options
-                ]
-            );
-
-        if (
-            result.ok
-        ) {
-
-            return {
-
-                ok:
-                    true,
-
-                action:
-                    "navigate",
-
-                target:
-                    destination,
-
-                result:
-                    result.result
-
-            };
-
-        }
-
-        emitModuleCommand(
-            "haldo:navigate",
-            {
-                target:
-                    destination,
-
-                options
-            }
-        );
-
-        return {
-
-            ok:
-                true,
-
-            action:
-                "navigate",
-
-            target:
-                destination,
-
-            fallback:
-                true
-
-        };
-
-    }
-
-    async function goHome() {
-
-        return navigate(
-            "home"
-        );
-
-    }
-
-    async function goBack() {
-
-        const router =
-            getRouter();
-
-        const result =
-            await callModuleMethod(
-                router,
-                [
-                    "back",
-                    "goBack",
-                    "previous"
-                ]
-            );
-
-        if (
-            result.ok
-        ) {
-
-            return {
-
-                ok:
-                    true,
-
-                action:
-                    "back",
-
-                result:
-                    result.result
-
-            };
-
-        }
-
-        if (
-            window.history &&
-            typeof window.history.back ===
-            "function"
-        ) {
-
-            window.history.back();
-
-            return {
-
-                ok:
-                    true,
-
-                action:
-                    "back",
-
-                fallback:
-                    true
-
-            };
-
-        }
-
-        return {
-
-            ok:
-                false,
-
-            action:
-                "back"
-
-        };
-
-    }
-
-    // --------------------------------------------------------
-    // WINDOW COMMANDS
-    // --------------------------------------------------------
-
-    async function openWindow(
-        windowName,
-        options = {}
-    ) {
-
-        const name =
-            cleanText(
-                windowName
-            );
-
-        const manager =
-            getWindowManager();
-
-        const result =
-            await callModuleMethod(
-                manager,
-                [
-                    "openWindow",
-                    "open",
-                    "createWindow",
-                    "show"
-                ],
-                [
-                    name,
-                    options
-                ]
-            );
-
-        if (
-            result.ok
-        ) {
-
-            return {
-
-                ok:
-                    true,
-
-                action:
-                    "open-window",
-
-                window:
-                    name,
-
-                result:
-                    result.result
-
-            };
-
-        }
-
-        emitModuleCommand(
-            "haldo:window:open",
-            {
-                window:
-                    name,
-
-                options
-            }
-        );
-
-        return {
-
-            ok:
-                true,
-
-            action:
-                "open-window",
-
-            window:
-                name,
-
-            fallback:
-                true
-
-        };
-
-    }
-
-    async function closeWindow(
-        windowName
-    ) {
-
-        const name =
-            cleanText(
-                windowName
-            );
-
-        const manager =
-            getWindowManager();
-
-        const result =
-            await callModuleMethod(
-                manager,
-                [
-                    "closeWindow",
-                    "close",
-                    "hide"
-                ],
-                [
-                    name
-                ]
-            );
-
-        if (
-            result.ok
-        ) {
-
-            return {
-
-                ok:
-                    true,
-
-                action:
-                    "close-window",
-
-                window:
-                    name,
-
-                result:
-                    result.result
-
-            };
-
-        }
-
-        emitModuleCommand(
-            "haldo:window:close",
-            {
-                window:
-                    name
-            }
-        );
-
-        return {
-
-            ok:
-                true,
-
-            action:
-                "close-window",
-
-            window:
-                name,
-
-            fallback:
-                true
-
-        };
-
-    }
-
-    async function minimizeWindow(
-        windowName
-    ) {
-
-        const manager =
-            getWindowManager();
-
-        const result =
-            await callModuleMethod(
-                manager,
-                [
-                    "minimizeWindow",
-                    "minimize"
-                ],
-                [
-                    windowName
-                ]
-            );
-
-        if (
-            result.ok
-        ) {
-
-            return {
-
-                ok:
-                    true,
-
-                action:
-                    "minimize-window",
-
-                result:
-                    result.result
-
-            };
-
-        }
-
-        emitModuleCommand(
-            "haldo:window:minimize",
-            {
-                window:
-                    windowName
-            }
-        );
-
-        return {
-
-            ok:
-                true,
-
-            action:
-                "minimize-window",
-
-            fallback:
-                true
-
-        };
-
-    }
-
-    async function maximizeWindow(
-        windowName
-    ) {
-
-        const manager =
-            getWindowManager();
-
-        const result =
-            await callModuleMethod(
-                manager,
-                [
-                    "maximizeWindow",
-                    "maximize"
-                ],
-                [
-                    windowName
-                ]
-            );
-
-        if (
-            result.ok
-        ) {
-
-            return {
-
-                ok:
-                    true,
-
-                action:
-                    "maximize-window",
-
-                result:
-                    result.result
-
-            };
-
-        }
-
-        emitModuleCommand(
-            "haldo:window:maximize",
-            {
-                window:
-                    windowName
-            }
-        );
-
-        return {
-
-            ok:
-                true,
-
-            action:
-                "maximize-window",
-
-            fallback:
-                true
-
-        };
-
-    }
-
-    // --------------------------------------------------------
-    // SYSTEM COMMANDS
-    // --------------------------------------------------------
-
-    async function systemStatus() {
-
-        const system =
-            getSystem();
-
-        const kernel =
-            getKernel();
-
-        const systemResult =
-            await callModuleMethod(
-                system,
-                [
-                    "getStatus",
-                    "status",
-                    "getSystemStatus"
-                ]
-            );
-
-        const kernelResult =
-            await callModuleMethod(
-                kernel,
-                [
-                    "getStatus",
-                    "status",
-                    "getDiagnostics"
-                ]
-            );
-
-        return {
-
-            ok:
-                true,
-
-            action:
-                "system-status",
-
-            system:
-                systemResult.ok
-                    ? systemResult.result
-                    : null,
-
-            kernel:
-                kernelResult.ok
-                    ? kernelResult.result
-                    : null
-
-        };
-
-    }
-
-    async function systemDiagnostics() {
-
-        const system =
-            getSystem();
-
-        const kernel =
-            getKernel();
-
-        const results = {
-
-            system:
-                await callModuleMethod(
-                    system,
-                    [
-                        "diagnose",
-                        "diagnostics",
-                        "getDiagnostics"
-                    ]
-                ),
-
-            kernel:
-                await callModuleMethod(
-                    kernel,
-                    [
-                        "diagnose",
-                        "diagnostics",
-                        "getDiagnostics"
-                    ]
-                )
-
-        };
-
-        emit(
-            "diagnostics",
-            results
-        );
-
-        return {
-
-            ok:
-                true,
-
-            action:
-                "diagnostics",
-
-            results
-
-        };
-
-    }
-
-    // --------------------------------------------------------
-    // LANGUAGE
-    // --------------------------------------------------------
-
-    async function setLanguage(
-        language
-    ) {
-
-        const lang =
-            cleanText(
-                language
-            );
-
-        if (!lang) {
-
-            return {
-
-                ok:
-                    false,
-
-                message:
-                    "Keine Sprache angegeben."
-
-            };
-
-        }
-
-        const manager =
-            getLanguage();
-
-        const result =
-            await callModuleMethod(
-                manager,
-                [
-                    "setLanguage",
-                    "changeLanguage",
-                    "switchLanguage",
-                    "set"
-                ],
-                [
-                    lang
-                ]
-            );
-
-        if (
-            result.ok
-        ) {
-
-            return {
-
-                ok:
-                    true,
-
-                action:
-                    "set-language",
-
-                language:
-                    lang,
-
-                result:
-                    result.result
-
-            };
-
-        }
-
-        emitModuleCommand(
-            "haldo:language:set",
-            {
-                language:
-                    lang
-            }
-        );
-
-        return {
-
-            ok:
-                true,
-
-            action:
-                "set-language",
-
-            language:
-                lang,
-
-            fallback:
-                true
-
-        };
-
-    }
-
-    // --------------------------------------------------------
-    // VOICE
-    // --------------------------------------------------------
-
-    async function speak(
-        text,
-        options = {}
-    ) {
-
-        const content =
-            cleanText(
-                text
-            );
-
-        if (!content) {
-
-            return {
-
-                ok:
-                    false,
-
-                message:
-                    "Kein Text zum Sprechen."
-
-            };
-
-        }
-
-        const voice =
-            getVoice();
-
-        const speech =
-            getSpeech();
-
-        let result =
-            await callModuleMethod(
-                voice,
-                [
-                    "speak",
-                    "say",
-                    "synthesize"
-                ],
-                [
-                    content,
-                    options
-                ]
-            );
-
-        if (
-            result.ok
-        ) {
-
-            return {
-
-                ok:
-                    true,
-
-                action:
-                    "speak",
-
-                text:
-                    content,
-
-                result:
-                    result.result
-
-            };
-
-        }
-
-        result =
-            await callModuleMethod(
-                speech,
-                [
-                    "speak",
-                    "say",
-                    "synthesize"
-                ],
-                [
-                    content,
-                    options
-                ]
-            );
-
-        if (
-            result.ok
-        ) {
-
-            return {
-
-                ok:
-                    true,
-
-                action:
-                    "speak",
-
-                text:
-                    content,
-
-                result:
-                    result.result
-
-            };
-
-        }
-
-        /*
-         * Browser-Fallback.
-         */
-
-        if (
-            "speechSynthesis" in
-            window
-        ) {
-
-            try {
-
-                const utterance =
-                    new SpeechSynthesisUtterance(
-                        content
-                    );
-
-                if (
-                    options.lang
-                ) {
-
-                    utterance.lang =
-                        options.lang;
-
-                }
-
-                window.speechSynthesis.speak(
-                    utterance
-                );
-
-                return {
-
-                    ok:
-                        true,
-
-                    action:
-                        "speak",
-
-                    text:
-                        content,
-
-                    fallback:
-                        true
-
-                };
-
-            } catch (
-                error
-            ) {
-
-                recordError(
-                    error,
-                    {
-                        phase:
-                            "speech-fallback"
-                    }
-                );
-
-            }
-
-        }
-
-        return {
-
-            ok:
-                false,
-
-            action:
-                "speak",
-
-            text:
-                content
-
-        };
-
-    }
-
-    // --------------------------------------------------------
-    // STORAGE
-    // --------------------------------------------------------
-
-    async function saveData(
-        key,
-        value
-    ) {
-
-        const storage =
-            getStorage();
-
-        const result =
-            await callModuleMethod(
-                storage,
-                [
-                    "set",
-                    "save",
-                    "setItem",
-                    "store"
-                ],
-                [
-                    key,
-                    value
-                ]
-            );
-
-        if (
-            result.ok
-        ) {
-
-            return {
-
-                ok:
-                    true,
-
-                action:
-                    "save",
-
-                key,
-
-                result:
-                    result.result
-
-            };
-
-        }
-
-        try {
-
-            localStorage.setItem(
-                key,
-                JSON.stringify(
-                    value
-                )
-            );
-
-            return {
-
-                ok:
-                    true,
-
-                action:
-                    "save",
-
-                key,
-
-                fallback:
-                    true
-
-            };
-
-        } catch (
-            error
-        ) {
-
-            recordError(
-                error,
-                {
-                    phase:
-                        "storage-save"
-                }
-            );
-
-        }
-
-        return {
-
-            ok:
-                false,
-
-            action:
-                "save",
-
-            key
-
-        };
-
-    }
-
-    async function loadData(
-        key
-    ) {
-
-        const storage =
-            getStorage();
-
-        const result =
-            await callModuleMethod(
-                storage,
-                [
-                    "get",
-                    "load",
-                    "getItem",
-                    "retrieve"
-                ],
-                [
-                    key
-                ]
-            );
-
-        if (
-            result.ok
-        ) {
-
-            return {
-
-                ok:
-                    true,
-
-                action:
-                    "load",
-
-                key,
-
-                value:
-                    result.result
-
-            };
-
-        }
-
-        try {
-
-            const raw =
-                localStorage.getItem(
-                    key
-                );
-
-            return {
-
-                ok:
-                    true,
-
-                action:
-                    "load",
-
-                key,
-
-                value:
-                    raw
-                        ? JSON.parse(
-                            raw
-                        )
-                        : null,
-
-                fallback:
-                    true
-
-            };
-
-        } catch (
-            error
-        ) {
-
-            recordError(
-                error,
-                {
-                    phase:
-                        "storage-load"
-                }
-            );
-
-        }
-
-        return {
-
-            ok:
-                false,
-
-            action:
-                "load",
-
-            key
-
-        };
-
-    }
+    // ========================================================
+    // BUILT-IN COMMANDS
+    // ========================================================
 
     // --------------------------------------------------------
     // HELP
     // --------------------------------------------------------
 
-    function getHelp() {
+    registerCommand({
 
-        return {
+        id:
+            "help",
 
-            ok:
-                true,
+        name:
+            "Help",
 
-            action:
-                "help",
+        description:
+            "Zeigt verfügbare HalDo-AI-Befehle.",
 
-            commands:
-                getCommands()
-                    .map(
-                        command => ({
+        category:
+            "system",
 
-                            name:
-                                command.name,
+        aliases: [
 
-                            description:
-                                command.description,
+            "hilfe",
+            "help me",
+            "?",
+            "befehle",
+            "commands"
 
-                            category:
-                                command.category,
+        ],
 
-                            aliases:
-                                command.aliases
+        keywords: [
 
-                        })
-                    )
+            "hilfe",
+            "help",
+            "befehle",
+            "commands"
 
-        };
+        ],
 
-    }
+        priority:
+            10,
 
-    // --------------------------------------------------------
-    // COMMAND PARSER
-    // --------------------------------------------------------
-
-    function parseCommand(
-        input
-    ) {
-
-        const original =
-            cleanText(
-                input
-            );
-
-        if (!original) {
-
-            return null;
-
-        }
-
-        let text =
-            original;
-
-        /*
-         * Präfixe entfernen.
-         */
-
-        text =
-            text.replace(
-                /^haldo[\s,:-]*/i,
-                ""
-            );
-
-        text =
-            text.replace(
-                /^ai[\s,:-]*/i,
-                ""
-            );
-
-        text =
-            text.trim();
-
-        const normalized =
-            normalize(
-                text
-            );
-
-        /*
-         * Direkte Kommandos.
-         */
-
-        if (
-            /^\/\w+/.test(
-                normalized
-            )
-        ) {
-
-            const match =
-                normalized.match(
-                    /^\/([^\s]+)(?:\s+(.*))?$/
-                );
-
-            if (
-                match
-            ) {
+        execute:
+            async () => {
 
                 return {
 
-                    command:
-                        match[1],
-
-                    argument:
-                        match[2] ||
-                        "",
-
-                    original
+                    commands:
+                        getCommands()
 
                 };
 
             }
 
-        }
-
-        /*
-         * App öffnen.
-         */
-
-        let match =
-            text.match(
-                /^(?:öffne|öffnen|starte|starten|open|launch)\s+(.+)$/i
-            );
-
-        if (
-            match
-        ) {
-
-            return {
-
-                command:
-                    "open-app",
-
-                argument:
-                    match[1],
-
-                original
-
-            };
-
-        }
-
-        /*
-         * App schließen.
-         */
-
-        match =
-            text.match(
-                /^(?:schließe|schliessen|beende|close|stop)\s+(.+)$/i
-            );
-
-        if (
-            match
-        ) {
-
-            return {
-
-                command:
-                    "close-app",
-
-                argument:
-                    match[1],
-
-                original
-
-            };
-
-        }
-
-        /*
-         * Zurück.
-         */
-
-        if (
-            /^(?:zurück|zurueck|back)$/i.test(
-                text
-            )
-        ) {
-
-            return {
-
-                command:
-                    "back",
-
-                argument:
-                    "",
-
-                original
-
-            };
-
-        }
-
-        /*
-         * Home.
-         */
-
-        if (
-            /^(?:home|startseite|hauptseite)$/i.test(
-                text
-            )
-        ) {
-
-            return {
-
-                command:
-                    "home",
-
-                argument:
-                    "",
-
-                original
-
-            };
-
-        }
-
-        /*
-         * Hilfe.
-         */
-
-        if (
-            /^(?:hilfe|help|befehle|commands)$/i.test(
-                text
-            )
-        ) {
-
-            return {
-
-                command:
-                    "help",
-
-                argument:
-                    "",
-
-                original
-
-            };
-
-        }
-
-        /*
-         * Status.
-         */
-
-        if (
-            /^(?:status|systemstatus|system status)$/i.test(
-                text
-            )
-        ) {
-
-            return {
-
-                command:
-                    "system-status",
-
-                argument:
-                    "",
-
-                original
-
-            };
-
-        }
-
-        /*
-         * Diagnose.
-         */
-
-        if (
-            /^(?:diagnose|diagnostik|diagnostics)$/i.test(
-                text
-            )
-        ) {
-
-            return {
-
-                command:
-                    "diagnostics",
-
-                argument:
-                    "",
-
-                original
-
-            };
-
-        }
-
-        /*
-         * Sprache.
-         */
-
-        match =
-            text.match(
-                /^(?:sprache|language)\s+(.+)$/i
-            );
-
-        if (
-            match
-        ) {
-
-            return {
-
-                command:
-                    "language",
-
-                argument:
-                    match[1],
-
-                original
-
-            };
-
-        }
-
-        /*
-         * Sprechen.
-         */
-
-        match =
-            text.match(
-                /^(?:sprich|sag|say|speak)\s+(.+)$/i
-            );
-
-        if (
-            match
-        ) {
-
-            return {
-
-                command:
-                    "speak",
-
-                argument:
-                    match[1],
-
-                original
-
-            };
-
-        }
-
-        return {
-
-            command:
-                null,
-
-            argument:
-                text,
-
-            original
-
-        };
-
-    }
+    });
 
     // --------------------------------------------------------
-    // Execute Parsed Command
+    // LANGUAGE
     // --------------------------------------------------------
 
-    async function execute(
-        input,
-        options = {}
-    ) {
+    registerCommand({
 
-        const parsed =
-            typeof input ===
-            "object"
-                ? input
-                : parseCommand(
-                    input
+        id:
+            "set-language-ai",
+
+        name:
+            "AI-Sprache ändern",
+
+        description:
+            "Ändert die Sprache von HalDo AI.",
+
+        category:
+            "language",
+
+        aliases: [
+
+            "language",
+            "sprache",
+            "ziman",
+            "dil"
+
+        ],
+
+        keywords: [
+
+            "sprache",
+            "language",
+            "ziman",
+            "dil"
+
+        ],
+
+        priority:
+            20,
+
+        execute:
+            async context => {
+
+                const language =
+                    getLanguage();
+
+                if (!language) {
+
+                    return {
+
+                        ok:
+                            false,
+
+                        error:
+                            "AI_LANGUAGE_UNAVAILABLE"
+
+                    };
+
+                }
+
+                const target =
+                    context.argumentText;
+
+                if (!target) {
+
+                    return {
+
+                        ok:
+                            true,
+
+                        current:
+                            language.getLanguage(),
+
+                        supported:
+                            language
+                                .getSupportedLanguages()
+
+                    };
+
+                }
+
+                return language.setLanguage(
+                    target
                 );
 
-        if (!parsed) {
-
-            return {
-
-                ok:
-                    false,
-
-                message:
-                    "Kein Befehl erkannt."
-
-            };
-
-        }
-
-        if (
-            !parsed.command
-        ) {
-
-            return {
-
-                ok:
-                    false,
-
-                unrecognized:
-                    true,
-
-                message:
-                    "Der Befehl wurde nicht erkannt.",
-
-                parsed
-
-            };
-
-        }
-
-        const command =
-            getCommand(
-                parsed.command
-            );
-
-        if (!command) {
-
-            return {
-
-                ok:
-                    false,
-
-                unrecognized:
-                    true,
-
-                command:
-                    parsed.command,
-
-                message:
-                    `Befehl "${parsed.command}" nicht gefunden.`
-
-            };
-
-        }
-
-        /*
-         * Sicherheitsprüfung.
-         */
-
-        if (
-            command.confirmation &&
-            CONFIG.confirmationRequired &&
-            options.confirmed !==
-            true
-        ) {
-
-            return {
-
-                ok:
-                    false,
-
-                confirmationRequired:
-                    true,
-
-                command:
-                    command.id,
-
-                message:
-                    `Bestätigung für "${command.name}" erforderlich.`
-
-            };
-
-        }
-
-        state.executing =
-            true;
-
-        state.commandCount++;
-
-        state.lastCommand =
-            {
-
-                id:
-                    createId(),
-
-                command:
-                    command.id,
-
-                argument:
-                    parsed.argument,
-
-                timestamp:
-                    Date.now()
-
-            };
-
-        emit(
-            "command-start",
-            {
-                command:
-                    state.lastCommand
             }
-        );
 
-        try {
+    });
 
-            const result =
-                await command.execute(
-                    parsed.argument,
-                    options,
-                    parsed
+    // --------------------------------------------------------
+    // DETECT LANGUAGE
+    // --------------------------------------------------------
+
+    registerCommand({
+
+        id:
+            "detect-language",
+
+        name:
+            "Sprache erkennen",
+
+        description:
+            "Erkennt die Sprache eines Textes.",
+
+        category:
+            "language",
+
+        aliases: [
+
+            "detect language",
+            "sprache erkennen",
+            "detect"
+
+        ],
+
+        keywords: [
+
+            "erkenne",
+            "erkennen",
+            "detect",
+            "language"
+
+        ],
+
+        execute:
+            async context => {
+
+                const language =
+                    getLanguage();
+
+                if (!language) {
+
+                    return {
+
+                        ok:
+                            false,
+
+                        error:
+                            "AI_LANGUAGE_UNAVAILABLE"
+
+                    };
+
+                }
+
+                return language.detectLanguage(
+                    context.argumentText ||
+                    context.input
                 );
 
-            const finalResult =
-                result || {
+            }
+
+    });
+
+    // --------------------------------------------------------
+    // OPEN APP
+    // --------------------------------------------------------
+
+    registerCommand({
+
+        id:
+            "open",
+
+        name:
+            "App öffnen",
+
+        description:
+            "Öffnet eine registrierte HalDo-App.",
+
+        category:
+            "apps",
+
+        aliases: [
+
+            "öffne",
+            "oeffne",
+            "launch",
+            "start",
+            "open app",
+            "app öffnen"
+
+        ],
+
+        keywords: [
+
+            "öffne",
+            "oeffne",
+            "open",
+            "start",
+            "launch"
+
+        ],
+
+        priority:
+            15,
+
+        execute:
+            async context => {
+
+                const target =
+                    context.argumentText;
+
+                if (!target) {
+
+                    return {
+
+                        ok:
+                            false,
+
+                        error:
+                            "APP_NAME_MISSING"
+
+                    };
+
+                }
+
+                const manager =
+                    getAppManager();
+
+                const router =
+                    getAppRouter();
+
+                const launcher =
+                    getLauncher();
+
+                /*
+                 * App Manager zuerst.
+                 */
+
+                if (manager) {
+
+                    const result =
+                        await callModule(
+                            manager,
+
+                            [
+                                "openApp",
+                                "launchApp",
+                                "startApp",
+                                "open"
+                            ],
+
+                            [
+                                target
+                            ]
+                        );
+
+                    if (
+                        result.ok
+                    ) {
+
+                        return result;
+
+                    }
+
+                }
+
+                /*
+                 * Router.
+                 */
+
+                if (router) {
+
+                    const result =
+                        await callModule(
+                            router,
+
+                            [
+                                "navigate",
+                                "open",
+                                "routeTo"
+                            ],
+
+                            [
+                                target
+                            ]
+                        );
+
+                    if (
+                        result.ok
+                    ) {
+
+                        return result;
+
+                    }
+
+                }
+
+                /*
+                 * Launcher.
+                 */
+
+                if (launcher) {
+
+                    const result =
+                        await callModule(
+                            launcher,
+
+                            [
+                                "launch",
+                                "open",
+                                "start"
+                            ],
+
+                            [
+                                target
+                            ]
+                        );
+
+                    if (
+                        result.ok
+                    ) {
+
+                        return result;
+
+                    }
+
+                }
+
+                return {
 
                     ok:
-                        true
+                        false,
+
+                    error:
+                        "APP_SYSTEM_UNAVAILABLE",
+
+                    target
 
                 };
 
-            if (
-                finalResult.ok
-            ) {
+            }
 
-                state.successfulCommands++;
+    });
 
-            } else {
+    // --------------------------------------------------------
+    // CLOSE APP
+    // --------------------------------------------------------
 
-                state.failedCommands++;
+    registerCommand({
+
+        id:
+            "close",
+
+        name:
+            "App schließen",
+
+        description:
+            "Schließt eine laufende App.",
+
+        category:
+            "apps",
+
+        aliases: [
+
+            "schließe",
+            "schliesse",
+            "close app",
+            "stop"
+
+        ],
+
+        keywords: [
+
+            "schließe",
+            "schliesse",
+            "close",
+            "stop"
+
+        ],
+
+        execute:
+            async context => {
+
+                const target =
+                    context.argumentText;
+
+                if (!target) {
+
+                    return {
+
+                        ok:
+                            false,
+
+                        error:
+                            "APP_NAME_MISSING"
+
+                    };
+
+                }
+
+                return callModule(
+
+                    getAppManager(),
+
+                    [
+
+                        "closeApp",
+                        "stopApp",
+                        "close",
+                        "stop"
+
+                    ],
+
+                    [
+                        target
+                    ]
+
+                );
 
             }
 
-            state.lastResult =
-                finalResult;
+    });
 
-            state.history.push({
+    // --------------------------------------------------------
+    // SYSTEM STATUS
+    // --------------------------------------------------------
 
-                ...clone(
-                    state.lastCommand
-                ),
+    registerCommand({
 
-                result:
-                    clone(
-                        finalResult
-                    )
+        id:
+            "system-status",
 
-            });
+        name:
+            "Systemstatus",
 
-            if (
-                state.history.length >
-                CONFIG.maxHistory
-            ) {
+        description:
+            "Zeigt den aktuellen HalDo-Systemstatus.",
 
-                state.history =
-                    state.history.slice(
-                        -CONFIG.maxHistory
-                    );
+        category:
+            "system",
+
+        aliases: [
+
+            "status",
+            "system status",
+            "systemstatus",
+            "zustand"
+
+        ],
+
+        keywords: [
+
+            "status",
+            "system",
+            "zustand"
+
+        ],
+
+        priority:
+            10,
+
+        execute:
+            async () => {
+
+                return callModule(
+
+                    getSystem(),
+
+                    [
+
+                        "getStatus",
+                        "status",
+                        "getSystemStatus"
+
+                    ]
+
+                );
 
             }
 
-            emit(
-                "command-complete",
-                {
-                    command:
-                        state.lastCommand,
-
-                    result:
-                        finalResult
-
-                }
-            );
-
-            return finalResult;
-
-        } catch (
-            error
-        ) {
-
-            state.failedCommands++;
-
-            recordError(
-                error,
-                {
-                    command:
-                        parsed.command
-                }
-            );
-
-            const result = {
-
-                ok:
-                    false,
-
-                command:
-                    parsed.command,
-
-                error
-
-            };
-
-            state.lastResult =
-                result;
-
-            emit(
-                "command-error",
-                {
-                    command:
-                        state.lastCommand,
-
-                    error
-
-                }
-            );
-
-            return result;
-
-        } finally {
-
-            state.executing =
-                false;
-
-        }
-
-    }
+    });
 
     // --------------------------------------------------------
-    // Built-in Commands
+    // KERNEL STATUS
     // --------------------------------------------------------
 
-    registerCommand(
-        "open-app",
-        {
-
-            name:
-                "App öffnen",
-
-            description:
-                "Öffnet eine HalDo-App.",
-
-            category:
-                "apps",
-
-            aliases:
-                [
-                    "open",
-                    "öffne",
-                    "start",
-                    "launch"
-                ],
-
-            execute:
-                (
-                    argument,
-                    options
-                ) =>
-                    openApp(
-                        argument,
-                        options
-                    )
-
-        }
-    );
-
-    registerCommand(
-        "close-app",
-        {
-
-            name:
-                "App schließen",
-
-            description:
-                "Schließt eine geöffnete App.",
-
-            category:
-                "apps",
-
-            aliases:
-                [
-                    "close",
-                    "schließe",
-                    "beenden"
-                ],
-
-            execute:
-                argument =>
-                    closeApp(
-                        argument
-                    )
-
-        }
-    );
-
-    registerCommand(
-        "list-apps",
-        {
-
-            name:
-                "Apps anzeigen",
-
-            description:
-                "Zeigt verfügbare Apps an.",
-
-            category:
-                "apps",
-
-            aliases:
-                [
-                    "apps",
-                    "app-liste",
-                    "applications"
-                ],
-
-            execute:
-                () =>
-                    listApps()
-
-        }
-    );
-
-    registerCommand(
-        "navigate",
-        {
-
-            name:
-                "Navigieren",
-
-            description:
-                "Navigiert zu einer HalDo-Seite.",
-
-            category:
-                "navigation",
-
-            aliases:
-                [
-                    "go",
-                    "route",
-                    "gehe"
-                ],
-
-            execute:
-                (
-                    argument,
-                    options
-                ) =>
-                    navigate(
-                        argument,
-                        options
-                    )
-
-        }
-    );
-
-    registerCommand(
-        "home",
-        {
-
-            name:
-                "Startseite",
-
-            description:
-                "Öffnet die HalDo-Startseite.",
-
-            category:
-                "navigation",
-
-            aliases:
-                [
-                    "startseite",
-                    "main"
-                ],
-
-            execute:
-                () =>
-                    goHome()
-
-        }
-    );
-
-    registerCommand(
-        "back",
-        {
-
-            name:
-                "Zurück",
-
-            description:
-                "Geht zur vorherigen Ansicht zurück.",
-
-            category:
-                "navigation",
-
-            aliases:
-                [
-                    "zurück",
-                    "zurueck"
-                ],
-
-            execute:
-                () =>
-                    goBack()
-
-        }
-    );
-
-    registerCommand(
-        "open-window",
-        {
-
-            name:
-                "Fenster öffnen",
-
-            description:
-                "Öffnet ein HalDo-Fenster.",
-
-            category:
-                "windows",
-
-            aliases:
-                [
-                    "window-open"
-                ],
-
-            execute:
-                (
-                    argument,
-                    options
-                ) =>
-                    openWindow(
-                        argument,
-                        options
-                    )
-
-        }
-    );
-
-    registerCommand(
-        "close-window",
-        {
-
-            name:
-                "Fenster schließen",
-
-            description:
-                "Schließt ein HalDo-Fenster.",
-
-            category:
-                "windows",
-
-            aliases:
-                [
-                    "window-close"
-                ],
+    registerCommand({
 
-            execute:
-                argument =>
-                    closeWindow(
-                        argument
-                    )
-
-        }
-    );
+        id:
+            "kernel-status",
 
-    registerCommand(
-        "minimize-window",
-        {
+        name:
+            "Kernelstatus",
 
-            name:
-                "Fenster minimieren",
+        description:
+            "Zeigt den Status des HalDo-Kernels.",
 
-            description:
-                "Minimiert ein Fenster.",
-
-            category:
-                "windows",
-
-            aliases:
-                [
-                    "minimize"
-                ],
+        category:
+            "system",
 
-            execute:
-                argument =>
-                    minimizeWindow(
-                        argument
-                    )
+        aliases: [
 
-        }
-    );
+            "kernel",
+            "kernel status"
 
-    registerCommand(
-        "maximize-window",
-        {
-
-            name:
-                "Fenster maximieren",
-
-            description:
-                "Maximiert ein Fenster.",
-
-            category:
-                "windows",
+        ],
 
-            aliases:
-                [
-                    "maximize"
-                ],
+        execute:
+            async () => {
 
-            execute:
-                argument =>
-                    maximizeWindow(
-                        argument
-                    )
+                return callModule(
 
-        }
-    );
+                    getKernel(),
 
-    registerCommand(
-        "system-status",
-        {
-
-            name:
-                "Systemstatus",
-
-            description:
-                "Zeigt den aktuellen HalDo-Systemstatus.",
-
-            category:
-                "system",
-
-            aliases:
-                [
-                    "status",
-                    "systemstatus"
-                ],
-
-            execute:
-                () =>
-                    systemStatus()
-
-        }
-    );
+                    [
 
-    registerCommand(
-        "diagnostics",
-        {
-
-            name:
-                "Systemdiagnose",
-
-            description:
-                "Führt eine Systemdiagnose durch.",
-
-            category:
-                "system",
-
-            aliases:
-                [
-                    "diagnose",
-                    "diagnostik"
-                ],
-
-            execute:
-                () =>
-                    systemDiagnostics()
-
-        }
-    );
-
-    registerCommand(
-        "language",
-        {
-
-            name:
-                "Sprache ändern",
-
-            description:
-                "Ändert die Sprache des Systems.",
-
-            category:
-                "language",
-
-            aliases:
-                [
-                    "sprache",
-                    "lang"
-                ],
-
-            execute:
-                argument =>
-                    setLanguage(
-                        argument
-                    )
-
-        }
-    );
-
-    registerCommand(
-        "speak",
-        {
-
-            name:
-                "Sprechen",
-
-            description:
-                "Lässt HalDo AI einen Text sprechen.",
-
-            category:
-                "voice",
-
-            aliases:
-                [
-                    "say",
-                    "sprich"
-                ],
-
-            execute:
-                (
-                    argument,
-                    options
-                ) =>
-                    speak(
-                        argument,
-                        options
-                    )
-
-        }
-    );
-
-    registerCommand(
-        "save",
-        {
-
-            name:
-                "Daten speichern",
-
-            description:
-                "Speichert Daten über das HalDo-Storage-System.",
-
-            category:
-                "storage",
-
-            aliases:
-                [
-                    "speichern"
-                ],
-
-            execute:
-                (
-                    argument,
-                    options
-                ) => {
-
-                    const key =
-                        options.key ||
-                        "haldo.ai.command.data";
-
-                    return saveData(
-                        key,
-                        argument
-                    );
+                        "getStatus",
+                        "getDiagnostics",
+                        "diagnostics"
+
+                    ]
+
+                );
+
+            }
+
+    });
+
+    // --------------------------------------------------------
+    // MEMORY / STORAGE
+    // --------------------------------------------------------
+
+    registerCommand({
+
+        id:
+            "storage-status",
+
+        name:
+            "Speicherstatus",
+
+        description:
+            "Prüft die HalDo-Speicherverbindung.",
+
+        category:
+            "system",
+
+        aliases: [
+
+            "storage",
+            "speicher",
+            "memory status"
+
+        ],
+
+        execute:
+            async () => {
+
+                return callModule(
+
+                    getStorage(),
+
+                    [
+
+                        "getStatus",
+                        "status",
+                        "diagnostics"
+
+                    ]
+
+                );
+
+            }
+
+    });
+
+    // --------------------------------------------------------
+    // CHAT
+    // --------------------------------------------------------
+
+    registerCommand({
+
+        id:
+            "chat",
+
+        name:
+            "AI Chat",
+
+        description:
+            "Öffnet bzw. aktiviert den HalDo-AI-Chat.",
+
+        category:
+            "ai",
+
+        aliases: [
+
+            "ai chat",
+            "chat öffnen",
+            "chat öffnen",
+            "conversation",
+            "gespräch"
+
+        ],
+
+        keywords: [
+
+            "chat",
+            "gespräch",
+            "conversation"
+
+        ],
+
+        execute:
+            async context => {
+
+                const chat =
+                    getChat();
+
+                if (!chat) {
+
+                    return {
+
+                        ok:
+                            false,
+
+                        error:
+                            "AI_CHAT_UNAVAILABLE"
+
+                    };
 
                 }
 
-        }
-    );
+                return callModule(
 
-    registerCommand(
-        "load",
-        {
+                    chat,
 
-            name:
-                "Daten laden",
+                    [
 
-            description:
-                "Lädt gespeicherte Daten.",
+                        "open",
+                        "show",
+                        "activate",
+                        "start"
 
-            category:
-                "storage",
+                    ],
 
-            aliases:
-                [
-                    "laden"
-                ],
+                    []
 
-            execute:
-                (
-                    argument,
-                    options
-                ) => {
+                );
 
-                    const key =
-                        options.key ||
-                        argument;
+            }
 
-                    return loadData(
-                        key
-                    );
+    });
+
+    // --------------------------------------------------------
+    // AI STATUS
+    // --------------------------------------------------------
+
+    registerCommand({
+
+        id:
+            "ai-status",
+
+        name:
+            "AI Status",
+
+        description:
+            "Zeigt den Status der HalDo AI.",
+
+        category:
+            "ai",
+
+        aliases: [
+
+            "ai status",
+            "ki status",
+            "ai-status"
+
+        ],
+
+        execute:
+            async () => {
+
+                return callModule(
+
+                    getAI(),
+
+                    [
+
+                        "getStatus",
+                        "status",
+                        "diagnostics"
+
+                    ]
+
+                );
+
+            }
+
+    });
+
+    // --------------------------------------------------------
+    // VOICE
+    // --------------------------------------------------------
+
+    registerCommand({
+
+        id:
+            "voice",
+
+        name:
+            "AI Stimme",
+
+        description:
+            "Steuert die Sprachfunktion.",
+
+        category:
+            "voice",
+
+        aliases: [
+
+            "sprich",
+            "sprech",
+            "voice",
+            "speech"
+
+        ],
+
+        keywords: [
+
+            "sprich",
+            "sprechen",
+            "voice",
+            "speech"
+
+        ],
+
+        execute:
+            async context => {
+
+                const voice =
+                    window.HalDoAIVoice ||
+                    window.HalDoVoice ||
+                    window.HalDoOS?.voice ||
+                    null;
+
+                if (!voice) {
+
+                    return {
+
+                        ok:
+                            false,
+
+                        error:
+                            "VOICE_UNAVAILABLE"
+
+                    };
 
                 }
 
-        }
-    );
+                return callModule(
 
-    registerCommand(
-        "help",
-        {
+                    voice,
 
-            name:
-                "Hilfe",
+                    [
 
-            description:
-                "Zeigt alle verfügbaren AI-Befehle.",
+                        "speak",
+                        "say",
+                        "start",
+                        "open"
 
-            category:
-                "system",
+                    ],
 
-            aliases:
-                [
-                    "hilfe",
-                    "commands",
-                    "befehle"
-                ],
+                    [
+                        context.argumentText
+                    ]
 
-            execute:
-                () =>
-                    getHelp()
+                );
 
-        }
-    );
+            }
+
+    });
 
     // --------------------------------------------------------
-    // Custom Command Registration
+    // EZIDI KEYBOARD
     // --------------------------------------------------------
 
-    function registerCustomCommand(
-        name,
-        handler,
-        options = {}
+    registerCommand({
+
+        id:
+            "ezidi-keyboard",
+
+        name:
+            "Êzîdî-Tastatur",
+
+        description:
+            "Öffnet oder aktiviert die Êzîdî-Tastatur.",
+
+        category:
+            "keyboard",
+
+        aliases: [
+
+            "ezidi",
+            "êzîdî",
+            "ezidi keyboard",
+            "kurdish keyboard",
+            "kurdische tastatur"
+
+        ],
+
+        keywords: [
+
+            "ezidi",
+            "êzîdî",
+            "keyboard",
+            "tastatur",
+            "kurdish"
+
+        ],
+
+        execute:
+            async () => {
+
+                const keyboard =
+                    window.HalDoEzidiKeyboard ||
+                    window.HalDoOS?.ezidiKeyboard;
+
+                if (!keyboard) {
+
+                    return {
+
+                        ok:
+                            false,
+
+                        error:
+                            "EZIDI_KEYBOARD_UNAVAILABLE"
+
+                    };
+
+                }
+
+                return callModule(
+
+                    keyboard,
+
+                    [
+
+                        "open",
+                        "show",
+                        "activate",
+                        "enable",
+                        "toggle"
+
+                    ],
+
+                    []
+
+                );
+
+            }
+
+    });
+
+    // --------------------------------------------------------
+    // REGISTER ALIAS API
+    // --------------------------------------------------------
+
+    function registerAlias(
+        alias,
+        commandId
     ) {
+
+        const normalizedAlias =
+            normalize(
+                alias
+            );
+
+        const normalizedCommand =
+            normalize(
+                commandId
+            );
 
         if (
-            typeof handler !==
-            "function"
+            !normalizedAlias ||
+            !state.commands.has(
+                normalizedCommand
+            )
         ) {
 
             return false;
 
         }
 
-        const id =
-            normalize(
-                name
+        state.aliases.set(
+            normalizedAlias,
+            normalizedCommand
+        );
+
+        const command =
+            state.commands.get(
+                normalizedCommand
             );
 
-        if (!id) {
+        if (
+            !command.aliases.includes(
+                alias
+            )
+        ) {
 
-            return false;
+            command.aliases.push(
+                alias
+            );
 
         }
 
-        state.customCommands.set(
-            id,
-            handler
-        );
+        return true;
 
-        return registerCommand(
-            id,
-            {
+    }
+
+    // --------------------------------------------------------
+    // Command List
+    // --------------------------------------------------------
+
+    function getCommands() {
+
+        return Array.from(
+            state.commands.values()
+        )
+        .map(
+            command => ({
+
+                id:
+                    command.id,
 
                 name:
-                    options.name ||
-                    name,
+                    command.name,
 
                 description:
-                    options.description ||
-                    "Benutzerdefinierter HalDo-Befehl.",
+                    command.description,
 
                 category:
-                    options.category ||
-                    "custom",
+                    command.category,
 
                 aliases:
-                    options.aliases ||
-                    [],
+                    command.aliases.slice(),
 
-                confirmation:
-                    options.confirmation ||
-                    false,
+                keywords:
+                    command.keywords.slice(),
 
-                execute:
-                    handler
+                enabled:
+                    command.enabled
 
-            }
+            })
         );
 
     }
 
     // --------------------------------------------------------
-    // Remove Custom Command
+    // Search Commands
     // --------------------------------------------------------
 
-    function unregisterCustomCommand(
-        name
+    function searchCommands(
+        query
     ) {
 
-        const id =
+        const q =
             normalize(
-                name
+                query
             );
 
-        state.customCommands.delete(
-            id
-        );
+        if (!q) {
 
-        return unregisterCommand(
-            id
-        );
+            return getCommands();
 
-    }
+        }
 
-    // --------------------------------------------------------
-    // Parse + Execute Shortcut
-    // --------------------------------------------------------
+        return getCommands()
+            .filter(
+                command => {
 
-    async function run(
-        input,
-        options = {}
-    ) {
+                    const text =
+                        [
 
-        return execute(
-            input,
-            options
-        );
+                            command.id,
+
+                            command.name,
+
+                            command.description,
+
+                            ...command.aliases,
+
+                            ...command.keywords
+
+                        ]
+                        .join(
+                            " "
+                        )
+                        .toLowerCase();
+
+                    return text.includes(
+                        q
+                    );
+
+                }
+            );
 
     }
 
@@ -3443,9 +2309,6 @@
             ready:
                 state.ready,
 
-            executing:
-                state.executing,
-
             commandCount:
                 state.commandCount,
 
@@ -3456,42 +2319,44 @@
                 state.failedCommands,
 
             registeredCommands:
-                commands.size,
+                state.commands.size,
 
-            customCommands:
-                state.customCommands.size,
+            aliases:
+                state.aliases.size,
 
-            historyCount:
+            history:
                 state.history.length,
 
-            errorCount:
-                state.errors.length,
+            connections: {
 
-            modules: {
+                aiCore:
+                    Boolean(
+                        getAI()
+                    ),
+
+                aiChat:
+                    Boolean(
+                        getChat()
+                    ),
+
+                aiLanguage:
+                    Boolean(
+                        getLanguage()
+                    ),
 
                 appManager:
                     Boolean(
                         getAppManager()
                     ),
 
-                appLauncher:
+                appRouter:
                     Boolean(
-                        getAppLauncher()
+                        getAppRouter()
                     ),
 
                 launcher:
                     Boolean(
                         getLauncher()
-                    ),
-
-                router:
-                    Boolean(
-                        getRouter()
-                    ),
-
-                windowManager:
-                    Boolean(
-                        getWindowManager()
                     ),
 
                 system:
@@ -3507,21 +2372,6 @@
                 storage:
                     Boolean(
                         getStorage()
-                    ),
-
-                language:
-                    Boolean(
-                        getLanguage()
-                    ),
-
-                voice:
-                    Boolean(
-                        getVoice()
-                    ),
-
-                speech:
-                    Boolean(
-                        getSpeech()
                     )
 
             }
@@ -3531,42 +2381,7 @@
     }
 
     // --------------------------------------------------------
-    // Reset Runtime
-    // --------------------------------------------------------
-
-    function reset() {
-
-        state.commandCount =
-            0;
-
-        state.successfulCommands =
-            0;
-
-        state.failedCommands =
-            0;
-
-        state.lastCommand =
-            null;
-
-        state.lastResult =
-            null;
-
-        state.history =
-            [];
-
-        state.errors =
-            [];
-
-        emit(
-            "reset"
-        );
-
-        return true;
-
-    }
-
-    // --------------------------------------------------------
-    // Initialization
+    // Initialize
     // --------------------------------------------------------
 
     function initialize() {
@@ -3583,83 +2398,100 @@
             true;
 
         /*
-         * AI Core registrieren.
+         * Verbindung zur Sprachschicht.
          */
 
-        const core =
-            window.HalDoAICore ||
-            window.HalDoOS?.aiCore;
+        const language =
+            getLanguage();
 
         if (
-            core &&
-            typeof core.registerModule ===
+            language &&
+            typeof language.on ===
+            "function"
+        ) {
+
+            language.on(
+                "language-changed",
+                detail => {
+
+                    emit(
+                        "language-changed",
+                        detail
+                    );
+
+                }
+            );
+
+        }
+
+        /*
+         * AI Core Events.
+         */
+
+        const ai =
+            getAI();
+
+        if (
+            ai &&
+            typeof ai.on ===
             "function"
         ) {
 
             try {
 
-                core.registerModule(
-                    "commands",
+                ai.on(
+                    "ready",
+                    detail => {
+
+                        emit(
+                            "ai-ready",
+                            detail
+                        );
+
+                    }
+                );
+
+            } catch (
+                error
+            ) {}
+
+        }
+
+        /*
+         * Kernel Registrierung.
+         */
+
+        const kernel =
+            getKernel();
+
+        if (
+            kernel &&
+            typeof kernel.registerModule ===
+            "function"
+        ) {
+
+            try {
+
+                kernel.registerModule(
+                    "ai-commands",
                     api
                 );
 
             } catch (
                 error
-            ) {
-
-                recordError(
-                    error,
-                    {
-                        phase:
-                            "core-registration"
-                    }
-                );
-
-            }
+            ) {}
 
         }
 
-        /*
-         * AI-Eingaben beobachten.
-         *
-         * Nur explizite command/request Events
-         * werden ausgeführt.
-         *
-         * Dadurch wird normaler Chat NICHT
-         * versehentlich als Systembefehl ausgeführt.
-         */
-
-        document.addEventListener(
-            "haldo:ai-command-request",
-            event => {
-
-                const input =
-                    event.detail?.command ??
-                    event.detail?.text ??
-                    event.detail?.input;
-
-                if (
-                    input
-                ) {
-
-                    execute(
-                        input,
-                        event.detail?.options ||
-                        {}
-                    );
-
-                }
-
-            }
-        );
-
         emit(
             "initialized",
-            {
-                status:
-                    getStatus()
-            }
+            getStatus()
         );
+
+        /*
+         * Andere Module können nach DOMContentLoaded
+         * noch später geladen worden sein.
+         */
 
         window.setTimeout(
             () => {
@@ -3669,15 +2501,7 @@
 
                 emit(
                     "ready",
-                    {
-                        status:
-                            getStatus()
-                    }
-                );
-
-                console.log(
-                    "[HalDoAICommands] " +
-                    "HalDo AI Command Center 18 bereit."
+                    getStatus()
                 );
 
             },
@@ -3712,64 +2536,32 @@
 
         registerCommand,
 
-        unregisterCommand,
-
         registerCustomCommand,
 
-        unregisterCustomCommand,
+        registerAlias,
 
-        getCommand,
+        unregisterCommand,
 
-        getCommands,
+        findCommand,
 
-        parseCommand,
+        parse,
 
         execute,
 
-        run,
+        getCommands,
 
-        openApp,
+        searchCommands,
 
-        closeApp,
+        getHistory,
 
-        listApps,
+        clearHistory,
 
-        navigate,
-
-        goHome,
-
-        goBack,
-
-        openWindow,
-
-        closeWindow,
-
-        minimizeWindow,
-
-        maximizeWindow,
-
-        systemStatus,
-
-        systemDiagnostics,
-
-        setLanguage,
-
-        speak,
-
-        saveData,
-
-        loadData,
-
-        getHelp,
-
-        getStatus,
-
-        reset
+        getStatus
 
     };
 
     // --------------------------------------------------------
-    // Global APIs
+    // Global Registration
     // --------------------------------------------------------
 
     window.HalDoAICommands =
@@ -3784,7 +2576,21 @@
 
     function boot() {
 
-        initialize();
+        try {
+
+            initialize();
+
+        } catch (
+            error
+        ) {
+
+            console.error(
+                "[HalDoAICommands] " +
+                "Initialization failed:",
+                error
+            );
+
+        }
 
     }
 
@@ -3811,5 +2617,5 @@
 })(window, document);
 
 // ============================================================
-// END OF PART 76
+// END OF PART 78
 // ============================================================
