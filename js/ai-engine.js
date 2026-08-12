@@ -1,1294 +1,1922 @@
-/*
-========================================================
-HalDo AI OS 18
-AI ENGINE
-Professional Ultimate Foundation
-========================================================
+// ============================================================
+// HALDO AI OS 18
+// AI ENGINE
+// PART 73
+// ============================================================
+// Zentrale Verarbeitungs-Engine.
+//
+// Aufgabe:
+//   - Anfragen entgegennehmen
+//   - Provider verwalten
+//   - lokale Antworten ermöglichen
+//   - externe Provider vorbereiten
+//   - History/Context verarbeiten
+//   - Core informieren
+//   - Fehler sicher behandeln
+//
+// Öffentliche APIs:
+//   window.HalDoAIEngine
+//   window.HalDoOS.aiEngine
+// ============================================================
 
-Zentrale Verarbeitungs-Engine.
+(function (window, document) {
 
-Verbindungen:
-- AI Core
-- AI Chat
-- AI Commands
-- AI Memory
-- Language System
-- Conversation State
-- Knowledge System
-- Code Builder
-- zukünftige externe AI/API-Anbindung
-
-Die Engine selbst enthält KEINE UI.
-
-========================================================
-*/
-
-(function () {
     "use strict";
 
-    const VERSION = "18.0.0";
+    // --------------------------------------------------------
+    // Duplicate Guard
+    // --------------------------------------------------------
 
-    const state = {
-        name: "HalDo AI Engine",
-        version: VERSION,
-        status: "created",
-        initialized: false,
-        running: false,
-        processing: false,
-        requests: 0,
-        successful: 0,
-        failed: 0,
-        lastRequest: null,
-        lastResponse: null,
-        lastError: null
-    };
-
-    const listeners = {};
-
-    /* ==================================================
-       EVENTS
-    ================================================== */
-
-    function on(event, callback) {
-        if (typeof callback !== "function") {
-            return function () {};
-        }
-
-        if (!listeners[event]) {
-            listeners[event] = [];
-        }
-
-        listeners[event].push(callback);
-
-        return function () {
-            off(event, callback);
-        };
+    if (
+        window.HalDoAIEngine &&
+        window.HalDoAIEngine.__haldoAI18
+    ) {
+        return;
     }
 
-    function off(event, callback) {
-        if (!listeners[event]) {
+    // --------------------------------------------------------
+    // Namespace
+    // --------------------------------------------------------
+
+    window.HalDoOS =
+        window.HalDoOS || {};
+
+    // --------------------------------------------------------
+    // Configuration
+    // --------------------------------------------------------
+
+    const CONFIG = {
+
+        name:
+            "HalDo AI Engine",
+
+        version:
+            "18.0.0",
+
+        mode:
+            "hybrid",
+
+        defaultProvider:
+            "local",
+
+        timeout:
+            30000,
+
+        maxContextMessages:
+            30,
+
+        maxInputLength:
+            12000,
+
+        debug:
+            false
+
+    };
+
+    // --------------------------------------------------------
+    // State
+    // --------------------------------------------------------
+
+    const state = {
+
+        initialized:
+            false,
+
+        ready:
+            false,
+
+        processing:
+            false,
+
+        requestCount:
+            0,
+
+        successfulRequests:
+            0,
+
+        failedRequests:
+            0,
+
+        providers:
+            {},
+
+        activeProvider:
+            CONFIG.defaultProvider,
+
+        lastRequest:
+            null,
+
+        lastResponse:
+            null,
+
+        errors:
+            []
+
+    };
+
+    // --------------------------------------------------------
+    // Event System
+    // --------------------------------------------------------
+
+    const listeners =
+        new Map();
+
+    function on(
+        event,
+        callback
+    ) {
+
+        if (
+            typeof callback !==
+            "function"
+        ) {
+            return () => {};
+        }
+
+        if (
+            !listeners.has(event)
+        ) {
+
+            listeners.set(
+                event,
+                new Set()
+            );
+
+        }
+
+        listeners
+            .get(event)
+            .add(callback);
+
+        return () =>
+            off(
+                event,
+                callback
+            );
+    }
+
+    function off(
+        event,
+        callback
+    ) {
+
+        const set =
+            listeners.get(event);
+
+        if (!set) {
             return;
         }
 
-        listeners[event] =
-            listeners[event].filter(
-                fn => fn !== callback
+        set.delete(
+            callback
+        );
+
+        if (
+            set.size === 0
+        ) {
+
+            listeners.delete(
+                event
             );
+
+        }
+
     }
 
-    function emit(event, data) {
-        (listeners[event] || []).forEach(
-            callback => {
+    function emit(
+        event,
+        detail = {}
+    ) {
+
+        const set =
+            listeners.get(event);
+
+        if (set) {
+
+            for (
+                const callback of set
+            ) {
+
                 try {
-                    callback(data);
-                } catch (error) {
+
+                    callback(
+                        detail
+                    );
+
+                } catch (
+                    error
+                ) {
+
                     console.error(
-                        "[HalDo AI Engine] Event error:",
+                        "[HalDoAIEngine] Event error:",
                         error
                     );
+
                 }
+
             }
-        );
+
+        }
 
         try {
-            if (
-                window.HalDoKernel &&
-                typeof window.HalDoKernel.emit ===
-                    "function"
-            ) {
-                window.HalDoKernel.emit(
-                    `ai-engine:${event}`,
-                    data
-                );
-            }
-        } catch (error) {
-            console.warn(
-                "[HalDo AI Engine] Kernel event failed:",
-                error
+
+            document.dispatchEvent(
+                new CustomEvent(
+                    `haldo:ai-engine:${event}`,
+                    {
+                        detail
+                    }
+                )
             );
+
+        } catch (
+            error
+        ) {}
+
+    }
+
+    // --------------------------------------------------------
+    // Logging
+    // --------------------------------------------------------
+
+    function log(
+        ...args
+    ) {
+
+        if (
+            CONFIG.debug
+        ) {
+
+            console.log(
+                "[HalDoAIEngine]",
+                ...args
+            );
+
         }
+
     }
 
-    /* ==================================================
-       LOGGING
-    ================================================== */
+    function warn(
+        ...args
+    ) {
 
-    function log(...args) {
-        console.log(
-            "[HalDo AI Engine]",
-            ...args
-        );
-    }
-
-    function warn(...args) {
         console.warn(
-            "[HalDo AI Engine]",
+            "[HalDoAIEngine]",
             ...args
         );
+
     }
 
-    /* ==================================================
-       MODULE LOOKUP
-    ================================================== */
+    // --------------------------------------------------------
+    // Error Handling
+    // --------------------------------------------------------
 
-    function getModule(name) {
-        if (!name) {
-            return null;
-        }
+    function recordError(
+        error,
+        context = {}
+    ) {
 
-        const modules = {
-            core:
-                window.HalDoAICore,
+        const entry = {
 
-            chat:
-                window.HalDoAIChat,
+            timestamp:
+                Date.now(),
 
-            commands:
-                window.HalDoAICommands,
+            message:
+                error instanceof Error
+                    ? error.message
+                    : String(error),
 
-            memory:
-                window.HalDoAIMemory,
+            context
 
-            language:
-                window.HalDoAILanguage,
-
-            languageManager:
-                window.HalDoLanguageManager,
-
-            conversation:
-                window.HalDoConversationState,
-
-            speech:
-                window.HalDoAISpeech,
-
-            voice:
-                window.HalDoAIVoice,
-
-            system:
-                window.HalDoSystem,
-
-            knowledge:
-                window.HalDoKnowledge,
-
-            code:
-                window.HalDoCodeBuilder
         };
 
-        if (modules[name]) {
-            return modules[name];
+        state.errors.push(
+            entry
+        );
+
+        if (
+            state.errors.length >
+            50
+        ) {
+
+            state.errors.shift();
+
+        }
+
+        emit(
+            "error",
+            entry
+        );
+
+        return entry;
+    }
+
+    // --------------------------------------------------------
+    // Utility
+    // --------------------------------------------------------
+
+    function cleanInput(
+        input
+    ) {
+
+        let text;
+
+        if (
+            typeof input ===
+            "string"
+        ) {
+
+            text =
+                input;
+
+        } else {
+
+            text =
+                input?.text ??
+                input?.message ??
+                input?.content ??
+                "";
+
+        }
+
+        text =
+            String(
+                text
+            )
+            .trim();
+
+        if (
+            text.length >
+            CONFIG.maxInputLength
+        ) {
+
+            text =
+                text.slice(
+                    0,
+                    CONFIG.maxInputLength
+                );
+
+        }
+
+        return text;
+    }
+
+    function normalizeResponse(
+        result
+    ) {
+
+        if (
+            result === null ||
+            result === undefined
+        ) {
+
+            return null;
+
+        }
+
+        if (
+            typeof result ===
+            "string"
+        ) {
+
+            return {
+
+                text:
+                    result,
+
+                raw:
+                    result
+
+            };
+
+        }
+
+        if (
+            typeof result ===
+            "number" ||
+            typeof result ===
+            "boolean"
+        ) {
+
+            return {
+
+                text:
+                    String(
+                        result
+                    ),
+
+                raw:
+                    result
+
+            };
+
+        }
+
+        if (
+            result.text !==
+            undefined
+        ) {
+
+            return {
+
+                text:
+                    String(
+                        result.text
+                    ),
+
+                raw:
+                    result
+
+            };
+
+        }
+
+        if (
+            result.content !==
+            undefined
+        ) {
+
+            return {
+
+                text:
+                    String(
+                        result.content
+                    ),
+
+                raw:
+                    result
+
+            };
+
+        }
+
+        if (
+            result.message !==
+            undefined
+        ) {
+
+            if (
+                typeof result.message ===
+                "string"
+            ) {
+
+                return {
+
+                    text:
+                        result.message,
+
+                    raw:
+                        result
+
+                };
+
+            }
+
+            if (
+                result.message?.content
+            ) {
+
+                return {
+
+                    text:
+                        String(
+                            result.message.content
+                        ),
+
+                    raw:
+                        result
+
+                };
+
+            }
+
         }
 
         try {
-            if (
-                window.HalDoModuleManager &&
-                typeof window.HalDoModuleManager.get ===
-                    "function"
-            ) {
-                return window.HalDoModuleManager.get(
-                    name
-                );
+
+            return {
+
+                text:
+                    JSON.stringify(
+                        result,
+                        null,
+                        2
+                    ),
+
+                raw:
+                    result
+
+            };
+
+        } catch (
+            error
+        ) {
+
+            return {
+
+                text:
+                    String(
+                        result
+                    ),
+
+                raw:
+                    result
+
+            };
+
+        }
+
+    }
+
+    // --------------------------------------------------------
+    // Provider Registry
+    // --------------------------------------------------------
+
+    function registerProvider(
+        name,
+        provider,
+        options = {}
+    ) {
+
+        if (
+            !name ||
+            !provider
+        ) {
+
+            return false;
+
+        }
+
+        state.providers[name] = {
+
+            name,
+
+            provider,
+
+            enabled:
+                options.enabled !==
+                false,
+
+            priority:
+                Number(
+                    options.priority ??
+                    0
+                ),
+
+            type:
+                options.type ||
+                "custom",
+
+            metadata:
+                options.metadata ||
+                {}
+
+        };
+
+        emit(
+            "provider-registered",
+            {
+                name,
+                provider:
+                    state.providers[name]
             }
-        } catch (error) {
-            warn(
-                "Module Manager Fehler:",
-                error
-            );
+        );
+
+        return true;
+    }
+
+    function unregisterProvider(
+        name
+    ) {
+
+        if (
+            !state.providers[name]
+        ) {
+
+            return false;
+
+        }
+
+        delete state.providers[
+            name
+        ];
+
+        if (
+            state.activeProvider ===
+            name
+        ) {
+
+            state.activeProvider =
+                CONFIG.defaultProvider;
+        }
+
+        emit(
+            "provider-unregistered",
+            {
+                name
+            }
+        );
+
+        return true;
+    }
+
+    function getProvider(
+        name
+    ) {
+
+        const entry =
+            state.providers[name];
+
+        if (!entry) {
+
+            return null;
+
+        }
+
+        if (
+            entry.enabled ===
+            false
+        ) {
+
+            return null;
+
+        }
+
+        return entry;
+
+    }
+
+    function getProviders() {
+
+        return Object.values(
+            state.providers
+        )
+        .filter(
+            provider =>
+                provider.enabled !==
+                false
+        )
+        .sort(
+            (a, b) =>
+                b.priority -
+                a.priority
+        );
+
+    }
+
+    function setProvider(
+        name
+    ) {
+
+        if (
+            !state.providers[name]
+        ) {
+
+            return false;
+
+        }
+
+        state.activeProvider =
+            name;
+
+        emit(
+            "provider-changed",
+            {
+                name
+            }
+        );
+
+        return true;
+    }
+
+    // --------------------------------------------------------
+    // Existing Module Resolver
+    // --------------------------------------------------------
+
+    function resolve(
+        names
+    ) {
+
+        if (
+            typeof names ===
+            "string"
+        ) {
+
+            names =
+                [names];
+
+        }
+
+        for (
+            const name of names
+        ) {
+
+            if (
+                window[name]
+            ) {
+
+                return window[name];
+
+            }
+
+            if (
+                window.HalDoOS &&
+                window.HalDoOS[name]
+            ) {
+
+                return window.HalDoOS[name];
+
+            }
+
         }
 
         return null;
     }
 
-    /* ==================================================
-       STATUS
-    ================================================== */
+    // --------------------------------------------------------
+    // Local AI Provider
+    // --------------------------------------------------------
+    //
+    // Dieser Provider ist bewusst sicher und funktioniert
+    // auch ohne Internet und ohne API-Key.
+    //
+    // Später kann hier ein echter AI-Dienst angeschlossen
+    // werden, ohne die Benutzeroberfläche umzubauen.
+    // --------------------------------------------------------
 
-    function getStatus() {
+    const localProvider = {
+
+        async generate(
+            payload
+        ) {
+
+            const text =
+                cleanInput(
+                    payload
+                );
+
+            return localResponse(
+                text,
+                payload
+            );
+
+        }
+
+    };
+
+    // --------------------------------------------------------
+    // Local Response Engine
+    // --------------------------------------------------------
+
+    function localResponse(
+        text,
+        payload = {}
+    ) {
+
+        const value =
+            text.toLowerCase();
+
+        // ----------------------------------------------
+        // Begrüßungen
+        // ----------------------------------------------
+
+        if (
+            /^(hallo|hi|hey|hello|servus)\b/
+                .test(value)
+        ) {
+
+            return {
+
+                text:
+                    "Hallo! Ich bin HalDo AI, " +
+                    "die zentrale KI von HalDo AI OS 18.",
+
+                provider:
+                    "local"
+
+            };
+
+        }
+
+        // ----------------------------------------------
+        // Identität
+        // ----------------------------------------------
+
+        if (
+            value.includes(
+                "wer bist du"
+            ) ||
+            value.includes(
+                "was bist du"
+            )
+        ) {
+
+            return {
+
+                text:
+                    "Ich bin HalDo AI – die zentrale " +
+                    "KI-Ebene von HalDo AI OS 18 " +
+                    "Professional Ultimate Foundation.",
+
+                provider:
+                    "local"
+
+            };
+
+        }
+
+        // ----------------------------------------------
+        // Version
+        // ----------------------------------------------
+
+        if (
+            value.includes(
+                "version"
+            )
+        ) {
+
+            return {
+
+                text:
+                    "HalDo AI OS 18 – " +
+                    "Professional Ultimate Foundation.",
+
+                provider:
+                    "local"
+
+            };
+
+        }
+
+        // ----------------------------------------------
+        // Hilfe
+        // ----------------------------------------------
+
+        if (
+            value.includes(
+                "hilfe"
+            ) ||
+            value ===
+            "help"
+        ) {
+
+            return {
+
+                text:
+                    "Ich kann Nachrichten verarbeiten, " +
+                    "Befehle an die vorhandenen HalDo-" +
+                    "AI-Module weitergeben, den Kontext " +
+                    "verwalten und später mit echten " +
+                    "AI-Providern verbunden werden.",
+
+                provider:
+                    "local"
+
+            };
+
+        }
+
+        // ----------------------------------------------
+        // Status
+        // ----------------------------------------------
+
+        if (
+            value.includes(
+                "status"
+            ) ||
+            value.includes(
+                "systemstatus"
+            )
+        ) {
+
+            return {
+
+                text:
+                    buildStatusResponse(),
+
+                provider:
+                    "local"
+
+            };
+
+        }
+
+        // ----------------------------------------------
+        // Zeit
+        // ----------------------------------------------
+
+        if (
+            value.includes(
+                "wie spät"
+            ) ||
+            value.includes(
+                "uhrzeit"
+            )
+        ) {
+
+            return {
+
+                text:
+                    "Die aktuelle Browserzeit ist " +
+                    new Date()
+                        .toLocaleTimeString(
+                            "de-DE"
+                        ) +
+                    ".",
+
+                provider:
+                    "local"
+
+            };
+
+        }
+
+        // ----------------------------------------------
+        // Datum
+        // ----------------------------------------------
+
+        if (
+            value.includes(
+                "welcher tag"
+            ) ||
+            value.includes(
+                "datum"
+            )
+        ) {
+
+            return {
+
+                text:
+                    "Heute ist " +
+                    new Date()
+                        .toLocaleDateString(
+                            "de-DE",
+                            {
+                                weekday:
+                                    "long",
+
+                                day:
+                                    "2-digit",
+
+                                month:
+                                    "long",
+
+                                year:
+                                    "numeric"
+
+                            }
+                        ) +
+                    ".",
+
+                provider:
+                    "local"
+
+            };
+
+        }
+
+        // ----------------------------------------------
+        // Danke
+        // ----------------------------------------------
+
+        if (
+            value.includes(
+                "danke"
+            ) ||
+            value.includes(
+                "vielen dank"
+            )
+        ) {
+
+            return {
+
+                text:
+                    "Sehr gerne. Wir bauen HalDo AI OS 18 " +
+                    "Schritt für Schritt weiter.",
+
+                provider:
+                    "local"
+
+            };
+
+        }
+
+        // ----------------------------------------------
+        // Fallback
+        // ----------------------------------------------
+
         return {
-            name:
-                state.name,
+
+            text:
+                "Ich habe deine Nachricht empfangen. " +
+                "Die lokale HalDo-AI-Engine ist aktiv. " +
+                "Für komplexere Antworten kann später " +
+                "ein echter AI-Provider angeschlossen " +
+                "werden, ohne die Oberfläche oder " +
+                "Systemarchitektur neu aufzubauen.",
+
+            provider:
+                "local",
+
+            fallback:
+                true
+
+        };
+
+    }
+
+    // --------------------------------------------------------
+    // Status Response
+    // --------------------------------------------------------
+
+    function buildStatusResponse() {
+
+        const core =
+            resolve(
+                [
+                    "HalDoAICore",
+                    "aiCore"
+                ]
+            );
+
+        let coreStatus =
+            null;
+
+        if (
+            core &&
+            typeof core.getStatus ===
+            "function"
+        ) {
+
+            try {
+
+                coreStatus =
+                    core.getStatus();
+
+            } catch (
+                error
+            ) {}
+
+        }
+
+        const modules =
+            Object.keys(
+                state.providers
+            );
+
+        return (
+            "HalDo AI Engine Status:\n\n" +
+
+            "Engine: bereit\n" +
+
+            "Version: " +
+            CONFIG.version +
+            "\n" +
+
+            "Modus: " +
+            CONFIG.mode +
+            "\n" +
+
+            "Provider: " +
+            (
+                modules.length
+                    ? modules.join(", ")
+                    : "local"
+            ) +
+            "\n" +
+
+            "Anfragen: " +
+            state.requestCount +
+            "\n" +
+
+            "Erfolgreich: " +
+            state.successfulRequests +
+            "\n" +
+
+            "Fehler: " +
+            state.failedRequests +
+
+            (
+                coreStatus
+                    ? (
+                        "\n\nCore: " +
+                        (
+                            coreStatus.ready
+                                ? "bereit"
+                                : "wird geladen"
+                        )
+                    )
+                    : ""
+            )
+        );
+
+    }
+
+    // --------------------------------------------------------
+    // Context Builder
+    // --------------------------------------------------------
+
+    function buildContext(
+        options = {}
+    ) {
+
+        let history =
+            options.history;
+
+        if (
+            !Array.isArray(
+                history
+            )
+        ) {
+
+            const core =
+                resolve(
+                    [
+                        "HalDoAICore",
+                        "aiCore"
+                    ]
+                );
+
+            if (
+                core &&
+                typeof core.getHistory ===
+                "function"
+            ) {
+
+                try {
+
+                    history =
+                        core.getHistory(
+                            CONFIG.maxContextMessages
+                        );
+
+                } catch (
+                    error
+                ) {
+
+                    history =
+                        [];
+
+                }
+
+            }
+
+        }
+
+        if (
+            !Array.isArray(
+                history
+            )
+        ) {
+
+            history =
+                [];
+
+        }
+
+        return {
+
+            system:
+                "HalDo AI OS 18 " +
+                "Professional Ultimate Foundation",
+
+            engine:
+                CONFIG.name,
 
             version:
-                state.version,
+                CONFIG.version,
 
-            status:
-                state.status,
+            language:
+                options.language ||
+                document.documentElement.lang ||
+                "de-DE",
+
+            history:
+                history.slice(
+                    -CONFIG.maxContextMessages
+                ),
+
+            timestamp:
+                Date.now(),
+
+            online:
+                navigator.onLine
+
+        };
+
+    }
+
+    // --------------------------------------------------------
+    // Provider Execution
+    // --------------------------------------------------------
+
+    async function executeProvider(
+        entry,
+        payload
+    ) {
+
+        if (
+            !entry ||
+            !entry.provider
+        ) {
+
+            return null;
+
+        }
+
+        const provider =
+            entry.provider;
+
+        const methods = [
+            "generate",
+            "generateResponse",
+            "complete",
+            "chat",
+            "ask",
+            "process",
+            "run"
+        ];
+
+        for (
+            const method of methods
+        ) {
+
+            if (
+                typeof provider[method] !==
+                "function"
+            ) {
+
+                continue;
+
+            }
+
+            try {
+
+                const result =
+                    provider[method](
+                        payload
+                    );
+
+                const resolved =
+                    result &&
+                    typeof result.then ===
+                    "function"
+                        ? await result
+                        : result;
+
+                const normalized =
+                    normalizeResponse(
+                        resolved
+                    );
+
+                if (
+                    normalized &&
+                    normalized.text
+                ) {
+
+                    normalized.provider =
+                        entry.name;
+
+                    return normalized;
+
+                }
+
+            } catch (
+                error
+            ) {
+
+                recordError(
+                    error,
+                    {
+                        provider:
+                            entry.name,
+
+                        method
+
+                    }
+                );
+
+                warn(
+                    `Provider ${entry.name} fehlgeschlagen.`,
+                    error
+                );
+
+            }
+
+        }
+
+        return null;
+    }
+
+    // --------------------------------------------------------
+    // Main Generate Function
+    // --------------------------------------------------------
+
+    async function generate(
+        input,
+        options = {}
+    ) {
+
+        const text =
+            cleanInput(
+                input
+            );
+
+        if (!text) {
+
+            return {
+
+                ok:
+                    false,
+
+                text:
+                    "",
+
+                error:
+                    "EMPTY_INPUT"
+
+            };
+
+        }
+
+        state.requestCount++;
+
+        const requestId =
+            state.requestCount;
+
+        state.processing =
+            true;
+
+        state.lastRequest = {
+
+            id:
+                requestId,
+
+            text,
+
+            timestamp:
+                Date.now()
+
+        };
+
+        emit(
+            "request-start",
+            {
+                requestId,
+                text
+            }
+        );
+
+        try {
+
+            const context =
+                buildContext(
+                    options
+                );
+
+            const payload = {
+
+                text,
+
+                message:
+                    text,
+
+                input:
+                    text,
+
+                context,
+
+                history:
+                    context.history,
+
+                language:
+                    context.language,
+
+                system:
+                    context.system,
+
+                version:
+                    CONFIG.version,
+
+                requestId,
+
+                options
+
+            };
+
+            /*
+             * Bevorzugter Provider.
+             */
+
+            const preferred =
+                options.provider ||
+                state.activeProvider ||
+                CONFIG.defaultProvider;
+
+            let response =
+                null;
+
+            const preferredProvider =
+                getProvider(
+                    preferred
+                );
+
+            if (
+                preferredProvider
+            ) {
+
+                response =
+                    await executeProvider(
+                        preferredProvider,
+                        payload
+                    );
+
+            }
+
+            /*
+             * Falls der bevorzugte Provider
+             * keine Antwort liefert, werden
+             * weitere Provider ausprobiert.
+             */
+
+            if (
+                !response &&
+                options.allowFallback !==
+                false
+            ) {
+
+                const providers =
+                    getProviders();
+
+                for (
+                    const provider of providers
+                ) {
+
+                    if (
+                        provider.name ===
+                        preferred
+                    ) {
+
+                        continue;
+
+                    }
+
+                    response =
+                        await executeProvider(
+                            provider,
+                            payload
+                        );
+
+                    if (
+                        response
+                    ) {
+
+                        break;
+
+                    }
+
+                }
+
+            }
+
+            /*
+             * Lokaler Fallback.
+             */
+
+            if (
+                !response
+            ) {
+
+                response =
+                    normalizeResponse(
+                        localResponse(
+                            text,
+                            payload
+                        )
+                    );
+
+            }
+
+            const result = {
+
+                ok:
+                    true,
+
+                requestId,
+
+                text:
+                    response?.text ||
+                    "",
+
+                provider:
+                    response?.provider ||
+                    "local",
+
+                fallback:
+                    Boolean(
+                        response?.fallback
+                    ),
+
+                raw:
+                    response?.raw ??
+                    null,
+
+                timestamp:
+                    Date.now()
+
+            };
+
+            state.successfulRequests++;
+
+            state.lastResponse =
+                result;
+
+            emit(
+                "response",
+                result
+            );
+
+            return result;
+
+        } catch (
+            error
+        ) {
+
+            state.failedRequests++;
+
+            recordError(
+                error,
+                {
+                    requestId,
+                    text
+                }
+            );
+
+            const fallback =
+                localResponse(
+                    text,
+                    {}
+                );
+
+            const result = {
+
+                ok:
+                    false,
+
+                requestId,
+
+                text:
+                    fallback.text,
+
+                provider:
+                    "local",
+
+                fallback:
+                    true,
+
+                error
+
+            };
+
+            state.lastResponse =
+                result;
+
+            emit(
+                "response",
+                result
+            );
+
+            return result;
+
+        } finally {
+
+            state.processing =
+                false;
+
+            emit(
+                "request-end",
+                {
+                    requestId
+                }
+            );
+
+        }
+
+    }
+
+    // --------------------------------------------------------
+    // Aliases
+    // --------------------------------------------------------
+
+    async function generateResponse(
+        input,
+        options = {}
+    ) {
+
+        return generate(
+            input,
+            options
+        );
+
+    }
+
+    async function ask(
+        input,
+        options = {}
+    ) {
+
+        return generate(
+            input,
+            options
+        );
+
+    }
+
+    async function process(
+        input,
+        options = {}
+    ) {
+
+        return generate(
+            input,
+            options
+        );
+
+    }
+
+    async function run(
+        input,
+        options = {}
+    ) {
+
+        return generate(
+            input,
+            options
+        );
+
+    }
+
+    // --------------------------------------------------------
+    // Provider: Local
+    // --------------------------------------------------------
+
+    registerProvider(
+        "local",
+        localProvider,
+        {
+            type:
+                "local",
+
+            priority:
+                1,
+
+            enabled:
+                true
+        }
+    );
+
+    // --------------------------------------------------------
+    // External Provider Registration API
+    // --------------------------------------------------------
+
+    function registerExternalProvider(
+        name,
+        provider,
+        options = {}
+    ) {
+
+        return registerProvider(
+            name,
+            provider,
+            {
+                ...options,
+
+                type:
+                    options.type ||
+                    "external"
+            }
+        );
+
+    }
+
+    // --------------------------------------------------------
+    // Fetch-Based Provider Factory
+    // --------------------------------------------------------
+    //
+    // Kein API-Key wird hier gespeichert.
+    //
+    // Ein späterer Provider kann z.B. so registriert werden:
+    //
+    // HalDoAIEngine.registerFetchProvider(...)
+    //
+    // Die URL und Authentifizierung bleiben außerhalb
+    // dieser Engine konfigurierbar.
+    // --------------------------------------------------------
+
+    function createFetchProvider(
+        options = {}
+    ) {
+
+        const endpoint =
+            options.endpoint;
+
+        if (!endpoint) {
+
+            throw new Error(
+                "Fetch Provider benötigt einen Endpoint."
+            );
+
+        }
+
+        return {
+
+            async generate(
+                payload
+            ) {
+
+                const controller =
+                    new AbortController();
+
+                const timeout =
+                    window.setTimeout(
+                        () =>
+                            controller.abort(),
+                        options.timeout ||
+                        CONFIG.timeout
+                    );
+
+                try {
+
+                    const headers = {
+
+                        "Content-Type":
+                            "application/json",
+
+                        ...(options.headers ||
+                            {})
+
+                    };
+
+                    const body =
+                        typeof options.bodyBuilder ===
+                        "function"
+
+                            ? options.bodyBuilder(
+                                payload
+                            )
+
+                            : {
+
+                                message:
+                                    payload.text,
+
+                                input:
+                                    payload.text,
+
+                                history:
+                                    payload.history,
+
+                                language:
+                                    payload.language,
+
+                                system:
+                                    payload.system
+
+                            };
+
+                    const response =
+                        await fetch(
+                            endpoint,
+                            {
+
+                                method:
+                                    "POST",
+
+                                headers,
+
+                                body:
+                                    JSON.stringify(
+                                        body
+                                    ),
+
+                                signal:
+                                    controller.signal
+
+                            }
+                        );
+
+                    if (
+                        !response.ok
+                    ) {
+
+                        throw new Error(
+                            `HTTP ${response.status}`
+                        );
+
+                    }
+
+                    const data =
+                        await response.json();
+
+                    if (
+                        typeof options.responseParser ===
+                        "function"
+                    ) {
+
+                        return options.responseParser(
+                            data
+                        );
+
+                    }
+
+                    return data;
+
+                } finally {
+
+                    window.clearTimeout(
+                        timeout
+                    );
+
+                }
+
+            }
+
+        };
+
+    }
+
+    // --------------------------------------------------------
+    // Status
+    // --------------------------------------------------------
+
+    function getStatus() {
+
+        return {
+
+            name:
+                CONFIG.name,
+
+            version:
+                CONFIG.version,
+
+            mode:
+                CONFIG.mode,
 
             initialized:
                 state.initialized,
 
-            running:
-                state.running,
+            ready:
+                state.ready,
 
             processing:
                 state.processing,
 
-            requests:
-                state.requests,
+            activeProvider:
+                state.activeProvider,
 
-            successful:
-                state.successful,
+            providers:
+                Object.keys(
+                    state.providers
+                ),
 
-            failed:
-                state.failed,
+            requestCount:
+                state.requestCount,
+
+            successfulRequests:
+                state.successfulRequests,
+
+            failedRequests:
+                state.failedRequests,
+
+            errorCount:
+                state.errors.length,
 
             lastRequest:
                 state.lastRequest,
 
             lastResponse:
-                state.lastResponse,
+                state.lastResponse
 
-            lastError:
-                state.lastError
-        };
-    }
-
-    /* ==================================================
-       INITIALIZE
-    ================================================== */
-
-    function initialize() {
-        if (state.initialized) {
-            return getStatus();
-        }
-
-        state.status =
-            "initializing";
-
-        emit(
-            "initializing",
-            getStatus()
-        );
-
-        state.initialized =
-            true;
-
-        state.status =
-            "ready";
-
-        emit(
-            "ready",
-            getStatus()
-        );
-
-        log(
-            "AI Engine initialisiert."
-        );
-
-        return getStatus();
-    }
-
-    /* ==================================================
-       START
-    ================================================== */
-
-    function start() {
-        if (!state.initialized) {
-            initialize();
-        }
-
-        if (state.running) {
-            return getStatus();
-        }
-
-        state.running =
-            true;
-
-        state.status =
-            "running";
-
-        emit(
-            "started",
-            getStatus()
-        );
-
-        log(
-            "AI Engine gestartet."
-        );
-
-        return getStatus();
-    }
-
-    /* ==================================================
-       STOP
-    ================================================== */
-
-    function stop() {
-        state.running =
-            false;
-
-        state.processing =
-            false;
-
-        state.status =
-            "stopped";
-
-        emit(
-            "stopped",
-            getStatus()
-        );
-
-        return getStatus();
-    }
-
-    /* ==================================================
-       NORMALIZE REQUEST
-    ================================================== */
-
-    function normalizeRequest(
-        message,
-        options = {}
-    ) {
-        return {
-            id:
-                `engine-${Date.now()}-${Math.random()
-                    .toString(36)
-                    .slice(2, 9)}`,
-
-            message:
-                String(
-                    message || ""
-                ).trim(),
-
-            mode:
-                options.mode ||
-                "assistant",
-
-            language:
-                options.language ||
-                null,
-
-            conversationId:
-                options.conversationId ||
-                null,
-
-            timestamp:
-                new Date().toISOString(),
-
-            options: {
-                ...options
-            }
-        };
-    }
-
-    /* ==================================================
-       LANGUAGE DETECTION
-    ================================================== */
-
-    function detectLanguage(
-        message,
-        options
-    ) {
-        if (
-            options &&
-            options.language
-        ) {
-            return options.language;
-        }
-
-        const language =
-            getModule(
-                "language"
-            );
-
-        if (!language) {
-            return "de";
-        }
-
-        try {
-            if (
-                typeof language.detect ===
-                    "function"
-            ) {
-                return (
-                    language.detect(
-                        message
-                    ) || "de"
-                );
-            }
-
-            if (
-                typeof language.detectLanguage ===
-                    "function"
-            ) {
-                return (
-                    language.detectLanguage(
-                        message
-                    ) || "de"
-                );
-            }
-        } catch (error) {
-            warn(
-                "Spracherkennung fehlgeschlagen:",
-                error
-            );
-        }
-
-        return "de";
-    }
-
-    /* ==================================================
-       INTENT DETECTION
-    ================================================== */
-
-    function detectIntent(
-        message,
-        options = {}
-    ) {
-        const text =
-            String(
-                message || ""
-            )
-                .trim()
-                .toLowerCase();
-
-        if (!text) {
-            return "empty";
-        }
-
-        if (
-            text.startsWith("/") ||
-            text.startsWith("haldo ")
-        ) {
-            return "command";
-        }
-
-        if (
-            text.includes("code") ||
-            text.includes("programm") ||
-            text.includes("javascript") ||
-            text.includes("html") ||
-            text.includes("css")
-        ) {
-            return "code";
-        }
-
-        if (
-            text.includes("wissen") ||
-            text.includes("erkläre") ||
-            text.includes("erklären") ||
-            text.includes("was ist") ||
-            text.includes("warum")
-        ) {
-            return "knowledge";
-        }
-
-        if (
-            text.includes("sprache") ||
-            text.includes("übersetz") ||
-            text.includes("translate")
-        ) {
-            return "language";
-        }
-
-        if (
-            text.includes("merke") ||
-            text.includes("erinnere") ||
-            text.includes("vergiss")
-        ) {
-            return "memory";
-        }
-
-        if (
-            text.includes("sprich") ||
-            text.includes("vorlesen") ||
-            text.includes("laut")
-        ) {
-            return "speech";
-        }
-
-        if (
-            options.mode ===
-            "code"
-        ) {
-            return "code";
-        }
-
-        if (
-            options.mode ===
-            "knowledge"
-        ) {
-            return "knowledge";
-        }
-
-        return "assistant";
-    }
-
-    /* ==================================================
-       COMMAND ROUTER
-    ================================================== */
-
-    async function routeCommand(
-        request
-    ) {
-        const commands =
-            getModule(
-                "commands"
-            );
-
-        if (!commands) {
-            return null;
-        }
-
-        try {
-            if (
-                typeof commands.execute ===
-                    "function"
-            ) {
-                return await commands.execute(
-                    request.message,
-                    request.options
-                );
-            }
-
-            if (
-                typeof commands.run ===
-                    "function"
-            ) {
-                return await commands.run(
-                    request.message,
-                    request.options
-                );
-            }
-        } catch (error) {
-            warn(
-                "Command-Ausführung fehlgeschlagen:",
-                error
-            );
-
-            throw error;
-        }
-
-        return null;
-    }
-
-    /* ==================================================
-       KNOWLEDGE ROUTER
-    ================================================== */
-
-    async function routeKnowledge(
-        request
-    ) {
-        const knowledge =
-            getModule(
-                "knowledge"
-            );
-
-        if (!knowledge) {
-            return null;
-        }
-
-        try {
-            if (
-                typeof knowledge.ask ===
-                    "function"
-            ) {
-                return await knowledge.ask(
-                    request.message,
-                    request.options
-                );
-            }
-
-            if (
-                typeof knowledge.search ===
-                    "function"
-            ) {
-                return await knowledge.search(
-                    request.message
-                );
-            }
-        } catch (error) {
-            warn(
-                "Knowledge-System Fehler:",
-                error
-            );
-
-            throw error;
-        }
-
-        return null;
-    }
-
-    /* ==================================================
-       CODE ROUTER
-    ================================================== */
-
-    async function routeCode(
-        request
-    ) {
-        const code =
-            getModule(
-                "code"
-            );
-
-        if (!code) {
-            return null;
-        }
-
-        try {
-            if (
-                typeof code.build ===
-                    "function"
-            ) {
-                return await code.build(
-                    request.message,
-                    request.options
-                );
-            }
-
-            if (
-                typeof code.generate ===
-                    "function"
-            ) {
-                return await code.generate(
-                    request.message,
-                    request.options
-                );
-            }
-        } catch (error) {
-            warn(
-                "Code Builder Fehler:",
-                error
-            );
-
-            throw error;
-        }
-
-        return null;
-    }
-
-    /* ==================================================
-       MEMORY ROUTER
-    ================================================== */
-
-    async function routeMemory(
-        request
-    ) {
-        const memory =
-            getModule(
-                "memory"
-            );
-
-        if (!memory) {
-            return null;
-        }
-
-        try {
-            if (
-                typeof memory.process ===
-                    "function"
-            ) {
-                return await memory.process(
-                    request.message
-                );
-            }
-
-            if (
-                typeof memory.handle ===
-                    "function"
-            ) {
-                return await memory.handle(
-                    request.message
-                );
-            }
-        } catch (error) {
-            warn(
-                "Memory-System Fehler:",
-                error
-            );
-
-            throw error;
-        }
-
-        return null;
-    }
-
-    /* ==================================================
-       SPEECH ROUTER
-    ================================================== */
-
-    async function routeSpeech(
-        request
-    ) {
-        const speech =
-            getModule(
-                "speech"
-            );
-
-        if (!speech) {
-            return null;
-        }
-
-        try {
-            if (
-                typeof speech.speak ===
-                    "function"
-            ) {
-                return await speech.speak(
-                    request.message
-                );
-            }
-        } catch (error) {
-            warn(
-                "Speech-System Fehler:",
-                error
-            );
-
-            throw error;
-        }
-
-        return null;
-    }
-
-    /* ==================================================
-       EXTERNAL AI ADAPTER
-    ==================================================
-
-       Hier kann später eine echte AI/API-Anbindung
-       angeschlossen werden.
-
-       Die Engine bleibt dadurch unabhängig vom
-       konkreten Anbieter.
-    ================================================== */
-
-    async function callExternalAI(
-        request
-    ) {
-        const config =
-            window.HalDoConfig ||
-            window.HalDoConfigManager;
-
-        /*
-         * Noch keine externe API erzwingen.
-         * Das lokale OS bleibt vollständig startfähig.
-         */
-        if (!config) {
-            return null;
-        }
-
-        try {
-            let endpoint = null;
-
-            if (
-                typeof config.get ===
-                    "function"
-            ) {
-                endpoint =
-                    config.get(
-                        "ai.endpoint"
-                    );
-            }
-
-            if (
-                !endpoint &&
-                config.ai
-            ) {
-                endpoint =
-                    config.ai.endpoint;
-            }
-
-            if (!endpoint) {
-                return null;
-            }
-
-            /*
-             * Sicherheitsregel:
-             * API-Schlüssel niemals aus dieser Engine
-             * hart codieren.
-             */
-            let apiKey = null;
-
-            if (
-                typeof config.get ===
-                    "function"
-            ) {
-                apiKey =
-                    config.get(
-                        "ai.apiKey"
-                    );
-            }
-
-            const headers = {
-                "Content-Type":
-                    "application/json"
-            };
-
-            if (apiKey) {
-                headers.Authorization =
-                    `Bearer ${apiKey}`;
-            }
-
-            const response =
-                await fetch(
-                    endpoint,
-                    {
-                        method:
-                            "POST",
-
-                        headers,
-
-                        body:
-                            JSON.stringify({
-                                message:
-                                    request.message,
-
-                                language:
-                                    request.language,
-
-                                mode:
-                                    request.mode,
-
-                                conversationId:
-                                    request.conversationId
-                            })
-                    }
-                );
-
-            if (!response.ok) {
-                throw new Error(
-                    `AI API HTTP ${response.status}`
-                );
-            }
-
-            const data =
-                await response.json();
-
-            return (
-                data?.text ||
-                data?.message ||
-                data
-            );
-
-        } catch (error) {
-            warn(
-                "Externe AI-Anbindung nicht verfügbar:",
-                error
-            );
-
-            /*
-             * Kein harter Systemabbruch.
-             * Die Foundation kann weiterarbeiten.
-             */
-            return null;
-        }
-    }
-
-    /* ==================================================
-       FOUNDATION RESPONSE
-    ================================================== */
-
-    function foundationResponse(
-        request
-    ) {
-        const responses = {
-            assistant:
-                "HalDo AI Core ist aktiv und bereit.",
-
-            knowledge:
-                "Das HalDo Knowledge-System ist vorbereitet.",
-
-            code:
-                "Der HalDo Code Builder ist vorbereitet.",
-
-            language:
-                "Das HalDo Language-System ist vorbereitet.",
-
-            memory:
-                "Das HalDo Memory-System ist verbunden.",
-
-            speech:
-                "Das HalDo Speech-System ist vorbereitet.",
-
-            command:
-                "Das HalDo Command-System ist bereit."
         };
 
-        return {
-            text:
-                responses[
-                    request.intent
-                ] ||
-                responses.assistant,
-
-            type:
-                "foundation",
-
-            source:
-                "haldo-ai-engine",
-
-            intent:
-                request.intent,
-
-            language:
-                request.language
-        };
     }
 
-    /* ==================================================
-       NORMALIZE RESPONSE
-    ================================================== */
-
-    function normalizeResponse(
-        response,
-        request
-    ) {
-        if (!response) {
-            return foundationResponse(
-                request
-            );
-        }
-
-        if (
-            typeof response ===
-            "string"
-        ) {
-            return {
-                text:
-                    response,
-
-                type:
-                    "ai",
-
-                source:
-                    "haldo-ai-engine",
-
-                intent:
-                    request.intent,
-
-                language:
-                    request.language
-            };
-        }
-
-        return {
-            text:
-                response.text ||
-                response.message ||
-                JSON.stringify(
-                    response
-                ),
-
-            type:
-                response.type ||
-                "ai",
-
-            source:
-                response.source ||
-                "haldo-ai-engine",
-
-            intent:
-                response.intent ||
-                request.intent,
-
-            language:
-                response.language ||
-                request.language,
-
-            data:
-                response.data ||
-                null
-        };
-    }
-
-    /* ==================================================
-       MAIN PROCESS
-    ================================================== */
-
-    async function ask(
-        message,
-        options = {}
-    ) {
-        if (!state.initialized) {
-            initialize();
-        }
-
-        if (!state.running) {
-            start();
-        }
-
-        const request =
-            normalizeRequest(
-                message,
-                options
-            );
-
-        if (!request.message) {
-            return {
-                text:
-                    "Bitte schreibe eine Anfrage.",
-
-                type:
-                    "empty",
-
-                source:
-                    "haldo-ai-engine"
-            };
-        }
-
-        request.language =
-            detectLanguage(
-                request.message,
-                options
-            );
-
-        request.intent =
-            detectIntent(
-                request.message,
-                options
-            );
-
-        state.requests += 1;
-        state.processing = true;
-        state.status =
-            "processing";
-        state.lastRequest =
-            request;
-        state.lastError =
-            null;
-
-        emit(
-            "request:start",
-            request
-        );
-
-        try {
-            let response =
-                null;
-
-            /*
-             * ------------------------------------------
-             * 1. Commands
-             * ------------------------------------------
-             */
-            if (
-                request.intent ===
-                "command"
-            ) {
-                response =
-                    await routeCommand(
-                        request
-                    );
-            }
-
-            /*
-             * ------------------------------------------
-             * 2. Memory
-             * ------------------------------------------
-             */
-            if (
-                !response &&
-                request.intent ===
-                    "memory"
-            ) {
-                response =
-                    await routeMemory(
-                        request
-                    );
-            }
-
-            /*
-             * ------------------------------------------
-             * 3. Knowledge
-             * ------------------------------------------
-             */
-            if (
-                !response &&
-                request.intent ===
-                    "knowledge"
-            ) {
-                response =
-                    await routeKnowledge(
-                        request
-                    );
-            }
-
-            /*
-             * ------------------------------------------
-             * 4. Code
-             * ------------------------------------------
-             */
-            if (
-                !response &&
-                request.intent ===
-                    "code"
-            ) {
-                response =
-                    await routeCode(
-                        request
-                    );
-            }
-
-            /*
-             * ------------------------------------------
-             * 5. Speech
-             * ------------------------------------------
-             */
-            if (
-                !response &&
-                request.intent ===
-                    "speech"
-            ) {
-                response =
-                    await routeSpeech(
-                        request
-                    );
-            }
-
-            /*
-             * ------------------------------------------
-             * 6. External AI
-             * ------------------------------------------
-             */
-            if (!response) {
-                response =
-                    await callExternalAI(
-                        request
-                    );
-            }
-
-            /*
-             * ------------------------------------------
-             * 7. Foundation
-             * ------------------------------------------
-             */
-            if (!response) {
-                response =
-                    foundationResponse(
-                        request
-                    );
-            }
-
-            response =
-                normalizeResponse(
-                    response,
-                    request
-                );
-
-            state.successful += 1;
-            state.lastResponse =
-                response;
-
-            state.processing =
-                false;
-
-            state.status =
-                "running";
-
-            emit(
-                "request:complete",
-                {
-                    request,
-                    response
-                }
-            );
-
-            return response;
-
-        } catch (error) {
-            state.failed += 1;
-            state.lastError =
-                error.message;
-
-            state.processing =
-                false;
-
-            state.status =
-                "running";
-
-            emit(
-                "request:error",
-                {
-                    request,
-                    error
-                }
-            );
-
-            return {
-                text:
-                    "HalDo AI konnte diese Anfrage gerade nicht vollständig verarbeiten.",
-
-                type:
-                    "error",
-
-                source:
-                    "haldo-ai-engine",
-
-                error:
-                    error.message,
-
-                intent:
-                    request.intent,
-
-                language:
-                    request.language
-            };
-        }
-    }
-
-    /* ==================================================
-       ANALYZE
-    ================================================== */
-
-    function analyze(
-        message,
-        options = {}
-    ) {
-        const text =
-            String(
-                message || ""
-            ).trim();
-
-        return {
-            text,
-
-            language:
-                detectLanguage(
-                    text,
-                    options
-                ),
-
-            intent:
-                detectIntent(
-                    text,
-                    options
-                ),
-
-            length:
-                text.length,
-
-            words:
-                text
-                    ? text.split(/\s+/).length
-                    : 0,
-
-            timestamp:
-                new Date().toISOString()
-        };
-    }
-
-    /* ==================================================
-       RESET
-    ================================================== */
+    // --------------------------------------------------------
+    // Reset
+    // --------------------------------------------------------
 
     function reset() {
-        state.status =
-            "created";
-
-        state.initialized =
-            false;
-
-        state.running =
-            false;
 
         state.processing =
             false;
 
-        state.requests =
+        state.requestCount =
             0;
 
-        state.successful =
+        state.successfulRequests =
             0;
 
-        state.failed =
+        state.failedRequests =
             0;
 
         state.lastRequest =
@@ -1297,114 +1925,232 @@ Die Engine selbst enthält KEINE UI.
         state.lastResponse =
             null;
 
-        state.lastError =
-            null;
+        state.errors =
+            [];
 
         emit(
-            "reset",
-            getStatus()
+            "reset"
+        );
+
+        return true;
+
+    }
+
+    // --------------------------------------------------------
+    // Initialization
+    // --------------------------------------------------------
+
+    function initialize() {
+
+        if (
+            state.initialized
+        ) {
+
+            return getStatus();
+
+        }
+
+        state.initialized =
+            true;
+
+        /*
+         * Falls ai-core.js bereits existiert,
+         * registrieren wir uns dort.
+         */
+
+        const core =
+            resolve(
+                [
+                    "HalDoAICore",
+                    "aiCore"
+                ]
+            );
+
+        if (
+            core &&
+            typeof core.registerModule ===
+            "function"
+        ) {
+
+            try {
+
+                core.registerModule(
+                    "engine",
+                    api
+                );
+
+            } catch (
+                error
+            ) {
+
+                recordError(
+                    error,
+                    {
+                        phase:
+                            "core-registration"
+                    }
+                );
+
+            }
+
+        }
+
+        emit(
+            "initialized",
+            {
+                status:
+                    getStatus()
+            }
+        );
+
+        window.setTimeout(
+            () => {
+
+                state.ready =
+                    true;
+
+                emit(
+                    "ready",
+                    {
+                        status:
+                            getStatus()
+                    }
+                );
+
+                console.log(
+                    "[HalDoAIEngine] " +
+                    "HalDo AI Engine 18 bereit."
+                );
+
+            },
+            0
         );
 
         return getStatus();
+
     }
 
-    /* ==================================================
-       PUBLIC API
-    ================================================== */
+    // --------------------------------------------------------
+    // Public API
+    // --------------------------------------------------------
 
     const api = {
 
-        name:
-            state.name,
+        __haldoAI18:
+            true,
 
-        version:
-            VERSION,
+        config:
+            CONFIG,
+
+        state,
 
         initialize,
-
-        start,
-
-        stop,
-
-        ask,
-
-        analyze,
-
-        getStatus,
-
-        detectIntent,
-
-        detectLanguage,
 
         on,
 
         off,
 
+        emit,
+
+        generate,
+
+        generateResponse,
+
+        ask,
+
+        process,
+
+        run,
+
+        registerProvider,
+
+        registerExternalProvider,
+
+        unregisterProvider,
+
+        getProvider,
+
+        getProviders,
+
+        setProvider,
+
+        createFetchProvider,
+
+        getStatus,
+
         reset
+
     };
 
-    /* ==================================================
-       GLOBAL API
-    ================================================== */
+    // --------------------------------------------------------
+    // Global APIs
+    // --------------------------------------------------------
 
     window.HalDoAIEngine =
         api;
 
-    window.HalDoOS =
-        window.HalDoOS || {};
-
     window.HalDoOS.aiEngine =
         api;
 
-    /* ==================================================
-       KERNEL REGISTRATION
-    ================================================== */
+    // --------------------------------------------------------
+    // Document Integration
+    // --------------------------------------------------------
 
-    function registerWithKernel() {
-        try {
-            const kernel =
-                window.HalDoKernel;
+    document.addEventListener(
+        "haldo:ai-engine-request",
+        event => {
+
+            const text =
+                event.detail?.text ??
+                event.detail?.message;
 
             if (
-                kernel &&
-                typeof kernel.registerModule ===
-                    "function"
+                text
             ) {
-                kernel.registerModule(
-                    "ai-engine",
-                    api
-                );
-            }
-        } catch (error) {
-            console.warn(
-                "[HalDo AI Engine] Kernel registration failed:",
-                error
-            );
-        }
-    }
 
-    /* ==================================================
-       BOOT
-    ================================================== */
+                generate(
+                    text,
+                    event.detail?.options ||
+                    {}
+                );
+
+            }
+
+        }
+    );
+
+    // --------------------------------------------------------
+    // DOM Ready
+    // --------------------------------------------------------
 
     function boot() {
-        registerWithKernel();
+
         initialize();
+
     }
 
     if (
         document.readyState ===
         "loading"
     ) {
+
         document.addEventListener(
             "DOMContentLoaded",
             boot,
             {
-                once: true
+                once:
+                    true
             }
         );
+
     } else {
+
         boot();
+
     }
 
-})();
+})(window, document);
+
+// ============================================================
+// END OF PART 73
+// ============================================================
