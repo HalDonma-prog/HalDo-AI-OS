@@ -5801,4 +5801,982 @@
      TEIL 5 ENDE
      TEIL 6 WIRD DIREKT HIER ANGESCHLOSSEN
      ========================================================= -->
-    
+    <!-- =========================================================
+     HALDO AI OS 18
+     COMPLETE INDEX
+     TEIL 6 / 7
+     GLOBAL RUNTIME BRIDGE · EVENTS · APP CONNECTIONS
+     ========================================================= -->
+
+
+<!-- =========================================================
+     HALDO GLOBAL RUNTIME BRIDGE
+     ========================================================= -->
+
+<script>
+(function () {
+
+    "use strict";
+
+
+    /* =======================================================
+       GLOBAL HALDO NAMESPACE
+       ======================================================= */
+
+    window.HalDo = window.HalDo || {};
+
+    window.HalDoOS = window.HalDoOS || {};
+
+    window.HalDoOS.ui = window.HalDoOS.ui || {};
+
+    window.HalDoOS.apps = window.HalDoOS.apps || {};
+
+    window.HalDoOS.events = window.HalDoOS.events || {};
+
+
+    /* =======================================================
+       SAFE EVENT BUS
+       ======================================================= */
+
+    const listeners = {};
+
+
+    function on(eventName, callback) {
+
+        if (
+            typeof eventName !== "string" ||
+            typeof callback !== "function"
+        ) {
+            return function () {};
+        }
+
+
+        if (!listeners[eventName]) {
+            listeners[eventName] = new Set();
+        }
+
+
+        listeners[eventName].add(callback);
+
+
+        return function () {
+            off(eventName, callback);
+        };
+
+    }
+
+
+    function off(eventName, callback) {
+
+        if (!listeners[eventName]) {
+            return;
+        }
+
+
+        listeners[eventName].delete(callback);
+
+    }
+
+
+    function emit(eventName, detail) {
+
+        if (!listeners[eventName]) {
+            return;
+        }
+
+
+        listeners[eventName].forEach(function (callback) {
+
+            try {
+
+                callback(detail);
+
+            } catch (error) {
+
+                console.error(
+                    "[HalDo UI Event]",
+                    error
+                );
+
+            }
+
+        });
+
+    }
+
+
+    window.HalDoOS.events.on = on;
+
+    window.HalDoOS.events.off = off;
+
+    window.HalDoOS.events.emit = emit;
+
+
+    /* =======================================================
+       ELEMENT HELPER
+       ======================================================= */
+
+    function get(id) {
+
+        return document.getElementById(id);
+
+    }
+
+
+    function show(element) {
+
+        if (!element) {
+            return;
+        }
+
+
+        element.classList.remove("haldo-hidden");
+
+        element.setAttribute(
+            "aria-hidden",
+            "false"
+        );
+
+    }
+
+
+    function hide(element) {
+
+        if (!element) {
+            return;
+        }
+
+
+        element.classList.add("haldo-hidden");
+
+        element.setAttribute(
+            "aria-hidden",
+            "true"
+        );
+
+    }
+
+
+    /* =======================================================
+       APP SCREEN REGISTRY
+       ======================================================= */
+
+    const appScreens = {};
+
+
+    function registerScreen(id, element) {
+
+        if (!id || !element) {
+            return;
+        }
+
+
+        appScreens[id] = element;
+
+    }
+
+
+    function closeAllApps() {
+
+        Object.keys(appScreens).forEach(function (id) {
+
+            hide(appScreens[id]);
+
+        });
+
+
+        const host = get(
+            "haldo-application-host"
+        );
+
+
+        if (host) {
+
+            host
+                .querySelectorAll(
+                    ".haldo-app-screen"
+                )
+                .forEach(function (screen) {
+
+                    hide(screen);
+
+                });
+
+        }
+
+
+        emit(
+            "app:all-closed"
+        );
+
+    }
+
+
+    function openApp(appId) {
+
+        if (!appId) {
+            return false;
+        }
+
+
+        const appDataElement = get(
+            "haldo-app-data"
+        );
+
+
+        let appData = null;
+
+
+        if (appDataElement) {
+
+            try {
+
+                appData = JSON.parse(
+                    appDataElement.textContent
+                );
+
+            } catch (error) {
+
+                console.error(
+                    "[HalDo] App-Daten konnten nicht gelesen werden.",
+                    error
+                );
+
+            }
+
+        }
+
+
+        let app = null;
+
+
+        if (
+            appData &&
+            Array.isArray(appData.apps)
+        ) {
+
+            app = appData.apps.find(
+                function (item) {
+                    return item.id === appId;
+                }
+            );
+
+        }
+
+
+        if (!app) {
+
+            console.warn(
+                "[HalDo] Unbekannte App:",
+                appId
+            );
+
+            return false;
+
+        }
+
+
+        closeAllApps();
+
+
+        if (app.screen) {
+
+            const screen = get(
+                app.screen
+            );
+
+
+            if (screen) {
+
+                show(screen);
+
+
+                emit(
+                    "app:opened",
+                    {
+                        id: app.id,
+                        name: app.name,
+                        element: screen
+                    }
+                );
+
+
+                return true;
+
+            }
+
+        }
+
+
+        /*
+         * Apps ohne eigene Oberfläche werden
+         * über den vorhandenen App-/Module-Manager
+         * weitergereicht.
+         */
+
+        emit(
+            "app:request",
+            app
+        );
+
+
+        return true;
+
+    }
+
+
+    function closeApp(appId) {
+
+        if (!appId) {
+            return;
+        }
+
+
+        const appDataElement = get(
+            "haldo-app-data"
+        );
+
+
+        let appData = null;
+
+
+        if (appDataElement) {
+
+            try {
+
+                appData = JSON.parse(
+                    appDataElement.textContent
+                );
+
+            } catch (error) {}
+
+        }
+
+
+        let app = null;
+
+
+        if (
+            appData &&
+            Array.isArray(appData.apps)
+        ) {
+
+            app = appData.apps.find(
+                function (item) {
+                    return item.id === appId;
+                }
+            );
+
+        }
+
+
+        if (app && app.screen) {
+
+            hide(
+                get(app.screen)
+            );
+
+        }
+
+
+        emit(
+            "app:closed",
+            {
+                id: appId
+            }
+        );
+
+    }
+
+
+    window.HalDoOS.apps.open = openApp;
+
+    window.HalDoOS.apps.close = closeApp;
+
+    window.HalDoOS.apps.closeAll = closeAllApps;
+
+
+    /* =======================================================
+       REGISTER KNOWN SCREENS
+       ======================================================= */
+
+    function registerKnownScreens() {
+
+        registerScreen(
+            "ai-chat",
+            get("haldo-ai-app")
+        );
+
+        registerScreen(
+            "navigation",
+            get("haldo-navigation-app")
+        );
+
+        registerScreen(
+            "driving-school",
+            get("haldo-driving-school-app")
+        );
+
+        registerScreen(
+            "language",
+            get("haldo-language-app")
+        );
+
+        registerScreen(
+            "ezidi-keyboard",
+            get("haldo-ezidi-keyboard-app")
+        );
+
+        registerScreen(
+            "settings",
+            get("haldo-settings-app")
+        );
+
+        registerScreen(
+            "system-status",
+            get("haldo-diagnostics-app")
+        );
+
+    }
+
+
+    /* =======================================================
+       DATA HELPERS
+       ======================================================= */
+
+    function readJSON(id, fallback) {
+
+        const element = get(id);
+
+
+        if (!element) {
+            return fallback;
+        }
+
+
+        try {
+
+            return JSON.parse(
+                element.textContent
+            );
+
+        } catch (error) {
+
+            console.error(
+                "[HalDo] JSON-Fehler:",
+                id,
+                error
+            );
+
+            return fallback;
+
+        }
+
+    }
+
+
+    window.HalDoOS.ui.readJSON = readJSON;
+
+
+    /* =======================================================
+       CLOCK
+       ======================================================= */
+
+    function updateClock() {
+
+        const timeElement =
+            get("haldo-clock-time");
+
+        const dateElement =
+            get("haldo-clock-date");
+
+
+        if (!timeElement && !dateElement) {
+            return;
+        }
+
+
+        const now = new Date();
+
+
+        if (timeElement) {
+
+            timeElement.textContent =
+                now.toLocaleTimeString(
+                    "de-DE",
+                    {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        second: "2-digit"
+                    }
+                );
+
+        }
+
+
+        if (dateElement) {
+
+            dateElement.textContent =
+                now.toLocaleDateString(
+                    "de-DE",
+                    {
+                        weekday: "long",
+                        day: "2-digit",
+                        month: "long",
+                        year: "numeric"
+                    }
+                );
+
+        }
+
+    }
+
+
+    setInterval(
+        updateClock,
+        1000
+    );
+
+
+    /* =======================================================
+       ONLINE / OFFLINE STATUS
+       ======================================================= */
+
+    function updateConnectionStatus() {
+
+        const indicator =
+            get("haldo-online-indicator");
+
+        const text =
+            get("haldo-online-text");
+
+
+        const online =
+            navigator.onLine;
+
+
+        if (indicator) {
+
+            indicator.classList.toggle(
+                "haldo-status-online",
+                online
+            );
+
+            indicator.classList.toggle(
+                "haldo-status-offline",
+                !online
+            );
+
+        }
+
+
+        if (text) {
+
+            text.textContent =
+                online
+                    ? "Online"
+                    : "Offline";
+
+        }
+
+
+        emit(
+            "network:status",
+            {
+                online: online
+            }
+        );
+
+    }
+
+
+    window.addEventListener(
+        "online",
+        updateConnectionStatus
+    );
+
+
+    window.addEventListener(
+        "offline",
+        updateConnectionStatus
+    );
+
+
+    /* =======================================================
+       AI DESKTOP INPUT
+       ======================================================= */
+
+    function sendDesktopAIMessage() {
+
+        const input =
+            get("haldo-desktop-ai-input");
+
+
+        if (!input) {
+            return;
+        }
+
+
+        const message =
+            input.value.trim();
+
+
+        if (!message) {
+            return;
+        }
+
+
+        emit(
+            "ai:message",
+            {
+                message: message,
+                source: "desktop"
+            }
+        );
+
+
+        /*
+         * Übergabe an vorhandene AI-Systeme.
+         */
+
+        if (
+            window.HalDoAI &&
+            typeof window.HalDoAI.sendMessage ===
+                "function"
+        ) {
+
+            try {
+
+                window.HalDoAI.sendMessage(
+                    message
+                );
+
+            } catch (error) {
+
+                console.error(
+                    "[HalDo AI]",
+                    error
+                );
+
+            }
+
+        }
+
+
+        if (
+            window.HalDoOS &&
+            window.HalDoOS.ai &&
+            typeof window.HalDoOS.ai.sendMessage ===
+                "function"
+        ) {
+
+            try {
+
+                window.HalDoOS.ai.sendMessage(
+                    message
+                );
+
+            } catch (error) {
+
+                console.error(
+                    "[HalDoOS AI]",
+                    error
+                );
+
+            }
+
+        }
+
+
+        input.value = "";
+
+    }
+
+
+    /* =======================================================
+       DOM EVENTS
+       ======================================================= */
+
+    function installUIEvents() {
+
+        document.addEventListener(
+            "click",
+            function (event) {
+
+                const appButton =
+                    event.target.closest(
+                        "[data-app]"
+                    );
+
+
+                if (appButton) {
+
+                    const appId =
+                        appButton.getAttribute(
+                            "data-app"
+                        );
+
+
+                    if (appId) {
+
+                        openApp(appId);
+
+                        return;
+
+                    }
+
+                }
+
+
+                const closeButton =
+                    event.target.closest(
+                        "[data-close-app]"
+                    );
+
+
+                if (closeButton) {
+
+                    closeApp(
+                        closeButton.getAttribute(
+                            "data-close-app"
+                        )
+                    );
+
+                    return;
+
+                }
+
+
+                const windowAction =
+                    event.target.closest(
+                        "[data-window-action]"
+                    );
+
+
+                if (windowAction) {
+
+                    emit(
+                        "window:action",
+                        {
+                            action:
+                                windowAction.getAttribute(
+                                    "data-window-action"
+                                )
+                        }
+                    );
+
+                }
+
+            }
+        );
+
+
+        const desktopAIForm =
+            get("haldo-desktop-ai-form");
+
+
+        if (desktopAIForm) {
+
+            desktopAIForm.addEventListener(
+                "submit",
+                function (event) {
+
+                    event.preventDefault();
+
+                    sendDesktopAIMessage();
+
+                }
+            );
+
+        }
+
+
+        const desktopAIExpand =
+            get("haldo-desktop-ai-expand");
+
+
+        if (desktopAIExpand) {
+
+            desktopAIExpand.addEventListener(
+                "click",
+                function () {
+
+                    openApp("ai-chat");
+
+                }
+            );
+
+        }
+
+
+        const widgetAI =
+            get("haldo-ai-widget-open");
+
+
+        if (widgetAI) {
+
+            widgetAI.addEventListener(
+                "click",
+                function () {
+
+                    openApp("ai-chat");
+
+                }
+            );
+
+        }
+
+
+        const diagnosticButton =
+            get("haldo-run-diagnostics");
+
+
+        if (diagnosticButton) {
+
+            diagnosticButton.addEventListener(
+                "click",
+                function () {
+
+                    emit(
+                        "diagnostics:run"
+                    );
+
+                }
+            );
+
+        }
+
+    }
+
+
+    /* =======================================================
+       GLOBAL KEYBOARD SHORTCUTS
+       ======================================================= */
+
+    function installKeyboardShortcuts() {
+
+        document.addEventListener(
+            "keydown",
+            function (event) {
+
+                /*
+                 * ESC = aktive App schließen
+                 */
+
+                if (
+                    event.key === "Escape"
+                ) {
+
+                    closeAllApps();
+
+                }
+
+
+                /*
+                 * CTRL/CMD + K = globale Suche
+                 */
+
+                if (
+                    (event.ctrlKey ||
+                     event.metaKey) &&
+                    event.key.toLowerCase() === "k"
+                ) {
+
+                    event.preventDefault();
+
+                    const search =
+                        get("haldo-global-search");
+
+                    if (search) {
+
+                        show(search);
+
+                        const input =
+                            get(
+                                "haldo-global-search-input"
+                            );
+
+                        if (input) {
+                            input.focus();
+                        }
+
+                    }
+
+                }
+
+            }
+        );
+
+    }
+
+
+    /* =======================================================
+       INITIALIZATION
+       ======================================================= */
+
+    function initializeBridge() {
+
+        registerKnownScreens();
+
+        installUIEvents();
+
+        installKeyboardShortcuts();
+
+        updateClock();
+
+        updateConnectionStatus();
+
+
+        window.HalDoOS.ui.openApp =
+            openApp;
+
+        window.HalDoOS.ui.closeApp =
+            closeApp;
+
+        window.HalDoOS.ui.closeAllApps =
+            closeAllApps;
+
+
+        emit(
+            "ui:ready",
+            {
+                timestamp:
+                    Date.now()
+            }
+        );
+
+
+        console.info(
+            "[HalDo UI] Runtime Bridge bereit."
+        );
+
+    }
+
+
+    if (
+        document.readyState ===
+        "loading"
+    ) {
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            initializeBridge,
+            {
+                once: true
+            }
+        );
+
+    } else {
+
+        initializeBridge();
+
+    }
+
+})();
+</script>
+
+
+<!-- =========================================================
+     TEIL 6 ENDE
+     TEIL 7 WIRD DIREKT HIER ANGESCHLOSSEN
+     ========================================================= -->
