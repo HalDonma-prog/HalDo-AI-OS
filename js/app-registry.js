@@ -4,27 +4,24 @@
 // APP REGISTRY
 // Version 18.0.0
 //
-// Zentrale App-Definition für das gesamte HalDo AI OS.
+// ZENTRALE QUELLE ALLER APPS
 //
-// Diese Datei registriert NICHT nur Namen.
-// Jede App erhält:
-// - ID
-// - Kategorie
-// - Version
-// - Status
-// - Entry
-// - Abhängigkeiten
-// - Permissions
-// - Features
-// - System-Verbindungen
-// - Update-Informationen
+// Registry = Definition
+// Manager  = Lebenszyklus
+// Router   = Navigation
+// Window   = Darstellung
 // ============================================================
 
-(function (window) {
+(function (window, document) {
 
     "use strict";
 
+    window.HalDoOS = window.HalDoOS || {};
+
+    const HalDoOS = window.HalDoOS;
+
     const VERSION = "18.0.0";
+    const NAME = "HalDo App Registry";
 
     const registry = new Map();
     const aliases = new Map();
@@ -95,19 +92,25 @@
         }
 
         if (
-            window.HalDoOS &&
-            window.HalDoOS.events &&
-            typeof window.HalDoOS.events.emit === "function"
+            HalDoOS.events &&
+            typeof HalDoOS.events.emit === "function"
         ) {
 
             try {
 
-                window.HalDoOS.events.emit(
+                HalDoOS.events.emit(
                     "app-registry:" + event,
                     data
                 );
 
-            } catch (error) {}
+            } catch (error) {
+
+                console.warn(
+                    "[HalDo App Registry] Global event error:",
+                    error
+                );
+
+            }
 
         }
     }
@@ -121,7 +124,21 @@
         return String(value || "")
             .trim()
             .toLowerCase()
-            .replace(/\s+/g, "-");
+            .replace(/\s+/g, "-")
+            .replace(/[^a-z0-9-_]/g, "-")
+            .replace(/-+/g, "-")
+            .replace(/^-|-$/g, "");
+    }
+
+    // ========================================================
+    // ARRAY HELPER
+    // ========================================================
+
+    function array(value) {
+
+        return Array.isArray(value)
+            ? [...value]
+            : [];
     }
 
     // ========================================================
@@ -132,7 +149,10 @@
 
         const source = config || {};
 
-        const id = normalize(source.id);
+        const id = normalize(
+            source.id ||
+            source.name
+        );
 
         if (!id) {
             throw new Error(
@@ -142,13 +162,20 @@
 
         return {
 
-            id: id,
+            id,
 
             name:
                 source.name ||
                 id,
 
             displayName:
+                source.displayName ||
+                source.title ||
+                source.name ||
+                id,
+
+            title:
+                source.title ||
                 source.displayName ||
                 source.name ||
                 id,
@@ -180,13 +207,13 @@
                 source.visible !== false,
 
             system:
-                source.system !== false,
+                source.system === true,
 
             core:
                 source.core === true,
 
             singleton:
-                source.singleton === true,
+                source.singleton !== false,
 
             window:
                 source.window !== false,
@@ -209,36 +236,22 @@
                 id,
 
             aliases:
-                Array.isArray(source.aliases)
-                    ? source.aliases
-                    : [],
+                array(source.aliases),
 
             dependencies:
-                Array.isArray(source.dependencies)
-                    ? source.dependencies
-                    : [],
+                array(source.dependencies),
 
             optionalDependencies:
-                Array.isArray(
-                    source.optionalDependencies
-                )
-                    ? source.optionalDependencies
-                    : [],
+                array(source.optionalDependencies),
 
             permissions:
-                Array.isArray(source.permissions)
-                    ? source.permissions
-                    : [],
+                array(source.permissions),
 
             features:
-                Array.isArray(source.features)
-                    ? source.features
-                    : [],
+                array(source.features),
 
             services:
-                Array.isArray(source.services)
-                    ? source.services
-                    : [],
+                array(source.services),
 
             ai:
                 source.ai !== false,
@@ -261,6 +274,50 @@
                     source.metadata || {}
                 ),
 
+            api:
+                source.api ||
+                null,
+
+            init:
+                typeof source.init === "function"
+                    ? source.init
+                    : null,
+
+            start:
+                typeof source.start === "function"
+                    ? source.start
+                    : null,
+
+            stop:
+                typeof source.stop === "function"
+                    ? source.stop
+                    : null,
+
+            minimize:
+                typeof source.minimize === "function"
+                    ? source.minimize
+                    : null,
+
+            restore:
+                typeof source.restore === "function"
+                    ? source.restore
+                    : null,
+
+            destroy:
+                typeof source.destroy === "function"
+                    ? source.destroy
+                    : null,
+
+            onActivate:
+                typeof source.onActivate === "function"
+                    ? source.onActivate
+                    : null,
+
+            onDeactivate:
+                typeof source.onDeactivate === "function"
+                    ? source.onDeactivate
+                    : null,
+
             createdAt:
                 source.createdAt ||
                 new Date().toISOString(),
@@ -271,16 +328,70 @@
     }
 
     // ========================================================
+    // ALIAS MANAGEMENT
+    // ========================================================
+
+    function removeAliasesForApp(appId) {
+
+        aliases.forEach(function (target, alias) {
+
+            if (target === appId) {
+                aliases.delete(alias);
+            }
+
+        });
+    }
+
+    function registerAliases(app) {
+
+        removeAliasesForApp(app.id);
+
+        const allAliases = [
+            app.id,
+            app.route,
+            ...array(app.aliases)
+        ];
+
+        allAliases.forEach(function (alias) {
+
+            const normalized = normalize(alias);
+
+            if (!normalized) {
+                return;
+            }
+
+            if (
+                aliases.has(normalized) &&
+                aliases.get(normalized) !== app.id
+            ) {
+
+                console.warn(
+                    "[HalDo App Registry] Alias bereits vergeben:",
+                    normalized
+                );
+
+                return;
+            }
+
+            aliases.set(
+                normalized,
+                app.id
+            );
+
+        });
+    }
+
+    // ========================================================
     // REGISTER
     // ========================================================
 
     function register(config) {
 
-        let app;
+        let incoming;
 
         try {
 
-            app =
+            incoming =
                 createApp(config);
 
         } catch (error) {
@@ -290,7 +401,36 @@
                 error
             );
 
-            return false;
+            return null;
+        }
+
+        const existing =
+            registry.get(incoming.id);
+
+        let app;
+
+        if (existing) {
+
+            app = Object.assign(
+                {},
+                existing,
+                incoming,
+                {
+                    metadata: Object.assign(
+                        {},
+                        existing.metadata || {},
+                        incoming.metadata || {}
+                    ),
+
+                    updatedAt:
+                        new Date().toISOString()
+                }
+            );
+
+        } else {
+
+            app = incoming;
+
         }
 
         registry.set(
@@ -298,26 +438,31 @@
             app
         );
 
-        app.aliases.forEach(function (alias) {
-
-            const key =
-                normalize(alias);
-
-            if (key) {
-                aliases.set(
-                    key,
-                    app.id
-                );
-            }
-
-        });
+        registerAliases(app);
 
         emit(
-            "registered",
+            existing
+                ? "updated"
+                : "registered",
             app
         );
 
         return app;
+    }
+
+    // ========================================================
+    // REGISTER MANY
+    // ========================================================
+
+    function registerMany(list) {
+
+        if (!Array.isArray(list)) {
+            return [];
+        }
+
+        return list
+            .map(register)
+            .filter(Boolean);
     }
 
     // ========================================================
@@ -330,22 +475,18 @@
             normalize(id);
 
         const app =
-            registry.get(normalized);
+            get(normalized);
 
         if (!app) {
             return false;
         }
 
-        registry.delete(normalized);
+        registry.delete(
+            app.id
+        );
 
-        aliases.forEach(
-            function (target, alias) {
-
-                if (target === normalized) {
-                    aliases.delete(alias);
-                }
-
-            }
+        removeAliasesForApp(
+            app.id
         );
 
         emit(
@@ -365,6 +506,10 @@
         const normalized =
             normalize(id);
 
+        if (!normalized) {
+            return null;
+        }
+
         if (registry.has(normalized)) {
             return registry.get(normalized);
         }
@@ -373,7 +518,7 @@
             aliases.get(normalized);
 
         if (target) {
-            return registry.get(target);
+            return registry.get(target) || null;
         }
 
         return null;
@@ -384,11 +529,13 @@
     // ========================================================
 
     function has(id) {
+
         return !!get(id);
+
     }
 
     // ========================================================
-    // UPDATE APP
+    // UPDATE
     // ========================================================
 
     function update(id, changes) {
@@ -401,19 +548,23 @@
         }
 
         const updated =
-            Object.assign(
-                {},
-                app,
-                changes || {},
-                {
-                    id: app.id,
-                    updatedAt:
-                        new Date().toISOString()
-                }
+            createApp(
+                Object.assign(
+                    {},
+                    app,
+                    changes || {},
+                    {
+                        id: app.id
+                    }
+                )
             );
 
         registry.set(
             app.id,
+            updated
+        );
+
+        registerAliases(
             updated
         );
 
@@ -433,6 +584,48 @@
 
         return Array.from(
             registry.values()
+        );
+    }
+
+    // ========================================================
+    // ENABLED
+    // ========================================================
+
+    function getEnabled() {
+
+        return list().filter(
+            function (app) {
+                return app.enabled !== false;
+            }
+        );
+    }
+
+    // ========================================================
+    // VISIBLE
+    // ========================================================
+
+    function getVisible() {
+
+        return list().filter(
+            function (app) {
+                return (
+                    app.visible !== false &&
+                    app.enabled !== false
+                );
+            }
+        );
+    }
+
+    // ========================================================
+    // CORE
+    // ========================================================
+
+    function getCoreApps() {
+
+        return list().filter(
+            function (app) {
+                return app.core === true;
+            }
         );
     }
 
@@ -457,27 +650,34 @@
     }
 
     // ========================================================
-    // ENABLED APPS
+    // SEARCH
     // ========================================================
 
-    function getEnabled() {
+    function search(query) {
+
+        const value =
+            normalize(query);
+
+        if (!value) {
+            return list();
+        }
 
         return list().filter(
             function (app) {
-                return app.enabled === true;
-            }
-        );
-    }
 
-    // ========================================================
-    // CORE APPS
-    // ========================================================
+                return [
+                    app.id,
+                    app.name,
+                    app.displayName,
+                    app.title,
+                    app.category,
+                    app.description,
+                    ...(app.features || [])
+                ]
+                    .join(" ")
+                    .toLowerCase()
+                    .includes(value);
 
-    function getCoreApps() {
-
-        return list().filter(
-            function (app) {
-                return app.core === true;
             }
         );
     }
@@ -498,17 +698,33 @@
                 appId: id,
                 missing: [
                     "APP_NOT_FOUND"
-                ]
+                ],
+                optionalMissing: []
             };
+
         }
 
         const missing = [];
+
+        const optionalMissing = [];
 
         app.dependencies.forEach(
             function (dependency) {
 
                 if (!has(dependency)) {
                     missing.push(
+                        dependency
+                    );
+                }
+
+            }
+        );
+
+        app.optionalDependencies.forEach(
+            function (dependency) {
+
+                if (!has(dependency)) {
+                    optionalMissing.push(
                         dependency
                     );
                 }
@@ -524,11 +740,15 @@
             appId:
                 app.id,
 
-            missing:
-                missing,
+            missing,
+
+            optionalMissing,
 
             dependencies:
-                [...app.dependencies]
+                [...app.dependencies],
+
+            optionalDependencies:
+                [...app.optionalDependencies]
 
         };
     }
@@ -571,35 +791,33 @@
     }
 
     // ========================================================
-    // COMPLETE APP CATALOG
+    // DEFAULT APP CATALOG
     // ========================================================
 
     const APP_DEFINITIONS = [
 
-        // ====================================================
-        // SYSTEM CORE
-        // ====================================================
+        // ---------------- SYSTEM ----------------
 
         {
             id: "system-dashboard",
             name: "System Dashboard",
             displayName: "HalDo System Dashboard",
             category: "system",
-            version: VERSION,
             icon: "▦",
             core: true,
+            system: true,
             singleton: true,
             route: "dashboard",
+            aliases: [
+                "dashboard",
+                "home",
+                "control-center"
+            ],
             features: [
                 "system-overview",
                 "status",
                 "module-monitor",
                 "performance"
-            ],
-            services: [
-                "kernel",
-                "system",
-                "diagnostics"
             ]
         },
 
@@ -608,9 +826,9 @@
             name: "System Monitor",
             displayName: "HalDo System Monitor",
             category: "system",
-            version: VERSION,
             icon: "◉",
             core: true,
+            system: true,
             singleton: true,
             features: [
                 "cpu",
@@ -626,12 +844,12 @@
             name: "Module Center",
             displayName: "HalDo Module Center",
             category: "system",
-            version: VERSION,
             icon: "◈",
             core: true,
+            system: true,
             route: "modules",
-            dependencies: [
-                "system-dashboard"
+            aliases: [
+                "module-manager"
             ],
             features: [
                 "module-list",
@@ -646,10 +864,14 @@
             name: "Diagnostics",
             displayName: "HalDo System Diagnostics",
             category: "system",
-            version: VERSION,
             icon: "✓",
             core: true,
+            system: true,
             route: "diagnostics",
+            aliases: [
+                "diagnostic",
+                "system-diagnostics"
+            ],
             features: [
                 "system-check",
                 "storage-check",
@@ -659,20 +881,137 @@
             ]
         },
 
-        // ====================================================
-        // AI SYSTEM
-        // ====================================================
+        // ---------------- AI ----------------
+
+        {
+            id: "ai-core",
+            name: "AI Core",
+            displayName: "HalDo AI Core",
+            category: "ai",
+            icon: "✦",
+            core: true,
+            system: true,
+            singleton: true,
+            visible: false,
+            window: false,
+            features: [
+                "ai-runtime",
+                "request-processing",
+                "response-processing",
+                "context"
+            ]
+        },
+
+        {
+            id: "ai-engine",
+            name: "AI Engine",
+            displayName: "HalDo AI Engine",
+            category: "ai",
+            icon: "◇",
+            core: true,
+            system: true,
+            visible: false,
+            window: false,
+            dependencies: [
+                "ai-core"
+            ],
+            features: [
+                "reasoning",
+                "processing",
+                "routing"
+            ]
+        },
+
+        {
+            id: "ai-memory",
+            name: "AI Memory",
+            displayName: "HalDo AI Memory",
+            category: "ai",
+            icon: "▤",
+            core: true,
+            system: true,
+            visible: false,
+            window: false,
+            dependencies: [
+                "storage"
+            ],
+            features: [
+                "memory",
+                "context",
+                "conversation-history"
+            ]
+        },
+
+        {
+            id: "conversation-state",
+            name: "Conversation State",
+            displayName: "HalDo Conversation State",
+            category: "ai",
+            icon: "◫",
+            core: true,
+            system: true,
+            visible: false,
+            window: false,
+            dependencies: [
+                "ai-memory"
+            ]
+        },
+
+        {
+            id: "ai-language",
+            name: "AI Language",
+            displayName: "HalDo AI Language",
+            category: "ai",
+            icon: "文",
+            core: true,
+            system: true,
+            visible: false,
+            window: false,
+            dependencies: [
+                "language-system"
+            ],
+            features: [
+                "language",
+                "translation",
+                "localization"
+            ]
+        },
+
+        {
+            id: "ai-commands",
+            name: "AI Commands",
+            displayName: "HalDo AI Commands",
+            category: "ai",
+            icon: "⌘",
+            core: true,
+            system: true,
+            visible: false,
+            window: false,
+            dependencies: [
+                "ai-core",
+                "app-router"
+            ],
+            features: [
+                "system-commands",
+                "app-commands",
+                "navigation"
+            ]
+        },
 
         {
             id: "ai-chat",
             name: "AI Chat",
             displayName: "HalDo AI Gespräch",
             category: "ai",
-            version: VERSION,
             icon: "✦",
             core: true,
             singleton: true,
             route: "chat",
+            aliases: [
+                "ai",
+                "assistant",
+                "haldo-ai"
+            ],
             dependencies: [
                 "ai-core",
                 "conversation-state"
@@ -693,112 +1032,11 @@
         },
 
         {
-            id: "ai-core",
-            name: "AI Core",
-            displayName: "HalDo AI Core",
-            category: "ai",
-            version: VERSION,
-            icon: "✦",
-            core: true,
-            singleton: true,
-            visible: false,
-            window: false,
-            features: [
-                "ai-runtime",
-                "request-processing",
-                "response-processing",
-                "context"
-            ]
-        },
-
-        {
-            id: "ai-engine",
-            name: "AI Engine",
-            displayName: "HalDo AI Engine",
-            category: "ai",
-            version: VERSION,
-            icon: "◇",
-            core: true,
-            visible: false,
-            window: false,
-            dependencies: [
-                "ai-core"
-            ],
-            features: [
-                "reasoning",
-                "processing",
-                "routing"
-            ]
-        },
-
-        {
-            id: "ai-memory",
-            name: "AI Memory",
-            displayName: "HalDo AI Memory",
-            category: "ai",
-            version: VERSION,
-            icon: "▤",
-            core: true,
-            visible: false,
-            window: false,
-            dependencies: [
-                "storage"
-            ],
-            features: [
-                "memory",
-                "context",
-                "conversation-history"
-            ]
-        },
-
-        {
-            id: "ai-commands",
-            name: "AI Commands",
-            displayName: "HalDo AI Commands",
-            category: "ai",
-            version: VERSION,
-            icon: "⌘",
-            core: true,
-            visible: false,
-            window: false,
-            dependencies: [
-                "ai-core",
-                "app-router"
-            ],
-            features: [
-                "system-commands",
-                "app-commands",
-                "navigation"
-            ]
-        },
-
-        {
-            id: "ai-language",
-            name: "AI Language",
-            displayName: "HalDo AI Language",
-            category: "ai",
-            version: VERSION,
-            icon: "文",
-            core: true,
-            visible: false,
-            window: false,
-            dependencies: [
-                "language-system"
-            ],
-            features: [
-                "language",
-                "translation",
-                "localization"
-            ]
-        },
-
-        {
             id: "ai-voice",
             name: "AI Voice",
             displayName: "HalDo AI Voice",
-            category: "ai",
-            version: VERSION,
-            icon: "◉",
+            category: "voice",
+            icon: "◎",
             core: true,
             route: "voice",
             dependencies: [
@@ -812,27 +1050,16 @@
         },
 
         {
-            id: "conversation-state",
-            name: "Conversation State",
-            displayName: "HalDo Conversation State",
-            category: "ai",
-            version: VERSION,
-            core: true,
-            visible: false,
-            window: false,
-            dependencies: [
-                "ai-memory"
-            ]
-        },
-
-        {
             id: "knowledge-center",
             name: "Knowledge Center",
             displayName: "HalDo Knowledge",
             category: "ai",
-            version: VERSION,
             icon: "◇",
             route: "knowledge",
+            aliases: [
+                "wissen",
+                "knowledge-base"
+            ],
             dependencies: [
                 "ai-core",
                 "ai-memory",
@@ -846,18 +1073,18 @@
             ]
         },
 
-        // ====================================================
-        // DEVELOPER
-        // ====================================================
+        // ---------------- DEVELOPER ----------------
 
         {
             id: "code-builder",
             name: "Code Builder",
             displayName: "HalDo Code Builder",
             category: "developer",
-            version: VERSION,
             icon: "</>",
             route: "code",
+            aliases: [
+                "developer"
+            ],
             dependencies: [
                 "storage",
                 "ai-core"
@@ -876,7 +1103,6 @@
             name: "Developer Center",
             displayName: "HalDo Developer Center",
             category: "developer",
-            version: VERSION,
             icon: "⌘",
             dependencies: [
                 "code-builder",
@@ -890,20 +1116,22 @@
             ]
         },
 
-        // ====================================================
-        // STORAGE
-        // ====================================================
+        // ---------------- STORAGE ----------------
 
         {
             id: "storage",
             name: "Storage",
             displayName: "HalDo Storage",
             category: "storage",
-            version: VERSION,
             icon: "◫",
             core: true,
+            system: true,
             singleton: true,
             route: "storage",
+            aliases: [
+                "files",
+                "data"
+            ],
             features: [
                 "local-storage",
                 "data",
@@ -917,8 +1145,8 @@
             name: "File Center",
             displayName: "HalDo File Center",
             category: "storage",
-            version: VERSION,
             icon: "▤",
+            route: "files",
             dependencies: [
                 "storage"
             ],
@@ -930,18 +1158,45 @@
             ]
         },
 
-        // ====================================================
-        // LANGUAGE
-        // ====================================================
+        // ---------------- LANGUAGE ----------------
+
+        {
+            id: "language-manager",
+            name: "Language Manager",
+            displayName: "HalDo Language Manager",
+            category: "language",
+            icon: "A",
+            core: true,
+            system: true,
+            visible: false,
+            window: false
+        },
+
+        {
+            id: "language-system",
+            name: "Language System",
+            displayName: "HalDo Language System",
+            category: "language",
+            icon: "文",
+            core: true,
+            system: true,
+            visible: false,
+            window: false,
+            dependencies: [
+                "language-manager"
+            ]
+        },
 
         {
             id: "language-center",
             name: "Language Center",
             displayName: "HalDo Sprachen",
             category: "language",
-            version: VERSION,
             icon: "文",
             route: "languages",
+            aliases: [
+                "language"
+            ],
             dependencies: [
                 "language-manager",
                 "language-system"
@@ -953,43 +1208,19 @@
             ]
         },
 
-        {
-            id: "language-manager",
-            name: "Language Manager",
-            displayName: "HalDo Language Manager",
-            category: "language",
-            version: VERSION,
-            core: true,
-            visible: false,
-            window: false
-        },
-
-        {
-            id: "language-system",
-            name: "Language System",
-            displayName: "HalDo Language System",
-            category: "language",
-            version: VERSION,
-            core: true,
-            visible: false,
-            window: false,
-            dependencies: [
-                "language-manager"
-            ]
-        },
-
-        // ====================================================
-        // ÊZÎDÎ
-        // ====================================================
+        // ---------------- ÊZÎDÎ ----------------
 
         {
             id: "ezidi-keyboard",
             name: "Êzîdî Keyboard",
             displayName: "HalDo Êzîdî Keyboard",
             category: "input",
-            version: VERSION,
             icon: "⌨",
             route: "keyboard",
+            aliases: [
+                "ezidi-keyboard",
+                "ezîdî-keyboard"
+            ],
             dependencies: [
                 "language-system",
                 "storage"
@@ -1002,16 +1233,13 @@
             ]
         },
 
-        // ====================================================
-        // VOICE
-        // ====================================================
+        // ---------------- VOICE ----------------
 
         {
             id: "voice-center",
             name: "Voice Center",
             displayName: "HalDo Voice Center",
             category: "voice",
-            version: VERSION,
             icon: "◉",
             route: "voice",
             dependencies: [
@@ -1024,20 +1252,22 @@
             ]
         },
 
-        // ====================================================
-        // APP CENTER
-        // ====================================================
+        // ---------------- APPS ----------------
 
         {
             id: "app-center",
             name: "App Center",
             displayName: "HalDo Apps",
             category: "apps",
-            version: VERSION,
             icon: "◈",
-            route: "apps",
             core: true,
+            system: true,
             singleton: true,
+            route: "apps",
+            aliases: [
+                "applications",
+                "application-center"
+            ],
             dependencies: [
                 "app-manager",
                 "app-router",
@@ -1052,18 +1282,19 @@
             ]
         },
 
-        // ====================================================
-        // SETTINGS
-        // ====================================================
+        // ---------------- SETTINGS ----------------
 
         {
             id: "settings",
             name: "Settings",
             displayName: "HalDo Einstellungen",
             category: "settings",
-            version: VERSION,
             icon: "⚙",
             route: "settings",
+            aliases: [
+                "setup",
+                "config"
+            ],
             singleton: true,
             dependencies: [
                 "storage",
@@ -1078,17 +1309,30 @@
             ]
         },
 
-        // ====================================================
-        // SOFTWARE UPDATE
-        // ====================================================
+        {
+            id: "config-manager",
+            name: "Config Manager",
+            displayName: "HalDo Configuration Manager",
+            category: "system-service",
+            icon: "⚙",
+            core: true,
+            system: true,
+            visible: false,
+            window: false,
+            dependencies: [
+                "storage"
+            ]
+        },
+
+        // ---------------- SOFTWARE ----------------
 
         {
             id: "software-update",
             name: "Software Update",
             displayName: "HalDo Software Update Center",
             category: "software",
-            version: VERSION,
             icon: "↻",
+            route: "updates",
             singleton: true,
             dependencies: [
                 "storage",
@@ -1111,7 +1355,6 @@
             name: "Software Center",
             displayName: "HalDo Software Center",
             category: "software",
-            version: VERSION,
             icon: "▣",
             dependencies: [
                 "software-update",
@@ -1125,17 +1368,16 @@
             ]
         },
 
-        // ====================================================
-        // LOGO / VISUAL
-        // ====================================================
+        // ---------------- VISUAL ----------------
 
         {
             id: "logo-system",
             name: "Logo System",
             displayName: "HalDo Logo System",
             category: "visual",
-            version: VERSION,
+            icon: "✦",
             core: true,
+            system: true,
             visible: false,
             window: false,
             dependencies: [
@@ -1153,8 +1395,9 @@
             name: "Light System",
             displayName: "HalDo Light System",
             category: "visual",
-            version: VERSION,
+            icon: "☀",
             core: true,
+            system: true,
             visible: false,
             window: false,
             features: [
@@ -1164,22 +1407,18 @@
             ]
         },
 
-        // ====================================================
-        // SYSTEM SERVICES
-        // ====================================================
+        // ---------------- SYSTEM SERVICES ----------------
 
         {
-            id: "config-manager",
-            name: "Config Manager",
-            displayName: "HalDo Configuration Manager",
+            id: "app-registry",
+            name: "App Registry",
+            displayName: "HalDo App Registry",
             category: "system-service",
-            version: VERSION,
+            icon: "▤",
             core: true,
+            system: true,
             visible: false,
-            window: false,
-            dependencies: [
-                "storage"
-            ]
+            window: false
         },
 
         {
@@ -1187,8 +1426,9 @@
             name: "App Manager",
             displayName: "HalDo App Manager",
             category: "system-service",
-            version: VERSION,
+            icon: "◆",
             core: true,
+            system: true,
             visible: false,
             window: false,
             dependencies: [
@@ -1202,8 +1442,9 @@
             name: "App Router",
             displayName: "HalDo App Router",
             category: "system-service",
-            version: VERSION,
+            icon: "➜",
             core: true,
+            system: true,
             visible: false,
             window: false,
             dependencies: [
@@ -1216,8 +1457,9 @@
             name: "App Launcher",
             displayName: "HalDo App Launcher",
             category: "system-service",
-            version: VERSION,
+            icon: "▦",
             core: true,
+            system: true,
             visible: false,
             window: false,
             dependencies: [
@@ -1231,8 +1473,9 @@
             name: "Window Manager",
             displayName: "HalDo Window Manager",
             category: "system-service",
-            version: VERSION,
+            icon: "□",
             core: true,
+            system: true,
             visible: false,
             window: false,
             dependencies: [
@@ -1240,16 +1483,13 @@
             ]
         },
 
-        // ====================================================
-        // FUTURE EXTENSIBILITY
-        // ====================================================
+        // ---------------- FUTURE ----------------
 
         {
             id: "notification-center",
             name: "Notification Center",
             displayName: "HalDo Notifications",
             category: "system",
-            version: VERSION,
             icon: "●",
             features: [
                 "notifications",
@@ -1263,7 +1503,6 @@
             name: "Security Center",
             displayName: "HalDo Security Center",
             category: "security",
-            version: VERSION,
             icon: "◆",
             dependencies: [
                 "diagnostics",
@@ -1281,7 +1520,6 @@
             name: "Backup Center",
             displayName: "HalDo Backup Center",
             category: "storage",
-            version: VERSION,
             icon: "↥",
             dependencies: [
                 "storage",
@@ -1297,140 +1535,16 @@
     ];
 
     // ========================================================
-    // REGISTER COMPLETE CATALOG
+    // REGISTER DEFAULT CATALOG
     // ========================================================
 
     function registerDefaultApps() {
 
-        APP_DEFINITIONS.forEach(
-            function (definition) {
-
-                register(
-                    definition
-                );
-
-            }
+        registerMany(
+            APP_DEFINITIONS
         );
+
     }
-
-    // ========================================================
-    // REGISTRY API
-    // ========================================================
-
-    const api = {
-
-        name:
-            "HalDo App Registry",
-
-        version:
-            VERSION,
-
-        init:
-            function () {
-
-                if (state.initialized) {
-                    return this;
-                }
-
-                registerDefaultApps();
-
-                state.initialized = true;
-
-                emit(
-                    "ready",
-                    this
-                );
-
-                return this;
-            },
-
-        start:
-            function () {
-                return this.init();
-            },
-
-        register:
-            register,
-
-        unregister:
-            unregister,
-
-        get:
-            get,
-
-        has:
-            has,
-
-        update:
-            update,
-
-        list:
-            list,
-
-        getAll:
-            list,
-
-        getByCategory:
-            getByCategory,
-
-        getEnabled:
-            getEnabled,
-
-        getCoreApps:
-            getCoreApps,
-
-        checkDependencies:
-            checkDependencies,
-
-        setStatus:
-            setStatus,
-
-        getStatus:
-            getStatus,
-
-        on:
-            on,
-
-        off:
-            off,
-
-        emit:
-            emit,
-
-        getState:
-            function () {
-
-                return {
-
-                    initialized:
-                        state.initialized,
-
-                    version:
-                        state.version,
-
-                    count:
-                        registry.size,
-
-                    apps:
-                        list()
-
-                };
-
-            }
-    };
-
-    // ========================================================
-    // GLOBAL API
-    // ========================================================
-
-    window.HalDoAppRegistry =
-        api;
-
-    window.HalDoOS =
-        window.HalDoOS || {};
-
-    window.HalDoOS.appRegistry =
-        api;
 
     // ========================================================
     // KERNEL CONNECTION
@@ -1440,10 +1554,7 @@
 
         const kernel =
             window.HalDoKernel ||
-            (
-                window.HalDoOS &&
-                window.HalDoOS.kernel
-            );
+            HalDoOS.kernel;
 
         if (!kernel) {
             return;
@@ -1478,7 +1589,7 @@
         } catch (error) {
 
             console.warn(
-                "[HalDo App Registry] Kernel-Verbindung fehlgeschlagen:",
+                "[HalDo App Registry] Kernel connection failed:",
                 error
             );
 
@@ -1489,16 +1600,127 @@
     // INITIALIZATION
     // ========================================================
 
-    function initialize() {
+    function init() {
 
-        api.init();
+        if (state.initialized) {
+            return api;
+        }
+
+        registerDefaultApps();
+
+        state.initialized = true;
 
         connectKernel();
 
         emit(
-            "initialized",
-            api
+            "ready",
+            {
+                version: VERSION,
+                count: registry.size
+            }
         );
+
+        return api;
+    }
+
+    const api = {
+
+        name: NAME,
+        version: VERSION,
+
+        init,
+        initialize: init,
+        start: init,
+
+        register,
+        registerApp: register,
+        registerMany,
+
+        unregister,
+        unregisterApp: unregister,
+
+        get,
+        getApp: get,
+
+        has,
+        hasApp: has,
+
+        update,
+        updateApp: update,
+
+        list,
+        getAll: list,
+
+        getEnabled,
+        getVisible,
+        getCoreApps,
+
+        getByCategory,
+        search,
+
+        checkDependencies,
+
+        setStatus,
+        getStatus,
+
+        on,
+        off,
+        emit,
+
+        getState: function () {
+
+            return {
+
+                initialized:
+                    state.initialized,
+
+                version:
+                    state.version,
+
+                count:
+                    registry.size,
+
+                apps:
+                    list()
+
+            };
+
+        }
+
+    };
+
+    // ========================================================
+    // GLOBAL API
+    // ========================================================
+
+    window.HalDoAppRegistry =
+        api;
+
+    HalDoOS.appRegistry =
+        api;
+
+    // ========================================================
+    // START
+    // ========================================================
+
+    function initialize() {
+
+        try {
+            init();
+        } catch (error) {
+
+            console.error(
+                "[HalDo App Registry] Initialization failed:",
+                error
+            );
+
+            emit(
+                "error",
+                error
+            );
+
+        }
+
     }
 
     if (
@@ -1520,4 +1742,4 @@
 
     }
 
-})(window);
+})(window, document);
