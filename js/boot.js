@@ -42,7 +42,7 @@ Das Logo selbst wird NICHT durch ein Emoji ersetzt.
     const startupSteps = [
         {
             progress: 8,
-            text: "HalDo AI OS startet ..."
+            text: "HalDo AI OS 18 wird initialisiert ..."
         },
         {
             progress: 18,
