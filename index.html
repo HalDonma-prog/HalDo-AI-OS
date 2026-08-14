@@ -4668,4 +4668,2586 @@ function connectAppManagerToKernel() {
 /* =========================================================
    ENDE TEIL 5
    ========================================================= */
-   
+   /* =========================================================
+   HALDO AI OS 18
+   NEW APP MANAGER
+   PART 6 / 7
+
+   APP LIFECYCLE
+   START
+   OPEN
+   ACTIVATE
+   MINIMIZE
+   RESTORE
+   CLOSE
+   ========================================================= */
+
+/* =====================================================
+   DEPENDENCY CHECK
+   ===================================================== */
+
+function checkDependencies(app) {
+
+    if (!app) {
+        return false;
+    }
+
+    if (
+        !Array.isArray(app.dependencies) ||
+        app.dependencies.length === 0
+    ) {
+        return true;
+    }
+
+    return app.dependencies.every(
+        function (dependency) {
+
+            const dependencyId =
+                createId(dependency);
+
+            const dependencyApp =
+                getApp(dependencyId);
+
+            return !!(
+                dependencyApp &&
+                dependencyApp.enabled !== false
+            );
+
+        }
+    );
+}
+
+/* =====================================================
+   MISSING DEPENDENCIES
+   ===================================================== */
+
+function getMissingDependencies(app) {
+
+    if (!app) {
+        return [];
+    }
+
+    if (
+        !Array.isArray(app.dependencies)
+    ) {
+        return [];
+    }
+
+    return app.dependencies.filter(
+        function (dependency) {
+
+            const dependencyId =
+                createId(dependency);
+
+            const dependencyApp =
+                getApp(dependencyId);
+
+            return !(
+                dependencyApp &&
+                dependencyApp.enabled !== false
+            );
+
+        }
+    );
+}
+
+/* =====================================================
+   APP STATUS
+   ===================================================== */
+
+function setAppStatus(
+    app,
+    status
+) {
+
+    if (!app) {
+        return;
+    }
+
+    app.status =
+        status;
+
+    app.updatedAt =
+        Date.now();
+
+}
+
+/* =====================================================
+   RUNTIME CONTEXT
+   ===================================================== */
+
+function createRuntimeContext(
+    app,
+    options
+) {
+
+    return {
+
+        id:
+            app.id,
+
+        app:
+            app,
+
+        options:
+            options || {},
+
+        manager:
+            api,
+
+        os:
+            HalDoOS,
+
+        startedAt:
+            Date.now(),
+
+        services: {
+
+            kernel:
+                getKernel(),
+
+            registry:
+                window.HalDoAppRegistry ||
+                HalDoOS.appRegistry ||
+                null,
+
+            router:
+                getRouter(),
+
+            launcher:
+                getLauncher(),
+
+            windowManager:
+                getWindowManager(),
+
+            system:
+                getSystem()
+
+        }
+
+    };
+
+}
+
+/* =====================================================
+   INITIALIZE APP
+   ===================================================== */
+
+async function initializeApp(
+    app,
+    options
+) {
+
+    if (!app) {
+
+        return false;
+
+    }
+
+    if (
+        typeof app.init !==
+        "function"
+    ) {
+
+        return true;
+
+    }
+
+    try {
+
+        setAppStatus(
+            app,
+            "initializing"
+        );
+
+        const runtime =
+            createRuntimeContext(
+                app,
+                options
+            );
+
+        const result =
+            await app.init(
+                runtime
+            );
+
+        setAppStatus(
+            app,
+            "initialized"
+        );
+
+        emit(
+            "initialized",
+            {
+                app,
+                runtime,
+                result
+            }
+        );
+
+        return true;
+
+    } catch (error) {
+
+        setAppStatus(
+            app,
+            "error"
+        );
+
+        emit(
+            "error",
+            {
+                type:
+                    "APP_INIT_ERROR",
+
+                app:
+                    app,
+
+                error:
+                    error
+
+            }
+        );
+
+        console.error(
+            "[HalDo App Manager] App initialization failed:",
+            app.id,
+            error
+        );
+
+        return false;
+
+    }
+
+}
+
+/* =====================================================
+   START APP
+   ===================================================== */
+
+async function startApp(
+    id,
+    options
+) {
+
+    const app =
+        getApp(id);
+
+    if (!app) {
+
+        emit(
+            "error",
+            {
+                type:
+                    "APP_NOT_FOUND",
+
+                id:
+                    id
+
+            }
+        );
+
+        return null;
+
+    }
+
+    if (
+        app.enabled === false
+    ) {
+
+        emit(
+            "error",
+            {
+                type:
+                    "APP_DISABLED",
+
+                app:
+                    app
+
+            }
+        );
+
+        return null;
+
+    }
+
+    /*
+     * Bereits laufende Singleton-App
+     * nicht erneut erzeugen.
+     */
+
+    if (
+        app.singleton &&
+        runningApps.has(app.id)
+    ) {
+
+        const existingRuntime =
+            runningApps.get(
+                app.id
+            );
+
+        await activateApp(
+            app.id,
+            options
+        );
+
+        return existingRuntime;
+
+    }
+
+    /*
+     * Abhängigkeiten prüfen.
+     */
+
+    if (
+        !checkDependencies(app)
+    ) {
+
+        const missing =
+            getMissingDependencies(
+                app
+            );
+
+        setAppStatus(
+            app,
+            "dependency-error"
+        );
+
+        emit(
+            "error",
+            {
+                type:
+                    "MISSING_DEPENDENCY",
+
+                app:
+                    app,
+
+                missing:
+                    missing
+
+            }
+        );
+
+        return null;
+
+    }
+
+    /*
+     * App initialisieren.
+     */
+
+    const initializedSuccessfully =
+        await initializeApp(
+            app,
+            options
+        );
+
+    if (
+        !initializedSuccessfully
+    ) {
+
+        return null;
+
+    }
+
+    const runtime =
+        createRuntimeContext(
+            app,
+            options
+        );
+
+    /*
+     * Start-Lifecycle.
+     */
+
+    if (
+        typeof app.start ===
+        "function"
+    ) {
+
+        try {
+
+            setAppStatus(
+                app,
+                "starting"
+            );
+
+            await app.start(
+                runtime
+            );
+
+        } catch (error) {
+
+            setAppStatus(
+                app,
+                "error"
+            );
+
+            emit(
+                "error",
+                {
+                    type:
+                        "APP_START_ERROR",
+
+                    app:
+                        app,
+
+                    error:
+                        error
+
+                }
+            );
+
+            console.error(
+                "[HalDo App Manager] App start failed:",
+                app.id,
+                error
+            );
+
+            return null;
+
+        }
+
+    }
+
+    runningApps.set(
+        app.id,
+        runtime
+    );
+
+    minimizedApps.delete(
+        app.id
+    );
+
+    setAppStatus(
+        app,
+        "running"
+    );
+
+    emit(
+        "started",
+        {
+            app,
+            runtime
+        }
+    );
+
+    return runtime;
+
+}
+
+/* =====================================================
+   OPEN APP
+   ===================================================== */
+
+async function openApp(
+    id,
+    options
+) {
+
+    const app =
+        getApp(id);
+
+    if (!app) {
+
+        emit(
+            "error",
+            {
+                type:
+                    "APP_NOT_FOUND",
+
+                id:
+                    id
+
+            }
+        );
+
+        return null;
+
+    }
+
+    /*
+     * Wenn die App bereits läuft,
+     * wird sie nur aktiviert.
+     */
+
+    if (
+        runningApps.has(app.id)
+    ) {
+
+        if (
+            minimizedApps.has(app.id)
+        ) {
+
+            return restoreApp(
+                app.id,
+                options
+            );
+
+        }
+
+        return activateApp(
+            app.id,
+            options
+        );
+
+    }
+
+    const runtime =
+        await startApp(
+            app.id,
+            options
+        );
+
+    if (!runtime) {
+
+        return null;
+
+    }
+
+    /*
+     * Fenster-Manager verbinden.
+     */
+
+    const windowManager =
+        getWindowManager();
+
+    if (windowManager) {
+
+        try {
+
+            if (
+                typeof windowManager.createWindow ===
+                "function"
+            ) {
+
+                windowManager.createWindow(
+                    runtime.id,
+                    {
+                        ...app,
+                        ...(
+                            options ||
+                            {}
+                        )
+                    }
+                );
+
+            } else if (
+                typeof windowManager.create ===
+                "function"
+            ) {
+
+                windowManager.create(
+                    runtime.id,
+                    {
+                        ...app,
+                        ...(
+                            options ||
+                            {}
+                        )
+                    }
+                );
+
+            } else if (
+                typeof windowManager.open ===
+                "function"
+            ) {
+
+                windowManager.open(
+                    runtime
+                );
+
+            }
+
+        } catch (error) {
+
+            console.warn(
+                "[HalDo App Manager] Window Manager open failed:",
+                error
+            );
+
+        }
+
+    }
+
+    /*
+     * Optionales App-open Callback.
+     */
+
+    if (
+        typeof app.open ===
+        "function"
+    ) {
+
+        try {
+
+            await app.open(
+                runtime
+            );
+
+        } catch (error) {
+
+            emit(
+                "error",
+                {
+                    type:
+                        "APP_OPEN_ERROR",
+
+                    app:
+                        app,
+
+                    error:
+                        error
+
+                }
+            );
+
+        }
+
+    }
+
+    await activateApp(
+        app.id,
+        options
+    );
+
+    emit(
+        "opened",
+        {
+            app,
+            runtime
+        }
+    );
+
+    return runtime;
+
+}
+
+/* =====================================================
+   ACTIVATE APP
+   ===================================================== */
+
+async function activateApp(
+    id,
+    options
+) {
+
+    const app =
+        getApp(id);
+
+    if (!app) {
+
+        return false;
+
+    }
+
+    const runtime =
+        runningApps.get(
+            app.id
+        );
+
+    if (!runtime) {
+
+        return false;
+
+    }
+
+    const previousId =
+        activeAppId;
+
+    /*
+     * Vorherige App deaktivieren.
+     */
+
+    if (
+        previousId &&
+        previousId !== app.id
+    ) {
+
+        const previousApp =
+            getApp(
+                previousId
+            );
+
+        const previousRuntime =
+            runningApps.get(
+                previousId
+            );
+
+        if (
+            previousApp &&
+            previousRuntime &&
+            typeof previousApp.onDeactivate ===
+            "function"
+        ) {
+
+            try {
+
+                await previousApp.onDeactivate(
+                    previousRuntime
+                );
+
+            } catch (error) {
+
+                console.warn(
+                    "[HalDo App Manager] Deactivation failed:",
+                    error
+                );
+
+            }
+
+        }
+
+    }
+
+    activeAppId =
+        app.id;
+
+    minimizedApps.delete(
+        app.id
+    );
+
+    setAppStatus(
+        app,
+        "active"
+    );
+
+    /*
+     * App-Aktivierung.
+     */
+
+    if (
+        typeof app.onActivate ===
+        "function"
+    ) {
+
+        try {
+
+            await app.onActivate(
+                runtime,
+                options || {}
+            );
+
+        } catch (error) {
+
+            console.warn(
+                "[HalDo App Manager] Activation callback failed:",
+                error
+            );
+
+        }
+
+    }
+
+    /*
+     * Window Manager fokussieren.
+     */
+
+    const windowManager =
+        getWindowManager();
+
+    if (windowManager) {
+
+        try {
+
+            if (
+                typeof windowManager.focusWindow ===
+                "function"
+            ) {
+
+                windowManager.focusWindow(
+                    runtime.id
+                );
+
+            } else if (
+                typeof windowManager.focus ===
+                "function"
+            ) {
+
+                windowManager.focus(
+                    runtime.id
+                );
+
+            } else if (
+                typeof windowManager.activate ===
+                "function"
+            ) {
+
+                windowManager.activate(
+                    runtime.id
+                );
+
+            }
+
+        } catch (error) {
+
+            console.warn(
+                "[HalDo App Manager] Window focus failed:",
+                error
+            );
+
+        }
+
+    }
+
+    emit(
+        "activated",
+        {
+            app,
+            runtime,
+            previous:
+                previousId
+        }
+    );
+
+    return runtime;
+
+}
+
+/* =====================================================
+   MINIMIZE APP
+   ===================================================== */
+
+async function minimizeApp(
+    id
+) {
+
+    const app =
+        getApp(id);
+
+    if (!app) {
+
+        return false;
+
+    }
+
+    const runtime =
+        runningApps.get(
+            app.id
+        );
+
+    if (!runtime) {
+
+        return false;
+
+    }
+
+    if (
+        minimizedApps.has(
+            app.id
+        )
+    ) {
+
+        return true;
+
+    }
+
+    if (
+        typeof app.minimize ===
+        "function"
+    ) {
+
+        try {
+
+            await app.minimize(
+                runtime
+            );
+
+        } catch (error) {
+
+            console.warn(
+                "[HalDo App Manager] App minimize callback failed:",
+                error
+            );
+
+        }
+
+    }
+
+    const windowManager =
+        getWindowManager();
+
+    if (windowManager) {
+
+        try {
+
+            if (
+                typeof windowManager.minimizeWindow ===
+                "function"
+            ) {
+
+                windowManager.minimizeWindow(
+                    runtime.id
+                );
+
+            } else if (
+                typeof windowManager.minimize ===
+                "function"
+            ) {
+
+                windowManager.minimize(
+                    runtime.id
+                );
+
+            }
+
+        } catch (error) {
+
+            console.warn(
+                "[HalDo App Manager] Window minimize failed:",
+                error
+            );
+
+        }
+
+    }
+
+    minimizedApps.add(
+        app.id
+    );
+
+    if (
+        activeAppId ===
+        app.id
+    ) {
+
+        activeAppId =
+            null;
+
+    }
+
+    setAppStatus(
+        app,
+        "minimized"
+    );
+
+    emit(
+        "minimized",
+        {
+            app,
+            runtime
+        }
+    );
+
+    return true;
+
+}
+
+/* =====================================================
+   RESTORE APP
+   ===================================================== */
+
+async function restoreApp(
+    id,
+    options
+) {
+
+    const app =
+        getApp(id);
+
+    if (!app) {
+
+        return false;
+
+    }
+
+    const runtime =
+        runningApps.get(
+            app.id
+        );
+
+    if (!runtime) {
+
+        return openApp(
+            app.id,
+            options
+        );
+
+    }
+
+    if (
+        typeof app.restore ===
+        "function"
+    ) {
+
+        try {
+
+            await app.restore(
+                runtime,
+                options || {}
+            );
+
+        } catch (error) {
+
+            console.warn(
+                "[HalDo App Manager] App restore callback failed:",
+                error
+            );
+
+        }
+
+    }
+
+    const windowManager =
+        getWindowManager();
+
+    if (windowManager) {
+
+        try {
+
+            if (
+                typeof windowManager.restoreWindow ===
+                "function"
+            ) {
+
+                windowManager.restoreWindow(
+                    runtime.id
+                );
+
+            } else if (
+                typeof windowManager.restore ===
+                "function"
+            ) {
+
+                windowManager.restore(
+                    runtime.id
+                );
+
+            }
+
+        } catch (error) {
+
+            console.warn(
+                "[HalDo App Manager] Window restore failed:",
+                error
+            );
+
+        }
+
+    }
+
+    minimizedApps.delete(
+        app.id
+    );
+
+    setAppStatus(
+        app,
+        "running"
+    );
+
+    await activateApp(
+        app.id,
+        options
+    );
+
+    emit(
+        "restored",
+        {
+            app,
+            runtime
+        }
+    );
+
+    return runtime;
+
+}
+
+/* =====================================================
+   CLOSE APP
+   ===================================================== */
+
+async function closeApp(
+    id,
+    options
+) {
+
+    const app =
+        getApp(id);
+
+    if (!app) {
+
+        return false;
+
+    }
+
+    const runtime =
+        runningApps.get(
+            app.id
+        );
+
+    if (!runtime) {
+
+        return false;
+
+    }
+
+    /*
+     * App Close Callback.
+     */
+
+    if (
+        typeof app.close ===
+        "function"
+    ) {
+
+        try {
+
+            await app.close(
+                runtime,
+                options || {}
+            );
+
+        } catch (error) {
+
+            console.warn(
+                "[HalDo App Manager] App close callback failed:",
+                error
+            );
+
+        }
+
+    }
+
+    /*
+     * Alter Stop-Lifecycle.
+     */
+
+    if (
+        typeof app.stop ===
+        "function"
+    ) {
+
+        try {
+
+            setAppStatus(
+                app,
+                "stopping"
+            );
+
+            await app.stop(
+                runtime
+            );
+
+        } catch (error) {
+
+            console.warn(
+                "[HalDo App Manager] App stop failed:",
+                error
+            );
+
+        }
+
+    }
+
+    /*
+     * Window Manager schließen.
+     */
+
+    const windowManager =
+        getWindowManager();
+
+    if (windowManager) {
+
+        try {
+
+            if (
+                typeof windowManager.closeWindow ===
+                "function"
+            ) {
+
+                windowManager.closeWindow(
+                    runtime.id
+                );
+
+            } else if (
+                typeof windowManager.close ===
+                "function"
+            ) {
+
+                windowManager.close(
+                    runtime.id
+                );
+
+            }
+
+        } catch (error) {
+
+            console.warn(
+                "[HalDo App Manager] Window close failed:",
+                error
+            );
+
+        }
+
+    }
+
+    /*
+     * Runtime entfernen.
+     */
+
+    runningApps.delete(
+        app.id
+    );
+
+    minimizedApps.delete(
+        app.id
+    );
+
+    if (
+        activeAppId ===
+        app.id
+    ) {
+
+        activeAppId =
+            null;
+
+    }
+
+    setAppStatus(
+        app,
+        "registered"
+    );
+
+    emit(
+        "closed",
+        {
+            app,
+            runtime
+        }
+    );
+
+    return true;
+
+}
+
+/* =====================================================
+   DESTROY APP
+   ===================================================== */
+
+async function destroyApp(
+    id
+) {
+
+    const app =
+        getApp(id);
+
+    if (!app) {
+
+        return false;
+
+    }
+
+    const runtime =
+        runningApps.get(
+            app.id
+        );
+
+    if (runtime) {
+
+        await closeApp(
+            app.id
+        );
+
+    }
+
+    if (
+        typeof app.destroy ===
+        "function"
+    ) {
+
+        try {
+
+            await app.destroy(
+                runtime || {
+                    app,
+                    manager:
+                        api
+                }
+            );
+
+        } catch (error) {
+
+            console.warn(
+                "[HalDo App Manager] App destroy failed:",
+                error
+            );
+
+        }
+
+    }
+
+    apps.delete(
+        app.id
+    );
+
+    runningApps.delete(
+        app.id
+    );
+
+    minimizedApps.delete(
+        app.id
+    );
+
+    if (
+        activeAppId ===
+        app.id
+    ) {
+
+        activeAppId =
+            null;
+
+    }
+
+    emit(
+        "destroyed",
+        {
+            app
+        }
+    );
+
+    return true;
+
+}
+
+/* =====================================================
+   STOP ALL APPS
+   ===================================================== */
+
+async function stopAllApps() {
+
+    const ids =
+        Array.from(
+            runningApps.keys()
+        );
+
+    for (
+        const id of ids
+    ) {
+
+        await closeApp(
+            id
+        );
+
+    }
+
+    activeAppId =
+        null;
+
+    return true;
+
+}
+
+/* =====================================================
+   PART 6 ENDE
+   ===================================================== */
+   /* =========================================================
+   HALDO AI OS 18
+   NEW APP MANAGER
+   PART 7 / 7
+
+   PUBLIC API
+   INITIALIZATION
+   KERNEL CONNECTION
+   SYSTEM CONNECTION
+   DIAGNOSTICS
+   GLOBAL EXPORT
+   FINAL STARTUP
+   ========================================================= */
+
+
+/* =====================================================
+   ACTIVE APP
+   ===================================================== */
+
+function getActiveApp() {
+
+    if (!activeAppId) {
+
+        return null;
+
+    }
+
+    return (
+        getApp(activeAppId) ||
+        null
+    );
+
+}
+
+
+/* =====================================================
+   ACTIVE APP ID
+   ===================================================== */
+
+function getActiveAppId() {
+
+    return activeAppId;
+
+}
+
+
+/* =====================================================
+   SET ACTIVE APP
+   ===================================================== */
+
+function setActiveApp(
+    id
+) {
+
+    const app =
+        getApp(id);
+
+    if (!app) {
+
+        return false;
+
+    }
+
+    if (
+        !runningApps.has(
+            app.id
+        )
+    ) {
+
+        return false;
+
+    }
+
+    activeAppId =
+        app.id;
+
+    emit(
+        "active-changed",
+        {
+            app,
+            appId:
+                app.id
+        }
+    );
+
+    return true;
+
+}
+
+
+/* =====================================================
+   UNREGISTER APP
+   ===================================================== */
+
+function unregisterApp(
+    id
+) {
+
+    const app =
+        getApp(id);
+
+    if (!app) {
+
+        return false;
+
+    }
+
+    /*
+     * Laufende App zuerst schließen.
+     */
+
+    if (
+        runningApps.has(
+            app.id
+        )
+    ) {
+
+        /*
+         * Async Lifecycle kann hier nicht
+         * abgewartet werden.
+         *
+         * closeApp übernimmt deshalb
+         * den kontrollierten Shutdown.
+         */
+
+        closeApp(
+            app.id
+        );
+
+    }
+
+    apps.delete(
+        app.id
+    );
+
+    runningApps.delete(
+        app.id
+    );
+
+    minimizedApps.delete(
+        app.id
+    );
+
+    if (
+        activeAppId ===
+        app.id
+    ) {
+
+        activeAppId =
+            null;
+
+    }
+
+    emit(
+        "unregistered",
+        {
+            app
+        }
+    );
+
+    return true;
+
+}
+
+
+/* =====================================================
+   ENABLE APP
+   ===================================================== */
+
+function enableApp(
+    id
+) {
+
+    const app =
+        getApp(id);
+
+    if (!app) {
+
+        return false;
+
+    }
+
+    app.enabled =
+        true;
+
+    setAppStatus(
+        app,
+        "registered"
+    );
+
+    emit(
+        "enabled",
+        {
+            app
+        }
+    );
+
+    return true;
+
+}
+
+
+/* =====================================================
+   DISABLE APP
+   ===================================================== */
+
+async function disableApp(
+    id
+) {
+
+    const app =
+        getApp(id);
+
+    if (!app) {
+
+        return false;
+
+    }
+
+    /*
+     * Falls die App läuft,
+     * zuerst kontrolliert schließen.
+     */
+
+    if (
+        runningApps.has(
+            app.id
+        )
+    ) {
+
+        await closeApp(
+            app.id
+        );
+
+    }
+
+    app.enabled =
+        false;
+
+    setAppStatus(
+        app,
+        "disabled"
+    );
+
+    emit(
+        "disabled",
+        {
+            app
+        }
+    );
+
+    return true;
+
+}
+
+
+/* =====================================================
+   APP COUNT
+   ===================================================== */
+
+function getAppCount() {
+
+    return apps.size;
+
+}
+
+
+/* =====================================================
+   RUNNING APP COUNT
+   ===================================================== */
+
+function getRunningAppCount() {
+
+    return runningApps.size;
+
+}
+
+
+/* =====================================================
+   MINIMIZED APP COUNT
+   ===================================================== */
+
+function getMinimizedAppCount() {
+
+    return minimizedApps.size;
+
+}
+
+
+/* =====================================================
+   REGISTRY SYNCHRONIZATION
+   ===================================================== */
+
+function syncAllRegistries() {
+
+    let synced =
+        0;
+
+    apps.forEach(
+        function (app) {
+
+            const registry =
+                window.HalDoAppRegistry ||
+                HalDoOS.appRegistry ||
+                null;
+
+            if (!registry) {
+
+                return;
+
+            }
+
+            try {
+
+                if (
+                    typeof registry.has ===
+                    "function" &&
+                    registry.has(
+                        app.id
+                    )
+                ) {
+
+                    if (
+                        typeof registry.update ===
+                        "function"
+                    ) {
+
+                        registry.update(
+                            app.id,
+                            app
+                        );
+
+                    }
+
+                    synced += 1;
+
+                    return;
+
+                }
+
+                if (
+                    typeof registry.register ===
+                    "function"
+                ) {
+
+                    registry.register(
+                        app
+                    );
+
+                    synced += 1;
+
+                }
+
+            } catch (error) {
+
+                console.warn(
+                    "[HalDo App Manager] Registry sync failed:",
+                    app.id,
+                    error
+                );
+
+            }
+
+        }
+    );
+
+    return synced;
+
+}
+
+
+/* =====================================================
+   ROUTER SYNCHRONIZATION
+   ===================================================== */
+
+function syncAllRoutes() {
+
+    const router =
+        getRouter();
+
+    if (!router) {
+
+        return 0;
+
+    }
+
+    let synced =
+        0;
+
+    apps.forEach(
+        function (app) {
+
+            if (!app.route) {
+
+                return;
+
+            }
+
+            try {
+
+                if (
+                    typeof router.has ===
+                    "function" &&
+                    router.has(
+                        app.route
+                    )
+                ) {
+
+                    synced += 1;
+
+                    return;
+
+                }
+
+                if (
+                    typeof router.register ===
+                    "function"
+                ) {
+
+                    router.register(
+                        app.route,
+                        {
+                            app:
+                                app.id,
+
+                            aliases:
+                                [
+                                    app.id,
+                                    app.name,
+                                    app.title
+                                ]
+                                .filter(
+                                    Boolean
+                                )
+                        }
+                    );
+
+                    synced += 1;
+
+                }
+
+            } catch (error) {
+
+                console.warn(
+                    "[HalDo App Manager] Router sync failed:",
+                    app.id,
+                    error
+                );
+
+            }
+
+        }
+    );
+
+    return synced;
+
+}
+
+
+/* =====================================================
+   CONNECTION STATUS
+   ===================================================== */
+
+function getConnectionStatus() {
+
+    return {
+
+        kernel:
+            !!getKernel(),
+
+        registry:
+            !!(
+                window.HalDoAppRegistry ||
+                HalDoOS.appRegistry
+            ),
+
+        router:
+            !!getRouter(),
+
+        launcher:
+            !!getLauncher(),
+
+        windowManager:
+            !!getWindowManager(),
+
+        system:
+            !!getSystem()
+
+    };
+
+}
+
+
+/* =====================================================
+   DIAGNOSTICS
+   ===================================================== */
+
+function diagnostics() {
+
+    const connection =
+        getConnectionStatus();
+
+    const appList =
+        getApps();
+
+    const runningList =
+        getRunningApps();
+
+    return {
+
+        manager:
+            MANAGER_NAME,
+
+        version:
+            VERSION,
+
+        initialized:
+            initialized,
+
+        appCount:
+            appList.length,
+
+        enabledAppCount:
+            appList.filter(
+                function (app) {
+
+                    return (
+                        app.enabled !== false
+                    );
+
+                }
+            ).length,
+
+        runningAppCount:
+            runningList.length,
+
+        minimizedAppCount:
+            minimizedApps.size,
+
+        activeAppId:
+            activeAppId,
+
+        connections:
+            connection,
+
+        apps:
+            appList.map(
+                function (app) {
+
+                    return {
+
+                        id:
+                            app.id,
+
+                        name:
+                            app.name,
+
+                        status:
+                            app.status,
+
+                        enabled:
+                            app.enabled,
+
+                        running:
+                            runningApps.has(
+                                app.id
+                            ),
+
+                        minimized:
+                            minimizedApps.has(
+                                app.id
+                            )
+
+                    };
+
+                }
+            ),
+
+        timestamp:
+            new Date().toISOString()
+
+    };
+
+}
+
+
+/* =====================================================
+   HEALTH CHECK
+   ===================================================== */
+
+function healthCheck() {
+
+    const connection =
+        getConnectionStatus();
+
+    const problems =
+        [];
+
+    if (!getKernel()) {
+
+        problems.push(
+            "Kernel nicht verbunden."
+
+        );
+
+    }
+
+    if (
+        !(
+            window.HalDoAppRegistry ||
+            HalDoOS.appRegistry
+        )
+    ) {
+
+        problems.push(
+            "App Registry nicht verbunden."
+        );
+
+    }
+
+    if (!getRouter()) {
+
+        problems.push(
+            "App Router nicht verbunden."
+        );
+
+    }
+
+    return {
+
+        healthy:
+            problems.length ===
+            0,
+
+        problems,
+
+        connections:
+            connection,
+
+        initialized:
+            initialized,
+
+        timestamp:
+            new Date().toISOString()
+
+    };
+
+}
+
+
+/* =====================================================
+   PUBLIC API
+   ===================================================== */
+
+const api = {
+
+    /*
+     * Meta
+     */
+
+    name:
+        MANAGER_NAME,
+
+    version:
+        VERSION,
+
+    module:
+        "app-manager",
+
+
+    /*
+     * Events
+     */
+
+    on,
+
+    off,
+
+    emit,
+
+
+    /*
+     * Registration
+     */
+
+    register:
+        registerApp,
+
+    registerApp,
+
+    registerApps,
+
+    unregister:
+        unregisterApp,
+
+    unregisterApp,
+
+
+    /*
+     * App Access
+     */
+
+    get:
+        getApp,
+
+    getApp,
+
+    getApps,
+
+    getEnabledApps,
+
+    has:
+        hasApp,
+
+    hasApp,
+
+
+    /*
+     * Runtime
+     */
+
+    getRunningApps,
+
+    isRunning,
+
+    isMinimized,
+
+    getActiveApp,
+
+    getActiveAppId,
+
+    setActiveApp,
+
+
+    /*
+     * Lifecycle
+     */
+
+    initApp:
+        initializeApp,
+
+    initializeApp,
+
+    start:
+        startApp,
+
+    startApp,
+
+    open:
+        openApp,
+
+    openApp,
+
+    activate:
+        activateApp,
+
+    activateApp,
+
+    minimize:
+        minimizeApp,
+
+    minimizeApp,
+
+    restore:
+        restoreApp,
+
+    restoreApp,
+
+    close:
+        closeApp,
+
+    closeApp,
+
+    destroy:
+        destroyApp,
+
+    destroyApp,
+
+    stopAll:
+        stopAllApps,
+
+    stopAllApps,
+
+
+    /*
+     * Enable / Disable
+     */
+
+    enable:
+        enableApp,
+
+    enableApp,
+
+    disable:
+        disableApp,
+
+    disableApp,
+
+
+    /*
+     * Dependencies
+     */
+
+    checkDependencies,
+
+    getMissingDependencies,
+
+
+    /*
+     * Synchronization
+     */
+
+    syncAllRegistries,
+
+    syncAllRoutes,
+
+
+    /*
+     * Statistics
+     */
+
+    getAppCount,
+
+    getRunningAppCount,
+
+    getMinimizedAppCount,
+
+
+    /*
+     * Connections
+     */
+
+    getConnectionStatus,
+
+
+    /*
+     * Diagnostics
+     */
+
+    diagnostics,
+
+    healthCheck
+
+};
+
+
+/* =====================================================
+   GLOBAL API EXPORT
+   ===================================================== */
+
+window.HalDoAppManager =
+    api;
+
+HalDoOS.appManager =
+    api;
+
+
+/* =====================================================
+   KERNEL REGISTRATION
+   ===================================================== */
+
+function connectToKernel() {
+
+    const kernel =
+        getKernel();
+
+    if (!kernel) {
+
+        return false;
+
+    }
+
+    try {
+
+        /*
+         * Moderne Kernel API
+         */
+
+        if (
+            typeof kernel.registerModule ===
+            "function"
+        ) {
+
+            kernel.registerModule(
+                "app-manager",
+                api
+            );
+
+        }
+
+        /*
+         * Ready Status
+         */
+
+        if (
+            typeof kernel.setModuleReady ===
+            "function"
+        ) {
+
+            kernel.setModuleReady(
+                "app-manager",
+                true
+            );
+
+        }
+
+        emit(
+            "kernel-connected",
+            {
+                kernel
+            }
+        );
+
+        return true;
+
+    } catch (error) {
+
+        console.warn(
+            "[HalDo App Manager] Kernel connection failed:",
+            error
+        );
+
+        return false;
+
+    }
+
+}
+
+
+/* =====================================================
+   SYSTEM CONNECTION
+   ===================================================== */
+
+function connectToSystem() {
+
+    const system =
+        getSystem();
+
+    if (!system) {
+
+        return false;
+
+    }
+
+    try {
+
+        /*
+         * Unterstützt verschiedene
+         * vorhandene System-APIs.
+         */
+
+        if (
+            typeof system.registerService ===
+            "function"
+        ) {
+
+            system.registerService(
+                "app-manager",
+                api
+            );
+
+        }
+
+        emit(
+            "system-connected",
+            {
+                system
+            }
+        );
+
+        return true;
+
+    } catch (error) {
+
+        console.warn(
+            "[HalDo App Manager] System connection failed:",
+            error
+        );
+
+        return false;
+
+    }
+
+}
+
+
+/* =====================================================
+   INITIALIZATION
+   ===================================================== */
+
+async function initializeManager() {
+
+    if (initialized) {
+
+        return api;
+
+    }
+
+    /*
+     * Grundstatus.
+     */
+
+    initialized =
+        true;
+
+    emit(
+        "initializing",
+        {
+            version:
+                VERSION
+        }
+    );
+
+
+    /*
+     * Kernel verbinden.
+     */
+
+    connectToKernel();
+
+
+    /*
+     * Registry synchronisieren.
+     */
+
+    syncAllRegistries();
+
+
+    /*
+     * Router synchronisieren.
+     */
+
+    syncAllRoutes();
+
+
+    /*
+     * System verbinden.
+     */
+
+    connectToSystem();
+
+
+    /*
+     * Finaler Status.
+     */
+
+    emit(
+        "ready",
+        {
+            version:
+                VERSION,
+
+            diagnostics:
+                diagnostics()
+
+        }
+    );
+
+
+    return api;
+
+}
+
+
+/* =====================================================
+   DOM READY
+   ===================================================== */
+
+function handleDOMReady() {
+
+    initializeManager()
+        .catch(
+            function (error) {
+
+                console.error(
+                    "[HalDo App Manager] Initialization error:",
+                    error
+                );
+
+                emit(
+                    "error",
+                    {
+                        type:
+                            "MANAGER_INIT_ERROR",
+
+                        error:
+                            error
+
+                    }
+                );
+
+            }
+        );
+
+}
+
+
+/* =====================================================
+   KERNEL READY LISTENER
+   ===================================================== */
+
+function handleKernelReady() {
+
+    connectToKernel();
+
+    connectToSystem();
+
+    syncAllRegistries();
+
+    syncAllRoutes();
+
+}
+
+
+/* =====================================================
+   HALDO EVENT CONNECTION
+   ===================================================== */
+
+function connectGlobalEvents() {
+
+    const kernel =
+        getKernel();
+
+    if (
+        !kernel
+    ) {
+
+        return;
+
+    }
+
+    /*
+     * Kernel Event-Bus.
+     */
+
+    if (
+        typeof kernel.on ===
+        "function"
+    ) {
+
+        try {
+
+            kernel.on(
+                "kernel:ready",
+                handleKernelReady
+            );
+
+        } catch (_) {}
+
+    }
+
+}
+
+
+/* =====================================================
+   STARTUP
+   ===================================================== */
+
+if (
+    document.readyState ===
+    "loading"
+) {
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        handleDOMReady,
+        {
+            once:
+                true
+        }
+    );
+
+} else {
+
+    handleDOMReady();
+
+}
+
+
+/* =====================================================
+   GLOBAL EVENT CONNECTION
+   ===================================================== */
+
+connectGlobalEvents();
+
+
+/* =====================================================
+   FINAL GLOBAL EXPOSURE
+   ===================================================== */
+
+window.HalDoOS =
+    window.HalDoOS ||
+    {};
+
+window.HalDoOS.appManager =
+    api;
+
+
+/* =========================================================
+   HALDO AI OS 18
+   NEW APP MANAGER
+   VERSION 18.0.0
+   PROFESSIONAL ULTIMATE FOUNDATION
+
+   TEIL 7/7 — ENDE
+
+   Dieser Abschluss ist der EINZIGE Abschluss
+   der neuen-app-manager.js.
+   ========================================================= */
+
+})(window, document);
