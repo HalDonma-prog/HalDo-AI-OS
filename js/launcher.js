@@ -5,7 +5,7 @@
    Datei:
    js/launcher.js
 
-   ZENTRALER LAUNCHER
+   ZENTRALER HALDO LAUNCHER
 
    Architektur:
 
@@ -21,38 +21,21 @@
            ↓
        launcher.js
            ↓
-       echte App-Module
-
-   AUFGABEN:
-   - zentrale Launcher-Steuerung
-   - Apps aus der Registry anzeigen
-   - App Manager verwenden
-   - App Router verwenden
-   - App-Suche
-   - Kategorien
-   - Favoriten
-   - App-Start
-   - Home-Navigation
-   - Launcher-Events
-   - Keyboard-Unterstützung
-   - Touch-Unterstützung
-   - Deep-Link-Unterstützung
-   - dynamische Aktualisierung
-   - Diagnose
-   - vorbereitet für zukünftige Erweiterungen
+       app-launcher.js
+           ↓
+       echte Apps
 
    WICHTIG:
-   - keine eigene App-Liste
+   - keine eigene App-Datenbank
    - Registry bleibt Quelle der App-Definitionen
-   - Manager bleibt für App-Zustände zuständig
-   - Router bleibt für Navigation zuständig
+   - Manager verwaltet App-Zustände
+   - Router verwaltet Navigation
+   - Launcher verbindet alles miteinander
    ============================================================ */
 
 "use strict";
 
-
 (function (window, document) {
-
 
     /* ========================================================
        01 — KONFIGURATION
@@ -60,262 +43,152 @@
 
     const CONFIG = {
 
-        name:
-            "HalDo AI OS Launcher",
+        name: "HalDo AI OS Launcher",
 
-        version:
-            "18.0.0",
+        version: "18.0.0",
 
-        searchDelay:
-            120,
+        container: "#app-launcher",
 
-        maxVisibleApps:
-            500,
+        searchDelay: 120,
 
-        keyboardEnabled:
-            true,
+        maxVisibleApps: 500,
 
-        touchEnabled:
-            true,
+        autoCreateContainer: true,
 
-        autoRender:
-            true
+        keyboardEnabled: true
 
     };
 
 
     /* ========================================================
-       02 — LAUNCHER STATUS
+       02 — STATUS
        ======================================================== */
 
     const state = {
 
-        initialized:
-            false,
+        initialized: false,
 
-        ready:
-            false,
+        ready: false,
 
-        visible:
-            false,
+        visible: false,
 
-        managerReady:
-            false,
+        search: "",
 
-        routerReady:
-            false,
+        category: "all",
 
-        registryReady:
-            false,
+        favoritesOnly: false,
 
-        currentView:
-            "all",
+        selectedApp: null,
 
-        currentCategory:
-            null,
+        launchCount: 0,
 
-        searchQuery:
-            "",
+        renderCount: 0,
 
-        selectedApp:
-            null,
+        lastError: null,
 
-        renderedCount:
-            0,
+        lastAction: null,
 
-        launchCount:
-            0,
+        managerReady: false,
 
-        lastError:
-            null,
+        registryReady: false,
 
-        lastAction:
-            null,
-
-        startTime:
-            null
+        routerReady: false
 
     };
 
 
     /* ========================================================
-       03 — DOM REFERENZEN
-       ======================================================== */
-
-    const dom = {
-
-        root:
-            null,
-
-        appContainer:
-            null,
-
-        searchInput:
-            null,
-
-        categoryContainer:
-            null,
-
-        favoriteContainer:
-            null,
-
-        status:
-            null
-
-    };
-
-
-    /* ========================================================
-       04 — EVENT SYSTEM
+       03 — EVENTS
        ======================================================== */
 
     const listeners = {};
 
 
-    function on(
-        eventName,
-        callback
-    ) {
+    function on(eventName, callback) {
 
-        if (
-            typeof callback !==
-            "function"
-        ) {
-
+        if (typeof callback !== "function") {
             return false;
-
         }
 
-
-        if (
-            !listeners[eventName]
-        ) {
-
-            listeners[eventName] =
-                [];
-
+        if (!listeners[eventName]) {
+            listeners[eventName] = [];
         }
 
-
-        listeners[eventName].push(
-            callback
-        );
-
+        listeners[eventName].push(callback);
 
         return true;
-
     }
 
 
-    function off(
-        eventName,
-        callback
-    ) {
+    function off(eventName, callback) {
 
-        if (
-            !listeners[eventName]
-        ) {
-
+        if (!listeners[eventName]) {
             return false;
-
         }
-
 
         listeners[eventName] =
             listeners[eventName].filter(
-                item =>
-                    item !== callback
+                item => item !== callback
             );
 
-
         return true;
-
     }
 
 
-    function emit(
-        eventName,
-        data = null
-    ) {
+    function emit(eventName, data = null) {
 
         const callbacks =
             listeners[eventName];
 
-
-        if (
-            !callbacks
-        ) {
-
+        if (!callbacks) {
             return;
-
         }
-
 
         callbacks
             .slice()
-            .forEach(
-                callback => {
+            .forEach(callback => {
 
-                    try {
+                try {
 
-                        callback(
-                            data
-                        );
+                    callback(data);
 
-                    }
-                    catch (
+                } catch (error) {
+
+                    console.error(
+                        "[HalDo Launcher] Event-Fehler:",
                         error
-                    ) {
-
-                        console.error(
-                            "[HalDo Launcher] Event-Fehler:",
-                            error
-                        );
-
-                    }
+                    );
 
                 }
-            );
 
+            });
     }
 
 
     /* ========================================================
-       05 — LOGGING
+       04 — LOG
        ======================================================== */
 
-    function log(
-        message,
-        type = "info"
-    ) {
+    function log(message, type = "info") {
 
         const prefix =
             "[HalDo Launcher]";
 
-
-        if (
-            type ===
-            "error"
-        ) {
+        if (type === "error") {
 
             console.error(
                 prefix,
                 message
             );
 
-        }
-        else if (
-            type ===
-            "warning"
-        ) {
+        } else if (type === "warning") {
 
             console.warn(
                 prefix,
                 message
             );
 
-        }
-        else {
+        } else {
 
             console.log(
                 prefix,
@@ -323,15 +196,14 @@
             );
 
         }
-
     }
 
 
     /* ========================================================
-       06 — APP MANAGER
+       05 — APP MANAGER
        ======================================================== */
 
-    function getAppManager() {
+    function getManager() {
 
         return (
             window.HalDoAppManager ||
@@ -341,33 +213,14 @@
             ) ||
             null
         );
-
     }
 
 
     /* ========================================================
-       07 — APP ROUTER
+       06 — APP REGISTRY
        ======================================================== */
 
-    function getAppRouter() {
-
-        return (
-            window.HalDoAppRouter ||
-            (
-                window.HalDoOS &&
-                window.HalDoOS.appRouter
-            ) ||
-            null
-        );
-
-    }
-
-
-    /* ========================================================
-       08 — APP REGISTRY
-       ======================================================== */
-
-    function getAppRegistry() {
+    function getRegistry() {
 
         return (
             window.HalDoAppRegistry ||
@@ -377,269 +230,130 @@
             ) ||
             null
         );
-
     }
 
 
     /* ========================================================
-       09 — MANAGER BEREIT?
+       07 — APP ROUTER
        ======================================================== */
 
-    function isManagerReady() {
-
-        const manager =
-            getAppManager();
-
-
-        if (
-            !manager
-        ) {
-
-            return false;
-
-        }
-
+    function getRouter() {
 
         return (
-            typeof manager.getAllApps ===
-                "function" &&
-
-            typeof manager.getApp ===
-                "function" &&
-
-            typeof manager.openApp ===
-                "function"
+            window.HalDoAppRouter ||
+            (
+                window.HalDoOS &&
+                window.HalDoOS.appRouter
+            ) ||
+            null
         );
-
     }
 
 
     /* ========================================================
-       10 — ROUTER BEREIT?
+       08 — APP-ID NORMALISIERUNG
        ======================================================== */
 
-    function isRouterReady() {
+    function normalizeAppId(appId) {
 
-        const router =
-            getAppRouter();
-
-
-        if (
-            !router
-        ) {
-
-            return false;
-
-        }
-
-
-        return (
-            typeof router.navigate ===
-                "function" ||
-
-            typeof router.goToApp ===
-                "function" ||
-
-            typeof router.openApp ===
-                "function"
-        );
-
+        return String(appId || "")
+            .trim()
+            .toLowerCase()
+            .replace(/\s+/g, "-");
     }
 
 
     /* ========================================================
-       11 — REGISTRY BEREIT?
-       ======================================================== */
-
-    function isRegistryReady() {
-
-        const registry =
-            getAppRegistry();
-
-
-        if (
-            !registry
-        ) {
-
-            return false;
-
-        }
-
-
-        return Boolean(
-
-            typeof registry.getAllApps ===
-                "function"
-
-            ||
-
-            typeof registry.getAll ===
-                "function"
-
-            ||
-
-            Array.isArray(
-                registry.definitions
-            )
-
-        );
-
-    }
-
-
-    /* ========================================================
-       12 — APP-ID NORMALISIEREN
-       ======================================================== */
-
-    function normalizeAppId(
-        appId
-    ) {
-
-        return String(
-            appId ||
-            ""
-        )
-        .trim()
-        .toLowerCase()
-        .replace(
-            /\s+/g,
-            "-"
-        );
-
-    }
-
-
-    /* ========================================================
-       13 — ALLE APPS HOLEN
+       09 — ALLE APPS
        ======================================================== */
 
     function getAllApps() {
 
         const manager =
-            getAppManager();
-
+            getManager();
 
         if (
             manager &&
-            typeof manager.getAllApps ===
-            "function"
+            typeof manager.getAllApps === "function"
         ) {
 
             const apps =
                 manager.getAllApps();
 
-
-            if (
-                Array.isArray(
-                    apps
-                )
-            ) {
-
+            if (Array.isArray(apps)) {
                 return apps;
-
             }
-
         }
 
 
         const registry =
-            getAppRegistry();
+            getRegistry();
+
+        if (!registry) {
+            return [];
+        }
 
 
         if (
-            registry
+            typeof registry.getAllApps ===
+            "function"
         ) {
 
-            if (
-                typeof registry.getAllApps ===
-                "function"
-            ) {
+            const apps =
+                registry.getAllApps();
 
-                const apps =
-                    registry.getAllApps();
-
-
-                if (
-                    Array.isArray(
-                        apps
-                    )
-                ) {
-
-                    return apps;
-
-                }
-
+            if (Array.isArray(apps)) {
+                return apps;
             }
+        }
 
 
-            if (
-                typeof registry.getAll ===
-                "function"
-            ) {
+        if (
+            typeof registry.getAll ===
+            "function"
+        ) {
 
-                const apps =
-                    registry.getAll();
+            const apps =
+                registry.getAll();
 
-
-                if (
-                    Array.isArray(
-                        apps
-                    )
-                ) {
-
-                    return apps;
-
-                }
-
+            if (Array.isArray(apps)) {
+                return apps;
             }
+        }
 
 
-            if (
-                Array.isArray(
-                    registry.definitions
-                )
-            ) {
+        if (
+            Array.isArray(
+                registry.definitions
+            )
+        ) {
 
-                return [
-                    ...registry.definitions
-                ];
-
-            }
-
+            return [
+                ...registry.definitions
+            ];
         }
 
 
         return [];
-
     }
 
 
     /* ========================================================
-       14 — APP HOLEN
+       10 — EINZELNE APP
        ======================================================== */
 
-    function getApp(
-        appId
-    ) {
+    function getApp(appId) {
 
         const normalized =
-            normalizeAppId(
-                appId
-            );
+            normalizeAppId(appId);
 
-
-        if (
-            !normalized
-        ) {
-
+        if (!normalized) {
             return null;
-
         }
 
 
         const manager =
-            getAppManager();
-
+            getManager();
 
         if (
             manager &&
@@ -652,41 +366,61 @@
                     normalized
                 );
 
-
-            if (
-                app
-            ) {
-
+            if (app) {
                 return app;
-
             }
-
         }
 
 
-        return getAllApps()
-            .find(
-                app =>
-                    normalizeAppId(
-                        app &&
-                        app.id
-                    ) ===
-                    normalized
-            ) ||
-            null;
-
+        return getAllApps().find(
+            app =>
+                normalizeAppId(
+                    app && app.id
+                ) === normalized
+        ) || null;
     }
 
 
     /* ========================================================
-       15 — FAVORITEN HOLEN
+       11 — AKTIVE APPS
+       ======================================================== */
+
+    function getEnabledApps() {
+
+        const manager =
+            getManager();
+
+        if (
+            manager &&
+            typeof manager.getEnabledApps ===
+            "function"
+        ) {
+
+            const apps =
+                manager.getEnabledApps();
+
+            if (Array.isArray(apps)) {
+                return apps;
+            }
+        }
+
+
+        return getAllApps().filter(
+            app =>
+                app &&
+                app.enabled !== false
+        );
+    }
+
+
+    /* ========================================================
+       12 — FAVORITEN
        ======================================================== */
 
     function getFavorites() {
 
         const manager =
-            getAppManager();
-
+            getManager();
 
         if (
             manager &&
@@ -697,40 +431,28 @@
             const favorites =
                 manager.getFavorites();
 
-
-            if (
-                Array.isArray(
-                    favorites
-                )
-            ) {
-
+            if (Array.isArray(favorites)) {
                 return favorites;
-
             }
-
         }
 
 
-        return getAllApps()
-            .filter(
-                app =>
-                    app &&
-                    app.favorite ===
-                    true
-            );
-
+        return getAllApps().filter(
+            app =>
+                app &&
+                app.favorite === true
+        );
     }
 
 
     /* ========================================================
-       16 — KATEGORIEN HOLEN
+       13 — KATEGORIEN
        ======================================================== */
 
     function getCategories() {
 
         const manager =
-            getAppManager();
-
+            getManager();
 
         if (
             manager &&
@@ -741,176 +463,103 @@
             const categories =
                 manager.getCategories();
 
-
-            if (
-                Array.isArray(
-                    categories
-                )
-            ) {
-
+            if (Array.isArray(categories)) {
                 return categories;
-
             }
-
         }
 
 
         const categories =
             new Set();
 
+        getAllApps().forEach(
+            app => {
 
-        getAllApps()
-            .forEach(
-                app => {
+                if (
+                    app &&
+                    app.category
+                ) {
 
-                    if (
-                        app &&
-                        app.category
-                    ) {
-
-                        categories.add(
-                            String(
-                                app.category
-                            )
-                        );
-
-                    }
-
+                    categories.add(
+                        String(
+                            app.category
+                        )
+                    );
                 }
-            );
+            }
+        );
 
 
         return Array.from(
             categories
-        )
-        .sort(
-            (
-                a,
-                b
-            ) =>
+        ).sort(
+            (a, b) =>
                 a.localeCompare(
                     b,
                     "de"
                 )
         );
-
     }
 
 
     /* ========================================================
-       17 — SICHTBARE APPS
+       14 — FILTER
        ======================================================== */
 
     function getVisibleApps() {
 
-        const manager =
-            getAppManager();
-
-
         let apps =
-            getAllApps();
+            getEnabledApps();
 
-
-        /*
-         * Nur aktivierte Apps.
-         */
 
         if (
-            manager &&
-            typeof manager.getEnabledApps ===
-            "function"
-        ) {
-
-            const enabledApps =
-                manager.getEnabledApps();
-
-
-            if (
-                Array.isArray(
-                    enabledApps
-                )
-            ) {
-
-                apps =
-                    enabledApps;
-
-            }
-
-        }
-
-
-        /*
-         * Favoritenansicht.
-         */
-
-        if (
-            state.currentView ===
-            "favorites"
+            state.favoritesOnly
         ) {
 
             apps =
                 getFavorites();
-
         }
 
 
-        /*
-         * Kategorie.
-         */
-
         if (
-            state.currentCategory
+            state.category !== "all"
         ) {
 
             const category =
                 String(
-                    state.currentCategory
+                    state.category
                 )
                 .trim()
                 .toLowerCase();
-
 
             apps =
                 apps.filter(
                     app =>
                         String(
-                            app.category ||
-                            ""
+                            app.category || ""
                         )
                         .trim()
                         .toLowerCase() ===
                         category
                 );
-
         }
 
 
-        /*
-         * Suche.
-         */
-
         const query =
-            state.searchQuery
+            state.search
                 .trim()
                 .toLowerCase();
 
 
-        if (
-            query
-        ) {
+        if (query) {
 
             apps =
                 apps.filter(
                     app => {
 
-                        if (
-                            !app
-                        ) {
-
+                        if (!app) {
                             return false;
-
                         }
-
 
                         const keywords =
                             Array.isArray(
@@ -919,22 +568,14 @@
                                 ? app.keywords
                                 : [];
 
-
                         const content =
                             [
-
                                 app.id,
-
                                 app.name,
-
                                 app.title,
-
                                 app.description,
-
                                 app.category,
-
                                 ...keywords
-
                             ]
                             .filter(
                                 value =>
@@ -943,93 +584,285 @@
                                     value !==
                                     undefined
                             )
-                            .join(
-                                " "
-                            )
+                            .join(" ")
                             .toLowerCase();
-
 
                         return content.includes(
                             query
                         );
-
                     }
                 );
-
         }
+
+
+        apps.sort(
+            (a, b) => {
+
+                const orderA =
+                    Number(a.order);
+
+                const orderB =
+                    Number(b.order);
+
+                const safeA =
+                    Number.isFinite(orderA)
+                        ? orderA
+                        : 999999;
+
+                const safeB =
+                    Number.isFinite(orderB)
+                        ? orderB
+                        : 999999;
+
+                return safeA - safeB;
+            }
+        );
 
 
         return apps.slice(
             0,
             CONFIG.maxVisibleApps
         );
-
     }
 
 
     /* ========================================================
-       18 — ENDE TEIL 1
-       ======================================================== */
-    /* ========================================================
-       19 — APP SUCHEN
+       15 — CONTAINER
        ======================================================== */
 
-    function searchApps(
-        query
-    ) {
+    function getContainer() {
 
-        const text =
-            String(
-                query ||
-                ""
-            )
-            .trim()
-            .toLowerCase();
+        return document.querySelector(
+            CONFIG.container
+        );
+    }
 
 
-        const manager =
-            getAppManager();
+    function ensureContainer() {
 
+        let container =
+            getContainer();
 
-        if (
-            manager &&
-            typeof manager.search ===
-            "function"
-        ) {
-
-            const results =
-                manager.search(
-                    text
-                );
-
-
-            if (
-                Array.isArray(
-                    results
-                )
-            ) {
-
-                return results.slice(
-                    0,
-                    CONFIG.maxVisibleApps
-                );
-
-            }
-
+        if (container) {
+            return container;
         }
 
 
-        state.searchQuery =
-            text;
+        if (
+            !CONFIG.autoCreateContainer
+        ) {
+
+            return null;
+        }
 
 
-        return getVisibleApps();
+        container =
+            document.createElement(
+                "section"
+            );
 
+        container.id =
+            "app-launcher";
+
+        container.className =
+            "haldo-app-launcher";
+
+        container.dataset.haldoLauncher =
+            "true";
+
+        document.body.appendChild(
+            container
+        );
+
+        return container;
     }
 
 
     /* ========================================================
-       20 — APP ÖFFNEN
+       16 — ICON
+       ======================================================== */
+
+    function createIcon(app) {
+
+        const wrapper =
+            document.createElement(
+                "div"
+            );
+
+        wrapper.className =
+            "haldo-launcher-icon";
+
+
+        const icon =
+            app &&
+            app.icon;
+
+
+        if (
+            typeof icon === "string" &&
+            (
+                icon.includes("/") ||
+                /\.(png|jpg|jpeg|webp|svg)$/i
+                    .test(icon)
+            )
+        ) {
+
+            const image =
+                document.createElement(
+                    "img"
+                );
+
+            image.src =
+                icon;
+
+            image.alt =
+                app.title ||
+                app.name ||
+                app.id ||
+                "HalDo App";
+
+            image.loading =
+                "lazy";
+
+            image.onerror =
+                () => {
+
+                    image.remove();
+
+                    wrapper.textContent =
+                        "◉";
+                };
+
+            wrapper.appendChild(
+                image
+            );
+
+            return wrapper;
+        }
+
+
+        wrapper.textContent =
+            icon ||
+            "◉";
+
+        return wrapper;
+    }
+
+
+    /* ========================================================
+       17 — APP-KARTE
+       ======================================================== */
+
+    function createAppCard(app) {
+
+        const card =
+            document.createElement(
+                "button"
+            );
+
+        card.type =
+            "button";
+
+        card.className =
+            "haldo-launcher-app";
+
+        card.dataset.appId =
+            app.id;
+
+        card.setAttribute(
+            "aria-label",
+            `App öffnen: ${
+                app.title ||
+                app.name ||
+                app.id
+            }`
+        );
+
+
+        card.appendChild(
+            createIcon(app)
+        );
+
+
+        const title =
+            document.createElement(
+                "span"
+            );
+
+        title.className =
+            "haldo-launcher-app-title";
+
+        title.textContent =
+            app.title ||
+            app.name ||
+            app.id;
+
+        card.appendChild(
+            title
+        );
+
+
+        const category =
+            document.createElement(
+                "span"
+            );
+
+        category.className =
+            "haldo-launcher-app-category";
+
+        category.textContent =
+            app.category ||
+            "App";
+
+        card.appendChild(
+            category
+        );
+
+
+        if (
+            app.favorite === true
+        ) {
+
+            const favorite =
+                document.createElement(
+                    "span"
+                );
+
+            favorite.className =
+                "haldo-launcher-favorite";
+
+            favorite.textContent =
+                "★";
+
+            favorite.setAttribute(
+                "aria-label",
+                "Favorit"
+            );
+
+            card.appendChild(
+                favorite
+            );
+        }
+
+
+        card.addEventListener(
+            "click",
+            () => {
+
+                openApp(
+                    app.id
+                );
+
+            }
+        );
+
+
+        return card;
+    }
+
+
+    /* ========================================================
+       18 — APP ÖFFNEN
        ======================================================== */
 
     async function openApp(
@@ -1038,76 +871,49 @@
     ) {
 
         const normalized =
-            normalizeAppId(
-                appId
-            );
+            normalizeAppId(appId);
 
-
-        if (
-            !normalized
-        ) {
+        if (!normalized) {
 
             return {
-
-                success:
-                    false,
-
-                status:
-                    "invalid-app",
-
-                error:
-                    "Keine gültige App-ID."
-
+                success: false,
+                status: "invalid-app"
             };
-
         }
 
 
         const app =
-            getApp(
-                normalized
-            );
+            getApp(normalized);
 
-
-        if (
-            !app
-        ) {
+        if (!app) {
 
             const result = {
 
-                success:
-                    false,
+                success: false,
 
-                status:
-                    "not-found",
+                status: "not-found",
 
                 appId:
                     normalized,
 
                 error:
-                    "Die angeforderte App wurde nicht gefunden."
-
+                    "App wurde nicht gefunden."
             };
-
 
             state.lastError =
                 result.error;
 
-
             emit(
-                "launcher-error",
+                "error",
                 result
             );
 
-
             return result;
-
         }
 
 
         state.selectedApp =
             normalized;
-
 
         state.lastAction =
             "open-app";
@@ -1116,95 +922,26 @@
         emit(
             "app-opening",
             {
-
                 app,
-
-                appId:
-                    normalized,
-
+                appId: normalized,
                 options
-
             }
         );
 
 
+        const router =
+            getRouter();
+
+
         /*
-         * Router bevorzugen.
-         *
-         * Der Router ist für Navigation
-         * zuständig.
+         * ROUTER IST HAUPTWEG
          */
 
-        const router =
-            getAppRouter();
-
-
-        if (
-            router
-        ) {
+        if (router) {
 
             try {
 
-                if (
-                    typeof router.goToApp ===
-                    "function"
-                ) {
-
-                    const result =
-                        await router.goToApp(
-                            normalized,
-                            options
-                        );
-
-
-                    if (
-                        result &&
-                        result.success ===
-                        false
-                    ) {
-
-                        state.lastError =
-                            result.error ||
-                            "Die App konnte nicht geöffnet werden.";
-
-                    }
-                    else {
-
-                        state.launchCount++;
-
-                    }
-
-
-                    emit(
-                        "app-opened",
-                        {
-
-                            app,
-
-                            result,
-
-                            via:
-                                "router"
-
-                        }
-                    );
-
-
-                    return (
-                        result || {
-
-                            success:
-                                true,
-
-                            status:
-                                "navigated",
-
-                            app
-
-                        }
-                    );
-
-                }
+                let result;
 
 
                 if (
@@ -1212,199 +949,123 @@
                     "function"
                 ) {
 
-                    const result =
+                    result =
                         await router.navigateToApp(
                             normalized,
                             options
                         );
 
+                }
+                else if (
+                    typeof router.goToApp ===
+                    "function"
+                ) {
 
-                    if (
-                        result &&
-                        result.success ===
-                        false
-                    ) {
-
-                        state.lastError =
-                            result.error ||
-                            "Die App konnte nicht geöffnet werden.";
-
-                    }
-                    else {
-
-                        state.launchCount++;
-
-                    }
-
-
-                    emit(
-                        "app-opened",
-                        {
-
-                            app,
-
-                            result,
-
-                            via:
-                                "router"
-
-                        }
-                    );
-
-
-                    return (
-                        result || {
-
-                            success:
-                                true,
-
-                            status:
-                                "navigated",
-
-                            app
-
-                        }
-                    );
+                    result =
+                        await router.goToApp(
+                            normalized,
+                            options
+                        );
 
                 }
+                else if (
+                    typeof router.openApp ===
+                    "function"
+                ) {
 
+                    result =
+                        await router.openApp(
+                            normalized,
+                            options
+                        );
 
-                if (
+                }
+                else if (
                     typeof router.navigate ===
                     "function"
                 ) {
 
                     const route =
-                        typeof router.createAppRoute ===
-                        "function"
+                        "#/app/" +
+                        normalized;
 
-                            ? router.createAppRoute(
-                                normalized,
-                                options
-                            )
-
-                            : (
-                                "#/app/" +
-                                normalized
-                            );
-
-
-                    const result =
+                    result =
                         await router.navigate(
                             route,
                             options
                         );
 
+                }
+
+
+                if (result !== undefined) {
 
                     if (
                         result &&
-                        result.success ===
-                        false
+                        result.success === false
                     ) {
 
                         state.lastError =
                             result.error ||
-                            "Die App konnte nicht geöffnet werden.";
+                            "App konnte nicht geöffnet werden.";
 
-                    }
-                    else {
+                    } else {
 
                         state.launchCount++;
-
                     }
 
 
                     emit(
                         "app-opened",
                         {
-
                             app,
-
                             result,
-
-                            via:
-                                "router"
-
+                            via: "router"
                         }
                     );
 
 
                     return (
                         result || {
-
-                            success:
-                                true,
-
-                            status:
-                                "navigated",
-
+                            success: true,
+                            status: "opened",
                             app
-
                         }
                     );
-
                 }
 
             }
-            catch (
-                error
-            ) {
-
-                const message =
-                    error &&
-                    error.message
-                        ? error.message
-                        : String(
-                            error
-                        );
-
+            catch (error) {
 
                 state.lastError =
-                    message;
-
+                    error.message ||
+                    String(error);
 
                 emit(
-                    "launcher-error",
+                    "error",
                     {
-
                         app,
-
                         error:
-                            message
-
+                            state.lastError
                     }
                 );
 
-
                 return {
-
-                    success:
-                        false,
-
-                    status:
-                        "router-error",
-
-                    app,
-
+                    success: false,
+                    status: "router-error",
                     error:
-                        message
-
+                        state.lastError
                 };
-
             }
-
         }
 
 
         /*
-         * Fallback:
-         *
-         * Wenn der Router noch nicht verfügbar
-         * ist, benutzen wir den App Manager.
+         * FALLBACK AUF MANAGER
          */
 
         const manager =
-            getAppManager();
+            getManager();
 
 
         if (
@@ -1417,386 +1078,188 @@
 
                 const result =
                     await manager.openApp(
-                        normalized
+                        normalized,
+                        options
                     );
 
 
                 if (
                     result &&
-                    result.success ===
-                    false
+                    result.success === false
                 ) {
 
                     state.lastError =
-                        result.error ||
-                        "Die App konnte nicht geöffnet werden.";
+                        result.error;
 
-                }
-                else {
+                } else {
 
                     state.launchCount++;
-
                 }
 
 
                 emit(
                     "app-opened",
                     {
-
                         app,
-
                         result,
-
-                        via:
-                            "manager"
-
+                        via: "manager"
                     }
                 );
 
 
                 return (
                     result || {
-
-                        success:
-                            true,
-
-                        status:
-                            "running",
-
+                        success: true,
+                        status: "opened",
                         app
-
                     }
                 );
 
             }
-            catch (
-                error
-            ) {
-
-                const message =
-                    error &&
-                    error.message
-                        ? error.message
-                        : String(
-                            error
-                        );
-
+            catch (error) {
 
                 state.lastError =
-                    message;
-
-
-                emit(
-                    "launcher-error",
-                    {
-
-                        app,
-
-                        error:
-                            message
-
-                    }
-                );
-
+                    error.message ||
+                    String(error);
 
                 return {
-
-                    success:
-                        false,
-
-                    status:
-                        "manager-error",
-
-                    app,
-
+                    success: false,
+                    status: "manager-error",
                     error:
-                        message
-
+                        state.lastError
                 };
-
             }
-
         }
 
 
         const result = {
 
-            success:
-                false,
+            success: false,
 
-            status:
-                "not-ready",
-
-            app,
+            status: "not-ready",
 
             error:
-                "App Manager und App Router sind noch nicht verfügbar."
-
+                "App Router und App Manager sind nicht verfügbar."
         };
-
 
         state.lastError =
             result.error;
 
-
         emit(
-            "launcher-error",
+            "error",
             result
         );
 
-
         return result;
-
     }
 
 
     /* ========================================================
-       21 — HOME ÖFFNEN
+       19 — SUCHE
        ======================================================== */
 
-    async function openHome(
-        options = {}
-    ) {
+    function setSearch(query) {
 
-        state.selectedApp =
-            null;
-
-
-        state.currentView =
-            "all";
-
-
-        state.currentCategory =
-            null;
-
-
-        state.searchQuery =
-            "";
-
+        state.search =
+            String(
+                query || ""
+            ).trim();
 
         state.lastAction =
-            "open-home";
-
-
-        const router =
-            getAppRouter();
-
+            "search";
 
         emit(
-            "home-opening",
+            "search-changed",
             {
-
-                options
-
+                query:
+                    state.search
             }
         );
 
+        render();
 
-        if (
-            router
-        ) {
-
-            try {
-
-                if (
-                    typeof router.goHome ===
-                    "function"
-                ) {
-
-                    const result =
-                        await router.goHome(
-                            options
-                        );
+        return getVisibleApps();
+    }
 
 
-                    emit(
-                        "home-opened",
-                        {
+    function clearSearch() {
 
-                            result,
-
-                            via:
-                                "router"
-
-                        }
-                    );
+        return setSearch("");
+    }
 
 
-                    return (
-                        result || {
+    /* ========================================================
+       20 — KATEGORIE
+       ======================================================== */
 
-                            success:
-                                true,
+    function setCategory(category) {
 
-                            status:
-                                "home"
+        const value =
+            String(
+                category ||
+                "all"
+            )
+            .trim()
+            .toLowerCase();
 
-                        }
-                    );
+        state.category =
+            value || "all";
 
-                }
+        state.favoritesOnly =
+            false;
 
-
-                if (
-                    typeof router.home ===
-                    "function"
-                ) {
-
-                    const result =
-                        await router.home(
-                            options
-                        );
-
-
-                    emit(
-                        "home-opened",
-                        {
-
-                            result,
-
-                            via:
-                                "router"
-
-                        }
-                    );
-
-
-                    return (
-                        result || {
-
-                            success:
-                                true,
-
-                            status:
-                                "home"
-
-                        }
-                    );
-
-                }
-
-
-                if (
-                    typeof router.navigate ===
-                    "function"
-                ) {
-
-                    const result =
-                        await router.navigate(
-                            "#/home",
-                            options
-                        );
-
-
-                    emit(
-                        "home-opened",
-                        {
-
-                            result,
-
-                            via:
-                                "router"
-
-                        }
-                    );
-
-
-                    return (
-                        result || {
-
-                            success:
-                                true,
-
-                            status:
-                                "home"
-
-                        }
-                    );
-
-                }
-
-            }
-            catch (
-                error
-            ) {
-
-                const message =
-                    error &&
-                    error.message
-                        ? error.message
-                        : String(
-                            error
-                        );
-
-
-                state.lastError =
-                    message;
-
-
-                emit(
-                    "launcher-error",
-                    {
-
-                        error:
-                            message,
-
-                        action:
-                            "home"
-
-                    }
-                );
-
-
-                return {
-
-                    success:
-                        false,
-
-                    status:
-                        "router-error",
-
-                    error:
-                        message
-
-                };
-
-            }
-
-        }
-
-
-        /*
-         * Wenn der Router noch nicht bereit ist,
-         * bleibt der Launcher trotzdem funktionsfähig.
-         */
+        state.lastAction =
+            "category";
 
         emit(
-            "home-opened",
+            "category-changed",
             {
-
-                via:
-                    "launcher",
-
-                fallback:
-                    true
-
+                category:
+                    state.category
             }
         );
 
+        render();
 
-        return {
+        return getVisibleApps();
+    }
 
-            success:
-                true,
 
-            status:
-                "home",
+    /* ========================================================
+       21 — FAVORITEN
+       ======================================================== */
 
-            fallback:
-                true
+    function showFavorites() {
 
-        };
+        state.favoritesOnly =
+            true;
 
+        state.category =
+            "all";
+
+        state.lastAction =
+            "favorites";
+
+        render();
+
+        return getVisibleApps();
+    }
+
+
+    function showAllApps() {
+
+        state.favoritesOnly =
+            false;
+
+        state.category =
+            "all";
+
+        state.lastAction =
+            "all";
+
+        render();
+
+        return getVisibleApps();
     }
 
 
@@ -1804,2042 +1267,596 @@
        22 — FAVORIT UMSCHALTEN
        ======================================================== */
 
-    function toggleFavorite(
-        appId
-    ) {
+    function toggleFavorite(appId) {
 
         const manager =
-            getAppManager();
-
-
-        if (
-            !manager
-        ) {
-
-            return {
-
-                success:
-                    false,
-
-                error:
-                    "App Manager ist nicht verfügbar."
-
-            };
-
-        }
-
+            getManager();
 
         if (
+            !manager ||
             typeof manager.toggleFavorite !==
             "function"
         ) {
 
             return {
-
-                success:
-                    false,
-
+                success: false,
                 error:
-                    "Die Favoriten-Funktion ist nicht verfügbar."
-
+                    "Favoriten-Funktion ist nicht verfügbar."
             };
-
         }
 
 
         const result =
             manager.toggleFavorite(
-                appId
+                normalizeAppId(appId)
             );
 
 
         if (
             result &&
-            result.success
+            result.success !== false
         ) {
-
-            state.lastAction =
-                "toggle-favorite";
-
 
             emit(
                 "favorite-changed",
                 result
             );
 
-
             render();
-
         }
 
 
         return result;
-
     }
 
 
     /* ========================================================
-       23 — FAVORIT SETZEN
+       23 — RENDER
        ======================================================== */
 
-    function setFavorite(
-        appId,
-        favorite = true
-    ) {
+    function render() {
 
-        const manager =
-            getAppManager();
+        const container =
+            ensureContainer();
 
-
-        if (
-            !manager
-        ) {
-
-            return {
-
-                success:
-                    false,
-
-                error:
-                    "App Manager ist nicht verfügbar."
-
-            };
-
+        if (!container) {
+            return false;
         }
 
 
-        if (
-            typeof manager.setFavorite !==
-            "function"
-        ) {
-
-            return {
-
-                success:
-                    false,
-
-                error:
-                    "Die Favoriten-Funktion ist nicht verfügbar."
-
-            };
-
-        }
+        container.innerHTML =
+            "";
 
 
-        const result =
-            manager.setFavorite(
-                appId,
-                favorite
+        const header =
+            document.createElement(
+                "header"
             );
 
-
-        if (
-            result &&
-            result.success
-        ) {
-
-            state.lastAction =
-                "set-favorite";
+        header.className =
+            "haldo-launcher-header";
 
 
-            emit(
-                "favorite-changed",
-                result
+        const title =
+            document.createElement(
+                "h2"
             );
 
-
-            render();
-
-        }
+        title.textContent =
+            "HalDo AI Apps";
 
 
-        return result;
+        const count =
+            document.createElement(
+                "span"
+            );
 
-    }
+        count.className =
+            "haldo-launcher-count";
 
-
-    /* ========================================================
-       24 — KATEGORIE AUSWÄHLEN
-       ======================================================== */
-
-    function selectCategory(
-        category
-    ) {
-
-        const value =
-            String(
-                category ||
-                ""
-            )
-            .trim();
+        count.textContent =
+            "0 Apps";
 
 
-        if (
-            !value
-        ) {
+        header.appendChild(
+            title
+        );
 
-            state.currentCategory =
-                null;
-
-            state.currentView =
-                "all";
-
-        }
-        else {
-
-            state.currentCategory =
-                value;
-
-            state.currentView =
-                "category";
-
-        }
-
-
-        state.lastAction =
-            "select-category";
-
-
-        emit(
-            "category-changed",
-            {
-
-                category:
-                    state.currentCategory
-
-            }
+        header.appendChild(
+            count
         );
 
 
-        render();
-
-
-        return getVisibleApps();
-
-    }
-
-
-    /* ========================================================
-       25 — FAVORITEN-ANSICHT
-       ======================================================== */
-
-    function showFavorites() {
-
-        state.currentView =
-            "favorites";
-
-
-        state.currentCategory =
-            null;
-
-
-        state.lastAction =
-            "show-favorites";
-
-
-        emit(
-            "view-changed",
-            {
-
-                view:
-                    "favorites"
-
-            }
+        container.appendChild(
+            header
         );
 
 
-        render();
+        /*
+         * Suche
+         */
 
+        const search =
+            document.createElement(
+                "input"
+            );
 
-        return getVisibleApps();
-
-    }
-
-
-    /* ========================================================
-       26 — ALLE APPS ANZEIGEN
-       ======================================================== */
-
-    function showAllApps() {
-
-        state.currentView =
-            "all";
-
-
-        state.currentCategory =
-            null;
-
-
-        state.lastAction =
-            "show-all";
-
-
-        emit(
-            "view-changed",
-            {
-
-                view:
-                    "all"
-
-            }
-        );
-
-
-        render();
-
-
-        return getVisibleApps();
-
-    }
-
-
-    /* ========================================================
-       27 — SUCHE SETZEN
-       ======================================================== */
-
-    function setSearch(
-        query
-    ) {
-
-        state.searchQuery =
-            String(
-                query ||
-                ""
-            )
-            .trim();
-
-
-        state.lastAction =
+        search.type =
             "search";
 
+        search.className =
+            "haldo-launcher-search";
 
-        emit(
-            "search-changed",
-            {
+        search.placeholder =
+            "Apps durchsuchen...";
 
-                query:
-                    state.searchQuery
+        search.value =
+            state.search;
 
-            }
-        );
+        search.autocomplete =
+            "off";
 
+        search.addEventListener(
+            "input",
+            () => {
 
-        render();
+                state.search =
+                    search.value;
 
-
-        return getVisibleApps();
-
-    }
-
-
-    /* ========================================================
-       28 — SUCHE LÖSCHEN
-       ======================================================== */
-
-    function clearSearch() {
-
-        return setSearch(
-            ""
-        );
-
-    }
-
-
-    /* ========================================================
-       29 — APP AUSWAHL
-       ======================================================== */
-
-    function selectApp(
-        appId
-    ) {
-
-        const normalized =
-            normalizeAppId(
-                appId
-            );
-
-
-        const app =
-            getApp(
-                normalized
-            );
-
-
-        if (
-            !app
-        ) {
-
-            state.selectedApp =
-                null;
-
-
-            return null;
-
-        }
-
-
-        state.selectedApp =
-            normalized;
-
-
-        emit(
-            "app-selected",
-            {
-
-                app
+                renderGrid();
 
             }
         );
 
 
-        return app;
-
-    }
-
-
-    /* ========================================================
-       30 — ENDE TEIL 2
-       ======================================================== */
-    /* ========================================================
-       21 — HASH ROUTE LESEN
-       ======================================================== */
-
-    function getHashRoute() {
-
-        const hash =
-            String(
-                window.location.hash ||
-                ""
-            ).trim();
-
-
-        if (
-            !hash
-        ) {
-
-            return CONFIG.homeRoute;
-
-        }
-
-
-        return normalizeRoute(
-            hash
+        container.appendChild(
+            search
         );
-
-    }
-
-
-    /* ========================================================
-       22 — ROUTE IN BROWSER-HISTORY SCHREIBEN
-       ======================================================== */
-
-    function updateBrowserHistory(
-        route,
-        options = {}
-    ) {
-
-        const replace =
-            options.replace === true;
-
-        const url =
-            window.location.pathname +
-            window.location.search +
-            route;
-
-
-        try {
-
-            if (
-                replace
-            ) {
-
-                window.history.replaceState(
-                    {
-                        haldoRouter:
-                            true,
-
-                        route
-                    },
-                    "",
-                    url
-                );
-
-            }
-            else {
-
-                window.history.pushState(
-                    {
-                        haldoRouter:
-                            true,
-
-                        route
-                    },
-                    "",
-                    url
-                );
-
-            }
-
-        }
-        catch (
-            error
-        ) {
-
-            /*
-             * Fallback für Umgebungen,
-             * in denen History API nicht
-             * vollständig verfügbar ist.
-             */
-
-            try {
-
-                window.location.hash =
-                    route.replace(
-                        /^#/,
-                        ""
-                    );
-
-            }
-            catch (
-                fallbackError
-            ) {
-
-                state.lastError =
-                    fallbackError.message;
-
-            }
-
-        }
-
-    }
-
-
-    /* ========================================================
-       23 — ROUTE HISTORY SPEICHERN
-       ======================================================== */
-
-    function addRouteHistory(
-        route
-    ) {
-
-        routeHistory.push(
-            route
-        );
-
-
-        while (
-            routeHistory.length >
-            CONFIG.maxHistoryEntries
-        ) {
-
-            routeHistory.shift();
-
-        }
-
-
-        state.historyCount =
-            routeHistory.length;
-
-    }
-
-
-    /* ========================================================
-       24 — APP AUS ROUTE LADEN
-       ======================================================== */
-
-    async function openRouteApp(
-        parsedRoute
-    ) {
-
-        const manager =
-            getAppManager();
-
-
-        if (
-            !manager
-        ) {
-
-            return {
-
-                success:
-                    false,
-
-                status:
-                    "manager-unavailable",
-
-                error:
-                    "HalDoAppManager ist nicht verfügbar."
-
-            };
-
-        }
-
-
-        if (
-            typeof manager.openApp !==
-            "function"
-        ) {
-
-            return {
-
-                success:
-                    false,
-
-                status:
-                    "manager-invalid",
-
-                error:
-                    "HalDoAppManager.openApp() fehlt."
-
-            };
-
-        }
-
-
-        const app =
-            typeof manager.getApp ===
-            "function"
-                ? manager.getApp(
-                    parsedRoute.appId
-                )
-                : null;
-
-
-        if (
-            !app
-        ) {
-
-            return {
-
-                success:
-                    false,
-
-                status:
-                    "app-not-found",
-
-                appId:
-                    parsedRoute.appId,
-
-                error:
-                    `App "${parsedRoute.appId}" ist nicht registriert.`
-
-            };
-
-        }
-
-
-        emit(
-            "before-app-navigation",
-            {
-
-                route:
-                    parsedRoute.route,
-
-                app,
-
-                params:
-                    parsedRoute.params,
-
-                query:
-                    parsedRoute.query
-
-            }
-        );
-
-
-        const result =
-            await manager.openApp(
-                parsedRoute.appId
-            );
-
-
-        if (
-            !result ||
-            result.success !== true
-        ) {
-
-            return {
-
-                success:
-                    false,
-
-                status:
-                    "app-open-failed",
-
-                app,
-
-                result,
-
-                error:
-                    result &&
-                    result.error
-                        ? result.error
-                        : "App konnte nicht geöffnet werden."
-
-            };
-
-        }
-
-
-        return {
-
-            success:
-                true,
-
-            status:
-                "app-opened",
-
-            app,
-
-            result,
-
-            params:
-                parsedRoute.params,
-
-            query:
-                parsedRoute.query
-
-        };
-
-    }
-
-
-    /* ========================================================
-       25 — HOME ÖFFNEN
-       ======================================================== */
-
-    async function openHome(
-        options = {}
-    ) {
-
-        const route =
-            CONFIG.homeRoute;
-
-
-        const previousRoute =
-            state.currentRoute;
-
-
-        state.previousRoute =
-            previousRoute;
-
-
-        state.previousApp =
-            state.currentApp;
-
-
-        const manager =
-            getAppManager();
 
 
         /*
-         * Aktive App sauber schließen.
+         * Kategorien
          */
 
+        const categories =
+            document.createElement(
+                "nav"
+            );
+
+        categories.className =
+            "haldo-launcher-categories";
+
+
+        const all =
+            document.createElement(
+                "button"
+            );
+
+        all.type =
+            "button";
+
+        all.textContent =
+            "Alle";
+
+        all.className =
+            "haldo-launcher-category";
+
+
         if (
-            manager &&
-            typeof manager.getActiveApp ===
-            "function" &&
-            typeof manager.stopApp ===
-            "function"
+            state.category ===
+                "all" &&
+            !state.favoritesOnly
         ) {
 
-            const activeApp =
-                manager.getActiveApp();
+            all.classList.add(
+                "active"
+            );
+        }
 
 
-            if (
-                activeApp &&
-                activeApp.id
-            ) {
+        all.addEventListener(
+            "click",
+            () => showAllApps()
+        );
 
-                try {
 
-                    await manager.stopApp(
-                        activeApp.id
+        categories.appendChild(
+            all
+        );
+
+
+        getCategories().forEach(
+            category => {
+
+                const button =
+                    document.createElement(
+                        "button"
                     );
 
-                }
-                catch (
-                    error
+                button.type =
+                    "button";
+
+                button.className =
+                    "haldo-launcher-category";
+
+                button.textContent =
+                    category;
+
+
+                if (
+                    state.category ===
+                    String(
+                        category
+                    )
+                    .toLowerCase() &&
+                    !state.favoritesOnly
                 ) {
 
-                    log(
-                        `Fehler beim Schließen der App: ${error.message}`,
-                        "warning"
+                    button.classList.add(
+                        "active"
                     );
-
                 }
 
+
+                button.addEventListener(
+                    "click",
+                    () =>
+                        setCategory(
+                            category
+                        )
+                );
+
+
+                categories.appendChild(
+                    button
+                );
             }
+        );
 
-        }
 
+        const favorites =
+            document.createElement(
+                "button"
+            );
 
-        state.currentRoute =
-            route;
+        favorites.type =
+            "button";
 
-        state.currentApp =
-            null;
+        favorites.className =
+            "haldo-launcher-category";
 
-        state.navigationCount++;
+        favorites.textContent =
+            "★ Favoriten";
 
 
         if (
-            options.history !==
-            false
+            state.favoritesOnly
         ) {
 
-            updateBrowserHistory(
-                route,
-                {
-                    replace:
-                        options.replace ===
-                        true
-                }
+            favorites.classList.add(
+                "active"
             );
-
         }
 
 
-        if (
-            options.record !==
-            false
-        ) {
-
-            addRouteHistory(
-                route
-            );
-
-        }
-
-
-        const detail = {
-
-            route,
-
-            previousRoute,
-
-            app:
-                null,
-
-            type:
-                "home"
-
-        };
-
-
-        emit(
-            "route-changing",
-            detail
+        favorites.addEventListener(
+            "click",
+            () => showFavorites()
         );
 
 
-        emit(
-            "home-opened",
-            detail
+        categories.appendChild(
+            favorites
         );
 
 
-        emit(
-            "route-changed",
-            detail
+        container.appendChild(
+            categories
         );
-
-
-        return {
-
-            success:
-                true,
-
-            status:
-                "home",
-
-            route,
-
-            app:
-                null
-
-        };
-
-    }
-
-
-    /* ========================================================
-       26 — ROUTE NAVIGIEREN
-       ======================================================== */
-
-    async function navigate(
-        route,
-        options = {}
-    ) {
-
-        const normalized =
-            normalizeRoute(
-                route
-            );
-
-
-        const parsed =
-            parseRoute(
-                normalized
-            );
-
-
-        state.lastError =
-            null;
 
 
         /*
-         * Unbekannte Route
+         * Grid
          */
 
-        if (
-            parsed.type ===
-            "unknown"
-        ) {
-
-            state.lastError =
-                `Unbekannte Route: ${normalized}`;
-
-
-            emit(
-                "route-error",
-                {
-
-                    route:
-                        normalized,
-
-                    error:
-                        state.lastError
-
-                }
+        const grid =
+            document.createElement(
+                "div"
             );
 
+        grid.className =
+            "haldo-launcher-grid";
 
-            return {
-
-                success:
-                    false,
-
-                status:
-                    "unknown-route",
-
-                route:
-                    normalized,
-
-                error:
-                    state.lastError
-
-            };
-
-        }
+        grid.dataset.haldoLauncherGrid =
+            "true";
 
 
-        /*
-         * Gleiche Route nicht
-         * unnötig erneut laden.
-         */
-
-        if (
-            normalized ===
-            state.currentRoute &&
-            options.force !== true
-        ) {
-
-            return {
-
-                success:
-                    true,
-
-                status:
-                    "already-active",
-
-                route:
-                    normalized,
-
-                app:
-                    state.currentApp
-
-            };
-
-        }
+        container.appendChild(
+            grid
+        );
 
 
-        const previousRoute =
-            state.currentRoute;
+        renderGrid();
 
 
-        const previousApp =
-            state.currentApp;
-
+        state.renderCount++;
 
         emit(
-            "route-changing",
+            "rendered",
             {
-
-                route:
-                    normalized,
-
-                previousRoute,
-
-                previousApp,
-
-                parsed
-
+                count:
+                    state.renderCount
             }
         );
-
-
-        /*
-         * HOME
-         */
-
-        if (
-            parsed.type ===
-            "home"
-        ) {
-
-            return openHome(
-                {
-                    ...options,
-                    history:
-                        options.history !==
-                        false
-                }
-            );
-
-        }
-
-
-        /*
-         * APP
-         */
-
-        if (
-            parsed.type ===
-            "app"
-        ) {
-
-            const result =
-                await openRouteApp(
-                    parsed
-                );
-
-
-            if (
-                !result.success
-            ) {
-
-                state.lastError =
-                    result.error;
-
-
-                emit(
-                    "route-error",
-                    {
-
-                        route:
-                            normalized,
-
-                        parsed,
-
-                        error:
-                            result.error,
-
-                        result
-
-                    }
-                );
-
-
-                return result;
-
-            }
-
-
-            state.previousRoute =
-                previousRoute;
-
-
-            state.previousApp =
-                previousApp;
-
-
-            state.currentRoute =
-                normalized;
-
-
-            state.currentApp =
-                result.app;
-
-
-            state.navigationCount++;
-
-
-            if (
-                options.history !==
-                false
-            ) {
-
-                updateBrowserHistory(
-                    normalized,
-                    {
-                        replace:
-                            options.replace ===
-                            true
-                    }
-                );
-
-            }
-
-
-            if (
-                options.record !==
-                false
-            ) {
-
-                addRouteHistory(
-                    normalized
-                );
-
-            }
-
-
-            const detail = {
-
-                route:
-                    normalized,
-
-                previousRoute,
-
-                app:
-                    result.app,
-
-                previousApp,
-
-                params:
-                    parsed.params,
-
-                query:
-                    parsed.query,
-
-                result
-
-            };
-
-
-            emit(
-                "app-opened",
-                detail
-            );
-
-
-            emit(
-                "route-changed",
-                detail
-            );
-
-
-            return {
-
-                success:
-                    true,
-
-                status:
-                    "navigated",
-
-                route:
-                    normalized,
-
-                app:
-                    result.app,
-
-                params:
-                    parsed.params,
-
-                query:
-                    parsed.query
-
-            };
-
-        }
-
-
-        return {
-
-            success:
-                false,
-
-            status:
-                "navigation-failed",
-
-            error:
-                "Navigation konnte nicht durchgeführt werden."
-
-        };
-
-    }
-
-
-    /* ========================================================
-       27 — APP NAVIGIEREN
-       ======================================================== */
-
-    async function navigateToApp(
-        appId,
-        options = {}
-    ) {
-
-        const route =
-            createAppRoute(
-                appId,
-                options
-            );
-
-
-        return navigate(
-            route,
-            options
-        );
-
-    }
-
-
-    /* ========================================================
-       28 — ROUTE WECHSELN OHNE HISTORY
-       ======================================================== */
-
-    async function replace(
-        route,
-        options = {}
-    ) {
-
-        return navigate(
-            route,
-            {
-                ...options,
-
-                replace:
-                    true
-
-            }
-        );
-
-    }
-
-
-    /* ========================================================
-       29 — HOME
-       ======================================================== */
-
-    async function home(
-        options = {}
-    ) {
-
-        return openHome(
-            options
-        );
-
-    }
-
-
-    /* ========================================================
-       30 — ZURÜCK
-       ======================================================== */
-
-    function back() {
-
-        try {
-
-            window.history.back();
-
-
-            emit(
-                "router-back",
-                {
-
-                    route:
-                        state.currentRoute
-
-                }
-            );
-
-
-            return {
-
-                success:
-                    true,
-
-                status:
-                    "history-back"
-
-            };
-
-        }
-        catch (
-            error
-        ) {
-
-            state.lastError =
-                error.message;
-
-
-            return {
-
-                success:
-                    false,
-
-                error:
-                    error.message
-
-            };
-
-        }
-
-    }
-
-
-    /* ========================================================
-       31 — VORWÄRTS
-       ======================================================== */
-
-    function forward() {
-
-        try {
-
-            window.history.forward();
-
-
-            emit(
-                "router-forward",
-                {
-
-                    route:
-                        state.currentRoute
-
-                }
-            );
-
-
-            return {
-
-                success:
-                    true,
-
-                status:
-                    "history-forward"
-
-            };
-
-        }
-        catch (
-            error
-        ) {
-
-            state.lastError =
-                error.message;
-
-
-            return {
-
-                success:
-                    false,
-
-                error:
-                    error.message
-
-            };
-
-        }
-
-    }
-
-
-    /* ========================================================
-       32 — ROUTE HISTORY ZURÜCKSETZEN
-       ======================================================== */
-
-    function clearRouteHistory() {
-
-        routeHistory.length =
-            0;
-
-
-        state.historyCount =
-            0;
 
 
         return true;
-
     }
 
 
     /* ========================================================
-       33 — ROUTE HISTORY AUSLESEN
+       24 — GRID AKTUALISIEREN
        ======================================================== */
 
-    function getRouteHistory() {
+    function renderGrid() {
 
-        return [
-            ...routeHistory
-        ];
+        const container =
+            ensureContainer();
 
+        if (!container) {
+            return false;
+        }
+
+
+        const grid =
+            container.querySelector(
+                "[data-haldo-launcher-grid]"
+            ) ||
+            container.querySelector(
+                ".haldo-launcher-grid"
+            );
+
+
+        if (!grid) {
+            return false;
+        }
+
+
+        grid.innerHTML =
+            "";
+
+
+        const apps =
+            getVisibleApps();
+
+
+        const count =
+            container.querySelector(
+                ".haldo-launcher-count"
+            );
+
+
+        if (count) {
+
+            count.textContent =
+                `${apps.length} Apps`;
+        }
+
+
+        if (!apps.length) {
+
+            const empty =
+                document.createElement(
+                    "div"
+                );
+
+            empty.className =
+                "haldo-launcher-empty";
+
+            empty.textContent =
+                state.search
+                    ? "Keine passende App gefunden."
+                    : "Keine Apps verfügbar.";
+
+            grid.appendChild(
+                empty
+            );
+
+            return true;
+        }
+
+
+        apps.forEach(
+            app => {
+
+                grid.appendChild(
+                    createAppCard(
+                        app
+                    )
+                );
+            }
+        );
+
+
+        emit(
+            "apps-rendered",
+            {
+                apps
+            }
+        );
+
+
+        return true;
     }
 
 
     /* ========================================================
-       34 — ROUTE SUCHEN
+       25 — SHOW / HIDE
        ======================================================== */
 
-    function searchRoutes(
-        query
-    ) {
+    function show() {
 
-        const text =
-            String(
-                query ||
-                ""
-            )
-            .trim()
-            .toLowerCase();
+        const container =
+            ensureContainer();
 
-
-        if (
-            !text
-        ) {
-
-            return [];
-
+        if (!container) {
+            return false;
         }
 
 
-        const registry =
-            getAppRegistry();
+        container.hidden =
+            false;
+
+        state.visible =
+            true;
 
 
-        if (
-            !registry
-        ) {
+        render();
 
-            return [];
 
+        emit(
+            "shown"
+        );
+
+
+        return true;
+    }
+
+
+    function hide() {
+
+        const container =
+            getContainer();
+
+        if (container) {
+
+            container.hidden =
+                true;
         }
 
 
-        let apps = [];
+        state.visible =
+            false;
 
 
-        try {
+        emit(
+            "hidden"
+        );
+
+
+        return true;
+    }
+
+
+    /* ========================================================
+       26 — KEYBOARD
+       ======================================================== */
+
+    function handleKeyboard(event) {
+
+        if (
+            !CONFIG.keyboardEnabled
+        ) {
+            return;
+        }
+
+
+        if (
+            event.key === "/" &&
+            !event.ctrlKey &&
+            !event.metaKey
+        ) {
+
+            const input =
+                document.querySelector(
+                    ".haldo-launcher-search"
+                );
 
             if (
-                typeof registry.getAllApps ===
-                "function"
+                input &&
+                document.activeElement !==
+                    input
             ) {
 
-                apps =
-                    registry.getAllApps();
+                event.preventDefault();
 
+                input.focus();
             }
-            else if (
-                typeof registry.getAll ===
-                "function"
-            ) {
-
-                apps =
-                    registry.getAll();
-
-            }
-            else if (
-                Array.isArray(
-                    registry.definitions
-                )
-            ) {
-
-                apps = [
-                    ...registry.definitions
-                ];
-
-            }
-
-        }
-        catch (
-            error
-        ) {
-
-            log(
-                `Routensuche fehlgeschlagen: ${error.message}`,
-                "warning"
-            );
-
         }
 
 
         if (
-            !Array.isArray(
-                apps
-            )
+            event.key === "Escape"
         ) {
 
-            return [];
+            const input =
+                document.querySelector(
+                    ".haldo-launcher-search"
+                );
 
+            if (
+                input &&
+                document.activeElement ===
+                    input
+            ) {
+
+                input.blur();
+
+                return;
+            }
+
+            hide();
         }
-
-
-        return apps
-            .filter(
-                app => {
-
-                    if (
-                        !app ||
-                        !app.id
-                    ) {
-
-                        return false;
-
-                    }
-
-
-                    const content =
-                        [
-
-                            app.id,
-
-                            app.name,
-
-                            app.title,
-
-                            app.description,
-
-                            app.category,
-
-                            ...(Array.isArray(
-                                app.keywords
-                            )
-                                ? app.keywords
-                                : [])
-
-                        ]
-                        .join(
-                            " "
-                        )
-                        .toLowerCase();
-
-
-                    return content.includes(
-                        text
-                    );
-
-                }
-            )
-            .map(
-                app => ({
-
-                    app,
-
-                    route:
-                        createAppRoute(
-                            app.id
-                        )
-
-                })
-            );
-
     }
 
 
     /* ========================================================
-       35 — ROUTE AKTUALISIEREN
-       ======================================================== */
-
-    async function reload() {
-
-        const route =
-            state.currentRoute;
-
-
-        return navigate(
-            route,
-            {
-                force:
-                    true,
-
-                history:
-                    false,
-
-                record:
-                    false
-
-            }
-        );
-
-    }
-
-
-    /* ========================================================
-       36 — HASH-ÄNDERUNG
-       ======================================================== */
-
-    async function handleHashChange() {
-
-        const route =
-            getHashRoute();
-
-
-        /*
-         * Wenn History API die URL
-         * verändert hat, synchronisieren
-         * wir den Router trotzdem.
-         */
-
-        if (
-            route ===
-            state.currentRoute
-        ) {
-
-            return;
-
-        }
-
-
-        await navigate(
-            route,
-            {
-                history:
-                    false,
-
-                record:
-                    true
-
-            }
-        );
-
-    }
-
-
-    /* ========================================================
-       37 — POPSTATE
-       ======================================================== */
-
-    async function handlePopState(
-        event
-    ) {
-
-        const route =
-            event &&
-            event.state &&
-            event.state.haldoRouter
-                ? normalizeRoute(
-                    event.state.route
-                )
-                : getHashRoute();
-
-
-        await navigate(
-            route,
-            {
-                history:
-                    false,
-
-                record:
-                    true
-
-            }
-        );
-
-    }
-
-
-    /* ========================================================
-       38 — INITIAL ROUTE
-       ======================================================== */
-
-    async function initializeRoute() {
-
-        const hash =
-            String(
-                window.location.hash ||
-                ""
-            ).trim();
-
-
-        if (
-            hash
-        ) {
-
-            return navigate(
-                hash,
-                {
-                    history:
-                        false,
-
-                    record:
-                        true,
-
-                    force:
-                        true
-
-                }
-            );
-
-        }
-
-
-        return openHome(
-            {
-                history:
-                    true,
-
-                replace:
-                    true,
-
-                record:
-                    true
-
-            }
-        );
-
-    }
-
-
-    /* ========================================================
-       39 — ABHÄNGIGKEITEN PRÜFEN
+       27 — ABHÄNGIGKEITEN
        ======================================================== */
 
     function checkDependencies() {
 
-        state.managerReady =
-            isManagerReady();
+        const manager =
+            getManager();
 
+        const registry =
+            getRegistry();
+
+        const router =
+            getRouter();
+
+
+        state.managerReady =
+            Boolean(manager);
 
         state.registryReady =
-            isRegistryReady();
+            Boolean(registry);
+
+        state.routerReady =
+            Boolean(router);
 
 
         return {
 
-            managerReady:
+            manager:
                 state.managerReady,
 
-            registryReady:
+            registry:
                 state.registryReady,
+
+            router:
+                state.routerReady,
 
             ready:
                 state.managerReady &&
-                state.registryReady
-
+                state.registryReady &&
+                state.routerReady
         };
-
     }
 
 
     /* ========================================================
-       40 — INITIALISIERUNG
-       ======================================================== */
-
-    async function init() {
-
-        if (
-            state.initialized
-        ) {
-
-            return getState();
-
-        }
-
-
-        state.startTime =
-            Date.now();
-
-
-        const dependencies =
-            checkDependencies();
-
-
-        if (
-            !dependencies.managerReady
-        ) {
-
-            state.lastError =
-                "HalDoAppManager ist noch nicht verfügbar.";
-
-
-            log(
-                state.lastError,
-                "warning"
-            );
-
-
-            return {
-
-                initialized:
-                    false,
-
-                ready:
-                    false,
-
-                error:
-                    state.lastError
-
-            };
-
-        }
-
-
-        if (
-            !dependencies.registryReady
-        ) {
-
-            state.lastError =
-                "HalDoAppRegistry ist noch nicht verfügbar.";
-
-
-            log(
-                state.lastError,
-                "warning"
-            );
-
-
-            return {
-
-                initialized:
-                    false,
-
-                ready:
-                    false,
-
-                error:
-                    state.lastError
-
-            };
-
-        }
-
-
-        state.initialized =
-            true;
-
-
-        state.ready =
-            true;
-
-
-        /*
-         * Kernel-Verbindung.
-         */
-
-        if (
-            window.HalDoKernel &&
-            typeof window.HalDoKernel.registerModule ===
-            "function"
-        ) {
-
-            window.HalDoKernel.registerModule(
-                "app-router",
-                api
-            );
-
-
-            if (
-                typeof window.HalDoKernel.setModuleReady ===
-                "function"
-            ) {
-
-                window.HalDoKernel.setModuleReady(
-                    "app-router",
-                    true
-                );
-
-            }
-
-        }
-
-
-        /*
-         * System-Verbindung.
-         */
-
-        if (
-            window.HalDoSystem &&
-            typeof window.HalDoSystem.registerService ===
-            "function"
-        ) {
-
-            window.HalDoSystem.registerService(
-                "app-router",
-                api
-            );
-
-        }
-
-
-        /*
-         * App Manager Events.
-         */
-
-        const manager =
-            getAppManager();
-
-
-        if (
-            manager &&
-            typeof manager.on ===
-            "function"
-        ) {
-
-            manager.on(
-                "app-opened",
-                data => {
-
-                    if (
-                        data &&
-                        data.app &&
-                        data.app.id
-                    ) {
-
-                        state.currentApp =
-                            data.app;
-
-                    }
-
-                }
-            );
-
-
-            manager.on(
-                "app-stopped",
-                data => {
-
-                    if (
-                        data &&
-                        data.app &&
-                        state.currentApp &&
-                        data.app.id ===
-                        state.currentApp.id
-                    ) {
-
-                        state.currentApp =
-                            null;
-
-                    }
-
-                }
-            );
-
-        }
-
-
-        window.addEventListener(
-            "hashchange",
-            handleHashChange
-        );
-
-
-        window.addEventListener(
-            "popstate",
-            handlePopState
-        );
-
-
-        emit(
-            "ready",
-            getState()
-        );
-
-
-        window.dispatchEvent(
-            new CustomEvent(
-                "haldo:app-router-ready",
-                {
-
-                    detail:
-                        getState()
-
-                }
-            )
-        );
-
-
-        if (
-            CONFIG.startupDelay >
-            0
-        ) {
-
-            await new Promise(
-                resolve =>
-                    window.setTimeout(
-                        resolve,
-                        CONFIG.startupDelay
-                    )
-            );
-
-        }
-
-
-        await initializeRoute();
-
-
-        log(
-            "App Router ist bereit."
-        );
-
-
-        return getState();
-
-    }
-
-
-    /* ========================================================
-       41 — STATUS
-       ======================================================== */
-
-    function getState() {
-
-        return {
-
-            initialized:
-                state.initialized,
-
-            ready:
-                state.ready,
-
-            managerReady:
-                isManagerReady(),
-
-            registryReady:
-                isRegistryReady(),
-
-            currentRoute:
-                state.currentRoute,
-
-            previousRoute:
-                state.previousRoute,
-
-            currentApp:
-                state.currentApp,
-
-            previousApp:
-                state.previousApp,
-
-            navigationCount:
-                state.navigationCount,
-
-            historyCount:
-                state.historyCount,
-
-            lastError:
-                state.lastError,
-
-            startTime:
-                state.startTime
-
-        };
-
-    }
-
-
-    /* ========================================================
-       42 — DIAGNOSE
+       28 — DIAGNOSE
        ======================================================== */
 
     function diagnose() {
@@ -3853,27 +1870,228 @@
                 CONFIG.version,
 
             state:
-                getState(),
-
-            currentRoute:
-                getCurrentRoute(),
-
-            currentApp:
-                getCurrentApp(),
-
-            routeHistory:
-                getRouteHistory(),
+                {
+                    ...state
+                },
 
             dependencies:
-                checkDependencies()
+                checkDependencies(),
 
+            apps:
+                getAllApps().length,
+
+            enabledApps:
+                getEnabledApps().length,
+
+            favorites:
+                getFavorites().length,
+
+            categories:
+                getCategories(),
+
+            container:
+                Boolean(
+                    getContainer()
+                )
         };
-
     }
 
 
     /* ========================================================
-       43 — PUBLIC API
+       29 — STATE
+       ======================================================== */
+
+    function getState() {
+
+        return {
+            ...state
+        };
+    }
+
+
+    /* ========================================================
+       30 — INITIALISIERUNG
+       ======================================================== */
+
+    function init() {
+
+        if (
+            state.initialized
+        ) {
+
+            return getState();
+        }
+
+
+        checkDependencies();
+
+
+        state.initialized =
+            true;
+
+        state.ready =
+            true;
+
+
+        /*
+         * Kernel
+         */
+
+        if (
+            window.HalDoKernel &&
+            typeof window.HalDoKernel.registerModule ===
+                "function"
+        ) {
+
+            window.HalDoKernel.registerModule(
+                "launcher",
+                api
+            );
+
+            if (
+                typeof window.HalDoKernel.setModuleReady ===
+                    "function"
+            ) {
+
+                window.HalDoKernel.setModuleReady(
+                    "launcher",
+                    true
+                );
+            }
+        }
+
+
+        /*
+         * System
+         */
+
+        if (
+            window.HalDoSystem &&
+            typeof window.HalDoSystem.registerService ===
+                "function"
+        ) {
+
+            window.HalDoSystem.registerService(
+                "launcher",
+                api
+            );
+        }
+
+
+        /*
+         * Tastatur
+         */
+
+        if (
+            CONFIG.keyboardEnabled
+        ) {
+
+            document.addEventListener(
+                "keydown",
+                handleKeyboard
+            );
+        }
+
+
+        /*
+         * Manager Events
+         */
+
+        const manager =
+            getManager();
+
+        if (
+            manager &&
+            typeof manager.on ===
+            "function"
+        ) {
+
+            manager.on(
+                "app-opened",
+                data => {
+
+                    emit(
+                        "manager-app-opened",
+                        data
+                    );
+
+                    renderGrid();
+                }
+            );
+
+
+            manager.on(
+                "app-registered",
+                data => {
+
+                    emit(
+                        "app-list-changed",
+                        data
+                    );
+
+                    renderGrid();
+                }
+            );
+
+
+            manager.on(
+                "app-unregistered",
+                data => {
+
+                    emit(
+                        "app-list-changed",
+                        data
+                    );
+
+                    renderGrid();
+                }
+            );
+
+
+            manager.on(
+                "favorite-changed",
+                data => {
+
+                    emit(
+                        "favorite-changed",
+                        data
+                    );
+
+                    renderGrid();
+                }
+            );
+        }
+
+
+        /*
+         * Nur rendern, wenn Container existiert.
+         */
+
+        if (
+            getContainer()
+        ) {
+
+            render();
+        }
+
+
+        emit(
+            "ready",
+            getState()
+        );
+
+
+        log(
+            "Zentraler Launcher ist bereit."
+        );
+
+
+        return getState();
+    }
+
+
+    /* ========================================================
+       31 — PUBLIC API
        ======================================================== */
 
     const api = {
@@ -3884,75 +2102,64 @@
         version:
             CONFIG.version,
 
-
         init,
 
         on,
 
         off,
 
+        getAllApps,
+
+        getEnabledApps,
+
+        getApp,
+
+        getFavorites,
+
+        getCategories,
+
+        getVisibleApps,
+
+        searchApps:
+            setSearch,
+
+        setSearch,
+
+        clearSearch,
+
+        setCategory,
+
+        showFavorites,
+
+        showAllApps,
+
+        toggleFavorite,
+
+        openApp,
+
+        show,
+
+        hide,
+
+        render,
+
+        renderGrid,
 
         normalizeAppId,
 
-        normalizeRoute,
-
-        parseRoute,
-
-
-        createAppRoute,
-
-        isHomeRoute,
-
-        isAppRoute,
-
-        getAppIdFromRoute,
-
-
-        getCurrentRoute,
-
-        getCurrentApp,
-
-
-        navigate,
-
-        navigateToApp,
-
-        replace,
-
-        home,
-
-
-        back,
-
-        forward,
-
-
-        reload,
-
-
-        searchRoutes,
-
-
-        clearRouteHistory,
-
-        getRouteHistory,
-
-
-        getHashRoute,
-
-
         getState,
 
-        diagnose
+        diagnose,
 
+        checkDependencies
     };
 
 
     /* ========================================================
-       44 — GLOBALE API
+       32 — GLOBALE API
        ======================================================== */
 
-    window.HalDoAppRouter =
+    window.HalDoLauncher =
         api;
 
 
@@ -3961,92 +2168,19 @@
         {};
 
 
-    window.HalDoOS.appRouter =
+    window.HalDoOS.launcher =
         api;
 
 
     /* ========================================================
-       45 — BOOT
+       33 — BOOT
        ======================================================== */
 
     function boot() {
 
-        if (
-            isManagerReady() &&
-            isRegistryReady()
-        ) {
-
-            init();
-
-            return;
-
-        }
-
-
-        let attempts =
-            0;
-
-
-        const maxAttempts =
-            CONFIG.moduleWaitAttempts;
-
-
-        const timer =
-            window.setInterval(
-                function () {
-
-                    attempts++;
-
-
-                    if (
-                        isManagerReady() &&
-                        isRegistryReady()
-                    ) {
-
-                        window.clearInterval(
-                            timer
-                        );
-
-
-                        init();
-
-
-                        return;
-
-                    }
-
-
-                    if (
-                        attempts >=
-                        maxAttempts
-                    ) {
-
-                        window.clearInterval(
-                            timer
-                        );
-
-
-                        state.lastError =
-                            "App Manager oder App Registry konnte beim Start nicht gefunden werden.";
-
-
-                        log(
-                            state.lastError,
-                            "error"
-                        );
-
-                    }
-
-                },
-                CONFIG.moduleWaitInterval
-            );
-
+        init();
     }
 
-
-    /* ========================================================
-       46 — DOM START
-       ======================================================== */
 
     if (
         document.readyState ===
@@ -4057,16 +2191,13 @@
             "DOMContentLoaded",
             boot,
             {
-                once:
-                    true
+                once: true
             }
         );
 
-    }
-    else {
+    } else {
 
         boot();
-
     }
 
 
@@ -4074,5 +2205,5 @@
 
 
 /* ============================================================
-   ENDE — HALDO AI OS 18 APP ROUTER
+   ENDE — HALDO AI OS 18 LAUNCHER
    ============================================================ */
