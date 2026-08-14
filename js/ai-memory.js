@@ -1,7 +1,7 @@
 // ============================================================
 // HALDO AI OS 18
-// AI MEMORY ENGINE
-// PART 80
+// AI MEMORY
+// PART 85
 // ============================================================
 
 (function (window, document) {
@@ -18,34 +18,45 @@
     window.HalDoOS =
         window.HalDoOS || {};
 
-    // --------------------------------------------------------
-    // CONFIGURATION
-    // --------------------------------------------------------
-
     const CONFIG = {
 
         name:
-            "HalDo AI Memory Engine",
+            "HalDo AI Memory",
 
         version:
             "18.0.0",
 
+        mode:
+            "Professional Ultimate Foundation",
+
         storageKey:
             "haldo-ai-memory",
-
-        conversationKey:
-            "haldo-ai-conversations",
 
         maxMemories:
             2000,
 
-        maxContext:
-            20,
-
         maxHistory:
-            1000,
+            500,
 
-        autoPersist:
+        maxSearchResults:
+            50,
+
+        autoSave:
+            true,
+
+        enabled:
+            true,
+
+        rememberConversation:
+            true,
+
+        rememberCorrections:
+            true,
+
+        rememberWriting:
+            true,
+
+        rememberReading:
             true
 
     };
@@ -62,31 +73,34 @@
         ready:
             false,
 
+        memoryCount:
+            0,
+
+        searchCount:
+            0,
+
+        writeCount:
+            0,
+
+        readCount:
+            0,
+
+        correctionCount:
+            0,
+
+        errors:
+            [],
+
         memories:
             [],
 
         history:
             [],
 
-        conversations:
-            new Map(),
-
-        searches:
-            0,
-
-        stores:
-            0,
-
-        recalls:
-            0,
-
-        errors:
-            [],
-
-        lastSearch:
+        lastMemory:
             null,
 
-        lastRecall:
+        lastSearch:
             null
 
     };
@@ -107,9 +121,7 @@
             typeof callback !==
             "function"
         ) {
-
             return () => {};
-
         }
 
         if (
@@ -184,9 +196,7 @@
                         detail
                     );
 
-                } catch (
-                    error
-                ) {
+                } catch (error) {
 
                     console.error(
                         "[HalDoAIMemory]",
@@ -210,9 +220,7 @@
                 )
             );
 
-        } catch (
-            error
-        ) {}
+        } catch (error) {}
 
     }
 
@@ -225,34 +233,16 @@
     ) {
 
         return String(
-            value ??
-            ""
+            value ?? ""
         ).trim();
 
     }
 
-    function normalize(
-        value
-    ) {
-
-        return clean(
-            value
-        )
-        .toLowerCase()
-        .replace(
-            /\s+/g,
-            " "
-        );
-
-    }
-
     function createId(
-        prefix =
-            "memory"
+        prefix = "memory"
     ) {
 
         return (
-
             prefix +
             "-" +
             Date.now().toString(36) +
@@ -260,8 +250,22 @@
             Math.random()
                 .toString(36)
                 .slice(2, 10)
-
         );
+
+    }
+
+    function normalizeText(
+        value
+    ) {
+
+        return clean(
+            value
+        )
+            .toLowerCase()
+            .replace(
+                /\s+/g,
+                " "
+            );
 
     }
 
@@ -272,7 +276,7 @@
     }
 
     // --------------------------------------------------------
-    // STORAGE ACCESS
+    // STORAGE CONNECTION
     // --------------------------------------------------------
 
     function getStorage() {
@@ -297,18 +301,13 @@
 
         if (storage) {
 
-            const methods = [
-
-                "set",
-                "save",
-                "write",
-                "store"
-
-            ];
-
             for (
-                const method of
-                methods
+                const method of [
+                    "set",
+                    "save",
+                    "write",
+                    "store"
+                ]
             ) {
 
                 if (
@@ -327,17 +326,11 @@
 
                     return true;
 
-                } catch (
-                    error
-                ) {}
+                } catch (error) {}
 
             }
 
         }
-
-        /*
-         * Fallback auf localStorage.
-         */
 
         try {
 
@@ -350,9 +343,11 @@
 
             return true;
 
-        } catch (
-            error
-        ) {
+        } catch (error) {
+
+            recordError(
+                error
+            );
 
             return false;
 
@@ -370,18 +365,13 @@
 
         if (storage) {
 
-            const methods = [
-
-                "get",
-                "load",
-                "read",
-                "retrieve"
-
-            ];
-
             for (
-                const method of
-                methods
+                const method of [
+                    "get",
+                    "load",
+                    "read",
+                    "retrieve"
+                ]
             ) {
 
                 if (
@@ -409,9 +399,7 @@
 
                     }
 
-                } catch (
-                    error
-                ) {}
+                } catch (error) {}
 
             }
 
@@ -425,16 +413,16 @@
                 );
 
             if (!raw) {
+
                 return fallback;
+
             }
 
             return JSON.parse(
                 raw
             );
 
-        } catch (
-            error
-        ) {
+        } catch (error) {
 
             return fallback;
 
@@ -442,66 +430,31 @@
 
     }
 
-    async function storageRemove(
-        key
-    ) {
+    async function persist() {
 
-        const storage =
-            getStorage();
-
-        if (storage) {
-
-            const methods = [
-
-                "remove",
-                "delete",
-                "clearKey"
-
-            ];
-
-            for (
-                const method of
-                methods
-            ) {
-
-                if (
-                    typeof storage[method] !==
-                    "function"
-                ) {
-                    continue;
-                }
-
-                try {
-
-                    await storage[method](
-                        key
-                    );
-
-                    return true;
-
-                } catch (
-                    error
-                ) {}
-
-            }
-
-        }
-
-        try {
-
-            localStorage.removeItem(
-                key
-            );
-
-            return true;
-
-        } catch (
-            error
+        if (
+            !CONFIG.autoSave
         ) {
-
             return false;
-
         }
+
+        const payload = {
+
+            version:
+                CONFIG.version,
+
+            updatedAt:
+                now(),
+
+            memories:
+                state.memories
+
+        };
+
+        return storageSet(
+            CONFIG.storageKey,
+            payload
+        );
 
     }
 
@@ -510,109 +463,129 @@
     // --------------------------------------------------------
 
     function normalizeMemory(
-        input
+        input,
+        options = {}
     ) {
+
+        let data = {};
 
         if (
             typeof input ===
             "string"
         ) {
 
-            return {
+            data.content =
+                input;
 
-                id:
-                    createId(),
+        } else if (
+            input &&
+            typeof input ===
+            "object"
+        ) {
 
-                type:
-                    "text",
-
-                content:
-                    clean(
-                        input
-                    ),
-
-                tags:
-                    [],
-
-                importance:
-                    1,
-
-                createdAt:
-                    now(),
-
-                updatedAt:
-                    now(),
-
-                accessCount:
-                    0,
-
-                lastAccessedAt:
-                    null
-
+            data = {
+                ...input
             };
 
         }
 
-        const memory =
-            input || {};
+        const content =
+            clean(
+                data.content ??
+                data.text ??
+                data.message ??
+                data.value ??
+                ""
+            );
+
+        const type =
+            clean(
+                data.type ||
+                options.type ||
+                "general"
+            ) || "general";
+
+        const language =
+            clean(
+                data.language ||
+                options.language ||
+                window.HalDoAILanguage?.getLanguage?.() ||
+                "de"
+            ) || "de";
+
+        const tags =
+            Array.isArray(
+                data.tags
+            )
+                ? [
+                    ...new Set(
+                        data.tags
+                            .map(
+                                tag =>
+                                    clean(tag)
+                            )
+                            .filter(
+                                Boolean
+                            )
+                    )
+                ]
+                : [];
 
         return {
 
             id:
-                memory.id ||
+                data.id ||
                 createId(),
 
-            type:
-                memory.type ||
-                "text",
+            type,
 
-            content:
-                clean(
-                    memory.content ??
-                    memory.text ??
-                    memory.value ??
-                    ""
-                ),
+            content,
 
-            title:
-                memory.title ||
-                "",
+            text:
+                content,
 
-            tags:
-                Array.isArray(
-                    memory.tags
-                )
-                    ? memory.tags
-                    : [],
+            language,
 
-            category:
-                memory.category ||
-                "general",
-
-            language:
-                memory.language ||
-                null,
-
-            importance:
-                Number(
-                    memory.importance ??
-                    1
-                ),
+            tags,
 
             source:
-                memory.source ||
+                data.source ||
+                options.source ||
                 "ai",
 
-            conversationId:
-                memory.conversationId ||
-                null,
+            importance:
+                Number.isFinite(
+                    Number(
+                        data.importance
+                    )
+                )
+                    ? Number(
+                        data.importance
+                    )
+                    : 0.5,
+
+            confidence:
+                Number.isFinite(
+                    Number(
+                        data.confidence
+                    )
+                )
+                    ? Number(
+                        data.confidence
+                    )
+                    : 1,
 
             metadata:
-                memory.metadata ||
-                {},
+                data.metadata &&
+                typeof data.metadata ===
+                "object"
+                    ? {
+                        ...data.metadata
+                    }
+                    : {},
 
             createdAt:
-                memory.createdAt ||
+                data.createdAt ||
                 now(),
 
             updatedAt:
@@ -620,12 +593,11 @@
 
             accessCount:
                 Number(
-                    memory.accessCount ||
-                    0
-                ),
+                    data.accessCount
+                ) || 0,
 
             lastAccessedAt:
-                memory.lastAccessedAt ||
+                data.lastAccessedAt ||
                 null
 
         };
@@ -633,196 +605,37 @@
     }
 
     // --------------------------------------------------------
-    // SAVE MEMORY DATABASE
+    // ADD / REMEMBER
     // --------------------------------------------------------
 
-    async function persist() {
-
-        if (
-            !CONFIG.autoPersist
-        ) {
-
-            return false;
-
-        }
-
-        const result =
-            await storageSet(
-                CONFIG.storageKey,
-                {
-
-                    version:
-                        CONFIG.version,
-
-                    updatedAt:
-                        now(),
-
-                    memories:
-                        state.memories
-
-                }
-            );
-
-        emit(
-            "persisted",
-            {
-                ok:
-                    result
-            }
-        );
-
-        return result;
-
-    }
-
-    async function persistConversations() {
-
-        const conversations =
-            Array.from(
-                state.conversations.values()
-            );
-
-        return storageSet(
-            CONFIG.conversationKey,
-            {
-
-                version:
-                    CONFIG.version,
-
-                updatedAt:
-                    now(),
-
-                conversations
-
-            }
-        );
-
-    }
-
-    // --------------------------------------------------------
-    // LOAD
-    // --------------------------------------------------------
-
-    async function load() {
-
-        try {
-
-            const data =
-                await storageGet(
-                    CONFIG.storageKey,
-                    null
-                );
-
-            if (
-                data &&
-                Array.isArray(
-                    data.memories
-                )
-            ) {
-
-                state.memories =
-                    data.memories.map(
-                        memory =>
-                            normalizeMemory(
-                                memory
-                            )
-                    );
-
-            }
-
-            const conversations =
-                await storageGet(
-                    CONFIG.conversationKey,
-                    null
-                );
-
-            if (
-                conversations &&
-                Array.isArray(
-                    conversations.conversations
-                )
-            ) {
-
-                state.conversations =
-                    new Map(
-                        conversations.conversations.map(
-                            conversation => [
-
-                                conversation.id,
-
-                                conversation
-
-                            ]
-                        )
-                    );
-
-            }
-
-            emit(
-                "loaded",
-                {
-
-                    memories:
-                        state.memories.length,
-
-                    conversations:
-                        state.conversations.size
-
-                }
-            );
-
-            return true;
-
-        } catch (
-            error
-        ) {
-
-            recordError(
-                error
-            );
-
-            return false;
-
-        }
-
-    }
-
-    // --------------------------------------------------------
-    // STORE
-    // --------------------------------------------------------
-
-    async function store(
+    async function remember(
         input,
         options = {}
     ) {
 
-        const memory =
-            normalizeMemory({
-
-                ...(
-                    typeof input ===
-                    "object"
-                        ? input
-                        : {}
-                ),
-
-                content:
-                    typeof input ===
-                    "string"
-                        ? input
-                        : (
-                            input?.content ??
-                            input?.text ??
-                            input?.value
-                        ),
-
-                ...options
-
-            });
-
         if (
-            !memory.content
+            !CONFIG.enabled
         ) {
+
+            return {
+
+                ok:
+                    false,
+
+                error:
+                    "MEMORY_DISABLED"
+
+            };
+
+        }
+
+        const memory =
+            normalizeMemory(
+                input,
+                options
+            );
+
+        if (!memory.content) {
 
             return {
 
@@ -837,20 +650,98 @@
         }
 
         /*
-         * Duplikate vermeiden.
+         * Bestimmte Memory-Typen können
+         * über die Konfiguration gesteuert
+         * werden.
+         */
+
+        if (
+            memory.type ===
+            "conversation" &&
+            !CONFIG.rememberConversation
+        ) {
+
+            return {
+
+                ok:
+                    false,
+
+                error:
+                    "CONVERSATION_MEMORY_DISABLED"
+
+            };
+
+        }
+
+        if (
+            memory.type ===
+            "correction" &&
+            !CONFIG.rememberCorrections
+        ) {
+
+            return {
+
+                ok:
+                    false,
+
+                error:
+                    "CORRECTION_MEMORY_DISABLED"
+
+            };
+
+        }
+
+        if (
+            memory.type ===
+            "writing" &&
+            !CONFIG.rememberWriting
+        ) {
+
+            return {
+
+                ok:
+                    false,
+
+                error:
+                    "WRITING_MEMORY_DISABLED"
+
+            };
+
+        }
+
+        if (
+            memory.type ===
+            "reading" &&
+            !CONFIG.rememberReading
+        ) {
+
+            return {
+
+                ok:
+                    false,
+
+                error:
+                    "READING_MEMORY_DISABLED"
+
+            };
+
+        }
+
+        /*
+         * Duplikate erkennen.
          */
 
         const duplicate =
             state.memories.find(
-                existing =>
-
-                    normalize(
-                        existing.content
+                item =>
+                    normalizeText(
+                        item.content
                     ) ===
-                    normalize(
+                    normalizeText(
                         memory.content
-                    )
-
+                    ) &&
+                    item.type ===
+                    memory.type
             );
 
         if (duplicate) {
@@ -860,14 +751,28 @@
 
             duplicate.accessCount++;
 
+            state.lastMemory =
+                duplicate;
+
             await persist();
+
+            emit(
+                "memory-updated",
+                {
+                    memory:
+                        duplicate
+                }
+            );
 
             return {
 
                 ok:
                     true,
 
-                duplicate:
+                created:
+                    false,
+
+                updated:
                     true,
 
                 memory:
@@ -881,10 +786,38 @@
             memory
         );
 
-        state.stores++;
+        state.memoryCount =
+            state.memories.length;
+
+        state.writeCount++;
+
+        state.lastMemory =
+            memory;
+
+        state.history.push({
+
+            action:
+                "remember",
+
+            memoryId:
+                memory.id,
+
+            timestamp:
+                now()
+
+        });
+
+        if (
+            state.history.length >
+            CONFIG.maxHistory
+        ) {
+
+            state.history.shift();
+
+        }
 
         /*
-         * Maximale Größe.
+         * Maximale Anzahl verwalten.
          */
 
         if (
@@ -893,27 +826,23 @@
         ) {
 
             state.memories.sort(
-                (
-                    a,
-                    b
-                ) => {
-
-                    const scoreA =
+                (a, b) =>
+                    (
                         Number(
-                            a.importance ||
-                            1
-                        );
-
-                    const scoreB =
+                            b.importance
+                        ) +
                         Number(
-                            b.importance ||
-                            1
-                        );
-
-                    return scoreB -
-                        scoreA;
-
-                }
+                            b.updatedAt
+                        ) / 1e15
+                    ) -
+                    (
+                        Number(
+                            a.importance
+                        ) +
+                        Number(
+                            a.updatedAt
+                        ) / 1e15
+                    )
             );
 
             state.memories =
@@ -922,12 +851,15 @@
                     CONFIG.maxMemories
                 );
 
+            state.memoryCount =
+                state.memories.length;
+
         }
 
         await persist();
 
         emit(
-            "stored",
+            "memory-added",
             {
                 memory
             }
@@ -938,46 +870,675 @@
             ok:
                 true,
 
+            created:
+                true,
+
+            updated:
+                false,
+
             memory
 
         };
 
     }
 
-    // --------------------------------------------------------
-    // REMEMBER
-    // --------------------------------------------------------
-
-    async function remember(
+    async function add(
         input,
         options = {}
     ) {
 
-        return store(
+        return remember(
             input,
+            options
+        );
+
+    }
+
+    async function store(
+        input,
+        options = {}
+    ) {
+
+        return remember(
+            input,
+            options
+        );
+
+    }
+
+    async function save(
+        input,
+        options = {}
+    ) {
+
+        return remember(
+            input,
+            options
+        );
+
+    }
+
+    async function rememberMessage(
+        message,
+        options = {}
+    ) {
+
+        return remember(
             {
 
-                source:
-                    options.source ||
-                    "conversation",
+                ...(
+                    typeof message ===
+                    "object"
+                        ? message
+                        : {
+                            content:
+                                message
+                        }
+                ),
 
-                category:
-                    options.category ||
-                    "conversation",
+                type:
+                    options.type ||
+                    "conversation"
 
-                importance:
-                    options.importance ??
-                    2,
-
-                ...options
-
-            }
+            },
+            options
         );
 
     }
 
     // --------------------------------------------------------
-    // REMOVE
+    // SEARCH / RECALL
+    // --------------------------------------------------------
+
+    function calculateScore(
+        memory,
+        query,
+        options = {}
+    ) {
+
+        const normalizedQuery =
+            normalizeText(
+                query
+            );
+
+        if (!normalizedQuery) {
+
+            return 0;
+
+        }
+
+        const content =
+            normalizeText(
+                memory.content
+            );
+
+        const tags =
+            memory.tags
+                .map(
+                    tag =>
+                        normalizeText(
+                            tag
+                        )
+                );
+
+        let score =
+            0;
+
+        /*
+         * Exakter Inhalt.
+         */
+
+        if (
+            content ===
+            normalizedQuery
+        ) {
+
+            score +=
+                1;
+
+        }
+
+        /*
+         * Gesamte Query enthalten.
+         */
+
+        if (
+            content.includes(
+                normalizedQuery
+            )
+        ) {
+
+            score +=
+                0.7;
+
+        }
+
+        /*
+         * Wörter vergleichen.
+         */
+
+        const words =
+            normalizedQuery
+                .split(
+                    /\s+/
+                )
+                .filter(
+                    word =>
+                        word.length >
+                        1
+                );
+
+        if (
+            words.length
+        ) {
+
+            let matches =
+                0;
+
+            for (
+                const word of words
+            ) {
+
+                if (
+                    content.includes(
+                        word
+                    )
+                ) {
+
+                    matches++;
+
+                }
+
+                if (
+                    tags.some(
+                        tag =>
+                            tag.includes(
+                                word
+                            )
+                    )
+                ) {
+
+                    matches +=
+                        0.5;
+
+                }
+
+            }
+
+            score +=
+                (
+                    matches /
+                    words.length
+                ) *
+                0.8;
+
+        }
+
+        /*
+         * Typ bevorzugen.
+         */
+
+        if (
+            options.type &&
+            memory.type ===
+            options.type
+        ) {
+
+            score +=
+                0.4;
+
+        }
+
+        /*
+         * Sprache bevorzugen.
+         */
+
+        if (
+            options.language &&
+            memory.language ===
+            options.language
+        ) {
+
+            score +=
+                0.15;
+
+        }
+
+        /*
+         * Wichtigkeit.
+         */
+
+        score +=
+            Math.max(
+                0,
+                Math.min(
+                    1,
+                    Number(
+                        memory.importance
+                    )
+                )
+            ) *
+            0.2;
+
+        return score;
+
+    }
+
+    async function recall(
+        query,
+        options = {}
+    ) {
+
+        if (
+            !CONFIG.enabled
+        ) {
+
+            return [];
+
+        }
+
+        const input =
+            clean(
+                query
+            );
+
+        state.searchCount++;
+
+        if (!input) {
+
+            return [];
+
+        }
+
+        const limit =
+            Math.min(
+                Number(
+                    options.limit
+                ) || 10,
+                CONFIG.maxSearchResults
+            );
+
+        const results =
+            state.memories
+                .map(
+                    memory => ({
+
+                        memory,
+
+                        score:
+                            calculateScore(
+                                memory,
+                                input,
+                                options
+                            )
+
+                    })
+                )
+                .filter(
+                    item =>
+                        item.score >
+                        (
+                            Number(
+                                options.threshold
+                            ) ||
+                            0.05
+                        )
+                )
+                .sort(
+                    (a, b) =>
+                        b.score -
+                        a.score
+                )
+                .slice(
+                    0,
+                    limit
+                );
+
+        for (
+            const item of results
+        ) {
+
+            item.memory.accessCount++;
+
+            item.memory.lastAccessedAt =
+                now();
+
+        }
+
+        state.lastSearch = {
+
+            query:
+                input,
+
+            count:
+                results.length,
+
+            timestamp:
+                now()
+
+        };
+
+        emit(
+            "memory-recalled",
+            {
+
+                query:
+                    input,
+
+                results
+
+            }
+        );
+
+        return results.map(
+            item => ({
+
+                ...item.memory,
+
+                score:
+                    item.score
+
+            })
+        );
+
+    }
+
+    async function search(
+        query,
+        options = {}
+    ) {
+
+        return recall(
+            query,
+            options
+        );
+
+    }
+
+    async function find(
+        query,
+        options = {}
+    ) {
+
+        return recall(
+            query,
+            options
+        );
+
+    }
+
+    async function query(
+        text,
+        options = {}
+    ) {
+
+        return recall(
+            text,
+            options
+        );
+
+    }
+
+    async function retrieve(
+        text,
+        options = {}
+    ) {
+
+        return recall(
+            text,
+            options
+        );
+
+    }
+
+    // --------------------------------------------------------
+    // SPECIALIZED MEMORY
+    // --------------------------------------------------------
+
+    async function rememberConversation(
+        user,
+        assistant,
+        options = {}
+    ) {
+
+        return remember(
+            {
+
+                type:
+                    "conversation",
+
+                content:
+                    `User: ${clean(user)}\nAssistant: ${clean(assistant)}`,
+
+                language:
+                    options.language,
+
+                tags:
+                    [
+                        "conversation",
+                        "chat"
+                    ],
+
+                metadata:
+                    {
+                        requestId:
+                            options.requestId ||
+                            null
+                    }
+
+            },
+            options
+        );
+
+    }
+
+    async function rememberCorrection(
+        original,
+        corrected,
+        options = {}
+    ) {
+
+        const originalText =
+            clean(
+                original
+            );
+
+        const correctedText =
+            clean(
+                corrected
+            );
+
+        return remember(
+            {
+
+                type:
+                    "correction",
+
+                content:
+                    correctedText,
+
+                tags:
+                    [
+                        "correction",
+                        "grammar",
+                        "spelling",
+                        "writing"
+                    ],
+
+                metadata:
+                    {
+
+                        original:
+                            originalText,
+
+                        corrected:
+                            correctedText,
+
+                        language:
+                            options.language ||
+                            "de"
+
+                    },
+
+                language:
+                    options.language
+
+            },
+            options
+        );
+
+    }
+
+    async function rememberWriting(
+        text,
+        options = {}
+    ) {
+
+        return remember(
+            {
+
+                type:
+                    "writing",
+
+                content:
+                    text,
+
+                tags:
+                    [
+                        "writing",
+                        "formulation"
+                    ],
+
+                metadata:
+                    {
+                        purpose:
+                            options.purpose ||
+                            "general"
+                    },
+
+                language:
+                    options.language
+
+            },
+            options
+        );
+
+    }
+
+    async function rememberReading(
+        text,
+        options = {}
+    ) {
+
+        return remember(
+            {
+
+                type:
+                    "reading",
+
+                content:
+                    text,
+
+                tags:
+                    [
+                        "reading",
+                        "analysis"
+                    ],
+
+                metadata:
+                    {
+                        source:
+                            options.source ||
+                            null
+                    },
+
+                language:
+                    options.language
+
+            },
+            options
+        );
+
+    }
+
+    // --------------------------------------------------------
+    // GET MEMORY
+    // --------------------------------------------------------
+
+    function get(
+        id
+    ) {
+
+        return (
+            state.memories.find(
+                memory =>
+                    memory.id ===
+                    id
+            ) ||
+            null
+        );
+
+    }
+
+    function getAll(
+        options = {}
+    ) {
+
+        let memories =
+            [
+                ...state.memories
+            ];
+
+        if (
+            options.type
+        ) {
+
+            memories =
+                memories.filter(
+                    memory =>
+                        memory.type ===
+                        options.type
+                );
+
+        }
+
+        if (
+            options.language
+        ) {
+
+            memories =
+                memories.filter(
+                    memory =>
+                        memory.language ===
+                        options.language
+                );
+
+        }
+
+        if (
+            Number.isFinite(
+                Number(
+                    options.limit
+                )
+            )
+        ) {
+
+            memories =
+                memories.slice(
+                    0,
+                    Number(
+                        options.limit
+                    )
+                );
+
+        }
+
+        return memories;
+
+    }
+
+    // --------------------------------------------------------
+    // REMOVE / CLEAR
     // --------------------------------------------------------
 
     async function remove(
@@ -996,7 +1557,15 @@
             -1
         ) {
 
-            return false;
+            return {
+
+                ok:
+                    false,
+
+                error:
+                    "MEMORY_NOT_FOUND"
+
+            };
 
         }
 
@@ -1006,478 +1575,16 @@
                 1
             )[0];
 
+        state.memoryCount =
+            state.memories.length;
+
         await persist();
 
         emit(
-            "removed",
+            "memory-removed",
             {
                 memory:
                     removed
-            }
-        );
-
-        return true;
-
-    }
-
-    // --------------------------------------------------------
-    // CLEAR
-    // --------------------------------------------------------
-
-    async function clear() {
-
-        state.memories =
-            [];
-
-        state.history =
-            [];
-
-        await persist();
-
-        emit(
-            "cleared"
-        );
-
-        return true;
-
-    }
-
-    // --------------------------------------------------------
-    // SEARCH
-    // --------------------------------------------------------
-
-    function scoreMemory(
-        memory,
-        queryTokens
-    ) {
-
-        const text =
-            normalize(
-                [
-
-                    memory.content,
-
-                    memory.title,
-
-                    memory.category,
-
-                    memory.source,
-
-                    ...(memory.tags || [])
-
-                ].join(
-                    " "
-                )
-            );
-
-        if (!text) {
-            return 0;
-        }
-
-        let score =
-            0;
-
-        for (
-            const token of
-            queryTokens
-        ) {
-
-            if (!token) {
-                continue;
-            }
-
-            if (
-                text.includes(
-                    token
-                )
-            ) {
-
-                score +=
-                    token.length;
-
-            }
-
-            if (
-                normalize(
-                    memory.title
-                ).includes(
-                    token
-                )
-            ) {
-
-                score +=
-                    10;
-
-            }
-
-            if (
-                (
-                    memory.tags ||
-                    []
-                )
-                .map(
-                    tag =>
-                        normalize(
-                            tag
-                        )
-                )
-                .includes(
-                    token
-                )
-            ) {
-
-                score +=
-                    15;
-
-            }
-
-        }
-
-        /*
-         * Wichtigkeit.
-         */
-
-        score +=
-            Number(
-                memory.importance ||
-                1
-            ) * 2;
-
-        /*
-         * Aktualität.
-         */
-
-        const age =
-            Math.max(
-                0,
-                now() -
-                Number(
-                    memory.updatedAt ||
-                    memory.createdAt ||
-                    now()
-                )
-            );
-
-        const days =
-            age /
-            86400000;
-
-        if (
-            days <
-            1
-        ) {
-
-            score +=
-                5;
-
-        } else if (
-            days <
-            7
-        ) {
-
-            score +=
-                2;
-
-        }
-
-        return score;
-
-    }
-
-    function search(
-        query,
-        options = {}
-    ) {
-
-        const text =
-            clean(
-                query
-            );
-
-        if (!text) {
-
-            return [];
-
-        }
-
-        state.searches++;
-
-        const tokens =
-            normalize(
-                text
-            )
-            .split(
-                /\s+/
-            )
-            .filter(
-                token =>
-                    token.length >
-                    1
-            );
-
-        const limit =
-            Number(
-                options.limit ||
-                CONFIG.maxContext
-            );
-
-        const results =
-            state.memories
-                .map(
-                    memory => ({
-
-                        memory,
-
-                        score:
-                            scoreMemory(
-                                memory,
-                                tokens
-                            )
-
-                    })
-                )
-                .filter(
-                    result =>
-                        result.score >
-                        0
-                )
-                .sort(
-                    (
-                        a,
-                        b
-                    ) =>
-                        b.score -
-                        a.score
-                )
-                .slice(
-                    0,
-                    limit
-                );
-
-        state.lastSearch = {
-
-            query:
-                text,
-
-            timestamp:
-                now(),
-
-            results:
-                results.length
-
-        };
-
-        /*
-         * Zugriff aktualisieren.
-         */
-
-        results.forEach(
-            result => {
-
-                result.memory.accessCount++;
-
-                result.memory.lastAccessedAt =
-                    now();
-
-            }
-        );
-
-        emit(
-            "searched",
-            {
-
-                query:
-                    text,
-
-                results
-
-            }
-        );
-
-        return results;
-
-    }
-
-    // --------------------------------------------------------
-    // RECALL
-    // --------------------------------------------------------
-
-    function recall(
-        query,
-        options = {}
-    ) {
-
-        const results =
-            search(
-                query,
-                options
-            );
-
-        state.recalls++;
-
-        state.lastRecall = {
-
-            query:
-                clean(
-                    query
-                ),
-
-            timestamp:
-                now(),
-
-            results:
-                results.length
-
-        };
-
-        return results.map(
-            result =>
-                result.memory
-        );
-
-    }
-
-    // --------------------------------------------------------
-    // GET RELEVANT CONTEXT
-    // --------------------------------------------------------
-
-    function getRelevant(
-        query,
-        options = {}
-    ) {
-
-        const memories =
-            recall(
-                query,
-                {
-
-                    limit:
-                        options.limit ||
-                        CONFIG.maxContext
-
-                }
-            );
-
-        return memories.map(
-            memory => ({
-
-                id:
-                    memory.id,
-
-                content:
-                    memory.content,
-
-                title:
-                    memory.title,
-
-                category:
-                    memory.category,
-
-                importance:
-                    memory.importance,
-
-                source:
-                    memory.source
-
-            })
-        );
-
-    }
-
-    // --------------------------------------------------------
-    // GET CONTEXT TEXT
-    // --------------------------------------------------------
-
-    function getContext(
-        query,
-        options = {}
-    ) {
-
-        const relevant =
-            getRelevant(
-                query,
-                options
-            );
-
-        if (
-            !relevant.length
-        ) {
-
-            return "";
-
-        }
-
-        return relevant
-            .map(
-                (
-                    memory,
-                    index
-                ) =>
-                    `[Memory ${index + 1}] ` +
-                    memory.content
-            )
-            .join(
-                "\n"
-            );
-
-    }
-
-    // --------------------------------------------------------
-    // CONVERSATION MEMORY
-    // --------------------------------------------------------
-
-    async function rememberConversation(
-        conversationId,
-        messages
-    ) {
-
-        if (
-            !conversationId ||
-            !Array.isArray(
-                messages
-            )
-        ) {
-
-            return {
-
-                ok:
-                    false,
-
-                error:
-                    "INVALID_CONVERSATION"
-
-            };
-
-        }
-
-        const conversation = {
-
-            id:
-                conversationId,
-
-            messages:
-                messages.map(
-                    message => ({
-                        ...message
-                    })
-                ),
-
-            updatedAt:
-                now()
-
-        };
-
-        state.conversations.set(
-            conversationId,
-            conversation
-        );
-
-        await persistConversations();
-
-        emit(
-            "conversation-stored",
-            {
-                conversation
             }
         );
 
@@ -1486,53 +1593,58 @@
             ok:
                 true,
 
-            conversation
+            memory:
+                removed
 
         };
 
     }
 
-    function getConversation(
-        conversationId
-    ) {
-
-        return (
-            state.conversations.get(
-                conversationId
-            ) ||
-            null
-        );
-
-    }
-
-    async function removeConversation(
-        conversationId
+    async function clear(
+        options = {}
     ) {
 
         if (
-            !state.conversations.has(
-                conversationId
-            )
+            options.type
         ) {
 
-            return false;
+            state.memories =
+                state.memories.filter(
+                    memory =>
+                        memory.type !==
+                        options.type
+                );
+
+        } else {
+
+            state.memories =
+                [];
 
         }
 
-        state.conversations.delete(
-            conversationId
-        );
+        state.memoryCount =
+            state.memories.length;
 
-        await persistConversations();
+        await persist();
 
         emit(
-            "conversation-removed",
+            "memory-cleared",
             {
-                conversationId
+                type:
+                    options.type ||
+                    null
             }
         );
 
-        return true;
+        return {
+
+            ok:
+                true,
+
+            count:
+                state.memoryCount
+
+        };
 
     }
 
@@ -1540,7 +1652,7 @@
     // IMPORT / EXPORT
     // --------------------------------------------------------
 
-    function exportData() {
+    function exportMemory() {
 
         return {
 
@@ -1555,30 +1667,19 @@
                     memory => ({
                         ...memory
                     })
-                ),
-
-            conversations:
-                Array.from(
-                    state.conversations.values()
-                ).map(
-                    conversation => ({
-                        ...conversation
-                    })
                 )
 
         };
 
     }
 
-    async function importData(
+    async function importMemory(
         data,
         options = {}
     ) {
 
         if (
-            !data ||
-            typeof data !==
-            "object"
+            !data
         ) {
 
             return {
@@ -1593,96 +1694,91 @@
 
         }
 
-        if (
-            options.replace ===
-            true
-        ) {
-
-            state.memories =
-                [];
-
-            state.conversations =
-                new Map();
-
-        }
-
-        if (
+        const memories =
             Array.isArray(
-                data.memories
+                data
             )
+                ? data
+                : Array.isArray(
+                    data.memories
+                )
+                    ? data.memories
+                    : [];
+
+        let imported =
+            0;
+
+        for (
+            const item of memories
         ) {
 
-            for (
-                const memory of
-                data.memories
+            const memory =
+                normalizeMemory(
+                    item
+                );
+
+            if (!memory.content) {
+                continue;
+            }
+
+            const exists =
+                state.memories.some(
+                    current =>
+                        current.id ===
+                        memory.id
+                );
+
+            if (
+                exists &&
+                !options.overwrite
             ) {
 
-                const normalized =
-                    normalizeMemory(
-                        memory
-                    );
-
-                if (
-                    normalized.content
-                ) {
-
-                    state.memories.push(
-                        normalized
-                    );
-
-                }
+                continue;
 
             }
 
-        }
+            const index =
+                state.memories.findIndex(
+                    current =>
+                        current.id ===
+                        memory.id
+                );
 
-        if (
-            Array.isArray(
-                data.conversations
-            )
-        ) {
-
-            for (
-                const conversation of
-                data.conversations
+            if (
+                index >=
+                0
             ) {
 
-                if (
-                    conversation.id
-                ) {
+                state.memories[
+                    index
+                ] = memory;
 
-                    state.conversations.set(
-                        conversation.id,
-                        conversation
-                    );
+            } else {
 
-                }
+                state.memories.push(
+                    memory
+                );
 
             }
 
-        }
+            imported++;
 
-        /*
-         * Limits anwenden.
-         */
+        }
 
         state.memories =
             state.memories.slice(
                 -CONFIG.maxMemories
             );
 
+        state.memoryCount =
+            state.memories.length;
+
         await persist();
-        await persistConversations();
 
         emit(
-            "imported",
+            "memory-imported",
             {
-                memories:
-                    state.memories.length,
-
-                conversations:
-                    state.conversations.size
-
+                imported
             }
         );
 
@@ -1691,18 +1787,71 @@
             ok:
                 true,
 
-            memories:
-                state.memories.length,
+            imported,
 
-            conversations:
-                state.conversations.size
+            count:
+                state.memoryCount
 
         };
 
     }
 
     // --------------------------------------------------------
-    // ERROR HANDLING
+    // STATUS
+    // --------------------------------------------------------
+
+    function getStatus() {
+
+        return {
+
+            name:
+                CONFIG.name,
+
+            version:
+                CONFIG.version,
+
+            mode:
+                CONFIG.mode,
+
+            initialized:
+                state.initialized,
+
+            ready:
+                state.ready,
+
+            enabled:
+                CONFIG.enabled,
+
+            memoryCount:
+                state.memories.length,
+
+            searchCount:
+                state.searchCount,
+
+            writeCount:
+                state.writeCount,
+
+            readCount:
+                state.readCount,
+
+            correctionCount:
+                state.correctionCount,
+
+            lastMemory:
+                state.lastMemory,
+
+            lastSearch:
+                state.lastSearch,
+
+            errors:
+                state.errors.length
+
+        };
+
+    }
+
+    // --------------------------------------------------------
+    // ERROR
     // --------------------------------------------------------
 
     function recordError(
@@ -1743,59 +1892,6 @@
     }
 
     // --------------------------------------------------------
-    // STATUS
-    // --------------------------------------------------------
-
-    function getStatus() {
-
-        return {
-
-            name:
-                CONFIG.name,
-
-            version:
-                CONFIG.version,
-
-            initialized:
-                state.initialized,
-
-            ready:
-                state.ready,
-
-            memories:
-                state.memories.length,
-
-            conversations:
-                state.conversations.size,
-
-            searches:
-                state.searches,
-
-            stores:
-                state.stores,
-
-            recalls:
-                state.recalls,
-
-            errors:
-                state.errors.length,
-
-            lastSearch:
-                state.lastSearch,
-
-            lastRecall:
-                state.lastRecall,
-
-            storage:
-                Boolean(
-                    getStorage()
-                )
-
-        };
-
-    }
-
-    // --------------------------------------------------------
     // INITIALIZE
     // --------------------------------------------------------
 
@@ -1812,10 +1908,54 @@
         state.initialized =
             true;
 
-        await load();
+        try {
+
+            const stored =
+                await storageGet(
+                    CONFIG.storageKey,
+                    null
+                );
+
+            if (
+                stored &&
+                Array.isArray(
+                    stored.memories
+                )
+            ) {
+
+                state.memories =
+                    stored.memories
+                        .map(
+                            memory =>
+                                normalizeMemory(
+                                    memory
+                                )
+                        )
+                        .filter(
+                            memory =>
+                                Boolean(
+                                    memory.content
+                                )
+                        )
+                        .slice(
+                            -CONFIG.maxMemories
+                        );
+
+            }
+
+            state.memoryCount =
+                state.memories.length;
+
+        } catch (error) {
+
+            recordError(
+                error
+            );
+
+        }
 
         /*
-         * Kernel registrieren.
+         * Kernel-Verbindung.
          */
 
         const kernel =
@@ -1835,9 +1975,7 @@
                     api
                 );
 
-            } catch (
-                error
-            ) {}
+            } catch (error) {}
 
         }
 
@@ -1887,47 +2025,45 @@
 
         emit,
 
-        store,
-
-        save:
-            store,
-
         remember,
 
-        add:
-            store,
+        add,
 
-        remove,
+        store,
 
-        delete:
-            remove,
+        save,
 
-        clear,
-
-        search,
-
-        recall,
-
-        retrieve:
-            recall,
-
-        getRelevant,
-
-        getContext,
+        rememberMessage,
 
         rememberConversation,
 
-        getConversation,
+        rememberCorrection,
 
-        removeConversation,
+        rememberWriting,
 
-        exportData,
+        rememberReading,
 
-        importData,
+        recall,
 
-        load,
+        search,
 
-        persist,
+        find,
+
+        query,
+
+        retrieve,
+
+        get,
+
+        getAll,
+
+        remove,
+
+        clear,
+
+        exportMemory,
+
+        importMemory,
 
         getStatus
 
@@ -1953,9 +2089,7 @@
 
             await initialize();
 
-        } catch (
-            error
-        ) {
+        } catch (error) {
 
             recordError(
                 error
@@ -1994,5 +2128,5 @@
 })(window, document);
 
 // ============================================================
-// END OF PART 80
+// END OF PART 85
 // ============================================================
