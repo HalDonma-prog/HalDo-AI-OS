@@ -1,986 +1,1582 @@
 /*
 ========================================================
 HalDo AI OS 18
+PROFESSIONAL ULTIMATE FOUNDATION
 BOOT SYSTEM
-Professional Ultimate Foundation
 Version 18.0.0
 
-Zentrale Boot-Steuerung
+DATEI:
+js/boot.js
 
-Verantwortlich für:
+AUFGABE:
+Zentrale sichtbare Boot-Oberfläche.
+
+VERANTWORTLICH FÜR:
 - Boot Screen
-- HalDo Logo
-- Startup Progress
-- Kernel-Verbindung
-- System-Verbindung
-- AI Core
-- Module-Status
-- lokale Einstellungen
-- Online/Offline
-- sichere Fehlerbehandlung
+- Boot Status
+- Fortschrittsanzeige
+- Logo-Fallback
+- Boot Events
+- Verbindung mit HalDoStartup
 - Übergang zur Hauptoberfläche
+- Online / Offline
+- sichere Fehlerbehandlung
 
-Wichtig:
-Das Logo selbst wird NICHT durch ein Emoji ersetzt.
+WICHTIG:
+Dieses Boot-System startet Kernel, System und AI
+NICHT mehr direkt.
+
+Die eigentliche Systeminitialisierung übernimmt:
+js/startup.js
+
+Dadurch verhindern wir doppelte Starts.
+
+Das HalDo Logo bleibt ein echtes Bild:
+logo.png
 ========================================================
 */
 
-(function () {
+(function (window, document) {
+
     "use strict";
 
-    const VERSION = "18.0.0";
 
-    const state = {
-        started: false,
-        finished: false,
-        progress: 0,
-        currentStep: 0,
-        online: navigator.onLine,
-        failedModules: []
+    // ========================================================
+    // KONFIGURATION
+    // ========================================================
+
+    const CONFIG = {
+
+        name:
+            "HalDo Boot System",
+
+        version:
+            "18.0.0",
+
+        logo:
+            "logo.png",
+
+        logoFallback:
+            "assets/logo/logo.png",
+
+        initialText:
+            "HalDo AI OS 18 wird initialisiert ...",
+
+        readyText:
+            "HalDo AI OS 18 ist bereit.",
+
+        transitionDelay:
+            650
+
     };
 
-    const startupSteps = [
-        {
-            progress: 8,
-            text: "HalDo AI OS 18 wird initialisiert ..."
-        },
-        {
-            progress: 18,
-            text: "HalDo Kernel wird vorbereitet ..."
-        },
-        {
-            progress: 30,
-            text: "System wird initialisiert ..."
-        },
-        {
-            progress: 44,
-            text: "Systemmodule werden geladen ..."
-        },
-        {
-            progress: 58,
-            text: "AI Core wird vorbereitet ..."
-        },
-        {
-            progress: 70,
-            text: "AI Sprache und Eingabe werden vorbereitet ..."
-        },
-        {
-            progress: 82,
-            text: "HalDo Benutzeroberfläche wird verbunden ..."
-        },
-        {
-            progress: 94,
-            text: "HalDo AI wird gestartet ..."
-        },
-        {
-            progress: 100,
-            text: "HalDo AI OS ist bereit."
-        }
-    ];
 
-    /*
-    ====================================================
-    DOM HELPERS
-    ====================================================
-    */
+    // ========================================================
+    // STATE
+    // ========================================================
 
-    function get(id) {
-        return document.getElementById(id);
-    }
+    const state = {
 
-    function exists(id) {
-        return Boolean(get(id));
-    }
+        initialized:
+            false,
 
-    function safeText(id, text) {
-        const element = get(id);
+        started:
+            false,
 
-        if (element) {
-            element.textContent = String(text);
-        }
-    }
+        finished:
+            false,
 
-    function safeClass(id, className, enabled) {
-        const element = get(id);
+        progress:
+            0,
 
-        if (!element) {
-            return;
-        }
+        currentText:
+            CONFIG.initialText,
 
-        element.classList.toggle(className, Boolean(enabled));
-    }
+        online:
+            navigator.onLine,
 
-    /*
-    ====================================================
-    BOOT ELEMENTS
-    ====================================================
-    */
+        startupConnected:
+            false,
 
-    function getBootScreen() {
-        return get("bootScreen");
-    }
+        startupReady:
+            false,
 
-    function getMainApp() {
-        return get("mainApp");
-    }
+        failed:
+            false,
 
-    function getStatusElement() {
-        return get("bootStatus") || get("startupStatus");
-    }
+        errors:
+            [],
 
-    function getProgressElement() {
-        return get("progressBar");
-    }
+        warnings:
+            []
 
-    /*
-    ====================================================
-    LOGGING
-    ====================================================
-    */
+    };
 
-    function log(...args) {
-        console.log(
-            "[HalDo Boot]",
-            ...args
-        );
-    }
 
-    function warn(...args) {
-        console.warn(
-            "[HalDo Boot]",
-            ...args
-        );
-    }
+    // ========================================================
+    // EVENT SYSTEM
+    // ========================================================
 
-    function error(...args) {
-        console.error(
-            "[HalDo Boot]",
-            ...args
-        );
-    }
+    const listeners = {};
 
-    /*
-    ====================================================
-    STATUS
-    ====================================================
-    */
 
-    function updateStatus(text, progress) {
-        if (typeof text === "string") {
-            safeText(
-                "bootStatus",
-                text
-            );
-
-            safeText(
-                "startupStatus",
-                text
-            );
-        }
+    function on(
+        eventName,
+        callback
+    ) {
 
         if (
-            typeof progress === "number"
+            typeof callback !==
+            "function"
         ) {
-            state.progress = Math.max(
-                0,
-                Math.min(
-                    100,
-                    progress
-                )
-            );
 
-            const progressBar =
-                getProgressElement();
+            return function () {};
 
-            if (progressBar) {
-                progressBar.style.width =
-                    state.progress + "%";
-            }
         }
 
-        emit(
-            "boot:progress",
-            {
-                progress: state.progress,
-                text: text || ""
-            }
+
+        if (
+            !listeners[eventName]
+        ) {
+
+            listeners[eventName] =
+                [];
+
+        }
+
+
+        listeners[eventName].push(
+            callback
         );
+
+
+        return function () {
+
+            off(
+                eventName,
+                callback
+            );
+
+        };
+
     }
 
-    /*
-    ====================================================
-    EVENT BRIDGE
-    ====================================================
-    */
 
-    function emit(name, detail = {}) {
-        try {
-            window.dispatchEvent(
-                new CustomEvent(
-                    name,
-                    {
-                        detail
-                    }
-                )
-            );
-        } catch (eventError) {
-            warn(
-                "Event konnte nicht gesendet werden:",
-                name,
-                eventError
-            );
+    function off(
+        eventName,
+        callback
+    ) {
+
+        if (
+            !listeners[eventName]
+        ) {
+
+            return;
+
         }
 
+
+        listeners[eventName] =
+            listeners[eventName]
+                .filter(
+                    function (
+                        item
+                    ) {
+
+                        return (
+                            item !==
+                            callback
+                        );
+
+                    }
+                );
+
+    }
+
+
+    function emit(
+        eventName,
+        data = null
+    ) {
+
+        if (
+            listeners[eventName]
+        ) {
+
+            listeners[eventName]
+                .slice()
+                .forEach(
+                    function (
+                        callback
+                    ) {
+
+                        try {
+
+                            callback(
+                                data
+                            );
+
+                        }
+                        catch (
+                            callbackError
+                        ) {
+
+                            console.error(
+                                "[HalDo Boot] Event-Fehler:",
+                                callbackError
+                            );
+
+                        }
+
+                    }
+                );
+
+        }
+
+
         /*
-         * Zusätzlich Kernel Event-Bus verwenden,
-         * wenn vorhanden.
+         * Browser Event Bridge
          */
 
         try {
+
+            window.dispatchEvent(
+                new CustomEvent(
+                    "haldo:" +
+                    eventName,
+                    {
+                        detail:
+                            data
+                    }
+                )
+            );
+
+        }
+        catch (
+            eventError
+        ) {
+
+            console.warn(
+                "[HalDo Boot] Browser Event konnte nicht gesendet werden:",
+                eventError
+            );
+
+        }
+
+
+        /*
+         * Kernel Event Bridge
+         */
+
+        try {
+
             if (
                 window.HalDoKernel &&
                 typeof window.HalDoKernel.emit ===
                     "function"
             ) {
+
                 window.HalDoKernel.emit(
-                    name,
-                    detail
+                    "boot:" +
+                    eventName,
+                    data
                 );
+
             }
-        } catch (kernelError) {
-            warn(
-                "Kernel Event konnte nicht gesendet werden:",
-                name,
+
+        }
+        catch (
+            kernelError
+        ) {
+
+            console.warn(
+                "[HalDo Boot] Kernel Event konnte nicht gesendet werden:",
                 kernelError
             );
+
         }
+
     }
 
-    /*
-    ====================================================
-    LOGO FALLBACK
-    ====================================================
-    */
+
+    // ========================================================
+    // LOGGING
+    // ========================================================
+
+    function log(
+        message,
+        ...args
+    ) {
+
+        console.log(
+            "[HalDo Boot]",
+            message,
+            ...args
+        );
+
+    }
+
+
+    function warn(
+        message,
+        error = null
+    ) {
+
+        const item = {
+
+            message:
+                message,
+
+            error:
+                error || null,
+
+            time:
+                new Date().toISOString()
+
+        };
+
+
+        state.warnings.push(
+            item
+        );
+
+
+        console.warn(
+            "[HalDo Boot]",
+            message,
+            error || ""
+        );
+
+
+        emit(
+            "warning",
+            item
+        );
+
+    }
+
+
+    function fail(
+        message,
+        error = null
+    ) {
+
+        const item = {
+
+            message:
+                message,
+
+            error:
+                error || null,
+
+            time:
+                new Date().toISOString()
+
+        };
+
+
+        state.errors.push(
+            item
+        );
+
+
+        state.failed =
+            true;
+
+
+        console.error(
+            "[HalDo Boot]",
+            message,
+            error || ""
+        );
+
+
+        emit(
+            "error",
+            item
+        );
+
+    }
+
+
+    // ========================================================
+    // DOM HELPERS
+    // ========================================================
+
+    function get(
+        id
+    ) {
+
+        return document.getElementById(
+            id
+        );
+
+    }
+
+
+    function exists(
+        id
+    ) {
+
+        return Boolean(
+            get(id)
+        );
+
+    }
+
+
+    function safeText(
+        id,
+        text
+    ) {
+
+        const element =
+            get(id);
+
+
+        if (
+            element
+        ) {
+
+            element.textContent =
+                String(
+                    text
+                );
+
+        }
+
+    }
+
+
+    // ========================================================
+    // BOOT SCREEN
+    // ========================================================
+
+    function getBootScreen() {
+
+        return (
+            get("bootScreen") ||
+            get("startupScreen")
+        );
+
+    }
+
+
+    function getMainApp() {
+
+        return get(
+            "mainApp"
+        );
+
+    }
+
+
+    function getProgressElement() {
+
+        return (
+            get("progressBar") ||
+            document.querySelector(
+                "[data-haldo-progress]"
+            )
+        );
+
+    }
+
+
+    // ========================================================
+    // PROGRESS
+    // ========================================================
+
+    function updateProgress(
+        progress,
+        text
+    ) {
+
+        if (
+            typeof progress ===
+            "number"
+        ) {
+
+            state.progress =
+                Math.max(
+                    0,
+                    Math.min(
+                        100,
+                        progress
+                    )
+                );
+
+        }
+
+
+        if (
+            typeof text ===
+            "string"
+        ) {
+
+            state.currentText =
+                text;
+
+
+            safeText(
+                "bootStatus",
+                text
+            );
+
+
+            safeText(
+                "startupStatus",
+                text
+            );
+
+
+            safeText(
+                "bootMessage",
+                text
+            );
+
+
+            safeText(
+                "startupMessage",
+                text
+            );
+
+        }
+
+
+        const progressBar =
+            getProgressElement();
+
+
+        if (
+            progressBar
+        ) {
+
+            progressBar.style.width =
+                state.progress +
+                "%";
+
+
+            progressBar.setAttribute(
+                "aria-valuenow",
+                String(
+                    state.progress
+                )
+            );
+
+        }
+
+
+        emit(
+            "progress",
+            {
+                progress:
+                    state.progress,
+
+                text:
+                    state.currentText
+            }
+        );
+
+    }
+
+
+    // ========================================================
+    // LOGO
+    // ========================================================
 
     function setupLogoFallback() {
+
         const logos =
             document.querySelectorAll(
                 "img"
             );
 
-        logos.forEach(
-            logo => {
-                const source =
-                    logo.getAttribute("src");
 
-                if (!source) {
+        logos.forEach(
+            function (
+                logo
+            ) {
+
+                const source =
+                    logo.getAttribute(
+                        "src"
+                    );
+
+
+                if (
+                    !source
+                ) {
+
                     return;
+
                 }
 
+
                 /*
-                 * Hauptlogo:
-                 * logo.png
-                 *
-                 * Fallback:
-                 * assets/logo/logo.png
+                 * Nur HalDo Logos behandeln.
                  */
+
+                const isHalDoLogo =
+                    source.includes(
+                        "logo.png"
+                    ) ||
+                    logo.classList.contains(
+                        "boot-logo"
+                    ) ||
+                    logo.classList.contains(
+                        "haldo-logo-image"
+                    ) ||
+                    logo.dataset.haldoLogo ===
+                        "true";
+
+
+                if (
+                    !isHalDoLogo
+                ) {
+
+                    return;
+
+                }
+
 
                 logo.addEventListener(
                     "error",
                     function () {
+
                         if (
-                            this.dataset
+                            logo.dataset
                                 .haldoFallbackUsed ===
                             "1"
                         ) {
+
                             warn(
-                                "HalDo Logo konnte nicht geladen werden:",
+                                "HalDo Logo konnte nicht geladen werden.",
                                 source
                             );
 
                             return;
+
                         }
 
-                        this.dataset
+
+                        logo.dataset
                             .haldoFallbackUsed =
                             "1";
 
+
                         if (
                             source !==
-                            "logo.png"
+                            CONFIG.logoFallback
                         ) {
-                            this.src =
-                                "logo.png";
-                        } else {
-                            this.src =
-                                "assets/logo/logo.png";
+
+                            logo.src =
+                                CONFIG.logoFallback;
+
                         }
+
                     },
                     {
-                        once: false
+                        once:
+                            false
                     }
                 );
+
             }
         );
+
     }
 
-    /*
-    ====================================================
-    LOCAL SETTINGS
-    ====================================================
-    */
 
-    function loadSettings() {
-        try {
-            const raw =
-                localStorage.getItem(
-                    "haldo_settings"
-                );
+    // ========================================================
+    // STARTUP API
+    // ========================================================
 
-            if (!raw) {
-                return {};
-            }
+    function getStartup() {
 
-            const settings =
-                JSON.parse(raw);
+        return (
+            window.HalDoStartup ||
+            (
+                window.HalDoOS &&
+                window.HalDoOS.startup
+            ) ||
+            null
+        );
 
-            if (
-                !settings ||
-                typeof settings !== "object"
-            ) {
-                return {};
-            }
+    }
 
-            return settings;
-        } catch (storageError) {
+
+    // ========================================================
+    // STARTUP EVENT CONNECTION
+    // ========================================================
+
+    function connectStartup() {
+
+        const startup =
+            getStartup();
+
+
+        if (
+            !startup
+        ) {
+
             warn(
-                "Lokale Einstellungen konnten nicht gelesen werden.",
-                storageError
+                "HalDoStartup ist momentan noch nicht verfügbar."
             );
 
-            return {};
-        }
-    }
+            return false;
 
-    function applySettings() {
-        const settings =
-            loadSettings();
+        }
+
+
+        state.startupConnected =
+            true;
+
 
         /*
-         * Logo Animation
+         * Falls Startup eigenes Event-System besitzt.
          */
 
         if (
-            settings.logoAnimation === false
+            typeof startup.on ===
+                "function"
         ) {
-            document
-                .querySelectorAll(
-                    ".boot-logo, .header-logo, .hero-logo, .haldo-logo-image"
-                )
-                .forEach(
-                    logo => {
-                        logo.style.animation =
-                            "none";
+
+            try {
+
+                startup.on(
+                    "start",
+                    function () {
+
+                        updateProgress(
+                            8,
+                            "HalDo AI OS 18 wird initialisiert ..."
+                        );
+
                     }
                 );
+
+
+                startup.on(
+                    "stage-start",
+                    function (
+                        data
+                    ) {
+
+                        if (
+                            !data
+                        ) {
+
+                            return;
+
+                        }
+
+
+                        const stage =
+                            String(
+                                data.name ||
+                                data.id ||
+                                ""
+                            );
+
+
+                        updateProgress(
+                            getStageProgress(
+                                data.id
+                            ),
+                            getStageText(
+                                data.id,
+                                stage
+                            )
+                        );
+
+                    }
+                );
+
+
+                startup.on(
+                    "stage-ready",
+                    function (
+                        data
+                    ) {
+
+                        if (
+                            !data
+                        ) {
+
+                            return;
+
+                        }
+
+
+                        updateProgress(
+                            getStageProgress(
+                                data.id
+                            ),
+                            getStageReadyText(
+                                data.id,
+                                data.name
+                            )
+                        );
+
+                    }
+                );
+
+
+                startup.on(
+                    "warning",
+                    function (
+                        data
+                    ) {
+
+                        if (
+                            data &&
+                            data.message
+                        ) {
+
+                            emit(
+                                "startup-warning",
+                                data
+                            );
+
+                        }
+
+                    }
+                );
+
+
+                startup.on(
+                    "error",
+                    function (
+                        data
+                    ) {
+
+                        emit(
+                            "startup-error",
+                            data
+                        );
+
+                    }
+                );
+
+
+                startup.on(
+                    "ready",
+                    function (
+                        data
+                    ) {
+
+                        state.startupReady =
+                            true;
+
+
+                        updateProgress(
+                            100,
+                            CONFIG.readyText
+                        );
+
+
+                        emit(
+                            "startup-ready",
+                            data
+                        );
+
+
+                        finish();
+
+                    }
+                );
+
+
+                startup.on(
+                    "failed",
+                    function (
+                        data
+                    ) {
+
+                        state.failed =
+                            true;
+
+
+                        emit(
+                            "startup-failed",
+                            data
+                        );
+
+                    }
+                );
+
+            }
+            catch (
+                connectionError
+            ) {
+
+                warn(
+                    "Startup Events konnten nicht vollständig verbunden werden.",
+                    connectionError
+                );
+
+            }
+
         }
 
-        /*
-         * Light System
-         */
 
-        if (
-            window.HalDoLight
-        ) {
-            if (
-                typeof settings.lightIntensity ===
-                "number"
-            ) {
-                window.HalDoLight.setIntensity(
-                    settings.lightIntensity
-                );
-            }
+        return true;
 
-            if (
-                typeof settings.lightSpeed ===
-                "number"
-            ) {
-                window.HalDoLight.setSpeed(
-                    settings.lightSpeed
-                );
-            }
-
-            if (
-                typeof settings.lightRunning ===
-                "boolean"
-            ) {
-                window.HalDoLight.setRunning(
-                    settings.lightRunning
-                );
-            }
-        }
-
-        emit(
-            "settings:applied",
-            settings
-        );
     }
 
-    /*
-    ====================================================
-    MODULE CHECK
-    ====================================================
-    */
 
-    function moduleAvailable(name) {
-        return Boolean(
-            window[name]
-        );
-    }
+    // ========================================================
+    // STAGE PROGRESS
+    // ========================================================
 
-    function checkModules() {
-        const modules = {
+    function getStageProgress(
+        id
+    ) {
+
+        const values = {
+
+            environment:
+                12,
+
+            loader:
+                24,
+
             kernel:
-                moduleAvailable(
-                    "HalDoKernel"
-                ),
+                36,
 
             system:
-                moduleAvailable(
-                    "HalDoSystem"
-                ),
+                48,
 
-            aiCore:
-                moduleAvailable(
-                    "HalDoAICore"
-                ),
+            modules:
+                60,
 
-            ezidiKeyboard:
-                moduleAvailable(
-                    "HalDoEzidiKeyboard"
-                ),
+            ai:
+                72,
 
-            light:
-                moduleAvailable(
-                    "HalDoLight"
-                ),
+            apps:
+                82,
 
-            storage:
-                moduleAvailable(
-                    "HalDoStorage"
-                ),
+            visual:
+                92,
 
-            language:
-                moduleAvailable(
-                    "HalDoLanguage"
-                )
+            ready:
+                100
+
         };
 
-        Object.entries(
-            modules
-        ).forEach(
-            ([name, available]) => {
-                if (!available) {
-                    state.failedModules.push(
-                        name
-                    );
-                }
-            }
+
+        return (
+            values[id] ??
+            state.progress
         );
 
-        emit(
-            "boot:modules",
-            modules
-        );
-
-        return modules;
     }
 
-    /*
-    ====================================================
-    KERNEL START
-    ====================================================
-    */
 
-    async function startKernel() {
+    // ========================================================
+    // STAGE TEXT
+    // ========================================================
+
+    function getStageText(
+        id,
+        fallback
+    ) {
+
+        const texts = {
+
+            environment:
+                "HalDo AI OS 18 wird initialisiert ...",
+
+            loader:
+                "HalDo System Loader wird verbunden ...",
+
+            kernel:
+                "HalDo Kernel wird gestartet ...",
+
+            system:
+                "HalDo System wird initialisiert ...",
+
+            modules:
+                "HalDo Systemmodule werden verbunden ...",
+
+            ai:
+                "HalDo AI Core wird vorbereitet ...",
+
+            apps:
+                "HalDo Apps werden vorbereitet ...",
+
+            visual:
+                "HalDo Benutzeroberfläche wird vorbereitet ...",
+
+            ready:
+                CONFIG.readyText
+
+        };
+
+
+        return (
+            texts[id] ||
+            fallback ||
+            CONFIG.initialText
+        );
+
+    }
+
+
+    // ========================================================
+    // STAGE READY TEXT
+    // ========================================================
+
+    function getStageReadyText(
+        id,
+        fallback
+    ) {
+
+        const texts = {
+
+            environment:
+                "Umgebung bereit ...",
+
+            loader:
+                "System Loader bereit ...",
+
+            kernel:
+                "Kernel bereit ...",
+
+            system:
+                "System bereit ...",
+
+            modules:
+                "Systemmodule verbunden ...",
+
+            ai:
+                "HalDo AI bereit ...",
+
+            apps:
+                "App-System bereit ...",
+
+            visual:
+                "Visual-System bereit ...",
+
+            ready:
+                CONFIG.readyText
+
+        };
+
+
+        return (
+            texts[id] ||
+            fallback ||
+            state.currentText
+        );
+
+    }
+
+
+    // ========================================================
+    // STARTUP STARTEN
+    // ========================================================
+
+    function startStartupSystem() {
+
+        const startup =
+            getStartup();
+
+
         if (
-            !window.HalDoKernel
+            !startup
         ) {
+
             warn(
-                "HalDoKernel ist noch nicht verfügbar."
+                "HalDoStartup wurde noch nicht gefunden."
             );
 
             return false;
+
         }
+
 
         try {
+
             if (
-                typeof window.HalDoKernel.start ===
-                "function"
+                typeof startup.start ===
+                    "function"
             ) {
+
                 const result =
-                    window.HalDoKernel.start();
+                    startup.start();
 
-                if (
-                    result instanceof Promise
-                ) {
-                    await result;
-                }
+
+                emit(
+                    "startup-start",
+                    result
+                );
+
+
+                return true;
+
             }
 
-            emit(
-                "boot:kernel-ready"
-            );
-
-            return true;
-        } catch (kernelError) {
-            error(
-                "Kernel konnte nicht gestartet werden.",
-                kernelError
-            );
-
-            emit(
-                "boot:kernel-error",
-                {
-                    error: kernelError
-                }
-            );
-
-            return false;
         }
-    }
-
-    /*
-    ====================================================
-    SYSTEM START
-    ====================================================
-    */
-
-    async function startSystem() {
-        if (
-            !window.HalDoSystem
+        catch (
+            startupError
         ) {
-            warn(
-                "HalDoSystem ist noch nicht verfügbar."
+
+            fail(
+                "HalDoStartup konnte nicht gestartet werden.",
+                startupError
             );
+
 
             return false;
+
         }
 
-        try {
-            if (
-                typeof window.HalDoSystem.start ===
-                "function"
-            ) {
-                const result =
-                    window.HalDoSystem.start();
 
-                if (
-                    result instanceof Promise
-                ) {
-                    await result;
-                }
-            }
+        return false;
 
-            emit(
-                "boot:system-ready"
-            );
-
-            return true;
-        } catch (systemError) {
-            error(
-                "System konnte nicht gestartet werden.",
-                systemError
-            );
-
-            emit(
-                "boot:system-error",
-                {
-                    error: systemError
-                }
-            );
-
-            return false;
-        }
     }
 
-    /*
-    ====================================================
-    AI CORE START
-    ====================================================
-    */
 
-    async function startAICore() {
-        if (
-            !window.HalDoAICore
-        ) {
-            warn(
-                "HalDoAICore ist nicht verfügbar."
-            );
+    // ========================================================
+    // FINISH
+    // ========================================================
 
-            return false;
-        }
+    function finish() {
 
-        try {
-            if (
-                typeof window.HalDoAICore.start ===
-                "function"
-            ) {
-                const result =
-                    window.HalDoAICore.start();
-
-                if (
-                    result instanceof Promise
-                ) {
-                    await result;
-                }
-            }
-
-            emit(
-                "boot:ai-ready"
-            );
-
-            return true;
-        } catch (aiError) {
-            error(
-                "AI Core konnte nicht gestartet werden.",
-                aiError
-            );
-
-            emit(
-                "boot:ai-error",
-                {
-                    error: aiError
-                }
-            );
-
-            return false;
-        }
-    }
-
-    /*
-    ====================================================
-    STARTUP STEP
-    ====================================================
-    */
-
-    async function executeStep(step) {
-        updateStatus(
-            step.text,
-            step.progress
-        );
-
-        await new Promise(
-            resolve =>
-                window.setTimeout(
-                    resolve,
-                    260
-                )
-        );
-    }
-
-    /*
-    ====================================================
-    STARTUP SEQUENCE
-    ====================================================
-    */
-
-    async function runStartup() {
-        if (
-            state.started
-        ) {
-            return;
-        }
-
-        state.started = true;
-
-        log(
-            "HalDo AI OS 18 Boot startet."
-        );
-
-        emit(
-            "boot:start",
-            {
-                version: VERSION
-            }
-        );
-
-        setupLogoFallback();
-
-        for (
-            let i = 0;
-            i < startupSteps.length;
-            i++
-        ) {
-            state.currentStep = i;
-
-            const step =
-                startupSteps[i];
-
-            await executeStep(
-                step
-            );
-
-            /*
-             * Spezifische Systemphasen
-             */
-
-            if (i === 1) {
-                await startKernel();
-            }
-
-            if (i === 2) {
-                await startSystem();
-            }
-
-            if (i === 4) {
-                await startAICore();
-            }
-
-            if (i === 6) {
-                checkModules();
-            }
-
-            if (i === 7) {
-                applySettings();
-            }
-        }
-
-        await finishStartup();
-    }
-
-    /*
-    ====================================================
-    FINISH STARTUP
-    ====================================================
-    */
-
-    async function finishStartup() {
         if (
             state.finished
         ) {
+
             return;
+
         }
 
-        state.finished = true;
 
-        updateStatus(
-            "HalDo AI OS ist bereit.",
-            100
+        state.finished =
+            true;
+
+
+        state.startupReady =
+            true;
+
+
+        updateProgress(
+            100,
+            CONFIG.readyText
         );
+
 
         emit(
-            "boot:ready",
-            {
-                version: VERSION,
-                online: state.online,
-                failedModules: [
-                    ...state.failedModules
-                ]
-            }
+            "ready",
+            getState()
         );
 
-        await new Promise(
-            resolve =>
-                window.setTimeout(
-                    resolve,
-                    500
-                )
-        );
 
-        const bootScreen =
-            getBootScreen();
+        window.setTimeout(
+            function () {
 
-        const mainApp =
-            getMainApp();
+                const bootScreen =
+                    getBootScreen();
 
-        if (bootScreen) {
-            bootScreen.classList.add(
-                "hide"
-            );
 
-            /*
-             * Kompatibilität mit älteren
-             * Boot-Screen-Klassen.
-             */
+                const mainApp =
+                    getMainApp();
 
-            bootScreen.classList.add(
-                "hidden"
-            );
-        }
 
-        if (mainApp) {
-            mainApp.classList.add(
-                "visible"
-            );
+                if (
+                    bootScreen
+                ) {
 
-            mainApp.classList.remove(
-                "hidden"
-            );
-        }
+                    bootScreen.classList.add(
+                        "hide"
+                    );
 
-        document.body.classList.add(
-            "haldo-system-ready"
-        );
+                    bootScreen.classList.add(
+                        "hidden"
+                    );
 
-        emit(
-            "boot:complete"
-        );
+                    bootScreen.setAttribute(
+                        "aria-hidden",
+                        "true"
+                    );
 
-        log(
-            "HalDo AI OS 18 vollständig gestartet."
-        );
-    }
+                }
 
-    /*
-    ====================================================
-    ONLINE / OFFLINE
-    ====================================================
-    */
 
-    function setupNetworkEvents() {
-        window.addEventListener(
-            "online",
-            () => {
-                state.online = true;
+                if (
+                    mainApp
+                ) {
+
+                    mainApp.classList.add(
+                        "visible"
+                    );
+
+                    mainApp.classList.remove(
+                        "hidden"
+                    );
+
+                    mainApp.removeAttribute(
+                        "aria-hidden"
+                    );
+
+                }
+
+
+                document.body.classList.add(
+                    "haldo-system-ready"
+                );
+
 
                 emit(
-                    "system:online"
+                    "complete",
+                    getState()
                 );
+
+
+                log(
+                    "HalDo AI OS 18 vollständig gestartet."
+                );
+
+            },
+            CONFIG.transitionDelay
+        );
+
+    }
+
+
+    // ========================================================
+    // NETWORK
+    // ========================================================
+
+    function setupNetworkEvents() {
+
+        window.addEventListener(
+            "online",
+            function () {
+
+                state.online =
+                    true;
+
+
+                emit(
+                    "online"
+                );
+
 
                 log(
                     "HalDo AI OS ist online."
                 );
+
             }
         );
 
+
         window.addEventListener(
             "offline",
-            () => {
-                state.online = false;
+            function () {
+
+                state.online =
+                    false;
+
 
                 emit(
-                    "system:offline"
+                    "offline"
                 );
+
 
                 warn(
                     "HalDo AI OS arbeitet offline."
                 );
+
             }
         );
+
     }
 
-    /*
-    ====================================================
-    PUBLIC API
-    ====================================================
-    */
 
-    const HalDoBoot = {
-        name:
-            "HalDo Boot System",
+    // ========================================================
+    // STATE
+    // ========================================================
 
-        version:
-            VERSION,
+    function getState() {
 
-        getState() {
-            return {
-                started:
-                    state.started,
+        return {
 
-                finished:
-                    state.finished,
+            name:
+                CONFIG.name,
 
-                progress:
-                    state.progress,
+            version:
+                CONFIG.version,
 
-                currentStep:
-                    state.currentStep,
+            initialized:
+                state.initialized,
 
-                online:
-                    state.online,
+            started:
+                state.started,
 
-                failedModules: [
-                    ...state.failedModules
-                ]
-            };
-        },
+            finished:
+                state.finished,
 
-        start() {
-            return runStartup();
-        },
+            progress:
+                state.progress,
 
-        finish() {
-            return finishStartup();
-        },
+            currentText:
+                state.currentText,
 
-        updateStatus,
+            online:
+                state.online,
 
-        checkModules,
+            startupConnected:
+                state.startupConnected,
 
-        loadSettings,
+            startupReady:
+                state.startupReady,
 
-        applySettings
-    };
+            failed:
+                state.failed,
 
-    /*
-    ====================================================
-    GLOBAL REGISTRATION
-    ====================================================
-    */
+            errors:
+                state.errors.slice(),
 
-    window.HalDoBoot =
-        HalDoBoot;
+            warnings:
+                state.warnings.slice()
 
-    window.HalDoOS =
-        window.HalDoOS || {};
+        };
 
-    window.HalDoOS.boot =
-        HalDoBoot;
+    }
 
-    /*
-    ====================================================
-    INIT
-    ====================================================
-    */
 
-    function init() {
-        setupNetworkEvents();
+    // ========================================================
+    // START
+    // ========================================================
+
+    function start() {
+
+        if (
+            state.started
+        ) {
+
+            return getState();
+
+        }
+
+
+        state.started =
+            true;
+
+
+        state.initialized =
+            true;
+
+
+        state.failed =
+            false;
+
+
+        updateProgress(
+            4,
+            CONFIG.initialText
+        );
+
+
+        emit(
+            "start",
+            {
+                version:
+                    CONFIG.version
+            }
+        );
+
+
+        setupLogoFallback();
+
 
         /*
-         * Nur starten, wenn die Seite
-         * tatsächlich ein Boot-System besitzt.
+         * Startup-Verbindung herstellen.
+         */
+
+        connectStartup();
+
+
+        /*
+         * Startup-System starten.
+         *
+         * Die eigentliche Initialisierung
+         * erfolgt ausschließlich dort.
+         */
+
+        window.setTimeout(
+            function () {
+
+                if (
+                    state.finished
+                ) {
+
+                    return;
+
+                }
+
+
+                startStartupSystem();
+
+            },
+            120
+        );
+
+
+        return getState();
+
+    }
+
+
+    // ========================================================
+    // PUBLIC API
+    // ========================================================
+
+    const api = {
+
+        name:
+            CONFIG.name,
+
+        version:
+            CONFIG.version,
+
+        init:
+            start,
+
+        start:
+            start,
+
+        finish:
+            finish,
+
+        on:
+            on,
+
+        off:
+            off,
+
+        emit:
+            emit,
+
+        updateProgress:
+            updateProgress,
+
+        getState:
+            getState
+
+    };
+
+
+    // ========================================================
+    // GLOBAL REGISTRATION
+    // ========================================================
+
+    window.HalDoBoot =
+        api;
+
+
+    window.HalDoOS =
+        window.HalDoOS ||
+        {};
+
+
+    window.HalDoOS.boot =
+        api;
+
+
+    // ========================================================
+    // DOM INIT
+    // ========================================================
+
+    function init() {
+
+        if (
+            state.initialized
+        ) {
+
+            return;
+
+        }
+
+
+        setupNetworkEvents();
+
+
+        /*
+         * Nur aktiv werden,
+         * wenn ein Boot-System vorhanden ist.
          */
 
         if (
             exists("bootScreen") ||
             exists("startupScreen")
         ) {
-            runStartup();
-        } else {
-            log(
-                "Kein Boot Screen gefunden."
-            );
+
+            start();
+
+        }
+        else {
+
+            /*
+             * Auch ohne sichtbaren Boot Screen
+             * bleibt das Boot-System registriert.
+             */
+
+            state.initialized =
+                true;
+
 
             emit(
-                "boot:no-screen"
+                "no-screen"
             );
+
+
+            log(
+                "Kein sichtbarer Boot Screen gefunden."
+            );
+
         }
+
     }
+
+
+    // ========================================================
+    // DOM READY
+    // ========================================================
 
     if (
         document.readyState ===
         "loading"
     ) {
+
         document.addEventListener(
             "DOMContentLoaded",
             init,
             {
-                once: true
+                once:
+                    true
             }
         );
-    } else {
+
+    }
+    else {
+
         init();
+
     }
 
-})();
+
+    // ========================================================
+    // ABSCHLUSS
+    // ========================================================
+
+    log(
+        "HalDo Boot System registriert.",
+        CONFIG.version
+    );
+
+
+})(window, document);
