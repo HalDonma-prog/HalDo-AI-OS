@@ -8,6 +8,9 @@ Version 18.0.0
 DATEI:
 js/boot.js
 
+AKTION:
+KOMPLETTEN INHALT ERSETZEN
+
 AUFGABE:
 Zentrale sichtbare Boot-Oberfläche.
 
@@ -24,15 +27,14 @@ VERANTWORTLICH FÜR:
 
 WICHTIG:
 Dieses Boot-System startet Kernel, System und AI
-NICHT mehr direkt.
+NICHT direkt.
 
 Die eigentliche Systeminitialisierung übernimmt:
 js/startup.js
 
-Dadurch verhindern wir doppelte Starts.
-
-Das HalDo Logo bleibt ein echtes Bild:
-logo.png
+Zusätzlich erkennt dieses Boot-System,
+wenn HalDoStartup bereits gestartet oder bereit ist.
+Dadurch kann kein Ready-Event mehr verloren gehen.
 ========================================================
 */
 
@@ -60,13 +62,22 @@ logo.png
             "assets/logo/logo.png",
 
         initialText:
+            "HalDo AI OS startet ...",
+
+        initializingText:
             "HalDo AI OS 18 wird initialisiert ...",
 
         readyText:
             "HalDo AI OS 18 ist bereit.",
 
         transitionDelay:
-            650
+            650,
+
+        startupCheckDelay:
+            100,
+
+        startupCheckLimit:
+            150
 
     };
 
@@ -98,11 +109,17 @@ logo.png
         startupConnected:
             false,
 
+        startupStarted:
+            false,
+
         startupReady:
             false,
 
         failed:
             false,
+
+        startupChecks:
+            0,
 
         errors:
             [],
@@ -234,10 +251,6 @@ logo.png
         }
 
 
-        /*
-         * Browser Event Bridge
-         */
-
         try {
 
             window.dispatchEvent(
@@ -263,10 +276,6 @@ logo.png
 
         }
 
-
-        /*
-         * Kernel Event Bridge
-         */
 
         try {
 
@@ -464,8 +473,10 @@ logo.png
 
     function getMainApp() {
 
-        return get(
-            "mainApp"
+        return (
+            get("mainApp") ||
+            get("desktop") ||
+            get("app")
         );
 
     }
@@ -541,6 +552,28 @@ logo.png
                 text
             );
 
+
+            /*
+             * Zusätzliche mögliche Status-Elemente.
+             */
+
+            const statusElements =
+                document.querySelectorAll(
+                    "[data-haldo-status]"
+                );
+
+
+            statusElements.forEach(
+                function (
+                    element
+                ) {
+
+                    element.textContent =
+                        text;
+
+                }
+            );
+
         }
 
 
@@ -582,7 +615,7 @@ logo.png
 
 
     // ========================================================
-    // LOGO
+    // LOGO FALLBACK
     // ========================================================
 
     function setupLogoFallback() {
@@ -612,10 +645,6 @@ logo.png
 
                 }
 
-
-                /*
-                 * Nur HalDo Logos behandeln.
-                 */
 
                 const isHalDoLogo =
                     source.includes(
@@ -707,6 +736,125 @@ logo.png
 
 
     // ========================================================
+    // STARTUP STATE CHECK
+    // ========================================================
+
+    function checkExistingStartupState() {
+
+        const startup =
+            getStartup();
+
+
+        if (
+            !startup
+        ) {
+
+            return false;
+
+        }
+
+
+        try {
+
+            /*
+             * Wichtig:
+             * Falls Startup bereits fertig ist,
+             * darf kein Event verloren gehen.
+             */
+
+            if (
+                typeof startup.isReady ===
+                "function" &&
+                startup.isReady()
+            ) {
+
+                state.startupStarted =
+                    true;
+
+                state.startupReady =
+                    true;
+
+                updateProgress(
+                    100,
+                    CONFIG.readyText
+                );
+
+                finish();
+
+                return true;
+
+            }
+
+
+            /*
+             * Zusätzlich getState() prüfen.
+             */
+
+            if (
+                typeof startup.getState ===
+                "function"
+            ) {
+
+                const startupState =
+                    startup.getState();
+
+
+                if (
+                    startupState &&
+                    startupState.ready ===
+                        true
+                ) {
+
+                    state.startupStarted =
+                        true;
+
+                    state.startupReady =
+                        true;
+
+                    updateProgress(
+                        100,
+                        CONFIG.readyText
+                    );
+
+                    finish();
+
+                    return true;
+
+                }
+
+
+                if (
+                    startupState &&
+                    startupState.started ===
+                        true
+                ) {
+
+                    state.startupStarted =
+                        true;
+
+                }
+
+            }
+
+        }
+        catch (
+            error
+        ) {
+
+            warn(
+                "Startup-Zustand konnte nicht gelesen werden.",
+                error
+            );
+
+        }
+
+
+        return false;
+
+    }
+
+
+    // ========================================================
     // STARTUP EVENT CONNECTION
     // ========================================================
 
@@ -720,11 +868,16 @@ logo.png
             !startup
         ) {
 
-            warn(
-                "HalDoStartup ist momentan noch nicht verfügbar."
-            );
-
             return false;
+
+        }
+
+
+        if (
+            state.startupConnected
+        ) {
+
+            return true;
 
         }
 
@@ -732,10 +885,6 @@ logo.png
         state.startupConnected =
             true;
 
-
-        /*
-         * Falls Startup eigenes Event-System besitzt.
-         */
 
         if (
             typeof startup.on ===
@@ -748,9 +897,12 @@ logo.png
                     "start",
                     function () {
 
+                        state.startupStarted =
+                            true;
+
                         updateProgress(
                             8,
-                            "HalDo AI OS 18 wird initialisiert ..."
+                            CONFIG.initializingText
                         );
 
                     }
@@ -903,6 +1055,12 @@ logo.png
                             data
                         );
 
+
+                        warn(
+                            "HalDo Startup wurde als fehlgeschlagen gemeldet.",
+                            data
+                        );
+
                     }
                 );
 
@@ -921,7 +1079,90 @@ logo.png
         }
 
 
+        /*
+         * Direkt nach der Verbindung prüfen.
+         */
+
+        checkExistingStartupState();
+
+
         return true;
+
+    }
+
+
+    // ========================================================
+    // STARTUP SUCHEN
+    // ========================================================
+
+    function waitForStartup() {
+
+        if (
+            state.finished
+        ) {
+
+            return;
+
+        }
+
+
+        if (
+            checkExistingStartupState()
+        ) {
+
+            return;
+
+        }
+
+
+        const startup =
+            getStartup();
+
+
+        if (
+            startup
+        ) {
+
+            connectStartup();
+
+
+            if (
+                checkExistingStartupState()
+            ) {
+
+                return;
+
+            }
+
+
+            startStartupSystem();
+
+            return;
+
+        }
+
+
+        state.startupChecks++;
+
+
+        if (
+            state.startupChecks >=
+            CONFIG.startupCheckLimit
+        ) {
+
+            fail(
+                "HalDoStartup wurde nicht rechtzeitig gefunden."
+            );
+
+            return;
+
+        }
+
+
+        window.setTimeout(
+            waitForStartup,
+            CONFIG.startupCheckDelay
+        );
 
     }
 
@@ -986,7 +1227,7 @@ logo.png
         const texts = {
 
             environment:
-                "HalDo AI OS 18 wird initialisiert ...",
+                CONFIG.initializingText,
 
             loader:
                 "HalDo System Loader wird verbunden ...",
@@ -1018,7 +1259,7 @@ logo.png
         return (
             texts[id] ||
             fallback ||
-            CONFIG.initialText
+            CONFIG.initializingText
         );
 
     }
@@ -1088,10 +1329,6 @@ logo.png
             !startup
         ) {
 
-            warn(
-                "HalDoStartup wurde noch nicht gefunden."
-            );
-
             return false;
 
         }
@@ -1099,10 +1336,56 @@ logo.png
 
         try {
 
+            /*
+             * Wenn Startup bereits läuft,
+             * niemals nochmals starten.
+             */
+
+            if (
+                typeof startup.isStarted ===
+                    "function" &&
+                startup.isStarted()
+            ) {
+
+                state.startupStarted =
+                    true;
+
+                return true;
+
+            }
+
+
+            if (
+                typeof startup.getState ===
+                    "function"
+            ) {
+
+                const startupState =
+                    startup.getState();
+
+
+                if (
+                    startupState &&
+                    startupState.started
+                ) {
+
+                    state.startupStarted =
+                        true;
+
+                    return true;
+
+                }
+
+            }
+
+
             if (
                 typeof startup.start ===
                     "function"
             ) {
+
+                state.startupStarted =
+                    true;
 
                 const result =
                     startup.start();
@@ -1331,11 +1614,17 @@ logo.png
             startupConnected:
                 state.startupConnected,
 
+            startupStarted:
+                state.startupStarted,
+
             startupReady:
                 state.startupReady,
 
             failed:
                 state.failed,
+
+            startupChecks:
+                state.startupChecks,
 
             errors:
                 state.errors.slice(),
@@ -1394,17 +1683,15 @@ logo.png
 
 
         /*
-         * Startup-Verbindung herstellen.
+         * Startup zuerst verbinden.
          */
 
         connectStartup();
 
 
         /*
-         * Startup-System starten.
-         *
-         * Die eigentliche Initialisierung
-         * erfolgt ausschließlich dort.
+         * Falls Startup noch nicht registriert
+         * wurde, kurz darauf erneut suchen.
          */
 
         window.setTimeout(
@@ -1419,7 +1706,13 @@ logo.png
                 }
 
 
-                startStartupSystem();
+                updateProgress(
+                    8,
+                    CONFIG.initializingText
+                );
+
+
+                waitForStartup();
 
             },
             120
@@ -1465,7 +1758,13 @@ logo.png
             updateProgress,
 
         getState:
-            getState
+            getState,
+
+        getStartup:
+            getStartup,
+
+        checkStartup:
+            checkExistingStartupState
 
     };
 
@@ -1505,11 +1804,6 @@ logo.png
         setupNetworkEvents();
 
 
-        /*
-         * Nur aktiv werden,
-         * wenn ein Boot-System vorhanden ist.
-         */
-
         if (
             exists("bootScreen") ||
             exists("startupScreen")
@@ -1519,11 +1813,6 @@ logo.png
 
         }
         else {
-
-            /*
-             * Auch ohne sichtbaren Boot Screen
-             * bleibt das Boot-System registriert.
-             */
 
             state.initialized =
                 true;
