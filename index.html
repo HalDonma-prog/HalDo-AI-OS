@@ -12073,3 +12073,1534 @@
 
 })();
 </script>
+<!-- =========================================================
+     HALDO AI OS 20
+     TEIL 9
+     APP FACTORY + APP RUNTIME
+     ========================================================= -->
+
+<script>
+(function () {
+
+    "use strict";
+
+
+    /* =========================================================
+       HALDO APP RUNTIME
+       ========================================================= */
+
+    const HalDoAppRuntime = {
+
+        version: "20.0.0",
+
+        instances: new Map(),
+
+        state: new Map(),
+
+        listeners: new Map(),
+
+
+        /* =====================================================
+           EVENT SYSTEM
+           ===================================================== */
+
+        on(
+            eventName,
+            callback
+        ) {
+
+            if (
+                typeof callback !==
+                "function"
+            ) {
+
+                return () => {};
+
+            }
+
+
+            if (
+                !this.listeners.has(
+                    eventName
+                )
+            ) {
+
+                this.listeners.set(
+                    eventName,
+                    new Set()
+                );
+
+            }
+
+
+            this.listeners
+                .get(eventName)
+                .add(callback);
+
+
+            return () => {
+
+                this.off(
+                    eventName,
+                    callback
+                );
+
+            };
+
+        },
+
+
+        off(
+            eventName,
+            callback
+        ) {
+
+            const listeners =
+                this.listeners.get(
+                    eventName
+                );
+
+
+            if (!listeners) {
+
+                return;
+
+            }
+
+
+            listeners.delete(
+                callback
+            );
+
+        },
+
+
+        emit(
+            eventName,
+            detail = {}
+        ) {
+
+            const listeners =
+                this.listeners.get(
+                    eventName
+                );
+
+
+            if (!listeners) {
+
+                return;
+
+            }
+
+
+            listeners.forEach(
+                callback => {
+
+                    try {
+
+                        callback(
+                            detail
+                        );
+
+                    } catch (error) {
+
+                        console.error(
+                            "[HalDo App Runtime]",
+                            eventName,
+                            error
+                        );
+
+                    }
+
+                }
+            );
+
+        },
+
+
+        /* =====================================================
+           APP STATE
+           ===================================================== */
+
+        getState(
+            appId
+        ) {
+
+            if (
+                !this.state.has(
+                    appId
+                )
+            ) {
+
+                this.state.set(
+                    appId,
+                    {}
+                );
+
+            }
+
+
+            return this.state.get(
+                appId
+            );
+
+        },
+
+
+        setState(
+            appId,
+            patch = {}
+        ) {
+
+            const current =
+                this.getState(
+                    appId
+                );
+
+
+            Object.assign(
+                current,
+                patch
+            );
+
+
+            this.emit(
+                "state:changed",
+                {
+                    appId,
+                    state: current
+                }
+            );
+
+
+            return current;
+
+        },
+
+
+        /* =====================================================
+           INSTANCE MANAGEMENT
+           ===================================================== */
+
+        registerInstance(
+            appId,
+            instance
+        ) {
+
+            if (
+                !appId ||
+                !instance
+            ) {
+
+                return false;
+
+            }
+
+
+            this.instances.set(
+                appId,
+                instance
+            );
+
+
+            this.emit(
+                "app:instance-registered",
+                {
+                    appId,
+                    instance
+                }
+            );
+
+
+            return true;
+
+        },
+
+
+        getInstance(
+            appId
+        ) {
+
+            return (
+                this.instances.get(
+                    appId
+                ) ||
+                null
+            );
+
+        },
+
+
+        removeInstance(
+            appId
+        ) {
+
+            const removed =
+                this.instances.delete(
+                    appId
+                );
+
+
+            if (removed) {
+
+                this.emit(
+                    "app:instance-removed",
+                    {
+                        appId
+                    }
+                );
+
+            }
+
+
+            return removed;
+
+        }
+
+    };
+
+
+    /* =========================================================
+       APP STORAGE
+       ========================================================= */
+
+    const HalDoAppStorage = {
+
+        prefix:
+            "haldo-os20-app:",
+
+
+        getKey(
+            appId
+        ) {
+
+            return (
+                this.prefix +
+                String(appId)
+            );
+
+        },
+
+
+        read(
+            appId,
+            fallback = {}
+        ) {
+
+            try {
+
+                const raw =
+                    localStorage.getItem(
+                        this.getKey(
+                            appId
+                        )
+                    );
+
+
+                if (!raw) {
+
+                    return fallback;
+
+                }
+
+
+                const parsed =
+                    JSON.parse(
+                        raw
+                    );
+
+
+                return (
+                    parsed &&
+                    typeof parsed ===
+                    "object"
+                )
+                    ? parsed
+                    : fallback;
+
+            } catch (error) {
+
+                console.warn(
+                    "[HalDo App Storage] Lesen fehlgeschlagen:",
+                    appId,
+                    error
+                );
+
+
+                return fallback;
+
+            }
+
+        },
+
+
+        write(
+            appId,
+            value
+        ) {
+
+            try {
+
+                localStorage.setItem(
+                    this.getKey(
+                        appId
+                    ),
+                    JSON.stringify(
+                        value
+                    )
+                );
+
+
+                return true;
+
+            } catch (error) {
+
+                console.error(
+                    "[HalDo App Storage] Speichern fehlgeschlagen:",
+                    appId,
+                    error
+                );
+
+
+                return false;
+
+            }
+
+        },
+
+
+        remove(
+            appId
+        ) {
+
+            try {
+
+                localStorage.removeItem(
+                    this.getKey(
+                        appId
+                    )
+                );
+
+
+                return true;
+
+            } catch (error) {
+
+                console.warn(
+                    "[HalDo App Storage] Löschen fehlgeschlagen:",
+                    appId,
+                    error
+                );
+
+
+                return false;
+
+            }
+
+        }
+
+    };
+
+
+    /* =========================================================
+       COMMON APP UI
+       ========================================================= */
+
+    function escapeHTML(
+        value
+    ) {
+
+        return String(
+            value ?? ""
+        )
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /'/g,
+            "&#039;"
+        );
+
+    }
+
+
+    function createElement(
+        html
+    ) {
+
+        const template =
+            document.createElement(
+                "template"
+            );
+
+
+        template.innerHTML =
+            String(
+                html || ""
+            ).trim();
+
+
+        return (
+            template.content.firstElementChild
+        );
+
+    }
+
+
+    function getAppLayer() {
+
+        return document.getElementById(
+            "haldo-app-layer"
+        );
+
+    }
+
+
+    /* =========================================================
+       BASE APP CLASS
+       ========================================================= */
+
+    class HalDoBaseApp {
+
+        constructor(
+            definition
+        ) {
+
+            this.definition =
+                definition || {};
+
+            this.id =
+                this.definition.id;
+
+            this.title =
+                this.definition.title ||
+                this.definition.name ||
+                this.id;
+
+            this.icon =
+                this.definition.icon ||
+                "◈";
+
+            this.root =
+                null;
+
+            this.mounted =
+                false;
+
+            this.destroyed =
+                false;
+
+            this.unsubscribe =
+                [];
+
+            this.state =
+                HalDoAppRuntime.getState(
+                    this.id
+                );
+
+
+            const saved =
+                HalDoAppStorage.read(
+                    this.id,
+                    {}
+                );
+
+
+            Object.assign(
+                this.state,
+                saved
+            );
+
+        }
+
+
+        /* =====================================================
+           ROOT
+           ===================================================== */
+
+        createRoot() {
+
+            const root =
+                document.createElement(
+                    "section"
+                );
+
+
+            root.className =
+                "haldo-runtime-app";
+
+
+            root.dataset.appId =
+                this.id;
+
+
+            root.innerHTML = `
+
+                <div
+                    class="haldo-runtime-header"
+                >
+
+                    <div
+                        class="haldo-runtime-title"
+                    >
+
+                        <span
+                            class="haldo-runtime-icon"
+                        >
+                            ${escapeHTML(this.icon)}
+                        </span>
+
+                        <div>
+
+                            <strong>
+                                ${escapeHTML(this.title)}
+                            </strong>
+
+                            <small>
+                                HalDo AI OS 20
+                            </small>
+
+                        </div>
+
+                    </div>
+
+
+                    <button
+                        type="button"
+                        class="haldo-runtime-close"
+                        data-action="close"
+                        aria-label="App schließen"
+                        title="Schließen"
+                    >
+                        ×
+                    </button>
+
+                </div>
+
+
+                <div
+                    class="haldo-runtime-content"
+                    data-app-content
+                ></div>
+
+            `;
+
+
+            return root;
+
+        }
+
+
+        /* =====================================================
+           MOUNT
+           ===================================================== */
+
+        mount(
+            container
+        ) {
+
+            if (
+                this.mounted
+            ) {
+
+                return this.root;
+
+            }
+
+
+            if (!container) {
+
+                throw new Error(
+                    "App-Container fehlt."
+                );
+
+            }
+
+
+            this.root =
+                this.createRoot();
+
+
+            container.appendChild(
+                this.root
+            );
+
+
+            this.bindCommonEvents();
+
+            this.render();
+
+            this.mounted =
+                true;
+
+            this.destroyed =
+                false;
+
+
+            HalDoAppRuntime
+                .registerInstance(
+                    this.id,
+                    this
+                );
+
+
+            this.emit(
+                "mounted"
+            );
+
+
+            return this.root;
+
+        }
+
+
+        /* =====================================================
+           COMMON EVENTS
+           ===================================================== */
+
+        bindCommonEvents() {
+
+            if (!this.root) {
+
+                return;
+
+            }
+
+
+            const closeButton =
+                this.root.querySelector(
+                    '[data-action="close"]'
+                );
+
+
+            if (
+                closeButton
+            ) {
+
+                const handler =
+                    () => {
+
+                        this.close();
+
+                    };
+
+
+                closeButton.addEventListener(
+                    "click",
+                    handler
+                );
+
+
+                this.unsubscribe.push(
+                    () => {
+
+                        closeButton.removeEventListener(
+                            "click",
+                            handler
+                        );
+
+                    }
+                );
+
+            }
+
+        }
+
+
+        /* =====================================================
+           RENDER
+           ===================================================== */
+
+        render() {
+
+            const content =
+                this.root?.querySelector(
+                    "[data-app-content]"
+                );
+
+
+            if (!content) {
+
+                return;
+
+            }
+
+
+            content.innerHTML = `
+
+                <div
+                    class="haldo-app-placeholder"
+                >
+
+                    <div
+                        class="haldo-app-placeholder-icon"
+                    >
+                        ${escapeHTML(this.icon)}
+                    </div>
+
+                    <h2>
+                        ${escapeHTML(this.title)}
+                    </h2>
+
+                    <p>
+                        Diese App ist im HalDo App Runtime
+                        registriert und wird weiter ausgebaut.
+                    </p>
+
+                </div>
+
+            `;
+
+        }
+
+
+        /* =====================================================
+           STATE
+           ===================================================== */
+
+        setState(
+            patch
+        ) {
+
+            this.state =
+                HalDoAppRuntime.setState(
+                    this.id,
+                    patch
+                );
+
+
+            HalDoAppStorage.write(
+                this.id,
+                this.state
+            );
+
+
+            this.render();
+
+
+            return this.state;
+
+        }
+
+
+        /* =====================================================
+           EVENT HELPERS
+           ===================================================== */
+
+        emit(
+            eventName,
+            detail = {}
+        ) {
+
+            HalDoAppRuntime.emit(
+                `app:${this.id}:${eventName}`,
+                {
+                    appId: this.id,
+                    app: this,
+                    ...detail
+                }
+            );
+
+        }
+
+
+        /* =====================================================
+           CLOSE
+           ===================================================== */
+
+        close() {
+
+            const launcher =
+                window.HalDoAppLauncher;
+
+
+            if (
+                launcher &&
+                typeof launcher.close ===
+                "function"
+            ) {
+
+                return launcher.close(
+                    this.id
+                );
+
+            }
+
+
+            this.unmount();
+
+            return true;
+
+        }
+
+
+        /* =====================================================
+           UNMOUNT
+           ===================================================== */
+
+        unmount() {
+
+            if (
+                !this.mounted
+            ) {
+
+                return false;
+
+            }
+
+
+            this.unsubscribe
+                .splice(0)
+                .forEach(
+                    cleanup => {
+
+                        try {
+
+                            cleanup();
+
+                        } catch (error) {
+
+                            console.warn(
+                                "[HalDo App]",
+                                error
+                            );
+
+                        }
+
+                    }
+                );
+
+
+            if (
+                this.root
+            ) {
+
+                this.root.remove();
+
+            }
+
+
+            this.mounted =
+                false;
+
+            this.destroyed =
+                true;
+
+
+            HalDoAppRuntime
+                .removeInstance(
+                    this.id
+                );
+
+
+            this.emit(
+                "unmounted"
+            );
+
+
+            return true;
+
+        }
+
+
+        /* =====================================================
+           DESTROY
+           ===================================================== */
+
+        destroy() {
+
+            return this.unmount();
+
+        }
+
+    }
+
+
+    /* =========================================================
+       APP FACTORY
+       ========================================================= */
+
+    const HalDoAppFactory = {
+
+        definitions:
+            new Map(),
+
+
+        classes:
+            new Map(),
+
+
+        instances:
+            HalDoAppRuntime.instances,
+
+
+        /* =====================================================
+           REGISTER
+           ===================================================== */
+
+        register(
+            appId,
+            AppClass
+        ) {
+
+            if (
+                !appId ||
+                typeof AppClass !==
+                "function"
+            ) {
+
+                return false;
+
+            }
+
+
+            this.classes.set(
+                appId,
+                AppClass
+            );
+
+
+            return true;
+
+        },
+
+
+        /* =====================================================
+           CREATE
+           ===================================================== */
+
+        create(
+            definition
+        ) {
+
+            if (
+                !definition ||
+                !definition.id
+            ) {
+
+                throw new Error(
+                    "Ungültige App-Definition."
+                );
+
+            }
+
+
+            const AppClass =
+                this.classes.get(
+                    definition.id
+                ) ||
+                HalDoBaseApp;
+
+
+            const instance =
+                new AppClass(
+                    definition
+                );
+
+
+            this.instances.set(
+                definition.id,
+                instance
+            );
+
+
+            return instance;
+
+        },
+
+
+        /* =====================================================
+           OPEN
+           ===================================================== */
+
+        async open(
+            appId,
+            options = {}
+        ) {
+
+            const catalog =
+                window.HalDoAppCatalog;
+
+
+            if (!catalog) {
+
+                throw new Error(
+                    "HalDoAppCatalog ist nicht verfügbar."
+                );
+
+            }
+
+
+            const definition =
+                catalog.get(
+                    appId
+                );
+
+
+            if (!definition) {
+
+                throw new Error(
+                    `App "${appId}" wurde nicht gefunden.`
+                );
+
+            }
+
+
+            const existing =
+                this.instances.get(
+                    appId
+                );
+
+
+            if (
+                existing &&
+                existing.mounted
+            ) {
+
+                return existing;
+
+            }
+
+
+            const app =
+                this.create(
+                    definition
+                );
+
+
+            const layer =
+                getAppLayer();
+
+
+            if (!layer) {
+
+                throw new Error(
+                    "HalDo App Layer fehlt."
+                );
+
+            }
+
+
+            app.mount(
+                layer
+            );
+
+
+            if (
+                typeof options.onOpen ===
+                "function"
+            ) {
+
+                options.onOpen(
+                    app
+                );
+
+            }
+
+
+            return app;
+
+        }
+
+    };
+
+
+    /* =========================================================
+       CONNECT LAUNCHER
+       ========================================================= */
+
+    const originalOpen =
+        window.HalDoAppLauncher?.open;
+
+
+    if (
+        window.HalDoAppLauncher
+    ) {
+
+        window.HalDoAppLauncher.open =
+            function (
+                appId,
+                options = {}
+            ) {
+
+                return HalDoAppFactory.open(
+                    appId,
+                    options
+                );
+
+            };
+
+    }
+
+
+    /* =========================================================
+       GLOBAL EXPORTS
+       ========================================================= */
+
+    window.HalDoAppRuntime =
+        HalDoAppRuntime;
+
+
+    window.HalDoAppStorage =
+        HalDoAppStorage;
+
+
+    window.HalDoBaseApp =
+        HalDoBaseApp;
+
+
+    window.HalDoAppFactory =
+        HalDoAppFactory;
+
+
+    if (
+        !window.HalDoOS
+    ) {
+
+        window.HalDoOS = {};
+
+    }
+
+
+    window.HalDoOS.appRuntime =
+        HalDoAppRuntime;
+
+
+    window.HalDoOS.appStorage =
+        HalDoAppStorage;
+
+
+    window.HalDoOS.appFactory =
+        HalDoAppFactory;
+
+
+    /* =========================================================
+       RUNTIME CSS
+       ========================================================= */
+
+    const style =
+        document.createElement(
+            "style"
+        );
+
+
+    style.id =
+        "haldo-app-runtime-style";
+
+
+    style.textContent = `
+
+        .haldo-runtime-app {
+
+            position: absolute;
+
+            inset: 18px;
+
+            display: flex;
+
+            flex-direction: column;
+
+            overflow: hidden;
+
+            border: 1px solid
+                rgba(255,255,255,0.10);
+
+            border-radius: 20px;
+
+            background:
+                rgba(8,12,21,0.96);
+
+            box-shadow:
+                0 24px 80px
+                rgba(0,0,0,0.42);
+
+            backdrop-filter:
+                blur(24px);
+
+            -webkit-backdrop-filter:
+                blur(24px);
+
+        }
+
+
+        .haldo-runtime-header {
+
+            min-height: 64px;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: space-between;
+
+            gap: 12px;
+
+            padding: 10px 14px;
+
+            border-bottom: 1px solid
+                rgba(255,255,255,0.08);
+
+            background:
+                rgba(255,255,255,0.025);
+
+        }
+
+
+        .haldo-runtime-title {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 11px;
+
+            min-width: 0;
+
+        }
+
+
+        .haldo-runtime-icon {
+
+            width: 38px;
+
+            height: 38px;
+
+            display: grid;
+
+            place-items: center;
+
+            flex: 0 0 auto;
+
+            border: 1px solid
+                rgba(66,230,255,0.14);
+
+            border-radius: 12px;
+
+            color: #42e6ff;
+
+            background:
+                rgba(66,230,255,0.06);
+
+            font-size: 18px;
+
+        }
+
+
+        .haldo-runtime-title strong {
+
+            display: block;
+
+            color: #f5f7fb;
+
+            font-size: 14px;
+
+        }
+
+
+        .haldo-runtime-title small {
+
+            display: block;
+
+            margin-top: 2px;
+
+            color:
+                rgba(245,247,251,0.45);
+
+            font-size: 9px;
+
+        }
+
+
+        .haldo-runtime-close {
+
+            width: 38px;
+
+            height: 38px;
+
+            display: grid;
+
+            place-items: center;
+
+            border: 1px solid
+                rgba(255,255,255,0.08);
+
+            border-radius: 11px;
+
+            color:
+                rgba(245,247,251,0.68);
+
+            background:
+                rgba(255,255,255,0.035);
+
+            font-size: 22px;
+
+            line-height: 1;
+
+        }
+
+
+        .haldo-runtime-close:hover {
+
+            color: #ffffff;
+
+            background:
+                rgba(255,77,109,0.12);
+
+            border-color:
+                rgba(255,77,109,0.22);
+
+        }
+
+
+        .haldo-runtime-content {
+
+            flex: 1;
+
+            min-height: 0;
+
+            overflow: auto;
+
+            padding: 20px;
+
+        }
+
+
+        .haldo-app-placeholder {
+
+            min-height: 100%;
+
+            display: flex;
+
+            flex-direction: column;
+
+            align-items: center;
+
+            justify-content: center;
+
+            text-align: center;
+
+            color: rgba(245,247,251,0.68);
+
+        }
+
+
+        .haldo-app-placeholder-icon {
+
+            width: 72px;
+
+            height: 72px;
+
+            display: grid;
+
+            place-items: center;
+
+            margin-bottom: 16px;
+
+            border: 1px solid
+                rgba(66,230,255,0.15);
+
+            border-radius: 20px;
+
+            color: #42e6ff;
+
+            background:
+                rgba(66,230,255,0.055);
+
+            box-shadow:
+                0 0 30px
+                rgba(66,230,255,0.08);
+
+            font-size: 28px;
+
+        }
+
+
+        .haldo-app-placeholder h2 {
+
+            margin: 0;
+
+            color: #f5f7fb;
+
+            font-size: 22px;
+
+        }
+
+
+        .haldo-app-placeholder p {
+
+            max-width: 480px;
+
+            margin: 10px auto 0;
+
+            color:
+                rgba(245,247,251,0.52);
+
+            line-height: 1.6;
+
+            font-size: 13px;
+
+        }
+
+
+        @media (max-width: 720px) {
+
+            .haldo-runtime-app {
+
+                inset: 10px;
+
+                border-radius: 16px;
+
+            }
+
+
+            .haldo-runtime-content {
+
+                padding: 14px;
+
+            }
+
+        }
+
+    `;
+
+
+    document.head.appendChild(
+        style
+    );
+
+
+    /* =========================================================
+       READY EVENT
+       ========================================================= */
+
+    HalDoAppRuntime.emit(
+        "runtime:ready",
+        {
+            version:
+                HalDoAppRuntime.version
+        }
+    );
+
+
+    console.log(
+        "%cHalDo App Runtime 20%c bereit",
+        "color:#42e6ff;font-weight:bold;",
+        "color:#fff;"
+    );
+
+
+})();
+</script>
