@@ -1,54 +1,58 @@
 /* ============================================================
-   HalDo AI OS 20
-   Professional Ultimate Foundation
+   HalDo AI OS 19/20
+   PROFESSIONAL ULTIMATE FOUNDATION
    ------------------------------------------------------------
    Datei: js/app-manager.js
 
-   ZENTRALER APPLICATION MANAGER
+   Zentrale App-Verwaltung
+
+   Verbindung:
+
+       KERNEL
+          │
+          ▼
+     APP REGISTRY
+          │
+          ▼
+     APP MANAGER
+       │  │  │
+       │  │  └── APP ROUTER
+       │  └───── WINDOW MANAGER
+       └──────── LAUNCHER
+          │
+          ▼
+      APPLICATION
 
    Aufgaben:
-   - Registry-Anbindung
-   - App-Lifecycle
-   - App-Start / Stop
-   - Open / Close
-   - Minimize / Restore
-   - mehrere gleichzeitig geöffnete Apps
-   - aktive App
-   - App-Zustände
-   - Dependencies
-   - App-Events
-   - Fehlerisolierung
-   - App-Kontext
-   - Settings-Vorbereitung
-   - Window-Manager-Verbindung
-   - Router-Verbindung
-   - Kernel-Verbindung
-   - Diagnostics
-   - Health Check
-   - zukünftige App-Module
+
+   • Apps verwalten
+   • Apps starten
+   • Apps schließen
+   • Apps aktivieren/deaktivieren
+   • App-Zustände
+   • mehrere Apps gleichzeitig
+   • aktive App
+   • App Sessions
+   • Fenster-Referenzen
+   • App Events
+   • Registry-Verbindung
+   • Kernel-Verbindung
+   • System-Verbindung
+   • Router-Verbindung
+   • Window-Manager-Verbindung
+   • Launcher-Kompatibilität
+   • Diagnostics
+   • Health Check
+   • Fehlerbehandlung
+   • zukünftige Erweiterbarkeit
 
    WICHTIG:
 
-   Diese Datei ist die zentrale Laufzeitverwaltung
-   aller HalDo AI OS Anwendungen.
+   Diese Datei enthält NICHT die komplette innere Logik
+   jeder einzelnen Anwendung.
 
-   Eine App ist nicht nur ein Name.
-
-   Eine App kann besitzen:
-
-   - UI
-   - State
-   - Settings
-   - Lifecycle
-   - Events
-   - Storage
-   - Permissions
-   - Dependencies
-   - Windows
-   - AI-Verbindungen
-   - Sprachsystem
-   - Module
-   - eigene Runtime
+   Jede Anwendung erhält später ihre eigene vollständige
+   App-Datei / App-Modul-Struktur.
 
    ============================================================ */
 
@@ -57,9 +61,9 @@
     "use strict";
 
 
-    /* ========================================================
+    /* =========================================================
        01 — HALDO FOUNDATION
-       ======================================================== */
+       ========================================================= */
 
     window.HalDoOS =
         window.HalDoOS || {};
@@ -68,52 +72,46 @@
         window.HalDoOS;
 
 
-    /* ========================================================
+    /* =========================================================
        02 — META
-       ======================================================== */
+       ========================================================= */
 
     const VERSION =
-        "20.0.0";
+        "19.0.0";
 
     const NAME =
-        "HalDo AI OS Application Manager";
+        "HalDo AI OS App Manager";
 
     const MODULE_ID =
         "app-manager";
 
 
-    /* ========================================================
-       03 — INTERNAL STATE
-       ======================================================== */
+    /* =========================================================
+       03 — STATE
+       ========================================================= */
 
     const state = {
 
         initialized:
             false,
 
-        ready:
-            false,
-
         initializing:
             false,
 
-        starting:
+        ready:
             false,
-
-        activeAppId:
-            null,
 
         apps:
             new Map(),
 
-        instances:
+        sessions:
             new Map(),
 
-        states:
-            new Map(),
+        activeAppId:
+            null,
 
-        settings:
-            new Map(),
+        activeSessionId:
+            null,
 
         listeners:
             new Map(),
@@ -121,6 +119,9 @@
         connections: {
 
             kernel:
+                false,
+
+            system:
                 false,
 
             registry:
@@ -132,35 +133,29 @@
             windowManager:
                 false,
 
-            system:
+            launcher:
                 false
 
         },
 
         statistics: {
 
-            registered:
+            launches:
                 0,
 
-            started:
+            closes:
                 0,
 
-            stopped:
+            activations:
                 0,
 
-            opened:
-                0,
-
-            closed:
+            deactivations:
                 0,
 
             minimized:
                 0,
 
             restored:
-                0,
-
-            activated:
                 0,
 
             errors:
@@ -171,9 +166,9 @@
     };
 
 
-    /* ========================================================
+    /* =========================================================
        04 — LOGGING
-       ======================================================== */
+       ========================================================= */
 
     function log() {
 
@@ -217,9 +212,9 @@
     }
 
 
-    /* ========================================================
-       05 — SAFE HELPERS
-       ======================================================== */
+    /* =========================================================
+       05 — HELPERS
+       ========================================================= */
 
     function hasMethod(
         object,
@@ -275,9 +270,7 @@
 
 
         if (
-            Array.isArray(
-                value
-            )
+            Array.isArray(value)
         ) {
 
             return value.map(
@@ -288,26 +281,28 @@
 
 
         if (
-            typeof value ===
-            "object"
+            typeof value === "object"
         ) {
 
             const result = {};
 
+            Object.keys(value)
+                .forEach(
+                    key => {
 
-            Object.keys(
-                value
-            ).forEach(
-                function (key) {
+                        const item =
+                            value[key];
 
-                    result[key] =
-                        clone(
-                            value[key]
-                        );
+                        result[key] =
+                            typeof item ===
+                            "function"
+                                ? item
+                                : clone(
+                                    item
+                                );
 
-                }
-            );
-
+                    }
+                );
 
             return result;
 
@@ -319,15 +314,26 @@
     }
 
 
-    /* ========================================================
+    /* =========================================================
        06 — SERVICE LOOKUPS
-       ======================================================== */
+       ========================================================= */
 
     function getKernel() {
 
         return (
             window.HalDoKernel ||
             HalDoOS.kernel ||
+            null
+        );
+
+    }
+
+
+    function getSystem() {
+
+        return (
+            window.HalDoSystem ||
+            HalDoOS.system ||
             null
         );
 
@@ -367,20 +373,20 @@
     }
 
 
-    function getSystem() {
+    function getLauncher() {
 
         return (
-            window.HalDoSystem ||
-            HalDoOS.system ||
+            window.HalDoAppLauncher ||
+            HalDoOS.appLauncher ||
             null
         );
 
     }
 
 
-    /* ========================================================
+    /* =========================================================
        07 — EVENT SYSTEM
-       ======================================================== */
+       ========================================================= */
 
     function on(
         event,
@@ -487,7 +493,7 @@
             Array.from(
                 listeners
             ).forEach(
-                function (callback) {
+                callback => {
 
                     try {
 
@@ -497,9 +503,9 @@
 
                     } catch (exception) {
 
-                        reportError(
-                            exception,
-                            "Event: " + event
+                        errorLog(
+                            "Event listener error:",
+                            exception
                         );
 
                     }
@@ -533,55 +539,82 @@
 
         }
 
+
+        const kernel =
+            getKernel();
+
+
+        if (
+            kernel &&
+            hasMethod(
+                kernel,
+                "emit"
+            )
+        ) {
+
+            try {
+
+                kernel.emit(
+                    "app-manager:" + event,
+                    data
+                );
+
+            } catch (_) {}
+
+        }
+
     }
 
 
-    /* ========================================================
+    /* =========================================================
        08 — ERROR SYSTEM
-       ======================================================== */
+       ========================================================= */
 
     function reportError(
-        error,
-        context = "Application Manager"
+        code,
+        exception,
+        extra = null
     ) {
 
         state.statistics.errors +=
             1;
 
 
-        const normalized =
-            error instanceof Error
-                ? error
-                : new Error(
-                    String(
-                        error
-                    )
-                );
+        const payload = {
 
-
-        const record = {
+            code:
+                code ||
+                "APP_MANAGER_ERROR",
 
             message:
-                normalized.message,
+                exception instanceof Error
+                    ? exception.message
+                    : String(
+                        exception ||
+                        "Unknown error"
+                    ),
 
-            name:
-                normalized.name,
+            error:
+                exception ||
+                null,
 
-            stack:
-                normalized.stack ||
-                "",
+            extra,
 
-            context,
-
-            time:
-                Date.now()
+            timestamp:
+                new Date().toISOString()
 
         };
 
 
         errorLog(
             "[HalDo App Manager]",
-            record
+            payload
+        );
+
+
+        emit(
+            "error",
+            payload
         );
 
 
@@ -600,8 +633,12 @@
             try {
 
                 kernel.reportError(
-                    normalized,
-                    context
+                    exception ||
+                    new Error(
+                        payload.message
+                    ),
+                    "App Manager: " +
+                    payload.code
                 );
 
             } catch (_) {}
@@ -609,276 +646,14 @@
         }
 
 
-        emit(
-            "error",
-            record
-        );
-
-
-        return record;
+        return payload;
 
     }
 
 
-    /* ========================================================
-       09 — APP CONTEXT
-       ======================================================== */
-
-    function createAppContext(
-        app
-    ) {
-
-        if (!app) {
-
-            return null;
-
-        }
-
-
-        const manager =
-            api;
-
-
-        return {
-
-            app:
-
-                app,
-
-            appId:
-
-                app.id,
-
-            manager:
-
-                manager,
-
-            registry:
-
-                getRegistry(),
-
-            kernel:
-
-                getKernel(),
-
-            router:
-
-                getRouter(),
-
-            windowManager:
-
-                getWindowManager(),
-
-            system:
-
-                getSystem(),
-
-
-            getState:
-
-                function () {
-
-                    return getState(
-                        app.id
-                    );
-
-                },
-
-
-            setState:
-
-                function (
-                    changes
-                ) {
-
-                    return setState(
-                        app.id,
-                        changes
-                    );
-
-                },
-
-
-            getSettings:
-
-                function () {
-
-                    return getSettings(
-                        app.id
-                    );
-
-                },
-
-
-            setSettings:
-
-                function (
-                    changes
-                ) {
-
-                    return setSettings(
-                        app.id,
-                        changes
-                    );
-
-                },
-
-
-            emit:
-
-                function (
-                    event,
-                    data
-                ) {
-
-                    emit(
-                        "app:" +
-                        app.id +
-                        ":" +
-                        event,
-                        data
-                    );
-
-                },
-
-
-            on:
-
-                function (
-                    event,
-                    callback
-                ) {
-
-                    return on(
-                        "app:" +
-                        app.id +
-                        ":" +
-                        event,
-                        callback
-                    );
-
-                }
-
-        };
-
-    }
-
-
-    /* ========================================================
-       10 — REGISTER INTERNAL APP
-       ======================================================== */
-
-    function registerInternal(
-        app
-    ) {
-
-        if (!app) {
-
-            return null;
-
-        }
-
-
-        const id =
-            normalizeId(
-                app.id ||
-                app.appId ||
-                app.name
-            );
-
-
-        if (!id) {
-
-            return null;
-
-        }
-
-
-        state.apps.set(
-            id,
-            app
-        );
-
-
-        if (
-            !state.states.has(
-                id
-            )
-        ) {
-
-            state.states.set(
-                id,
-                {
-
-                    status:
-                        "registered",
-
-                    running:
-                        false,
-
-                    opened:
-                        false,
-
-                    minimized:
-                        false,
-
-                    active:
-                        false,
-
-                    startedAt:
-                        null,
-
-                    openedAt:
-                        null,
-
-                    closedAt:
-                        null,
-
-                    updatedAt:
-                        Date.now()
-
-                }
-            );
-
-        }
-
-
-        if (
-            !state.settings.has(
-                id
-            )
-        ) {
-
-            state.settings.set(
-                id,
-                {
-
-                    theme:
-                        "system",
-
-                    notifications:
-                        true,
-
-                    sound:
-                        true,
-
-                    animations:
-                        true
-
-                }
-            );
-
-        }
-
-
-        return app;
-
-    }
-
-
-    /* ========================================================
-       11 — SYNCHRONIZE REGISTRY
-       ======================================================== */
+    /* =========================================================
+       09 — REGISTRY SYNCHRONISATION
+       ========================================================= */
 
     function syncRegistry() {
 
@@ -900,10 +675,10 @@
             true;
 
 
-        let apps = [];
-
-
         try {
+
+            let apps = [];
+
 
             if (
                 hasMethod(
@@ -928,70 +703,240 @@
 
             }
 
+
+            if (
+                !Array.isArray(apps)
+            ) {
+
+                return 0;
+
+            }
+
+
+            apps.forEach(
+                app => {
+
+                    if (!app) {
+
+                        return;
+
+                    }
+
+
+                    const id =
+                        normalizeId(
+                            app.id ||
+                            app.appId ||
+                            app.name
+                        );
+
+
+                    if (!id) {
+
+                        return;
+
+                    }
+
+
+                    const existing =
+                        state.apps.get(
+                            id
+                        );
+
+
+                    state.apps.set(
+                        id,
+                        {
+
+                            ...(
+                                existing ||
+                                {}
+                            ),
+
+                            ...app,
+
+                            id,
+
+                            appId:
+                                id,
+
+                            manager:
+                                MODULE_ID,
+
+                            managerUpdatedAt:
+                                Date.now()
+
+                        }
+                    );
+
+                }
+            );
+
+
+            return apps.length;
+
         } catch (exception) {
 
             reportError(
-                exception,
-                "Registry Synchronisation"
+                "REGISTRY_SYNC_ERROR",
+                exception
             );
 
-            return 0;
-
-        }
-
-
-        if (
-            !Array.isArray(
-                apps
-            )
-        ) {
 
             return 0;
 
         }
-
-
-        let count = 0;
-
-
-        apps.forEach(
-            function (app) {
-
-                if (
-                    registerInternal(
-                        app
-                    )
-                ) {
-
-                    count += 1;
-
-                }
-
-            }
-        );
-
-
-        emit(
-            "registry-synchronized",
-            {
-
-                count:
-                    count
-
-            }
-        );
-
-
-        return count;
 
     }
 
 
-    /* ========================================================
-       12 — GET APP
-       ======================================================== */
+    /* =========================================================
+       10 — APP REGISTRATION
+       ========================================================= */
 
-    function getApp(
+    function register(
+        config
+    ) {
+
+        if (
+            !config ||
+            typeof config !==
+            "object"
+        ) {
+
+            reportError(
+                "INVALID_APP_CONFIG",
+                new Error(
+                    "Ungültige App-Konfiguration."
+                )
+            );
+
+
+            return null;
+
+        }
+
+
+        const id =
+            normalizeId(
+                config.id ||
+                config.appId ||
+                config.name ||
+                config.title
+            );
+
+
+        if (!id) {
+
+            reportError(
+                "MISSING_APP_ID",
+                new Error(
+                    "App besitzt keine gültige ID."
+                )
+            );
+
+
+            return null;
+
+        }
+
+
+        const existing =
+            state.apps.get(
+                id
+            );
+
+
+        const app = {
+
+            ...(existing || {}),
+
+            ...config,
+
+            id,
+
+            appId:
+                id,
+
+            name:
+                config.name ||
+                existing?.name ||
+                id,
+
+            title:
+                config.title ||
+                existing?.title ||
+                config.name ||
+                id,
+
+            enabled:
+                config.enabled !==
+                undefined
+                    ? config.enabled !== false
+                    : (
+                        existing
+                            ? existing.enabled !== false
+                            : true
+                    ),
+
+            status:
+                config.status ||
+                existing?.status ||
+                "registered",
+
+            manager:
+                MODULE_ID,
+
+            registeredAt:
+                existing?.registeredAt ||
+                Date.now(),
+
+            updatedAt:
+                Date.now()
+
+        };
+
+
+        state.apps.set(
+            id,
+            app
+        );
+
+
+        emit(
+            existing
+                ? "app-updated"
+                : "app-registered",
+            {
+                app,
+                previous:
+                    existing ||
+                    null
+            }
+        );
+
+
+        return app;
+
+    }
+
+
+    function registerApp(
+        config
+    ) {
+
+        return register(
+            config
+        );
+
+    }
+
+
+    /* =========================================================
+       11 — APP ACCESS
+       ========================================================= */
+
+    function get(
         id
     ) {
 
@@ -1018,11 +963,11 @@
     }
 
 
-    function get(
+    function getApp(
         id
     ) {
 
-        return getApp(
+        return get(
             id
         );
 
@@ -1033,7 +978,7 @@
         id
     ) {
 
-        return !!getApp(
+        return !!get(
             id
         );
 
@@ -1056,334 +1001,315 @@
     }
 
 
-    /* ========================================================
-       13 — APP STATE
-       ======================================================== */
+    function getCount() {
 
-    function getState(
-        id
-    ) {
-
-        const normalized =
-            normalizeId(
-                id
-            );
-
-
-        if (!normalized) {
-
-            return null;
-
-        }
-
-
-        if (
-            !state.states.has(
-                normalized
-            )
-        ) {
-
-            state.states.set(
-                normalized,
-                {
-
-                    status:
-                        "unknown",
-
-                    running:
-                        false,
-
-                    opened:
-                        false,
-
-                    minimized:
-                        false,
-
-                    active:
-                        false,
-
-                    startedAt:
-                        null,
-
-                    openedAt:
-                        null,
-
-                    closedAt:
-                        null,
-
-                    updatedAt:
-                        Date.now()
-
-                }
-            );
-
-        }
-
-
-        return state.states.get(
-            normalized
-        );
+        return state.apps.size;
 
     }
 
 
-    function setState(
-        id,
-        changes
+    /* =========================================================
+       12 — APP SEARCH
+       ========================================================= */
+
+    function search(
+        query
     ) {
 
-        const current =
-            getState(
+        const value =
+            String(
+                query || ""
+            )
+            .trim()
+            .toLowerCase();
+
+
+        if (!value) {
+
+            return getAll();
+
+        }
+
+
+        return getAll()
+            .filter(
+                app => {
+
+                    const fields = [
+
+                        app.id,
+
+                        app.name,
+
+                        app.title,
+
+                        app.description,
+
+                        app.category,
+
+                        ...(app.tags || []),
+
+                        ...(app.keywords || [])
+
+                    ];
+
+
+                    return fields.some(
+                        field =>
+                            String(
+                                field ||
+                                ""
+                            )
+                            .toLowerCase()
+                            .includes(
+                                value
+                            )
+                    );
+
+                }
+            );
+
+    }
+
+
+    /* =========================================================
+       13 — APP STATE
+       ========================================================= */
+
+    function setStatus(
+        id,
+        status
+    ) {
+
+        const app =
+            get(
                 id
             );
 
 
-        if (!current) {
+        if (!app) {
 
-            return null;
+            return false;
 
         }
 
 
-        if (
-            changes &&
-            typeof changes ===
-            "object"
-        ) {
-
-            Object.assign(
-                current,
-                changes
+        app.status =
+            String(
+                status ||
+                "unknown"
             );
 
-        }
 
-
-        current.updatedAt =
+        app.updatedAt =
             Date.now();
 
 
         emit(
-            "state-changed",
+            "app-status",
             {
-
-                appId:
-                    normalizeId(
-                        id
-                    ),
-
-                state:
-                    current
-
+                app
             }
         );
 
 
-        return current;
+        return true;
 
     }
 
 
-    /* ========================================================
-       14 — SETTINGS
-       ======================================================== */
-
-    function getSettings(
+    function getStatus(
         id
     ) {
 
-        const normalized =
-            normalizeId(
+        const app =
+            get(
                 id
             );
 
 
-        if (!normalized) {
-
-            return null;
-
-        }
-
-
-        if (
-            !state.settings.has(
-                normalized
-            )
-        ) {
-
-            state.settings.set(
-                normalized,
-                {}
-            );
-
-        }
-
-
-        return state.settings.get(
-            normalized
-        );
+        return app
+            ? app.status
+            : null;
 
     }
 
 
-    function setSettings(
-        id,
-        changes
+    /* =========================================================
+       14 — SESSION CREATION
+       ========================================================= */
+
+    function createSession(
+        app,
+        options = {}
     ) {
 
-        const settings =
-            getSettings(
-                id
-            );
+        const sessionId =
+            "session-" +
+            app.id +
+            "-" +
+            Date.now() +
+            "-" +
+            Math.random()
+                .toString(36)
+                .slice(2, 8);
 
 
-        if (!settings) {
+        const session = {
 
-            return null;
+            id:
+                sessionId,
 
-        }
+            sessionId,
 
+            appId:
+                app.id,
 
-        if (
-            changes &&
-            typeof changes ===
-            "object"
-        ) {
+            state:
+                "opening",
 
-            Object.assign(
-                settings,
-                changes
-            );
+            createdAt:
+                Date.now(),
 
-        }
+            openedAt:
+                null,
 
+            closedAt:
+                null,
 
-        emit(
-            "settings-changed",
-            {
+            minimized:
+                false,
 
-                appId:
-                    normalizeId(
-                        id
-                    ),
+            focused:
+                true,
 
-                settings:
-                    settings
+            windowId:
+                options.windowId ||
+                null,
 
-            }
-        );
+            route:
+                options.route ||
+                app.route ||
+                null,
 
+            data:
+                options.data || {},
 
-        return settings;
-
-    }
-
-
-    /* ========================================================
-       15 — DEPENDENCIES
-       ======================================================== */
-
-    function checkDependencies(
-        app
-    ) {
-
-        if (!app) {
-
-            return {
-
-                valid:
-                    false,
-
-                missing:
-                    []
-
-            };
-
-        }
-
-
-        const dependencies =
-            Array.isArray(
-                app.dependencies
-            )
-                ? app.dependencies
-                : [];
-
-
-        const missing =
-            [];
-
-
-        dependencies.forEach(
-            function (
-                dependency
-            ) {
-
-                const dependencyId =
-                    normalizeId(
-                        dependency
-                    );
-
-
-                const dependencyApp =
-                    getApp(
-                        dependencyId
-                    );
-
-
-                if (
-                    !dependencyApp ||
-                    dependencyApp.enabled ===
-                    false
-                ) {
-
-                    missing.push(
-                        dependencyId
-                    );
-
-                }
-
-            }
-        );
-
-
-        return {
-
-            valid:
-                missing.length ===
-                0,
-
-            missing:
-                missing
+            metadata:
+                options.metadata || {}
 
         };
 
+
+        state.sessions.set(
+            sessionId,
+            session
+        );
+
+
+        return session;
+
     }
 
 
-    /* ========================================================
-       16 — START APP
-       ======================================================== */
+    function getSession(
+        sessionId
+    ) {
 
-    async function startApp(
+        return (
+            state.sessions.get(
+                sessionId
+            ) ||
+            null
+        );
+
+    }
+
+
+    function getSessions() {
+
+        return Array.from(
+            state.sessions.values()
+        );
+
+    }
+
+
+    function getAppSessions(
+        appId
+    ) {
+
+        const id =
+            normalizeId(
+                appId
+            );
+
+
+        return getSessions()
+            .filter(
+                session =>
+                    session.appId ===
+                    id
+            );
+
+    }
+
+
+    function getRunningSessions() {
+
+        return getSessions()
+            .filter(
+                session =>
+                    session.state !==
+                    "closed"
+            );
+
+    }
+
+
+    /* =========================================================
+       15 — OPEN / LAUNCH
+       ========================================================= */
+
+    async function open(
         id,
         options = {}
     ) {
 
-        const app =
-            getApp(
+        let app =
+            get(
                 id
             );
+
+
+        /*
+         * Falls der Manager noch nicht synchronisiert
+         * wurde, versuchen wir die Registry erneut.
+         */
+
+        if (!app) {
+
+            syncRegistry();
+
+            app =
+                get(
+                    id
+                );
+
+        }
 
 
         if (!app) {
 
             reportError(
+                "APP_NOT_FOUND",
                 new Error(
-                    "App nicht gefunden: " +
-                    id
+                    `App '${id}' wurde nicht gefunden.`
                 ),
-                "App Start"
+                {
+                    appId:
+                        id
+                }
             );
 
 
@@ -1398,293 +1324,89 @@
         ) {
 
             reportError(
+                "APP_DISABLED",
                 new Error(
-                    "App ist deaktiviert: " +
+                    `App '${app.id}' ist deaktiviert.`
+                ),
+                {
+                    appId:
+                        app.id
+                }
+            );
+
+
+            return null;
+
+        }
+
+
+        /*
+         * Singleton-App:
+         * vorhandene Session aktivieren.
+         */
+
+        if (
+            app.singleton !==
+            false
+        ) {
+
+            const existingSession =
+                getAppSessions(
                     app.id
-                ),
-                "App Start"
-            );
-
-
-            return null;
-
-        }
-
-
-        const dependencyCheck =
-            checkDependencies(
-                app
-            );
-
-
-        if (
-            !dependencyCheck.valid &&
-            options.ignoreDependencies !==
-            true
-        ) {
-
-            reportError(
-                new Error(
-                    "Fehlende App-Abhängigkeiten: " +
-                    dependencyCheck.missing.join(
-                        ", "
-                    )
-                ),
-                "App Start"
-            );
-
-
-            return null;
-
-        }
-
-
-        const currentState =
-            getState(
-                app.id
-            );
-
-
-        if (
-            currentState.running
-        ) {
-
-            return app;
-
-        }
-
-
-        state.starting =
-            true;
-
-
-        emit(
-            "starting",
-            {
-
-                app:
-                    app,
-
-                options:
-                    options
-
-            }
-        );
-
-
-        try {
-
-            const context =
-                createAppContext(
-                    app
+                )
+                .find(
+                    session =>
+                        session.state !==
+                        "closed"
                 );
 
 
-            if (
-                typeof app.init ===
-                "function" &&
-                !currentState.initialized
-            ) {
+            if (existingSession) {
 
-                const result =
-                    app.init(
-                        context
-                    );
+                await activate(
+                    existingSession.id
+                );
 
 
-                if (
-                    result &&
-                    typeof result.then ===
-                    "function"
-                ) {
-
-                    await result;
-
-                }
-
-
-                currentState.initialized =
-                    true;
+                return existingSession;
 
             }
 
-
-            if (
-                typeof app.start ===
-                "function"
-            ) {
-
-                const result =
-                    app.start(
-                        context,
-                        options
-                    );
-
-
-                if (
-                    result &&
-                    typeof result.then ===
-                    "function"
-                ) {
-
-                    await result;
-
-                }
-
-            }
-
-
-            currentState.running =
-                true;
-
-            currentState.status =
-                "running";
-
-            currentState.startedAt =
-                Date.now();
-
-            currentState.updatedAt =
-                Date.now();
-
-
-            state.statistics.started +=
-                1;
-
-
-            emit(
-                "started",
-                {
-
-                    app:
-                        app,
-
-                    state:
-                        currentState
-
-                }
-            );
-
-
-            state.starting =
-                false;
-
-
-            return app;
-
-        }
-        catch (exception) {
-
-            state.starting =
-                false;
-
-
-            currentState.running =
-                false;
-
-            currentState.status =
-                "error";
-
-
-            reportError(
-                exception,
-                "App Start: " +
-                app.id
-            );
-
-
-            emit(
-                "start-failed",
-                {
-
-                    app:
-                        app,
-
-                    error:
-                        exception
-
-                }
-            );
-
-
-            return null;
-
-        }
-
-    }
-
-
-    function start(
-        id,
-        options
-    ) {
-
-        return startApp(
-            id,
-            options
-        );
-
-    }
-
-
-    /* ========================================================
-       17 — OPEN APP
-       ======================================================== */
-
-    async function openApp(
-        id,
-        options = {}
-    ) {
-
-        const app =
-            getApp(
-                id
-            );
-
-
-        if (!app) {
-
-            return null;
-
         }
 
 
-        const started =
-            await startApp(
-                app.id,
+        const session =
+            createSession(
+                app,
                 options
             );
 
 
-        if (!started) {
-
-            return null;
-
-        }
-
-
-        const appState =
-            getState(
-                app.id
-            );
+        setStatus(
+            app.id,
+            "opening"
+        );
 
 
         try {
 
-            const context =
-                createAppContext(
-                    app
-                );
-
+            /*
+             * App-eigene init()
+             */
 
             if (
-                typeof app.open ===
+                typeof app.init ===
                 "function"
             ) {
 
                 const result =
-                    app.open(
-                        context,
-                        options
+                    app.init(
+                        {
+                            app,
+                            session,
+                            manager:
+                                api
+                        }
                     );
 
 
@@ -1702,7 +1424,60 @@
 
 
             /*
-             * Verbindung zum Window Manager.
+             * Router
+             */
+
+            const router =
+                getRouter();
+
+
+            if (
+                router &&
+                hasMethod(
+                    router,
+                    "open"
+                )
+            ) {
+
+                try {
+
+                    const routeResult =
+                        await router.open(
+                            app.route ||
+                            app.id,
+                            {
+                                app,
+                                session,
+                                options
+                            }
+                        );
+
+
+                    if (
+                        routeResult &&
+                        typeof routeResult ===
+                        "string"
+                    ) {
+
+                        session.route =
+                            routeResult;
+
+                    }
+
+                } catch (exception) {
+
+                    warn(
+                        "Router konnte App nicht öffnen:",
+                        exception
+                    );
+
+                }
+
+            }
+
+
+            /*
+             * Window Manager
              */
 
             const windowManager =
@@ -1713,128 +1488,198 @@
                 windowManager
             ) {
 
-                if (
-                    hasMethod(
-                        windowManager,
-                        "open"
-                    )
-                ) {
+                try {
 
-                    try {
+                    if (
+                        hasMethod(
+                            windowManager,
+                            "open"
+                        )
+                    ) {
 
-                        windowManager.open(
-                            app.id,
-                            {
-                                app:
+                        const windowResult =
+                            await windowManager.open(
+                                app.id,
+                                {
+                                    app,
+                                    session,
+                                    options
+                                }
+                            );
+
+
+                        if (
+                            windowResult &&
+                            typeof windowResult ===
+                            "object"
+                        ) {
+
+                            session.windowId =
+                                windowResult.id ||
+                                windowResult.windowId ||
+                                session.windowId;
+
+                        }
+
+                    }
+                    else if (
+                        hasMethod(
+                            windowManager,
+                            "createWindow"
+                        )
+                    ) {
+
+                        const windowResult =
+                            await windowManager.createWindow(
+                                {
+                                    id:
+                                        app.id,
+
                                     app,
 
-                                options:
-                                    options
+                                    session
+                                }
+                            );
 
-                            }
-                        );
 
-                    } catch (_) {}
+                        if (
+                            windowResult
+                        ) {
 
-                }
-                else if (
-                    hasMethod(
-                        windowManager,
-                        "createWindow"
-                    )
-                ) {
+                            session.windowId =
+                                windowResult.id ||
+                                windowResult.windowId ||
+                                session.windowId;
 
-                    try {
+                        }
 
-                        windowManager.createWindow(
-                            {
-                                id:
-                                    app.id,
+                    }
 
-                                app:
-                                    app
+                } catch (exception) {
 
-                            }
-                        );
-
-                    } catch (_) {}
+                    warn(
+                        "Window Manager konnte Fenster nicht öffnen:",
+                        exception
+                    );
 
                 }
 
             }
 
 
-            appState.opened =
-                true;
+            /*
+             * App-eigene start()
+             */
 
-            appState.minimized =
-                false;
+            if (
+                typeof app.start ===
+                "function"
+            ) {
 
-            appState.status =
-                "open";
+                const result =
+                    app.start(
+                        {
+                            app,
+                            session,
+                            manager:
+                                api
+                        }
+                    );
 
-            appState.openedAt =
-                appState.openedAt ||
-                Date.now();
 
+                if (
+                    result &&
+                    typeof result.then ===
+                    "function"
+                ) {
 
-            state.instances.set(
-                app.id,
-                {
-
-                    id:
-                        app.id,
-
-                    app:
-                        app,
-
-                    context:
-                        createAppContext(
-                            app
-                        ),
-
-                    openedAt:
-                        Date.now(),
-
-                    minimized:
-                        false
+                    await result;
 
                 }
+
+            }
+
+
+            session.state =
+                "running";
+
+            session.openedAt =
+                Date.now();
+
+            session.focused =
+                true;
+
+
+            state.activeAppId =
+                app.id;
+
+            state.activeSessionId =
+                session.id;
+
+
+            setStatus(
+                app.id,
+                "running"
             );
 
 
-            state.statistics.opened +=
+            state.statistics.launches +=
                 1;
 
 
-            activateApp(
-                app.id
+            emit(
+                "app-opened",
+                {
+                    app,
+                    session
+                }
             );
 
 
             emit(
-                "opened",
+                "app-started",
                 {
-
-                    app:
-                        app,
-
-                    options:
-                        options
-
+                    app,
+                    session
                 }
             );
 
 
-            return app;
+            await activate(
+                session.id
+            );
 
-        }
-        catch (exception) {
+
+            log(
+                "App geöffnet:",
+                app.id
+            );
+
+
+            return session;
+
+        } catch (exception) {
+
+            session.state =
+                "error";
+
+
+            setStatus(
+                app.id,
+                "error"
+            );
+
 
             reportError(
+                "APP_OPEN_ERROR",
                 exception,
-                "App Open: " +
-                app.id
+                {
+                    appId:
+                        app.id,
+
+                    sessionId:
+                        session.id
+                }
             );
 
 
@@ -1845,186 +1690,12 @@
     }
 
 
-    function open(
-        id,
-        options
-    ) {
-
-        return openApp(
-            id,
-            options
-        );
-
-    }
-
-
-    /* ========================================================
-       18 — CLOSE APP
-       ======================================================== */
-
-    async function closeApp(
+    function launch(
         id,
         options = {}
     ) {
 
-        const app =
-            getApp(
-                id
-            );
-
-
-        if (!app) {
-
-            return false;
-
-        }
-
-
-        const appState =
-            getState(
-                app.id
-            );
-
-
-        try {
-
-            const context =
-                createAppContext(
-                    app
-                );
-
-
-            if (
-                typeof app.close ===
-                "function"
-            ) {
-
-                const result =
-                    app.close(
-                        context,
-                        options
-                    );
-
-
-                if (
-                    result &&
-                    typeof result.then ===
-                    "function"
-                ) {
-
-                    await result;
-
-                }
-
-            }
-
-
-            const windowManager =
-                getWindowManager();
-
-
-            if (
-                windowManager
-            ) {
-
-                if (
-                    hasMethod(
-                        windowManager,
-                        "close"
-                    )
-                ) {
-
-                    try {
-
-                        windowManager.close(
-                            app.id
-                        );
-
-                    } catch (_) {}
-
-                }
-
-            }
-
-
-            state.instances.delete(
-                app.id
-            );
-
-
-            appState.opened =
-                false;
-
-            appState.minimized =
-                false;
-
-            appState.active =
-                false;
-
-            appState.status =
-                "running";
-
-            appState.closedAt =
-                Date.now();
-
-            appState.updatedAt =
-                Date.now();
-
-
-            if (
-                state.activeAppId ===
-                app.id
-            ) {
-
-                state.activeAppId =
-                    null;
-
-            }
-
-
-            state.statistics.closed +=
-                1;
-
-
-            emit(
-                "closed",
-                {
-
-                    app:
-                        app,
-
-                    options:
-                        options
-
-                }
-            );
-
-
-            return true;
-
-        }
-        catch (exception) {
-
-            reportError(
-                exception,
-                "App Close: " +
-                app.id
-            );
-
-
-            return false;
-
-        }
-
-    }
-
-
-    function close(
-        id,
-        options
-    ) {
-
-        return closeApp(
+        return open(
             id,
             options
         );
@@ -2032,476 +1703,47 @@
     }
 
 
-    /* ========================================================
-       19 — STOP APP
-       ======================================================== */
-
-    async function stopApp(
-        id
+    function launchApp(
+        id,
+        options = {}
     ) {
 
-        const app =
-            getApp(
-                id
-            );
-
-
-        if (!app) {
-
-            return false;
-
-        }
-
-
-        const appState =
-            getState(
-                app.id
-            );
-
-
-        try {
-
-            if (
-                appState.opened
-            ) {
-
-                await closeApp(
-                    app.id
-                );
-
-            }
-
-
-            const context =
-                createAppContext(
-                    app
-                );
-
-
-            if (
-                typeof app.stop ===
-                "function"
-            ) {
-
-                const result =
-                    app.stop(
-                        context
-                    );
-
-
-                if (
-                    result &&
-                    typeof result.then ===
-                    "function"
-                ) {
-
-                    await result;
-
-                }
-
-            }
-
-
-            appState.running =
-                false;
-
-            appState.status =
-                "stopped";
-
-            appState.active =
-                false;
-
-            appState.updatedAt =
-                Date.now();
-
-
-            state.statistics.stopped +=
-                1;
-
-
-            emit(
-                "stopped",
-                {
-
-                    app:
-                        app
-
-                }
-            );
-
-
-            return true;
-
-        }
-        catch (exception) {
-
-            reportError(
-                exception,
-                "App Stop: " +
-                app.id
-            );
-
-
-            return false;
-
-        }
-
-    }
-
-
-    function stop(
-        id
-    ) {
-
-        return stopApp(
-            id
+        return open(
+            id,
+            options
         );
 
     }
 
 
-    /* ========================================================
-       20 — MINIMIZE
-       ======================================================== */
+    /* =========================================================
+       16 — ACTIVATE
+       ========================================================= */
 
-    function minimizeApp(
-        id
+    async function activate(
+        sessionId
     ) {
 
+        const session =
+            getSession(
+                sessionId
+            );
+
+
+        if (!session) {
+
+            return false;
+
+        }
+
+
         const app =
-            getApp(
-                id
+            get(
+                session.appId
             );
 
 
         if (!app) {
-
-            return false;
-
-        }
-
-
-        const appState =
-            getState(
-                app.id
-            );
-
-
-        if (
-            !appState.opened
-        ) {
-
-            return false;
-
-        }
-
-
-        try {
-
-            if (
-                typeof app.minimize ===
-                "function"
-            ) {
-
-                app.minimize(
-                    createAppContext(
-                        app
-                    )
-                );
-
-            }
-
-
-            const windowManager =
-                getWindowManager();
-
-
-            if (
-                windowManager &&
-                hasMethod(
-                    windowManager,
-                    "minimize"
-                )
-            ) {
-
-                try {
-
-                    windowManager.minimize(
-                        app.id
-                    );
-
-                } catch (_) {}
-
-            }
-
-
-            appState.minimized =
-                true;
-
-            appState.active =
-                false;
-
-            appState.status =
-                "minimized";
-
-            appState.updatedAt =
-                Date.now();
-
-
-            if (
-                state.activeAppId ===
-                app.id
-            ) {
-
-                state.activeAppId =
-                    null;
-
-            }
-
-
-            const instance =
-                state.instances.get(
-                    app.id
-                );
-
-
-            if (instance) {
-
-                instance.minimized =
-                    true;
-
-            }
-
-
-            state.statistics.minimized +=
-                1;
-
-
-            emit(
-                "minimized",
-                {
-
-                    app:
-                        app
-
-                }
-            );
-
-
-            return true;
-
-        }
-        catch (exception) {
-
-            reportError(
-                exception,
-                "App Minimize: " +
-                app.id
-            );
-
-
-            return false;
-
-        }
-
-    }
-
-
-    function minimize(
-        id
-    ) {
-
-        return minimizeApp(
-            id
-        );
-
-    }
-
-
-    /* ========================================================
-       21 — RESTORE
-       ======================================================== */
-
-    function restoreApp(
-        id
-    ) {
-
-        const app =
-            getApp(
-                id
-            );
-
-
-        if (!app) {
-
-            return false;
-
-        }
-
-
-        const appState =
-            getState(
-                app.id
-            );
-
-
-        if (
-            !appState.opened
-        ) {
-
-            return false;
-
-        }
-
-
-        try {
-
-            if (
-                typeof app.restore ===
-                "function"
-            ) {
-
-                app.restore(
-                    createAppContext(
-                        app
-                    )
-                );
-
-            }
-
-
-            const windowManager =
-                getWindowManager();
-
-
-            if (
-                windowManager &&
-                hasMethod(
-                    windowManager,
-                    "restore"
-                )
-            ) {
-
-                try {
-
-                    windowManager.restore(
-                        app.id
-                    );
-
-                } catch (_) {}
-
-            }
-
-
-            appState.minimized =
-                false;
-
-            appState.status =
-                "open";
-
-            appState.updatedAt =
-                Date.now();
-
-
-            const instance =
-                state.instances.get(
-                    app.id
-                );
-
-
-            if (instance) {
-
-                instance.minimized =
-                    false;
-
-            }
-
-
-            state.statistics.restored +=
-                1;
-
-
-            activateApp(
-                app.id
-            );
-
-
-            emit(
-                "restored",
-                {
-
-                    app:
-                        app
-
-                }
-            );
-
-
-            return true;
-
-        }
-        catch (exception) {
-
-            reportError(
-                exception,
-                "App Restore: " +
-                app.id
-            );
-
-
-            return false;
-
-        }
-
-    }
-
-
-    function restore(
-        id
-    ) {
-
-        return restoreApp(
-            id
-        );
-
-    }
-
-
-    /* ========================================================
-       22 — ACTIVATE
-       ======================================================== */
-
-    function activateApp(
-        id
-    ) {
-
-        const app =
-            getApp(
-                id
-            );
-
-
-        if (!app) {
-
-            return false;
-
-        }
-
-
-        const appState =
-            getState(
-                app.id
-            );
-
-
-        /*
-         * Nur geöffnete Apps können
-         * aktive Fenster werden.
-         */
-
-        if (
-            !appState.opened
-        ) {
 
             return false;
 
@@ -2509,71 +1751,59 @@
 
 
         /*
-         * Bisher aktive App deaktivieren.
+         * Vorherige Session verliert Fokus.
          */
 
         if (
-            state.activeAppId &&
-            state.activeAppId !==
-            app.id
+            state.activeSessionId &&
+            state.activeSessionId !==
+            session.id
         ) {
 
             const previous =
-                getApp(
-                    state.activeAppId
+                getSession(
+                    state.activeSessionId
                 );
 
 
             if (previous) {
 
-                const previousState =
-                    getState(
-                        previous.id
-                    );
-
-
-                previousState.active =
+                previous.focused =
                     false;
 
-
-                if (
-                    typeof previous.onDeactivate ===
-                    "function"
-                ) {
-
-                    try {
-
-                        previous.onDeactivate(
-                            createAppContext(
-                                previous
-                            )
-                        );
-
-                    } catch (_) {}
-
-                }
+                emit(
+                    "session-deactivated",
+                    {
+                        session:
+                            previous
+                    }
+                );
 
             }
 
         }
 
 
+        session.focused =
+            true;
+
+        session.minimized =
+            false;
+
+        session.state =
+            "running";
+
+
         state.activeAppId =
             app.id;
 
+        state.activeSessionId =
+            session.id;
 
-        appState.active =
-            true;
 
-        appState.minimized =
-            false;
-
-        appState.status =
-            "active";
-
-        appState.updatedAt =
-            Date.now();
-
+        /*
+         * App onActivate
+         */
 
         if (
             typeof app.onActivate ===
@@ -2582,18 +1812,289 @@
 
             try {
 
-                app.onActivate(
-                    createAppContext(
-                        app
-                    )
+                await app.onActivate(
+                    {
+                        app,
+                        session,
+                        manager:
+                            api
+                    }
                 );
 
             } catch (exception) {
 
                 reportError(
+                    "APP_ACTIVATE_ERROR",
                     exception,
-                    "App Activate: " +
-                    app.id
+                    {
+                        appId:
+                            app.id
+                    }
+                );
+
+            }
+
+        }
+
+
+        /*
+         * Window Manager focus
+         */
+
+        const windowManager =
+            getWindowManager();
+
+
+        if (
+            windowManager
+        ) {
+
+            try {
+
+                if (
+                    hasMethod(
+                        windowManager,
+                        "focus"
+                    ) &&
+                    session.windowId
+                ) {
+
+                    await windowManager.focus(
+                        session.windowId
+                    );
+
+                }
+                else if (
+                    hasMethod(
+                        windowManager,
+                        "activate"
+                    ) &&
+                    session.windowId
+                ) {
+
+                    await windowManager.activate(
+                        session.windowId
+                    );
+
+                }
+
+            } catch (exception) {
+
+                warn(
+                    "Fenster konnte nicht fokussiert werden:",
+                    exception
+                );
+
+            }
+
+        }
+
+
+        state.statistics.activations +=
+            1;
+
+
+        emit(
+            "app-activated",
+            {
+                app,
+                session
+            }
+        );
+
+
+        return true;
+
+    }
+
+
+    function activateApp(
+        id
+    ) {
+
+        const sessions =
+            getAppSessions(
+                id
+            );
+
+
+        const session =
+            sessions.find(
+                item =>
+                    item.state !==
+                    "closed"
+            );
+
+
+        if (!session) {
+
+            return false;
+
+        }
+
+
+        return activate(
+            session.id
+        );
+
+    }
+
+
+    /* =========================================================
+       17 — DEACTIVATE
+       ========================================================= */
+
+    async function deactivate(
+        sessionId
+    ) {
+
+        const session =
+            getSession(
+                sessionId
+            );
+
+
+        if (!session) {
+
+            return false;
+
+        }
+
+
+        const app =
+            get(
+                session.appId
+            );
+
+
+        session.focused =
+            false;
+
+
+        if (
+            app &&
+            typeof app.onDeactivate ===
+            "function"
+        ) {
+
+            try {
+
+                await app.onDeactivate(
+                    {
+                        app,
+                        session,
+                        manager:
+                            api
+                    }
+                );
+
+            } catch (exception) {
+
+                reportError(
+                    "APP_DEACTIVATE_ERROR",
+                    exception,
+                    {
+                        appId:
+                            session.appId
+                    }
+                );
+
+            }
+
+        }
+
+
+        if (
+            state.activeSessionId ===
+            session.id
+        ) {
+
+            state.activeSessionId =
+                null;
+
+            state.activeAppId =
+                null;
+
+        }
+
+
+        state.statistics.deactivations +=
+            1;
+
+
+        emit(
+            "app-deactivated",
+            {
+                app,
+                session
+            }
+        );
+
+
+        return true;
+
+    }
+
+
+    /* =========================================================
+       18 — MINIMIZE
+       ========================================================= */
+
+    async function minimize(
+        sessionId
+    ) {
+
+        const session =
+            getSession(
+                sessionId
+            );
+
+
+        if (!session) {
+
+            return false;
+
+        }
+
+
+        const app =
+            get(
+                session.appId
+            );
+
+
+        session.minimized =
+            true;
+
+        session.focused =
+            false;
+
+        session.state =
+            "minimized";
+
+
+        if (
+            app &&
+            typeof app.minimize ===
+            "function"
+        ) {
+
+            try {
+
+                await app.minimize(
+                    {
+                        app,
+                        session,
+                        manager:
+                            api
+                    }
+                );
+
+            } catch (exception) {
+
+                reportError(
+                    "APP_MINIMIZE_ERROR",
+                    exception
                 );
 
             }
@@ -2607,34 +2108,59 @@
 
         if (
             windowManager &&
-            hasMethod(
-                windowManager,
-                "focus"
-            )
+            session.windowId
         ) {
 
             try {
 
-                windowManager.focus(
-                    app.id
+                if (
+                    hasMethod(
+                        windowManager,
+                        "minimize"
+                    )
+                ) {
+
+                    await windowManager.minimize(
+                        session.windowId
+                    );
+
+                }
+
+            } catch (exception) {
+
+                warn(
+                    "Window minimization failed:",
+                    exception
                 );
 
-            } catch (_) {}
+            }
 
         }
 
 
-        state.statistics.activated +=
+        if (
+            state.activeSessionId ===
+            session.id
+        ) {
+
+            state.activeSessionId =
+                null;
+
+            state.activeAppId =
+                null;
+
+        }
+
+
+        state.statistics.minimized +=
             1;
 
 
         emit(
-            "activated",
+            "app-minimized",
             {
-
-                app:
-                    app
-
+                app,
+                session
             }
         );
 
@@ -2644,20 +2170,438 @@
     }
 
 
-    function activate(
-        id
+    /* =========================================================
+       19 — RESTORE
+       ========================================================= */
+
+    async function restore(
+        sessionId
     ) {
 
-        return activateApp(
-            id
+        const session =
+            getSession(
+                sessionId
+            );
+
+
+        if (!session) {
+
+            return false;
+
+        }
+
+
+        const app =
+            get(
+                session.appId
+            );
+
+
+        session.minimized =
+            false;
+
+        session.state =
+            "running";
+
+
+        if (
+            app &&
+            typeof app.restore ===
+            "function"
+        ) {
+
+            try {
+
+                await app.restore(
+                    {
+                        app,
+                        session,
+                        manager:
+                            api
+                    }
+                );
+
+            } catch (exception) {
+
+                reportError(
+                    "APP_RESTORE_ERROR",
+                    exception
+                );
+
+            }
+
+        }
+
+
+        const windowManager =
+            getWindowManager();
+
+
+        if (
+            windowManager &&
+            session.windowId
+        ) {
+
+            try {
+
+                if (
+                    hasMethod(
+                        windowManager,
+                        "restore"
+                    )
+                ) {
+
+                    await windowManager.restore(
+                        session.windowId
+                    );
+
+                }
+
+            } catch (exception) {
+
+                warn(
+                    "Window restore failed:",
+                    exception
+                );
+
+            }
+
+        }
+
+
+        state.statistics.restored +=
+            1;
+
+
+        emit(
+            "app-restored",
+            {
+                app,
+                session
+            }
+        );
+
+
+        return activate(
+            session.id
         );
 
     }
 
 
-    /* ========================================================
-       23 — ACTIVE APP
-       ======================================================== */
+    /* =========================================================
+       20 — CLOSE
+       ========================================================= */
+
+    async function close(
+        sessionId
+    ) {
+
+        const session =
+            getSession(
+                sessionId
+            );
+
+
+        if (!session) {
+
+            return false;
+
+        }
+
+
+        const app =
+            get(
+                session.appId
+            );
+
+
+        try {
+
+            /*
+             * App close()
+             */
+
+            if (
+                app &&
+                typeof app.close ===
+                "function"
+            ) {
+
+                const result =
+                    app.close(
+                        {
+                            app,
+                            session,
+                            manager:
+                                api
+                        }
+                    );
+
+
+                if (
+                    result &&
+                    typeof result.then ===
+                    "function"
+                ) {
+
+                    await result;
+
+                }
+
+            }
+
+
+            /*
+             * App stop()
+             */
+
+            if (
+                app &&
+                typeof app.stop ===
+                "function"
+            ) {
+
+                const result =
+                    app.stop(
+                        {
+                            app,
+                            session,
+                            manager:
+                                api
+                        }
+                    );
+
+
+                if (
+                    result &&
+                    typeof result.then ===
+                    "function"
+                ) {
+
+                    await result;
+
+                }
+
+            }
+
+
+            /*
+             * Window Manager
+             */
+
+            const windowManager =
+                getWindowManager();
+
+
+            if (
+                windowManager &&
+                session.windowId
+            ) {
+
+                try {
+
+                    if (
+                        hasMethod(
+                            windowManager,
+                            "close"
+                        )
+                    ) {
+
+                        await windowManager.close(
+                            session.windowId
+                        );
+
+                    }
+                    else if (
+                        hasMethod(
+                            windowManager,
+                            "closeWindow"
+                        )
+                    ) {
+
+                        await windowManager.closeWindow(
+                            session.windowId
+                        );
+
+                    }
+
+                } catch (exception) {
+
+                    warn(
+                        "Window konnte nicht geschlossen werden:",
+                        exception
+                    );
+
+                }
+
+            }
+
+
+            session.state =
+                "closed";
+
+            session.focused =
+                false;
+
+            session.minimized =
+                false;
+
+            session.closedAt =
+                Date.now();
+
+
+            if (
+                state.activeSessionId ===
+                session.id
+            ) {
+
+                state.activeSessionId =
+                    null;
+
+                state.activeAppId =
+                    null;
+
+            }
+
+
+            setStatus(
+                session.appId,
+                "registered"
+            );
+
+
+            state.statistics.closes +=
+                1;
+
+
+            emit(
+                "app-closed",
+                {
+                    app,
+                    session
+                }
+            );
+
+
+            return true;
+
+        } catch (exception) {
+
+            reportError(
+                "APP_CLOSE_ERROR",
+                exception,
+                {
+                    appId:
+                        session.appId,
+
+                    sessionId:
+                        session.id
+                }
+            );
+
+
+            session.state =
+                "error";
+
+
+            return false;
+
+        }
+
+    }
+
+
+    function closeApp(
+        id
+    ) {
+
+        const sessions =
+            getAppSessions(
+                id
+            )
+            .filter(
+                session =>
+                    session.state !==
+                    "closed"
+            );
+
+
+        if (
+            sessions.length ===
+            0
+        ) {
+
+            return false;
+
+        }
+
+
+        return Promise.all(
+            sessions.map(
+                session =>
+                    close(
+                        session.id
+                    )
+            )
+        );
+
+    }
+
+
+    /* =========================================================
+       21 — CLOSE ALL
+       ========================================================= */
+
+    async function closeAll(
+        options = {}
+    ) {
+
+        const sessions =
+            getRunningSessions();
+
+
+        let closed =
+            0;
+
+
+        for (
+            const session of sessions
+        ) {
+
+            const result =
+                await close(
+                    session.id
+                );
+
+
+            if (result) {
+
+                closed++;
+
+            }
+
+        }
+
+
+        emit(
+            "all-apps-closed",
+            {
+                closed,
+
+                options
+            }
+        );
+
+
+        return closed;
+
+    }
+
+
+    /* =========================================================
+       22 — ACTIVE APP
+       ========================================================= */
 
     function getActiveApp() {
 
@@ -2670,124 +2614,351 @@
         }
 
 
-        return getApp(
+        return get(
             state.activeAppId
         );
 
     }
 
 
-    /* ========================================================
-       24 — OPEN APPS
-       ======================================================== */
+    function getActiveSession() {
 
-    function getOpenApps() {
+        if (
+            !state.activeSessionId
+        ) {
 
-        return getAll().filter(
-            function (app) {
+            return null;
 
-                const appState =
-                    getState(
-                        app.id
-                    );
+        }
 
 
-                return (
-                    appState &&
-                    appState.opened
-                );
-
-            }
+        return getSession(
+            state.activeSessionId
         );
 
     }
 
+
+    /* =========================================================
+       23 — RUNNING APPS
+       ========================================================= */
 
     function getRunningApps() {
 
-        return getAll().filter(
-            function (app) {
-
-                const appState =
-                    getState(
-                        app.id
-                    );
+        const ids =
+            new Set();
 
 
-                return (
-                    appState &&
-                    appState.running
-                );
+        getRunningSessions()
+            .forEach(
+                session =>
+                    ids.add(
+                        session.appId
+                    )
+            );
 
-            }
+
+        return Array.from(
+            ids
+        )
+        .map(
+            id =>
+                get(id)
+        )
+        .filter(
+            Boolean
         );
 
     }
 
 
-    function getMinimizedApps() {
+    /* =========================================================
+       24 — MULTI APP
+       ========================================================= */
 
-        return getAll().filter(
-            function (app) {
+    function getMultiAppState() {
 
-                const appState =
-                    getState(
-                        app.id
-                    );
+        const sessions =
+            getRunningSessions();
 
 
-                return (
-                    appState &&
-                    appState.minimized
-                );
+        return {
 
-            }
-        );
+            enabled:
+                sessions.length >
+                1,
+
+            count:
+                sessions.length,
+
+            sessions:
+                sessions.map(
+                    session => ({
+                        ...session
+                    })
+                ),
+
+            activeAppId:
+                state.activeAppId,
+
+            activeSessionId:
+                state.activeSessionId
+
+        };
 
     }
 
 
-    /* ========================================================
-       25 — APP INSTANCES
-       ======================================================== */
+    /*
+     * Diese Methode wird später von der Desktop-/Window-
+     * Architektur genutzt, wenn mehrere Apps gleichzeitig
+     * sichtbar sein sollen.
+     */
 
-    function getInstance(
+    async function splitApp(
+        sessionId,
+        options = {}
+    ) {
+
+        const session =
+            getSession(
+                sessionId
+            );
+
+
+        if (!session) {
+
+            return false;
+
+        }
+
+
+        session.metadata =
+            {
+                ...session.metadata,
+
+                splitScreen:
+                    true,
+
+                splitOptions:
+                    clone(
+                        options
+                    )
+
+            };
+
+
+        emit(
+            "app-split",
+            {
+                session,
+                options
+            }
+        );
+
+
+        return true;
+
+    }
+
+
+    /*
+     * Vorbereitung für Picture-in-Picture.
+     */
+
+    async function pictureInPicture(
+        sessionId,
+        options = {}
+    ) {
+
+        const session =
+            getSession(
+                sessionId
+            );
+
+
+        if (!session) {
+
+            return false;
+
+        }
+
+
+        session.metadata =
+            {
+                ...session.metadata,
+
+                pictureInPicture:
+                    true,
+
+                pictureInPictureOptions:
+                    clone(
+                        options
+                    )
+
+            };
+
+
+        emit(
+            "app-picture-in-picture",
+            {
+                session,
+                options
+            }
+        );
+
+
+        return true;
+
+    }
+
+
+    /* =========================================================
+       25 — ENABLE / DISABLE
+       ========================================================= */
+
+    function enable(
         id
     ) {
 
-        return (
-            state.instances.get(
-                normalizeId(
-                    id
-                )
-            ) ||
-            null
+        const app =
+            get(
+                id
+            );
+
+
+        if (!app) {
+
+            return false;
+
+        }
+
+
+        app.enabled =
+            true;
+
+        app.status =
+            "registered";
+
+        app.updatedAt =
+            Date.now();
+
+
+        emit(
+            "app-enabled",
+            {
+                app
+            }
         );
 
+
+        return true;
+
     }
 
 
-    function getInstances() {
+    function disable(
+        id
+    ) {
 
-        return Array.from(
-            state.instances.values()
+        const app =
+            get(
+                id
+            );
+
+
+        if (!app) {
+
+            return false;
+
+        }
+
+
+        app.enabled =
+            false;
+
+        app.status =
+            "disabled";
+
+        app.updatedAt =
+            Date.now();
+
+
+        emit(
+            "app-disabled",
+            {
+                app
+            }
         );
 
-    }
 
-
-    function getInstanceCount() {
-
-        return state.instances.size;
+        return true;
 
     }
 
 
-    /* ========================================================
-       26 — ROUTER CONNECTION
-       ======================================================== */
+    /* =========================================================
+       26 — REMOVE
+       ========================================================= */
 
-    function connectToRouter() {
+    async function remove(
+        id
+    ) {
+
+        const normalized =
+            normalizeId(
+                id
+            );
+
+
+        if (!normalized) {
+
+            return false;
+
+        }
+
+
+        const app =
+            get(
+                normalized
+            );
+
+
+        if (!app) {
+
+            return false;
+
+        }
+
+
+        await closeApp(
+            normalized
+        );
+
+
+        state.apps.delete(
+            normalized
+        );
+
+
+        emit(
+            "app-removed",
+            {
+                app
+            }
+        );
+
+
+        return true;
+
+    }
+
+
+    /* =========================================================
+       27 — ROUTER CONNECTION
+       ========================================================= */
+
+    function connectRouter() {
 
         const router =
             getRouter();
@@ -2797,71 +2968,54 @@
             !!router;
 
 
-        if (!router) {
-
-            return false;
-
-        }
-
-
-        emit(
-            "router-connected",
-            {
-
-                router:
-                    router
-
-            }
-        );
-
-
-        return true;
+        return state.connections.router;
 
     }
 
 
-    /* ========================================================
-       27 — WINDOW MANAGER CONNECTION
-       ======================================================== */
+    /* =========================================================
+       28 — WINDOW MANAGER CONNECTION
+       ========================================================= */
 
-    function connectToWindowManager() {
+    function connectWindowManager() {
 
-        const windowManager =
+        const manager =
             getWindowManager();
 
 
         state.connections.windowManager =
-            !!windowManager;
+            !!manager;
 
 
-        if (!windowManager) {
-
-            return false;
-
-        }
-
-
-        emit(
-            "window-manager-connected",
-            {
-
-                windowManager:
-                    windowManager
-
-            }
-        );
-
-
-        return true;
+        return state.connections.windowManager;
 
     }
 
 
-    /* ========================================================
-       28 — KERNEL CONNECTION
-       ======================================================== */
+    /* =========================================================
+       29 — LAUNCHER CONNECTION
+       ========================================================= */
 
-    function connectToKernel() {
+    function connectLauncher() {
+
+        const launcher =
+            getLauncher();
+
+
+        state.connections.launcher =
+            !!launcher;
+
+
+        return state.connections.launcher;
+
+    }
+
+
+    /* =========================================================
+       30 — KERNEL CONNECTION
+       ========================================================= */
+
+    function connectKernel() {
 
         const kernel =
             getKernel();
@@ -2898,40 +3052,21 @@
             }
 
 
-            if (
-                hasMethod(
-                    kernel,
-                    "setModuleReady"
-                )
-            ) {
-
-                kernel.setModuleReady(
-                    MODULE_ID,
-                    true
-                );
-
-            }
-
-
             emit(
                 "kernel-connected",
                 {
-
-                    kernel:
-                        kernel
-
+                    kernel
                 }
             );
 
 
             return true;
 
-        }
-        catch (exception) {
+        } catch (exception) {
 
             reportError(
-                exception,
-                "Kernel Connection"
+                "KERNEL_CONNECTION_ERROR",
+                exception
             );
 
 
@@ -2942,25 +3077,28 @@
     }
 
 
-    /* ========================================================
-       29 — SYSTEM CONNECTION
-       ======================================================== */
+    /* =========================================================
+       31 — SYSTEM CONNECTION
+       ========================================================= */
 
-    function connectToSystem() {
+    function connectSystem() {
 
         const system =
             getSystem();
 
 
-        state.connections.system =
-            !!system;
-
-
         if (!system) {
+
+            state.connections.system =
+                false;
 
             return false;
 
         }
+
+
+        state.connections.system =
+            true;
 
 
         try {
@@ -2992,12 +3130,22 @@
 
             }
 
-        }
-        catch (exception) {
+
+            emit(
+                "system-connected",
+                {
+                    system
+                }
+            );
+
+
+            return true;
+
+        } catch (exception) {
 
             reportError(
-                exception,
-                "System Connection"
+                "SYSTEM_CONNECTION_ERROR",
+                exception
             );
 
 
@@ -3005,38 +3153,26 @@
 
         }
 
-
-        emit(
-            "system-connected",
-            {
-
-                system:
-                    system
-
-            }
-        );
-
-
-        return true;
-
     }
 
 
-    /* ========================================================
-       30 — REFRESH CONNECTIONS
-       ======================================================== */
+    /* =========================================================
+       32 — CONNECTION REFRESH
+       ========================================================= */
 
     function refreshConnections() {
 
-        connectToKernel();
+        connectKernel();
 
-        connectToSystem();
-
-        connectToRouter();
-
-        connectToWindowManager();
+        connectSystem();
 
         syncRegistry();
+
+        connectRouter();
+
+        connectWindowManager();
+
+        connectLauncher();
 
 
         return getConnectionStatus();
@@ -3051,6 +3187,9 @@
             kernel:
                 !!getKernel(),
 
+            system:
+                !!getSystem(),
+
             registry:
                 !!getRegistry(),
 
@@ -3060,200 +3199,72 @@
             windowManager:
                 !!getWindowManager(),
 
-            system:
-                !!getSystem()
+            launcher:
+                !!getLauncher()
 
         };
 
     }
 
 
-    /* ========================================================
-       31 — APP REGISTRY EVENTS
-       ======================================================== */
-
-    function connectRegistryEvents() {
-
-        const registry =
-            getRegistry();
-
-
-        if (
-            !registry ||
-            !hasMethod(
-                registry,
-                "on"
-            )
-        ) {
-
-            return false;
-
-        }
-
-
-        try {
-
-            registry.on(
-                "registered",
-                function (
-                    payload
-                ) {
-
-                    if (
-                        payload &&
-                        payload.app
-                    ) {
-
-                        registerInternal(
-                            payload.app
-                        );
-
-                        state.statistics.registered +=
-                            1;
-
-                    }
-
-                }
-            );
-
-
-            registry.on(
-                "updated",
-                function (
-                    payload
-                ) {
-
-                    if (
-                        payload &&
-                        payload.app
-                    ) {
-
-                        registerInternal(
-                            payload.app
-                        );
-
-                    }
-
-                }
-            );
-
-
-            registry.on(
-                "removed",
-                function (
-                    payload
-                ) {
-
-                    if (
-                        payload &&
-                        payload.app
-                    ) {
-
-                        const id =
-                            normalizeId(
-                                payload.app.id
-                            );
-
-
-                        state.apps.delete(
-                            id
-                        );
-
-                        state.states.delete(
-                            id
-                        );
-
-                        state.settings.delete(
-                            id
-                        );
-
-                    }
-
-                }
-            );
-
-
-            state.connections.registry =
-                true;
-
-
-            return true;
-
-        }
-        catch (exception) {
-
-            reportError(
-                exception,
-                "Registry Events"
-            );
-
-
-            return false;
-
-        }
-
-    }
-
-
-    /* ========================================================
-       32 — STATISTICS
-       ======================================================== */
+    /* =========================================================
+       33 — STATISTICS
+       ========================================================= */
 
     function getStatistics() {
 
         return {
-
             ...state.statistics
-
         };
 
     }
 
 
-    /* ========================================================
-       33 — DIAGNOSTICS
-       ======================================================== */
+    /* =========================================================
+       34 — DIAGNOSTICS
+       ========================================================= */
 
     function diagnostics() {
-
-        const apps =
-            getAll();
-
 
         return {
 
             name:
                 NAME,
 
-            version:
-                VERSION,
-
             module:
                 MODULE_ID,
+
+            version:
+                VERSION,
 
             initialized:
                 state.initialized,
 
+            initializing:
+                state.initializing,
+
             ready:
                 state.ready,
+
+            appCount:
+                getCount(),
+
+            runningAppCount:
+                getRunningApps()
+                    .length,
+
+            sessionCount:
+                getSessions()
+                    .length,
 
             activeApp:
                 state.activeAppId,
 
-            appCount:
-                apps.length,
+            activeSession:
+                state.activeSessionId,
 
-            openAppCount:
-                getOpenApps().length,
-
-            runningAppCount:
-                getRunningApps().length,
-
-            minimizedAppCount:
-                getMinimizedApps().length,
-
-            instanceCount:
-                getInstanceCount(),
+            multiApp:
+                getMultiAppState(),
 
             connections:
                 getConnectionStatus(),
@@ -3262,16 +3273,9 @@
                 getStatistics(),
 
             apps:
-                apps.map(
-                    function (app) {
-
-                        const appState =
-                            getState(
-                                app.id
-                            );
-
-
-                        return {
+                getAll()
+                    .map(
+                        app => ({
 
                             id:
                                 app.id,
@@ -3282,47 +3286,37 @@
                             title:
                                 app.title,
 
-                            version:
-                                app.version,
-
                             category:
-                                app.category,
+                                app.category ||
+                                null,
+
+                            version:
+                                app.version ||
+                                null,
 
                             enabled:
                                 app.enabled !==
                                 false,
 
                             status:
-                                appState.status,
+                                app.status ||
+                                "unknown"
 
-                            running:
-                                appState.running,
-
-                            opened:
-                                appState.opened,
-
-                            minimized:
-                                appState.minimized,
-
-                            active:
-                                appState.active
-
-                        };
-
-                    }
-                ),
+                        })
+                    ),
 
             timestamp:
-                new Date().toISOString()
+                new Date()
+                    .toISOString()
 
         };
 
     }
 
 
-    /* ========================================================
-       34 — HEALTH CHECK
-       ======================================================== */
+    /* =========================================================
+       35 — HEALTH CHECK
+       ========================================================= */
 
     function healthCheck() {
 
@@ -3334,9 +3328,7 @@
             [];
 
 
-        if (
-            !connections.kernel
-        ) {
+        if (!connections.kernel) {
 
             problems.push(
                 "Kernel nicht verbunden."
@@ -3345,9 +3337,7 @@
         }
 
 
-        if (
-            !connections.registry
-        ) {
+        if (!connections.registry) {
 
             problems.push(
                 "App Registry nicht verbunden."
@@ -3362,32 +3352,33 @@
                 problems.length ===
                 0,
 
-            problems:
-                problems,
+            problems,
 
-            connections:
-                connections,
+            connections,
 
             appCount:
-                getAll().length,
+                getCount(),
 
-            openAppCount:
-                getOpenApps().length,
+            runningApps:
+                getRunningApps()
+                    .length,
 
-            runningAppCount:
-                getRunningApps().length,
+            sessions:
+                getSessions()
+                    .length,
 
             timestamp:
-                new Date().toISOString()
+                new Date()
+                    .toISOString()
 
         };
 
     }
 
 
-    /* ========================================================
-       35 — INITIALIZATION
-       ======================================================== */
+    /* =========================================================
+       36 — INITIALIZATION
+       ========================================================= */
 
     async function initialize() {
 
@@ -3412,6 +3403,7 @@
         state.initializing =
             true;
 
+
         state.initialized =
             true;
 
@@ -3419,30 +3411,101 @@
         emit(
             "initializing",
             {
-
                 version:
                     VERSION
-
             }
         );
 
 
-        /*
-         * Verbindungen aufbauen.
-         */
-
         refreshConnections();
 
-        connectRegistryEvents();
-
 
         /*
-         * Registry nochmals synchronisieren,
-         * falls die Registry erst kurz vorher
-         * Apps erhalten hat.
+         * Registry Events
          */
 
-        syncRegistry();
+        const registry =
+            getRegistry();
+
+
+        if (
+            registry &&
+            hasMethod(
+                registry,
+                "on"
+            )
+        ) {
+
+            try {
+
+                registry.on(
+                    "registered",
+                    payload => {
+
+                        if (
+                            payload &&
+                            payload.app
+                        ) {
+
+                            register(
+                                payload.app
+                            );
+
+                        }
+
+                    }
+                );
+
+
+                registry.on(
+                    "updated",
+                    payload => {
+
+                        if (
+                            payload &&
+                            payload.app
+                        ) {
+
+                            register(
+                                payload.app
+                            );
+
+                        }
+
+                    }
+                );
+
+
+                registry.on(
+                    "removed",
+                    payload => {
+
+                        if (
+                            payload &&
+                            payload.app
+                        ) {
+
+                            state.apps.delete(
+                                normalizeId(
+                                    payload.app.id
+                                )
+                            );
+
+                        }
+
+                    }
+                );
+
+            } catch (exception) {
+
+                warn(
+                    "Registry Event-Verbindung fehlgeschlagen:",
+                    exception
+                );
+
+            }
+
+        }
 
 
         state.ready =
@@ -3452,22 +3515,48 @@
             false;
 
 
+        /*
+         * Kernel als ready markieren.
+         */
+
+        const kernel =
+            getKernel();
+
+
+        if (
+            kernel &&
+            hasMethod(
+                kernel,
+                "setModuleReady"
+            )
+        ) {
+
+            try {
+
+                kernel.setModuleReady(
+                    MODULE_ID,
+                    true
+                );
+
+            } catch (_) {}
+
+        }
+
+
         emit(
             "ready",
             {
-
                 version:
                     VERSION,
 
                 diagnostics:
                     diagnostics()
-
             }
         );
 
 
         log(
-            "Application Manager bereit.",
+            "App Manager bereit.",
             VERSION
         );
 
@@ -3477,20 +3566,9 @@
     }
 
 
-    /*
-     * Kernel erwartet init().
-     */
-
-    async function init() {
-
-        return initialize();
-
-    }
-
-
-    /* ========================================================
-       36 — PUBLIC API
-       ======================================================== */
+    /* =========================================================
+       37 — PUBLIC API
+       ========================================================= */
 
     const api = {
 
@@ -3504,254 +3582,230 @@
             MODULE_ID,
 
 
-        /* Initialization */
-
-        init:
-            init,
-
-        initialize:
-            initialize,
-
-
-        /* Events */
-
-        on:
-            on,
-
-        off:
-            off,
-
-        emit:
-            emit,
-
-
-        /* Apps */
-
-        get:
-            get,
-
-        getApp:
-            getApp,
-
-        getAll:
-            getAll,
-
-        getApps:
-            getApps,
-
-        has:
-            has,
-
-
-        /* Registry */
-
-        syncRegistry:
-            syncRegistry,
-
-        register:
-            registerInternal,
-
-
-        /* Lifecycle */
-
-        start:
-            start,
-
-        startApp:
-            startApp,
-
-        open:
-            open,
-
-        openApp:
-            openApp,
-
-        close:
-            close,
-
-        closeApp:
-            closeApp,
-
-        stop:
-            stop,
-
-        stopApp:
-            stopApp,
-
-        minimize:
-            minimize,
-
-        minimizeApp:
-            minimizeApp,
-
-        restore:
-            restore,
-
-        restoreApp:
-            restoreApp,
-
-        activate:
-            activate,
-
-        activateApp:
-            activateApp,
-
-
-        /* Active / running */
-
-        getActiveApp:
-            getActiveApp,
-
-        getOpenApps:
-            getOpenApps,
-
-        getRunningApps:
-            getRunningApps,
-
-        getMinimizedApps:
-            getMinimizedApps,
-
-
-        /* Instances */
-
-        getInstance:
-            getInstance,
-
-        getInstances:
-            getInstances,
-
-        getInstanceCount:
-            getInstanceCount,
-
-
         /* State */
 
         getState:
-            getState,
+            function () {
 
-        setState:
-            setState,
+                return {
 
+                    initialized:
+                        state.initialized,
 
-        /* Settings */
+                    initializing:
+                        state.initializing,
 
-        getSettings:
-            getSettings,
+                    ready:
+                        state.ready,
 
-        setSettings:
-            setSettings,
+                    appCount:
+                        getCount(),
 
+                    sessionCount:
+                        getSessions()
+                            .length,
 
-        /* Dependencies */
+                    activeAppId:
+                        state.activeAppId,
 
-        checkDependencies:
-            function (
-                id
-            ) {
+                    activeSessionId:
+                        state.activeSessionId,
 
-                return checkDependencies(
-                    getApp(
-                        id
-                    )
-                );
+                    connections:
+                        getConnectionStatus()
+
+                };
 
             },
 
 
+        /* Events */
+
+        on,
+
+        off,
+
+        emit,
+
+
+        /* Registry */
+
+        register,
+
+        registerApp,
+
+        syncRegistry,
+
+
+        /* Access */
+
+        get,
+
+        getApp,
+
+        getAll,
+
+        getApps,
+
+        has,
+
+        getCount,
+
+        search,
+
+
+        /* Status */
+
+        setStatus,
+
+        getStatus,
+
+        enable,
+
+        disable,
+
+
+        /* Sessions */
+
+        createSession,
+
+        getSession,
+
+        getSessions,
+
+        getAppSessions,
+
+        getRunningSessions,
+
+
+        /* Launch */
+
+        open,
+
+        launch,
+
+        launchApp,
+
+
+        /* Control */
+
+        activate,
+
+        activateApp,
+
+        deactivate,
+
+        minimize,
+
+        restore,
+
+        close,
+
+        closeApp,
+
+        closeAll,
+
+        remove,
+
+
+        /* Active */
+
+        getActiveApp,
+
+        getActiveSession,
+
+        getRunningApps,
+
+
+        /* Multi App */
+
+        getMultiAppState,
+
+        splitApp,
+
+        pictureInPicture,
+
+
         /* Connections */
 
-        connectToKernel:
-            connectToKernel,
+        connectKernel,
 
-        connectToSystem:
-            connectToSystem,
+        connectSystem,
 
-        connectToRouter:
-            connectToRouter,
+        connectRouter,
 
-        connectToWindowManager:
-            connectToWindowManager,
+        connectWindowManager,
 
-        refreshConnections:
-            refreshConnections,
+        connectLauncher,
 
-        getConnectionStatus:
-            getConnectionStatus,
+        refreshConnections,
+
+        getConnectionStatus,
 
 
         /* Diagnostics */
 
-        diagnostics:
-            diagnostics,
+        getStatistics,
 
-        healthCheck:
-            healthCheck,
+        diagnostics,
 
-        getStatistics:
-            getStatistics,
+        healthCheck,
 
 
-        /* Context */
+        /* Initialization */
 
-        createAppContext:
-            createAppContext
+        initialize
 
     };
 
 
-    /* ========================================================
-       37 — GLOBAL EXPORT
-       ======================================================== */
+    /* =========================================================
+       38 — GLOBAL EXPORT
+       ========================================================= */
 
     window.HalDoAppManager =
         api;
 
+
     window.HalDoOSAppManager =
         api;
+
 
     HalDoOS.appManager =
         api;
 
 
-    /* ========================================================
-       38 — GLOBAL KERNEL EVENT
-       ======================================================== */
+    /* =========================================================
+       39 — KERNEL EVENT
+       ========================================================= */
 
     function handleKernelReady() {
 
         refreshConnections();
 
+
         emit(
             "kernel-ready",
             {
-
                 diagnostics:
                     diagnostics()
-
             }
         );
 
     }
 
 
-    function connectKernelEvents() {
-
-        const kernel =
-            getKernel();
+    const kernel =
+        getKernel();
 
 
-        if (
-            !kernel ||
-            !hasMethod(
-                kernel,
-                "on"
-            )
-        ) {
-
-            return false;
-
-        }
-
+    if (
+        kernel &&
+        hasMethod(
+            kernel,
+            "on"
+        )
+    ) {
 
         try {
 
@@ -3760,46 +3814,34 @@
                 handleKernelReady
             );
 
+        } catch (exception) {
 
-            return true;
-
-        }
-        catch (exception) {
-
-            reportError(
-                exception,
-                "Kernel Event Connection"
+            warn(
+                "Kernel Event-Verbindung fehlgeschlagen:",
+                exception
             );
-
-
-            return false;
 
         }
 
     }
 
 
-    /* ========================================================
-       39 — DOM STARTUP
-       ======================================================== */
+    /* =========================================================
+       40 — DOM START
+       ========================================================= */
 
-    function handleDOMReady() {
-
-        connectKernelEvents();
-
+    function boot() {
 
         initialize()
             .catch(
-                function (
-                    exception
-                ) {
+                exception => {
 
                     state.initializing =
                         false;
 
                     reportError(
-                        exception,
-                        "App Manager Initialization"
+                        "APP_MANAGER_INIT_ERROR",
+                        exception
                     );
 
                 }
@@ -3815,7 +3857,7 @@
 
         document.addEventListener(
             "DOMContentLoaded",
-            handleDOMReady,
+            boot,
             {
                 once:
                     true
@@ -3825,27 +3867,32 @@
     }
     else {
 
-        handleDOMReady();
+        boot();
 
     }
 
 
-    /* ========================================================
-       40 — FINAL EXPOSURE
-       ======================================================== */
+    /* =========================================================
+       41 — FINAL EXPOSURE
+       ========================================================= */
 
     window.HalDoOS =
         window.HalDoOS ||
         {};
 
+
     window.HalDoOS.appManager =
         api;
 
 
-    /* ========================================================
-       HALDO AI OS 20
-       APPLICATION MANAGER
-       END OF FILE
-       ======================================================== */
+    log(
+        "HalDo AI OS App Manager geladen."
+    );
+
 
 })(window, document);
+
+
+/* ============================================================
+   ENDE — HALDO AI OS APP MANAGER
+   ============================================================ */
