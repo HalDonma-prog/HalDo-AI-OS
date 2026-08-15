@@ -39712,4 +39712,2173 @@
     })();
 
     </script>
-    
+        <!-- =========================================================
+         HALDO AI OS 20
+         APP STATE / PERSISTENT INSTANCE STORE
+         TEIL 40
+         ========================================================= -->
+
+    <script>
+
+    (() => {
+
+        "use strict";
+
+
+        /* =====================================================
+           STATE STORAGE
+           ===================================================== */
+
+        const stateStore =
+            new Map();
+
+
+        const STORAGE_KEY =
+            "haldo-ai-os-20-app-state";
+
+
+        /* =====================================================
+           EVENT DISPATCH
+           ===================================================== */
+
+        function emit(
+            eventName,
+            detail = {}
+        ) {
+
+            if (
+                typeof window.HalDoDispatch ===
+                "function"
+            ) {
+
+                window.HalDoDispatch(
+                    eventName,
+                    detail
+                );
+
+                return;
+
+            }
+
+
+            try {
+
+                document.dispatchEvent(
+                    new CustomEvent(
+                        `haldo:${eventName}`,
+                        {
+                            detail
+                        }
+                    )
+                );
+
+            } catch (error) {
+
+                console.warn(
+                    "[HalDo App State 20]",
+                    error
+                );
+
+            }
+
+        }
+
+
+        /* =====================================================
+           SAFE CLONE
+           ===================================================== */
+
+        function clone(
+            value
+        ) {
+
+            try {
+
+                return JSON.parse(
+                    JSON.stringify(
+                        value
+                    )
+                );
+
+            } catch {
+
+                return value;
+
+            }
+
+        }
+
+
+        /* =====================================================
+           VALIDATE APP ID
+           ===================================================== */
+
+        function normalizeAppId(
+            appId
+        ) {
+
+            return String(
+                appId ||
+                ""
+            )
+            .trim();
+
+        }
+
+
+        /* =====================================================
+           GET APP STATE
+           ===================================================== */
+
+        function get(
+            appId,
+            defaultValue = {}
+        ) {
+
+            appId =
+                normalizeAppId(
+                    appId
+                );
+
+
+            if (!appId) {
+
+                return clone(
+                    defaultValue
+                );
+
+            }
+
+
+            if (
+                !stateStore.has(
+                    appId
+                )
+            ) {
+
+                stateStore.set(
+                    appId,
+                    clone(
+                        defaultValue
+                    )
+                );
+
+            }
+
+
+            return clone(
+                stateStore.get(
+                    appId
+                )
+            );
+
+        }
+
+
+        /* =====================================================
+           SET APP STATE
+           ===================================================== */
+
+        function set(
+            appId,
+            value
+        ) {
+
+            appId =
+                normalizeAppId(
+                    appId
+                );
+
+
+            if (!appId) {
+
+                return false;
+
+            }
+
+
+            stateStore.set(
+                appId,
+                clone(
+                    value
+                )
+            );
+
+
+            emit(
+                "app:state:changed",
+                {
+
+                    appId,
+
+                    state:
+                        clone(
+                            value
+                        ),
+
+                    timestamp:
+                        Date.now()
+
+                }
+            );
+
+
+            return true;
+
+        }
+
+
+        /* =====================================================
+           UPDATE APP STATE
+           ===================================================== */
+
+        function update(
+            appId,
+            patch
+        ) {
+
+            appId =
+                normalizeAppId(
+                    appId
+                );
+
+
+            if (!appId) {
+
+                return false;
+
+            }
+
+
+            const current =
+                get(
+                    appId,
+                    {}
+                );
+
+
+            const next =
+                (
+                    patch &&
+                    typeof patch ===
+                    "object" &&
+                    !Array.isArray(
+                        patch
+                    )
+                )
+                    ? {
+
+                        ...current,
+
+                        ...clone(
+                            patch
+                        )
+
+                    }
+                    : patch;
+
+
+            return set(
+                appId,
+                next
+            );
+
+        }
+
+
+        /* =====================================================
+           DELETE APP STATE
+           ===================================================== */
+
+        function remove(
+            appId
+        ) {
+
+            appId =
+                normalizeAppId(
+                    appId
+                );
+
+
+            if (!appId) {
+
+                return false;
+
+            }
+
+
+            const removed =
+                stateStore.delete(
+                    appId
+                );
+
+
+            if (
+                removed
+            ) {
+
+                emit(
+                    "app:state:removed",
+                    {
+                        appId
+                    }
+                );
+
+            }
+
+
+            return removed;
+
+        }
+
+
+        /* =====================================================
+           CLEAR ALL
+           ===================================================== */
+
+        function clear() {
+
+            stateStore.clear();
+
+
+            emit(
+                "app:state:cleared",
+                {
+                    timestamp:
+                        Date.now()
+                }
+            );
+
+
+            return true;
+
+        }
+
+
+        /* =====================================================
+           EXPORT
+           ===================================================== */
+
+        function exportState() {
+
+            const result =
+                {};
+
+
+            for (
+                const [
+                    appId,
+                    value
+                ]
+                of stateStore.entries()
+            ) {
+
+                result[
+                    appId
+                ] =
+                    clone(
+                        value
+                    );
+
+            }
+
+
+            return result;
+
+        }
+
+
+        /* =====================================================
+           IMPORT
+           ===================================================== */
+
+        function importState(
+            data,
+            options = {}
+        ) {
+
+            if (
+                !data ||
+                typeof data !==
+                "object"
+            ) {
+
+                return false;
+
+            }
+
+
+            if (
+                options.replace ===
+                true
+            ) {
+
+                stateStore.clear();
+
+            }
+
+
+            for (
+                const [
+                    appId,
+                    value
+                ]
+                of Object.entries(
+                    data
+                )
+            ) {
+
+                const normalized =
+                    normalizeAppId(
+                        appId
+                    );
+
+
+                if (
+                    normalized
+                ) {
+
+                    stateStore.set(
+                        normalized,
+                        clone(
+                            value
+                        )
+                    );
+
+                }
+
+            }
+
+
+            emit(
+                "app:state:imported",
+                {
+
+                    count:
+                        stateStore.size,
+
+                    timestamp:
+                        Date.now()
+
+                }
+            );
+
+
+            return true;
+
+        }
+
+
+        /* =====================================================
+           PERSIST TO LOCAL STORAGE
+           ===================================================== */
+
+        function save() {
+
+            try {
+
+                localStorage.setItem(
+                    STORAGE_KEY,
+                    JSON.stringify(
+                        exportState()
+                    )
+                );
+
+
+                emit(
+                    "app:state:saved",
+                    {
+                        timestamp:
+                            Date.now()
+                    }
+                );
+
+
+                return true;
+
+            } catch (error) {
+
+                console.warn(
+                    "[HalDo App State] Save",
+                    error
+                );
+
+
+                emit(
+                    "app:state:error",
+                    {
+
+                        phase:
+                            "save",
+
+                        error:
+                            String(
+                                error?.message ||
+                                error
+                            )
+
+                    }
+                );
+
+
+                return false;
+
+            }
+
+        }
+
+
+        /* =====================================================
+           LOAD FROM LOCAL STORAGE
+           ===================================================== */
+
+        function load() {
+
+            try {
+
+                const raw =
+                    localStorage.getItem(
+                        STORAGE_KEY
+                    );
+
+
+                if (!raw) {
+
+                    return false;
+
+                }
+
+
+                const data =
+                    JSON.parse(
+                        raw
+                    );
+
+
+                return importState(
+                    data
+                );
+
+            } catch (error) {
+
+                console.warn(
+                    "[HalDo App State] Load",
+                    error
+                );
+
+
+                emit(
+                    "app:state:error",
+                    {
+
+                        phase:
+                            "load",
+
+                        error:
+                            String(
+                                error?.message ||
+                                error
+                            )
+
+                    }
+                );
+
+
+                return false;
+
+            }
+
+        }
+
+
+        /* =====================================================
+           AUTO SAVE
+           ===================================================== */
+
+        let saveTimer =
+            null;
+
+
+        function scheduleSave(
+            delay = 500
+        ) {
+
+            clearTimeout(
+                saveTimer
+            );
+
+
+            saveTimer =
+                setTimeout(
+                    save,
+                    delay
+                );
+
+        }
+
+
+        /* =====================================================
+           STATE CHANGE AUTO SAVE
+           ===================================================== */
+
+        document.addEventListener(
+            "haldo:app:state:changed",
+            () => {
+
+                scheduleSave();
+
+            }
+        );
+
+
+        /* =====================================================
+           PUBLIC API
+           ===================================================== */
+
+        const appState = {
+
+            get,
+
+            set,
+
+            update,
+
+            remove,
+
+            clear,
+
+            exportState,
+
+            importState,
+
+            save,
+
+            load,
+
+            scheduleSave
+
+        };
+
+
+        /* =====================================================
+           GLOBAL API
+           ===================================================== */
+
+        window.HalDoAppState =
+            appState;
+
+
+        if (
+            !window.HalDoOS
+        ) {
+
+            window.HalDoOS =
+                {};
+
+        }
+
+
+        window.HalDoOS.appState =
+            appState;
+
+
+        /* =====================================================
+           INITIALIZATION
+           ===================================================== */
+
+        function initializeAppState() {
+
+            load();
+
+
+            emit(
+                "app-state:ready",
+                {
+
+                    version:
+                        "20.0.0",
+
+                    appCount:
+                        stateStore.size,
+
+                    timestamp:
+                        Date.now()
+
+                }
+            );
+
+
+            console.info(
+                "%cHalDo AI OS 20%c App State Manager bereit",
+                "color:#42e6ff;font-weight:800;",
+                "color:#ffffff;"
+            );
+
+        }
+
+
+        if (
+            document.readyState ===
+            "loading"
+        ) {
+
+            document.addEventListener(
+                "DOMContentLoaded",
+                initializeAppState,
+                {
+                    once:
+                        true
+                }
+            );
+
+        } else {
+
+            initializeAppState();
+
+        }
+
+
+        /* =====================================================
+           PAGE LIFECYCLE SAVE
+           ===================================================== */
+
+        window.addEventListener(
+            "beforeunload",
+            () => {
+
+                save();
+
+            }
+        );
+
+
+        document.addEventListener(
+            "visibilitychange",
+            () => {
+
+                if (
+                    document.visibilityState ===
+                    "hidden"
+                ) {
+
+                    save();
+
+                }
+
+            }
+        );
+
+
+    })();
+
+    </script>
+        <!-- =========================================================
+         HALDO AI OS 20
+         APP EVENT / INTERACTION BUS
+         TEIL 41
+         ========================================================= -->
+
+    <script>
+
+    (() => {
+
+        "use strict";
+
+
+        /* =====================================================
+           INTERNAL LISTENERS
+           ===================================================== */
+
+        const listeners =
+            new Map();
+
+
+        const onceListeners =
+            new Map();
+
+
+        /* =====================================================
+           SUBSCRIBE
+           ===================================================== */
+
+        function on(
+            eventName,
+            handler
+        ) {
+
+            if (
+                typeof handler !==
+                "function"
+            ) {
+
+                return () => {};
+
+            }
+
+
+            const name =
+                String(
+                    eventName ||
+                    ""
+                )
+                .trim();
+
+
+            if (!name) {
+
+                return () => {};
+
+            }
+
+
+            if (
+                !listeners.has(
+                    name
+                )
+            ) {
+
+                listeners.set(
+                    name,
+                    new Set()
+                );
+
+            }
+
+
+            const bucket =
+                listeners.get(
+                    name
+                );
+
+
+            bucket.add(
+                handler
+            );
+
+
+            return () => {
+
+                off(
+                    name,
+                    handler
+                );
+
+            };
+
+        }
+
+
+        /* =====================================================
+           UNSUBSCRIBE
+           ===================================================== */
+
+        function off(
+            eventName,
+            handler
+        ) {
+
+            const bucket =
+                listeners.get(
+                    eventName
+                );
+
+
+            if (!bucket) {
+
+                return false;
+
+            }
+
+
+            const removed =
+                bucket.delete(
+                    handler
+                );
+
+
+            if (
+                bucket.size ===
+                0
+            ) {
+
+                listeners.delete(
+                    eventName
+                );
+
+            }
+
+
+            return removed;
+
+        }
+
+
+        /* =====================================================
+           ONCE
+           ===================================================== */
+
+        function once(
+            eventName,
+            handler
+        ) {
+
+            if (
+                typeof handler !==
+                "function"
+            ) {
+
+                return () => {};
+
+            }
+
+
+            const wrapper =
+                (
+                    detail
+                ) => {
+
+                    off(
+                        eventName,
+                        wrapper
+                    );
+
+
+                    handler(
+                        detail
+                    );
+
+                };
+
+
+            return on(
+                eventName,
+                wrapper
+            );
+
+        }
+
+
+        /* =====================================================
+           EMIT
+           ===================================================== */
+
+        function emit(
+            eventName,
+            detail = {}
+        ) {
+
+            const name =
+                String(
+                    eventName ||
+                    ""
+                )
+                .trim();
+
+
+            if (!name) {
+
+                return false;
+
+            }
+
+
+            const bucket =
+                listeners.get(
+                    name
+                );
+
+
+            if (
+                bucket
+            ) {
+
+                [
+                    ...bucket
+                ]
+                .forEach(
+                    handler => {
+
+                        try {
+
+                            handler(
+                                detail
+                            );
+
+                        } catch (error) {
+
+                            console.error(
+                                `[HalDo EventBus] ${name}`,
+                                error
+                            );
+
+                        }
+
+                    }
+                );
+
+            }
+
+
+            const event =
+                new CustomEvent(
+                    `haldo:${name}`,
+                    {
+
+                        detail,
+
+                        bubbles:
+                            false,
+
+                        cancelable:
+                            false
+
+                    }
+                );
+
+
+            document.dispatchEvent(
+                event
+            );
+
+
+            return true;
+
+        }
+
+
+        /* =====================================================
+           WAIT FOR EVENT
+           ===================================================== */
+
+        function waitFor(
+            eventName,
+            timeout = 10000
+        ) {
+
+            return new Promise(
+                (
+                    resolve,
+                    reject
+                ) => {
+
+                    let timer =
+                        null;
+
+
+                    const unsubscribe =
+                        once(
+                            eventName,
+                            detail => {
+
+                                if (
+                                    timer
+                                ) {
+
+                                    clearTimeout(
+                                        timer
+                                    );
+
+                                }
+
+
+                                resolve(
+                                    detail
+                                );
+
+                            }
+                        );
+
+
+                    if (
+                        Number.isFinite(
+                            timeout
+                        ) &&
+                        timeout > 0
+                    ) {
+
+                        timer =
+                            setTimeout(
+                                () => {
+
+                                    unsubscribe();
+
+
+                                    reject(
+                                        new Error(
+                                            `Timeout waiting for ${eventName}`
+                                        )
+                                    );
+
+                                },
+                                timeout
+                            );
+
+                    }
+
+                }
+            );
+
+        }
+
+
+        /* =====================================================
+           CLEAR EVENT
+           ===================================================== */
+
+        function clear(
+            eventName
+        ) {
+
+            if (
+                eventName
+            ) {
+
+                return listeners.delete(
+                    eventName
+                );
+
+            }
+
+
+            listeners.clear();
+
+
+            return true;
+
+        }
+
+
+        /* =====================================================
+           LIST EVENTS
+           ===================================================== */
+
+        function list() {
+
+            return Array.from(
+                listeners.keys()
+            );
+
+        }
+
+
+        /* =====================================================
+           PUBLIC API
+           ===================================================== */
+
+        const eventBus = {
+
+            on,
+
+            off,
+
+            once,
+
+            emit,
+
+            waitFor,
+
+            clear,
+
+            list
+
+        };
+
+
+        /* =====================================================
+           GLOBAL API
+           ===================================================== */
+
+        window.HalDoEventBus20 =
+            eventBus;
+
+
+        if (
+            !window.HalDoOS
+        ) {
+
+            window.HalDoOS =
+                {};
+
+        }
+
+
+        window.HalDoOS.eventBus20 =
+            eventBus;
+
+
+        /*
+         * Nur falls noch kein zentraler EventBus existiert,
+         * wird diese Version als kompatibler Alias angeboten.
+         */
+
+        if (
+            !window.HalDoEventBus
+        ) {
+
+            window.HalDoEventBus =
+                eventBus;
+
+        }
+
+
+        /* =====================================================
+           DISPATCH BRIDGE
+           ===================================================== */
+
+        if (
+            typeof window.HalDoDispatch !==
+            "function"
+        ) {
+
+            window.HalDoDispatch =
+                (
+                    eventName,
+                    detail = {}
+                ) => {
+
+                    eventBus.emit(
+                        eventName,
+                        detail
+                    );
+
+                };
+
+        }
+
+
+        /* =====================================================
+           DOM EVENT BRIDGE
+           ===================================================== */
+
+        document.addEventListener(
+            "haldo:event:emit",
+            event => {
+
+                const detail =
+                    event?.detail;
+
+
+                if (
+                    detail?.name
+                ) {
+
+                    eventBus.emit(
+                        detail.name,
+                        detail.data ||
+                        {}
+                    );
+
+                }
+
+            }
+        );
+
+
+        /* =====================================================
+           INITIALIZATION
+           ===================================================== */
+
+        function initializeEventBus() {
+
+            emit(
+                "event-bus:ready",
+                {
+
+                    version:
+                        "20.0.0",
+
+                    timestamp:
+                        Date.now()
+
+                }
+            );
+
+
+            console.info(
+                "%cHalDo AI OS 20%c Event Bus 20 bereit",
+                "color:#42e6ff;font-weight:800;",
+                "color:#ffffff;"
+            );
+
+        }
+
+
+        if (
+            document.readyState ===
+            "loading"
+        ) {
+
+            document.addEventListener(
+                "DOMContentLoaded",
+                initializeEventBus,
+                {
+                    once:
+                        true
+                }
+            );
+
+        } else {
+
+            initializeEventBus();
+
+        }
+
+
+    })();
+
+    </script>
+        <!-- =========================================================
+         HALDO AI OS 20
+         APP ROUTING / VIEW NAVIGATION BRIDGE
+         TEIL 42
+         ========================================================= -->
+
+    <script>
+
+    (() => {
+
+        "use strict";
+
+
+        /* =====================================================
+           ROUTER STATE
+           ===================================================== */
+
+        let currentRoute =
+            "home";
+
+
+        let previousRoute =
+            null;
+
+
+        const historyStack =
+            [];
+
+
+        const routeDefinitions =
+            new Map();
+
+
+        /* =====================================================
+           EVENT BRIDGE
+           ===================================================== */
+
+        function emit(
+            eventName,
+            detail = {}
+        ) {
+
+            if (
+                window.HalDoEventBus &&
+                typeof window.HalDoEventBus.emit ===
+                "function"
+            ) {
+
+                window.HalDoEventBus.emit(
+                    eventName,
+                    detail
+                );
+
+                return;
+
+            }
+
+
+            try {
+
+                document.dispatchEvent(
+                    new CustomEvent(
+                        `haldo:${eventName}`,
+                        {
+                            detail
+                        }
+                    )
+                );
+
+            } catch (error) {
+
+                console.warn(
+                    "[HalDo Router 20]",
+                    error
+                );
+
+            }
+
+        }
+
+
+        /* =====================================================
+           NORMALIZE ROUTE
+           ===================================================== */
+
+        function normalizeRoute(
+            route
+        ) {
+
+            let value =
+                String(
+                    route ||
+                    ""
+                )
+                .trim();
+
+
+            if (!value) {
+
+                return "home";
+
+            }
+
+
+            if (
+                value.startsWith(
+                    "#"
+                )
+            ) {
+
+                value =
+                    value.slice(
+                        1
+                    );
+
+            }
+
+
+            if (
+                value.startsWith(
+                    "/"
+                )
+            ) {
+
+                value =
+                    value.slice(
+                        1
+                    );
+
+            }
+
+
+            return (
+                value
+                    .replace(
+                        /\/+/g,
+                        "/"
+                    )
+                    .replace(
+                        /^\/|\/$/g,
+                        ""
+                    )
+                    .toLowerCase()
+                ||
+                "home"
+            );
+
+        }
+
+
+        /* =====================================================
+           REGISTER ROUTE
+           ===================================================== */
+
+        function register(
+            route,
+            definition = {}
+        ) {
+
+            const normalized =
+                normalizeRoute(
+                    route
+                );
+
+
+            routeDefinitions.set(
+                normalized,
+                {
+
+                    route:
+                        normalized,
+
+                    appId:
+                        definition.appId ||
+                        null,
+
+                    title:
+                        definition.title ||
+                        normalized,
+
+                    view:
+                        definition.view ||
+                        null,
+
+                    onEnter:
+                        typeof definition.onEnter ===
+                        "function"
+                            ? definition.onEnter
+                            : null,
+
+                    onLeave:
+                        typeof definition.onLeave ===
+                        "function"
+                            ? definition.onLeave
+                            : null,
+
+                    metadata:
+                        {
+                            ...(
+                                definition.metadata ||
+                                {}
+                            )
+                        }
+
+                }
+            );
+
+
+            emit(
+                "router:route:registered",
+                {
+
+                    route:
+                        normalized
+
+                }
+            );
+
+
+            return normalized;
+
+        }
+
+
+        /* =====================================================
+           UNREGISTER ROUTE
+           ===================================================== */
+
+        function unregister(
+            route
+        ) {
+
+            return routeDefinitions.delete(
+                normalizeRoute(
+                    route
+                )
+            );
+
+        }
+
+
+        /* =====================================================
+           GET ROUTE
+           ===================================================== */
+
+        function getRoute(
+            route
+        ) {
+
+            return routeDefinitions.get(
+                normalizeRoute(
+                    route
+                )
+            ) || null;
+
+        }
+
+
+        /* =====================================================
+           GET CURRENT ROUTE
+           ===================================================== */
+
+        function getCurrent() {
+
+            return {
+
+                route:
+                    currentRoute,
+
+                previous:
+                    previousRoute,
+
+                history:
+                    [
+                        ...historyStack
+                    ]
+
+            };
+
+        }
+
+
+        /* =====================================================
+           RENDER VIEW
+           ===================================================== */
+
+        async function render(
+            definition,
+            context
+        ) {
+
+            if (!definition) {
+
+                return true;
+
+            }
+
+
+            if (
+                typeof definition.onEnter ===
+                "function"
+            ) {
+
+                await definition.onEnter(
+                    context
+                );
+
+            }
+
+
+            if (
+                definition.view
+            ) {
+
+                const target =
+                    typeof definition.view ===
+                    "string"
+                        ? document.querySelector(
+                            definition.view
+                        )
+                        : definition.view;
+
+
+                if (
+                    target
+                ) {
+
+                    target.hidden =
+                        false;
+
+
+                    target.setAttribute(
+                        "data-route-active",
+                        "true"
+                    );
+
+                }
+
+            }
+
+
+            return true;
+
+        }
+
+
+        /* =====================================================
+           HIDE PREVIOUS VIEW
+           ===================================================== */
+
+        async function leave(
+            definition,
+            context
+        ) {
+
+            if (!definition) {
+
+                return true;
+
+            }
+
+
+            if (
+                typeof definition.onLeave ===
+                "function"
+            ) {
+
+                await definition.onLeave(
+                    context
+                );
+
+            }
+
+
+            if (
+                definition.view
+            ) {
+
+                const target =
+                    typeof definition.view ===
+                    "string"
+                        ? document.querySelector(
+                            definition.view
+                        )
+                        : definition.view;
+
+
+                if (
+                    target
+                ) {
+
+                    target.hidden =
+                        true;
+
+
+                    target.setAttribute(
+                        "data-route-active",
+                        "false"
+                    );
+
+                }
+
+            }
+
+
+            return true;
+
+        }
+
+
+        /* =====================================================
+           NAVIGATE
+           ===================================================== */
+
+        async function navigate(
+            route,
+            options = {}
+        ) {
+
+            const nextRoute =
+                normalizeRoute(
+                    route
+                );
+
+
+            if (
+                nextRoute ===
+                currentRoute &&
+                options.force !==
+                true
+            ) {
+
+                return {
+
+                    success:
+                        true,
+
+                    route:
+                        currentRoute,
+
+                    unchanged:
+                        true
+
+                };
+
+            }
+
+
+            const nextDefinition =
+                getRoute(
+                    nextRoute
+                );
+
+
+            if (
+                !nextDefinition &&
+                options.allowUnknown !==
+                true
+            ) {
+
+                emit(
+                    "router:route:not-found",
+                    {
+
+                        route:
+                            nextRoute
+
+                    }
+                );
+
+
+                return {
+
+                    success:
+                        false,
+
+                    route:
+                        currentRoute,
+
+                    reason:
+                        "route-not-found"
+
+                };
+
+            }
+
+
+            const previous =
+                currentRoute;
+
+
+            const previousDefinition =
+                getRoute(
+                    previous
+                );
+
+
+            const context = {
+
+                route:
+                    nextRoute,
+
+                previousRoute:
+                    previous,
+
+                params:
+                    options.params ||
+                    {},
+
+                metadata:
+                    options.metadata ||
+                    {},
+
+                source:
+                    options.source ||
+                    "system"
+
+            };
+
+
+            try {
+
+                emit(
+                    "router:navigation:before",
+                    context
+                );
+
+
+                await leave(
+                    previousDefinition,
+                    context
+                );
+
+
+                if (
+                    options.replace !==
+                    true
+                ) {
+
+                    historyStack.push(
+                        previous
+                    );
+
+                }
+
+
+                previousRoute =
+                    previous;
+
+
+                currentRoute =
+                    nextRoute;
+
+
+                await render(
+                    nextDefinition,
+                    context
+                );
+
+
+                emit(
+                    "router:navigation:after",
+                    {
+
+                        ...context,
+
+                        currentRoute:
+                            currentRoute
+
+                    }
+                );
+
+
+                return {
+
+                    success:
+                        true,
+
+                    route:
+                        currentRoute,
+
+                    previous:
+                        previousRoute
+
+                };
+
+            } catch (error) {
+
+                emit(
+                    "router:navigation:error",
+                    {
+
+                        ...context,
+
+                        error:
+                            String(
+                                error?.message ||
+                                error
+                            )
+
+                    }
+                );
+
+
+                console.error(
+                    "[HalDo Router 20]",
+                    error
+                );
+
+
+                return {
+
+                    success:
+                        false,
+
+                    route:
+                        currentRoute,
+
+                    error
+
+                };
+
+            }
+
+        }
+
+
+        /* =====================================================
+           BACK
+           ===================================================== */
+
+        async function back() {
+
+            if (
+                historyStack.length ===
+                0
+            ) {
+
+                return navigate(
+                    "home",
+                    {
+                        source:
+                            "history"
+                    }
+                );
+
+            }
+
+
+            const route =
+                historyStack.pop();
+
+
+            return navigate(
+                route,
+                {
+
+                    source:
+                        "history",
+
+                    replace:
+                        true
+
+                }
+            );
+
+        }
+
+
+        /* =====================================================
+           FORWARD / HASH BRIDGE
+           ===================================================== */
+
+        function syncHash() {
+
+            const hash =
+                normalizeRoute(
+                    window.location.hash
+                );
+
+
+            if (
+                hash !==
+                currentRoute
+            ) {
+
+                navigate(
+                    hash,
+                    {
+                        source:
+                            "hash",
+                        allowUnknown:
+                            false
+                    }
+                );
+
+            }
+
+        }
+
+
+        window.addEventListener(
+            "hashchange",
+            syncHash
+        );
+
+
+        /* =====================================================
+           ROUTER API
+           ===================================================== */
+
+        const router = {
+
+            register,
+
+            unregister,
+
+            getRoute,
+
+            getCurrent,
+
+            navigate,
+
+            back,
+
+            syncHash,
+
+            normalizeRoute
+
+        };
+
+
+        /* =====================================================
+           GLOBAL API
+           ===================================================== */
+
+        window.HalDoRouter20 =
+            router;
+
+
+        if (
+            !window.HalDoOS
+        ) {
+
+            window.HalDoOS =
+                {};
+
+        }
+
+
+        window.HalDoOS.router20 =
+            router;
+
+
+        /* =====================================================
+           DEFAULT ROUTE
+           ===================================================== */
+
+        register(
+            "home",
+            {
+
+                title:
+                    "HalDo AI",
+
+                view:
+                    "#haldo-home"
+
+            }
+        );
+
+
+        /* =====================================================
+           INITIALIZATION
+           ===================================================== */
+
+        function initializeRouter() {
+
+            const initialRoute =
+                normalizeRoute(
+                    window.location.hash
+                );
+
+
+            if (
+                initialRoute !==
+                "home"
+            ) {
+
+                navigate(
+                    initialRoute,
+                    {
+                        source:
+                            "startup"
+                    }
+                );
+
+            } else {
+
+                currentRoute =
+                    "home";
+
+
+                emit(
+                    "router:ready",
+                    {
+
+                        route:
+                            "home",
+
+                        version:
+                            "20.0.0",
+
+                        timestamp:
+                            Date.now()
+
+                    }
+                );
+
+            }
+
+
+            console.info(
+                "%cHalDo AI OS 20%c Router bereit",
+                "color:#42e6ff;font-weight:800;",
+                "color:#ffffff;"
+            );
+
+        }
+
+
+        if (
+            document.readyState ===
+            "loading"
+        ) {
+
+            document.addEventListener(
+                "DOMContentLoaded",
+                initializeRouter,
+                {
+                    once:
+                        true
+                }
+            );
+
+        } else {
+
+            initializeRouter();
+
+        }
+
+
+    })();
+
+    </script>
