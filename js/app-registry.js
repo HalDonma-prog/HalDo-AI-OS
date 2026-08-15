@@ -1,75 +1,56 @@
-/* =========================================================
+/* ============================================================
    HALDO AI OS 18
-   APP REGISTRY
-   VERSION 18.0.0
    PROFESSIONAL ULTIMATE FOUNDATION
+   ------------------------------------------------------------
+   Datei:
+       js/app-registry.js
 
-   ZENTRALE APP-REGISTRIERUNG
+   APP REGISTRY
+   Version:
+       18.0.0
 
-   Architektur:
+   Aufgabe:
+   Zentrale und sichere Registrierung aller HalDo-AI-OS-Apps.
 
-       HALDO AI OS
-            │
-            ▼
-         KERNEL
-            │
-            ▼
-       APP REGISTRY
-            │
-       ┌────┼──────────────┐
-       ▼    ▼              ▼
-     MANAGER ROUTER      LAUNCHER
-            │
-            ▼
-        APPLICATION
+   Verbindungen:
+       kernel.js
+       system.js
+       app-manager.js
+       app-router.js
+       launcher.js
+       window-manager.js
+       zukünftige App-Systeme
 
-   Aufgaben:
+   Grundprinzip:
+       REGISTRY ≠ APP MANAGER
 
-   • Apps registrieren
-   • Apps aktualisieren
-   • Apps entfernen
-   • Apps suchen
-   • Kategorien
-   • Tags
-   • Dependencies
-   • Metadaten
-   • Enable / Disable
-   • Registry Events
-   • Import / Export
-   • Synchronisation
-   • Kernel-Verbindung
-   • System-Verbindung
-   • App Manager-Kompatibilität
-   • Diagnostics
-   • Health Check
-   • Runtime-Sicherheit
-   • zukünftige Erweiterbarkeit
+   Die Registry verwaltet App-Definitionen.
+   Der App Manager verwaltet App-Laufzeitinstanzen.
 
-   WICHTIG:
-
-   Diese Datei ist eine eigenständige Gesamtversion.
-
-   ========================================================= */
+   Bestehende APIs werden erhalten und erweitert.
+   ============================================================ */
 
 (function (window, document) {
 
     "use strict";
 
 
-    /* =====================================================
-       HALDO OS FOUNDATION
-       ===================================================== */
+    /* ========================================================
+       01 — HALDO OS FOUNDATION
+       ======================================================== */
 
     window.HalDoOS =
-        window.HalDoOS || {};
+        window.HalDoOS ||
+        {};
+
 
     const HalDoOS =
         window.HalDoOS;
 
 
-    /* =====================================================
-       META
-       ===================================================== */
+    /* ========================================================
+       02 — META
+       ======================================================== */
 
     const VERSION =
         "18.0.0";
@@ -81,20 +62,29 @@
         "app-registry";
 
 
-    /* =====================================================
-       INTERNAL STATE
-       ===================================================== */
+    /* ========================================================
+       03 — INTERNAL STATE
+       ======================================================== */
 
     const state = {
 
         initialized:
             false,
 
+        initializing:
+            false,
+
         ready:
             false,
 
-        initializing:
+        failed:
             false,
+
+        initializedAt:
+            null,
+
+        readyAt:
+            null,
 
         apps:
             new Map(),
@@ -111,6 +101,12 @@
                 false,
 
             manager:
+                false,
+
+            router:
+                false,
+
+            launcher:
                 false
 
         },
@@ -146,9 +142,9 @@
     };
 
 
-    /* =====================================================
-       LOGGING
-       ===================================================== */
+    /* ========================================================
+       04 — LOGGING
+       ======================================================== */
 
     function log() {
 
@@ -192,9 +188,9 @@
     }
 
 
-    /* =====================================================
-       ID NORMALIZATION
-       ===================================================== */
+    /* ========================================================
+       05 — ID NORMALIZATION
+       ======================================================== */
 
     function normalizeId(value) {
 
@@ -227,9 +223,9 @@
     }
 
 
-    /* =====================================================
-       SAFE HELPERS
-       ===================================================== */
+    /* ========================================================
+       06 — SAFE HELPERS
+       ======================================================== */
 
     function hasMethod(
         object,
@@ -256,10 +252,19 @@
 
         }
 
+
         if (
-            Array.isArray(
-                value
-            )
+            typeof value ===
+            "function"
+        ) {
+
+            return value;
+
+        }
+
+
+        if (
+            Array.isArray(value)
         ) {
 
             return value.map(
@@ -267,6 +272,7 @@
             );
 
         }
+
 
         if (
             typeof value ===
@@ -280,30 +286,10 @@
             ).forEach(
                 function (key) {
 
-                    const item =
-                        value[key];
-
-                    /*
-                     * Funktionen werden bewusst
-                     * erhalten.
-                     */
-
-                    if (
-                        typeof item ===
-                        "function"
-                    ) {
-
-                        result[key] =
-                            item;
-
-                    } else {
-
-                        result[key] =
-                            safeClone(
-                                item
-                            );
-
-                    }
+                    result[key] =
+                        safeClone(
+                            value[key]
+                        );
 
                 }
             );
@@ -312,14 +298,46 @@
 
         }
 
+
         return value;
 
     }
 
 
-    /* =====================================================
-       SERVICE LOOKUPS
-       ===================================================== */
+    function toArray(value) {
+
+        if (
+            Array.isArray(value)
+        ) {
+
+            return [
+                ...value
+            ];
+
+        }
+
+
+        if (
+            value === null ||
+            value === undefined ||
+            value === ""
+        ) {
+
+            return [];
+
+        }
+
+
+        return [
+            value
+        ];
+
+    }
+
+
+    /* ========================================================
+       07 — SERVICE LOOKUPS
+       ======================================================== */
 
     function getKernel() {
 
@@ -354,9 +372,31 @@
     }
 
 
-    /* =====================================================
-       EVENT SYSTEM
-       ===================================================== */
+    function getRouter() {
+
+        return (
+            window.HalDoAppRouter ||
+            HalDoOS.appRouter ||
+            null
+        );
+
+    }
+
+
+    function getLauncher() {
+
+        return (
+            window.HalDoLauncher ||
+            HalDoOS.launcher ||
+            null
+        );
+
+    }
+
+
+    /* ========================================================
+       08 — EVENT SYSTEM
+       ======================================================== */
 
     function on(
         event,
@@ -364,6 +404,7 @@
     ) {
 
         if (
+            !event ||
             typeof callback !==
             "function"
         ) {
@@ -371,6 +412,7 @@
             return function () {};
 
         }
+
 
         if (
             !state.listeners.has(
@@ -385,14 +427,17 @@
 
         }
 
+
         const listeners =
             state.listeners.get(
                 event
             );
 
+
         listeners.add(
             callback
         );
+
 
         return function () {
 
@@ -416,15 +461,18 @@
                 event
             );
 
+
         if (!listeners) {
 
-            return;
+            return false;
 
         }
+
 
         listeners.delete(
             callback
         );
+
 
         if (
             listeners.size ===
@@ -437,18 +485,22 @@
 
         }
 
+
+        return true;
+
     }
 
 
     function emit(
         event,
-        data
+        data = null
     ) {
 
         const listeners =
             state.listeners.get(
                 event
             );
+
 
         if (listeners) {
 
@@ -466,7 +518,7 @@
                     } catch (exception) {
 
                         errorLog(
-                            "Event listener error:",
+                            "Registry Event Listener Error:",
                             exception
                         );
 
@@ -479,16 +531,67 @@
 
 
         /*
-         * Zentrales HalDoOS Event-System
+         * Verbindung mit dem zentralen
+         * Kernel Event Bus.
+         */
+
+        const kernel =
+            getKernel();
+
+
+        if (
+            kernel &&
+            hasMethod(
+                kernel,
+                "emit"
+            )
+        ) {
+
+            try {
+
+                kernel.emit(
+                    "app-registry:" + event,
+                    data
+                );
+
+            } catch (exception) {
+
+                errorLog(
+                    "Kernel Event Error:",
+                    exception
+                );
+
+            }
+
+        }
+
+
+        /*
+         * Zusätzlich optionales globales
+         * HalDoOS.events-System.
          */
 
         const globalEvents =
             HalDoOS.events;
 
+
         if (
             globalEvents &&
-            typeof globalEvents.emit ===
-            "function"
+            typeof globalEvents !==
+            "object"
+        ) {
+
+            return;
+
+        }
+
+
+        if (
+            globalEvents &&
+            hasMethod(
+                globalEvents,
+                "emit"
+            )
         ) {
 
             try {
@@ -505,18 +608,19 @@
     }
 
 
-    /* =====================================================
-       ERROR SYSTEM
-       ===================================================== */
+    /* ========================================================
+       09 — ERROR SYSTEM
+       ======================================================== */
 
     function reportError(
         code,
         exception,
-        extra
+        extra = null
     ) {
 
         state.statistics.errors +=
             1;
+
 
         const payload = {
 
@@ -525,35 +629,76 @@
                 "UNKNOWN_ERROR",
 
             error:
-                exception ||
-                null,
+                exception instanceof Error
+                    ? exception
+                    : exception || null,
 
             extra:
-                extra ||
-                null,
+                extra,
 
             timestamp:
                 new Date().toISOString()
 
         };
 
+
         errorLog(
+            "[App Registry]",
             payload
         );
+
 
         emit(
             "error",
             payload
         );
 
+
+        const kernel =
+            getKernel();
+
+
+        /*
+         * Fehler an den Kernel weiterreichen,
+         * ohne eine Endlosschleife zu erzeugen.
+         */
+
+        if (
+            kernel &&
+            hasMethod(
+                kernel,
+                "reportError"
+            )
+        ) {
+
+            try {
+
+                kernel.reportError(
+                    exception ||
+                    new Error(
+                        code ||
+                        "App Registry Error"
+                    ),
+                    "App Registry: " +
+                    (
+                        code ||
+                        "UNKNOWN_ERROR"
+                    )
+                );
+
+            } catch (_) {}
+
+        }
+
+
         return payload;
 
     }
 
 
-    /* =====================================================
-       APP NORMALIZATION
-       ===================================================== */
+    /* ========================================================
+       10 — APP NORMALIZATION
+       ======================================================== */
 
     function normalizeApp(
         config
@@ -570,12 +715,17 @@
         }
 
 
+        const requestedId =
+            config.id ||
+            config.appId ||
+            config.appID ||
+            config.name ||
+            config.title;
+
+
         const id =
             createId(
-                config.id ||
-                config.appId ||
-                config.name ||
-                config.title
+                requestedId
             );
 
 
@@ -601,19 +751,24 @@
                 id,
 
             name:
-                config.name ||
-                existing?.name ||
-                id,
+                config.name !== undefined
+                    ? String(config.name)
+                    : (
+                        existing?.name ||
+                        id
+                    ),
 
             title:
-                config.title ||
-                existing?.title ||
-                config.name ||
-                id,
+                config.title !== undefined
+                    ? String(config.title)
+                    : (
+                        existing?.title ||
+                        config.name ||
+                        id
+                    ),
 
             description:
-                config.description !==
-                undefined
+                config.description !== undefined
                     ? String(
                         config.description
                     )
@@ -628,9 +783,12 @@
                 "system",
 
             icon:
-                config.icon ||
-                existing?.icon ||
-                "◈",
+                config.icon !== undefined
+                    ? config.icon
+                    : (
+                        existing?.icon ||
+                        "◈"
+                    ),
 
             version:
                 config.version ||
@@ -643,8 +801,7 @@
                 "registered",
 
             enabled:
-                config.enabled !==
-                undefined
+                config.enabled !== undefined
                     ? config.enabled !== false
                     : (
                         existing
@@ -657,8 +814,7 @@
                 existing?.system === true,
 
             singleton:
-                config.singleton !==
-                undefined
+                config.singleton !== undefined
                     ? config.singleton !== false
                     : (
                         existing
@@ -667,8 +823,7 @@
                     ),
 
             route:
-                config.route !==
-                undefined
+                config.route !== undefined
                     ? config.route
                     : (
                         existing?.route ||
@@ -676,8 +831,7 @@
                     ),
 
             entry:
-                config.entry !==
-                undefined
+                config.entry !== undefined
                     ? config.entry
                     : (
                         existing?.entry ||
@@ -685,71 +839,83 @@
                     ),
 
             url:
-                config.url !==
-                undefined
+                config.url !== undefined
                     ? config.url
                     : (
                         existing?.url ||
                         null
                     ),
 
+            component:
+                config.component !== undefined
+                    ? config.component
+                    : (
+                        existing?.component ||
+                        null
+                    ),
+
             permissions:
-                Array.isArray(
-                    config.permissions
-                )
-                    ? [
-                        ...config.permissions
-                    ]
+                config.permissions !== undefined
+                    ? toArray(
+                        config.permissions
+                    )
                     : (
                         existing
-                            ? [
-                                ...(existing.permissions || [])
-                            ]
+                            ? toArray(
+                                existing.permissions
+                            )
                             : []
                     ),
 
             dependencies:
-                Array.isArray(
-                    config.dependencies
-                )
-                    ? [
-                        ...config.dependencies
-                    ]
+                config.dependencies !== undefined
+                    ? toArray(
+                        config.dependencies
+                    )
                     : (
                         existing
-                            ? [
-                                ...(existing.dependencies || [])
-                            ]
+                            ? toArray(
+                                existing.dependencies
+                            )
+                            : []
+                    ),
+
+            optionalDependencies:
+                config.optionalDependencies !== undefined
+                    ? toArray(
+                        config.optionalDependencies
+                    )
+                    : (
+                        existing
+                            ? toArray(
+                                existing.optionalDependencies
+                            )
                             : []
                     ),
 
             tags:
-                Array.isArray(
-                    config.tags
-                )
-                    ? [
-                        ...config.tags
-                    ]
+                config.tags !== undefined
+                    ? toArray(
+                        config.tags
+                    )
                     : (
                         existing
-                            ? [
-                                ...(existing.tags || [])
-                            ]
+                            ? toArray(
+                                existing.tags
+                            )
                             : []
                     ),
 
             keywords:
-                Array.isArray(
-                    config.keywords
-                )
-                    ? [
-                        ...config.keywords
-                    ]
+                config.keywords !== undefined
+                    ? toArray(
+                        config.keywords
+                    )
                     : (
                         existing
-                            ? [
-                                ...(existing.keywords || [])
-                            ]
+                            ? toArray(
+                                existing.keywords
+                            )
                             : []
                     ),
 
@@ -794,6 +960,11 @@
                     : {
                         ...(existing?.permissionsPolicy || {})
                     },
+
+
+            /*
+             * Lifecycle APIs
+             */
 
             init:
                 typeof config.init ===
@@ -885,6 +1056,19 @@
                         null
                     ),
 
+
+            /*
+             * Erweiterbare Runtime-Informationen
+             */
+
+            state:
+                config.state !== undefined
+                    ? config.state
+                    : (
+                        existing?.state ||
+                        "idle"
+                    ),
+
             createdAt:
                 existing?.createdAt ||
                 config.createdAt ||
@@ -904,13 +1088,13 @@
     }
 
 
-    /* =====================================================
-       REGISTER
-       ===================================================== */
+    /* ========================================================
+       11 — REGISTER
+       ======================================================== */
 
     function register(
         config,
-        options
+        options = {}
     ) {
 
         const app =
@@ -927,10 +1111,10 @@
                     "Ungültige App-Konfiguration."
                 ),
                 {
-                    config:
-                        config
+                    config
                 }
             );
+
 
             return null;
 
@@ -954,19 +1138,21 @@
             state.statistics.updated +=
                 1;
 
+
             emit(
                 "updated",
                 {
-                    app:
-                        app,
-
+                    app,
                     previous:
                         existing,
-
-                    options:
-                        options || {}
-
+                    options
                 }
+            );
+
+
+            notifyManager(
+                app,
+                "updated"
             );
 
         } else {
@@ -974,27 +1160,22 @@
             state.statistics.registered +=
                 1;
 
+
             emit(
                 "registered",
                 {
-                    app:
-                        app,
-
-                    options:
-                        options || {}
-
+                    app,
+                    options
                 }
             );
 
+
+            notifyManager(
+                app,
+                "registered"
+            );
+
         }
-
-
-        notifyManager(
-            app,
-            existing
-                ? "updated"
-                : "registered"
-        );
 
 
         return app;
@@ -1021,9 +1202,7 @@
     ) {
 
         if (
-            !Array.isArray(
-                list
-            )
+            !Array.isArray(list)
         ) {
 
             return [];
@@ -1043,6 +1222,7 @@
                         options
                     );
 
+
                 if (app) {
 
                     result.push(
@@ -1060,9 +1240,9 @@
     }
 
 
-    /* =====================================================
-       GET
-       ===================================================== */
+    /* ========================================================
+       12 — GET
+       ======================================================== */
 
     function get(
         id
@@ -1072,6 +1252,7 @@
             createId(
                 id
             );
+
 
         if (!normalized) {
 
@@ -1133,8 +1314,9 @@
                 id
             );
 
-        return (
-            !!normalized &&
+
+        return !!(
+            normalized &&
             state.apps.has(
                 normalized
             )
@@ -1154,9 +1336,9 @@
     }
 
 
-    /* =====================================================
-       FIND / SEARCH
-       ===================================================== */
+    /* ========================================================
+       13 — FIND / SEARCH
+       ======================================================== */
 
     function find(
         query
@@ -1184,6 +1366,8 @@
 
                     app.id,
 
+                    app.appId,
+
                     app.name,
 
                     app.title,
@@ -1191,6 +1375,8 @@
                     app.description,
 
                     app.category,
+
+                    app.route,
 
                     ...(app.tags || []),
 
@@ -1230,9 +1416,9 @@
     }
 
 
-    /* =====================================================
-       CATEGORY
-       ===================================================== */
+    /* ========================================================
+       14 — CATEGORY
+       ======================================================== */
 
     function getByCategory(
         category
@@ -1301,9 +1487,56 @@
     }
 
 
-    /* =====================================================
-       UPDATE
-       ===================================================== */
+    /* ========================================================
+       15 — TAGS
+       ======================================================== */
+
+    function getByTag(
+        tag
+    ) {
+
+        const value =
+            String(
+                tag || ""
+            )
+            .trim()
+            .toLowerCase();
+
+
+        if (!value) {
+
+            return [];
+
+        }
+
+
+        return getAll().filter(
+            function (app) {
+
+                return (
+                    app.tags || []
+                ).some(
+                    function (item) {
+
+                        return String(
+                            item
+                        )
+                        .trim()
+                        .toLowerCase() ===
+                        value;
+
+                    }
+                );
+
+            }
+        );
+
+    }
+
+
+    /* ========================================================
+       16 — UPDATE
+       ======================================================== */
 
     function update(
         id,
@@ -1340,7 +1573,7 @@
             );
 
 
-        const normalizedChanges =
+        const normalized =
             normalizeApp(
                 {
                     ...app,
@@ -1353,7 +1586,7 @@
             );
 
 
-        if (!normalizedChanges) {
+        if (!normalized) {
 
             return null;
 
@@ -1362,7 +1595,7 @@
 
         state.apps.set(
             app.id,
-            normalizedChanges
+            normalized
         );
 
 
@@ -1374,21 +1607,20 @@
             "updated",
             {
                 app:
-                    normalizedChanges,
+                    normalized,
 
-                previous:
-                    previous
+                previous
             }
         );
 
 
         notifyManager(
-            normalizedChanges,
+            normalized,
             "updated"
         );
 
 
-        return normalizedChanges;
+        return normalized;
 
     }
 
@@ -1406,13 +1638,13 @@
     }
 
 
-    /* =====================================================
-       REMOVE
-       ===================================================== */
+    /* ========================================================
+       17 — REMOVE
+       ======================================================== */
 
     function remove(
         id,
-        options
+        options = {}
     ) {
 
         const normalized =
@@ -1441,6 +1673,33 @@
         }
 
 
+        /*
+         * System-Apps werden nicht versehentlich
+         * gelöscht, außer force=true gesetzt wurde.
+         */
+
+        if (
+            app.system === true &&
+            options.force !== true
+        ) {
+
+            reportError(
+                "SYSTEM_APP_REMOVE_BLOCKED",
+                new Error(
+                    "System-App darf ohne force=true nicht entfernt werden."
+                ),
+                {
+                    appId:
+                        app.id
+                }
+            );
+
+
+            return false;
+
+        }
+
+
         state.apps.delete(
             normalized
         );
@@ -1453,13 +1712,15 @@
         emit(
             "removed",
             {
-                app:
-                    app,
-
-                options:
-                    options || {}
-
+                app,
+                options
             }
+        );
+
+
+        notifyManager(
+            app,
+            "removed"
         );
 
 
@@ -1494,9 +1755,9 @@
     }
 
 
-    /* =====================================================
-       ENABLE / DISABLE
-       ===================================================== */
+    /* ========================================================
+       18 — ENABLE
+       ======================================================== */
 
     function enable(
         id
@@ -1525,6 +1786,18 @@
         }
 
 
+        const missing =
+            getMissingDependencies(
+                app.id
+            );
+
+
+        /*
+         * Fehlende Dependencies verhindern
+         * das Aktivieren nicht automatisch.
+         * Sie werden aber im Event gemeldet.
+         */
+
         app.enabled =
             true;
 
@@ -1542,8 +1815,9 @@
         emit(
             "enabled",
             {
-                app:
-                    app
+                app,
+                missingDependencies:
+                    missing
             }
         );
 
@@ -1570,6 +1844,10 @@
     }
 
 
+    /* ========================================================
+       19 — DISABLE
+       ======================================================== */
+
     function disable(
         id
     ) {
@@ -1583,6 +1861,37 @@
         if (!app) {
 
             return false;
+
+        }
+
+
+        if (
+            app.system === true
+        ) {
+
+            reportError(
+                "SYSTEM_APP_DISABLE_BLOCKED",
+                new Error(
+                    "System-App darf nicht deaktiviert werden."
+                ),
+                {
+                    appId:
+                        app.id
+                }
+            );
+
+
+            return false;
+
+        }
+
+
+        if (
+            app.enabled ===
+            false
+        ) {
+
+            return true;
 
         }
 
@@ -1604,8 +1913,7 @@
         emit(
             "disabled",
             {
-                app:
-                    app
+                app
             }
         );
 
@@ -1632,9 +1940,65 @@
     }
 
 
-    /* =====================================================
-       DEPENDENCIES
-       ===================================================== */
+    /* ========================================================
+       20 — ENABLED / DISABLED
+       ======================================================== */
+
+    function getEnabledApps() {
+
+        return getAll().filter(
+            function (app) {
+
+                return (
+                    app.enabled !==
+                    false
+                );
+
+            }
+        );
+
+    }
+
+
+    function getDisabledApps() {
+
+        return getAll().filter(
+            function (app) {
+
+                return (
+                    app.enabled ===
+                    false
+                );
+
+            }
+        );
+
+    }
+
+
+    /* ========================================================
+       21 — SYSTEM APPS
+       ======================================================== */
+
+    function getSystemApps() {
+
+        return getAll().filter(
+            function (app) {
+
+                return (
+                    app.system ===
+                    true
+                );
+
+            }
+        );
+
+    }
+
+
+    /* ========================================================
+       22 — DEPENDENCIES
+       ======================================================== */
 
     function getDependencies(
         id
@@ -1727,23 +2091,17 @@
     }
 
 
-    /* =====================================================
-       TAGS
-       ===================================================== */
-
-    function getByTag(
-        tag
+    function getDependents(
+        id
     ) {
 
-        const value =
-            String(
-                tag || ""
-            )
-            .trim()
-            .toLowerCase();
+        const normalized =
+            createId(
+                id
+            );
 
 
-        if (!value) {
+        if (!normalized) {
 
             return [];
 
@@ -1754,16 +2112,15 @@
             function (app) {
 
                 return (
-                    app.tags || []
+                    app.dependencies || []
                 ).some(
-                    function (item) {
+                    function (dependency) {
 
                         return (
-                            String(
-                                item
-                            )
-                            .toLowerCase() ===
-                            value
+                            createId(
+                                dependency
+                            ) ===
+                            normalized
                         );
 
                     }
@@ -1775,73 +2132,13 @@
     }
 
 
-    /* =====================================================
-       ENABLED / DISABLED
-       ===================================================== */
-
-    function getEnabledApps() {
-
-        return getAll().filter(
-            function (app) {
-
-                return (
-                    app.enabled !==
-                    false
-                );
-
-            }
-        );
-
-    }
-
-
-    function getDisabledApps() {
-
-        return getAll().filter(
-            function (app) {
-
-                return (
-                    app.enabled ===
-                    false
-                );
-
-            }
-        );
-
-    }
-
-
-    /* =====================================================
-       SYSTEM APPS
-       ===================================================== */
-
-    function getSystemApps() {
-
-        return getAll().filter(
-            function (app) {
-
-                return (
-                    app.system ===
-                    true
-                );
-
-            }
-        );
-
-    }
-
-
-    /* =====================================================
-       EXPORT
-       ===================================================== */
+    /* ========================================================
+       23 — EXPORT
+       ======================================================== */
 
     function exportApps(
-        options
+        options = {}
     ) {
-
-        const settings =
-            options || {};
-
 
         const apps =
             getAll();
@@ -1862,7 +2159,7 @@
                 apps.length,
 
             apps:
-                settings.clone === false
+                options.clone === false
                     ? apps
                     : safeClone(
                         apps
@@ -1878,8 +2175,7 @@
         emit(
             "exported",
             {
-                data:
-                    data
+                data
             }
         );
 
@@ -1900,13 +2196,13 @@
     }
 
 
-    /* =====================================================
-       IMPORT
-       ===================================================== */
+    /* ========================================================
+       24 — IMPORT
+       ======================================================== */
 
     function importApps(
         source,
-        options
+        options = {}
     ) {
 
         let definitions =
@@ -1931,6 +2227,7 @@
                     "IMPORT_JSON_ERROR",
                     exception
                 );
+
 
                 return 0;
 
@@ -1961,6 +2258,14 @@
             )
         ) {
 
+            reportError(
+                "INVALID_IMPORT",
+                new Error(
+                    "Import-Daten enthalten keine App-Liste."
+                )
+            );
+
+
             return 0;
 
         }
@@ -1973,14 +2278,22 @@
         definitions.forEach(
             function (definition) {
 
+                if (
+                    !definition ||
+                    typeof definition !==
+                    "object"
+                ) {
+
+                    return;
+
+                }
+
+
                 const id =
                     createId(
-                        definition &&
-                        (
-                            definition.id ||
-                            definition.appId ||
-                            definition.name
-                        )
+                        definition.id ||
+                        definition.appId ||
+                        definition.name
                     );
 
 
@@ -2049,19 +2362,45 @@
     }
 
 
-    /* =====================================================
-       CLEAR
-       ===================================================== */
+    /* ========================================================
+       25 — CLEAR
+       ======================================================== */
 
     function clear(
-        options
+        options = {}
     ) {
 
         const apps =
             getAll();
 
 
-        state.apps.clear();
+        if (
+            options.keepSystem ===
+            true
+        ) {
+
+            apps.forEach(
+                function (app) {
+
+                    if (
+                        app.system !==
+                        true
+                    ) {
+
+                        state.apps.delete(
+                            app.id
+                        );
+
+                    }
+
+                }
+            );
+
+        } else {
+
+            state.apps.clear();
+
+        }
 
 
         emit(
@@ -2070,24 +2409,27 @@
                 count:
                     apps.length,
 
-                apps:
-                    apps,
+                remaining:
+                    getCount(),
 
-                options:
-                    options || {}
+                apps,
 
+                options
             }
         );
 
 
-        return apps.length;
+        return (
+            apps.length -
+            getCount()
+        );
 
     }
 
 
-    /* =====================================================
-       MANAGER NOTIFICATION
-       ===================================================== */
+    /* ========================================================
+       26 — MANAGER NOTIFICATION
+       ======================================================== */
 
     function notifyManager(
         app,
@@ -2106,6 +2448,7 @@
             state.connections.manager =
                 false;
 
+
             return false;
 
         }
@@ -2118,18 +2461,13 @@
         try {
 
             /*
-             * Wichtig:
+             * Nur Event-Benachrichtigung.
              *
-             * Die Registry übernimmt nicht
-             * automatisch die App-Registrierung
-             * im Manager.
+             * Die Registry registriert die App
+             * NICHT erneut im Manager.
              *
-             * Dadurch vermeiden wir eine
-             * Endlosschleife zwischen Registry
-             * und Manager.
-             *
-             * Der Manager kann die Registry
-             * über getAll()/getApps() importieren.
+             * Dadurch wird eine Endlosschleife
+             * zwischen Registry und Manager verhindert.
              */
 
             if (
@@ -2140,10 +2478,10 @@
             ) {
 
                 manager.emit(
-                    "registry-" + action,
+                    "registry-" +
+                    action,
                     {
-                        app:
-                            app
+                        app
                     }
                 );
 
@@ -2161,10 +2499,10 @@
                     appId:
                         app.id,
 
-                    action:
-                        action
+                    action
                 }
             );
+
 
             return false;
 
@@ -2173,9 +2511,9 @@
     }
 
 
-    /* =====================================================
-       CONNECTIONS
-       ===================================================== */
+    /* ========================================================
+       27 — CONNECTIONS
+       ======================================================== */
 
     function connectToKernel() {
 
@@ -2187,6 +2525,7 @@
 
             state.connections.kernel =
                 false;
+
 
             return false;
 
@@ -2232,8 +2571,7 @@
             emit(
                 "kernel-connected",
                 {
-                    kernel:
-                        kernel
+                    kernel
                 }
             );
 
@@ -2242,10 +2580,15 @@
 
         } catch (exception) {
 
+            state.connections.kernel =
+                false;
+
+
             reportError(
                 "KERNEL_CONNECTION_ERROR",
                 exception
             );
+
 
             return false;
 
@@ -2264,6 +2607,7 @@
 
             state.connections.system =
                 false;
+
 
             return false;
 
@@ -2284,7 +2628,8 @@
                     api
                 );
 
-            } else if (
+            }
+            else if (
                 hasMethod(
                     system,
                     "registerModule"
@@ -2306,8 +2651,7 @@
             emit(
                 "system-connected",
                 {
-                    system:
-                        system
+                    system
                 }
             );
 
@@ -2316,10 +2660,15 @@
 
         } catch (exception) {
 
+            state.connections.system =
+                false;
+
+
             reportError(
                 "SYSTEM_CONNECTION_ERROR",
                 exception
             );
+
 
             return false;
 
@@ -2338,6 +2687,12 @@
         state.connections.manager =
             !!getManager();
 
+        state.connections.router =
+            !!getRouter();
+
+        state.connections.launcher =
+            !!getLauncher();
+
 
         return getConnectionStatus();
 
@@ -2349,22 +2704,33 @@
         return {
 
             kernel:
-                !!getKernel(),
+                !!getKernel() &&
+                state.connections.kernel,
 
             system:
-                !!getSystem(),
+                !!getSystem() &&
+                state.connections.system,
 
             manager:
-                !!getManager()
+                !!getManager() &&
+                state.connections.manager,
+
+            router:
+                !!getRouter() &&
+                state.connections.router,
+
+            launcher:
+                !!getLauncher() &&
+                state.connections.launcher
 
         };
 
     }
 
 
-    /* =====================================================
-       COUNTERS
-       ===================================================== */
+    /* ========================================================
+       28 — COUNTERS
+       ======================================================== */
 
     function getCount() {
 
@@ -2383,17 +2749,52 @@
     function getStatistics() {
 
         return {
-
             ...state.statistics
+        };
+
+    }
+
+
+    /* ========================================================
+       29 — STATE
+       ======================================================== */
+
+    function getState() {
+
+        return {
+
+            initialized:
+                state.initialized,
+
+            initializing:
+                state.initializing,
+
+            ready:
+                state.ready,
+
+            failed:
+                state.failed,
+
+            initializedAt:
+                state.initializedAt,
+
+            readyAt:
+                state.readyAt,
+
+            appCount:
+                state.apps.size,
+
+            connections:
+                getConnectionStatus()
 
         };
 
     }
 
 
-    /* =====================================================
-       DIAGNOSTICS
-       ===================================================== */
+    /* ========================================================
+       30 — DIAGNOSTICS
+       ======================================================== */
 
     function diagnostics() {
 
@@ -2415,8 +2816,14 @@
             initialized:
                 state.initialized,
 
+            initializing:
+                state.initializing,
+
             ready:
                 state.ready,
+
+            failed:
+                state.failed,
 
             count:
                 apps.length,
@@ -2483,6 +2890,14 @@
                             missingDependencies:
                                 getMissingDependencies(
                                     app.id
+                                ),
+
+                            dependents:
+                                getDependents(
+                                    app.id
+                                ).map(
+                                    item =>
+                                        item.id
                                 )
 
                         };
@@ -2498,9 +2913,9 @@
     }
 
 
-    /* =====================================================
-       HEALTH CHECK
-       ===================================================== */
+    /* ========================================================
+       31 — HEALTH CHECK
+       ======================================================== */
 
     function healthCheck() {
 
@@ -2510,6 +2925,28 @@
 
         const problems =
             [];
+
+
+        if (
+            !state.initialized
+        ) {
+
+            problems.push(
+                "Registry wurde noch nicht initialisiert."
+            );
+
+        }
+
+
+        if (
+            !state.ready
+        ) {
+
+            problems.push(
+                "Registry ist noch nicht bereit."
+            );
+
+        }
 
 
         if (
@@ -2534,17 +2971,36 @@
         }
 
 
+        const dependencyProblems =
+            getAll().filter(
+                app =>
+                    !checkDependencies(
+                        app.id
+                    )
+            );
+
+
+        if (
+            dependencyProblems.length
+        ) {
+
+            problems.push(
+                dependencyProblems.length +
+                " App(s) haben fehlende Dependencies."
+            );
+
+        }
+
+
         return {
 
             healthy:
                 problems.length ===
                 0,
 
-            problems:
-                problems,
+            problems,
 
-            connections:
-                connections,
+            connections,
 
             initialized:
                 state.initialized,
@@ -2555,6 +3011,20 @@
             appCount:
                 getCount(),
 
+            dependencyProblems:
+                dependencyProblems.map(
+                    app => ({
+                        id:
+                            app.id,
+
+                        missing:
+                            getMissingDependencies(
+                                app.id
+                            )
+
+                    })
+                ),
+
             timestamp:
                 new Date().toISOString()
 
@@ -2563,9 +3033,9 @@
     }
 
 
-    /* =====================================================
-       PUBLIC API
-       ===================================================== */
+    /* ========================================================
+       32 — PUBLIC API
+       ======================================================== */
 
     const api = {
 
@@ -2582,25 +3052,7 @@
         /* State */
 
         getState:
-            function () {
-
-                return {
-
-                    initialized:
-                        state.initialized,
-
-                    ready:
-                        state.ready,
-
-                    appCount:
-                        state.apps.size,
-
-                    connections:
-                        getConnectionStatus()
-
-                };
-
-            },
+            getState,
 
 
         /* Events */
@@ -2722,6 +3174,9 @@
         checkDependencies:
             checkDependencies,
 
+        getDependents:
+            getDependents,
+
 
         /* Import / Export */
 
@@ -2785,9 +3240,9 @@
     };
 
 
-    /* =====================================================
-       GLOBAL EXPORT
-       ===================================================== */
+    /* ========================================================
+       33 — GLOBAL EXPORT
+       ======================================================== */
 
     window.HalDoAppRegistry =
         api;
@@ -2799,11 +3254,13 @@
         api;
 
 
-    /* =====================================================
-       KERNEL READY
-       ===================================================== */
+    /* ========================================================
+       34 — KERNEL READY HANDLER
+       ======================================================== */
 
-    function handleKernelReady() {
+    function handleKernelReady(
+        data
+    ) {
 
         refreshConnections();
 
@@ -2811,6 +3268,8 @@
         emit(
             "kernel-ready",
             {
+                data,
+
                 diagnostics:
                     diagnostics()
             }
@@ -2819,9 +3278,9 @@
     }
 
 
-    /* =====================================================
-       GLOBAL EVENT CONNECTION
-       ===================================================== */
+    /* ========================================================
+       35 — GLOBAL EVENT CONNECTION
+       ======================================================== */
 
     function connectGlobalEvents() {
 
@@ -2830,7 +3289,15 @@
 
 
         if (
-            kernel &&
+            !kernel
+        ) {
+
+            return false;
+
+        }
+
+
+        if (
             hasMethod(
                 kernel,
                 "on"
@@ -2844,6 +3311,9 @@
                     handleKernelReady
                 );
 
+
+                return true;
+
             } catch (exception) {
 
                 warn(
@@ -2855,12 +3325,15 @@
 
         }
 
+
+        return false;
+
     }
 
 
-    /* =====================================================
-       INITIALIZATION
-       ===================================================== */
+    /* ========================================================
+       36 — INITIALIZATION
+       ======================================================== */
 
     async function initializeRegistry() {
 
@@ -2888,6 +3361,12 @@
         state.initialized =
             true;
 
+        state.failed =
+            false;
+
+        state.initializedAt =
+            Date.now();
+
 
         emit(
             "initializing",
@@ -2898,42 +3377,103 @@
         );
 
 
-        refreshConnections();
+        try {
+
+            refreshConnections();
 
 
-        state.ready =
-            true;
+            /*
+             * Falls der Kernel bereits läuft,
+             * Registry sofort als bereit markieren.
+             */
 
-        state.initializing =
-            false;
+            const kernel =
+                getKernel();
 
 
-        emit(
-            "ready",
-            {
-                version:
-                    VERSION,
+            if (
+                kernel &&
+                hasMethod(
+                    kernel,
+                    "getStatus"
+                )
+            ) {
 
-                diagnostics:
-                    diagnostics()
+                const kernelStatus =
+                    kernel.getStatus();
+
+
+                if (
+                    kernelStatus &&
+                    kernelStatus.ready
+                ) {
+
+                    state.connections.kernel =
+                        true;
+
+                }
+
             }
-        );
 
 
-        log(
-            "App Registry bereit.",
-            VERSION
-        );
+            state.ready =
+                true;
+
+            state.initializing =
+                false;
+
+            state.readyAt =
+                Date.now();
 
 
-        return api;
+            emit(
+                "ready",
+                {
+                    version:
+                        VERSION,
+
+                    diagnostics:
+                        diagnostics()
+                }
+            );
+
+
+            log(
+                "App Registry bereit.",
+                VERSION
+            );
+
+
+            return api;
+
+        } catch (exception) {
+
+            state.initializing =
+                false;
+
+            state.ready =
+                false;
+
+            state.failed =
+                true;
+
+
+            reportError(
+                "REGISTRY_INIT_ERROR",
+                exception
+            );
+
+
+            throw exception;
+
+        }
 
     }
 
 
-    /* =====================================================
-       STARTUP
-       ===================================================== */
+    /* ========================================================
+       37 — STARTUP
+       ======================================================== */
 
     connectGlobalEvents();
 
@@ -2944,11 +3484,8 @@
             .catch(
                 function (exception) {
 
-                    state.initializing =
-                        false;
-
                     reportError(
-                        "REGISTRY_INIT_ERROR",
+                        "REGISTRY_STARTUP_ERROR",
                         exception
                     );
 
@@ -2979,9 +3516,9 @@
     }
 
 
-    /* =====================================================
-       FINAL EXPOSURE
-       ===================================================== */
+    /* ========================================================
+       38 — FINAL EXPOSURE
+       ======================================================== */
 
     window.HalDoOS =
         window.HalDoOS ||
@@ -2991,13 +3528,10 @@
         api;
 
 
-    /* =====================================================
+    /* ========================================================
+       END OF FILE
        HALDO AI OS 18
        APP REGISTRY
-       VERSION 18.0.0
-       PROFESSIONAL ULTIMATE FOUNDATION
-
-       END OF FILE
-       ===================================================== */
+       ======================================================== */
 
 })(window, document);
