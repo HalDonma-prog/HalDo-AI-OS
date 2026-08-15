@@ -14,6 +14,11 @@
    - Fehlerbehandlung
    - Systemdiagnose
    - globale HalDo OS API
+   - sichere Modulinitialisierung
+   - Kernel-/System-Kompatibilität
+   - Online-/Offline-Zustand
+   - Runtime-Diagnose
+   - zukünftige Erweiterbarkeit
    ============================================================ */
 
 "use strict";
@@ -26,7 +31,8 @@
        01 — KONFIGURATION
        ======================================================== */
 
-    const VERSION = "18.0.0";
+    const VERSION =
+        "18.0.0";
 
     const SYSTEM_NAME =
         "HalDo AI OS";
@@ -34,45 +40,86 @@
     const SYSTEM_EDITION =
         "Professional Ultimate Foundation";
 
+    const MODULE_ID =
+        "kernel";
+
 
     /* ========================================================
-       02 — KERNEL STATE
+       02 — HALDO OS FOUNDATION
+       ======================================================== */
+
+    window.HalDoOS =
+        window.HalDoOS ||
+        {};
+
+
+    const HalDoOS =
+        window.HalDoOS;
+
+
+    /* ========================================================
+       03 — KERNEL STATE
        ======================================================== */
 
     const state = {
 
-        initialized: false,
+        initialized:
+            false,
 
-        starting: false,
+        starting:
+            false,
 
-        ready: false,
+        ready:
+            false,
 
-        failed: false,
+        failed:
+            false,
 
-        startTime: null,
+        startTime:
+            null,
 
-        readyTime: null,
+        readyTime:
+            null,
 
-        uptime: 0,
+        uptime:
+            0,
 
-        modules: new Map(),
+        modules:
+            new Map(),
 
-        moduleStatus: new Map(),
+        moduleStatus:
+            new Map(),
 
-        errors: [],
+        errors:
+            [],
 
-        warnings: [],
+        warnings:
+            [],
 
-        events: 0
+        events:
+            0,
+
+        bootCount:
+            0,
+
+        lastEvent:
+            null,
+
+        lastError:
+            null,
+
+        lastWarning:
+            null
 
     };
 
 
     /* ========================================================
-       03 — EVENT BUS
+       04 — EVENT BUS
        ======================================================== */
 
-    const listeners = {};
+    const listeners =
+        new Map();
 
 
     function on(
@@ -81,6 +128,7 @@
     ) {
 
         if (
+            !eventName ||
             typeof callback !==
             "function"
         ) {
@@ -90,18 +138,39 @@
         }
 
 
-        if (
-            !listeners[eventName]
-        ) {
+        const name =
+            String(
+                eventName
+            )
+            .trim();
 
-            listeners[eventName] = [];
+
+        if (!name) {
+
+            return false;
 
         }
 
 
-        listeners[eventName].push(
-            callback
-        );
+        if (
+            !listeners.has(
+                name
+            )
+        ) {
+
+            listeners.set(
+                name,
+                new Set()
+            );
+
+        }
+
+
+        listeners
+            .get(name)
+            .add(
+                callback
+            );
 
 
         return true;
@@ -114,20 +183,60 @@
         callback
     ) {
 
-        if (
-            !listeners[eventName]
-        ) {
+        if (!eventName) {
 
             return false;
 
         }
 
 
-        listeners[eventName] =
-            listeners[eventName].filter(
-                listener =>
-                    listener !== callback
+        const name =
+            String(
+                eventName
+            )
+            .trim();
+
+
+        const callbacks =
+            listeners.get(
+                name
             );
+
+
+        if (!callbacks) {
+
+            return false;
+
+        }
+
+
+        if (
+            typeof callback ===
+            "function"
+        ) {
+
+            callbacks.delete(
+                callback
+            );
+
+        }
+        else {
+
+            callbacks.clear();
+
+        }
+
+
+        if (
+            callbacks.size ===
+            0
+        ) {
+
+            listeners.delete(
+                name
+            );
+
+        }
 
 
         return true;
@@ -140,71 +249,117 @@
         data = null
     ) {
 
-        state.events++;
+        if (!eventName) {
 
-
-        const callbacks =
-            listeners[eventName];
-
-
-        if (
-            !callbacks
-        ) {
-
-            return;
+            return false;
 
         }
 
 
-        callbacks
-            .slice()
-            .forEach(
-                callback => {
+        const name =
+            String(
+                eventName
+            )
+            .trim();
 
-                    try {
 
-                        callback(
-                            data
-                        );
+        if (!name) {
 
-                    }
-                    catch (
-                        error
-                    ) {
+            return false;
 
-                        reportError(
-                            error,
-                            `Event: ${eventName}`
-                        );
+        }
 
-                    }
+
+        state.events +=
+            1;
+
+        state.lastEvent = {
+
+            name:
+                name,
+
+            time:
+                Date.now()
+
+        };
+
+
+        const callbacks =
+            listeners.get(
+                name
+            );
+
+
+        if (!callbacks) {
+
+            return true;
+
+        }
+
+
+        Array.from(
+            callbacks
+        )
+        .forEach(
+            function (callback) {
+
+                try {
+
+                    callback(
+                        data
+                    );
 
                 }
-            );
+                catch (
+                    error
+                ) {
+
+                    reportError(
+                        error,
+                        `Event: ${name}`
+                    );
+
+                }
+
+            }
+        );
+
+
+        return true;
 
     }
 
 
     /* ========================================================
-       04 — LOGGING
+       05 — LOGGING
        ======================================================== */
 
     function timestamp() {
 
-        return new Date()
-            .toLocaleTimeString(
-                "de-DE",
-                {
-                    hour:
-                        "2-digit",
+        try {
 
-                    minute:
-                        "2-digit",
+            return new Date()
+                .toLocaleTimeString(
+                    "de-DE",
+                    {
+                        hour:
+                            "2-digit",
 
-                    second:
-                        "2-digit"
-                }
-            );
+                        minute:
+                            "2-digit",
+
+                        second:
+                            "2-digit"
+                    }
+                );
+
+        }
+        catch (_) {
+
+            return new Date()
+                .toISOString();
+
+        }
 
     }
 
@@ -217,47 +372,56 @@
         const prefix =
             `[${SYSTEM_NAME}]`;
 
-
         const output =
-            `${prefix} [${timestamp()}] ${message}`;
+            `${prefix} [${timestamp()}] ${String(message)}`;
 
 
-        if (
-            type ===
-            "error"
-        ) {
+        try {
 
-            console.error(
-                output
-            );
+            if (
+                type ===
+                "error"
+            ) {
+
+                console.error(
+                    output
+                );
+
+            }
+            else if (
+                type ===
+                "warning"
+            ) {
+
+                console.warn(
+                    output
+                );
+
+            }
+            else {
+
+                console.log(
+                    output
+                );
+
+            }
 
         }
-        else if (
-            type ===
-            "warning"
-        ) {
-
-            console.warn(
-                output
-            );
-
-        }
-        else {
-
-            console.log(
-                output
-            );
-
-        }
+        catch (_) {}
 
 
         emit(
             "kernel:log",
             {
-                message,
-                type,
+                message:
+                    String(message),
+
+                type:
+                    type,
+
                 time:
                     Date.now()
+
             }
         );
 
@@ -265,7 +429,7 @@
 
 
     /* ========================================================
-       05 — FEHLER
+       06 — FEHLER
        ======================================================== */
 
     function reportError(
@@ -273,14 +437,29 @@
         context = "Unknown"
     ) {
 
-        const normalized =
-            error instanceof Error
-                ? error
-                : new Error(
+        let normalized;
+
+
+        if (
+            error instanceof
+            Error
+        ) {
+
+            normalized =
+                error;
+
+        }
+        else {
+
+            normalized =
+                new Error(
                     String(
-                        error
+                        error ??
+                        "Unbekannter Fehler"
                     )
                 );
+
+        }
 
 
         const record = {
@@ -295,7 +474,10 @@
                 normalized.stack ||
                 "",
 
-            context,
+            context:
+                String(
+                    context
+                ),
 
             time:
                 Date.now()
@@ -308,11 +490,6 @@
         );
 
 
-        /*
-         * Nur die letzten 100 Fehler
-         * behalten.
-         */
-
         if (
             state.errors.length >
             100
@@ -323,10 +500,27 @@
         }
 
 
-        log(
-            `${context}: ${normalized.message}`,
-            "error"
-        );
+        state.lastError =
+            record;
+
+
+        /*
+         * Fehler direkt loggen.
+         *
+         * emit() selbst ist geschützt,
+         * damit Fehlerbehandlung nicht
+         * erneut den Kernel beschädigt.
+         */
+
+        try {
+
+            log(
+                `${record.context}: ${record.message}`,
+                "error"
+            );
+
+        }
+        catch (_) {}
 
 
         emit(
@@ -341,7 +535,7 @@
 
 
     /* ========================================================
-       06 — WARNUNG
+       07 — WARNUNG
        ======================================================== */
 
     function reportWarning(
@@ -356,7 +550,10 @@
                     message
                 ),
 
-            context,
+            context:
+                String(
+                    context
+                ),
 
             time:
                 Date.now()
@@ -379,10 +576,19 @@
         }
 
 
-        log(
-            `${context}: ${message}`,
-            "warning"
-        );
+        state.lastWarning =
+            record;
+
+
+        try {
+
+            log(
+                `${record.context}: ${record.message}`,
+                "warning"
+            );
+
+        }
+        catch (_) {}
 
 
         emit(
@@ -397,7 +603,25 @@
 
 
     /* ========================================================
-       07 — MODUL REGISTRIEREN
+       08 — MODULNAME NORMALISIERUNG
+       ======================================================== */
+
+    function normalizeModuleName(
+        name
+    ) {
+
+        return String(
+            name ||
+            ""
+        )
+        .trim()
+        .toLowerCase();
+
+    }
+
+
+    /* ========================================================
+       09 — MODUL REGISTRIEREN
        ======================================================== */
 
     function registerModule(
@@ -405,9 +629,13 @@
         module
     ) {
 
-        if (
-            !name
-        ) {
+        const moduleName =
+            normalizeModuleName(
+                name
+            );
+
+
+        if (!moduleName) {
 
             reportWarning(
                 "Ein Modul ohne Namen wurde abgelehnt.",
@@ -420,16 +648,11 @@
         }
 
 
-        const moduleName =
-            String(
-                name
-            )
-            .trim()
-            .toLowerCase();
-
-
         if (
-            !module
+            module ===
+            null ||
+            module ===
+            undefined
         ) {
 
             reportWarning(
@@ -443,40 +666,70 @@
         }
 
 
+        const existed =
+            state.modules.has(
+                moduleName
+            );
+
+
         state.modules.set(
             moduleName,
             module
         );
 
 
+        const previousStatus =
+            state.moduleStatus.get(
+                moduleName
+            ) ||
+            {};
+
+
         state.moduleStatus.set(
             moduleName,
             {
+
+                ...previousStatus,
+
                 registered:
                     true,
 
                 ready:
-                    false,
+                    Boolean(
+                        previousStatus.ready
+                    ),
 
                 registeredAt:
+                    previousStatus.registeredAt ||
+                    Date.now(),
+
+                updatedAt:
                     Date.now()
+
             }
         );
 
 
         emit(
-            "module:registered",
+            existed
+                ? "module:updated"
+                : "module:registered",
             {
+
                 name:
                     moduleName,
 
-                module
+                module:
+                    module
+
             }
         );
 
 
         log(
-            `Modul registriert: ${moduleName}`
+            existed
+                ? `Modul aktualisiert: ${moduleName}`
+                : `Modul registriert: ${moduleName}`
         );
 
 
@@ -486,16 +739,20 @@
 
 
     /* ========================================================
-       08 — MODUL ABFRAGEN
+       10 — MODUL ABFRAGEN
        ======================================================== */
 
     function getModule(
         name
     ) {
 
-        if (
-            !name
-        ) {
+        const moduleName =
+            normalizeModuleName(
+                name
+            );
+
+
+        if (!moduleName) {
 
             return null;
 
@@ -504,11 +761,7 @@
 
         return (
             state.modules.get(
-                String(
-                    name
-                )
-                .trim()
-                .toLowerCase()
+                moduleName
             ) ||
             null
         );
@@ -517,7 +770,35 @@
 
 
     /* ========================================================
-       09 — MODULSTATUS
+       11 — MODUL VORHANDEN?
+       ======================================================== */
+
+    function hasModule(
+        name
+    ) {
+
+        const moduleName =
+            normalizeModuleName(
+                name
+            );
+
+
+        if (!moduleName) {
+
+            return false;
+
+        }
+
+
+        return state.modules.has(
+            moduleName
+        );
+
+    }
+
+
+    /* ========================================================
+       12 — MODULSTATUS
        ======================================================== */
 
     function setModuleReady(
@@ -526,11 +807,16 @@
     ) {
 
         const moduleName =
-            String(
+            normalizeModuleName(
                 name
-            )
-            .trim()
-            .toLowerCase();
+            );
+
+
+        if (!moduleName) {
+
+            return false;
+
+        }
 
 
         const current =
@@ -543,10 +829,16 @@
         state.moduleStatus.set(
             moduleName,
             {
+
                 ...current,
 
                 registered:
-                    true,
+                    state.modules.has(
+                        moduleName
+                    ) ||
+                    Boolean(
+                        current.registered
+                    ),
 
                 ready:
                     Boolean(
@@ -556,7 +848,10 @@
                 readyAt:
                     ready
                         ? Date.now()
-                        : null
+                        : null,
+
+                updatedAt:
+                    Date.now()
 
             }
         );
@@ -565,6 +860,7 @@
         emit(
             "module:status",
             {
+
                 name:
                     moduleName,
 
@@ -572,6 +868,77 @@
                     Boolean(
                         ready
                     )
+
+            }
+        );
+
+
+        return true;
+
+    }
+
+
+    /* ========================================================
+       13 — MODULSTATUS ABFRAGEN
+       ======================================================== */
+
+    function getModuleStatus(
+        name
+    ) {
+
+        const moduleName =
+            normalizeModuleName(
+                name
+            );
+
+
+        if (!moduleName) {
+
+            return null;
+
+        }
+
+
+        return (
+            state.moduleStatus.get(
+                moduleName
+            ) ||
+            null
+        );
+
+    }
+
+
+    /* ========================================================
+       14 — MODULE ALLE
+       ======================================================== */
+
+    function getModules() {
+
+        return Array.from(
+            state.modules.entries()
+        )
+        .map(
+            function (
+                [name, module]
+            ) {
+
+                return {
+
+                    name:
+                        name,
+
+                    module:
+                        module,
+
+                    status:
+                        state.moduleStatus.get(
+                            name
+                        ) ||
+                        null
+
+                };
+
             }
         );
 
@@ -579,35 +946,7 @@
 
 
     /* ========================================================
-       10 — MODULE ALLE
-       ======================================================== */
-
-    function getModules() {
-
-        return [
-            ...state.modules.entries()
-        ]
-        .map(
-            ([name, module]) => ({
-
-                name,
-
-                module,
-
-                status:
-                    state.moduleStatus.get(
-                        name
-                    ) ||
-                    null
-
-            })
-        );
-
-    }
-
-
-    /* ========================================================
-       11 — MODUL ENTFERNEN
+       15 — MODUL ENTFERNEN
        ======================================================== */
 
     function unregisterModule(
@@ -615,11 +954,16 @@
     ) {
 
         const moduleName =
-            String(
+            normalizeModuleName(
                 name
-            )
-            .trim()
-            .toLowerCase();
+            );
+
+
+        if (!moduleName) {
+
+            return false;
+
+        }
 
 
         const existed =
@@ -633,16 +977,21 @@
         );
 
 
-        if (
-            existed
-        ) {
+        if (existed) {
 
             emit(
                 "module:unregistered",
                 {
+
                     name:
                         moduleName
+
                 }
+            );
+
+
+            log(
+                `Modul entfernt: ${moduleName}`
             );
 
         }
@@ -654,7 +1003,7 @@
 
 
     /* ========================================================
-       12 — UPTIME
+       16 — UPTIME
        ======================================================== */
 
     function updateUptime() {
@@ -666,20 +1015,26 @@
             state.uptime =
                 0;
 
-            return;
+            return 0;
 
         }
 
 
         state.uptime =
-            Date.now() -
-            state.startTime;
+            Math.max(
+                0,
+                Date.now() -
+                state.startTime
+            );
+
+
+        return state.uptime;
 
     }
 
 
     /* ========================================================
-       13 — SYSTEM STATUS
+       17 — SYSTEM STATUS
        ======================================================== */
 
     function getStatus() {
@@ -702,6 +1057,9 @@
             edition:
                 SYSTEM_EDITION,
 
+            module:
+                MODULE_ID,
+
             initialized:
                 state.initialized,
 
@@ -723,14 +1081,22 @@
             uptime:
                 state.uptime,
 
+            bootCount:
+                state.bootCount,
+
             moduleCount:
                 modules.length,
 
             readyModules:
                 modules.filter(
-                    item =>
-                        item.status &&
-                        item.status.ready
+                    function (item) {
+
+                        return (
+                            item.status &&
+                            item.status.ready
+                        );
+
+                    }
                 ).length,
 
             errorCount:
@@ -740,7 +1106,16 @@
                 state.warnings.length,
 
             eventCount:
-                state.events
+                state.events,
+
+            lastEvent:
+                state.lastEvent,
+
+            lastError:
+                state.lastError,
+
+            lastWarning:
+                state.lastWarning
 
         };
 
@@ -748,90 +1123,7 @@
 
 
     /* ========================================================
-       14 — DIAGNOSE
-       ======================================================== */
-
-    function diagnose() {
-
-        const status =
-            getStatus();
-
-
-        const diagnostics = {
-
-            browser:
-                {
-                    userAgent:
-                        navigator.userAgent,
-
-                    language:
-                        navigator.language,
-
-                    online:
-                        navigator.onLine,
-
-                    cookies:
-                        navigator.cookieEnabled
-
-                },
-
-
-            display:
-                {
-                    width:
-                        window.innerWidth,
-
-                    height:
-                        window.innerHeight,
-
-                    pixelRatio:
-                        window.devicePixelRatio ||
-                        1
-
-                },
-
-
-            storage:
-                {
-                    localStorage:
-                        testStorage()
-                },
-
-
-            kernel:
-                status,
-
-            modules:
-                getModules()
-                    .map(
-                        item => ({
-                            name:
-                                item.name,
-
-                            ready:
-                                Boolean(
-                                    item.status &&
-                                    item.status.ready
-                                )
-                        })
-                    )
-
-        };
-
-
-        emit(
-            "kernel:diagnostics",
-            diagnostics
-        );
-
-
-        return diagnostics;
-
-    }
-
-
-    /* ========================================================
-       15 — STORAGE TEST
+       18 — STORAGE TEST
        ======================================================== */
 
     function testStorage() {
@@ -848,12 +1140,19 @@
             );
 
 
+            const result =
+                window.localStorage.getItem(
+                    key
+                ) ===
+                "1";
+
+
             window.localStorage.removeItem(
                 key
             );
 
 
-            return true;
+            return result;
 
         }
         catch (
@@ -868,7 +1167,146 @@
 
 
     /* ========================================================
-       16 — SAFE MODULE INIT
+       19 — SYSTEM DIAGNOSE
+       ======================================================== */
+
+    function diagnose() {
+
+        const status =
+            getStatus();
+
+
+        let browser = {};
+
+        let display = {};
+
+
+        try {
+
+            browser = {
+
+                userAgent:
+                    navigator.userAgent,
+
+                language:
+                    navigator.language,
+
+                languages:
+                    Array.isArray(
+                        navigator.languages
+                    )
+                        ? [
+                            ...navigator.languages
+                        ]
+                        : [],
+
+                online:
+                    navigator.onLine,
+
+                cookies:
+                    navigator.cookieEnabled
+
+            };
+
+        }
+        catch (_) {}
+
+
+        try {
+
+            display = {
+
+                width:
+                    window.innerWidth,
+
+                height:
+                    window.innerHeight,
+
+                pixelRatio:
+                    window.devicePixelRatio ||
+                    1
+
+            };
+
+        }
+        catch (_) {}
+
+
+        const diagnostics = {
+
+            browser:
+                browser,
+
+            display:
+                display,
+
+            storage:
+                {
+
+                    localStorage:
+                        testStorage()
+
+                },
+
+            kernel:
+                status,
+
+            modules:
+                getModules()
+                .map(
+                    function (item) {
+
+                        return {
+
+                            name:
+                                item.name,
+
+                            registered:
+                                Boolean(
+                                    item.status &&
+                                    item.status.registered
+                                ),
+
+                            ready:
+                                Boolean(
+                                    item.status &&
+                                    item.status.ready
+                                )
+
+                        };
+
+                    }
+                ),
+
+            errors:
+                [
+                    ...state.errors
+                ],
+
+            warnings:
+                [
+                    ...state.warnings
+                ],
+
+            timestamp:
+                new Date().toISOString()
+
+        };
+
+
+        emit(
+            "kernel:diagnostics",
+            diagnostics
+        );
+
+
+        return diagnostics;
+
+    }
+
+
+    /* ========================================================
+       20 — SAFE MODULE INIT
        ======================================================== */
 
     async function initializeModule(
@@ -876,8 +1314,15 @@
         module
     ) {
 
+        const moduleName =
+            normalizeModuleName(
+                name
+            );
+
+
         if (
-            !module
+            !module ||
+            !moduleName
         ) {
 
             return false;
@@ -888,7 +1333,30 @@
         try {
 
             /*
-             * Manche Module besitzen init().
+             * Bereits bereites Modul nicht
+             * unnötig erneut initialisieren.
+             */
+
+            const current =
+                getModuleStatus(
+                    moduleName
+                );
+
+
+            if (
+                current &&
+                current.ready ===
+                true
+            ) {
+
+                return true;
+
+            }
+
+
+            /*
+             * Manche Module besitzen
+             * init().
              */
 
             if (
@@ -914,7 +1382,7 @@
 
 
             setModuleReady(
-                name,
+                moduleName,
                 true
             );
 
@@ -927,14 +1395,14 @@
         ) {
 
             setModuleReady(
-                name,
+                moduleName,
                 false
             );
 
 
             reportError(
                 error,
-                `Modul '${name}'`
+                `Modul '${moduleName}'`
             );
 
 
@@ -946,7 +1414,64 @@
 
 
     /* ========================================================
-       17 — KERNEL START
+       21 — WAIT
+       ======================================================== */
+
+    function wait(
+        milliseconds
+    ) {
+
+        const delay =
+            Math.max(
+                0,
+                Number(
+                    milliseconds
+                ) || 0
+            );
+
+
+        return new Promise(
+            function (resolve) {
+
+                window.setTimeout(
+                    resolve,
+                    delay
+                );
+
+            }
+        );
+
+    }
+
+
+    /* ========================================================
+       22 — KERNMODULE
+       ======================================================== */
+
+    const CORE_MODULES = [
+
+        "app-manager",
+
+        "app-router",
+
+        "launcher",
+
+        "system"
+
+    ];
+
+
+    function getCoreModuleNames() {
+
+        return [
+            ...CORE_MODULES
+        ];
+
+    }
+
+
+    /* ========================================================
+       23 — KERNEL START
        ======================================================== */
 
     async function start() {
@@ -978,6 +1503,9 @@
         state.startTime =
             Date.now();
 
+        state.bootCount +=
+            1;
+
 
         emit(
             "kernel:starting",
@@ -1005,9 +1533,11 @@
 
 
         /*
-         * Warten, damit defer-Skripte
-         * ihre globalen APIs registrieren
-         * können.
+         * Kurze Wartephase:
+         *
+         * Andere defer-Skripte erhalten
+         * die Möglichkeit, ihre globalen
+         * APIs zu registrieren.
          */
 
         await wait(
@@ -1016,24 +1546,12 @@
 
 
         /*
-         * Bekannte Kernmodule prüfen.
+         * Bekannte Kernmodule initialisieren.
          */
 
-        const moduleNames = [
-
-            "app-manager",
-
-            "app-router",
-
-            "launcher",
-
-            "system"
-
-        ];
-
-
         for (
-            const moduleName of moduleNames
+            const moduleName
+            of CORE_MODULES
         ) {
 
             const module =
@@ -1042,16 +1560,23 @@
                 );
 
 
-            if (
-                module
-            ) {
+            if (!module) {
 
-                await initializeModule(
-                    moduleName,
-                    module
-                );
+                /*
+                 * Fehlende Module sind an
+                 * dieser Stelle kein harter
+                 * Kernel-Fehler.
+                 */
+
+                continue;
 
             }
+
+
+            await initializeModule(
+                moduleName,
+                module
+            );
 
         }
 
@@ -1086,26 +1611,7 @@
 
 
     /* ========================================================
-       18 — WAIT
-       ======================================================== */
-
-    function wait(
-        milliseconds
-    ) {
-
-        return new Promise(
-            resolve =>
-                window.setTimeout(
-                    resolve,
-                    milliseconds
-                )
-        );
-
-    }
-
-
-    /* ========================================================
-       19 — RESET FEHLER
+       24 — DIAGNOSTIK LÖSCHEN
        ======================================================== */
 
     function clearDiagnostics() {
@@ -1115,6 +1621,12 @@
 
         state.warnings =
             [];
+
+        state.lastError =
+            null;
+
+        state.lastWarning =
+            null;
 
 
         emit(
@@ -1128,7 +1640,106 @@
 
 
     /* ========================================================
-       20 — PUBLIC API
+       25 — FEHLER / WARNUNGEN LESEN
+       ======================================================== */
+
+    function getErrors() {
+
+        return [
+            ...state.errors
+        ];
+
+    }
+
+
+    function getWarnings() {
+
+        return [
+            ...state.warnings
+        ];
+
+    }
+
+
+    /* ========================================================
+       26 — KERNEL HEALTH CHECK
+       ======================================================== */
+
+    function healthCheck() {
+
+        const status =
+            getStatus();
+
+
+        const problems =
+            [];
+
+
+        if (
+            !status.initialized
+        ) {
+
+            problems.push(
+                "Kernel ist nicht initialisiert."
+            );
+
+        }
+
+
+        if (
+            status.failed
+        ) {
+
+            problems.push(
+                "Kernel befindet sich im Fehlerzustand."
+            );
+
+        }
+
+
+        return {
+
+            healthy:
+                problems.length ===
+                0,
+
+            problems:
+                problems,
+
+            initialized:
+                status.initialized,
+
+            starting:
+                status.starting,
+
+            ready:
+                status.ready,
+
+            failed:
+                status.failed,
+
+            moduleCount:
+                status.moduleCount,
+
+            readyModules:
+                status.readyModules,
+
+            errorCount:
+                status.errorCount,
+
+            warningCount:
+                status.warningCount,
+
+            timestamp:
+                new Date().toISOString()
+
+        };
+
+    }
+
+
+    /* ========================================================
+       27 — PUBLIC API
        ======================================================== */
 
     const api = {
@@ -1142,78 +1753,153 @@
         edition:
             SYSTEM_EDITION,
 
-
-        start,
-
-
-        on,
-
-        off,
-
-        emit,
+        module:
+            MODULE_ID,
 
 
-        log,
+        /*
+         * Start
+         */
 
-        reportError,
-
-        reportWarning,
-
-
-        registerModule,
-
-        unregisterModule,
-
-        getModule,
-
-        getModules,
-
-        setModuleReady,
+        start:
+            start,
 
 
-        getStatus,
+        /*
+         * Event Bus
+         */
 
-        diagnose,
+        on:
+            on,
 
-        clearDiagnostics
+        off:
+            off,
+
+        emit:
+            emit,
+
+
+        /*
+         * Logging
+         */
+
+        log:
+            log,
+
+        reportError:
+            reportError,
+
+        reportWarning:
+            reportWarning,
+
+
+        /*
+         * Module Management
+         */
+
+        registerModule:
+            registerModule,
+
+        unregisterModule:
+            unregisterModule,
+
+        getModule:
+            getModule,
+
+        hasModule:
+            hasModule,
+
+        getModules:
+            getModules,
+
+        setModuleReady:
+            setModuleReady,
+
+        getModuleStatus:
+            getModuleStatus,
+
+        initializeModule:
+            initializeModule,
+
+
+        /*
+         * Status / Diagnostics
+         */
+
+        getStatus:
+            getStatus,
+
+        diagnose:
+            diagnose,
+
+        healthCheck:
+            healthCheck,
+
+        clearDiagnostics:
+            clearDiagnostics,
+
+        getErrors:
+            getErrors,
+
+        getWarnings:
+            getWarnings,
+
+
+        /*
+         * Utilities
+         */
+
+        testStorage:
+            testStorage,
+
+        wait:
+            wait,
+
+        getCoreModuleNames:
+            getCoreModuleNames
 
     };
 
 
     /* ========================================================
-       21 — GLOBALE HALDO API
+       28 — GLOBALE HALDO API
        ======================================================== */
 
     window.HalDoKernel =
         api;
 
 
-    window.HalDoOS =
-        window.HalDoOS ||
-        {};
-
-
-    window.HalDoOS.kernel =
+    HalDoOS.kernel =
         api;
 
 
-    window.HalDoOS.version =
+    HalDoOS.version =
         VERSION;
 
 
-    window.HalDoOS.system =
+    HalDoOS.system =
         SYSTEM_NAME;
 
 
+    HalDoOS.edition =
+        SYSTEM_EDITION;
+
+
     /* ========================================================
-       22 — GLOBALER FEHLERFÄNGER
+       29 — GLOBALER FEHLERFÄNGER
        ======================================================== */
 
     window.addEventListener(
         "error",
         function (event) {
 
+            /*
+             * Fehler aus dem Kernel selbst
+             * werden trotzdem sauber erfasst.
+             */
+
             if (
+                event &&
                 event.error
             ) {
 
@@ -1227,8 +1913,10 @@
 
                 reportError(
                     new Error(
-                        event.message ||
-                        "Unbekannter JavaScript-Fehler"
+                        event &&
+                        event.message
+                            ? event.message
+                            : "Unbekannter JavaScript-Fehler"
                     ),
                     "Global JavaScript Error"
                 );
@@ -1239,15 +1927,21 @@
     );
 
 
+    /* ========================================================
+       30 — UNHANDLED PROMISE REJECTION
+       ======================================================== */
+
     window.addEventListener(
         "unhandledrejection",
         function (event) {
 
             reportError(
-                event.reason ||
-                new Error(
-                    "Unbehandelte Promise-Ablehnung"
-                ),
+                event &&
+                event.reason
+                    ? event.reason
+                    : new Error(
+                        "Unbehandelte Promise-Ablehnung"
+                    ),
                 "Unhandled Promise Rejection"
             );
 
@@ -1256,7 +1950,7 @@
 
 
     /* ========================================================
-       23 — ONLINE / OFFLINE
+       31 — ONLINE / OFFLINE
        ======================================================== */
 
     window.addEventListener(
@@ -1295,42 +1989,42 @@
 
 
     /* ========================================================
-       24 — START NACH DOM
+       32 — DOM START
        ======================================================== */
 
     function boot() {
 
-        /*
-         * Kernel startet bewusst zuerst.
-         */
-
         start()
-            .catch(
-                error => {
+        .catch(
+            function (error) {
 
-                    state.starting =
-                        false;
+                state.starting =
+                    false;
 
-                    state.failed =
-                        true;
-
-
-                    reportError(
-                        error,
-                        "Kernel Start"
-                    );
+                state.failed =
+                    true;
 
 
-                    emit(
-                        "kernel:failed",
-                        getStatus()
-                    );
+                reportError(
+                    error,
+                    "Kernel Start"
+                );
 
-                }
-            );
+
+                emit(
+                    "kernel:failed",
+                    getStatus()
+                );
+
+            }
+        );
 
     }
 
+
+    /* ========================================================
+       33 — START NACH DOM
+       ======================================================== */
 
     if (
         document.readyState ===
@@ -1354,9 +2048,35 @@
     }
 
 
+    /* ========================================================
+       34 — FINAL EXPOSURE
+       ======================================================== */
+
+    /*
+     * Sicherstellen, dass die zentrale
+     * HalDoOS-Struktur vorhanden bleibt.
+     */
+
+    window.HalDoOS =
+        window.HalDoOS ||
+        {};
+
+
+    window.HalDoOS.kernel =
+        api;
+
+
+    window.HalDoKernel =
+        api;
+
+
+    /* ========================================================
+       HALDO AI OS 18
+       KERNEL
+       VERSION 18.0.0
+       PROFESSIONAL ULTIMATE FOUNDATION
+
+       END OF FILE
+       ======================================================== */
+
 })(window, document);
-
-
-/* ============================================================
-   ENDE — HALDO AI OS 18 KERNEL
-   ============================================================ */
