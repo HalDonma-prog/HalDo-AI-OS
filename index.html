@@ -37554,3 +37554,2162 @@
     })();
 
     </script>
+        <!-- =========================================================
+         HALDO AI OS 20
+         APP WINDOW / UI HOST BRIDGE
+         TEIL 37
+         ========================================================= -->
+
+    <script>
+
+    (() => {
+
+        "use strict";
+
+
+        /* =====================================================
+           APP LAYER
+           ===================================================== */
+
+        const appLayer =
+            document.getElementById(
+                "haldo-app-layer"
+            );
+
+
+        if (!appLayer) {
+
+            console.warn(
+                "[HalDo App Host] App Layer fehlt."
+            );
+
+            return;
+
+        }
+
+
+        /* =====================================================
+           INTERNAL APP HOSTS
+           ===================================================== */
+
+        const hosts =
+            new Map();
+
+
+        /* =====================================================
+           EVENT DISPATCH
+           ===================================================== */
+
+        function emit(
+            eventName,
+            detail = {}
+        ) {
+
+            if (
+                typeof window.HalDoDispatch ===
+                "function"
+            ) {
+
+                window.HalDoDispatch(
+                    eventName,
+                    detail
+                );
+
+                return;
+
+            }
+
+
+            try {
+
+                document.dispatchEvent(
+                    new CustomEvent(
+                        `haldo:${eventName}`,
+                        {
+                            detail
+                        }
+                    )
+                );
+
+            } catch (error) {
+
+                console.warn(
+                    "[HalDo App Host]",
+                    error
+                );
+
+            }
+
+        }
+
+
+        /* =====================================================
+           CREATE HOST
+           ===================================================== */
+
+        function createHost(
+            appId,
+            options = {}
+        ) {
+
+            if (
+                !appId
+            ) {
+
+                return null;
+
+            }
+
+
+            const existing =
+                hosts.get(
+                    appId
+                );
+
+
+            if (
+                existing
+            ) {
+
+                return existing;
+
+            }
+
+
+            const host =
+                document.createElement(
+                    "section"
+                );
+
+
+            host.className =
+                "haldo-app-host";
+
+
+            host.dataset.appId =
+                appId;
+
+
+            host.setAttribute(
+                "role",
+                "application"
+            );
+
+
+            host.setAttribute(
+                "aria-label",
+                String(
+                    options.title ||
+                    appId
+                )
+            );
+
+
+            host.style.position =
+                "absolute";
+
+
+            host.style.inset =
+                "0";
+
+
+            host.style.display =
+                "none";
+
+
+            host.style.overflow =
+                "auto";
+
+
+            host.style.background =
+                "rgba(5,7,13,0.94)";
+
+
+            host.style.backdropFilter =
+                "blur(18px)";
+
+
+            host.style.webkitBackdropFilter =
+                "blur(18px)";
+
+
+            appLayer.appendChild(
+                host
+            );
+
+
+            const record = {
+
+                appId,
+
+                element:
+                    host,
+
+                mounted:
+                    false,
+
+                visible:
+                    false,
+
+                createdAt:
+                    Date.now(),
+
+                updatedAt:
+                    Date.now()
+
+            };
+
+
+            hosts.set(
+                appId,
+                record
+            );
+
+
+            emit(
+                "app-host:created",
+                {
+
+                    appId,
+
+                    element:
+                        host
+
+                }
+            );
+
+
+            return record;
+
+        }
+
+
+        /* =====================================================
+           MOUNT
+           ===================================================== */
+
+        function mount(
+            appId,
+            content
+        ) {
+
+            const record =
+                hosts.get(
+                    appId
+                ) ||
+                createHost(
+                    appId
+                );
+
+
+            if (!record) {
+
+                return false;
+
+            }
+
+
+            const element =
+                record.element;
+
+
+            try {
+
+                if (
+                    content instanceof
+                    Node
+                ) {
+
+                    element.replaceChildren(
+                        content
+                    );
+
+                } else if (
+                    typeof content ===
+                    "string"
+                ) {
+
+                    element.innerHTML =
+                        content;
+
+                } else if (
+                    content &&
+                    typeof content.render ===
+                    "function"
+                ) {
+
+                    const rendered =
+                        content.render();
+
+
+                    if (
+                        rendered instanceof
+                        Node
+                    ) {
+
+                        element.replaceChildren(
+                            rendered
+                        );
+
+                    } else {
+
+                        element.innerHTML =
+                            String(
+                                rendered ||
+                                ""
+                            );
+
+                    }
+
+                } else {
+
+                    element.innerHTML =
+                        "";
+
+                }
+
+
+                record.mounted =
+                    true;
+
+
+                record.updatedAt =
+                    Date.now();
+
+
+                emit(
+                    "app-host:mounted",
+                    {
+                        appId
+                    }
+                );
+
+
+                return true;
+
+            } catch (error) {
+
+                console.error(
+                    "[HalDo App Host] Mount",
+                    error
+                );
+
+
+                emit(
+                    "app-host:error",
+                    {
+
+                        appId,
+
+                        phase:
+                            "mount",
+
+                        error:
+                            String(
+                                error?.message ||
+                                error
+                            )
+
+                    }
+                );
+
+
+                return false;
+
+            }
+
+        }
+
+
+        /* =====================================================
+           SHOW
+           ===================================================== */
+
+        function show(
+            appId
+        ) {
+
+            const record =
+                hosts.get(
+                    appId
+                );
+
+
+            if (!record) {
+
+                return false;
+
+            }
+
+
+            for (
+                const item
+                of hosts.values()
+            ) {
+
+                item.visible =
+                    false;
+
+                item.element.style.display =
+                    "none";
+
+                item.element.setAttribute(
+                    "aria-hidden",
+                    "true"
+                );
+
+            }
+
+
+            record.visible =
+                true;
+
+
+            record.element.style.display =
+                "block";
+
+
+            record.element.removeAttribute(
+                "aria-hidden"
+            );
+
+
+            record.updatedAt =
+                Date.now();
+
+
+            emit(
+                "app-host:shown",
+                {
+                    appId
+                }
+            );
+
+
+            return true;
+
+        }
+
+
+        /* =====================================================
+           HIDE
+           ===================================================== */
+
+        function hide(
+            appId
+        ) {
+
+            const record =
+                hosts.get(
+                    appId
+                );
+
+
+            if (!record) {
+
+                return false;
+
+            }
+
+
+            record.visible =
+                false;
+
+
+            record.element.style.display =
+                "none";
+
+
+            record.element.setAttribute(
+                "aria-hidden",
+                "true"
+            );
+
+
+            record.updatedAt =
+                Date.now();
+
+
+            emit(
+                "app-host:hidden",
+                {
+                    appId
+                }
+            );
+
+
+            return true;
+
+        }
+
+
+        /* =====================================================
+           CLEAR
+           ===================================================== */
+
+        function clear(
+            appId
+        ) {
+
+            const record =
+                hosts.get(
+                    appId
+                );
+
+
+            if (!record) {
+
+                return false;
+
+            }
+
+
+            record.element.replaceChildren();
+
+
+            record.mounted =
+                false;
+
+
+            record.updatedAt =
+                Date.now();
+
+
+            emit(
+                "app-host:cleared",
+                {
+                    appId
+                }
+            );
+
+
+            return true;
+
+        }
+
+
+        /* =====================================================
+           DESTROY
+           ===================================================== */
+
+        function destroy(
+            appId
+        ) {
+
+            const record =
+                hosts.get(
+                    appId
+                );
+
+
+            if (!record) {
+
+                return false;
+
+            }
+
+
+            record.element.remove();
+
+
+            hosts.delete(
+                appId
+            );
+
+
+            emit(
+                "app-host:destroyed",
+                {
+                    appId
+                }
+            );
+
+
+            return true;
+
+        }
+
+
+        /* =====================================================
+           GET
+           ===================================================== */
+
+        function get(
+            appId
+        ) {
+
+            const record =
+                hosts.get(
+                    appId
+                );
+
+
+            if (!record) {
+
+                return null;
+
+            }
+
+
+            return {
+
+                appId,
+
+                element:
+                    record.element,
+
+                mounted:
+                    record.mounted,
+
+                visible:
+                    record.visible,
+
+                createdAt:
+                    record.createdAt,
+
+                updatedAt:
+                    record.updatedAt
+
+            };
+
+        }
+
+
+        /* =====================================================
+           GET ALL
+           ===================================================== */
+
+        function getAll() {
+
+            return Array.from(
+                hosts.keys()
+            ).map(
+                get
+            );
+
+        }
+
+
+        /* =====================================================
+           PUBLIC API
+           ===================================================== */
+
+        const appHost = {
+
+            createHost,
+
+            mount,
+
+            show,
+
+            hide,
+
+            clear,
+
+            destroy,
+
+            get,
+
+            getAll
+
+        };
+
+
+        /* =====================================================
+           GLOBAL API
+           ===================================================== */
+
+        window.HalDoAppHost =
+            appHost;
+
+
+        if (
+            !window.HalDoOS
+        ) {
+
+            window.HalDoOS =
+                {};
+
+        }
+
+
+        window.HalDoOS.appHost =
+            appHost;
+
+
+        /* =====================================================
+           ROUTER BRIDGE
+           ===================================================== */
+
+        if (
+            typeof window.HalDoEventBus?.on ===
+            "function"
+        ) {
+
+            window.HalDoEventBus.on(
+                "router:navigate",
+                detail => {
+
+                    const appId =
+                        detail?.to?.appId;
+
+
+                    if (
+                        appId &&
+                        hosts.has(
+                            appId
+                        )
+                    ) {
+
+                        show(
+                            appId
+                        );
+
+                    }
+
+                }
+            );
+
+        }
+
+
+        /* =====================================================
+           INITIALIZATION
+           ===================================================== */
+
+        function initializeAppHost() {
+
+            emit(
+                "app-host:ready",
+                {
+
+                    version:
+                        "20.0.0",
+
+                    timestamp:
+                        Date.now()
+
+                }
+            );
+
+
+            console.info(
+                "%cHalDo AI OS 20%c App Host bereit",
+                "color:#42e6ff;font-weight:800;",
+                "color:#ffffff;"
+            );
+
+        }
+
+
+        if (
+            document.readyState ===
+            "loading"
+        ) {
+
+            document.addEventListener(
+                "DOMContentLoaded",
+                initializeAppHost,
+                {
+                    once:
+                        true
+                }
+            );
+
+        } else {
+
+            initializeAppHost();
+
+        }
+
+
+    })();
+
+    </script>
+        <!-- =========================================================
+         HALDO AI OS 20
+         APP LIFECYCLE / MOUNT CONTROLLER
+         TEIL 38
+         ========================================================= -->
+
+    <script>
+
+    (() => {
+
+        "use strict";
+
+
+        /* =====================================================
+           STATE
+           ===================================================== */
+
+        const applications =
+            new Map();
+
+
+        /* =====================================================
+           EVENT DISPATCH
+           ===================================================== */
+
+        function emit(
+            eventName,
+            detail = {}
+        ) {
+
+            if (
+                typeof window.HalDoDispatch ===
+                "function"
+            ) {
+
+                window.HalDoDispatch(
+                    eventName,
+                    detail
+                );
+
+                return;
+
+            }
+
+
+            try {
+
+                document.dispatchEvent(
+                    new CustomEvent(
+                        `haldo:${eventName}`,
+                        {
+                            detail
+                        }
+                    )
+                );
+
+            } catch (error) {
+
+                console.warn(
+                    "[HalDo Lifecycle 20]",
+                    error
+                );
+
+            }
+
+        }
+
+
+        /* =====================================================
+           REGISTER INSTANCE
+           ===================================================== */
+
+        function register(
+            appId,
+            instance,
+            metadata = {}
+        ) {
+
+            if (
+                !appId
+            ) {
+
+                return false;
+
+            }
+
+
+            applications.set(
+                appId,
+                {
+
+                    appId,
+
+                    instance:
+                        instance ||
+                        null,
+
+                    metadata:
+                        {
+                            ...metadata
+                        },
+
+                    state:
+                        "registered",
+
+                    createdAt:
+                        Date.now(),
+
+                    updatedAt:
+                        Date.now()
+
+                }
+            );
+
+
+            emit(
+                "app:lifecycle:registered",
+                {
+
+                    appId,
+
+                    metadata:
+                        {
+                            ...metadata
+                        }
+
+                }
+            );
+
+
+            return true;
+
+        }
+
+
+        /* =====================================================
+           INITIALIZE
+           ===================================================== */
+
+        async function initialize(
+            appId
+        ) {
+
+            const record =
+                applications.get(
+                    appId
+                );
+
+
+            if (!record) {
+
+                return false;
+
+            }
+
+
+            try {
+
+                record.state =
+                    "initializing";
+
+
+                emit(
+                    "app:lifecycle:initializing",
+                    {
+                        appId
+                    }
+                );
+
+
+                const instance =
+                    record.instance;
+
+
+                if (
+                    instance &&
+                    typeof instance.init ===
+                    "function"
+                ) {
+
+                    await instance.init();
+
+                }
+
+
+                record.state =
+                    "ready";
+
+
+                record.updatedAt =
+                    Date.now();
+
+
+                emit(
+                    "app:lifecycle:initialized",
+                    {
+                        appId
+                    }
+                );
+
+
+                return true;
+
+            } catch (error) {
+
+                record.state =
+                    "error";
+
+
+                record.updatedAt =
+                    Date.now();
+
+
+                emit(
+                    "app:lifecycle:error",
+                    {
+
+                        appId,
+
+                        phase:
+                            "initialize",
+
+                        error:
+                            String(
+                                error?.message ||
+                                error
+                            )
+
+                    }
+                );
+
+
+                console.error(
+                    `[HalDo Lifecycle] ${appId}`,
+                    error
+                );
+
+
+                return false;
+
+            }
+
+        }
+
+
+        /* =====================================================
+           ACTIVATE
+           ===================================================== */
+
+        async function activate(
+            appId
+        ) {
+
+            const record =
+                applications.get(
+                    appId
+                );
+
+
+            if (!record) {
+
+                return false;
+
+            }
+
+
+            try {
+
+                if (
+                    record.state !==
+                    "ready" &&
+                    record.state !==
+                    "inactive"
+                ) {
+
+                    const initialized =
+                        await initialize(
+                            appId
+                        );
+
+
+                    if (!initialized) {
+
+                        return false;
+
+                    }
+
+                }
+
+
+                record.state =
+                    "activating";
+
+
+                emit(
+                    "app:lifecycle:activating",
+                    {
+                        appId
+                    }
+                );
+
+
+                if (
+                    record.instance &&
+                    typeof record.instance.activate ===
+                    "function"
+                ) {
+
+                    await record.instance.activate();
+
+                }
+
+
+                record.state =
+                    "active";
+
+
+                record.updatedAt =
+                    Date.now();
+
+
+                emit(
+                    "app:lifecycle:activated",
+                    {
+                        appId
+                    }
+                );
+
+
+                return true;
+
+            } catch (error) {
+
+                record.state =
+                    "error";
+
+
+                record.updatedAt =
+                    Date.now();
+
+
+                emit(
+                    "app:lifecycle:error",
+                    {
+
+                        appId,
+
+                        phase:
+                            "activate",
+
+                        error:
+                            String(
+                                error?.message ||
+                                error
+                            )
+
+                    }
+                );
+
+
+                return false;
+
+            }
+
+        }
+
+
+        /* =====================================================
+           DEACTIVATE
+           ===================================================== */
+
+        async function deactivate(
+            appId
+        ) {
+
+            const record =
+                applications.get(
+                    appId
+                );
+
+
+            if (!record) {
+
+                return false;
+
+            }
+
+
+            try {
+
+                if (
+                    record.instance &&
+                    typeof record.instance.deactivate ===
+                    "function"
+                ) {
+
+                    await record.instance.deactivate();
+
+                }
+
+
+                record.state =
+                    "inactive";
+
+
+                record.updatedAt =
+                    Date.now();
+
+
+                emit(
+                    "app:lifecycle:deactivated",
+                    {
+                        appId
+                    }
+                );
+
+
+                return true;
+
+            } catch (error) {
+
+                record.state =
+                    "error";
+
+
+                emit(
+                    "app:lifecycle:error",
+                    {
+
+                        appId,
+
+                        phase:
+                            "deactivate",
+
+                        error:
+                            String(
+                                error?.message ||
+                                error
+                            )
+
+                    }
+                );
+
+
+                return false;
+
+            }
+
+        }
+
+
+        /* =====================================================
+           DESTROY
+           ===================================================== */
+
+        async function destroy(
+            appId
+        ) {
+
+            const record =
+                applications.get(
+                    appId
+                );
+
+
+            if (!record) {
+
+                return false;
+
+            }
+
+
+            try {
+
+                if (
+                    record.instance &&
+                    typeof record.instance.destroy ===
+                    "function"
+                ) {
+
+                    await record.instance.destroy();
+
+                }
+
+
+                applications.delete(
+                    appId
+                );
+
+
+                emit(
+                    "app:lifecycle:destroyed",
+                    {
+                        appId
+                    }
+                );
+
+
+                return true;
+
+            } catch (error) {
+
+                emit(
+                    "app:lifecycle:error",
+                    {
+
+                        appId,
+
+                        phase:
+                            "destroy",
+
+                        error:
+                            String(
+                                error?.message ||
+                                error
+                            )
+
+                    }
+                );
+
+
+                return false;
+
+            }
+
+        }
+
+
+        /* =====================================================
+           GET
+           ===================================================== */
+
+        function get(
+            appId
+        ) {
+
+            const record =
+                applications.get(
+                    appId
+                );
+
+
+            if (!record) {
+
+                return null;
+
+            }
+
+
+            return {
+
+                appId,
+
+                instance:
+                    record.instance,
+
+                metadata:
+                    {
+                        ...record.metadata
+                    },
+
+                state:
+                    record.state,
+
+                createdAt:
+                    record.createdAt,
+
+                updatedAt:
+                    record.updatedAt
+
+            };
+
+        }
+
+
+        /* =====================================================
+           GET ALL
+           ===================================================== */
+
+        function getAll() {
+
+            return Array.from(
+                applications.keys()
+            ).map(
+                get
+            );
+
+        }
+
+
+        /* =====================================================
+           PUBLIC API
+           ===================================================== */
+
+        const lifecycle = {
+
+            register,
+
+            initialize,
+
+            activate,
+
+            deactivate,
+
+            destroy,
+
+            get,
+
+            getAll
+
+        };
+
+
+        /* =====================================================
+           GLOBAL API
+           ===================================================== */
+
+        window.HalDoAppLifecycle =
+            lifecycle;
+
+
+        if (
+            !window.HalDoOS
+        ) {
+
+            window.HalDoOS =
+                {};
+
+        }
+
+
+        window.HalDoOS.appLifecycle =
+            lifecycle;
+
+
+        /* =====================================================
+           INITIALIZATION
+           ===================================================== */
+
+        function initializeLifecycle() {
+
+            emit(
+                "app-lifecycle:ready",
+                {
+
+                    version:
+                        "20.0.0",
+
+                    timestamp:
+                        Date.now()
+
+                }
+            );
+
+
+            console.info(
+                "%cHalDo AI OS 20%c App Lifecycle bereit",
+                "color:#42e6ff;font-weight:800;",
+                "color:#ffffff;"
+            );
+
+        }
+
+
+        if (
+            document.readyState ===
+            "loading"
+        ) {
+
+            document.addEventListener(
+                "DOMContentLoaded",
+                initializeLifecycle,
+                {
+                    once:
+                        true
+                }
+            );
+
+        } else {
+
+            initializeLifecycle();
+
+        }
+
+
+    })();
+
+    </script>
+        <!-- =========================================================
+         HALDO AI OS 20
+         APP SERVICE / DEPENDENCY BRIDGE
+         TEIL 39
+         ========================================================= -->
+
+    <script>
+
+    (() => {
+
+        "use strict";
+
+
+        /* =====================================================
+           SERVICE REGISTRY
+           ===================================================== */
+
+        const services =
+            new Map();
+
+
+        /* =====================================================
+           EVENT DISPATCH
+           ===================================================== */
+
+        function emit(
+            eventName,
+            detail = {}
+        ) {
+
+            if (
+                typeof window.HalDoDispatch ===
+                "function"
+            ) {
+
+                window.HalDoDispatch(
+                    eventName,
+                    detail
+                );
+
+                return;
+
+            }
+
+
+            try {
+
+                document.dispatchEvent(
+                    new CustomEvent(
+                        `haldo:${eventName}`,
+                        {
+                            detail
+                        }
+                    )
+                );
+
+            } catch (error) {
+
+                console.warn(
+                    "[HalDo Service 20]",
+                    error
+                );
+
+            }
+
+        }
+
+
+        /* =====================================================
+           REGISTER SERVICE
+           ===================================================== */
+
+        function register(
+            name,
+            service,
+            options = {}
+        ) {
+
+            if (
+                !name ||
+                !service
+            ) {
+
+                return false;
+
+            }
+
+
+            services.set(
+                name,
+                {
+
+                    name,
+
+                    service,
+
+                    singleton:
+                        options.singleton !==
+                        false,
+
+                    dependencies:
+                        Array.isArray(
+                            options.dependencies
+                        )
+                            ? [
+                                ...options.dependencies
+                            ]
+                            : [],
+
+                    state:
+                        "registered",
+
+                    createdAt:
+                        Date.now(),
+
+                    updatedAt:
+                        Date.now()
+
+                }
+            );
+
+
+            emit(
+                "service:registered",
+                {
+                    name
+                }
+            );
+
+
+            return true;
+
+        }
+
+
+        /* =====================================================
+           GET SERVICE
+           ===================================================== */
+
+        function get(
+            name
+        ) {
+
+            const record =
+                services.get(
+                    name
+                );
+
+
+            return record
+                ? record.service
+                : null;
+
+        }
+
+
+        /* =====================================================
+           GET RECORD
+           ===================================================== */
+
+        function getRecord(
+            name
+        ) {
+
+            const record =
+                services.get(
+                    name
+                );
+
+
+            if (!record) {
+
+                return null;
+
+            }
+
+
+            return {
+
+                name:
+                    record.name,
+
+                service:
+                    record.service,
+
+                singleton:
+                    record.singleton,
+
+                dependencies:
+                    [
+                        ...record.dependencies
+                    ],
+
+                state:
+                    record.state,
+
+                createdAt:
+                    record.createdAt,
+
+                updatedAt:
+                    record.updatedAt
+
+            };
+
+        }
+
+
+        /* =====================================================
+           RESOLVE DEPENDENCIES
+           ===================================================== */
+
+        function resolveDependencies(
+            name,
+            stack = []
+        ) {
+
+            const record =
+                services.get(
+                    name
+                );
+
+
+            if (!record) {
+
+                return {
+
+                    success:
+                        false,
+
+                    missing:
+                        [
+                            name
+                        ]
+
+                };
+
+            }
+
+
+            if (
+                stack.includes(
+                    name
+                )
+            ) {
+
+                return {
+
+                    success:
+                        false,
+
+                    circular:
+                        [
+                            ...stack,
+                            name
+                        ]
+
+                };
+
+            }
+
+
+            const resolved =
+                {};
+
+
+            for (
+                const dependency
+                of record.dependencies
+            ) {
+
+                const dependencyRecord =
+                    services.get(
+                        dependency
+                    );
+
+
+                if (
+                    !dependencyRecord
+                ) {
+
+                    return {
+
+                        success:
+                            false,
+
+                        missing:
+                            [
+                                dependency
+                            ]
+
+                    };
+
+                }
+
+
+                const result =
+                    resolveDependencies(
+                        dependency,
+                        [
+                            ...stack,
+                            name
+                        ]
+                    );
+
+
+                if (
+                    !result.success
+                ) {
+
+                    return result;
+
+                }
+
+
+                resolved[
+                    dependency
+                ] =
+                    dependencyRecord.service;
+
+            }
+
+
+            return {
+
+                success:
+                    true,
+
+                dependencies:
+                    resolved
+
+            };
+
+        }
+
+
+        /* =====================================================
+           INITIALIZE SERVICE
+           ===================================================== */
+
+        async function initialize(
+            name
+        ) {
+
+            const record =
+                services.get(
+                    name
+                );
+
+
+            if (!record) {
+
+                return false;
+
+            }
+
+
+            if (
+                record.state ===
+                "ready"
+            ) {
+
+                return true;
+
+            }
+
+
+            const dependencyResult =
+                resolveDependencies(
+                    name
+                );
+
+
+            if (
+                !dependencyResult.success
+            ) {
+
+                record.state =
+                    "error";
+
+
+                emit(
+                    "service:error",
+                    {
+
+                        name,
+
+                        reason:
+                            dependencyResult
+
+                    }
+                );
+
+
+                return false;
+
+            }
+
+
+            try {
+
+                record.state =
+                    "initializing";
+
+
+                emit(
+                    "service:initializing",
+                    {
+                        name
+                    }
+                );
+
+
+                const service =
+                    record.service;
+
+
+                if (
+                    service &&
+                    typeof service.init ===
+                    "function"
+                ) {
+
+                    await service.init(
+                        dependencyResult.dependencies
+                    );
+
+                }
+
+
+                record.state =
+                    "ready";
+
+
+                record.updatedAt =
+                    Date.now();
+
+
+                emit(
+                    "service:ready",
+                    {
+                        name
+                    }
+                );
+
+
+                return true;
+
+            } catch (error) {
+
+                record.state =
+                    "error";
+
+
+                record.updatedAt =
+                    Date.now();
+
+
+                emit(
+                    "service:error",
+                    {
+
+                        name,
+
+                        reason:
+                            String(
+                                error?.message ||
+                                error
+                            )
+
+                    }
+                );
+
+
+                console.error(
+                    `[HalDo Service] ${name}`,
+                    error
+                );
+
+
+                return false;
+
+            }
+
+        }
+
+
+        /* =====================================================
+           INITIALIZE ALL
+           ===================================================== */
+
+        async function initializeAll() {
+
+            const names =
+                Array.from(
+                    services.keys()
+                );
+
+
+            const results =
+                {};
+
+
+            for (
+                const name
+                of names
+            ) {
+
+                results[
+                    name
+                ] =
+                    await initialize(
+                        name
+                    );
+
+            }
+
+
+            return results;
+
+        }
+
+
+        /* =====================================================
+           UNREGISTER
+           ===================================================== */
+
+        function unregister(
+            name
+        ) {
+
+            const removed =
+                services.delete(
+                    name
+                );
+
+
+            if (
+                removed
+            ) {
+
+                emit(
+                    "service:unregistered",
+                    {
+                        name
+                    }
+                );
+
+            }
+
+
+            return removed;
+
+        }
+
+
+        /* =====================================================
+           LIST
+           ===================================================== */
+
+        function list() {
+
+            return Array.from(
+                services.keys()
+            );
+
+        }
+
+
+        /* =====================================================
+           GET STATUS
+           ===================================================== */
+
+        function status() {
+
+            return Array.from(
+                services.values()
+            ).map(
+                record => ({
+
+                    name:
+                        record.name,
+
+                    state:
+                        record.state,
+
+                    dependencies:
+                        [
+                            ...record.dependencies
+                        ]
+
+                })
+            );
+
+        }
+
+
+        /* =====================================================
+           PUBLIC API
+           ===================================================== */
+
+        const serviceManager = {
+
+            register,
+
+            get,
+
+            getRecord,
+
+            resolveDependencies,
+
+            initialize,
+
+            initializeAll,
+
+            unregister,
+
+            list,
+
+            status
+
+        };
+
+
+        /* =====================================================
+           GLOBAL API
+           ===================================================== */
+
+        window.HalDoServiceManager =
+            serviceManager;
+
+
+        if (
+            !window.HalDoOS
+        ) {
+
+            window.HalDoOS =
+                {};
+
+        }
+
+
+        window.HalDoOS.services =
+            serviceManager;
+
+
+        /* =====================================================
+           INITIALIZATION
+           ===================================================== */
+
+        function initializeServiceManager() {
+
+            emit(
+                "services:ready",
+                {
+
+                    version:
+                        "20.0.0",
+
+                    timestamp:
+                        Date.now()
+
+                }
+            );
+
+
+            console.info(
+                "%cHalDo AI OS 20%c Service Manager bereit",
+                "color:#42e6ff;font-weight:800;",
+                "color:#ffffff;"
+            );
+
+        }
+
+
+        if (
+            document.readyState ===
+            "loading"
+        ) {
+
+            document.addEventListener(
+                "DOMContentLoaded",
+                initializeServiceManager,
+                {
+                    once:
+                        true
+                }
+            );
+
+        } else {
+
+            initializeServiceManager();
+
+        }
+
+
+    })();
+
+    </script>
+    
