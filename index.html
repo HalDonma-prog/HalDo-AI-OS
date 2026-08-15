@@ -55951,294 +55951,111 @@
                 );
 
 
-            if (!session) {
+          <!-- =========================================================
+         HALDO AI OS 20
+         APPLICATION EVENT / MESSAGE BUS
+         TEIL 56
+         ========================================================= -->
 
-                return false;
+    <script>
 
-            }
+    (() => {
 
-
-            const previous =
-                clone(
-                    session.state
-                );
-
-
-            session.state =
-                clone(
-                    initialState
-                ) ||
-                {};
+        "use strict";
 
 
-            session.updatedAt =
-                Date.now();
+        /* =====================================================
+           STATE
+           ===================================================== */
+
+        const channels =
+            new Map();
 
 
-            session.dirty =
-                true;
+        const onceChannels =
+            new Map();
 
 
-            if (
-                options.removeSaved ===
-                true
-            ) {
+        const history = [];
 
-                storageRemove(
-                    storageKey(
-                        appId
-                    )
-                );
-
-            }
+        const MAX_HISTORY =
+            500;
 
 
-            if (
-                options.save ===
-                true
-            ) {
+        /* =====================================================
+           UTILS
+           ===================================================== */
 
-                save(
-                    appId
-                );
+        function normalize(
+            value
+        ) {
 
-            }
-
-
-            emit(
-                "app:state:reset",
-                {
-
-                    appId,
-
-                    previous,
-
-                    state:
-                        clone(
-                            session.state
-                        )
-
-                }
-            );
-
-
-            notify(
-                appId,
-                {
-
-                    type:
-                        "reset",
-
-                    previous,
-
-                    state:
-                        clone(
-                            session.state
-                        )
-
-                }
-            );
-
-
-            return true;
+            return String(
+                value || ""
+            ).trim();
 
         }
 
 
-        /* =====================================================
-           SAVE
-           ===================================================== */
-
-        function save(
-            appId
+        function emitDOM(
+            name,
+            detail = {}
         ) {
 
-            const session =
-                get(
-                    appId,
-                    false
-                );
+            try {
 
-
-            if (!session) {
-
-                return false;
-
-            }
-
-
-            const payload = {
-
-                appId,
-
-                version:
-                    session.version,
-
-                savedAt:
-                    Date.now(),
-
-                state:
-                    clone(
-                        session.state
+                document.dispatchEvent(
+                    new CustomEvent(
+                        `haldo:${name}`,
+                        {
+                            detail
+                        }
                     )
-
-            };
-
-
-            const success =
-                storageSet(
-                    storageKey(
-                        appId
-                    ),
-                    payload
                 );
 
+            } catch (
+                error
+            ) {
 
-            if (success) {
-
-                session.updatedAt =
-                    Date.now();
-
-                session.dirty =
-                    false;
-
-
-                emit(
-                    "app:state:saved",
-                    {
-
-                        appId,
-
-                        payload
-
-                    }
+                console.warn(
+                    "[HalDo Message Bus 20]",
+                    error
                 );
 
             }
-
-
-            return success;
 
         }
 
 
-        /* =====================================================
-           LOAD
-           ===================================================== */
-
-        function load(
-            appId
+        function record(
+            type,
+            payload
         ) {
 
-            const payload =
-                storageGet(
-                    storageKey(
-                        appId
-                    )
-                );
+            history.push({
+
+                type,
+
+                payload,
+
+                timestamp:
+                    Date.now()
+
+            });
 
 
             if (
-                !payload ||
-                !payload.state
+                history.length >
+                MAX_HISTORY
             ) {
 
-                return null;
-
-            }
-
-
-            const session =
-                create(
-                    appId,
-                    payload.state,
-                    {
-                        restore:
-                            false
-                    }
-                );
-
-
-            if (!session) {
-
-                return null;
-
-            }
-
-
-            session.state =
-                clone(
-                    payload.state
-                ) ||
-                {};
-
-            session.restored =
-                true;
-
-            session.dirty =
-                false;
-
-
-            if (
-                Number.isFinite(
-                    payload.version
-                )
-            ) {
-
-                session.version =
-                    payload.version;
-
-            }
-
-
-            emit(
-                "app:state:loaded",
-                {
-
-                    appId,
-
-                    payload
-
-                }
-            );
-
-
-            return session;
-
-        }
-
-
-        /* =====================================================
-           CLEAR SAVED STATE
-           ===================================================== */
-
-        function clearSaved(
-            appId
-        ) {
-
-            const success =
-                storageRemove(
-                    storageKey(
-                        appId
-                    )
-                );
-
-
-            if (success) {
-
-                emit(
-                    "app:state:cleared",
-                    {
-
-                        appId
-
-                    }
+                history.splice(
+                    0,
+                    history.length -
+                    MAX_HISTORY
                 );
 
             }
-
-
-            return success;
 
         }
 
@@ -56247,13 +56064,20 @@
            SUBSCRIBE
            ===================================================== */
 
-        function subscribe(
-            appId,
-            callback
+        function on(
+            channel,
+            callback,
+            options = {}
         ) {
 
+            channel =
+                normalize(
+                    channel
+                );
+
+
             if (
-                !appId ||
+                !channel ||
                 typeof callback !==
                 "function"
             ) {
@@ -56263,45 +56087,51 @@
             }
 
 
+            const target =
+                options.once
+                    ? onceChannels
+                    : channels;
+
+
             if (
-                !listeners.has(
-                    appId
+                !target.has(
+                    channel
                 )
             ) {
 
-                listeners.set(
-                    appId,
+                target.set(
+                    channel,
                     new Set()
                 );
 
             }
 
 
-            const set =
-                listeners.get(
-                    appId
+            const listeners =
+                target.get(
+                    channel
                 );
 
 
-            set.add(
+            listeners.add(
                 callback
             );
 
 
             return () => {
 
-                set.delete(
+                listeners.delete(
                     callback
                 );
 
 
                 if (
-                    set.size ===
+                    listeners.size ===
                     0
                 ) {
 
-                    listeners.delete(
-                        appId
+                    target.delete(
+                        channel
                     );
 
                 }
@@ -56312,47 +56142,20 @@
 
 
         /* =====================================================
-           NOTIFY
+           ONCE
            ===================================================== */
 
-        function notify(
-            appId,
-            detail
+        function once(
+            channel,
+            callback
         ) {
 
-            const set =
-                listeners.get(
-                    appId
-                );
-
-
-            if (!set) {
-
-                return;
-
-            }
-
-
-            set.forEach(
-                callback => {
-
-                    try {
-
-                        callback(
-                            detail
-                        );
-
-                    } catch (
-                        error
-                    ) {
-
-                        console.warn(
-                            "[HalDo App State 20]",
-                            error
-                        );
-
-                    }
-
+            return on(
+                channel,
+                callback,
+                {
+                    once:
+                        true
                 }
             );
 
@@ -56360,112 +56163,782 @@
 
 
         /* =====================================================
-           DESTROY SESSION
+           OFF
            ===================================================== */
 
-        function destroy(
-            appId,
-            options = {}
+        function off(
+            channel,
+            callback
         ) {
 
-            const session =
-                sessions.get(
-                    appId
+            channel =
+                normalize(
+                    channel
                 );
 
 
-            if (!session) {
+            if (!channel) {
 
                 return false;
 
             }
 
 
-            if (
-                options.save ===
-                true
-            ) {
-
-                save(
-                    appId
-                );
-
-            }
+            let removed =
+                false;
 
 
-            if (
-                options.clearSaved ===
-                true
-            ) {
+            const targets = [
 
-                clearSaved(
-                    appId
-                );
+                channels,
 
-            }
+                onceChannels
+
+            ];
 
 
-            sessions.delete(
-                appId
-            );
+            targets.forEach(
+                target => {
+
+                    const listeners =
+                        target.get(
+                            channel
+                        );
 
 
-            listeners.delete(
-                appId
-            );
+                    if (!listeners) {
+
+                        return;
+
+                    }
 
 
-            emit(
-                "app:state:destroyed",
-                {
+                    if (
+                        typeof callback ===
+                        "function"
+                    ) {
 
-                    appId
+                        if (
+                            listeners.delete(
+                                callback
+                            )
+                        ) {
+
+                            removed =
+                                true;
+
+                        }
+
+                    } else {
+
+                        target.delete(
+                            channel
+                        );
+
+
+                        removed =
+                            true;
+
+                    }
 
                 }
             );
 
 
-            return true;
+            return removed;
 
         }
 
 
         /* =====================================================
-           AUTO SESSION CREATION
+           PUBLISH
            ===================================================== */
 
-        document.addEventListener(
-            "haldo:app:lifecycle:created",
-            event => {
+        function publish(
+            channel,
+            payload = {},
+            options = {}
+        ) {
 
-                const appId =
-                    event.detail &&
-                    event.detail.appId;
+            channel =
+                normalize(
+                    channel
+                );
 
 
-                if (!appId) {
+            if (!channel) {
 
-                    return;
+                return false;
+
+            }
+
+
+            const message = {
+
+                id:
+                    `msg-${Date.now()}-${Math.random()
+                        .toString(36)
+                        .slice(2, 10)}`,
+
+                channel,
+
+                payload,
+
+                sender:
+                    options.sender ||
+                    "system",
+
+                timestamp:
+                    Date.now(),
+
+                metadata:
+                    options.metadata ||
+                    {}
+
+            };
+
+
+            record(
+                "publish",
+                message
+            );
+
+
+            const normal =
+                channels.get(
+                    channel
+                );
+
+
+            const oneTime =
+                onceChannels.get(
+                    channel
+                );
+
+
+            if (normal) {
+
+                normal.forEach(
+                    callback => {
+
+                        try {
+
+                            callback(
+                                payload,
+                                message
+                            );
+
+                        } catch (
+                            error
+                        ) {
+
+                            console.error(
+                                "[HalDo Message Bus 20]",
+                                error
+                            );
+
+                            emitDOM(
+                                "message:error",
+                                {
+
+                                    channel,
+
+                                    error,
+
+                                    message
+
+                                }
+                            );
+
+                        }
+
+                    }
+                );
+
+            }
+
+
+            if (oneTime) {
+
+                const callbacks = [
+                    ...oneTime
+                ];
+
+
+                onceChannels.delete(
+                    channel
+                );
+
+
+                callbacks.forEach(
+                    callback => {
+
+                        try {
+
+                            callback(
+                                payload,
+                                message
+                            );
+
+                        } catch (
+                            error
+                        ) {
+
+                            console.error(
+                                "[HalDo Message Bus 20]",
+                                error
+                            );
+
+                        }
+
+                    }
+                );
+
+            }
+
+
+            if (
+                options.dom !==
+                false
+            ) {
+
+                emitDOM(
+                    `bus:${channel}`,
+                    message
+                );
+
+            }
+
+
+            emitDOM(
+                "message:published",
+                message
+            );
+
+
+            return message;
+
+        }
+
+
+        /* =====================================================
+           REQUEST / RESPONSE
+           ===================================================== */
+
+        function request(
+            channel,
+            payload = {},
+            options = {}
+        ) {
+
+            const timeout =
+                Number.isFinite(
+                    options.timeout
+                )
+                    ? options.timeout
+                    : 5000;
+
+
+            return new Promise(
+                (
+                    resolve,
+                    reject
+                ) => {
+
+                    let completed =
+                        false;
+
+
+                    const responseChannel =
+                        `${channel}:response:${Date.now()}:${Math.random()
+                            .toString(36)
+                            .slice(2, 8)}`;
+
+
+                    const cleanup =
+                        on(
+                            responseChannel,
+                            (
+                                response
+                            ) => {
+
+                                if (
+                                    completed
+                                ) {
+
+                                    return;
+
+                                }
+
+
+                                completed =
+                                    true;
+
+
+                                clearTimeout(
+                                    timer
+                                );
+
+
+                                off(
+                                    responseChannel
+                                );
+
+
+                                resolve(
+                                    response
+                                );
+
+                            }
+                        );
+
+
+                    const timer =
+                        setTimeout(
+                            () => {
+
+                                if (
+                                    completed
+                                ) {
+
+                                    return;
+
+                                }
+
+
+                                completed =
+                                    true;
+
+
+                                cleanup();
+
+
+                                reject(
+                                    new Error(
+                                        `Timeout waiting for ${channel}`
+                                    )
+                                );
+
+                            },
+                            timeout
+                        );
+
+
+                    publish(
+                        channel,
+                        payload,
+                        {
+
+                            sender:
+                                options.sender ||
+                                "request",
+
+                            metadata: {
+
+                                responseChannel
+
+                            }
+
+                        }
+                    );
 
                 }
+            );
+
+        }
 
 
-                const instance =
-                    event.detail &&
-                    event.detail.instance;
+        /* =====================================================
+           RESPOND
+           ===================================================== */
+
+        function respond(
+            message,
+            payload = {}
+        ) {
+
+            if (
+                !message ||
+                !message.metadata ||
+                !message.metadata.responseChannel
+            ) {
+
+                return false;
+
+            }
 
 
-                const initialState =
-                    instance &&
-                    instance.definition &&
-                    instance.definition.initialState
-                        ? instance.definition.initialState
-                        : {};
+            return publish(
+                message.metadata.responseChannel,
+                payload,
+                {
+
+                    sender:
+                        message.channel,
+
+                    dom:
+                        false
+
+                }
+            );
+
+        }
 
 
-                create(
+        /* =====================================================
+           APP CHANNEL
+           ===================================================== */
+
+        function appChannel(
+            appId,
+            event
+        ) {
+
+            return (
+                `app:${appId}:${event}`
+            );
+
+        }
+
+
+        /* =====================================================
+           APP PUBLISH
+           ===================================================== */
+
+        function publishApp(
+            appId,
+            event,
+            payload = {}
+        ) {
+
+            if (!appId || !event) {
+
+                return false;
+
+            }
+
+
+            return publish(
+                appChannel(
                     appId,
-                    initialState
+                    event
+                ),
+                payload,
+                {
+
+                    sender:
+                        appId
+
+                }
+            );
+
+        }
+
+
+        /* =====================================================
+           APP SUBSCRIBE
+           ===================================================== */
+
+        function onApp(
+            appId,
+            event,
+            callback
+        ) {
+
+            if (
+                !appId ||
+                !event
+            ) {
+
+                return () => {};
+
+            }
+
+
+            return on(
+                appChannel(
+                    appId,
+                    event
+                ),
+                callback
+            );
+
+        }
+
+
+        /* =====================================================
+           BROADCAST
+           ===================================================== */
+
+        function broadcast(
+            event,
+            payload = {},
+            options = {}
+        ) {
+
+            return publish(
+                `broadcast:${event}`,
+                payload,
+                {
+
+                    sender:
+                        options.sender ||
+                        "system",
+
+                    metadata:
+                        options.metadata ||
+                        {}
+
+                }
+            );
+
+        }
+
+
+        /* =====================================================
+           APP BROADCAST
+           ===================================================== */
+
+        function broadcastFromApp(
+            appId,
+            event,
+            payload = {}
+        ) {
+
+            return broadcast(
+                event,
+                payload,
+                {
+
+                    sender:
+                        appId
+
+                }
+            );
+
+        }
+
+
+        /* =====================================================
+           HISTORY
+           ===================================================== */
+
+        function getHistory(
+            options = {}
+        ) {
+
+            const limit =
+                Number.isFinite(
+                    options.limit
+                )
+                    ? options.limit
+                    : 100;
+
+
+            const channel =
+                options.channel
+                    ? normalize(
+                        options.channel
+                    )
+                    : null;
+
+
+            let result =
+                history;
+
+
+            if (channel) {
+
+                result =
+                    result.filter(
+                        item =>
+                            item.payload &&
+                            item.payload.channel ===
+                            channel
+                    );
+
+            }
+
+
+            return result
+                .slice(
+                    Math.max(
+                        0,
+                        result.length -
+                        limit
+                    )
+                )
+                .map(
+                    item =>
+                        ({
+                            ...item
+                        })
+                );
+
+        }
+
+
+        /* =====================================================
+           CLEAR HISTORY
+           ===================================================== */
+
+        function clearHistory() {
+
+            history.length =
+                0;
+
+
+            emitDOM(
+                "message:history:cleared",
+                {
+
+                    timestamp:
+                        Date.now()
+
+                }
+            );
+
+        }
+
+
+        /* =====================================================
+           CHANNEL INSPECTION
+           ===================================================== */
+
+        function listChannels() {
+
+            const result =
+                new Set();
+
+
+            channels.forEach(
+                (
+                    _,
+                    channel
+                ) => {
+
+                    result.add(
+                        channel
+                    );
+
+                }
+            );
+
+
+            onceChannels.forEach(
+                (
+                    _,
+                    channel
+                ) => {
+
+                    result.add(
+                        channel
+                    );
+
+                }
+            );
+
+
+            return [
+                ...result
+            ];
+
+        }
+
+
+        function listenerCount(
+            channel
+        ) {
+
+            channel =
+                normalize(
+                    channel
+                );
+
+
+            const normal =
+                channels.get(
+                    channel
+                );
+
+
+            const oneTime =
+                onceChannels.get(
+                    channel
+                );
+
+
+            return (
+                (normal
+                    ? normal.size
+                    : 0) +
+                (oneTime
+                    ? oneTime.size
+                    : 0)
+            );
+
+        }
+
+
+        /* =====================================================
+           AUTOMATIC APP LIFECYCLE CHANNELS
+           ===================================================== */
+
+        const lifecycleEvents = [
+
+            "created",
+
+            "ready",
+
+            "started",
+
+            "activated",
+
+            "deactivated",
+
+            "paused",
+
+            "resumed",
+
+            "stopped",
+
+            "destroyed",
+
+            "error"
+
+        ];
+
+
+        lifecycleEvents.forEach(
+            eventName => {
+
+                document.addEventListener(
+                    `haldo:app:lifecycle:${eventName}`,
+                    event => {
+
+                        const detail =
+                            event.detail ||
+                            {};
+
+
+                        const appId =
+                            detail.appId;
+
+
+                        if (!appId) {
+
+                            return;
+
+                        }
+
+
+                        publishApp(
+                            appId,
+                            `lifecycle:${eventName}`,
+                            detail
+                        );
+
+                    }
                 );
 
             }
@@ -56473,42 +56946,112 @@
 
 
         /* =====================================================
-           SAVE ON CLOSE
+           WINDOW BRIDGE
            ===================================================== */
 
-        document.addEventListener(
-            "haldo:app:launch:closed",
-            event => {
+        const windowEvents = [
 
-                const appId =
-                    event.detail &&
-                    event.detail.appId;
+            "focused",
 
+            "minimized",
 
-                if (!appId) {
+            "maximized",
 
-                    return;
+            "restored",
 
-                }
+            "closed"
 
-
-                const session =
-                    get(
-                        appId,
-                        false
-                    );
+        ];
 
 
-                if (
-                    session &&
-                    session.dirty
-                ) {
+        windowEvents.forEach(
+            eventName => {
 
-                    save(
-                        appId
-                    );
+                document.addEventListener(
+                    `haldo:window:${eventName}`,
+                    event => {
 
-                }
+                        const detail =
+                            event.detail ||
+                            {};
+
+
+                        const appId =
+                            detail.appId;
+
+
+                        if (!appId) {
+
+                            return;
+
+                        }
+
+
+                        publishApp(
+                            appId,
+                            `window:${eventName}`,
+                            detail
+                        );
+
+                    }
+                );
+
+            }
+        );
+
+
+        /* =====================================================
+           STATE BRIDGE
+           ===================================================== */
+
+        const stateEvents = [
+
+            "created",
+
+            "changed",
+
+            "saved",
+
+            "loaded",
+
+            "reset",
+
+            "destroyed"
+
+        ];
+
+
+        stateEvents.forEach(
+            eventName => {
+
+                document.addEventListener(
+                    `haldo:app:state:${eventName}`,
+                    event => {
+
+                        const detail =
+                            event.detail ||
+                            {};
+
+
+                        const appId =
+                            detail.appId;
+
+
+                        if (!appId) {
+
+                            return;
+
+                        }
+
+
+                        publishApp(
+                            appId,
+                            `state:${eventName}`,
+                            detail
+                        );
+
+                    }
+                );
 
             }
         );
@@ -56518,37 +57061,37 @@
            PUBLIC API
            ===================================================== */
 
-        const appState = {
+        const messageBus = {
 
-            create,
+            on,
 
-            get,
+            once,
 
-            getValue,
+            off,
 
-            setValue,
+            publish,
 
-            merge,
+            request,
 
-            reset,
+            respond,
 
-            save,
+            appChannel,
 
-            load,
+            publishApp,
 
-            clearSaved,
+            onApp,
 
-            subscribe,
+            broadcast,
 
-            destroy,
+            broadcastFromApp,
 
-            list() {
+            getHistory,
 
-                return [
-                    ...sessions.values()
-                ];
+            clearHistory,
 
-            }
+            listChannels,
+
+            listenerCount
 
         };
 
@@ -56557,8 +57100,8 @@
            GLOBAL API
            ===================================================== */
 
-        window.HalDoAppState20 =
-            appState;
+        window.HalDoMessageBus20 =
+            messageBus;
 
 
         if (
@@ -56571,16 +57114,16 @@
         }
 
 
-        window.HalDoOS.appState20 =
-            appState;
+        window.HalDoOS.messageBus20 =
+            messageBus;
 
 
         /* =====================================================
            READY
            ===================================================== */
 
-        emit(
-            "app:state:ready",
+        emitDOM(
+            "message-bus:ready",
             {
 
                 version:
@@ -56594,7 +57137,7 @@
 
 
         console.info(
-            "%cHalDo AI OS 20%c App-State Engine bereit",
+            "%cHalDo AI OS 20%c Application Message Bus bereit",
             "color:#42e6ff;font-weight:800;",
             "color:#ffffff;"
         );
@@ -56603,4 +57146,3 @@
     })();
 
     </script>
-    
