@@ -14409,3 +14409,693 @@
         })();
 
     </script>
+        <!-- =========================================================
+         HALDO AI OS 20
+         PART 12 — SYSTEM INTEGRATION BRIDGE
+         
+         Verbindet die zentrale UI-Shell mit den bereits vorhandenen
+         HalDo-Systemmodulen, ohne deren interne Logik zu ersetzen.
+         ========================================================= -->
+
+    <script>
+    (function () {
+
+        "use strict";
+
+        const HalDoIntegration = {
+
+            version: "20.0.0",
+
+            connected: false,
+
+            modules: {},
+
+            events: {},
+
+
+            /* =====================================================
+               EVENT SYSTEM
+               ===================================================== */
+
+            on(name, callback) {
+
+                if (typeof callback !== "function") {
+                    return () => {};
+                }
+
+                if (!this.events[name]) {
+                    this.events[name] = [];
+                }
+
+                this.events[name].push(callback);
+
+                return () => {
+                    this.off(name, callback);
+                };
+            },
+
+
+            off(name, callback) {
+
+                if (!this.events[name]) {
+                    return;
+                }
+
+                this.events[name] =
+                    this.events[name].filter(
+                        fn => fn !== callback
+                    );
+            },
+
+
+            emit(name, detail) {
+
+                const listeners =
+                    this.events[name] || [];
+
+                listeners.forEach(
+                    callback => {
+
+                        try {
+
+                            callback(detail);
+
+                        } catch (error) {
+
+                            console.error(
+                                "[HalDo Integration]",
+                                error
+                            );
+
+                        }
+
+                    }
+                );
+
+                window.dispatchEvent(
+                    new CustomEvent(
+                        "haldo:integration:" + name,
+                        {
+                            detail
+                        }
+                    )
+                );
+
+            },
+
+
+            /* =====================================================
+               MODULE DISCOVERY
+               ===================================================== */
+
+            discover() {
+
+                const sources = {
+
+                    kernel:
+                        window.HalDoKernel ||
+                        window.HalDoOS?.kernel ||
+                        null,
+
+                    system:
+                        window.HalDoSystem ||
+                        window.HalDoOS?.system ||
+                        null,
+
+                    appManager:
+                        window.HalDoAppManager ||
+                        window.HalDoOS?.appManager ||
+                        null,
+
+                    appRouter:
+                        window.HalDoAppRouter ||
+                        window.HalDoOS?.appRouter ||
+                        null,
+
+                    launcher:
+                        window.HalDoLauncher ||
+                        window.HalDoOS?.launcher ||
+                        null,
+
+                    windowManager:
+                        window.HalDoWindowManager ||
+                        window.HalDoOS?.windowManager ||
+                        null,
+
+                    storage:
+                        window.HalDoStorage ||
+                        window.HalDoOS?.storage ||
+                        null,
+
+                    storageManager:
+                        window.HalDoStorageManager ||
+                        window.HalDoOS?.storageManager ||
+                        null,
+
+                    config:
+                        window.HalDoConfigManager ||
+                        window.HalDoOS?.configManager ||
+                        null,
+
+                    language:
+                        window.HalDoLanguage ||
+                        window.HalDoOS?.language ||
+                        null,
+
+                    ai:
+                        window.HalDoAI ||
+                        window.HalDoOS?.ai ||
+                        null,
+
+                    voice:
+                        window.HalDoVoice ||
+                        window.HalDoOS?.voice ||
+                        null,
+
+                    keyboard:
+                        window.HalDoEzidiKeyboard ||
+                        window.HalDoOS?.ezidiKeyboard ||
+                        null
+
+                };
+
+
+                this.modules =
+                    sources;
+
+                return sources;
+
+            },
+
+
+            /* =====================================================
+               CONNECTION TEST
+               ===================================================== */
+
+            connect() {
+
+                this.discover();
+
+                let count = 0;
+
+                Object.keys(this.modules)
+                    .forEach(
+                        key => {
+
+                            if (
+                                this.modules[key]
+                            ) {
+
+                                count++;
+
+                            }
+
+                        }
+                    );
+
+
+                this.connected =
+                    count > 0;
+
+
+                this.emit(
+                    "connected",
+                    {
+                        connected:
+                            this.connected,
+
+                        moduleCount:
+                            count,
+
+                        modules:
+                            this.modules
+                    }
+                );
+
+
+                return this.connected;
+
+            },
+
+
+            /* =====================================================
+               SAFE MODULE ACCESS
+               ===================================================== */
+
+            get(name) {
+
+                if (
+                    this.modules &&
+                    this.modules[name]
+                ) {
+
+                    return this.modules[name];
+
+                }
+
+                this.discover();
+
+                return this.modules[name] || null;
+
+            },
+
+
+            has(name) {
+
+                return !!this.get(name);
+
+            },
+
+
+            /* =====================================================
+               SAFE METHOD CALL
+               ===================================================== */
+
+            call(
+                moduleName,
+                methodName,
+                ...args
+            ) {
+
+                const module =
+                    this.get(moduleName);
+
+
+                if (!module) {
+
+                    return {
+                        success: false,
+                        reason:
+                            "module-not-available"
+                    };
+
+                }
+
+
+                if (
+                    typeof module[methodName] !==
+                    "function"
+                ) {
+
+                    return {
+                        success: false,
+                        reason:
+                            "method-not-available"
+                    };
+
+                }
+
+
+                try {
+
+                    const result =
+                        module[methodName](...args);
+
+
+                    if (
+                        result &&
+                        typeof result.then ===
+                        "function"
+                    ) {
+
+                        return result
+                            .then(
+                                value => ({
+                                    success: true,
+                                    value
+                                })
+                            )
+                            .catch(
+                                error => {
+
+                                    console.error(
+                                        "[HalDo Integration]",
+                                        error
+                                    );
+
+                                    return {
+                                        success: false,
+                                        reason:
+                                            "execution-error",
+                                        error
+                                    };
+
+                                }
+                            );
+
+                    }
+
+
+                    return {
+                        success: true,
+                        value: result
+                    };
+
+                } catch (error) {
+
+                    console.error(
+                        "[HalDo Integration]",
+                        error
+                    );
+
+                    return {
+                        success: false,
+                        reason:
+                            "execution-error",
+                        error
+                    };
+
+                }
+
+            },
+
+
+            /* =====================================================
+               SYSTEM STATUS
+               ===================================================== */
+
+            getStatus() {
+
+                this.discover();
+
+                const status = {};
+
+
+                Object.keys(this.modules)
+                    .forEach(
+                        name => {
+
+                            status[name] =
+                                !!this.modules[name];
+
+                        }
+                    );
+
+
+                status.online =
+                    navigator.onLine;
+
+
+                status.version =
+                    this.version;
+
+
+                status.connected =
+                    this.connected;
+
+
+                return status;
+
+            },
+
+
+            /* =====================================================
+               KERNEL CONNECTION
+               ===================================================== */
+
+            connectKernel() {
+
+                const kernel =
+                    this.get("kernel");
+
+
+                if (
+                    !kernel ||
+                    typeof kernel.on !==
+                    "function"
+                ) {
+
+                    return false;
+
+                }
+
+
+                try {
+
+                    kernel.on(
+                        "kernel:ready",
+                        payload => {
+
+                            this.emit(
+                                "kernel-ready",
+                                payload
+                            );
+
+                        }
+                    );
+
+
+                    kernel.on(
+                        "kernel:error",
+                        payload => {
+
+                            this.emit(
+                                "kernel-error",
+                                payload
+                            );
+
+                        }
+                    );
+
+
+                    return true;
+
+                } catch (error) {
+
+                    console.warn(
+                        "[HalDo Integration]",
+                        error
+                    );
+
+                    return false;
+
+                }
+
+            },
+
+
+            /* =====================================================
+               SYSTEM CONNECTION
+               ===================================================== */
+
+            connectSystem() {
+
+                const system =
+                    this.get("system");
+
+
+                if (!system) {
+
+                    return false;
+
+                }
+
+
+                this.emit(
+                    "system-discovered",
+                    {
+                        system
+                    }
+                );
+
+
+                return true;
+
+            },
+
+
+            /* =====================================================
+               APP CONNECTION
+               ===================================================== */
+
+            connectApps() {
+
+                const manager =
+                    this.get("appManager");
+
+
+                const router =
+                    this.get("appRouter");
+
+
+                const launcher =
+                    this.get("launcher");
+
+
+                this.emit(
+                    "apps-discovered",
+                    {
+                        manager,
+                        router,
+                        launcher
+                    }
+                );
+
+
+                return !!(
+                    manager ||
+                    router ||
+                    launcher
+                );
+
+            },
+
+
+            /* =====================================================
+               AI CONNECTION
+               ===================================================== */
+
+            connectAI() {
+
+                const ai =
+                    this.get("ai");
+
+
+                if (!ai) {
+
+                    return false;
+
+                }
+
+
+                this.emit(
+                    "ai-discovered",
+                    {
+                        ai
+                    }
+                );
+
+
+                return true;
+
+            },
+
+
+            /* =====================================================
+               STORAGE CONNECTION
+               ===================================================== */
+
+            connectStorage() {
+
+                const storage =
+                    this.get("storage");
+
+
+                const manager =
+                    this.get("storageManager");
+
+
+                this.emit(
+                    "storage-discovered",
+                    {
+                        storage,
+                        manager
+                    }
+                );
+
+
+                return !!(
+                    storage ||
+                    manager
+                );
+
+            },
+
+
+            /* =====================================================
+               COMPLETE INITIALIZATION
+               ===================================================== */
+
+            initialize() {
+
+                this.connect();
+
+                this.connectKernel();
+
+                this.connectSystem();
+
+                this.connectApps();
+
+                this.connectAI();
+
+                this.connectStorage();
+
+
+                this.emit(
+                    "ready",
+                    this.getStatus()
+                );
+
+
+                return this.getStatus();
+
+            }
+
+        };
+
+
+        /* =========================================================
+           GLOBAL API
+           ========================================================= */
+
+        window.HalDoIntegration =
+            HalDoIntegration;
+
+
+        window.HalDoOS =
+            window.HalDoOS || {};
+
+
+        window.HalDoOS.integration =
+            HalDoIntegration;
+
+
+        /* =========================================================
+           SAFE START
+           ========================================================= */
+
+        function startIntegration() {
+
+            try {
+
+                HalDoIntegration.initialize();
+
+                console.log(
+                    "%cHalDo AI OS 20%c Integration Bridge bereit",
+                    "color:#42e6ff;font-weight:800;",
+                    "color:#ffffff;"
+                );
+
+            } catch (error) {
+
+                console.error(
+                    "[HalDo Integration]",
+                    error
+                );
+
+            }
+
+        }
+
+
+        if (
+            document.readyState ===
+            "loading"
+        ) {
+
+            document.addEventListener(
+                "DOMContentLoaded",
+                startIntegration,
+                {
+                    once: true
+                }
+            );
+
+        } else {
+
+            startIntegration();
+
+        }
+
+    })();
+    </script>
