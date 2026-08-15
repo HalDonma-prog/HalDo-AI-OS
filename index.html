@@ -42660,3 +42660,2617 @@
     })();
 
     </script>
+        <!-- =========================================================
+         HALDO AI OS 20
+         APP LAUNCH / WINDOW INTEGRATION BRIDGE
+         TEIL 44
+         ========================================================= -->
+
+    <script>
+
+    (() => {
+
+        "use strict";
+
+
+        /* =====================================================
+           DEPENDENCY REFERENCES
+           ===================================================== */
+
+        const appManager =
+            window.HalDoAppManager ||
+            window.HalDoOS?.appManager ||
+            null;
+
+
+        const windowManager =
+            window.HalDoWindowManager20 ||
+            window.HalDoOS?.windowManager20 ||
+            null;
+
+
+        const router =
+            window.HalDoRouter20 ||
+            window.HalDoOS?.router20 ||
+            null;
+
+
+        /* =====================================================
+           EVENT BRIDGE
+           ===================================================== */
+
+        function emit(
+            eventName,
+            detail = {}
+        ) {
+
+            if (
+                window.HalDoEventBus &&
+                typeof window.HalDoEventBus.emit ===
+                "function"
+            ) {
+
+                window.HalDoEventBus.emit(
+                    eventName,
+                    detail
+                );
+
+                return;
+
+            }
+
+
+            document.dispatchEvent(
+                new CustomEvent(
+                    `haldo:${eventName}`,
+                    {
+                        detail
+                    }
+                )
+            );
+
+        }
+
+
+        /* =====================================================
+           APP INSTANCE REGISTRY
+           ===================================================== */
+
+        const instances =
+            new Map();
+
+
+        /* =====================================================
+           APP ID NORMALIZATION
+           ===================================================== */
+
+        function normalizeAppId(
+            appId
+        ) {
+
+            return String(
+                appId ||
+                ""
+            )
+            .trim();
+
+        }
+
+
+        /* =====================================================
+           FIND APP DEFINITION
+           ===================================================== */
+
+        function getDefinition(
+            appId
+        ) {
+
+            appId =
+                normalizeAppId(
+                    appId
+                );
+
+
+            if (!appId) {
+
+                return null;
+
+            }
+
+
+            if (
+                appManager
+            ) {
+
+                if (
+                    typeof appManager.getApp ===
+                    "function"
+                ) {
+
+                    return appManager.getApp(
+                        appId
+                    );
+
+                }
+
+
+                if (
+                    typeof appManager.get ===
+                    "function"
+                ) {
+
+                    return appManager.get(
+                        appId
+                    );
+
+                }
+
+            }
+
+
+            if (
+                window.HalDoAppRegistry &&
+                typeof window.HalDoAppRegistry.get ===
+                "function"
+            ) {
+
+                return window.HalDoAppRegistry.get(
+                    appId
+                );
+
+            }
+
+
+            return null;
+
+        }
+
+
+        /* =====================================================
+           CREATE APP CONTAINER
+           ===================================================== */
+
+        function createContainer(
+            appId,
+            definition
+        ) {
+
+            const container =
+                document.createElement(
+                    "section"
+                );
+
+
+            container.className =
+                "haldo-app-window";
+
+
+            container.dataset.haldoApp =
+                appId;
+
+
+            container.setAttribute(
+                "role",
+                "application"
+            );
+
+
+            container.setAttribute(
+                "aria-label",
+                definition?.name ||
+                definition?.title ||
+                appId
+            );
+
+
+            container.innerHTML = `
+
+                <div
+                    class="haldo-app-window-inner"
+                >
+
+                    <header
+                        class="haldo-app-window-header"
+                    >
+
+                        <strong>
+                            ${
+                                definition?.name ||
+                                definition?.title ||
+                                appId
+                            }
+                        </strong>
+
+                        <div
+                            class="haldo-app-window-actions"
+                        >
+
+                            <button
+                                type="button"
+                                data-window-action="minimize"
+                                aria-label="Minimieren"
+                                title="Minimieren"
+                            >
+                                −
+                            </button>
+
+                            <button
+                                type="button"
+                                data-window-action="maximize"
+                                aria-label="Maximieren"
+                                title="Maximieren"
+                            >
+                                □
+                            </button>
+
+                            <button
+                                type="button"
+                                data-window-action="close"
+                                aria-label="Schließen"
+                                title="Schließen"
+                            >
+                                ×
+                            </button>
+
+                        </div>
+
+                    </header>
+
+
+                    <div
+                        class="haldo-app-window-content"
+                        data-app-content
+                    ></div>
+
+                </div>
+
+            `;
+
+
+            const layer =
+                document.getElementById(
+                    "haldo-app-layer"
+                );
+
+
+            if (
+                !layer
+            ) {
+
+                return null;
+
+            }
+
+
+            layer.appendChild(
+                container
+            );
+
+
+            return container;
+
+        }
+
+
+        /* =====================================================
+           RENDER APP CONTENT
+           ===================================================== */
+
+        async function renderApp(
+            appId,
+            container,
+            definition,
+            options
+        ) {
+
+            const content =
+                container.querySelector(
+                    "[data-app-content]"
+                );
+
+
+            if (!content) {
+
+                return;
+
+            }
+
+
+            /*
+             * Bestehende App-Renderer bevorzugen.
+             */
+
+            if (
+                typeof definition?.render ===
+                "function"
+            ) {
+
+                await definition.render(
+                    content,
+                    options
+                );
+
+
+                return;
+
+            }
+
+
+            if (
+                typeof definition?.mount ===
+                "function"
+            ) {
+
+                await definition.mount(
+                    content,
+                    options
+                );
+
+
+                return;
+
+            }
+
+
+            /*
+             * Bereits vorhandene HTML-Struktur
+             * einer App verwenden.
+             */
+
+            if (
+                typeof definition?.html ===
+                "string"
+            ) {
+
+                content.innerHTML =
+                    definition.html;
+
+
+                return;
+
+            }
+
+
+            /*
+             * Kein Renderer:
+             * keine künstliche App-Funktion vortäuschen.
+             */
+
+            content.innerHTML = `
+
+                <div
+                    class="haldo-app-empty"
+                >
+
+                    <strong>
+                        ${
+                            definition?.name ||
+                            definition?.title ||
+                            appId
+                        }
+                    </strong>
+
+                    <p>
+                        App-Modul wird geladen ...
+                    </p>
+
+                </div>
+
+            `;
+
+        }
+
+
+        /* =====================================================
+           ACTIVATE APP
+           ===================================================== */
+
+        async function launch(
+            appId,
+            options = {}
+        ) {
+
+            appId =
+                normalizeAppId(
+                    appId
+                );
+
+
+            if (!appId) {
+
+                return {
+
+                    success:
+                        false,
+
+                    reason:
+                        "missing-app-id"
+
+                };
+
+            }
+
+
+            const definition =
+                getDefinition(
+                    appId
+                );
+
+
+            if (
+                !definition
+            ) {
+
+                emit(
+                    "app:launch:error",
+                    {
+
+                        appId,
+
+                        reason:
+                            "app-not-found"
+
+                    }
+                );
+
+
+                return {
+
+                    success:
+                        false,
+
+                    reason:
+                        "app-not-found"
+
+                };
+
+            }
+
+
+            /*
+             * Bereits geöffnete Instanz wiederverwenden,
+             * sofern nicht ausdrücklich eine neue Instanz
+             * verlangt wurde.
+             */
+
+            if (
+                instances.has(
+                    appId
+                ) &&
+                options.newInstance !==
+                true
+            ) {
+
+                const existing =
+                    instances.get(
+                        appId
+                    );
+
+
+                if (
+                    existing.windowId &&
+                    windowManager
+                ) {
+
+                    windowManager.restore(
+                        existing.windowId
+                    );
+
+
+                    windowManager.focus(
+                        existing.windowId
+                    );
+
+                }
+
+
+                emit(
+                    "app:launch:reused",
+                    {
+                        appId
+                    }
+                );
+
+
+                return {
+
+                    success:
+                        true,
+
+                    appId,
+
+                    reused:
+                        true,
+
+                    instance:
+                        existing
+
+                };
+
+            }
+
+
+            const container =
+                createContainer(
+                    appId,
+                    definition
+                );
+
+
+            if (!container) {
+
+                return {
+
+                    success:
+                        false,
+
+                    reason:
+                        "workspace-unavailable"
+
+                };
+
+            }
+
+
+            let windowId =
+                null;
+
+
+            if (
+                windowManager
+            ) {
+
+                windowId =
+                    windowManager.register(
+                        appId,
+                        container,
+                        {
+
+                            title:
+                                definition.name ||
+                                definition.title ||
+                                appId
+
+                        }
+                    );
+
+            }
+
+
+            const instance = {
+
+                appId,
+
+                windowId,
+
+                container,
+
+                definition,
+
+                launchedAt:
+                    Date.now(),
+
+                state:
+                    "loading"
+
+            };
+
+
+            instances.set(
+                appId,
+                instance
+            );
+
+
+            emit(
+                "app:launching",
+                {
+
+                    appId,
+
+                    windowId
+
+                }
+            );
+
+
+            try {
+
+                await renderApp(
+                    appId,
+                    container,
+                    definition,
+                    options
+                );
+
+
+                instance.state =
+                    "ready";
+
+
+                /*
+                 * App-Lifecycle-Hooks vorhandener Apps
+                 * werden respektiert.
+                 */
+
+                if (
+                    typeof definition.onOpen ===
+                    "function"
+                ) {
+
+                    await definition.onOpen(
+                        {
+
+                            appId,
+
+                            windowId,
+
+                            container,
+
+                            options
+
+                        }
+                    );
+
+                }
+
+
+                emit(
+                    "app:launched",
+                    {
+
+                        appId,
+
+                        windowId,
+
+                        instance
+
+                    }
+                );
+
+
+                /*
+                 * Router optional mit der App verbinden.
+                 */
+
+                if (
+                    router &&
+                    options.route !==
+                    false
+                ) {
+
+                    const route =
+                        options.route ||
+                        definition.route;
+
+
+                    if (
+                        route &&
+                        typeof router.register ===
+                        "function"
+                    ) {
+
+                        router.register(
+                            route,
+                            {
+
+                                appId,
+
+                                title:
+                                    definition.name ||
+                                    definition.title ||
+                                    appId
+
+                            }
+                        );
+
+                    }
+
+                }
+
+
+                return {
+
+                    success:
+                        true,
+
+                    appId,
+
+                    windowId,
+
+                    instance
+
+                };
+
+            } catch (error) {
+
+                instance.state =
+                    "error";
+
+
+                emit(
+                    "app:launch:error",
+                    {
+
+                        appId,
+
+                        windowId,
+
+                        error:
+                            String(
+                                error?.message ||
+                                error
+                            )
+
+                    }
+                );
+
+
+                console.error(
+                    `[HalDo App Launcher 20] ${appId}`,
+                    error
+                );
+
+
+                return {
+
+                    success:
+                        false,
+
+                    appId,
+
+                    windowId,
+
+                    error
+
+                };
+
+            }
+
+        }
+
+
+        /* =====================================================
+           CLOSE APP
+           ===================================================== */
+
+        async function close(
+            appId
+        ) {
+
+            appId =
+                normalizeAppId(
+                    appId
+                );
+
+
+            const instance =
+                instances.get(
+                    appId
+                );
+
+
+            if (
+                !instance
+            ) {
+
+                return false;
+
+            }
+
+
+            try {
+
+                if (
+                    typeof instance.definition?.onClose ===
+                    "function"
+                ) {
+
+                    await instance.definition.onClose(
+                        instance
+                    );
+
+                }
+
+            } catch (error) {
+
+                console.warn(
+                    "[HalDo App Launcher 20] onClose",
+                    error
+                );
+
+            }
+
+
+            if (
+                windowManager &&
+                instance.windowId
+            ) {
+
+                windowManager.close(
+                    instance.windowId
+                );
+
+            } else if (
+                instance.container
+            ) {
+
+                instance.container.remove();
+
+            }
+
+
+            instances.delete(
+                appId
+            );
+
+
+            emit(
+                "app:closed",
+                {
+                    appId
+                }
+            );
+
+
+            return true;
+
+        }
+
+
+        /* =====================================================
+           GET INSTANCE
+           ===================================================== */
+
+        function getInstance(
+            appId
+        ) {
+
+            return (
+                instances.get(
+                    normalizeAppId(
+                        appId
+                    )
+                ) ||
+                null
+            );
+
+        }
+
+
+        /* =====================================================
+           GET ALL INSTANCES
+           ===================================================== */
+
+        function getInstances() {
+
+            return Array.from(
+                instances.values()
+            );
+
+        }
+
+
+        /* =====================================================
+           CLOSE ALL
+           ===================================================== */
+
+        async function closeAll() {
+
+            const ids =
+                Array.from(
+                    instances.keys()
+                );
+
+
+            for (
+                const appId
+                of ids
+            ) {
+
+                await close(
+                    appId
+                );
+
+            }
+
+
+            return true;
+
+        }
+
+
+        /* =====================================================
+           WINDOW ACTION BRIDGE
+           ===================================================== */
+
+        document.addEventListener(
+            "click",
+            event => {
+
+                const button =
+                    event.target?.closest(
+                        "[data-window-action]"
+                    );
+
+
+                if (!button) {
+
+                    return;
+
+                }
+
+
+                const container =
+                    button.closest(
+                        "[data-haldo-window]"
+                    );
+
+
+                if (!container) {
+
+                    return;
+
+                }
+
+
+                const windowId =
+                    container.dataset
+                        .haldoWindow;
+
+
+                if (
+                    !windowId ||
+                    !windowManager
+                ) {
+
+                    return;
+
+                }
+
+
+                const action =
+                    button.dataset
+                        .windowAction;
+
+
+                if (
+                    action ===
+                    "minimize"
+                ) {
+
+                    windowManager.minimize(
+                        windowId
+                    );
+
+                }
+
+
+                if (
+                    action ===
+                    "maximize"
+                ) {
+
+                    windowManager.maximize(
+                        windowId
+                    );
+
+                }
+
+
+                if (
+                    action ===
+                    "close"
+                ) {
+
+                    const appId =
+                        container.dataset
+                            .haldoApp;
+
+
+                    windowManager.close(
+                        windowId
+                    );
+
+
+                    if (
+                        appId
+                    ) {
+
+                        instances.delete(
+                            appId
+                        );
+
+                    }
+
+                }
+
+            }
+        );
+
+
+        /* =====================================================
+           PUBLIC API
+           ===================================================== */
+
+        const appLauncher20 = {
+
+            launch,
+
+            close,
+
+            closeAll,
+
+            getInstance,
+
+            getInstances
+
+        };
+
+
+        /* =====================================================
+           GLOBAL API
+           ===================================================== */
+
+        window.HalDoAppLauncher20 =
+            appLauncher20;
+
+
+        if (
+            !window.HalDoOS
+        ) {
+
+            window.HalDoOS =
+                {};
+
+        }
+
+
+        window.HalDoOS.appLauncher20 =
+            appLauncher20;
+
+
+        /* =====================================================
+           INITIALIZATION
+           ===================================================== */
+
+        function initializeAppLauncher() {
+
+            emit(
+                "app-launcher:ready",
+                {
+
+                    version:
+                        "20.0.0",
+
+                    timestamp:
+                        Date.now()
+
+                }
+            );
+
+
+            console.info(
+                "%cHalDo AI OS 20%c App Launcher 20 bereit",
+                "color:#42e6ff;font-weight:800;",
+                "color:#ffffff;"
+            );
+
+        }
+
+
+        if (
+            document.readyState ===
+            "loading"
+        ) {
+
+            document.addEventListener(
+                "DOMContentLoaded",
+                initializeAppLauncher,
+                {
+                    once:
+                        true
+                }
+            );
+
+        } else {
+
+            initializeAppLauncher();
+
+        }
+
+
+    })();
+
+    </script>
+        <!-- =========================================================
+         HALDO AI OS 20
+         APP UI / WINDOW STYLE FOUNDATION
+         TEIL 45
+         ========================================================= -->
+
+    <style>
+
+        /* =====================================================
+           APP WINDOW FOUNDATION
+           ===================================================== */
+
+        .haldo-app-window {
+
+            position:
+                absolute;
+
+            top:
+                28px;
+
+            left:
+                28px;
+
+            width:
+                min(
+                    900px,
+                    calc(
+                        100% - 56px
+                    )
+                );
+
+            height:
+                min(
+                    650px,
+                    calc(
+                        100% - 56px
+                    )
+                );
+
+            min-width:
+                280px;
+
+            min-height:
+                220px;
+
+            overflow:
+                hidden;
+
+            border:
+                1px solid
+                var(--haldo-border-strong);
+
+            border-radius:
+                var(--haldo-radius);
+
+            background:
+                rgba(
+                    8,
+                    12,
+                    21,
+                    0.94
+                );
+
+            box-shadow:
+                var(--haldo-shadow);
+
+            backdrop-filter:
+                blur(24px);
+
+            -webkit-backdrop-filter:
+                blur(24px);
+
+            opacity:
+                1;
+
+            transform:
+                translateZ(0);
+
+            transition:
+                opacity 180ms ease,
+                transform 180ms ease,
+                border-color 180ms ease,
+                box-shadow 180ms ease;
+
+        }
+
+
+        /* =====================================================
+           ACTIVE WINDOW
+           ===================================================== */
+
+        .haldo-app-window.is-active {
+
+            border-color:
+                rgba(
+                    66,
+                    230,
+                    255,
+                    0.22
+                );
+
+            box-shadow:
+                0 28px 90px
+                rgba(
+                    0,
+                    0,
+                    0,
+                    0.52
+                ),
+                0 0 35px
+                rgba(
+                    66,
+                    230,
+                    255,
+                    0.055
+                );
+
+        }
+
+
+        /* =====================================================
+           MINIMIZED WINDOW
+           ===================================================== */
+
+        .haldo-app-window.is-minimized {
+
+            opacity:
+                0;
+
+            transform:
+                scale(
+                    0.92
+                );
+
+            pointer-events:
+                none;
+
+        }
+
+
+        /* =====================================================
+           MAXIMIZED WINDOW
+           ===================================================== */
+
+        .haldo-app-window.is-maximized {
+
+            top:
+                10px;
+
+            left:
+                10px;
+
+            width:
+                calc(
+                    100% - 20px
+                );
+
+            height:
+                calc(
+                    100% - 20px
+                );
+
+            border-radius:
+                16px;
+
+        }
+
+
+        /* =====================================================
+           WINDOW INNER
+           ===================================================== */
+
+        .haldo-app-window-inner {
+
+            width:
+                100%;
+
+            height:
+                100%;
+
+            display:
+                flex;
+
+            flex-direction:
+                column;
+
+            min-height:
+                0;
+
+        }
+
+
+        /* =====================================================
+           WINDOW HEADER
+           ===================================================== */
+
+        .haldo-app-window-header {
+
+            flex:
+                0 0 54px;
+
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            justify-content:
+                space-between;
+
+            gap:
+                12px;
+
+            padding:
+                0 12px 0 18px;
+
+            border-bottom:
+                1px solid
+                var(--haldo-border);
+
+            background:
+                rgba(
+                    255,
+                    255,
+                    255,
+                    0.025
+                );
+
+            user-select:
+                none;
+
+        }
+
+
+        .haldo-app-window-header strong {
+
+            min-width:
+                0;
+
+            overflow:
+                hidden;
+
+            color:
+                var(--haldo-text);
+
+            font-size:
+                13px;
+
+            font-weight:
+                700;
+
+            text-overflow:
+                ellipsis;
+
+            white-space:
+                nowrap;
+
+        }
+
+
+        /* =====================================================
+           WINDOW ACTIONS
+           ===================================================== */
+
+        .haldo-app-window-actions {
+
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            gap:
+                6px;
+
+            flex-shrink:
+                0;
+
+        }
+
+
+        .haldo-app-window-actions button {
+
+            width:
+                32px;
+
+            height:
+                32px;
+
+            display:
+                grid;
+
+            place-items:
+                center;
+
+            border:
+                1px solid
+                transparent;
+
+            border-radius:
+                9px;
+
+            color:
+                var(--haldo-text-secondary);
+
+            background:
+                transparent;
+
+            font-size:
+                16px;
+
+            line-height:
+                1;
+
+            transition:
+                background 160ms ease,
+                color 160ms ease,
+                border-color 160ms ease;
+
+        }
+
+
+        .haldo-app-window-actions button:hover {
+
+            color:
+                var(--haldo-text);
+
+            background:
+                rgba(
+                    255,
+                    255,
+                    255,
+                    0.07
+                );
+
+            border-color:
+                var(--haldo-border);
+
+        }
+
+
+        .haldo-app-window-actions button[data-window-action="close"]:hover {
+
+            color:
+                #ffffff;
+
+            background:
+                rgba(
+                    255,
+                    77,
+                    109,
+                    0.18
+                );
+
+            border-color:
+                rgba(
+                    255,
+                    77,
+                    109,
+                    0.24
+                );
+
+        }
+
+
+        /* =====================================================
+           WINDOW CONTENT
+           ===================================================== */
+
+        .haldo-app-window-content {
+
+            position:
+                relative;
+
+            flex:
+                1 1 auto;
+
+            min-height:
+                0;
+
+            overflow:
+                auto;
+
+            padding:
+                18px;
+
+            scrollbar-width:
+                thin;
+
+            scrollbar-color:
+                rgba(
+                    255,
+                    255,
+                    255,
+                    0.16
+                )
+                transparent;
+
+        }
+
+
+        .haldo-app-window-content::-webkit-scrollbar {
+
+            width:
+                7px;
+
+            height:
+                7px;
+
+        }
+
+
+        .haldo-app-window-content::-webkit-scrollbar-track {
+
+            background:
+                transparent;
+
+        }
+
+
+        .haldo-app-window-content::-webkit-scrollbar-thumb {
+
+            border-radius:
+                99px;
+
+            background:
+                rgba(
+                    255,
+                    255,
+                    255,
+                    0.14
+                );
+
+        }
+
+
+        /* =====================================================
+           APP EMPTY / LOADING STATE
+           ===================================================== */
+
+        .haldo-app-empty {
+
+            width:
+                100%;
+
+            min-height:
+                180px;
+
+            display:
+                flex;
+
+            flex-direction:
+                column;
+
+            align-items:
+                center;
+
+            justify-content:
+                center;
+
+            gap:
+                8px;
+
+            color:
+                var(--haldo-text-secondary);
+
+            text-align:
+                center;
+
+        }
+
+
+        .haldo-app-empty strong {
+
+            color:
+                var(--haldo-text);
+
+            font-size:
+                16px;
+
+        }
+
+
+        .haldo-app-empty p {
+
+            margin:
+                0;
+
+            color:
+                var(--haldo-text-muted);
+
+            font-size:
+                12px;
+
+        }
+
+
+        /* =====================================================
+           COMMON APP COMPONENTS
+           ===================================================== */
+
+        .haldo-app-panel {
+
+            border:
+                1px solid
+                var(--haldo-border);
+
+            border-radius:
+                var(--haldo-radius-small);
+
+            background:
+                rgba(
+                    255,
+                    255,
+                    255,
+                    0.025
+                );
+
+        }
+
+
+        .haldo-app-button {
+
+            min-height:
+                38px;
+
+            padding:
+                0 14px;
+
+            border:
+                1px solid
+                var(--haldo-border);
+
+            border-radius:
+                10px;
+
+            color:
+                var(--haldo-text);
+
+            background:
+                rgba(
+                    255,
+                    255,
+                    255,
+                    0.045
+                );
+
+            font-size:
+                12px;
+
+            font-weight:
+                600;
+
+            transition:
+                all 160ms ease;
+
+        }
+
+
+        .haldo-app-button:hover {
+
+            border-color:
+                rgba(
+                    66,
+                    230,
+                    255,
+                    0.22
+                );
+
+            background:
+                rgba(
+                    66,
+                    230,
+                    255,
+                    0.075
+                );
+
+        }
+
+
+        .haldo-app-button.primary {
+
+            border-color:
+                rgba(
+                    66,
+                    230,
+                    255,
+                    0.25
+                );
+
+            color:
+                #ffffff;
+
+            background:
+                rgba(
+                    66,
+                    230,
+                    255,
+                    0.10
+                );
+
+        }
+
+
+        .haldo-app-input {
+
+            width:
+                100%;
+
+            min-height:
+                40px;
+
+            padding:
+                0 12px;
+
+            border:
+                1px solid
+                var(--haldo-border);
+
+            border-radius:
+                10px;
+
+            outline:
+                none;
+
+            color:
+                var(--haldo-text);
+
+            background:
+                rgba(
+                    0,
+                    0,
+                    0,
+                    0.18
+                );
+
+            font-size:
+                12px;
+
+            transition:
+                border-color 160ms ease,
+                box-shadow 160ms ease;
+
+        }
+
+
+        .haldo-app-input:focus {
+
+            border-color:
+                rgba(
+                    66,
+                    230,
+                    255,
+                    0.38
+                );
+
+            box-shadow:
+                0 0 0 3px
+                rgba(
+                    66,
+                    230,
+                    255,
+                    0.07
+                );
+
+        }
+
+
+        .haldo-app-grid {
+
+            display:
+                grid;
+
+            grid-template-columns:
+                repeat(
+                    auto-fit,
+                    minmax(
+                        180px,
+                        1fr
+                    )
+                );
+
+            gap:
+                12px;
+
+        }
+
+
+        /* =====================================================
+           RESPONSIVE WINDOWS
+           ===================================================== */
+
+        @media (max-width: 720px) {
+
+            .haldo-app-window {
+
+                top:
+                    10px;
+
+                left:
+                    10px;
+
+                width:
+                    calc(
+                        100% - 20px
+                    );
+
+                height:
+                    calc(
+                        100% - 20px
+                    );
+
+                border-radius:
+                    15px;
+
+            }
+
+
+            .haldo-app-window-header {
+
+                flex-basis:
+                    50px;
+
+                padding-left:
+                    13px;
+
+            }
+
+
+            .haldo-app-window-content {
+
+                padding:
+                    13px;
+
+            }
+
+        }
+
+
+        @media (max-width: 480px) {
+
+            .haldo-app-window-actions {
+
+                gap:
+                    2px;
+
+            }
+
+
+            .haldo-app-window-actions button {
+
+                width:
+                    29px;
+
+                height:
+                    29px;
+
+            }
+
+        }
+
+    </style>
+        <!-- =========================================================
+         HALDO AI OS 20
+         GLOBAL APP REGISTRY / APP CATALOG FOUNDATION
+         TEIL 46
+         ========================================================= -->
+
+    <script>
+
+    (() => {
+
+        "use strict";
+
+
+        /* =====================================================
+           REGISTRY
+           ===================================================== */
+
+        const registry =
+            new Map();
+
+
+        /* =====================================================
+           EVENT BRIDGE
+           ===================================================== */
+
+        function emit(
+            eventName,
+            detail = {}
+        ) {
+
+            if (
+                window.HalDoEventBus &&
+                typeof window.HalDoEventBus.emit ===
+                "function"
+            ) {
+
+                window.HalDoEventBus.emit(
+                    eventName,
+                    detail
+                );
+
+                return;
+
+            }
+
+
+            try {
+
+                document.dispatchEvent(
+                    new CustomEvent(
+                        `haldo:${eventName}`,
+                        {
+                            detail
+                        }
+                    )
+                );
+
+            } catch (error) {
+
+                console.warn(
+                    "[HalDo App Registry 20]",
+                    error
+                );
+
+            }
+
+        }
+
+
+        /* =====================================================
+           NORMALIZE DEFINITION
+           ===================================================== */
+
+        function normalize(
+            definition
+        ) {
+
+            if (
+                typeof definition ===
+                "string"
+            ) {
+
+                definition = {
+
+                    id:
+                        definition,
+
+                    name:
+                        definition
+
+                };
+
+            }
+
+
+            if (
+                !definition ||
+                typeof definition !==
+                "object"
+            ) {
+
+                return null;
+
+            }
+
+
+            const id =
+                String(
+                    definition.id ||
+                    definition.appId ||
+                    ""
+                )
+                .trim();
+
+
+            if (!id) {
+
+                return null;
+
+            }
+
+
+            return {
+
+                ...definition,
+
+                id,
+
+                appId:
+                    id,
+
+                name:
+                    definition.name ||
+                    definition.title ||
+                    id,
+
+                title:
+                    definition.title ||
+                    definition.name ||
+                    id,
+
+                description:
+                    definition.description ||
+                    "",
+
+                category:
+                    definition.category ||
+                    "system",
+
+                icon:
+                    definition.icon ||
+                    "◈",
+
+                version:
+                    definition.version ||
+                    "20.0.0",
+
+                enabled:
+                    definition.enabled !==
+                    false,
+
+                visible:
+                    definition.visible !==
+                    false,
+
+                system:
+                    definition.system ===
+                    true,
+
+                installed:
+                    definition.installed !==
+                    false,
+
+                permissions:
+                    Array.isArray(
+                        definition.permissions
+                    )
+                        ? [
+                            ...definition.permissions
+                        ]
+                        : [],
+
+                tags:
+                    Array.isArray(
+                        definition.tags
+                    )
+                        ? [
+                            ...definition.tags
+                        ]
+                        : []
+
+            };
+
+        }
+
+
+        /* =====================================================
+           REGISTER
+           ===================================================== */
+
+        function register(
+            definition
+        ) {
+
+            const normalized =
+                normalize(
+                    definition
+                );
+
+
+            if (!normalized) {
+
+                return false;
+
+            }
+
+
+            const existing =
+                registry.get(
+                    normalized.id
+                );
+
+
+            /*
+             * Bestehende Definition nicht blind
+             * überschreiben. Neue Werte werden
+             * kontrolliert zusammengeführt.
+             */
+
+            const merged =
+                existing
+                    ? {
+
+                        ...existing,
+                        ...normalized,
+
+                        permissions:
+                            [
+                                ...new Set(
+                                    [
+                                        ...(
+                                            existing.permissions ||
+                                            []
+                                        ),
+                                        ...(
+                                            normalized.permissions ||
+                                            []
+                                        )
+                                    ]
+                                )
+                            ],
+
+                        tags:
+                            [
+                                ...new Set(
+                                    [
+                                        ...(
+                                            existing.tags ||
+                                            []
+                                        ),
+                                        ...(
+                                            normalized.tags ||
+                                            []
+                                        )
+                                    ]
+                                )
+                            ]
+
+                    }
+                    : normalized;
+
+
+            registry.set(
+                merged.id,
+                merged
+            );
+
+
+            emit(
+                existing
+                    ? "app:registry:updated"
+                    : "app:registry:registered",
+                {
+
+                    appId:
+                        merged.id,
+
+                    definition:
+                        merged
+
+                }
+            );
+
+
+            return true;
+
+        }
+
+
+        /* =====================================================
+           REGISTER MANY
+           ===================================================== */
+
+        function registerMany(
+            definitions
+        ) {
+
+            if (
+                !Array.isArray(
+                    definitions
+                )
+            ) {
+
+                return 0;
+
+            }
+
+
+            let count =
+                0;
+
+
+            definitions.forEach(
+                definition => {
+
+                    if (
+                        register(
+                            definition
+                        )
+                    ) {
+
+                        count++;
+
+                    }
+
+                }
+            );
+
+
+            return count;
+
+        }
+
+
+        /* =====================================================
+           GET
+           ===================================================== */
+
+        function get(
+            appId
+        ) {
+
+            return (
+                registry.get(
+                    String(
+                        appId ||
+                        ""
+                    )
+                    .trim()
+                ) ||
+                null
+            );
+
+        }
+
+
+        /* =====================================================
+           HAS
+           ===================================================== */
+
+        function has(
+            appId
+        ) {
+
+            return registry.has(
+                String(
+                    appId ||
+                    ""
+                )
+                .trim()
+            );
+
+        }
+
+
+        /* =====================================================
+           REMOVE
+           ===================================================== */
+
+        function unregister(
+            appId
+        ) {
+
+            const id =
+                String(
+                    appId ||
+                    ""
+                )
+                .trim();
+
+
+            if (
+                !registry.has(
+                    id
+                )
+            ) {
+
+                return false;
+
+            }
+
+
+            registry.delete(
+                id
+            );
+
+
+            emit(
+                "app:registry:unregistered",
+                {
+
+                    appId:
+                        id
+
+                }
+            );
+
+
+            return true;
+
+        }
+
+
+        /* =====================================================
+           LIST
+           ===================================================== */
+
+        function list(
+            options = {}
+        ) {
+
+            let result =
+                Array.from(
+                    registry.values()
+                );
+
+
+            if (
+                options.category
+            ) {
+
+                result =
+                    result.filter(
+                        app =>
+                            app.category ===
+                            options.category
+                    );
+
+            }
+
+
+            if (
+                options.enabled ===
+                true
+            ) {
+
+                result =
+                    result.filter(
+                        app =>
+                            app.enabled
+                    );
+
+            }
+
+
+            if (
+                options.visible ===
+                true
+            ) {
+
+                result =
+                    result.filter(
+                        app =>
+                            app.visible
+                    );
+
+            }
+
+
+            if (
+                options.system ===
+                true
+            ) {
+
+                result =
+                    result.filter(
+                        app =>
+                            app.system
+                    );
+
+            }
+
+
+            return result;
+
+        }
+
+
+        /* =====================================================
+           SEARCH
+           ===================================================== */
+
+        function search(
+            query
+        ) {
+
+            const value =
+                String(
+                    query ||
+                    ""
+                )
+                .trim()
+                .toLowerCase();
+
+
+            if (!value) {
+
+                return list();
+
+            }
+
+
+            return list()
+                .filter(
+                    app => {
+
+                        const haystack =
+                            [
+                                app.id,
+                                app.name,
+                                app.title,
+                                app.description,
+                                app.category,
+                                ...(
+                                    app.tags ||
+                                    []
+                                )
+                            ]
+                            .join(
+                                " "
+                            )
+                            .toLowerCase();
+
+
+                        return haystack.includes(
+                            value
+                        );
+
+                    }
+                );
+
+        }
+
+
+        /* =====================================================
+           ENABLE / DISABLE
+           ===================================================== */
+
+        function setEnabled(
+            appId,
+            enabled
+        ) {
+
+            const app =
+                get(
+                    appId
+                );
+
+
+            if (!app) {
+
+                return false;
+
+            }
+
+
+            app.enabled =
+                Boolean(
+                    enabled
+                );
+
+
+            emit(
+                "app:registry:enabled-changed",
+                {
+
+                    appId:
+                        app.id,
+
+                    enabled:
+                        app.enabled
+
+                }
+            );
+
+
+            return true;
+
+        }
+
+
+        /* =====================================================
+           PUBLIC API
+           ===================================================== */
+
+        const appRegistry20 = {
+
+            register,
+
+            registerMany,
+
+            get,
+
+            has,
+
+            unregister,
+
+            list,
+
+            search,
+
+            setEnabled
+
+        };
+
+
+        /* =====================================================
+           GLOBAL API
+           ===================================================== */
+
+        window.HalDoAppRegistry20 =
+            appRegistry20;
+
+
+        if (
+            !window.HalDoOS
+        ) {
+
+            window.HalDoOS =
+                {};
+
+        }
+
+
+        window.HalDoOS.appRegistry20 =
+            appRegistry20;
+
+
+        /*
+         * Kompatibler Alias nur dann, wenn noch
+         * keine ältere Registry vorhanden ist.
+         */
+
+        if (
+            !window.HalDoAppRegistry
+        ) {
+
+            window.HalDoAppRegistry =
+                appRegistry20;
+
+        }
+
+
+        /* =====================================================
+           INITIALIZATION
+           ===================================================== */
+
+        function initializeRegistry() {
+
+            emit(
+                "app-registry:ready",
+                {
+
+                    version:
+                        "20.0.0",
+
+                    count:
+                        registry.size,
+
+                    timestamp:
+                        Date.now()
+
+                }
+            );
+
+
+            console.info(
+                "%cHalDo AI OS 20%c App Registry 20 bereit",
+                "color:#42e6ff;font-weight:800;",
+                "color:#ffffff;"
+            );
+
+        }
+
+
+        if (
+            document.readyState ===
+            "loading"
+        ) {
+
+            document.addEventListener(
+                "DOMContentLoaded",
+                initializeRegistry,
+                {
+                    once:
+                        true
+                }
+            );
+
+        } else {
+
+            initializeRegistry();
+
+        }
+
+
+    })();
+
+    </script>
