@@ -23505,3 +23505,3125 @@
 
 })();
 </script>
+<script>
+/* =========================================================
+   HALDO AI OS 20
+   PART 21 — APP STATE & SESSION BRIDGE
+   ========================================================= */
+
+(function () {
+
+    "use strict";
+
+
+    const HALDO =
+        window.HalDoOS =
+            window.HalDoOS || {};
+
+
+    const state = {
+
+        initialized:
+            false,
+
+        activeApp:
+            null,
+
+        openApps:
+            new Map(),
+
+        sessions:
+            new Map(),
+
+        history:
+            [],
+
+        maxHistory:
+            200
+
+    };
+
+
+    /* =====================================================
+       HELPERS
+       ===================================================== */
+
+    function timestamp() {
+
+        return Date.now();
+
+    }
+
+
+    function normalizeAppId(
+        appId
+    ) {
+
+        return String(
+            appId || ""
+        )
+            .trim()
+            .toLowerCase();
+
+    }
+
+
+    function emit(
+        eventName,
+        detail = {}
+    ) {
+
+        const bridge =
+            HALDO.events ||
+            window.HalDoEvents;
+
+
+        if (
+            bridge &&
+            typeof bridge.emit ===
+            "function"
+        ) {
+
+            try {
+
+                bridge.emit(
+                    eventName,
+                    detail
+                );
+
+                return true;
+
+            } catch (error) {
+
+                console.warn(
+                    "[HalDo App State]",
+                    error
+                );
+
+            }
+
+        }
+
+
+        try {
+
+            window.dispatchEvent(
+                new CustomEvent(
+                    eventName,
+                    {
+                        detail
+                    }
+                )
+            );
+
+
+            return true;
+
+        } catch {
+
+            return false;
+
+        }
+
+    }
+
+
+    function record(
+        type,
+        appId,
+        detail = {}
+    ) {
+
+        state.history.push({
+
+            type,
+
+            appId,
+
+            detail,
+
+            timestamp:
+                timestamp()
+
+        });
+
+
+        if (
+            state.history.length >
+            state.maxHistory
+        ) {
+
+            state.history.shift();
+
+        }
+
+    }
+
+
+    /* =====================================================
+       APP SESSION CREATION
+       ===================================================== */
+
+    function createSession(
+        appId,
+        metadata = {}
+    ) {
+
+        const id =
+            normalizeAppId(
+                appId
+            );
+
+
+        if (!id) {
+
+            return null;
+
+        }
+
+
+        if (
+            state.sessions.has(id)
+        ) {
+
+            return state.sessions.get(
+                id
+            );
+
+        }
+
+
+        const session = {
+
+            id,
+
+            appId:
+                id,
+
+            createdAt:
+                timestamp(),
+
+            updatedAt:
+                timestamp(),
+
+            active:
+                false,
+
+            minimized:
+                false,
+
+            maximized:
+                false,
+
+            data:
+                {},
+
+            metadata:
+                {
+                    ...metadata
+                }
+
+        };
+
+
+        state.sessions.set(
+            id,
+            session
+        );
+
+
+        record(
+            "session-created",
+            id
+        );
+
+
+        emit(
+            "app:session:created",
+            {
+                session
+            }
+        );
+
+
+        return session;
+
+    }
+
+
+    /* =====================================================
+       OPEN APP
+       ===================================================== */
+
+    function open(
+        appId,
+        metadata = {}
+    ) {
+
+        const id =
+            normalizeAppId(
+                appId
+            );
+
+
+        if (!id) {
+
+            return null;
+
+        }
+
+
+        const session =
+            createSession(
+                id,
+                metadata
+            );
+
+
+        session.active =
+            true;
+
+        session.minimized =
+            false;
+
+        session.updatedAt =
+            timestamp();
+
+
+        state.openApps.set(
+            id,
+            session
+        );
+
+
+        state.activeApp =
+            id;
+
+
+        record(
+            "opened",
+            id
+        );
+
+
+        emit(
+            "app:opened",
+            {
+                appId:
+                    id,
+
+                session
+            }
+        );
+
+
+        return session;
+
+    }
+
+
+    /* =====================================================
+       CLOSE APP
+       ===================================================== */
+
+    function close(
+        appId
+    ) {
+
+        const id =
+            normalizeAppId(
+                appId
+            );
+
+
+        if (!id) {
+
+            return false;
+
+        }
+
+
+        const session =
+            state.sessions.get(
+                id
+            );
+
+
+        if (!session) {
+
+            return false;
+
+        }
+
+
+        session.active =
+            false;
+
+        session.updatedAt =
+            timestamp();
+
+
+        state.openApps.delete(
+            id
+        );
+
+
+        if (
+            state.activeApp ===
+            id
+        ) {
+
+            const remaining =
+                Array.from(
+                    state.openApps.keys()
+                );
+
+
+            state.activeApp =
+                remaining.length
+                    ? remaining[
+                        remaining.length - 1
+                    ]
+                    : null;
+
+        }
+
+
+        record(
+            "closed",
+            id
+        );
+
+
+        emit(
+            "app:closed",
+            {
+                appId:
+                    id,
+
+                session
+            }
+        );
+
+
+        return true;
+
+    }
+
+
+    /* =====================================================
+       ACTIVATE APP
+       ===================================================== */
+
+    function activate(
+        appId
+    ) {
+
+        const id =
+            normalizeAppId(
+                appId
+            );
+
+
+        const session =
+            state.sessions.get(
+                id
+            );
+
+
+        if (!session) {
+
+            return open(
+                id
+            );
+
+        }
+
+
+        session.active =
+            true;
+
+        session.minimized =
+            false;
+
+        session.updatedAt =
+            timestamp();
+
+
+        state.openApps.set(
+            id,
+            session
+        );
+
+
+        state.activeApp =
+            id;
+
+
+        record(
+            "activated",
+            id
+        );
+
+
+        emit(
+            "app:activated",
+            {
+                appId:
+                    id,
+
+                session
+            }
+        );
+
+
+        return session;
+
+    }
+
+
+    /* =====================================================
+       MINIMIZE / MAXIMIZE
+       ===================================================== */
+
+    function minimize(
+        appId
+    ) {
+
+        const id =
+            normalizeAppId(
+                appId
+            );
+
+
+        const session =
+            state.sessions.get(
+                id
+            );
+
+
+        if (!session) {
+
+            return false;
+
+        }
+
+
+        session.minimized =
+            true;
+
+        session.active =
+            false;
+
+        session.updatedAt =
+            timestamp();
+
+
+        record(
+            "minimized",
+            id
+        );
+
+
+        emit(
+            "app:minimized",
+            {
+                appId:
+                    id,
+
+                session
+            }
+        );
+
+
+        return true;
+
+    }
+
+
+    function maximize(
+        appId
+    ) {
+
+        const id =
+            normalizeAppId(
+                appId
+            );
+
+
+        const session =
+            state.sessions.get(
+                id
+            );
+
+
+        if (!session) {
+
+            return false;
+
+        }
+
+
+        session.maximized =
+            true;
+
+        session.minimized =
+            false;
+
+        session.active =
+            true;
+
+        session.updatedAt =
+            timestamp();
+
+
+        state.activeApp =
+            id;
+
+
+        record(
+            "maximized",
+            id
+        );
+
+
+        emit(
+            "app:maximized",
+            {
+                appId:
+                    id,
+
+                session
+            }
+        );
+
+
+        return true;
+
+    }
+
+
+    /* =====================================================
+       APP DATA
+       ===================================================== */
+
+    function setData(
+        appId,
+        key,
+        value
+    ) {
+
+        const id =
+            normalizeAppId(
+                appId
+            );
+
+
+        const session =
+            state.sessions.get(
+                id
+            ) ||
+            createSession(
+                id
+            );
+
+
+        if (!session) {
+
+            return false;
+
+        }
+
+
+        session.data[
+            String(key)
+        ] =
+            value;
+
+        session.updatedAt =
+            timestamp();
+
+
+        emit(
+            "app:data:changed",
+            {
+
+                appId:
+                    id,
+
+                key:
+                    String(key),
+
+                value
+
+            }
+        );
+
+
+        return true;
+
+    }
+
+
+    function getData(
+        appId,
+        key,
+        fallback = null
+    ) {
+
+        const id =
+            normalizeAppId(
+                appId
+            );
+
+
+        const session =
+            state.sessions.get(
+                id
+            );
+
+
+        if (
+            !session
+        ) {
+
+            return fallback;
+
+        }
+
+
+        return Object.prototype.hasOwnProperty.call(
+            session.data,
+            String(key)
+        )
+            ? session.data[
+                String(key)
+            ]
+            : fallback;
+
+    }
+
+
+    /* =====================================================
+       QUERIES
+       ===================================================== */
+
+    function isOpen(
+        appId
+    ) {
+
+        return state.openApps.has(
+            normalizeAppId(
+                appId
+            )
+        );
+
+    }
+
+
+    function isActive(
+        appId
+    ) {
+
+        return (
+            state.activeApp ===
+            normalizeAppId(
+                appId
+            )
+        );
+
+    }
+
+
+    function getSession(
+        appId
+    ) {
+
+        return (
+            state.sessions.get(
+                normalizeAppId(
+                    appId
+                )
+            ) ||
+            null
+        );
+
+    }
+
+
+    function getOpenApps() {
+
+        return Array.from(
+            state.openApps.values()
+        );
+
+    }
+
+
+    function getHistory(
+        limit = 50
+    ) {
+
+        const amount =
+            Math.max(
+                1,
+                Math.min(
+                    Number(limit) || 50,
+                    state.maxHistory
+                )
+            );
+
+
+        return state.history
+            .slice(
+                -amount
+            );
+
+    }
+
+
+    /* =====================================================
+       SNAPSHOT
+       ===================================================== */
+
+    function snapshot() {
+
+        return {
+
+            activeApp:
+                state.activeApp,
+
+            openApps:
+                getOpenApps(),
+
+            sessions:
+                Array.from(
+                    state.sessions.values()
+                ),
+
+            history:
+                getHistory(
+                    state.maxHistory
+                ),
+
+            timestamp:
+                timestamp()
+
+        };
+
+    }
+
+
+    /* =====================================================
+       INITIALIZATION
+       ===================================================== */
+
+    function initialize() {
+
+        if (
+            state.initialized
+        ) {
+
+            return HALDO.appState;
+
+        }
+
+
+        state.initialized =
+            true;
+
+
+        HALDO.appState = {
+
+            open,
+
+            close,
+
+            activate,
+
+            minimize,
+
+            maximize,
+
+            createSession,
+
+            getSession,
+
+            setData,
+
+            getData,
+
+            isOpen,
+
+            isActive,
+
+            getOpenApps,
+
+            getHistory,
+
+            snapshot
+
+        };
+
+
+        window.HalDoAppState =
+            HALDO.appState;
+
+
+        emit(
+            "app:state:ready",
+            {
+
+                version:
+                    "20.0.0",
+
+                timestamp:
+                    timestamp()
+
+            }
+        );
+
+
+        console.info(
+            "%cHalDo AI OS 20%c App-State- und Session-System bereit",
+            "color:#42e6ff;font-weight:800;",
+            "color:#ffffff;"
+        );
+
+
+        return HALDO.appState;
+
+    }
+
+
+    if (
+        document.readyState ===
+        "loading"
+    ) {
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            initialize,
+            {
+                once:
+                    true
+            }
+        );
+
+    } else {
+
+        initialize();
+
+    }
+
+
+})();
+</script>
+<script>
+/* =========================================================
+   HALDO AI OS 20
+   PART 22 — APP REGISTRY / CAPABILITY BRIDGE
+   ========================================================= */
+
+(function () {
+
+    "use strict";
+
+
+    const HALDO =
+        window.HalDoOS =
+            window.HalDoOS || {};
+
+
+    const state = {
+
+        initialized:
+            false,
+
+        registry:
+            new Map(),
+
+        aliases:
+            new Map(),
+
+        categories:
+            new Map(),
+
+        history:
+            [],
+
+        maxHistory:
+            300
+
+    };
+
+
+    /* =====================================================
+       HELPERS
+       ===================================================== */
+
+    function timestamp() {
+        return Date.now();
+    }
+
+
+    function normalize(
+        value
+    ) {
+
+        return String(
+            value || ""
+        )
+            .trim()
+            .toLowerCase()
+            .replace(
+                /\s+/g,
+                "-"
+            );
+
+    }
+
+
+    function clone(
+        value
+    ) {
+
+        if (
+            value === undefined
+        ) {
+
+            return undefined;
+
+        }
+
+
+        try {
+
+            return JSON.parse(
+                JSON.stringify(
+                    value
+                )
+            );
+
+        } catch {
+
+            return value;
+
+        }
+
+    }
+
+
+    function emit(
+        eventName,
+        detail = {}
+    ) {
+
+        const bridge =
+            HALDO.events ||
+            window.HalDoEvents;
+
+
+        if (
+            bridge &&
+            typeof bridge.emit ===
+            "function"
+        ) {
+
+            try {
+
+                bridge.emit(
+                    eventName,
+                    detail
+                );
+
+            } catch (error) {
+
+                console.warn(
+                    "[HalDo App Registry]",
+                    error
+                );
+
+            }
+
+        }
+
+
+        try {
+
+            window.dispatchEvent(
+                new CustomEvent(
+                    eventName,
+                    {
+                        detail
+                    }
+                )
+            );
+
+        } catch {
+
+            // Event dispatch is optional.
+
+        }
+
+    }
+
+
+    function record(
+        type,
+        appId,
+        detail = {}
+    ) {
+
+        state.history.push({
+
+            type,
+
+            appId,
+
+            detail,
+
+            timestamp:
+                timestamp()
+
+        });
+
+
+        if (
+            state.history.length >
+            state.maxHistory
+        ) {
+
+            state.history.shift();
+
+        }
+
+    }
+
+
+    /* =====================================================
+       CATEGORY MANAGEMENT
+       ===================================================== */
+
+    function addToCategory(
+        category,
+        appId
+    ) {
+
+        const normalizedCategory =
+            normalize(
+                category
+            );
+
+
+        if (!normalizedCategory) {
+
+            return;
+
+        }
+
+
+        if (
+            !state.categories.has(
+                normalizedCategory
+            )
+        ) {
+
+            state.categories.set(
+                normalizedCategory,
+                new Set()
+            );
+
+        }
+
+
+        state.categories
+            .get(
+                normalizedCategory
+            )
+            .add(
+                appId
+            );
+
+    }
+
+
+    function removeFromCategories(
+        appId
+    ) {
+
+        state.categories.forEach(
+            apps => {
+
+                apps.delete(
+                    appId
+                );
+
+            }
+        );
+
+    }
+
+
+    /* =====================================================
+       REGISTER
+       ===================================================== */
+
+    function register(
+        definition
+    ) {
+
+        if (
+            !definition ||
+            typeof definition !==
+            "object"
+        ) {
+
+            return null;
+
+        }
+
+
+        const id =
+            normalize(
+                definition.id ||
+                definition.appId ||
+                definition.name
+            );
+
+
+        if (!id) {
+
+            console.warn(
+                "[HalDo App Registry]",
+                "App benötigt eine gültige ID."
+            );
+
+
+            return null;
+
+        }
+
+
+        const existing =
+            state.registry.get(
+                id
+            );
+
+
+        const app = {
+
+            id,
+
+            name:
+                definition.name ||
+                id,
+
+            title:
+                definition.title ||
+                definition.name ||
+                id,
+
+            description:
+                definition.description ||
+                "",
+
+            version:
+                definition.version ||
+                "1.0.0",
+
+            icon:
+                definition.icon ||
+                "◈",
+
+            category:
+                normalize(
+                    definition.category ||
+                    "system"
+                ),
+
+            enabled:
+                definition.enabled !==
+                    false,
+
+            visible:
+                definition.visible !==
+                    false,
+
+            launchable:
+                definition.launchable !==
+                    false,
+
+            permissions:
+                Array.isArray(
+                    definition.permissions
+                )
+                    ? [
+                        ...new Set(
+                            definition.permissions
+                        )
+                    ]
+                    : [],
+
+            capabilities:
+                Array.isArray(
+                    definition.capabilities
+                )
+                    ? [
+                        ...new Set(
+                            definition.capabilities
+                        )
+                    ]
+                    : [],
+
+            metadata:
+                {
+                    ...(definition.metadata ||
+                        {})
+                },
+
+            module:
+                definition.module ||
+                null,
+
+            factory:
+                typeof definition.factory ===
+                "function"
+                    ? definition.factory
+                    : null,
+
+            open:
+                typeof definition.open ===
+                "function"
+                    ? definition.open
+                    : null,
+
+            close:
+                typeof definition.close ===
+                "function"
+                    ? definition.close
+                    : null,
+
+            createdAt:
+                existing?.createdAt ||
+                timestamp(),
+
+            updatedAt:
+                timestamp()
+
+        };
+
+
+        state.registry.set(
+            id,
+            app
+        );
+
+
+        removeFromCategories(
+            id
+        );
+
+
+        addToCategory(
+            app.category,
+            id
+        );
+
+
+        if (
+            Array.isArray(
+                definition.aliases
+            )
+        ) {
+
+            definition.aliases.forEach(
+                alias => {
+
+                    const normalized =
+                        normalize(
+                            alias
+                        );
+
+
+                    if (
+                        normalized
+                    ) {
+
+                        state.aliases.set(
+                            normalized,
+                            id
+                        );
+
+                    }
+
+                }
+            );
+
+        }
+
+
+        record(
+            existing
+                ? "updated"
+                : "registered",
+            id,
+            {
+                name:
+                    app.name,
+
+                category:
+                    app.category
+
+            }
+        );
+
+
+        emit(
+            existing
+                ? "app:registry:updated"
+                : "app:registry:registered",
+            {
+                app:
+                    clone(
+                        app
+                    )
+            }
+        );
+
+
+        return app;
+
+    }
+
+
+    /* =====================================================
+       UNREGISTER
+       ===================================================== */
+
+    function unregister(
+        appId
+    ) {
+
+        const id =
+            resolveId(
+                appId
+            );
+
+
+        if (!id) {
+
+            return false;
+
+        }
+
+
+        if (
+            !state.registry.has(
+                id
+            )
+        ) {
+
+            return false;
+
+        }
+
+
+        state.registry.delete(
+            id
+        );
+
+
+        state.aliases.forEach(
+            (target, alias) => {
+
+                if (
+                    target === id
+                ) {
+
+                    state.aliases.delete(
+                        alias
+                    );
+
+                }
+
+            }
+        );
+
+
+        removeFromCategories(
+            id
+        );
+
+
+        record(
+            "unregistered",
+            id
+        );
+
+
+        emit(
+            "app:registry:unregistered",
+            {
+                appId:
+                    id
+            }
+        );
+
+
+        return true;
+
+    }
+
+
+    /* =====================================================
+       RESOLVE
+       ===================================================== */
+
+    function resolveId(
+        value
+    ) {
+
+        const normalized =
+            normalize(
+                value
+            );
+
+
+        if (!normalized) {
+
+            return null;
+
+        }
+
+
+        if (
+            state.registry.has(
+                normalized
+            )
+        ) {
+
+            return normalized;
+
+        }
+
+
+        return (
+            state.aliases.get(
+                normalized
+            ) ||
+            null
+        );
+
+    }
+
+
+    /* =====================================================
+       LOOKUP
+       ===================================================== */
+
+    function get(
+        appId
+    ) {
+
+        const id =
+            resolveId(
+                appId
+            );
+
+
+        if (!id) {
+
+            return null;
+
+        }
+
+
+        return (
+            state.registry.get(
+                id
+            ) ||
+            null
+        );
+
+    }
+
+
+    function has(
+        appId
+    ) {
+
+        return !!get(
+            appId
+        );
+
+    }
+
+
+    /* =====================================================
+       FILTERING
+       ===================================================== */
+
+    function getAll(
+        options = {}
+    ) {
+
+        let apps =
+            Array.from(
+                state.registry.values()
+            );
+
+
+        if (
+            options.category
+        ) {
+
+            const category =
+                normalize(
+                    options.category
+                );
+
+
+            apps =
+                apps.filter(
+                    app =>
+                        app.category ===
+                        category
+                );
+
+        }
+
+
+        if (
+            options.enabled !==
+            undefined
+        ) {
+
+            apps =
+                apps.filter(
+                    app =>
+                        app.enabled ===
+                        !!options.enabled
+                );
+
+        }
+
+
+        if (
+            options.visible !==
+            undefined
+        ) {
+
+            apps =
+                apps.filter(
+                    app =>
+                        app.visible ===
+                        !!options.visible
+                );
+
+        }
+
+
+        if (
+            options.launchable !==
+            undefined
+        ) {
+
+            apps =
+                apps.filter(
+                    app =>
+                        app.launchable ===
+                        !!options.launchable
+                );
+
+        }
+
+
+        if (
+            options.capability
+        ) {
+
+            const capability =
+                normalize(
+                    options.capability
+                );
+
+
+            apps =
+                apps.filter(
+                    app =>
+                        app.capabilities
+                            .map(
+                                normalize
+                            )
+                            .includes(
+                                capability
+                            )
+                );
+
+        }
+
+
+        return apps;
+
+    }
+
+
+    function getByCategory(
+        category
+    ) {
+
+        return getAll({
+            category
+        });
+
+    }
+
+
+    function getCategories() {
+
+        return Array.from(
+            state.categories.keys()
+        );
+
+    }
+
+
+    /* =====================================================
+       CAPABILITIES
+       ===================================================== */
+
+    function hasCapability(
+        appId,
+        capability
+    ) {
+
+        const app =
+            get(
+                appId
+            );
+
+
+        if (!app) {
+
+            return false;
+
+        }
+
+
+        const wanted =
+            normalize(
+                capability
+            );
+
+
+        return app.capabilities
+            .map(
+                normalize
+            )
+            .includes(
+                wanted
+            );
+
+    }
+
+
+    function getCapabilities(
+        appId
+    ) {
+
+        const app =
+            get(
+                appId
+            );
+
+
+        return app
+            ? [
+                ...app.capabilities
+            ]
+            : [];
+
+    }
+
+
+    /* =====================================================
+       APP LAUNCH DELEGATION
+       ===================================================== */
+
+    async function launch(
+        appId,
+        context = {}
+    ) {
+
+        const app =
+            get(
+                appId
+            );
+
+
+        if (!app) {
+
+            emit(
+                "app:launch:error",
+                {
+                    appId,
+                    reason:
+                        "not-found"
+                }
+            );
+
+
+            return {
+
+                success:
+                    false,
+
+                error:
+                    "App nicht gefunden."
+
+            };
+
+        }
+
+
+        if (
+            !app.enabled
+        ) {
+
+            return {
+
+                success:
+                    false,
+
+                error:
+                    "App ist deaktiviert."
+
+            };
+
+        }
+
+
+        if (
+            !app.launchable
+        ) {
+
+            return {
+
+                success:
+                    false,
+
+                error:
+                    "App kann nicht gestartet werden."
+
+            };
+
+        }
+
+
+        try {
+
+            let result =
+                null;
+
+
+            if (
+                typeof app.open ===
+                "function"
+            ) {
+
+                result =
+                    await app.open(
+                        context
+                    );
+
+            } else if (
+                typeof app.factory ===
+                "function"
+            ) {
+
+                result =
+                    await app.factory(
+                        context
+                    );
+
+            } else {
+
+                const ui =
+                    window.HalDoUI;
+
+
+                if (
+                    ui &&
+                    typeof ui.openAppWindow ===
+                    "function"
+                ) {
+
+                    result =
+                        await ui.openAppWindow(
+                            app.title,
+                            app.module ||
+                            app.description ||
+                            ""
+                        );
+
+                }
+
+            }
+
+
+            record(
+                "launched",
+                app.id
+            );
+
+
+            emit(
+                "app:launched",
+                {
+
+                    app:
+                        clone(
+                            app
+                        ),
+
+                    context,
+
+                    result
+
+                }
+            );
+
+
+            return {
+
+                success:
+                    true,
+
+                app,
+                result
+
+            };
+
+        } catch (error) {
+
+            record(
+                "launch-error",
+                app.id,
+                {
+                    message:
+                        error?.message ||
+                        String(error)
+                }
+            );
+
+
+            emit(
+                "app:launch:error",
+                {
+
+                    appId:
+                        app.id,
+
+                    error
+
+                }
+            );
+
+
+            console.error(
+                "[HalDo App Registry]",
+                "App-Start fehlgeschlagen:",
+                app.id,
+                error
+            );
+
+
+            return {
+
+                success:
+                    false,
+
+                error:
+                    error?.message ||
+                    "Unbekannter App-Fehler."
+
+            };
+
+        }
+
+    }
+
+
+    /* =====================================================
+       CLOSE DELEGATION
+       ===================================================== */
+
+    async function close(
+        appId,
+        context = {}
+    ) {
+
+        const app =
+            get(
+                appId
+            );
+
+
+        if (!app) {
+
+            return false;
+
+        }
+
+
+        try {
+
+            if (
+                typeof app.close ===
+                "function"
+            ) {
+
+                await app.close(
+                    context
+                );
+
+            }
+
+
+            if (
+                HALDO.appState &&
+                typeof HALDO.appState.close ===
+                "function"
+            ) {
+
+                HALDO.appState.close(
+                    app.id
+                );
+
+            }
+
+
+            record(
+                "closed",
+                app.id
+            );
+
+
+            emit(
+                "app:registry:closed",
+                {
+
+                    appId:
+                        app.id
+
+                }
+            );
+
+
+            return true;
+
+        } catch (error) {
+
+            console.error(
+                "[HalDo App Registry]",
+                "App-Schließen fehlgeschlagen:",
+                error
+            );
+
+
+            return false;
+
+        }
+
+    }
+
+
+    /* =====================================================
+       SNAPSHOT
+       ===================================================== */
+
+    function snapshot() {
+
+        return {
+
+            version:
+                "20.0.0",
+
+            count:
+                state.registry.size,
+
+            apps:
+                getAll().map(
+                    clone
+                ),
+
+            categories:
+                getCategories(),
+
+            timestamp:
+                timestamp()
+
+        };
+
+    }
+
+
+    function getHistory(
+        limit = 50
+    ) {
+
+        const amount =
+            Math.max(
+                1,
+                Math.min(
+                    Number(limit) || 50,
+                    state.maxHistory
+                )
+            );
+
+
+        return state.history
+            .slice(
+                -amount
+            )
+            .map(
+                clone
+            );
+
+    }
+
+
+    /* =====================================================
+       INITIALIZATION
+       ===================================================== */
+
+    function initialize() {
+
+        if (
+            state.initialized
+        ) {
+
+            return HALDO.appRegistry;
+
+        }
+
+
+        state.initialized =
+            true;
+
+
+        HALDO.appRegistry = {
+
+            register,
+
+            unregister,
+
+            resolveId,
+
+            get,
+
+            has,
+
+            getAll,
+
+            getByCategory,
+
+            getCategories,
+
+            hasCapability,
+
+            getCapabilities,
+
+            launch,
+
+            close,
+
+            snapshot,
+
+            getHistory
+
+        };
+
+
+        /*
+         * Das bestehende App-Registry-Modul
+         * wird nicht überschrieben.
+         *
+         * Diese Bridge stellt nur eine
+         * zentrale Zugriffsschicht bereit.
+         */
+
+        window.HalDoAppRegistry =
+            HALDO.appRegistry;
+
+
+        emit(
+            "app:registry:bridge:ready",
+            {
+
+                version:
+                    "20.0.0",
+
+                timestamp:
+                    timestamp()
+
+            }
+        );
+
+
+        console.info(
+            "%cHalDo AI OS 20%c App-Registry- und Capability-Bridge bereit",
+            "color:#42e6ff;font-weight:800;",
+            "color:#ffffff;"
+        );
+
+
+        return HALDO.appRegistry;
+
+    }
+
+
+    if (
+        document.readyState ===
+        "loading"
+    ) {
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            initialize,
+            {
+                once:
+                    true
+            }
+        );
+
+    } else {
+
+        initialize();
+
+    }
+
+
+})();
+</script>
+<script>
+/* =========================================================
+   HALDO AI OS 20
+   PART 22
+   CENTRAL RUNTIME / SAFETY / COMPATIBILITY BRIDGE
+   ========================================================= */
+
+(() => {
+
+    "use strict";
+
+
+    /* =====================================================
+       GLOBAL HALDO NAMESPACE
+       ===================================================== */
+
+    window.HalDoOS =
+        window.HalDoOS || {};
+
+
+    window.HalDoOS.version =
+        "20.0.0";
+
+
+    window.HalDoOS.edition =
+        "Professional Ultimate Foundation";
+
+
+    window.HalDoOS.runtime =
+        window.HalDoOS.runtime || {};
+
+
+    window.HalDoOS.runtime.startedAt =
+        window.HalDoOS.runtime.startedAt ||
+        Date.now();
+
+
+    /* =====================================================
+       RUNTIME STATE
+       ===================================================== */
+
+    const runtimeState = {
+
+        initialized:
+            false,
+
+        domReady:
+            document.readyState !== "loading",
+
+        online:
+            navigator.onLine,
+
+        errors:
+            0,
+
+        warnings:
+            0,
+
+        lastError:
+            null,
+
+        lastWarning:
+            null,
+
+        modules:
+            {},
+
+        services:
+            {},
+
+        apps:
+            {},
+
+        events:
+            {}
+
+    };
+
+
+    window.HalDoOS.runtime.state =
+        runtimeState;
+
+
+    /* =====================================================
+       SAFE LOGGER
+       ===================================================== */
+
+    function log(
+        ...args
+    ) {
+
+        try {
+
+            console.info(
+                "[HalDo OS 20]",
+                ...args
+            );
+
+        } catch (_) {}
+
+    }
+
+
+    function warn(
+        ...args
+    ) {
+
+        runtimeState.warnings++;
+
+        runtimeState.lastWarning =
+            args;
+
+        try {
+
+            console.warn(
+                "[HalDo OS 20]",
+                ...args
+            );
+
+        } catch (_) {}
+
+    }
+
+
+    function error(
+        ...args
+    ) {
+
+        runtimeState.errors++;
+
+        runtimeState.lastError =
+            args;
+
+        try {
+
+            console.error(
+                "[HalDo OS 20]",
+                ...args
+            );
+
+        } catch (_) {}
+
+    }
+
+
+    /* =====================================================
+       SAFE DOM HELPERS
+       ===================================================== */
+
+    function getElement(
+        id
+    ) {
+
+        if (
+            typeof id !==
+            "string"
+        ) {
+
+            return null;
+
+        }
+
+
+        return document.getElementById(
+            id
+        );
+
+    }
+
+
+    function setText(
+        id,
+        value
+    ) {
+
+        const element =
+            getElement(id);
+
+
+        if (!element) {
+
+            return false;
+
+        }
+
+
+        element.textContent =
+            String(
+                value ?? ""
+            );
+
+
+        return true;
+
+    }
+
+
+    /* =====================================================
+       BOOT PROGRESS BRIDGE
+       ===================================================== */
+
+    function updateBootProgress(
+        percent,
+        status
+    ) {
+
+        const bar =
+            getElement(
+                "haldo-boot-progress-bar"
+            );
+
+
+        const statusElement =
+            getElement(
+                "haldo-boot-status"
+            );
+
+
+        const safePercent =
+            Math.max(
+                0,
+                Math.min(
+                    100,
+                    Number(percent) || 0
+                )
+            );
+
+
+        if (bar) {
+
+            bar.style.width =
+                `${safePercent}%`;
+
+        }
+
+
+        if (statusElement) {
+
+            statusElement.textContent =
+                status ||
+                "HalDo AI OS 20 wird gestartet ...";
+
+        }
+
+    }
+
+
+    /* =====================================================
+       MODULE REGISTRATION BRIDGE
+       ===================================================== */
+
+    function registerModule(
+        name,
+        module
+    ) {
+
+        if (
+            !name ||
+            !module
+        ) {
+
+            return false;
+
+        }
+
+
+        runtimeState.modules[name] =
+            module;
+
+
+        try {
+
+            window.HalDoOS.modules =
+                window.HalDoOS.modules ||
+                {};
+
+
+            window.HalDoOS.modules[name] =
+                module;
+
+        } catch (exception) {
+
+            warn(
+                "Modul konnte nicht global verbunden werden.",
+                name,
+                exception
+            );
+
+        }
+
+
+        return true;
+
+    }
+
+
+    function getModule(
+        name
+    ) {
+
+        if (
+            runtimeState.modules[name]
+        ) {
+
+            return runtimeState.modules[name];
+
+        }
+
+
+        if (
+            window.HalDoOS.modules &&
+            window.HalDoOS.modules[name]
+        ) {
+
+            return window.HalDoOS.modules[name];
+
+        }
+
+
+        return null;
+
+    }
+
+
+    /* =====================================================
+       SERVICE REGISTRATION
+       ===================================================== */
+
+    function registerService(
+        name,
+        service
+    ) {
+
+        if (
+            !name ||
+            !service
+        ) {
+
+            return false;
+
+        }
+
+
+        runtimeState.services[name] =
+            service;
+
+
+        window.HalDoOS.services =
+            window.HalDoOS.services ||
+            {};
+
+
+        window.HalDoOS.services[name] =
+            service;
+
+
+        return true;
+
+    }
+
+
+    function getService(
+        name
+    ) {
+
+        return (
+            runtimeState.services[name] ||
+            window.HalDoOS.services?.[name] ||
+            null
+        );
+
+    }
+
+
+    /* =====================================================
+       EVENT BRIDGE
+       ===================================================== */
+
+    function on(
+        eventName,
+        callback
+    ) {
+
+        if (
+            !eventName ||
+            typeof callback !==
+            "function"
+        ) {
+
+            return () => {};
+
+        }
+
+
+        if (
+            !runtimeState.events[eventName]
+        ) {
+
+            runtimeState.events[eventName] =
+                new Set();
+
+        }
+
+
+        runtimeState.events[eventName]
+            .add(callback);
+
+
+        return () => {
+
+            off(
+                eventName,
+                callback
+            );
+
+        };
+
+    }
+
+
+    function off(
+        eventName,
+        callback
+    ) {
+
+        const listeners =
+            runtimeState.events[eventName];
+
+
+        if (!listeners) {
+
+            return;
+
+        }
+
+
+        listeners.delete(
+            callback
+        );
+
+    }
+
+
+    function emit(
+        eventName,
+        detail
+    ) {
+
+        const listeners =
+            runtimeState.events[eventName];
+
+
+        if (listeners) {
+
+            listeners.forEach(
+                callback => {
+
+                    try {
+
+                        callback(
+                            detail
+                        );
+
+                    } catch (exception) {
+
+                        error(
+                            "Event-Handler-Fehler:",
+                            eventName,
+                            exception
+                        );
+
+                    }
+
+                }
+            );
+
+        }
+
+
+        try {
+
+            window.dispatchEvent(
+                new CustomEvent(
+                    eventName,
+                    {
+                        detail
+                    }
+                )
+            );
+
+        } catch (exception) {
+
+            warn(
+                "CustomEvent konnte nicht ausgelöst werden.",
+                exception
+            );
+
+        }
+
+    }
+
+
+    /* =====================================================
+       NETWORK STATE
+       ===================================================== */
+
+    function updateNetworkState() {
+
+        runtimeState.online =
+            navigator.onLine;
+
+
+        setText(
+            "home-status-network",
+            runtimeState.online
+                ? "Online"
+                : "Offline"
+        );
+
+
+        const dot =
+            getElement(
+                "home-status-network-dot"
+            );
+
+
+        if (dot) {
+
+            dot.classList.toggle(
+                "is-online",
+                runtimeState.online
+            );
+
+        }
+
+
+        emit(
+            "network:changed",
+            {
+                online:
+                    runtimeState.online,
+
+                timestamp:
+                    Date.now()
+            }
+        );
+
+    }
+
+
+    window.addEventListener(
+        "online",
+        updateNetworkState
+    );
+
+
+    window.addEventListener(
+        "offline",
+        updateNetworkState
+    );
+
+
+    /* =====================================================
+       GLOBAL ERROR PROTECTION
+       ===================================================== */
+
+    window.addEventListener(
+        "error",
+        event => {
+
+            runtimeState.errors++;
+
+            runtimeState.lastError =
+                event.error ||
+                event.message ||
+                "Unbekannter Fehler";
+
+
+            error(
+                "Globaler Laufzeitfehler:",
+                runtimeState.lastError
+            );
+
+
+            emit(
+                "runtime:error",
+                {
+                    type:
+                        "error",
+
+                    error:
+                        runtimeState.lastError,
+
+                    timestamp:
+                        Date.now()
+                }
+            );
+
+        }
+    );
+
+
+    window.addEventListener(
+        "unhandledrejection",
+        event => {
+
+            runtimeState.errors++;
+
+            runtimeState.lastError =
+                event.reason;
+
+
+            error(
+                "Nicht behandelte Promise-Ablehnung:",
+                event.reason
+            );
+
+
+            emit(
+                "runtime:error",
+                {
+                    type:
+                        "unhandledrejection",
+
+                    error:
+                        event.reason,
+
+                    timestamp:
+                        Date.now()
+                }
+            );
+
+        }
+    );
+
+
+    /* =====================================================
+       EXISTING SYSTEM CONNECTIONS
+       ===================================================== */
+
+    function connectExistingSystems() {
+
+        const kernel =
+            window.HalDoKernel ||
+            window.HalDoOS.kernel;
+
+
+        const system =
+            window.HalDoSystem ||
+            window.HalDoOS.system;
+
+
+        const appManager =
+            window.HalDoAppManager ||
+            window.HalDoOS.appManager;
+
+
+        const router =
+            window.HalDoAppRouter ||
+            window.HalDoOS.appRouter;
+
+
+        const ui =
+            window.HalDoUI;
+
+
+        if (kernel) {
+
+            registerService(
+                "kernel",
+                kernel
+            );
+
+        }
+
+
+        if (system) {
+
+            registerService(
+                "system",
+                system
+            );
+
+        }
+
+
+        if (appManager) {
+
+            registerService(
+                "appManager",
+                appManager
+            );
+
+        }
+
+
+        if (router) {
+
+            registerService(
+                "router",
+                router
+            );
+
+        }
+
+
+        if (ui) {
+
+            registerService(
+                "ui",
+                ui
+            );
+
+        }
+
+
+        emit(
+            "runtime:systems-connected",
+            {
+                kernel:
+                    !!kernel,
+
+                system:
+                    !!system,
+
+                appManager:
+                    !!appManager,
+
+                router:
+                    !!router,
+
+                ui:
+                    !!ui,
+
+                timestamp:
+                    Date.now()
+            }
+        );
+
+    }
+
+
+    /* =====================================================
+       RUNTIME DIAGNOSTICS
+       ===================================================== */
+
+    function diagnostics() {
+
+        const result = {
+
+            version:
+                window.HalDoOS.version,
+
+            edition:
+                window.HalDoOS.edition,
+
+            initialized:
+                runtimeState.initialized,
+
+            domReady:
+                runtimeState.domReady,
+
+            online:
+                runtimeState.online,
+
+            errors:
+                runtimeState.errors,
+
+            warnings:
+                runtimeState.warnings,
+
+            modules:
+                Object.keys(
+                    runtimeState.modules
+                ),
+
+            services:
+                Object.keys(
+                    runtimeState.services
+                ),
+
+            timestamp:
+                Date.now()
+
+        };
+
+
+        return result;
+
+    }
+
+
+    /* =====================================================
+       PUBLIC RUNTIME API
+       ===================================================== */
+
+    window.HalDoOS.runtime.registerModule =
+        registerModule;
+
+
+    window.HalDoOS.runtime.getModule =
+        getModule;
+
+
+    window.HalDoOS.runtime.registerService =
+        registerService;
+
+
+    window.HalDoOS.runtime.getService =
+        getService;
+
+
+    window.HalDoOS.runtime.on =
+        on;
+
+
+    window.HalDoOS.runtime.off =
+        off;
+
+
+    window.HalDoOS.runtime.emit =
+        emit;
+
+
+    window.HalDoOS.runtime.diagnostics =
+        diagnostics;
+
+
+    window.HalDoOS.runtime.updateBootProgress =
+        updateBootProgress;
+
+
+    window.HalDoOS.runtime.updateNetworkState =
+        updateNetworkState;
+
+
+    /* =====================================================
+       INITIALIZATION
+       ===================================================== */
+
+    function initializeRuntime() {
+
+        if (
+            runtimeState.initialized
+        ) {
+
+            return;
+
+        }
+
+
+        runtimeState.domReady =
+            true;
+
+
+        updateBootProgress(
+            92,
+            "HalDo AI OS 20 verbindet Systemdienste ..."
+        );
+
+
+        connectExistingSystems();
+
+
+        updateNetworkState();
+
+
+        runtimeState.initialized =
+            true;
+
+
+        updateBootProgress(
+            96,
+            "HalDo AI OS 20 prüft die Laufzeit ..."
+        );
+
+
+        emit(
+            "runtime:ready",
+            diagnostics()
+        );
+
+
+        updateBootProgress(
+            100,
+            "HalDo AI OS 20 ist bereit."
+        );
+
+
+        log(
+            "Runtime Bridge bereit.",
+            diagnostics()
+        );
+
+    }
+
+
+    if (
+        document.readyState ===
+        "loading"
+    ) {
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            initializeRuntime,
+            {
+                once:
+                    true
+            }
+        );
+
+    } else {
+
+        initializeRuntime();
+
+    }
+
+
+})();
+</script>
