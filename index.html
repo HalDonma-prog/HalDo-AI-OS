@@ -5028,3 +5028,1794 @@
     })();
 
     </script>
+        <!-- =========================================================
+         HALDO AI OS 20
+         MODULE LOADER
+         ========================================================= -->
+
+    <script>
+
+        /*
+         * =======================================================
+         * HALDO AI OS 20
+         * ZENTRALER MODUL-LOADER
+         *
+         * Reihenfolge:
+         *
+         * 1. Storage
+         * 2. Configuration
+         * 3. Language
+         * 4. Kernel
+         * 5. System
+         * 6. App-System
+         * 7. Window-System
+         * 8. Launcher
+         * 9. AI-System
+         * 10. UI / Startup
+         *
+         * Die vorhandenen Dateien werden NICHT ersetzt.
+         * Sie werden hier nur kontrolliert geladen.
+         * =======================================================
+         */
+
+        (() => {
+
+            "use strict";
+
+
+            /* ===================================================
+               GLOBAL HALDO CONFIG
+               =================================================== */
+
+            window.HalDoBootConfig = {
+
+                version:
+                    "20.0.0",
+
+                edition:
+                    "Professional Ultimate Foundation",
+
+                name:
+                    "HalDo AI OS",
+
+                logo:
+                    "assets/logo/logo.png",
+
+                modulePath:
+                    "js/",
+
+                cssPath:
+                    "css/",
+
+                debug:
+                    true,
+
+                autoStart:
+                    true
+
+            };
+
+
+            /* ===================================================
+               MODULE REGISTRY
+               =================================================== */
+
+            const modules = [
+
+                /*
+                 * STORAGE
+                 */
+
+                "storage.js",
+                "storage-manager.js",
+                "config-manager.js",
+
+
+                /*
+                 * LANGUAGE
+                 */
+
+                "language-system.js",
+                "language-manager.js",
+                "ai-language.js",
+
+
+                /*
+                 * CORE SYSTEM
+                 */
+
+                "kernel.js",
+                "system.js",
+                "system-loader.js",
+                "system-status.js",
+
+
+                /*
+                 * MODULE MANAGEMENT
+                 */
+
+                "module-manager.js",
+
+
+                /*
+                 * APPLICATION SYSTEM
+                 */
+
+                "app-registry.js",
+                "app-manager.js",
+                "app-router.js",
+                "app-launcher.js",
+                "launcher.js",
+
+
+                /*
+                 * WINDOW / DESKTOP
+                 */
+
+                "window-manager.js",
+                "desktop manager.js",
+                "shell-manager.js",
+
+
+                /*
+                 * HALDO LIGHT / LOGO
+                 */
+
+                "haldo-light-system.js",
+                "logo-animation-manager.js",
+                "logo-intro-manager.js",
+
+
+                /*
+                 * EZIDI KEYBOARD
+                 */
+
+                "ezidi-keyboard.js",
+
+
+                /*
+                 * CONVERSATION / AI MEMORY
+                 */
+
+                "conversation-state.js",
+                "ai-memory.js",
+
+
+                /*
+                 * AI CORE
+                 */
+
+                "ai-core.js",
+                "ai-engine.js",
+                "ai-commands.js",
+                "ai-chat.js",
+
+
+                /*
+                 * VOICE
+                 */
+
+                "voice.js",
+                "ai-voice.js",
+                "ai-speech.js",
+
+
+                /*
+                 * STARTUP
+                 */
+
+                "boot.js",
+                "startup.js"
+
+            ];
+
+
+            /* ===================================================
+               LOADER STATE
+               =================================================== */
+
+            const loaderState = {
+
+                started:
+                    false,
+
+                completed:
+                    false,
+
+                loading:
+                    false,
+
+                loaded:
+                    [],
+
+                failed:
+                    [],
+
+                promises:
+                    new Map()
+
+            };
+
+
+            /* ===================================================
+               BOOT STATUS
+               =================================================== */
+
+            function updateBootStatus(
+                text,
+                progress
+            ) {
+
+                const status =
+                    document.getElementById(
+                        "haldo-boot-status"
+                    );
+
+                const progressBar =
+                    document.getElementById(
+                        "haldo-boot-progress-bar"
+                    );
+
+                const progressContainer =
+                    progressBar
+                    ?.parentElement;
+
+
+                if (status) {
+
+                    status.textContent =
+                        text;
+
+                }
+
+
+                if (progressBar) {
+
+                    const safeProgress =
+                        Math.max(
+                            0,
+                            Math.min(
+                                100,
+                                Number(progress) || 0
+                            )
+                        );
+
+
+                    progressBar.style.width =
+                        safeProgress + "%";
+
+
+                    if (progressContainer) {
+
+                        progressContainer.setAttribute(
+                            "aria-valuenow",
+                            String(
+                                safeProgress
+                            )
+                        );
+
+                    }
+
+                }
+
+            }
+
+
+            /* ===================================================
+               LOGGING
+               =================================================== */
+
+            function log(
+                message,
+                ...args
+            ) {
+
+                if (
+                    window.HalDoBootConfig.debug
+                ) {
+
+                    console.log(
+                        "[HalDo OS 20]",
+                        message,
+                        ...args
+                    );
+
+                }
+
+            }
+
+
+            function warn(
+                message,
+                ...args
+            ) {
+
+                console.warn(
+                    "[HalDo OS 20]",
+                    message,
+                    ...args
+                );
+
+            }
+
+
+            function error(
+                message,
+                ...args
+            ) {
+
+                console.error(
+                    "[HalDo OS 20]",
+                    message,
+                    ...args
+                );
+
+            }
+
+
+            /* ===================================================
+               SCRIPT LOADER
+               =================================================== */
+
+            function loadScript(
+                filename
+            ) {
+
+                if (
+                    loaderState.promises.has(
+                        filename
+                    )
+                ) {
+
+                    return loaderState.promises.get(
+                        filename
+                    );
+
+                }
+
+
+                const promise =
+                    new Promise(
+                        (
+                            resolve,
+                            reject
+                        ) => {
+
+                            const existing =
+                                document.querySelector(
+                                    `script[data-haldo-module="${filename}"]`
+                                );
+
+
+                            if (existing) {
+
+                                if (
+                                    existing.dataset.loaded ===
+                                    "true"
+                                ) {
+
+                                    resolve(
+                                        filename
+                                    );
+
+                                    return;
+
+                                }
+
+
+                                existing.addEventListener(
+                                    "load",
+                                    () => {
+
+                                        resolve(
+                                            filename
+                                        );
+
+                                    },
+                                    {
+                                        once:
+                                            true
+                                    }
+                                );
+
+
+                                existing.addEventListener(
+                                    "error",
+                                    () => {
+
+                                        reject(
+                                            new Error(
+                                                `Modul konnte nicht geladen werden: ${filename}`
+                                            )
+                                        );
+
+                                    },
+                                    {
+                                        once:
+                                            true
+                                    }
+                                );
+
+
+                                return;
+
+                            }
+
+
+                            const script =
+                                document.createElement(
+                                    "script"
+                                );
+
+
+                            script.src =
+                                window.HalDoBootConfig.modulePath +
+                                filename;
+
+
+                            script.async =
+                                false;
+
+
+                            script.defer =
+                                false;
+
+
+                            script.dataset.haldoModule =
+                                filename;
+
+
+                            script.addEventListener(
+                                "load",
+                                () => {
+
+                                    script.dataset.loaded =
+                                        "true";
+
+
+                                    loaderState.loaded.push(
+                                        filename
+                                    );
+
+
+                                    resolve(
+                                        filename
+                                    );
+
+                                },
+                                {
+                                    once:
+                                        true
+                                }
+                            );
+
+
+                            script.addEventListener(
+                                "error",
+                                () => {
+
+                                    reject(
+                                        new Error(
+                                            `Fehler beim Laden von ${filename}`
+                                        )
+                                    );
+
+                                },
+                                {
+                                    once:
+                                        true
+                                }
+                            );
+
+
+                            document.head.appendChild(
+                                script
+                            );
+
+                        }
+                    );
+
+
+                loaderState.promises.set(
+                    filename,
+                    promise
+                );
+
+
+                return promise;
+
+            }
+
+
+            /* ===================================================
+               SEQUENTIELLES LADEN
+               =================================================== */
+
+            async function loadModules() {
+
+                if (
+                    loaderState.loading
+                ) {
+
+                    return;
+
+                }
+
+
+                loaderState.loading =
+                    true;
+
+
+                loaderState.started =
+                    true;
+
+
+                const total =
+                    modules.length;
+
+
+                let current =
+                    0;
+
+
+                updateBootStatus(
+                    "HalDo AI OS 20 lädt Kernmodule ...",
+                    5
+                );
+
+
+                for (
+                    const module
+                    of modules
+                ) {
+
+                    current++;
+
+
+                    const progress =
+                        5 +
+                        (
+                            current /
+                            total
+                        ) *
+                        78;
+
+
+                    updateBootStatus(
+                        `Modul wird geladen: ${module}`,
+                        progress
+                    );
+
+
+                    try {
+
+                        await loadScript(
+                            module
+                        );
+
+
+                        log(
+                            `Modul geladen: ${module}`
+                        );
+
+                    } catch (
+                        moduleError
+                    ) {
+
+                        loaderState.failed.push(
+                            {
+                                file:
+                                    module,
+
+                                error:
+                                    moduleError
+                            }
+                        );
+
+
+                        warn(
+                            `Modul konnte nicht geladen werden: ${module}`,
+                            moduleError
+                        );
+
+                    }
+
+                }
+
+
+                loaderState.completed =
+                    true;
+
+
+                loaderState.loading =
+                    false;
+
+
+                updateBootStatus(
+                    "HalDo AI OS 20 Module geladen.",
+                    86
+                );
+
+
+                log(
+                    "Modulladevorgang abgeschlossen.",
+                    {
+                        loaded:
+                            loaderState.loaded,
+
+                        failed:
+                            loaderState.failed
+                    }
+                );
+
+
+                dispatchLoaderEvent();
+
+            }
+
+
+            /* ===================================================
+               LOADER EVENT
+               =================================================== */
+
+            function dispatchLoaderEvent() {
+
+                window.dispatchEvent(
+                    new CustomEvent(
+                        "haldo:modules-ready",
+                        {
+                            detail: {
+
+                                version:
+                                    window.HalDoBootConfig.version,
+
+                                loaded:
+                                    [
+                                        ...loaderState.loaded
+                                    ],
+
+                                failed:
+                                    [
+                                        ...loaderState.failed
+                                    ]
+
+                            }
+                        }
+                    )
+                );
+
+
+                if (
+                    window.HalDoKernel &&
+                    typeof
+                    window.HalDoKernel.emit ===
+                    "function"
+                ) {
+
+                    try {
+
+                        window.HalDoKernel.emit(
+                            "haldo:modules-ready",
+                            {
+                                loaded:
+                                    loaderState.loaded,
+
+                                failed:
+                                    loaderState.failed
+                            }
+                        );
+
+                    } catch (
+                        kernelError
+                    ) {
+
+                        warn(
+                            "Kernel-Event konnte nicht gesendet werden.",
+                            kernelError
+                        );
+
+                    }
+
+                }
+
+            }
+
+
+            /* ===================================================
+               PUBLIC LOADER API
+               =================================================== */
+
+            window.HalDoModuleLoader = {
+
+                modules,
+
+                state:
+                    loaderState,
+
+                load:
+                    loadModules,
+
+                loadScript,
+
+                updateBootStatus
+
+            };
+
+
+            /* ===================================================
+               HALDO OS NAMESPACE
+               =================================================== */
+
+            window.HalDoOS =
+                window.HalDoOS ||
+                {};
+
+
+            window.HalDoOS.version =
+                window.HalDoBootConfig.version;
+
+
+            window.HalDoOS.edition =
+                window.HalDoBootConfig.edition;
+
+
+            window.HalDoOS.name =
+                window.HalDoBootConfig.name;
+
+
+            window.HalDoOS.moduleLoader =
+                window.HalDoModuleLoader;
+
+
+            /* ===================================================
+               START AFTER DOM
+               =================================================== */
+
+            function startLoader() {
+
+                updateBootStatus(
+                    "HalDo AI OS 20 initialisiert ...",
+                    2
+                );
+
+
+                /*
+                 * Kurze Verzögerung:
+                 * Dadurch kann die Shell vollständig
+                 * aufgebaut werden, bevor die Module
+                 * geladen werden.
+                 */
+
+                setTimeout(
+                    () => {
+
+                        loadModules()
+                            .catch(
+                                loaderError => {
+
+                                    error(
+                                        "Kritischer Loader-Fehler.",
+                                        loaderError
+                                    );
+
+
+                                    updateBootStatus(
+                                        "HalDo AI OS 20 – Modulfehler erkannt.",
+                                        90
+                                    );
+
+                                }
+                            );
+
+                    },
+                    80
+                );
+
+            }
+
+
+            if (
+                document.readyState ===
+                "loading"
+            ) {
+
+                document.addEventListener(
+                    "DOMContentLoaded",
+                    startLoader,
+                    {
+                        once:
+                            true
+                    }
+                );
+
+            } else {
+
+                startLoader();
+
+            }
+
+        })();
+
+    </script>
+        <!-- =========================================================
+         HALDO AI OS 20
+         CORE INTEGRATION BRIDGE
+         ========================================================= -->
+
+    <script>
+
+        (() => {
+
+            "use strict";
+
+
+            /* =====================================================
+               HALDO CORE BRIDGE
+               ===================================================== */
+
+            const Bridge = {
+
+                version:
+                    "20.0.0",
+
+                initialized:
+                    false,
+
+                connected:
+                    false,
+
+                systems:
+                    {},
+
+                errors:
+                    [],
+
+                warnings:
+                    []
+
+            };
+
+
+            /* =====================================================
+               HALDO OS NAMESPACE
+               ===================================================== */
+
+            window.HalDoOS =
+                window.HalDoOS ||
+                {};
+
+
+            window.HalDoOS.bridge =
+                Bridge;
+
+
+            /* =====================================================
+               SAFE HELPER
+               ===================================================== */
+
+            function exists(
+                value
+            ) {
+
+                return (
+                    value !== null &&
+                    value !== undefined
+                );
+
+            }
+
+
+            function getGlobal(
+                names
+            ) {
+
+                for (
+                    const name
+                    of names
+                ) {
+
+                    const parts =
+                        name.split(".");
+
+
+                    let current =
+                        window;
+
+
+                    for (
+                        const part
+                        of parts
+                    ) {
+
+                        if (
+                            !exists(
+                                current
+                            )
+                        ) {
+
+                            current =
+                                null;
+
+                            break;
+
+                        }
+
+
+                        current =
+                            current[part];
+
+                    }
+
+
+                    if (
+                        exists(
+                            current
+                        )
+                    ) {
+
+                        return current;
+
+                    }
+
+                }
+
+
+                return null;
+
+            }
+
+
+            /* =====================================================
+               MODULE DETECTION
+               ===================================================== */
+
+            function detectSystems() {
+
+                Bridge.systems =
+                    {
+
+                        kernel:
+                            getGlobal(
+                                [
+                                    "HalDoKernel",
+                                    "HalDoOS.kernel"
+                                ]
+                            ),
+
+                        system:
+                            getGlobal(
+                                [
+                                    "HalDoSystem",
+                                    "HalDoOS.system"
+                                ]
+                            ),
+
+                        storage:
+                            getGlobal(
+                                [
+                                    "HalDoStorage",
+                                    "HalDoOS.storage"
+                                ]
+                            ),
+
+                        storageManager:
+                            getGlobal(
+                                [
+                                    "HalDoStorageManager",
+                                    "HalDoOS.storageManager"
+                                ]
+                            ),
+
+                        config:
+                            getGlobal(
+                                [
+                                    "HalDoConfig",
+                                    "HalDoOS.config"
+                                ]
+                            ),
+
+                        language:
+                            getGlobal(
+                                [
+                                    "HalDoLanguage",
+                                    "HalDoOS.language"
+                                ]
+                            ),
+
+                        languageManager:
+                            getGlobal(
+                                [
+                                    "HalDoLanguageManager",
+                                    "HalDoOS.languageManager"
+                                ]
+                            ),
+
+                        moduleManager:
+                            getGlobal(
+                                [
+                                    "HalDoModuleManager",
+                                    "HalDoOS.moduleManager"
+                                ]
+                            ),
+
+                        appRegistry:
+                            getGlobal(
+                                [
+                                    "HalDoAppRegistry",
+                                    "HalDoOS.appRegistry"
+                                ]
+                            ),
+
+                        appManager:
+                            getGlobal(
+                                [
+                                    "HalDoAppManager",
+                                    "HalDoOS.appManager"
+                                ]
+                            ),
+
+                        appRouter:
+                            getGlobal(
+                                [
+                                    "HalDoAppRouter",
+                                    "HalDoOS.appRouter"
+                                ]
+                            ),
+
+                        launcher:
+                            getGlobal(
+                                [
+                                    "HalDoLauncher",
+                                    "HalDoOS.launcher"
+                                ]
+                            ),
+
+                        appLauncher:
+                            getGlobal(
+                                [
+                                    "HalDoAppLauncher",
+                                    "HalDoOS.appLauncher"
+                                ]
+                            ),
+
+                        windowManager:
+                            getGlobal(
+                                [
+                                    "HalDoWindowManager",
+                                    "HalDoOS.windowManager"
+                                ]
+                            ),
+
+                        desktop:
+                            getGlobal(
+                                [
+                                    "HalDoDesktop",
+                                    "HalDoOS.desktop"
+                                ]
+                            ),
+
+                        shell:
+                            getGlobal(
+                                [
+                                    "HalDoShell",
+                                    "HalDoOS.shell"
+                                ]
+                            ),
+
+                        ai:
+                            getGlobal(
+                                [
+                                    "HalDoAI",
+                                    "HalDoOS.ai"
+                                ]
+                            ),
+
+                        aiCore:
+                            getGlobal(
+                                [
+                                    "HalDoAICore",
+                                    "HalDoOS.aiCore"
+                                ]
+                            ),
+
+                        aiEngine:
+                            getGlobal(
+                                [
+                                    "HalDoAIEngine",
+                                    "HalDoOS.aiEngine"
+                                ]
+                            ),
+
+                        aiChat:
+                            getGlobal(
+                                [
+                                    "HalDoAIChat",
+                                    "HalDoOS.aiChat"
+                                ]
+                            ),
+
+                        aiMemory:
+                            getGlobal(
+                                [
+                                    "HalDoAIMemory",
+                                    "HalDoOS.aiMemory"
+                                ]
+                            ),
+
+                        voice:
+                            getGlobal(
+                                [
+                                    "HalDoVoice",
+                                    "HalDoOS.voice"
+                                ]
+                            ),
+
+                        speech:
+                            getGlobal(
+                                [
+                                    "HalDoSpeech",
+                                    "HalDoOS.speech"
+                                ]
+                            ),
+
+                        languageAI:
+                            getGlobal(
+                                [
+                                    "HalDoAILanguage",
+                                    "HalDoOS.aiLanguage"
+                                ]
+                            ),
+
+                        ezidiKeyboard:
+                            getGlobal(
+                                [
+                                    "HalDoEzidiKeyboard",
+                                    "HalDoOS.ezidiKeyboard"
+                                ]
+                            ),
+
+                        light:
+                            getGlobal(
+                                [
+                                    "HalDoLightSystem",
+                                    "HalDoOS.light"
+                                ]
+                            ),
+
+                        logo:
+                            getGlobal(
+                                [
+                                    "HalDoLogo",
+                                    "HalDoOS.logo"
+                                ]
+                            )
+
+                    };
+
+            }
+
+
+            /* =====================================================
+               MODULE CONNECTION
+               ===================================================== */
+
+            function connectSystems() {
+
+                const {
+
+                    kernel,
+
+                    system,
+
+                    storage,
+
+                    storageManager,
+
+                    config,
+
+                    language,
+
+                    languageManager,
+
+                    moduleManager,
+
+                    appRegistry,
+
+                    appManager,
+
+                    appRouter,
+
+                    launcher,
+
+                    appLauncher,
+
+                    windowManager,
+
+                    desktop,
+
+                    shell,
+
+                    ai,
+
+                    aiCore,
+
+                    aiEngine,
+
+                    aiChat,
+
+                    aiMemory,
+
+                    voice,
+
+                    speech,
+
+                    languageAI,
+
+                    ezidiKeyboard,
+
+                    light,
+
+                    logo
+
+                } =
+                    Bridge.systems;
+
+
+                /*
+                 * -------------------------------------------------
+                 * OS namespace
+                 * -------------------------------------------------
+                 */
+
+                window.HalDoOS.kernel =
+                    kernel;
+
+                window.HalDoOS.system =
+                    system;
+
+                window.HalDoOS.storage =
+                    storage;
+
+                window.HalDoOS.storageManager =
+                    storageManager;
+
+                window.HalDoOS.config =
+                    config;
+
+                window.HalDoOS.language =
+                    language;
+
+                window.HalDoOS.languageManager =
+                    languageManager;
+
+                window.HalDoOS.moduleManager =
+                    moduleManager;
+
+
+                /*
+                 * -------------------------------------------------
+                 * APP SYSTEM
+                 * -------------------------------------------------
+                 */
+
+                window.HalDoOS.appRegistry =
+                    appRegistry;
+
+                window.HalDoOS.appManager =
+                    appManager;
+
+                window.HalDoOS.appRouter =
+                    appRouter;
+
+                window.HalDoOS.launcher =
+                    launcher;
+
+                window.HalDoOS.appLauncher =
+                    appLauncher;
+
+
+                /*
+                 * -------------------------------------------------
+                 * DESKTOP
+                 * -------------------------------------------------
+                 */
+
+                window.HalDoOS.windowManager =
+                    windowManager;
+
+                window.HalDoOS.desktop =
+                    desktop;
+
+                window.HalDoOS.shell =
+                    shell;
+
+
+                /*
+                 * -------------------------------------------------
+                 * AI
+                 * -------------------------------------------------
+                 */
+
+                window.HalDoOS.ai =
+                    ai;
+
+                window.HalDoOS.aiCore =
+                    aiCore;
+
+                window.HalDoOS.aiEngine =
+                    aiEngine;
+
+                window.HalDoOS.aiChat =
+                    aiChat;
+
+                window.HalDoOS.aiMemory =
+                    aiMemory;
+
+
+                /*
+                 * -------------------------------------------------
+                 * VOICE / LANGUAGE
+                 * -------------------------------------------------
+                 */
+
+                window.HalDoOS.voice =
+                    voice;
+
+                window.HalDoOS.speech =
+                    speech;
+
+                window.HalDoOS.aiLanguage =
+                    languageAI;
+
+
+                /*
+                 * -------------------------------------------------
+                 * EZIDI
+                 * -------------------------------------------------
+                 */
+
+                window.HalDoOS.ezidiKeyboard =
+                    ezidiKeyboard;
+
+
+                /*
+                 * -------------------------------------------------
+                 * VISUAL SYSTEM
+                 * -------------------------------------------------
+                 */
+
+                window.HalDoOS.light =
+                    light;
+
+                window.HalDoOS.logo =
+                    logo;
+
+
+                /*
+                 * -------------------------------------------------
+                 * KERNEL MODULE REGISTRATION
+                 * -------------------------------------------------
+                 */
+
+                if (
+                    kernel &&
+                    typeof kernel.setModuleReady ===
+                    "function"
+                ) {
+
+                    const availableModules = {
+
+                        storage,
+
+                        storageManager,
+
+                        config,
+
+                        language,
+
+                        languageManager,
+
+                        moduleManager,
+
+                        appRegistry,
+
+                        appManager,
+
+                        appRouter,
+
+                        launcher,
+
+                        appLauncher,
+
+                        windowManager,
+
+                        desktop,
+
+                        shell,
+
+                        ai,
+
+                        aiCore,
+
+                        aiEngine,
+
+                        aiChat,
+
+                        aiMemory,
+
+                        voice,
+
+                        speech,
+
+                        languageAI,
+
+                        ezidiKeyboard,
+
+                        light,
+
+                        logo
+
+                    };
+
+
+                    Object.entries(
+                        availableModules
+                    ).forEach(
+                        (
+                            [
+                                name,
+                                module
+                            ]
+                        ) => {
+
+                            if (
+                                module
+                            ) {
+
+                                try {
+
+                                    kernel.setModuleReady(
+                                        name,
+                                        module
+                                    );
+
+                                } catch (
+                                    kernelError
+                                ) {
+
+                                    Bridge.warnings.push(
+                                        {
+                                            module:
+                                                name,
+
+                                            error:
+                                                kernelError
+                                        }
+                                    );
+
+                                }
+
+                            }
+
+                        }
+                    );
+
+                }
+
+
+                Bridge.connected =
+                    true;
+
+            }
+
+
+            /* =====================================================
+               EVENT CONNECTION
+               ===================================================== */
+
+            function connectEvents() {
+
+                const kernel =
+                    Bridge.systems.kernel;
+
+
+                if (
+                    !kernel ||
+                    typeof kernel.on !==
+                    "function"
+                ) {
+
+                    return;
+
+                }
+
+
+                try {
+
+                    kernel.on(
+                        "kernel:ready",
+                        () => {
+
+                            Bridge.connected =
+                                true;
+
+
+                            window.dispatchEvent(
+                                new CustomEvent(
+                                    "haldo:core-ready"
+                                )
+                            );
+
+                        }
+                    );
+
+
+                    kernel.on(
+                        "kernel:error",
+                        error => {
+
+                            Bridge.errors.push(
+                                error
+                            );
+
+
+                            window.dispatchEvent(
+                                new CustomEvent(
+                                    "haldo:core-error",
+                                    {
+                                        detail:
+                                            error
+                                    }
+                                )
+                            );
+
+                        }
+                    );
+
+                } catch (
+                    eventError
+                ) {
+
+                    Bridge.warnings.push(
+                        eventError
+                    );
+
+                }
+
+            }
+
+
+            /* =====================================================
+               STATUS API
+               ===================================================== */
+
+            function getStatus() {
+
+                const systems =
+                    Bridge.systems;
+
+
+                const result =
+                    {};
+
+
+                Object.entries(
+                    systems
+                ).forEach(
+                    (
+                        [
+                            name,
+                            module
+                        ]
+                    ) => {
+
+                        result[name] =
+                            Boolean(
+                                module
+                            );
+
+                    }
+                );
+
+
+                return result;
+
+            }
+
+
+            /* =====================================================
+               DIAGNOSTIC API
+               ===================================================== */
+
+            function diagnose() {
+
+                const status =
+                    getStatus();
+
+
+                const available =
+                    Object.values(
+                        status
+                    ).filter(
+                        Boolean
+                    ).length;
+
+
+                const total =
+                    Object.keys(
+                        status
+                    ).length;
+
+
+                return {
+
+                    version:
+                        Bridge.version,
+
+                    initialized:
+                        Bridge.initialized,
+
+                    connected:
+                        Bridge.connected,
+
+                    available,
+
+                    total,
+
+                    percentage:
+                        total
+                        ? Math.round(
+                            (
+                                available /
+                                total
+                            ) *
+                            100
+                        )
+                        : 0,
+
+                    status,
+
+                    errors:
+                        [
+                            ...Bridge.errors
+                        ],
+
+                    warnings:
+                        [
+                            ...Bridge.warnings
+                        ]
+
+                };
+
+            }
+
+
+            /* =====================================================
+               PUBLIC API
+               ===================================================== */
+
+            Bridge.detect =
+                detectSystems;
+
+
+            Bridge.connect =
+                connectSystems;
+
+
+            Bridge.connectEvents =
+                connectEvents;
+
+
+            Bridge.status =
+                getStatus;
+
+
+            Bridge.diagnose =
+                diagnose;
+
+
+            Bridge.initialize =
+                () => {
+
+                    if (
+                        Bridge.initialized
+                    ) {
+
+                        return Bridge;
+
+                    }
+
+
+                    detectSystems();
+
+                    connectSystems();
+
+                    connectEvents();
+
+
+                    Bridge.initialized =
+                        true;
+
+
+                    window.dispatchEvent(
+                        new CustomEvent(
+                            "haldo:bridge-ready",
+                            {
+                                detail:
+                                    diagnose()
+                            }
+                        )
+                    );
+
+
+                    console.log(
+                        "%cHalDo AI OS 20%c Core Bridge bereit",
+                        "color:#42e6ff;font-weight:bold;",
+                        "color:#ffffff;"
+                    );
+
+
+                    return Bridge;
+
+                };
+
+
+            /* =====================================================
+               WAIT FOR MODULE LOADER
+               ===================================================== */
+
+            function waitForModules() {
+
+                if (
+                    window.HalDoModuleLoader &&
+                    window.HalDoModuleLoader.state &&
+                    window.HalDoModuleLoader.state.completed
+                ) {
+
+                    Bridge.initialize();
+
+                    return;
+
+                }
+
+
+                window.addEventListener(
+                    "haldo:modules-ready",
+                    () => {
+
+                        Bridge.initialize();
+
+                    },
+                    {
+                        once:
+                            true
+                    }
+                );
+
+            }
+
+
+            waitForModules();
+
+
+            /* =====================================================
+               GLOBAL DIAGNOSTIC COMMAND
+               ===================================================== */
+
+            window.HalDoSystemDiagnostics = {
+
+                run:
+                    diagnose,
+
+                status:
+                    getStatus,
+
+                bridge:
+                    Bridge
+
+            };
+
+        })();
+
+    </script>
+    
