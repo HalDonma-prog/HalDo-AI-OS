@@ -21883,3 +21883,1625 @@
 })();
 
 </script>
+<script>
+/* =========================================================
+   HALDO AI OS 20
+   PART 18 — SYSTEM DIAGNOSTICS & RUNTIME BRIDGE
+   ========================================================= */
+
+(function () {
+
+    "use strict";
+
+    const HALDO =
+        window.HalDoOS =
+            window.HalDoOS || {};
+
+    const state = {
+        started: false,
+        lastCheck: 0,
+        checks: {},
+        errors: []
+    };
+
+
+    function now() {
+        return Date.now();
+    }
+
+
+    function getKernel() {
+        return (
+            window.HalDoKernel ||
+            HALDO.kernel ||
+            null
+        );
+    }
+
+
+    function getSystem() {
+        return (
+            window.HalDoSystem ||
+            HALDO.system ||
+            null
+        );
+    }
+
+
+    function getAppManager() {
+        return (
+            window.HalDoAppManager ||
+            HALDO.appManager ||
+            null
+        );
+    }
+
+
+    function getRouter() {
+        return (
+            window.HalDoAppRouter ||
+            HALDO.appRouter ||
+            HALDO.router ||
+            null
+        );
+    }
+
+
+    function getWindowManager() {
+        return (
+            window.HalDoWindowManager ||
+            HALDO.windowManager ||
+            null
+        );
+    }
+
+
+    function getAI() {
+
+        return (
+            window.HalDoAI ||
+            HALDO.ai ||
+            window.HalDoAIEngine ||
+            null
+        );
+
+    }
+
+
+    function checkObject(
+        name,
+        object
+    ) {
+
+        const result = {
+
+            name,
+            available:
+                !!object,
+
+            type:
+                object
+                    ? typeof object
+                    : "undefined",
+
+            timestamp:
+                now()
+
+        };
+
+
+        state.checks[name] =
+            result;
+
+
+        return result;
+
+    }
+
+
+    function runDiagnostics() {
+
+        const results = {
+
+            timestamp:
+                now(),
+
+            kernel:
+                checkObject(
+                    "kernel",
+                    getKernel()
+                ),
+
+            system:
+                checkObject(
+                    "system",
+                    getSystem()
+                ),
+
+            appManager:
+                checkObject(
+                    "appManager",
+                    getAppManager()
+                ),
+
+            router:
+                checkObject(
+                    "router",
+                    getRouter()
+                ),
+
+            windowManager:
+                checkObject(
+                    "windowManager",
+                    getWindowManager()
+                ),
+
+            ai:
+                checkObject(
+                    "ai",
+                    getAI()
+                ),
+
+            ui:
+                checkObject(
+                    "ui",
+                    window.HalDoUI
+                ),
+
+            storage:
+                checkObject(
+                    "storage",
+                    window.HalDoStorage ||
+                    HALDO.storage
+                )
+
+        };
+
+
+        state.lastCheck =
+            results.timestamp;
+
+
+        const failed =
+            Object.values(results)
+                .filter(
+                    item =>
+                        item &&
+                        typeof item === "object" &&
+                        item.available === false
+                );
+
+
+        results.ok =
+            failed.length === 0;
+
+
+        results.missing =
+            failed.map(
+                item =>
+                    item.name
+            );
+
+
+        return results;
+
+    }
+
+
+    function emitDiagnosticEvent(
+        results
+    ) {
+
+        const kernel =
+            getKernel();
+
+
+        if (
+            kernel &&
+            typeof kernel.emit ===
+            "function"
+        ) {
+
+            try {
+
+                kernel.emit(
+                    "system:diagnostics",
+                    results
+                );
+
+            } catch (error) {
+
+                console.warn(
+                    "[HalDo Diagnostics]",
+                    error
+                );
+
+            }
+
+        }
+
+
+        if (
+            typeof window.dispatchEvent ===
+            "function"
+        ) {
+
+            window.dispatchEvent(
+                new CustomEvent(
+                    "haldo:diagnostics",
+                    {
+                        detail:
+                            results
+                    }
+                )
+            );
+
+        }
+
+    }
+
+
+    function getStatus() {
+
+        const diagnostics =
+            runDiagnostics();
+
+
+        return {
+
+            version:
+                "20.0.0",
+
+            edition:
+                "Professional Ultimate Foundation",
+
+            ready:
+                state.started,
+
+            diagnostics,
+
+            timestamp:
+                now()
+
+        };
+
+    }
+
+
+    function initialize() {
+
+        if (
+            state.started
+        ) {
+
+            return getStatus();
+
+        }
+
+
+        state.started =
+            true;
+
+
+        const diagnostics =
+            runDiagnostics();
+
+
+        emitDiagnosticEvent(
+            diagnostics
+        );
+
+
+        console.info(
+            "%cHalDo AI OS 20%c System-Diagnose bereit",
+            "color:#42e6ff;font-weight:800;",
+            "color:#ffffff;"
+        );
+
+
+        return getStatus();
+
+    }
+
+
+    HALDO.diagnostics = {
+
+        initialize,
+
+        run:
+            runDiagnostics,
+
+        getStatus,
+
+        getState() {
+
+            return {
+                ...state,
+                checks: {
+                    ...state.checks
+                }
+            };
+
+        }
+
+    };
+
+
+    window.HalDoDiagnostics =
+        HALDO.diagnostics;
+
+
+    if (
+        document.readyState ===
+        "loading"
+    ) {
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            initialize,
+            {
+                once:
+                    true
+            }
+        );
+
+    } else {
+
+        initialize();
+
+    }
+
+
+})();
+</script>
+<script>
+/* =========================================================
+   HALDO AI OS 20
+   PART 19 — GLOBAL EVENT / MODULE BRIDGE
+   ========================================================= */
+
+(function () {
+
+    "use strict";
+
+    const HALDO =
+        window.HalDoOS =
+            window.HalDoOS || {};
+
+
+    const state = {
+
+        initialized:
+            false,
+
+        listeners:
+            new Map(),
+
+        events:
+            [],
+
+        maxHistory:
+            250
+
+    };
+
+
+    function timestamp() {
+        return Date.now();
+    }
+
+
+    function recordEvent(
+        name,
+        detail
+    ) {
+
+        state.events.push({
+
+            name,
+
+            detail,
+
+            timestamp:
+                timestamp()
+
+        });
+
+
+        if (
+            state.events.length >
+            state.maxHistory
+        ) {
+
+            state.events.shift();
+
+        }
+
+    }
+
+
+    function emit(
+        name,
+        detail = {}
+    ) {
+
+        recordEvent(
+            name,
+            detail
+        );
+
+
+        const kernel =
+            window.HalDoKernel ||
+            HALDO.kernel;
+
+
+        if (
+            kernel &&
+            typeof kernel.emit ===
+            "function"
+        ) {
+
+            try {
+
+                kernel.emit(
+                    name,
+                    detail
+                );
+
+            } catch (error) {
+
+                console.warn(
+                    "[HalDo Event Bridge]",
+                    error
+                );
+
+            }
+
+        }
+
+
+        try {
+
+            window.dispatchEvent(
+                new CustomEvent(
+                    name,
+                    {
+                        detail
+                    }
+                )
+            );
+
+        } catch (error) {
+
+            console.warn(
+                "[HalDo DOM Event]",
+                error
+            );
+
+        }
+
+    }
+
+
+    function on(
+        name,
+        handler
+    ) {
+
+        if (
+            typeof handler !==
+            "function"
+        ) {
+
+            return () => {};
+
+        }
+
+
+        const wrapped =
+            event => {
+
+                try {
+
+                    handler(
+                        event?.detail ??
+                        event
+                    );
+
+                } catch (error) {
+
+                    console.error(
+                        `[HalDo Event Handler] ${name}`,
+                        error
+                    );
+
+                }
+
+            };
+
+
+        window.addEventListener(
+            name,
+            wrapped
+        );
+
+
+        if (
+            !state.listeners.has(name)
+        ) {
+
+            state.listeners.set(
+                name,
+                new Set()
+            );
+
+        }
+
+
+        state.listeners
+            .get(name)
+            .add(wrapped);
+
+
+        return () => {
+
+            off(
+                name,
+                wrapped
+            );
+
+        };
+
+    }
+
+
+    function off(
+        name,
+        handler
+    ) {
+
+        if (
+            typeof handler !==
+            "function"
+        ) {
+
+            return false;
+
+        }
+
+
+        window.removeEventListener(
+            name,
+            handler
+        );
+
+
+        const collection =
+            state.listeners.get(name);
+
+
+        if (collection) {
+
+            collection.delete(
+                handler
+            );
+
+
+            if (
+                collection.size === 0
+            ) {
+
+                state.listeners.delete(
+                    name
+                );
+
+            }
+
+        }
+
+
+        return true;
+
+    }
+
+
+    function once(
+        name,
+        handler
+    ) {
+
+        let unsubscribe =
+            null;
+
+
+        const wrapped =
+            detail => {
+
+                if (
+                    unsubscribe
+                ) {
+
+                    unsubscribe();
+
+                }
+
+
+                handler(
+                    detail
+                );
+
+            };
+
+
+        unsubscribe =
+            on(
+                name,
+                wrapped
+            );
+
+
+        return unsubscribe;
+
+    }
+
+
+    function clearHistory() {
+
+        state.events.length =
+            0;
+
+    }
+
+
+    function getHistory(
+        limit = 50
+    ) {
+
+        const safeLimit =
+            Math.max(
+                1,
+                Math.min(
+                    Number(limit) || 50,
+                    state.maxHistory
+                )
+            );
+
+
+        return state.events
+            .slice(
+                -safeLimit
+            )
+            .map(
+                event => ({
+                    ...event
+                })
+            );
+
+    }
+
+
+    function connectModule(
+        moduleName,
+        module
+    ) {
+
+        if (
+            !moduleName ||
+            !module
+        ) {
+
+            return false;
+
+        }
+
+
+        HALDO.modules =
+            HALDO.modules || {};
+
+
+        HALDO.modules[
+            moduleName
+        ] =
+            module;
+
+
+        emit(
+            "module:connected",
+            {
+
+                name:
+                    moduleName,
+
+                module,
+
+                timestamp:
+                    timestamp()
+
+            }
+        );
+
+
+        return true;
+
+    }
+
+
+    function getModule(
+        moduleName
+    ) {
+
+        if (
+            !moduleName
+        ) {
+
+            return null;
+
+        }
+
+
+        return (
+            HALDO.modules?.[
+                moduleName
+            ] ||
+            null
+        );
+
+    }
+
+
+    function disconnectModule(
+        moduleName
+    ) {
+
+        if (
+            !HALDO.modules ||
+            !HALDO.modules[
+                moduleName
+            ]
+        ) {
+
+            return false;
+
+        }
+
+
+        delete HALDO.modules[
+            moduleName
+        ];
+
+
+        emit(
+            "module:disconnected",
+            {
+
+                name:
+                    moduleName,
+
+                timestamp:
+                    timestamp()
+
+            }
+        );
+
+
+        return true;
+
+    }
+
+
+    function initialize() {
+
+        if (
+            state.initialized
+        ) {
+
+            return;
+
+        }
+
+
+        state.initialized =
+            true;
+
+
+        HALDO.events = {
+
+            emit,
+
+            on,
+
+            off,
+
+            once,
+
+            getHistory,
+
+            clearHistory
+
+        };
+
+
+        HALDO.moduleBridge = {
+
+            connect:
+                connectModule,
+
+            get:
+                getModule,
+
+            disconnect:
+                disconnectModule
+
+        };
+
+
+        window.HalDoEvents =
+            HALDO.events;
+
+
+        window.HalDoModuleBridge =
+            HALDO.moduleBridge;
+
+
+        emit(
+            "haldo:event-bridge:ready",
+            {
+
+                version:
+                    "20.0.0",
+
+                timestamp:
+                    timestamp()
+
+            }
+        );
+
+
+        console.info(
+            "%cHalDo AI OS 20%c Event- und Modul-Bridge bereit",
+            "color:#42e6ff;font-weight:800;",
+            "color:#ffffff;"
+        );
+
+    }
+
+
+    if (
+        document.readyState ===
+        "loading"
+    ) {
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            initialize,
+            {
+                once:
+                    true
+            }
+        );
+
+    } else {
+
+        initialize();
+
+    }
+
+
+})();
+</script>
+<script>
+/* =========================================================
+   HALDO AI OS 20
+   PART 20 — PERSISTENT RUNTIME STATE & STORAGE BRIDGE
+   ========================================================= */
+
+(function () {
+
+    "use strict";
+
+
+    const HALDO =
+        window.HalDoOS =
+            window.HalDoOS || {};
+
+
+    const state = {
+
+        initialized:
+            false,
+
+        memory:
+            {},
+
+        storageAvailable:
+            false,
+
+        prefix:
+            "haldo-os20:",
+
+        version:
+            "20.0.0"
+
+    };
+
+
+    /* =====================================================
+       STORAGE DETECTION
+       ===================================================== */
+
+    function detectStorage() {
+
+        try {
+
+            const testKey =
+                `${state.prefix}test`;
+
+            window.localStorage.setItem(
+                testKey,
+                "1"
+            );
+
+            window.localStorage.removeItem(
+                testKey
+            );
+
+            state.storageAvailable =
+                true;
+
+        } catch (error) {
+
+            state.storageAvailable =
+                false;
+
+            console.warn(
+                "[HalDo Storage Bridge]",
+                "localStorage nicht verfügbar.",
+                error
+            );
+
+        }
+
+
+        return state.storageAvailable;
+
+    }
+
+
+    /* =====================================================
+       SERIALIZATION
+       ===================================================== */
+
+    function serialize(
+        value
+    ) {
+
+        try {
+
+            return JSON.stringify(
+                value
+            );
+
+        } catch (error) {
+
+            console.warn(
+                "[HalDo Storage]",
+                "Serialisierung fehlgeschlagen.",
+                error
+            );
+
+            return null;
+
+        }
+
+    }
+
+
+    function deserialize(
+        value
+    ) {
+
+        if (
+            typeof value !==
+            "string"
+        ) {
+
+            return value;
+
+        }
+
+
+        try {
+
+            return JSON.parse(
+                value
+            );
+
+        } catch {
+
+            return value;
+
+        }
+
+    }
+
+
+    /* =====================================================
+       KEY MANAGEMENT
+       ===================================================== */
+
+    function makeKey(
+        key
+    ) {
+
+        return (
+            state.prefix +
+            String(key)
+        );
+
+    }
+
+
+    /* =====================================================
+       MEMORY STORAGE
+       ===================================================== */
+
+    function memorySet(
+        key,
+        value
+    ) {
+
+        state.memory[
+            String(key)
+        ] =
+            value;
+
+        return true;
+
+    }
+
+
+    function memoryGet(
+        key,
+        fallback = null
+    ) {
+
+        const normalized =
+            String(key);
+
+
+        if (
+            Object.prototype.hasOwnProperty.call(
+                state.memory,
+                normalized
+            )
+        ) {
+
+            return state.memory[
+                normalized
+            ];
+
+        }
+
+
+        return fallback;
+
+    }
+
+
+    function memoryRemove(
+        key
+    ) {
+
+        const normalized =
+            String(key);
+
+
+        if (
+            Object.prototype.hasOwnProperty.call(
+                state.memory,
+                normalized
+            )
+        ) {
+
+            delete state.memory[
+                normalized
+            ];
+
+            return true;
+
+        }
+
+
+        return false;
+
+    }
+
+
+    /* =====================================================
+       SET
+       ===================================================== */
+
+    function set(
+        key,
+        value,
+        options = {}
+    ) {
+
+        const normalized =
+            String(key);
+
+
+        memorySet(
+            normalized,
+            value
+        );
+
+
+        if (
+            !state.storageAvailable
+        ) {
+
+            return true;
+
+        }
+
+
+        const serialized =
+            serialize(
+                value
+            );
+
+
+        if (
+            serialized === null
+        ) {
+
+            return false;
+
+        }
+
+
+        try {
+
+            window.localStorage.setItem(
+                makeKey(
+                    normalized
+                ),
+                serialized
+            );
+
+
+            return true;
+
+        } catch (error) {
+
+            console.warn(
+                "[HalDo Storage]",
+                "Speichern fehlgeschlagen.",
+                normalized,
+                error
+            );
+
+
+            if (
+                options.strict
+            ) {
+
+                return false;
+
+            }
+
+
+            return true;
+
+        }
+
+    }
+
+
+    /* =====================================================
+       GET
+       ===================================================== */
+
+    function get(
+        key,
+        fallback = null
+    ) {
+
+        const normalized =
+            String(key);
+
+
+        if (
+            state.storageAvailable
+        ) {
+
+            try {
+
+                const raw =
+                    window.localStorage.getItem(
+                        makeKey(
+                            normalized
+                        )
+                    );
+
+
+                if (
+                    raw !== null
+                ) {
+
+                    const value =
+                        deserialize(
+                            raw
+                        );
+
+
+                    memorySet(
+                        normalized,
+                        value
+                    );
+
+
+                    return value;
+
+                }
+
+            } catch (error) {
+
+                console.warn(
+                    "[HalDo Storage]",
+                    "Lesen fehlgeschlagen.",
+                    normalized,
+                    error
+                );
+
+            }
+
+        }
+
+
+        return memoryGet(
+            normalized,
+            fallback
+        );
+
+    }
+
+
+    /* =====================================================
+       REMOVE
+       ===================================================== */
+
+    function remove(
+        key
+    ) {
+
+        const normalized =
+            String(key);
+
+
+        memoryRemove(
+            normalized
+        );
+
+
+        if (
+            !state.storageAvailable
+        ) {
+
+            return true;
+
+        }
+
+
+        try {
+
+            window.localStorage.removeItem(
+                makeKey(
+                    normalized
+                )
+            );
+
+
+            return true;
+
+        } catch (error) {
+
+            console.warn(
+                "[HalDo Storage]",
+                "Entfernen fehlgeschlagen.",
+                normalized,
+                error
+            );
+
+
+            return false;
+
+        }
+
+    }
+
+
+    /* =====================================================
+       EXISTS
+       ===================================================== */
+
+    function has(
+        key
+    ) {
+
+        const normalized =
+            String(key);
+
+
+        if (
+            state.storageAvailable
+        ) {
+
+            try {
+
+                return (
+                    window.localStorage.getItem(
+                        makeKey(
+                            normalized
+                        )
+                    ) !== null
+                );
+
+            } catch {
+
+                // Memory fallback below.
+
+            }
+
+        }
+
+
+        return Object.prototype.hasOwnProperty.call(
+            state.memory,
+            normalized
+        );
+
+    }
+
+
+    /* =====================================================
+       CLEAR HALDO STORAGE ONLY
+       ===================================================== */
+
+    function clear(
+        options = {}
+    ) {
+
+        state.memory = {};
+
+
+        if (
+            !state.storageAvailable
+        ) {
+
+            return true;
+
+        }
+
+
+        try {
+
+            const keys = [];
+
+
+            for (
+                let i = 0;
+                i < window.localStorage.length;
+                i++
+            ) {
+
+                const key =
+                    window.localStorage.key(
+                        i
+                    );
+
+
+                if (
+                    key &&
+                    key.startsWith(
+                        state.prefix
+                    )
+                ) {
+
+                    keys.push(
+                        key
+                    );
+
+                }
+
+            }
+
+
+            keys.forEach(
+                key => {
+
+                    window.localStorage.removeItem(
+                        key
+                    );
+
+                }
+            );
+
+
+            return true;
+
+        } catch (error) {
+
+            console.warn(
+                "[HalDo Storage]",
+                "Bereinigung fehlgeschlagen.",
+                error
+            );
+
+
+            return !options.strict;
+
+        }
+
+    }
+
+
+    /* =====================================================
+       SNAPSHOT
+       ===================================================== */
+
+    function snapshot() {
+
+        return {
+
+            version:
+                state.version,
+
+            timestamp:
+                Date.now(),
+
+            storageAvailable:
+                state.storageAvailable,
+
+            memoryKeys:
+                Object.keys(
+                    state.memory
+                )
+
+        };
+
+    }
+
+
+    /* =====================================================
+       INITIALIZATION
+       ===================================================== */
+
+    function initialize() {
+
+        if (
+            state.initialized
+        ) {
+
+            return HALDO.storageBridge;
+
+        }
+
+
+        detectStorage();
+
+
+        state.initialized =
+            true;
+
+
+        HALDO.storageBridge = {
+
+            set,
+
+            get,
+
+            remove,
+
+            has,
+
+            clear,
+
+            snapshot,
+
+            memorySet,
+
+            memoryGet,
+
+            memoryRemove
+
+        };
+
+
+        window.HalDoStorageBridge =
+            HALDO.storageBridge;
+
+
+        /*
+         * Falls bereits ein vollständiges
+         * HalDoStorage-Modul vorhanden ist,
+         * wird dieses NICHT überschrieben.
+         */
+
+        if (
+            !window.HalDoStorage
+        ) {
+
+            window.HalDoStorage =
+                HALDO.storageBridge;
+
+        }
+
+
+        const kernel =
+            window.HalDoKernel ||
+            HALDO.kernel;
+
+
+        if (
+            kernel &&
+            typeof kernel.emit ===
+            "function"
+        ) {
+
+            try {
+
+                kernel.emit(
+                    "storage:bridge:ready",
+                    snapshot()
+                );
+
+            } catch (error) {
+
+                console.warn(
+                    "[HalDo Storage Bridge]",
+                    error
+                );
+
+            }
+
+        }
+
+
+        console.info(
+            "%cHalDo AI OS 20%c Persistent Storage Bridge bereit",
+            "color:#42e6ff;font-weight:800;",
+            "color:#ffffff;"
+        );
+
+
+        return HALDO.storageBridge;
+
+    }
+
+
+    if (
+        document.readyState ===
+        "loading"
+    ) {
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            initialize,
+            {
+                once:
+                    true
+            }
+        );
+
+    } else {
+
+        initialize();
+
+    }
+
+
+})();
+</script>
