@@ -1,33 +1,56 @@
 /* ============================================================
-   HALDO AI OS 18
-   PROFESSIONAL ULTIMATE FOUNDATION
+   HALDO AI OS 20
+   PROFESSIONAL ULTIMATE STABLE
    ------------------------------------------------------------
    Datei:
-       js/app-registry.js
+   js/app-registry.js
 
-   APP REGISTRY
    Version:
-       18.0.0
+   20.0.0
 
-   Aufgabe:
-   Zentrale und sichere Registrierung aller HalDo-AI-OS-Apps.
+   ZENTRALE APP-PLATTFORM
 
-   Verbindungen:
-       kernel.js
-       system.js
-       app-manager.js
-       app-router.js
-       launcher.js
-       window-manager.js
-       zukünftige App-Systeme
+   Diese Registry ist nicht nur eine Liste von Apps.
 
-   Grundprinzip:
-       REGISTRY ≠ APP MANAGER
+   Sie bildet die gemeinsame Grundlage für:
 
-   Die Registry verwaltet App-Definitionen.
-   Der App Manager verwaltet App-Laufzeitinstanzen.
+   • App Registrierung
+   • App Manager
+   • App Router
+   • App Launcher
+   • Window Manager
+   • App Shell
+   • App Settings
+   • App Menus
+   • App Permissions
+   • App Capabilities
+   • App Commands
+   • App Events
+   • App Storage
+   • App Notifications
+   • App Lifecycle
+   • App Dependencies
+   • AI Integration
+   • Voice Integration
+   • Language Integration
+   • Multitasking
+   • Split View
+   • Floating Windows
+   • Picture-in-Picture
+   • Diagnostics
+   • Health Check
+   • Import / Export
+   • zukünftige Erweiterungen
 
-   Bestehende APIs werden erhalten und erweitert.
+   WICHTIG:
+
+   Diese Datei ist die zentrale App-Quelle.
+
+   Die tatsächliche interne Funktionalität jeder App
+   wird später in ihren eigenen Modulen implementiert.
+
+   Keine App soll nur ein Name/Platzhalter sein.
+
    ============================================================ */
 
 (function (window, document) {
@@ -35,25 +58,21 @@
     "use strict";
 
 
-    /* ========================================================
+    /* =========================================================
        01 — HALDO OS FOUNDATION
-       ======================================================== */
-
-    window.HalDoOS =
-        window.HalDoOS ||
-        {};
-
+       ========================================================= */
 
     const HalDoOS =
-        window.HalDoOS;
+        window.HalDoOS =
+        window.HalDoOS || {};
 
 
-    /* ========================================================
+    /* =========================================================
        02 — META
-       ======================================================== */
+       ========================================================= */
 
     const VERSION =
-        "18.0.0";
+        "20.0.0";
 
     const NAME =
         "HalDo AI OS App Registry";
@@ -61,10 +80,21 @@
     const MODULE_ID =
         "app-registry";
 
+    const EDITION =
+        "Professional Ultimate Stable";
 
-    /* ========================================================
-       03 — INTERNAL STATE
-       ======================================================== */
+
+    /* =========================================================
+       03 — APP PLATFORM VERSION
+       ========================================================= */
+
+    const APP_PLATFORM_VERSION =
+        "20.0.0";
+
+
+    /* =========================================================
+       04 — INTERNAL STATE
+       ========================================================= */
 
     const state = {
 
@@ -77,20 +107,14 @@
         ready:
             false,
 
-        failed:
-            false,
-
-        initializedAt:
-            null,
-
-        readyAt:
-            null,
-
         apps:
             new Map(),
 
         listeners:
             new Map(),
+
+        categories:
+            new Set(),
 
         connections: {
 
@@ -107,6 +131,9 @@
                 false,
 
             launcher:
+                false,
+
+            windowManager:
                 false
 
         },
@@ -137,21 +164,24 @@
             errors:
                 0
 
-        }
+        },
+
+        startedAt:
+            null
 
     };
 
 
-    /* ========================================================
-       04 — LOGGING
-       ======================================================== */
+    /* =========================================================
+       05 — LOGGING
+       ========================================================= */
 
     function log() {
 
         try {
 
             console.log(
-                "[HalDo App Registry]",
+                "[HalDo AI OS 20][App Registry]",
                 ...arguments
             );
 
@@ -165,7 +195,7 @@
         try {
 
             console.warn(
-                "[HalDo App Registry]",
+                "[HalDo AI OS 20][App Registry]",
                 ...arguments
             );
 
@@ -179,7 +209,7 @@
         try {
 
             console.error(
-                "[HalDo App Registry]",
+                "[HalDo AI OS 20][App Registry]",
                 ...arguments
             );
 
@@ -188,11 +218,84 @@
     }
 
 
-    /* ========================================================
-       05 — ID NORMALIZATION
-       ======================================================== */
+    /* =========================================================
+       06 — HELPERS
+       ========================================================= */
 
-    function normalizeId(value) {
+    function hasMethod(
+        object,
+        method
+    ) {
+
+        return !!(
+            object &&
+            typeof object[method] ===
+            "function"
+        );
+
+    }
+
+
+    function clone(
+        value
+    ) {
+
+        if (
+            value === null ||
+            value === undefined
+        ) {
+
+            return value;
+
+        }
+
+
+        if (
+            Array.isArray(
+                value
+            )
+        ) {
+
+            return value.map(
+                clone
+            );
+
+        }
+
+
+        if (
+            typeof value ===
+            "object"
+        ) {
+
+            const result = {};
+
+            Object.keys(
+                value
+            ).forEach(
+                key => {
+
+                    result[key] =
+                        clone(
+                            value[key]
+                        );
+
+                }
+            );
+
+            return result;
+
+        }
+
+
+        return value;
+
+    }
+
+
+    function normalizeId(
+        value
+    ) {
 
         return String(
             value || ""
@@ -214,113 +317,14 @@
     }
 
 
-    function createId(value) {
-
-        return normalizeId(
-            value
-        );
-
-    }
-
-
-    /* ========================================================
-       06 — SAFE HELPERS
-       ======================================================== */
-
-    function hasMethod(
-        object,
-        method
+    function uniqueArray(
+        value
     ) {
 
-        return !!(
-            object &&
-            typeof object[method] ===
-            "function"
-        );
-
-    }
-
-
-    function safeClone(value) {
-
         if (
-            value === null ||
-            value === undefined
-        ) {
-
-            return value;
-
-        }
-
-
-        if (
-            typeof value ===
-            "function"
-        ) {
-
-            return value;
-
-        }
-
-
-        if (
-            Array.isArray(value)
-        ) {
-
-            return value.map(
-                safeClone
-            );
-
-        }
-
-
-        if (
-            typeof value ===
-            "object"
-        ) {
-
-            const result = {};
-
-            Object.keys(
+            !Array.isArray(
                 value
-            ).forEach(
-                function (key) {
-
-                    result[key] =
-                        safeClone(
-                            value[key]
-                        );
-
-                }
-            );
-
-            return result;
-
-        }
-
-
-        return value;
-
-    }
-
-
-    function toArray(value) {
-
-        if (
-            Array.isArray(value)
-        ) {
-
-            return [
-                ...value
-            ];
-
-        }
-
-
-        if (
-            value === null ||
-            value === undefined ||
-            value === ""
+            )
         ) {
 
             return [];
@@ -329,15 +333,29 @@
 
 
         return [
-            value
+            ...new Set(
+                value
+                    .map(
+                        item =>
+                            typeof item ===
+                            "string"
+                                ? item.trim()
+                                : item
+                    )
+                    .filter(
+                        item =>
+                            item !==
+                            ""
+                    )
+            )
         ];
 
     }
 
 
-    /* ========================================================
+    /* =========================================================
        07 — SERVICE LOOKUPS
-       ======================================================== */
+       ========================================================= */
 
     function getKernel() {
 
@@ -386,17 +404,28 @@
     function getLauncher() {
 
         return (
-            window.HalDoLauncher ||
-            HalDoOS.launcher ||
+            window.HalDoAppLauncher ||
+            HalDoOS.appLauncher ||
             null
         );
 
     }
 
 
-    /* ========================================================
+    function getWindowManager() {
+
+        return (
+            window.HalDoWindowManager ||
+            HalDoOS.windowManager ||
+            null
+        );
+
+    }
+
+
+    /* =========================================================
        08 — EVENT SYSTEM
-       ======================================================== */
+       ========================================================= */
 
     function on(
         event,
@@ -404,7 +433,6 @@
     ) {
 
         if (
-            !event ||
             typeof callback !==
             "function"
         ) {
@@ -507,7 +535,7 @@
             Array.from(
                 listeners
             ).forEach(
-                function (callback) {
+                callback => {
 
                     try {
 
@@ -518,7 +546,7 @@
                     } catch (exception) {
 
                         errorLog(
-                            "Registry Event Listener Error:",
+                            "Registry event error:",
                             exception
                         );
 
@@ -531,73 +559,27 @@
 
 
         /*
-         * Verbindung mit dem zentralen
-         * Kernel Event Bus.
+         * Verbindung zum zentralen
+         * HalDo Event-System.
          */
 
-        const kernel =
-            getKernel();
-
-
-        if (
-            kernel &&
-            hasMethod(
-                kernel,
-                "emit"
-            )
-        ) {
-
-            try {
-
-                kernel.emit(
-                    "app-registry:" + event,
-                    data
-                );
-
-            } catch (exception) {
-
-                errorLog(
-                    "Kernel Event Error:",
-                    exception
-                );
-
-            }
-
-        }
-
-
-        /*
-         * Zusätzlich optionales globales
-         * HalDoOS.events-System.
-         */
-
-        const globalEvents =
+        const events =
             HalDoOS.events;
 
 
         if (
-            globalEvents &&
-            typeof globalEvents !==
-            "object"
-        ) {
-
-            return;
-
-        }
-
-
-        if (
-            globalEvents &&
+            events &&
             hasMethod(
-                globalEvents,
+                events,
                 "emit"
             )
         ) {
 
             try {
 
-                globalEvents.emit(
-                    "app-registry:" + event,
+                events.emit(
+                    "app-registry:" +
+                    event,
                     data
                 );
 
@@ -608,9 +590,9 @@
     }
 
 
-    /* ========================================================
+    /* =========================================================
        09 — ERROR SYSTEM
-       ======================================================== */
+       ========================================================= */
 
     function reportError(
         code,
@@ -618,8 +600,7 @@
         extra = null
     ) {
 
-        state.statistics.errors +=
-            1;
+        state.statistics.errors++;
 
 
         const payload = {
@@ -628,13 +609,19 @@
                 code ||
                 "UNKNOWN_ERROR",
 
-            error:
+            message:
                 exception instanceof Error
-                    ? exception
-                    : exception || null,
+                    ? exception.message
+                    : String(
+                        exception ||
+                        "Unbekannter Fehler"
+                    ),
 
-            extra:
-                extra,
+            error:
+                exception ||
+                null,
+
+            extra,
 
             timestamp:
                 new Date().toISOString()
@@ -643,7 +630,6 @@
 
 
         errorLog(
-            "[App Registry]",
             payload
         );
 
@@ -658,11 +644,6 @@
             getKernel();
 
 
-        /*
-         * Fehler an den Kernel weiterreichen,
-         * ohne eine Endlosschleife zu erzeugen.
-         */
-
         if (
             kernel &&
             hasMethod(
@@ -675,15 +656,9 @@
 
                 kernel.reportError(
                     exception ||
-                    new Error(
-                        code ||
-                        "App Registry Error"
-                    ),
+                    payload.message,
                     "App Registry: " +
-                    (
-                        code ||
-                        "UNKNOWN_ERROR"
-                    )
+                    code
                 );
 
             } catch (_) {}
@@ -696,9 +671,153 @@
     }
 
 
-    /* ========================================================
-       10 — APP NORMALIZATION
-       ======================================================== */
+    /* =========================================================
+       10 — DEFAULT WINDOW SYSTEM
+       ========================================================= */
+
+    const DEFAULT_WINDOW =
+        {
+
+            mode:
+                "window",
+
+            resizable:
+                true,
+
+            movable:
+                true,
+
+            minimizable:
+                true,
+
+            maximizable:
+                true,
+
+            closable:
+                true,
+
+            fullscreen:
+                true,
+
+            floating:
+                true,
+
+            splitView:
+                true,
+
+            pictureInPicture:
+                false,
+
+            snap:
+                true,
+
+            rememberPosition:
+                true,
+
+            rememberSize:
+                true,
+
+            multiWindow:
+                true
+
+        };
+
+
+    /* =========================================================
+       11 — DEFAULT APP CAPABILITIES
+       ========================================================= */
+
+    const DEFAULT_CAPABILITIES =
+        {
+
+            ui:
+                true,
+
+            menu:
+                true,
+
+            settings:
+                true,
+
+            notifications:
+                true,
+
+            commands:
+                true,
+
+            shortcuts:
+                true,
+
+            storage:
+                true,
+
+            search:
+                true,
+
+            permissions:
+                true,
+
+            events:
+                true,
+
+            diagnostics:
+                true,
+
+            lifecycle:
+                true,
+
+            multitasking:
+                true,
+
+            windowManagement:
+                true
+
+        };
+
+
+    /* =========================================================
+       12 — DEFAULT APP SETTINGS
+       ========================================================= */
+
+    const DEFAULT_SETTINGS =
+        {
+
+            enabled:
+                true,
+
+            theme:
+                "system",
+
+            language:
+                "system",
+
+            notifications:
+                true,
+
+            sound:
+                true,
+
+            vibration:
+                true,
+
+            animations:
+                true,
+
+            autosave:
+                true,
+
+            rememberState:
+                true,
+
+            rememberWindow:
+                true
+
+        };
+
+
+    /* =========================================================
+       13 — NORMALIZE APP
+       ========================================================= */
 
     function normalizeApp(
         config
@@ -715,17 +834,12 @@
         }
 
 
-        const requestedId =
-            config.id ||
-            config.appId ||
-            config.appID ||
-            config.name ||
-            config.title;
-
-
         const id =
-            createId(
-                requestedId
+            normalizeId(
+                config.id ||
+                config.appId ||
+                config.name ||
+                config.title
             );
 
 
@@ -742,33 +856,47 @@
             );
 
 
+        const category =
+            String(
+                config.category ||
+                existing?.category ||
+                "system"
+            )
+            .trim()
+            .toLowerCase();
+
+
         const app = {
 
-            id:
-                id,
+            id,
 
             appId:
                 id,
 
-            name:
-                config.name !== undefined
-                    ? String(config.name)
+            order:
+                Number.isFinite(
+                    config.order
+                )
+                    ? config.order
                     : (
-                        existing?.name ||
-                        id
+                        existing?.order ||
+                        9999
                     ),
+
+            name:
+                config.name ||
+                existing?.name ||
+                id,
 
             title:
-                config.title !== undefined
-                    ? String(config.title)
-                    : (
-                        existing?.title ||
-                        config.name ||
-                        id
-                    ),
+                config.title ||
+                existing?.title ||
+                config.name ||
+                id,
 
             description:
-                config.description !== undefined
+                config.description !==
+                undefined
                     ? String(
                         config.description
                     )
@@ -777,18 +905,17 @@
                         ""
                     ),
 
-            category:
-                config.category ||
-                existing?.category ||
-                "system",
+            category,
+
+            subcategory:
+                config.subcategory ||
+                existing?.subcategory ||
+                null,
 
             icon:
-                config.icon !== undefined
-                    ? config.icon
-                    : (
-                        existing?.icon ||
-                        "◈"
-                    ),
+                config.icon ||
+                existing?.icon ||
+                "◈",
 
             version:
                 config.version ||
@@ -801,7 +928,8 @@
                 "registered",
 
             enabled:
-                config.enabled !== undefined
+                config.enabled !==
+                undefined
                     ? config.enabled !== false
                     : (
                         existing
@@ -814,7 +942,8 @@
                 existing?.system === true,
 
             singleton:
-                config.singleton !== undefined
+                config.singleton !==
+                undefined
                     ? config.singleton !== false
                     : (
                         existing
@@ -823,15 +952,17 @@
                     ),
 
             route:
-                config.route !== undefined
+                config.route !==
+                undefined
                     ? config.route
                     : (
                         existing?.route ||
-                        null
+                        "/" + id
                     ),
 
             entry:
-                config.entry !== undefined
+                config.entry !==
+                undefined
                     ? config.entry
                     : (
                         existing?.entry ||
@@ -839,132 +970,140 @@
                     ),
 
             url:
-                config.url !== undefined
+                config.url !==
+                undefined
                     ? config.url
                     : (
                         existing?.url ||
                         null
                     ),
 
-            component:
-                config.component !== undefined
-                    ? config.component
-                    : (
-                        existing?.component ||
-                        null
-                    ),
-
-            permissions:
-                config.permissions !== undefined
-                    ? toArray(
-                        config.permissions
-                    )
-                    : (
-                        existing
-                            ? toArray(
-                                existing.permissions
-                            )
-                            : []
-                    ),
-
-            dependencies:
-                config.dependencies !== undefined
-                    ? toArray(
-                        config.dependencies
-                    )
-                    : (
-                        existing
-                            ? toArray(
-                                existing.dependencies
-                            )
-                            : []
-                    ),
-
-            optionalDependencies:
-                config.optionalDependencies !== undefined
-                    ? toArray(
-                        config.optionalDependencies
-                    )
-                    : (
-                        existing
-                            ? toArray(
-                                existing.optionalDependencies
-                            )
-                            : []
-                    ),
-
             tags:
-                config.tags !== undefined
-                    ? toArray(
-                        config.tags
-                    )
-                    : (
-                        existing
-                            ? toArray(
-                                existing.tags
-                            )
-                            : []
-                    ),
+                uniqueArray(
+                    config.tags !==
+                    undefined
+                        ? config.tags
+                        : existing?.tags
+                ),
 
             keywords:
-                config.keywords !== undefined
-                    ? toArray(
-                        config.keywords
+                uniqueArray(
+                    config.keywords !==
+                    undefined
+                        ? config.keywords
+                        : existing?.keywords
+                ),
+
+            permissions:
+                uniqueArray(
+                    config.permissions !==
+                    undefined
+                        ? config.permissions
+                        : existing?.permissions
+                ),
+
+            dependencies:
+                uniqueArray(
+                    config.dependencies !==
+                    undefined
+                        ? config.dependencies
+                        : existing?.dependencies
+                ),
+
+            capabilities:
+                {
+                    ...DEFAULT_CAPABILITIES,
+                    ...(existing?.capabilities || {}),
+                    ...(config.capabilities || {})
+                },
+
+            window:
+                {
+                    ...DEFAULT_WINDOW,
+                    ...(existing?.window || {}),
+                    ...(config.window || {})
+                },
+
+            settings:
+                {
+                    ...DEFAULT_SETTINGS,
+                    ...(existing?.settings || {}),
+                    ...(config.settings || {})
+                },
+
+            menu:
+                Array.isArray(
+                    config.menu
+                )
+                    ? clone(
+                        config.menu
                     )
                     : (
-                        existing
-                            ? toArray(
-                                existing.keywords
-                            )
-                            : []
+                        existing?.menu ||
+                        []
                     ),
 
-            metadata:
-                (
-                    config.metadata &&
-                    typeof config.metadata ===
-                    "object"
+            commands:
+                Array.isArray(
+                    config.commands
                 )
-                    ? {
-                        ...(existing?.metadata || {}),
-                        ...config.metadata
-                    }
-                    : {
-                        ...(existing?.metadata || {})
-                    },
+                    ? clone(
+                        config.commands
+                    )
+                    : (
+                        existing?.commands ||
+                        []
+                    ),
+
+            services:
+                uniqueArray(
+                    config.services !==
+                    undefined
+                        ? config.services
+                        : existing?.services
+                ),
+
+            metadata:
+                {
+                    ...(existing?.metadata || {}),
+                    ...(config.metadata || {})
+                },
 
             api:
-                (
-                    config.api &&
-                    typeof config.api ===
-                    "object"
-                )
-                    ? {
-                        ...(existing?.api || {}),
-                        ...config.api
-                    }
-                    : {
-                        ...(existing?.api || {})
-                    },
+                {
+                    ...(existing?.api || {}),
+                    ...(config.api || {})
+                },
 
             permissionsPolicy:
-                (
-                    config.permissionsPolicy &&
-                    typeof config.permissionsPolicy ===
-                    "object"
-                )
-                    ? {
-                        ...(existing?.permissionsPolicy || {}),
-                        ...config.permissionsPolicy
-                    }
-                    : {
-                        ...(existing?.permissionsPolicy || {})
-                    },
+                {
+                    ...(existing?.permissionsPolicy || {}),
+                    ...(config.permissionsPolicy || {})
+                },
 
+            ai:
+                {
+                    ...(existing?.ai || {}),
+                    ...(config.ai || {})
+                },
 
-            /*
-             * Lifecycle APIs
-             */
+            language:
+                {
+                    ...(existing?.language || {}),
+                    ...(config.language || {})
+                },
+
+            storage:
+                {
+                    ...(existing?.storage || {}),
+                    ...(config.storage || {})
+                },
+
+            lifecycle:
+                {
+                    ...(existing?.lifecycle || {}),
+                    ...(config.lifecycle || {})
+                },
 
             init:
                 typeof config.init ===
@@ -990,6 +1129,24 @@
                     ? config.open
                     : (
                         existing?.open ||
+                        null
+                    ),
+
+            activate:
+                typeof config.activate ===
+                "function"
+                    ? config.activate
+                    : (
+                        existing?.activate ||
+                        null
+                    ),
+
+            deactivate:
+                typeof config.deactivate ===
+                "function"
+                    ? config.deactivate
+                    : (
+                        existing?.deactivate ||
                         null
                     ),
 
@@ -1038,37 +1195,6 @@
                         null
                     ),
 
-            onActivate:
-                typeof config.onActivate ===
-                "function"
-                    ? config.onActivate
-                    : (
-                        existing?.onActivate ||
-                        null
-                    ),
-
-            onDeactivate:
-                typeof config.onDeactivate ===
-                "function"
-                    ? config.onDeactivate
-                    : (
-                        existing?.onDeactivate ||
-                        null
-                    ),
-
-
-            /*
-             * Erweiterbare Runtime-Informationen
-             */
-
-            state:
-                config.state !== undefined
-                    ? config.state
-                    : (
-                        existing?.state ||
-                        "idle"
-                    ),
-
             createdAt:
                 existing?.createdAt ||
                 config.createdAt ||
@@ -1078,7 +1204,10 @@
                 Date.now(),
 
             registry:
-                MODULE_ID
+                MODULE_ID,
+
+            platformVersion:
+                APP_PLATFORM_VERSION
 
         };
 
@@ -1088,9 +1217,620 @@
     }
 
 
-    /* ========================================================
-       11 — REGISTER
-       ======================================================== */
+    /* =========================================================
+       14 — APP CATALOG
+       =========================================================
+
+       Nur bereits festgelegte Apps werden hier eingetragen.
+
+       Die fehlenden Einträge der ursprünglichen 79er-Liste
+       werden NICHT erfunden.
+
+       Die Struktur ist aber vollständig vorbereitet.
+       ========================================================= */
+
+    const CORE_APPS = [
+
+        {
+            id: "haldo-home",
+            name: "HalDo Home",
+            title: "HalDo Home",
+            category: "system",
+            icon: "⌂",
+            system: true,
+            order: 1,
+            route: "/home",
+            tags: ["home", "desktop", "system"],
+            keywords: ["start", "desktop", "home"],
+            window: {
+                mode: "desktop",
+                pictureInPicture: false
+            }
+        },
+
+        {
+            id: "home",
+            name: "Home",
+            title: "Home",
+            category: "system",
+            icon: "⌂",
+            system: true,
+            order: 2,
+            route: "/home-main"
+        },
+
+        {
+            id: "dashboard",
+            name: "Dashboard",
+            title: "Dashboard",
+            category: "system",
+            icon: "▦",
+            system: true,
+            order: 3,
+            route: "/dashboard"
+        },
+
+        {
+            id: "control-center",
+            name: "Control Center",
+            title: "Control Center",
+            category: "system",
+            icon: "⚙",
+            system: true,
+            order: 4,
+            route: "/control-center",
+            window: {
+                mode: "floating"
+            }
+        },
+
+        {
+            id: "app-center",
+            name: "App Center",
+            title: "App Center",
+            category: "system",
+            icon: "▤",
+            system: true,
+            order: 5,
+            route: "/app-center"
+        },
+
+        {
+            id: "startup",
+            name: "Startup",
+            title: "Startup",
+            category: "system",
+            icon: "◉",
+            system: true,
+            order: 6,
+            route: "/startup"
+        },
+
+        {
+            id: "settings",
+            name: "Settings",
+            title: "Settings",
+            category: "system",
+            icon: "⚙",
+            system: true,
+            order: 7,
+            route: "/settings"
+        },
+
+        {
+            id: "notifications",
+            name: "Notifications",
+            title: "Notifications",
+            category: "system",
+            icon: "🔔",
+            system: true,
+            order: 8,
+            route: "/notifications"
+        },
+
+        {
+            id: "system-status",
+            name: "System Status",
+            title: "System Status",
+            category: "system",
+            icon: "◉",
+            system: true,
+            order: 9,
+            route: "/system-status"
+        },
+
+        {
+            id: "system-information",
+            name: "System Information",
+            title: "System Information",
+            category: "system",
+            icon: "ⓘ",
+            system: true,
+            order: 10,
+            route: "/system-information"
+        },
+
+
+        /* =====================================================
+           AI
+           ===================================================== */
+
+        {
+            id: "ai-assistant",
+            name: "AI Assistant",
+            title: "HalDo AI Assistant",
+            category: "ai",
+            icon: "AI",
+            order: 11,
+            route: "/ai-assistant",
+            tags: ["ai", "assistant"],
+            capabilities: {
+                ai: true,
+                voice: true
+            },
+            ai: {
+                enabled: true,
+                memory: true,
+                voice: true,
+                commands: true,
+                tools: true
+            }
+        },
+
+        {
+            id: "ai-chat",
+            name: "AI Chat",
+            title: "AI Chat",
+            category: "ai",
+            icon: "AI",
+            order: 12,
+            route: "/ai-chat",
+            ai: {
+                enabled: true,
+                memory: true,
+                voice: true
+            }
+        },
+
+        {
+            id: "ai-image",
+            name: "AI Image",
+            title: "AI Image",
+            category: "ai",
+            icon: "▧",
+            order: 13,
+            route: "/ai-image",
+            ai: {
+                enabled: true,
+                image: true
+            }
+        },
+
+        {
+            id: "ai-writing",
+            name: "AI Writing",
+            title: "AI Writing",
+            category: "ai",
+            icon: "✎",
+            order: 14,
+            route: "/ai-writing",
+            ai: {
+                enabled: true,
+                writing: true
+            }
+        },
+
+        {
+            id: "ai-code",
+            name: "AI Code",
+            title: "AI Code",
+            category: "ai",
+            icon: "</>",
+            order: 15,
+            route: "/ai-code",
+            ai: {
+                enabled: true,
+                coding: true
+            }
+        },
+
+        {
+            id: "ai-translate",
+            name: "AI Translate",
+            title: "AI Translate",
+            category: "ai",
+            icon: "文",
+            order: 16,
+            route: "/ai-translate",
+            ai: {
+                enabled: true,
+                translation: true
+            }
+        },
+
+        {
+            id: "ai-search",
+            name: "AI Search",
+            title: "AI Search",
+            category: "ai",
+            icon: "⌕",
+            order: 17,
+            route: "/ai-search",
+            ai: {
+                enabled: true,
+                search: true
+            }
+        },
+
+        {
+            id: "ai-memory",
+            name: "AI Memory",
+            title: "AI Memory",
+            category: "ai",
+            icon: "◇",
+            order: 18,
+            route: "/ai-memory",
+            ai: {
+                enabled: true,
+                memory: true
+            }
+        },
+
+        {
+            id: "ai-voice",
+            name: "AI Voice",
+            title: "AI Voice",
+            category: "ai",
+            icon: "◉",
+            order: 19,
+            route: "/ai-voice",
+            ai: {
+                enabled: true,
+                voice: true
+            }
+        },
+
+        {
+            id: "ai-commands",
+            name: "AI Commands",
+            title: "AI Commands",
+            category: "ai",
+            icon: "⌘",
+            order: 20,
+            route: "/ai-commands",
+            ai: {
+                enabled: true,
+                commands: true
+            }
+        },
+
+
+        /* =====================================================
+           FILES
+           ===================================================== */
+
+        {
+            id: "file-manager",
+            name: "File Manager",
+            title: "File Manager",
+            category: "files",
+            icon: "▰",
+            order: 21,
+            route: "/file-manager",
+            tags: ["files", "storage"],
+            storage: {
+                enabled: true,
+                fileAccess: true
+            }
+        },
+
+        {
+            id: "downloads",
+            name: "Downloads",
+            title: "Downloads",
+            category: "files",
+            icon: "⇩",
+            order: 22,
+            route: "/downloads"
+        },
+
+        {
+            id: "recent-files",
+            name: "Recent Files",
+            title: "Recent Files",
+            category: "files",
+            icon: "◷",
+            order: 23,
+            route: "/recent-files"
+        },
+
+        {
+            id: "favorites-files",
+            name: "Favorites Files",
+            title: "Favorite Files",
+            category: "files",
+            icon: "★",
+            order: 24,
+            route: "/favorites-files"
+        },
+
+        {
+            id: "documents",
+            name: "Documents",
+            title: "Documents",
+            category: "files",
+            icon: "▤",
+            order: 25,
+            route: "/documents"
+        },
+
+        {
+            id: "cloud-files",
+            name: "Cloud Files",
+            title: "Cloud Files",
+            category: "files",
+            icon: "☁",
+            order: 26,
+            route: "/cloud-files"
+        },
+
+
+        /* =====================================================
+           PRODUCTIVITY
+           ===================================================== */
+
+        {
+            id: "text-editor",
+            name: "Text Editor",
+            title: "Text Editor",
+            category: "productivity",
+            icon: "✎",
+            order: 27,
+            route: "/text-editor",
+            tags: ["text", "editor"],
+            window: {
+                multiWindow: true,
+                splitView: true
+            }
+        },
+
+        {
+            id: "word-processor",
+            name: "Word Processor",
+            title: "Word Processor",
+            category: "productivity",
+            icon: "W",
+            order: 28,
+            route: "/word-processor"
+        },
+
+        {
+            id: "spreadsheet",
+            name: "Spreadsheet",
+            title: "Spreadsheet",
+            category: "productivity",
+            icon: "▦",
+            order: 29,
+            route: "/spreadsheet"
+        },
+
+        {
+            id: "presentation",
+            name: "Presentation",
+            title: "Presentation",
+            category: "productivity",
+            icon: "▤",
+            order: 30,
+            route: "/presentation"
+        },
+
+        {
+            id: "pdf-reader",
+            name: "PDF Reader",
+            title: "PDF Reader",
+            category: "productivity",
+            icon: "PDF",
+            order: 31,
+            route: "/pdf-reader"
+        },
+
+        {
+            id: "pdf-editor",
+            name: "PDF Editor",
+            title: "PDF Editor",
+            category: "productivity",
+            icon: "PDF",
+            order: 32,
+            route: "/pdf-editor"
+        },
+
+        {
+            id: "calculator",
+            name: "Calculator",
+            title: "Calculator",
+            category: "productivity",
+            icon: "＋",
+            order: 33,
+            route: "/calculator",
+            window: {
+                mode: "floating"
+            }
+        },
+
+
+        /* =====================================================
+           COMMUNICATION
+           ===================================================== */
+
+        {
+            id: "messages",
+            name: "Messages",
+            title: "Messages",
+            category: "communication",
+            icon: "✉",
+            order: 34,
+            route: "/messages"
+        },
+
+        {
+            id: "calls",
+            name: "Calls",
+            title: "Calls",
+            category: "communication",
+            icon: "☎",
+            order: 35,
+            route: "/calls"
+        },
+
+        {
+            id: "video-calls",
+            name: "Video Calls",
+            title: "Video Calls",
+            category: "communication",
+            icon: "▣",
+            order: 36,
+            route: "/video-calls",
+            window: {
+                pictureInPicture: true,
+                floating: true
+            }
+        },
+
+        {
+            id: "contacts",
+            name: "Contacts",
+            title: "Contacts",
+            category: "communication",
+            icon: "♙",
+            order: 37,
+            route: "/contacts"
+        },
+
+        {
+            id: "chat-groups",
+            name: "Chat Groups",
+            title: "Chat Groups",
+            category: "communication",
+            icon: "♧",
+            order: 38,
+            route: "/chat-groups"
+        },
+
+        {
+            id: "email",
+            name: "Email",
+            title: "Email",
+            category: "communication",
+            icon: "@",
+            order: 39,
+            route: "/email"
+        },
+
+
+        /* =====================================================
+           BROWSER
+           ===================================================== */
+
+        {
+            id: "browser",
+            name: "Browser",
+            title: "HalDo Browser",
+            category: "internet",
+            icon: "◎",
+            order: 40,
+            route: "/browser",
+            tags: ["web", "internet"],
+            window: {
+                multiWindow: true,
+                splitView: true
+            }
+        },
+
+        {
+            id: "bookmarks",
+            name: "Bookmarks",
+            title: "Bookmarks",
+            category: "internet",
+            icon: "★",
+            order: 41,
+            route: "/bookmarks"
+        },
+
+        {
+            id: "history",
+            name: "History",
+            title: "History",
+            category: "internet",
+            icon: "◷",
+            order: 42,
+            route: "/history"
+        },
+
+        {
+            id: "downloads-browser",
+            name: "Browser Downloads",
+            title: "Browser Downloads",
+            category: "internet",
+            icon: "⇩",
+            order: 43,
+            route: "/downloads-browser"
+        },
+
+
+        /* =====================================================
+           MEDIA
+           ===================================================== */
+
+        {
+            id: "gallery",
+            name: "Gallery",
+            title: "Gallery",
+            category: "media",
+            icon: "▧",
+            order: 44,
+            route: "/gallery"
+        },
+
+        {
+            id: "camera",
+            name: "Camera",
+            title: "Camera",
+            category: "media",
+            icon: "▣",
+            order: 45,
+            route: "/camera"
+        },
+
+        {
+            id: "audio-recorder",
+            name: "Audio Recorder",
+            title: "Audio Recorder",
+            category: "media",
+            icon: "◉",
+            order: 46,
+            route: "/audio-recorder"
+        },
+
+        {
+            id: "video-recorder",
+            name: "Video Recorder",
+            title: "Video Recorder",
+            category: "media",
+            icon: "▣",
+            order: 47,
+            route: "/video-recorder",
+            window: {
+                pictureInPicture: true,
+                floating: true
+            }
+        }
+
+    ];
+
+
+    /* =========================================================
+       15 — REGISTER
+       ========================================================= */
 
     function register(
         config,
@@ -1115,7 +1855,6 @@
                 }
             );
 
-
             return null;
 
         }
@@ -1133,49 +1872,53 @@
         );
 
 
+        state.categories.add(
+            app.category
+        );
+
+
         if (existing) {
 
-            state.statistics.updated +=
-                1;
+            state.statistics.updated++;
 
 
             emit(
                 "updated",
                 {
-                    app,
+                    app:
+                        clone(app),
+
                     previous:
-                        existing,
+                        clone(existing),
+
                     options
                 }
             );
 
-
-            notifyManager(
-                app,
-                "updated"
-            );
-
         } else {
 
-            state.statistics.registered +=
-                1;
+            state.statistics.registered++;
 
 
             emit(
                 "registered",
                 {
-                    app,
+                    app:
+                        clone(app),
+
                     options
                 }
             );
 
-
-            notifyManager(
-                app,
-                "registered"
-            );
-
         }
+
+
+        notifyConnectedServices(
+            app,
+            existing
+                ? "updated"
+                : "registered"
+        );
 
 
         return app;
@@ -1197,12 +1940,14 @@
 
 
     function registerApps(
-        list,
-        options
+        apps,
+        options = {}
     ) {
 
         if (
-            !Array.isArray(list)
+            !Array.isArray(
+                apps
+            )
         ) {
 
             return [];
@@ -1213,12 +1958,12 @@
         const result = [];
 
 
-        list.forEach(
-            function (config) {
+        apps.forEach(
+            appConfig => {
 
                 const app =
                     register(
-                        config,
+                        appConfig,
                         options
                     );
 
@@ -1240,16 +1985,16 @@
     }
 
 
-    /* ========================================================
-       12 — GET
-       ======================================================== */
+    /* =========================================================
+       16 — ACCESS
+       ========================================================= */
 
     function get(
         id
     ) {
 
         const normalized =
-            createId(
+            normalizeId(
                 id
             );
 
@@ -1286,12 +2031,24 @@
 
         return Array.from(
             state.apps.values()
+        )
+        .sort(
+            (a, b) =>
+                a.order -
+                b.order
         );
 
     }
 
 
     function getApps() {
+
+        return getAll();
+
+    }
+
+
+    function getAllApps() {
 
         return getAll();
 
@@ -1310,13 +2067,13 @@
     ) {
 
         const normalized =
-            createId(
+            normalizeId(
                 id
             );
 
 
-        return !!(
-            normalized &&
+        return (
+            !!normalized &&
             state.apps.has(
                 normalized
             )
@@ -1336,9 +2093,9 @@
     }
 
 
-    /* ========================================================
-       13 — FIND / SEARCH
-       ======================================================== */
+    /* =========================================================
+       17 — SEARCH
+       ========================================================= */
 
     function find(
         query
@@ -1359,47 +2116,54 @@
         }
 
 
-        return getAll().filter(
-            function (app) {
+        return getAll()
+            .filter(
+                app => {
 
-                const fields = [
+                    const fields = [
 
-                    app.id,
+                        app.id,
 
-                    app.appId,
+                        app.name,
 
-                    app.name,
+                        app.title,
 
-                    app.title,
+                        app.description,
 
-                    app.description,
+                        app.category,
 
-                    app.category,
+                        app.subcategory,
 
-                    app.route,
+                        ...(app.tags || []),
 
-                    ...(app.tags || []),
+                        ...(app.keywords || [])
 
-                    ...(app.keywords || [])
-
-                ];
+                    ];
 
 
-                return fields.some(
-                    function (field) {
+                    return fields.some(
+                        field =>
+                            String(
+                                field || ""
+                            )
+                            .toLowerCase()
+                            .includes(
+                                value
+                            )
+                    );
 
-                        return String(
-                            field || ""
-                        )
-                        .toLowerCase()
-                        .includes(
-                            value
-                        );
+                }
+            );
 
-                    }
-                );
+    }
 
-            }
+
+    function findApp(
+        query
+    ) {
+
+        return find(
+            query
         );
 
     }
@@ -1416,9 +2180,9 @@
     }
 
 
-    /* ========================================================
-       14 — CATEGORY
-       ======================================================== */
+    /* =========================================================
+       18 — CATEGORY / TAG
+       ========================================================= */
 
     function getByCategory(
         category
@@ -1432,64 +2196,37 @@
             .toLowerCase();
 
 
-        if (!value) {
-
-            return [];
-
-        }
-
-
-        return getAll().filter(
-            function (app) {
-
-                return (
+        return getAll()
+            .filter(
+                app =>
                     String(
                         app.category ||
                         ""
                     )
                     .toLowerCase() ===
                     value
-                );
-
-            }
-        );
+            );
 
     }
 
 
     function getCategories() {
 
-        const categories =
-            new Set();
-
-
-        getAll().forEach(
-            function (app) {
-
-                if (
-                    app.category
-                ) {
-
-                    categories.add(
-                        app.category
-                    );
-
-                }
-
-            }
-        );
-
-
-        return Array.from(
-            categories
-        );
+        return [
+            ...new Set(
+                getAll()
+                    .map(
+                        app =>
+                            app.category
+                    )
+                    .filter(
+                        Boolean
+                    )
+            )
+        ];
 
     }
 
-
-    /* ========================================================
-       15 — TAGS
-       ======================================================== */
 
     function getByTag(
         tag
@@ -1503,40 +2240,197 @@
             .toLowerCase();
 
 
-        if (!value) {
+        return getAll()
+            .filter(
+                app =>
+                    (app.tags || [])
+                        .some(
+                            item =>
+                                String(
+                                    item
+                                )
+                                .toLowerCase() ===
+                                value
+                        )
+            );
 
-            return [];
+    }
+
+
+    /* =========================================================
+       19 — STATUS
+       ========================================================= */
+
+    function enable(
+        id
+    ) {
+
+        const app =
+            get(
+                id
+            );
+
+
+        if (!app) {
+
+            return false;
 
         }
 
 
-        return getAll().filter(
-            function (app) {
+        if (
+            app.enabled
+        ) {
 
-                return (
-                    app.tags || []
-                ).some(
-                    function (item) {
+            return true;
 
-                        return String(
-                            item
-                        )
-                        .trim()
-                        .toLowerCase() ===
-                        value;
+        }
 
-                    }
-                );
 
+        app.enabled =
+            true;
+
+        app.status =
+            "registered";
+
+        app.updatedAt =
+            Date.now();
+
+
+        state.statistics.enabled++;
+
+
+        emit(
+            "enabled",
+            {
+                app:
+                    clone(app)
             }
+        );
+
+
+        notifyConnectedServices(
+            app,
+            "enabled"
+        );
+
+
+        return true;
+
+    }
+
+
+    function enableApp(
+        id
+    ) {
+
+        return enable(
+            id
         );
 
     }
 
 
-    /* ========================================================
-       16 — UPDATE
-       ======================================================== */
+    function disable(
+        id
+    ) {
+
+        const app =
+            get(
+                id
+            );
+
+
+        if (!app) {
+
+            return false;
+
+        }
+
+
+        app.enabled =
+            false;
+
+        app.status =
+            "disabled";
+
+        app.updatedAt =
+            Date.now();
+
+
+        state.statistics.disabled++;
+
+
+        emit(
+            "disabled",
+            {
+                app:
+                    clone(app)
+            }
+        );
+
+
+        notifyConnectedServices(
+            app,
+            "disabled"
+        );
+
+
+        return true;
+
+    }
+
+
+    function disableApp(
+        id
+    ) {
+
+        return disable(
+            id
+        );
+
+    }
+
+
+    function getEnabledApps() {
+
+        return getAll()
+            .filter(
+                app =>
+                    app.enabled !==
+                    false
+            );
+
+    }
+
+
+    function getDisabledApps() {
+
+        return getAll()
+            .filter(
+                app =>
+                    app.enabled ===
+                    false
+            );
+
+    }
+
+
+    function getSystemApps() {
+
+        return getAll()
+            .filter(
+                app =>
+                    app.system ===
+                    true
+            );
+
+    }
+
+
+    /* =========================================================
+       20 — UPDATE
+       ========================================================= */
 
     function update(
         id,
@@ -1568,25 +2462,33 @@
 
 
         const previous =
-            safeClone(
+            clone(
                 app
             );
 
 
-        const normalized =
+        const merged = {
+
+            ...app,
+
+            ...changes,
+
+            id:
+                app.id,
+
+            appId:
+                app.id
+
+        };
+
+
+        const updated =
             normalizeApp(
-                {
-                    ...app,
-                    ...changes,
-                    id:
-                        app.id,
-                    appId:
-                        app.id
-                }
+                merged
             );
 
 
-        if (!normalized) {
+        if (!updated) {
 
             return null;
 
@@ -1595,32 +2497,36 @@
 
         state.apps.set(
             app.id,
-            normalized
+            updated
         );
 
 
-        state.statistics.updated +=
-            1;
+        state.categories.add(
+            updated.category
+        );
+
+
+        state.statistics.updated++;
 
 
         emit(
             "updated",
             {
                 app:
-                    normalized,
+                    clone(updated),
 
                 previous
             }
         );
 
 
-        notifyManager(
-            normalized,
+        notifyConnectedServices(
+            updated,
             "updated"
         );
 
 
-        return normalized;
+        return updated;
 
     }
 
@@ -1638,9 +2544,9 @@
     }
 
 
-    /* ========================================================
-       17 — REMOVE
-       ======================================================== */
+    /* =========================================================
+       21 — REMOVE
+       ========================================================= */
 
     function remove(
         id,
@@ -1648,20 +2554,13 @@
     ) {
 
         const normalized =
-            createId(
+            normalizeId(
                 id
             );
 
 
-        if (!normalized) {
-
-            return false;
-
-        }
-
-
         const app =
-            state.apps.get(
+            get(
                 normalized
             );
 
@@ -1673,27 +2572,16 @@
         }
 
 
-        /*
-         * System-Apps werden nicht versehentlich
-         * gelöscht, außer force=true gesetzt wurde.
-         */
-
         if (
-            app.system === true &&
-            options.force !== true
+            app.system &&
+            options.force !==
+            true
         ) {
 
-            reportError(
-                "SYSTEM_APP_REMOVE_BLOCKED",
-                new Error(
-                    "System-App darf ohne force=true nicht entfernt werden."
-                ),
-                {
-                    appId:
-                        app.id
-                }
+            warn(
+                "System-App nicht entfernt:",
+                app.id
             );
-
 
             return false;
 
@@ -1705,20 +2593,21 @@
         );
 
 
-        state.statistics.removed +=
-            1;
+        state.statistics.removed++;
 
 
         emit(
             "removed",
             {
-                app,
+                app:
+                    clone(app),
+
                 options
             }
         );
 
 
-        notifyManager(
+        notifyConnectedServices(
             app,
             "removed"
         );
@@ -1755,250 +2644,9 @@
     }
 
 
-    /* ========================================================
-       18 — ENABLE
-       ======================================================== */
-
-    function enable(
-        id
-    ) {
-
-        const app =
-            get(
-                id
-            );
-
-
-        if (!app) {
-
-            return false;
-
-        }
-
-
-        if (
-            app.enabled ===
-            true
-        ) {
-
-            return true;
-
-        }
-
-
-        const missing =
-            getMissingDependencies(
-                app.id
-            );
-
-
-        /*
-         * Fehlende Dependencies verhindern
-         * das Aktivieren nicht automatisch.
-         * Sie werden aber im Event gemeldet.
-         */
-
-        app.enabled =
-            true;
-
-        app.status =
-            "registered";
-
-        app.updatedAt =
-            Date.now();
-
-
-        state.statistics.enabled +=
-            1;
-
-
-        emit(
-            "enabled",
-            {
-                app,
-                missingDependencies:
-                    missing
-            }
-        );
-
-
-        notifyManager(
-            app,
-            "enabled"
-        );
-
-
-        return true;
-
-    }
-
-
-    function enableApp(
-        id
-    ) {
-
-        return enable(
-            id
-        );
-
-    }
-
-
-    /* ========================================================
-       19 — DISABLE
-       ======================================================== */
-
-    function disable(
-        id
-    ) {
-
-        const app =
-            get(
-                id
-            );
-
-
-        if (!app) {
-
-            return false;
-
-        }
-
-
-        if (
-            app.system === true
-        ) {
-
-            reportError(
-                "SYSTEM_APP_DISABLE_BLOCKED",
-                new Error(
-                    "System-App darf nicht deaktiviert werden."
-                ),
-                {
-                    appId:
-                        app.id
-                }
-            );
-
-
-            return false;
-
-        }
-
-
-        if (
-            app.enabled ===
-            false
-        ) {
-
-            return true;
-
-        }
-
-
-        app.enabled =
-            false;
-
-        app.status =
-            "disabled";
-
-        app.updatedAt =
-            Date.now();
-
-
-        state.statistics.disabled +=
-            1;
-
-
-        emit(
-            "disabled",
-            {
-                app
-            }
-        );
-
-
-        notifyManager(
-            app,
-            "disabled"
-        );
-
-
-        return true;
-
-    }
-
-
-    function disableApp(
-        id
-    ) {
-
-        return disable(
-            id
-        );
-
-    }
-
-
-    /* ========================================================
-       20 — ENABLED / DISABLED
-       ======================================================== */
-
-    function getEnabledApps() {
-
-        return getAll().filter(
-            function (app) {
-
-                return (
-                    app.enabled !==
-                    false
-                );
-
-            }
-        );
-
-    }
-
-
-    function getDisabledApps() {
-
-        return getAll().filter(
-            function (app) {
-
-                return (
-                    app.enabled ===
-                    false
-                );
-
-            }
-        );
-
-    }
-
-
-    /* ========================================================
-       21 — SYSTEM APPS
-       ======================================================== */
-
-    function getSystemApps() {
-
-        return getAll().filter(
-            function (app) {
-
-                return (
-                    app.system ===
-                    true
-                );
-
-            }
-        );
-
-    }
-
-
-    /* ========================================================
+    /* =========================================================
        22 — DEPENDENCIES
-       ======================================================== */
+       ========================================================= */
 
     function getDependencies(
         id
@@ -2010,16 +2658,11 @@
             );
 
 
-        if (!app) {
-
-            return [];
-
-        }
-
-
-        return [
-            ...(app.dependencies || [])
-        ];
+        return app
+            ? [
+                ...(app.dependencies || [])
+            ]
+            : [];
 
     }
 
@@ -2028,35 +2671,16 @@
         id
     ) {
 
-        const app =
-            get(
-                id
-            );
-
-
-        if (!app) {
-
-            return [];
-
-        }
-
-
-        return (
-            app.dependencies || []
-        ).filter(
-            function (dependency) {
+        return getDependencies(
+            id
+        )
+        .filter(
+            dependency => {
 
                 const dependencyId =
-                    createId(
+                    normalizeId(
                         dependency
                     );
-
-
-                if (!dependencyId) {
-
-                    return true;
-
-                }
 
 
                 const dependencyApp =
@@ -2091,50 +2715,408 @@
     }
 
 
-    function getDependents(
+    /* =========================================================
+       23 — APP SETTINGS
+       ========================================================= */
+
+    function getSettings(
         id
     ) {
 
-        const normalized =
-            createId(
+        const app =
+            get(
                 id
             );
 
 
-        if (!normalized) {
+        return app
+            ? clone(
+                app.settings
+            )
+            : null;
 
-            return [];
+    }
+
+
+    function updateSettings(
+        id,
+        settings
+    ) {
+
+        const app =
+            get(
+                id
+            );
+
+
+        if (!app) {
+
+            return null;
 
         }
 
 
-        return getAll().filter(
-            function (app) {
+        app.settings = {
 
-                return (
-                    app.dependencies || []
-                ).some(
-                    function (dependency) {
+            ...app.settings,
 
-                        return (
-                            createId(
-                                dependency
-                            ) ===
-                            normalized
-                        );
+            ...(settings || {})
 
-                    }
-                );
+        };
 
+
+        app.updatedAt =
+            Date.now();
+
+
+        emit(
+            "settings-updated",
+            {
+                app:
+                    clone(app),
+
+                settings:
+                    clone(
+                        app.settings
+                    )
             }
+        );
+
+
+        return clone(
+            app.settings
         );
 
     }
 
 
-    /* ========================================================
-       23 — EXPORT
-       ======================================================== */
+    /* =========================================================
+       24 — APP MENU
+       ========================================================= */
+
+    function getMenu(
+        id
+    ) {
+
+        const app =
+            get(
+                id
+            );
+
+
+        return app
+            ? clone(
+                app.menu
+            )
+            : [];
+
+    }
+
+
+    function setMenu(
+        id,
+        menu
+    ) {
+
+        const app =
+            get(
+                id
+            );
+
+
+        if (!app) {
+
+            return false;
+
+        }
+
+
+        app.menu =
+            Array.isArray(
+                menu
+            )
+                ? clone(
+                    menu
+                )
+                : [];
+
+
+        app.updatedAt =
+            Date.now();
+
+
+        emit(
+            "menu-updated",
+            {
+                app:
+                    clone(app)
+            }
+        );
+
+
+        return true;
+
+    }
+
+
+    /* =========================================================
+       25 — APP COMMANDS
+       ========================================================= */
+
+    function getCommands(
+        id
+    ) {
+
+        const app =
+            get(
+                id
+            );
+
+
+        return app
+            ? clone(
+                app.commands
+            )
+            : [];
+
+    }
+
+
+    function setCommands(
+        id,
+        commands
+    ) {
+
+        const app =
+            get(
+                id
+            );
+
+
+        if (!app) {
+
+            return false;
+
+        }
+
+
+        app.commands =
+            Array.isArray(
+                commands
+            )
+                ? clone(
+                    commands
+                )
+                : [];
+
+
+        app.updatedAt =
+            Date.now();
+
+
+        emit(
+            "commands-updated",
+            {
+                app:
+                    clone(app)
+            }
+        );
+
+
+        return true;
+
+    }
+
+
+    /* =========================================================
+       26 — WINDOW CAPABILITIES
+       ========================================================= */
+
+    function getWindowCapabilities(
+        id
+    ) {
+
+        const app =
+            get(
+                id
+            );
+
+
+        return app
+            ? clone(
+                app.window
+            )
+            : null;
+
+    }
+
+
+    function updateWindowCapabilities(
+        id,
+        changes
+    ) {
+
+        const app =
+            get(
+                id
+            );
+
+
+        if (!app) {
+
+            return null;
+
+        }
+
+
+        app.window = {
+
+            ...app.window,
+
+            ...(changes || {})
+
+        };
+
+
+        app.updatedAt =
+            Date.now();
+
+
+        emit(
+            "window-capabilities-updated",
+            {
+                app:
+                    clone(app)
+            }
+        );
+
+
+        return clone(
+            app.window
+        );
+
+    }
+
+
+    /* =========================================================
+       27 — APP CAPABILITIES
+       ========================================================= */
+
+    function getCapabilities(
+        id
+    ) {
+
+        const app =
+            get(
+                id
+            );
+
+
+        return app
+            ? clone(
+                app.capabilities
+            )
+            : null;
+
+    }
+
+
+    function updateCapabilities(
+        id,
+        changes
+    ) {
+
+        const app =
+            get(
+                id
+            );
+
+
+        if (!app) {
+
+            return null;
+
+        }
+
+
+        app.capabilities = {
+
+            ...app.capabilities,
+
+            ...(changes || {})
+
+        };
+
+
+        app.updatedAt =
+            Date.now();
+
+
+        emit(
+            "capabilities-updated",
+            {
+                app:
+                    clone(app)
+            }
+        );
+
+
+        return clone(
+            app.capabilities
+        );
+
+    }
+
+
+    /* =========================================================
+       28 — AI
+       ========================================================= */
+
+    function getAIConfig(
+        id
+    ) {
+
+        const app =
+            get(
+                id
+            );
+
+
+        return app
+            ? clone(
+                app.ai
+            )
+            : null;
+
+    }
+
+
+    /* =========================================================
+       29 — STORAGE
+       ========================================================= */
+
+    function getStorageConfig(
+        id
+    ) {
+
+        const app =
+            get(
+                id
+            );
+
+
+        return app
+            ? clone(
+                app.storage
+            )
+            : null;
+
+    }
+
+
+    /* =========================================================
+       30 — IMPORT / EXPORT
+       ========================================================= */
 
     function exportApps(
         options = {}
@@ -2147,10 +3129,16 @@
         const data = {
 
             format:
-                "haldo-app-registry",
+                "haldo-ai-os-app-registry",
 
             version:
                 VERSION,
+
+            platform:
+                APP_PLATFORM_VERSION,
+
+            edition:
+                EDITION,
 
             exportedAt:
                 new Date().toISOString(),
@@ -2159,23 +3147,24 @@
                 apps.length,
 
             apps:
-                options.clone === false
+                options.clone ===
+                false
                     ? apps
-                    : safeClone(
+                    : clone(
                         apps
                     )
 
         };
 
 
-        state.statistics.exported +=
-            1;
+        state.statistics.exported++;
 
 
         emit(
             "exported",
             {
-                data
+                data:
+                    clone(data)
             }
         );
 
@@ -2195,10 +3184,6 @@
 
     }
 
-
-    /* ========================================================
-       24 — IMPORT
-       ======================================================== */
 
     function importApps(
         source,
@@ -2227,7 +3212,6 @@
                     "IMPORT_JSON_ERROR",
                     exception
                 );
-
 
                 return 0;
 
@@ -2258,14 +3242,6 @@
             )
         ) {
 
-            reportError(
-                "INVALID_IMPORT",
-                new Error(
-                    "Import-Daten enthalten keine App-Liste."
-                )
-            );
-
-
             return 0;
 
         }
@@ -2276,39 +3252,7 @@
 
 
         definitions.forEach(
-            function (definition) {
-
-                if (
-                    !definition ||
-                    typeof definition !==
-                    "object"
-                ) {
-
-                    return;
-
-                }
-
-
-                const id =
-                    createId(
-                        definition.id ||
-                        definition.appId ||
-                        definition.name
-                    );
-
-
-                if (!id) {
-
-                    return;
-
-                }
-
-
-                const existed =
-                    state.apps.has(
-                        id
-                    );
-
+            definition => {
 
                 const app =
                     register(
@@ -2317,13 +3261,9 @@
                     );
 
 
-                if (
-                    app &&
-                    !existed
-                ) {
+                if (app) {
 
-                    imported +=
-                        1;
+                    imported++;
 
                 }
 
@@ -2362,9 +3302,9 @@
     }
 
 
-    /* ========================================================
-       25 — CLEAR
-       ======================================================== */
+    /* =========================================================
+       31 — CLEAR
+       ========================================================= */
 
     function clear(
         options = {}
@@ -2375,26 +3315,24 @@
 
 
         if (
-            options.keepSystem ===
+            options.force !==
             true
         ) {
 
-            apps.forEach(
-                function (app) {
-
-                    if (
-                        app.system !==
-                        true
-                    ) {
+            apps
+                .filter(
+                    app =>
+                        app.system
+                )
+                .forEach(
+                    app => {
 
                         state.apps.delete(
                             app.id
                         );
 
                     }
-
-                }
-            );
+                );
 
         } else {
 
@@ -2409,29 +3347,21 @@
                 count:
                     apps.length,
 
-                remaining:
-                    getCount(),
-
-                apps,
-
                 options
             }
         );
 
 
-        return (
-            apps.length -
-            getCount()
-        );
+        return apps.length;
 
     }
 
 
-    /* ========================================================
-       26 — MANAGER NOTIFICATION
-       ======================================================== */
+    /* =========================================================
+       32 — CONNECTIONS
+       ========================================================= */
 
-    function notifyManager(
+    function notifyConnectedServices(
         app,
         action
     ) {
@@ -2441,79 +3371,133 @@
 
 
         if (
-            !manager ||
-            !app
+            manager &&
+            hasMethod(
+                manager,
+                "emit"
+            )
         ) {
 
-            state.connections.manager =
-                false;
-
-
-            return false;
-
-        }
-
-
-        state.connections.manager =
-            true;
-
-
-        try {
-
-            /*
-             * Nur Event-Benachrichtigung.
-             *
-             * Die Registry registriert die App
-             * NICHT erneut im Manager.
-             *
-             * Dadurch wird eine Endlosschleife
-             * zwischen Registry und Manager verhindert.
-             */
-
-            if (
-                hasMethod(
-                    manager,
-                    "emit"
-                )
-            ) {
+            try {
 
                 manager.emit(
                     "registry-" +
                     action,
                     {
-                        app
+                        app:
+                            clone(app)
                     }
+                );
+
+                state.connections.manager =
+                    true;
+
+            } catch (exception) {
+
+                reportError(
+                    "MANAGER_EVENT_ERROR",
+                    exception
                 );
 
             }
 
-
-            return true;
-
-        } catch (exception) {
-
-            reportError(
-                "MANAGER_NOTIFICATION_ERROR",
-                exception,
-                {
-                    appId:
-                        app.id,
-
-                    action
-                }
-            );
+        }
 
 
-            return false;
+        const router =
+            getRouter();
+
+
+        if (
+            router &&
+            hasMethod(
+                router,
+                "emit"
+            )
+        ) {
+
+            try {
+
+                router.emit(
+                    "registry-" +
+                    action,
+                    {
+                        app:
+                            clone(app)
+                    }
+                );
+
+                state.connections.router =
+                    true;
+
+            } catch (_) {}
+
+        }
+
+
+        const launcher =
+            getLauncher();
+
+
+        if (
+            launcher &&
+            hasMethod(
+                launcher,
+                "emit"
+            )
+        ) {
+
+            try {
+
+                launcher.emit(
+                    "registry-" +
+                    action,
+                    {
+                        app:
+                            clone(app)
+                    }
+                );
+
+                state.connections.launcher =
+                    true;
+
+            } catch (_) {}
+
+        }
+
+
+        const windowManager =
+            getWindowManager();
+
+
+        if (
+            windowManager &&
+            hasMethod(
+                windowManager,
+                "emit"
+            )
+        ) {
+
+            try {
+
+                windowManager.emit(
+                    "registry-" +
+                    action,
+                    {
+                        app:
+                            clone(app)
+                    }
+                );
+
+                state.connections.windowManager =
+                    true;
+
+            } catch (_) {}
 
         }
 
     }
 
-
-    /* ========================================================
-       27 — CONNECTIONS
-       ======================================================== */
 
     function connectToKernel() {
 
@@ -2525,7 +3509,6 @@
 
             state.connections.kernel =
                 false;
-
 
             return false;
 
@@ -2569,10 +3552,7 @@
 
 
             emit(
-                "kernel-connected",
-                {
-                    kernel
-                }
+                "kernel-connected"
             );
 
 
@@ -2580,15 +3560,10 @@
 
         } catch (exception) {
 
-            state.connections.kernel =
-                false;
-
-
             reportError(
                 "KERNEL_CONNECTION_ERROR",
                 exception
             );
-
 
             return false;
 
@@ -2607,7 +3582,6 @@
 
             state.connections.system =
                 false;
-
 
             return false;
 
@@ -2649,10 +3623,7 @@
 
 
             emit(
-                "system-connected",
-                {
-                    system
-                }
+                "system-connected"
             );
 
 
@@ -2660,15 +3631,10 @@
 
         } catch (exception) {
 
-            state.connections.system =
-                false;
-
-
             reportError(
                 "SYSTEM_CONNECTION_ERROR",
                 exception
             );
-
 
             return false;
 
@@ -2693,6 +3659,9 @@
         state.connections.launcher =
             !!getLauncher();
 
+        state.connections.windowManager =
+            !!getWindowManager();
+
 
         return getConnectionStatus();
 
@@ -2704,33 +3673,31 @@
         return {
 
             kernel:
-                !!getKernel() &&
-                state.connections.kernel,
+                !!getKernel(),
 
             system:
-                !!getSystem() &&
-                state.connections.system,
+                !!getSystem(),
 
             manager:
-                !!getManager() &&
-                state.connections.manager,
+                !!getManager(),
 
             router:
-                !!getRouter() &&
-                state.connections.router,
+                !!getRouter(),
 
             launcher:
-                !!getLauncher() &&
-                state.connections.launcher
+                !!getLauncher(),
+
+            windowManager:
+                !!getWindowManager()
 
         };
 
     }
 
 
-    /* ========================================================
-       28 — COUNTERS
-       ======================================================== */
+    /* =========================================================
+       33 — COUNTERS
+       ========================================================= */
 
     function getCount() {
 
@@ -2755,46 +3722,9 @@
     }
 
 
-    /* ========================================================
-       29 — STATE
-       ======================================================== */
-
-    function getState() {
-
-        return {
-
-            initialized:
-                state.initialized,
-
-            initializing:
-                state.initializing,
-
-            ready:
-                state.ready,
-
-            failed:
-                state.failed,
-
-            initializedAt:
-                state.initializedAt,
-
-            readyAt:
-                state.readyAt,
-
-            appCount:
-                state.apps.size,
-
-            connections:
-                getConnectionStatus()
-
-        };
-
-    }
-
-
-    /* ========================================================
-       30 — DIAGNOSTICS
-       ======================================================== */
+    /* =========================================================
+       34 — DIAGNOSTICS
+       ========================================================= */
 
     function diagnostics() {
 
@@ -2807,23 +3737,26 @@
             name:
                 NAME,
 
+            version:
+                VERSION,
+
+            edition:
+                EDITION,
+
             module:
                 MODULE_ID,
 
-            version:
-                VERSION,
+            platformVersion:
+                APP_PLATFORM_VERSION,
 
             initialized:
                 state.initialized,
 
-            initializing:
-                state.initializing,
-
             ready:
                 state.ready,
 
-            failed:
-                state.failed,
+            initializing:
+                state.initializing,
 
             count:
                 apps.length,
@@ -2848,61 +3781,59 @@
 
             apps:
                 apps.map(
-                    function (app) {
+                    app => ({
 
-                        return {
+                        id:
+                            app.id,
 
-                            id:
-                                app.id,
+                        name:
+                            app.name,
 
-                            name:
-                                app.name,
+                        title:
+                            app.title,
 
-                            title:
-                                app.title,
+                        category:
+                            app.category,
 
-                            category:
-                                app.category,
+                        order:
+                            app.order,
 
-                            version:
-                                app.version,
+                        version:
+                            app.version,
 
-                            status:
-                                app.status,
+                        status:
+                            app.status,
 
-                            enabled:
-                                app.enabled,
+                        enabled:
+                            app.enabled,
 
-                            system:
-                                app.system,
+                        system:
+                            app.system,
 
-                            singleton:
-                                app.singleton,
+                        route:
+                            app.route,
 
-                            route:
-                                app.route,
+                        window:
+                            clone(
+                                app.window
+                            ),
 
-                            dependencies:
-                                [
-                                    ...(app.dependencies || [])
-                                ],
+                        capabilities:
+                            clone(
+                                app.capabilities
+                            ),
 
-                            missingDependencies:
-                                getMissingDependencies(
-                                    app.id
-                                ),
+                        dependencies:
+                            [
+                                ...(app.dependencies || [])
+                            ],
 
-                            dependents:
-                                getDependents(
-                                    app.id
-                                ).map(
-                                    item =>
-                                        item.id
-                                )
+                        missingDependencies:
+                            getMissingDependencies(
+                                app.id
+                            )
 
-                        };
-
-                    }
+                    })
                 ),
 
             timestamp:
@@ -2913,9 +3844,9 @@
     }
 
 
-    /* ========================================================
-       31 — HEALTH CHECK
-       ======================================================== */
+    /* =========================================================
+       35 — HEALTH CHECK
+       ========================================================= */
 
     function healthCheck() {
 
@@ -2923,30 +3854,7 @@
             getConnectionStatus();
 
 
-        const problems =
-            [];
-
-
-        if (
-            !state.initialized
-        ) {
-
-            problems.push(
-                "Registry wurde noch nicht initialisiert."
-            );
-
-        }
-
-
-        if (
-            !state.ready
-        ) {
-
-            problems.push(
-                "Registry ist noch nicht bereit."
-            );
-
-        }
+        const problems = [];
 
 
         if (
@@ -2971,25 +3879,35 @@
         }
 
 
-        const dependencyProblems =
-            getAll().filter(
-                app =>
-                    !checkDependencies(
+        const apps =
+            getAll();
+
+
+        apps.forEach(
+            app => {
+
+                const missing =
+                    getMissingDependencies(
                         app.id
-                    )
-            );
+                    );
 
 
-        if (
-            dependencyProblems.length
-        ) {
+                if (
+                    missing.length
+                ) {
 
-            problems.push(
-                dependencyProblems.length +
-                " App(s) haben fehlende Dependencies."
-            );
+                    problems.push(
+                        app.id +
+                        ": fehlende Dependencies: " +
+                        missing.join(
+                            ", "
+                        )
+                    );
 
-        }
+                }
+
+            }
+        );
 
 
         return {
@@ -3000,8 +3918,6 @@
 
             problems,
 
-            connections,
-
             initialized:
                 state.initialized,
 
@@ -3011,19 +3927,10 @@
             appCount:
                 getCount(),
 
-            dependencyProblems:
-                dependencyProblems.map(
-                    app => ({
-                        id:
-                            app.id,
+            enabledCount:
+                getEnabledApps().length,
 
-                        missing:
-                            getMissingDependencies(
-                                app.id
-                            )
-
-                    })
-                ),
+            connections,
 
             timestamp:
                 new Date().toISOString()
@@ -3033,309 +3940,45 @@
     }
 
 
-    /* ========================================================
-       32 — PUBLIC API
-       ======================================================== */
+    /* =========================================================
+       36 — STATE
+       ========================================================= */
 
-    const api = {
+    function getState() {
 
-        name:
-            NAME,
+        return {
 
-        version:
-            VERSION,
+            initialized:
+                state.initialized,
 
-        module:
-            MODULE_ID,
+            initializing:
+                state.initializing,
 
+            ready:
+                state.ready,
 
-        /* State */
+            appCount:
+                state.apps.size,
 
-        getState:
-            getState,
+            categories:
+                getCategories(),
 
+            connections:
+                getConnectionStatus(),
 
-        /* Events */
+            startedAt:
+                state.startedAt
 
-        on:
-            on,
-
-        off:
-            off,
-
-        emit:
-            emit,
-
-
-        /* Registration */
-
-        register:
-            register,
-
-        registerApp:
-            registerApp,
-
-        registerApps:
-            registerApps,
-
-        unregister:
-            unregister,
-
-        unregisterApp:
-            unregisterApp,
-
-        remove:
-            remove,
-
-
-        /* Access */
-
-        get:
-            get,
-
-        getApp:
-            getApp,
-
-        getAll:
-            getAll,
-
-        getApps:
-            getApps,
-
-        list:
-            list,
-
-        has:
-            has,
-
-        hasApp:
-            hasApp,
-
-
-        /* Search */
-
-        find:
-            find,
-
-        search:
-            search,
-
-        getByCategory:
-            getByCategory,
-
-        getCategories:
-            getCategories,
-
-        getByTag:
-            getByTag,
-
-
-        /* Status */
-
-        getEnabledApps:
-            getEnabledApps,
-
-        getDisabledApps:
-            getDisabledApps,
-
-        getSystemApps:
-            getSystemApps,
-
-        enable:
-            enable,
-
-        enableApp:
-            enableApp,
-
-        disable:
-            disable,
-
-        disableApp:
-            disableApp,
-
-
-        /* Update */
-
-        update:
-            update,
-
-        updateApp:
-            updateApp,
-
-
-        /* Dependencies */
-
-        getDependencies:
-            getDependencies,
-
-        getMissingDependencies:
-            getMissingDependencies,
-
-        checkDependencies:
-            checkDependencies,
-
-        getDependents:
-            getDependents,
-
-
-        /* Import / Export */
-
-        export:
-            exportApps,
-
-        exportApps:
-            exportApps,
-
-        exportRegistry:
-            exportRegistry,
-
-        import:
-            importApps,
-
-        importApps:
-            importApps,
-
-        importRegistry:
-            importRegistry,
-
-        clear:
-            clear,
-
-
-        /* Connections */
-
-        connectToKernel:
-            connectToKernel,
-
-        connectToSystem:
-            connectToSystem,
-
-        refreshConnections:
-            refreshConnections,
-
-        getConnectionStatus:
-            getConnectionStatus,
-
-
-        /* Statistics */
-
-        getCount:
-            getCount,
-
-        getAppCount:
-            getAppCount,
-
-        getStatistics:
-            getStatistics,
-
-
-        /* Diagnostics */
-
-        diagnostics:
-            diagnostics,
-
-        healthCheck:
-            healthCheck
-
-    };
-
-
-    /* ========================================================
-       33 — GLOBAL EXPORT
-       ======================================================== */
-
-    window.HalDoAppRegistry =
-        api;
-
-    window.HalDoOSAppRegistry =
-        api;
-
-    HalDoOS.appRegistry =
-        api;
-
-
-    /* ========================================================
-       34 — KERNEL READY HANDLER
-       ======================================================== */
-
-    function handleKernelReady(
-        data
-    ) {
-
-        refreshConnections();
-
-
-        emit(
-            "kernel-ready",
-            {
-                data,
-
-                diagnostics:
-                    diagnostics()
-            }
-        );
+        };
 
     }
 
 
-    /* ========================================================
-       35 — GLOBAL EVENT CONNECTION
-       ======================================================== */
+    /* =========================================================
+       37 — INITIALIZATION
+       ========================================================= */
 
-    function connectGlobalEvents() {
-
-        const kernel =
-            getKernel();
-
-
-        if (
-            !kernel
-        ) {
-
-            return false;
-
-        }
-
-
-        if (
-            hasMethod(
-                kernel,
-                "on"
-            )
-        ) {
-
-            try {
-
-                kernel.on(
-                    "kernel:ready",
-                    handleKernelReady
-                );
-
-
-                return true;
-
-            } catch (exception) {
-
-                warn(
-                    "Kernel Event-Verbindung fehlgeschlagen:",
-                    exception
-                );
-
-            }
-
-        }
-
-
-        return false;
-
-    }
-
-
-    /* ========================================================
-       36 — INITIALIZATION
-       ======================================================== */
-
-    async function initializeRegistry() {
+    async function initialize() {
 
         if (
             state.ready
@@ -3361,10 +4004,7 @@
         state.initialized =
             true;
 
-        state.failed =
-            false;
-
-        state.initializedAt =
+        state.startedAt =
             Date.now();
 
 
@@ -3377,115 +4017,366 @@
         );
 
 
-        try {
+        /*
+         * Die bekannte App-Basis registrieren.
+         *
+         * Fehlende Einträge der früher festgelegten
+         * 79er-Liste werden bewusst nicht erfunden.
+         */
 
-            refreshConnections();
-
-
-            /*
-             * Falls der Kernel bereits läuft,
-             * Registry sofort als bereit markieren.
-             */
-
-            const kernel =
-                getKernel();
-
-
-            if (
-                kernel &&
-                hasMethod(
-                    kernel,
-                    "getStatus"
-                )
-            ) {
-
-                const kernelStatus =
-                    kernel.getStatus();
+        registerApps(
+            CORE_APPS,
+            {
+                source:
+                    "haldo-core-catalog"
+            }
+        );
 
 
-                if (
-                    kernelStatus &&
-                    kernelStatus.ready
-                ) {
+        refreshConnections();
 
-                    state.connections.kernel =
-                        true;
 
-                }
+        state.ready =
+            true;
+
+        state.initializing =
+            false;
+
+
+        emit(
+            "ready",
+            {
+                version:
+                    VERSION,
+
+                appCount:
+                    getCount(),
+
+                diagnostics:
+                    diagnostics()
+            }
+        );
+
+
+        log(
+            "App Registry 20 ist bereit.",
+            getCount(),
+            "Apps registriert."
+        );
+
+
+        return api;
+
+    }
+
+
+    /* =========================================================
+       38 — KERNEL EVENT
+       ========================================================= */
+
+    function handleKernelReady() {
+
+        refreshConnections();
+
+
+        emit(
+            "kernel-ready",
+            {
+                diagnostics:
+                    diagnostics()
+            }
+        );
+
+    }
+
+
+    function connectGlobalEvents() {
+
+        const kernel =
+            getKernel();
+
+
+        if (
+            kernel &&
+            hasMethod(
+                kernel,
+                "on"
+            )
+        ) {
+
+            try {
+
+                kernel.on(
+                    "kernel:ready",
+                    handleKernelReady
+                );
+
+            } catch (exception) {
+
+                warn(
+                    "Kernel-Verbindung konnte nicht aufgebaut werden.",
+                    exception
+                );
 
             }
-
-
-            state.ready =
-                true;
-
-            state.initializing =
-                false;
-
-            state.readyAt =
-                Date.now();
-
-
-            emit(
-                "ready",
-                {
-                    version:
-                        VERSION,
-
-                    diagnostics:
-                        diagnostics()
-                }
-            );
-
-
-            log(
-                "App Registry bereit.",
-                VERSION
-            );
-
-
-            return api;
-
-        } catch (exception) {
-
-            state.initializing =
-                false;
-
-            state.ready =
-                false;
-
-            state.failed =
-                true;
-
-
-            reportError(
-                "REGISTRY_INIT_ERROR",
-                exception
-            );
-
-
-            throw exception;
 
         }
 
     }
 
 
-    /* ========================================================
-       37 — STARTUP
-       ======================================================== */
+    /* =========================================================
+       39 — PUBLIC API
+       ========================================================= */
+
+    const api = {
+
+        name:
+            NAME,
+
+        version:
+            VERSION,
+
+        edition:
+            EDITION,
+
+        module:
+            MODULE_ID,
+
+        platformVersion:
+            APP_PLATFORM_VERSION,
+
+
+        /* State */
+
+        getState,
+
+        initialize,
+
+
+        /* Events */
+
+        on,
+
+        off,
+
+        emit,
+
+
+        /* Registration */
+
+        register,
+
+        registerApp,
+
+        registerApps,
+
+        unregister,
+
+        unregisterApp,
+
+        remove,
+
+
+        /* Access */
+
+        get,
+
+        getApp,
+
+        getAll,
+
+        getApps,
+
+        getAllApps,
+
+        list,
+
+        has,
+
+        hasApp,
+
+
+        /* Search */
+
+        find,
+
+        findApp,
+
+        search,
+
+
+        /* Categories */
+
+        getByCategory,
+
+        getCategories,
+
+        getByTag,
+
+
+        /* Status */
+
+        enable,
+
+        enableApp,
+
+        disable,
+
+        disableApp,
+
+        getEnabledApps,
+
+        getDisabledApps,
+
+        getSystemApps,
+
+
+        /* Update */
+
+        update,
+
+        updateApp,
+
+
+        /* Dependencies */
+
+        getDependencies,
+
+        getMissingDependencies,
+
+        checkDependencies,
+
+
+        /* Settings */
+
+        getSettings,
+
+        updateSettings,
+
+
+        /* Menus */
+
+        getMenu,
+
+        setMenu,
+
+
+        /* Commands */
+
+        getCommands,
+
+        setCommands,
+
+
+        /* Window System */
+
+        getWindowCapabilities,
+
+        updateWindowCapabilities,
+
+
+        /* Capabilities */
+
+        getCapabilities,
+
+        updateCapabilities,
+
+
+        /* AI */
+
+        getAIConfig,
+
+
+        /* Storage */
+
+        getStorageConfig,
+
+
+        /* Import / Export */
+
+        export:
+            exportApps,
+
+        exportApps,
+
+        exportRegistry,
+
+        import:
+            importApps,
+
+        importApps,
+
+        importRegistry,
+
+        clear,
+
+
+        /* Connections */
+
+        connectToKernel,
+
+        connectToSystem,
+
+        refreshConnections,
+
+        getConnectionStatus,
+
+
+        /* Statistics */
+
+        getCount,
+
+        getAppCount,
+
+        getStatistics,
+
+
+        /* Diagnostics */
+
+        diagnostics,
+
+        healthCheck
+
+    };
+
+
+    /* =========================================================
+       40 — GLOBAL EXPORTS
+       ========================================================= */
+
+    window.HalDoAppRegistry =
+        api;
+
+    window.HalDoOSAppRegistry =
+        api;
+
+    HalDoOS.appRegistry =
+        api;
+
+
+    /* =========================================================
+       41 — GLOBAL EVENTS
+       ========================================================= */
 
     connectGlobalEvents();
 
 
-    function handleDOMReady() {
+    /* =========================================================
+       42 — DOM STARTUP
+       ========================================================= */
 
-        initializeRegistry()
+    function bootRegistry() {
+
+        initialize()
             .catch(
-                function (exception) {
+                exception => {
+
+                    state.initializing =
+                        false;
 
                     reportError(
-                        "REGISTRY_STARTUP_ERROR",
+                        "REGISTRY_INITIALIZATION_ERROR",
                         exception
                     );
 
@@ -3502,7 +4393,7 @@
 
         document.addEventListener(
             "DOMContentLoaded",
-            handleDOMReady,
+            bootRegistry,
             {
                 once:
                     true
@@ -3511,14 +4402,14 @@
 
     } else {
 
-        handleDOMReady();
+        bootRegistry();
 
     }
 
 
-    /* ========================================================
-       38 — FINAL EXPOSURE
-       ======================================================== */
+    /* =========================================================
+       43 — FINAL EXPOSURE
+       ========================================================= */
 
     window.HalDoOS =
         window.HalDoOS ||
@@ -3528,10 +4419,17 @@
         api;
 
 
-    /* ========================================================
-       END OF FILE
-       HALDO AI OS 18
-       APP REGISTRY
-       ======================================================== */
+    log(
+        "HalDo AI OS 20 App Registry geladen."
+    );
+
 
 })(window, document);
+
+
+/* ============================================================
+   ENDE
+   HALDO AI OS 20
+   APP REGISTRY
+   PROFESSIONAL ULTIMATE STABLE
+   ============================================================ */
