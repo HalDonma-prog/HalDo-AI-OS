@@ -13891,3 +13891,521 @@
         );
 
     </script>
+        <!-- =========================================================
+         HALDO AI OS 20
+         CENTRAL INTEGRATION BRIDGE
+         
+         TEIL 11
+         
+         Aufgabe:
+         - zentrale OS-Referenz vorbereiten
+         - vorhandene Module erkennen
+         - Integrationsstatus sammeln
+         - globale Fehler kontrolliert behandeln
+         - keine vorhandenen Module ersetzen
+         ========================================================= -->
+
+    <script>
+
+        (function () {
+
+            "use strict";
+
+
+            /* =====================================================
+               HALDO OS NAMESPACE
+               ===================================================== */
+
+            window.HalDoOS =
+                window.HalDoOS || {};
+
+
+            const OS =
+                window.HalDoOS;
+
+
+            OS.version =
+                OS.version || "20.0.0";
+
+
+            OS.edition =
+                OS.edition ||
+                "Professional Ultimate Foundation";
+
+
+            OS.integration =
+                OS.integration || {};
+
+
+            OS.integration.version =
+                "20.0.0";
+
+
+            OS.integration.startedAt =
+                Date.now();
+
+
+            /* =====================================================
+               MODULE DETECTION
+               ===================================================== */
+
+            function detect(name, paths) {
+
+                for (
+                    const path of paths
+                ) {
+
+                    try {
+
+                        let value =
+                            window;
+
+                        const parts =
+                            path.split(".");
+
+                        for (
+                            const part of parts
+                        ) {
+
+                            if (
+                                value == null
+                            ) {
+
+                                break;
+                            }
+
+                            value =
+                                value[part];
+
+                        }
+
+
+                        if (
+                            value != null
+                        ) {
+
+                            return true;
+                        }
+
+                    } catch (error) {
+
+                        console.warn(
+                            "[HalDo Integration]",
+                            name,
+                            error
+                        );
+
+                    }
+
+                }
+
+                return false;
+            }
+
+
+            /* =====================================================
+               SYSTEM MAP
+               ===================================================== */
+
+            function collectSystemMap() {
+
+                const modules = {
+
+                    kernel:
+                        detect(
+                            "Kernel",
+                            [
+                                "HalDoKernel",
+                                "HalDoOS.kernel"
+                            ]
+                        ),
+
+                    system:
+                        detect(
+                            "System",
+                            [
+                                "HalDoSystem",
+                                "HalDoOS.system"
+                            ]
+                        ),
+
+                    storage:
+                        detect(
+                            "Storage",
+                            [
+                                "HalDoStorage",
+                                "HalDoOS.storage"
+                            ]
+                        ),
+
+                    storageManager:
+                        detect(
+                            "Storage Manager",
+                            [
+                                "HalDoStorageManager",
+                                "HalDoOS.storageManager"
+                            ]
+                        ),
+
+                    config:
+                        detect(
+                            "Config",
+                            [
+                                "HalDoConfigManager",
+                                "HalDoOS.configManager"
+                            ]
+                        ),
+
+                    moduleManager:
+                        detect(
+                            "Module Manager",
+                            [
+                                "HalDoModuleManager",
+                                "HalDoOS.moduleManager"
+                            ]
+                        ),
+
+                    appRegistry:
+                        detect(
+                            "App Registry",
+                            [
+                                "HalDoAppRegistry",
+                                "HalDoOS.appRegistry"
+                            ]
+                        ),
+
+                    appManager:
+                        detect(
+                            "App Manager",
+                            [
+                                "HalDoAppManager",
+                                "HalDoOS.appManager"
+                            ]
+                        ),
+
+                    appRouter:
+                        detect(
+                            "App Router",
+                            [
+                                "HalDoAppRouter",
+                                "HalDoOS.appRouter"
+                            ]
+                        ),
+
+                    launcher:
+                        detect(
+                            "Launcher",
+                            [
+                                "HalDoLauncher",
+                                "HalDoOS.launcher"
+                            ]
+                        ),
+
+                    windowManager:
+                        detect(
+                            "Window Manager",
+                            [
+                                "HalDoWindowManager",
+                                "HalDoOS.windowManager"
+                            ]
+                        ),
+
+                    desktop:
+                        detect(
+                            "Desktop",
+                            [
+                                "HalDoDesktop",
+                                "HalDoOS.desktop"
+                            ]
+                        ),
+
+                    language:
+                        detect(
+                            "Language",
+                            [
+                                "HalDoLanguage",
+                                "HalDoOS.language"
+                            ]
+                        ),
+
+                    ezidiKeyboard:
+                        detect(
+                            "Ezidi Keyboard",
+                            [
+                                "HalDoEzidiKeyboard",
+                                "HalDoOS.ezidiKeyboard"
+                            ]
+                        ),
+
+                    aiCore:
+                        detect(
+                            "AI Core",
+                            [
+                                "HalDoAI",
+                                "HalDoAICore",
+                                "HalDoOS.ai"
+                            ]
+                        ),
+
+                    aiEngine:
+                        detect(
+                            "AI Engine",
+                            [
+                                "HalDoAIEngine",
+                                "HalDoOS.aiEngine"
+                            ]
+                        ),
+
+                    aiChat:
+                        detect(
+                            "AI Chat",
+                            [
+                                "HalDoAIChat",
+                                "HalDoOS.aiChat"
+                            ]
+                        ),
+
+                    voice:
+                        detect(
+                            "Voice",
+                            [
+                                "HalDoVoice",
+                                "HalDoOS.voice"
+                            ]
+                        ),
+
+                    logo:
+                        detect(
+                            "Logo",
+                            [
+                                "HalDoLogo",
+                                "HalDoOS.logo"
+                            ]
+                        )
+
+                };
+
+
+                OS.integration.modules =
+                    modules;
+
+
+                OS.integration.moduleCount =
+                    Object.keys(
+                        modules
+                    ).length;
+
+
+                OS.integration.connectedCount =
+                    Object.values(
+                        modules
+                    ).filter(
+                        Boolean
+                    ).length;
+
+
+                return modules;
+
+            }
+
+
+            /* =====================================================
+               WAIT FOR DEFERRED MODULES
+               ===================================================== */
+
+            function scanModules() {
+
+                const modules =
+                    collectSystemMap();
+
+
+                console.log(
+                    "[HalDo Integration]",
+                    "Module scan:",
+                    modules
+                );
+
+            }
+
+
+            /*
+             * Die vorhandenen JS-Dateien verwenden "defer".
+             * Deshalb wird die erste Prüfung nach dem DOM-Lauf
+             * durchgeführt und anschließend nochmals kurz
+             * wiederholt, damit langsam initialisierte Module
+             * erkannt werden können.
+             */
+
+            if (
+                document.readyState ===
+                "loading"
+            ) {
+
+                document.addEventListener(
+                    "DOMContentLoaded",
+                    scanModules,
+                    {
+                        once: true
+                    }
+                );
+
+            } else {
+
+                scanModules();
+
+            }
+
+
+            window.setTimeout(
+                scanModules,
+                300
+            );
+
+
+            window.setTimeout(
+                scanModules,
+                1200
+            );
+
+
+            window.setTimeout(
+                scanModules,
+                3000
+            );
+
+
+            /* =====================================================
+               GLOBAL ERROR BRIDGE
+               ===================================================== */
+
+            window.addEventListener(
+                "error",
+                function (event) {
+
+                    OS.integration.lastError = {
+
+                        type:
+                            "runtime",
+
+                        message:
+                            event.message ||
+                            "Unbekannter JavaScript-Fehler",
+
+                        source:
+                            event.filename ||
+                            null,
+
+                        line:
+                            event.lineno ||
+                            null,
+
+                        column:
+                            event.colno ||
+                            null,
+
+                        time:
+                            Date.now()
+
+                    };
+
+
+                    console.error(
+                        "[HalDo OS 20 Runtime Error]",
+                        event.error ||
+                        event.message
+                    );
+
+                }
+            );
+
+
+            window.addEventListener(
+                "unhandledrejection",
+                function (event) {
+
+                    OS.integration.lastError = {
+
+                        type:
+                            "promise",
+
+                        message:
+                            event.reason?.message ||
+                            String(
+                                event.reason ||
+                                "Unbekannter Promise-Fehler"
+                            ),
+
+                        time:
+                            Date.now()
+
+                    };
+
+
+                    console.error(
+                        "[HalDo OS 20 Promise Error]",
+                        event.reason
+                    );
+
+                }
+            );
+
+
+            /* =====================================================
+               PUBLIC INTEGRATION API
+               ===================================================== */
+
+            OS.integration.scan =
+                scanModules;
+
+
+            OS.integration.getStatus =
+                function () {
+
+                    const modules =
+                        collectSystemMap();
+
+
+                    return {
+
+                        version:
+                            OS.version,
+
+                        edition:
+                            OS.edition,
+
+                        modules,
+
+                        connected:
+                            Object.values(
+                                modules
+                            ).filter(
+                                Boolean
+                            ).length,
+
+                        total:
+                            Object.keys(
+                                modules
+                            ).length,
+
+                        lastError:
+                            OS.integration.lastError ||
+                            null
+
+                    };
+
+                };
+
+
+            OS.integration.ready =
+                true;
+
+
+            console.log(
+                "%cHalDo AI OS 20%c · Integrationsbrücke bereit",
+                "color:#42e6ff;font-weight:800;",
+                "color:#ffffff;"
+            );
+
+        })();
+
+    </script>
