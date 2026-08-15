@@ -19564,3 +19564,2322 @@
 
 })();
 </script>
+<!-- =========================================================
+     HALDO AI OS 20
+     TEIL 16
+     APP INTEGRATION BRIDGE
+     
+     Verbindet die zentrale UI-Shell mit den bereits vorhandenen
+     HalDo-Systemen, ohne deren bestehende Implementierungen
+     zu ersetzen.
+     ========================================================= -->
+
+<script>
+
+(() => {
+
+    "use strict";
+
+
+    /* =========================================================
+       HALDO APP INTEGRATION BRIDGE
+       ========================================================= */
+
+    const VERSION =
+        "20.0.0";
+
+
+    const bridge =
+        {
+
+            version:
+                VERSION,
+
+            initialized:
+                false,
+
+            connected:
+                false,
+
+            systems:
+                {},
+
+            apps:
+                {},
+
+            events:
+                new Map()
+
+        };
+
+
+    /* =========================================================
+       SAFE GLOBAL ACCESS
+       ========================================================= */
+
+    function getGlobal(
+        name
+    ) {
+
+        try {
+
+            return window[name] || null;
+
+        } catch (error) {
+
+            console.warn(
+                "[HalDo App Bridge] Globalzugriff fehlgeschlagen:",
+                name,
+                error
+            );
+
+            return null;
+
+        }
+
+    }
+
+
+    /* =========================================================
+       HALDO OS ACCESS
+       ========================================================= */
+
+    function getOS() {
+
+        if (
+            !window.HalDoOS
+        ) {
+
+            window.HalDoOS =
+                {};
+
+        }
+
+        return window.HalDoOS;
+
+    }
+
+
+    /* =========================================================
+       SYSTEM CONNECTIONS
+       ========================================================= */
+
+    function connectSystems() {
+
+        const os =
+            getOS();
+
+
+        bridge.systems =
+            {
+
+                kernel:
+                    getGlobal(
+                        "HalDoKernel"
+                    ) ||
+                    os.kernel ||
+                    null,
+
+                system:
+                    getGlobal(
+                        "HalDoSystem"
+                    ) ||
+                    os.system ||
+                    null,
+
+                appManager:
+                    getGlobal(
+                        "HalDoAppManager"
+                    ) ||
+                    os.appManager ||
+                    null,
+
+                appRegistry:
+                    getGlobal(
+                        "HalDoAppRegistry"
+                    ) ||
+                    os.appRegistry ||
+                    null,
+
+                appRouter:
+                    getGlobal(
+                        "HalDoAppRouter"
+                    ) ||
+                    os.appRouter ||
+                    null,
+
+                windowManager:
+                    getGlobal(
+                        "HalDoWindowManager"
+                    ) ||
+                    os.windowManager ||
+                    null,
+
+                launcher:
+                    getGlobal(
+                        "HalDoLauncher"
+                    ) ||
+                    os.launcher ||
+                    null,
+
+                ai:
+                    getGlobal(
+                        "HalDoAI"
+                    ) ||
+                    os.ai ||
+                    null,
+
+                storage:
+                    getGlobal(
+                        "HalDoStorage"
+                    ) ||
+                    os.storage ||
+                    null,
+
+                language:
+                    getGlobal(
+                        "HalDoLanguage"
+                    ) ||
+                    getGlobal(
+                        "HalDoLanguageManager"
+                    ) ||
+                    os.language ||
+                    null
+
+            };
+
+
+        bridge.connected =
+            true;
+
+
+        os.appBridge =
+            bridge;
+
+
+        window.HalDoAppBridge =
+            bridge;
+
+
+        return bridge.systems;
+
+    }
+
+
+    /* =========================================================
+       EVENT SYSTEM
+       ========================================================= */
+
+    function on(
+        eventName,
+        handler
+    ) {
+
+        if (
+            typeof handler !==
+            "function"
+        ) {
+
+            return () => {};
+
+        }
+
+
+        if (
+            !bridge.events.has(
+                eventName
+            )
+        ) {
+
+            bridge.events.set(
+                eventName,
+                new Set()
+            );
+
+        }
+
+
+        const handlers =
+            bridge.events.get(
+                eventName
+            );
+
+
+        handlers.add(
+            handler
+        );
+
+
+        return () => {
+
+            handlers.delete(
+                handler
+            );
+
+        };
+
+    }
+
+
+    function emit(
+        eventName,
+        detail = {}
+    ) {
+
+        const handlers =
+            bridge.events.get(
+                eventName
+            );
+
+
+        if (
+            handlers
+        ) {
+
+            handlers.forEach(
+                handler => {
+
+                    try {
+
+                        handler(
+                            detail
+                        );
+
+                    } catch (error) {
+
+                        console.error(
+                            "[HalDo App Bridge Event]",
+                            eventName,
+                            error
+                        );
+
+                    }
+
+                }
+            );
+
+        }
+
+
+        try {
+
+            window.dispatchEvent(
+                new CustomEvent(
+                    "haldo:" + eventName,
+                    {
+                        detail
+                    }
+                )
+            );
+
+        } catch (error) {
+
+            console.warn(
+                "[HalDo App Bridge]",
+                error
+            );
+
+        }
+
+    }
+
+
+    /* =========================================================
+       APP REGISTRATION
+       ========================================================= */
+
+    function registerApp(
+        app
+    ) {
+
+        if (
+            !app ||
+            typeof app !==
+            "object"
+        ) {
+
+            throw new TypeError(
+                "Eine App-Definition ist erforderlich."
+            );
+
+        }
+
+
+        const id =
+            String(
+                app.id ||
+                app.appId ||
+                app.name ||
+                ""
+            )
+            .trim()
+            .toLowerCase();
+
+
+        if (
+            !id
+        ) {
+
+            throw new Error(
+                "Die App benötigt eine eindeutige ID."
+            );
+
+        }
+
+
+        const normalized =
+            {
+
+                ...app,
+
+                id,
+
+                version:
+                    app.version ||
+                    VERSION,
+
+                enabled:
+                    app.enabled !== false,
+
+                state:
+                    app.state ||
+                    "registered",
+
+                registeredAt:
+                    app.registeredAt ||
+                    Date.now()
+
+            };
+
+
+        bridge.apps[id] =
+            normalized;
+
+
+        emit(
+            "app:registered",
+            {
+                app:
+                    normalized
+            }
+        );
+
+
+        return normalized;
+
+    }
+
+
+    /* =========================================================
+       APP LOOKUP
+       ========================================================= */
+
+    function getApp(
+        id
+    ) {
+
+        const key =
+            String(
+                id ||
+                ""
+            )
+            .trim()
+            .toLowerCase();
+
+
+        return (
+            bridge.apps[key] ||
+            null
+        );
+
+    }
+
+
+    function getApps() {
+
+        return Object.values(
+            bridge.apps
+        );
+
+    }
+
+
+    /* =========================================================
+       EXTERNAL REGISTRY SYNC
+       ========================================================= */
+
+    function syncRegistry() {
+
+        const registry =
+            bridge.systems.appRegistry;
+
+
+        if (
+            !registry
+        ) {
+
+            return;
+
+        }
+
+
+        try {
+
+            let externalApps =
+                null;
+
+
+            if (
+                typeof registry.getApps ===
+                "function"
+            ) {
+
+                externalApps =
+                    registry.getApps();
+
+            } else if (
+                typeof registry.list ===
+                "function"
+            ) {
+
+                externalApps =
+                    registry.list();
+
+            }
+
+
+            if (
+                Array.isArray(
+                    externalApps
+                )
+            ) {
+
+                externalApps.forEach(
+                    app => {
+
+                        try {
+
+                            registerApp(
+                                app
+                            );
+
+                        } catch (error) {
+
+                            console.warn(
+                                "[HalDo App Bridge] App konnte nicht synchronisiert werden:",
+                                error
+                            );
+
+                        }
+
+                    }
+                );
+
+            }
+
+        } catch (error) {
+
+            console.warn(
+                "[HalDo App Bridge] Registry-Synchronisation fehlgeschlagen:",
+                error
+            );
+
+        }
+
+    }
+
+
+    /* =========================================================
+       APP OPENING
+       ========================================================= */
+
+    async function openApp(
+        id,
+        options = {}
+    ) {
+
+        const app =
+            getApp(
+                id
+            );
+
+
+        const router =
+            bridge.systems.appRouter;
+
+
+        const manager =
+            bridge.systems.appManager;
+
+
+        emit(
+            "app:open:requested",
+            {
+                id,
+                app,
+                options
+            }
+        );
+
+
+        try {
+
+            if (
+                router &&
+                typeof router.open ===
+                "function"
+            ) {
+
+                const result =
+                    await router.open(
+                        id,
+                        options
+                    );
+
+
+                emit(
+                    "app:opened",
+                    {
+                        id,
+                        app,
+                        result
+                    }
+                );
+
+
+                return result;
+
+            }
+
+
+            if (
+                router &&
+                typeof router.navigate ===
+                "function"
+            ) {
+
+                const result =
+                    await router.navigate(
+                        id,
+                        options
+                    );
+
+
+                emit(
+                    "app:opened",
+                    {
+                        id,
+                        app,
+                        result
+                    }
+                );
+
+
+                return result;
+
+            }
+
+
+            if (
+                manager &&
+                typeof manager.openApp ===
+                "function"
+            ) {
+
+                const result =
+                    await manager.openApp(
+                        id,
+                        options
+                    );
+
+
+                emit(
+                    "app:opened",
+                    {
+                        id,
+                        app,
+                        result
+                    }
+                );
+
+
+                return result;
+
+            }
+
+
+            if (
+                window.HalDoUI &&
+                typeof window.HalDoUI.openAppWindow ===
+                "function"
+            ) {
+
+                return window.HalDoUI.openAppWindow(
+                    app?.name ||
+                    id,
+                    app?.render ||
+                    null
+                );
+
+            }
+
+
+            console.warn(
+                "[HalDo App Bridge] Kein App-Öffner verfügbar:",
+                id
+            );
+
+
+            return null;
+
+        } catch (error) {
+
+            emit(
+                "app:open:error",
+                {
+                    id,
+                    app,
+                    error
+                }
+            );
+
+
+            console.error(
+                "[HalDo App Bridge]",
+                error
+            );
+
+
+            return null;
+
+        }
+
+    }
+
+
+    /* =========================================================
+       APP CLOSE
+       ========================================================= */
+
+    async function closeApp(
+        id
+    ) {
+
+        const router =
+            bridge.systems.appRouter;
+
+
+        const manager =
+            bridge.systems.appManager;
+
+
+        try {
+
+            if (
+                router &&
+                typeof router.close ===
+                "function"
+            ) {
+
+                return await router.close(
+                    id
+                );
+
+            }
+
+
+            if (
+                manager &&
+                typeof manager.closeApp ===
+                "function"
+            ) {
+
+                return await manager.closeApp(
+                    id
+                );
+
+            }
+
+        } catch (error) {
+
+            console.error(
+                "[HalDo App Bridge] App schließen fehlgeschlagen:",
+                error
+            );
+
+        }
+
+
+        emit(
+            "app:close",
+            {
+                id
+            }
+        );
+
+
+        return false;
+
+    }
+
+
+    /* =========================================================
+       APP STATE
+       ========================================================= */
+
+    function setAppState(
+        id,
+        state,
+        data = {}
+    ) {
+
+        const app =
+            getApp(
+                id
+            );
+
+
+        if (
+            !app
+        ) {
+
+            return false;
+
+        }
+
+
+        app.state =
+            state;
+
+
+        app.stateData =
+            {
+                ...data
+            };
+
+
+        app.stateChangedAt =
+            Date.now();
+
+
+        emit(
+            "app:state",
+            {
+                id,
+                state,
+                data,
+                app
+            }
+        );
+
+
+        return true;
+
+    }
+
+
+    /* =========================================================
+       AI CONNECTION
+       ========================================================= */
+
+    async function sendToAI(
+        message,
+        context = {}
+    ) {
+
+        const ai =
+            bridge.systems.ai;
+
+
+        if (
+            ai &&
+            typeof ai.sendMessage ===
+            "function"
+        ) {
+
+            return await ai.sendMessage(
+                message,
+                context
+            );
+
+        }
+
+
+        if (
+            ai &&
+            typeof ai.process ===
+            "function"
+        ) {
+
+            return await ai.process(
+                message,
+                context
+            );
+
+        }
+
+
+        if (
+            window.HalDoUI &&
+            typeof window.HalDoUI.handleMessage ===
+            "function"
+        ) {
+
+            return window.HalDoUI.handleMessage(
+                message
+            );
+
+        }
+
+
+        return null;
+
+    }
+
+
+    /* =========================================================
+       STORAGE CONNECTION
+       ========================================================= */
+
+    async function save(
+        key,
+        value
+    ) {
+
+        const storage =
+            bridge.systems.storage;
+
+
+        try {
+
+            if (
+                storage &&
+                typeof storage.set ===
+                "function"
+            ) {
+
+                return await storage.set(
+                    key,
+                    value
+                );
+
+            }
+
+
+            localStorage.setItem(
+                "haldo:" + key,
+                JSON.stringify(
+                    value
+                )
+            );
+
+
+            return true;
+
+        } catch (error) {
+
+            console.error(
+                "[HalDo App Bridge] Speichern fehlgeschlagen:",
+                error
+            );
+
+            return false;
+
+        }
+
+    }
+
+
+    async function load(
+        key,
+        fallback = null
+    ) {
+
+        const storage =
+            bridge.systems.storage;
+
+
+        try {
+
+            if (
+                storage &&
+                typeof storage.get ===
+                "function"
+            ) {
+
+                const result =
+                    await storage.get(
+                        key
+                    );
+
+
+                return result ??
+                    fallback;
+
+            }
+
+
+            const raw =
+                localStorage.getItem(
+                    "haldo:" + key
+                );
+
+
+            if (
+                raw ===
+                null
+            ) {
+
+                return fallback;
+
+            }
+
+
+            return JSON.parse(
+                raw
+            );
+
+        } catch (error) {
+
+            console.warn(
+                "[HalDo App Bridge] Laden fehlgeschlagen:",
+                error
+            );
+
+
+            return fallback;
+
+        }
+
+    }
+
+
+    /* =========================================================
+       PUBLIC API
+       ========================================================= */
+
+    bridge.on =
+        on;
+
+    bridge.emit =
+        emit;
+
+    bridge.connect =
+        connectSystems;
+
+    bridge.registerApp =
+        registerApp;
+
+    bridge.getApp =
+        getApp;
+
+    bridge.getApps =
+        getApps;
+
+    bridge.syncRegistry =
+        syncRegistry;
+
+    bridge.openApp =
+        openApp;
+
+    bridge.closeApp =
+        closeApp;
+
+    bridge.setAppState =
+        setAppState;
+
+    bridge.sendToAI =
+        sendToAI;
+
+    bridge.save =
+        save;
+
+    bridge.load =
+        load;
+
+
+    /* =========================================================
+       INITIALIZATION
+       ========================================================= */
+
+    function initialize() {
+
+        if (
+            bridge.initialized
+        ) {
+
+            return bridge;
+
+        }
+
+
+        connectSystems();
+
+        syncRegistry();
+
+
+        bridge.initialized =
+            true;
+
+
+        emit(
+            "app:bridge:ready",
+            {
+                version:
+                    VERSION,
+
+                systems:
+                    bridge.systems,
+
+                apps:
+                    getApps(),
+
+                timestamp:
+                    Date.now()
+
+            }
+        );
+
+
+        console.info(
+            "%cHalDo AI OS 20%c App-Integrations-Bridge bereit",
+            "color:#42e6ff;font-weight:800;",
+            "color:#ffffff;"
+        );
+
+
+        return bridge;
+
+    }
+
+
+    /* =========================================================
+       SAFE START
+       ========================================================= */
+
+    if (
+        document.readyState ===
+        "loading"
+    ) {
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            initialize,
+            {
+                once:
+                    true
+            }
+        );
+
+    } else {
+
+        initialize();
+
+    }
+
+
+})();
+
+</script>
+<!-- =========================================================
+     HALDO AI OS 20
+     TEIL 17
+     APP RUNTIME & LIFECYCLE
+     ========================================================= -->
+
+<script>
+
+(() => {
+
+    "use strict";
+
+    const VERSION = "20.0.0";
+
+    const bridge =
+        window.HalDoAppBridge ||
+        null;
+
+    const runtime = {
+
+        version: VERSION,
+
+        initialized: false,
+
+        activeApp: null,
+
+        instances: new Map(),
+
+        states: new Map(),
+
+        counters: new Map(),
+
+        listeners: new Map()
+
+    };
+
+
+    /* =========================================================
+       HELPERS
+       ========================================================= */
+
+    function normalizeId(id) {
+
+        return String(
+            id || ""
+        )
+        .trim()
+        .toLowerCase();
+
+    }
+
+
+    function now() {
+
+        return Date.now();
+
+    }
+
+
+    function safeCall(
+        fn,
+        ...args
+    ) {
+
+        if (
+            typeof fn !== "function"
+        ) {
+
+            return undefined;
+
+        }
+
+        try {
+
+            return fn(...args);
+
+        } catch (error) {
+
+            console.error(
+                "[HalDo Runtime]",
+                error
+            );
+
+            return undefined;
+
+        }
+
+    }
+
+
+    /* =========================================================
+       EVENT SYSTEM
+       ========================================================= */
+
+    function on(
+        event,
+        handler
+    ) {
+
+        if (
+            typeof handler !==
+            "function"
+        ) {
+
+            return () => {};
+
+        }
+
+
+        if (
+            !runtime.listeners.has(
+                event
+            )
+        ) {
+
+            runtime.listeners.set(
+                event,
+                new Set()
+            );
+
+        }
+
+
+        const set =
+            runtime.listeners.get(
+                event
+            );
+
+
+        set.add(
+            handler
+        );
+
+
+        return () => {
+
+            set.delete(
+                handler
+            );
+
+        };
+
+    }
+
+
+    function emit(
+        event,
+        detail = {}
+    ) {
+
+        const handlers =
+            runtime.listeners.get(
+                event
+            );
+
+
+        if (
+            handlers
+        ) {
+
+            handlers.forEach(
+                handler => {
+
+                    safeCall(
+                        handler,
+                        detail
+                    );
+
+                }
+            );
+
+        }
+
+
+        if (
+            bridge &&
+            typeof bridge.emit ===
+            "function"
+        ) {
+
+            safeCall(
+                bridge.emit,
+                "runtime:" + event,
+                detail
+            );
+
+        }
+
+    }
+
+
+    /* =========================================================
+       INSTANCE ID
+       ========================================================= */
+
+    function createInstanceId(
+        appId
+    ) {
+
+        const count =
+            (
+                runtime.counters.get(
+                    appId
+                ) ||
+                0
+            ) + 1;
+
+
+        runtime.counters.set(
+            appId,
+            count
+        );
+
+
+        return (
+            appId +
+            "-" +
+            now() +
+            "-" +
+            count
+        );
+
+    }
+
+
+    /* =========================================================
+       APP DEFINITION
+       ========================================================= */
+
+    function resolveApp(
+        appId
+    ) {
+
+        if (
+            !bridge ||
+            typeof bridge.getApp !==
+            "function"
+        ) {
+
+            return null;
+
+        }
+
+
+        return bridge.getApp(
+            appId
+        );
+
+    }
+
+
+    /* =========================================================
+       APP CONTEXT
+       ========================================================= */
+
+    function createContext(
+        app,
+        instance
+    ) {
+
+        return {
+
+            app,
+
+            instance,
+
+            runtime,
+
+            version:
+                VERSION,
+
+            emit(
+                event,
+                detail = {}
+            ) {
+
+                emit(
+                    event,
+                    {
+                        app,
+                        instance,
+                        ...detail
+                    }
+                );
+
+            },
+
+            on(
+                event,
+                handler
+            ) {
+
+                return on(
+                    event,
+                    handler
+                );
+
+            },
+
+            openApp(
+                id,
+                options
+            ) {
+
+                if (
+                    bridge &&
+                    typeof bridge.openApp ===
+                    "function"
+                ) {
+
+                    return bridge.openApp(
+                        id,
+                        options
+                    );
+
+                }
+
+                return null;
+
+            },
+
+            closeApp(
+                id
+            ) {
+
+                if (
+                    bridge &&
+                    typeof bridge.closeApp ===
+                    "function"
+                ) {
+
+                    return bridge.closeApp(
+                        id
+                    );
+
+                }
+
+                return null;
+
+            },
+
+            save(
+                key,
+                value
+            ) {
+
+                if (
+                    bridge &&
+                    typeof bridge.save ===
+                    "function"
+                ) {
+
+                    return bridge.save(
+                        app.id +
+                        ":" +
+                        key,
+                        value
+                    );
+
+                }
+
+                return null;
+
+            },
+
+            load(
+                key,
+                fallback
+            ) {
+
+                if (
+                    bridge &&
+                    typeof bridge.load ===
+                    "function"
+                ) {
+
+                    return bridge.load(
+                        app.id +
+                        ":" +
+                        key,
+                        fallback
+                    );
+
+                }
+
+                return fallback;
+
+            },
+
+            ai(
+                message,
+                context = {}
+            ) {
+
+                if (
+                    bridge &&
+                    typeof bridge.sendToAI ===
+                    "function"
+                ) {
+
+                    return bridge.sendToAI(
+                        message,
+                        {
+                            app,
+                            instance,
+                            ...context
+                        }
+                    );
+
+                }
+
+                return null;
+
+            }
+
+        };
+
+    }
+
+
+    /* =========================================================
+       MOUNT APP
+       ========================================================= */
+
+    async function mount(
+        appId,
+        options = {}
+    ) {
+
+        const id =
+            normalizeId(
+                appId
+            );
+
+
+        if (
+            !id
+        ) {
+
+            throw new Error(
+                "App-ID fehlt."
+            );
+
+        }
+
+
+        let app =
+            resolveApp(
+                id
+            );
+
+
+        if (
+            !app &&
+            bridge &&
+            typeof bridge.registerApp ===
+            "function" &&
+            options.definition
+        ) {
+
+            app =
+                bridge.registerApp(
+                    {
+                        ...options.definition,
+                        id
+                    }
+                );
+
+        }
+
+
+        if (
+            !app
+        ) {
+
+            throw new Error(
+                "App nicht gefunden: " +
+                id
+            );
+
+        }
+
+
+        if (
+            app.enabled ===
+            false
+        ) {
+
+            throw new Error(
+                "App ist deaktiviert: " +
+                id
+            );
+
+        }
+
+
+        const instanceId =
+            createInstanceId(
+                id
+            );
+
+
+        const instance = {
+
+            id:
+                instanceId,
+
+            appId:
+                id,
+
+            app,
+
+            state:
+                "created",
+
+            element:
+                null,
+
+            context:
+                null,
+
+            mountedAt:
+                now(),
+
+            updatedAt:
+                now(),
+
+            error:
+                null
+
+        };
+
+
+        instance.context =
+            createContext(
+                app,
+                instance
+            );
+
+
+        runtime.instances.set(
+            instanceId,
+            instance
+        );
+
+
+        runtime.states.set(
+            instanceId,
+            "created"
+        );
+
+
+        emit(
+            "app:created",
+            {
+                instance
+            }
+        );
+
+
+        try {
+
+            if (
+                typeof app.create ===
+                "function"
+            ) {
+
+                instance.element =
+                    await app.create(
+                        instance.context,
+                        options
+                    );
+
+            } else if (
+                typeof app.render ===
+                "function"
+            ) {
+
+                instance.element =
+                    await app.render(
+                        instance.context,
+                        options
+                    );
+
+            }
+
+
+            instance.state =
+                "mounted";
+
+            instance.updatedAt =
+                now();
+
+
+            runtime.states.set(
+                instanceId,
+                "mounted"
+            );
+
+
+            emit(
+                "app:mounted",
+                {
+                    instance
+                }
+            );
+
+
+            if (
+                typeof app.mount ===
+                "function"
+            ) {
+
+                await app.mount(
+                    instance.context,
+                    options
+                );
+
+            }
+
+
+            return instance;
+
+        } catch (error) {
+
+            instance.state =
+                "error";
+
+            instance.error =
+                error;
+
+            runtime.states.set(
+                instanceId,
+                "error"
+            );
+
+
+            emit(
+                "app:error",
+                {
+                    instance,
+                    error
+                }
+            );
+
+
+            console.error(
+                "[HalDo Runtime] App-Mount fehlgeschlagen:",
+                error
+            );
+
+
+            return instance;
+
+        }
+
+    }
+
+
+    /* =========================================================
+       UNMOUNT APP
+       ========================================================= */
+
+    async function unmount(
+        instanceId
+    ) {
+
+        const instance =
+            runtime.instances.get(
+                instanceId
+            );
+
+
+        if (
+            !instance
+        ) {
+
+            return false;
+
+        }
+
+
+        const app =
+            instance.app;
+
+
+        try {
+
+            if (
+                typeof app.unmount ===
+                "function"
+            ) {
+
+                await app.unmount(
+                    instance.context
+                );
+
+            }
+
+
+            if (
+                instance.element &&
+                instance.element.parentNode
+            ) {
+
+                instance.element.parentNode.removeChild(
+                    instance.element
+                );
+
+            }
+
+        } catch (error) {
+
+            console.warn(
+                "[HalDo Runtime] Unmount-Fehler:",
+                error
+            );
+
+        }
+
+
+        instance.state =
+            "unmounted";
+
+
+        runtime.states.set(
+            instanceId,
+            "unmounted"
+        );
+
+
+        runtime.instances.delete(
+            instanceId
+        );
+
+
+        emit(
+            "app:unmounted",
+            {
+                instance
+            }
+        );
+
+
+        if (
+            runtime.activeApp ===
+            instanceId
+        ) {
+
+            runtime.activeApp =
+                null;
+
+        }
+
+
+        return true;
+
+    }
+
+
+    /* =========================================================
+       ACTIVATE APP
+       ========================================================= */
+
+    async function activate(
+        instanceId
+    ) {
+
+        const instance =
+            runtime.instances.get(
+                instanceId
+            );
+
+
+        if (
+            !instance
+        ) {
+
+            return false;
+
+        }
+
+
+        if (
+            runtime.activeApp &&
+            runtime.activeApp !==
+            instanceId
+        ) {
+
+            await deactivate(
+                runtime.activeApp
+            );
+
+        }
+
+
+        const app =
+            instance.app;
+
+
+        try {
+
+            if (
+                typeof app.activate ===
+                "function"
+            ) {
+
+                await app.activate(
+                    instance.context
+                );
+
+            }
+
+
+            instance.state =
+                "active";
+
+            instance.updatedAt =
+                now();
+
+
+            runtime.states.set(
+                instanceId,
+                "active"
+            );
+
+
+            runtime.activeApp =
+                instanceId;
+
+
+            emit(
+                "app:activated",
+                {
+                    instance
+                }
+            );
+
+
+            if (
+                bridge &&
+                typeof bridge.setAppState ===
+                "function"
+            ) {
+
+                bridge.setAppState(
+                    instance.appId,
+                    "active",
+                    {
+                        instanceId
+                    }
+                );
+
+            }
+
+
+            return true;
+
+        } catch (error) {
+
+            instance.state =
+                "error";
+
+            instance.error =
+                error;
+
+
+            emit(
+                "app:error",
+                {
+                    instance,
+                    error
+                }
+            );
+
+
+            return false;
+
+        }
+
+    }
+
+
+    /* =========================================================
+       DEACTIVATE APP
+       ========================================================= */
+
+    async function deactivate(
+        instanceId
+    ) {
+
+        const instance =
+            runtime.instances.get(
+                instanceId
+            );
+
+
+        if (
+            !instance
+        ) {
+
+            return false;
+
+        }
+
+
+        const app =
+            instance.app;
+
+
+        try {
+
+            if (
+                typeof app.deactivate ===
+                "function"
+            ) {
+
+                await app.deactivate(
+                    instance.context
+                );
+
+            }
+
+        } catch (error) {
+
+            console.warn(
+                "[HalDo Runtime] Deaktivierung fehlgeschlagen:",
+                error
+            );
+
+        }
+
+
+        instance.state =
+            "inactive";
+
+
+        instance.updatedAt =
+            now();
+
+
+        runtime.states.set(
+            instanceId,
+            "inactive"
+        );
+
+
+        if (
+            runtime.activeApp ===
+            instanceId
+        ) {
+
+            runtime.activeApp =
+                null;
+
+        }
+
+
+        emit(
+            "app:deactivated",
+            {
+                instance
+            }
+        );
+
+
+        return true;
+
+    }
+
+
+    /* =========================================================
+       APP RESTART
+       ========================================================= */
+
+    async function restart(
+        instanceId,
+        options = {}
+    ) {
+
+        const instance =
+            runtime.instances.get(
+                instanceId
+            );
+
+
+        if (
+            !instance
+        ) {
+
+            return null;
+
+        }
+
+
+        const appId =
+            instance.appId;
+
+
+        await unmount(
+            instanceId
+        );
+
+
+        return mount(
+            appId,
+            options
+        );
+
+    }
+
+
+    /* =========================================================
+       APP INSTANCE ACCESS
+       ========================================================= */
+
+    function getInstance(
+        instanceId
+    ) {
+
+        return (
+            runtime.instances.get(
+                instanceId
+            ) ||
+            null
+        );
+
+    }
+
+
+    function getInstances(
+        appId = null
+    ) {
+
+        const values =
+            Array.from(
+                runtime.instances.values()
+            );
+
+
+        if (
+            !appId
+        ) {
+
+            return values;
+
+        }
+
+
+        const id =
+            normalizeId(
+                appId
+            );
+
+
+        return values.filter(
+            instance =>
+                instance.appId ===
+                id
+        );
+
+    }
+
+
+    function getActiveApp() {
+
+        if (
+            !runtime.activeApp
+        ) {
+
+            return null;
+
+        }
+
+
+        return getInstance(
+            runtime.activeApp
+        );
+
+    }
+
+
+    /* =========================================================
+       PUBLIC API
+       ========================================================= */
+
+    runtime.on =
+        on;
+
+    runtime.emit =
+        emit;
+
+    runtime.mount =
+        mount;
+
+    runtime.unmount =
+        unmount;
+
+    runtime.activate =
+        activate;
+
+    runtime.deactivate =
+        deactivate;
+
+    runtime.restart =
+        restart;
+
+    runtime.getInstance =
+        getInstance;
+
+    runtime.getInstances =
+        getInstances;
+
+    runtime.getActiveApp =
+        getActiveApp;
+
+
+    /* =========================================================
+       GLOBAL REGISTRATION
+       ========================================================= */
+
+    window.HalDoAppRuntime =
+        runtime;
+
+
+    if (
+        !window.HalDoOS
+    ) {
+
+        window.HalDoOS =
+            {};
+
+    }
+
+
+    window.HalDoOS.appRuntime =
+        runtime;
+
+
+    /* =========================================================
+       INITIALIZATION
+       ========================================================= */
+
+    function initialize() {
+
+        if (
+            runtime.initialized
+        ) {
+
+            return;
+
+        }
+
+
+        runtime.initialized =
+            true;
+
+
+        emit(
+            "runtime:ready",
+            {
+                version:
+                    VERSION,
+
+                timestamp:
+                    now()
+            }
+        );
+
+
+        console.info(
+            "%cHalDo AI OS 20%c App Runtime bereit",
+            "color:#42e6ff;font-weight:800;",
+            "color:#ffffff;"
+        );
+
+    }
+
+
+    if (
+        document.readyState ===
+        "loading"
+    ) {
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            initialize,
+            {
+                once:
+                    true
+            }
+        );
+
+    } else {
+
+        initialize();
+
+    }
+
+})();
+
+</script>
