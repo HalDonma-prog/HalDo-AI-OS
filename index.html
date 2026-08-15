@@ -15099,3 +15099,878 @@
 
     })();
     </script>
+    <!-- =========================================================
+     HALDO AI OS 20
+     TEIL 13
+     ZENTRALE MODUL-LADE- UND STARTSCHICHT
+     ========================================================= -->
+
+<script>
+(function () {
+
+    "use strict";
+
+
+    /* =====================================================
+       HALDO GLOBAL FOUNDATION
+       ===================================================== */
+
+    if (!window.HalDoOS) {
+        window.HalDoOS = {};
+    }
+
+
+    if (!window.HalDoOS.config) {
+        window.HalDoOS.config = {};
+    }
+
+
+    window.HalDoOS.config.version =
+        "20.0.0";
+
+
+    window.HalDoOS.config.edition =
+        "Professional Ultimate Foundation";
+
+
+    window.HalDoOS.config.environment =
+        "browser";
+
+
+    window.HalDoOS.config.initialized =
+        false;
+
+
+    /* =====================================================
+       MODULE REGISTRY
+       ===================================================== */
+
+    const moduleRegistry = {
+
+        loaded: new Map(),
+
+        failed: new Map(),
+
+        pending: new Map(),
+
+        registered: new Map()
+
+    };
+
+
+    window.HalDoOS.moduleRegistry =
+        moduleRegistry;
+
+
+    /* =====================================================
+       CORE MODULE DEFINITIONS
+       ===================================================== */
+
+    const coreModules = [
+
+        {
+            id: "kernel",
+            name: "HalDo Kernel",
+            path: "js/kernel.js",
+            required: true
+        },
+
+        {
+            id: "system",
+            name: "HalDo System",
+            path: "js/system.js",
+            required: true
+        },
+
+        {
+            id: "storage",
+            name: "Storage",
+            path: "js/storage.js",
+            required: true
+        },
+
+        {
+            id: "storage-manager",
+            name: "Storage Manager",
+            path: "js/storage-manager.js",
+            required: false
+        },
+
+        {
+            id: "config-manager",
+            name: "Config Manager",
+            path: "js/config-manager.js",
+            required: false
+        },
+
+        {
+            id: "module-manager",
+            name: "Module Manager",
+            path: "js/module-manager.js",
+            required: false
+        },
+
+        {
+            id: "system-loader",
+            name: "System Loader",
+            path: "js/system-loader.js",
+            required: false
+        },
+
+        {
+            id: "system-status",
+            name: "System Status",
+            path: "js/system-status.js",
+            required: false
+        },
+
+        {
+            id: "app-manager",
+            name: "App Manager",
+            path: "js/app-manager.js",
+            required: true
+        },
+
+        {
+            id: "app-registry",
+            name: "App Registry",
+            path: "js/app-registry.js",
+            required: false
+        },
+
+        {
+            id: "app-router",
+            name: "App Router",
+            path: "js/app-router.js",
+            required: true
+        },
+
+        {
+            id: "window-manager",
+            name: "Window Manager",
+            path: "js/window-manager.js",
+            required: false
+        },
+
+        {
+            id: "app-launcher",
+            name: "App Launcher",
+            path: "js/app-launcher.js",
+            required: false
+        },
+
+        {
+            id: "launcher",
+            name: "Launcher",
+            path: "js/launcher.js",
+            required: false
+        },
+
+        {
+            id: "desktop-manager",
+            name: "Desktop Manager",
+            path: "js/desktop manager.js",
+            required: false
+        }
+
+    ];
+
+
+    const aiModules = [
+
+        {
+            id: "ai-core",
+            name: "AI Core",
+            path: "js/ai-core.js",
+            required: false
+        },
+
+        {
+            id: "ai-engine",
+            name: "AI Engine",
+            path: "js/ai-engine.js",
+            required: false
+        },
+
+        {
+            id: "ai-chat",
+            name: "AI Chat",
+            path: "js/ai-chat.js",
+            required: false
+        },
+
+        {
+            id: "ai-commands",
+            name: "AI Commands",
+            path: "js/ai-commands.js",
+            required: false
+        },
+
+        {
+            id: "ai-language",
+            name: "AI Language",
+            path: "js/ai-language.js",
+            required: false
+        },
+
+        {
+            id: "ai-memory",
+            name: "AI Memory",
+            path: "js/ai-memory.js",
+            required: false
+        },
+
+        {
+            id: "ai-speech",
+            name: "AI Speech",
+            path: "js/ai-speech.js",
+            required: false
+        },
+
+        {
+            id: "ai-voice",
+            name: "AI Voice",
+            path: "js/ai-voice.js",
+            required: false
+        },
+
+        {
+            id: "voice",
+            name: "Voice",
+            path: "js/voice.js",
+            required: false
+        },
+
+        {
+            id: "conversation-state",
+            name: "Conversation State",
+            path: "js/conversation-state.js",
+            required: false
+        },
+
+        {
+            id: "ezidi-keyboard",
+            name: "Êzîdî Keyboard",
+            path: "js/ezidi-keyboard.js",
+            required: false
+        }
+
+    ];
+
+
+    const languageModules = [
+
+        {
+            id: "language-manager",
+            name: "Language Manager",
+            path: "js/language-manager.js",
+            required: false
+        },
+
+        {
+            id: "language-system",
+            name: "Language System",
+            path: "js/language-system.js",
+            required: false
+        }
+
+    ];
+
+
+    const visualModules = [
+
+        {
+            id: "logo-animation-manager",
+            name: "Logo Animation Manager",
+            path: "js/logo-animation-manager.js",
+            required: false
+        },
+
+        {
+            id: "logo-intro-manager",
+            name: "Logo Intro Manager",
+            path: "js/logo-intro-manager.js",
+            required: false
+        },
+
+        {
+            id: "haldo-light-system",
+            name: "HalDo Light System",
+            path: "js/haldo-light-system.js",
+            required: false
+        }
+
+    ];
+
+
+    const startupModules = [
+
+        {
+            id: "boot",
+            name: "Boot",
+            path: "js/boot.js",
+            required: false
+        },
+
+        {
+            id: "startup",
+            name: "Startup",
+            path: "js/startup.js",
+            required: false
+        }
+
+    ];
+
+
+    const allModules = [
+
+        ...coreModules,
+        ...aiModules,
+        ...languageModules,
+        ...visualModules,
+        ...startupModules
+
+    ];
+
+
+    window.HalDoOS.moduleDefinitions =
+        allModules;
+
+
+    /* =====================================================
+       MODULE REGISTRATION
+       ===================================================== */
+
+    function registerModule(definition) {
+
+        if (
+            !definition ||
+            !definition.id
+        ) {
+
+            return false;
+
+        }
+
+
+        moduleRegistry.registered.set(
+            definition.id,
+            definition
+        );
+
+
+        return true;
+
+    }
+
+
+    allModules.forEach(
+        registerModule
+    );
+
+
+    /* =====================================================
+       SCRIPT EXISTENCE / LOADING
+       ===================================================== */
+
+    function isScriptLoaded(path) {
+
+        const scripts =
+            document.querySelectorAll(
+                "script[src]"
+            );
+
+
+        for (
+            const script of scripts
+        ) {
+
+            const source =
+                script.src || "";
+
+
+            if (
+                source.endsWith(path)
+            ) {
+
+                return true;
+
+            }
+
+        }
+
+
+        return false;
+
+    }
+
+
+    function loadScript(definition) {
+
+        if (
+            !definition ||
+            !definition.path
+        ) {
+
+            return Promise.reject(
+                new Error(
+                    "Ungültige Moduldefinition."
+                )
+            );
+
+        }
+
+
+        if (
+            moduleRegistry.loaded.has(
+                definition.id
+            )
+        ) {
+
+            return Promise.resolve(
+                moduleRegistry.loaded.get(
+                    definition.id
+                )
+            );
+
+        }
+
+
+        if (
+            moduleRegistry.pending.has(
+                definition.id
+            )
+        ) {
+
+            return moduleRegistry.pending.get(
+                definition.id
+            );
+
+        }
+
+
+        if (
+            isScriptLoaded(
+                definition.path
+            )
+        ) {
+
+            moduleRegistry.loaded.set(
+                definition.id,
+                definition
+            );
+
+
+            return Promise.resolve(
+                definition
+            );
+
+        }
+
+
+        const promise =
+            new Promise(
+                (resolve, reject) => {
+
+                    const script =
+                        document.createElement(
+                            "script"
+                        );
+
+
+                    script.src =
+                        definition.path;
+
+
+                    script.async =
+                        false;
+
+
+                    script.dataset.haldoModule =
+                        definition.id;
+
+
+                    script.onload =
+                        () => {
+
+                            moduleRegistry.loaded.set(
+                                definition.id,
+                                definition
+                            );
+
+                            moduleRegistry.pending.delete(
+                                definition.id
+                            );
+
+                            resolve(
+                                definition
+                            );
+
+                        };
+
+
+                    script.onerror =
+                        error => {
+
+                            moduleRegistry.failed.set(
+                                definition.id,
+                                {
+                                    definition,
+                                    error
+                                }
+                            );
+
+                            moduleRegistry.pending.delete(
+                                definition.id
+                            );
+
+                            reject(
+                                error
+                            );
+
+                        };
+
+
+                    document.head.appendChild(
+                        script
+                    );
+
+                }
+            );
+
+
+        moduleRegistry.pending.set(
+            definition.id,
+            promise
+        );
+
+
+        return promise;
+
+    }
+
+
+    /* =====================================================
+       MODULE LOAD ORDER
+       ===================================================== */
+
+    async function loadModuleGroup(
+        modules,
+        label
+    ) {
+
+        const results = [];
+
+
+        for (
+            const module of modules
+        ) {
+
+            try {
+
+                const result =
+                    await loadScript(
+                        module
+                    );
+
+
+                results.push({
+                    id: module.id,
+                    status: "loaded",
+                    result
+                });
+
+
+                console.info(
+                    "[HalDo OS 20] Modul geladen:",
+                    label,
+                    module.name
+                );
+
+            } catch (error) {
+
+                results.push({
+                    id: module.id,
+                    status: "failed",
+                    error
+                });
+
+
+                if (
+                    module.required
+                ) {
+
+                    console.error(
+                        "[HalDo OS 20] Kritisches Modul konnte nicht geladen werden:",
+                        module.name,
+                        error
+                    );
+
+                } else {
+
+                    console.warn(
+                        "[HalDo OS 20] Optionales Modul nicht verfügbar:",
+                        module.name
+                    );
+
+                }
+
+            }
+
+        }
+
+
+        return results;
+
+    }
+
+
+    /* =====================================================
+       SYSTEM EVENT HELPER
+       ===================================================== */
+
+    function emitSystemEvent(
+        eventName,
+        detail = {}
+    ) {
+
+        try {
+
+            window.dispatchEvent(
+                new CustomEvent(
+                    eventName,
+                    {
+                        detail
+                    }
+                )
+            );
+
+        } catch (error) {
+
+            console.warn(
+                "[HalDo OS 20] Event-Fehler:",
+                error
+            );
+
+        }
+
+
+        const kernel =
+            window.HalDoKernel ||
+            window.HalDoOS.kernel;
+
+
+        if (
+            kernel &&
+            typeof kernel.emit ===
+            "function"
+        ) {
+
+            try {
+
+                kernel.emit(
+                    eventName,
+                    detail
+                );
+
+            } catch (error) {
+
+                console.warn(
+                    "[HalDo OS 20] Kernel Event Fehler:",
+                    error
+                );
+
+            }
+
+        }
+
+    }
+
+
+    /* =====================================================
+       GLOBAL MODULE API
+       ===================================================== */
+
+    window.HalDoOS.modules = {
+
+        definitions:
+            allModules,
+
+        core:
+            coreModules,
+
+        ai:
+            aiModules,
+
+        language:
+            languageModules,
+
+        visual:
+            visualModules,
+
+        startup:
+            startupModules,
+
+        register:
+            registerModule,
+
+        load:
+            loadScript,
+
+        loadGroup:
+            loadModuleGroup,
+
+        isLoaded:
+            id =>
+                moduleRegistry.loaded.has(id),
+
+        getLoaded:
+            () =>
+                Array.from(
+                    moduleRegistry.loaded.values()
+                ),
+
+        getFailed:
+            () =>
+                Array.from(
+                    moduleRegistry.failed.values()
+                )
+
+    };
+
+
+    /* =====================================================
+       STARTUP PIPELINE
+       ===================================================== */
+
+    async function startHalDoModuleSystem() {
+
+        if (
+            window.HalDoOS.config
+                .moduleSystemStarted
+        ) {
+
+            return;
+
+        }
+
+
+        window.HalDoOS.config
+            .moduleSystemStarted =
+            true;
+
+
+        emitSystemEvent(
+            "haldo:modules:starting",
+            {
+                version:
+                    "20.0.0"
+            }
+        );
+
+
+        /*
+         * Die vorhandenen Dateien werden bewusst
+         * in Gruppen geladen.
+         *
+         * Dadurch bleiben Kernel und System
+         * von den höheren Ebenen getrennt.
+         */
+
+
+        await loadModuleGroup(
+            coreModules,
+            "CORE"
+        );
+
+
+        await loadModuleGroup(
+            aiModules,
+            "AI"
+        );
+
+
+        await loadModuleGroup(
+            languageModules,
+            "LANGUAGE"
+        );
+
+
+        await loadModuleGroup(
+            visualModules,
+            "VISUAL"
+        );
+
+
+        await loadModuleGroup(
+            startupModules,
+            "STARTUP"
+        );
+
+
+        window.HalDoOS.config
+            .moduleSystemReady =
+            true;
+
+
+        emitSystemEvent(
+            "haldo:modules:ready",
+            {
+                loaded:
+                    moduleRegistry.loaded.size,
+
+                failed:
+                    moduleRegistry.failed.size
+            }
+        );
+
+
+        console.info(
+            "%cHalDo AI OS 20%c Modulsystem bereit",
+            "color:#42e6ff;font-weight:800;",
+            "color:#ffffff;"
+        );
+
+    }
+
+
+    /* =====================================================
+       PUBLIC START API
+       ===================================================== */
+
+    window.HalDoOS.startModuleSystem =
+        startHalDoModuleSystem;
+
+
+    /*
+     * Das Modulsystem startet erst nach dem Laden
+     * des DOM und nachdem die aktuelle index.html
+     * vollständig aufgebaut wurde.
+     */
+
+    if (
+        document.readyState ===
+        "loading"
+    ) {
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            () => {
+
+                startHalDoModuleSystem();
+
+            },
+            {
+                once: true
+            }
+        );
+
+    } else {
+
+        startHalDoModuleSystem();
+
+    }
+
+
+})();
+</script>
