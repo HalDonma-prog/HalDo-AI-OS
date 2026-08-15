@@ -41882,3 +41882,781 @@
     })();
 
     </script>
+        <!-- =========================================================
+         HALDO AI OS 20
+         APP WINDOW / WORKSPACE BRIDGE
+         TEIL 43
+         ========================================================= -->
+
+    <script>
+
+    (() => {
+
+        "use strict";
+
+
+        /* =====================================================
+           WINDOW REGISTRY
+           ===================================================== */
+
+        const windows =
+            new Map();
+
+
+        let zIndex =
+            100;
+
+
+        let activeWindowId =
+            null;
+
+
+        /* =====================================================
+           EVENT BRIDGE
+           ===================================================== */
+
+        function emit(
+            eventName,
+            detail = {}
+        ) {
+
+            if (
+                window.HalDoEventBus &&
+                typeof window.HalDoEventBus.emit ===
+                "function"
+            ) {
+
+                window.HalDoEventBus.emit(
+                    eventName,
+                    detail
+                );
+
+                return;
+
+            }
+
+
+            document.dispatchEvent(
+                new CustomEvent(
+                    `haldo:${eventName}`,
+                    {
+                        detail
+                    }
+                )
+            );
+
+        }
+
+
+        /* =====================================================
+           ID GENERATOR
+           ===================================================== */
+
+        function createId(
+            appId
+        ) {
+
+            const base =
+                String(
+                    appId ||
+                    "app"
+                )
+                .replace(
+                    /[^a-zA-Z0-9_-]/g,
+                    "-"
+                );
+
+
+            return (
+                `${base}-window-` +
+                Date.now() +
+                "-" +
+                Math.random()
+                    .toString(36)
+                    .slice(2, 7)
+            );
+
+        }
+
+
+        /* =====================================================
+           REGISTER WINDOW
+           ===================================================== */
+
+        function register(
+            appId,
+            element,
+            options = {}
+        ) {
+
+            if (
+                !element
+            ) {
+
+                return null;
+
+            }
+
+
+            const id =
+                options.id ||
+                createId(
+                    appId
+                );
+
+
+            element.dataset.haldoWindow =
+                id;
+
+
+            element.dataset.haldoApp =
+                appId ||
+                "";
+
+
+            element.style.zIndex =
+                String(
+                    ++zIndex
+                );
+
+
+            const record = {
+
+                id,
+
+                appId:
+                    appId ||
+                    null,
+
+                element,
+
+                title:
+                    options.title ||
+                    appId ||
+                    "HalDo App",
+
+                state:
+                    "open",
+
+                minimized:
+                    false,
+
+                maximized:
+                    false,
+
+                zIndex,
+
+                createdAt:
+                    Date.now(),
+
+                updatedAt:
+                    Date.now()
+
+            };
+
+
+            windows.set(
+                id,
+                record
+            );
+
+
+            setActive(
+                id
+            );
+
+
+            emit(
+                "window:registered",
+                {
+
+                    id,
+
+                    appId:
+                        record.appId
+
+                }
+            );
+
+
+            return id;
+
+        }
+
+
+        /* =====================================================
+           SET ACTIVE
+           ===================================================== */
+
+        function setActive(
+            id
+        ) {
+
+            const record =
+                windows.get(
+                    id
+                );
+
+
+            if (
+                !record
+            ) {
+
+                return false;
+
+            }
+
+
+            activeWindowId =
+                id;
+
+
+            record.zIndex =
+                ++zIndex;
+
+
+            record.element.style.zIndex =
+                String(
+                    record.zIndex
+                );
+
+
+            windows.forEach(
+                (
+                    item,
+                    windowId
+                ) => {
+
+                    item.element
+                        .classList
+                        .toggle(
+                            "is-active",
+                            windowId ===
+                            id
+                        );
+
+                }
+            );
+
+
+            emit(
+                "window:activated",
+                {
+
+                    id,
+
+                    appId:
+                        record.appId
+
+                }
+            );
+
+
+            return true;
+
+        }
+
+
+        /* =====================================================
+           MINIMIZE
+           ===================================================== */
+
+        function minimize(
+            id
+        ) {
+
+            const record =
+                windows.get(
+                    id
+                );
+
+
+            if (
+                !record
+            ) {
+
+                return false;
+
+            }
+
+
+            record.minimized =
+                true;
+
+
+            record.updatedAt =
+                Date.now();
+
+
+            record.element
+                .classList
+                .add(
+                    "is-minimized"
+                );
+
+
+            record.element
+                .setAttribute(
+                    "aria-hidden",
+                    "true"
+                );
+
+
+            emit(
+                "window:minimized",
+                {
+                    id
+                }
+            );
+
+
+            return true;
+
+        }
+
+
+        /* =====================================================
+           RESTORE
+           ===================================================== */
+
+        function restore(
+            id
+        ) {
+
+            const record =
+                windows.get(
+                    id
+                );
+
+
+            if (
+                !record
+            ) {
+
+                return false;
+
+            }
+
+
+            record.minimized =
+                false;
+
+
+            record.updatedAt =
+                Date.now();
+
+
+            record.element
+                .classList
+                .remove(
+                    "is-minimized"
+                );
+
+
+            record.element
+                .removeAttribute(
+                    "aria-hidden"
+                );
+
+
+            setActive(
+                id
+            );
+
+
+            emit(
+                "window:restored",
+                {
+                    id
+                }
+            );
+
+
+            return true;
+
+        }
+
+
+        /* =====================================================
+           MAXIMIZE
+           ===================================================== */
+
+        function maximize(
+            id
+        ) {
+
+            const record =
+                windows.get(
+                    id
+                );
+
+
+            if (
+                !record
+            ) {
+
+                return false;
+
+            }
+
+
+            record.maximized =
+                !record.maximized;
+
+
+            record.updatedAt =
+                Date.now();
+
+
+            record.element
+                .classList
+                .toggle(
+                    "is-maximized",
+                    record.maximized
+                );
+
+
+            setActive(
+                id
+            );
+
+
+            emit(
+                "window:maximized",
+                {
+
+                    id,
+
+                    maximized:
+                        record.maximized
+
+                }
+            );
+
+
+            return true;
+
+        }
+
+
+        /* =====================================================
+           CLOSE
+           ===================================================== */
+
+        function close(
+            id
+        ) {
+
+            const record =
+                windows.get(
+                    id
+                );
+
+
+            if (
+                !record
+            ) {
+
+                return false;
+
+            }
+
+
+            record.state =
+                "closed";
+
+
+            if (
+                record.element
+            ) {
+
+                record.element.remove();
+
+            }
+
+
+            windows.delete(
+                id
+            );
+
+
+            if (
+                activeWindowId ===
+                id
+            ) {
+
+                activeWindowId =
+                    null;
+
+            }
+
+
+            emit(
+                "window:closed",
+                {
+
+                    id,
+
+                    appId:
+                        record.appId
+
+                }
+            );
+
+
+            return true;
+
+        }
+
+
+        /* =====================================================
+           CLOSE APP WINDOWS
+           ===================================================== */
+
+        function closeByApp(
+            appId
+        ) {
+
+            const ids =
+                [];
+
+
+            windows.forEach(
+                record => {
+
+                    if (
+                        record.appId ===
+                        appId
+                    ) {
+
+                        ids.push(
+                            record.id
+                        );
+
+                    }
+
+                }
+            );
+
+
+            ids.forEach(
+                close
+            );
+
+
+            return ids.length;
+
+        }
+
+
+        /* =====================================================
+           GET WINDOW
+           ===================================================== */
+
+        function get(
+            id
+        ) {
+
+            return (
+                windows.get(
+                    id
+                ) ||
+                null
+            );
+
+        }
+
+
+        /* =====================================================
+           GET ALL
+           ===================================================== */
+
+        function getAll() {
+
+            return Array.from(
+                windows.values()
+            );
+
+        }
+
+
+        /* =====================================================
+           ACTIVE WINDOW
+           ===================================================== */
+
+        function getActive() {
+
+            return (
+                activeWindowId
+                    ? windows.get(
+                        activeWindowId
+                    )
+                    : null
+            );
+
+        }
+
+
+        /* =====================================================
+           BRING TO FRONT
+           ===================================================== */
+
+        function focus(
+            id
+        ) {
+
+            return setActive(
+                id
+            );
+
+        }
+
+
+        /* =====================================================
+           PUBLIC API
+           ===================================================== */
+
+        const windowManager = {
+
+            register,
+
+            setActive,
+
+            focus,
+
+            minimize,
+
+            restore,
+
+            maximize,
+
+            close,
+
+            closeByApp,
+
+            get,
+
+            getAll,
+
+            getActive
+
+        };
+
+
+        /* =====================================================
+           GLOBAL API
+           ===================================================== */
+
+        window.HalDoWindowManager20 =
+            windowManager;
+
+
+        if (
+            !window.HalDoOS
+        ) {
+
+            window.HalDoOS =
+                {};
+
+        }
+
+
+        window.HalDoOS.windowManager20 =
+            windowManager;
+
+
+        /* =====================================================
+           CLICK-TO-FOCUS
+           ===================================================== */
+
+        document.addEventListener(
+            "click",
+            event => {
+
+                const element =
+                    event.target
+                        ?.closest(
+                            "[data-haldo-window]"
+                        );
+
+
+                if (!element) {
+
+                    return;
+
+                }
+
+
+                const id =
+                    element.dataset
+                        .haldoWindow;
+
+
+                if (
+                    id
+                ) {
+
+                    focus(
+                        id
+                    );
+
+                }
+
+            },
+            true
+        );
+
+
+        /* =====================================================
+           INITIALIZATION
+           ===================================================== */
+
+        function initializeWindowManager() {
+
+            emit(
+                "window-manager:ready",
+                {
+
+                    version:
+                        "20.0.0",
+
+                    timestamp:
+                        Date.now()
+
+                }
+            );
+
+
+            console.info(
+                "%cHalDo AI OS 20%c Window Manager 20 bereit",
+                "color:#42e6ff;font-weight:800;",
+                "color:#ffffff;"
+            );
+
+        }
+
+
+        if (
+            document.readyState ===
+            "loading"
+        ) {
+
+            document.addEventListener(
+                "DOMContentLoaded",
+                initializeWindowManager,
+                {
+                    once:
+                        true
+                }
+            );
+
+        } else {
+
+            initializeWindowManager();
+
+        }
+
+
+    })();
+
+    </script>
