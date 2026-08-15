@@ -55094,3 +55094,1513 @@
     })();
 
     </script>
+        <!-- =========================================================
+         HALDO AI OS 20
+         APPLICATION SESSION / STATE ENGINE
+         TEIL 55
+         ========================================================= -->
+
+    <script>
+
+    (() => {
+
+        "use strict";
+
+
+        /* =====================================================
+           STORAGE RESOLUTION
+           ===================================================== */
+
+        const storageCandidates = [
+
+            window.HalDoStorage20,
+
+            window.HalDoStorage,
+
+            window.HalDoOS &&
+            window.HalDoOS.storage,
+
+            window.HalDoStorageManager
+
+        ];
+
+
+        function resolveStorage() {
+
+            for (
+                const candidate
+                of storageCandidates
+            ) {
+
+                if (
+                    candidate &&
+                    typeof candidate ===
+                    "object"
+                ) {
+
+                    return candidate;
+
+                }
+
+            }
+
+
+            return null;
+
+        }
+
+
+        /* =====================================================
+           STATE
+           ===================================================== */
+
+        const sessions =
+            new Map();
+
+
+        const listeners =
+            new Map();
+
+
+        /* =====================================================
+           SAFE CLONE
+           ===================================================== */
+
+        function clone(
+            value
+        ) {
+
+            if (
+                value ===
+                undefined
+            ) {
+
+                return undefined;
+
+            }
+
+
+            try {
+
+                return JSON.parse(
+                    JSON.stringify(
+                        value
+                    )
+                );
+
+            } catch (
+                error
+            ) {
+
+                return value;
+
+            }
+
+        }
+
+
+        /* =====================================================
+           EVENT
+           ===================================================== */
+
+        function emit(
+            name,
+            detail = {}
+        ) {
+
+            try {
+
+                document.dispatchEvent(
+                    new CustomEvent(
+                        `haldo:${name}`,
+                        {
+
+                            detail
+
+                        }
+                    )
+                );
+
+            } catch (
+                error
+            ) {
+
+                console.warn(
+                    "[HalDo App State 20]",
+                    error
+                );
+
+            }
+
+        }
+
+
+        /* =====================================================
+           STORAGE HELPERS
+           ===================================================== */
+
+        function storageKey(
+            appId
+        ) {
+
+            return (
+                `haldo:app-session:${appId}`
+            );
+
+        }
+
+
+        function storageGet(
+            key
+        ) {
+
+            const storage =
+                resolveStorage();
+
+
+            if (
+                storage &&
+                typeof storage.get ===
+                "function"
+            ) {
+
+                try {
+
+                    return storage.get(
+                        key
+                    );
+
+                } catch (
+                    error
+                ) {
+
+                    console.warn(
+                        "[HalDo App State 20]",
+                        error
+                    );
+
+                }
+
+            }
+
+
+            try {
+
+                const raw =
+                    localStorage.getItem(
+                        key
+                    );
+
+
+                return raw
+                    ? JSON.parse(
+                        raw
+                    )
+                    : null;
+
+            } catch (
+                error
+            ) {
+
+                return null;
+
+            }
+
+        }
+
+
+        function storageSet(
+            key,
+            value
+        ) {
+
+            const storage =
+                resolveStorage();
+
+
+            if (
+                storage &&
+                typeof storage.set ===
+                "function"
+            ) {
+
+                try {
+
+                    const result =
+                        storage.set(
+                            key,
+                            value
+                        );
+
+
+                    if (
+                        result instanceof
+                        Promise
+                    ) {
+
+                        result.catch(
+                            error => {
+
+                                console.warn(
+                                    "[HalDo App State 20]",
+                                    error
+                                );
+
+                            }
+                        );
+
+                    }
+
+
+                    return true;
+
+                } catch (
+                    error
+                ) {
+
+                    console.warn(
+                        "[HalDo App State 20]",
+                        error
+                    );
+
+                }
+
+            }
+
+
+            try {
+
+                localStorage.setItem(
+                    key,
+                    JSON.stringify(
+                        value
+                    )
+                );
+
+
+                return true;
+
+            } catch (
+                error
+            ) {
+
+                return false;
+
+            }
+
+        }
+
+
+        function storageRemove(
+            key
+        ) {
+
+            const storage =
+                resolveStorage();
+
+
+            if (
+                storage &&
+                typeof storage.remove ===
+                "function"
+            ) {
+
+                try {
+
+                    storage.remove(
+                        key
+                    );
+
+                    return true;
+
+                } catch (
+                    error
+                ) {
+
+                    console.warn(
+                        "[HalDo App State 20]",
+                        error
+                    );
+
+                }
+
+            }
+
+
+            try {
+
+                localStorage.removeItem(
+                    key
+                );
+
+
+                return true;
+
+            } catch (
+                error
+            ) {
+
+                return false;
+
+            }
+
+        }
+
+
+        /* =====================================================
+           CREATE SESSION
+           ===================================================== */
+
+        function create(
+            appId,
+            initialState = {},
+            options = {}
+        ) {
+
+            if (!appId) {
+
+                return null;
+
+            }
+
+
+            const existing =
+                sessions.get(
+                    appId
+                );
+
+
+            if (existing) {
+
+                return existing;
+
+            }
+
+
+            let saved =
+                null;
+
+
+            if (
+                options.restore !==
+                false
+            ) {
+
+                saved =
+                    storageGet(
+                        storageKey(
+                            appId
+                        )
+                    );
+
+            }
+
+
+            const baseState =
+                saved &&
+                saved.state &&
+                typeof saved.state ===
+                "object"
+                    ? saved.state
+                    : initialState;
+
+
+            const session = {
+
+                appId,
+
+                state:
+                    clone(
+                        baseState
+                    ) ||
+                    {},
+
+                createdAt:
+                    Date.now(),
+
+                updatedAt:
+                    Date.now(),
+
+                restored:
+                    !!saved,
+
+                dirty:
+                    false,
+
+                version:
+                    saved &&
+                    Number.isFinite(
+                        saved.version
+                    )
+                        ? saved.version
+                        : 1
+
+            };
+
+
+            sessions.set(
+                appId,
+                session
+            );
+
+
+            emit(
+                "app:state:created",
+                {
+
+                    appId,
+
+                    session
+
+                }
+            );
+
+
+            return session;
+
+        }
+
+
+        /* =====================================================
+           GET SESSION
+           ===================================================== */
+
+        function get(
+            appId,
+            createIfMissing = true
+        ) {
+
+            let session =
+                sessions.get(
+                    appId
+                );
+
+
+            if (
+                !session &&
+                createIfMissing
+            ) {
+
+                session =
+                    create(
+                        appId
+                    );
+
+            }
+
+
+            return (
+                session ||
+                null
+            );
+
+        }
+
+
+        /* =====================================================
+           GET VALUE
+           ===================================================== */
+
+        function getValue(
+            appId,
+            path,
+            fallback = undefined
+        ) {
+
+            const session =
+                get(
+                    appId
+                );
+
+
+            if (!session) {
+
+                return fallback;
+
+            }
+
+
+            if (
+                !path
+            ) {
+
+                return clone(
+                    session.state
+                );
+
+            }
+
+
+            const parts =
+                Array.isArray(
+                    path
+                )
+                    ? path
+                    : String(
+                        path
+                    ).split(
+                        "."
+                    );
+
+
+            let current =
+                session.state;
+
+
+            for (
+                const part
+                of parts
+            ) {
+
+                if (
+                    current ===
+                    null ||
+                    current ===
+                    undefined
+                ) {
+
+                    return fallback;
+
+                }
+
+
+                if (
+                    !Object.prototype.hasOwnProperty.call(
+                        current,
+                        part
+                    )
+                ) {
+
+                    return fallback;
+
+                }
+
+
+                current =
+                    current[
+                        part
+                    ];
+
+            }
+
+
+            return clone(
+                current
+            );
+
+        }
+
+
+        /* =====================================================
+           SET VALUE
+           ===================================================== */
+
+        function setValue(
+            appId,
+            path,
+            value,
+            options = {}
+        ) {
+
+            const session =
+                get(
+                    appId
+                );
+
+
+            if (!session) {
+
+                return false;
+
+            }
+
+
+            const parts =
+                Array.isArray(
+                    path
+                )
+                    ? path
+                    : String(
+                        path
+                    ).split(
+                        "."
+                    );
+
+
+            if (
+                !parts.length
+            ) {
+
+                return false;
+
+            }
+
+
+            let target =
+                session.state;
+
+
+            for (
+                let index = 0;
+                index <
+                parts.length - 1;
+                index++
+            ) {
+
+                const part =
+                    parts[
+                        index
+                    ];
+
+
+                if (
+                    !target[part] ||
+                    typeof target[part] !==
+                    "object"
+                ) {
+
+                    target[part] =
+                        {};
+
+                }
+
+
+                target =
+                    target[part];
+
+            }
+
+
+            const finalKey =
+                parts[
+                    parts.length - 1
+                ];
+
+
+            const previous =
+                clone(
+                    target[
+                        finalKey
+                    ]
+                );
+
+
+            target[
+                finalKey
+            ] =
+                clone(
+                    value
+                );
+
+
+            session.updatedAt =
+                Date.now();
+
+
+            session.dirty =
+                true;
+
+
+            if (
+                options.save ===
+                true
+            ) {
+
+                save(
+                    appId
+                );
+
+            }
+
+
+            emit(
+                "app:state:changed",
+                {
+
+                    appId,
+
+                    path:
+                        parts.join(
+                            "."
+                        ),
+
+                    previous,
+
+                    value:
+                        clone(
+                            value
+                        ),
+
+                    session
+
+                }
+            );
+
+
+            notify(
+                appId,
+                {
+
+                    type:
+                        "change",
+
+                    path:
+                        parts.join(
+                            "."
+                        ),
+
+                    previous,
+
+                    value:
+                        clone(
+                            value
+                        )
+
+                }
+            );
+
+
+            return true;
+
+        }
+
+
+        /* =====================================================
+           MERGE STATE
+           ===================================================== */
+
+        function merge(
+            appId,
+            values = {},
+            options = {}
+        ) {
+
+            const session =
+                get(
+                    appId
+                );
+
+
+            if (!session) {
+
+                return false;
+
+            }
+
+
+            if (
+                !values ||
+                typeof values !==
+                "object"
+            ) {
+
+                return false;
+
+            }
+
+
+            Object.keys(
+                values
+            ).forEach(
+                key => {
+
+                    setValue(
+                        appId,
+                        key,
+                        values[key],
+                        {
+                            save:
+                                false
+                        }
+                    );
+
+                }
+            );
+
+
+            if (
+                options.save ===
+                true
+            ) {
+
+                save(
+                    appId
+                );
+
+            }
+
+
+            return true;
+
+        }
+
+
+        /* =====================================================
+           RESET
+           ===================================================== */
+
+        function reset(
+            appId,
+            initialState = {},
+            options = {}
+        ) {
+
+            const session =
+                get(
+                    appId
+                );
+
+
+            if (!session) {
+
+                return false;
+
+            }
+
+
+            const previous =
+                clone(
+                    session.state
+                );
+
+
+            session.state =
+                clone(
+                    initialState
+                ) ||
+                {};
+
+
+            session.updatedAt =
+                Date.now();
+
+
+            session.dirty =
+                true;
+
+
+            if (
+                options.removeSaved ===
+                true
+            ) {
+
+                storageRemove(
+                    storageKey(
+                        appId
+                    )
+                );
+
+            }
+
+
+            if (
+                options.save ===
+                true
+            ) {
+
+                save(
+                    appId
+                );
+
+            }
+
+
+            emit(
+                "app:state:reset",
+                {
+
+                    appId,
+
+                    previous,
+
+                    state:
+                        clone(
+                            session.state
+                        )
+
+                }
+            );
+
+
+            notify(
+                appId,
+                {
+
+                    type:
+                        "reset",
+
+                    previous,
+
+                    state:
+                        clone(
+                            session.state
+                        )
+
+                }
+            );
+
+
+            return true;
+
+        }
+
+
+        /* =====================================================
+           SAVE
+           ===================================================== */
+
+        function save(
+            appId
+        ) {
+
+            const session =
+                get(
+                    appId,
+                    false
+                );
+
+
+            if (!session) {
+
+                return false;
+
+            }
+
+
+            const payload = {
+
+                appId,
+
+                version:
+                    session.version,
+
+                savedAt:
+                    Date.now(),
+
+                state:
+                    clone(
+                        session.state
+                    )
+
+            };
+
+
+            const success =
+                storageSet(
+                    storageKey(
+                        appId
+                    ),
+                    payload
+                );
+
+
+            if (success) {
+
+                session.updatedAt =
+                    Date.now();
+
+                session.dirty =
+                    false;
+
+
+                emit(
+                    "app:state:saved",
+                    {
+
+                        appId,
+
+                        payload
+
+                    }
+                );
+
+            }
+
+
+            return success;
+
+        }
+
+
+        /* =====================================================
+           LOAD
+           ===================================================== */
+
+        function load(
+            appId
+        ) {
+
+            const payload =
+                storageGet(
+                    storageKey(
+                        appId
+                    )
+                );
+
+
+            if (
+                !payload ||
+                !payload.state
+            ) {
+
+                return null;
+
+            }
+
+
+            const session =
+                create(
+                    appId,
+                    payload.state,
+                    {
+                        restore:
+                            false
+                    }
+                );
+
+
+            if (!session) {
+
+                return null;
+
+            }
+
+
+            session.state =
+                clone(
+                    payload.state
+                ) ||
+                {};
+
+            session.restored =
+                true;
+
+            session.dirty =
+                false;
+
+
+            if (
+                Number.isFinite(
+                    payload.version
+                )
+            ) {
+
+                session.version =
+                    payload.version;
+
+            }
+
+
+            emit(
+                "app:state:loaded",
+                {
+
+                    appId,
+
+                    payload
+
+                }
+            );
+
+
+            return session;
+
+        }
+
+
+        /* =====================================================
+           CLEAR SAVED STATE
+           ===================================================== */
+
+        function clearSaved(
+            appId
+        ) {
+
+            const success =
+                storageRemove(
+                    storageKey(
+                        appId
+                    )
+                );
+
+
+            if (success) {
+
+                emit(
+                    "app:state:cleared",
+                    {
+
+                        appId
+
+                    }
+                );
+
+            }
+
+
+            return success;
+
+        }
+
+
+        /* =====================================================
+           SUBSCRIBE
+           ===================================================== */
+
+        function subscribe(
+            appId,
+            callback
+        ) {
+
+            if (
+                !appId ||
+                typeof callback !==
+                "function"
+            ) {
+
+                return () => {};
+
+            }
+
+
+            if (
+                !listeners.has(
+                    appId
+                )
+            ) {
+
+                listeners.set(
+                    appId,
+                    new Set()
+                );
+
+            }
+
+
+            const set =
+                listeners.get(
+                    appId
+                );
+
+
+            set.add(
+                callback
+            );
+
+
+            return () => {
+
+                set.delete(
+                    callback
+                );
+
+
+                if (
+                    set.size ===
+                    0
+                ) {
+
+                    listeners.delete(
+                        appId
+                    );
+
+                }
+
+            };
+
+        }
+
+
+        /* =====================================================
+           NOTIFY
+           ===================================================== */
+
+        function notify(
+            appId,
+            detail
+        ) {
+
+            const set =
+                listeners.get(
+                    appId
+                );
+
+
+            if (!set) {
+
+                return;
+
+            }
+
+
+            set.forEach(
+                callback => {
+
+                    try {
+
+                        callback(
+                            detail
+                        );
+
+                    } catch (
+                        error
+                    ) {
+
+                        console.warn(
+                            "[HalDo App State 20]",
+                            error
+                        );
+
+                    }
+
+                }
+            );
+
+        }
+
+
+        /* =====================================================
+           DESTROY SESSION
+           ===================================================== */
+
+        function destroy(
+            appId,
+            options = {}
+        ) {
+
+            const session =
+                sessions.get(
+                    appId
+                );
+
+
+            if (!session) {
+
+                return false;
+
+            }
+
+
+            if (
+                options.save ===
+                true
+            ) {
+
+                save(
+                    appId
+                );
+
+            }
+
+
+            if (
+                options.clearSaved ===
+                true
+            ) {
+
+                clearSaved(
+                    appId
+                );
+
+            }
+
+
+            sessions.delete(
+                appId
+            );
+
+
+            listeners.delete(
+                appId
+            );
+
+
+            emit(
+                "app:state:destroyed",
+                {
+
+                    appId
+
+                }
+            );
+
+
+            return true;
+
+        }
+
+
+        /* =====================================================
+           AUTO SESSION CREATION
+           ===================================================== */
+
+        document.addEventListener(
+            "haldo:app:lifecycle:created",
+            event => {
+
+                const appId =
+                    event.detail &&
+                    event.detail.appId;
+
+
+                if (!appId) {
+
+                    return;
+
+                }
+
+
+                const instance =
+                    event.detail &&
+                    event.detail.instance;
+
+
+                const initialState =
+                    instance &&
+                    instance.definition &&
+                    instance.definition.initialState
+                        ? instance.definition.initialState
+                        : {};
+
+
+                create(
+                    appId,
+                    initialState
+                );
+
+            }
+        );
+
+
+        /* =====================================================
+           SAVE ON CLOSE
+           ===================================================== */
+
+        document.addEventListener(
+            "haldo:app:launch:closed",
+            event => {
+
+                const appId =
+                    event.detail &&
+                    event.detail.appId;
+
+
+                if (!appId) {
+
+                    return;
+
+                }
+
+
+                const session =
+                    get(
+                        appId,
+                        false
+                    );
+
+
+                if (
+                    session &&
+                    session.dirty
+                ) {
+
+                    save(
+                        appId
+                    );
+
+                }
+
+            }
+        );
+
+
+        /* =====================================================
+           PUBLIC API
+           ===================================================== */
+
+        const appState = {
+
+            create,
+
+            get,
+
+            getValue,
+
+            setValue,
+
+            merge,
+
+            reset,
+
+            save,
+
+            load,
+
+            clearSaved,
+
+            subscribe,
+
+            destroy,
+
+            list() {
+
+                return [
+                    ...sessions.values()
+                ];
+
+            }
+
+        };
+
+
+        /* =====================================================
+           GLOBAL API
+           ===================================================== */
+
+        window.HalDoAppState20 =
+            appState;
+
+
+        if (
+            !window.HalDoOS
+        ) {
+
+            window.HalDoOS =
+                {};
+
+        }
+
+
+        window.HalDoOS.appState20 =
+            appState;
+
+
+        /* =====================================================
+           READY
+           ===================================================== */
+
+        emit(
+            "app:state:ready",
+            {
+
+                version:
+                    "20.0.0",
+
+                timestamp:
+                    Date.now()
+
+            }
+        );
+
+
+        console.info(
+            "%cHalDo AI OS 20%c App-State Engine bereit",
+            "color:#42e6ff;font-weight:800;",
+            "color:#ffffff;"
+        );
+
+
+    })();
+
+    </script>
+    
