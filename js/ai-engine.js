@@ -1,6 +1,7 @@
 // ============================================================
 // HALDO AI OS 18
 // AI ENGINE
+// PROFESSIONAL ULTIMATE FOUNDATION
 // PART 85
 // ============================================================
 
@@ -18,6 +19,10 @@
     window.HalDoOS =
         window.HalDoOS || {};
 
+    // ========================================================
+    // CONFIGURATION
+    // ========================================================
+
     const CONFIG = {
 
         name:
@@ -29,28 +34,46 @@
         mode:
             "Professional Ultimate Foundation",
 
-        defaultLanguage:
-            "de",
-
         maxHistory:
             500,
 
-        enableGreetings:
+        maxTextLength:
+            100000,
+
+        defaultLanguage:
+            "de",
+
+        minimumProviderConfidence:
+            0.50,
+
+        enableCorrection:
+            true,
+
+        enableWriting:
+            true,
+
+        enableReading:
+            true,
+
+        enableRewriting:
+            true,
+
+        enableSummarization:
+            true,
+
+        enableTranslation:
+            true,
+
+        enableAnalysis:
+            true,
+
+        enableMemory:
             true,
 
         enableConversation:
             true,
 
-        enableCommands:
-            true,
-
-        enableLocalResponses:
-            true,
-
-        enableLearning:
-            true,
-
-        enableAppRouting:
+        enableLocalProcessing:
             true
 
     };
@@ -73,35 +96,58 @@
         requestCount:
             0,
 
-        responseCount:
+        successfulRequests:
             0,
 
-        commandCount:
+        failedRequests:
             0,
 
-        conversationCount:
-            0,
-
-        learningCount:
-            0,
-
-        lastInput:
+        lastRequest:
             null,
 
         lastResponse:
             null,
 
-        lastIntent:
+        currentLanguage:
+            CONFIG.defaultLanguage,
+
+        provider:
             null,
 
-        currentLanguage:
-            "de",
+        providers:
+            {},
 
         history:
             [],
 
         errors:
-            []
+            [],
+
+        capabilities:
+            {
+
+                correction:
+                    CONFIG.enableCorrection,
+
+                writing:
+                    CONFIG.enableWriting,
+
+                reading:
+                    CONFIG.enableReading,
+
+                rewriting:
+                    CONFIG.enableRewriting,
+
+                summarization:
+                    CONFIG.enableSummarization,
+
+                translation:
+                    CONFIG.enableTranslation,
+
+                analysis:
+                    CONFIG.enableAnalysis
+
+            }
 
     };
 
@@ -164,11 +210,12 @@
         );
 
         if (
-            set.size ===
-            0
+            set.size === 0
         ) {
 
-            listeners.delete(event);
+            listeners.delete(
+                event
+            );
 
         }
 
@@ -190,7 +237,9 @@
 
                 try {
 
-                    callback(detail);
+                    callback(
+                        detail
+                    );
 
                 } catch (error) {
 
@@ -238,17 +287,14 @@
         value
     ) {
 
-        return clean(value)
-            .toLowerCase()
-            .normalize("NFD")
-            .replace(
-                /[\u0300-\u036f]/g,
-                ""
-            )
-            .replace(
-                /\s+/g,
-                " "
-            );
+        return clean(
+            value
+        )
+        .toLowerCase()
+        .replace(
+            /\s+/g,
+            " "
+        );
 
     }
 
@@ -268,6 +314,31 @@
 
     }
 
+    function limitText(
+        text
+    ) {
+
+        const value =
+            clean(
+                text
+            );
+
+        if (
+            value.length <=
+            CONFIG.maxTextLength
+        ) {
+
+            return value;
+
+        }
+
+        return value.slice(
+            0,
+            CONFIG.maxTextLength
+        );
+
+    }
+
     // ========================================================
     // MODULE CONNECTIONS
     // ========================================================
@@ -282,11 +353,11 @@
 
     }
 
-    function getCommands() {
+    function getChat() {
 
         return (
-            window.HalDoAICommands ||
-            window.HalDoOS?.aiCommands ||
+            window.HalDoAIChat ||
+            window.HalDoOS?.aiChat ||
             null
         );
 
@@ -322,32 +393,11 @@
 
     }
 
-    function getAppManager() {
+    function getKernel() {
 
         return (
-            window.HalDoAppManager ||
-            window.HalDoOS?.appManager ||
-            null
-        );
-
-    }
-
-    function getLauncher() {
-
-        return (
-            window.HalDoLauncher ||
-            window.HalDoAppLauncher ||
-            window.HalDoOS?.launcher ||
-            null
-        );
-
-    }
-
-    function getRouter() {
-
-        return (
-            window.HalDoAppRouter ||
-            window.HalDoOS?.appRouter ||
+            window.HalDoKernel ||
+            window.HalDoOS?.kernel ||
             null
         );
 
@@ -373,7 +423,9 @@
             try {
 
                 const result =
-                    language.detectLanguage(text);
+                    language.detectLanguage(
+                        text
+                    );
 
                 if (
                     result?.language
@@ -388,7 +440,9 @@
 
             } catch (error) {
 
-                recordError(error);
+                recordError(
+                    error
+                );
 
             }
 
@@ -397,8 +451,7 @@
         return {
 
             language:
-                state.currentLanguage ||
-                CONFIG.defaultLanguage,
+                state.currentLanguage,
 
             confidence:
                 0
@@ -408,1057 +461,528 @@
     }
 
     // ========================================================
-    // GREETING DETECTION
+    // TEXT TYPE DETECTION
     // ========================================================
 
-    const greetingPatterns = [
-
-        "hallo",
-
-        "hi",
-
-        "hey",
-
-        "hello",
-
-        "moin",
-
-        "guten morgen",
-
-        "guten tag",
-
-        "guten abend",
-
-        "gute nacht",
-
-        "hallo haldo",
-
-        "hi haldo",
-
-        "hey haldo",
-
-        "hello haldo",
-
-        "haldo",
-
-        "salam",
-
-        "merhaba",
-
-        "slav",
-
-        "roj bash",
-
-        "spas",
-
-        "ez başî",
-
-        "ez basî"
-
-    ];
-
-    function isGreeting(
-        text
-    ) {
-
-        if (
-            !CONFIG.enableGreetings
-        ) {
-            return false;
-        }
-
-        const value =
-            normalize(text);
-
-        return greetingPatterns.some(
-            greeting =>
-                value === greeting ||
-                value.startsWith(
-                    greeting + " "
-                ) ||
-                value.includes(
-                    greeting + " haldo"
-                )
-        );
-
-    }
-
-    // ========================================================
-    // INTENT DETECTION
-    // ========================================================
-
-    function detectIntent(
-        text
-    ) {
-
-        const value =
-            normalize(text);
-
-        if (!value) {
-
-            return {
-
-                intent:
-                    "empty",
-
-                confidence:
-                    1
-
-            };
-
-        }
-
-        if (
-            isGreeting(value)
-        ) {
-
-            return {
-
-                intent:
-                    "greeting",
-
-                confidence:
-                    0.99
-
-            };
-
-        }
-
-        const commandEngine =
-            getCommands();
-
-        if (
-            CONFIG.enableCommands &&
-            commandEngine &&
-            typeof commandEngine.detectCommand ===
-            "function"
-        ) {
-
-            try {
-
-                const result =
-                    commandEngine.detectCommand(
-                        text
-                    );
-
-                if (
-                    result?.command &&
-                    result.confidence >=
-                    0.55
-                ) {
-
-                    return {
-
-                        intent:
-                            "command",
-
-                        confidence:
-                            result.confidence,
-
-                        command:
-                            result.command,
-
-                        detection:
-                            result
-
-                    };
-
-                }
-
-            } catch (error) {
-
-                recordError(error);
-
-            }
-
-        }
-
-        if (
-            matchesAny(
-                value,
-                [
-                    "lernen",
-                    "lerne",
-                    "lernen mit haldo",
-                    "schule",
-                    "universitaet",
-                    "universitat",
-                    "studium",
-                    "studieren",
-                    "hausaufgabe",
-                    "prüfung",
-                    "pruefung",
-                    "mathe",
-                    "physik",
-                    "chemie",
-                    "geschichte",
-                    "sprache lernen"
-                ]
-            )
-        ) {
-
-            return {
-
-                intent:
-                    "learning",
-
-                confidence:
-                    0.88
-
-            };
-
-        }
-
-        if (
-            matchesAny(
-                value,
-                [
-                    "fahrschule",
-                    "führerschein",
-                    "fuehrerschein",
-                    "verkehr",
-                    "verkehrsregeln",
-                    "autobahn",
-                    "fahrprüfung",
-                    "fahrpruefung"
-                ]
-            )
-        ) {
-
-            return {
-
-                intent:
-                    "driving",
-
-                confidence:
-                    0.88
-
-            };
-
-        }
-
-        if (
-            matchesAny(
-                value,
-                [
-                    "navigation",
-                    "route",
-                    "weg",
-                    "wie komme ich",
-                    "navigiere",
-                    "navigieren"
-                ]
-            )
-        ) {
-
-            return {
-
-                intent:
-                    "navigation",
-
-                confidence:
-                    0.86
-
-            };
-
-        }
-
-        if (
-            matchesAny(
-                value,
-                [
-                    "unfall",
-                    "verkehrsunfall",
-                    "stau",
-                    "verkehrslage",
-                    "blitzer",
-                    "warnung"
-                ]
-            )
-        ) {
-
-            return {
-
-                intent:
-                    "traffic",
-
-                confidence:
-                    0.86
-
-            };
-
-        }
-
-        if (
-            matchesAny(
-                value,
-                [
-                    "was kannst du",
-                    "was kannst du machen",
-                    "wer bist du",
-                    "was bist du",
-                    "über dich",
-                    "ueber dich"
-                ]
-            )
-        ) {
-
-            return {
-
-                intent:
-                    "about",
-
-                confidence:
-                    0.91
-
-            };
-
-        }
-
-        if (
-            matchesAny(
-                value,
-                [
-                    "danke",
-                    "vielen dank",
-                    "dankeschön",
-                    "dankeschoen"
-                ]
-            )
-        ) {
-
-            return {
-
-                intent:
-                    "thanks",
-
-                confidence:
-                    0.98
-
-            };
-
-        }
-
-        if (
-            matchesAny(
-                value,
-                [
-                    "tschüss",
-                    "tschuess",
-                    "bye",
-                    "auf wiedersehen"
-                ]
-            )
-        ) {
-
-            return {
-
-                intent:
-                    "goodbye",
-
-                confidence:
-                    0.98
-
-            };
-
-        }
-
-        return {
-
-            intent:
-                "conversation",
-
-            confidence:
-                0.65
-
-        };
-
-    }
-
-    function matchesAny(
-        text,
-        values
-    ) {
-
-        return values.some(
-            value =>
-                text === value ||
-                text.includes(value)
-        );
-
-    }
-
-    // ========================================================
-    // LOCAL RESPONSE SYSTEM
-    // ========================================================
-
-    function getLocalizedResponse(
-        intent,
-        language = "de"
-    ) {
-
-        const responses = {
-
-            de: {
-
-                greeting:
-                    "Hallo! Ich bin HalDo AI. 💙❤️ Wie kann ich dir helfen?",
-
-                thanks:
-                    "Sehr gerne! 💙❤️",
-
-                goodbye:
-                    "Bis bald! HalDo AI bleibt für dich bereit. 🚀",
-
-                about:
-                    "Ich bin HalDo AI – die intelligente Assistenz des HalDo AI OS 18. Ich kann mit dir sprechen, Befehle ausführen, Apps öffnen, Informationen verarbeiten und dich beim Lernen unterstützen.",
-
-                learning:
-                    "Natürlich. 📚 HalDo AI kann dich beim Lernen für Schule, Universität, Prüfungen und verschiedene Fachgebiete unterstützen.",
-
-                driving:
-                    "Ich kann dich beim Lernen für Fahrschule, Verkehrsregeln und Führerschein-Themen unterstützen.",
-
-                navigation:
-                    "Navigation ist vorbereitet. Sag mir zum Beispiel, wohin du möchtest.",
-
-                traffic:
-                    "Verkehrs- und Warnfunktionen sind als Teil des HalDo-Systems vorgesehen. Für aktuelle Verkehrsdaten benötigt HalDo AI später eine entsprechende Datenquelle.",
-
-                conversation:
-                    "Ich höre dir zu. Erzähl mir, was du wissen oder machen möchtest."
-
-            },
-
-            en: {
-
-                greeting:
-                    "Hello! I am HalDo AI. 💙❤️ How can I help you?",
-
-                thanks:
-                    "You're very welcome! 💙❤️",
-
-                goodbye:
-                    "See you soon! HalDo AI is ready for you. 🚀",
-
-                about:
-                    "I am HalDo AI, the intelligent assistant of HalDo AI OS 18. I can communicate with you, execute commands, work with apps and support learning.",
-
-                learning:
-                    "Of course. 📚 HalDo AI can support you with school, university, exams and different subjects.",
-
-                driving:
-                    "I can help you learn driving theory, traffic rules and driving-related topics.",
-
-                navigation:
-                    "Navigation is prepared. Tell me where you want to go.",
-
-                traffic:
-                    "Traffic and warning functions are prepared as part of HalDo. Current traffic data requires an appropriate live data source.",
-
-                conversation:
-                    "I am listening. Tell me what you would like to know or do."
-
-            },
-
-            ku: {
-
-                greeting:
-                    "Silav! Ez HalDo AI me. 💙❤️ Ez dikarim çi ji bo te bikim?",
-
-                thanks:
-                    "Bi kêfa min! 💙❤️",
-
-                goodbye:
-                    "Bi xêr be! HalDo AI ji bo te amade ye. 🚀",
-
-                about:
-                    "Ez HalDo AI me, alîkarê hişmend ê HalDo AI OS 18.",
-
-                learning:
-                    "Erê. Ez dikarim di fêrbûnê, dibistanê û zanîngehê de alîkarî bikim.",
-
-                driving:
-                    "Ez dikarim di mijarên ajotinê û rêzikên trafîkê de alîkarî bikim.",
-
-                navigation:
-                    "Nîvigasyon amade ye. Ji min re bêje ku tu dixwazî biçî ku derê.",
-
-                traffic:
-                    "Fonksiyonên trafîkê ji bo HalDo hatine amadekirin.",
-
-                conversation:
-                    "Ez te dibihîzim. Ji min re bêje tu çi dixwazî."
-
-            },
-
-            ez: {
-
-                greeting:
-                    "Silav! Ez HalDo AI me. 💙❤️ Ez dikarim çi ji bo te bikim?",
-
-                thanks:
-                    "Bi kêfa min! 💙❤️",
-
-                goodbye:
-                    "Bi xêr be! HalDo AI ji bo te amade ye. 🚀",
-
-                about:
-                    "Ez HalDo AI me, alîkarê hişmend ê HalDo AI OS 18.",
-
-                learning:
-                    "Erê. Ez dikarim di fêrbûnê û xwendinê de alîkarî bikim.",
-
-                driving:
-                    "Ez dikarim di mijarên ajotinê û trafîkê de alîkarî bikim.",
-
-                navigation:
-                    "Nîvigasyon ji bo HalDo hatiye amadekirin.",
-
-                traffic:
-                    "Fonksiyonên trafîkê ji bo HalDo hatiye amadekirin.",
-
-                conversation:
-                    "Ez te dibihîzim. Ji min re bêje tu çi dixwazî."
-
-            }
-
-        };
-
-        const selected =
-            responses[
-                language
-            ] ||
-            responses.de;
-
-        return (
-            selected[intent] ||
-            selected.conversation
-        );
-
-    }
-
-    // ========================================================
-    // COMMAND EXECUTION
-    // ========================================================
-
-    async function executeCommand(
-        text,
+    function detectTask(
+        input,
         options = {}
     ) {
 
-        const commands =
-            getCommands();
+        const text =
+            normalize(
+                input
+            );
 
         if (
-            !commands ||
-            typeof commands.execute !==
-            "function"
+            options.task
         ) {
 
-            return {
-
-                ok:
-                    false,
-
-                handled:
-                    false,
-
-                error:
-                    "COMMAND_ENGINE_UNAVAILABLE"
-
-            };
+            return normalize(
+                options.task
+            );
 
         }
 
-        try {
+        /*
+         * Korrektur
+         */
 
-            const result =
-                await commands.execute(
-                    text,
-                    options
-                );
+        if (
+            /rechtschreib|grammatik|grammatikal|fehler|korrigier|korrektur|verbessere den text|korrigiere den text|correct|grammar|spell/.test(
+                text
+            )
+        ) {
 
-            if (
-                result?.ok
-            ) {
-
-                state.commandCount++;
-
-            }
-
-            return {
-
-                ok:
-                    result?.ok !== false,
-
-                handled:
-                    Boolean(
-                        result?.command ||
-                        result?.result ||
-                        result?.ok
-                    ),
-
-                result
-
-            };
-
-        } catch (error) {
-
-            recordError(error);
-
-            return {
-
-                ok:
-                    false,
-
-                handled:
-                    false,
-
-                error:
-                    error.message ||
-                    String(error)
-
-            };
+            return "correction";
 
         }
+
+        /*
+         * Formulieren
+         */
+
+        if (
+            /formuliere|formulieren|schreib|schreiben|verfasse|erstelle einen text|text erstellen|write|writing|compose|draft/.test(
+                text
+            )
+        ) {
+
+            return "writing";
+
+        }
+
+        /*
+         * Umschreiben
+         */
+
+        if (
+            /umschreib|umformulieren|anders formulieren|professioneller|freundlicher|kürzer|länger|rewrite|rephrase|paraphrase/.test(
+                text
+            )
+        ) {
+
+            return "rewriting";
+
+        }
+
+        /*
+         * Zusammenfassung
+         */
+
+        if (
+            /zusammenfass|kurz zusammen|kurzfassung|fasse .* zusammen|summary|summarize/.test(
+                text
+            )
+        ) {
+
+            return "summarization";
+
+        }
+
+        /*
+         * Übersetzung
+         */
+
+        if (
+            /übersetz|translation|translate|auf deutsch|auf englisch|auf kurdisch|auf êzîdî|auf ezidi/.test(
+                text
+            )
+        ) {
+
+            return "translation";
+
+        }
+
+        /*
+         * Analyse / Lesen
+         */
+
+        if (
+            /analys|erkläre|erklär|lies|lese|verstehe|bedeutung|analyse|analyze|explain|read/.test(
+                text
+            )
+        ) {
+
+            return "analysis";
+
+        }
+
+        return "conversation";
 
     }
 
     // ========================================================
-    // MEMORY
+    // TEXT ANALYSIS
     // ========================================================
 
-    async function remember(
-        input,
-        response,
-        metadata = {}
+    function analyzeText(
+        text
     ) {
 
-        if (
-            !CONFIG.enableLearning
-        ) {
-            return false;
-        }
+        const value =
+            limitText(
+                text
+            );
 
-        const memory =
-            getMemory();
+        const words =
+            value
+                ? value.split(
+                    /\s+/
+                ).filter(
+                    Boolean
+                )
+                : [];
 
-        if (!memory) {
-            return false;
-        }
+        const sentences =
+            value
+                ? value
+                    .split(
+                        /[.!?]+/
+                    )
+                    .map(
+                        item =>
+                            item.trim()
+                    )
+                    .filter(
+                        Boolean
+                    )
+                : [];
 
-        const data = {
+        const paragraphs =
+            value
+                ? value
+                    .split(
+                        /\n\s*\n/
+                    )
+                    .map(
+                        item =>
+                            item.trim()
+                    )
+                    .filter(
+                        Boolean
+                    )
+                : [];
+
+        const characters =
+            value.length;
+
+        const letters =
+            (
+                value.match(
+                    /[A-Za-zÄÖÜäöüßÀ-ÿ]/g
+                ) ||
+                []
+            ).length;
+
+        const numbers =
+            (
+                value.match(
+                    /\d/g
+                ) ||
+                []
+            ).length;
+
+        const questionMarks =
+            (
+                value.match(
+                    /\?/g
+                ) ||
+                []
+            ).length;
+
+        const exclamations =
+            (
+                value.match(
+                    /!/g
+                ) ||
+                []
+            ).length;
+
+        const averageWordsPerSentence =
+            sentences.length
+                ? Number(
+                    (
+                        words.length /
+                        sentences.length
+                    ).toFixed(
+                        2
+                    )
+                )
+                : 0;
+
+        return {
+
+            ok:
+                true,
 
             type:
-                "ai-interaction",
+                "text-analysis",
 
-            input,
+            text:
+                value,
 
-            response,
+            statistics: {
+
+                characters,
+
+                letters,
+
+                numbers,
+
+                words:
+                    words.length,
+
+                sentences:
+                    sentences.length,
+
+                paragraphs:
+                    paragraphs.length,
+
+                questionMarks,
+
+                exclamations,
+
+                averageWordsPerSentence
+
+            },
 
             language:
-                state.currentLanguage,
-
-            timestamp:
-                Date.now(),
-
-            ...metadata
+                detectLanguage(
+                    value
+                )
 
         };
-
-        for (
-            const method of [
-                "remember",
-                "add",
-                "store",
-                "save"
-            ]
-        ) {
-
-            if (
-                typeof memory[method] !==
-                "function"
-            ) {
-                continue;
-            }
-
-            try {
-
-                await memory[method](data);
-
-                state.learningCount++;
-
-                return true;
-
-            } catch (error) {}
-
-        }
-
-        return false;
 
     }
 
     // ========================================================
-    // CONVERSATION
+    // LOCAL CORRECTION ENGINE
     // ========================================================
 
-    async function saveConversation(
-        role,
-        text,
-        metadata = {}
+    function correctBasicGerman(
+        text
     ) {
 
-        if (
-            !CONFIG.enableConversation
+        let result =
+            clean(
+                text
+            );
+
+        const corrections = [];
+
+        /*
+         * Häufige einfache Fehler.
+         */
+
+        const replacements = [
+
+            [
+                /\bseid dem\b/gi,
+                "seit dem"
+            ],
+
+            [
+                /\bseid ihr\b/gi,
+                "seid ihr"
+            ],
+
+            [
+                /\bseit ihr\b/gi,
+                "seid ihr"
+            ],
+
+            [
+                /\bseid gestern\b/gi,
+                "seit gestern"
+            ],
+
+            [
+                /\bseid heute\b/gi,
+                "seit heute"
+            ],
+
+            [
+                /\bdas selbe\b/gi,
+                "dasselbe"
+            ],
+
+            [
+                /\bzum Beispiel\b/gi,
+                "zum Beispiel"
+            ],
+
+            [
+                /\baufjedenfall\b/gi,
+                "auf jeden Fall"
+            ],
+
+            [
+                /\bimmernoch\b/gi,
+                "immer noch"
+            ],
+
+            [
+                /\nvielen dank\b/gi,
+                "\nVielen Dank"
+            ],
+
+            [
+                /\bHallo,\s*ich\b/g,
+                "Hallo, ich"
+            ]
+
+        ];
+
+        for (
+            const [
+                pattern,
+                replacement
+            ] of replacements
         ) {
-            return false;
+
+            const before =
+                result;
+
+            result =
+                result.replace(
+                    pattern,
+                    replacement
+                );
+
+            if (
+                before !==
+                result
+            ) {
+
+                corrections.push({
+
+                    type:
+                        "spelling",
+
+                    replacement
+
+                });
+
+            }
+
         }
 
-        const conversation =
-            getConversation();
+        /*
+         * Mehrfache Leerzeichen.
+         */
 
-        if (!conversation) {
-            return false;
+        const beforeSpaces =
+            result;
+
+        result =
+            result
+                .replace(
+                    /[ \t]+/g,
+                    " "
+                )
+                .replace(
+                    /\n{3,}/g,
+                    "\n\n"
+                )
+                .trim();
+
+        if (
+            beforeSpaces !==
+            result
+        ) {
+
+            corrections.push({
+
+                type:
+                    "spacing",
+
+                description:
+                    "Überflüssige Leerzeichen bereinigt."
+
+            });
+
         }
 
-        const message = {
+        /*
+         * Leerzeichen vor Satzzeichen.
+         */
 
-            role,
+        const beforePunctuation =
+            result;
 
-            content:
+        result =
+            result.replace(
+                /\s+([,.!?;:])/g,
+                "$1"
+            );
+
+        if (
+            beforePunctuation !==
+            result
+        ) {
+
+            corrections.push({
+
+                type:
+                    "punctuation",
+
+                description:
+                    "Satzzeichen korrigiert."
+
+            });
+
+        }
+
+        /*
+         * Satzanfang groß schreiben.
+         */
+
+        result =
+            result.replace(
+                /(^|[.!?]\s+)([a-zäöü])/g,
+                (
+                    match,
+                    prefix,
+                    letter
+                ) =>
+                    prefix +
+                    letter.toUpperCase()
+            );
+
+        return {
+
+            ok:
+                true,
+
+            type:
+                "correction",
+
+            original:
                 text,
 
-            text,
+            corrected:
+                result,
 
-            language:
-                state.currentLanguage,
+            changed:
+                result !==
+                clean(
+                    text
+                ),
 
-            timestamp:
-                Date.now(),
+            corrections,
 
-            ...metadata
+            limitations: [
+
+                "Die lokale Korrektur ist keine vollständige linguistische Grammatikprüfung.",
+
+                "Für eine vollständige semantische Korrektur wird ein aktiver AI-Provider benötigt."
+
+            ]
 
         };
-
-        for (
-            const method of [
-                "addMessage",
-                "add",
-                "pushMessage",
-                "appendMessage"
-            ]
-        ) {
-
-            if (
-                typeof conversation[method] !==
-                "function"
-            ) {
-                continue;
-            }
-
-            try {
-
-                await conversation[method](
-                    message
-                );
-
-                state.conversationCount++;
-
-                return true;
-
-            } catch (error) {}
-
-        }
-
-        return false;
 
     }
 
     // ========================================================
-    // MAIN GENERATION
+    // LOCAL WRITING ENGINE
     // ========================================================
 
-    async function generate(
+    function localWriting(
         input,
-        context = {}
+        options = {}
     ) {
 
-        const text =
-            clean(input);
+        const task =
+            detectTask(
+                input,
+                options
+            );
 
-        if (!text) {
+        if (
+            task ===
+            "correction"
+        ) {
 
-            return {
-
-                ok:
-                    false,
-
-                type:
-                    "empty",
-
-                text:
-                    "Bitte sag mir, was du möchtest."
-
-            };
+            return correctBasicGerman(
+                input
+            );
 
         }
 
-        const language =
-            context.language ||
-            detectLanguage(text)?.language ||
-            state.currentLanguage ||
-            CONFIG.defaultLanguage;
-
-        state.currentLanguage =
-            language;
-
-        const intent =
-            detectIntent(text);
-
-        state.lastIntent =
-            intent;
-
-        emit(
-            "intent-detected",
-            {
-                input:
-                    text,
-
-                intent,
-
-                language
-            }
-        );
-
-        // ----------------------------------------------------
-        // GREETING
-        // ----------------------------------------------------
-
         if (
-            intent.intent ===
-            "greeting"
+            task ===
+            "analysis"
         ) {
 
-            return {
-
-                ok:
-                    true,
-
-                type:
-                    "greeting",
-
-                intent:
-                    intent.intent,
-
-                language,
-
-                text:
-                    getLocalizedResponse(
-                        "greeting",
-                        language
-                    )
-
-            };
-
-        }
-
-        // ----------------------------------------------------
-        // COMMAND
-        // ----------------------------------------------------
-
-        if (
-            intent.intent ===
-            "command"
-        ) {
-
-            const result =
-                await executeCommand(
-                    text,
-                    context.options || {}
-                );
-
-            if (
-                result.ok ||
-                result.handled
-            ) {
-
-                return {
-
-                    ok:
-                        true,
-
-                    type:
-                        "command",
-
-                    intent:
-                        "command",
-
-                    language,
-
-                    command:
-                        intent.command?.id ||
-                        null,
-
-                    result:
-
-                        result.result ||
-                        result
-
-                };
-
-            }
-
-        }
-
-        // ----------------------------------------------------
-        // LOCAL RESPONSES
-        // ----------------------------------------------------
-
-        if (
-            CONFIG.enableLocalResponses
-        ) {
-
-            const supportedIntents = [
-
-                "thanks",
-
-                "goodbye",
-
-                "about",
-
-                "learning",
-
-                "driving",
-
-                "navigation",
-
-                "traffic"
-
-            ];
-
-            if (
-                supportedIntents.includes(
-                    intent.intent
-                )
-            ) {
-
-                const response =
-                    getLocalizedResponse(
-                        intent.intent,
-                        language
-                    );
-
-                await remember(
-                    text,
-                    response,
-                    {
-                        intent:
-                            intent.intent
-                    }
-                );
-
-                return {
-
-                    ok:
-                        true,
-
-                    type:
-                        intent.intent,
-
-                    intent:
-                        intent.intent,
-
-                    language,
-
-                    text:
-                        response
-
-                };
-
-            }
-
-        }
-
-        // ----------------------------------------------------
-        // EXISTING AI PROVIDER
-        // ----------------------------------------------------
-
-        const core =
-            getCore();
-
-        /*
-         * Wichtig:
-         * Keine Endlosschleife.
-         * ai-core -> ai-engine.generate()
-         * darf nicht wieder ai-core.process()
-         * aufrufen.
-         */
-
-        if (
-            context.allowProvider !==
-            false &&
-            context.provider &&
-            typeof context.provider.generate ===
-            "function"
-        ) {
-
-            try {
-
-                const result =
-                    await context.provider.generate(
-                        text,
-                        context
-                    );
-
-                return normalizeResult(
-                    result,
-                    language
-                );
-
-            } catch (error) {
-
-                recordError(error);
-
-            }
+            return analyzeText(
+                input
+            );
 
         }
 
         /*
-         * Falls eine externe AI-Engine später
-         * als Provider eingebunden wird.
-         */
-
-        if (
-            context.externalProvider &&
-            typeof context.externalProvider.generate ===
-            "function"
-        ) {
-
-            try {
-
-                const result =
-                    await context.externalProvider.generate(
-                        text,
-                        context
-                    );
-
-                return normalizeResult(
-                    result,
-                    language
-                );
-
-            } catch (error) {
-
-                recordError(error);
-
-            }
-
-        }
-
-        /*
-         * Kein echter AI-Provider:
-         * ehrliche vorbereitete Antwort.
+         * Kein erfundener AI-Text.
          */
 
         return {
@@ -1467,39 +991,369 @@
                 false,
 
             type:
-                "provider-required",
-
-            intent:
-                intent.intent,
-
-            language,
-
-            text:
-                getLocalizedResponse(
-                    "conversation",
-                    language
-                ),
+                "local-writing-unavailable",
 
             message:
-                "Für freie generative Antworten muss ein AI-Provider verbunden werden.",
+                "Für diese Schreibaufgabe ist ein aktiver AI-Provider erforderlich.",
 
-            providerRequired:
-                true,
+            task,
 
-            coreAvailable:
-                Boolean(core)
+            input
 
         };
 
     }
 
     // ========================================================
-    // NORMALIZE RESULT
+    // PROVIDER SYSTEM
+    // ========================================================
+
+    function registerProvider(
+        id,
+        provider
+    ) {
+
+        const key =
+            normalize(
+                id
+            );
+
+        if (
+            !key ||
+            !provider
+        ) {
+
+            return false;
+
+        }
+
+        state.providers[
+            key
+        ] =
+            provider;
+
+        if (
+            !state.provider
+        ) {
+
+            state.provider =
+                key;
+
+        }
+
+        emit(
+            "provider-registered",
+            {
+
+                id:
+                    key,
+
+                provider
+
+            }
+        );
+
+        return true;
+
+    }
+
+    function unregisterProvider(
+        id
+    ) {
+
+        const key =
+            normalize(
+                id
+            );
+
+        if (
+            !state.providers[
+                key
+            ]
+        ) {
+
+            return false;
+
+        }
+
+        delete state.providers[
+            key
+        ];
+
+        if (
+            state.provider ===
+            key
+        ) {
+
+            state.provider =
+                Object.keys(
+                    state.providers
+                )[0] ||
+                null;
+
+        }
+
+        emit(
+            "provider-unregistered",
+            {
+                id:
+                    key
+            }
+        );
+
+        return true;
+
+    }
+
+    function setProvider(
+        id
+    ) {
+
+        const key =
+            normalize(
+                id
+            );
+
+        if (
+            !state.providers[
+                key
+            ]
+        ) {
+
+            return {
+
+                ok:
+                    false,
+
+                error:
+                    "PROVIDER_NOT_FOUND"
+
+            };
+
+        }
+
+        state.provider =
+            key;
+
+        emit(
+            "provider-changed",
+            {
+                provider:
+                    key
+            }
+        );
+
+        return {
+
+            ok:
+                true,
+
+            provider:
+                key
+
+        };
+
+    }
+
+    function getProvider() {
+
+        if (
+            state.provider &&
+            state.providers[
+                state.provider
+            ]
+        ) {
+
+            return state.providers[
+                state.provider
+            ];
+
+        }
+
+        const first =
+            Object.keys(
+                state.providers
+            )[0];
+
+        return first
+            ? state.providers[
+                first
+            ]
+            : null;
+
+    }
+
+    // ========================================================
+    // PROVIDER EXECUTION
+    // ========================================================
+
+    async function executeProvider(
+        input,
+        context = {}
+    ) {
+
+        const provider =
+            getProvider();
+
+        if (
+            !provider
+        ) {
+
+            return null;
+
+        }
+
+        const methods = [
+
+            "generate",
+            "generateResponse",
+            "respond",
+            "process",
+            "ask",
+            "complete",
+            "chat"
+
+        ];
+
+        for (
+            const method of methods
+        ) {
+
+            if (
+                typeof provider[
+                    method
+                ] !==
+                "function"
+            ) {
+                continue;
+            }
+
+            try {
+
+                const result =
+                    await provider[
+                        method
+                    ](
+                        input,
+                        context
+                    );
+
+                if (
+                    result !==
+                    undefined &&
+                    result !==
+                    null
+                ) {
+
+                    return normalizeResult(
+                        result,
+                        context
+                    );
+
+                }
+
+            } catch (error) {
+
+                recordError(
+                    error
+                );
+
+            }
+
+        }
+
+        return null;
+
+    }
+
+    // ========================================================
+    // CHAT FALLBACK
+    // ========================================================
+
+    async function executeChat(
+        input,
+        context = {}
+    ) {
+
+        const chat =
+            getChat();
+
+        if (
+            !chat
+        ) {
+
+            return null;
+
+        }
+
+        const methods = [
+
+            "sendMessage",
+            "send",
+            "ask",
+            "respond",
+            "processMessage"
+
+        ];
+
+        for (
+            const method of methods
+        ) {
+
+            if (
+                typeof chat[
+                    method
+                ] !==
+                "function"
+            ) {
+                continue;
+            }
+
+            try {
+
+                const result =
+                    await chat[
+                        method
+                    ](
+                        input,
+                        context
+                    );
+
+                if (
+                    result !==
+                    undefined &&
+                    result !==
+                    null
+                ) {
+
+                    return normalizeResult(
+                        result,
+                        context
+                    );
+
+                }
+
+            } catch (error) {
+
+                recordError(
+                    error
+                );
+
+            }
+
+        }
+
+        return null;
+
+    }
+
+    // ========================================================
+    // RESULT NORMALIZATION
     // ========================================================
 
     function normalizeResult(
         result,
-        language
+        context = {}
     ) {
 
         if (
@@ -1515,20 +1369,25 @@
                 type:
                     "text",
 
-                language,
-
                 text:
                     result,
 
                 content:
-                    result
+                    result,
+
+                task:
+                    context.task ||
+                    "conversation",
+
+                language:
+                    context.language ||
+                    state.currentLanguage
 
             };
 
         }
 
         if (
-            !result ||
             typeof result !==
             "object"
         ) {
@@ -1541,19 +1400,22 @@
                 type:
                     "value",
 
-                language,
-
                 value:
                     result,
 
-                text:
-                    String(
-                        result ?? ""
-                    )
+                task:
+                    context.task ||
+                    "conversation"
 
             };
 
         }
+
+        const text =
+            result.text ??
+            result.content ??
+            result.message ??
+            "";
 
         return {
 
@@ -1562,22 +1424,249 @@
 
             ...result,
 
+            text:
+                clean(
+                    text
+                ),
+
+            content:
+                result.content ??
+                clean(
+                    text
+                ),
+
+            task:
+                result.task ||
+                context.task ||
+                "conversation",
+
             language:
                 result.language ||
-                language,
-
-            text:
-                result.text ??
-                result.content ??
-                result.message ??
-                ""
+                context.language ||
+                state.currentLanguage
 
         };
 
     }
 
     // ========================================================
-    // PROCESS
+    // MEMORY
+    // ========================================================
+
+    async function recall(
+        query,
+        options = {}
+    ) {
+
+        if (
+            !CONFIG.enableMemory
+        ) {
+
+            return [];
+
+        }
+
+        const memory =
+            getMemory();
+
+        if (
+            !memory
+        ) {
+
+            return [];
+
+        }
+
+        for (
+            const method of [
+                "recall",
+                "search",
+                "find",
+                "query",
+                "retrieve"
+            ]
+        ) {
+
+            if (
+                typeof memory[
+                    method
+                ] !==
+                "function"
+            ) {
+                continue;
+            }
+
+            try {
+
+                const result =
+                    await memory[
+                        method
+                    ](
+                        query,
+                        options
+                    );
+
+                if (
+                    Array.isArray(
+                        result
+                    )
+                ) {
+
+                    return result;
+
+                }
+
+                if (
+                    result
+                ) {
+
+                    return [
+                        result
+                    ];
+
+                }
+
+            } catch (error) {}
+
+        }
+
+        return [];
+
+    }
+
+    async function remember(
+        data
+    ) {
+
+        if (
+            !CONFIG.enableMemory
+        ) {
+
+            return false;
+
+        }
+
+        const memory =
+            getMemory();
+
+        if (
+            !memory
+        ) {
+
+            return false;
+
+        }
+
+        for (
+            const method of [
+                "remember",
+                "add",
+                "store",
+                "save",
+                "rememberMessage"
+            ]
+        ) {
+
+            if (
+                typeof memory[
+                    method
+                ] !==
+                "function"
+            ) {
+                continue;
+            }
+
+            try {
+
+                await memory[
+                    method
+                ](
+                    data
+                );
+
+                return true;
+
+            } catch (error) {}
+
+        }
+
+        return false;
+
+    }
+
+    // ========================================================
+    // CONVERSATION
+    // ========================================================
+
+    function getConversationMessages(
+        limit = 50
+    ) {
+
+        if (
+            !CONFIG.enableConversation
+        ) {
+
+            return [];
+
+        }
+
+        const conversation =
+            getConversation();
+
+        if (
+            !conversation
+        ) {
+
+            return [];
+
+        }
+
+        for (
+            const method of [
+                "getMessages",
+                "getHistory",
+                "getConversation"
+            ]
+        ) {
+
+            if (
+                typeof conversation[
+                    method
+                ] !==
+                "function"
+            ) {
+                continue;
+            }
+
+            try {
+
+                const result =
+                    conversation[
+                        method
+                    ](
+                        limit
+                    );
+
+                if (
+                    Array.isArray(
+                        result
+                    )
+                ) {
+
+                    return result;
+
+                }
+
+            } catch (error) {}
+
+        }
+
+        return [];
+
+    }
+
+    // ========================================================
+    // MAIN ENGINE
     // ========================================================
 
     async function process(
@@ -1586,7 +1675,9 @@
     ) {
 
         const text =
-            clean(input);
+            limitText(
+                input
+            );
 
         if (!text) {
 
@@ -1595,177 +1686,280 @@
                 ok:
                     false,
 
+                type:
+                    "error",
+
                 error:
-                    "EMPTY_INPUT"
+                    "EMPTY_INPUT",
+
+                message:
+                    "Keine Eingabe vorhanden."
 
             };
 
         }
 
-        const id =
+        const requestId =
             createId(
                 "request"
             );
+
+        const startedAt =
+            Date.now();
 
         state.processing =
             true;
 
         state.requestCount++;
 
-        state.lastInput =
-            text;
+        const language =
+            detectLanguage(
+                text
+            );
 
-        const started =
-            Date.now();
+        const task =
+            detectTask(
+                text,
+                options
+            );
+
+        const memories =
+            await recall(
+                text,
+                {
+                    limit:
+                        options.memoryLimit ||
+                        10
+                }
+            );
+
+        const request = {
+
+            id:
+                requestId,
+
+            input:
+                text,
+
+            task,
+
+            language:
+                language?.language ||
+                state.currentLanguage,
+
+            timestamp:
+                startedAt,
+
+            options
+
+        };
+
+        state.lastRequest =
+            request;
 
         emit(
             "request-start",
             {
-                id,
-                input:
-                    text
+                request
             }
         );
 
         try {
 
-            const detected =
-                detectLanguage(text);
-
-            const language =
-                detected?.language ||
-                state.currentLanguage;
-
-            state.currentLanguage =
-                language;
-
-            await saveConversation(
-                "user",
-                text,
-                {
-                    requestId:
-                        id
-                }
-            );
+            /*
+             * Kontext für Provider und Chat.
+             */
 
             const context = {
 
-                requestId:
-                    id,
+                requestId,
 
-                language,
+                task,
 
-                options,
+                language:
+                    request.language,
 
-                memories:
-                    [],
+                languageDetection:
+                    language,
 
-                history:
-                    state.history.slice(-50)
+                memories,
+
+                messages:
+                    getConversationMessages(
+                        options.historyLimit ||
+                        50
+                    ),
+
+                mode:
+                    CONFIG.mode,
+
+                engine:
+                    {
+
+                        name:
+                            CONFIG.name,
+
+                        version:
+                            CONFIG.version
+
+                    }
 
             };
 
-            const result =
-                await generate(
+            emit(
+                "task-detected",
+                {
+
+                    request,
+
+                    task,
+
+                    context
+
+                }
+            );
+
+            /*
+             * Lokale Analyse.
+             */
+
+            if (
+                task ===
+                "analysis" &&
+                options.localOnly !==
+                false
+            ) {
+
+                const analysis =
+                    analyzeText(
+                        text
+                    );
+
+                if (
+                    options.preferLocal ||
+                    !getProvider()
+                ) {
+
+                    return finalize(
+                        analysis,
+                        request,
+                        startedAt
+                    );
+
+                }
+
+            }
+
+            /*
+             * Lokale Korrektur zuerst,
+             * wenn ausdrücklich gewünscht.
+             */
+
+            if (
+                task ===
+                "correction" &&
+                options.localOnly ===
+                true
+            ) {
+
+                return finalize(
+                    correctBasicGerman(
+                        text
+                    ),
+                    request,
+                    startedAt
+                );
+
+            }
+
+            /*
+             * 1. Externer/registrierter Provider
+             */
+
+            let result =
+                await executeProvider(
                     text,
                     context
                 );
 
-            const response = {
-
-                id,
-
-                requestId:
-                    id,
-
-                ok:
-                    result?.ok !== false,
-
-                type:
-                    result?.type ||
-                    "text",
-
-                intent:
-                    result?.intent ||
-                    state.lastIntent?.intent ||
-                    "conversation",
-
-                language,
-
-                input:
-                    text,
-
-                text:
-                    result?.text ||
-                    result?.content ||
-                    result?.message ||
-                    "",
-
-                result,
-
-                timestamp:
-                    Date.now(),
-
-                duration:
-                    Date.now() -
-                    started
-
-            };
-
-            state.lastResponse =
-                response;
-
-            state.responseCount++;
-
-            await saveConversation(
-                "assistant",
-                response.text,
-                {
-                    requestId:
-                        id,
-
-                    type:
-                        response.type
-                }
-            );
-
-            await remember(
-                text,
-                response.text,
-                {
-                    requestId:
-                        id,
-
-                    intent:
-                        response.intent
-                }
-            );
-
-            state.history.push(
-                response
-            );
+            /*
+             * 2. AI Chat
+             */
 
             if (
-                state.history.length >
-                CONFIG.maxHistory
+                !result
             ) {
 
-                state.history.shift();
+                result =
+                    await executeChat(
+                        text,
+                        context
+                    );
 
             }
 
-            emit(
-                "response",
-                {
-                    response
-                }
-            );
+            /*
+             * 3. Lokale Verarbeitung
+             */
 
-            return response;
+            if (
+                !result &&
+                CONFIG.enableLocalProcessing
+            ) {
+
+                result =
+                    localWriting(
+                        text,
+                        {
+                            ...options,
+                            task
+                        }
+                    );
+
+            }
+
+            /*
+             * Kein Provider und keine
+             * lokale Antwort.
+             */
+
+            if (
+                !result
+            ) {
+
+                result = {
+
+                    ok:
+                        false,
+
+                    type:
+                        "no-provider",
+
+                    task,
+
+                    text:
+                        "",
+
+                    message:
+                        "Kein aktiver AI-Provider ist momentan verbunden."
+
+                };
+
+            }
+
+            return finalize(
+                result,
+                request,
+                startedAt
+            );
 
         } catch (error) {
 
-            recordError(error);
+            state.failedRequests++;
+
+            recordError(
+                error
+            );
 
             const response = {
 
@@ -1775,17 +1969,28 @@
                 type:
                     "error",
 
-                id,
+                requestId,
+
+                task,
 
                 input:
                     text,
 
                 language:
-                    state.currentLanguage,
+                    request.language,
 
                 error:
-                    error.message ||
-                    String(error)
+                    error?.message ||
+                    String(
+                        error
+                    ),
+
+                timestamp:
+                    Date.now(),
+
+                duration:
+                    Date.now() -
+                    startedAt
 
             };
 
@@ -1793,7 +1998,7 @@
                 response;
 
             emit(
-                "error-response",
+                "response-error",
                 {
                     response,
                     error
@@ -1807,10 +2012,30 @@
             state.processing =
                 false;
 
+            request.finishedAt =
+                Date.now();
+
+            request.duration =
+                request.finishedAt -
+                startedAt;
+
+            state.history.push(
+                request
+            );
+
+            if (
+                state.history.length >
+                CONFIG.maxHistory
+            ) {
+
+                state.history.shift();
+
+            }
+
             emit(
                 "request-end",
                 {
-                    id
+                    request
                 }
             );
 
@@ -1819,70 +2044,92 @@
     }
 
     // ========================================================
-    // APP CONTROL HELPERS
+    // FINALIZE RESPONSE
     // ========================================================
 
-    async function openApp(
-        app
+    async function finalize(
+        result,
+        request,
+        startedAt
     ) {
 
-        const launcher =
-            getLauncher();
+        const normalized =
+            normalizeResult(
+                result,
+                {
+                    task:
+                        request.task,
 
-        const manager =
-            getAppManager();
+                    language:
+                        request.language
+                }
+            );
 
-        const router =
-            getRouter();
+        const response = {
 
-        const target =
-            typeof app ===
-            "object"
-                ? app.id ||
-                  app.name ||
-                  app.title
-                : app;
+            ...normalized,
+
+            requestId:
+                request.id,
+
+            input:
+                request.input,
+
+            task:
+                request.task,
+
+            language:
+                request.language,
+
+            timestamp:
+                Date.now(),
+
+            duration:
+                Date.now() -
+                startedAt
+
+        };
+
+        state.lastResponse =
+            response;
 
         if (
-            !target
+            response.ok
         ) {
 
-            return {
+            state.successfulRequests++;
 
-                ok:
-                    false,
+        } else {
 
-                error:
-                    "APP_NOT_SPECIFIED"
-
-            };
+            state.failedRequests++;
 
         }
 
-        for (
-            const system of [
-                launcher,
-                manager,
-                router
-            ]
-        ) {
+        /*
+         * Conversation speichern.
+         */
 
-            if (!system) {
-                continue;
-            }
+        const conversation =
+            getConversation();
+
+        if (
+            CONFIG.enableConversation &&
+            conversation
+        ) {
 
             for (
                 const method of [
-                    "openApp",
-                    "launchApp",
-                    "launch",
-                    "open",
-                    "navigate"
+                    "addMessage",
+                    "add",
+                    "pushMessage",
+                    "appendMessage"
                 ]
             ) {
 
                 if (
-                    typeof system[method] !==
+                    typeof conversation[
+                        method
+                    ] !==
                     "function"
                 ) {
                     continue;
@@ -1890,29 +2137,38 @@
 
                 try {
 
-                    const result =
-                        await system[method](
-                            target
-                        );
+                    await conversation[
+                        method
+                    ]({
 
-                    if (
-                        result !==
-                        false
-                    ) {
+                        role:
+                            "assistant",
 
-                        return {
+                        content:
+                            response.text ||
+                            response.content ||
+                            "",
 
-                            ok:
-                                true,
+                        text:
+                            response.text ||
+                            response.content ||
+                            "",
 
-                            app:
-                                target,
+                        task:
+                            request.task,
 
-                            result
+                        requestId:
+                            request.id,
 
-                        };
+                        language:
+                            request.language,
 
-                    }
+                        timestamp:
+                            Date.now()
+
+                    });
+
+                    break;
 
                 } catch (error) {}
 
@@ -1920,56 +2176,181 @@
 
         }
 
-        return {
+        /*
+         * Memory speichern.
+         */
 
-            ok:
-                false,
+        await remember({
 
-            error:
-                "APP_OPEN_FAILED",
+            type:
+                "ai-engine-request",
 
-            app:
-                target
+            requestId:
+                request.id,
 
-        };
+            task:
+                request.task,
+
+            language:
+                request.language,
+
+            input:
+                request.input,
+
+            response:
+                response.text ||
+                response.content ||
+                "",
+
+            timestamp:
+                Date.now()
+
+        });
+
+        emit(
+            "response",
+            {
+                response
+            }
+        );
+
+        return response;
 
     }
 
     // ========================================================
-    // ERROR
+    // SPECIALIZED FUNCTIONS
     // ========================================================
 
-    function recordError(
-        error
+    async function correct(
+        text,
+        options = {}
     ) {
 
-        const entry = {
+        return process(
+            text,
+            {
 
-            timestamp:
-                Date.now(),
+                ...options,
 
-            message:
-                error?.message ||
-                String(error)
+                task:
+                    "correction"
 
-        };
-
-        state.errors.push(
-            entry
+            }
         );
 
-        if (
-            state.errors.length >
-            100
-        ) {
+    }
 
-            state.errors.shift();
+    async function write(
+        instruction,
+        options = {}
+    ) {
 
-        }
+        return process(
+            instruction,
+            {
 
-        emit(
-            "error",
-            entry
+                ...options,
+
+                task:
+                    "writing"
+
+            }
+        );
+
+    }
+
+    async function rewrite(
+        text,
+        options = {}
+    ) {
+
+        return process(
+            text,
+            {
+
+                ...options,
+
+                task:
+                    "rewriting"
+
+            }
+        );
+
+    }
+
+    async function summarize(
+        text,
+        options = {}
+    ) {
+
+        return process(
+            text,
+            {
+
+                ...options,
+
+                task:
+                    "summarization"
+
+            }
+        );
+
+    }
+
+    async function translate(
+        text,
+        options = {}
+    ) {
+
+        return process(
+            text,
+            {
+
+                ...options,
+
+                task:
+                    "translation"
+
+            }
+        );
+
+    }
+
+    async function analyze(
+        text,
+        options = {}
+    ) {
+
+        return process(
+            text,
+            {
+
+                ...options,
+
+                task:
+                    "analysis"
+
+            }
+        );
+
+    }
+
+    async function read(
+        text,
+        options = {}
+    ) {
+
+        return process(
+            text,
+            {
+
+                ...options,
+
+                task:
+                    "analysis"
+
+            }
         );
 
     }
@@ -2003,29 +2384,30 @@
             requestCount:
                 state.requestCount,
 
-            responseCount:
-                state.responseCount,
+            successfulRequests:
+                state.successfulRequests,
 
-            commandCount:
-                state.commandCount,
-
-            conversationCount:
-                state.conversationCount,
-
-            learningCount:
-                state.learningCount,
+            failedRequests:
+                state.failedRequests,
 
             currentLanguage:
                 state.currentLanguage,
 
-            lastInput:
-                state.lastInput,
+            provider:
+                state.provider,
 
-            lastIntent:
-                state.lastIntent,
+            providerCount:
+                Object.keys(
+                    state.providers
+                ).length,
 
-            lastResponse:
-                state.lastResponse,
+            historyCount:
+                state.history.length,
+
+            capabilities:
+                {
+                    ...state.capabilities
+                },
 
             modules: {
 
@@ -2034,9 +2416,9 @@
                         getCore()
                     ),
 
-                commands:
+                chat:
                     Boolean(
-                        getCommands()
+                        getChat()
                     ),
 
                 language:
@@ -2052,29 +2434,79 @@
                 conversation:
                     Boolean(
                         getConversation()
-                    ),
-
-                appManager:
-                    Boolean(
-                        getAppManager()
-                    ),
-
-                launcher:
-                    Boolean(
-                        getLauncher()
-                    ),
-
-                router:
-                    Boolean(
-                        getRouter()
                     )
 
             },
+
+            lastRequest:
+                state.lastRequest,
+
+            lastResponse:
+                state.lastResponse,
 
             errors:
                 state.errors.length
 
         };
+
+    }
+
+    // ========================================================
+    // ERROR MANAGEMENT
+    // ========================================================
+
+    function recordError(
+        error
+    ) {
+
+        const entry = {
+
+            id:
+                createId(
+                    "error"
+                ),
+
+            timestamp:
+                Date.now(),
+
+            message:
+                error?.message ||
+                String(
+                    error
+                )
+
+        };
+
+        state.errors.push(
+            entry
+        );
+
+        if (
+            state.errors.length >
+            100
+        ) {
+
+            state.errors.shift();
+
+        }
+
+        emit(
+            "error",
+            entry
+        );
+
+    }
+
+    function clearErrors() {
+
+        state.errors =
+            [];
+
+        emit(
+            "errors-cleared"
+        );
+
+        return true;
 
     }
 
@@ -2095,6 +2527,10 @@
         state.initialized =
             true;
 
+        /*
+         * Sprache übernehmen.
+         */
+
         const language =
             getLanguage();
 
@@ -2114,10 +2550,81 @@
 
         }
 
+        /*
+         * Core beobachten.
+         */
+
+        const core =
+            getCore();
+
+        if (
+            core &&
+            typeof core.on ===
+            "function"
+        ) {
+
+            core.on(
+                "language-changed",
+                detail => {
+
+                    if (
+                        detail?.language
+                    ) {
+
+                        state.currentLanguage =
+                            detail.language;
+
+                    }
+
+                    emit(
+                        "language-changed",
+                        detail
+                    );
+
+                }
+            );
+
+        }
+
+        /*
+         * Language Engine beobachten.
+         */
+
+        if (
+            language &&
+            typeof language.on ===
+            "function"
+        ) {
+
+            language.on(
+                "language-changed",
+                detail => {
+
+                    if (
+                        detail?.language
+                    ) {
+
+                        state.currentLanguage =
+                            detail.language;
+
+                    }
+
+                    emit(
+                        "language-changed",
+                        detail
+                    );
+
+                }
+            );
+
+        }
+
+        /*
+         * Kernel registrieren.
+         */
+
         const kernel =
-            window.HalDoKernel ||
-            window.HalDoOS?.kernel ||
-            null;
+            getKernel();
 
         if (
             kernel &&
@@ -2182,14 +2689,6 @@
 
         emit,
 
-        detectLanguage,
-
-        detectIntent,
-
-        isGreeting,
-
-        generate,
-
         process,
 
         ask:
@@ -2198,20 +2697,71 @@
         send:
             process,
 
-        respond:
+        generate:
             process,
 
-        executeCommand,
+        generateResponse:
+            process,
 
-        openApp,
+        correct,
 
-        remember,
+        write,
 
-        saveConversation,
+        rewrite,
 
-        normalizeResult,
+        summarize,
 
-        getStatus
+        translate,
+
+        analyze,
+
+        read,
+
+        analyzeText,
+
+        detectTask,
+
+        detectLanguage,
+
+        registerProvider,
+
+        unregisterProvider,
+
+        setProvider,
+
+        getProvider,
+
+        getStatus,
+
+        getHistory:
+            () =>
+                state.history.slice(),
+
+        clearHistory:
+            () => {
+
+                state.history =
+                    [];
+
+                emit(
+                    "history-cleared"
+                );
+
+                return true;
+
+            },
+
+        clearErrors,
+
+        getErrors:
+            () =>
+                state.errors.slice(),
+
+        getProviders:
+            () =>
+                ({
+                    ...state.providers
+                })
 
     };
 
@@ -2237,7 +2787,9 @@
 
         } catch (error) {
 
-            recordError(error);
+            recordError(
+                error
+            );
 
             console.error(
                 "[HalDoAIEngine] Initialization failed:",
