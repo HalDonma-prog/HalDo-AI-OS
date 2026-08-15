@@ -36177,4 +36177,1380 @@
     })();
 
     </script>
-    
+        <!-- =========================================================
+         HALDO AI OS 20
+         APP ROUTER / NAVIGATION BRIDGE
+         TEIL 35
+         ========================================================= -->
+
+    <script>
+
+    (() => {
+
+        "use strict";
+
+
+        /* =====================================================
+           ROUTER STATE
+           ===================================================== */
+
+        const state = {
+
+            current:
+                null,
+
+            history:
+                [],
+
+            maxHistory:
+                100
+
+        };
+
+
+        /* =====================================================
+           EVENT DISPATCH
+           ===================================================== */
+
+        function emit(
+            eventName,
+            detail = {}
+        ) {
+
+            if (
+                typeof window.HalDoDispatch ===
+                "function"
+            ) {
+
+                window.HalDoDispatch(
+                    eventName,
+                    detail
+                );
+
+                return;
+
+            }
+
+
+            try {
+
+                document.dispatchEvent(
+                    new CustomEvent(
+                        `haldo:${eventName}`,
+                        {
+                            detail
+                        }
+                    )
+                );
+
+            } catch (error) {
+
+                console.warn(
+                    "[HalDo Router 20]",
+                    error
+                );
+
+            }
+
+        }
+
+
+        /* =====================================================
+           NORMALIZE ROUTE
+           ===================================================== */
+
+        function normalizeRoute(
+            route
+        ) {
+
+            if (
+                typeof route ===
+                "string"
+            ) {
+
+                return {
+
+                    appId:
+                        route
+                            .replace(
+                                /^#/,
+                                ""
+                            )
+                            .trim(),
+
+                    params:
+                        {}
+
+                };
+
+            }
+
+
+            if (
+                route &&
+                typeof route ===
+                "object"
+            ) {
+
+                return {
+
+                    appId:
+                        String(
+                            route.appId ||
+                            route.id ||
+                            ""
+                        )
+                        .replace(
+                            /^#/,
+                            ""
+                        )
+                        .trim(),
+
+                    params:
+                        {
+                            ...(route.params || {})
+                        }
+
+                };
+
+            }
+
+
+            return {
+
+                appId:
+                    "",
+
+                params:
+                    {}
+
+            };
+
+        }
+
+
+        /* =====================================================
+           NAVIGATE
+           ===================================================== */
+
+        function navigate(
+            route,
+            options = {}
+        ) {
+
+            const target =
+                normalizeRoute(
+                    route
+                );
+
+
+            if (
+                !target.appId
+            ) {
+
+                return false;
+
+            }
+
+
+            const previous =
+                state.current;
+
+
+            if (
+                previous &&
+                options.addHistory !==
+                false
+            ) {
+
+                state.history.push(
+                    {
+                        ...previous
+                    }
+                );
+
+
+                if (
+                    state.history.length >
+                    state.maxHistory
+                ) {
+
+                    state.history.shift();
+
+                }
+
+            }
+
+
+            state.current =
+                target;
+
+
+            emit(
+                "router:navigate",
+                {
+
+                    from:
+                        previous,
+
+                    to:
+                        {
+                            ...target
+                        },
+
+                    options:
+                        {
+                            ...options
+                        },
+
+                    timestamp:
+                        Date.now()
+
+                }
+            );
+
+
+            /* ---------------------------------------------
+               APP MANAGER BRIDGE
+               --------------------------------------------- */
+
+            const manager =
+                window.HalDoAppManager ||
+                window.HalDoOS?.appManager;
+
+
+            if (
+                manager
+            ) {
+
+                try {
+
+                    if (
+                        typeof manager.openApp ===
+                        "function"
+                    ) {
+
+                        manager.openApp(
+                            target.appId,
+                            target.params
+                        );
+
+                    } else if (
+                        typeof manager.launch ===
+                        "function"
+                    ) {
+
+                        manager.launch(
+                            target.appId,
+                            target.params
+                        );
+
+                    }
+
+                } catch (error) {
+
+                    console.warn(
+                        "[HalDo Router 20] App Manager",
+                        error
+                    );
+
+                }
+
+            }
+
+
+            /* ---------------------------------------------
+               SESSION BRIDGE
+               --------------------------------------------- */
+
+            const session =
+                window.HalDoSession ||
+                window.HalDoOS?.session;
+
+
+            if (
+                session
+            ) {
+
+                try {
+
+                    if (
+                        typeof session.openApp ===
+                        "function"
+                    ) {
+
+                        session.openApp(
+                            target.appId,
+                            target.params
+                        );
+
+                    }
+
+                } catch (error) {
+
+                    console.warn(
+                        "[HalDo Router 20] Session",
+                        error
+                    );
+
+                }
+
+            }
+
+
+            return true;
+
+        }
+
+
+        /* =====================================================
+           BACK
+           ===================================================== */
+
+        function back() {
+
+            if (
+                !state.history.length
+            ) {
+
+                return false;
+
+            }
+
+
+            const previous =
+                state.history.pop();
+
+
+            const current =
+                state.current;
+
+
+            state.current =
+                previous;
+
+
+            emit(
+                "router:back",
+                {
+
+                    from:
+                        current,
+
+                    to:
+                        previous,
+
+                    timestamp:
+                        Date.now()
+
+                }
+            );
+
+
+            return navigate(
+                previous,
+                {
+                    addHistory:
+                        false
+                }
+            );
+
+        }
+
+
+        /* =====================================================
+           HOME
+           ===================================================== */
+
+        function home() {
+
+            const previous =
+                state.current;
+
+
+            state.current =
+                null;
+
+
+            emit(
+                "router:home",
+                {
+
+                    from:
+                        previous,
+
+                    timestamp:
+                        Date.now()
+
+                }
+            );
+
+
+            return true;
+
+        }
+
+
+        /* =====================================================
+           CURRENT ROUTE
+           ===================================================== */
+
+        function getCurrent() {
+
+            return state.current
+                ? {
+                    ...state.current,
+                    params:
+                        {
+                            ...state.current.params
+                        }
+                }
+                : null;
+
+        }
+
+
+        /* =====================================================
+           HISTORY
+           ===================================================== */
+
+        function getHistory() {
+
+            return state.history.map(
+                route => ({
+                    ...route,
+
+                    params:
+                        {
+                            ...route.params
+                        }
+
+                })
+            );
+
+        }
+
+
+        /* =====================================================
+           CLEAR HISTORY
+           ===================================================== */
+
+        function clearHistory() {
+
+            state.history =
+                [];
+
+
+            emit(
+                "router:history-cleared",
+                {
+                    timestamp:
+                        Date.now()
+                }
+            );
+
+
+            return true;
+
+        }
+
+
+        /* =====================================================
+           DEEP LINK
+           ===================================================== */
+
+        function resolveLocation() {
+
+            const hash =
+                window.location.hash;
+
+
+            if (
+                !hash
+            ) {
+
+                return null;
+
+            }
+
+
+            return normalizeRoute(
+                hash
+            );
+
+        }
+
+
+        window.addEventListener(
+            "hashchange",
+            () => {
+
+                const route =
+                    resolveLocation();
+
+
+                if (
+                    route &&
+                    route.appId
+                ) {
+
+                    navigate(
+                        route,
+                        {
+                            addHistory:
+                                true,
+                            source:
+                                "hash"
+                        }
+                    );
+
+                }
+
+            }
+        );
+
+
+        /* =====================================================
+           PUBLIC API
+           ===================================================== */
+
+        const router = {
+
+            navigate,
+
+            back,
+
+            home,
+
+            getCurrent,
+
+            getHistory,
+
+            clearHistory,
+
+            resolveLocation
+
+        };
+
+
+        /* =====================================================
+           GLOBAL API
+           ===================================================== */
+
+        window.HalDoRouter20 =
+            router;
+
+
+        if (
+            !window.HalDoOS
+        ) {
+
+            window.HalDoOS =
+                {};
+
+        }
+
+
+        window.HalDoOS.router20 =
+            router;
+
+
+        /* =====================================================
+           INITIALIZATION
+           ===================================================== */
+
+        function initializeRouter() {
+
+            const initialRoute =
+                resolveLocation();
+
+
+            if (
+                initialRoute &&
+                initialRoute.appId
+            ) {
+
+                navigate(
+                    initialRoute,
+                    {
+                        addHistory:
+                            false,
+                        source:
+                            "startup"
+                    }
+                );
+
+            }
+
+
+            emit(
+                "router:ready",
+                {
+
+                    version:
+                        "20.0.0",
+
+                    timestamp:
+                        Date.now()
+
+                }
+            );
+
+
+            console.info(
+                "%cHalDo AI OS 20%c Router 20 bereit",
+                "color:#42e6ff;font-weight:800;",
+                "color:#ffffff;"
+            );
+
+        }
+
+
+        if (
+            document.readyState ===
+            "loading"
+        ) {
+
+            document.addEventListener(
+                "DOMContentLoaded",
+                initializeRouter,
+                {
+                    once:
+                        true
+                }
+            );
+
+        } else {
+
+            initializeRouter();
+
+        }
+
+
+    })();
+
+    </script>
+        <!-- =========================================================
+         HALDO AI OS 20
+         WINDOW MANAGER BRIDGE
+         TEIL 36
+         ========================================================= -->
+
+    <script>
+
+    (() => {
+
+        "use strict";
+
+
+        /* =====================================================
+           STATE
+           ===================================================== */
+
+        const windows =
+            new Map();
+
+
+        let zIndex =
+            100;
+
+
+        let activeWindow =
+            null;
+
+
+        /* =====================================================
+           EVENT DISPATCH
+           ===================================================== */
+
+        function emit(
+            eventName,
+            detail = {}
+        ) {
+
+            if (
+                typeof window.HalDoDispatch ===
+                "function"
+            ) {
+
+                window.HalDoDispatch(
+                    eventName,
+                    detail
+                );
+
+                return;
+
+            }
+
+
+            try {
+
+                document.dispatchEvent(
+                    new CustomEvent(
+                        `haldo:${eventName}`,
+                        {
+                            detail
+                        }
+                    )
+                );
+
+            } catch (error) {
+
+                console.warn(
+                    "[HalDo Window Manager 20]",
+                    error
+                );
+
+            }
+
+        }
+
+
+        /* =====================================================
+           CREATE WINDOW
+           ===================================================== */
+
+        function create(
+            appId,
+            options = {}
+        ) {
+
+            if (
+                !appId
+            ) {
+
+                return null;
+
+            }
+
+
+            if (
+                windows.has(
+                    appId
+                )
+            ) {
+
+                return focus(
+                    appId
+                );
+
+            }
+
+
+            const record = {
+
+                id:
+                    appId,
+
+                title:
+                    String(
+                        options.title ||
+                        appId
+                    ),
+
+                icon:
+                    String(
+                        options.icon ||
+                        "◈"
+                    ),
+
+                state:
+                    "normal",
+
+                x:
+                    Number.isFinite(
+                        options.x
+                    )
+                        ? options.x
+                        : 80,
+
+                y:
+                    Number.isFinite(
+                        options.y
+                    )
+                        ? options.y
+                        : 80,
+
+                width:
+                    Number.isFinite(
+                        options.width
+                    )
+                        ? options.width
+                        : 720,
+
+                height:
+                    Number.isFinite(
+                        options.height
+                    )
+                        ? options.height
+                        : 520,
+
+                zIndex:
+                    ++zIndex,
+
+                createdAt:
+                    Date.now(),
+
+                updatedAt:
+                    Date.now()
+
+            };
+
+
+            windows.set(
+                appId,
+                record
+            );
+
+
+            activeWindow =
+                appId;
+
+
+            emit(
+                "window:created",
+                {
+                    window:
+                        {
+                            ...record
+                        }
+                }
+            );
+
+
+            return {
+                ...record
+            };
+
+        }
+
+
+        /* =====================================================
+           OPEN
+           ===================================================== */
+
+        function open(
+            appId,
+            options = {}
+        ) {
+
+            const existing =
+                windows.get(
+                    appId
+                );
+
+
+            if (
+                existing
+            ) {
+
+                return focus(
+                    appId
+                );
+
+            }
+
+
+            return create(
+                appId,
+                options
+            );
+
+        }
+
+
+        /* =====================================================
+           FOCUS
+           ===================================================== */
+
+        function focus(
+            appId
+        ) {
+
+            const record =
+                windows.get(
+                    appId
+                );
+
+
+            if (!record) {
+
+                return false;
+
+            }
+
+
+            record.zIndex =
+                ++zIndex;
+
+
+            record.updatedAt =
+                Date.now();
+
+
+            activeWindow =
+                appId;
+
+
+            emit(
+                "window:focus",
+                {
+
+                    appId,
+
+                    window:
+                        {
+                            ...record
+                        }
+
+                }
+            );
+
+
+            return {
+                ...record
+            };
+
+        }
+
+
+        /* =====================================================
+           MINIMIZE
+           ===================================================== */
+
+        function minimize(
+            appId
+        ) {
+
+            const record =
+                windows.get(
+                    appId
+                );
+
+
+            if (!record) {
+
+                return false;
+
+            }
+
+
+            record.state =
+                "minimized";
+
+
+            record.updatedAt =
+                Date.now();
+
+
+            if (
+                activeWindow ===
+                appId
+            ) {
+
+                activeWindow =
+                    null;
+
+            }
+
+
+            emit(
+                "window:minimized",
+                {
+                    appId
+                }
+            );
+
+
+            return true;
+
+        }
+
+
+        /* =====================================================
+           MAXIMIZE
+           ===================================================== */
+
+        function maximize(
+            appId
+        ) {
+
+            const record =
+                windows.get(
+                    appId
+                );
+
+
+            if (!record) {
+
+                return false;
+
+            }
+
+
+            record.state =
+                record.state ===
+                "maximized"
+                    ? "normal"
+                    : "maximized";
+
+
+            record.updatedAt =
+                Date.now();
+
+
+            emit(
+                "window:maximized",
+                {
+
+                    appId,
+
+                    state:
+                        record.state
+
+                }
+            );
+
+
+            return true;
+
+        }
+
+
+        /* =====================================================
+           CLOSE
+           ===================================================== */
+
+        function close(
+            appId
+        ) {
+
+            if (
+                !windows.has(
+                    appId
+                )
+            ) {
+
+                return false;
+
+            }
+
+
+            windows.delete(
+                appId
+            );
+
+
+            if (
+                activeWindow ===
+                appId
+            ) {
+
+                activeWindow =
+                    null;
+
+            }
+
+
+            emit(
+                "window:close",
+                {
+                    appId
+                }
+            );
+
+
+            return true;
+
+        }
+
+
+        /* =====================================================
+           MOVE
+           ===================================================== */
+
+        function move(
+            appId,
+            x,
+            y
+        ) {
+
+            const record =
+                windows.get(
+                    appId
+                );
+
+
+            if (
+                !record ||
+                !Number.isFinite(
+                    x
+                ) ||
+                !Number.isFinite(
+                    y
+                )
+            ) {
+
+                return false;
+
+            }
+
+
+            record.x =
+                x;
+
+
+            record.y =
+                y;
+
+
+            record.updatedAt =
+                Date.now();
+
+
+            emit(
+                "window:moved",
+                {
+
+                    appId,
+
+                    x,
+
+                    y
+
+                }
+            );
+
+
+            return true;
+
+        }
+
+
+        /* =====================================================
+           RESIZE
+           ===================================================== */
+
+        function resize(
+            appId,
+            width,
+            height
+        ) {
+
+            const record =
+                windows.get(
+                    appId
+                );
+
+
+            if (
+                !record ||
+                !Number.isFinite(
+                    width
+                ) ||
+                !Number.isFinite(
+                    height
+                )
+            ) {
+
+                return false;
+
+            }
+
+
+            record.width =
+                Math.max(
+                    260,
+                    width
+                );
+
+
+            record.height =
+                Math.max(
+                    180,
+                    height
+                );
+
+
+            record.updatedAt =
+                Date.now();
+
+
+            emit(
+                "window:resized",
+                {
+
+                    appId,
+
+                    width:
+                        record.width,
+
+                    height:
+                        record.height
+
+                }
+            );
+
+
+            return true;
+
+        }
+
+
+        /* =====================================================
+           GET
+           ===================================================== */
+
+        function get(
+            appId
+        ) {
+
+            const record =
+                windows.get(
+                    appId
+                );
+
+
+            return record
+                ? {
+                    ...record
+                }
+                : null;
+
+        }
+
+
+        /* =====================================================
+           GET ALL
+           ===================================================== */
+
+        function getAll() {
+
+            return Array.from(
+                windows.values()
+            ).map(
+                record => ({
+                    ...record
+                })
+            );
+
+        }
+
+
+        /* =====================================================
+           ACTIVE WINDOW
+           ===================================================== */
+
+        function getActive() {
+
+            return activeWindow;
+
+        }
+
+
+        /* =====================================================
+           PUBLIC API
+           ===================================================== */
+
+        const windowManager = {
+
+            create,
+
+            open,
+
+            focus,
+
+            minimize,
+
+            maximize,
+
+            close,
+
+            move,
+
+            resize,
+
+            get,
+
+            getAll,
+
+            getActive
+
+        };
+
+
+        /* =====================================================
+           GLOBAL API
+           ===================================================== */
+
+        window.HalDoWindowManager20 =
+            windowManager;
+
+
+        if (
+            !window.HalDoOS
+        ) {
+
+            window.HalDoOS =
+                {};
+
+        }
+
+
+        window.HalDoOS.windowManager20 =
+            windowManager;
+
+
+        /* =====================================================
+           INITIALIZATION
+           ===================================================== */
+
+        function initializeWindowManager() {
+
+            emit(
+                "window-manager:ready",
+                {
+
+                    version:
+                        "20.0.0",
+
+                    timestamp:
+                        Date.now()
+
+                }
+            );
+
+
+            console.info(
+                "%cHalDo AI OS 20%c Window Manager 20 bereit",
+                "color:#42e6ff;font-weight:800;",
+                "color:#ffffff;"
+            );
+
+        }
+
+
+        if (
+            document.readyState ===
+            "loading"
+        ) {
+
+            document.addEventListener(
+                "DOMContentLoaded",
+                initializeWindowManager,
+                {
+                    once:
+                        true
+                }
+            );
+
+        } else {
+
+            initializeWindowManager();
+
+        }
+
+
+    })();
+
+    </script>
