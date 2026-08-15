@@ -45274,3 +45274,911 @@
     })();
 
     </script>
+        <!-- =========================================================
+         HALDO AI OS 20
+         APP CATALOG / CORE APP DEFINITIONS
+         TEIL 47
+         ========================================================= -->
+
+    <script>
+
+    (() => {
+
+        "use strict";
+
+
+        /* =====================================================
+           REGISTRY REFERENCE
+           ===================================================== */
+
+        const registry =
+            window.HalDoAppRegistry20 ||
+            window.HalDoAppRegistry ||
+            null;
+
+
+        /* =====================================================
+           SAFE REGISTRATION
+           ===================================================== */
+
+        function register(
+            definition
+        ) {
+
+            if (
+                !registry ||
+                typeof registry.register !==
+                "function"
+            ) {
+
+                console.warn(
+                    "[HalDo App Catalog 20] Registry noch nicht verfügbar."
+                );
+
+                return false;
+
+            }
+
+
+            return registry.register(
+                definition
+            );
+
+        }
+
+
+        /* =====================================================
+           CORE APPLICATION CATALOG
+           ===================================================== */
+
+        const coreApps = [
+
+            {
+                id:
+                    "haldo-ai",
+
+                name:
+                    "HalDo AI",
+
+                title:
+                    "HalDo AI",
+
+                description:
+                    "Zentrale künstliche Intelligenz von HalDo AI OS.",
+
+                category:
+                    "ai",
+
+                icon:
+                    "✦",
+
+                system:
+                    true,
+
+                tags:
+                    [
+                        "ai",
+                        "assistant",
+                        "chat",
+                        "voice",
+                        "language"
+                    ],
+
+                permissions:
+                    [
+                        "ai",
+                        "memory",
+                        "voice",
+                        "storage"
+                    ]
+
+            },
+
+
+            {
+                id:
+                    "apps",
+
+                name:
+                    "Apps",
+
+                title:
+                    "App-Zentrum",
+
+                description:
+                    "Zentrale Verwaltung und Startoberfläche aller installierten Anwendungen.",
+
+                category:
+                    "system",
+
+                icon:
+                    "◈",
+
+                system:
+                    true,
+
+                tags:
+                    [
+                        "apps",
+                        "launcher",
+                        "catalog",
+                        "management"
+                    ],
+
+                permissions:
+                    [
+                        "apps",
+                        "system"
+                    ]
+
+            },
+
+
+            {
+                id:
+                    "system",
+
+                name:
+                    "System",
+
+                title:
+                    "Systemzentrum",
+
+                description:
+                    "Systemstatus, Diagnose, Module, Kernel und Laufzeitinformationen.",
+
+                category:
+                    "system",
+
+                icon:
+                    "◉",
+
+                system:
+                    true,
+
+                tags:
+                    [
+                        "system",
+                        "kernel",
+                        "diagnostics",
+                        "status"
+                    ],
+
+                permissions:
+                    [
+                        "system",
+                        "diagnostics"
+                    ]
+
+            },
+
+
+            {
+                id:
+                    "files",
+
+                name:
+                    "Dateien",
+
+                title:
+                    "Dateimanager",
+
+                description:
+                    "Verwaltung lokaler Dateien, Ordner und gespeicherter HalDo-Daten.",
+
+                category:
+                    "productivity",
+
+                icon:
+                    "▣",
+
+                tags:
+                    [
+                        "files",
+                        "folders",
+                        "storage",
+                        "documents"
+                    ],
+
+                permissions:
+                    [
+                        "storage"
+                    ]
+
+            },
+
+
+            {
+                id:
+                    "browser",
+
+                name:
+                    "Browser",
+
+                title:
+                    "HalDo Browser",
+
+                description:
+                    "Web-Arbeitsbereich innerhalb der HalDo-Oberfläche.",
+
+                category:
+                    "internet",
+
+                icon:
+                    "◎",
+
+                tags:
+                    [
+                        "browser",
+                        "web",
+                        "internet"
+                    ],
+
+                permissions:
+                    [
+                        "network"
+                    ]
+
+            },
+
+
+            {
+                id:
+                    "notes",
+
+                name:
+                    "Notizen",
+
+                title:
+                    "HalDo Notizen",
+
+                description:
+                    "Erstellen, Bearbeiten, Organisieren und Speichern persönlicher Notizen.",
+
+                category:
+                    "productivity",
+
+                icon:
+                    "▤",
+
+                tags:
+                    [
+                        "notes",
+                        "writing",
+                        "documents",
+                        "productivity"
+                    ],
+
+                permissions:
+                    [
+                        "storage"
+                    ]
+
+            },
+
+
+            {
+                id:
+                    "settings",
+
+                name:
+                    "Einstellungen",
+
+                title:
+                    "HalDo Einstellungen",
+
+                description:
+                    "Zentrale Konfiguration von System, AI, Sprache, Darstellung und Apps.",
+
+                category:
+                    "system",
+
+                icon:
+                    "⚙",
+
+                system:
+                    true,
+
+                tags:
+                    [
+                        "settings",
+                        "configuration",
+                        "preferences"
+                    ],
+
+                permissions:
+                    [
+                        "system",
+                        "storage"
+                    ]
+
+            },
+
+
+            {
+                id:
+                    "terminal",
+
+                name:
+                    "Terminal",
+
+                title:
+                    "HalDo Terminal",
+
+                description:
+                    "Systemnahe Kommando- und Diagnoseoberfläche.",
+
+                category:
+                    "system",
+
+                icon:
+                    ">_",
+
+                system:
+                    true,
+
+                tags:
+                    [
+                        "terminal",
+                        "shell",
+                        "commands",
+                        "diagnostics"
+                    ],
+
+                permissions:
+                    [
+                        "system"
+                    ]
+
+            },
+
+
+            {
+                id:
+                    "dashboard",
+
+                name:
+                    "Dashboard",
+
+                title:
+                    "HalDo Dashboard",
+
+                description:
+                    "Zentrale Übersicht über Apps, Systemstatus, AI und Aktivitäten.",
+
+                category:
+                    "system",
+
+                icon:
+                    "▦",
+
+                system:
+                    true,
+
+                tags:
+                    [
+                        "dashboard",
+                        "overview",
+                        "status"
+                    ],
+
+                permissions:
+                    [
+                        "system",
+                        "apps"
+                    ]
+
+            },
+
+
+            {
+                id:
+                    "calendar",
+
+                name:
+                    "Kalender",
+
+                title:
+                    "HalDo Kalender",
+
+                description:
+                    "Verwalten von Terminen, Ereignissen und Zeitplanung.",
+
+                category:
+                    "productivity",
+
+                icon:
+                    "□",
+
+                tags:
+                    [
+                        "calendar",
+                        "events",
+                        "schedule",
+                        "time"
+                    ],
+
+                permissions:
+                    [
+                        "storage"
+                    ]
+
+            },
+
+
+            {
+                id:
+                    "clock",
+
+                name:
+                    "Uhr",
+
+                title:
+                    "HalDo Uhr",
+
+                description:
+                    "Uhrzeit, Timer, Stoppuhr und weitere Zeitfunktionen.",
+
+                category:
+                    "system",
+
+                icon:
+                    "◷",
+
+                system:
+                    true,
+
+                tags:
+                    [
+                        "clock",
+                        "timer",
+                        "stopwatch",
+                        "time"
+                    ],
+
+                permissions:
+                    []
+
+            },
+
+
+            {
+                id:
+                    "calculator",
+
+                name:
+                    "Rechner",
+
+                title:
+                    "HalDo Rechner",
+
+                description:
+                    "Mathematische Berechnungen und praktische Umrechnungen.",
+
+                category:
+                    "utilities",
+
+                icon:
+                    "＋",
+
+                tags:
+                    [
+                        "calculator",
+                        "math",
+                        "conversion"
+                    ],
+
+                permissions:
+                    []
+
+            },
+
+
+            {
+                id:
+                    "weather",
+
+                name:
+                    "Wetter",
+
+                title:
+                    "HalDo Wetter",
+
+                description:
+                    "Wetterinformationen und Wetterübersicht.",
+
+                category:
+                    "information",
+
+                icon:
+                    "☼",
+
+                tags:
+                    [
+                        "weather",
+                        "forecast",
+                        "temperature"
+                    ],
+
+                permissions:
+                    [
+                        "network",
+                        "location"
+                    ]
+
+            },
+
+
+            {
+                id:
+                    "gallery",
+
+                name:
+                    "Galerie",
+
+                title:
+                    "HalDo Galerie",
+
+                description:
+                    "Verwalten und Anzeigen von Bildern und visuellen Inhalten.",
+
+                category:
+                    "media",
+
+                icon:
+                    "▧",
+
+                tags:
+                    [
+                        "gallery",
+                        "images",
+                        "photos",
+                        "media"
+                    ],
+
+                permissions:
+                    [
+                        "storage"
+                    ]
+
+            },
+
+
+            {
+                id:
+                    "music",
+
+                name:
+                    "Musik",
+
+                title:
+                    "HalDo Musik",
+
+                description:
+                    "Wiedergabe und Verwaltung von Audioinhalten.",
+
+                category:
+                    "media",
+
+                icon:
+                    "♫",
+
+                tags:
+                    [
+                        "music",
+                        "audio",
+                        "player"
+                    ],
+
+                permissions:
+                    [
+                        "storage",
+                        "audio"
+                    ]
+
+            },
+
+
+            {
+                id:
+                    "video",
+
+                name:
+                    "Video",
+
+                title:
+                    "HalDo Video",
+
+                description:
+                    "Wiedergabe und Verwaltung von Videoinhalten.",
+
+                category:
+                    "media",
+
+                icon:
+                    "▶",
+
+                tags:
+                    [
+                        "video",
+                        "player",
+                        "media"
+                    ],
+
+                permissions:
+                    [
+                        "storage",
+                        "media"
+                    ]
+
+            },
+
+
+            {
+                id:
+                    "messages",
+
+                name:
+                    "Nachrichten",
+
+                title:
+                    "HalDo Nachrichten",
+
+                description:
+                    "Zentrale Oberfläche für Nachrichten und Kommunikation.",
+
+                category:
+                    "communication",
+
+                icon:
+                    "◇",
+
+                tags:
+                    [
+                        "messages",
+                        "chat",
+                        "communication"
+                    ],
+
+                permissions:
+                    [
+                        "network",
+                        "storage"
+                    ]
+
+            },
+
+
+            {
+                id:
+                    "contacts",
+
+                name:
+                    "Kontakte",
+
+                title:
+                    "HalDo Kontakte",
+
+                description:
+                    "Verwalten von Kontakten und Kommunikationsinformationen.",
+
+                category:
+                    "communication",
+
+                icon:
+                    "◌",
+
+                tags:
+                    [
+                        "contacts",
+                        "people",
+                        "communication"
+                    ],
+
+                permissions:
+                    [
+                        "storage"
+                    ]
+
+            },
+
+
+            {
+                id:
+                    "tasks",
+
+                name:
+                    "Aufgaben",
+
+                title:
+                    "HalDo Aufgaben",
+
+                description:
+                    "Aufgaben, Prioritäten, Listen und Fortschritt verwalten.",
+
+                category:
+                    "productivity",
+
+                icon:
+                    "✓",
+
+                tags:
+                    [
+                        "tasks",
+                        "todo",
+                        "productivity"
+                    ],
+
+                permissions:
+                    [
+                        "storage"
+                    ]
+
+            },
+
+
+            {
+                id:
+                    "documents",
+
+                name:
+                    "Dokumente",
+
+                title:
+                    "HalDo Dokumente",
+
+                description:
+                    "Dokumente erstellen, bearbeiten, organisieren und speichern.",
+
+                category:
+                    "productivity",
+
+                icon:
+                    "▤",
+
+                tags:
+                    [
+                        "documents",
+                        "files",
+                        "writing",
+                        "productivity"
+                    ],
+
+                permissions:
+                    [
+                        "storage"
+                    ]
+
+            },
+
+
+            {
+                id:
+                    "ezidi-keyboard",
+
+                name:
+                    "Êzîdî Tastatur",
+
+                title:
+                    "HalDo Êzîdî Tastatur",
+
+                description:
+                    "Spezielle Tastatur mit Êzîdî-Zeichen und eigenen Layouts.",
+
+                category:
+                    "language",
+
+                icon:
+                    "⌨",
+
+                system:
+                    true,
+
+                tags:
+                    [
+                        "ezidi",
+                        "ezîdî",
+                        "keyboard",
+                        "language",
+                        "input"
+                    ],
+
+                permissions:
+                    [
+                        "input",
+                        "language",
+                        "storage"
+                    ]
+
+            }
+
+        ];
+
+
+        /* =====================================================
+           REGISTER COMPLETE CORE CATALOG
+           ===================================================== */
+
+        let registered =
+            0;
+
+
+        coreApps.forEach(
+            app => {
+
+                if (
+                    register(
+                        app
+                    )
+                ) {
+
+                    registered++;
+
+                }
+
+            }
+        );
+
+
+        /* =====================================================
+           EXPOSE CATALOG
+           ===================================================== */
+
+        window.HalDoCoreAppCatalog20 =
+            coreApps;
+
+
+        if (
+            !window.HalDoOS
+        ) {
+
+            window.HalDoOS =
+                {};
+
+        }
+
+
+        window.HalDoOS.coreAppCatalog20 =
+            coreApps;
+
+
+        /* =====================================================
+           EVENT
+           ===================================================== */
+
+        document.dispatchEvent(
+            new CustomEvent(
+                "haldo:app-catalog:ready",
+                {
+
+                    detail: {
+
+                        version:
+                            "20.0.0",
+
+                        total:
+                            coreApps.length,
+
+                        registered,
+
+                        timestamp:
+                            Date.now()
+
+                    }
+
+                }
+            )
+        );
+
+
+        console.info(
+            `%cHalDo AI OS 20%c App-Katalog bereit: ${coreApps.length} Apps`,
+            "color:#42e6ff;font-weight:800;",
+            "color:#ffffff;"
+        );
+
+
+    })();
+
+    </script>
+    
