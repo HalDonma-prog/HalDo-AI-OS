@@ -50931,4 +50931,1558 @@
     })();
 
     </script>
-    
+        <!-- =========================================================
+         HALDO AI OS 20
+         WINDOW CONTROL ENGINE
+         TEIL 53
+         ========================================================= -->
+
+    <script>
+
+    (() => {
+
+        "use strict";
+
+
+        /* =====================================================
+           REFERENCES
+           ===================================================== */
+
+        const appLayer =
+            document.getElementById(
+                "haldo-app-layer"
+            );
+
+
+        const windowEngine =
+            window.HalDoWindowEngine20 ||
+            null;
+
+
+        /* =====================================================
+           STATE
+           ===================================================== */
+
+        const state = {
+
+            zIndex:
+                100,
+
+            windows:
+                new Map(),
+
+            initialized:
+                false
+
+        };
+
+
+        /* =====================================================
+           STYLE
+           ===================================================== */
+
+        const style =
+            document.createElement(
+                "style"
+            );
+
+
+        style.id =
+            "haldo-window-control-engine-style";
+
+
+        style.textContent = `
+
+            .haldo-app-window
+            .haldo-window-control {
+
+                position:
+                    relative;
+
+            }
+
+
+            .haldo-app-window
+            .haldo-window-control
+            .haldo-window-control-icon {
+
+                display:
+                    inline-flex;
+
+                align-items:
+                    center;
+
+                justify-content:
+                    center;
+
+                width:
+                    100%;
+
+                height:
+                    100%;
+
+                line-height:
+                    1;
+
+            }
+
+
+            .haldo-app-window
+            .haldo-window-minimized-indicator {
+
+                position:
+                    absolute;
+
+                left:
+                    50%;
+
+                bottom:
+                    10px;
+
+                z-index:
+                    20;
+
+                transform:
+                    translateX(-50%);
+
+                display:
+                    none;
+
+                align-items:
+                    center;
+
+                gap:
+                    7px;
+
+                min-height:
+                    30px;
+
+                padding:
+                    0 12px;
+
+                border:
+                    1px solid
+                    rgba(66,230,255,0.18);
+
+                border-radius:
+                    999px;
+
+                color:
+                    rgba(245,247,251,0.78);
+
+                background:
+                    rgba(7,11,19,0.92);
+
+                backdrop-filter:
+                    blur(18px);
+
+                font-size:
+                    10px;
+
+                pointer-events:
+                    none;
+
+            }
+
+
+            .haldo-app-window.is-minimized
+            .haldo-window-minimized-indicator {
+
+                display:
+                    inline-flex;
+
+            }
+
+
+            .haldo-app-window
+            .haldo-window-focus-ring {
+
+                position:
+                    absolute;
+
+                inset:
+                    0;
+
+                z-index:
+                    30;
+
+                border:
+                    1px solid
+                    rgba(66,230,255,0.18);
+
+                border-radius:
+                    inherit;
+
+                pointer-events:
+                    none;
+
+                opacity:
+                    0;
+
+                transition:
+                    opacity 160ms ease;
+
+            }
+
+
+            .haldo-app-window.is-active
+            .haldo-window-focus-ring {
+
+                opacity:
+                    1;
+
+            }
+
+
+            .haldo-app-window.is-maximized
+            .haldo-window-focus-ring {
+
+                border-radius:
+                    0;
+
+            }
+
+        `;
+
+
+        document.head.appendChild(
+            style
+        );
+
+
+        /* =====================================================
+           UTILS
+           ===================================================== */
+
+        function nextZIndex() {
+
+            state.zIndex +=
+                1;
+
+
+            return state.zIndex;
+
+        }
+
+
+        function getWindow(
+            appId
+        ) {
+
+            if (!appLayer) {
+
+                return null;
+
+            }
+
+
+            const windows =
+                appLayer.querySelectorAll(
+                    ".haldo-app-window"
+                );
+
+
+            for (
+                const element
+                of windows
+            ) {
+
+                if (
+                    element.dataset.appId ===
+                    appId
+                ) {
+
+                    return element;
+
+                }
+
+            }
+
+
+            return null;
+
+        }
+
+
+        function emit(
+            name,
+            detail = {}
+        ) {
+
+            document.dispatchEvent(
+                new CustomEvent(
+                    `haldo:${name}`,
+                    {
+                        detail
+                    }
+                )
+            );
+
+        }
+
+
+        /* =====================================================
+           REGISTER WINDOW
+           ===================================================== */
+
+        function register(
+            element
+        ) {
+
+            if (!element) {
+
+                return null;
+
+            }
+
+
+            const appId =
+                element.dataset.appId;
+
+
+            if (!appId) {
+
+                return null;
+
+            }
+
+
+            if (
+                state.windows.has(
+                    appId
+                )
+            ) {
+
+                return state.windows.get(
+                    appId
+                );
+
+            }
+
+
+            const record = {
+
+                appId,
+
+                element,
+
+                previousPosition:
+                    null,
+
+                previousSize:
+                    null,
+
+                isMaximized:
+                    element.classList.contains(
+                        "is-maximized"
+                    ),
+
+                isMinimized:
+                    element.classList.contains(
+                        "is-minimized"
+                    ),
+
+                registeredAt:
+                    Date.now()
+
+            };
+
+
+            state.windows.set(
+                appId,
+                record
+            );
+
+
+            prepareControls(
+                record
+            );
+
+
+            focus(
+                appId
+            );
+
+
+            emit(
+                "window:registered",
+                {
+
+                    appId,
+
+                    element
+
+                }
+            );
+
+
+            return record;
+
+        }
+
+
+        /* =====================================================
+           PREPARE CONTROLS
+           ===================================================== */
+
+        function prepareControls(
+            record
+        ) {
+
+            const element =
+                record.element;
+
+
+            if (
+                element.dataset.haldoControlsReady ===
+                "true"
+            ) {
+
+                return;
+
+            }
+
+
+            element.dataset.haldoControlsReady =
+                "true";
+
+
+            const header =
+                element.querySelector(
+                    ".haldo-app-window-header"
+                );
+
+
+            const actions =
+                element.querySelector(
+                    ".haldo-app-window-actions"
+                );
+
+
+            if (!actions) {
+
+                return;
+
+            }
+
+
+            /*
+             * Bestehende Controls werden
+             * nicht blind überschrieben.
+             */
+
+            let minimizeButton =
+                actions.querySelector(
+                    "[data-window-action='minimize']"
+                );
+
+
+            let maximizeButton =
+                actions.querySelector(
+                    "[data-window-action='maximize']"
+                );
+
+
+            let closeButton =
+                actions.querySelector(
+                    "[data-window-action='close']"
+                );
+
+
+            if (!minimizeButton) {
+
+                minimizeButton =
+                    document.createElement(
+                        "button"
+                    );
+
+                minimizeButton.type =
+                    "button";
+
+                minimizeButton.dataset.windowAction =
+                    "minimize";
+
+                minimizeButton.className =
+                    "haldo-window-control";
+
+                minimizeButton.title =
+                    "Minimieren";
+
+                minimizeButton.setAttribute(
+                    "aria-label",
+                    "Fenster minimieren"
+                );
+
+                minimizeButton.innerHTML =
+                    `<span class="haldo-window-control-icon">−</span>`;
+
+                actions.prepend(
+                    minimizeButton
+                );
+
+            }
+
+
+            if (!maximizeButton) {
+
+                maximizeButton =
+                    document.createElement(
+                        "button"
+                    );
+
+                maximizeButton.type =
+                    "button";
+
+                maximizeButton.dataset.windowAction =
+                    "maximize";
+
+                maximizeButton.className =
+                    "haldo-window-control";
+
+                maximizeButton.title =
+                    "Maximieren";
+
+                maximizeButton.setAttribute(
+                    "aria-label",
+                    "Fenster maximieren"
+                );
+
+                maximizeButton.innerHTML =
+                    `<span class="haldo-window-control-icon">□</span>`;
+
+                actions.insertBefore(
+                    maximizeButton,
+                    closeButton || null
+                );
+
+            }
+
+
+            if (!closeButton) {
+
+                closeButton =
+                    document.createElement(
+                        "button"
+                    );
+
+                closeButton.type =
+                    "button";
+
+                closeButton.dataset.windowAction =
+                    "close";
+
+                closeButton.className =
+                    "haldo-window-control";
+
+                closeButton.title =
+                    "Schließen";
+
+                closeButton.setAttribute(
+                    "aria-label",
+                    "Fenster schließen"
+                );
+
+                closeButton.innerHTML =
+                    `<span class="haldo-window-control-icon">×</span>`;
+
+                actions.append(
+                    closeButton
+                );
+
+            }
+
+
+            minimizeButton.addEventListener(
+                "click",
+                event => {
+
+                    event.stopPropagation();
+
+                    minimize(
+                        record.appId
+                    );
+
+                }
+            );
+
+
+            maximizeButton.addEventListener(
+                "click",
+                event => {
+
+                    event.stopPropagation();
+
+                    toggleMaximize(
+                        record.appId
+                    );
+
+                }
+            );
+
+
+            closeButton.addEventListener(
+                "click",
+                event => {
+
+                    event.stopPropagation();
+
+                    close(
+                        record.appId
+                    );
+
+                }
+            );
+
+
+            element.addEventListener(
+                "pointerdown",
+                () => {
+
+                    focus(
+                        record.appId
+                    );
+
+                }
+            );
+
+
+            if (header) {
+
+                header.addEventListener(
+                    "dblclick",
+                    event => {
+
+                        if (
+                            event.target.closest(
+                                ".haldo-app-window-actions"
+                            )
+                        ) {
+
+                            return;
+
+                        }
+
+
+                        toggleMaximize(
+                            record.appId
+                        );
+
+                    }
+                );
+
+            }
+
+
+            /*
+             * Focus-Ring
+             */
+
+            if (
+                !element.querySelector(
+                    ".haldo-window-focus-ring"
+                )
+            ) {
+
+                const ring =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                ring.className =
+                    "haldo-window-focus-ring";
+
+
+                element.appendChild(
+                    ring
+                );
+
+            }
+
+
+            /*
+             * Minimiert-Anzeige
+             */
+
+            if (
+                !element.querySelector(
+                    ".haldo-window-minimized-indicator"
+                )
+            ) {
+
+                const indicator =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                indicator.className =
+                    "haldo-window-minimized-indicator";
+
+
+                indicator.innerHTML = `
+
+                    <span>
+                        ●
+                    </span>
+
+                    <span>
+                        Fenster minimiert
+                    </span>
+
+                `;
+
+
+                element.appendChild(
+                    indicator
+                );
+
+            }
+
+        }
+
+
+        /* =====================================================
+           FOCUS
+           ===================================================== */
+
+        function focus(
+            appId
+        ) {
+
+            const element =
+                getWindow(
+                    appId
+                );
+
+
+            if (!element) {
+
+                return false;
+
+            }
+
+
+            const z =
+                nextZIndex();
+
+
+            element.style.zIndex =
+                String(z);
+
+
+            appLayer
+                .querySelectorAll(
+                    ".haldo-app-window.is-active"
+                )
+                .forEach(
+                    other => {
+
+                        if (
+                            other !==
+                            element
+                        ) {
+
+                            other.classList.remove(
+                                "is-active"
+                            );
+
+                        }
+
+                    }
+                );
+
+
+            element.classList.add(
+                "is-active"
+            );
+
+
+            element.classList.remove(
+                "is-minimized"
+            );
+
+
+            const record =
+                state.windows.get(
+                    appId
+                );
+
+
+            if (record) {
+
+                record.isMinimized =
+                    false;
+
+            }
+
+
+            emit(
+                "window:focused",
+                {
+
+                    appId,
+
+                    zIndex:
+                        z
+
+                }
+            );
+
+
+            emit(
+                "app:window:focused",
+                {
+
+                    appId,
+
+                    element
+
+                }
+            );
+
+
+            return true;
+
+        }
+
+
+        /* =====================================================
+           MINIMIZE
+           ===================================================== */
+
+        function minimize(
+            appId
+        ) {
+
+            const element =
+                getWindow(
+                    appId
+                );
+
+
+            if (!element) {
+
+                return false;
+
+            }
+
+
+            const record =
+                state.windows.get(
+                    appId
+                );
+
+
+            if (record) {
+
+                record.isMinimized =
+                    true;
+
+            }
+
+
+            element.classList.remove(
+                "is-active"
+            );
+
+
+            element.classList.add(
+                "is-minimized"
+            );
+
+
+            emit(
+                "window:minimized",
+                {
+
+                    appId,
+
+                    element
+
+                }
+            );
+
+
+            emit(
+                "app:window:minimized",
+                {
+
+                    appId,
+
+                    element
+
+                }
+            );
+
+
+            return true;
+
+        }
+
+
+        /* =====================================================
+           MAXIMIZE
+           ===================================================== */
+
+        function maximize(
+            appId
+        ) {
+
+            const element =
+                getWindow(
+                    appId
+                );
+
+
+            if (!element) {
+
+                return false;
+
+            }
+
+
+            const record =
+                state.windows.get(
+                    appId
+                );
+
+
+            if (!record) {
+
+                return false;
+
+            }
+
+
+            if (
+                record.isMaximized
+            ) {
+
+                return true;
+
+            }
+
+
+            /*
+             * Vorherige Geometrie sichern.
+             */
+
+            const rect =
+                element.getBoundingClientRect();
+
+
+            const layerRect =
+                appLayer.getBoundingClientRect();
+
+
+            record.previousPosition = {
+
+                left:
+                    rect.left -
+                    layerRect.left,
+
+                top:
+                    rect.top -
+                    layerRect.top
+
+            };
+
+
+            record.previousSize = {
+
+                width:
+                    rect.width,
+
+                height:
+                    rect.height
+
+            };
+
+
+            record.isMaximized =
+                true;
+
+
+            element.classList.remove(
+                "is-minimized"
+            );
+
+
+            element.classList.add(
+                "is-maximized"
+            );
+
+
+            element.style.left =
+                "0px";
+
+
+            element.style.top =
+                "0px";
+
+
+            element.style.width =
+                "100%";
+
+
+            element.style.height =
+                "100%";
+
+
+            focus(
+                appId
+            );
+
+
+            updateMaximizeButton(
+                element,
+                true
+            );
+
+
+            emit(
+                "window:maximized",
+                {
+
+                    appId,
+
+                    element
+
+                }
+            );
+
+
+            return true;
+
+        }
+
+
+        /* =====================================================
+           RESTORE
+           ===================================================== */
+
+        function restore(
+            appId
+        ) {
+
+            const element =
+                getWindow(
+                    appId
+                );
+
+
+            if (!element) {
+
+                return false;
+
+            }
+
+
+            const record =
+                state.windows.get(
+                    appId
+                );
+
+
+            if (!record) {
+
+                return false;
+
+            }
+
+
+            if (
+                !record.isMaximized
+            ) {
+
+                focus(
+                    appId
+                );
+
+                return true;
+
+            }
+
+
+            element.classList.remove(
+                "is-maximized"
+            );
+
+
+            record.isMaximized =
+                false;
+
+
+            if (
+                record.previousPosition
+            ) {
+
+                element.style.left =
+                    `${record.previousPosition.left}px`;
+
+                element.style.top =
+                    `${record.previousPosition.top}px`;
+
+            }
+
+
+            if (
+                record.previousSize
+            ) {
+
+                element.style.width =
+                    `${record.previousSize.width}px`;
+
+                element.style.height =
+                    `${record.previousSize.height}px`;
+
+            } else {
+
+                element.style.width =
+                    "";
+
+                element.style.height =
+                    "";
+
+            }
+
+
+            updateMaximizeButton(
+                element,
+                false
+            );
+
+
+            focus(
+                appId
+            );
+
+
+            emit(
+                "window:restored",
+                {
+
+                    appId,
+
+                    element
+
+                }
+            );
+
+
+            return true;
+
+        }
+
+
+        /* =====================================================
+           TOGGLE MAXIMIZE
+           ===================================================== */
+
+        function toggleMaximize(
+            appId
+        ) {
+
+            const record =
+                state.windows.get(
+                    appId
+                );
+
+
+            if (
+                record &&
+                record.isMaximized
+            ) {
+
+                return restore(
+                    appId
+                );
+
+            }
+
+
+            return maximize(
+                appId
+            );
+
+        }
+
+
+        /* =====================================================
+           UPDATE MAXIMIZE BUTTON
+           ===================================================== */
+
+        function updateMaximizeButton(
+            element,
+            maximized
+        ) {
+
+            const button =
+                element.querySelector(
+                    "[data-window-action='maximize']"
+                );
+
+
+            if (!button) {
+
+                return;
+
+            }
+
+
+            const icon =
+                button.querySelector(
+                    ".haldo-window-control-icon"
+                );
+
+
+            if (icon) {
+
+                icon.textContent =
+                    maximized
+                        ? "❐"
+                        : "□";
+
+            }
+
+
+            button.title =
+                maximized
+                    ? "Wiederherstellen"
+                    : "Maximieren";
+
+
+            button.setAttribute(
+                "aria-label",
+                maximized
+                    ? "Fenster wiederherstellen"
+                    : "Fenster maximieren"
+            );
+
+        }
+
+
+        /* =====================================================
+           CLOSE
+           ===================================================== */
+
+        function close(
+            appId
+        ) {
+
+            const element =
+                getWindow(
+                    appId
+                );
+
+
+            if (!element) {
+
+                return false;
+
+            }
+
+
+            const record =
+                state.windows.get(
+                    appId
+                );
+
+
+            emit(
+                "window:before-close",
+                {
+
+                    appId,
+
+                    element
+
+                }
+            );
+
+
+            element.classList.remove(
+                "is-active"
+            );
+
+
+            element.classList.add(
+                "is-closing"
+            );
+
+
+            window.setTimeout(
+                () => {
+
+                    if (
+                        element.parentNode
+                    ) {
+
+                        element.remove();
+
+                    }
+
+
+                    state.windows.delete(
+                        appId
+                    );
+
+
+                    emit(
+                        "window:closed",
+                        {
+
+                            appId
+
+                        }
+                    );
+
+
+                    emit(
+                        "app:window:closed",
+                        {
+
+                            appId
+
+                        }
+                    );
+
+                },
+                180
+            );
+
+
+            return true;
+
+        }
+
+
+        /* =====================================================
+           REGISTER EXISTING WINDOWS
+           ===================================================== */
+
+        function scan() {
+
+            if (!appLayer) {
+
+                return;
+
+            }
+
+
+            appLayer
+                .querySelectorAll(
+                    ".haldo-app-window"
+                )
+                .forEach(
+                    element => {
+
+                        register(
+                            element
+                        );
+
+                    }
+                );
+
+        }
+
+
+        /* =====================================================
+           MUTATION OBSERVER
+           ===================================================== */
+
+        if (appLayer) {
+
+            const observer =
+                new MutationObserver(
+                    mutations => {
+
+                        mutations.forEach(
+                            mutation => {
+
+                                mutation.addedNodes
+                                    .forEach(
+                                        node => {
+
+                                            if (
+                                                node.nodeType !==
+                                                Node.ELEMENT_NODE
+                                            ) {
+
+                                                return;
+
+                                            }
+
+
+                                            if (
+                                                node.matches &&
+                                                node.matches(
+                                                    ".haldo-app-window"
+                                                )
+                                            ) {
+
+                                                register(
+                                                    node
+                                                );
+
+                                            }
+
+
+                                            if (
+                                                node.querySelectorAll
+                                            ) {
+
+                                                node.querySelectorAll(
+                                                    ".haldo-app-window"
+                                                ).forEach(
+                                                    element => {
+
+                                                        register(
+                                                            element
+                                                        );
+
+                                                    }
+                                                );
+
+                                            }
+
+                                        }
+                                    );
+
+                            }
+                        );
+
+                    }
+                );
+
+
+            observer.observe(
+                appLayer,
+                {
+
+                    childList:
+                        true,
+
+                    subtree:
+                        true
+
+                }
+            );
+
+        }
+
+
+        /* =====================================================
+           PUBLIC API
+           ===================================================== */
+
+        const windowControls = {
+
+            register,
+
+            scan,
+
+            focus,
+
+            minimize,
+
+            maximize,
+
+            restore,
+
+            toggleMaximize,
+
+            close,
+
+            get(
+                appId
+            ) {
+
+                return (
+                    state.windows.get(
+                        appId
+                    ) ||
+                    null
+                );
+
+            },
+
+            list() {
+
+                return [
+                    ...state.windows.values()
+                ];
+
+            }
+
+        };
+
+
+        /* =====================================================
+           GLOBAL API
+           ===================================================== */
+
+        window.HalDoWindowControls20 =
+            windowControls;
+
+
+        if (
+            !window.HalDoOS
+        ) {
+
+            window.HalDoOS =
+                {};
+
+        }
+
+
+        window.HalDoOS.windowControls20 =
+            windowControls;
+
+
+        /* =====================================================
+           INITIAL SCAN
+           ===================================================== */
+
+        scan();
+
+
+        state.initialized =
+            true;
+
+
+        /* =====================================================
+           READY EVENT
+           ===================================================== */
+
+        document.dispatchEvent(
+            new CustomEvent(
+                "haldo:window-controls:ready",
+                {
+
+                    detail: {
+
+                        version:
+                            "20.0.0",
+
+                        timestamp:
+                            Date.now()
+
+                    }
+
+                }
+            )
+        );
+
+
+        console.info(
+            "%cHalDo AI OS 20%c Window Control Engine bereit",
+            "color:#42e6ff;font-weight:800;",
+            "color:#ffffff;"
+        );
+
+
+    })();
+
+    </script>
