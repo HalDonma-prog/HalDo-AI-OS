@@ -55950,10 +55950,11 @@
                     appId
                 );
 
-    <!-- =========================================================
+    <!-
+        <!-- =========================================================
          HALDO AI OS 20
-         APPLICATION EVENT / MESSAGE BUS
-         TEIL 56
+         APPLICATION COMMAND / ACTION ENGINE
+         TEIL 57
          ========================================================= -->
 
     <script>
@@ -55964,25 +55965,44 @@
 
 
         /* =====================================================
+           REFERENCES
+           ===================================================== */
+
+        const messageBus =
+            window.HalDoMessageBus20 ||
+            null;
+
+
+        const appState =
+            window.HalDoAppState20 ||
+            null;
+
+
+        const windowControls =
+            window.HalDoWindowControls20 ||
+            null;
+
+
+        /* =====================================================
            STATE
            ===================================================== */
 
-        const channels =
+        const commands =
             new Map();
 
 
-        const onceChannels =
+        const appCommands =
             new Map();
 
 
-        const history = [];
+        const executionHistory = [];
 
         const MAX_HISTORY =
             500;
 
 
         /* =====================================================
-           UTILS
+           UTILITIES
            ===================================================== */
 
         function normalize(
@@ -55996,7 +56016,7 @@
         }
 
 
-        function emitDOM(
+        function emit(
             name,
             detail = {}
         ) {
@@ -56017,7 +56037,7 @@
             ) {
 
                 console.warn(
-                    "[HalDo Message Bus 20]",
+                    "[HalDo Command Engine 20]",
                     error
                 );
 
@@ -56026,31 +56046,56 @@
         }
 
 
-        function record(
-            type,
-            payload
+        function clone(
+            value
         ) {
 
-            history.push({
+            if (
+                value ===
+                undefined
+            ) {
 
-                type,
+                return undefined;
 
-                payload,
+            }
 
-                timestamp:
-                    Date.now()
 
-            });
+            try {
+
+                return JSON.parse(
+                    JSON.stringify(
+                        value
+                    )
+                );
+
+            } catch (
+                error
+            ) {
+
+                return value;
+
+            }
+
+        }
+
+
+        function record(
+            entry
+        ) {
+
+            executionHistory.push(
+                entry
+            );
 
 
             if (
-                history.length >
+                executionHistory.length >
                 MAX_HISTORY
             ) {
 
-                history.splice(
+                executionHistory.splice(
                     0,
-                    history.length -
+                    executionHistory.length -
                     MAX_HISTORY
                 );
 
@@ -56060,660 +56105,1336 @@
 
 
         /* =====================================================
-           SUBSCRIBE
+           COMMAND REGISTRATION
            ===================================================== */
 
-        function on(
-            channel,
-            callback,
-            options = {}
+        function register(
+            definition
         ) {
 
-            channel =
-                normalize(
-                    channel
-                );
-
-
             if (
-                !channel ||
-                typeof callback !==
-                "function"
+                !definition ||
+                typeof definition !==
+                "object"
             ) {
 
-                return () => {};
+                return null;
 
             }
 
 
-            const target =
-                options.once
-                    ? onceChannels
-                    : channels;
+            const id =
+                normalize(
+                    definition.id
+                );
+
+
+            if (!id) {
+
+                return null;
+
+            }
 
 
             if (
-                !target.has(
-                    channel
+                typeof definition.execute !==
+                "function"
+            ) {
+
+                return null;
+
+            }
+
+
+            const command = {
+
+                id,
+
+                title:
+                    definition.title ||
+                    id,
+
+                description:
+                    definition.description ||
+                    "",
+
+                category:
+                    definition.category ||
+                    "general",
+
+                shortcut:
+                    definition.shortcut ||
+                    null,
+
+                appId:
+                    definition.appId ||
+                    null,
+
+                enabled:
+                    definition.enabled !==
+                    false,
+
+                visible:
+                    definition.visible !==
+                    false,
+
+                execute:
+                    definition.execute,
+
+                canExecute:
+                    typeof definition.canExecute ===
+                    "function"
+                        ? definition.canExecute
+                        : null,
+
+                createdAt:
+                    Date.now(),
+
+                metadata:
+                    definition.metadata ||
+                    {}
+
+            };
+
+
+            commands.set(
+                id,
+                command
+            );
+
+
+            if (
+                command.appId
+            ) {
+
+                registerAppCommand(
+                    command.appId,
+                    command
+                );
+
+            }
+
+
+            emit(
+                "command:registered",
+                {
+
+                    command
+
+                }
+            );
+
+
+            return command;
+
+        }
+
+
+        /* =====================================================
+           UNREGISTER
+           ===================================================== */
+
+        function unregister(
+            commandId
+        ) {
+
+            commandId =
+                normalize(
+                    commandId
+                );
+
+
+            const command =
+                commands.get(
+                    commandId
+                );
+
+
+            if (!command) {
+
+                return false;
+
+            }
+
+
+            commands.delete(
+                commandId
+            );
+
+
+            if (
+                command.appId
+            ) {
+
+                const set =
+                    appCommands.get(
+                        command.appId
+                    );
+
+
+                if (set) {
+
+                    set.delete(
+                        commandId
+                    );
+
+
+                    if (
+                        set.size ===
+                        0
+                    ) {
+
+                        appCommands.delete(
+                            command.appId
+                        );
+
+                    }
+
+                }
+
+            }
+
+
+            emit(
+                "command:unregistered",
+                {
+
+                    commandId
+
+                }
+            );
+
+
+            return true;
+
+        }
+
+
+        /* =====================================================
+           GET COMMAND
+           ===================================================== */
+
+        function get(
+            commandId
+        ) {
+
+            return (
+                commands.get(
+                    normalize(
+                        commandId
+                    )
+                ) ||
+                null
+            );
+
+        }
+
+
+        /* =====================================================
+           REGISTER APP COMMAND
+           ===================================================== */
+
+        function registerAppCommand(
+            appId,
+            definition
+        ) {
+
+            appId =
+                normalize(
+                    appId
+                );
+
+
+            if (!appId) {
+
+                return null;
+
+            }
+
+
+            let command;
+
+
+            if (
+                typeof definition ===
+                "function"
+            ) {
+
+                command =
+                    register(
+                        {
+
+                            id:
+                                `app:${appId}:${Date.now()}:${Math.random()
+                                    .toString(36)
+                                    .slice(2, 8)}`,
+
+                            appId,
+
+                            execute:
+                                definition
+
+                        }
+                    );
+
+            } else {
+
+                command =
+                    definition &&
+                    definition.id
+                        ? (
+                            commands.get(
+                                definition.id
+                            ) ||
+                            register(
+                                {
+
+                                    ...definition,
+
+                                    appId
+
+                                }
+                            )
+                        )
+                        : null;
+
+            }
+
+
+            if (!command) {
+
+                return null;
+
+            }
+
+
+            if (
+                !appCommands.has(
+                    appId
                 )
             ) {
 
-                target.set(
-                    channel,
+                appCommands.set(
+                    appId,
                     new Set()
                 );
 
             }
 
 
-            const listeners =
-                target.get(
-                    channel
+            appCommands
+                .get(
+                    appId
+                )
+                .add(
+                    command.id
                 );
 
 
-            listeners.add(
-                callback
+            return command;
+
+        }
+
+
+        /* =====================================================
+           UNREGISTER APP COMMANDS
+           ===================================================== */
+
+        function unregisterAppCommands(
+            appId
+        ) {
+
+            appId =
+                normalize(
+                    appId
+                );
+
+
+            const set =
+                appCommands.get(
+                    appId
+                );
+
+
+            if (!set) {
+
+                return false;
+
+            }
+
+
+            [
+                ...set
+            ].forEach(
+                commandId => {
+
+                    commands.delete(
+                        commandId
+                    );
+
+                }
             );
 
 
-            return () => {
+            appCommands.delete(
+                appId
+            );
 
-                listeners.delete(
-                    callback
+
+            emit(
+                "command:app:cleared",
+                {
+
+                    appId
+
+                }
+            );
+
+
+            return true;
+
+        }
+
+
+        /* =====================================================
+           CAN EXECUTE
+           ===================================================== */
+
+        function canExecute(
+            command,
+            context = {}
+        ) {
+
+            if (!command) {
+
+                return false;
+
+            }
+
+
+            if (
+                command.enabled ===
+                false
+            ) {
+
+                return false;
+
+            }
+
+
+            if (
+                typeof command.canExecute !==
+                "function"
+            ) {
+
+                return true;
+
+            }
+
+
+            try {
+
+                return (
+                    command.canExecute(
+                        context
+                    ) !== false
+                );
+
+            } catch (
+                error
+            ) {
+
+                return false;
+
+            }
+
+        }
+
+
+        /* =====================================================
+           EXECUTE
+           ===================================================== */
+
+        async function execute(
+            commandId,
+            payload = {},
+            context = {}
+        ) {
+
+            commandId =
+                normalize(
+                    commandId
+                );
+
+
+            const command =
+                get(
+                    commandId
+                );
+
+
+            const executionId =
+                `exec-${Date.now()}-${Math.random()
+                    .toString(36)
+                    .slice(2, 10)}`;
+
+
+            if (!command) {
+
+                const error =
+                    new Error(
+                        `Command not found: ${commandId}`
+                    );
+
+
+                record({
+
+                    executionId,
+
+                    commandId,
+
+                    success:
+                        false,
+
+                    error:
+                        error.message,
+
+                    timestamp:
+                        Date.now()
+
+                });
+
+
+                emit(
+                    "command:error",
+                    {
+
+                        executionId,
+
+                        commandId,
+
+                        error
+
+                    }
+                );
+
+
+                throw error;
+
+            }
+
+
+            const executionContext = {
+
+                ...context,
+
+                commandId,
+
+                executionId,
+
+                timestamp:
+                    Date.now()
+
+            };
+
+
+            if (
+                !canExecute(
+                    command,
+                    executionContext
+                )
+            ) {
+
+                const error =
+                    new Error(
+                        `Command disabled: ${commandId}`
+                    );
+
+
+                record({
+
+                    executionId,
+
+                    commandId,
+
+                    success:
+                        false,
+
+                    error:
+                        error.message,
+
+                    timestamp:
+                        Date.now()
+
+                });
+
+
+                emit(
+                    "command:blocked",
+                    {
+
+                        executionId,
+
+                        commandId,
+
+                        error
+
+                    }
+                );
+
+
+                throw error;
+
+            }
+
+
+            emit(
+                "command:before-execute",
+                {
+
+                    executionId,
+
+                    commandId,
+
+                    payload:
+                        clone(
+                            payload
+                        ),
+
+                    context:
+                        executionContext
+
+                }
+            );
+
+
+            try {
+
+                const result =
+                    await command.execute(
+                        payload,
+                        executionContext
+                    );
+
+
+                const historyEntry = {
+
+                    executionId,
+
+                    commandId,
+
+                    appId:
+                        command.appId,
+
+                    payload:
+                        clone(
+                            payload
+                        ),
+
+                    result:
+                        clone(
+                            result
+                        ),
+
+                    success:
+                        true,
+
+                    timestamp:
+                        Date.now()
+
+                };
+
+
+                record(
+                    historyEntry
+                );
+
+
+                emit(
+                    "command:executed",
+                    historyEntry
                 );
 
 
                 if (
-                    listeners.size ===
-                    0
+                    messageBus &&
+                    typeof messageBus.publish ===
+                    "function"
                 ) {
 
-                    target.delete(
-                        channel
-                    );
-
-                }
-
-            };
-
-        }
-
-
-        /* =====================================================
-           ONCE
-           ===================================================== */
-
-        function once(
-            channel,
-            callback
-        ) {
-
-            return on(
-                channel,
-                callback,
-                {
-                    once:
-                        true
-                }
-            );
-
-        }
-
-
-        /* =====================================================
-           OFF
-           ===================================================== */
-
-        function off(
-            channel,
-            callback
-        ) {
-
-            channel =
-                normalize(
-                    channel
-                );
-
-
-            if (!channel) {
-
-                return false;
-
-            }
-
-
-            let removed =
-                false;
-
-
-            const targets = [
-
-                channels,
-
-                onceChannels
-
-            ];
-
-
-            targets.forEach(
-                target => {
-
-                    const listeners =
-                        target.get(
-                            channel
-                        );
-
-
-                    if (!listeners) {
-
-                        return;
-
-                    }
-
-
-                    if (
-                        typeof callback ===
-                        "function"
-                    ) {
-
-                        if (
-                            listeners.delete(
-                                callback
-                            )
-                        ) {
-
-                            removed =
-                                true;
-
-                        }
-
-                    } else {
-
-                        target.delete(
-                            channel
-                        );
-
-
-                        removed =
-                            true;
-
-                    }
-
-                }
-            );
-
-
-            return removed;
-
-        }
-
-
-        /* =====================================================
-           PUBLISH
-           ===================================================== */
-
-        function publish(
-            channel,
-            payload = {},
-            options = {}
-        ) {
-
-            channel =
-                normalize(
-                    channel
-                );
-
-
-            if (!channel) {
-
-                return false;
-
-            }
-
-
-            const message = {
-
-                id:
-                    `msg-${Date.now()}-${Math.random()
-                        .toString(36)
-                        .slice(2, 10)}`,
-
-                channel,
-
-                payload,
-
-                sender:
-                    options.sender ||
-                    "system",
-
-                timestamp:
-                    Date.now(),
-
-                metadata:
-                    options.metadata ||
-                    {}
-
-            };
-
-
-            record(
-                "publish",
-                message
-            );
-
-
-            const normal =
-                channels.get(
-                    channel
-                );
-
-
-            const oneTime =
-                onceChannels.get(
-                    channel
-                );
-
-
-            if (normal) {
-
-                normal.forEach(
-                    callback => {
-
-                        try {
-
-                            callback(
-                                payload,
-                                message
-                            );
-
-                        } catch (
-                            error
-                        ) {
-
-                            console.error(
-                                "[HalDo Message Bus 20]",
-                                error
-                            );
-
-                            emitDOM(
-                                "message:error",
-                                {
-
-                                    channel,
-
-                                    error,
-
-                                    message
-
-                                }
-                            );
-
-                        }
-
-                    }
-                );
-
-            }
-
-
-            if (oneTime) {
-
-                const callbacks = [
-                    ...oneTime
-                ];
-
-
-                onceChannels.delete(
-                    channel
-                );
-
-
-                callbacks.forEach(
-                    callback => {
-
-                        try {
-
-                            callback(
-                                payload,
-                                message
-                            );
-
-                        } catch (
-                            error
-                        ) {
-
-                            console.error(
-                                "[HalDo Message Bus 20]",
-                                error
-                            );
-
-                        }
-
-                    }
-                );
-
-            }
-
-
-            if (
-                options.dom !==
-                false
-            ) {
-
-                emitDOM(
-                    `bus:${channel}`,
-                    message
-                );
-
-            }
-
-
-            emitDOM(
-                "message:published",
-                message
-            );
-
-
-            return message;
-
-        }
-
-
-        /* =====================================================
-           REQUEST / RESPONSE
-           ===================================================== */
-
-        function request(
-            channel,
-            payload = {},
-            options = {}
-        ) {
-
-            const timeout =
-                Number.isFinite(
-                    options.timeout
-                )
-                    ? options.timeout
-                    : 5000;
-
-
-            return new Promise(
-                (
-                    resolve,
-                    reject
-                ) => {
-
-                    let completed =
-                        false;
-
-
-                    const responseChannel =
-                        `${channel}:response:${Date.now()}:${Math.random()
-                            .toString(36)
-                            .slice(2, 8)}`;
-
-
-                    const cleanup =
-                        on(
-                            responseChannel,
-                            (
-                                response
-                            ) => {
-
-                                if (
-                                    completed
-                                ) {
-
-                                    return;
-
-                                }
-
-
-                                completed =
-                                    true;
-
-
-                                clearTimeout(
-                                    timer
-                                );
-
-
-                                off(
-                                    responseChannel
-                                );
-
-
-                                resolve(
-                                    response
-                                );
-
-                            }
-                        );
-
-
-                    const timer =
-                        setTimeout(
-                            () => {
-
-                                if (
-                                    completed
-                                ) {
-
-                                    return;
-
-                                }
-
-
-                                completed =
-                                    true;
-
-
-                                cleanup();
-
-
-                                reject(
-                                    new Error(
-                                        `Timeout waiting for ${channel}`
-                                    )
-                                );
-
-                            },
-                            timeout
-                        );
-
-
-                    publish(
-                        channel,
-                        payload,
+                    messageBus.publish(
+                        "command:executed",
+                        historyEntry,
                         {
 
                             sender:
-                                options.sender ||
-                                "request",
+                                command.appId ||
+                                "system",
 
-                            metadata: {
-
-                                responseChannel
-
-                            }
+                            dom:
+                                false
 
                         }
                     );
 
                 }
-            );
-
-        }
 
 
-        /* =====================================================
-           RESPOND
-           ===================================================== */
+                return result;
 
-        function respond(
-            message,
-            payload = {}
-        ) {
-
-            if (
-                !message ||
-                !message.metadata ||
-                !message.metadata.responseChannel
+            } catch (
+                error
             ) {
 
-                return false;
+                const historyEntry = {
+
+                    executionId,
+
+                    commandId,
+
+                    appId:
+                        command.appId,
+
+                    payload:
+                        clone(
+                            payload
+                        ),
+
+                    success:
+                        false,
+
+                    error:
+                        error &&
+                        error.message
+                            ? error.message
+                            : String(
+                                error
+                            ),
+
+                    timestamp:
+                        Date.now()
+
+                };
+
+
+                record(
+                    historyEntry
+                );
+
+
+                emit(
+                    "command:error",
+                    {
+
+                        ...historyEntry,
+
+                        error
+
+                    }
+                );
+
+
+                throw error;
 
             }
 
-
-            return publish(
-                message.metadata.responseChannel,
-                payload,
-                {
-
-                    sender:
-                        message.channel,
-
-                    dom:
-                        false
-
-                }
-            );
-
         }
 
 
         /* =====================================================
-           APP CHANNEL
+           EXECUTE APP COMMAND
            ===================================================== */
 
-        function appChannel(
+        async function executeApp(
             appId,
-            event
+            commandName,
+            payload = {},
+            context = {}
         ) {
 
-            return (
-                `app:${appId}:${event}`
-            );
-
-        }
-
-
-        /* =====================================================
-           APP PUBLISH
-           ===================================================== */
-
-        function publishApp(
-            appId,
-            event,
-            payload = {}
-        ) {
-
-            if (!appId || !event) {
-
-                return false;
-
-            }
+            appId =
+                normalize(
+                    appId
+                );
 
 
-            return publish(
-                appChannel(
-                    appId,
-                    event
-                ),
-                payload,
-                {
+            commandName =
+                normalize(
+                    commandName
+                );
 
-                    sender:
-                        appId
-
-                }
-            );
-
-        }
-
-
-        /* =====================================================
-           APP SUBSCRIBE
-           ===================================================== */
-
-        function onApp(
-            appId,
-            event,
-            callback
-        ) {
 
             if (
                 !appId ||
-                !event
+                !commandName
             ) {
 
-                return () => {};
+                throw new Error(
+                    "App ID and command name are required"
+                );
 
             }
 
 
-            return on(
-                appChannel(
-                    appId,
-                    event
-                ),
-                callback
+            const directId =
+                `${appId}:${commandName}`;
+
+
+            let command =
+                get(
+                    directId
+                );
+
+
+            if (!command) {
+
+                command =
+                    get(
+                        `app:${appId}:${commandName}`
+                    );
+
+            }
+
+
+            if (!command) {
+
+                const set =
+                    appCommands.get(
+                        appId
+                    );
+
+
+                if (set) {
+
+                    for (
+                        const id
+                        of set
+                    ) {
+
+                        const candidate =
+                            get(
+                                id
+                            );
+
+
+                        if (
+                            candidate &&
+                            (
+                                candidate.name ===
+                                commandName ||
+                                candidate.id.endsWith(
+                                    `:${commandName}`
+                                )
+                            )
+                        ) {
+
+                            command =
+                                candidate;
+
+                            break;
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+
+            if (!command) {
+
+                throw new Error(
+                    `App command not found: ${appId}/${commandName}`
+                );
+
+            }
+
+
+            return execute(
+                command.id,
+                payload,
+                {
+
+                    ...context,
+
+                    appId
+
+                }
             );
 
         }
 
 
         /* =====================================================
-           BROADCAST
+           BUILT-IN WINDOW COMMANDS
            ===================================================== */
 
-        function broadcast(
-            event,
-            payload = {},
+        register({
+
+            id:
+                "window:focus",
+
+            title:
+                "Fenster fokussieren",
+
+            category:
+                "window",
+
+            execute(
+                payload
+            ) {
+
+                if (
+                    !windowControls
+                ) {
+
+                    return false;
+
+                }
+
+
+                return windowControls.focus(
+                    payload.appId
+                );
+
+            }
+
+        });
+
+
+        register({
+
+            id:
+                "window:minimize",
+
+            title:
+                "Fenster minimieren",
+
+            category:
+                "window",
+
+            execute(
+                payload
+            ) {
+
+                if (
+                    !windowControls
+                ) {
+
+                    return false;
+
+                }
+
+
+                return windowControls.minimize(
+                    payload.appId
+                );
+
+            }
+
+        });
+
+
+        register({
+
+            id:
+                "window:maximize",
+
+            title:
+                "Fenster maximieren",
+
+            category:
+                "window",
+
+            execute(
+                payload
+            ) {
+
+                if (
+                    !windowControls
+                ) {
+
+                    return false;
+
+                }
+
+
+                return windowControls.maximize(
+                    payload.appId
+                );
+
+            }
+
+        });
+
+
+        register({
+
+            id:
+                "window:restore",
+
+            title:
+                "Fenster wiederherstellen",
+
+            category:
+                "window",
+
+            execute(
+                payload
+            ) {
+
+                if (
+                    !windowControls
+                ) {
+
+                    return false;
+
+                }
+
+
+                return windowControls.restore(
+                    payload.appId
+                );
+
+            }
+
+        });
+
+
+        register({
+
+            id:
+                "window:toggle-maximize",
+
+            title:
+                "Maximieren umschalten",
+
+            category:
+                "window",
+
+            execute(
+                payload
+            ) {
+
+                if (
+                    !windowControls
+                ) {
+
+                    return false;
+
+                }
+
+
+                return windowControls.toggleMaximize(
+                    payload.appId
+                );
+
+            }
+
+        });
+
+
+        register({
+
+            id:
+                "window:close",
+
+            title:
+                "Fenster schließen",
+
+            category:
+                "window",
+
+            execute(
+                payload
+            ) {
+
+                if (
+                    !windowControls
+                ) {
+
+                    return false;
+
+                }
+
+
+                return windowControls.close(
+                    payload.appId
+                );
+
+            }
+
+        });
+
+
+        /* =====================================================
+           BUILT-IN STATE COMMANDS
+           ===================================================== */
+
+        register({
+
+            id:
+                "state:get",
+
+            title:
+                "App-Zustand lesen",
+
+            category:
+                "state",
+
+            execute(
+                payload
+            ) {
+
+                if (
+                    !appState
+                ) {
+
+                    return null;
+
+                }
+
+
+                return appState.getValue(
+                    payload.appId,
+                    payload.path,
+                    payload.fallback
+                );
+
+            }
+
+        });
+
+
+        register({
+
+            id:
+                "state:set",
+
+            title:
+                "App-Zustand ändern",
+
+            category:
+                "state",
+
+            execute(
+                payload
+            ) {
+
+                if (
+                    !appState
+                ) {
+
+                    return false;
+
+                }
+
+
+                return appState.setValue(
+                    payload.appId,
+                    payload.path,
+                    payload.value,
+                    {
+
+                        save:
+                            payload.save ===
+                            true
+
+                    }
+                );
+
+            }
+
+        });
+
+
+        register({
+
+            id:
+                "state:save",
+
+            title:
+                "App-Zustand speichern",
+
+            category:
+                "state",
+
+            execute(
+                payload
+            ) {
+
+                if (
+                    !appState
+                ) {
+
+                    return false;
+
+                }
+
+
+                return appState.save(
+                    payload.appId
+                );
+
+            }
+
+        });
+
+
+        register({
+
+            id:
+                "state:reset",
+
+            title:
+                "App-Zustand zurücksetzen",
+
+            category:
+                "state",
+
+            execute(
+                payload
+            ) {
+
+                if (
+                    !appState
+                ) {
+
+                    return false;
+
+                }
+
+
+                return appState.reset(
+                    payload.appId,
+                    payload.initialState ||
+                    {},
+                    {
+
+                        save:
+                            payload.save ===
+                            true,
+
+                        removeSaved:
+                            payload.removeSaved ===
+                            true
+
+                    }
+                );
+
+            }
+
+        });
+
+
+        /* =====================================================
+           MESSAGE COMMAND
+           ===================================================== */
+
+        register({
+
+            id:
+                "message:publish",
+
+            title:
+                "Nachricht senden",
+
+            category:
+                "communication",
+
+            execute(
+                payload
+            ) {
+
+                if (
+                    !messageBus
+                ) {
+
+                    return false;
+
+                }
+
+
+                return messageBus.publish(
+                    payload.channel,
+                    payload.payload ||
+                    {},
+                    {
+
+                        sender:
+                            payload.sender ||
+                            "system",
+
+                        metadata:
+                            payload.metadata ||
+                            {}
+
+                    }
+                );
+
+            }
+
+        });
+
+
+        /* =====================================================
+           COMMAND QUERY
+           ===================================================== */
+
+        function list(
             options = {}
         ) {
 
-            return publish(
-                `broadcast:${event}`,
-                payload,
-                {
-
-                    sender:
-                        options.sender ||
-                        "system",
-
-                    metadata:
-                        options.metadata ||
-                        {}
-
-                }
-            );
-
-        }
+            let result =
+                [
+                    ...commands.values()
+                ];
 
 
-        /* =====================================================
-           APP BROADCAST
-           ===================================================== */
+            if (
+                options.category
+            ) {
 
-        function broadcastFromApp(
-            appId,
-            event,
-            payload = {}
-        ) {
+                result =
+                    result.filter(
+                        command =>
+                            command.category ===
+                            options.category
+                    );
 
-            return broadcast(
-                event,
-                payload,
-                {
+            }
 
-                    sender:
-                        appId
 
-                }
-            );
+            if (
+                options.appId
+            ) {
+
+                result =
+                    result.filter(
+                        command =>
+                            command.appId ===
+                            options.appId
+                    );
+
+            }
+
+
+            if (
+                options.visibleOnly
+            ) {
+
+                result =
+                    result.filter(
+                        command =>
+                            command.visible !==
+                            false
+                    );
+
+            }
+
+
+            return result;
 
         }
 
@@ -56734,61 +57455,32 @@
                     : 100;
 
 
-            const channel =
-                options.channel
-                    ? normalize(
-                        options.channel
-                    )
-                    : null;
-
-
-            let result =
-                history;
-
-
-            if (channel) {
-
-                result =
-                    result.filter(
-                        item =>
-                            item.payload &&
-                            item.payload.channel ===
-                            channel
-                    );
-
-            }
-
-
-            return result
+            return executionHistory
                 .slice(
                     Math.max(
                         0,
-                        result.length -
+                        executionHistory.length -
                         limit
                     )
                 )
                 .map(
-                    item =>
+                    entry =>
                         ({
-                            ...item
+                            ...entry
                         })
                 );
 
         }
 
 
-        /* =====================================================
-           CLEAR HISTORY
-           ===================================================== */
-
         function clearHistory() {
 
-            history.length =
+            executionHistory.length =
                 0;
 
 
-            emitDOM(
-                "message:history:cleared",
+            emit(
+                "command:history:cleared",
                 {
 
                     timestamp:
@@ -56801,140 +57493,155 @@
 
 
         /* =====================================================
-           CHANNEL INSPECTION
+           KEYBOARD SHORTCUTS
            ===================================================== */
 
-        function listChannels() {
-
-            const result =
-                new Set();
+        const shortcutMap =
+            new Map();
 
 
-            channels.forEach(
-                (
-                    _,
-                    channel
-                ) => {
-
-                    result.add(
-                        channel
-                    );
-
-                }
-            );
-
-
-            onceChannels.forEach(
-                (
-                    _,
-                    channel
-                ) => {
-
-                    result.add(
-                        channel
-                    );
-
-                }
-            );
-
-
-            return [
-                ...result
-            ];
-
-        }
-
-
-        function listenerCount(
-            channel
+        function registerShortcut(
+            shortcut,
+            commandId
         ) {
 
-            channel =
+            shortcut =
                 normalize(
-                    channel
+                    shortcut
                 );
 
 
-            const normal =
-                channels.get(
-                    channel
+            if (
+                !shortcut ||
+                !commands.has(
+                    commandId
+                )
+            ) {
+
+                return false;
+
+            }
+
+
+            shortcutMap.set(
+                shortcut.toLowerCase(),
+                commandId
+            );
+
+
+            return true;
+
+        }
+
+
+        function normalizeShortcut(
+            event
+        ) {
+
+            const parts = [];
+
+
+            if (
+                event.ctrlKey
+            ) {
+
+                parts.push(
+                    "ctrl"
                 );
 
+            }
 
-            const oneTime =
-                onceChannels.get(
-                    channel
+
+            if (
+                event.altKey
+            ) {
+
+                parts.push(
+                    "alt"
                 );
 
+            }
 
-            return (
-                (normal
-                    ? normal.size
-                    : 0) +
-                (oneTime
-                    ? oneTime.size
-                    : 0)
+
+            if (
+                event.shiftKey
+            ) {
+
+                parts.push(
+                    "shift"
+                );
+
+            }
+
+
+            if (
+                event.metaKey
+            ) {
+
+                parts.push(
+                    "meta"
+                );
+
+            }
+
+
+            parts.push(
+                String(
+                    event.key
+                ).toLowerCase()
+            );
+
+
+            return parts.join(
+                "+"
             );
 
         }
 
 
-        /* =====================================================
-           AUTOMATIC APP LIFECYCLE CHANNELS
-           ===================================================== */
+        document.addEventListener(
+            "keydown",
+            event => {
 
-        const lifecycleEvents = [
-
-            "created",
-
-            "ready",
-
-            "started",
-
-            "activated",
-
-            "deactivated",
-
-            "paused",
-
-            "resumed",
-
-            "stopped",
-
-            "destroyed",
-
-            "error"
-
-        ];
+                const shortcut =
+                    normalizeShortcut(
+                        event
+                    );
 
 
-        lifecycleEvents.forEach(
-            eventName => {
-
-                document.addEventListener(
-                    `haldo:app:lifecycle:${eventName}`,
-                    event => {
-
-                        const detail =
-                            event.detail ||
-                            {};
+                const commandId =
+                    shortcutMap.get(
+                        shortcut
+                    );
 
 
-                        const appId =
-                            detail.appId;
+                if (!commandId) {
+
+                    return;
+
+                }
 
 
-                        if (!appId) {
-
-                            return;
-
-                        }
+                event.preventDefault();
 
 
-                        publishApp(
-                            appId,
-                            `lifecycle:${eventName}`,
-                            detail
+                execute(
+                    commandId,
+                    {},
+                    {
+
+                        source:
+                            "keyboard",
+
+                        event
+
+                    }
+                ).catch(
+                    error => {
+
+                        console.warn(
+                            "[HalDo Command Engine 20]",
+                            error
                         );
 
                     }
@@ -56945,114 +57652,24 @@
 
 
         /* =====================================================
-           WINDOW BRIDGE
+           DEFAULT SHORTCUTS
            ===================================================== */
 
-        const windowEvents = [
-
-            "focused",
-
-            "minimized",
-
-            "maximized",
-
-            "restored",
-
-            "closed"
-
-        ];
-
-
-        windowEvents.forEach(
-            eventName => {
-
-                document.addEventListener(
-                    `haldo:window:${eventName}`,
-                    event => {
-
-                        const detail =
-                            event.detail ||
-                            {};
-
-
-                        const appId =
-                            detail.appId;
-
-
-                        if (!appId) {
-
-                            return;
-
-                        }
-
-
-                        publishApp(
-                            appId,
-                            `window:${eventName}`,
-                            detail
-                        );
-
-                    }
-                );
-
-            }
+        registerShortcut(
+            "ctrl+shift+w",
+            "window:close"
         );
 
 
-        /* =====================================================
-           STATE BRIDGE
-           ===================================================== */
-
-        const stateEvents = [
-
-            "created",
-
-            "changed",
-
-            "saved",
-
-            "loaded",
-
-            "reset",
-
-            "destroyed"
-
-        ];
+        registerShortcut(
+            "ctrl+shift+m",
+            "window:minimize"
+        );
 
 
-        stateEvents.forEach(
-            eventName => {
-
-                document.addEventListener(
-                    `haldo:app:state:${eventName}`,
-                    event => {
-
-                        const detail =
-                            event.detail ||
-                            {};
-
-
-                        const appId =
-                            detail.appId;
-
-
-                        if (!appId) {
-
-                            return;
-
-                        }
-
-
-                        publishApp(
-                            appId,
-                            `state:${eventName}`,
-                            detail
-                        );
-
-                    }
-                );
-
-            }
+        registerShortcut(
+            "ctrl+shift+f",
+            "window:focus"
         );
 
 
@@ -57060,37 +57677,31 @@
            PUBLIC API
            ===================================================== */
 
-        const messageBus = {
+        const commandEngine = {
 
-            on,
+            register,
 
-            once,
+            unregister,
 
-            off,
+            get,
 
-            publish,
+            list,
 
-            request,
+            execute,
 
-            respond,
+            executeApp,
 
-            appChannel,
+            registerAppCommand,
 
-            publishApp,
+            unregisterAppCommands,
 
-            onApp,
+            canExecute,
 
-            broadcast,
-
-            broadcastFromApp,
+            registerShortcut,
 
             getHistory,
 
-            clearHistory,
-
-            listChannels,
-
-            listenerCount
+            clearHistory
 
         };
 
@@ -57099,8 +57710,8 @@
            GLOBAL API
            ===================================================== */
 
-        window.HalDoMessageBus20 =
-            messageBus;
+        window.HalDoCommandEngine20 =
+            commandEngine;
 
 
         if (
@@ -57113,30 +57724,33 @@
         }
 
 
-        window.HalDoOS.messageBus20 =
-            messageBus;
+        window.HalDoOS.commandEngine20 =
+            commandEngine;
 
 
         /* =====================================================
            READY
            ===================================================== */
 
-        emitDOM(
-            "message-bus:ready",
+        emit(
+            "command-engine:ready",
             {
 
                 version:
                     "20.0.0",
 
                 timestamp:
-                    Date.now()
+                    Date.now(),
+
+                commandCount:
+                    commands.size
 
             }
         );
 
 
         console.info(
-            "%cHalDo AI OS 20%c Application Message Bus bereit",
+            "%cHalDo AI OS 20%c Command / Action Engine bereit",
             "color:#42e6ff;font-weight:800;",
             "color:#ffffff;"
         );
@@ -57145,4 +57759,4 @@
     })();
 
     </script>
-      
+    
