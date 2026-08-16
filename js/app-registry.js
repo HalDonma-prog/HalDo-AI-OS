@@ -5,48 +5,43 @@
    Datei:
        js/app-registry.js
 
-   ZENTRALE APPLICATION REGISTRY
+   HALDO APPLICATION REGISTRY 20
 
-   HALDO AI OS 18 → 20 UPGRADE
+   Zentrale Verwaltung aller Anwendungen.
 
-   Aufgaben:
-   - vollständige App-Registrierung
-   - App-Contract-Unterstützung
-   - App-Metadaten
-   - App-Versionen
-   - Kategorien
-   - Tags / Keywords
-   - Dependencies
-   - Permissions
-   - Features
-   - App Settings
-   - App States
-   - Enable / Disable
-   - Suche
-   - Kategorien
-   - Events
-   - Kernel-Verbindung
-   - System-Verbindung
-   - App-Manager-Verbindung
-   - Router-Verbindung
-   - Window-Manager-Verbindung
-   - AI-/Language-Kompatibilität
-   - Diagnostics
-   - Health Check
-   - sichere Erweiterbarkeit
+   Verantwortlich für:
+
+   - App Registrierung
+   - App Contract
+   - App Metadaten
+   - App Versionen
+   - App Kategorien
+   - App Berechtigungen
+   - App Dependencies
+   - App Capabilities
+   - App Status
+   - App Aktivierung
+   - App Deaktivierung
+   - App Suche
+   - App Filter
+   - App Updates
+   - App Entfernen
+   - App Events
+   - App Storage
+   - App Diagnostics
+   - App Health
+   - Kernel Verbindung
+   - System Verbindung
+   - App Manager Verbindung
+   - Router Verbindung
+   - zukünftige AI-Verbindungen
 
    WICHTIG:
-   Diese Datei arbeitet mit:
 
-       js/app-contract.js
-       js/app-manager.js
-       js/app-router.js
-       js/window-manager.js
-       js/kernel.js
-       js/system.js
+   Diese Registry ist nicht nur eine Liste.
 
-   Bestehende Apps werden nicht automatisch entfernt.
-   Neue Apps können jederzeit hinzugefügt werden.
+   Jede App soll später über diesen Contract
+   vollständig mit HalDo AI OS 20 verbunden werden.
 
    ============================================================ */
 
@@ -55,7 +50,7 @@
 (function (window, document) {
 
     /* ========================================================
-       01 — HALDO FOUNDATION
+       01 — FOUNDATION
        ======================================================== */
 
     window.HalDoOS =
@@ -76,11 +71,11 @@
         "app-registry";
 
     const NAME =
-        "HalDo AI OS Application Registry";
+        "HalDo AI OS 20 Application Registry";
 
 
     /* ========================================================
-       03 — INTERNAL STATE
+       03 — STATE
        ======================================================== */
 
     const state = {
@@ -106,9 +101,6 @@
         listeners:
             new Map(),
 
-        disabled:
-            new Set(),
-
         statistics: {
 
             registered:
@@ -126,10 +118,10 @@
             disabled:
                 0,
 
-            searches:
+            errors:
                 0,
 
-            errors:
+            searches:
                 0
 
         },
@@ -142,6 +134,9 @@
             system:
                 false,
 
+            appContract:
+                false,
+
             appManager:
                 false,
 
@@ -151,7 +146,13 @@
             windowManager:
                 false,
 
-            contract:
+            storage:
+                false,
+
+            ai:
+                false,
+
+            language:
                 false
 
         }
@@ -286,22 +287,13 @@
             ).forEach(
                 key => {
 
-                    if (
+                    result[key] =
                         typeof value[key] ===
                         "function"
-                    ) {
-
-                        result[key] =
-                            value[key];
-
-                    } else {
-
-                        result[key] =
-                            clone(
+                            ? value[key]
+                            : clone(
                                 value[key]
                             );
-
-                    }
 
                 }
             );
@@ -316,52 +308,9 @@
     }
 
 
-    function normalizeArray(
-        value
-    ) {
+    function now() {
 
-        if (
-            Array.isArray(
-                value
-            )
-        ) {
-
-            return value
-                .filter(
-                    item =>
-                        item !==
-                        null &&
-                        item !==
-                        undefined
-                )
-                .map(
-                    item =>
-                        typeof item ===
-                        "string"
-                            ? item.trim()
-                            : item
-                )
-                .filter(
-                    Boolean
-                );
-
-        }
-
-
-        if (
-            value === null ||
-            value === undefined ||
-            value === ""
-        ) {
-
-            return [];
-
-        }
-
-
-        return [
-            value
-        ];
+        return Date.now();
 
     }
 
@@ -386,6 +335,17 @@
         return (
             window.HalDoSystem ||
             HalDoOS.system ||
+            null
+        );
+
+    }
+
+
+    function getAppContract() {
+
+        return (
+            window.HalDoAppContract ||
+            HalDoOS.appContract ||
             null
         );
 
@@ -425,11 +385,33 @@
     }
 
 
-    function getContract() {
+    function getStorage() {
 
         return (
-            window.HalDoAppContract ||
-            HalDoOS.appContract ||
+            window.HalDoStorage ||
+            HalDoOS.storage ||
+            null
+        );
+
+    }
+
+
+    function getAICore() {
+
+        return (
+            window.HalDoAICore ||
+            HalDoOS.aiCore ||
+            null
+        );
+
+    }
+
+
+    function getLanguageManager() {
+
+        return (
+            window.HalDoLanguageManager ||
+            HalDoOS.languageManager ||
             null
         );
 
@@ -557,8 +539,7 @@
 
                         reportError(
                             exception,
-                            "Event: " +
-                            event
+                            "Event: " + event
                         );
 
                     }
@@ -569,21 +550,21 @@
         }
 
 
-        const globalEvents =
+        const events =
             HalDoOS.events;
 
 
         if (
-            globalEvents &&
+            events &&
             hasMethod(
-                globalEvents,
+                events,
                 "emit"
             )
         ) {
 
             try {
 
-                globalEvents.emit(
+                events.emit(
                     "app-registry:" +
                     event,
                     data
@@ -660,7 +641,7 @@
             context,
 
             timestamp:
-                Date.now()
+                new Date().toISOString()
 
         };
 
@@ -707,7 +688,7 @@
 
 
     /* ========================================================
-       09 — APP NORMALIZATION
+       09 — CONTRACT NORMALIZATION
        ======================================================== */
 
     function normalizeDefinition(
@@ -721,7 +702,7 @@
         ) {
 
             throw new Error(
-                "Ungültige App-Definition."
+                "Ungültige App Definition."
             );
 
         }
@@ -744,21 +725,86 @@
         if (!id) {
 
             throw new Error(
-                "App benötigt eine eindeutige ID."
+                "Jede App benötigt eine eindeutige ID."
             );
 
         }
 
 
-        const normalized = {
+        const tags =
+            Array.isArray(
+                source.tags
+            )
+                ? source.tags
+                    .map(
+                        item =>
+                            String(
+                                item
+                            )
+                            .trim()
+                    )
+                    .filter(Boolean)
+                : [];
+
+
+        const keywords =
+            Array.isArray(
+                source.keywords
+            )
+                ? source.keywords
+                    .map(
+                        item =>
+                            String(
+                                item
+                            )
+                            .trim()
+                    )
+                    .filter(Boolean)
+                : [];
+
+
+        const dependencies =
+            Array.isArray(
+                source.dependencies
+            )
+                ? source.dependencies
+                    .map(
+                        normalizeId
+                    )
+                    .filter(Boolean)
+                : [];
+
+
+        const permissions =
+            Array.isArray(
+                source.permissions
+            )
+                ? source.permissions
+                : [];
+
+
+        const capabilities =
+            Array.isArray(
+                source.capabilities
+            )
+                ? source.capabilities
+                : [];
+
+
+        const category =
+            String(
+                source.category ||
+                "system"
+            )
+            .trim()
+            .toLowerCase();
+
+
+        const app = {
 
             ...source,
 
-
-            /* Identity */
-
-            id:
-                id,
+            id,
 
             appId:
                 id,
@@ -772,167 +818,68 @@
                 source.name ||
                 id,
 
+            description:
+                source.description ||
+                "",
 
-            /* Version */
-
-            version:
-                source.version ||
-                VERSION,
-
-
-            platform:
-                source.platform ||
-                "HalDo AI OS",
-
-
-            osVersion:
-                source.osVersion ||
-                "20",
-
-
-            /* Presentation */
+            category,
 
             icon:
                 source.icon ||
                 "◈",
 
-            description:
-                source.description ||
-                "",
-
-            category:
-                source.category ||
-                "system",
-
-
-            /* Search */
-
-            tags:
-                normalizeArray(
-                    source.tags
-                ),
-
-            keywords:
-                normalizeArray(
-                    source.keywords
-                ),
-
-
-            /* Runtime */
+            version:
+                source.version ||
+                VERSION,
 
             enabled:
                 source.enabled !==
+                false,
+
+            visible:
+                source.visible !==
                 false,
 
             singleton:
                 source.singleton !==
                 false,
 
+            system:
+                source.system ===
+                true,
 
-            /* Navigation */
+            core:
+                source.core ===
+                true,
+
+            tags,
+
+            keywords,
+
+            dependencies,
+
+            permissions,
+
+            capabilities,
 
             route:
                 source.route ||
-                "/app/" +
-                id,
-
-
-            /* Dependencies */
-
-            dependencies:
-                normalizeArray(
-                    source.dependencies
-                ),
-
-
-            optionalDependencies:
-                normalizeArray(
-                    source.optionalDependencies
-                ),
-
-
-            /* Permissions */
-
-            permissions:
-                normalizeArray(
-                    source.permissions
-                ),
-
-
-            /* Features */
-
-            features:
-                normalizeArray(
-                    source.features
-                ),
-
-
-            /* Languages */
-
-            languages:
-                normalizeArray(
-                    source.languages
-                ),
-
-
-            /* AI */
-
-            aiEnabled:
-                source.aiEnabled !==
-                false,
-
-
-            aiFeatures:
-                normalizeArray(
-                    source.aiFeatures
-                ),
-
-
-            /* Storage */
-
-            storage:
-                source.storage ||
-                {
-                    enabled:
-                        true,
-
-                    persistent:
-                        true,
-
-                    namespace:
-                        "haldo.app." +
-                        id
-
-                },
-
-
-            /* Window */
-
-            window:
-                source.window ||
-                {
-                    enabled:
-                        true
-                },
-
-
-            /* Metadata */
-
-            author:
-                source.author ||
-                "HalDo",
+                "/apps/" + id,
 
             createdAt:
                 source.createdAt ||
-                Date.now(),
+                now(),
 
             updatedAt:
-                Date.now()
+                now(),
+
+            registryVersion:
+                VERSION
 
         };
 
 
-        return normalized;
+        return app;
 
     }
 
@@ -941,68 +888,42 @@
        10 — CONTRACT VALIDATION
        ======================================================== */
 
-    function validateContract(
-        app
+    function validate(
+        definition
     ) {
-
-        const contract =
-            getContract();
-
-
-        if (
-            contract &&
-            hasMethod(
-                contract,
-                "validate"
-            )
-        ) {
-
-            try {
-
-                const result =
-                    contract.validate(
-                        app
-                    );
-
-
-                state.connections.contract =
-                    true;
-
-
-                return result;
-
-            } catch (exception) {
-
-                reportError(
-                    exception,
-                    "App Contract Validation"
-                );
-
-
-                return {
-
-                    valid:
-                        false,
-
-                    errors: [
-                        exception.message
-                    ]
-
-                };
-
-            }
-
-        }
-
-
-        state.connections.contract =
-            false;
-
 
         const errors = [];
 
 
-        if (!app.id) {
+        if (
+            !definition ||
+            typeof definition !==
+            "object"
+        ) {
+
+            errors.push(
+                "App Definition fehlt."
+            );
+
+            return {
+
+                valid:
+                    false,
+
+                errors
+
+            };
+
+        }
+
+
+        if (
+            !normalizeId(
+                definition.id ||
+                definition.appId ||
+                definition.name
+            )
+        ) {
 
             errors.push(
                 "App ID fehlt."
@@ -1011,19 +932,43 @@
         }
 
 
-        if (!app.name) {
+        if (
+            definition.dependencies &&
+            !Array.isArray(
+                definition.dependencies
+            )
+        ) {
 
             errors.push(
-                "App Name fehlt."
+                "dependencies muss ein Array sein."
             );
 
         }
 
 
-        if (!app.version) {
+        if (
+            definition.permissions &&
+            !Array.isArray(
+                definition.permissions
+            )
+        ) {
 
             errors.push(
-                "App Version fehlt."
+                "permissions muss ein Array sein."
+            );
+
+        }
+
+
+        if (
+            definition.capabilities &&
+            !Array.isArray(
+                definition.capabilities
+            )
+        ) {
+
+            errors.push(
+                "capabilities muss ein Array sein."
             );
 
         }
@@ -1035,8 +980,7 @@
                 errors.length ===
                 0,
 
-            errors:
-                errors
+            errors
 
         };
 
@@ -1044,101 +988,27 @@
 
 
     /* ========================================================
-       11 — CATEGORY INDEX
-       ======================================================== */
-
-    function indexCategory(
-        app
-    ) {
-
-        const category =
-            String(
-                app.category ||
-                "system"
-            )
-            .trim()
-            .toLowerCase();
-
-
-        if (
-            !state.categories.has(
-                category
-            )
-        ) {
-
-            state.categories.set(
-                category,
-                new Set()
-            );
-
-        }
-
-
-        state.categories
-            .get(
-                category
-            )
-            .add(
-                app.id
-            );
-
-    }
-
-
-    function rebuildCategories() {
-
-        state.categories.clear();
-
-
-        state.apps.forEach(
-            app => {
-
-                indexCategory(
-                    app
-                );
-
-            }
-        );
-
-    }
-
-
-    /* ========================================================
-       12 — REGISTER
+       11 — REGISTER
        ======================================================== */
 
     function register(
-        definition,
-        options = {}
+        definition
     ) {
 
         try {
 
-            const app =
-                normalizeDefinition(
+            const validation =
+                validate(
                     definition
                 );
 
 
-            const validation =
-                validateContract(
-                    app
-                );
-
-
             if (
-                validation &&
-                validation.valid ===
-                false
+                !validation.valid
             ) {
 
                 throw new Error(
-                    (
-                        validation.errors ||
-                        [
-                            "App Contract ungültig."
-                        ]
-                    ).join(
+                    validation.errors.join(
                         " "
                     )
                 );
@@ -1146,27 +1016,72 @@
             }
 
 
-            const exists =
-                state.apps.has(
+            const app =
+                normalizeDefinition(
+                    definition
+                );
+
+
+            const existing =
+                state.apps.get(
                     app.id
                 );
 
 
-            if (
-                exists &&
-                options.overwrite !==
-                true
-            ) {
+            if (existing) {
 
                 /*
-                 * Bereits registrierte App:
-                 * sichere Aktualisierung nur wenn
-                 * ausdrücklich erlaubt.
+                 * Bestehende App wird erweitert,
+                 * nicht blind gelöscht.
                  */
 
-                return update(
+                const merged = {
+
+                    ...existing,
+
+                    ...app,
+
+                    createdAt:
+                        existing.createdAt ||
+                        app.createdAt,
+
+                    updatedAt:
+                        now()
+
+                };
+
+
+                state.apps.set(
                     app.id,
-                    app
+                    merged
+                );
+
+
+                rebuildCategoryIndex();
+
+
+                state.statistics.updated +=
+                    1;
+
+
+                emit(
+                    "updated",
+                    {
+                        app:
+                            clone(
+                                merged
+                            ),
+
+                        previous:
+                            clone(
+                                existing
+                            )
+                    }
+                );
+
+
+                return clone(
+                    merged
                 );
 
             }
@@ -1178,70 +1093,27 @@
             );
 
 
-            if (
-                app.enabled ===
-                false
-            ) {
-
-                state.disabled.add(
-                    app.id
-                );
-
-            } else {
-
-                state.disabled.delete(
-                    app.id
-                );
-
-            }
+            rebuildCategoryIndex();
 
 
-            indexCategory(
+            state.statistics.registered +=
+                1;
+
+
+            emit(
+                "registered",
+                {
+                    app:
+                        clone(
+                            app
+                        )
+                }
+            );
+
+
+            return clone(
                 app
             );
-
-
-            if (exists) {
-
-                state.statistics.updated +=
-                    1;
-
-                emit(
-                    "updated",
-                    {
-                        app:
-                            clone(
-                                app
-                            )
-                    }
-                );
-
-            } else {
-
-                state.statistics.registered +=
-                    1;
-
-                emit(
-                    "registered",
-                    {
-                        app:
-                            clone(
-                                app
-                            )
-                    }
-                );
-
-            }
-
-
-            log(
-                "App registriert:",
-                app.id,
-                app.version
-            );
-
-
-            return app;
 
         } catch (exception) {
 
@@ -1259,252 +1131,18 @@
 
 
     function registerApp(
-        definition,
-        options
+        definition
     ) {
 
         return register(
-            definition,
-            options
+            definition
         );
 
     }
 
 
     /* ========================================================
-       13 — UPDATE
-       ======================================================== */
-
-    function update(
-        appId,
-        changes = {}
-    ) {
-
-        const id =
-            normalizeId(
-                appId
-            );
-
-
-        if (!id) {
-
-            return null;
-
-        }
-
-
-        const current =
-            state.apps.get(
-                id
-            );
-
-
-        if (!current) {
-
-            return register(
-                {
-                    ...changes,
-                    id:
-                        id
-                }
-            );
-
-        }
-
-
-        try {
-
-            const next =
-                normalizeDefinition(
-                    {
-                        ...current,
-                        ...changes,
-                        id:
-                            id
-                    }
-                );
-
-
-            const validation =
-                validateContract(
-                    next
-                );
-
-
-            if (
-                validation &&
-                validation.valid ===
-                false
-            ) {
-
-                throw new Error(
-                    (
-                        validation.errors ||
-                        []
-                    ).join(
-                        " "
-                    )
-                );
-
-            }
-
-
-            state.apps.set(
-                id,
-                next
-            );
-
-
-            if (
-                next.enabled ===
-                false
-            ) {
-
-                state.disabled.add(
-                    id
-                );
-
-            } else {
-
-                state.disabled.delete(
-                    id
-                );
-
-            }
-
-
-            rebuildCategories();
-
-
-            state.statistics.updated +=
-                1;
-
-
-            emit(
-                "updated",
-                {
-                    app:
-                        clone(
-                            next
-                        )
-                }
-            );
-
-
-            return next;
-
-        } catch (exception) {
-
-            reportError(
-                exception,
-                "App Aktualisierung"
-            );
-
-
-            return null;
-
-        }
-
-    }
-
-
-    function updateApp(
-        appId,
-        changes
-    ) {
-
-        return update(
-            appId,
-            changes
-        );
-
-    }
-
-
-    /* ========================================================
-       14 — REMOVE
-       ======================================================== */
-
-    function remove(
-        appId
-    ) {
-
-        const id =
-            normalizeId(
-                appId
-            );
-
-
-        if (!id) {
-
-            return false;
-
-        }
-
-
-        if (
-            !state.apps.has(
-                id
-            )
-        ) {
-
-            return false;
-
-        }
-
-
-        const app =
-            state.apps.get(
-                id
-            );
-
-
-        state.apps.delete(
-            id
-        );
-
-
-        state.disabled.delete(
-            id
-        );
-
-
-        rebuildCategories();
-
-
-        state.statistics.removed +=
-            1;
-
-
-        emit(
-            "removed",
-            {
-                app:
-                    clone(
-                        app
-                    )
-            }
-        );
-
-
-        return true;
-
-    }
-
-
-    function unregister(
-        appId
-    ) {
-
-        return remove(
-            appId
-        );
-
-    }
-
-
-    /* ========================================================
-       15 — GET
+       12 — GET
        ======================================================== */
 
     function get(
@@ -1524,12 +1162,15 @@
         }
 
 
-        return (
+        const app =
             state.apps.get(
                 id
-            ) ||
-            null
-        );
+            );
+
+
+        return app
+            ? clone(app)
+            : null;
 
     }
 
@@ -1559,7 +1200,7 @@
 
 
     /* ========================================================
-       16 — GET ALL
+       13 — GET ALL
        ======================================================== */
 
     function getAll() {
@@ -1581,8 +1222,368 @@
     }
 
 
+    function getCount() {
+
+        return state.apps.size;
+
+    }
+
+
     /* ========================================================
-       17 — ENABLE
+       14 — CATEGORY INDEX
+       ======================================================== */
+
+    function rebuildCategoryIndex() {
+
+        state.categories.clear();
+
+
+        state.apps.forEach(
+            app => {
+
+                const category =
+                    app.category ||
+                    "system";
+
+
+                if (
+                    !state.categories.has(
+                        category
+                    )
+                ) {
+
+                    state.categories.set(
+                        category,
+                        new Set()
+                    );
+
+                }
+
+
+                state.categories
+                    .get(
+                        category
+                    )
+                    .add(
+                        app.id
+                    );
+
+            }
+        );
+
+    }
+
+
+    function getCategories() {
+
+        return Array.from(
+            state.categories.keys()
+        );
+
+    }
+
+
+    function getByCategory(
+        category
+    ) {
+
+        const value =
+            String(
+                category || ""
+            )
+            .trim()
+            .toLowerCase();
+
+
+        const ids =
+            state.categories.get(
+                value
+            );
+
+
+        if (!ids) {
+
+            return [];
+
+        }
+
+
+        return Array.from(
+            ids
+        )
+        .map(
+            id =>
+                get(id)
+        )
+        .filter(Boolean);
+
+    }
+
+
+    /* ========================================================
+       15 — SEARCH
+       ======================================================== */
+
+    function search(
+        query,
+        options = {}
+    ) {
+
+        state.statistics.searches +=
+            1;
+
+
+        const value =
+            String(
+                query || ""
+            )
+            .trim()
+            .toLowerCase();
+
+
+        if (!value) {
+
+            return getAll();
+
+        }
+
+
+        const results =
+            getAll()
+            .filter(
+                app => {
+
+                    const fields = [
+
+                        app.id,
+
+                        app.name,
+
+                        app.title,
+
+                        app.description,
+
+                        app.category,
+
+                        app.version,
+
+                        ...(app.tags ||
+                            []),
+
+                        ...(app.keywords ||
+                            [])
+
+                    ];
+
+
+                    return fields.some(
+                        field => {
+
+                            return String(
+                                field ||
+                                ""
+                            )
+                            .toLowerCase()
+                            .includes(
+                                value
+                            );
+
+                        }
+                    );
+
+                }
+            );
+
+
+        if (
+            options.limit &&
+            Number(
+                options.limit
+            ) > 0
+        ) {
+
+            return results.slice(
+                0,
+                Number(
+                    options.limit
+                )
+            );
+
+        }
+
+
+        return results;
+
+    }
+
+
+    /* ========================================================
+       16 — UPDATE
+       ======================================================== */
+
+    function update(
+        appId,
+        changes
+    ) {
+
+        const id =
+            normalizeId(
+                appId
+            );
+
+
+        if (!id) {
+
+            return null;
+
+        }
+
+
+        const existing =
+            state.apps.get(
+                id
+            );
+
+
+        if (!existing) {
+
+            return null;
+
+        }
+
+
+        const merged =
+            normalizeDefinition({
+
+                ...existing,
+
+                ...(changes || {}),
+
+                id
+
+            });
+
+
+        state.apps.set(
+            id,
+            merged
+        );
+
+
+        rebuildCategoryIndex();
+
+
+        state.statistics.updated +=
+            1;
+
+
+        emit(
+            "updated",
+            {
+                app:
+                    clone(
+                        merged
+                    )
+            }
+        );
+
+
+        return clone(
+            merged
+        );
+
+    }
+
+
+    /* ========================================================
+       17 — REMOVE
+       ======================================================== */
+
+    function remove(
+        appId
+    ) {
+
+        const id =
+            normalizeId(
+                appId
+            );
+
+
+        const existing =
+            state.apps.get(
+                id
+            );
+
+
+        if (!existing) {
+
+            return false;
+
+        }
+
+
+        /*
+         * System/Core Apps werden nicht
+         * versehentlich entfernt.
+         */
+
+        if (
+            existing.core ===
+            true
+        ) {
+
+            warn(
+                "Core-App darf nicht entfernt werden:",
+                id
+            );
+
+
+            return false;
+
+        }
+
+
+        state.apps.delete(
+            id
+        );
+
+
+        rebuildCategoryIndex();
+
+
+        state.statistics.removed +=
+            1;
+
+
+        emit(
+            "removed",
+            {
+                app:
+                    clone(
+                        existing
+                    )
+            }
+        );
+
+
+        return true;
+
+    }
+
+
+    function removeApp(
+        appId
+    ) {
+
+        return remove(
+            appId
+        );
+
+    }
+
+
+    /* ========================================================
+       18 — ENABLE
        ======================================================== */
 
     function enable(
@@ -1608,32 +1609,33 @@
         }
 
 
-        app.enabled =
-            true;
+        if (
+            app.enabled !==
+            true
+        ) {
+
+            app.enabled =
+                true;
+
+            app.updatedAt =
+                now();
 
 
-        app.updatedAt =
-            Date.now();
+            state.statistics.enabled +=
+                1;
 
 
-        state.disabled.delete(
-            id
-        );
+            emit(
+                "enabled",
+                {
+                    app:
+                        clone(
+                            app
+                        )
+                }
+            );
 
-
-        state.statistics.enabled +=
-            1;
-
-
-        emit(
-            "enabled",
-            {
-                app:
-                    clone(
-                        app
-                    )
-            }
-        );
+        }
 
 
         return true;
@@ -1641,8 +1643,19 @@
     }
 
 
+    function enableApp(
+        appId
+    ) {
+
+        return enable(
+            appId
+        );
+
+    }
+
+
     /* ========================================================
-       18 — DISABLE
+       19 — DISABLE
        ======================================================== */
 
     function disable(
@@ -1668,17 +1681,27 @@
         }
 
 
+        if (
+            app.core ===
+            true
+        ) {
+
+            warn(
+                "Core-App darf nicht deaktiviert werden:",
+                id
+            );
+
+
+            return false;
+
+        }
+
+
         app.enabled =
             false;
 
-
         app.updatedAt =
-            Date.now();
-
-
-        state.disabled.add(
-            id
-        );
+            now();
 
 
         state.statistics.disabled +=
@@ -1701,211 +1724,19 @@
     }
 
 
-    function isEnabled(
+    function disableApp(
         appId
     ) {
 
-        const app =
-            get(
-                appId
-            );
-
-
-        return !!(
-            app &&
-            app.enabled !==
-            false
+        return disable(
+            appId
         );
 
     }
 
 
     /* ========================================================
-       19 — CATEGORY
-       ======================================================== */
-
-    function getByCategory(
-        category
-    ) {
-
-        const value =
-            String(
-                category ||
-                ""
-            )
-            .trim()
-            .toLowerCase();
-
-
-        if (!value) {
-
-            return [];
-
-        }
-
-
-        return getAll()
-            .filter(
-                app =>
-                    String(
-                        app.category ||
-                        ""
-                    )
-                    .toLowerCase() ===
-                    value
-            );
-
-    }
-
-
-    function getCategories() {
-
-        return Array.from(
-            state.categories.keys()
-        );
-
-    }
-
-
-    /* ========================================================
-       20 — SEARCH
-       ======================================================== */
-
-    function search(
-        query,
-        options = {}
-    ) {
-
-        state.statistics.searches +=
-            1;
-
-
-        const value =
-            String(
-                query ||
-                ""
-            )
-            .trim()
-            .toLowerCase();
-
-
-        let results =
-            getAll();
-
-
-        if (value) {
-
-            results =
-                results.filter(
-                    app => {
-
-                        const fields = [
-
-                            app.id,
-
-                            app.name,
-
-                            app.title,
-
-                            app.description,
-
-                            app.category,
-
-                            app.version,
-
-                            ...(
-                                app.tags ||
-                                []
-                            ),
-
-                            ...(
-                                app.keywords ||
-                                []
-                            )
-
-                        ];
-
-
-                        return fields.some(
-                            field =>
-                                String(
-                                    field ||
-                                    ""
-                                )
-                                .toLowerCase()
-                                .includes(
-                                    value
-                                )
-                        );
-
-                    }
-                );
-
-        }
-
-
-        if (
-            options.category
-        ) {
-
-            const category =
-                String(
-                    options.category
-                )
-                .toLowerCase();
-
-
-            results =
-                results.filter(
-                    app =>
-                        String(
-                            app.category ||
-                            ""
-                        )
-                        .toLowerCase() ===
-                        category
-                );
-
-        }
-
-
-        if (
-            options.enabled ===
-            true
-        ) {
-
-            results =
-                results.filter(
-                    app =>
-                        app.enabled !==
-                        false
-                );
-
-        }
-
-
-        if (
-            options.enabled ===
-            false
-        ) {
-
-            results =
-                results.filter(
-                    app =>
-                        app.enabled ===
-                        false
-                );
-
-        }
-
-
-        return results;
-
-    }
-
-
-    /* ========================================================
-       21 — DEPENDENCIES
+       20 — APP DEPENDENCIES
        ======================================================== */
 
     function checkDependencies(
@@ -1932,6 +1763,9 @@
                     [],
 
                 disabled:
+                    [],
+
+                circular:
                     []
 
             };
@@ -1939,56 +1773,65 @@
         }
 
 
-        const dependencies =
-            normalizeArray(
-                app.dependencies
-            );
-
-
         const missing = [];
 
         const disabled = [];
 
-
-        dependencies.forEach(
-            dependency => {
-
-                const id =
-                    normalizeId(
-                        dependency
-                    );
+        const circular = [];
 
 
-                const dependencyApp =
-                    get(
-                        id
-                    );
+        (app.dependencies || [])
+            .forEach(
+                dependencyId => {
+
+                    const id =
+                        normalizeId(
+                            dependencyId
+                        );
 
 
-                if (!dependencyApp) {
+                    const dependency =
+                        state.apps.get(
+                            id
+                        );
 
-                    missing.push(
-                        id
-                    );
 
-                    return;
+                    if (!dependency) {
+
+                        missing.push(
+                            id
+                        );
+
+                        return;
+
+                    }
+
+
+                    if (
+                        dependency.enabled ===
+                        false
+                    ) {
+
+                        disabled.push(
+                            id
+                        );
+
+                    }
+
+
+                    if (
+                        id ===
+                        app.id
+                    ) {
+
+                        circular.push(
+                            id
+                        );
+
+                    }
 
                 }
-
-
-                if (
-                    dependencyApp.enabled ===
-                    false
-                ) {
-
-                    disabled.push(
-                        id
-                    );
-
-                }
-
-            }
-        );
+            );
 
 
         return {
@@ -1997,13 +1840,15 @@
                 missing.length ===
                 0 &&
                 disabled.length ===
+                0 &&
+                circular.length ===
                 0,
 
-            missing:
-                missing,
+            missing,
 
-            disabled:
-                disabled
+            disabled,
+
+            circular
 
         };
 
@@ -2011,87 +1856,14 @@
 
 
     /* ========================================================
-       22 — OPTIONAL DEPENDENCIES
+       21 — PERMISSIONS
        ======================================================== */
-
-    function getOptionalDependencies(
-        appId
-    ) {
-
-        const app =
-            get(
-                appId
-            );
-
-
-        if (!app) {
-
-            return [];
-
-        }
-
-
-        return normalizeArray(
-            app.optionalDependencies
-        );
-
-    }
-
-
-    /* ========================================================
-       23 — PERMISSIONS
-       ======================================================== */
-
-    function getPermissions(
-        appId
-    ) {
-
-        const app =
-            get(
-                appId
-            );
-
-
-        if (!app) {
-
-            return [];
-
-        }
-
-
-        return normalizeArray(
-            app.permissions
-        );
-
-    }
-
 
     function hasPermission(
         appId,
         permission
     ) {
 
-        const permissions =
-            getPermissions(
-                appId
-            );
-
-
-        return permissions.includes(
-            permission
-        );
-
-    }
-
-
-    /* ========================================================
-       24 — FEATURES
-       ======================================================== */
-
-    function getFeatures(
-        appId
-    ) {
-
         const app =
             get(
                 appId
@@ -2100,39 +1872,38 @@
 
         if (!app) {
 
-            return [];
+            return false;
 
         }
 
 
-        return normalizeArray(
-            app.features
-        );
-
-    }
-
-
-    function hasFeature(
-        appId,
-        feature
-    ) {
-
-        return getFeatures(
-            appId
+        return (
+            app.permissions || []
+        )
+        .map(
+            item =>
+                String(
+                    item
+                )
+                .toLowerCase()
         )
         .includes(
-            feature
+            String(
+                permission || ""
+            )
+            .toLowerCase()
         );
 
     }
 
 
     /* ========================================================
-       25 — LANGUAGE SUPPORT
+       22 — CAPABILITIES
        ======================================================== */
 
-    function getLanguages(
-        appId
+    function hasCapability(
+        appId,
+        capability
     ) {
 
         const app =
@@ -2143,79 +1914,186 @@
 
         if (!app) {
 
-            return [];
+            return false;
 
         }
 
 
-        return normalizeArray(
-            app.languages
-        );
-
-    }
-
-
-    /* ========================================================
-       26 — AI SUPPORT
-       ======================================================== */
-
-    function getAICapabilities(
-        appId
-    ) {
-
-        const app =
-            get(
-                appId
-            );
-
-
-        if (!app) {
-
-            return {
-
-                enabled:
-                    false,
-
-                features:
-                    []
-
-            };
-
-        }
-
-
-        return {
-
-            enabled:
-                app.aiEnabled !==
-                false,
-
-            features:
-                normalizeArray(
-                    app.aiFeatures
+        return (
+            app.capabilities || []
+        )
+        .map(
+            item =>
+                String(
+                    item
                 )
-
-        };
+                .toLowerCase()
+        )
+        .includes(
+            String(
+                capability || ""
+            )
+            .toLowerCase()
+        );
 
     }
 
 
     /* ========================================================
-       27 — APP MANAGER CONNECTION
+       23 — OPEN STATE
        ======================================================== */
 
-    function notifyAppManager(
-        event,
-        app
+    function isOpen(
+        appId
     ) {
 
         const manager =
             getAppManager();
 
 
-        if (!manager) {
+        if (
+            manager &&
+            hasMethod(
+                manager,
+                "getAppState"
+            )
+        ) {
 
-            state.connections.appManager =
+            const appState =
+                manager.getAppState(
+                    appId
+                );
+
+
+            return !!(
+                appState &&
+                appState.open
+            );
+
+        }
+
+
+        return false;
+
+    }
+
+
+    /* ========================================================
+       24 — LAUNCH
+       ======================================================== */
+
+    async function launch(
+        appId,
+        options = {}
+    ) {
+
+        const manager =
+            getAppManager();
+
+
+        if (
+            !manager ||
+            !hasMethod(
+                manager,
+                "open"
+            )
+        ) {
+
+            reportError(
+                new Error(
+                    "App Manager nicht verfügbar."
+                ),
+                "Registry Launch"
+            );
+
+
+            return null;
+
+        }
+
+
+        const app =
+            get(
+                appId
+            );
+
+
+        if (!app) {
+
+            return null;
+
+        }
+
+
+        if (
+            app.enabled ===
+            false
+        ) {
+
+            return null;
+
+        }
+
+
+        const dependencies =
+            checkDependencies(
+                app
+            );
+
+
+        if (
+            !dependencies.valid
+        ) {
+
+            reportError(
+                new Error(
+                    "App Dependencies nicht erfüllt."
+                ),
+                "Registry Launch"
+            );
+
+
+            return null;
+
+        }
+
+
+        try {
+
+            return await manager.open(
+                app.id,
+                options
+            );
+
+        } catch (exception) {
+
+            reportError(
+                exception,
+                "App Launch: " +
+                app.id
+            );
+
+
+            return null;
+
+        }
+
+    }
+
+
+    /* ========================================================
+       25 — APP CONTRACT CONNECTION
+       ======================================================== */
+
+    function connectAppContract() {
+
+        const contract =
+            getAppContract();
+
+
+        if (!contract) {
+
+            state.connections.appContract =
                 false;
 
             return false;
@@ -2223,42 +2101,166 @@
         }
 
 
-        state.connections.appManager =
+        state.connections.appContract =
             true;
+
+
+        return true;
+
+    }
+
+
+    /* ========================================================
+       26 — SERVICE CONNECTIONS
+       ======================================================== */
+
+    function refreshConnections() {
+
+        state.connections.kernel =
+            !!getKernel();
+
+
+        state.connections.system =
+            !!getSystem();
+
+
+        state.connections.appContract =
+            !!getAppContract();
+
+
+        state.connections.appManager =
+            !!getAppManager();
+
+
+        state.connections.router =
+            !!getRouter();
+
+
+        state.connections.windowManager =
+            !!getWindowManager();
+
+
+        state.connections.storage =
+            !!getStorage();
+
+
+        state.connections.ai =
+            !!getAICore();
+
+
+        state.connections.language =
+            !!getLanguageManager();
+
+
+        connectAppContract();
+
+
+        return getConnectionStatus();
+
+    }
+
+
+    function getConnectionStatus() {
+
+        return {
+
+            kernel:
+                !!getKernel(),
+
+            system:
+                !!getSystem(),
+
+            appContract:
+                !!getAppContract(),
+
+            appManager:
+                !!getAppManager(),
+
+            router:
+                !!getRouter(),
+
+            windowManager:
+                !!getWindowManager(),
+
+            storage:
+                !!getStorage(),
+
+            ai:
+                !!getAICore(),
+
+            language:
+                !!getLanguageManager()
+
+        };
+
+    }
+
+
+    /* ========================================================
+       27 — PERSISTENCE
+       ======================================================== */
+
+    function getStorageKey() {
+
+        return (
+            "haldo.ai.os.20.app-registry"
+        );
+
+    }
+
+
+    function save() {
+
+        const data =
+            getAll();
 
 
         try {
 
+            const storage =
+                getStorage();
+
+
             if (
+                storage &&
                 hasMethod(
-                    manager,
-                    "emit"
+                    storage,
+                    "set"
                 )
             ) {
 
-                manager.emit(
-                    "registry-" +
-                    event,
-                    {
-                        app:
-                            clone(
-                                app
-                            )
-                    }
+                storage.set(
+                    getStorageKey(),
+                    data
                 );
 
+                return true;
+
             }
-
-
-            return true;
 
         } catch (exception) {
 
             reportError(
                 exception,
-                "App Manager Verbindung"
+                "Registry Storage"
             );
 
+        }
+
+
+        try {
+
+            window.localStorage.setItem(
+                getStorageKey(),
+                JSON.stringify(
+                    data
+                )
+            );
+
+
+            return true;
+
+        } catch (_) {
 
             return false;
 
@@ -2267,126 +2269,117 @@
     }
 
 
-    /* ========================================================
-       28 — ROUTER CONNECTION
-       ======================================================== */
+    function load() {
 
-    function getAppRoute(
-        appId
-    ) {
+        try {
 
-        const app =
-            get(
-                appId
+            const storage =
+                getStorage();
+
+
+            if (
+                storage &&
+                hasMethod(
+                    storage,
+                    "get"
+                )
+            ) {
+
+                const data =
+                    storage.get(
+                        getStorageKey()
+                    );
+
+
+                if (
+                    Array.isArray(
+                        data
+                    )
+                ) {
+
+                    data.forEach(
+                        app =>
+                            register(
+                                app
+                            )
+                    );
+
+
+                    return true;
+
+                }
+
+            }
+
+        } catch (exception) {
+
+            reportError(
+                exception,
+                "Registry Storage Load"
             );
-
-
-        if (!app) {
-
-            return null;
 
         }
 
 
-        return (
-            app.route ||
-            "/app/" +
-            app.id
-        );
+        try {
 
-    }
+            const raw =
+                window.localStorage.getItem(
+                    getStorageKey()
+                );
 
 
-    /* ========================================================
-       29 — WINDOW INFORMATION
-       ======================================================== */
+            if (!raw) {
 
-    function getWindowConfiguration(
-        appId
-    ) {
+                return false;
 
-        const app =
-            get(
-                appId
+            }
+
+
+            const data =
+                JSON.parse(
+                    raw
+                );
+
+
+            if (
+                Array.isArray(
+                    data
+                )
+            ) {
+
+                data.forEach(
+                    app =>
+                        register(
+                            app
+                        )
+                );
+
+
+                return true;
+
+            }
+
+        } catch (exception) {
+
+            reportError(
+                exception,
+                "Registry LocalStorage Load"
             );
-
-
-        if (!app) {
-
-            return null;
 
         }
 
 
-        return {
-
-            appId:
-                app.id,
-
-            title:
-                app.title ||
-                app.name,
-
-            icon:
-                app.icon,
-
-            singleton:
-                app.singleton !==
-                false,
-
-            ...(app.window || {})
-
-        };
+        return false;
 
     }
 
 
     /* ========================================================
-       30 — COUNTS
-       ======================================================== */
-
-    function getCount() {
-
-        return state.apps.size;
-
-    }
-
-
-    function getEnabledCount() {
-
-        return getAll()
-            .filter(
-                app =>
-                    app.enabled !==
-                    false
-            )
-            .length;
-
-    }
-
-
-    function getDisabledCount() {
-
-        return getAll()
-            .filter(
-                app =>
-                    app.enabled ===
-                    false
-            )
-            .length;
-
-    }
-
-
-    /* ========================================================
-       31 — DIAGNOSTICS
+       28 — DIAGNOSTICS
        ======================================================== */
 
     function diagnostics() {
-
-        const apps =
-            getAll();
-
 
         return {
 
@@ -2411,60 +2404,23 @@
             failed:
                 state.failed,
 
+            appCount:
+                getCount(),
 
-            counts: {
+            categories:
+                getCategories(),
 
-                total:
-                    apps.length,
-
-                enabled:
-                    getEnabledCount(),
-
-                disabled:
-                    getDisabledCount(),
-
-                categories:
-                    getCategories()
-                        .length
-
-            },
-
-
-            connections: {
-
-                kernel:
-                    !!getKernel(),
-
-                system:
-                    !!getSystem(),
-
-                appManager:
-                    !!getAppManager(),
-
-                router:
-                    !!getRouter(),
-
-                windowManager:
-                    !!getWindowManager(),
-
-                contract:
-                    !!getContract()
-
-            },
-
+            connections:
+                getConnectionStatus(),
 
             statistics:
                 {
                     ...state.statistics
                 },
 
-
-            categories:
-                getCategories(),
-
-
             apps:
-                apps.map(
+                getAll()
+                .map(
                     app => ({
 
                         id:
@@ -2473,6 +2429,9 @@
                         name:
                             app.name,
 
+                        title:
+                            app.title,
+
                         version:
                             app.version,
 
@@ -2480,25 +2439,24 @@
                             app.category,
 
                         enabled:
-                            app.enabled !==
-                            false,
+                            app.enabled,
+
+                        core:
+                            app.core,
+
+                        system:
+                            app.system,
 
                         dependencies:
                             checkDependencies(
-                                app.id
-                            ),
-
-                        aiEnabled:
-                            app.aiEnabled !==
-                            false
+                                app
+                            )
 
                     })
                 ),
 
-
             timestamp:
-                new Date()
-                    .toISOString()
+                new Date().toISOString()
 
         };
 
@@ -2506,7 +2464,7 @@
 
 
     /* ========================================================
-       32 — HEALTH CHECK
+       29 — HEALTH CHECK
        ======================================================== */
 
     function healthCheck() {
@@ -2514,7 +2472,9 @@
         const problems = [];
 
 
-        if (!getKernel()) {
+        if (
+            !getKernel()
+        ) {
 
             problems.push(
                 "Kernel nicht verbunden."
@@ -2523,7 +2483,9 @@
         }
 
 
-        if (!getSystem()) {
+        if (
+            !getSystem()
+        ) {
 
             problems.push(
                 "System nicht verbunden."
@@ -2532,16 +2494,18 @@
         }
 
 
-        if (!getAppManager()) {
+        if (
+            !getAppContract()
+        ) {
 
             problems.push(
-                "App Manager nicht verbunden."
+                "App Contract nicht verbunden."
             );
 
         }
 
 
-        const brokenDependencies =
+        const dependencyProblems =
             [];
 
 
@@ -2550,7 +2514,7 @@
 
                 const result =
                     checkDependencies(
-                        app.id
+                        app
                     );
 
 
@@ -2558,18 +2522,14 @@
                     !result.valid
                 ) {
 
-                    brokenDependencies.push(
-                        {
-                            appId:
-                                app.id,
+                    dependencyProblems.push({
 
-                            missing:
-                                result.missing,
+                        appId:
+                            app.id,
 
-                            disabled:
-                                result.disabled
-                        }
-                    );
+                        ...result
+
+                    });
 
                 }
 
@@ -2582,27 +2542,21 @@
             healthy:
                 problems.length ===
                 0 &&
-                brokenDependencies.length ===
+                dependencyProblems.length ===
                 0,
 
-            problems:
-                problems,
+            problems,
 
-            brokenDependencies:
-                brokenDependencies,
+            dependencyProblems,
 
             appCount:
                 getCount(),
 
-            enabledCount:
-                getEnabledCount(),
-
-            disabledCount:
-                getDisabledCount(),
+            categories:
+                getCategories(),
 
             timestamp:
-                new Date()
-                    .toISOString()
+                new Date().toISOString()
 
         };
 
@@ -2610,66 +2564,178 @@
 
 
     /* ========================================================
-       33 — CONNECTION STATUS
+       30 — PUBLIC API
        ======================================================== */
 
-    function refreshConnections() {
+    const api = {
 
-        state.connections.kernel =
-            !!getKernel();
+        name:
+            NAME,
 
-        state.connections.system =
-            !!getSystem();
+        version:
+            VERSION,
 
-        state.connections.appManager =
-            !!getAppManager();
-
-        state.connections.router =
-            !!getRouter();
-
-        state.connections.windowManager =
-            !!getWindowManager();
-
-        state.connections.contract =
-            !!getContract();
+        module:
+            MODULE_ID,
 
 
-        return {
-            ...state.connections
-        };
+        /* State */
 
-    }
+        getState:
+            function () {
+
+                return {
+
+                    initialized:
+                        state.initialized,
+
+                    initializing:
+                        state.initializing,
+
+                    ready:
+                        state.ready,
+
+                    failed:
+                        state.failed,
+
+                    appCount:
+                        getCount(),
+
+                    connections:
+                        getConnectionStatus()
+
+                };
+
+            },
 
 
-    function getConnectionStatus() {
+        /* Events */
 
-        return {
+        on,
 
-            kernel:
-                !!getKernel(),
+        off,
 
-            system:
-                !!getSystem(),
+        emit,
 
-            appManager:
-                !!getAppManager(),
 
-            router:
-                !!getRouter(),
+        /* Registration */
 
-            windowManager:
-                !!getWindowManager(),
+        register,
 
-            contract:
-                !!getContract()
+        registerApp,
 
-        };
+        update,
 
-    }
+        remove,
+
+        removeApp,
+
+
+        /* Access */
+
+        get,
+
+        getApp,
+
+        getAll,
+
+        getApps,
+
+        has,
+
+        getCount,
+
+
+        /* Categories */
+
+        getCategories,
+
+        getByCategory,
+
+
+        /* Search */
+
+        search,
+
+
+        /* Status */
+
+        enable,
+
+        enableApp,
+
+        disable,
+
+        disableApp,
+
+
+        /* Dependencies */
+
+        checkDependencies,
+
+        hasPermission,
+
+        hasCapability,
+
+
+        /* Runtime */
+
+        isOpen,
+
+        launch,
+
+
+        /* Persistence */
+
+        save,
+
+        load,
+
+
+        /* Connections */
+
+        refreshConnections,
+
+        getConnectionStatus,
+
+
+        /* Diagnostics */
+
+        diagnostics,
+
+        healthCheck,
+
+
+        /* Statistics */
+
+        getStatistics:
+            function () {
+
+                return {
+                    ...state.statistics
+                };
+
+            }
+
+    };
 
 
     /* ========================================================
-       34 — KERNEL CONNECTION
+       31 — GLOBAL EXPORT
+       ======================================================== */
+
+    window.HalDoAppRegistry =
+        api;
+
+    window.HalDoOSAppRegistry =
+        api;
+
+    HalDoOS.appRegistry =
+        api;
+
+
+    /* ========================================================
+       32 — KERNEL CONNECTION
        ======================================================== */
 
     function connectKernel() {
@@ -2727,7 +2793,7 @@
 
             reportError(
                 exception,
-                "Kernel Verbindung"
+                "Kernel Connection"
             );
 
 
@@ -2739,299 +2805,7 @@
 
 
     /* ========================================================
-       35 — KERNEL EVENTS
-       ======================================================== */
-
-    function connectKernelEvents() {
-
-        const kernel =
-            getKernel();
-
-
-        if (
-            !kernel ||
-            !hasMethod(
-                kernel,
-                "on"
-            )
-        ) {
-
-            return false;
-
-        }
-
-
-        try {
-
-            kernel.on(
-                "kernel:ready",
-                function () {
-
-                    refreshConnections();
-
-                    emit(
-                        "kernel-ready"
-                    );
-
-                }
-            );
-
-
-            return true;
-
-        } catch (exception) {
-
-            reportError(
-                exception,
-                "Kernel Events"
-            );
-
-
-            return false;
-
-        }
-
-    }
-
-
-    /* ========================================================
-       36 — PUBLIC API
-       ======================================================== */
-
-    const api = {
-
-        name:
-            NAME,
-
-        version:
-            VERSION,
-
-        module:
-            MODULE_ID,
-
-
-        /* State */
-
-        getState:
-            function () {
-
-                return {
-
-                    initialized:
-                        state.initialized,
-
-                    initializing:
-                        state.initializing,
-
-                    ready:
-                        state.ready,
-
-                    failed:
-                        state.failed,
-
-                    appCount:
-                        getCount(),
-
-                    enabledCount:
-                        getEnabledCount(),
-
-                    disabledCount:
-                        getDisabledCount(),
-
-                    connections:
-                        getConnectionStatus()
-
-                };
-
-            },
-
-
-        /* Events */
-
-        on:
-            on,
-
-        off:
-            off,
-
-        emit:
-            emit,
-
-
-        /* Registration */
-
-        register:
-            register,
-
-        registerApp:
-            registerApp,
-
-        update:
-            update,
-
-        updateApp:
-            updateApp,
-
-        remove:
-            remove,
-
-        unregister:
-            unregister,
-
-
-        /* Access */
-
-        get:
-            get,
-
-        getApp:
-            getApp,
-
-        getAll:
-            getAll,
-
-        getApps:
-            getApps,
-
-        has:
-            has,
-
-
-        /* Enable */
-
-        enable:
-            enable,
-
-        disable:
-            disable,
-
-        isEnabled:
-            isEnabled,
-
-
-        /* Categories */
-
-        getByCategory:
-            getByCategory,
-
-        getCategories:
-            getCategories,
-
-
-        /* Search */
-
-        search:
-            search,
-
-
-        /* Dependencies */
-
-        checkDependencies:
-            checkDependencies,
-
-        getOptionalDependencies:
-            getOptionalDependencies,
-
-
-        /* Permissions */
-
-        getPermissions:
-            getPermissions,
-
-        hasPermission:
-            hasPermission,
-
-
-        /* Features */
-
-        getFeatures:
-            getFeatures,
-
-        hasFeature:
-            hasFeature,
-
-
-        /* Languages */
-
-        getLanguages:
-            getLanguages,
-
-
-        /* AI */
-
-        getAICapabilities:
-            getAICapabilities,
-
-
-        /* Navigation */
-
-        getAppRoute:
-            getAppRoute,
-
-
-        /* Window */
-
-        getWindowConfiguration:
-            getWindowConfiguration,
-
-
-        /* Counts */
-
-        getCount:
-            getCount,
-
-        getEnabledCount:
-            getEnabledCount,
-
-        getDisabledCount:
-            getDisabledCount,
-
-
-        /* Connections */
-
-        connectKernel:
-            connectKernel,
-
-        refreshConnections:
-            refreshConnections,
-
-        getConnectionStatus:
-            getConnectionStatus,
-
-
-        /* Diagnostics */
-
-        diagnostics:
-            diagnostics,
-
-        healthCheck:
-            healthCheck,
-
-
-        /* Error */
-
-        reportError:
-            reportError
-
-    };
-
-
-    /* ========================================================
-       37 — GLOBAL EXPORT
-       ======================================================== */
-
-    window.HalDoAppRegistry =
-        api;
-
-    window.HalDoOSAppRegistry =
-        api;
-
-    HalDoOS.appRegistry =
-        api;
-
-
-    /* ========================================================
-       38 — INITIALIZATION
+       33 — INITIALIZATION
        ======================================================== */
 
     async function initialize() {
@@ -3077,14 +2851,18 @@
 
         connectKernel();
 
-        connectKernelEvents();
+        connectAppContract();
 
 
         /*
-         * Kategorien neu aufbauen.
+         * Bereits gespeicherte Registry-Daten
+         * vorsichtig laden.
          */
 
-        rebuildCategories();
+        load();
+
+
+        rebuildCategoryIndex();
 
 
         state.ready =
@@ -3111,8 +2889,7 @@
 
 
         log(
-            "Application Registry bereit.",
-            VERSION,
+            "HalDo AI OS 20 App Registry bereit.",
             "Apps:",
             getCount()
         );
@@ -3124,7 +2901,7 @@
 
 
     /* ========================================================
-       39 — BOOT
+       34 — BOOT
        ======================================================== */
 
     function boot() {
@@ -3152,7 +2929,7 @@
 
 
     /* ========================================================
-       40 — DOM START
+       35 — DOM START
        ======================================================== */
 
     if (
@@ -3177,7 +2954,7 @@
 
 
     /* ========================================================
-       41 — FINAL EXPORT
+       FINAL
        ======================================================== */
 
     HalDoOS.appRegistry =
@@ -3190,9 +2967,10 @@
         api;
 
 
-    /* ========================================================
-       END
-       HALDO AI OS 20 APPLICATION REGISTRY
-       ======================================================== */
-
 })(window, document);
+
+
+/* ============================================================
+   END
+   HALDO AI OS 20 APPLICATION REGISTRY
+   ============================================================ */
