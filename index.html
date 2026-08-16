@@ -55767,8 +55767,8 @@
             }
      <!-- =========================================================
          HALDO AI OS 20
-         APPLICATION DATA / STATE ENGINE
-         TEIL 60
+         APPLICATION SERVICE / DEPENDENCY ENGINE
+         TEIL 58
          ========================================================= -->
 
     <script>
@@ -55779,50 +55779,23 @@
 
 
         /* =====================================================
-           ENGINE REFERENCES
-           ===================================================== */
-
-        const manifestEngine =
-            window.HalDoAppManifest20 ||
-            null;
-
-
-        const storageEngine =
-            window.HalDoStorage20 ||
-            window.HalDoStorageManager20 ||
-            null;
-
-
-        /* =====================================================
            STATE
            ===================================================== */
 
-        const appStates =
+        const services =
             new Map();
 
 
-        const history =
+        const appDependencies =
             new Map();
 
 
-        const listeners =
+        const serviceWaiters =
             new Map();
 
 
-        const transactions =
+        const health =
             new Map();
-
-
-        /* =====================================================
-           CONSTANTS
-           ===================================================== */
-
-        const VERSION =
-            "20.0.0";
-
-
-        const MAX_HISTORY =
-            100;
 
 
         /* =====================================================
@@ -55836,51 +55809,6 @@
             return String(
                 value || ""
             ).trim();
-
-        }
-
-
-        function clone(
-            value
-        ) {
-
-            if (
-                value ===
-                undefined
-            ) {
-
-                return undefined;
-
-            }
-
-
-            try {
-
-                return structuredClone(
-                    value
-                );
-
-            } catch (
-                error
-            ) {
-
-                try {
-
-                    return JSON.parse(
-                        JSON.stringify(
-                            value
-                        )
-                    );
-
-                } catch (
-                    fallbackError
-                ) {
-
-                    return value;
-
-                }
-
-            }
 
         }
 
@@ -55906,7 +55834,7 @@
             ) {
 
                 console.warn(
-                    "[HalDo App State 20]",
+                    "[HalDo Service Engine 20]",
                     error
                 );
 
@@ -55915,261 +55843,62 @@
         }
 
 
-        function ensureApp(
-            appId
+        /* =====================================================
+           SERVICE STATUS
+           ===================================================== */
+
+        const STATUS = {
+
+            REGISTERED:
+                "registered",
+
+            STARTING:
+                "starting",
+
+            READY:
+                "ready",
+
+            STOPPING:
+                "stopping",
+
+            STOPPED:
+                "stopped",
+
+            ERROR:
+                "error",
+
+            UNAVAILABLE:
+                "unavailable"
+
+        };
+
+
+        /* =====================================================
+           REGISTER SERVICE
+           ===================================================== */
+
+        function register(
+            definition
         ) {
 
-            appId =
-                normalize(
-                    appId
-                );
-
-
-            if (!appId) {
+            if (
+                !definition ||
+                typeof definition !==
+                "object"
+            ) {
 
                 return null;
 
             }
 
 
-            if (
-                !appStates.has(
-                    appId
-                )
-            ) {
-
-                create(
-                    appId
-                );
-
-            }
-
-
-            return appStates.get(
-                appId
-            );
-
-        }
-
-
-        function createPathObject(
-            root,
-            path,
-            value
-        ) {
-
-            const parts =
+            const id =
                 normalize(
-                    path
-                )
-                    .split(".")
-                    .filter(
-                        Boolean
-                    );
-
-
-            if (!parts.length) {
-
-                return;
-
-            }
-
-
-            let cursor =
-                root;
-
-
-            for (
-                let index = 0;
-                index < parts.length - 1;
-                index++
-            ) {
-
-                const key =
-                    parts[index];
-
-
-                if (
-                    !cursor[key] ||
-                    typeof cursor[key] !==
-                    "object"
-                ) {
-
-                    cursor[key] =
-                        {};
-
-                }
-
-
-                cursor =
-                    cursor[key];
-
-            }
-
-
-            cursor[
-                parts[
-                    parts.length - 1
-                ]
-            ] =
-                clone(
-                    value
-                );
-
-        }
-
-
-        function readPath(
-            root,
-            path
-        ) {
-
-            const parts =
-                normalize(
-                    path
-                )
-                    .split(".")
-                    .filter(
-                        Boolean
-                    );
-
-
-            if (!parts.length) {
-
-                return root;
-
-            }
-
-
-            let cursor =
-                root;
-
-
-            for (
-                const part of parts
-            ) {
-
-                if (
-                    cursor ===
-                    null ||
-                    cursor ===
-                    undefined
-                ) {
-
-                    return undefined;
-
-                }
-
-
-                cursor =
-                    cursor[
-                        part
-                    ];
-
-            }
-
-
-            return cursor;
-
-        }
-
-
-        function deletePath(
-            root,
-            path
-        ) {
-
-            const parts =
-                normalize(
-                    path
-                )
-                    .split(".")
-                    .filter(
-                        Boolean
-                    );
-
-
-            if (!parts.length) {
-
-                return false;
-
-            }
-
-
-            let cursor =
-                root;
-
-
-            for (
-                let index = 0;
-                index < parts.length - 1;
-                index++
-            ) {
-
-                if (
-                    !cursor ||
-                    typeof cursor !==
-                    "object"
-                ) {
-
-                    return false;
-
-                }
-
-
-                cursor =
-                    cursor[
-                        parts[index]
-                    ];
-
-            }
-
-
-            const key =
-                parts[
-                    parts.length - 1
-                ];
-
-
-            if (
-                cursor &&
-                Object.prototype.hasOwnProperty.call(
-                    cursor,
-                    key
-                )
-            ) {
-
-                delete cursor[
-                    key
-                ];
-
-                return true;
-
-            }
-
-
-            return false;
-
-        }
-
-
-        /* =====================================================
-           CREATE APP STATE
-           ===================================================== */
-
-        function create(
-            appId,
-            initialState = {},
-            options = {}
-        ) {
-
-            appId =
-                normalize(
-                    appId
+                    definition.id
                 );
 
 
-            if (!appId) {
+            if (!id) {
 
                 return null;
 
@@ -56177,54 +55906,96 @@
 
 
             const existing =
-                appStates.get(
-                    appId
+                services.get(
+                    id
                 );
 
 
-            if (
-                existing
-            ) {
+            if (existing) {
 
                 return existing;
 
             }
 
 
-            const state = {
+            const service = {
 
-                appId,
+                id,
+
+                name:
+                    definition.name ||
+                    id,
+
+                description:
+                    definition.description ||
+                    "",
 
                 version:
-                    Number.isFinite(
-                        options.version
+                    definition.version ||
+                    "1.0.0",
+
+                status:
+                    STATUS.REGISTERED,
+
+                provider:
+                    definition.provider ||
+                    "HalDo AI OS",
+
+                dependencies:
+                    Array.isArray(
+                        definition.dependencies
                     )
-                        ? options.version
-                        : 1,
+                        ? [
+                            ...definition.dependencies
+                        ]
+                        : [],
 
-                data:
-                    clone(
-                        initialState ||
-                        {}
-                    ),
+                init:
+                    typeof definition.init ===
+                    "function"
+                        ? definition.init
+                        : null,
 
-                createdAt:
+                start:
+                    typeof definition.start ===
+                    "function"
+                        ? definition.start
+                        : null,
+
+                stop:
+                    typeof definition.stop ===
+                    "function"
+                        ? definition.stop
+                        : null,
+
+                destroy:
+                    typeof definition.destroy ===
+                    "function"
+                        ? definition.destroy
+                        : null,
+
+                healthCheck:
+                    typeof definition.healthCheck ===
+                    "function"
+                        ? definition.healthCheck
+                        : null,
+
+                api:
+                    definition.api ||
+                    {},
+
+                metadata:
+                    definition.metadata ||
+                    {},
+
+                registeredAt:
                     Date.now(),
 
-                updatedAt:
-                    Date.now(),
+                startedAt:
+                    null,
 
-                dirty:
-                    false,
-
-                restored:
-                    false,
-
-                saving:
-                    false,
-
-                loading:
-                    false,
+                stoppedAt:
+                    null,
 
                 error:
                     null
@@ -56232,585 +56003,190 @@
             };
 
 
-            appStates.set(
-                appId,
-                state
+            services.set(
+                id,
+                service
             );
 
 
-            history.set(
-                appId,
+            health.set(
+                id,
                 {
 
-                    past: [],
+                    status:
+                        STATUS.REGISTERED,
 
-                    future: []
+                    checkedAt:
+                        Date.now(),
 
-                }
-            );
-
-
-            listeners.set(
-                appId,
-                new Set()
-            );
-
-
-            emit(
-                "app:state:created",
-                {
-
-                    appId,
-
-                    state:
-                        clone(
-                            state
-                        )
-
-                }
-            );
-
-
-            return state;
-
-        }
-
-
-        /* =====================================================
-           GET APP STATE
-           ===================================================== */
-
-        function getState(
-            appId
-        ) {
-
-            const state =
-                ensureApp(
-                    appId
-                );
-
-
-            if (!state) {
-
-                return null;
-
-            }
-
-
-            return clone(
-                state.data
-            );
-
-        }
-
-
-        /* =====================================================
-           GET INTERNAL STATE OBJECT
-           ===================================================== */
-
-        function getRecord(
-            appId
-        ) {
-
-            return ensureApp(
-                appId
-            );
-
-        }
-
-
-        /* =====================================================
-           SET VALUE
-           ===================================================== */
-
-        function set(
-            appId,
-            path,
-            value,
-            options = {}
-        ) {
-
-            const state =
-                ensureApp(
-                    appId
-                );
-
-
-            if (!state) {
-
-                return false;
-
-            }
-
-
-            const normalizedPath =
-                normalize(
-                    path
-                );
-
-
-            if (!normalizedPath) {
-
-                return false;
-
-            }
-
-
-            const before =
-                clone(
-                    state.data
-                );
-
-
-            createPathObject(
-                state.data,
-                normalizedPath,
-                value
-            );
-
-
-            state.updatedAt =
-                Date.now();
-
-
-            state.dirty =
-                true;
-
-
-            state.error =
-                null;
-
-
-            if (
-                options.history !==
-                false
-            ) {
-
-                pushHistory(
-                    appId,
-                    {
-
-                        before,
-
-                        after:
-                            clone(
-                                state.data
-                            ),
-
-                        path:
-                            normalizedPath,
-
-                        timestamp:
-                            Date.now()
-
-                    }
-                );
-
-            }
-
-
-            notify(
-                appId,
-                {
-
-                    type:
-                        "set",
-
-                    path:
-                        normalizedPath,
-
-                    value:
-                        clone(
-                            value
-                        ),
-
-                    state:
-                        clone(
-                            state.data
-                        )
+                    healthy:
+                        false
 
                 }
             );
 
 
             emit(
-                "app:state:changed",
+                "service:registered",
                 {
 
-                    appId,
-
-                    type:
-                        "set",
-
-                    path:
-                        normalizedPath,
-
-                    value:
-                        clone(
-                            value
-                        )
+                    service
 
                 }
             );
 
 
-            if (
-                options.save ===
-                true
-            ) {
-
-                save(
-                    appId
-                );
-
-            }
-
-
-            return true;
+            return service;
 
         }
 
 
         /* =====================================================
-           GET VALUE
+           GET SERVICE
            ===================================================== */
 
         function get(
-            appId,
-            path,
-            fallback
+            serviceId
         ) {
 
-            const state =
-                ensureApp(
-                    appId
-                );
-
-
-            if (!state) {
-
-                return fallback;
-
-            }
-
-
-            const value =
-                readPath(
-                    state.data,
-                    path
-                );
-
-
-            return value ===
-                undefined
-                    ? fallback
-                    : clone(
-                        value
-                    );
-
-        }
-
-
-        /* =====================================================
-           DELETE VALUE
-           ===================================================== */
-
-        function remove(
-            appId,
-            path,
-            options = {}
-        ) {
-
-            const state =
-                ensureApp(
-                    appId
-                );
-
-
-            if (!state) {
-
-                return false;
-
-            }
-
-
-            const before =
-                clone(
-                    state.data
-                );
-
-
-            const removed =
-                deletePath(
-                    state.data,
-                    path
-                );
-
-
-            if (!removed) {
-
-                return false;
-
-            }
-
-
-            state.updatedAt =
-                Date.now();
-
-
-            state.dirty =
-                true;
-
-
-            if (
-                options.history !==
-                false
-            ) {
-
-                pushHistory(
-                    appId,
-                    {
-
-                        before,
-
-                        after:
-                            clone(
-                                state.data
-                            ),
-
-                        path:
-                            normalize(
-                                path
-                            ),
-
-                        timestamp:
-                            Date.now()
-
-                    }
-                );
-
-            }
-
-
-            notify(
-                appId,
-                {
-
-                    type:
-                        "remove",
-
-                    path:
-                        normalize(
-                            path
-                        ),
-
-                    state:
-                        clone(
-                            state.data
-                        )
-
-                }
-            );
-
-
-            emit(
-                "app:state:changed",
-                {
-
-                    appId,
-
-                    type:
-                        "remove",
-
-                    path:
-                        normalize(
-                            path
-                        )
-
-                }
-            );
-
-
-            return true;
-
-        }
-
-
-        /* =====================================================
-           MERGE STATE
-           ===================================================== */
-
-        function merge(
-            appId,
-            values = {},
-            options = {}
-        ) {
-
-            const state =
-                ensureApp(
-                    appId
-                );
-
-
-            if (!state) {
-
-                return false;
-
-            }
-
-
-            if (
-                !values ||
-                typeof values !==
-                "object"
-            ) {
-
-                return false;
-
-            }
-
-
-            const before =
-                clone(
-                    state.data
-                );
-
-
-            state.data =
-                deepMerge(
-                    state.data,
-                    values
-                );
-
-
-            state.updatedAt =
-                Date.now();
-
-
-            state.dirty =
-                true;
-
-
-            if (
-                options.history !==
-                false
-            ) {
-
-                pushHistory(
-                    appId,
-                    {
-
-                        before,
-
-                        after:
-                            clone(
-                                state.data
-                            ),
-
-                        path:
-                            "*",
-
-                        timestamp:
-                            Date.now()
-
-                    }
-                );
-
-            }
-
-
-            notify(
-                appId,
-                {
-
-                    type:
-                        "merge",
-
-                    values:
-                        clone(
-                            values
-                        ),
-
-                    state:
-                        clone(
-                            state.data
-                        )
-
-                }
-            );
-
-
-            emit(
-                "app:state:changed",
-                {
-
-                    appId,
-
-                    type:
-                        "merge"
-
-                }
-            );
-
-
-            return true;
-
-        }
-
-
-        /* =====================================================
-           DEEP MERGE
-           ===================================================== */
-
-        function deepMerge(
-            target,
-            source
-        ) {
-
-            const result =
-                clone(
-                    target
+            return (
+                services.get(
+                    normalize(
+                        serviceId
+                    )
                 ) ||
-                {};
+                null
+            );
+
+        }
 
 
-            Object.entries(
-                source
-            ).forEach(
-                (
-                    [
-                        key,
-                        value
-                    ]
-                ) => {
+        /* =====================================================
+           HAS SERVICE
+           ===================================================== */
+
+        function has(
+            serviceId
+        ) {
+
+            return !!get(
+                serviceId
+            );
+
+        }
+
+
+        /* =====================================================
+           SERVICE READY
+           ===================================================== */
+
+        function isReady(
+            serviceId
+        ) {
+
+            const service =
+                get(
+                    serviceId
+                );
+
+
+            return !!(
+                service &&
+                service.status ===
+                STATUS.READY
+            );
+
+        }
+
+
+        /* =====================================================
+           DEPENDENCY CHECK
+           ===================================================== */
+
+        function checkDependencies(
+            dependencies = []
+        ) {
+
+            const result = {
+
+                ready:
+                    true,
+
+                missing: [],
+
+                unavailable: [],
+
+                error: []
+
+            };
+
+
+            dependencies.forEach(
+                dependency => {
+
+                    const id =
+                        typeof dependency ===
+                        "string"
+                            ? dependency
+                            : dependency &&
+                              dependency.id;
+
+
+                    if (!id) {
+
+                        return;
+
+                    }
+
+
+                    const service =
+                        get(
+                            id
+                        );
+
+
+                    if (!service) {
+
+                        result.ready =
+                            false;
+
+                        result.missing.push(
+                            id
+                        );
+
+                        return;
+
+                    }
+
 
                     if (
-                        value &&
-                        typeof value ===
-                        "object" &&
-                        !Array.isArray(
-                            value
-                        ) &&
-                        result[key] &&
-                        typeof result[key] ===
-                        "object" &&
-                        !Array.isArray(
-                            result[key]
-                        )
+                        service.status ===
+                        STATUS.ERROR
                     ) {
 
-                        result[key] =
-                            deepMerge(
-                                result[key],
-                                value
-                            );
+                        result.ready =
+                            false;
 
-                    } else {
+                        result.error.push(
+                            id
+                        );
 
-                        result[key] =
-                            clone(
-                                value
-                            );
+                        return;
+
+                    }
+
+
+                    if (
+                        service.status !==
+                        STATUS.READY
+                    ) {
+
+                        result.ready =
+                            false;
+
+                        result.unavailable.push(
+                            id
+                        );
 
                     }
 
@@ -56824,664 +56200,155 @@
 
 
         /* =====================================================
-           RESET STATE
+           WAIT FOR SERVICE
            ===================================================== */
 
-        function reset(
-            appId,
-            values = {},
+        function waitFor(
+            serviceId,
             options = {}
         ) {
 
-            const state =
-                ensureApp(
-                    appId
+            serviceId =
+                normalize(
+                    serviceId
                 );
 
 
-            if (!state) {
+            if (
+                isReady(
+                    serviceId
+                )
+            ) {
 
-                return false;
+                return Promise.resolve(
+                    get(
+                        serviceId
+                    )
+                );
 
             }
 
 
-            const before =
-                clone(
-                    state.data
-                );
+            const timeout =
+                Number.isFinite(
+                    options.timeout
+                )
+                    ? options.timeout
+                    : 10000;
 
 
-            state.data =
-                clone(
-                    values ||
-                    {}
-                );
+            return new Promise(
+                (
+                    resolve,
+                    reject
+                ) => {
 
+                    if (
+                        !serviceWaiters.has(
+                            serviceId
+                        )
+                    ) {
 
-            state.updatedAt =
-                Date.now();
-
-
-            state.dirty =
-                true;
-
-
-            if (
-                options.history !==
-                false
-            ) {
-
-                pushHistory(
-                    appId,
-                    {
-
-                        before,
-
-                        after:
-                            clone(
-                                state.data
-                            ),
-
-                        path:
-                            "*",
-
-                        timestamp:
-                            Date.now()
+                        serviceWaiters.set(
+                            serviceId,
+                            new Set()
+                        );
 
                     }
-                );
-
-            }
 
 
-            notify(
-                appId,
-                {
+                    const waiter = {
 
-                    type:
-                        "reset",
+                        resolve,
 
-                    state:
-                        clone(
-                            state.data
+                        reject,
+
+                        timer:
+                            setTimeout(
+                                () => {
+
+                                    const set =
+                                        serviceWaiters.get(
+                                            serviceId
+                                        );
+
+
+                                    if (set) {
+
+                                        set.delete(
+                                            waiter
+                                        );
+
+                                    }
+
+
+                                    reject(
+                                        new Error(
+                                            `Service timeout: ${serviceId}`
+                                        )
+                                    );
+
+                                },
+                                timeout
+                            )
+
+                    };
+
+
+                    serviceWaiters
+                        .get(
+                            serviceId
                         )
+                        .add(
+                            waiter
+                        );
 
                 }
             );
-
-
-            emit(
-                "app:state:reset",
-                {
-
-                    appId
-
-                }
-            );
-
-
-            return true;
 
         }
 
 
         /* =====================================================
-           HISTORY
+           RESOLVE WAITERS
            ===================================================== */
 
-        function pushHistory(
-            appId,
-            entry
+        function resolveWaiters(
+            serviceId,
+            service
         ) {
 
-            const record =
-                history.get(
-                    appId
+            const set =
+                serviceWaiters.get(
+                    serviceId
                 );
 
 
-            if (!record) {
+            if (!set) {
 
                 return;
 
             }
 
 
-            record.past.push(
-                clone(
-                    entry
-                )
+            serviceWaiters.delete(
+                serviceId
             );
-
-
-            if (
-                record.past.length >
-                MAX_HISTORY
-            ) {
-
-                record.past.shift();
-
-            }
-
-
-            record.future = [];
-
-        }
-
-
-        /* =====================================================
-           UNDO
-           ===================================================== */
-
-        function undo(
-            appId
-        ) {
-
-            const state =
-                ensureApp(
-                    appId
-                );
-
-
-            const record =
-                history.get(
-                    normalize(
-                        appId
-                    )
-                );
-
-
-            if (
-                !state ||
-                !record ||
-                !record.past.length
-            ) {
-
-                return false;
-
-            }
-
-
-            const entry =
-                record.past.pop();
-
-
-            record.future.push(
-                clone(
-                    entry
-                )
-            );
-
-
-            state.data =
-                clone(
-                    entry.before
-                );
-
-
-            state.updatedAt =
-                Date.now();
-
-
-            state.dirty =
-                true;
-
-
-            notify(
-                appId,
-                {
-
-                    type:
-                        "undo",
-
-                    state:
-                        clone(
-                            state.data
-                        )
-
-                }
-            );
-
-
-            emit(
-                "app:state:undo",
-                {
-
-                    appId
-
-                }
-            );
-
-
-            return true;
-
-        }
-
-
-        /* =====================================================
-           REDO
-           ===================================================== */
-
-        function redo(
-            appId
-        ) {
-
-            const state =
-                ensureApp(
-                    appId
-                );
-
-
-            const record =
-                history.get(
-                    normalize(
-                        appId
-                    )
-                );
-
-
-            if (
-                !state ||
-                !record ||
-                !record.future.length
-            ) {
-
-                return false;
-
-            }
-
-
-            const entry =
-                record.future.pop();
-
-
-            record.past.push(
-                clone(
-                    entry
-                )
-            );
-
-
-            state.data =
-                clone(
-                    entry.after
-                );
-
-
-            state.updatedAt =
-                Date.now();
-
-
-            state.dirty =
-                true;
-
-
-            notify(
-                appId,
-                {
-
-                    type:
-                        "redo",
-
-                    state:
-                        clone(
-                            state.data
-                        )
-
-                }
-            );
-
-
-            emit(
-                "app:state:redo",
-                {
-
-                    appId
-
-                }
-            );
-
-
-            return true;
-
-        }
-
-
-        /* =====================================================
-           TRANSACTIONS
-           ===================================================== */
-
-        function beginTransaction(
-            appId
-        ) {
-
-            const state =
-                ensureApp(
-                    appId
-                );
-
-
-            if (!state) {
-
-                return null;
-
-            }
-
-
-            const id =
-                `${normalize(appId)}:${Date.now()}:${Math.random()
-                    .toString(36)
-                    .slice(2)}`;
-
-
-            transactions.set(
-                id,
-                {
-
-                    id,
-
-                    appId:
-                        normalize(
-                            appId
-                        ),
-
-                    before:
-                        clone(
-                            state.data
-                        ),
-
-                    startedAt:
-                        Date.now(),
-
-                    active:
-                        true
-
-                }
-            );
-
-
-            return id;
-
-        }
-
-
-        function commitTransaction(
-            transactionId
-        ) {
-
-            const transaction =
-                transactions.get(
-                    transactionId
-                );
-
-
-            if (
-                !transaction ||
-                !transaction.active
-            ) {
-
-                return false;
-
-            }
-
-
-            const state =
-                ensureApp(
-                    transaction.appId
-                );
-
-
-            if (!state) {
-
-                return false;
-
-            }
-
-
-            pushHistory(
-                transaction.appId,
-                {
-
-                    before:
-                        transaction.before,
-
-                    after:
-                        clone(
-                            state.data
-                        ),
-
-                    path:
-                        "*",
-
-                    transactionId,
-
-                    timestamp:
-                        Date.now()
-
-                }
-            );
-
-
-            transaction.active =
-                false;
-
-
-            transactions.delete(
-                transactionId
-            );
-
-
-            emit(
-                "app:state:transaction:commit",
-                {
-
-                    transactionId,
-
-                    appId:
-                        transaction.appId
-
-                }
-            );
-
-
-            return true;
-
-        }
-
-
-        function rollbackTransaction(
-            transactionId
-        ) {
-
-            const transaction =
-                transactions.get(
-                    transactionId
-                );
-
-
-            if (
-                !transaction ||
-                !transaction.active
-            ) {
-
-                return false;
-
-            }
-
-
-            const state =
-                ensureApp(
-                    transaction.appId
-                );
-
-
-            if (!state) {
-
-                return false;
-
-            }
-
-
-            state.data =
-                clone(
-                    transaction.before
-                );
-
-
-            state.updatedAt =
-                Date.now();
-
-
-            state.dirty =
-                true;
-
-
-            transaction.active =
-                false;
-
-
-            transactions.delete(
-                transactionId
-            );
-
-
-            notify(
-                transaction.appId,
-                {
-
-                    type:
-                        "rollback",
-
-                    state:
-                        clone(
-                            state.data
-                        )
-
-                }
-            );
-
-
-            emit(
-                "app:state:transaction:rollback",
-                {
-
-                    transactionId,
-
-                    appId:
-                        transaction.appId
-
-                }
-            );
-
-
-            return true;
-
-        }
-
-
-        /* =====================================================
-           LISTENERS
-           ===================================================== */
-
-        function subscribe(
-            appId,
-            callback
-        ) {
-
-            appId =
-                normalize(
-                    appId
-                );
-
-
-            if (
-                typeof callback !==
-                "function"
-            ) {
-
-                return () => {};
-
-            }
-
-
-            ensureApp(
-                appId
-            );
-
-
-            const setOfListeners =
-                listeners.get(
-                    appId
-                );
-
-
-            setOfListeners.add(
-                callback
-            );
-
-
-            return () => {
-
-                setOfListeners.delete(
-                    callback
-                );
-
-            };
-
-        }
-
-
-        function notify(
-            appId,
-            payload
-        ) {
-
-            const setOfListeners =
-                listeners.get(
-                    normalize(
-                        appId
-                    )
-                );
-
-
-            if (!setOfListeners) {
-
-                return;
-
-            }
 
 
             [
-                ...setOfListeners
+                ...set
             ].forEach(
-                callback => {
+                waiter => {
 
-                    try {
+                    clearTimeout(
+                        waiter.timer
+                    );
 
-                        callback(
-                            {
 
-                                appId:
-                                    normalize(
-                                        appId
-                                    ),
-
-                                ...payload
-
-                            }
-                        );
-
-                    } catch (
-                        error
-                    ) {
-
-                        console.warn(
-                            "[HalDo App State 20]",
-                            error
-                        );
-
-                    }
+                    waiter.resolve(
+                        service
+                    );
 
                 }
             );
@@ -57490,182 +56357,172 @@
 
 
         /* =====================================================
-           PERSISTENCE KEY
+           REJECT WAITERS
            ===================================================== */
 
-        function getStorageKey(
-            appId
+        function rejectWaiters(
+            serviceId,
+            error
         ) {
 
-            const manifest =
-                manifestEngine &&
-                typeof manifestEngine.get ===
-                "function"
-                    ? manifestEngine.get(
-                        appId
-                    )
-                    : null;
+            const set =
+                serviceWaiters.get(
+                    serviceId
+                );
 
 
-            return (
-                manifest &&
-                manifest.storage &&
-                manifest.storage.namespace
-                    ? manifest.storage.namespace
-                    : `haldo:app:${normalize(appId)}:state`
+            if (!set) {
+
+                return;
+
+            }
+
+
+            serviceWaiters.delete(
+                serviceId
+            );
+
+
+            [
+                ...set
+            ].forEach(
+                waiter => {
+
+                    clearTimeout(
+                        waiter.timer
+                    );
+
+
+                    waiter.reject(
+                        error
+                    );
+
+                }
             );
 
         }
 
 
         /* =====================================================
-           SAVE
+           INIT SERVICE
            ===================================================== */
 
-        async function save(
-            appId
+        async function initialize(
+            serviceId,
+            context = {}
         ) {
 
-            const state =
-                ensureApp(
-                    appId
+            const service =
+                get(
+                    serviceId
                 );
 
 
-            if (!state) {
+            if (!service) {
 
-                return false;
+                throw new Error(
+                    `Service not found: ${serviceId}`
+                );
 
             }
 
 
             if (
-                state.saving
+                service.status ===
+                STATUS.READY
             ) {
 
-                return false;
+                return service;
 
             }
 
 
-            state.saving =
-                true;
+            if (
+                service.status ===
+                STATUS.STARTING
+            ) {
+
+                return waitFor(
+                    serviceId
+                );
+
+            }
+
+
+            const dependencies =
+                checkDependencies(
+                    service.dependencies
+                );
+
+
+            if (
+                !dependencies.ready
+            ) {
+
+                service.status =
+                    STATUS.UNAVAILABLE;
+
+
+                const error =
+                    new Error(
+                        `Dependencies unavailable for ${serviceId}`
+                    );
+
+
+                service.error =
+                    error;
+
+
+                emit(
+                    "service:unavailable",
+                    {
+
+                        service,
+
+                        dependencies
+
+                    }
+                );
+
+
+                throw error;
+
+            }
+
+
+            service.status =
+                STATUS.STARTING;
+
+
+            service.error =
+                null;
+
+
+            emit(
+                "service:starting",
+                {
+
+                    service
+
+                }
+            );
 
 
             try {
 
-                const key =
-                    getStorageKey(
-                        appId
-                    );
-
-
-                const payload = {
-
-                    schemaVersion:
-                        VERSION,
-
-                    appId:
-                        state.appId,
-
-                    version:
-                        state.version,
-
-                    data:
-                        clone(
-                            state.data
-                        ),
-
-                    savedAt:
-                        Date.now()
-
-                };
-
-
-                let saved =
-                    false;
-
-
                 if (
-                    storageEngine
+                    service.init
                 ) {
 
-                    if (
-                        typeof storageEngine.set ===
-                        "function"
-                    ) {
-
-                        await storageEngine.set(
-                            key,
-                            payload
-                        );
-
-                        saved =
-                            true;
-
-                    } else if (
-                        typeof storageEngine.save ===
-                        "function"
-                    ) {
-
-                        await storageEngine.save(
-                            key,
-                            payload
-                        );
-
-                        saved =
-                            true;
-
-                    }
-
-                }
-
-
-                if (!saved) {
-
-                    try {
-
-                        localStorage.setItem(
-                            key,
-                            JSON.stringify(
-                                payload
-                            )
-                        );
-
-
-                        saved =
-                            true;
-
-                    } catch (
-                        localError
-                    ) {
-
-                        saved =
-                            false;
-
-                    }
-
-                }
-
-
-                if (
-                    saved
-                ) {
-
-                    state.dirty =
-                        false;
-
-                    state.error =
-                        null;
-
-
-                    emit(
-                        "app:state:saved",
+                    await service.init(
                         {
 
-                            appId,
+                            service,
 
-                            key
+                            context,
+
+                            engine:
+                                publicAPI
 
                         }
                     );
@@ -57673,244 +56530,93 @@
                 }
 
 
-                return saved;
+                if (
+                    service.start
+                ) {
 
-            } catch (
-                error
-            ) {
+                    await service.start(
+                        {
 
-                state.error =
-                    error;
+                            service,
 
+                            context,
 
-                emit(
-                    "app:state:save:error",
-                    {
+                            engine:
+                                publicAPI
 
-                        appId,
-
-                        error
-
-                    }
-                );
-
-
-                return false;
-
-            } finally {
-
-                state.saving =
-                    false;
-
-            }
-
-        }
-
-
-        /* =====================================================
-           RESTORE
-           ===================================================== */
-
-        async function restore(
-            appId
-        ) {
-
-            const state =
-                ensureApp(
-                    appId
-                );
-
-
-            if (!state) {
-
-                return false;
-
-            }
-
-
-            state.loading =
-                true;
-
-
-            try {
-
-                const key =
-                    getStorageKey(
-                        appId
+                        }
                     );
 
-
-                let payload =
-                    null;
-
-
-                if (
-                    storageEngine
-                ) {
-
-                    if (
-                        typeof storageEngine.get ===
-                        "function"
-                    ) {
-
-                        payload =
-                            await storageEngine.get(
-                                key
-                            );
-
-                    } else if (
-                        typeof storageEngine.load ===
-                        "function"
-                    ) {
-
-                        payload =
-                            await storageEngine.load(
-                                key
-                            );
-
-                    }
-
                 }
 
 
-                if (
-                    payload ===
-                    null ||
-                    payload ===
-                    undefined
-                ) {
-
-                    try {
-
-                        const raw =
-                            localStorage.getItem(
-                                key
-                            );
+                service.status =
+                    STATUS.READY;
 
 
-                        if (raw) {
-
-                            payload =
-                                JSON.parse(
-                                    raw
-                                );
-
-                            }
-
-                    } catch (
-                        localError
-                    ) {
-
-                        payload =
-                            null;
-
-                    }
-
-                }
-
-
-                if (
-                    !payload ||
-                    typeof payload !==
-                    "object"
-                ) {
-
-                    state.restored =
-                        false;
-
-                    return false;
-
-                }
-
-
-                if (
-                    payload.data !==
-                    undefined
-                ) {
-
-                    state.data =
-                        clone(
-                            payload.data
-                        );
-
-                } else {
-
-                    state.data =
-                        clone(
-                            payload
-                        );
-
-                }
-
-
-                if (
-                    Number.isFinite(
-                        payload.version
-                    )
-                ) {
-
-                    state.version =
-                        payload.version;
-
-                }
-
-
-                state.restored =
-                    true;
-
-                state.dirty =
-                    false;
-
-                state.error =
-                    null;
-
-                state.updatedAt =
+                service.startedAt =
                     Date.now();
 
 
-                notify(
-                    appId,
+                health.set(
+                    service.id,
                     {
 
-                        type:
-                            "restore",
+                        status:
+                            STATUS.READY,
 
-                        state:
-                            clone(
-                                state.data
-                            )
+                        checkedAt:
+                            Date.now(),
+
+                        healthy:
+                            true
 
                     }
+                );
+
+
+                resolveWaiters(
+                    service.id,
+                    service
                 );
 
 
                 emit(
-                    "app:state:restored",
+                    "service:ready",
                     {
 
-                        appId,
-
-                        key
+                        service
 
                     }
                 );
 
 
-                return true;
+                return service;
 
             } catch (
                 error
             ) {
 
-                state.error =
+                service.status =
+                    STATUS.ERROR;
+
+
+                service.error =
                     error;
 
 
-                emit(
-                    "app:state:restore:error",
+                health.set(
+                    service.id,
                     {
 
-                        appId,
+                        status:
+                            STATUS.ERROR,
+
+                        checkedAt:
+                            Date.now(),
+
+                        healthy:
+                            false,
 
                         error
 
@@ -57918,12 +56624,25 @@
                 );
 
 
-                return false;
+                rejectWaiters(
+                    service.id,
+                    error
+                );
 
-            } finally {
 
-                state.loading =
-                    false;
+                emit(
+                    "service:error",
+                    {
+
+                        service,
+
+                        error
+
+                    }
+                );
+
+
+                throw error;
 
             }
 
@@ -57931,70 +56650,105 @@
 
 
         /* =====================================================
-           CLEAR PERSISTED STATE
+           STOP SERVICE
            ===================================================== */
 
-        async function clearPersisted(
-            appId
+        async function stop(
+            serviceId,
+            context = {}
         ) {
 
-            const key =
-                getStorageKey(
-                    appId
+            const service =
+                get(
+                    serviceId
                 );
+
+
+            if (!service) {
+
+                return false;
+
+            }
+
+
+            if (
+                service.status ===
+                STATUS.STOPPED ||
+                service.status ===
+                STATUS.REGISTERED
+            ) {
+
+                return true;
+
+            }
+
+
+            service.status =
+                STATUS.STOPPING;
+
+
+            emit(
+                "service:stopping",
+                {
+
+                    service
+
+                }
+            );
 
 
             try {
 
                 if (
-                    storageEngine
+                    service.stop
                 ) {
 
-                    if (
-                        typeof storageEngine.remove ===
-                        "function"
-                    ) {
+                    await service.stop(
+                        {
 
-                        await storageEngine.remove(
-                            key
-                        );
+                            service,
 
-                    } else if (
-                        typeof storageEngine.delete ===
-                        "function"
-                    ) {
+                            context,
 
-                        await storageEngine.delete(
-                            key
-                        );
+                            engine:
+                                publicAPI
 
-                    }
-
-                }
-
-
-                try {
-
-                    localStorage.removeItem(
-                        key
+                        }
                     );
 
-                } catch (
-                    error
-                ) {
-
-                    /* Browser storage unavailable. */
-
                 }
+
+
+                service.status =
+                    STATUS.STOPPED;
+
+
+                service.stoppedAt =
+                    Date.now();
+
+
+                health.set(
+                    service.id,
+                    {
+
+                        status:
+                            STATUS.STOPPED,
+
+                        checkedAt:
+                            Date.now(),
+
+                        healthy:
+                            false
+
+                    }
+                );
 
 
                 emit(
-                    "app:state:persistence:cleared",
+                    "service:stopped",
                     {
 
-                        appId,
-
-                        key
+                        service
 
                     }
                 );
@@ -58006,11 +56760,19 @@
                 error
             ) {
 
+                service.status =
+                    STATUS.ERROR;
+
+
+                service.error =
+                    error;
+
+
                 emit(
-                    "app:state:persistence:clear:error",
+                    "service:error",
                     {
 
-                        appId,
+                        service,
 
                         error
 
@@ -58026,144 +56788,75 @@
 
 
         /* =====================================================
-           APP STATE SNAPSHOT
+           DESTROY SERVICE
            ===================================================== */
 
-        function snapshot(
-            appId
+        async function destroy(
+            serviceId,
+            context = {}
         ) {
 
-            const state =
-                ensureApp(
-                    appId
+            const service =
+                get(
+                    serviceId
                 );
 
 
-            if (!state) {
-
-                return null;
-
-            }
-
-
-            return {
-
-                appId:
-                    state.appId,
-
-                version:
-                    state.version,
-
-                data:
-                    clone(
-                        state.data
-                    ),
-
-                createdAt:
-                    state.createdAt,
-
-                updatedAt:
-                    state.updatedAt,
-
-                dirty:
-                    state.dirty,
-
-                restored:
-                    state.restored,
-
-                error:
-                    state.error
-                        ? String(
-                            state.error.message ||
-                            state.error
-                        )
-                        : null
-
-            };
-
-        }
-
-
-        /* =====================================================
-           DESTROY APP STATE
-           ===================================================== */
-
-        function destroy(
-            appId,
-            options = {}
-        ) {
-
-            appId =
-                normalize(
-                    appId
-                );
-
-
-            if (
-                !appStates.has(
-                    appId
-                )
-            ) {
+            if (!service) {
 
                 return false;
 
             }
 
 
-            if (
-                options.save ===
-                true
+            try {
+
+                if (
+                    service.destroy
+                ) {
+
+                    await service.destroy(
+                        {
+
+                            service,
+
+                            context,
+
+                            engine:
+                                publicAPI
+
+                        }
+                    );
+
+                }
+
+            } catch (
+                error
             ) {
 
-                save(
-                    appId
+                console.warn(
+                    "[HalDo Service Engine 20]",
+                    error
                 );
 
             }
 
 
-            appStates.delete(
-                appId
+            services.delete(
+                service.id
             );
 
 
-            history.delete(
-                appId
+            health.delete(
+                service.id
             );
-
-
-            listeners.delete(
-                appId
-            );
-
-
-            for (
-                const [
-                    transactionId,
-                    transaction
-                ]
-                of transactions.entries()
-            ) {
-
-                if (
-                    transaction.appId ===
-                    appId
-                ) {
-
-                    transactions.delete(
-                        transactionId
-                    );
-
-                }
-
-            }
 
 
             emit(
-                "app:state:destroyed",
+                "service:destroyed",
                 {
 
-                    appId
+                    serviceId
 
                 }
             );
@@ -58175,24 +56868,467 @@
 
 
         /* =====================================================
-           LIST APP STATES
+           HEALTH CHECK
            ===================================================== */
 
-        function list() {
+        async function checkHealth(
+            serviceId
+        ) {
 
-            return [
-                ...appStates.keys()
-            ];
+            const service =
+                get(
+                    serviceId
+                );
+
+
+            if (!service) {
+
+                return {
+
+                    serviceId,
+
+                    healthy:
+                        false,
+
+                    status:
+                        STATUS.UNAVAILABLE
+
+                };
+
+            }
+
+
+            if (
+                !service.healthCheck
+            ) {
+
+                const healthy =
+                    service.status ===
+                    STATUS.READY;
+
+
+                const result = {
+
+                    serviceId,
+
+                    healthy,
+
+                    status:
+                        service.status,
+
+                    checkedAt:
+                        Date.now()
+
+                };
+
+
+                health.set(
+                    serviceId,
+                    result
+                );
+
+
+                return result;
+
+            }
+
+
+            try {
+
+                const result =
+                    await service.healthCheck(
+                        {
+
+                            service,
+
+                            engine:
+                                publicAPI
+
+                        }
+                    );
+
+
+                const healthy =
+                    result === true ||
+                    (
+                        result &&
+                        result.healthy ===
+                        true
+                    );
+
+
+                const status =
+                    healthy
+                        ? STATUS.READY
+                        : STATUS.ERROR;
+
+
+                const healthResult = {
+
+                    serviceId,
+
+                    healthy,
+
+                    status,
+
+                    checkedAt:
+                        Date.now(),
+
+                    details:
+                        result
+
+                };
+
+
+                health.set(
+                    serviceId,
+                    healthResult
+                );
+
+
+                emit(
+                    "service:health",
+                    healthResult
+                );
+
+
+                return healthResult;
+
+            } catch (
+                error
+            ) {
+
+                const result = {
+
+                    serviceId,
+
+                    healthy:
+                        false,
+
+                    status:
+                        STATUS.ERROR,
+
+                    checkedAt:
+                        Date.now(),
+
+                    error
+
+                };
+
+
+                health.set(
+                    serviceId,
+                    result
+                );
+
+
+                emit(
+                    "service:health:error",
+                    result
+                );
+
+
+                return result;
+
+            }
 
         }
 
 
         /* =====================================================
-           AUTO MANIFEST INITIALIZATION
+           APP DEPENDENCY REGISTRATION
+           ===================================================== */
+
+        function registerAppDependencies(
+            appId,
+            dependencies = []
+        ) {
+
+            appId =
+                normalize(
+                    appId
+                );
+
+
+            if (!appId) {
+
+                return false;
+
+            }
+
+
+            const normalized =
+                dependencies
+                    .map(
+                        dependency => {
+
+                            if (
+                                typeof dependency ===
+                                "string"
+                            ) {
+
+                                return {
+
+                                    id:
+                                        dependency,
+
+                                    required:
+                                        true
+
+                                };
+
+                            }
+
+
+                            return {
+
+                                id:
+                                    dependency &&
+                                    dependency.id,
+
+                                required:
+                                    dependency &&
+                                    dependency.required !==
+                                    false,
+
+                                optional:
+                                    dependency &&
+                                    dependency.optional ===
+                                    true
+
+                            };
+
+                        }
+                    )
+                    .filter(
+                        dependency =>
+                            !!dependency.id
+                    );
+
+
+            appDependencies.set(
+                appId,
+                normalized
+            );
+
+
+            emit(
+                "app:dependencies:registered",
+                {
+
+                    appId,
+
+                    dependencies:
+                        normalized
+
+                }
+            );
+
+
+            return true;
+
+        }
+
+
+        /* =====================================================
+           GET APP DEPENDENCIES
+           ===================================================== */
+
+        function getAppDependencies(
+            appId
+        ) {
+
+            return (
+                appDependencies.get(
+                    normalize(
+                        appId
+                    )
+                ) ||
+                []
+            );
+
+        }
+
+
+        /* =====================================================
+           CHECK APP DEPENDENCIES
+           ===================================================== */
+
+        function checkAppDependencies(
+            appId
+        ) {
+
+            const dependencies =
+                getAppDependencies(
+                    appId
+                );
+
+
+            const required =
+                dependencies.filter(
+                    dependency =>
+                        dependency.required !==
+                        false &&
+                        dependency.optional !==
+                        true
+                );
+
+
+            const optional =
+                dependencies.filter(
+                    dependency =>
+                        dependency.optional ===
+                        true
+                );
+
+
+            const requiredResult =
+                checkDependencies(
+                    required
+                );
+
+
+            const optionalResult =
+                checkDependencies(
+                    optional
+                );
+
+
+            return {
+
+                appId,
+
+                ready:
+                    requiredResult.ready,
+
+                required:
+                    requiredResult,
+
+                optional:
+                    optionalResult,
+
+                checkedAt:
+                    Date.now()
+
+            };
+
+        }
+
+
+        /* =====================================================
+           WAIT FOR APP DEPENDENCIES
+           ===================================================== */
+
+        async function waitForApp(
+            appId,
+            options = {}
+        ) {
+
+            const timeout =
+                Number.isFinite(
+                    options.timeout
+                )
+                    ? options.timeout
+                    : 15000;
+
+
+            const startedAt =
+                Date.now();
+
+
+            while (
+                Date.now() -
+                startedAt <
+                timeout
+            ) {
+
+                const result =
+                    checkAppDependencies(
+                        appId
+                    );
+
+
+                if (
+                    result.ready
+                ) {
+
+                    return result;
+
+                }
+
+
+                const pending =
+                    result.required.unavailable;
+
+
+                if (
+                    pending.length
+                ) {
+
+                    try {
+
+                        await Promise.race(
+                            pending.map(
+                                serviceId =>
+                                    waitFor(
+                                        serviceId,
+                                        {
+
+                                            timeout:
+                                                Math.max(
+                                                    500,
+                                                    timeout -
+                                                    (
+                                                        Date.now() -
+                                                        startedAt
+                                                    )
+                                                )
+
+                                        }
+                                    )
+                            )
+                        );
+
+                    } catch (
+                        error
+                    ) {
+
+                        /*
+                         * Weiter prüfen.
+                         * Ein anderer Dienst kann
+                         * inzwischen bereit sein.
+                         */
+
+                    }
+
+                } else {
+
+                    await new Promise(
+                        resolve =>
+                            setTimeout(
+                                resolve,
+                                50
+                            )
+                    );
+
+                }
+
+            }
+
+
+            throw new Error(
+                `App dependencies timeout: ${appId}`
+            );
+
+        }
+
+
+        /* =====================================================
+           AUTO APP DEPENDENCY BRIDGE
            ===================================================== */
 
         document.addEventListener(
-            "haldo:app:manifest:registered",
+            "haldo:app:lifecycle:created",
             event => {
 
                 const detail =
@@ -58204,53 +57340,34 @@
                     detail.appId;
 
 
-                const manifest =
-                    detail.manifest;
+                const instance =
+                    detail.instance;
 
 
-                if (!appId) {
+                if (
+                    !appId ||
+                    !instance
+                ) {
 
                     return;
 
                 }
 
 
+                const definition =
+                    instance.definition ||
+                    {};
+
+
                 if (
-                    !appStates.has(
-                        appId
+                    Array.isArray(
+                        definition.dependencies
                     )
                 ) {
 
-                    create(
+                    registerAppDependencies(
                         appId,
-
-                        manifest &&
-                        manifest.data
-                            ? manifest.data.defaults
-                            : {},
-
-                        {
-
-                            version:
-                                manifest &&
-                                manifest.data
-                                    ? manifest.data.version
-                                    : 1
-
-                        }
-                    );
-
-                }
-
-
-                if (
-                    manifest &&
-                    manifest.storage &&
-                    manifest.storage.autoRestore
-                ) {
-
-                    restore(
-                        appId
+                        definition.dependencies
                     );
 
                 }
@@ -58260,30 +57377,42 @@
 
 
         /* =====================================================
-           APP LIFECYCLE CLEANUP
+           LIST SERVICES
            ===================================================== */
 
-        document.addEventListener(
-            "haldo:app:lifecycle:destroyed",
-            event => {
+        function listServices() {
 
-                const detail =
-                    event.detail ||
-                    {};
+            return [
+                ...services.values()
+            ];
+
+        }
 
 
-                if (
-                    detail.appId
-                ) {
+        /* =====================================================
+           LIST HEALTH
+           ===================================================== */
 
-                    destroy(
-                        detail.appId
-                    );
+        function listHealth() {
 
-                }
+            return [
+                ...health.entries()
+            ].map(
+                (
+                    [
+                        serviceId,
+                        value
+                    ]
+                ) => ({
 
-            }
-        );
+                    serviceId,
+
+                    ...value
+
+                })
+            );
+
+        }
 
 
         /* =====================================================
@@ -58292,49 +57421,39 @@
 
         const publicAPI = {
 
-            VERSION,
+            STATUS,
 
-            MAX_HISTORY,
-
-            create,
+            register,
 
             get,
 
-            getState,
+            has,
 
-            getRecord,
+            isReady,
 
-            set,
+            initialize,
 
-            remove,
-
-            merge,
-
-            reset,
-
-            undo,
-
-            redo,
-
-            beginTransaction,
-
-            commitTransaction,
-
-            rollbackTransaction,
-
-            subscribe,
-
-            save,
-
-            restore,
-
-            clearPersisted,
-
-            snapshot,
+            stop,
 
             destroy,
 
-            list
+            waitFor,
+
+            checkDependencies,
+
+            checkHealth,
+
+            registerAppDependencies,
+
+            getAppDependencies,
+
+            checkAppDependencies,
+
+            waitForApp,
+
+            listServices,
+
+            listHealth
 
         };
 
@@ -58343,7 +57462,7 @@
            GLOBAL API
            ===================================================== */
 
-        window.HalDoAppState20 =
+        window.HalDoServiceEngine20 =
             publicAPI;
 
 
@@ -58357,7 +57476,7 @@
         }
 
 
-        window.HalDoOS.appState20 =
+        window.HalDoOS.serviceEngine20 =
             publicAPI;
 
 
@@ -58366,11 +57485,11 @@
            ===================================================== */
 
         emit(
-            "app:state:ready",
+            "service-engine:ready",
             {
 
                 version:
-                    VERSION,
+                    "20.0.0",
 
                 timestamp:
                     Date.now()
@@ -58380,7 +57499,7 @@
 
 
         console.info(
-            "%cHalDo AI OS 20%c App Data / State Engine bereit",
+            "%cHalDo AI OS 20%c Service / Dependency Engine bereit",
             "color:#42e6ff;font-weight:800;",
             "color:#ffffff;"
         );
@@ -58389,4 +57508,3 @@
     })();
 
     </script>
-    
