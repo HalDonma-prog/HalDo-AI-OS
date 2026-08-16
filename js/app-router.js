@@ -1,59 +1,64 @@
 /* ============================================================
    HALDO AI OS 20
-   PROFESSIONAL ULTIMATE STABLE
+   PROFESSIONAL ULTIMATE FOUNDATION
    ------------------------------------------------------------
-   Datei: js/app-router.js
+   Datei:
+       js/app-router.js
 
-   ZENTRALER APPLICATION ROUTER
+   ZENTRALER APPLICATION ROUTER 20.0
 
-   Aufgaben:
-   - App-Navigation
-   - App-Routen
-   - Deep Links
-   - Route-Parameter
-   - Query-Parameter
-   - Navigation History
-   - Back / Forward
-   - App Registry Verbindung
+   VERBINDET:
+
+   App Manager
+   App Registry
+   Kernel
+   System
+   Window Manager
+   Launcher
+   Shell
+   Desktop
+   Navigation
+   Browser History
+   Deep Links
+   App Routes
+   Events
+   Diagnostics
+
+   Unterstützt:
+
+   - App Routing
+   - navigate()
+   - open()
+   - back()
+   - forward()
+   - replace()
+   - home()
+   - current route
+   - route history
+   - route parameters
+   - query parameters
+   - hash routes
+   - app routes
+   - deep links
+   - route guards
+   - route listeners
+   - navigation events
+   - Router Diagnostics
+   - Browser History
    - App Manager Verbindung
    - Window Manager Verbindung
-   - Kernel Verbindung
-   - System Verbindung
-   - Navigation Events
-   - Route Guards
-   - App Open / Close
-   - Multitasking-Vorbereitung
-   - Deep-Link-Unterstützung
-   - Fehlerbehandlung
-   - Diagnose
-   - Health Check
-   - zukünftige Erweiterbarkeit
+   - Launcher Verbindung
+   - Shell/Desktop Verbindung
 
-   Architektur:
-
-       HALDO AI OS
-            │
-          KERNEL
-            │
-       APP REGISTRY
-            │
-       APP MANAGER
-            │
-       APP ROUTER
-            │
-       WINDOW MANAGER
-            │
-       APPLICATION
-
+   HALDO AI OS 20
    ============================================================ */
+
+"use strict";
 
 (function (window, document) {
 
-    "use strict";
-
-
     /* ========================================================
-       01 — HALDO FOUNDATION
+       01 — FOUNDATION
        ======================================================== */
 
     window.HalDoOS =
@@ -70,240 +75,15 @@
     const VERSION =
         "20.0.0";
 
-    const NAME =
-        "HalDo AI OS App Router";
-
     const MODULE_ID =
         "app-router";
 
-
-    /* ========================================================
-       03 — INTERNAL STATE
-       ======================================================== */
-
-    const state = {
-
-        initialized:
-            false,
-
-        initializing:
-            false,
-
-        ready:
-            false,
-
-        currentRoute:
-            null,
-
-        previousRoute:
-            null,
-
-        history:
-            [],
-
-        historyIndex:
-            -1,
-
-        routes:
-            new Map(),
-
-        guards:
-            new Set(),
-
-        listeners:
-            new Map(),
-
-        connections: {
-
-            kernel:
-                false,
-
-            system:
-                false,
-
-            registry:
-                false,
-
-            manager:
-                false,
-
-            windowManager:
-                false
-
-        },
-
-        statistics: {
-
-            navigations:
-                0,
-
-            successfulNavigations:
-                0,
-
-            failedNavigations:
-                0,
-
-            registeredRoutes:
-                0,
-
-            guardsBlocked:
-                0,
-
-            backNavigations:
-                0,
-
-            forwardNavigations:
-                0,
-
-            errors:
-                0
-
-        }
-
-    };
+    const NAME =
+        "HalDo AI OS 20 Application Router";
 
 
     /* ========================================================
-       04 — LOGGING
-       ======================================================== */
-
-    function log() {
-
-        try {
-
-            console.log(
-                "[HalDo App Router]",
-                ...arguments
-            );
-
-        } catch (_) {}
-
-    }
-
-
-    function warn() {
-
-        try {
-
-            console.warn(
-                "[HalDo App Router]",
-                ...arguments
-            );
-
-        } catch (_) {}
-
-    }
-
-
-    function errorLog() {
-
-        try {
-
-            console.error(
-                "[HalDo App Router]",
-                ...arguments
-            );
-
-        } catch (_) {}
-
-    }
-
-
-    /* ========================================================
-       05 — SAFE HELPERS
-       ======================================================== */
-
-    function hasMethod(
-        object,
-        method
-    ) {
-
-        return !!(
-            object &&
-            typeof object[method] ===
-            "function"
-        );
-
-    }
-
-
-    function safeClone(
-        value
-    ) {
-
-        if (
-            value === null ||
-            value === undefined
-        ) {
-
-            return value;
-
-        }
-
-
-        if (
-            Array.isArray(
-                value
-            )
-        ) {
-
-            return value.map(
-                safeClone
-            );
-
-        }
-
-
-        if (
-            typeof value ===
-            "object"
-        ) {
-
-            const result = {};
-
-
-            Object.keys(
-                value
-            ).forEach(
-                function (key) {
-
-                    const item =
-                        value[key];
-
-
-                    if (
-                        typeof item !==
-                        "function"
-                    ) {
-
-                        result[key] =
-                            safeClone(
-                                item
-                            );
-
-                    } else {
-
-                        result[key] =
-                            item;
-
-                    }
-
-                }
-            );
-
-
-            return result;
-
-        }
-
-
-        return value;
-
-    }
-
-
-    /* ========================================================
-       06 — SERVICE LOOKUPS
+       03 — SERVICE ACCESS
        ======================================================== */
 
     function getKernel() {
@@ -328,23 +108,23 @@
     }
 
 
-    function getRegistry() {
+    function getAppManager() {
 
         return (
-            window.HalDoAppRegistry ||
-            HalDoOS.appRegistry ||
-            window.HalDoOSAppRegistry ||
+            window.HalDoAppManager ||
+            window.HalDoOSAppManager ||
+            HalDoOS.appManager ||
             null
         );
 
     }
 
 
-    function getManager() {
+    function getRegistry() {
 
         return (
-            window.HalDoAppManager ||
-            HalDoOS.appManager ||
+            window.HalDoAppRegistry ||
+            HalDoOS.appRegistry ||
             null
         );
 
@@ -362,8 +142,598 @@
     }
 
 
+    function getLauncher() {
+
+        return (
+            window.HalDoLauncher ||
+            HalDoOS.launcher ||
+            null
+        );
+
+    }
+
+
+    function getShell() {
+
+        return (
+            window.HalDoShellManager ||
+            HalDoOS.shellManager ||
+            null
+        );
+
+    }
+
+
+    function getDesktop() {
+
+        return (
+            window.HalDoDesktopManager ||
+            HalDoOS.desktopManager ||
+            null
+        );
+
+    }
+
+
+    function hasMethod(
+        object,
+        method
+    ) {
+
+        return !!(
+            object &&
+            typeof object[method] ===
+            "function"
+        );
+
+    }
+
+
     /* ========================================================
-       07 — EVENT SYSTEM
+       04 — HELPERS
+       ======================================================== */
+
+    function normalizeAppId(
+        value
+    ) {
+
+        return String(
+            value || ""
+        )
+        .trim()
+        .toLowerCase()
+        .replace(
+            /[^a-z0-9äöüßîêç_-]+/gi,
+            "-"
+        )
+        .replace(
+            /-+/g,
+            "-"
+        )
+        .replace(
+            /^-|-$/g,
+            "");
+
+    }
+
+
+    function normalizePath(
+        value
+    ) {
+
+        let path =
+            String(
+                value || "/"
+            )
+            .trim();
+
+
+        if (!path) {
+
+            return "/";
+
+        }
+
+
+        if (
+            !path.startsWith("/")
+        ) {
+
+            path =
+                "/" +
+                path;
+
+        }
+
+
+        path =
+            path.replace(
+                /\/+/g,
+                "/"
+            );
+
+
+        if (
+            path.length > 1 &&
+            path.endsWith("/")
+        ) {
+
+            path =
+                path.slice(
+                    0,
+                    -1
+                );
+
+        }
+
+
+        return path;
+
+    }
+
+
+    function clone(
+        value
+    ) {
+
+        if (
+            value === null ||
+            value === undefined
+        ) {
+
+            return value;
+
+        }
+
+
+        if (
+            Array.isArray(
+                value
+            )
+        ) {
+
+            return value.map(
+                clone
+            );
+
+        }
+
+
+        if (
+            typeof value ===
+            "object"
+        ) {
+
+            const result = {};
+
+            Object.keys(
+                value
+            ).forEach(
+                key => {
+
+                    result[key] =
+                        clone(
+                            value[key]
+                        );
+
+                }
+            );
+
+            return result;
+
+        }
+
+
+        return value;
+
+    }
+
+
+    function createQuery(
+        query
+    ) {
+
+        if (
+            !query ||
+            typeof query !==
+            "object"
+        ) {
+
+            return "";
+
+        }
+
+
+        const params =
+            new URLSearchParams();
+
+
+        Object.keys(
+            query
+        ).forEach(
+            key => {
+
+                const value =
+                    query[key];
+
+
+                if (
+                    value ===
+                    undefined ||
+                    value ===
+                    null
+                ) {
+
+                    return;
+
+                }
+
+
+                if (
+                    Array.isArray(
+                        value
+                    )
+                ) {
+
+                    value.forEach(
+                        item => {
+
+                            params.append(
+                                key,
+                                String(
+                                    item
+                                )
+                            );
+
+                        }
+                    );
+
+                    return;
+
+                }
+
+
+                params.set(
+                    key,
+                    String(
+                        value
+                    )
+                );
+
+            }
+        );
+
+
+        const result =
+            params.toString();
+
+
+        return result
+            ? "?" + result
+            : "";
+
+    }
+
+
+    function parseQuery(
+        queryString
+    ) {
+
+        const result = {};
+
+
+        if (!queryString) {
+
+            return result;
+
+        }
+
+
+        const query =
+            queryString.startsWith("?")
+                ? queryString.slice(1)
+                : queryString;
+
+
+        const params =
+            new URLSearchParams(
+                query
+            );
+
+
+        params.forEach(
+            (
+                value,
+                key
+            ) => {
+
+                if (
+                    Object.prototype.hasOwnProperty.call(
+                        result,
+                        key
+                    )
+                ) {
+
+                    if (
+                        Array.isArray(
+                            result[key]
+                        )
+                    ) {
+
+                        result[key].push(
+                            value
+                        );
+
+                    } else {
+
+                        result[key] = [
+                            result[key],
+                            value
+                        ];
+
+                    }
+
+                } else {
+
+                    result[key] =
+                        value;
+
+                }
+
+            }
+        );
+
+
+        return result;
+
+    }
+
+
+    function createRouteObject(
+        path,
+        options = {}
+    ) {
+
+        const normalized =
+            normalizePath(
+                path
+            );
+
+
+        let parsed;
+
+
+        try {
+
+            parsed =
+                new URL(
+                    normalized,
+                    window.location.origin
+                );
+
+        } catch (_) {
+
+            parsed = null;
+
+        }
+
+
+        const pathname =
+            parsed
+                ? normalizePath(
+                    parsed.pathname
+                )
+                : normalized;
+
+
+        const query =
+            parsed
+                ? parseQuery(
+                    parsed.search
+                )
+                : {};
+
+
+        const hash =
+            parsed
+                ? (
+                    parsed.hash ||
+                    ""
+                ).replace(
+                    /^#/,
+                    ""
+                )
+                : "";
+
+
+        return {
+
+            path:
+                normalized,
+
+            pathname,
+
+            query,
+
+            hash,
+
+            appId:
+                options.appId
+                    ? normalizeAppId(
+                        options.appId
+                    )
+                    : null,
+
+            params:
+                clone(
+                    options.params ||
+                    {}
+                ),
+
+            state:
+                clone(
+                    options.state ||
+                    null
+                ),
+
+            source:
+                options.source ||
+                "router",
+
+            timestamp:
+                Date.now()
+
+        };
+
+    }
+
+
+    /* ========================================================
+       05 — STATE
+       ======================================================== */
+
+    const state = {
+
+        initialized:
+            false,
+
+        initializing:
+            false,
+
+        ready:
+            false,
+
+        failed:
+            false,
+
+        current:
+            null,
+
+        previous:
+            null,
+
+        history:
+            [],
+
+        historyIndex:
+            -1,
+
+        maxHistory:
+            200,
+
+        listeners:
+            new Map(),
+
+        guards:
+            new Set(),
+
+        connections: {
+
+            kernel:
+                false,
+
+            system:
+                false,
+
+            appManager:
+                false,
+
+            registry:
+                false,
+
+            windowManager:
+                false,
+
+            launcher:
+                false,
+
+            shell:
+                false,
+
+            desktop:
+                false
+
+        },
+
+        statistics: {
+
+            navigations:
+                0,
+
+            opens:
+                0,
+
+            replaces:
+                0,
+
+            backs:
+                0,
+
+            forwards:
+                0,
+
+            home:
+                0,
+
+            cancelled:
+                0,
+
+            errors:
+                0
+
+        }
+
+    };
+
+
+    /* ========================================================
+       06 — LOGGING
+       ======================================================== */
+
+    function log() {
+
+        try {
+
+            console.log(
+                "[HalDo Router 20]",
+                ...arguments
+            );
+
+        } catch (_) {}
+
+    }
+
+
+    function warn() {
+
+        try {
+
+            console.warn(
+                "[HalDo Router 20]",
+                ...arguments
+            );
+
+        } catch (_) {}
+
+    }
+
+
+    function errorLog() {
+
+        try {
+
+            console.error(
+                "[HalDo Router 20]",
+                ...arguments
+            );
+
+        } catch (_) {}
+
+    }
+
+
+    /* ========================================================
+       07 — EVENTS
        ======================================================== */
 
     function on(
@@ -457,7 +827,7 @@
 
     function emit(
         event,
-        data
+        payload = null
     ) {
 
         const listeners =
@@ -471,23 +841,22 @@
             Array.from(
                 listeners
             ).forEach(
-                function (callback) {
+                callback => {
 
                     try {
 
                         callback(
-                            data
+                            payload
                         );
 
-                    } catch (exception) {
+                    } catch (
+                        exception
+                    ) {
 
                         reportError(
-                            "EVENT_LISTENER_ERROR",
                             exception,
-                            {
-                                event:
-                                    event
-                            }
+                            "Router Event: " +
+                            event
                         );
 
                     }
@@ -498,21 +867,49 @@
         }
 
 
-        const globalEvents =
+        const events =
             HalDoOS.events;
 
 
         if (
-            globalEvents &&
-            typeof globalEvents.emit ===
-            "function"
+            events &&
+            hasMethod(
+                events,
+                "emit"
+            )
         ) {
 
             try {
 
-                globalEvents.emit(
-                    "app-router:" + event,
-                    data
+                events.emit(
+                    "router:" +
+                    event,
+                    payload
+                );
+
+            } catch (_) {}
+
+        }
+
+
+        const kernel =
+            getKernel();
+
+
+        if (
+            kernel &&
+            hasMethod(
+                kernel,
+                "emit"
+            )
+        ) {
+
+            try {
+
+                kernel.emit(
+                    "router:" +
+                    event,
+                    payload
                 );
 
             } catch (_) {}
@@ -523,48 +920,57 @@
 
 
     /* ========================================================
-       08 — ERROR SYSTEM
+       08 — ERROR HANDLING
        ======================================================== */
 
     function reportError(
-        code,
         exception,
-        extra
+        context =
+            "Application Router"
     ) {
 
         state.statistics.errors +=
             1;
 
 
-        const payload = {
+        const normalized =
+            exception instanceof Error
+                ? exception
+                : new Error(
+                    String(
+                        exception
+                    )
+                );
 
-            code:
-                code ||
-                "UNKNOWN_ERROR",
 
-            error:
-                exception ||
-                null,
+        const record = {
 
-            extra:
-                extra ||
-                null,
+            message:
+                normalized.message,
+
+            name:
+                normalized.name,
+
+            stack:
+                normalized.stack ||
+                "",
+
+            context,
 
             timestamp:
-                new Date().toISOString()
+                Date.now()
 
         };
 
 
         errorLog(
-            "[HalDo Router]",
-            payload
+            record
         );
 
 
         emit(
             "error",
-            payload
+            record
         );
 
 
@@ -583,18 +989,8 @@
             try {
 
                 kernel.reportError(
-                    exception ||
-                    new Error(
-                        String(
-                            code ||
-                            "Router error"
-                        )
-                    ),
-                    "App Router: " +
-                    String(
-                        code ||
-                        "UNKNOWN_ERROR"
-                    )
+                    normalized,
+                    context
                 );
 
             } catch (_) {}
@@ -602,921 +998,21 @@
         }
 
 
-        return payload;
+        return record;
 
     }
 
 
     /* ========================================================
-       09 — ROUTE NORMALIZATION
-       ======================================================== */
-
-    function normalizeRoute(
-        route
-    ) {
-
-        if (
-            route === null ||
-            route === undefined
-        ) {
-
-            return "/";
-
-        }
-
-
-        let value =
-            String(
-                route
-            ).trim();
-
-
-        if (!value) {
-
-            return "/";
-
-        }
-
-
-        /*
-         * App-Schema:
-         *
-         * app://ai-chat
-         *
-         * wird intern zu:
-         *
-         * /ai-chat
-         */
-
-        if (
-            value
-                .toLowerCase()
-                .startsWith(
-                    "app://"
-                )
-        ) {
-
-            value =
-                value.substring(
-                    6
-                );
-
-        }
-
-
-        /*
-         * HalDo-Schema:
-         *
-         * haldo://apps/ai-chat
-         */
-
-        if (
-            value
-                .toLowerCase()
-                .startsWith(
-                    "haldo://"
-                )
-        ) {
-
-            value =
-                value.substring(
-                    8
-                );
-
-
-            if (
-                value
-                    .startsWith(
-                        "apps/"
-                    )
-            ) {
-
-                value =
-                    value.substring(
-                        5
-                    );
-
-            }
-
-        }
-
-
-        if (
-            !value.startsWith(
-                "/"
-            )
-        ) {
-
-            value =
-                "/" +
-                value;
-
-        }
-
-
-        value =
-            value.replace(
-                /\/+/g,
-                "/"
-            );
-
-
-        if (
-            value.length > 1 &&
-            value.endsWith("/")
-        ) {
-
-            value =
-                value.slice(
-                    0,
-                    -1
-                );
-
-        }
-
-
-        return value;
-
-    }
-
-
-    /* ========================================================
-       10 — QUERY PARSING
-       ======================================================== */
-
-    function parseQuery(
-        query
-    ) {
-
-        const result = {};
-
-
-        if (!query) {
-
-            return result;
-
-        }
-
-
-        const value =
-            String(
-                query
-            ).replace(
-                /^\?/,
-                ""
-            );
-
-
-        if (!value) {
-
-            return result;
-
-        }
-
-
-        value.split(
-            "&"
-        ).forEach(
-            function (part) {
-
-                if (!part) {
-
-                    return;
-
-                }
-
-
-                const pieces =
-                    part.split(
-                        "="
-                    );
-
-
-                const key =
-                    decodeURIComponent(
-                        pieces.shift() ||
-                        ""
-                    );
-
-
-                const rawValue =
-                    pieces.join(
-                        "="
-                    );
-
-
-                if (!key) {
-
-                    return;
-
-                }
-
-
-                let decoded;
-
-
-                try {
-
-                    decoded =
-                        decodeURIComponent(
-                            rawValue
-                        );
-
-                } catch (_) {
-
-                    decoded =
-                        rawValue;
-
-                }
-
-
-                result[key] =
-                    decoded;
-
-            }
-        );
-
-
-        return result;
-
-    }
-
-
-    /* ========================================================
-       11 — ROUTE PARSING
-       ======================================================== */
-
-    function parseRoute(
-        route
-    ) {
-
-        const normalized =
-            normalizeRoute(
-                route
-            );
-
-
-        const hashIndex =
-            normalized.indexOf(
-                "#"
-            );
-
-
-        const withoutHash =
-            hashIndex >= 0
-                ? normalized.substring(
-                    0,
-                    hashIndex
-                )
-                : normalized;
-
-
-        const queryIndex =
-            withoutHash.indexOf(
-                "?"
-            );
-
-
-        const pathname =
-            queryIndex >= 0
-                ? withoutHash.substring(
-                    0,
-                    queryIndex
-                )
-                : withoutHash;
-
-
-        const queryString =
-            queryIndex >= 0
-                ? withoutHash.substring(
-                    queryIndex + 1
-                )
-                : "";
-
-
-        const segments =
-            pathname
-                .split(
-                    "/"
-                )
-                .filter(
-                    Boolean
-                );
-
-
-        return {
-
-            original:
-                route,
-
-            route:
-                normalized,
-
-            pathname:
-                pathname || "/",
-
-            queryString:
-                queryString,
-
-            query:
-                parseQuery(
-                    queryString
-                ),
-
-            segments:
-                segments
-
-        };
-
-    }
-
-
-    /* ========================================================
-       12 — ROUTE MATCHING
-       ======================================================== */
-
-    function matchPattern(
-        pattern,
-        pathname
-    ) {
-
-        const normalizedPattern =
-            normalizeRoute(
-                pattern
-            );
-
-
-        const normalizedPath =
-            normalizeRoute(
-                pathname
-            );
-
-
-        if (
-            normalizedPattern ===
-            normalizedPath
-        ) {
-
-            return {
-
-                matched:
-                    true,
-
-                params:
-                    {}
-
-            };
-
-        }
-
-
-        const patternParts =
-            normalizedPattern
-                .split("/")
-                .filter(
-                    Boolean
-                );
-
-
-        const pathParts =
-            normalizedPath
-                .split("/")
-                .filter(
-                    Boolean
-                );
-
-
-        if (
-            patternParts.length !==
-            pathParts.length
-        ) {
-
-            return {
-
-                matched:
-                    false,
-
-                params:
-                    {}
-
-            };
-
-        }
-
-
-        const params = {};
-
-
-        for (
-            let i = 0;
-            i < patternParts.length;
-            i++
-        ) {
-
-            const patternPart =
-                patternParts[i];
-
-            const pathPart =
-                pathParts[i];
-
-
-            if (
-                patternPart.startsWith(
-                    ":"
-                )
-            ) {
-
-                const parameterName =
-                    patternPart.substring(
-                        1
-                    );
-
-
-                if (
-                    parameterName
-                ) {
-
-                    params[
-                        parameterName
-                    ] =
-                        decodeURIComponent(
-                            pathPart
-                        );
-
-                }
-
-
-                continue;
-
-            }
-
-
-            if (
-                patternPart ===
-                "*"
-            ) {
-
-                params.wildcard =
-                    pathParts
-                        .slice(i)
-                        .map(
-                            function (
-                                value
-                            ) {
-
-                                try {
-
-                                    return decodeURIComponent(
-                                        value
-                                    );
-
-                                } catch (_) {
-
-                                    return value;
-
-                                }
-
-                            }
-                        )
-                        .join(
-                            "/"
-                        );
-
-
-                return {
-
-                    matched:
-                        true,
-
-                    params:
-                        params
-
-                };
-
-            }
-
-
-            if (
-                patternPart.toLowerCase() !==
-                pathPart.toLowerCase()
-            ) {
-
-                return {
-
-                    matched:
-                        false,
-
-                    params:
-                        {}
-
-                };
-
-            }
-
-        }
-
-
-        return {
-
-            matched:
-                true,
-
-            params:
-                params
-
-        };
-
-    }
-
-
-    /* ========================================================
-       13 — ROUTE REGISTRATION
-       ======================================================== */
-
-    function registerRoute(
-        pattern,
-        config
-    ) {
-
-        const normalized =
-            normalizeRoute(
-                pattern
-            );
-
-
-        if (
-            !normalized
-        ) {
-
-            reportError(
-                "INVALID_ROUTE",
-                new Error(
-                    "Route ist ungültig."
-                ),
-                {
-                    pattern:
-                        pattern
-                }
-            );
-
-
-            return false;
-
-        }
-
-
-        const definition =
-            (
-                config &&
-                typeof config ===
-                "object"
-            )
-                ? {
-                    ...config
-                }
-                : {};
-
-
-        definition.pattern =
-            normalized;
-
-
-        definition.name =
-            definition.name ||
-            normalized;
-
-
-        definition.enabled =
-            definition.enabled !== false;
-
-
-        state.routes.set(
-            normalized,
-            definition
-        );
-
-
-        state.statistics.registeredRoutes +=
-            1;
-
-
-        emit(
-            "route-registered",
-            {
-                route:
-                    normalized,
-
-                config:
-                    definition
-            }
-        );
-
-
-        return true;
-
-    }
-
-
-    function unregisterRoute(
-        pattern
-    ) {
-
-        const normalized =
-            normalizeRoute(
-                pattern
-            );
-
-
-        const existed =
-            state.routes.delete(
-                normalized
-            );
-
-
-        if (existed) {
-
-            emit(
-                "route-unregistered",
-                {
-                    route:
-                        normalized
-                }
-            );
-
-        }
-
-
-        return existed;
-
-    }
-
-
-    function getRoute(
-        pattern
-    ) {
-
-        const normalized =
-            normalizeRoute(
-                pattern
-            );
-
-
-        return (
-            state.routes.get(
-                normalized
-            ) ||
-            null
-        );
-
-    }
-
-
-    function getRoutes() {
-
-        return Array.from(
-            state.routes.values()
-        );
-
-    }
-
-
-    /* ========================================================
-       14 — FIND ROUTE
-       ======================================================== */
-
-    function resolveRoute(
-        pathname
-    ) {
-
-        const normalized =
-            normalizeRoute(
-                pathname
-            );
-
-
-        const exact =
-            state.routes.get(
-                normalized
-            );
-
-
-        if (
-            exact &&
-            exact.enabled !== false
-        ) {
-
-            return {
-
-                route:
-                    exact,
-
-                params:
-                    {}
-
-            };
-
-        }
-
-
-        for (
-            const [
-                pattern,
-                route
-            ]
-            of state.routes.entries()
-        ) {
-
-            if (
-                route.enabled === false
-            ) {
-
-                continue;
-
-            }
-
-
-            const match =
-                matchPattern(
-                    pattern,
-                    normalized
-                );
-
-
-            if (
-                match.matched
-            ) {
-
-                return {
-
-                    route:
-                        route,
-
-                    params:
-                        match.params
-
-                };
-
-            }
-
-        }
-
-
-        /*
-         * Falls die Registry eine App mit
-         * passender route kennt, erzeugen
-         * wir automatisch eine Route.
-         */
-
-        const registry =
-            getRegistry();
-
-
-        if (registry) {
-
-            const apps =
-                hasMethod(
-                    registry,
-                    "getAll"
-                )
-                    ? registry.getAll()
-                    : [];
-
-
-            for (
-                const app of apps
-            ) {
-
-                if (
-                    !app ||
-                    app.enabled === false
-                ) {
-
-                    continue;
-
-                }
-
-
-                if (
-                    app.route
-                ) {
-
-                    const appRoute =
-                        normalizeRoute(
-                            app.route
-                        );
-
-
-                    const match =
-                        matchPattern(
-                            appRoute,
-                            normalized
-                        );
-
-
-                    if (
-                        match.matched
-                    ) {
-
-                        return {
-
-                            route: {
-
-                                name:
-                                    app.name ||
-                                    app.id,
-
-                                pattern:
-                                    appRoute,
-
-                                appId:
-                                    app.id,
-
-                                enabled:
-                                    true
-
-                            },
-
-                            params:
-                                match.params
-
-                        };
-
-                    }
-
-                }
-
-            }
-
-        }
-
-
-        return null;
-
-    }
-
-
-    /* ========================================================
-       15 — APP ROUTE RESOLUTION
-       ======================================================== */
-
-    function resolveApp(
-        appId
-    ) {
-
-        const registry =
-            getRegistry();
-
-
-        if (!registry) {
-
-            return null;
-
-        }
-
-
-        if (
-            hasMethod(
-                registry,
-                "getApp"
-            )
-        ) {
-
-            return registry.getApp(
-                appId
-            );
-
-        }
-
-
-        if (
-            hasMethod(
-                registry,
-                "get"
-            )
-        ) {
-
-            return registry.get(
-                appId
-            );
-
-        }
-
-
-        return null;
-
-    }
-
-
-    /* ========================================================
-       16 — ROUTE GUARDS
+       09 — ROUTE GUARDS
        ======================================================== */
 
     function addGuard(
-        callback
+        guard
     ) {
 
         if (
-            typeof callback !==
+            typeof guard !==
             "function"
         ) {
 
@@ -1526,14 +1022,14 @@
 
 
         state.guards.add(
-            callback
+            guard
         );
 
 
         return function () {
 
-            removeGuard(
-                callback
+            state.guards.delete(
+                guard
             );
 
         };
@@ -1542,69 +1038,54 @@
 
 
     function removeGuard(
-        callback
+        guard
     ) {
 
         return state.guards.delete(
-            callback
+            guard
         );
 
     }
 
 
-    async function runGuards(
-        context
+    async function checkGuards(
+        route,
+        navigationOptions
     ) {
 
         for (
-            const guard of state.guards
+            const guard of
+                Array.from(
+                    state.guards
+                )
         ) {
 
             try {
 
                 const result =
                     await guard(
-                        context
+                        route,
+                        navigationOptions
                     );
 
-
-                /*
-                 * false blockiert
-                 * die Navigation.
-                 */
 
                 if (
                     result ===
                     false
                 ) {
 
-                    state.statistics.guardsBlocked +=
-                        1;
-
-
-                    emit(
-                        "navigation-blocked",
-                        {
-                            context:
-                                context
-                        }
-                    );
-
-
                     return false;
 
                 }
 
-            } catch (exception) {
+            } catch (
+                exception
+            ) {
 
                 reportError(
-                    "ROUTE_GUARD_ERROR",
-                    exception
+                    exception,
+                    "Route Guard"
                 );
-
-
-                state.statistics.guardsBlocked +=
-                    1;
 
 
                 return false;
@@ -1620,50 +1101,12 @@
 
 
     /* ========================================================
-       17 — HISTORY
+       10 — HISTORY
        ======================================================== */
 
-    function addHistory(
-        entry,
-        replace
+    function pushHistory(
+        route
     ) {
-
-        if (
-            replace
-        ) {
-
-            if (
-                state.historyIndex >=
-                0
-            ) {
-
-                state.history[
-                    state.historyIndex
-                ] =
-                    entry;
-
-            } else {
-
-                state.history.push(
-                    entry
-                );
-
-                state.historyIndex =
-                    state.history.length -
-                    1;
-
-            }
-
-
-            return;
-
-        }
-
-
-        /*
-         * Alles hinter der aktuellen
-         * Position wird entfernt.
-         */
 
         if (
             state.historyIndex <
@@ -1680,39 +1123,51 @@
 
 
         state.history.push(
-            entry
+            clone(
+                route
+            )
         );
 
 
-        state.historyIndex =
-            state.history.length -
-            1;
-
-
-        /*
-         * History begrenzen.
-         */
-
         if (
             state.history.length >
-            100
+            state.maxHistory
         ) {
 
             state.history.shift();
 
-            state.historyIndex -=
-                1;
-
         }
+
+
+        state.historyIndex =
+            state.history.length - 1;
 
     }
 
 
-    function getHistory() {
+    function replaceHistory(
+        route
+    ) {
 
-        return state.history.map(
-            safeClone
-        );
+        if (
+            state.historyIndex < 0
+        ) {
+
+            pushHistory(
+                route
+            );
+
+            return;
+
+        }
+
+
+        state.history[
+            state.historyIndex
+        ] =
+            clone(
+                route
+            );
 
     }
 
@@ -1730,6 +1185,7 @@
     function canGoForward() {
 
         return (
+            state.historyIndex >= 0 &&
             state.historyIndex <
             state.history.length - 1
         );
@@ -1738,649 +1194,421 @@
 
 
     /* ========================================================
-       18 — WINDOW MANAGER OPEN
+       11 — BROWSER HISTORY
        ======================================================== */
 
-    async function openWindow(
-        app,
-        context
+    function updateBrowserHistory(
+        route,
+        mode = "push"
     ) {
 
-        const windowManager =
-            getWindowManager();
-
-
         if (
-            !windowManager
+            !window.history ||
+            !window.history.pushState
         ) {
 
-            return false;
+            return;
 
         }
 
 
         try {
 
-            /*
-             * Unterschiedliche zukünftige
-             * Window-Manager APIs werden
-             * unterstützt.
-             */
-
-            if (
-                hasMethod(
-                    windowManager,
-                    "openApp"
-                )
-            ) {
-
-                await windowManager.openApp(
-                    app.id,
-                    context
-                );
+            const url =
+                route.path;
 
 
-                return true;
+            const historyState = {
 
-            }
+                haldo:
+                    true,
+
+                route:
+                    clone(
+                        route
+                    )
+
+            };
 
 
             if (
-                hasMethod(
-                    windowManager,
-                    "open"
-                )
+                mode ===
+                "replace"
             ) {
 
-                await windowManager.open(
-                    app.id,
-                    context
+                window.history.replaceState(
+                    historyState,
+                    "",
+                    url
                 );
 
+            } else {
 
-                return true;
+                window.history.pushState(
+                    historyState,
+                    "",
+                    url
+                );
 
             }
 
-
-            if (
-                hasMethod(
-                    windowManager,
-                    "createWindow"
-                )
-            ) {
-
-                await windowManager.createWindow(
-                    {
-                        appId:
-                            app.id,
-
-                        title:
-                            app.title ||
-                            app.name,
-
-                        route:
-                            context.route,
-
-                        params:
-                            context.params,
-
-                        query:
-                            context.query
-
-                    }
-                );
-
-
-                return true;
-
-            }
-
-        } catch (exception) {
+        } catch (
+            exception
+        ) {
 
             reportError(
-                "WINDOW_OPEN_ERROR",
                 exception,
-                {
-                    appId:
-                        app.id
-                }
+                "Browser History"
             );
 
         }
-
-
-        return false;
 
     }
 
 
     /* ========================================================
-       19 — APP MANAGER OPEN
+       12 — APP RESOLUTION
        ======================================================== */
 
-    async function openApp(
-        appId,
-        options
+    function resolveApp(
+        appId
     ) {
 
-        const app =
-            resolveApp(
+        const id =
+            normalizeAppId(
                 appId
             );
 
 
-        if (!app) {
+        if (!id) {
 
-            reportError(
-                "APP_NOT_FOUND",
-                new Error(
-                    "App nicht gefunden: " +
-                    String(
-                        appId
-                    )
-                ),
-                {
-                    appId:
-                        appId
-                }
-            );
-
-
-            return false;
-
-        }
-
-
-        if (
-            app.enabled ===
-            false
-        ) {
-
-            reportError(
-                "APP_DISABLED",
-                new Error(
-                    "App ist deaktiviert: " +
-                    app.id
-                ),
-                {
-                    appId:
-                        app.id
-                }
-            );
-
-
-            return false;
+            return null;
 
         }
 
 
         const manager =
-            getManager();
+            getAppManager();
 
 
         if (
-            manager
-        ) {
-
-            try {
-
-                if (
-                    hasMethod(
-                        manager,
-                        "openApp"
-                    )
-                ) {
-
-                    const result =
-                        await manager.openApp(
-                            app.id,
-                            options || {}
-                        );
-
-
-                    if (
-                        result !==
-                        false
-                    ) {
-
-                        return true;
-
-                    }
-
-                }
-
-
-                if (
-                    hasMethod(
-                        manager,
-                        "launch"
-                    )
-                ) {
-
-                    const result =
-                        await manager.launch(
-                            app.id,
-                            options || {}
-                        );
-
-
-                    if (
-                        result !==
-                        false
-                    ) {
-
-                        return true;
-
-                    }
-
-                }
-
-
-                if (
-                    hasMethod(
-                        manager,
-                        "open"
-                    )
-                ) {
-
-                    const result =
-                        await manager.open(
-                            app.id,
-                            options || {}
-                        );
-
-
-                    if (
-                        result !==
-                        false
-                    ) {
-
-                        return true;
-
-                    }
-
-                }
-
-            } catch (exception) {
-
-                reportError(
-                    "APP_MANAGER_OPEN_ERROR",
-                    exception,
-                    {
-                        appId:
-                            app.id
-                    }
-                );
-
-            }
-
-        }
-
-
-        /*
-         * Fallback:
-         * App selbst öffnen.
-         */
-
-        if (
+            manager &&
             hasMethod(
-                app,
-                "open"
+                manager,
+                "get"
             )
         ) {
 
             try {
 
-                const result =
-                    await app.open(
-                        options || {}
+                const app =
+                    manager.get(
+                        id
                     );
 
 
-                return result !==
-                    false;
+                if (app) {
 
-            } catch (exception) {
+                    return app;
 
-                reportError(
-                    "APP_OPEN_ERROR",
-                    exception,
-                    {
-                        appId:
-                            app.id
-                    }
-                );
+                }
 
-            }
+            } catch (_) {}
 
         }
 
 
-        return false;
+        const registry =
+            getRegistry();
+
+
+        if (
+            registry &&
+            hasMethod(
+                registry,
+                "get"
+            )
+        ) {
+
+            try {
+
+                return registry.get(
+                    id
+                );
+
+            } catch (_) {}
+
+        }
+
+
+        return null;
 
     }
 
 
     /* ========================================================
-       20 — NAVIGATION
+       13 — ROUTE FROM APP
        ======================================================== */
 
-    async function navigate(
-        target,
-        options
+    function resolveAppRoute(
+        app,
+        options = {}
     ) {
 
-        const settings =
-            options || {};
+        if (!app) {
+
+            return "/";
+
+        }
+
+
+        let route =
+            app.route ||
+            app.path ||
+            (
+                "/apps/" +
+                normalizeAppId(
+                    app.id
+                )
+            );
+
+
+        route =
+            normalizePath(
+                route
+            );
+
+
+        const query =
+            createQuery(
+                options.query
+            );
+
+
+        if (query) {
+
+            route +=
+                query;
+
+        }
+
+
+        if (
+            options.hash
+        ) {
+
+            route +=
+                "#" +
+                String(
+                    options.hash
+                )
+                .replace(
+                    /^#/,
+                    ""
+                );
+
+        }
+
+
+        return route;
+
+    }
+
+
+    /* ========================================================
+       14 — INTERNAL NAVIGATION
+       ======================================================== */
+
+    async function performNavigation(
+        route,
+        options = {},
+        historyMode = "push"
+    ) {
+
+        const allowed =
+            await checkGuards(
+                route,
+                options
+            );
+
+
+        if (!allowed) {
+
+            state.statistics.cancelled +=
+                1;
+
+
+            emit(
+                "navigation-cancelled",
+                {
+                    route,
+                    options
+                }
+            );
+
+
+            return false;
+
+        }
+
+
+        const previous =
+            state.current
+                ? clone(
+                    state.current
+                )
+                : null;
+
+
+        state.previous =
+            previous;
+
+
+        state.current =
+            clone(
+                route
+            );
+
+
+        if (
+            historyMode ===
+            "replace"
+        ) {
+
+            replaceHistory(
+                route
+            );
+
+        } else {
+
+            pushHistory(
+                route
+            );
+
+        }
+
+
+        updateBrowserHistory(
+            route,
+            historyMode
+        );
 
 
         state.statistics.navigations +=
             1;
 
 
-        const parsed =
-            parseRoute(
-                target
-            );
+        emit(
+            "before-navigate",
+            {
+
+                from:
+                    previous,
+
+                to:
+                    clone(
+                        route
+                    ),
+
+                options
+
+            }
+        );
 
 
-        const resolved =
-            resolveRoute(
-                parsed.pathname
-            );
+        /* ---------------------------------------------
+           Shell
+           --------------------------------------------- */
 
-
-        let app =
-            null;
+        const shell =
+            getShell();
 
 
         if (
-            settings.appId
+            shell &&
+            hasMethod(
+                shell,
+                "navigate"
+            )
         ) {
 
-            app =
-                resolveApp(
-                    settings.appId
+            try {
+
+                await shell.navigate(
+                    route.path,
+                    options
                 );
+
+            } catch (exception) {
+
+                reportError(
+                    exception,
+                    "Shell Navigation"
+                );
+
+            }
 
         }
 
 
+        /* ---------------------------------------------
+           Desktop
+           --------------------------------------------- */
+
+        const desktop =
+            getDesktop();
+
+
         if (
-            !app &&
-            resolved &&
-            resolved.route &&
-            resolved.route.appId
+            desktop &&
+            hasMethod(
+                desktop,
+                "navigate"
+            )
         ) {
 
-            app =
-                resolveApp(
-                    resolved.route.appId
+            try {
+
+                await desktop.navigate(
+                    route.path,
+                    options
                 );
+
+            } catch (_) {}
 
         }
 
 
+        /* ---------------------------------------------
+           Window Manager
+           --------------------------------------------- */
+
         if (
-            !app &&
-            resolved &&
-            resolved.route
+            route.appId
         ) {
 
-            const routeAppId =
-                resolved.route.app;
+            const windowManager =
+                getWindowManager();
 
 
             if (
-                routeAppId
+                windowManager &&
+                hasMethod(
+                    windowManager,
+                    "navigate"
+                )
             ) {
 
-                app =
-                    resolveApp(
-                        routeAppId
+                try {
+
+                    await windowManager.navigate(
+                        route.path,
+                        options
                     );
 
-            }
-
-        }
-
-
-        /*
-         * Wenn kein registrierter Route-Eintrag
-         * vorhanden ist, prüfen wir direkt,
-         * ob der erste Segmentname eine App ist.
-         */
-
-        if (
-            !app &&
-            parsed.segments.length > 0
-        ) {
-
-            const possibleAppId =
-                parsed.segments[0];
-
-
-            app =
-                resolveApp(
-                    possibleAppId
-                );
-
-        }
-
-
-        const context = {
-
-            target:
-                target,
-
-            route:
-                parsed.route,
-
-            pathname:
-                parsed.pathname,
-
-            query:
-                parsed.query,
-
-            params:
-                resolved
-                    ? resolved.params
-                    : {},
-
-            app:
-                app,
-
-            appId:
-                app
-                    ? app.id
-                    : (
-                        settings.appId ||
-                        null
-                    ),
-
-            options:
-                settings,
-
-            timestamp:
-                Date.now()
-
-        };
-
-
-        emit(
-            "before-navigate",
-            context
-        );
-
-
-        const allowed =
-            await runGuards(
-                context
-            );
-
-
-        if (!allowed) {
-
-            state.statistics.failedNavigations +=
-                1;
-
-
-            return {
-
-                success:
-                    false,
-
-                blocked:
-                    true,
-
-                context:
-                    context
-
-            };
-
-        }
-
-
-        /*
-         * App öffnen.
-         */
-
-        if (
-            app
-        ) {
-
-            const opened =
-                await openApp(
-                    app.id,
-                    {
-                        ...settings,
-
-                        route:
-                            parsed.route,
-
-                        params:
-                            context.params,
-
-                        query:
-                            context.query,
-
-                        navigation:
-                            true
-
-                    }
-                );
-
-
-            if (!opened) {
-
-                /*
-                 * Ein App-Router darf eine Route
-                 * auch ohne vorhandenen Manager
-                 * registrieren. Deshalb wird die
-                 * Navigation nicht automatisch
-                 * als Fehler betrachtet, wenn
-                 * die App selbst vorhanden ist.
-                 */
-
-                if (
-                    hasMethod(
-                        app,
-                        "open"
-                    )
-                ) {
-
-                    state.statistics.failedNavigations +=
-                        1;
-
-
-                    return {
-
-                        success:
-                            false,
-
-                        blocked:
-                            false,
-
-                        context:
-                            context
-
-                    };
-
-                }
+                } catch (_) {}
 
             }
-
-        }
-
-
-        const previous =
-            state.currentRoute;
-
-
-        const entry = {
-
-            route:
-                parsed.route,
-
-            pathname:
-                parsed.pathname,
-
-            query:
-                safeClone(
-                    parsed.query
-                ),
-
-            params:
-                safeClone(
-                    context.params
-                ),
-
-            appId:
-                app
-                    ? app.id
-                    : (
-                        settings.appId ||
-                        null
-                    ),
-
-            timestamp:
-                Date.now()
-
-        };
-
-
-        addHistory(
-            entry,
-            settings.replace === true
-        );
-
-
-        state.previousRoute =
-            previous;
-
-
-        state.currentRoute =
-            entry;
-
-
-        state.statistics.successfulNavigations +=
-            1;
-
-
-        /*
-         * Browser History.
-         */
-
-        if (
-            settings.updateBrowser !==
-            false
-        ) {
-
-            updateBrowserHistory(
-                parsed.route,
-                settings
-            );
 
         }
 
@@ -2388,14 +1616,16 @@
         emit(
             "navigate",
             {
-                current:
-                    entry,
 
-                previous:
+                from:
                     previous,
 
-                app:
-                    app
+                route:
+                    clone(
+                        route
+                    ),
+
+                options
 
             }
         );
@@ -2403,18 +1633,273 @@
 
         emit(
             "route-changed",
+            clone(
+                route
+            )
+        );
+
+
+        emit(
+            "after-navigate",
             {
+
+                from:
+                    previous,
+
+                to:
+                    clone(
+                        route
+                    ),
+
+                options
+
+            }
+        );
+
+
+        return true;
+
+    }
+
+
+    /* ========================================================
+       15 — NAVIGATE
+       ======================================================== */
+
+    async function navigate(
+        path,
+        options = {}
+    ) {
+
+        const route =
+            createRouteObject(
+                path,
+                options
+            );
+
+
+        return performNavigation(
+            route,
+            options,
+            "push"
+        );
+
+    }
+
+
+    /* ========================================================
+       16 — REPLACE
+       ======================================================== */
+
+    async function replace(
+        path,
+        options = {}
+    ) {
+
+        const route =
+            createRouteObject(
+                path,
+                options
+            );
+
+
+        const result =
+            await performNavigation(
+                route,
+                options,
+                "replace"
+            );
+
+
+        if (result) {
+
+            state.statistics.replaces +=
+                1;
+
+        }
+
+
+        return result;
+
+    }
+
+
+    /* ========================================================
+       17 — OPEN APP
+       ======================================================== */
+
+    async function open(
+        appId,
+        options = {}
+    ) {
+
+        const id =
+            normalizeAppId(
+                appId
+            );
+
+
+        if (!id) {
+
+            return null;
+
+        }
+
+
+        const app =
+            resolveApp(
+                id
+            );
+
+
+        if (!app) {
+
+            reportError(
+                new Error(
+                    "App nicht gefunden: " +
+                    id
+                ),
+                "Router App Open"
+            );
+
+
+            return null;
+
+        }
+
+
+        const path =
+            resolveAppRoute(
+                app,
+                options
+            );
+
+
+        const route =
+            createRouteObject(
+                path,
+                {
+
+                    ...options,
+
+                    appId:
+                        id,
+
+                    source:
+                        options.source ||
+                        "router"
+
+                }
+            );
+
+
+        const allowed =
+            await checkGuards(
+                route,
+                options
+            );
+
+
+        if (!allowed) {
+
+            state.statistics.cancelled +=
+                1;
+
+            return null;
+
+        }
+
+
+        const manager =
+            getAppManager();
+
+
+        let result =
+            null;
+
+
+        /*
+         * WICHTIG:
+         * App Manager besitzt den eigentlichen
+         * App-Lifecycle.
+         *
+         * Router übernimmt Navigation.
+         */
+
+        if (
+            manager &&
+            hasMethod(
+                manager,
+                "open"
+            )
+        ) {
+
+            try {
+
+                result =
+                    await manager.open(
+                        id,
+                        {
+
+                            ...options,
+
+                            route:
+                                path,
+
+                            source:
+                                options.source ||
+                                "router"
+
+                        }
+                    );
+
+            } catch (
+                exception
+            ) {
+
+                reportError(
+                    exception,
+                    "Router → App Manager"
+                );
+
+                return null;
+
+            }
+
+        }
+
+
+        const navigated =
+            await performNavigation(
+                route,
+                options,
+                "push"
+            );
+
+
+        if (!navigated) {
+
+            return null;
+
+        }
+
+
+        state.statistics.opens +=
+            1;
+
+
+        emit(
+            "app-opened",
+            {
+
+                app,
+
+                result,
+
                 route:
-                    entry.route,
-
-                appId:
-                    entry.appId,
-
-                params:
-                    entry.params,
-
-                query:
-                    entry.query
+                    clone(
+                        route
+                    )
 
             }
         );
@@ -2422,17 +1907,14 @@
 
         return {
 
-            success:
-                true,
+            app,
 
-            blocked:
-                false,
+            result,
 
             route:
-                entry,
-
-            app:
-                app
+                clone(
+                    route
+                )
 
         };
 
@@ -2440,83 +1922,60 @@
 
 
     /* ========================================================
-       21 — BROWSER HISTORY
+       18 — APP ROUTE
        ======================================================== */
 
-    function updateBrowserHistory(
-        route,
-        options
+    async function openApp(
+        appId,
+        options = {}
     ) {
 
-        try {
-
-            if (
-                !window.history
-            ) {
-
-                return false;
-
-            }
-
-
-            const stateData = {
-
-                haldo:
-                    true,
-
-                router:
-                    MODULE_ID,
-
-                route:
-                    route
-
-            };
-
-
-            if (
-                options &&
-                options.replace ===
-                true
-            ) {
-
-                window.history.replaceState(
-                    stateData,
-                    "",
-                    "#" +
-                    route
-                );
-
-            } else {
-
-                window.history.pushState(
-                    stateData,
-                    "",
-                    "#" +
-                    route
-                );
-
-            }
-
-
-            return true;
-
-        } catch (exception) {
-
-            reportError(
-                "BROWSER_HISTORY_ERROR",
-                exception
-            );
-
-
-            return false;
-
-        }
+        return open(
+            appId,
+            options
+        );
 
     }
 
 
     /* ========================================================
-       22 — BACK
+       19 — HOME
+       ======================================================== */
+
+    async function home(
+        options = {}
+    ) {
+
+        const result =
+            await navigate(
+                "/",
+                {
+
+                    ...options,
+
+                    source:
+                        options.source ||
+                        "home"
+
+                }
+            );
+
+
+        if (result) {
+
+            state.statistics.home +=
+                1;
+
+        }
+
+
+        return result;
+
+    }
+
+
+    /* ========================================================
+       20 — BACK
        ======================================================== */
 
     async function back() {
@@ -2531,17 +1990,36 @@
 
 
         const targetIndex =
-            state.historyIndex -
-            1;
+            state.historyIndex - 1;
 
 
-        const entry =
+        const target =
             state.history[
                 targetIndex
             ];
 
 
-        if (!entry) {
+        if (!target) {
+
+            return false;
+
+        }
+
+
+        const allowed =
+            await checkGuards(
+                target,
+                {
+                    direction:
+                        "back"
+                }
+            );
+
+
+        if (!allowed) {
+
+            state.statistics.cancelled +=
+                1;
 
             return false;
 
@@ -2552,43 +2030,60 @@
             targetIndex;
 
 
-        state.statistics.backNavigations +=
-            1;
+        state.previous =
+            state.current;
 
 
-        const result =
-            await navigate(
-                entry.route,
-                {
-                    appId:
-                        entry.appId,
-
-                    params:
-                        entry.params,
-
-                    query:
-                        entry.query,
-
-                    replace:
-                        true,
-
-                    updateBrowser:
-                        false,
-
-                    historyNavigation:
-                        true
-
-                }
+        state.current =
+            clone(
+                target
             );
 
 
-        return result;
+        if (
+            window.history &&
+            hasMethod(
+                window.history,
+                "back"
+            )
+        ) {
+
+            try {
+
+                window.history.back();
+
+            } catch (_) {}
+
+        }
+
+
+        state.statistics.backs +=
+            1;
+
+
+        emit(
+            "back",
+            clone(
+                target
+            )
+        );
+
+
+        emit(
+            "route-changed",
+            clone(
+                target
+            )
+        );
+
+
+        return true;
 
     }
 
 
     /* ========================================================
-       23 — FORWARD
+       21 — FORWARD
        ======================================================== */
 
     async function forward() {
@@ -2603,113 +2098,36 @@
 
 
         const targetIndex =
-            state.historyIndex +
-            1;
+            state.historyIndex + 1;
 
 
-        const entry =
+        const target =
             state.history[
                 targetIndex
             ];
 
 
-        if (!entry) {
+        if (!target) {
 
             return false;
 
         }
 
 
-        state.historyIndex =
-            targetIndex;
-
-
-        state.statistics.forwardNavigations +=
-            1;
-
-
-        const result =
-            await navigate(
-                entry.route,
+        const allowed =
+            await checkGuards(
+                target,
                 {
-                    appId:
-                        entry.appId,
-
-                    params:
-                        entry.params,
-
-                    query:
-                        entry.query,
-
-                    replace:
-                        true,
-
-                    updateBrowser:
-                        false,
-
-                    historyNavigation:
-                        true
-
+                    direction:
+                        "forward"
                 }
             );
 
 
-        return result;
+        if (!allowed) {
 
-    }
-
-
-    /* ========================================================
-       24 — GO
-       ======================================================== */
-
-    async function go(
-        offset
-    ) {
-
-        const amount =
-            Number(
-                offset
-            );
-
-
-        if (
-            !Number.isFinite(
-                amount
-            ) ||
-            amount === 0
-        ) {
-
-            return false;
-
-        }
-
-
-        const targetIndex =
-            state.historyIndex +
-            Math.trunc(
-                amount
-            );
-
-
-        if (
-            targetIndex < 0 ||
-            targetIndex >=
-            state.history.length
-        ) {
-
-            return false;
-
-        }
-
-
-        const entry =
-            state.history[
-                targetIndex
-            ];
-
-
-        if (!entry) {
+            state.statistics.cancelled +=
+                1;
 
             return false;
 
@@ -2720,211 +2138,373 @@
             targetIndex;
 
 
-        return navigate(
-            entry.route,
-            {
-                appId:
-                    entry.appId,
+        state.previous =
+            state.current;
 
-                params:
-                    entry.params,
 
-                query:
-                    entry.query,
+        state.current =
+            clone(
+                target
+            );
 
-                replace:
-                    true,
 
-                updateBrowser:
-                    false,
+        if (
+            window.history &&
+            hasMethod(
+                window.history,
+                "forward"
+            )
+        ) {
 
-                historyNavigation:
-                    true
+            try {
 
-            }
+                window.history.forward();
+
+            } catch (_) {}
+
+        }
+
+
+        state.statistics.forwards +=
+            1;
+
+
+        emit(
+            "forward",
+            clone(
+                target
+            )
         );
+
+
+        emit(
+            "route-changed",
+            clone(
+                target
+            )
+        );
+
+
+        return true;
 
     }
 
 
     /* ========================================================
-       25 — CURRENT ROUTE
+       22 — CURRENT ROUTE
        ======================================================== */
 
     function getCurrentRoute() {
 
-        return safeClone(
-            state.currentRoute
+        return clone(
+            state.current
         );
+
+    }
+
+
+    function getCurrentPath() {
+
+        return state.current
+            ? state.current.path
+            : null;
 
     }
 
 
     function getPreviousRoute() {
 
-        return safeClone(
-            state.previousRoute
+        return clone(
+            state.previous
         );
 
     }
 
 
-    function getCurrentApp() {
+    /* ========================================================
+       23 — HISTORY API
+       ======================================================== */
 
-        const current =
-            state.currentRoute;
+    function getHistory() {
+
+        return clone(
+            state.history
+        );
+
+    }
+
+
+    function clearHistory() {
+
+        state.history =
+            state.current
+                ? [
+                    clone(
+                        state.current
+                    )
+                ]
+                : [];
+
+        state.historyIndex =
+            state.history.length
+                ? 0
+                : -1;
+
+
+        emit(
+            "history-cleared"
+        );
+
+
+        return true;
+
+    }
+
+
+    function setMaxHistory(
+        value
+    ) {
+
+        const number =
+            Number(
+                value
+            );
 
 
         if (
-            !current ||
-            !current.appId
+            !Number.isFinite(
+                number
+            ) ||
+            number < 10
         ) {
-
-            return null;
-
-        }
-
-
-        return resolveApp(
-            current.appId
-        );
-
-    }
-
-
-    /* ========================================================
-       26 — OPEN APP BY ROUTE
-       ======================================================== */
-
-    async function open(
-        route,
-        options
-    ) {
-
-        return navigate(
-            route,
-            options
-        );
-
-    }
-
-
-    async function routeTo(
-        route,
-        options
-    ) {
-
-        return navigate(
-            route,
-            options
-        );
-
-    }
-
-
-    /* ========================================================
-       27 — CLOSE CURRENT APP
-       ======================================================== */
-
-    async function closeCurrentApp() {
-
-        const app =
-            getCurrentApp();
-
-
-        if (!app) {
 
             return false;
 
         }
 
 
-        const manager =
-            getManager();
+        state.maxHistory =
+            Math.floor(
+                number
+            );
 
 
-        try {
+        while (
+            state.history.length >
+            state.maxHistory
+        ) {
 
-            if (
-                manager &&
-                hasMethod(
-                    manager,
-                    "closeApp"
-                )
-            ) {
+            state.history.shift();
 
-                return (
-                    await manager.closeApp(
-                        app.id
-                    )
-                ) !== false;
+            state.historyIndex -=
+                1;
 
-            }
+        }
 
 
-            if (
-                manager &&
-                hasMethod(
-                    manager,
-                    "close"
-                )
-            ) {
+        if (
+            state.historyIndex < 0 &&
+            state.history.length
+        ) {
 
-                return (
-                    await manager.close(
-                        app.id
-                    )
-                ) !== false;
+            state.historyIndex =
+                0;
 
-            }
+        }
 
 
-            if (
-                hasMethod(
-                    app,
-                    "close"
-                )
-            ) {
+        return true;
 
-                return (
-                    await app.close()
-                ) !== false;
+    }
 
-            }
 
-        } catch (exception) {
+    /* ========================================================
+       24 — DEEP LINK
+       ======================================================== */
 
-            reportError(
-                "APP_CLOSE_ERROR",
-                exception,
+    async function handleDeepLink(
+        path
+    ) {
+
+        const normalized =
+            normalizePath(
+                path
+            );
+
+
+        const segments =
+            normalized
+                .split("/")
+                .filter(Boolean);
+
+
+        if (
+            segments[0] ===
+            "apps" &&
+            segments[1]
+        ) {
+
+            return open(
+                segments[1],
                 {
-                    appId:
-                        app.id
+
+                    source:
+                        "deep-link",
+
+                    path:
+                        normalized
+
                 }
             );
 
         }
 
 
-        return false;
+        return navigate(
+            normalized,
+            {
+                source:
+                    "deep-link"
+            }
+        );
 
     }
 
 
     /* ========================================================
-       28 — CONNECTIONS
+       25 — BROWSER POPSTATE
        ======================================================== */
 
-    function connectToKernel() {
+    function connectBrowserHistory() {
+
+        try {
+
+            window.addEventListener(
+                "popstate",
+                async function (
+                    event
+                ) {
+
+                    const route =
+                        event.state &&
+                        event.state.haldo &&
+                        event.state.route
+                            ? event.state.route
+                            : createRouteObject(
+                                window.location.pathname +
+                                window.location.search +
+                                window.location.hash,
+                                {
+                                    source:
+                                        "browser-history"
+                                }
+                            );
+
+
+                    state.previous =
+                        state.current;
+
+
+                    state.current =
+                        clone(
+                            route
+                        );
+
+
+                    emit(
+                        "popstate",
+                        clone(
+                            route
+                        )
+                    );
+
+
+                    emit(
+                        "route-changed",
+                        clone(
+                            route
+                        )
+                    );
+
+                }
+            );
+
+
+            return true;
+
+        } catch (
+            exception
+        ) {
+
+            reportError(
+                exception,
+                "Browser PopState"
+            );
+
+
+            return false;
+
+        }
+
+    }
+
+
+    /* ========================================================
+       26 — CONNECTIONS
+       ======================================================== */
+
+    function refreshConnections() {
+
+        state.connections.kernel =
+            !!getKernel();
+
+        state.connections.system =
+            !!getSystem();
+
+        state.connections.appManager =
+            !!getAppManager();
+
+        state.connections.registry =
+            !!getRegistry();
+
+        state.connections.windowManager =
+            !!getWindowManager();
+
+        state.connections.launcher =
+            !!getLauncher();
+
+        state.connections.shell =
+            !!getShell();
+
+        state.connections.desktop =
+            !!getDesktop();
+
+
+        return {
+            ...state.connections
+        };
+
+    }
+
+
+    function getConnectionStatus() {
+
+        return refreshConnections();
+
+    }
+
+
+    /* ========================================================
+       27 — KERNEL
+       ======================================================== */
+
+    function connectKernel() {
 
         const kernel =
             getKernel();
 
 
         if (!kernel) {
-
-            state.connections.kernel =
-                false;
 
             return false;
 
@@ -2969,11 +2549,13 @@
 
             return true;
 
-        } catch (exception) {
+        } catch (
+            exception
+        ) {
 
             reportError(
-                "KERNEL_CONNECTION_ERROR",
-                exception
+                exception,
+                "Router Kernel Connection"
             );
 
 
@@ -2984,16 +2566,19 @@
     }
 
 
-    function connectToSystem() {
+    function connectKernelEvents() {
 
-        const system =
-            getSystem();
+        const kernel =
+            getKernel();
 
 
-        if (!system) {
-
-            state.connections.system =
-                false;
+        if (
+            !kernel ||
+            !hasMethod(
+                kernel,
+                "on"
+            )
+        ) {
 
             return false;
 
@@ -3002,44 +2587,44 @@
 
         try {
 
-            if (
-                hasMethod(
-                    system,
-                    "registerService"
-                )
-            ) {
+            kernel.on(
+                "kernel:ready",
+                function () {
 
-                system.registerService(
-                    MODULE_ID,
-                    api
-                );
+                    refreshConnections();
 
-            } else if (
-                hasMethod(
-                    system,
-                    "registerModule"
-                )
-            ) {
+                    emit(
+                        "kernel-ready"
+                    );
 
-                system.registerModule(
-                    MODULE_ID,
-                    api
-                );
-
-            }
+                }
+            );
 
 
-            state.connections.system =
-                true;
+            kernel.on(
+                "kernel:error",
+                function (
+                    payload
+                ) {
+
+                    emit(
+                        "kernel-error",
+                        payload
+                    );
+
+                }
+            );
 
 
             return true;
 
-        } catch (exception) {
+        } catch (
+            exception
+        ) {
 
             reportError(
-                "SYSTEM_CONNECTION_ERROR",
-                exception
+                exception,
+                "Router Kernel Events"
             );
 
 
@@ -3050,129 +2635,66 @@
     }
 
 
-    function connectToRegistry() {
+    /* ========================================================
+       28 — DIAGNOSTICS
+       ======================================================== */
 
-        const registry =
-            getRegistry();
+    function diagnostics() {
 
+        refreshConnections();
 
-        state.connections.registry =
-            !!registry;
-
-
-        if (
-            registry &&
-            hasMethod(
-                registry,
-                "on"
-            )
-        ) {
-
-            try {
-
-                registry.on(
-                    "registered",
-                    handleRegistryChange
-                );
-
-
-                registry.on(
-                    "updated",
-                    handleRegistryChange
-                );
-
-
-                registry.on(
-                    "removed",
-                    handleRegistryChange
-                );
-
-
-                return true;
-
-            } catch (exception) {
-
-                reportError(
-                    "REGISTRY_EVENT_ERROR",
-                    exception
-                );
-
-            }
-
-        }
-
-
-        return !!registry;
-
-    }
-
-
-    function connectToManager() {
-
-        const manager =
-            getManager();
-
-
-        state.connections.manager =
-            !!manager;
-
-
-        return !!manager;
-
-    }
-
-
-    function connectToWindowManager() {
-
-        const manager =
-            getWindowManager();
-
-
-        state.connections.windowManager =
-            !!manager;
-
-
-        return !!manager;
-
-    }
-
-
-    function refreshConnections() {
-
-        connectToKernel();
-
-        connectToSystem();
-
-        connectToRegistry();
-
-        connectToManager();
-
-        connectToWindowManager();
-
-
-        return getConnectionStatus();
-
-    }
-
-
-    function getConnectionStatus() {
 
         return {
 
-            kernel:
-                !!getKernel(),
+            name:
+                NAME,
 
-            system:
-                !!getSystem(),
+            version:
+                VERSION,
 
-            registry:
-                !!getRegistry(),
+            module:
+                MODULE_ID,
 
-            manager:
-                !!getManager(),
+            initialized:
+                state.initialized,
 
-            windowManager:
-                !!getWindowManager()
+            initializing:
+                state.initializing,
+
+            ready:
+                state.ready,
+
+            failed:
+                state.failed,
+
+            current:
+                getCurrentRoute(),
+
+            previous:
+                getPreviousRoute(),
+
+            historyLength:
+                state.history.length,
+
+            historyIndex:
+                state.historyIndex,
+
+            canGoBack:
+                canGoBack(),
+
+            canGoForward:
+                canGoForward(),
+
+            connections:
+                getConnectionStatus(),
+
+            statistics:
+                {
+                    ...state.statistics
+                },
+
+            timestamp:
+                new Date().toISOString()
 
         };
 
@@ -3180,207 +2702,240 @@
 
 
     /* ========================================================
-       29 — REGISTRY EVENTS
+       29 — HEALTH CHECK
        ======================================================== */
 
-    function handleRegistryChange(
-        payload
-    ) {
+    function healthCheck() {
 
-        emit(
-            "registry-changed",
-            payload
-        );
-
-    }
+        refreshConnections();
 
 
-    /* ========================================================
-       30 — BROWSER POPSTATE / HASH
-       ======================================================== */
-
-    function handleBrowserNavigation() {
-
-        let route =
-            null;
-
-
-        try {
-
-            if (
-                window.location.hash
-            ) {
-
-                route =
-                    window.location.hash
-                        .replace(
-                            /^#/,
-                            ""
-                        );
-
-            }
-
-        } catch (_) {}
+        const problems = [];
 
 
         if (
-            route
+            !state.connections.kernel
         ) {
 
-            navigate(
-                route,
-                {
-                    updateBrowser:
-                        false,
-
-                    historyNavigation:
-                        true
-
-                }
-            )
-            .catch(
-                function (exception) {
-
-                    reportError(
-                        "BROWSER_NAVIGATION_ERROR",
-                        exception
-                    );
-
-                }
+            problems.push(
+                "Kernel nicht verbunden."
             );
 
         }
 
+
+        if (
+            !state.connections.appManager
+        ) {
+
+            problems.push(
+                "App Manager nicht verbunden."
+            );
+
+        }
+
+
+        if (
+            !state.connections.windowManager
+        ) {
+
+            problems.push(
+                "Window Manager nicht verbunden."
+            );
+
+        }
+
+
+        return {
+
+            healthy:
+                problems.length ===
+                0,
+
+            problems,
+
+            currentRoute:
+                getCurrentRoute(),
+
+            historyLength:
+                state.history.length,
+
+            connections:
+                getConnectionStatus(),
+
+            timestamp:
+                new Date().toISOString()
+
+        };
+
     }
 
 
     /* ========================================================
-       31 — DEFAULT SYSTEM ROUTES
+       30 — PUBLIC API
        ======================================================== */
 
-    function registerDefaultRoutes() {
+    const api = {
 
-        const defaults = [
+        name:
+            NAME,
 
-            {
-                pattern:
-                    "/",
+        version:
+            VERSION,
 
-                name:
-                    "home",
-
-                appId:
-                    "haldo-home"
-
-            },
-
-            {
-                pattern:
-                    "/home",
-
-                name:
-                    "home",
-
-                appId:
-                    "haldo-home"
-
-            },
-
-            {
-                pattern:
-                    "/dashboard",
-
-                name:
-                    "dashboard",
-
-                appId:
-                    "dashboard"
-
-            },
-
-            {
-                pattern:
-                    "/settings",
-
-                name:
-                    "settings",
-
-                appId:
-                    "settings"
-
-            },
-
-            {
-                pattern:
-                    "/apps",
-
-                name:
-                    "app-center",
-
-                appId:
-                    "app-center"
-
-            },
-
-            {
-                pattern:
-                    "/ai",
-
-                name:
-                    "ai-assistant",
-
-                appId:
-                    "ai-assistant"
-
-            },
-
-            {
-                pattern:
-                    "/files",
-
-                name:
-                    "file-manager",
-
-                appId:
-                    "file-manager"
-
-            },
-
-            {
-                pattern:
-                    "/browser",
-
-                name:
-                    "browser",
-
-                appId:
-                    "browser"
-
-            }
-
-        ];
+        module:
+            MODULE_ID,
 
 
-        defaults.forEach(
-            function (definition) {
+        /* Navigation */
 
-                if (
-                    !state.routes.has(
-                        definition.pattern
-                    )
-                ) {
+        navigate,
 
-                    registerRoute(
-                        definition.pattern,
-                        definition
-                    );
+        open,
 
-                }
+        openApp,
 
-            }
-        );
+        replace,
 
-    }
+        back,
+
+        forward,
+
+        home,
+
+
+        /* Routes */
+
+        getCurrentRoute,
+
+        getCurrentPath,
+
+        getPreviousRoute,
+
+        createRouteObject,
+
+        resolveApp,
+
+        resolveAppRoute,
+
+
+        /* History */
+
+        getHistory,
+
+        clearHistory,
+
+        canGoBack,
+
+        canGoForward,
+
+        setMaxHistory,
+
+
+        /* Deep Links */
+
+        handleDeepLink,
+
+
+        /* Guards */
+
+        addGuard,
+
+        removeGuard,
+
+
+        /* Events */
+
+        on,
+
+        off,
+
+        emit,
+
+
+        /* Connections */
+
+        refreshConnections,
+
+        getConnectionStatus,
+
+        connectKernel,
+
+
+        /* Diagnostics */
+
+        diagnostics,
+
+        healthCheck,
+
+
+        /* State */
+
+        getState() {
+
+            return {
+
+                initialized:
+                    state.initialized,
+
+                initializing:
+                    state.initializing,
+
+                ready:
+                    state.ready,
+
+                failed:
+                    state.failed,
+
+                current:
+                    getCurrentRoute(),
+
+                previous:
+                    getPreviousRoute(),
+
+                historyLength:
+                    state.history.length,
+
+                historyIndex:
+                    state.historyIndex,
+
+                canGoBack:
+                    canGoBack(),
+
+                canGoForward:
+                    canGoForward(),
+
+                connections:
+                    getConnectionStatus()
+
+            };
+
+        },
+
+
+        getStatistics() {
+
+            return {
+                ...state.statistics
+            };
+
+        }
+
+    };
+
+
+    /* ========================================================
+       31 — GLOBAL EXPORT
+       ======================================================== */
+
+    window.HalDoAppRouter =
+        api;
+
+    window.HalDoOSAppRouter =
+        api;
+
+    HalDoOS.appRouter =
+        api;
 
 
     /* ========================================================
@@ -3413,6 +2968,9 @@
         state.initialized =
             true;
 
+        state.failed =
+            false;
+
 
         emit(
             "initializing",
@@ -3423,481 +2981,130 @@
         );
 
 
-        refreshConnections();
-
-        registerDefaultRoutes();
-
-
-        /*
-         * Browser Navigation vorbereiten.
-         */
-
-        if (
-            window.addEventListener
-        ) {
-
-            window.addEventListener(
-                "popstate",
-                handleBrowserNavigation
-            );
-
-        }
-
-
-        state.ready =
-            true;
-
-        state.initializing =
-            false;
-
-
-        emit(
-            "ready",
-            {
-                version:
-                    VERSION,
-
-                routes:
-                    state.routes.size,
-
-                connections:
-                    getConnectionStatus()
-
-            }
-        );
-
-
-        log(
-            "App Router bereit.",
-            VERSION
-        );
-
-
-        return api;
-
-    }
-
-
-    /* ========================================================
-       33 — DIAGNOSTICS
-       ======================================================== */
-
-    function diagnostics() {
-
-        return {
-
-            name:
-                NAME,
-
-            module:
-                MODULE_ID,
-
-            version:
-                VERSION,
-
-            initialized:
-                state.initialized,
-
-            ready:
-                state.ready,
-
-            currentRoute:
-                getCurrentRoute(),
-
-            previousRoute:
-                getPreviousRoute(),
-
-            historyLength:
-                state.history.length,
-
-            historyIndex:
-                state.historyIndex,
-
-            routeCount:
-                state.routes.size,
-
-            guardCount:
-                state.guards.size,
-
-            connections:
-                getConnectionStatus(),
-
-            statistics:
-                {
-                    ...state.statistics
-                },
-
-            routes:
-                getRoutes().map(
-                    function (route) {
-
-                        return {
-
-                            name:
-                                route.name,
-
-                            pattern:
-                                route.pattern,
-
-                            appId:
-                                route.appId ||
-                                null,
-
-                            enabled:
-                                route.enabled !==
-                                false
-
-                        };
-
-                    }
-                ),
-
-            timestamp:
-                new Date().toISOString()
-
-        };
-
-    }
-
-
-    /* ========================================================
-       34 — HEALTH CHECK
-       ======================================================== */
-
-    function healthCheck() {
-
-        const connections =
-            getConnectionStatus();
-
-
-        const problems =
-            [];
-
-
-        if (
-            !connections.kernel
-        ) {
-
-            problems.push(
-                "Kernel nicht verbunden."
-            );
-
-        }
-
-
-        if (
-            !connections.registry
-        ) {
-
-            problems.push(
-                "App Registry nicht verbunden."
-            );
-
-        }
-
-
-        return {
-
-            healthy:
-                problems.length ===
-                0,
-
-            problems:
-                problems,
-
-            initialized:
-                state.initialized,
-
-            ready:
-                state.ready,
-
-            routeCount:
-                state.routes.size,
-
-            currentRoute:
-                getCurrentRoute(),
-
-            connections:
-                connections,
-
-            timestamp:
-                new Date().toISOString()
-
-        };
-
-    }
-
-
-    /* ========================================================
-       35 — PUBLIC API
-       ======================================================== */
-
-    const api = {
-
-        name:
-            NAME,
-
-        version:
-            VERSION,
-
-        module:
-            MODULE_ID,
-
-
-        /* State */
-
-        getState:
-            function () {
-
-                return {
-
-                    initialized:
-                        state.initialized,
-
-                    ready:
-                        state.ready,
-
-                    currentRoute:
-                        getCurrentRoute(),
-
-                    previousRoute:
-                        getPreviousRoute(),
-
-                    historyLength:
-                        state.history.length,
-
-                    historyIndex:
-                        state.historyIndex,
-
-                    routeCount:
-                        state.routes.size,
-
-                    connections:
-                        getConnectionStatus()
-
-                };
-
-            },
-
-
-        /* Events */
-
-        on:
-            on,
-
-        off:
-            off,
-
-        emit:
-            emit,
-
-
-        /* Navigation */
-
-        navigate:
-            navigate,
-
-        open:
-            open,
-
-        routeTo:
-            routeTo,
-
-        back:
-            back,
-
-        forward:
-            forward,
-
-        go:
-            go,
-
-
-        /* Current */
-
-        getCurrentRoute:
-            getCurrentRoute,
-
-        getPreviousRoute:
-            getPreviousRoute,
-
-        getCurrentApp:
-            getCurrentApp,
-
-
-        /* App */
-
-        openApp:
-            openApp,
-
-        closeCurrentApp:
-            closeCurrentApp,
-
-
-        /* Routes */
-
-        registerRoute:
-            registerRoute,
-
-        unregisterRoute:
-            unregisterRoute,
-
-        getRoute:
-            getRoute,
-
-        getRoutes:
-            getRoutes,
-
-        resolveRoute:
-            resolveRoute,
-
-        matchPattern:
-            matchPattern,
-
-        parseRoute:
-            parseRoute,
-
-        normalizeRoute:
-            normalizeRoute,
-
-
-        /* Guards */
-
-        addGuard:
-            addGuard,
-
-        removeGuard:
-            removeGuard,
-
-
-        /* History */
-
-        getHistory:
-            getHistory,
-
-        canGoBack:
-            canGoBack,
-
-        canGoForward:
-            canGoForward,
-
-
-        /* Connections */
-
-        connectToKernel:
-            connectToKernel,
-
-        connectToSystem:
-            connectToSystem,
-
-        connectToRegistry:
-            connectToRegistry,
-
-        connectToManager:
-            connectToManager,
-
-        connectToWindowManager:
-            connectToWindowManager,
-
-        refreshConnections:
-            refreshConnections,
-
-        getConnectionStatus:
-            getConnectionStatus,
-
-
-        /* Diagnostics */
-
-        diagnostics:
-            diagnostics,
-
-        healthCheck:
-            healthCheck,
-
-
-        /* Initialization */
-
-        initialize:
-            initialize
-
-    };
-
-
-    /* ========================================================
-       36 — GLOBAL EXPORT
-       ======================================================== */
-
-    window.HalDoAppRouter =
-        api;
-
-    window.HalDoOSAppRouter =
-        api;
-
-    HalDoOS.appRouter =
-        api;
-
-
-    /* ========================================================
-       37 — KERNEL EVENT CONNECTION
-       ======================================================== */
-
-    function connectKernelEvents() {
-
-        const kernel =
-            getKernel();
-
-
-        if (
-            !kernel ||
-            !hasMethod(
-                kernel,
-                "on"
-            )
-        ) {
-
-            return false;
-
-        }
-
-
         try {
 
-            kernel.on(
-                "kernel:ready",
-                function () {
+            refreshConnections();
 
-                    refreshConnections();
+            connectKernel();
+
+            connectKernelEvents();
+
+            connectBrowserHistory();
 
 
-                    emit(
-                        "kernel-ready"
+            /*
+             * Erst vorhandene Browser-Route
+             * übernehmen.
+             */
+
+            const initialPath =
+                normalizePath(
+                    window.location.pathname +
+                    window.location.search +
+                    window.location.hash
+                );
+
+
+            const initialRoute =
+                createRouteObject(
+                    initialPath,
+                    {
+                        source:
+                            "boot"
+                    }
+                );
+
+
+            state.current =
+                initialRoute;
+
+
+            state.history = [
+                clone(
+                    initialRoute
+                )
+            ];
+
+
+            state.historyIndex =
+                0;
+
+
+            state.ready =
+                true;
+
+            state.initializing =
+                false;
+
+
+            const kernel =
+                getKernel();
+
+
+            if (
+                kernel &&
+                hasMethod(
+                    kernel,
+                    "setModuleReady"
+                )
+            ) {
+
+                try {
+
+                    kernel.setModuleReady(
+                        MODULE_ID,
+                        true
                     );
 
+                } catch (_) {}
+
+            }
+
+
+            emit(
+                "ready",
+                {
+
+                    version:
+                        VERSION,
+
+                    route:
+                        getCurrentRoute(),
+
+                    diagnostics:
+                        diagnostics()
+
                 }
             );
 
 
-            kernel.on(
-                "module:registered",
-                function () {
-
-                    refreshConnections();
-
-                }
+            log(
+                "HalDo AI OS 20 App Router bereit.",
+                "Version:",
+                VERSION
             );
 
 
-            return true;
+            return api;
 
-        } catch (exception) {
+        } catch (
+            exception
+        ) {
+
+            state.initializing =
+                false;
+
+            state.failed =
+                true;
+
 
             reportError(
-                "KERNEL_EVENT_CONNECTION_ERROR",
-                exception
+                exception,
+                "Router Initialisierung"
             );
 
 
-            return false;
+            return api;
 
         }
 
@@ -3905,24 +3112,25 @@
 
 
     /* ========================================================
-       38 — STARTUP
+       33 — BOOT
        ======================================================== */
 
-    connectKernelEvents();
-
-
-    function handleDOMReady() {
+    function boot() {
 
         initialize()
             .catch(
-                function (exception) {
+                exception => {
 
                     state.initializing =
                         false;
 
+                    state.failed =
+                        true;
+
+
                     reportError(
-                        "ROUTER_INIT_ERROR",
-                        exception
+                        exception,
+                        "Router Boot"
                     );
 
                 }
@@ -3930,6 +3138,10 @@
 
     }
 
+
+    /* ========================================================
+       34 — DOM START
+       ======================================================== */
 
     if (
         document.readyState ===
@@ -3938,7 +3150,7 @@
 
         document.addEventListener(
             "DOMContentLoaded",
-            handleDOMReady,
+            boot,
             {
                 once:
                     true
@@ -3947,31 +3159,29 @@
 
     } else {
 
-        handleDOMReady();
+        boot();
 
     }
 
 
     /* ========================================================
-       39 — FINAL EXPOSURE
+       35 — FINAL EXPORT
        ======================================================== */
 
-    window.HalDoOS =
-        window.HalDoOS ||
-        {};
+    HalDoOS.appRouter =
+        api;
 
-    window.HalDoOS.appRouter =
+    window.HalDoAppRouter =
+        api;
+
+    window.HalDoOSAppRouter =
         api;
 
 
-    log(
-        "HalDo AI OS App Router geladen."
-    );
-
+    /* ========================================================
+       END
+       HALDO AI OS 20
+       APPLICATION ROUTER
+       ======================================================== */
 
 })(window, document);
-
-
-/* ============================================================
-   ENDE — HALDO AI OS 20 APP ROUTER
-   ============================================================ */
