@@ -55767,8 +55767,8 @@
             }
      <!-- =========================================================
          HALDO AI OS 20
-         APPLICATION SERVICE / DEPENDENCY ENGINE
-         TEIL 58
+         APPLICATION COMMAND / ACTION ENGINE
+         TEIL 57
          ========================================================= -->
 
     <script>
@@ -55779,23 +55779,40 @@
 
 
         /* =====================================================
+           REFERENCES
+           ===================================================== */
+
+        const messageBus =
+            window.HalDoMessageBus20 ||
+            null;
+
+
+        const appState =
+            window.HalDoAppState20 ||
+            null;
+
+
+        const windowControls =
+            window.HalDoWindowControls20 ||
+            null;
+
+
+        /* =====================================================
            STATE
            ===================================================== */
 
-        const services =
+        const commands =
             new Map();
 
 
-        const appDependencies =
+        const appCommands =
             new Map();
 
 
-        const serviceWaiters =
-            new Map();
+        const executionHistory = [];
 
-
-        const health =
-            new Map();
+        const MAX_HISTORY =
+            500;
 
 
         /* =====================================================
@@ -55834,7 +55851,7 @@
             ) {
 
                 console.warn(
-                    "[HalDo Service Engine 20]",
+                    "[HalDo Command Engine 20]",
                     error
                 );
 
@@ -55843,38 +55860,66 @@
         }
 
 
+        function clone(
+            value
+        ) {
+
+            if (
+                value ===
+                undefined
+            ) {
+
+                return undefined;
+
+            }
+
+
+            try {
+
+                return JSON.parse(
+                    JSON.stringify(
+                        value
+                    )
+                );
+
+            } catch (
+                error
+            ) {
+
+                return value;
+
+            }
+
+        }
+
+
+        function record(
+            entry
+        ) {
+
+            executionHistory.push(
+                entry
+            );
+
+
+            if (
+                executionHistory.length >
+                MAX_HISTORY
+            ) {
+
+                executionHistory.splice(
+                    0,
+                    executionHistory.length -
+                    MAX_HISTORY
+                );
+
+            }
+
+        }
+
+
         /* =====================================================
-           SERVICE STATUS
-           ===================================================== */
-
-        const STATUS = {
-
-            REGISTERED:
-                "registered",
-
-            STARTING:
-                "starting",
-
-            READY:
-                "ready",
-
-            STOPPING:
-                "stopping",
-
-            STOPPED:
-                "stopped",
-
-            ERROR:
-                "error",
-
-            UNAVAILABLE:
-                "unavailable"
-
-        };
-
-
-        /* =====================================================
-           REGISTER SERVICE
+           COMMAND REGISTRATION
            ===================================================== */
 
         function register(
@@ -55905,958 +55950,170 @@
             }
 
 
-            const existing =
-                services.get(
-                    id
-                );
+            if (
+                typeof definition.execute !==
+                "function"
+            ) {
 
-
-            if (existing) {
-
-                return existing;
+                return null;
 
             }
 
 
-            const service = {
+            const command = {
 
                 id,
 
-                name:
-                    definition.name ||
+                title:
+                    definition.title ||
                     id,
 
                 description:
                     definition.description ||
                     "",
 
-                version:
-                    definition.version ||
-                    "1.0.0",
+                category:
+                    definition.category ||
+                    "general",
 
-                status:
-                    STATUS.REGISTERED,
+                shortcut:
+                    definition.shortcut ||
+                    null,
 
-                provider:
-                    definition.provider ||
-                    "HalDo AI OS",
+                appId:
+                    definition.appId ||
+                    null,
 
-                dependencies:
-                    Array.isArray(
-                        definition.dependencies
-                    )
-                        ? [
-                            ...definition.dependencies
-                        ]
-                        : [],
+                enabled:
+                    definition.enabled !==
+                    false,
 
-                init:
-                    typeof definition.init ===
+                visible:
+                    definition.visible !==
+                    false,
+
+                execute:
+                    definition.execute,
+
+                canExecute:
+                    typeof definition.canExecute ===
                     "function"
-                        ? definition.init
+                        ? definition.canExecute
                         : null,
 
-                start:
-                    typeof definition.start ===
-                    "function"
-                        ? definition.start
-                        : null,
-
-                stop:
-                    typeof definition.stop ===
-                    "function"
-                        ? definition.stop
-                        : null,
-
-                destroy:
-                    typeof definition.destroy ===
-                    "function"
-                        ? definition.destroy
-                        : null,
-
-                healthCheck:
-                    typeof definition.healthCheck ===
-                    "function"
-                        ? definition.healthCheck
-                        : null,
-
-                api:
-                    definition.api ||
-                    {},
+                createdAt:
+                    Date.now(),
 
                 metadata:
                     definition.metadata ||
-                    {},
-
-                registeredAt:
-                    Date.now(),
-
-                startedAt:
-                    null,
-
-                stoppedAt:
-                    null,
-
-                error:
-                    null
+                    {}
 
             };
 
 
-            services.set(
+            commands.set(
                 id,
-                service
+                command
             );
 
 
-            health.set(
-                id,
-                {
+            if (
+                command.appId
+            ) {
 
-                    status:
-                        STATUS.REGISTERED,
+                registerAppCommand(
+                    command.appId,
+                    command
+                );
 
-                    checkedAt:
-                        Date.now(),
-
-                    healthy:
-                        false
-
-                }
-            );
+            }
 
 
             emit(
-                "service:registered",
+                "command:registered",
                 {
 
-                    service
+                    command
 
                 }
             );
 
 
-            return service;
+            return command;
 
         }
 
 
         /* =====================================================
-           GET SERVICE
+           UNREGISTER
            ===================================================== */
 
-        function get(
-            serviceId
+        function unregister(
+            commandId
         ) {
 
-            return (
-                services.get(
-                    normalize(
-                        serviceId
-                    )
-                ) ||
-                null
-            );
-
-        }
-
-
-        /* =====================================================
-           HAS SERVICE
-           ===================================================== */
-
-        function has(
-            serviceId
-        ) {
-
-            return !!get(
-                serviceId
-            );
-
-        }
-
-
-        /* =====================================================
-           SERVICE READY
-           ===================================================== */
-
-        function isReady(
-            serviceId
-        ) {
-
-            const service =
-                get(
-                    serviceId
-                );
-
-
-            return !!(
-                service &&
-                service.status ===
-                STATUS.READY
-            );
-
-        }
-
-
-        /* =====================================================
-           DEPENDENCY CHECK
-           ===================================================== */
-
-        function checkDependencies(
-            dependencies = []
-        ) {
-
-            const result = {
-
-                ready:
-                    true,
-
-                missing: [],
-
-                unavailable: [],
-
-                error: []
-
-            };
-
-
-            dependencies.forEach(
-                dependency => {
-
-                    const id =
-                        typeof dependency ===
-                        "string"
-                            ? dependency
-                            : dependency &&
-                              dependency.id;
-
-
-                    if (!id) {
-
-                        return;
-
-                    }
-
-
-                    const service =
-                        get(
-                            id
-                        );
-
-
-                    if (!service) {
-
-                        result.ready =
-                            false;
-
-                        result.missing.push(
-                            id
-                        );
-
-                        return;
-
-                    }
-
-
-                    if (
-                        service.status ===
-                        STATUS.ERROR
-                    ) {
-
-                        result.ready =
-                            false;
-
-                        result.error.push(
-                            id
-                        );
-
-                        return;
-
-                    }
-
-
-                    if (
-                        service.status !==
-                        STATUS.READY
-                    ) {
-
-                        result.ready =
-                            false;
-
-                        result.unavailable.push(
-                            id
-                        );
-
-                    }
-
-                }
-            );
-
-
-            return result;
-
-        }
-
-
-        /* =====================================================
-           WAIT FOR SERVICE
-           ===================================================== */
-
-        function waitFor(
-            serviceId,
-            options = {}
-        ) {
-
-            serviceId =
+            commandId =
                 normalize(
-                    serviceId
+                    commandId
                 );
 
 
-            if (
-                isReady(
-                    serviceId
-                )
-            ) {
-
-                return Promise.resolve(
-                    get(
-                        serviceId
-                    )
+            const command =
+                commands.get(
+                    commandId
                 );
+
+
+            if (!command) {
+
+                return false;
 
             }
 
 
-            const timeout =
-                Number.isFinite(
-                    options.timeout
-                )
-                    ? options.timeout
-                    : 10000;
+            commands.delete(
+                commandId
+            );
 
 
-            return new Promise(
-                (
-                    resolve,
-                    reject
-                ) => {
+            if (
+                command.appId
+            ) {
+
+                const set =
+                    appCommands.get(
+                        command.appId
+                    );
+
+
+                if (set) {
+
+                    set.delete(
+                        commandId
+                    );
+
 
                     if (
-                        !serviceWaiters.has(
-                            serviceId
-                        )
+                        set.size ===
+                        0
                     ) {
 
-                        serviceWaiters.set(
-                            serviceId,
-                            new Set()
+                        appCommands.delete(
+                            command.appId
                         );
 
                     }
 
-
-                    const waiter = {
-
-                        resolve,
-
-                        reject,
-
-                        timer:
-                            setTimeout(
-                                () => {
-
-                                    const set =
-                                        serviceWaiters.get(
-                                            serviceId
-                                        );
-
-
-                                    if (set) {
-
-                                        set.delete(
-                                            waiter
-                                        );
-
-                                    }
-
-
-                                    reject(
-                                        new Error(
-                                            `Service timeout: ${serviceId}`
-                                        )
-                                    );
-
-                                },
-                                timeout
-                            )
-
-                    };
-
-
-                    serviceWaiters
-                        .get(
-                            serviceId
-                        )
-                        .add(
-                            waiter
-                        );
-
                 }
-            );
-
-        }
-
-
-        /* =====================================================
-           RESOLVE WAITERS
-           ===================================================== */
-
-        function resolveWaiters(
-            serviceId,
-            service
-        ) {
-
-            const set =
-                serviceWaiters.get(
-                    serviceId
-                );
-
-
-            if (!set) {
-
-                return;
 
             }
-
-
-            serviceWaiters.delete(
-                serviceId
-            );
-
-
-            [
-                ...set
-            ].forEach(
-                waiter => {
-
-                    clearTimeout(
-                        waiter.timer
-                    );
-
-
-                    waiter.resolve(
-                        service
-                    );
-
-                }
-            );
-
-        }
-
-
-        /* =====================================================
-           REJECT WAITERS
-           ===================================================== */
-
-        function rejectWaiters(
-            serviceId,
-            error
-        ) {
-
-            const set =
-                serviceWaiters.get(
-                    serviceId
-                );
-
-
-            if (!set) {
-
-                return;
-
-            }
-
-
-            serviceWaiters.delete(
-                serviceId
-            );
-
-
-            [
-                ...set
-            ].forEach(
-                waiter => {
-
-                    clearTimeout(
-                        waiter.timer
-                    );
-
-
-                    waiter.reject(
-                        error
-                    );
-
-                }
-            );
-
-        }
-
-
-        /* =====================================================
-           INIT SERVICE
-           ===================================================== */
-
-        async function initialize(
-            serviceId,
-            context = {}
-        ) {
-
-            const service =
-                get(
-                    serviceId
-                );
-
-
-            if (!service) {
-
-                throw new Error(
-                    `Service not found: ${serviceId}`
-                );
-
-            }
-
-
-            if (
-                service.status ===
-                STATUS.READY
-            ) {
-
-                return service;
-
-            }
-
-
-            if (
-                service.status ===
-                STATUS.STARTING
-            ) {
-
-                return waitFor(
-                    serviceId
-                );
-
-            }
-
-
-            const dependencies =
-                checkDependencies(
-                    service.dependencies
-                );
-
-
-            if (
-                !dependencies.ready
-            ) {
-
-                service.status =
-                    STATUS.UNAVAILABLE;
-
-
-                const error =
-                    new Error(
-                        `Dependencies unavailable for ${serviceId}`
-                    );
-
-
-                service.error =
-                    error;
-
-
-                emit(
-                    "service:unavailable",
-                    {
-
-                        service,
-
-                        dependencies
-
-                    }
-                );
-
-
-                throw error;
-
-            }
-
-
-            service.status =
-                STATUS.STARTING;
-
-
-            service.error =
-                null;
 
 
             emit(
-                "service:starting",
+                "command:unregistered",
                 {
 
-                    service
-
-                }
-            );
-
-
-            try {
-
-                if (
-                    service.init
-                ) {
-
-                    await service.init(
-                        {
-
-                            service,
-
-                            context,
-
-                            engine:
-                                publicAPI
-
-                        }
-                    );
-
-                }
-
-
-                if (
-                    service.start
-                ) {
-
-                    await service.start(
-                        {
-
-                            service,
-
-                            context,
-
-                            engine:
-                                publicAPI
-
-                        }
-                    );
-
-                }
-
-
-                service.status =
-                    STATUS.READY;
-
-
-                service.startedAt =
-                    Date.now();
-
-
-                health.set(
-                    service.id,
-                    {
-
-                        status:
-                            STATUS.READY,
-
-                        checkedAt:
-                            Date.now(),
-
-                        healthy:
-                            true
-
-                    }
-                );
-
-
-                resolveWaiters(
-                    service.id,
-                    service
-                );
-
-
-                emit(
-                    "service:ready",
-                    {
-
-                        service
-
-                    }
-                );
-
-
-                return service;
-
-            } catch (
-                error
-            ) {
-
-                service.status =
-                    STATUS.ERROR;
-
-
-                service.error =
-                    error;
-
-
-                health.set(
-                    service.id,
-                    {
-
-                        status:
-                            STATUS.ERROR,
-
-                        checkedAt:
-                            Date.now(),
-
-                        healthy:
-                            false,
-
-                        error
-
-                    }
-                );
-
-
-                rejectWaiters(
-                    service.id,
-                    error
-                );
-
-
-                emit(
-                    "service:error",
-                    {
-
-                        service,
-
-                        error
-
-                    }
-                );
-
-
-                throw error;
-
-            }
-
-        }
-
-
-        /* =====================================================
-           STOP SERVICE
-           ===================================================== */
-
-        async function stop(
-            serviceId,
-            context = {}
-        ) {
-
-            const service =
-                get(
-                    serviceId
-                );
-
-
-            if (!service) {
-
-                return false;
-
-            }
-
-
-            if (
-                service.status ===
-                STATUS.STOPPED ||
-                service.status ===
-                STATUS.REGISTERED
-            ) {
-
-                return true;
-
-            }
-
-
-            service.status =
-                STATUS.STOPPING;
-
-
-            emit(
-                "service:stopping",
-                {
-
-                    service
-
-                }
-            );
-
-
-            try {
-
-                if (
-                    service.stop
-                ) {
-
-                    await service.stop(
-                        {
-
-                            service,
-
-                            context,
-
-                            engine:
-                                publicAPI
-
-                        }
-                    );
-
-                }
-
-
-                service.status =
-                    STATUS.STOPPED;
-
-
-                service.stoppedAt =
-                    Date.now();
-
-
-                health.set(
-                    service.id,
-                    {
-
-                        status:
-                            STATUS.STOPPED,
-
-                        checkedAt:
-                            Date.now(),
-
-                        healthy:
-                            false
-
-                    }
-                );
-
-
-                emit(
-                    "service:stopped",
-                    {
-
-                        service
-
-                    }
-                );
-
-
-                return true;
-
-            } catch (
-                error
-            ) {
-
-                service.status =
-                    STATUS.ERROR;
-
-
-                service.error =
-                    error;
-
-
-                emit(
-                    "service:error",
-                    {
-
-                        service,
-
-                        error
-
-                    }
-                );
-
-
-                return false;
-
-            }
-
-        }
-
-
-        /* =====================================================
-           DESTROY SERVICE
-           ===================================================== */
-
-        async function destroy(
-            serviceId,
-            context = {}
-        ) {
-
-            const service =
-                get(
-                    serviceId
-                );
-
-
-            if (!service) {
-
-                return false;
-
-            }
-
-
-            try {
-
-                if (
-                    service.destroy
-                ) {
-
-                    await service.destroy(
-                        {
-
-                            service,
-
-                            context,
-
-                            engine:
-                                publicAPI
-
-                        }
-                    );
-
-                }
-
-            } catch (
-                error
-            ) {
-
-                console.warn(
-                    "[HalDo Service Engine 20]",
-                    error
-                );
-
-            }
-
-
-            services.delete(
-                service.id
-            );
-
-
-            health.delete(
-                service.id
-            );
-
-
-            emit(
-                "service:destroyed",
-                {
-
-                    serviceId
+                    commandId
 
                 }
             );
@@ -56868,180 +56125,32 @@
 
 
         /* =====================================================
-           HEALTH CHECK
+           GET COMMAND
            ===================================================== */
 
-        async function checkHealth(
-            serviceId
+        function get(
+            commandId
         ) {
 
-            const service =
-                get(
-                    serviceId
-                );
-
-
-            if (!service) {
-
-                return {
-
-                    serviceId,
-
-                    healthy:
-                        false,
-
-                    status:
-                        STATUS.UNAVAILABLE
-
-                };
-
-            }
-
-
-            if (
-                !service.healthCheck
-            ) {
-
-                const healthy =
-                    service.status ===
-                    STATUS.READY;
-
-
-                const result = {
-
-                    serviceId,
-
-                    healthy,
-
-                    status:
-                        service.status,
-
-                    checkedAt:
-                        Date.now()
-
-                };
-
-
-                health.set(
-                    serviceId,
-                    result
-                );
-
-
-                return result;
-
-            }
-
-
-            try {
-
-                const result =
-                    await service.healthCheck(
-                        {
-
-                            service,
-
-                            engine:
-                                publicAPI
-
-                        }
-                    );
-
-
-                const healthy =
-                    result === true ||
-                    (
-                        result &&
-                        result.healthy ===
-                        true
-                    );
-
-
-                const status =
-                    healthy
-                        ? STATUS.READY
-                        : STATUS.ERROR;
-
-
-                const healthResult = {
-
-                    serviceId,
-
-                    healthy,
-
-                    status,
-
-                    checkedAt:
-                        Date.now(),
-
-                    details:
-                        result
-
-                };
-
-
-                health.set(
-                    serviceId,
-                    healthResult
-                );
-
-
-                emit(
-                    "service:health",
-                    healthResult
-                );
-
-
-                return healthResult;
-
-            } catch (
-                error
-            ) {
-
-                const result = {
-
-                    serviceId,
-
-                    healthy:
-                        false,
-
-                    status:
-                        STATUS.ERROR,
-
-                    checkedAt:
-                        Date.now(),
-
-                    error
-
-                };
-
-
-                health.set(
-                    serviceId,
-                    result
-                );
-
-
-                emit(
-                    "service:health:error",
-                    result
-                );
-
-
-                return result;
-
-            }
+            return (
+                commands.get(
+                    normalize(
+                        commandId
+                    )
+                ) ||
+                null
+            );
 
         }
 
 
         /* =====================================================
-           APP DEPENDENCY REGISTRATION
+           REGISTER APP COMMAND
            ===================================================== */
 
-        function registerAppDependencies(
+        function registerAppCommand(
             appId,
-            dependencies = []
+            definition
         ) {
 
             appId =
@@ -57052,74 +56161,145 @@
 
             if (!appId) {
 
+                return null;
+
+            }
+
+
+            let command;
+
+
+            if (
+                typeof definition ===
+                "function"
+            ) {
+
+                command =
+                    register(
+                        {
+
+                            id:
+                                `app:${appId}:${Date.now()}:${Math.random()
+                                    .toString(36)
+                                    .slice(2, 8)}`,
+
+                            appId,
+
+                            execute:
+                                definition
+
+                        }
+                    );
+
+            } else {
+
+                command =
+                    definition &&
+                    definition.id
+                        ? (
+                            commands.get(
+                                definition.id
+                            ) ||
+                            register(
+                                {
+
+                                    ...definition,
+
+                                    appId
+
+                                }
+                            )
+                        )
+                        : null;
+
+            }
+
+
+            if (!command) {
+
+                return null;
+
+            }
+
+
+            if (
+                !appCommands.has(
+                    appId
+                )
+            ) {
+
+                appCommands.set(
+                    appId,
+                    new Set()
+                );
+
+            }
+
+
+            appCommands
+                .get(
+                    appId
+                )
+                .add(
+                    command.id
+                );
+
+
+            return command;
+
+        }
+
+
+        /* =====================================================
+           UNREGISTER APP COMMANDS
+           ===================================================== */
+
+        function unregisterAppCommands(
+            appId
+        ) {
+
+            appId =
+                normalize(
+                    appId
+                );
+
+
+            const set =
+                appCommands.get(
+                    appId
+                );
+
+
+            if (!set) {
+
                 return false;
 
             }
 
 
-            const normalized =
-                dependencies
-                    .map(
-                        dependency => {
+            [
+                ...set
+            ].forEach(
+                commandId => {
 
-                            if (
-                                typeof dependency ===
-                                "string"
-                            ) {
-
-                                return {
-
-                                    id:
-                                        dependency,
-
-                                    required:
-                                        true
-
-                                };
-
-                            }
-
-
-                            return {
-
-                                id:
-                                    dependency &&
-                                    dependency.id,
-
-                                required:
-                                    dependency &&
-                                    dependency.required !==
-                                    false,
-
-                                optional:
-                                    dependency &&
-                                    dependency.optional ===
-                                    true
-
-                            };
-
-                        }
-                    )
-                    .filter(
-                        dependency =>
-                            !!dependency.id
+                    commands.delete(
+                        commandId
                     );
 
+                }
+            );
 
-            appDependencies.set(
-                appId,
-                normalized
+
+            appCommands.delete(
+                appId
             );
 
 
             emit(
-                "app:dependencies:registered",
+                "command:app:cleared",
                 {
 
-                    appId,
-
-                    dependencies:
-                        normalized
+                    appId
 
                 }
             );
@@ -57131,329 +56311,1211 @@
 
 
         /* =====================================================
-           GET APP DEPENDENCIES
+           CAN EXECUTE
            ===================================================== */
 
-        function getAppDependencies(
-            appId
+        function canExecute(
+            command,
+            context = {}
         ) {
 
-            return (
-                appDependencies.get(
-                    normalize(
-                        appId
-                    )
-                ) ||
-                []
-            );
+            if (!command) {
+
+                return false;
+
+            }
+
+
+            if (
+                command.enabled ===
+                false
+            ) {
+
+                return false;
+
+            }
+
+
+            if (
+                typeof command.canExecute !==
+                "function"
+            ) {
+
+                return true;
+
+            }
+
+
+            try {
+
+                return (
+                    command.canExecute(
+                        context
+                    ) !== false
+                );
+
+            } catch (
+                error
+            ) {
+
+                return false;
+
+            }
 
         }
 
 
         /* =====================================================
-           CHECK APP DEPENDENCIES
+           EXECUTE
            ===================================================== */
 
-        function checkAppDependencies(
-            appId
+        async function execute(
+            commandId,
+            payload = {},
+            context = {}
         ) {
 
-            const dependencies =
-                getAppDependencies(
-                    appId
+            commandId =
+                normalize(
+                    commandId
                 );
 
 
-            const required =
-                dependencies.filter(
-                    dependency =>
-                        dependency.required !==
-                        false &&
-                        dependency.optional !==
-                        true
+            const command =
+                get(
+                    commandId
                 );
 
 
-            const optional =
-                dependencies.filter(
-                    dependency =>
-                        dependency.optional ===
-                        true
+            const executionId =
+                `exec-${Date.now()}-${Math.random()
+                    .toString(36)
+                    .slice(2, 10)}`;
+
+
+            if (!command) {
+
+                const error =
+                    new Error(
+                        `Command not found: ${commandId}`
+                    );
+
+
+                record({
+
+                    executionId,
+
+                    commandId,
+
+                    success:
+                        false,
+
+                    error:
+                        error.message,
+
+                    timestamp:
+                        Date.now()
+
+                });
+
+
+                emit(
+                    "command:error",
+                    {
+
+                        executionId,
+
+                        commandId,
+
+                        error
+
+                    }
                 );
 
 
-            const requiredResult =
-                checkDependencies(
-                    required
-                );
+                throw error;
+
+            }
 
 
-            const optionalResult =
-                checkDependencies(
-                    optional
-                );
+            const executionContext = {
 
+                ...context,
 
-            return {
+                commandId,
 
-                appId,
+                executionId,
 
-                ready:
-                    requiredResult.ready,
-
-                required:
-                    requiredResult,
-
-                optional:
-                    optionalResult,
-
-                checkedAt:
+                timestamp:
                     Date.now()
 
             };
 
-        }
 
-
-        /* =====================================================
-           WAIT FOR APP DEPENDENCIES
-           ===================================================== */
-
-        async function waitForApp(
-            appId,
-            options = {}
-        ) {
-
-            const timeout =
-                Number.isFinite(
-                    options.timeout
+            if (
+                !canExecute(
+                    command,
+                    executionContext
                 )
-                    ? options.timeout
-                    : 15000;
-
-
-            const startedAt =
-                Date.now();
-
-
-            while (
-                Date.now() -
-                startedAt <
-                timeout
             ) {
 
-                const result =
-                    checkAppDependencies(
-                        appId
+                const error =
+                    new Error(
+                        `Command disabled: ${commandId}`
                     );
 
 
+                record({
+
+                    executionId,
+
+                    commandId,
+
+                    success:
+                        false,
+
+                    error:
+                        error.message,
+
+                    timestamp:
+                        Date.now()
+
+                });
+
+
+                emit(
+                    "command:blocked",
+                    {
+
+                        executionId,
+
+                        commandId,
+
+                        error
+
+                    }
+                );
+
+
+                throw error;
+
+            }
+
+
+            emit(
+                "command:before-execute",
+                {
+
+                    executionId,
+
+                    commandId,
+
+                    payload:
+                        clone(
+                            payload
+                        ),
+
+                    context:
+                        executionContext
+
+                }
+            );
+
+
+            try {
+
+                const result =
+                    await command.execute(
+                        payload,
+                        executionContext
+                    );
+
+
+                const historyEntry = {
+
+                    executionId,
+
+                    commandId,
+
+                    appId:
+                        command.appId,
+
+                    payload:
+                        clone(
+                            payload
+                        ),
+
+                    result:
+                        clone(
+                            result
+                        ),
+
+                    success:
+                        true,
+
+                    timestamp:
+                        Date.now()
+
+                };
+
+
+                record(
+                    historyEntry
+                );
+
+
+                emit(
+                    "command:executed",
+                    historyEntry
+                );
+
+
                 if (
-                    result.ready
+                    messageBus &&
+                    typeof messageBus.publish ===
+                    "function"
                 ) {
 
-                    return result;
+                    messageBus.publish(
+                        "command:executed",
+                        historyEntry,
+                        {
+
+                            sender:
+                                command.appId ||
+                                "system",
+
+                            dom:
+                                false
+
+                        }
+                    );
 
                 }
 
 
-                const pending =
-                    result.required.unavailable;
+                return result;
+
+            } catch (
+                error
+            ) {
+
+                const historyEntry = {
+
+                    executionId,
+
+                    commandId,
+
+                    appId:
+                        command.appId,
+
+                    payload:
+                        clone(
+                            payload
+                        ),
+
+                    success:
+                        false,
+
+                    error:
+                        error &&
+                        error.message
+                            ? error.message
+                            : String(
+                                error
+                            ),
+
+                    timestamp:
+                        Date.now()
+
+                };
 
 
-                if (
-                    pending.length
-                ) {
+                record(
+                    historyEntry
+                );
 
-                    try {
 
-                        await Promise.race(
-                            pending.map(
-                                serviceId =>
-                                    waitFor(
-                                        serviceId,
-                                        {
+                emit(
+                    "command:error",
+                    {
 
-                                            timeout:
-                                                Math.max(
-                                                    500,
-                                                    timeout -
-                                                    (
-                                                        Date.now() -
-                                                        startedAt
-                                                    )
-                                                )
+                        ...historyEntry,
 
-                                        }
-                                    )
-                            )
-                        );
-
-                    } catch (
                         error
-                    ) {
-
-                        /*
-                         * Weiter prüfen.
-                         * Ein anderer Dienst kann
-                         * inzwischen bereit sein.
-                         */
 
                     }
+                );
 
-                } else {
 
-                    await new Promise(
-                        resolve =>
-                            setTimeout(
-                                resolve,
-                                50
-                            )
+                throw error;
+
+            }
+
+        }
+
+
+        /* =====================================================
+           EXECUTE APP COMMAND
+           ===================================================== */
+
+        async function executeApp(
+            appId,
+            commandName,
+            payload = {},
+            context = {}
+        ) {
+
+            appId =
+                normalize(
+                    appId
+                );
+
+
+            commandName =
+                normalize(
+                    commandName
+                );
+
+
+            if (
+                !appId ||
+                !commandName
+            ) {
+
+                throw new Error(
+                    "App ID and command name are required"
+                );
+
+            }
+
+
+            const directId =
+                `${appId}:${commandName}`;
+
+
+            let command =
+                get(
+                    directId
+                );
+
+
+            if (!command) {
+
+                command =
+                    get(
+                        `app:${appId}:${commandName}`
                     );
+
+            }
+
+
+            if (!command) {
+
+                const set =
+                    appCommands.get(
+                        appId
+                    );
+
+
+                if (set) {
+
+                    for (
+                        const id
+                        of set
+                    ) {
+
+                        const candidate =
+                            get(
+                                id
+                            );
+
+
+                        if (
+                            candidate &&
+                            (
+                                candidate.name ===
+                                commandName ||
+                                candidate.id.endsWith(
+                                    `:${commandName}`
+                                )
+                            )
+                        ) {
+
+                            command =
+                                candidate;
+
+                            break;
+
+                        }
+
+                    }
 
                 }
 
             }
 
 
-            throw new Error(
-                `App dependencies timeout: ${appId}`
+            if (!command) {
+
+                throw new Error(
+                    `App command not found: ${appId}/${commandName}`
+                );
+
+            }
+
+
+            return execute(
+                command.id,
+                payload,
+                {
+
+                    ...context,
+
+                    appId
+
+                }
             );
 
         }
 
 
         /* =====================================================
-           AUTO APP DEPENDENCY BRIDGE
+           BUILT-IN WINDOW COMMANDS
            ===================================================== */
 
-        document.addEventListener(
-            "haldo:app:lifecycle:created",
-            event => {
+        register({
 
-                const detail =
-                    event.detail ||
-                    {};
+            id:
+                "window:focus",
 
+            title:
+                "Fenster fokussieren",
 
-                const appId =
-                    detail.appId;
+            category:
+                "window",
 
-
-                const instance =
-                    detail.instance;
-
+            execute(
+                payload
+            ) {
 
                 if (
-                    !appId ||
-                    !instance
+                    !windowControls
                 ) {
+
+                    return false;
+
+                }
+
+
+                return windowControls.focus(
+                    payload.appId
+                );
+
+            }
+
+        });
+
+
+        register({
+
+            id:
+                "window:minimize",
+
+            title:
+                "Fenster minimieren",
+
+            category:
+                "window",
+
+            execute(
+                payload
+            ) {
+
+                if (
+                    !windowControls
+                ) {
+
+                    return false;
+
+                }
+
+
+                return windowControls.minimize(
+                    payload.appId
+                );
+
+            }
+
+        });
+
+
+        register({
+
+            id:
+                "window:maximize",
+
+            title:
+                "Fenster maximieren",
+
+            category:
+                "window",
+
+            execute(
+                payload
+            ) {
+
+                if (
+                    !windowControls
+                ) {
+
+                    return false;
+
+                }
+
+
+                return windowControls.maximize(
+                    payload.appId
+                );
+
+            }
+
+        });
+
+
+        register({
+
+            id:
+                "window:restore",
+
+            title:
+                "Fenster wiederherstellen",
+
+            category:
+                "window",
+
+            execute(
+                payload
+            ) {
+
+                if (
+                    !windowControls
+                ) {
+
+                    return false;
+
+                }
+
+
+                return windowControls.restore(
+                    payload.appId
+                );
+
+            }
+
+        });
+
+
+        register({
+
+            id:
+                "window:toggle-maximize",
+
+            title:
+                "Maximieren umschalten",
+
+            category:
+                "window",
+
+            execute(
+                payload
+            ) {
+
+                if (
+                    !windowControls
+                ) {
+
+                    return false;
+
+                }
+
+
+                return windowControls.toggleMaximize(
+                    payload.appId
+                );
+
+            }
+
+        });
+
+
+        register({
+
+            id:
+                "window:close",
+
+            title:
+                "Fenster schließen",
+
+            category:
+                "window",
+
+            execute(
+                payload
+            ) {
+
+                if (
+                    !windowControls
+                ) {
+
+                    return false;
+
+                }
+
+
+                return windowControls.close(
+                    payload.appId
+                );
+
+            }
+
+        });
+
+
+        /* =====================================================
+           BUILT-IN STATE COMMANDS
+           ===================================================== */
+
+        register({
+
+            id:
+                "state:get",
+
+            title:
+                "App-Zustand lesen",
+
+            category:
+                "state",
+
+            execute(
+                payload
+            ) {
+
+                if (
+                    !appState
+                ) {
+
+                    return null;
+
+                }
+
+
+                return appState.getValue(
+                    payload.appId,
+                    payload.path,
+                    payload.fallback
+                );
+
+            }
+
+        });
+
+
+        register({
+
+            id:
+                "state:set",
+
+            title:
+                "App-Zustand ändern",
+
+            category:
+                "state",
+
+            execute(
+                payload
+            ) {
+
+                if (
+                    !appState
+                ) {
+
+                    return false;
+
+                }
+
+
+                return appState.setValue(
+                    payload.appId,
+                    payload.path,
+                    payload.value,
+                    {
+
+                        save:
+                            payload.save ===
+                            true
+
+                    }
+                );
+
+            }
+
+        });
+
+
+        register({
+
+            id:
+                "state:save",
+
+            title:
+                "App-Zustand speichern",
+
+            category:
+                "state",
+
+            execute(
+                payload
+            ) {
+
+                if (
+                    !appState
+                ) {
+
+                    return false;
+
+                }
+
+
+                return appState.save(
+                    payload.appId
+                );
+
+            }
+
+        });
+
+
+        register({
+
+            id:
+                "state:reset",
+
+            title:
+                "App-Zustand zurücksetzen",
+
+            category:
+                "state",
+
+            execute(
+                payload
+            ) {
+
+                if (
+                    !appState
+                ) {
+
+                    return false;
+
+                }
+
+
+                return appState.reset(
+                    payload.appId,
+                    payload.initialState ||
+                    {},
+                    {
+
+                        save:
+                            payload.save ===
+                            true,
+
+                        removeSaved:
+                            payload.removeSaved ===
+                            true
+
+                    }
+                );
+
+            }
+
+        });
+
+
+        /* =====================================================
+           MESSAGE COMMAND
+           ===================================================== */
+
+        register({
+
+            id:
+                "message:publish",
+
+            title:
+                "Nachricht senden",
+
+            category:
+                "communication",
+
+            execute(
+                payload
+            ) {
+
+                if (
+                    !messageBus
+                ) {
+
+                    return false;
+
+                }
+
+
+                return messageBus.publish(
+                    payload.channel,
+                    payload.payload ||
+                    {},
+                    {
+
+                        sender:
+                            payload.sender ||
+                            "system",
+
+                        metadata:
+                            payload.metadata ||
+                            {}
+
+                    }
+                );
+
+            }
+
+        });
+
+
+        /* =====================================================
+           COMMAND QUERY
+           ===================================================== */
+
+        function list(
+            options = {}
+        ) {
+
+            let result =
+                [
+                    ...commands.values()
+                ];
+
+
+            if (
+                options.category
+            ) {
+
+                result =
+                    result.filter(
+                        command =>
+                            command.category ===
+                            options.category
+                    );
+
+            }
+
+
+            if (
+                options.appId
+            ) {
+
+                result =
+                    result.filter(
+                        command =>
+                            command.appId ===
+                            options.appId
+                    );
+
+            }
+
+
+            if (
+                options.visibleOnly
+            ) {
+
+                result =
+                    result.filter(
+                        command =>
+                            command.visible !==
+                            false
+                    );
+
+            }
+
+
+            return result;
+
+        }
+
+
+        /* =====================================================
+           HISTORY
+           ===================================================== */
+
+        function getHistory(
+            options = {}
+        ) {
+
+            const limit =
+                Number.isFinite(
+                    options.limit
+                )
+                    ? options.limit
+                    : 100;
+
+
+            return executionHistory
+                .slice(
+                    Math.max(
+                        0,
+                        executionHistory.length -
+                        limit
+                    )
+                )
+                .map(
+                    entry =>
+                        ({
+                            ...entry
+                        })
+                );
+
+        }
+
+
+        function clearHistory() {
+
+            executionHistory.length =
+                0;
+
+
+            emit(
+                "command:history:cleared",
+                {
+
+                    timestamp:
+                        Date.now()
+
+                }
+            );
+
+        }
+
+
+        /* =====================================================
+           KEYBOARD SHORTCUTS
+           ===================================================== */
+
+        const shortcutMap =
+            new Map();
+
+
+        function registerShortcut(
+            shortcut,
+            commandId
+        ) {
+
+            shortcut =
+                normalize(
+                    shortcut
+                );
+
+
+            if (
+                !shortcut ||
+                !commands.has(
+                    commandId
+                )
+            ) {
+
+                return false;
+
+            }
+
+
+            shortcutMap.set(
+                shortcut.toLowerCase(),
+                commandId
+            );
+
+
+            return true;
+
+        }
+
+
+        function normalizeShortcut(
+            event
+        ) {
+
+            const parts = [];
+
+
+            if (
+                event.ctrlKey
+            ) {
+
+                parts.push(
+                    "ctrl"
+                );
+
+            }
+
+
+            if (
+                event.altKey
+            ) {
+
+                parts.push(
+                    "alt"
+                );
+
+            }
+
+
+            if (
+                event.shiftKey
+            ) {
+
+                parts.push(
+                    "shift"
+                );
+
+            }
+
+
+            if (
+                event.metaKey
+            ) {
+
+                parts.push(
+                    "meta"
+                );
+
+            }
+
+
+            parts.push(
+                String(
+                    event.key
+                ).toLowerCase()
+            );
+
+
+            return parts.join(
+                "+"
+            );
+
+        }
+
+
+        document.addEventListener(
+            "keydown",
+            event => {
+
+                const shortcut =
+                    normalizeShortcut(
+                        event
+                    );
+
+
+                const commandId =
+                    shortcutMap.get(
+                        shortcut
+                    );
+
+
+                if (!commandId) {
 
                     return;
 
                 }
 
 
-                const definition =
-                    instance.definition ||
-                    {};
+                event.preventDefault();
 
 
-                if (
-                    Array.isArray(
-                        definition.dependencies
-                    )
-                ) {
+                execute(
+                    commandId,
+                    {},
+                    {
 
-                    registerAppDependencies(
-                        appId,
-                        definition.dependencies
-                    );
+                        source:
+                            "keyboard",
 
-                }
+                        event
+
+                    }
+                ).catch(
+                    error => {
+
+                        console.warn(
+                            "[HalDo Command Engine 20]",
+                            error
+                        );
+
+                    }
+                );
 
             }
         );
 
 
         /* =====================================================
-           LIST SERVICES
+           DEFAULT SHORTCUTS
            ===================================================== */
 
-        function listServices() {
-
-            return [
-                ...services.values()
-            ];
-
-        }
+        registerShortcut(
+            "ctrl+shift+w",
+            "window:close"
+        );
 
 
-        /* =====================================================
-           LIST HEALTH
-           ===================================================== */
+        registerShortcut(
+            "ctrl+shift+m",
+            "window:minimize"
+        );
 
-        function listHealth() {
 
-            return [
-                ...health.entries()
-            ].map(
-                (
-                    [
-                        serviceId,
-                        value
-                    ]
-                ) => ({
-
-                    serviceId,
-
-                    ...value
-
-                })
-            );
-
-        }
+        registerShortcut(
+            "ctrl+shift+f",
+            "window:focus"
+        );
 
 
         /* =====================================================
            PUBLIC API
            ===================================================== */
 
-        const publicAPI = {
-
-            STATUS,
+        const commandEngine = {
 
             register,
 
+            unregister,
+
             get,
 
-            has,
+            list,
 
-            isReady,
+            execute,
 
-            initialize,
+            executeApp,
 
-            stop,
+            registerAppCommand,
 
-            destroy,
+            unregisterAppCommands,
 
-            waitFor,
+            canExecute,
 
-            checkDependencies,
+            registerShortcut,
 
-            checkHealth,
+            getHistory,
 
-            registerAppDependencies,
-
-            getAppDependencies,
-
-            checkAppDependencies,
-
-            waitForApp,
-
-            listServices,
-
-            listHealth
+            clearHistory
 
         };
 
@@ -57462,8 +57524,8 @@
            GLOBAL API
            ===================================================== */
 
-        window.HalDoServiceEngine20 =
-            publicAPI;
+        window.HalDoCommandEngine20 =
+            commandEngine;
 
 
         if (
@@ -57476,8 +57538,8 @@
         }
 
 
-        window.HalDoOS.serviceEngine20 =
-            publicAPI;
+        window.HalDoOS.commandEngine20 =
+            commandEngine;
 
 
         /* =====================================================
@@ -57485,21 +57547,24 @@
            ===================================================== */
 
         emit(
-            "service-engine:ready",
+            "command-engine:ready",
             {
 
                 version:
                     "20.0.0",
 
                 timestamp:
-                    Date.now()
+                    Date.now(),
+
+                commandCount:
+                    commands.size
 
             }
         );
 
 
         console.info(
-            "%cHalDo AI OS 20%c Service / Dependency Engine bereit",
+            "%cHalDo AI OS 20%c Command / Action Engine bereit",
             "color:#42e6ff;font-weight:800;",
             "color:#ffffff;"
         );
