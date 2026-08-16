@@ -1,48 +1,80 @@
-// ============================================================
-// HALDO AI OS 18
-// CONVERSATION STATE
-// PART 81
-// ============================================================
+/* ============================================================
+   HALDO AI OS 20
+   PROFESSIONAL ULTIMATE FOUNDATION
+   ------------------------------------------------------------
+   Datei:
+       js/conversation-state.js
+
+   HALDO AI CONVERSATION STATE ENGINE
+
+   Verantwortlich für:
+   - Gespräche
+   - Nachrichten
+   - Rollen
+   - Kontext
+   - aktive Unterhaltung
+   - Conversation IDs
+   - Nachricht IDs
+   - Verlauf
+   - System-/AI-/User-Nachrichten
+   - Typing/Thinking/Streaming Status
+   - Fehlerzustände
+   - Sprache
+   - Metadaten
+   - Import / Export
+   - lokale Speicherung
+   - Events
+   - AI Engine Integration
+   - Memory Integration
+   - zukünftige Provider
+   ============================================================ */
+
+"use strict";
 
 (function (window, document) {
 
-    "use strict";
-
-    if (
-        window.HalDoConversationState &&
-        window.HalDoConversationState.__haldoAI18
-    ) {
-        return;
-    }
+    /* ========================================================
+       01 — HALDO FOUNDATION
+       ======================================================== */
 
     window.HalDoOS =
         window.HalDoOS || {};
 
-    const CONFIG = {
+    const HalDoOS =
+        window.HalDoOS;
 
-        name:
-            "HalDo Conversation State",
 
-        version:
-            "18.0.0",
+    /* ========================================================
+       02 — META
+       ======================================================== */
 
-        storageKey:
-            "haldo-conversation-state",
+    const VERSION =
+        "20.0.0";
 
-        maxMessages:
-            1000,
+    const MODULE_ID =
+        "conversation-state";
 
-        maxConversations:
-            50,
+    const NAME =
+        "HalDo AI Conversation State";
 
-        autoSave:
-            true
 
-    };
+    /* ========================================================
+       03 — CONSTANTS
+       ======================================================== */
 
-    // --------------------------------------------------------
-    // STATE
-    // --------------------------------------------------------
+    const STORAGE_PREFIX =
+        "haldo.ai.conversation.";
+
+    const INDEX_KEY =
+        "haldo.ai.conversations.index";
+
+    const MAX_MESSAGES =
+        1000;
+
+
+    /* ========================================================
+       04 — INTERNAL STATE
+       ======================================================== */
 
     const state = {
 
@@ -52,59 +84,290 @@
         ready:
             false,
 
-        active:
+        failed:
             false,
-
-        conversationId:
-            null,
-
-        title:
-            "Neue Unterhaltung",
-
-        language:
-            null,
-
-        mode:
-            "chat",
-
-        status:
-            "idle",
-
-        startedAt:
-            null,
-
-        updatedAt:
-            null,
-
-        messages:
-            [],
 
         conversations:
-            [],
+            new Map(),
 
-        metadata:
-            {},
+        activeConversationId:
+            null,
 
-        typing:
-            false,
+        listeners:
+            new Map(),
 
-        processing:
-            false,
+        statistics: {
 
-        unread:
-            0,
+            conversationsCreated:
+                0,
 
-        errors:
-            []
+            conversationsDeleted:
+                0,
+
+            messagesAdded:
+                0,
+
+            messagesRemoved:
+                0,
+
+            messagesCleared:
+                0,
+
+            imports:
+                0,
+
+            exports:
+                0,
+
+            errors:
+                0
+
+        }
 
     };
 
-    // --------------------------------------------------------
-    // EVENTS
-    // --------------------------------------------------------
 
-    const listeners =
-        new Map();
+    /* ========================================================
+       05 — SAFE HELPERS
+       ======================================================== */
+
+    function normalizeId(
+        value
+    ) {
+
+        return String(
+            value || ""
+        )
+        .trim()
+        .toLowerCase()
+        .replace(
+            /[^a-z0-9äöüßîêç_-]+/gi,
+            "-"
+        )
+        .replace(
+            /-+/g,
+            "-"
+        )
+        .replace(
+            /^-|-$/g,
+            "");
+
+    }
+
+
+    function generateId(
+        prefix
+    ) {
+
+        const random =
+            Math.random()
+                .toString(36)
+                .slice(2, 10);
+
+        return (
+            String(
+                prefix ||
+                "id"
+            ) +
+            "-" +
+            Date.now().toString(36) +
+            "-" +
+            random
+        );
+
+    }
+
+
+    function clone(
+        value
+    ) {
+
+        if (
+            value === null ||
+            value === undefined
+        ) {
+
+            return value;
+
+        }
+
+
+        if (
+            Array.isArray(
+                value
+            )
+        ) {
+
+            return value.map(
+                clone
+            );
+
+        }
+
+
+        if (
+            typeof value ===
+            "object"
+        ) {
+
+            const result = {};
+
+            Object.keys(
+                value
+            ).forEach(
+                key => {
+
+                    result[key] =
+                        clone(
+                            value[key]
+                        );
+
+                }
+            );
+
+            return result;
+
+        }
+
+
+        return value;
+
+    }
+
+
+    function hasMethod(
+        object,
+        method
+    ) {
+
+        return !!(
+            object &&
+            typeof object[method] ===
+            "function"
+        );
+
+    }
+
+
+    /* ========================================================
+       06 — LOGGING
+       ======================================================== */
+
+    function log() {
+
+        try {
+
+            console.log(
+                "[HalDo Conversation State]",
+                ...arguments
+            );
+
+        } catch (_) {}
+
+    }
+
+
+    function warn() {
+
+        try {
+
+            console.warn(
+                "[HalDo Conversation State]",
+                ...arguments
+            );
+
+        } catch (_) {}
+
+    }
+
+
+    function errorLog() {
+
+        try {
+
+            console.error(
+                "[HalDo Conversation State]",
+                ...arguments
+            );
+
+        } catch (_) {}
+
+    }
+
+
+    /* ========================================================
+       07 — SERVICES
+       ======================================================== */
+
+    function getStorage() {
+
+        return (
+            window.HalDoStorage ||
+            HalDoOS.storage ||
+            null
+        );
+
+    }
+
+
+    function getStorageManager() {
+
+        return (
+            window.HalDoStorageManager ||
+            HalDoOS.storageManager ||
+            null
+        );
+
+    }
+
+
+    function getAICore() {
+
+        return (
+            window.HalDoAICore ||
+            HalDoOS.aiCore ||
+            null
+        );
+
+    }
+
+
+    function getAIEngine() {
+
+        return (
+            window.HalDoAIEngine ||
+            HalDoOS.aiEngine ||
+            null
+        );
+
+    }
+
+
+    function getAIMemory() {
+
+        return (
+            window.HalDoAIMemory ||
+            HalDoOS.aiMemory ||
+            null
+        );
+
+    }
+
+
+    function getAILanguage() {
+
+        return (
+            window.HalDoAILanguage ||
+            HalDoOS.aiLanguage ||
+            null
+        );
+
+    }
+
+
+    /* ========================================================
+       08 — EVENTS
+       ======================================================== */
 
     function on(
         event,
@@ -116,55 +379,77 @@
             "function"
         ) {
 
-            return () => {};
+            return function () {};
 
         }
 
+
         if (
-            !listeners.has(event)
+            !state.listeners.has(
+                event
+            )
         ) {
 
-            listeners.set(
+            state.listeners.set(
                 event,
                 new Set()
             );
 
         }
 
-        listeners
-            .get(event)
-            .add(callback);
 
-        return () =>
+        const listeners =
+            state.listeners.get(
+                event
+            );
+
+
+        listeners.add(
+            callback
+        );
+
+
+        return function () {
+
             off(
                 event,
                 callback
             );
 
+        };
+
     }
+
 
     function off(
         event,
         callback
     ) {
 
-        const set =
-            listeners.get(event);
+        const listeners =
+            state.listeners.get(
+                event
+            );
 
-        if (!set) {
+
+        if (!listeners) {
+
             return;
+
         }
 
-        set.delete(
+
+        listeners.delete(
             callback
         );
 
+
         if (
-            set.size ===
+            listeners.size ===
             0
         ) {
 
-            listeners.delete(
+            state.listeners.delete(
                 event
             );
 
@@ -172,172 +457,520 @@
 
     }
 
+
     function emit(
         event,
-        detail = {}
+        data = null
     ) {
 
-        const set =
-            listeners.get(event);
+        const listeners =
+            state.listeners.get(
+                event
+            );
 
-        if (set) {
 
-            for (
-                const callback of
-                set
-            ) {
+        if (listeners) {
 
-                try {
+            Array.from(
+                listeners
+            ).forEach(
+                callback => {
 
-                    callback(
-                        detail
-                    );
+                    try {
 
-                } catch (
-                    error
-                ) {
+                        callback(
+                            data
+                        );
 
-                    console.error(
-                        "[HalDoConversationState]",
-                        error
-                    );
+                    } catch (exception) {
 
-                }
+                        reportError(
+                            exception,
+                            "Event: " +
+                            event
+                        );
 
-            }
-
-        }
-
-        try {
-
-            document.dispatchEvent(
-                new CustomEvent(
-                    `haldo:conversation:${event}`,
-                    {
-                        detail
                     }
-                )
-            );
 
-        } catch (
-            error
-        ) {}
-
-    }
-
-    // --------------------------------------------------------
-    // UTILITIES
-    // --------------------------------------------------------
-
-    function clean(
-        value
-    ) {
-
-        return String(
-            value ??
-            ""
-        ).trim();
-
-    }
-
-    function createId(
-        prefix =
-            "conversation"
-    ) {
-
-        return (
-
-            prefix +
-            "-" +
-            Date.now().toString(36) +
-            "-" +
-            Math.random()
-                .toString(36)
-                .slice(2, 9)
-
-        );
-
-    }
-
-    function timestamp() {
-
-        return Date.now();
-
-    }
-
-    // --------------------------------------------------------
-    // STORAGE
-    // --------------------------------------------------------
-
-    function getStorage() {
-
-        return (
-            window.HalDoStorage ||
-            window.HalDoStorageManager ||
-            window.HalDoOS?.storage ||
-            window.HalDoOS?.storageManager ||
-            null
-        );
-
-    }
-
-    async function saveStorage(
-        key,
-        value
-    ) {
-
-        const storage =
-            getStorage();
-
-        if (storage) {
-
-            for (
-                const method of [
-                    "set",
-                    "save",
-                    "write",
-                    "store"
-                ]
-            ) {
-
-                if (
-                    typeof storage[method] !==
-                    "function"
-                ) {
-                    continue;
                 }
-
-                try {
-
-                    await storage[method](
-                        key,
-                        value
-                    );
-
-                    return true;
-
-                } catch (
-                    error
-                ) {}
-
-            }
+            );
 
         }
 
+
+        const globalEvents =
+            HalDoOS.events;
+
+
+        if (
+            globalEvents &&
+            hasMethod(
+                globalEvents,
+                "emit"
+            )
+        ) {
+
+            try {
+
+                globalEvents.emit(
+                    "conversation:" +
+                    event,
+                    data
+                );
+
+            } catch (_) {}
+
+        }
+
+    }
+
+
+    /* ========================================================
+       09 — ERROR HANDLING
+       ======================================================== */
+
+    function reportError(
+        exception,
+        context
+    ) {
+
+        state.statistics.errors +=
+            1;
+
+
+        const normalized =
+            exception instanceof Error
+                ? exception
+                : new Error(
+                    String(
+                        exception
+                    )
+                );
+
+
+        const record = {
+
+            name:
+                normalized.name,
+
+            message:
+                normalized.message,
+
+            stack:
+                normalized.stack ||
+                "",
+
+            context:
+                context ||
+                MODULE_ID,
+
+            timestamp:
+                Date.now()
+
+        };
+
+
+        errorLog(
+            "[HalDo Conversation State]",
+            record
+        );
+
+
+        emit(
+            "error",
+            record
+        );
+
+
+        return record;
+
+    }
+
+
+    /* ========================================================
+       10 — DEFAULT CONVERSATION
+       ======================================================== */
+
+    function createConversationObject(
+        options = {}
+    ) {
+
+        const now =
+            Date.now();
+
+
+        const id =
+            normalizeId(
+                options.id
+            ) ||
+            generateId(
+                "conversation"
+            );
+
+
+        return {
+
+            id:
+
+                id,
+
+            title:
+
+                options.title ||
+                "Neue Unterhaltung",
+
+            description:
+
+                options.description ||
+                "",
+
+            createdAt:
+
+                options.createdAt ||
+                now,
+
+            updatedAt:
+
+                options.updatedAt ||
+                now,
+
+            language:
+
+                options.language ||
+                "auto",
+
+            direction:
+
+                options.direction ||
+                "ltr",
+
+            model:
+
+                options.model ||
+                null,
+
+            provider:
+
+                options.provider ||
+                null,
+
+            systemPrompt:
+
+                options.systemPrompt ||
+                "",
+
+            temperature:
+
+                typeof options.temperature ===
+                "number"
+                    ? options.temperature
+                    : 0.7,
+
+            messages:
+
+                Array.isArray(
+                    options.messages
+                )
+                    ? options.messages.map(
+                        normalizeMessage
+                    )
+                    : [],
+
+            context:
+
+                options.context &&
+                typeof options.context ===
+                "object"
+                    ? clone(
+                        options.context
+                    )
+                    : {},
+
+            metadata:
+
+                options.metadata &&
+                typeof options.metadata ===
+                "object"
+                    ? clone(
+                        options.metadata
+                    )
+                    : {},
+
+            flags: {
+
+                archived:
+                    !!(
+                        options.flags &&
+                        options.flags.archived
+                    ),
+
+                favorite:
+                    !!(
+                        options.flags &&
+                        options.flags.favorite
+                    ),
+
+                pinned:
+                    !!(
+                        options.flags &&
+                        options.flags.pinned
+                    )
+
+            },
+
+            status:
+
+                options.status ||
+                "idle",
+
+            error:
+
+                null
+
+        };
+
+    }
+
+
+    /* ========================================================
+       11 — MESSAGE NORMALIZATION
+       ======================================================== */
+
+    function normalizeRole(
+        role
+    ) {
+
+        const value =
+            String(
+                role ||
+                "user"
+            )
+            .trim()
+            .toLowerCase();
+
+
+        const allowed = [
+
+            "system",
+            "user",
+            "assistant",
+            "developer",
+            "tool",
+
+        ];
+
+
+        return allowed.includes(
+            value
+        )
+            ? value
+            : "user";
+
+    }
+
+
+    function normalizeMessage(
+        message
+    ) {
+
+        if (
+            typeof message ===
+            "string"
+        ) {
+
+            return {
+
+                id:
+                    generateId(
+                        "message"
+                    ),
+
+                role:
+                    "user",
+
+                content:
+                    message,
+
+                timestamp:
+                    Date.now(),
+
+                language:
+                    "auto",
+
+                status:
+                    "complete",
+
+                metadata:
+                    {}
+
+            };
+
+        }
+
+
+        const input =
+            message || {};
+
+
+        return {
+
+            id:
+
+                input.id ||
+                generateId(
+                    "message"
+                ),
+
+            role:
+
+                normalizeRole(
+                    input.role
+                ),
+
+            content:
+
+                typeof input.content ===
+                "string"
+                    ? input.content
+                    : String(
+                        input.content ||
+                        ""
+                    ),
+
+            timestamp:
+
+                input.timestamp ||
+                Date.now(),
+
+            language:
+
+                input.language ||
+                "auto",
+
+            status:
+
+                input.status ||
+                "complete",
+
+            replyTo:
+
+                input.replyTo ||
+                null,
+
+            parentId:
+
+                input.parentId ||
+                null,
+
+            model:
+
+                input.model ||
+                null,
+
+            provider:
+
+                input.provider ||
+                null,
+
+            tokens:
+
+                typeof input.tokens ===
+                "number"
+                    ? input.tokens
+                    : null,
+
+            metadata:
+
+                input.metadata &&
+                typeof input.metadata ===
+                "object"
+                    ? clone(
+                        input.metadata
+                    )
+                    : {}
+
+        };
+
+    }
+
+
+    /* ========================================================
+       12 — STORAGE
+       ======================================================== */
+
+    function storageKey(
+        conversationId
+    ) {
+
+        return (
+            STORAGE_PREFIX +
+            normalizeId(
+                conversationId
+            )
+        );
+
+    }
+
+
+    function saveIndex() {
+
         try {
 
-            localStorage.setItem(
-                key,
+            const index =
+                Array.from(
+                    state.conversations.values()
+                )
+                .map(
+                    conversation => ({
+
+                        id:
+                            conversation.id,
+
+                        title:
+                            conversation.title,
+
+                        createdAt:
+                            conversation.createdAt,
+
+                        updatedAt:
+                            conversation.updatedAt,
+
+                        language:
+                            conversation.language,
+
+                        archived:
+                            conversation.flags &&
+                            conversation.flags.archived,
+
+                        favorite:
+                            conversation.flags &&
+                            conversation.flags.favorite,
+
+                        pinned:
+                            conversation.flags &&
+                            conversation.flags.pinned
+
+                    })
+                );
+
+
+            window.localStorage.setItem(
+                INDEX_KEY,
                 JSON.stringify(
-                    value
+                    index
                 )
             );
+
 
             return true;
 
-        } catch (
-            error
-        ) {
+        } catch (exception) {
+
+            reportError(
+                exception,
+                "Conversation Index speichern"
+            );
+
 
             return false;
 
@@ -345,378 +978,948 @@
 
     }
 
-    async function loadStorage(
-        key,
-        fallback = null
+
+    function saveConversation(
+        conversation
     ) {
 
-        const storage =
-            getStorage();
+        if (!conversation) {
 
-        if (storage) {
+            return false;
 
-            for (
-                const method of [
-                    "get",
-                    "load",
-                    "read",
-                    "retrieve"
-                ]
+        }
+
+
+        try {
+
+            const serialized =
+                JSON.stringify(
+                    conversation
+                );
+
+
+            /*
+             * Primär über HalDo Storage,
+             * falls vorhanden.
+             */
+
+            const storage =
+                getStorage();
+
+
+            if (
+                storage &&
+                hasMethod(
+                    storage,
+                    "set"
+                )
             ) {
-
-                if (
-                    typeof storage[method] !==
-                    "function"
-                ) {
-                    continue;
-                }
 
                 try {
 
-                    const result =
-                        await storage[method](
-                            key
-                        );
+                    storage.set(
+                        storageKey(
+                            conversation.id
+                        ),
+                        conversation
+                    );
 
-                    if (
-                        result !==
-                        undefined &&
-                        result !==
-                        null
-                    ) {
-
-                        return result;
-
-                    }
-
-                } catch (
-                    error
-                ) {}
+                } catch (_) {}
 
             }
 
+
+            /*
+             * Fallback:
+             * localStorage.
+             */
+
+            window.localStorage.setItem(
+                storageKey(
+                    conversation.id
+                ),
+                serialized
+            );
+
+
+            saveIndex();
+
+
+            return true;
+
+        } catch (exception) {
+
+            reportError(
+                exception,
+                "Conversation speichern"
+            );
+
+
+            return false;
+
         }
+
+    }
+
+
+    function loadConversationFromStorage(
+        id
+    ) {
+
+        const normalized =
+            normalizeId(
+                id
+            );
+
+
+        if (!normalized) {
+
+            return null;
+
+        }
+
+
+        try {
+
+            const storage =
+                getStorage();
+
+
+            if (
+                storage &&
+                hasMethod(
+                    storage,
+                    "get"
+                )
+            ) {
+
+                const stored =
+                    storage.get(
+                        storageKey(
+                            normalized
+                        )
+                    );
+
+
+                if (stored) {
+
+                    return createConversationObject(
+                        stored
+                    );
+
+                }
+
+            }
+
+        } catch (exception) {
+
+            reportError(
+                exception,
+                "HalDo Storage Conversation laden"
+            );
+
+        }
+
 
         try {
 
             const raw =
-                localStorage.getItem(
-                    key
+                window.localStorage.getItem(
+                    storageKey(
+                        normalized
+                    )
                 );
 
+
             if (!raw) {
-                return fallback;
+
+                return null;
+
             }
 
-            return JSON.parse(
-                raw
+
+            return createConversationObject(
+                JSON.parse(
+                    raw
+                )
             );
 
-        } catch (
-            error
-        ) {
+        } catch (exception) {
 
-            return fallback;
+            reportError(
+                exception,
+                "Conversation laden"
+            );
+
+
+            return null;
 
         }
 
     }
 
-    // --------------------------------------------------------
-    // NORMALIZE MESSAGE
-    // --------------------------------------------------------
 
-    function normalizeMessage(
-        message
-    ) {
+    function loadIndex() {
 
-        const data =
-            message || {};
+        try {
 
-        return {
+            const raw =
+                window.localStorage.getItem(
+                    INDEX_KEY
+                );
 
-            id:
-                data.id ||
-                createId(
-                    "message"
-                ),
 
-            role:
-                data.role ||
-                "user",
+            if (!raw) {
 
-            content:
-                clean(
-                    data.content ??
-                    data.text ??
-                    ""
-                ),
+                return [];
 
-            language:
-                data.language ||
-                state.language ||
-                null,
+            }
 
-            timestamp:
-                data.timestamp ||
-                timestamp(),
 
-            type:
-                data.type ||
-                "message",
+            const parsed =
+                JSON.parse(
+                    raw
+                );
 
-            status:
-                data.status ||
-                "complete",
 
-            metadata:
-                data.metadata ||
-                {}
+            return Array.isArray(
+                parsed
+            )
+                ? parsed
+                : [];
 
-        };
+        } catch (exception) {
+
+            reportError(
+                exception,
+                "Conversation Index laden"
+            );
+
+
+            return [];
+
+        }
 
     }
 
-    // --------------------------------------------------------
-    // NORMALIZE CONVERSATION
-    // --------------------------------------------------------
 
-    function normalizeConversation(
-        conversation
+    /* ========================================================
+       13 — CREATE
+       ======================================================== */
+
+    function create(
+        options = {}
     ) {
 
-        const data =
-            conversation || {};
+        try {
 
-        return {
+            let conversation =
+                createConversationObject(
+                    options
+                );
 
-            id:
-                data.id ||
-                createId(),
 
-            title:
-                data.title ||
-                "Neue Unterhaltung",
+            /*
+             * ID-Kollision vermeiden.
+             */
 
-            language:
-                data.language ||
-                state.language ||
-                null,
+            while (
+                state.conversations.has(
+                    conversation.id
+                )
+            ) {
 
-            mode:
-                data.mode ||
-                "chat",
+                conversation.id =
+                    generateId(
+                        "conversation"
+                    );
 
-            createdAt:
-                data.createdAt ||
-                timestamp(),
+            }
 
-            updatedAt:
-                data.updatedAt ||
-                timestamp(),
 
-            messageCount:
-                Number(
-                    data.messageCount ||
-                    0
-                ),
+            state.conversations.set(
+                conversation.id,
+                conversation
+            );
 
-            metadata:
-                data.metadata ||
-                {}
 
-        };
+            state.statistics
+                .conversationsCreated +=
+                1;
+
+
+            saveConversation(
+                conversation
+            );
+
+
+            if (
+                options.activate !==
+                false
+            ) {
+
+                setActive(
+                    conversation.id
+                );
+
+            }
+
+
+            emit(
+                "created",
+                {
+                    conversation:
+                        clone(
+                            conversation
+                        )
+                }
+            );
+
+
+            return clone(
+                conversation
+            );
+
+        } catch (exception) {
+
+            reportError(
+                exception,
+                "Conversation erstellen"
+            );
+
+
+            return null;
+
+        }
 
     }
 
-    // --------------------------------------------------------
-    // ACTIVE CONVERSATION
-    // --------------------------------------------------------
 
-    function getActiveConversation() {
+    function createConversation(
+        options
+    ) {
+
+        return create(
+            options
+        );
+
+    }
+
+
+    /* ========================================================
+       14 — GET
+       ======================================================== */
+
+    function get(
+        conversationId
+    ) {
+
+        const id =
+            normalizeId(
+                conversationId
+            );
+
+
+        if (!id) {
+
+            return null;
+
+        }
+
 
         if (
-            !state.conversationId
+            state.conversations.has(
+                id
+            )
+        ) {
+
+            return clone(
+                state.conversations.get(
+                    id
+                )
+            );
+
+        }
+
+
+        const loaded =
+            loadConversationFromStorage(
+                id
+            );
+
+
+        if (loaded) {
+
+            state.conversations.set(
+                id,
+                loaded
+            );
+
+
+            return clone(
+                loaded
+            );
+
+        }
+
+
+        return null;
+
+    }
+
+
+    function getConversation(
+        conversationId
+    ) {
+
+        return get(
+            conversationId
+        );
+
+    }
+
+
+    function getAll(
+        options = {}
+    ) {
+
+        const includeArchived =
+            options.includeArchived ===
+            true;
+
+
+        return Array.from(
+            state.conversations.values()
+        )
+        .filter(
+            conversation => {
+
+                if (
+                    includeArchived
+                ) {
+
+                    return true;
+
+                }
+
+
+                return !(
+                    conversation.flags &&
+                    conversation.flags.archived
+                );
+
+            }
+        )
+        .sort(
+            (
+                a,
+                b
+            ) =>
+                b.updatedAt -
+                a.updatedAt
+        )
+        .map(
+            clone
+        );
+
+    }
+
+
+    function getConversations(
+        options
+    ) {
+
+        return getAll(
+            options
+        );
+
+    }
+
+
+    /* ========================================================
+       15 — ACTIVE CONVERSATION
+       ======================================================== */
+
+    function setActive(
+        conversationId
+    ) {
+
+        const id =
+            normalizeId(
+                conversationId
+            );
+
+
+        if (!id) {
+
+            return false;
+
+        }
+
+
+        const conversation =
+            get(
+                id
+            );
+
+
+        if (!conversation) {
+
+            return false;
+
+        }
+
+
+        state.activeConversationId =
+            id;
+
+
+        emit(
+            "active-changed",
+            {
+                conversationId:
+                    id,
+
+                conversation:
+                    conversation
+            }
+        );
+
+
+        return true;
+
+    }
+
+
+    function getActive() {
+
+        if (
+            !state.activeConversationId
         ) {
 
             return null;
 
         }
 
-        return state.conversations.find(
-            conversation =>
-                conversation.id ===
-                state.conversationId
-        ) || null;
+
+        return get(
+            state.activeConversationId
+        );
 
     }
 
-    function ensureConversation() {
 
-        let conversation =
-            getActiveConversation();
+    function getActiveId() {
 
-        if (conversation) {
-
-            return conversation;
-
-        }
-
-        conversation =
-            createConversation();
-
-        return conversation;
+        return state.activeConversationId;
 
     }
 
-    function createConversation(
+
+    /* ========================================================
+       16 — MESSAGE OPERATIONS
+       ======================================================== */
+
+    function addMessage(
+        conversationId,
+        message,
         options = {}
     ) {
 
-        const conversation =
-            normalizeConversation({
+        const id =
+            normalizeId(
+                conversationId
+            );
 
-                id:
-                    options.id ||
-                    createId(),
 
-                title:
-                    options.title ||
-                    "Neue Unterhaltung",
+        if (!id) {
+
+            return null;
+
+        }
+
+
+        let conversation =
+            state.conversations.get(
+                id
+            );
+
+
+        if (!conversation) {
+
+            const loaded =
+                loadConversationFromStorage(
+                    id
+                );
+
+
+            if (!loaded) {
+
+                return null;
+
+            }
+
+
+            conversation =
+                loaded;
+
+            state.conversations.set(
+                id,
+                conversation
+            );
+
+        }
+
+
+        const normalized =
+            normalizeMessage(
+                message
+            );
+
+
+        if (
+            options.language
+        ) {
+
+            normalized.language =
+                options.language;
+
+        }
+
+
+        if (
+            options.status
+        ) {
+
+            normalized.status =
+                options.status;
+
+        }
+
+
+        conversation.messages.push(
+            normalized
+        );
+
+
+        /*
+         * Schutz gegen unendliches
+         * Speicherwachstum.
+         */
+
+        if (
+            conversation.messages.length >
+            MAX_MESSAGES
+        ) {
+
+            conversation.messages =
+                conversation.messages.slice(
+                    -MAX_MESSAGES
+                );
+
+        }
+
+
+        conversation.updatedAt =
+            Date.now();
+
+
+        conversation.status =
+            "active";
+
+
+        conversation.error =
+            null;
+
+
+        state.statistics
+            .messagesAdded +=
+            1;
+
+
+        saveConversation(
+            conversation
+        );
+
+
+        emit(
+            "message-added",
+            {
+
+                conversationId:
+                    id,
+
+                message:
+                    clone(
+                        normalized
+                    ),
+
+                conversation:
+                    clone(
+                        conversation
+                    )
+
+            }
+        );
+
+
+        /*
+         * Memory Hook
+         */
+
+        const memory =
+            getAIMemory();
+
+
+        if (
+            memory &&
+            hasMethod(
+                memory,
+                "remember"
+            )
+        ) {
+
+            try {
+
+                memory.remember(
+                    {
+                        conversationId:
+                            id,
+
+                        message:
+                            clone(
+                                normalized
+                            )
+                    }
+                );
+
+            } catch (exception) {
+
+                reportError(
+                    exception,
+                    "AI Memory Hook"
+                );
+
+            }
+
+        }
+
+
+        return clone(
+            normalized
+        );
+
+    }
+
+
+    function addUserMessage(
+        conversationId,
+        content,
+        options = {}
+    ) {
+
+        return addMessage(
+            conversationId,
+            {
+
+                role:
+                    "user",
+
+                content:
+                    content,
 
                 language:
                     options.language ||
-                    state.language,
-
-                mode:
-                    options.mode ||
-                    "chat",
+                    "auto",
 
                 metadata:
                     options.metadata ||
                     {}
 
-            });
-
-        state.conversations.push(
-            conversation
+            },
+            options
         );
-
-        state.conversationId =
-            conversation.id;
-
-        state.title =
-            conversation.title;
-
-        state.startedAt =
-            conversation.createdAt;
-
-        state.updatedAt =
-            timestamp();
-
-        state.messages =
-            [];
-
-        state.unread =
-            0;
-
-        state.active =
-            true;
-
-        enforceLimits();
-
-        emit(
-            "created",
-            {
-                conversation
-            }
-        );
-
-        save();
-
-        return conversation;
 
     }
 
-    function switchConversation(
-        conversationId
+
+    function addAssistantMessage(
+        conversationId,
+        content,
+        options = {}
+    ) {
+
+        return addMessage(
+            conversationId,
+            {
+
+                role:
+                    "assistant",
+
+                content:
+                    content,
+
+                language:
+                    options.language ||
+                    "auto",
+
+                model:
+                    options.model ||
+                    null,
+
+                provider:
+                    options.provider ||
+                    null,
+
+                metadata:
+                    options.metadata ||
+                    {}
+
+            },
+            options
+        );
+
+    }
+
+
+    function addSystemMessage(
+        conversationId,
+        content,
+        options = {}
+    ) {
+
+        return addMessage(
+            conversationId,
+            {
+
+                role:
+                    "system",
+
+                content:
+                    content,
+
+                language:
+                    options.language ||
+                    "auto",
+
+                metadata:
+                    options.metadata ||
+                    {}
+
+            },
+            options
+        );
+
+    }
+
+
+    function getMessages(
+        conversationId,
+        options = {}
     ) {
 
         const conversation =
-            state.conversations.find(
-                item =>
-                    item.id ===
-                    conversationId
+            get(
+                conversationId
             );
+
 
         if (!conversation) {
 
-            return {
-
-                ok:
-                    false,
-
-                error:
-                    "CONVERSATION_NOT_FOUND"
-
-            };
+            return [];
 
         }
 
-        state.conversationId =
-            conversation.id;
 
-        state.title =
-            conversation.title;
+        let messages =
+            conversation.messages || [];
 
-        state.language =
-            conversation.language ||
-            state.language;
 
-        state.mode =
-            conversation.mode ||
-            "chat";
+        if (
+            options.role
+        ) {
 
-        state.startedAt =
-            conversation.createdAt;
+            messages =
+                messages.filter(
+                    message =>
+                        message.role ===
+                        normalizeRole(
+                            options.role
+                        )
+                );
 
-        state.updatedAt =
-            conversation.updatedAt;
+        }
 
-        state.messages =
-            [];
 
-        state.unread =
-            0;
+        if (
+            typeof options.limit ===
+            "number"
+        ) {
 
-        emit(
-            "switched",
-            {
-                conversation
-            }
+            messages =
+                messages.slice(
+                    -Math.max(
+                        0,
+                        options.limit
+                    )
+                );
+
+        }
+
+
+        return clone(
+            messages
         );
-
-        return {
-
-            ok:
-                true,
-
-            conversation
-
-        };
 
     }
 
-    function deleteConversation(
+
+    function getLastMessage(
         conversationId
     ) {
 
-        const index =
-            state.conversations.findIndex(
-                conversation =>
-                    conversation.id ===
-                    conversationId
+        const messages =
+            getMessages(
+                conversationId
             );
+
+
+        return messages.length
+            ? messages[
+                messages.length - 1
+            ]
+            : null;
+
+    }
+
+
+    function removeMessage(
+        conversationId,
+        messageId
+    ) {
+
+        const conversation =
+            state.conversations.get(
+                normalizeId(
+                    conversationId
+                )
+            );
+
+
+        if (!conversation) {
+
+            return false;
+
+        }
+
+
+        const index =
+            conversation.messages.findIndex(
+                message =>
+                    message.id ===
+                    messageId
+            );
+
 
         if (
             index ===
@@ -727,1249 +1930,1395 @@
 
         }
 
+
         const removed =
-            state.conversations.splice(
+            conversation.messages.splice(
                 index,
                 1
             )[0];
 
-        if (
-            state.conversationId ===
-            conversationId
-        ) {
 
-            state.conversationId =
-                null;
+        conversation.updatedAt =
+            Date.now();
 
-            state.messages =
-                [];
 
-            state.title =
-                "Neue Unterhaltung";
+        state.statistics
+            .messagesRemoved +=
+            1;
 
-            state.active =
-                false;
 
-        }
+        saveConversation(
+            conversation
+        );
 
-        save();
 
         emit(
-            "deleted",
+            "message-removed",
             {
-                conversation:
-                    removed
+
+                conversationId:
+                    conversation.id,
+
+                message:
+                    clone(
+                        removed
+                    )
+
             }
         );
+
 
         return true;
 
     }
 
-    // --------------------------------------------------------
-    // MESSAGES
-    // --------------------------------------------------------
 
-    function addMessage(
-        role,
-        content,
-        metadata = {}
+    function clearMessages(
+        conversationId
     ) {
 
-        const text =
-            clean(
-                content
+        const conversation =
+            state.conversations.get(
+                normalizeId(
+                    conversationId
+                )
             );
 
-        if (!text) {
+
+        if (!conversation) {
+
+            return false;
+
+        }
+
+
+        conversation.messages =
+            [];
+
+        conversation.updatedAt =
+            Date.now();
+
+        conversation.status =
+            "idle";
+
+        conversation.error =
+            null;
+
+
+        state.statistics
+            .messagesCleared +=
+            1;
+
+
+        saveConversation(
+            conversation
+        );
+
+
+        emit(
+            "messages-cleared",
+            {
+                conversationId:
+                    conversation.id
+            }
+        );
+
+
+        return true;
+
+    }
+
+
+    /* ========================================================
+       17 — CONTEXT
+       ======================================================== */
+
+    function setContext(
+        conversationId,
+        changes
+    ) {
+
+        const conversation =
+            state.conversations.get(
+                normalizeId(
+                    conversationId
+                )
+            );
+
+
+        if (!conversation) {
 
             return null;
 
         }
 
-        const conversation =
-            ensureConversation();
 
-        const message =
-            normalizeMessage({
+        conversation.context = {
 
-                role,
+            ...conversation.context,
 
-                content:
-                    text,
+            ...(changes || {})
 
-                language:
-                    metadata.language ||
-                    state.language,
+        };
 
-                type:
-                    metadata.type ||
-                    "message",
-
-                status:
-                    metadata.status ||
-                    "complete",
-
-                metadata
-
-            });
-
-        state.messages.push(
-            message
-        );
-
-        state.updatedAt =
-            timestamp();
 
         conversation.updatedAt =
-            state.updatedAt;
+            Date.now();
 
-        conversation.messageCount =
-            state.messages.length;
 
-        /*
-         * Neue Nachrichten für UI markieren.
-         */
+        saveConversation(
+            conversation
+        );
 
-        if (
-            role ===
-            "assistant"
-        ) {
-
-            state.unread++;
-
-        }
-
-        enforceLimits();
 
         emit(
-            "message-added",
+            "context-changed",
             {
-                message,
 
-                conversation
+                conversationId:
+                    conversation.id,
+
+                context:
+                    clone(
+                        conversation.context
+                    )
 
             }
         );
 
-        save();
 
-        return message;
-
-    }
-
-    function addUserMessage(
-        content,
-        metadata = {}
-    ) {
-
-        return addMessage(
-            "user",
-            content,
-            metadata
+        return clone(
+            conversation.context
         );
 
     }
 
-    function addAssistantMessage(
-        content,
-        metadata = {}
+
+    function getContext(
+        conversationId
     ) {
-
-        return addMessage(
-            "assistant",
-            content,
-            metadata
-        );
-
-    }
-
-    function addSystemMessage(
-        content,
-        metadata = {}
-    ) {
-
-        return addMessage(
-            "system",
-            content,
-            metadata
-        );
-
-    }
-
-    function getMessages(
-        options = {}
-    ) {
-
-        let messages =
-            state.messages.slice();
-
-        if (
-            options.role
-        ) {
-
-            messages =
-                messages.filter(
-                    message =>
-                        message.role ===
-                        options.role
-                );
-
-        }
-
-        if (
-            options.type
-        ) {
-
-            messages =
-                messages.filter(
-                    message =>
-                        message.type ===
-                        options.type
-                );
-
-        }
-
-        if (
-            Number.isInteger(
-                options.limit
-            )
-        ) {
-
-            messages =
-                messages.slice(
-                    -options.limit
-                );
-
-        }
-
-        return messages;
-
-    }
-
-    function clearMessages() {
-
-        state.messages =
-            [];
 
         const conversation =
-            getActiveConversation();
-
-        if (conversation) {
-
-            conversation.messageCount =
-                0;
-
-            conversation.updatedAt =
-                timestamp();
-
-        }
-
-        state.updatedAt =
-            timestamp();
-
-        state.unread =
-            0;
-
-        save();
-
-        emit(
-            "messages-cleared",
-            {
-                conversation
-            }
-        );
-
-        return true;
-
-    }
-
-    // --------------------------------------------------------
-    // TYPING / PROCESSING
-    // --------------------------------------------------------
-
-    function setTyping(
-        value
-    ) {
-
-        state.typing =
-            Boolean(
-                value
+            get(
+                conversationId
             );
 
-        emit(
-            "typing",
-            {
-                typing:
-                    state.typing
-            }
-        );
 
-        return state.typing;
+        return conversation
+            ? clone(
+                conversation.context
+            )
+            : {};
 
     }
 
-    function setProcessing(
-        value
-    ) {
 
-        state.processing =
-            Boolean(
-                value
-            );
-
-        state.status =
-            state.processing
-                ? "processing"
-                : "idle";
-
-        emit(
-            "processing",
-            {
-                processing:
-                    state.processing
-            }
-        );
-
-        return state.processing;
-
-    }
-
-    // --------------------------------------------------------
-    // LANGUAGE
-    // --------------------------------------------------------
+    /* ========================================================
+       18 — LANGUAGE
+       ======================================================== */
 
     function setLanguage(
+        conversationId,
         language
     ) {
 
-        const value =
-            clean(
-                language
+        const conversation =
+            state.conversations.get(
+                normalizeId(
+                    conversationId
+                )
             );
 
-        if (!value) {
 
-            return state.language;
+        if (!conversation) {
 
-        }
-
-        state.language =
-            value;
-
-        const conversation =
-            getActiveConversation();
-
-        if (conversation) {
-
-            conversation.language =
-                value;
-
-            conversation.updatedAt =
-                timestamp();
+            return false;
 
         }
 
-        state.updatedAt =
-            timestamp();
+
+        conversation.language =
+            language ||
+            "auto";
+
+
+        conversation.updatedAt =
+            Date.now();
+
+
+        saveConversation(
+            conversation
+        );
+
 
         emit(
             "language-changed",
             {
+
+                conversationId:
+                    conversation.id,
+
                 language:
-                    value
+                    conversation.language
+
             }
         );
 
-        save();
 
-        return value;
-
-    }
-
-    function getLanguage() {
-
-        if (
-            state.language
-        ) {
-
-            return state.language;
-
-        }
-
-        const language =
-            window.HalDoAILanguage ||
-            window.HalDoOS?.aiLanguage;
-
-        if (
-            language &&
-            typeof language.getLanguage ===
-            "function"
-        ) {
-
-            try {
-
-                state.language =
-                    language.getLanguage();
-
-            } catch (
-                error
-            ) {}
-
-        }
-
-        return state.language;
+        return true;
 
     }
 
-    // --------------------------------------------------------
-    // MODE
-    // --------------------------------------------------------
 
-    function setMode(
-        mode
+    function getLanguage(
+        conversationId
     ) {
-
-        const value =
-            clean(
-                mode
-            ) ||
-            "chat";
-
-        state.mode =
-            value;
 
         const conversation =
-            getActiveConversation();
+            get(
+                conversationId
+            );
 
-        if (conversation) {
 
-            conversation.mode =
-                value;
-
-            conversation.updatedAt =
-                timestamp();
-
-        }
-
-        state.updatedAt =
-            timestamp();
-
-        emit(
-            "mode-changed",
-            {
-                mode:
-                    value
-            }
-        );
-
-        save();
-
-        return value;
+        return conversation
+            ? conversation.language
+            : "auto";
 
     }
 
-    // --------------------------------------------------------
-    // METADATA
-    // --------------------------------------------------------
 
-    function setMetadata(
-        key,
-        value
+    /* ========================================================
+       19 — STATUS
+       ======================================================== */
+
+    function setStatus(
+        conversationId,
+        status,
+        error = null
     ) {
 
-        if (!key) {
+        const conversation =
+            state.conversations.get(
+                normalizeId(
+                    conversationId
+                )
+            );
+
+
+        if (!conversation) {
 
             return false;
 
         }
 
-        state.metadata[
-            key
-        ] =
-            value;
 
-        state.updatedAt =
-            timestamp();
+        conversation.status =
+            status ||
+            "idle";
+
+
+        conversation.error =
+            error
+                ? clone(
+                    error
+                )
+                : null;
+
+
+        conversation.updatedAt =
+            Date.now();
+
+
+        saveConversation(
+            conversation
+        );
+
 
         emit(
-            "metadata-changed",
+            "status-changed",
             {
 
-                key,
+                conversationId:
+                    conversation.id,
 
-                value
+                status:
+                    conversation.status,
+
+                error:
+                    conversation.error
 
             }
         );
 
-        save();
 
         return true;
 
     }
 
-    function getMetadata(
-        key,
-        fallback = null
+
+    function getStatus(
+        conversationId
     ) {
 
-        if (!key) {
+        const conversation =
+            get(
+                conversationId
+            );
 
-            return state.metadata;
+
+        return conversation
+            ? conversation.status
+            : "idle";
+
+    }
+
+
+    /* ========================================================
+       20 — TITLE
+       ======================================================== */
+
+    function setTitle(
+        conversationId,
+        title
+    ) {
+
+        const conversation =
+            state.conversations.get(
+                normalizeId(
+                    conversationId
+                )
+            );
+
+
+        if (!conversation) {
+
+            return false;
 
         }
 
-        return (
-            state.metadata[key] ??
-            fallback
+
+        conversation.title =
+            String(
+                title ||
+                "Neue Unterhaltung"
+            )
+            .trim();
+
+
+        conversation.updatedAt =
+            Date.now();
+
+
+        saveConversation(
+            conversation
         );
 
-    }
-
-    // --------------------------------------------------------
-    // UNREAD
-    // --------------------------------------------------------
-
-    function markRead() {
-
-        state.unread =
-            0;
 
         emit(
-            "read"
+            "title-changed",
+            {
+
+                conversationId:
+                    conversation.id,
+
+                title:
+                    conversation.title
+
+            }
         );
+
 
         return true;
 
     }
 
-    function getUnreadCount() {
 
-        return state.unread;
+    /* ========================================================
+       21 — FLAGS
+       ======================================================== */
 
-    }
-
-    // --------------------------------------------------------
-    // HISTORY CONTEXT
-    // --------------------------------------------------------
-
-    function getContext(
-        limit = 20
+    function setFlags(
+        conversationId,
+        changes
     ) {
 
-        return getMessages({
+        const conversation =
+            state.conversations.get(
+                normalizeId(
+                    conversationId
+                )
+            );
 
-            limit
 
-        }).map(
-            message => ({
+        if (!conversation) {
 
-                role:
-                    message.role,
+            return false;
 
-                content:
-                    message.content,
+        }
 
-                language:
-                    message.language
 
-            })
+        conversation.flags = {
+
+            ...conversation.flags,
+
+            ...(changes || {})
+
+        };
+
+
+        conversation.updatedAt =
+            Date.now();
+
+
+        saveConversation(
+            conversation
         );
+
+
+        emit(
+            "flags-changed",
+            {
+
+                conversationId:
+                    conversation.id,
+
+                flags:
+                    clone(
+                        conversation.flags
+                    )
+
+            }
+        );
+
+
+        return true;
 
     }
 
-    // --------------------------------------------------------
-    // SAVE STATE
-    // --------------------------------------------------------
 
-    async function save() {
+    /* ========================================================
+       22 — DELETE
+       ======================================================== */
+
+    function remove(
+        conversationId
+    ) {
+
+        const id =
+            normalizeId(
+                conversationId
+            );
+
 
         if (
-            !CONFIG.autoSave
+            !state.conversations.has(
+                id
+            )
         ) {
 
             return false;
 
         }
+
+
+        state.conversations.delete(
+            id
+        );
+
 
         try {
 
-            const data = {
+            window.localStorage.removeItem(
+                storageKey(
+                    id
+                )
+            );
 
-                version:
-                    CONFIG.version,
+        } catch (_) {}
 
-                savedAt:
-                    timestamp(),
 
+        if (
+            state.activeConversationId ===
+            id
+        ) {
+
+            state.activeConversationId =
+                null;
+
+        }
+
+
+        state.statistics
+            .conversationsDeleted +=
+            1;
+
+
+        saveIndex();
+
+
+        emit(
+            "deleted",
+            {
                 conversationId:
-                    state.conversationId,
+                    id
+            }
+        );
 
-                title:
-                    state.title,
 
-                language:
-                    state.language,
+        return true;
 
-                mode:
-                    state.mode,
+    }
 
-                status:
-                    state.status,
 
-                startedAt:
-                    state.startedAt,
+    function deleteConversation(
+        conversationId
+    ) {
 
-                updatedAt:
-                    state.updatedAt,
+        return remove(
+            conversationId
+        );
+
+    }
+
+
+    /* ========================================================
+       23 — EXPORT
+       ======================================================== */
+
+    function exportConversation(
+        conversationId
+    ) {
+
+        const conversation =
+            get(
+                conversationId
+            );
+
+
+        if (!conversation) {
+
+            return null;
+
+        }
+
+
+        state.statistics.exports +=
+            1;
+
+
+        const payload = {
+
+            format:
+                "haldo-conversation",
+
+            version:
+                VERSION,
+
+            exportedAt:
+                new Date().toISOString(),
+
+            conversation:
+                conversation
+
+        };
+
+
+        emit(
+            "exported",
+            payload
+        );
+
+
+        return JSON.stringify(
+            payload,
+            null,
+            2
+        );
+
+    }
+
+
+    /* ========================================================
+       24 — IMPORT
+       ======================================================== */
+
+    function importConversation(
+        input,
+        options = {}
+    ) {
+
+        try {
+
+            const payload =
+                typeof input ===
+                "string"
+                    ? JSON.parse(
+                        input
+                    )
+                    : input;
+
+
+            const source =
+                payload &&
+                payload.conversation
+                    ? payload.conversation
+                    : payload;
+
+
+            if (
+                !source
+            ) {
+
+                return null;
+
+            }
+
+
+            const conversation =
+                createConversationObject(
+                    source
+                );
+
+
+            if (
+                options.newId !==
+                false
+            ) {
+
+                conversation.id =
+                    generateId(
+                        "conversation"
+                    );
+
+            }
+
+
+            state.conversations.set(
+                conversation.id,
+                conversation
+            );
+
+
+            saveConversation(
+                conversation
+            );
+
+
+            state.statistics.imports +=
+                1;
+
+
+            emit(
+                "imported",
+                {
+
+                    conversation:
+                        clone(
+                            conversation
+                        )
+
+                }
+            );
+
+
+            if (
+                options.activate !==
+                false
+            ) {
+
+                setActive(
+                    conversation.id
+                );
+
+            }
+
+
+            return clone(
+                conversation
+            );
+
+        } catch (exception) {
+
+            reportError(
+                exception,
+                "Conversation Import"
+            );
+
+
+            return null;
+
+        }
+
+    }
+
+
+    /* ========================================================
+       25 — AI CONTEXT
+       ======================================================== */
+
+    function buildAIContext(
+        conversationId,
+        options = {}
+    ) {
+
+        const conversation =
+            get(
+                conversationId
+            );
+
+
+        if (!conversation) {
+
+            return {
 
                 messages:
-                    state.messages,
+                    [],
 
-                conversations:
-                    state.conversations,
+                language:
+                    "auto",
+
+                systemPrompt:
+                    "",
+
+                context:
+                    {},
 
                 metadata:
-                    state.metadata,
-
-                unread:
-                    state.unread
+                    {}
 
             };
 
-            const result =
-                await saveStorage(
-                    CONFIG.storageKey,
-                    data
-                );
+        }
 
-            emit(
-                "saved",
-                {
-                    ok:
-                        result
-                }
-            );
 
-            return result;
+        let messages =
+            conversation.messages || [];
 
-        } catch (
-            error
+
+        const limit =
+            typeof options.limit ===
+            "number"
+                ? options.limit
+                : 50;
+
+
+        if (
+            messages.length >
+            limit
         ) {
 
-            recordError(
-                error
-            );
-
-            return false;
+            messages =
+                messages.slice(
+                    -limit
+                );
 
         }
 
-    }
 
-    // --------------------------------------------------------
-    // LOAD STATE
-    // --------------------------------------------------------
+        const aiLanguage =
+            getAILanguage();
 
-    async function load() {
 
-        try {
+        let language =
+            conversation.language;
 
-            const data =
-                await loadStorage(
-                    CONFIG.storageKey,
-                    null
-                );
 
-            if (!data) {
+        if (
+            language ===
+            "auto" &&
+            aiLanguage
+        ) {
 
-                return false;
+            if (
+                hasMethod(
+                    aiLanguage,
+                    "detect"
+                )
+            ) {
+
+                try {
+
+                    const lastUserMessage =
+                        messages
+                            .slice()
+                            .reverse()
+                            .find(
+                                message =>
+                                    message.role ===
+                                    "user"
+                            );
+
+
+                    if (
+                        lastUserMessage
+                    ) {
+
+                        language =
+                            aiLanguage.detect(
+                                lastUserMessage.content
+                            ) ||
+                            "auto";
+
+                    }
+
+                } catch (_) {}
 
             }
 
-            state.conversationId =
-                data.conversationId ||
-                null;
-
-            state.title =
-                data.title ||
-                "Neue Unterhaltung";
-
-            state.language =
-                data.language ||
-                null;
-
-            state.mode =
-                data.mode ||
-                "chat";
-
-            state.status =
-                data.status ||
-                "idle";
-
-            state.startedAt =
-                data.startedAt ||
-                null;
-
-            state.updatedAt =
-                data.updatedAt ||
-                null;
-
-            state.messages =
-                Array.isArray(
-                    data.messages
-                )
-                    ? data.messages.map(
-                        normalizeMessage
-                    )
-                    : [];
-
-            state.conversations =
-                Array.isArray(
-                    data.conversations
-                )
-                    ? data.conversations.map(
-                        normalizeConversation
-                    )
-                    : [];
-
-            state.metadata =
-                data.metadata ||
-                {};
-
-            state.unread =
-                Number(
-                    data.unread ||
-                    0
-                );
-
-            enforceLimits();
-
-            emit(
-                "loaded",
-                getStatus()
-            );
-
-            return true;
-
-        } catch (
-            error
-        ) {
-
-            recordError(
-                error
-            );
-
-            return false;
-
         }
 
-    }
-
-    // --------------------------------------------------------
-    // LIMITS
-    // --------------------------------------------------------
-
-    function enforceLimits() {
-
-        if (
-            state.messages.length >
-            CONFIG.maxMessages
-        ) {
-
-            state.messages =
-                state.messages.slice(
-                    -CONFIG.maxMessages
-                );
-
-        }
-
-        if (
-            state.conversations.length >
-            CONFIG.maxConversations
-        ) {
-
-            state.conversations =
-                state.conversations
-                    .slice(
-                        -CONFIG.maxConversations
-                    );
-
-        }
-
-    }
-
-    // --------------------------------------------------------
-    // RESET
-    // --------------------------------------------------------
-
-    async function reset() {
-
-        state.conversationId =
-            null;
-
-        state.title =
-            "Neue Unterhaltung";
-
-        state.language =
-            null;
-
-        state.mode =
-            "chat";
-
-        state.status =
-            "idle";
-
-        state.startedAt =
-            null;
-
-        state.updatedAt =
-            timestamp();
-
-        state.messages =
-            [];
-
-        state.conversations =
-            [];
-
-        state.metadata =
-            {};
-
-        state.typing =
-            false;
-
-        state.processing =
-            false;
-
-        state.unread =
-            0;
-
-        await save();
-
-        emit(
-            "reset"
-        );
-
-        return true;
-
-    }
-
-    // --------------------------------------------------------
-    // ERROR
-    // --------------------------------------------------------
-
-    function recordError(
-        error
-    ) {
-
-        const entry = {
-
-            timestamp:
-                timestamp(),
-
-            message:
-                error?.message ||
-                String(
-                    error
-                )
-
-        };
-
-        state.errors.push(
-            entry
-        );
-
-        if (
-            state.errors.length >
-            100
-        ) {
-
-            state.errors.shift();
-
-        }
-
-        emit(
-            "error",
-            entry
-        );
-
-    }
-
-    // --------------------------------------------------------
-    // STATUS
-    // --------------------------------------------------------
-
-    function getStatus() {
 
         return {
 
-            name:
-                CONFIG.name,
-
-            version:
-                CONFIG.version,
-
-            initialized:
-                state.initialized,
-
-            ready:
-                state.ready,
-
-            active:
-                state.active,
-
             conversationId:
-                state.conversationId,
+                conversation.id,
 
             title:
-                state.title,
+                conversation.title,
 
             language:
-                state.language,
+                language,
 
-            mode:
-                state.mode,
+            systemPrompt:
+                conversation.systemPrompt,
 
-            status:
-                state.status,
+            temperature:
+                conversation.temperature,
 
-            messageCount:
-                state.messages.length,
+            messages:
+                clone(
+                    messages
+                ),
 
-            conversationCount:
-                state.conversations.length,
+            context:
+                clone(
+                    conversation.context
+                ),
 
-            typing:
-                state.typing,
-
-            processing:
-                state.processing,
-
-            unread:
-                state.unread,
-
-            errors:
-                state.errors.length
+            metadata:
+                clone(
+                    conversation.metadata
+                )
 
         };
 
     }
 
-    // --------------------------------------------------------
-    // INITIALIZE
-    // --------------------------------------------------------
 
-    async function initialize() {
+    /* ========================================================
+       26 — CLEAR ALL
+       ======================================================== */
 
-        if (
-            state.initialized
-        ) {
+    function clearAll() {
 
-            return getStatus();
-
-        }
-
-        state.initialized =
-            true;
-
-        await load();
-
-        /*
-         * Falls noch kein Gespräch existiert,
-         * wird es erst bei Bedarf erstellt.
-         */
-
-        getLanguage();
-
-        /*
-         * AI Chat anbinden.
-         */
-
-        const chat =
-            window.HalDoAIChat;
-
-        if (
-            chat &&
-            typeof chat.on ===
-            "function"
-        ) {
-
-            chat.on(
-                "processing-start",
-                () => {
-
-                    setProcessing(
-                        true
-                    );
-
-                }
+        const ids =
+            Array.from(
+                state.conversations.keys()
             );
 
-            chat.on(
-                "processing-end",
-                () => {
 
-                    setProcessing(
-                        false
-                    );
+        ids.forEach(
+            id => {
 
-                }
-            );
-
-            chat.on(
-                "message-added",
-                detail => {
-
-                    const message =
-                        detail?.message;
-
-                    if (!message) {
-                        return;
-                    }
-
-                    /*
-                     * Verhindert unnötige
-                     * Doppelobjekte.
-                     */
-
-                    const exists =
-                        state.messages.some(
-                            item =>
-                                item.id ===
-                                message.id
-                        );
-
-                    if (!exists) {
-
-                        state.messages.push(
-                            normalizeMessage(
-                                message
-                            )
-                        );
-
-                        const conversation =
-                            ensureConversation();
-
-                        conversation.updatedAt =
-                            timestamp();
-
-                        conversation.messageCount =
-                            state.messages.length;
-
-                        state.updatedAt =
-                            timestamp();
-
-                        enforceLimits();
-
-                        save();
-
-                    }
-
-                }
-            );
-
-        }
-
-        /*
-         * Memory anbinden.
-         */
-
-        const memory =
-            window.HalDoAIMemory ||
-            window.HalDoOS?.aiMemory;
-
-        if (
-            memory &&
-            typeof memory.on ===
-            "function"
-        ) {
-
-            memory.on(
-                "stored",
-                detail => {
-
-                    emit(
-                        "memory-stored",
-                        detail
-                    );
-
-                }
-            );
-
-        }
-
-        /*
-         * Kernel registrieren.
-         */
-
-        const kernel =
-            window.HalDoKernel ||
-            window.HalDoOS?.kernel;
-
-        if (
-            kernel &&
-            typeof kernel.registerModule ===
-            "function"
-        ) {
-
-            try {
-
-                kernel.registerModule(
-                    "conversation-state",
-                    api
+                remove(
+                    id
                 );
 
-            } catch (
-                error
-            ) {}
+            }
+        );
 
-        }
+
+        state.activeConversationId =
+            null;
+
 
         emit(
-            "initialized",
-            getStatus()
+            "all-cleared",
+            {
+                count:
+                    ids.length
+            }
         );
 
-        window.setTimeout(
-            () => {
 
-                state.ready =
-                    true;
-
-                emit(
-                    "ready",
-                    getStatus()
-                );
-
-            },
-            0
-        );
-
-        return getStatus();
+        return ids.length;
 
     }
 
-    // --------------------------------------------------------
-    // PUBLIC API
-    // --------------------------------------------------------
+
+    /* ========================================================
+       27 — RESTORE FROM INDEX
+       ======================================================== */
+
+    function restoreFromStorage() {
+
+        const index =
+            loadIndex();
+
+
+        index.forEach(
+            item => {
+
+                if (
+                    item &&
+                    item.id
+                ) {
+
+                    const conversation =
+                        loadConversationFromStorage(
+                            item.id
+                        );
+
+
+                    if (
+                        conversation
+                    ) {
+
+                        state.conversations.set(
+                            conversation.id,
+                            conversation
+                        );
+
+                    }
+
+                }
+
+            }
+        );
+
+
+        /*
+         * Letzte aktive Unterhaltung
+         * wiederherstellen.
+         */
+
+        try {
+
+            const active =
+                window.localStorage.getItem(
+                    "haldo.ai.active-conversation"
+                );
+
+
+            if (
+                active &&
+                state.conversations.has(
+                    active
+                )
+            ) {
+
+                state.activeConversationId =
+                    active;
+
+            }
+
+        } catch (_) {}
+
+
+        return state.conversations.size;
+
+    }
+
+
+    function persistActiveConversation() {
+
+        try {
+
+            if (
+                state.activeConversationId
+            ) {
+
+                window.localStorage.setItem(
+                    "haldo.ai.active-conversation",
+                    state.activeConversationId
+                );
+
+            } else {
+
+                window.localStorage.removeItem(
+                    "haldo.ai.active-conversation"
+                );
+
+            }
+
+        } catch (_) {}
+
+    }
+
+
+    /* ========================================================
+       28 — INITIALIZATION
+       ======================================================== */
+
+    function initialize() {
+
+        if (
+            state.ready
+        ) {
+
+            return api;
+
+        }
+
+
+        try {
+
+            restoreFromStorage();
+
+
+            /*
+             * Falls noch keine Unterhaltung
+             * existiert, eine neue erstellen.
+             */
+
+            if (
+                state.conversations.size ===
+                0
+            ) {
+
+                create(
+                    {
+                        title:
+                            "Neue Unterhaltung",
+
+                        activate:
+                            true
+                    }
+                );
+
+            }
+
+
+            if (
+                state.activeConversationId
+            ) {
+
+                persistActiveConversation();
+
+            } else {
+
+                const first =
+                    getAll(
+                        {
+                            includeArchived:
+                                true
+                        }
+                    )[0];
+
+
+                if (first) {
+
+                    setActive(
+                        first.id
+                    );
+
+                }
+
+            }
+
+
+            state.initialized =
+                true;
+
+            state.ready =
+                true;
+
+            state.failed =
+                false;
+
+
+            emit(
+                "ready",
+                {
+
+                    version:
+                        VERSION,
+
+                    conversationCount:
+                        state.conversations.size,
+
+                    activeConversationId:
+                        state.activeConversationId
+
+                }
+            );
+
+
+            log(
+                "Conversation State bereit.",
+                VERSION
+            );
+
+
+            return api;
+
+        } catch (exception) {
+
+            state.failed =
+                true;
+
+            state.ready =
+                false;
+
+
+            reportError(
+                exception,
+                "Conversation State Initialisierung"
+            );
+
+
+            return api;
+
+        }
+
+    }
+
+
+    /* ========================================================
+       29 — PUBLIC API
+       ======================================================== */
 
     const api = {
 
-        __haldoAI18:
-            true,
+        name:
+            NAME,
 
-        config:
-            CONFIG,
+        version:
+            VERSION,
 
-        state,
+        module:
+            MODULE_ID,
 
-        initialize,
 
-        on,
+        /* Lifecycle */
 
-        off,
+        initialize:
+            initialize,
 
-        emit,
 
-        createConversation,
+        /* Events */
 
-        newConversation:
+        on:
+            on,
+
+        off:
+            off,
+
+        emit:
+            emit,
+
+
+        /* Conversations */
+
+        create:
+            create,
+
+        createConversation:
             createConversation,
 
-        switchConversation,
-
-        deleteConversation,
-
-        getActiveConversation,
+        get:
+            get,
 
         getConversation:
-            getActiveConversation,
+            getConversation,
 
-        ensureConversation,
+        getAll:
+            getAll,
 
-        addMessage,
+        getConversations:
+            getConversations,
 
-        addUserMessage,
+        remove:
+            remove,
 
-        addAssistantMessage,
+        deleteConversation:
+            deleteConversation,
 
-        addSystemMessage,
+        clearAll:
+            clearAll,
 
-        getMessages,
 
-        getHistory:
+        /* Active */
+
+        setActive:
+            setActive,
+
+        getActive:
+            getActive,
+
+        getActiveId:
+            getActiveId,
+
+
+        /* Messages */
+
+        addMessage:
+            addMessage,
+
+        addUserMessage:
+            addUserMessage,
+
+        addAssistantMessage:
+            addAssistantMessage,
+
+        addSystemMessage:
+            addSystemMessage,
+
+        getMessages:
             getMessages,
 
-        clearMessages,
+        getLastMessage:
+            getLastMessage,
 
-        setTyping,
+        removeMessage:
+            removeMessage,
 
-        setProcessing,
+        clearMessages:
+            clearMessages,
 
-        setLanguage,
 
-        getLanguage,
+        /* Context */
 
-        setMode,
+        setContext:
+            setContext,
 
-        setMetadata,
+        getContext:
+            getContext,
 
-        getMetadata,
+        buildAIContext:
+            buildAIContext,
 
-        markRead,
 
-        getUnreadCount,
+        /* Language */
 
-        getContext,
+        setLanguage:
+            setLanguage,
 
-        save,
+        getLanguage:
+            getLanguage,
 
-        load,
 
-        reset,
+        /* Status */
 
-        getStatus
+        setStatus:
+            setStatus,
+
+        getStatus:
+            getStatus,
+
+
+        /* Metadata */
+
+        setTitle:
+            setTitle,
+
+        setFlags:
+            setFlags,
+
+
+        /* Storage */
+
+        save:
+            saveConversation,
+
+        load:
+            loadConversationFromStorage,
+
+        restoreFromStorage:
+            restoreFromStorage,
+
+
+        /* Import / Export */
+
+        export:
+            exportConversation,
+
+        import:
+            importConversation,
+
+
+        /* Diagnostics */
+
+        getStatistics:
+            function () {
+
+                return {
+                    ...state.statistics
+                };
+
+            },
+
+
+        getState:
+            function () {
+
+                return {
+
+                    initialized:
+                        state.initialized,
+
+                    ready:
+                        state.ready,
+
+                    failed:
+                        state.failed,
+
+                    conversationCount:
+                        state.conversations.size,
+
+                    activeConversationId:
+                        state.activeConversationId,
+
+                    statistics:
+                        {
+                            ...state.statistics
+                        }
+
+                };
+
+            }
 
     };
 
-    // --------------------------------------------------------
-    // GLOBAL REGISTRATION
-    // --------------------------------------------------------
+
+    /* ========================================================
+       30 — GLOBAL EXPORT
+       ======================================================== */
 
     window.HalDoConversationState =
         api;
 
-    window.HalDoOS.conversationState =
+    window.HalDoOSConversationState =
         api;
 
-    // --------------------------------------------------------
-    // BOOT
-    // --------------------------------------------------------
+    HalDoOS.conversationState =
+        api;
 
-    async function boot() {
 
-        try {
+    /* ========================================================
+       31 — ACTIVE PERSISTENCE
+       ======================================================== */
 
-            await initialize();
+    on(
+        "active-changed",
+        function () {
 
-        } catch (
-            error
-        ) {
-
-            recordError(
-                error
-            );
-
-            console.error(
-                "[HalDoConversationState] " +
-                "Initialization failed:",
-                error
-            );
+            persistActiveConversation();
 
         }
+    );
+
+
+    /* ========================================================
+       32 — DOM START
+       ======================================================== */
+
+    function boot() {
+
+        initialize();
 
     }
+
 
     if (
         document.readyState ===
@@ -1991,8 +3340,21 @@
 
     }
 
-})(window, document);
 
-// ============================================================
-// END OF PART 81
-// ============================================================
+    /* ========================================================
+       33 — FINAL CONNECTION
+       ======================================================== */
+
+    HalDoOS.conversationState =
+        api;
+
+    window.HalDoConversationState =
+        api;
+
+
+    log(
+        "HalDo Conversation State geladen."
+    );
+
+
+})(window, document);
