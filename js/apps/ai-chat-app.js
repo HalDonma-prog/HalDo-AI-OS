@@ -1,44 +1,58 @@
 /* ============================================================
    HALDO AI OS 20
-   PROFESSIONAL ULTIMATE FOUNDATION
+   PROFESSIONAL ULTIMATE
    ------------------------------------------------------------
+   Datei:
+       js/apps/ai-chat-app.js
+
    APP:
        HalDo AI Chat
 
-   DATEI:
-       js/apps/ai-chat-app.js
+   ARCHITEKTUR:
+       App Contract
+       App Base
+       App Manager
+       Kernel
+       System
+       Router
+       Window Manager
+       Storage
+       AI Core
+       AI Engine
+       AI Chat
+       AI Language
+       AI Memory
+       AI Speech
+       AI Voice
+       Language Manager
+       Language System
+       Ezidi Keyboard
 
-   VERSION:
-       20.0.0
-
-   ZWECK:
-       Vollständige HalDo AI Chat Anwendung
-
-   VERBINDUNGEN:
-       - app-contract.js
-       - app-base.js
-       - app-manager.js
-       - app-registry.js
-       - app-router.js
-       - window-manager.js
-       - kernel.js
-       - system.js
-       - ai-core.js
-       - ai-chat.js
-       - ai-engine.js
-       - ai-language.js
-       - ai-memory.js
-       - ai-speech.js
-       - ai-voice.js
-       - language-system.js
-       - language-manager.js
-       - storage.js
-       - storage-manager.js
-       - ezidi-keyboard.js
-
-   WICHTIG:
-       Diese App ist als vollständige Anwendung aufgebaut
-       und nicht nur als Registry-Platzhalter.
+   FUNKTIONEN:
+       - vollständige Chat-Oberfläche
+       - Nachrichten
+       - Verlauf
+       - Konversationen
+       - neue Unterhaltung
+       - löschen
+       - suchen
+       - kopieren
+       - senden
+       - Enter / Shift+Enter
+       - Sprachbutton
+       - Mikrofon-Anbindung
+       - AI-Anbindung
+       - Memory-Anbindung
+       - Sprache
+       - Einstellungen
+       - Theme
+       - App-Zustand
+       - Persistenz
+       - Events
+       - Fehlerbehandlung
+       - Diagnostics
+       - Accessibility
+       - Erweiterbare Architektur
 
    ============================================================ */
 
@@ -57,6 +71,10 @@
         window.HalDoOS;
 
 
+    /* ========================================================
+       02 — APP META
+       ======================================================== */
+
     const APP_ID =
         "ai-chat";
 
@@ -66,85 +84,14 @@
     const APP_NAME =
         "HalDo AI Chat";
 
+    const APP_TITLE =
+        "HalDo AI";
 
-    /* ========================================================
-       02 — SAFE HELPERS
-       ======================================================== */
+    const APP_CATEGORY =
+        "ai";
 
-    function hasMethod(
-        object,
-        method
-    ) {
-
-        return !!(
-            object &&
-            typeof object[method] ===
-            "function"
-        );
-
-    }
-
-
-    function normalizeId(
-        value
-    ) {
-
-        return String(
-            value || ""
-        )
-        .trim()
-        .toLowerCase()
-        .replace(
-            /[^a-z0-9äöüßîêç_-]+/gi,
-            "-"
-        )
-        .replace(
-            /-+/g,
-            "-"
-        )
-        .replace(
-            /^-|-$/g,
-            "");
-
-    }
-
-
-    function safeClone(
-        value
-    ) {
-
-        try {
-
-            return JSON.parse(
-                JSON.stringify(
-                    value
-                )
-            );
-
-        } catch (_) {
-
-            return value;
-
-        }
-
-    }
-
-
-    function createId(
-        prefix
-    ) {
-
-        return (
-            prefix +
-            "-" +
-            Date.now().toString(36) +
-            "-" +
-            Math.random()
-                .toString(36)
-                .slice(2, 10)
-        );
-
-    }
+    const APP_ROUTE =
+        "/ai-chat";
 
 
     /* ========================================================
@@ -184,11 +131,22 @@
     }
 
 
-    function getAIChat() {
+    function getRouter() {
 
         return (
-            window.HalDoAIChat ||
-            HalDoOS.aiChat ||
+            window.HalDoAppRouter ||
+            HalDoOS.appRouter ||
+            null
+        );
+
+    }
+
+
+    function getWindowManager() {
+
+        return (
+            window.HalDoWindowManager ||
+            HalDoOS.windowManager ||
             null
         );
 
@@ -217,11 +175,11 @@
     }
 
 
-    function getAILanguage() {
+    function getAIChat() {
 
         return (
-            window.HalDoAILanguage ||
-            HalDoOS.aiLanguage ||
+            window.HalDoAIChat ||
+            HalDoOS.aiChat ||
             null
         );
 
@@ -233,6 +191,17 @@
         return (
             window.HalDoAIMemory ||
             HalDoOS.aiMemory ||
+            null
+        );
+
+    }
+
+
+    function getAILanguage() {
+
+        return (
+            window.HalDoAILanguage ||
+            HalDoOS.aiLanguage ||
             null
         );
 
@@ -272,11 +241,11 @@
     }
 
 
-    function getStorage() {
+    function getLanguageSystem() {
 
         return (
-            window.HalDoStorage ||
-            HalDoOS.storage ||
+            window.HalDoLanguageSystem ||
+            HalDoOS.languageSystem ||
             null
         );
 
@@ -295,61 +264,108 @@
 
 
     /* ========================================================
-       04 — DEFAULT SETTINGS
+       04 — SAFE HELPERS
        ======================================================== */
 
-    const DEFAULT_SETTINGS = {
+    function hasMethod(
+        object,
+        method
+    ) {
 
-        language:
-            "auto",
+        return !!(
+            object &&
+            typeof object[method] ===
+            "function"
+        );
 
-        theme:
-            "system",
+    }
 
-        sendOnEnter:
-            true,
 
-        showTimestamps:
-            true,
+    function safeString(
+        value
+    ) {
 
-        showStatus:
-            true,
+        return String(
+            value === undefined ||
+            value === null
+                ? ""
+                : value
+        );
 
-        autoScroll:
-            true,
+    }
 
-        speechEnabled:
-            false,
 
-        voiceEnabled:
-            false,
+    function createId(
+        prefix
+    ) {
 
-        memoryEnabled:
-            true,
+        return (
+            prefix +
+            "-" +
+            Date.now() +
+            "-" +
+            Math.random()
+                .toString(36)
+                .slice(2, 9)
+        );
 
-        aiProvider:
-            "haldo",
+    }
 
-        aiModel:
-            "haldo-default",
 
-        temperature:
-            0.7,
+    function escapeHTML(
+        value
+    ) {
 
-        maxHistory:
-            100,
+        return safeString(
+            value
+        )
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /'/g,
+            "&#039;"
+        );
 
-        ezidiKeyboard:
-            true,
+    }
 
-        animations:
-            true
 
-    };
+    function clone(
+        value
+    ) {
+
+        try {
+
+            return JSON.parse(
+                JSON.stringify(
+                    value
+                )
+            );
+
+        } catch (_) {
+
+            return value;
+
+        }
+
+    }
 
 
     /* ========================================================
-       05 — APPLICATION STATE
+       05 — APP STATE
        ======================================================== */
 
     const state = {
@@ -369,56 +385,291 @@
         busy:
             false,
 
+        recording:
+            false,
+
         currentConversationId:
             null,
 
-        messages:
+        conversations:
             [],
 
-        conversations:
+        messages:
             [],
 
         searchQuery:
             "",
 
+        language:
+            "de",
+
+        theme:
+            "system",
+
         settings:
             {
-                ...DEFAULT_SETTINGS
+
+                enterToSend:
+                    true,
+
+                sound:
+                    true,
+
+                voiceReplies:
+                    false,
+
+                saveHistory:
+                    true,
+
+                memory:
+                    true,
+
+                autoScroll:
+                    true,
+
+                showTimestamps:
+                    true,
+
+                compactMode:
+                    false
+
+            },
+
+        statistics:
+            {
+
+                messagesSent:
+                    0,
+
+                messagesReceived:
+                    0,
+
+                conversationsCreated:
+                    0,
+
+                errors:
+                    0,
+
+                startedAt:
+                    null
+
             },
 
         elements:
             {},
 
-        unsubscribers:
+        listeners:
             [],
 
-        statistics: {
-
-            messagesSent:
-                0,
-
-            messagesReceived:
-                0,
-
-            errors:
-                0,
-
-            conversationsCreated:
-                0,
-
-            startedAt:
-                null,
-
-            lastMessageAt:
-                null
-
-        }
+        speechRecognition:
+            null
 
     };
 
 
     /* ========================================================
-       06 — EVENTS
+       06 — STORAGE
+       ======================================================== */
+
+    const STORAGE_PREFIX =
+        "haldo.ai-chat.";
+
+    const STORAGE_KEYS = {
+
+        conversations:
+            STORAGE_PREFIX +
+            "conversations",
+
+        settings:
+            STORAGE_PREFIX +
+            "settings",
+
+        language:
+            STORAGE_PREFIX +
+            "language",
+
+        currentConversation:
+            STORAGE_PREFIX +
+            "current-conversation"
+
+    };
+
+
+    function saveJSON(
+        key,
+        value
+    ) {
+
+        try {
+
+            localStorage.setItem(
+                key,
+                JSON.stringify(
+                    value
+                )
+            );
+
+            return true;
+
+        } catch (exception) {
+
+            reportError(
+                exception,
+                "Storage speichern"
+            );
+
+            return false;
+
+        }
+
+    }
+
+
+    function loadJSON(
+        key,
+        fallback
+    ) {
+
+        try {
+
+            const raw =
+                localStorage.getItem(
+                    key
+                );
+
+            if (!raw) {
+
+                return fallback;
+
+            }
+
+            return JSON.parse(
+                raw
+            );
+
+        } catch (exception) {
+
+            reportError(
+                exception,
+                "Storage laden"
+            );
+
+            return fallback;
+
+        }
+
+    }
+
+
+    function saveState() {
+
+        if (
+            !state.settings.saveHistory
+        ) {
+
+            return;
+
+        }
+
+        saveJSON(
+            STORAGE_KEYS.conversations,
+            state.conversations
+        );
+
+        saveJSON(
+            STORAGE_KEYS.settings,
+            state.settings
+        );
+
+        try {
+
+            localStorage.setItem(
+                STORAGE_KEYS.language,
+                state.language
+            );
+
+            if (
+                state.currentConversationId
+            ) {
+
+                localStorage.setItem(
+                    STORAGE_KEYS.currentConversation,
+                    state.currentConversationId
+                );
+
+            }
+
+        } catch (exception) {
+
+            reportError(
+                exception,
+                "Chat State speichern"
+            );
+
+        }
+
+    }
+
+
+    function loadState() {
+
+        state.conversations =
+            loadJSON(
+                STORAGE_KEYS.conversations,
+                []
+            );
+
+
+        const storedSettings =
+            loadJSON(
+                STORAGE_KEYS.settings,
+                {}
+            );
+
+
+        state.settings = {
+
+            ...state.settings,
+
+            ...(storedSettings || {})
+
+        };
+
+
+        try {
+
+            state.language =
+                localStorage.getItem(
+                    STORAGE_KEYS.language
+                ) ||
+                state.language;
+
+
+            state.currentConversationId =
+                localStorage.getItem(
+                    STORAGE_KEYS.currentConversation
+                ) ||
+                null;
+
+        } catch (_) {}
+
+
+        if (
+            !Array.isArray(
+                state.conversations
+            )
+        ) {
+
+            state.conversations =
+                [];
+
+        }
+
+    }
+
+
+    /* ========================================================
+       07 — EVENTS
        ======================================================== */
 
     const listeners =
@@ -493,18 +744,6 @@
             callback
         );
 
-
-        if (
-            set.size ===
-            0
-        ) {
-
-            listeners.delete(
-                event
-            );
-
-        }
-
     }
 
 
@@ -521,48 +760,50 @@
 
         if (set) {
 
-            Array.from(set)
-                .forEach(
-                    callback => {
+            Array.from(
+                set
+            ).forEach(
+                callback => {
 
-                        try {
+                    try {
 
-                            callback(
-                                data
-                            );
+                        callback(
+                            data
+                        );
 
-                        } catch (exception) {
+                    } catch (
+                        exception
+                    ) {
 
-                            reportError(
-                                exception,
-                                "Event: " +
-                                event
-                            );
-
-                        }
+                        reportError(
+                            exception,
+                            "Event " + event
+                        );
 
                     }
-                );
+
+                }
+            );
 
         }
 
 
-        const manager =
+        const appManager =
             getAppManager();
 
 
         if (
-            manager &&
+            appManager &&
             hasMethod(
-                manager,
+                appManager,
                 "emit"
             )
         ) {
 
             try {
 
-                manager.emit(
-                    APP_ID + ":" + event,
+                appManager.emit(
+                    "ai-chat:" + event,
                     data
                 );
 
@@ -574,7 +815,7 @@
 
 
     /* ========================================================
-       07 — ERROR HANDLING
+       08 — ERROR HANDLING
        ======================================================== */
 
     function reportError(
@@ -590,7 +831,7 @@
             exception instanceof Error
                 ? exception
                 : new Error(
-                    String(
+                    safeString(
                         exception
                     )
                 );
@@ -607,14 +848,14 @@
             "error",
             {
 
-                error:
-                    error,
+                context:
+                    context,
 
                 message:
                     error.message,
 
-                context:
-                    context,
+                stack:
+                    error.stack || "",
 
                 time:
                     Date.now()
@@ -654,268 +895,226 @@
 
 
     /* ========================================================
-       08 — STORAGE
+       09 — TRANSLATIONS
        ======================================================== */
 
-    const STORAGE_KEYS = {
+    const translations = {
 
-        settings:
-            "haldo.ai-chat.settings",
+        de: {
 
-        conversations:
-            "haldo.ai-chat.conversations",
+            title:
+                "HalDo AI",
 
-        active:
-            "haldo.ai-chat.active"
+            newChat:
+                "Neue Unterhaltung",
+
+            placeholder:
+                "Schreibe HalDo AI etwas...",
+
+            send:
+                "Senden",
+
+            search:
+                "Unterhaltungen suchen",
+
+            settings:
+                "Einstellungen",
+
+            clear:
+                "Löschen",
+
+            copy:
+                "Kopieren",
+
+            microphone:
+                "Mikrofon",
+
+            stop:
+                "Stoppen",
+
+            welcome:
+                "Hallo! Ich bin HalDo AI. Wie kann ich dir helfen?",
+
+            thinking:
+                "HalDo AI denkt nach...",
+
+            empty:
+                "Noch keine Unterhaltung.",
+
+            saved:
+                "Gespeichert",
+
+            error:
+                "Es ist ein Fehler aufgetreten."
+
+        },
+
+        en: {
+
+            title:
+                "HalDo AI",
+
+            newChat:
+                "New conversation",
+
+            placeholder:
+                "Write something to HalDo AI...",
+
+            send:
+                "Send",
+
+            search:
+                "Search conversations",
+
+            settings:
+                "Settings",
+
+            clear:
+                "Delete",
+
+            copy:
+                "Copy",
+
+            microphone:
+                "Microphone",
+
+            stop:
+                "Stop",
+
+            welcome:
+                "Hello! I am HalDo AI. How can I help you?",
+
+            thinking:
+                "HalDo AI is thinking...",
+
+            empty:
+                "No conversation yet.",
+
+            saved:
+                "Saved",
+
+            error:
+                "An error occurred."
+
+        },
+
+        ku: {
+
+            title:
+                "HalDo AI",
+
+            newChat:
+                "Daniştina nû",
+
+            placeholder:
+                "Ji HalDo AI re binivîse...",
+
+            send:
+                "Şandin",
+
+            search:
+                "Lêgerîna danûstendinan",
+
+            settings:
+                "Mîheng",
+
+            clear:
+                "Jêbirin",
+
+            copy:
+                "Kopîkirin",
+
+            microphone:
+                "Mîkrofon",
+
+            stop:
+                "Rawestandin",
+
+            welcome:
+                "Silav! Ez HalDo AI me. Ez dikarim çawa alîkarîya te bikim?",
+
+            thinking:
+                "HalDo AI difikire...",
+
+            empty:
+                "Hîn danûstendinek tune.",
+
+            saved:
+                "Hat tomarkirin",
+
+            error:
+                "Çewtiyek çêbû."
+
+        },
+
+        ez: {
+
+            title:
+                "HalDo AI",
+
+            newChat:
+                "گفتوگۆیەکی نوێ",
+
+            placeholder:
+                "نامەیەک بۆ HalDo AI بنووسە...",
+
+            send:
+                "ناردن",
+
+            search:
+                "گەڕان لە گفتوگۆکان",
+
+            settings:
+                "ڕێکخستنەکان",
+
+            clear:
+                "سڕینەوە",
+
+            copy:
+                "کۆپی",
+
+            microphone:
+                "مایکرۆفۆن",
+
+            stop:
+                "وەستاندن",
+
+            welcome:
+                "سڵاو! من HalDo AI ـم. چۆن دەتوانم یارمەتیت بدەم؟",
+
+            thinking:
+                "HalDo AI بیر دەکاتەوە...",
+
+            empty:
+                "هێشتا هیچ گفتوگۆیەک نییە.",
+
+            saved:
+                "هەڵگیرا",
+
+            error:
+                "هەڵەیەک ڕوویدا."
+
+        }
 
     };
 
 
-    function storageSet(
-        key,
-        value
+    function t(
+        key
     ) {
 
-        const storage =
-            getStorage();
-
-
-        if (
-            storage &&
-            hasMethod(
-                storage,
-                "set"
-            )
-        ) {
-
-            try {
-
-                storage.set(
-                    key,
-                    value
-                );
-
-                return true;
-
-            } catch (_) {}
-
-        }
-
-
-        try {
-
-            localStorage.setItem(
-                key,
-                JSON.stringify(
-                    value
-                )
-            );
-
-            return true;
-
-        } catch (_) {
-
-            return false;
-
-        }
-
-    }
-
-
-    function storageGet(
-        key,
-        fallback
-    ) {
-
-        const storage =
-            getStorage();
-
-
-        if (
-            storage &&
-            hasMethod(
-                storage,
-                "get"
-            )
-        ) {
-
-            try {
-
-                const value =
-                    storage.get(
-                        key
-                    );
-
-                return value ===
-                    undefined
-                    ? fallback
-                    : value;
-
-            } catch (_) {}
-
-        }
-
-
-        try {
-
-            const raw =
-                localStorage.getItem(
-                    key
-                );
-
-
-            if (!raw) {
-
-                return fallback;
-
-            }
-
-
-            return JSON.parse(
-                raw
-            );
-
-        } catch (_) {
-
-            return fallback;
-
-        }
-
-    }
-
-
-    /* ========================================================
-       09 — SETTINGS
-       ======================================================== */
-
-    function loadSettings() {
-
-        const manager =
-            getAppManager();
-
-
-        let saved =
-            null;
-
-
-        if (
-            manager &&
-            hasMethod(
-                manager,
-                "loadAppSettings"
-            )
-        ) {
-
-            saved =
-                manager.loadAppSettings(
-                    APP_ID
-                );
-
-        }
-
-
-        if (!saved) {
-
-            saved =
-                storageGet(
-                    STORAGE_KEYS.settings,
-                    {}
-                );
-
-        }
-
-
-        state.settings = {
-
-            ...DEFAULT_SETTINGS,
-
-            ...(saved || {})
-
-        };
-
-
-        return state.settings;
-
-    }
-
-
-    function saveSettings() {
-
-        const manager =
-            getAppManager();
-
-
-        if (
-            manager &&
-            hasMethod(
-                manager,
-                "setSettings"
-            )
-        ) {
-
-            try {
-
-                manager.setSettings(
-                    APP_ID,
-                    state.settings
-                );
-
-            } catch (_) {}
-
-        }
-
-
-        storageSet(
-            STORAGE_KEYS.settings,
-            state.settings
+        const language =
+            translations[
+                state.language
+            ] ||
+            translations.de;
+
+
+        return (
+            language[key] ||
+            translations.de[key] ||
+            key
         );
-
-
-        emit(
-            "settings-changed",
-            {
-                settings:
-                    safeClone(
-                        state.settings
-                    )
-            }
-        );
-
-
-        return true;
-
-    }
-
-
-    function getSettings() {
-
-        return {
-            ...state.settings
-        };
-
-    }
-
-
-    function updateSettings(
-        changes
-    ) {
-
-        state.settings = {
-
-            ...state.settings,
-
-            ...(changes || {})
-
-        };
-
-
-        saveSettings();
-
-
-        render();
-
-
-        return getSettings();
 
     }
 
@@ -925,7 +1124,7 @@
        ======================================================== */
 
     function createConversation(
-        title = "Neue Unterhaltung"
+        title = ""
     ) {
 
         const conversation = {
@@ -936,7 +1135,8 @@
                 ),
 
             title:
-                title,
+                title ||
+                t("newChat"),
 
             createdAt:
                 Date.now(),
@@ -968,14 +1168,14 @@
             1;
 
 
-        saveConversations();
+        saveState();
 
 
         emit(
             "conversation-created",
             {
                 conversation:
-                    safeClone(
+                    clone(
                         conversation
                     )
             }
@@ -1002,14 +1202,13 @@
 
 
     function selectConversation(
-        conversationId
+        id
     ) {
 
         const conversation =
             state.conversations.find(
                 item =>
-                    item.id ===
-                    conversationId
+                    item.id === id
             );
 
 
@@ -1028,24 +1227,21 @@
             conversation.messages;
 
 
-        storageSet(
-            STORAGE_KEYS.active,
-            conversation.id
-        );
-
-
-        render();
+        saveState();
 
 
         emit(
             "conversation-selected",
             {
                 conversation:
-                    safeClone(
+                    clone(
                         conversation
                     )
             }
         );
+
+
+        render();
 
 
         return true;
@@ -1054,14 +1250,13 @@
 
 
     function deleteConversation(
-        conversationId
+        id
     ) {
 
         const index =
             state.conversations.findIndex(
-                item =>
-                    item.id ===
-                    conversationId
+                conversation =>
+                    conversation.id === id
             );
 
 
@@ -1080,7 +1275,7 @@
 
         if (
             state.currentConversationId ===
-            conversationId
+            id
         ) {
 
             const next =
@@ -1089,27 +1284,30 @@
 
             if (next) {
 
-                selectConversation(
-                    next.id
-                );
+                state.currentConversationId =
+                    next.id;
+
+                state.messages =
+                    next.messages;
 
             } else {
 
                 createConversation();
 
+                return true;
+
             }
 
         }
 
 
-        saveConversations();
-
+        saveState();
 
         emit(
             "conversation-deleted",
             {
-                conversationId:
-                    conversationId
+                id:
+                    id
             }
         );
 
@@ -1122,141 +1320,21 @@
     }
 
 
-    function clearCurrentConversation() {
+    function ensureConversation() {
 
-        const conversation =
+        let conversation =
             getCurrentConversation();
 
 
         if (!conversation) {
 
-            return false;
+            conversation =
+                createConversation();
 
         }
 
 
-        conversation.messages =
-            [];
-
-        conversation.updatedAt =
-            Date.now();
-
-
-        state.messages =
-            conversation.messages;
-
-
-        saveConversations();
-
-
-        render();
-
-
-        emit(
-            "conversation-cleared",
-            {
-                conversationId:
-                    conversation.id
-            }
-        );
-
-
-        return true;
-
-    }
-
-
-    function saveConversations() {
-
-        state.conversations =
-            state.conversations.map(
-                conversation => ({
-
-                    ...conversation,
-
-                    messages:
-                        Array.isArray(
-                            conversation.messages
-                        )
-                            ? conversation.messages
-                            : [],
-
-                    updatedAt:
-                        Date.now()
-
-                })
-            );
-
-
-        storageSet(
-            STORAGE_KEYS.conversations,
-            state.conversations
-        );
-
-
-        return true;
-
-    }
-
-
-    function loadConversations() {
-
-        const saved =
-            storageGet(
-                STORAGE_KEYS.conversations,
-                []
-            );
-
-
-        if (
-            Array.isArray(
-                saved
-            ) &&
-            saved.length
-        ) {
-
-            state.conversations =
-                saved;
-
-        }
-
-
-        const active =
-            storageGet(
-                STORAGE_KEYS.active,
-                null
-            );
-
-
-        if (
-            active &&
-            state.conversations.some(
-                item =>
-                    item.id ===
-                    active
-            )
-        ) {
-
-            selectConversation(
-                active
-            );
-
-        } else if (
-            state.conversations.length
-        ) {
-
-            selectConversation(
-                state.conversations[0].id
-            );
-
-        } else {
-
-            createConversation();
-
-        }
-
-
-        return state.conversations;
+        return conversation;
 
     }
 
@@ -1265,13 +1343,17 @@
        11 — MESSAGES
        ======================================================== */
 
-    function createMessage(
+    function addMessage(
         role,
         content,
-        extra = {}
+        metadata = {}
     ) {
 
-        return {
+        const conversation =
+            ensureConversation();
+
+
+        const message = {
 
             id:
                 createId(
@@ -1282,96 +1364,120 @@
                 role,
 
             content:
-                String(
-                    content || ""
+                safeString(
+                    content
                 ),
 
-            timestamp:
+            createdAt:
                 Date.now(),
 
-            ...extra
+            metadata:
+                metadata || {}
 
         };
 
-    }
 
-
-    function addMessage(
-        role,
-        content,
-        extra = {}
-    ) {
-
-        const conversation =
-            getCurrentConversation();
-
-
-        if (!conversation) {
-
-            createConversation();
-
-        }
-
-
-        const current =
-            getCurrentConversation();
-
-
-        const message =
-            createMessage(
-                role,
-                content,
-                extra
-            );
-
-
-        current.messages.push(
+        conversation.messages.push(
             message
         );
 
 
-        current.updatedAt =
+        conversation.updatedAt =
             Date.now();
 
 
         state.messages =
-            current.messages;
+            conversation.messages;
 
 
         if (
-            state.messages.length >
-            state.settings.maxHistory
+            role === "user"
         ) {
 
-            state.messages =
-                state.messages.slice(
-                    -state.settings.maxHistory
-                );
-
-            current.messages =
-                state.messages;
+            state.statistics
+                .messagesSent +=
+                1;
 
         }
 
 
-        saveConversations();
+        if (
+            role === "assistant"
+        ) {
+
+            state.statistics
+                .messagesReceived +=
+                1;
+
+        }
 
 
-        render();
+        updateConversationTitle(
+            conversation
+        );
+
+
+        saveState();
 
 
         emit(
             "message-added",
             {
                 message:
-                    safeClone(
+                    clone(
                         message
-                    )
+                    ),
+
+                conversationId:
+                    conversation.id
+
             }
         );
 
 
+        renderMessages();
+
+
         return message;
+
+    }
+
+
+    function updateConversationTitle(
+        conversation
+    ) {
+
+        if (
+            !conversation ||
+            conversation.title !==
+                t("newChat")
+        ) {
+
+            return;
+
+        }
+
+
+        const firstUserMessage =
+            conversation.messages.find(
+                message =>
+                    message.role ===
+                    "user"
+            );
+
+
+        if (
+            firstUserMessage
+        ) {
+
+            conversation.title =
+                firstUserMessage.content
+                    .slice(
+                        0,
+                        40
+                    );
+
+        }
 
     }
 
@@ -1381,162 +1487,198 @@
        ======================================================== */
 
     async function askAI(
-        text
+        prompt
     ) {
 
         const aiChat =
             getAIChat();
 
+        const aiEngine =
+            getAIEngine();
 
         const aiCore =
             getAICore();
 
 
-        const aiEngine =
-            getAIEngine();
+        const payload = {
 
+            appId:
+                APP_ID,
 
-        const context = {
+            conversationId:
+                state.currentConversationId,
 
             message:
-                text,
+                prompt,
+
+            language:
+                state.language,
 
             messages:
-                safeClone(
+                clone(
                     state.messages
                 ),
 
-            conversation:
-                safeClone(
-                    getCurrentConversation()
-                ),
-
             settings:
-                getSettings(),
-
-            appId:
-                APP_ID
+                clone(
+                    state.settings
+                )
 
         };
 
 
         /*
-         * Bestehendes HalDo AI Chat-Modul
+         * Priorität:
+         *
+         * 1. AI Chat
+         * 2. AI Engine
+         * 3. AI Core
+         *
+         * Dadurch bleibt die App mit
+         * unterschiedlichen Versionen
+         * der vorhandenen AI-Module
+         * kompatibel.
          */
 
+
         if (
-            aiChat &&
-            hasMethod(
-                aiChat,
-                "sendMessage"
-            )
+            aiChat
         ) {
 
-            return await aiChat.sendMessage(
-                text,
-                context
-            );
+            const methods = [
 
-        }
+                "sendMessage",
 
+                "chat",
 
-        if (
-            aiChat &&
-            hasMethod(
-                aiChat,
+                "ask",
+
                 "send"
-            )
-        ) {
 
-            return await aiChat.send(
-                text,
-                context
-            );
+            ];
+
+
+            for (
+                const method of methods
+            ) {
+
+                if (
+                    hasMethod(
+                        aiChat,
+                        method
+                    )
+                ) {
+
+                    return aiChat[method](
+                        payload
+                    );
+
+                }
+
+            }
 
         }
 
 
-        /*
-         * AI Core
-         */
-
         if (
-            aiCore &&
-            hasMethod(
-                aiCore,
+            aiEngine
+        ) {
+
+            const methods = [
+
+                "generate",
+
+                "chat",
+
+                "ask",
+
                 "process"
-            )
-        ) {
 
-            return await aiCore.process(
-                text,
-                context
-            );
+            ];
+
+
+            for (
+                const method of methods
+            ) {
+
+                if (
+                    hasMethod(
+                        aiEngine,
+                        method
+                    )
+                ) {
+
+                    return aiEngine[method](
+                        payload
+                    );
+
+                }
+
+            }
 
         }
 
 
         if (
-            aiCore &&
-            hasMethod(
-                aiCore,
-                "ask"
-            )
+            aiCore
         ) {
 
-            return await aiCore.ask(
-                text,
-                context
-            );
+            const methods = [
 
-        }
+                "chat",
 
+                "ask",
 
-        /*
-         * AI Engine
-         */
+                "process",
 
-        if (
-            aiEngine &&
-            hasMethod(
-                aiEngine,
                 "generate"
-            )
-        ) {
 
-            return await aiEngine.generate(
-                text,
-                context
-            );
-
-        }
+            ];
 
 
-        if (
-            aiEngine &&
-            hasMethod(
-                aiEngine,
-                "respond"
-            )
-        ) {
+            for (
+                const method of methods
+            ) {
 
-            return await aiEngine.respond(
-                text,
-                context
-            );
+                if (
+                    hasMethod(
+                        aiCore,
+                        method
+                    )
+                ) {
+
+                    return aiCore[method](
+                        payload
+                    );
+
+                }
+
+            }
 
         }
 
 
         /*
-         * Noch kein echter Provider
+         * Falls die eigentliche AI Engine
+         * noch nicht geladen ist, geben wir
+         * keinen falschen Fehler zurück.
+         *
+         * Die App bleibt funktionsfähig und
+         * wartet auf die echte AI-Verbindung.
          */
 
-        return (
-            "HalDo AI ist verbunden, aber aktuell " +
-            "wurde noch kein aktiver AI-Provider " +
-            "für diese Unterhaltung bereitgestellt."
-        );
+        return {
+
+            success:
+                false,
+
+            pending:
+                true,
+
+            message:
+                "AI engine not available."
+
+        };
 
     }
 
@@ -1566,11 +1708,33 @@
 
 
         if (
-            response.text
+            response.response
         ) {
 
-            return String(
-                response.text
+            return safeString(
+                response.response
+            );
+
+        }
+
+
+        if (
+            response.answer
+        ) {
+
+            return safeString(
+                response.answer
+            );
+
+        }
+
+
+        if (
+            response.content
+        ) {
+
+            return safeString(
+                response.content
             );
 
         }
@@ -1580,41 +1744,25 @@
             response.message
         ) {
 
-            if (
-                typeof response.message ===
-                "string"
-            ) {
-
-                return response.message;
-
-            }
-
-
-            if (
-                response.message.content
-            ) {
-
-                return String(
-                    response.message.content
-                );
-
-            }
-
-        }
-
-
-        if (
-            response.content
-        ) {
-
-            return String(
-                response.content
+            return safeString(
+                response.message
             );
 
         }
 
 
-        return JSON.stringify(
+        if (
+            response.text
+        ) {
+
+            return safeString(
+                response.text
+            );
+
+        }
+
+
+        return safeString(
             response
         );
 
@@ -1629,124 +1777,104 @@
         text
     ) {
 
-        const value =
-            String(
-                text || ""
+        const prompt =
+            safeString(
+                text
             ).trim();
 
 
-        if (!value) {
-
-            return null;
-
-        }
-
-
         if (
+            !prompt ||
             state.busy
         ) {
 
-            return null;
+            return false;
 
         }
+
+
+        ensureConversation();
+
+
+        addMessage(
+            "user",
+            prompt
+        );
+
+
+        clearComposer();
 
 
         state.busy =
             true;
 
 
-        state.statistics.messagesSent +=
-            1;
-
-
-        state.statistics.lastMessageAt =
-            Date.now();
-
-
-        addMessage(
-            "user",
-            value
+        updateBusyState(
+            true
         );
 
 
         emit(
-            "message-sending",
+            "thinking",
             {
-                text:
-                    value
+                prompt:
+                    prompt
             }
-        );
-
-
-        setStatus(
-            "HalDo AI denkt …"
         );
 
 
         try {
 
-            /*
-             * AI Memory
-             */
-
-            const memory =
-                getAIMemory();
-
-
-            if (
-                state.settings.memoryEnabled &&
-                memory &&
-                hasMethod(
-                    memory,
-                    "remember"
-                )
-            ) {
-
-                try {
-
-                    memory.remember(
-                        value,
-                        {
-                            source:
-                                APP_ID
-                        }
-                    );
-
-                } catch (_) {}
-
-            }
-
-
             const response =
                 await askAI(
-                    value
+                    prompt
                 );
 
 
-            const answer =
+            let answer =
                 normalizeAIResponse(
                     response
                 );
 
 
-            const message =
-                addMessage(
-                    "assistant",
-                    answer
-                );
+            if (
+                !answer &&
+                response &&
+                response.pending
+            ) {
+
+                answer =
+                    "HalDo AI ist bereit. Die zentrale AI-Engine ist momentan noch nicht verbunden.";
+
+            }
 
 
-            state.statistics
-                .messagesReceived +=
-                1;
+            if (!answer) {
+
+                answer =
+                    t("error");
+
+            }
 
 
-            /*
-             * Sprachsystem
-             */
+            addMessage(
+                "assistant",
+                answer,
+                {
+                    source:
+                        "haldo-ai"
+                }
+            );
+
+
+            await saveMemory(
+                prompt,
+                answer
+            );
+
 
             if (
-                state.settings.speechEnabled
+                state.settings.voiceReplies
             ) {
 
                 speak(
@@ -1757,45 +1885,39 @@
 
 
             emit(
-                "message-received",
+                "response",
                 {
-                    message:
-                        message,
+                    prompt:
+                        prompt,
 
                     response:
-                        response
+                        answer
+
                 }
             );
 
 
-            setStatus(
-                "Bereit"
-            );
-
-
-            return message;
+            return answer;
 
         } catch (exception) {
 
             reportError(
                 exception,
-                "AI Nachricht senden"
+                "AI Anfrage"
             );
 
 
-            const message =
-                addMessage(
-                    "system",
-                    "Beim Verarbeiten deiner Nachricht ist ein Fehler aufgetreten."
-                );
-
-
-            setStatus(
-                "Fehler"
+            addMessage(
+                "system",
+                t("error"),
+                {
+                    error:
+                        true
+                }
             );
 
 
-            return message;
+            return false;
 
         } finally {
 
@@ -1803,7 +1925,9 @@
                 false;
 
 
-            updateSendButton();
+            updateBusyState(
+                false
+            );
 
         }
 
@@ -1811,79 +1935,103 @@
 
 
     /* ========================================================
-       14 — SPEECH
+       14 — MEMORY
        ======================================================== */
 
-    async function speak(
-        text
+    async function saveMemory(
+        prompt,
+        answer
     ) {
 
-        const speech =
-            getAISpeech();
+        if (
+            !state.settings.memory
+        ) {
+
+            return false;
+
+        }
 
 
-        const voice =
-            getAIVoice();
+        const memory =
+            getAIMemory();
 
 
-        try {
+        if (!memory) {
+
+            return false;
+
+        }
+
+
+        const payload = {
+
+            appId:
+                APP_ID,
+
+            conversationId:
+                state.currentConversationId,
+
+            user:
+                prompt,
+
+            assistant:
+                answer,
+
+            language:
+                state.language,
+
+            timestamp:
+                Date.now()
+
+        };
+
+
+        const methods = [
+
+            "remember",
+
+            "save",
+
+            "add",
+
+            "store"
+
+        ];
+
+
+        for (
+            const method of methods
+        ) {
 
             if (
-                speech &&
                 hasMethod(
-                    speech,
-                    "speak"
+                    memory,
+                    method
                 )
             ) {
 
-                return await speech.speak(
-                    text
-                );
+                try {
 
-            }
-
-
-            if (
-                voice &&
-                hasMethod(
-                    voice,
-                    "speak"
-                )
-            ) {
-
-                return await voice.speak(
-                    text
-                );
-
-            }
-
-
-            if (
-                "speechSynthesis" in
-                window
-            ) {
-
-                const utterance =
-                    new SpeechSynthesisUtterance(
-                        text
+                    await memory[method](
+                        payload
                     );
 
+                    return true;
 
-                speechSynthesis.speak(
-                    utterance
-                );
+                } catch (
+                    exception
+                ) {
 
+                    reportError(
+                        exception,
+                        "AI Memory"
+                    );
 
-                return true;
+                    return false;
+
+                }
 
             }
-
-        } catch (exception) {
-
-            reportError(
-                exception,
-                "Sprachausgabe"
-            );
 
         }
 
@@ -1894,114 +2042,357 @@
 
 
     /* ========================================================
-       15 — LANGUAGE
+       15 — SPEECH
        ======================================================== */
 
-    function getCurrentLanguage() {
-
-        const languageManager =
-            getLanguageManager();
-
-
-        if (
-            languageManager &&
-            hasMethod(
-                languageManager,
-                "getCurrentLanguage"
-            )
-        ) {
-
-            try {
-
-                return languageManager
-                    .getCurrentLanguage();
-
-            } catch (_) {}
-
-        }
-
-
-        const aiLanguage =
-            getAILanguage();
-
-
-        if (
-            aiLanguage &&
-            hasMethod(
-                aiLanguage,
-                "getCurrentLanguage"
-            )
-        ) {
-
-            try {
-
-                return aiLanguage
-                    .getCurrentLanguage();
-
-            } catch (_) {}
-
-        }
-
-
-        return (
-            state.settings.language ===
-            "auto"
-                ? "de"
-                : state.settings.language
-        );
-
-    }
-
-
-    function translate(
-        key,
-        fallback
+    function speak(
+        text
     ) {
 
-        const manager =
-            getLanguageManager();
+        const voice =
+            getAIVoice();
+
+        const speech =
+            getAISpeech();
 
 
         if (
-            manager &&
-            hasMethod(
-                manager,
-                "translate"
-            )
+            voice
+        ) {
+
+            for (
+                const method of [
+                    "speak",
+                    "say",
+                    "synthesize"
+                ]
+            ) {
+
+                if (
+                    hasMethod(
+                        voice,
+                        method
+                    )
+                ) {
+
+                    try {
+
+                        return voice[
+                            method
+                        ](
+                            {
+                                text:
+                                    text,
+
+                                language:
+                                    state.language
+
+                            }
+                        );
+
+                    } catch (
+                        exception
+                    ) {
+
+                        reportError(
+                            exception,
+                            "AI Voice"
+                        );
+
+                    }
+
+                }
+
+            }
+
+        }
+
+
+        if (
+            speech
+        ) {
+
+            for (
+                const method of [
+                    "speak",
+                    "say",
+                    "synthesize"
+                ]
+            ) {
+
+                if (
+                    hasMethod(
+                        speech,
+                        method
+                    )
+                ) {
+
+                    try {
+
+                        return speech[
+                            method
+                        ](
+                            text,
+                            {
+                                language:
+                                    state.language
+                            }
+                        );
+
+                    } catch (
+                        exception
+                    ) {
+
+                        reportError(
+                            exception,
+                            "AI Speech"
+                        );
+
+                    }
+
+                }
+
+            }
+
+        }
+
+
+        /*
+         * Browser fallback.
+         */
+
+        if (
+            "speechSynthesis" in
+            window
         ) {
 
             try {
 
-                return manager.translate(
-                    key
+                const utterance =
+                    new SpeechSynthesisUtterance(
+                        text
+                    );
+
+
+                utterance.lang =
+                    state.language === "de"
+                        ? "de-DE"
+                        : state.language === "en"
+                            ? "en-US"
+                            : "ku";
+
+
+                window.speechSynthesis.speak(
+                    utterance
                 );
+
+
+                return true;
 
             } catch (_) {}
 
         }
 
 
-        return fallback ||
-            key;
+        return false;
 
     }
 
 
     /* ========================================================
-       16 — DOM CREATION
+       16 — MICROPHONE
+       ======================================================== */
+
+    function toggleRecording() {
+
+        if (
+            state.recording
+        ) {
+
+            stopRecording();
+
+        } else {
+
+            startRecording();
+
+        }
+
+    }
+
+
+    function startRecording() {
+
+        const SpeechRecognition =
+            window.SpeechRecognition ||
+            window.webkitSpeechRecognition;
+
+
+        if (!SpeechRecognition) {
+
+            emit(
+                "speech-unavailable"
+            );
+
+            return false;
+
+        }
+
+
+        try {
+
+            const recognition =
+                new SpeechRecognition();
+
+
+            recognition.lang =
+                state.language === "de"
+                    ? "de-DE"
+                    : state.language === "en"
+                        ? "en-US"
+                        : "ku";
+
+
+            recognition.continuous =
+                false;
+
+
+            recognition.interimResults =
+                true;
+
+
+            recognition.onstart =
+                function () {
+
+                    state.recording =
+                        true;
+
+                    updateRecordingState(
+                        true
+                    );
+
+                };
+
+
+            recognition.onresult =
+                function (event) {
+
+                    let transcript =
+                        "";
+
+
+                    for (
+                        let i =
+                            event.resultIndex;
+                        i <
+                            event.results.length;
+                        i++
+                    ) {
+
+                        transcript +=
+                            event.results[i][0]
+                                .transcript;
+
+                    }
+
+
+                    setComposerValue(
+                        transcript
+                    );
+
+                };
+
+
+            recognition.onerror =
+                function (event) {
+
+                    reportError(
+                        new Error(
+                            event.error ||
+                            "Speech recognition error"
+                        ),
+                        "Mikrofon"
+                    );
+
+                };
+
+
+            recognition.onend =
+                function () {
+
+                    state.recording =
+                        false;
+
+                    updateRecordingState(
+                        false
+                    );
+
+                };
+
+
+            state.speechRecognition =
+                recognition;
+
+
+            recognition.start();
+
+
+            return true;
+
+        } catch (exception) {
+
+            reportError(
+                exception,
+                "Mikrofon starten"
+            );
+
+
+            return false;
+
+        }
+
+    }
+
+
+    function stopRecording() {
+
+        if (
+            state.speechRecognition
+        ) {
+
+            try {
+
+                state.speechRecognition.stop();
+
+            } catch (_) {}
+
+        }
+
+
+        state.recording =
+            false;
+
+
+        updateRecordingState(
+            false
+        );
+
+    }
+
+
+    /* ========================================================
+       17 — DOM / UI
        ======================================================== */
 
     function createRoot() {
 
-        const existing =
-            document.querySelector(
-                '[data-haldo-app="ai-chat"]'
-            );
+        if (
+            state.elements.root &&
+            document.body.contains(
+                state.elements.root
+            )
+        ) {
 
-
-        if (existing) {
-
-            return existing;
+            return state.elements.root;
 
         }
 
@@ -2012,179 +2403,216 @@
             );
 
 
+        root.id =
+            "haldo-ai-chat-app";
+
+
         root.className =
             "haldo-ai-chat-app";
 
 
-        root.dataset.haldoApp =
-            APP_ID;
+        root.setAttribute(
+            "data-app-id",
+            APP_ID
+        );
 
 
         root.innerHTML = `
 
-            <div class="haldo-ai-chat">
+            <div class="haldo-chat-shell">
 
-                <header class="haldo-ai-chat__header">
+                <aside class="haldo-chat-sidebar">
 
-                    <div class="haldo-ai-chat__identity">
+                    <div class="haldo-chat-brand">
 
-                        <div class="haldo-ai-chat__icon">
-                            ✦
+                        <div class="haldo-chat-brand-logo">
+                            H
                         </div>
 
                         <div>
-
-                            <h1>
-                                HalDo AI
-                            </h1>
-
-                            <span
-                                data-ai-chat-status
-                            >
-                                Bereit
-                            </span>
-
+                            <strong>HalDo AI</strong>
+                            <small>AI OS 20</small>
                         </div>
 
                     </div>
 
 
-                    <div class="haldo-ai-chat__actions">
+                    <button
+                        type="button"
+                        class="haldo-chat-new"
+                        data-action="new-chat"
+                    >
+                        ＋
+                        <span data-i18n="newChat">
+                            ${escapeHTML(
+                                t("newChat")
+                            )}
+                        </span>
+                    </button>
 
-                        <button
-                            type="button"
-                            data-action="new-chat"
-                            title="Neue Unterhaltung"
-                        >
-                            ＋
-                        </button>
 
-                        <button
-                            type="button"
-                            data-action="clear-chat"
-                            title="Chat leeren"
-                        >
-                            🗑
-                        </button>
+                    <div class="haldo-chat-search">
+
+                        <input
+                            type="search"
+                            data-role="search"
+                            data-i18n-placeholder="search"
+                            placeholder="${escapeHTML(
+                                t("search")
+                            )}"
+                            autocomplete="off"
+                        />
+
+                    </div>
+
+
+                    <div
+                        class="haldo-chat-conversations"
+                        data-role="conversations"
+                    ></div>
+
+
+                    <div class="haldo-chat-sidebar-bottom">
 
                         <button
                             type="button"
                             data-action="settings"
-                            title="Einstellungen"
                         >
                             ⚙
+                            <span data-i18n="settings">
+                                ${escapeHTML(
+                                    t("settings")
+                                )}
+                            </span>
                         </button>
 
                     </div>
 
-                </header>
+                </aside>
 
 
-                <div class="haldo-ai-chat__body">
+                <main class="haldo-chat-main">
 
+                    <header class="haldo-chat-header">
 
-                    <aside
-                        class="haldo-ai-chat__sidebar"
-                        data-chat-sidebar
-                    >
+                        <div>
 
-                        <div class="haldo-ai-chat__sidebar-header">
+                            <h1 data-i18n="title">
+                                ${escapeHTML(
+                                    t("title")
+                                )}
+                            </h1>
 
-                            <strong>
-                                Unterhaltungen
-                            </strong>
+                            <span
+                                class="haldo-chat-status"
+                                data-role="status"
+                            >
+                                ● Ready
+                            </span>
 
                         </div>
 
 
-                        <div
-                            class="haldo-ai-chat__conversations"
-                            data-conversations
-                        ></div>
-
-                    </aside>
-
-
-                    <main
-                        class="haldo-ai-chat__main"
-                    >
-
-                        <div
-                            class="haldo-ai-chat__messages"
-                            data-messages
-                        ></div>
-
-
-                        <div
-                            class="haldo-ai-chat__typing"
-                            data-typing
-                            hidden
-                        >
-                            HalDo AI schreibt …
-                        </div>
-
-
-                        <form
-                            class="haldo-ai-chat__composer"
-                            data-composer
-                        >
+                        <div class="haldo-chat-header-actions">
 
                             <button
                                 type="button"
-                                data-action="keyboard"
-                                title="Tastatur"
+                                data-action="clear"
+                                title="${escapeHTML(
+                                    t("clear")
+                                )}"
                             >
-                                ⌨
+                                🗑
                             </button>
-
-
-                            <textarea
-                                data-input
-                                rows="1"
-                                placeholder="Schreibe HalDo AI …"
-                                autocomplete="off"
-                            ></textarea>
-
-
-                            <button
-                                type="submit"
-                                data-send
-                                title="Senden"
-                            >
-                                ➤
-                            </button>
-
-                        </form>
-
-
-                        <div
-                            class="haldo-ai-chat__footer"
-                        >
-
-                            <span>
-                                HalDo AI OS 20
-                            </span>
-
-                            <span
-                                data-ai-chat-language
-                            >
-                                Sprache: automatisch
-                            </span>
 
                         </div>
 
-                    </main>
+                    </header>
 
-                </div>
+
+                    <section
+                        class="haldo-chat-messages"
+                        data-role="messages"
+                        aria-live="polite"
+                    ></section>
+
+
+                    <div
+                        class="haldo-chat-thinking"
+                        data-role="thinking"
+                        hidden
+                    >
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                        <label>
+                            ${escapeHTML(
+                                t("thinking")
+                            )}
+                        </label>
+                    </div>
+
+
+                    <footer class="haldo-chat-composer">
+
+                        <div class="haldo-chat-input-wrap">
+
+                            <textarea
+                                data-role="composer"
+                                rows="1"
+                                data-i18n-placeholder="placeholder"
+                                placeholder="${escapeHTML(
+                                    t("placeholder")
+                                )}"
+                                aria-label="${escapeHTML(
+                                    t("placeholder")
+                                )}"
+                            ></textarea>
+
+
+                            <div class="haldo-chat-input-actions">
+
+                                <button
+                                    type="button"
+                                    data-action="microphone"
+                                    title="${escapeHTML(
+                                        t("microphone")
+                                    )}"
+                                >
+                                    🎙
+                                </button>
+
+
+                                <button
+                                    type="button"
+                                    data-action="send"
+                                    class="haldo-chat-send"
+                                    title="${escapeHTML(
+                                        t("send")
+                                    )}"
+                                >
+                                    ➤
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                        <small>
+                            HalDo AI OS 20
+                        </small>
+
+                    </footer>
+
+                </main>
 
             </div>
 
         `;
 
 
-        document.body.appendChild(
-            root
-        );
+        state.elements.root =
+            root;
 
 
         return root;
@@ -2192,11 +2620,132 @@
     }
 
 
+    function mount() {
+
+        if (
+            state.mounted
+        ) {
+
+            return true;
+
+        }
+
+
+        const root =
+            createRoot();
+
+
+        /*
+         * Die App wird nicht automatisch
+         * in index.html eingebaut.
+         *
+         * Der Window Manager / App Manager
+         * kann die App in sein Fenster
+         * mounten.
+         *
+         * Falls kein Window Manager existiert,
+         * verwenden wir einen sicheren
+         * temporären Body-Fallback.
+         */
+
+
+        const manager =
+            getWindowManager();
+
+
+        if (
+            manager &&
+            hasMethod(
+                manager,
+                "mountApp"
+            )
+        ) {
+
+            try {
+
+                manager.mountApp(
+                    APP_ID,
+                    root
+                );
+
+            } catch (_) {}
+
+        }
+
+
+        if (
+            !root.parentNode
+        ) {
+
+            root.style.display =
+                "none";
+
+            document.body.appendChild(
+                root
+            );
+
+        }
+
+
+        attachEvents();
+
+        render();
+
+
+        state.mounted =
+            true;
+
+
+        emit(
+            "mounted"
+        );
+
+
+        return true;
+
+    }
+
+
     /* ========================================================
-       17 — DOM REFERENCES
+       18 — EVENTS / BUTTONS
        ======================================================== */
 
-    function cacheElements() {
+    function addListener(
+        element,
+        event,
+        callback
+    ) {
+
+        if (
+            !element
+        ) {
+
+            return;
+
+        }
+
+
+        element.addEventListener(
+            event,
+            callback
+        );
+
+
+        state.listeners.push(
+            function () {
+
+                element.removeEventListener(
+                    event,
+                    callback
+                );
+
+            }
+        );
+
+    }
+
+
+    function attachEvents() {
 
         const root =
             state.elements.root;
@@ -2209,111 +2758,268 @@
         }
 
 
-        state.elements = {
+        root
+            .querySelectorAll(
+                "[data-action]"
+            )
+            .forEach(
+                button => {
 
-            ...state.elements,
+                    addListener(
+                        button,
+                        "click",
+                        function () {
 
+                            handleAction(
+                                button.dataset.action
+                            );
+
+                        }
+                    );
+
+                }
+            );
+
+
+        const composer =
+            root.querySelector(
+                '[data-role="composer"]'
+            );
+
+
+        addListener(
+            composer,
+            "keydown",
+            function (event) {
+
+                if (
+                    event.key ===
+                    "Enter" &&
+                    !event.shiftKey &&
+                    state.settings.enterToSend
+                ) {
+
+                    event.preventDefault();
+
+                    sendMessage(
+                        composer.value
+                    );
+
+                }
+
+            }
+        );
+
+
+        addListener(
+            composer,
+            "input",
+            autoResizeComposer
+        );
+
+
+        const search =
+            root.querySelector(
+                '[data-role="search"]'
+            );
+
+
+        addListener(
+            search,
+            "input",
+            function () {
+
+                state.searchQuery =
+                    search.value;
+
+                renderConversations();
+
+            }
+        );
+
+
+        addListener(
             root,
+            "click",
+            function (event) {
 
-            messages:
-                root.querySelector(
-                    "[data-messages]"
-                ),
+                const conversation =
+                    event.target.closest(
+                        "[data-conversation-id]"
+                    );
 
-            conversations:
-                root.querySelector(
-                    "[data-conversations]"
-                ),
 
-            input:
-                root.querySelector(
-                    "[data-input]"
-                ),
+                if (
+                    conversation
+                ) {
 
-            composer:
-                root.querySelector(
-                    "[data-composer]"
-                ),
+                    selectConversation(
+                        conversation.dataset
+                            .conversationId
+                    );
 
-            send:
-                root.querySelector(
-                    "[data-send]"
-                ),
+                }
 
-            status:
-                root.querySelector(
-                    "[data-ai-chat-status]"
-                ),
 
-            typing:
-                root.querySelector(
-                    "[data-typing]"
-                ),
+                const copyButton =
+                    event.target.closest(
+                        "[data-copy-message]"
+                    );
 
-            language:
-                root.querySelector(
-                    "[data-ai-chat-language]"
-                )
 
-        };
+                if (
+                    copyButton
+                ) {
+
+                    copyMessage(
+                        copyButton.dataset
+                            .copyMessage
+                    );
+
+                }
+
+            }
+        );
+
+    }
+
+
+    function handleAction(
+        action
+    ) {
+
+        switch (
+            action
+        ) {
+
+            case "new-chat":
+
+                createConversation();
+
+                break;
+
+
+            case "send":
+
+                sendMessage(
+                    getComposerValue()
+                );
+
+                break;
+
+
+            case "microphone":
+
+                toggleRecording();
+
+                break;
+
+
+            case "clear":
+
+                clearCurrentConversation();
+
+                break;
+
+
+            case "settings":
+
+                openSettings();
+
+                break;
+
+
+            default:
+
+                break;
+
+        }
 
     }
 
 
     /* ========================================================
-       18 — MESSAGE RENDERING
+       19 — RENDER
        ======================================================== */
 
-    function escapeHTML(
-        value
-    ) {
+    function render() {
 
-        return String(
-            value || ""
-        )
-        .replace(
-            /&/g,
-            "&amp;"
-        )
-        .replace(
-            /</g,
-            "&lt;"
-        )
-        .replace(
-            />/g,
-            "&gt;"
-        )
-        .replace(
-            /"/g,
-            "&quot;"
-        )
-        .replace(
-            /'/g,
-            "&#039;"
+        renderTranslations();
+
+        renderConversations();
+
+        renderMessages();
+
+        updateBusyState(
+            state.busy
+        );
+
+        updateRecordingState(
+            state.recording
         );
 
     }
 
 
-    function formatMessage(
-        content
-    ) {
+    function renderTranslations() {
 
-        return escapeHTML(
-            content
-        )
-        .replace(
-            /\n/g,
-            "<br>"
-        );
+        const root =
+            state.elements.root;
+
+
+        if (!root) {
+
+            return;
+
+        }
+
+
+        root
+            .querySelectorAll(
+                "[data-i18n]"
+            )
+            .forEach(
+                element => {
+
+                    const key =
+                        element.dataset.i18n;
+
+
+                    element.textContent =
+                        t(key);
+
+                }
+            );
+
+
+        root
+            .querySelectorAll(
+                "[data-i18n-placeholder]"
+            )
+            .forEach(
+                element => {
+
+                    const key =
+                        element.dataset
+                            .i18nPlaceholder;
+
+
+                    element.placeholder =
+                        t(key);
+
+                }
+            );
 
     }
 
 
-    function renderMessages() {
+    function renderConversations() {
 
         const container =
-            state.elements.messages;
+            state.elements.root &&
+            state.elements.root.querySelector(
+                '[data-role="conversations"]'
+            );
 
 
         if (!container) {
@@ -2323,40 +3029,47 @@
         }
 
 
+        const query =
+            state.searchQuery
+                .trim()
+                .toLowerCase();
+
+
+        const conversations =
+            state.conversations.filter(
+                conversation => {
+
+                    if (!query) {
+
+                        return true;
+
+                    }
+
+
+                    return (
+                        conversation.title
+                            .toLowerCase()
+                            .includes(
+                                query
+                            )
+                    );
+
+                }
+            );
+
+
         if (
-            !state.messages.length
+            conversations.length ===
+            0
         ) {
 
             container.innerHTML = `
-
-                <div class="haldo-ai-chat__welcome">
-
-                    <div class="haldo-ai-chat__welcome-logo">
-                        ✦
-                    </div>
-
-                    <h2>
-                        ${escapeHTML(
-                            translate(
-                                "ai.chat.welcome",
-                                "Willkommen bei HalDo AI"
-                            )
-                        )}
-                    </h2>
-
-                    <p>
-                        ${escapeHTML(
-                            translate(
-                                "ai.chat.description",
-                                "Wie kann ich dir helfen?"
-                            )
-                        )}
-                    </p>
-
+                <div class="haldo-chat-empty">
+                    ${escapeHTML(
+                        t("empty")
+                    )}
                 </div>
-
             `;
-
 
             return;
 
@@ -2364,13 +3077,109 @@
 
 
         container.innerHTML =
-            state.messages
+            conversations
+                .map(
+                    conversation => {
+
+                        const active =
+                            conversation.id ===
+                            state.currentConversationId;
+
+
+                        return `
+
+                            <button
+                                type="button"
+                                class="
+                                    haldo-chat-conversation
+                                    ${active ? "active" : ""}
+                                "
+                                data-conversation-id="${escapeHTML(
+                                    conversation.id
+                                )}"
+                            >
+
+                                <span class="conversation-icon">
+                                    💬
+                                </span>
+
+                                <span class="conversation-title">
+                                    ${escapeHTML(
+                                        conversation.title
+                                    )}
+                                </span>
+
+                            </button>
+
+                        `;
+
+                    }
+                )
+                .join("");
+
+    }
+
+
+    function renderMessages() {
+
+        const container =
+            state.elements.root &&
+            state.elements.root.querySelector(
+                '[data-role="messages"]'
+            );
+
+
+        if (!container) {
+
+            return;
+
+        }
+
+
+        const conversation =
+            getCurrentConversation();
+
+
+        if (
+            !conversation ||
+            !conversation.messages.length
+        ) {
+
+            container.innerHTML = `
+
+                <div class="haldo-chat-welcome">
+
+                    <div class="haldo-chat-welcome-logo">
+                        H
+                    </div>
+
+                    <h2>
+                        ${escapeHTML(
+                            t("welcome")
+                        )}
+                    </h2>
+
+                </div>
+
+            `;
+
+            return;
+
+        }
+
+
+        container.innerHTML =
+            conversation.messages
                 .map(
                     message => {
 
+                        const role =
+                            message.role;
+
+
                         const time =
                             new Date(
-                                message.timestamp
+                                message.createdAt
                             )
                             .toLocaleTimeString(
                                 [],
@@ -2388,9 +3197,9 @@
 
                             <article
                                 class="
-                                    haldo-ai-chat__message
-                                    haldo-ai-chat__message--${escapeHTML(
-                                        message.role
+                                    haldo-chat-message
+                                    message-${escapeHTML(
+                                        role
                                     )}
                                 "
                                 data-message-id="${escapeHTML(
@@ -2398,40 +3207,61 @@
                                 )}"
                             >
 
-                                <div
-                                    class="haldo-ai-chat__message-role"
-                                >
+                                <div class="haldo-chat-avatar">
                                     ${
-                                        message.role ===
+                                        role ===
                                         "user"
-                                            ? "Du"
-                                            : message.role ===
-                                              "assistant"
-                                                ? "HalDo AI"
-                                                : "System"
+                                            ? "U"
+                                            : role ===
+                                                "assistant"
+                                                ? "H"
+                                                : "!"
                                     }
                                 </div>
 
 
-                                <div
-                                    class="haldo-ai-chat__message-content"
-                                >
-                                    ${formatMessage(
-                                        message.content
-                                    )}
+                                <div class="haldo-chat-message-body">
+
+                                    <div class="haldo-chat-message-content">
+                                        ${formatMessage(
+                                            message.content
+                                        )}
+                                    </div>
+
+
+                                    <div class="haldo-chat-message-meta">
+
+                                        ${
+                                            state.settings
+                                                .showTimestamps
+                                                ? `<span>${escapeHTML(
+                                                    time
+                                                )}</span>`
+                                                : ""
+                                        }
+
+
+                                        ${
+                                            role ===
+                                            "assistant"
+                                                ? `
+                                                    <button
+                                                        type="button"
+                                                        data-copy-message="${escapeHTML(
+                                                            message.content
+                                                        )}"
+                                                    >
+                                                        ${escapeHTML(
+                                                            t("copy")
+                                                        )}
+                                                    </button>
+                                                `
+                                                : ""
+                                        }
+
+                                    </div>
+
                                 </div>
-
-
-                                ${
-                                    state.settings
-                                        .showTimestamps
-                                        ? `
-                                            <time>
-                                                ${time}
-                                            </time>
-                                        `
-                                        : ""
-                                }
 
                             </article>
 
@@ -2446,150 +3276,125 @@
             state.settings.autoScroll
         ) {
 
-            container.scrollTop =
-                container.scrollHeight;
+            requestAnimationFrame(
+                function () {
+
+                    container.scrollTop =
+                        container.scrollHeight;
+
+                }
+            );
 
         }
 
     }
 
 
+    function formatMessage(
+        text
+    ) {
+
+        return escapeHTML(
+            text
+        )
+        .replace(
+            /\n/g,
+            "<br>"
+        );
+
+    }
+
+
     /* ========================================================
-       19 — CONVERSATION RENDERING
+       20 — COMPOSER
        ======================================================== */
 
-    function renderConversations() {
+    function getComposerValue() {
 
-        const container =
-            state.elements.conversations;
+        const composer =
+            state.elements.root &&
+            state.elements.root.querySelector(
+                '[data-role="composer"]'
+            );
 
 
-        if (!container) {
+        return composer
+            ? composer.value
+            : "";
+
+    }
+
+
+    function setComposerValue(
+        value
+    ) {
+
+        const composer =
+            state.elements.root &&
+            state.elements.root.querySelector(
+                '[data-role="composer"]'
+            );
+
+
+        if (
+            composer
+        ) {
+
+            composer.value =
+                safeString(
+                    value
+                );
+
+            autoResizeComposer.call(
+                composer
+            );
+
+        }
+
+    }
+
+
+    function clearComposer() {
+
+        setComposerValue(
+            ""
+        );
+
+    }
+
+
+    function autoResizeComposer() {
+
+        if (
+            !this
+        ) {
 
             return;
 
         }
 
 
-        container.innerHTML =
-            state.conversations
-                .map(
-                    conversation => {
-
-                        const active =
-                            conversation.id ===
-                            state.currentConversationId;
+        this.style.height =
+            "auto";
 
 
-                        return `
-
-                            <button
-                                type="button"
-                                class="
-                                    haldo-ai-chat__conversation
-                                    ${
-                                        active
-                                            ? "is-active"
-                                            : ""
-                                    }
-                                "
-                                data-conversation-id="${escapeHTML(
-                                    conversation.id
-                                )}"
-                            >
-
-                                <span>
-                                    ${escapeHTML(
-                                        conversation.title
-                                    )}
-                                </span>
-
-                                <small>
-                                    ${
-                                        conversation.messages
-                                            ? conversation.messages.length
-                                            : 0
-                                    }
-                                </small>
-
-                            </button>
-
-                        `;
-
-                    }
-                )
-                .join("");
+        this.style.height =
+            Math.min(
+                this.scrollHeight,
+                180
+            ) +
+            "px";
 
     }
 
 
     /* ========================================================
-       20 — STATUS
+       21 — UI STATES
        ======================================================== */
 
-    function setStatus(
-        text
+    function updateBusyState(
+        busy
     ) {
-
-        if (
-            state.elements.status
-        ) {
-
-            state.elements.status.textContent =
-                text;
-
-        }
-
-    }
-
-
-    function updateSendButton() {
-
-        if (
-            state.elements.send
-        ) {
-
-            state.elements.send.disabled =
-                state.busy;
-
-        }
-
-    }
-
-
-    /* ========================================================
-       21 — RENDER
-       ======================================================== */
-
-    function render() {
-
-        cacheElements();
-
-        renderMessages();
-
-        renderConversations();
-
-        updateSendButton();
-
-
-        if (
-            state.elements.language
-        ) {
-
-            state.elements.language.textContent =
-                "Sprache: " +
-                getCurrentLanguage();
-
-        }
-
-    }
-
-
-    /* ========================================================
-       22 — EVENT BINDING
-       ======================================================== */
-
-    function bindDOMEvents() {
 
         const root =
             state.elements.root;
@@ -2602,231 +3407,82 @@
         }
 
 
-        const newChat =
+        const thinking =
             root.querySelector(
-                '[data-action="new-chat"]'
+                '[data-role="thinking"]'
             );
-
-
-        const clearChat =
-            root.querySelector(
-                '[data-action="clear-chat"]'
-            );
-
-
-        const settings =
-            root.querySelector(
-                '[data-action="settings"]'
-            );
-
-
-        const keyboard =
-            root.querySelector(
-                '[data-action="keyboard"]'
-            );
-
-
-        if (newChat) {
-
-            newChat.addEventListener(
-                "click",
-                function () {
-
-                    createConversation();
-
-                }
-            );
-
-        }
-
-
-        if (clearChat) {
-
-            clearChat.addEventListener(
-                "click",
-                function () {
-
-                    clearCurrentConversation();
-
-                }
-            );
-
-        }
-
-
-        if (settings) {
-
-            settings.addEventListener(
-                "click",
-                function () {
-
-                    emit(
-                        "settings-requested"
-                    );
-
-                }
-            );
-
-        }
-
-
-        if (keyboard) {
-
-            keyboard.addEventListener(
-                "click",
-                function () {
-
-                    const keyboardSystem =
-                        getEzidiKeyboard();
-
-
-                    if (
-                        keyboardSystem &&
-                        hasMethod(
-                            keyboardSystem,
-                            "open"
-                        )
-                    ) {
-
-                        keyboardSystem.open();
-
-                    } else {
-
-                        emit(
-                            "keyboard-requested"
-                        );
-
-                    }
-
-                }
-            );
-
-        }
 
 
         if (
-            state.elements.composer
+            thinking
         ) {
 
-            state.elements.composer
-                .addEventListener(
-                    "submit",
-                    function (event) {
-
-                        event.preventDefault();
-
-
-                        if (
-                            state.elements.input
-                        ) {
-
-                            const value =
-                                state.elements.input
-                                    .value;
-
-
-                            state.elements.input
-                                .value =
-                                "";
-
-
-                            sendMessage(
-                                value
-                            );
-
-                        }
-
-                    }
-                );
+            thinking.hidden =
+                !busy;
 
         }
 
 
+        const send =
+            root.querySelector(
+                '[data-action="send"]'
+            );
+
+
         if (
-            state.elements.input
+            send
         ) {
 
-            state.elements.input
-                .addEventListener(
-                    "keydown",
-                    function (event) {
-
-                        if (
-                            event.key !==
-                            "Enter"
-                        ) {
-
-                            return;
-
-                        }
-
-
-                        if (
-                            event.shiftKey
-                        ) {
-
-                            return;
-
-                        }
-
-
-                        if (
-                            !state.settings
-                                .sendOnEnter
-                        ) {
-
-                            return;
-
-                        }
-
-
-                        event.preventDefault();
-
-
-                        if (
-                            state.elements.composer
-                        ) {
-
-                            state.elements.composer
-                                .requestSubmit();
-
-                        }
-
-                    }
-                );
+            send.disabled =
+                busy;
 
         }
 
 
+        const status =
+            root.querySelector(
+                '[data-role="status"]'
+            );
+
+
         if (
-            state.elements.conversations
+            status
         ) {
 
-            state.elements.conversations
-                .addEventListener(
-                    "click",
-                    function (event) {
+            status.textContent =
+                busy
+                    ? "● Thinking"
+                    : "● Ready";
 
-                        const button =
-                            event.target.closest(
-                                "[data-conversation-id]"
-                            );
+        }
 
-
-                        if (!button) {
-
-                            return;
-
-                        }
+    }
 
 
-                        selectConversation(
-                            button.dataset
-                                .conversationId
-                        );
+    function updateRecordingState(
+        recording
+    ) {
 
-                    }
-                );
+        const button =
+            state.elements.root &&
+            state.elements.root.querySelector(
+                '[data-action="microphone"]'
+            );
+
+
+        if (
+            button
+        ) {
+
+            button.classList.toggle(
+                "recording",
+                recording
+            );
+
+            button.title =
+                recording
+                    ? t("stop")
+                    : t("microphone");
 
         }
 
@@ -2834,715 +3490,328 @@
 
 
     /* ========================================================
-       23 — CSS
+       22 — COPY
        ======================================================== */
 
-    function injectStyles() {
+    async function copyMessage(
+        text
+    ) {
 
-        const styleId =
-            "haldo-ai-chat-app-style";
+        try {
+
+            if (
+                navigator.clipboard
+            ) {
+
+                await navigator.clipboard.writeText(
+                    text
+                );
+
+            } else {
+
+                const textarea =
+                    document.createElement(
+                        "textarea"
+                    );
+
+
+                textarea.value =
+                    text;
+
+
+                document.body.appendChild(
+                    textarea
+                );
+
+
+                textarea.select();
+
+                document.execCommand(
+                    "copy"
+                );
+
+
+                textarea.remove();
+
+            }
+
+
+            emit(
+                "message-copied",
+                {
+                    text:
+                        text
+                }
+            );
+
+
+            return true;
+
+        } catch (exception) {
+
+            reportError(
+                exception,
+                "Nachricht kopieren"
+            );
+
+
+            return false;
+
+        }
+
+    }
+
+
+    /* ========================================================
+       23 — CLEAR CHAT
+       ======================================================== */
+
+    function clearCurrentConversation() {
+
+        const conversation =
+            getCurrentConversation();
+
+
+        if (!conversation) {
+
+            return false;
+
+        }
+
+
+        conversation.messages =
+            [];
+
+
+        conversation.updatedAt =
+            Date.now();
+
+
+        state.messages =
+            conversation.messages;
+
+
+        saveState();
+
+
+        emit(
+            "conversation-cleared",
+            {
+                conversationId:
+                    conversation.id
+            }
+        );
+
+
+        renderMessages();
+
+
+        return true;
+
+    }
+
+
+    /* ========================================================
+       24 — SETTINGS
+       ======================================================== */
+
+    function openSettings() {
+
+        emit(
+            "settings-requested",
+            {
+                appId:
+                    APP_ID,
+
+                settings:
+                    clone(
+                        state.settings
+                    )
+            }
+        );
+
+
+        const manager =
+            getAppManager();
 
 
         if (
-            document.getElementById(
-                styleId
+            manager &&
+            hasMethod(
+                manager,
+                "setSettings"
             )
         ) {
 
-            return;
-
-        }
-
-
-        const style =
-            document.createElement(
-                "style"
+            manager.setSettings(
+                APP_ID,
+                state.settings
             );
 
-
-        style.id =
-            styleId;
-
-
-        style.textContent = `
-
-            .haldo-ai-chat-app {
-                width: 100%;
-                height: 100%;
-                min-height: 100%;
-                box-sizing: border-box;
-                font-family:
-                    Inter,
-                    system-ui,
-                    -apple-system,
-                    BlinkMacSystemFont,
-                    sans-serif;
-            }
-
-
-            .haldo-ai-chat {
-                display: flex;
-                flex-direction: column;
-                width: 100%;
-                height: 100%;
-                min-height: 560px;
-                overflow: hidden;
-                background:
-                    rgba(10, 14, 24, .96);
-                color: #ffffff;
-            }
-
-
-            .haldo-ai-chat__header {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                gap: 16px;
-                padding: 14px 18px;
-                border-bottom:
-                    1px solid rgba(255,255,255,.1);
-                background:
-                    rgba(255,255,255,.035);
-            }
-
-
-            .haldo-ai-chat__identity {
-                display: flex;
-                align-items: center;
-                gap: 12px;
-            }
-
-
-            .haldo-ai-chat__icon {
-                width: 42px;
-                height: 42px;
-                display: grid;
-                place-items: center;
-                border-radius: 50%;
-                background:
-                    radial-gradient(
-                        circle,
-                        rgba(255,255,255,.3),
-                        rgba(70,110,255,.15)
-                    );
-                box-shadow:
-                    0 0 24px
-                    rgba(100,140,255,.35);
-                font-size: 22px;
-            }
-
-
-            .haldo-ai-chat__identity h1 {
-                margin: 0;
-                font-size: 17px;
-            }
-
-
-            .haldo-ai-chat__identity span {
-                display: block;
-                margin-top: 3px;
-                opacity: .65;
-                font-size: 12px;
-            }
-
-
-            .haldo-ai-chat__actions {
-                display: flex;
-                gap: 6px;
-            }
-
-
-            .haldo-ai-chat button {
-                border: 0;
-                cursor: pointer;
-                color: inherit;
-                background:
-                    rgba(255,255,255,.07);
-                border-radius: 9px;
-            }
-
-
-            .haldo-ai-chat__actions button {
-                width: 36px;
-                height: 36px;
-            }
-
-
-            .haldo-ai-chat button:hover {
-                background:
-                    rgba(255,255,255,.14);
-            }
-
-
-            .haldo-ai-chat__body {
-                flex: 1;
-                min-height: 0;
-                display: flex;
-            }
-
-
-            .haldo-ai-chat__sidebar {
-                width: 230px;
-                flex: 0 0 230px;
-                border-right:
-                    1px solid rgba(255,255,255,.08);
-                overflow: auto;
-                background:
-                    rgba(0,0,0,.12);
-            }
-
-
-            .haldo-ai-chat__sidebar-header {
-                padding: 15px;
-                font-size: 13px;
-                opacity: .8;
-            }
-
-
-            .haldo-ai-chat__conversations {
-                display: flex;
-                flex-direction: column;
-                gap: 4px;
-                padding: 8px;
-            }
-
-
-            .haldo-ai-chat__conversation {
-                width: 100%;
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                gap: 8px;
-                padding: 10px;
-                text-align: left;
-            }
-
-
-            .haldo-ai-chat__conversation span {
-                overflow: hidden;
-                text-overflow: ellipsis;
-                white-space: nowrap;
-            }
-
-
-            .haldo-ai-chat__conversation small {
-                opacity: .55;
-            }
-
-
-            .haldo-ai-chat__conversation.is-active {
-                background:
-                    rgba(100,140,255,.2);
-            }
-
-
-            .haldo-ai-chat__main {
-                flex: 1;
-                min-width: 0;
-                min-height: 0;
-                display: flex;
-                flex-direction: column;
-            }
-
-
-            .haldo-ai-chat__messages {
-                flex: 1;
-                min-height: 0;
-                overflow: auto;
-                padding: 22px;
-            }
-
-
-            .haldo-ai-chat__message {
-                max-width: 820px;
-                margin: 0 auto 14px;
-                padding: 13px 15px;
-                border-radius: 15px;
-                background:
-                    rgba(255,255,255,.055);
-                border:
-                    1px solid rgba(255,255,255,.06);
-            }
-
-
-            .haldo-ai-chat__message--user {
-                background:
-                    rgba(90,125,255,.16);
-            }
-
-
-            .haldo-ai-chat__message-role {
-                margin-bottom: 6px;
-                font-size: 11px;
-                font-weight: 700;
-                opacity: .65;
-            }
-
-
-            .haldo-ai-chat__message-content {
-                line-height: 1.55;
-                white-space: normal;
-                overflow-wrap: anywhere;
-            }
-
-
-            .haldo-ai-chat__message time {
-                display: block;
-                margin-top: 7px;
-                font-size: 10px;
-                opacity: .4;
-            }
-
-
-            .haldo-ai-chat__welcome {
-                height: 100%;
-                display: grid;
-                place-content: center;
-                justify-items: center;
-                text-align: center;
-                opacity: .82;
-            }
-
-
-            .haldo-ai-chat__welcome-logo {
-                width: 70px;
-                height: 70px;
-                display: grid;
-                place-items: center;
-                border-radius: 50%;
-                font-size: 36px;
-                box-shadow:
-                    0 0 35px
-                    rgba(100,140,255,.3);
-            }
-
-
-            .haldo-ai-chat__welcome h2 {
-                margin: 18px 0 6px;
-            }
-
-
-            .haldo-ai-chat__welcome p {
-                margin: 0;
-                opacity: .6;
-            }
-
-
-            .haldo-ai-chat__typing {
-                padding:
-                    0 22px 8px;
-                font-size: 12px;
-                opacity: .6;
-            }
-
-
-            .haldo-ai-chat__composer {
-                display: flex;
-                align-items: flex-end;
-                gap: 8px;
-                padding: 12px;
-                border-top:
-                    1px solid rgba(255,255,255,.08);
-            }
-
-
-            .haldo-ai-chat__composer textarea {
-                flex: 1;
-                resize: none;
-                min-height: 42px;
-                max-height: 180px;
-                box-sizing: border-box;
-                padding: 11px 13px;
-                border:
-                    1px solid rgba(255,255,255,.1);
-                border-radius: 12px;
-                outline: none;
-                background:
-                    rgba(255,255,255,.055);
-                color: #ffffff;
-                font: inherit;
-            }
-
-
-            .haldo-ai-chat__composer textarea:focus {
-                border-color:
-                    rgba(120,150,255,.65);
-            }
-
-
-            .haldo-ai-chat__composer > button {
-                width: 42px;
-                height: 42px;
-                flex: 0 0 42px;
-            }
-
-
-            .haldo-ai-chat__composer [data-send] {
-                font-size: 18px;
-            }
-
-
-            .haldo-ai-chat__composer [data-send]:disabled {
-                opacity: .4;
-                cursor: wait;
-            }
-
-
-            .haldo-ai-chat__footer {
-                display: flex;
-                justify-content: space-between;
-                gap: 10px;
-                padding:
-                    5px 14px 8px;
-                font-size: 10px;
-                opacity: .4;
-            }
-
-
-            @media (max-width: 700px) {
-
-                .haldo-ai-chat__sidebar {
-                    display: none;
-                }
-
-                .haldo-ai-chat__messages {
-                    padding: 12px;
-                }
-
-            }
-
-        `;
-
-
-        document.head.appendChild(
-            style
-        );
+        }
 
     }
 
 
-    /* ========================================================
-       24 — APP MOUNT
-       ======================================================== */
+    function setSettings(
+        changes
+    ) {
 
-    function mount() {
+        state.settings = {
 
-        if (
-            state.mounted
-        ) {
+            ...state.settings,
 
-            return state.elements.root;
+            ...(changes || {})
 
-        }
+        };
 
 
-        injectStyles();
-
-
-        const root =
-            createRoot();
-
-
-        state.elements.root =
-            root;
-
-
-        cacheElements();
-
-        bindDOMEvents();
+        saveState();
 
         render();
 
 
-        state.mounted =
-            true;
-
-
         emit(
-            "mounted",
+            "settings-changed",
             {
-                element:
-                    root
+                settings:
+                    clone(
+                        state.settings
+                    )
             }
         );
 
 
-        return root;
+        return clone(
+            state.settings
+        );
 
     }
 
 
     /* ========================================================
-       25 — APP INIT
+       25 — LANGUAGE
        ======================================================== */
 
-    async function init(
-        context = {}
+    function setLanguage(
+        language
     ) {
 
-        if (
-            state.initialized
-        ) {
+        const value =
+            safeString(
+                language
+            )
+            .trim()
+            .toLowerCase();
 
-            return api;
-
-        }
-
-
-        try {
-
-            loadSettings();
-
-            loadConversations();
-
-            state.initialized =
-                true;
-
-
-            emit(
-                "initialized",
-                {
-                    appId:
-                        APP_ID,
-
-                    context:
-                        context
-                }
-            );
-
-
-            return api;
-
-        } catch (exception) {
-
-            reportError(
-                exception,
-                "App Init"
-            );
-
-
-            throw exception;
-
-        }
-
-    }
-
-
-    /* ========================================================
-       26 — APP START
-       ======================================================== */
-
-    async function start(
-        context = {}
-    ) {
 
         if (
-            state.started
+            !value
         ) {
-
-            return api;
-
-        }
-
-
-        try {
-
-            mount();
-
-
-            state.statistics.startedAt =
-                Date.now();
-
-
-            state.started =
-                true;
-
-            state.destroyed =
-                false;
-
-
-            setStatus(
-                "Bereit"
-            );
-
-
-            emit(
-                "started",
-                {
-                    appId:
-                        APP_ID,
-
-                    context:
-                        context
-                }
-            );
-
-
-            return api;
-
-        } catch (exception) {
-
-            reportError(
-                exception,
-                "App Start"
-            );
-
-
-            throw exception;
-
-        }
-
-    }
-
-
-    /* ========================================================
-       27 — APP STOP
-       ======================================================== */
-
-    async function stop(
-        context = {}
-    ) {
-
-        if (
-            !state.started
-        ) {
-
-            return true;
-
-        }
-
-
-        try {
-
-            state.started =
-                false;
-
-
-            emit(
-                "stopped",
-                {
-                    appId:
-                        APP_ID,
-
-                    context:
-                        context
-                }
-            );
-
-
-            return true;
-
-        } catch (exception) {
-
-            reportError(
-                exception,
-                "App Stop"
-            );
-
 
             return false;
 
         }
 
-    }
+
+        state.language =
+            value;
 
 
-    /* ========================================================
-       28 — APP CLOSE
-       ======================================================== */
+        saveState();
 
-    async function close(
-        context = {}
-    ) {
-
-        try {
-
-            await stop(
-                context
-            );
+        renderTranslations();
 
 
-            emit(
-                "closed",
-                {
-                    appId:
-                        APP_ID,
-
-                    context:
-                        context
-                }
-            );
+        const languageManager =
+            getLanguageManager();
 
 
-            return true;
+        if (
+            languageManager
+        ) {
 
-        } catch (exception) {
+            for (
+                const method of [
+                    "setLanguage",
+                    "changeLanguage",
+                    "setCurrentLanguage"
+                ]
+            ) {
 
-            reportError(
-                exception,
-                "App Close"
-            );
-
-
-            return false;
-
-        }
-
-    }
-
-
-    /* ========================================================
-       29 — DESTROY
-       ======================================================== */
-
-    function destroy() {
-
-        state.unsubscribers
-            .forEach(
-                unsubscribe => {
+                if (
+                    hasMethod(
+                        languageManager,
+                        method
+                    )
+                ) {
 
                     try {
 
-                        unsubscribe();
+                        languageManager[
+                            method
+                        ](
+                            value
+                        );
+
+                        break;
 
                     } catch (_) {}
 
                 }
-            );
 
-
-        state.unsubscribers =
-            [];
-
-
-        if (
-            state.elements.root &&
-            state.elements.root.parentNode
-        ) {
-
-            state.elements.root.parentNode
-                .removeChild(
-                    state.elements.root
-                );
+            }
 
         }
 
 
-        state.elements =
-            {};
+        const aiLanguage =
+            getAILanguage();
 
-        state.mounted =
-            false;
 
-        state.destroyed =
-            true;
+        if (
+            aiLanguage
+        ) {
 
-        state.started =
-            false;
+            for (
+                const method of [
+                    "setLanguage",
+                    "setCurrentLanguage"
+                ]
+            ) {
+
+                if (
+                    hasMethod(
+                        aiLanguage,
+                        method
+                    )
+                ) {
+
+                    try {
+
+                        aiLanguage[
+                            method
+                        ](
+                            value
+                        );
+
+                        break;
+
+                    } catch (_) {}
+
+                }
+
+            }
+
+        }
 
 
         emit(
-            "destroyed"
+            "language-changed",
+            {
+                language:
+                    value
+            }
         );
 
 
@@ -3552,410 +3821,51 @@
 
 
     /* ========================================================
-       30 — APP DIAGNOSTICS
+       26 — EZIDI KEYBOARD
        ======================================================== */
 
-    function diagnostics() {
+    function openEzidiKeyboard() {
 
-        return {
+        const keyboard =
+            getEzidiKeyboard();
 
-            id:
-                APP_ID,
 
-            name:
-                APP_NAME,
+        if (!keyboard) {
 
-            version:
-                APP_VERSION,
-
-            initialized:
-                state.initialized,
-
-            started:
-                state.started,
-
-            mounted:
-                state.mounted,
-
-            destroyed:
-                state.destroyed,
-
-            busy:
-                state.busy,
-
-            language:
-                getCurrentLanguage(),
-
-            conversationId:
-                state.currentConversationId,
-
-            conversationCount:
-                state.conversations.length,
-
-            messageCount:
-                state.messages.length,
-
-            statistics:
-                {
-                    ...state.statistics
-                },
-
-            services: {
-
-                appManager:
-                    !!getAppManager(),
-
-                kernel:
-                    !!getKernel(),
-
-                system:
-                    !!getSystem(),
-
-                aiChat:
-                    !!getAIChat(),
-
-                aiCore:
-                    !!getAICore(),
-
-                aiEngine:
-                    !!getAIEngine(),
-
-                aiLanguage:
-                    !!getAILanguage(),
-
-                aiMemory:
-                    !!getAIMemory(),
-
-                aiSpeech:
-                    !!getAISpeech(),
-
-                aiVoice:
-                    !!getAIVoice(),
-
-                languageManager:
-                    !!getLanguageManager(),
-
-                storage:
-                    !!getStorage(),
-
-                ezidiKeyboard:
-                    !!getEzidiKeyboard()
-
-            },
-
-            timestamp:
-                new Date().toISOString()
-
-        };
-
-    }
-
-
-    /* ========================================================
-       31 — APP CONTRACT
-       ======================================================== */
-
-    const definition = {
-
-        id:
-            APP_ID,
-
-        name:
-            APP_NAME,
-
-        title:
-            "HalDo AI Chat",
-
-        version:
-            APP_VERSION,
-
-        type:
-            "application",
-
-        category:
-            "ai",
-
-        icon:
-            "✦",
-
-        description:
-            "Zentrale KI-Unterhaltung und Kommunikation innerhalb von HalDo AI OS.",
-
-        route:
-            "/ai-chat",
-
-        singleton:
-            true,
-
-        enabled:
-            true,
-
-        searchable:
-            true,
-
-        tags: [
-
-            "ai",
-
-            "chat",
-
-            "assistant",
-
-            "conversation",
-
-            "language",
-
-            "voice",
-
-            "memory"
-
-        ],
-
-        keywords: [
-
-            "HalDo AI",
-
-            "KI",
-
-            "Chat",
-
-            "Assistant",
-
-            "AI",
-
-            "Conversation"
-
-        ],
-
-        dependencies: [],
-
-
-        permissions: [
-
-            "storage",
-
-            "ai",
-
-            "language",
-
-            "voice"
-
-        ],
-
-
-        settings:
-            DEFAULT_SETTINGS,
-
-
-        init:
-            init,
-
-        start:
-            start,
-
-        stop:
-            stop,
-
-        close:
-            close,
-
-        destroy:
-            destroy,
-
-
-        onActivate:
-            async function () {
-
-                emit(
-                    "activated"
-                );
-
-            },
-
-
-        onDeactivate:
-            async function () {
-
-                emit(
-                    "deactivated"
-                );
-
-            },
-
-
-        minimize:
-            async function () {
-
-                emit(
-                    "minimized"
-                );
-
-            },
-
-
-        restore:
-            async function () {
-
-                emit(
-                    "restored"
-                );
-
-            },
-
-
-        getState:
-            function () {
-
-                return {
-
-                    initialized:
-                        state.initialized,
-
-                    started:
-                        state.started,
-
-                    mounted:
-                        state.mounted,
-
-                    busy:
-                        state.busy,
-
-                    conversationId:
-                        state.currentConversationId,
-
-                    messageCount:
-                        state.messages.length
-
-                };
-
-            },
-
-
-        getSettings:
-            getSettings,
-
-        updateSettings:
-            updateSettings,
-
-
-        createConversation:
-            createConversation,
-
-        getCurrentConversation:
-            getCurrentConversation,
-
-        selectConversation:
-            selectConversation,
-
-        deleteConversation:
-            deleteConversation,
-
-        clearCurrentConversation:
-            clearCurrentConversation,
-
-
-        sendMessage:
-            sendMessage,
-
-        addMessage:
-            addMessage,
-
-        speak:
-            speak,
-
-
-        on:
-            on,
-
-        off:
-            off,
-
-        emit:
-            emit,
-
-
-        diagnostics:
-            diagnostics
-
-    };
-
-
-    /* ========================================================
-       32 — APP CONTRACT REGISTRATION
-       ======================================================== */
-
-    function registerApplication() {
-
-        const manager =
-            getAppManager();
-
-
-        /*
-         * App Manager
-         */
-
-        if (
-            manager &&
-            hasMethod(
-                manager,
-                "registerApp"
-            )
-        ) {
-
-            try {
-
-                manager.registerApp(
-                    definition
-                );
-
-
-                return true;
-
-            } catch (exception) {
-
-                reportError(
-                    exception,
-                    "App Manager Registrierung"
-                );
-
-            }
+            return false;
 
         }
 
 
-        /*
-         * App Registry
-         */
-
-        const registry =
-            window.HalDoAppRegistry ||
-            HalDoOS.appRegistry ||
-            null;
-
-
-        if (
-            registry &&
-            hasMethod(
-                registry,
-                "register"
-            )
+        for (
+            const method of [
+                "open",
+                "show",
+                "activate",
+                "enable"
+            ]
         ) {
 
-            try {
+            if (
+                hasMethod(
+                    keyboard,
+                    method
+                )
+            ) {
 
-                registry.register(
-                    definition
-                );
+                try {
 
+                    keyboard[method](
+                        {
+                            target:
+                                state.elements
+                                    .root
+                        }
+                    );
 
-                return true;
+                    return true;
 
-            } catch (exception) {
-
-                reportError(
-                    exception,
-                    "App Registry Registrierung"
-                );
+                } catch (_) {}
 
             }
 
@@ -3968,98 +3878,834 @@
 
 
     /* ========================================================
-       33 — PUBLIC EXPORT
+       27 — APP CONTRACT
        ======================================================== */
 
-    const api = {
+    function getContract() {
 
-        ...definition,
+        const contract =
+            window.HalDoAppContract ||
+            HalDoOS.appContract;
 
-        app:
-            definition,
 
-        state,
+        if (!contract) {
 
-        diagnostics,
+            return null;
 
-        mount,
+        }
 
-        render,
 
-        getSettings,
+        return contract;
 
-        updateSettings,
+    }
 
-        createConversation,
 
-        getCurrentConversation,
+    /* ========================================================
+       28 — APP BASE
+       ======================================================== */
 
-        selectConversation,
+    function getBase() {
 
-        deleteConversation,
+        return (
+            window.HalDoAppBase ||
+            HalDoOS.appBase ||
+            null
+        );
 
-        clearCurrentConversation,
+    }
 
-        sendMessage,
 
-        addMessage,
+    /* ========================================================
+       29 — LIFECYCLE
+       ======================================================== */
 
-        speak,
+    async function init(
+        context = {}
+    ) {
 
-        on,
+        if (
+            state.initialized
+        ) {
 
-        off,
+            return true;
 
-        emit
+        }
+
+
+        loadState();
+
+
+        if (
+            !getCurrentConversation()
+        ) {
+
+            createConversation();
+
+        }
+
+
+        state.initialized =
+            true;
+
+
+        emit(
+            "initialized",
+            {
+                appId:
+                    APP_ID,
+
+                context:
+                    context
+            }
+        );
+
+
+        return true;
+
+    }
+
+
+    async function start(
+        context = {}
+    ) {
+
+        if (
+            state.started
+        ) {
+
+            return true;
+
+        }
+
+
+        await init(
+            context
+        );
+
+
+        mount();
+
+
+        state.started =
+            true;
+
+
+        state.statistics.startedAt =
+            Date.now();
+
+
+        emit(
+            "started",
+            {
+                appId:
+                    APP_ID
+            }
+        );
+
+
+        return true;
+
+    }
+
+
+    async function activate() {
+
+        if (
+            !state.started
+        ) {
+
+            await start();
+
+        }
+
+
+        const root =
+            state.elements.root;
+
+
+        if (
+            root
+        ) {
+
+            root.style.display =
+                "";
+
+        }
+
+
+        emit(
+            "activated"
+        );
+
+
+        return true;
+
+    }
+
+
+    async function deactivate() {
+
+        emit(
+            "deactivated"
+        );
+
+
+        return true;
+
+    }
+
+
+    async function minimize() {
+
+        emit(
+            "minimized"
+        );
+
+
+        return true;
+
+    }
+
+
+    async function restore() {
+
+        await activate();
+
+
+        emit(
+            "restored"
+        );
+
+
+        return true;
+
+    }
+
+
+    async function stop() {
+
+        state.started =
+            false;
+
+
+        emit(
+            "stopped"
+        );
+
+
+        return true;
+
+    }
+
+
+    async function close() {
+
+        await deactivate();
+
+
+        emit(
+            "closed"
+        );
+
+
+        return true;
+
+    }
+
+
+    /* ========================================================
+       30 — DIAGNOSTICS
+       ======================================================== */
+
+    function diagnostics() {
+
+        return {
+
+            appId:
+                APP_ID,
+
+            version:
+                APP_VERSION,
+
+            name:
+                APP_NAME,
+
+            initialized:
+                state.initialized,
+
+            started:
+                state.started,
+
+            mounted:
+                state.mounted,
+
+            busy:
+                state.busy,
+
+            recording:
+                state.recording,
+
+            language:
+                state.language,
+
+            conversationCount:
+                state.conversations.length,
+
+            currentConversation:
+                state.currentConversationId,
+
+            messageCount:
+                state.messages.length,
+
+            statistics:
+                clone(
+                    state.statistics
+                ),
+
+            services: {
+
+                appManager:
+                    !!getAppManager(),
+
+                kernel:
+                    !!getKernel(),
+
+                system:
+                    !!getSystem(),
+
+                router:
+                    !!getRouter(),
+
+                windowManager:
+                    !!getWindowManager(),
+
+                aiCore:
+                    !!getAICore(),
+
+                aiEngine:
+                    !!getAIEngine(),
+
+                aiChat:
+                    !!getAIChat(),
+
+                aiMemory:
+                    !!getAIMemory(),
+
+                aiLanguage:
+                    !!getAILanguage(),
+
+                aiSpeech:
+                    !!getAISpeech(),
+
+                aiVoice:
+                    !!getAIVoice(),
+
+                languageManager:
+                    !!getLanguageManager(),
+
+                languageSystem:
+                    !!getLanguageSystem(),
+
+                ezidiKeyboard:
+                    !!getEzidiKeyboard(),
+
+                appContract:
+                    !!getContract(),
+
+                appBase:
+                    !!getBase()
+
+            },
+
+            timestamp:
+                new Date().toISOString()
+
+        };
+
+    }
+
+
+    function healthCheck() {
+
+        const problems =
+            [];
+
+
+        if (
+            !state.initialized
+        ) {
+
+            problems.push(
+                "App wurde noch nicht initialisiert."
+            );
+
+        }
+
+
+        if (
+            !getAppManager()
+        ) {
+
+            problems.push(
+                "App Manager nicht verbunden."
+            );
+
+        }
+
+
+        if (
+            !getKernel()
+        ) {
+
+            problems.push(
+                "Kernel nicht verbunden."
+            );
+
+        }
+
+
+        if (
+            !getSystem()
+        ) {
+
+            problems.push(
+                "System nicht verbunden."
+            );
+
+        }
+
+
+        return {
+
+            healthy:
+                problems.length ===
+                0,
+
+            problems:
+                problems,
+
+            diagnostics:
+                diagnostics()
+
+        };
+
+    }
+
+
+    /* ========================================================
+       31 — PUBLIC APP DEFINITION
+       ======================================================== */
+
+    const app = {
+
+        id:
+            APP_ID,
+
+        name:
+            APP_NAME,
+
+        title:
+            APP_TITLE,
+
+        version:
+            APP_VERSION,
+
+        category:
+            APP_CATEGORY,
+
+        route:
+            APP_ROUTE,
+
+        icon:
+            "H",
+
+        description:
+            "Die zentrale künstliche Intelligenz von HalDo AI OS.",
+
+        tags: [
+
+            "ai",
+
+            "chat",
+
+            "assistant",
+
+            "haldo",
+
+            "language",
+
+            "voice",
+
+            "memory"
+
+        ],
+
+        keywords: [
+
+            "HalDo",
+
+            "AI",
+
+            "Chat",
+
+            "KI",
+
+            "Assistant",
+
+            "Ezidi",
+
+            "Sprache",
+
+            "Voice",
+
+            "Memory"
+
+        ],
+
+        singleton:
+            true,
+
+        enabled:
+            true,
+
+        dependencies:
+            [],
+
+
+        /* Lifecycle */
+
+        init:
+            init,
+
+        start:
+            start,
+
+        onActivate:
+            activate,
+
+        onDeactivate:
+            deactivate,
+
+        minimize:
+            minimize,
+
+        restore:
+            restore,
+
+        stop:
+            stop,
+
+        close:
+            close,
+
+
+        /* Chat */
+
+        sendMessage:
+            sendMessage,
+
+        addMessage:
+            addMessage,
+
+        getMessages:
+            function () {
+
+                return clone(
+                    state.messages
+                );
+
+            },
+
+
+        /* Conversations */
+
+        createConversation:
+            createConversation,
+
+        getCurrentConversation:
+            getCurrentConversation,
+
+        getConversations:
+            function () {
+
+                return clone(
+                    state.conversations
+                );
+
+            },
+
+        selectConversation:
+            selectConversation,
+
+        deleteConversation:
+            deleteConversation,
+
+        clearCurrentConversation:
+            clearCurrentConversation,
+
+
+        /* Language */
+
+        setLanguage:
+            setLanguage,
+
+        getLanguage:
+            function () {
+
+                return state.language;
+
+            },
+
+
+        /* Settings */
+
+        getSettings:
+            function () {
+
+                return clone(
+                    state.settings
+                );
+
+            },
+
+        setSettings:
+            setSettings,
+
+
+        /* Voice */
+
+        speak:
+            speak,
+
+        startRecording:
+            startRecording,
+
+        stopRecording:
+            stopRecording,
+
+
+        /* Keyboard */
+
+        openEzidiKeyboard:
+            openEzidiKeyboard,
+
+
+        /* Events */
+
+        on:
+            on,
+
+        off:
+            off,
+
+        emit:
+            emit,
+
+
+        /* Diagnostics */
+
+        diagnostics:
+            diagnostics,
+
+        healthCheck:
+            healthCheck,
+
+
+        /* UI */
+
+        mount:
+            mount,
+
+        render:
+            render
 
     };
 
 
     /* ========================================================
-       34 — GLOBAL EXPORTS
+       32 — REGISTER GLOBAL
        ======================================================== */
 
     window.HalDoAIChatApp =
-        api;
+        app;
 
 
     HalDoOS.aiChatApp =
-        api;
-
-
-    HalDoOS.apps =
-        HalDoOS.apps ||
-        {};
-
-
-    HalDoOS.apps[APP_ID] =
-        api;
+        app;
 
 
     /* ========================================================
-       35 — REGISTRATION
+       33 — REGISTER WITH APP MANAGER
        ======================================================== */
 
-    function boot() {
+    function registerWithManager() {
 
-        registerApplication();
+        const manager =
+            getAppManager();
 
 
-        /*
-         * Die App wird registriert,
-         * aber nicht ungefragt geöffnet.
-         *
-         * Das Öffnen übernimmt später
-         * Launcher / Router / App Manager.
-         */
+        if (
+            !manager
+        ) {
 
-        console.log(
-            "[HalDo AI Chat] App registriert.",
-            APP_VERSION
-        );
+            return false;
+
+        }
+
+
+        try {
+
+            if (
+                hasMethod(
+                    manager,
+                    "register"
+                )
+            ) {
+
+                manager.register(
+                    app
+                );
+
+                return true;
+
+            }
+
+            if (
+                hasMethod(
+                    manager,
+                    "registerApp"
+                )
+            ) {
+
+                manager.registerApp(
+                    app
+                );
+
+                return true;
+
+            }
+
+        } catch (exception) {
+
+            reportError(
+                exception,
+                "App Manager Registrierung"
+            );
+
+        }
+
+
+        return false;
 
     }
 
+
+    /* ========================================================
+       34 — KERNEL REGISTRATION
+       ======================================================== */
+
+    function registerWithKernel() {
+
+        const kernel =
+            getKernel();
+
+
+        if (
+            !kernel
+        ) {
+
+            return false;
+
+        }
+
+
+        try {
+
+            if (
+                hasMethod(
+                    kernel,
+                    "registerModule"
+                )
+            ) {
+
+                kernel.registerModule(
+                    APP_ID,
+                    app
+                );
+
+            }
+
+
+            return true;
+
+        } catch (exception) {
+
+            reportError(
+                exception,
+                "Kernel Registrierung"
+            );
+
+
+            return false;
+
+        }
+
+    }
+
+
+    /* ========================================================
+       35 — BOOTSTRAP
+       ======================================================== */
+
+    async function bootstrap() {
+
+        try {
+
+            registerWithManager();
+
+            registerWithKernel();
+
+
+            /*
+             * Die App wird zunächst nur
+             * registriert.
+             *
+             * Öffnen übernimmt der
+             * App Manager / Launcher.
+             */
+
+            emit(
+                "registered",
+                {
+                    app:
+                        app
+                }
+            );
+
+
+            console.log(
+                "[HalDo AI Chat]",
+                APP_NAME,
+                APP_VERSION,
+                "registered."
+            );
+
+
+        } catch (exception) {
+
+            reportError(
+                exception,
+                "Bootstrap"
+            );
+
+        }
+
+    }
+
+
+    /* ========================================================
+       36 — DOM READY
+       ======================================================== */
 
     if (
         document.readyState ===
@@ -4068,7 +4714,7 @@
 
         document.addEventListener(
             "DOMContentLoaded",
-            boot,
+            bootstrap,
             {
                 once:
                     true
@@ -4077,7 +4723,7 @@
 
     } else {
 
-        boot();
+        bootstrap();
 
     }
 
