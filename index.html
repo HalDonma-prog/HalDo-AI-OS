@@ -52502,7 +52502,7 @@
     })();
 
     </script>
-        <!-- =========================================================
+    <!-- =========================================================
          HALDO AI OS 20
          APPLICATION SESSION / STATE ENGINE
          TEIL 55
@@ -53358,7 +53358,659 @@
                     appId
                 );
 
-    <!-
+
+            if (!session) {
+
+                return false;
+
+            }
+
+
+            const previous =
+                clone(
+                    session.state
+                );
+
+
+            session.state =
+                clone(
+                    initialState
+                ) ||
+                {};
+
+
+            session.updatedAt =
+                Date.now();
+
+
+            session.dirty =
+                true;
+
+
+            if (
+                options.removeSaved ===
+                true
+            ) {
+
+                storageRemove(
+                    storageKey(
+                        appId
+                    )
+                );
+
+            }
+
+
+            if (
+                options.save ===
+                true
+            ) {
+
+                save(
+                    appId
+                );
+
+            }
+
+
+            emit(
+                "app:state:reset",
+                {
+
+                    appId,
+
+                    previous,
+
+                    state:
+                        clone(
+                            session.state
+                        )
+
+                }
+            );
+
+
+            notify(
+                appId,
+                {
+
+                    type:
+                        "reset",
+
+                    previous,
+
+                    state:
+                        clone(
+                            session.state
+                        )
+
+                }
+            );
+
+
+            return true;
+
+        }
+
+
+        /* =====================================================
+           SAVE
+           ===================================================== */
+
+        function save(
+            appId
+        ) {
+
+            const session =
+                get(
+                    appId,
+                    false
+                );
+
+
+            if (!session) {
+
+                return false;
+
+            }
+
+
+            const payload = {
+
+                appId,
+
+                version:
+                    session.version,
+
+                savedAt:
+                    Date.now(),
+
+                state:
+                    clone(
+                        session.state
+                    )
+
+            };
+
+
+            const success =
+                storageSet(
+                    storageKey(
+                        appId
+                    ),
+                    payload
+                );
+
+
+            if (success) {
+
+                session.updatedAt =
+                    Date.now();
+
+                session.dirty =
+                    false;
+
+
+                emit(
+                    "app:state:saved",
+                    {
+
+                        appId,
+
+                        payload
+
+                    }
+                );
+
+            }
+
+
+            return success;
+
+        }
+
+
+        /* =====================================================
+           LOAD
+           ===================================================== */
+
+        function load(
+            appId
+        ) {
+
+            const payload =
+                storageGet(
+                    storageKey(
+                        appId
+                    )
+                );
+
+
+            if (
+                !payload ||
+                !payload.state
+            ) {
+
+                return null;
+
+            }
+
+
+            const session =
+                create(
+                    appId,
+                    payload.state,
+                    {
+                        restore:
+                            false
+                    }
+                );
+
+
+            if (!session) {
+
+                return null;
+
+            }
+
+
+            session.state =
+                clone(
+                    payload.state
+                ) ||
+                {};
+
+            session.restored =
+                true;
+
+            session.dirty =
+                false;
+
+
+            if (
+                Number.isFinite(
+                    payload.version
+                )
+            ) {
+
+                session.version =
+                    payload.version;
+
+            }
+
+
+            emit(
+                "app:state:loaded",
+                {
+
+                    appId,
+
+                    payload
+
+                }
+            );
+
+
+            return session;
+
+        }
+
+
+        /* =====================================================
+           CLEAR SAVED STATE
+           ===================================================== */
+
+        function clearSaved(
+            appId
+        ) {
+
+            const success =
+                storageRemove(
+                    storageKey(
+                        appId
+                    )
+                );
+
+
+            if (success) {
+
+                emit(
+                    "app:state:cleared",
+                    {
+
+                        appId
+
+                    }
+                );
+
+            }
+
+
+            return success;
+
+        }
+
+
+        /* =====================================================
+           SUBSCRIBE
+           ===================================================== */
+
+        function subscribe(
+            appId,
+            callback
+        ) {
+
+            if (
+                !appId ||
+                typeof callback !==
+                "function"
+            ) {
+
+                return () => {};
+
+            }
+
+
+            if (
+                !listeners.has(
+                    appId
+                )
+            ) {
+
+                listeners.set(
+                    appId,
+                    new Set()
+                );
+
+            }
+
+
+            const set =
+                listeners.get(
+                    appId
+                );
+
+
+            set.add(
+                callback
+            );
+
+
+            return () => {
+
+                set.delete(
+                    callback
+                );
+
+
+                if (
+                    set.size ===
+                    0
+                ) {
+
+                    listeners.delete(
+                        appId
+                    );
+
+                }
+
+            };
+
+        }
+
+
+        /* =====================================================
+           NOTIFY
+           ===================================================== */
+
+        function notify(
+            appId,
+            detail
+        ) {
+
+            const set =
+                listeners.get(
+                    appId
+                );
+
+
+            if (!set) {
+
+                return;
+
+            }
+
+
+            set.forEach(
+                callback => {
+
+                    try {
+
+                        callback(
+                            detail
+                        );
+
+                    } catch (
+                        error
+                    ) {
+
+                        console.warn(
+                            "[HalDo App State 20]",
+                            error
+                        );
+
+                    }
+
+                }
+            );
+
+        }
+
+
+        /* =====================================================
+           DESTROY SESSION
+           ===================================================== */
+
+        function destroy(
+            appId,
+            options = {}
+        ) {
+
+            const session =
+                sessions.get(
+                    appId
+                );
+
+
+            if (!session) {
+
+                return false;
+
+            }
+
+
+            if (
+                options.save ===
+                true
+            ) {
+
+                save(
+                    appId
+                );
+
+            }
+
+
+            if (
+                options.clearSaved ===
+                true
+            ) {
+
+                clearSaved(
+                    appId
+                );
+
+            }
+
+
+            sessions.delete(
+                appId
+            );
+
+
+            listeners.delete(
+                appId
+            );
+
+
+            emit(
+                "app:state:destroyed",
+                {
+
+                    appId
+
+                }
+            );
+
+
+            return true;
+
+        }
+
+
+        /* =====================================================
+           AUTO SESSION CREATION
+           ===================================================== */
+
+        document.addEventListener(
+            "haldo:app:lifecycle:created",
+            event => {
+
+                const appId =
+                    event.detail &&
+                    event.detail.appId;
+
+
+                if (!appId) {
+
+                    return;
+
+                }
+
+
+                const instance =
+                    event.detail &&
+                    event.detail.instance;
+
+
+                const initialState =
+                    instance &&
+                    instance.definition &&
+                    instance.definition.initialState
+                        ? instance.definition.initialState
+                        : {};
+
+
+                create(
+                    appId,
+                    initialState
+                );
+
+            }
+        );
+
+
+        /* =====================================================
+           SAVE ON CLOSE
+           ===================================================== */
+
+        document.addEventListener(
+            "haldo:app:launch:closed",
+            event => {
+
+                const appId =
+                    event.detail &&
+                    event.detail.appId;
+
+
+                if (!appId) {
+
+                    return;
+
+                }
+
+
+                const session =
+                    get(
+                        appId,
+                        false
+                    );
+
+
+                if (
+                    session &&
+                    session.dirty
+                ) {
+
+                    save(
+                        appId
+                    );
+
+                }
+
+            }
+        );
+
+
+        /* =====================================================
+           PUBLIC API
+           ===================================================== */
+
+        const appState = {
+
+            create,
+
+            get,
+
+            getValue,
+
+            setValue,
+
+            merge,
+
+            reset,
+
+            save,
+
+            load,
+
+            clearSaved,
+
+            subscribe,
+
+            destroy,
+
+            list() {
+
+                return [
+                    ...sessions.values()
+                ];
+
+            }
+
+        };
+
+
+        /* =====================================================
+           GLOBAL API
+           ===================================================== */
+
+        window.HalDoAppState20 =
+            appState;
+
+
+        if (
+            !window.HalDoOS
+        ) {
+
+            window.HalDoOS =
+                {};
+
+        }
+
+
+        window.HalDoOS.appState20 =
+            appState;
+
+
+        /* =====================================================
+           READY
+           ===================================================== */
+
+        emit(
+            "app:state:ready",
+            {
+
+                version:
+                    "20.0.0",
+
+                timestamp:
+                    Date.now()
+
+            }
+        );
+
+
+        console.info(
+            "%cHalDo AI OS 20%c App-State Engine bereit",
+            "color:#42e6ff;font-weight:800;",
+            "color:#ffffff;"
+        );
+
+
+    })();
+
+    </script>
         <!-- =========================================================
          HALDO AI OS 20
          APPLICATION EVENT / MESSAGE BUS
@@ -54554,3 +55206,4 @@
     })();
 
     </script>
+    
