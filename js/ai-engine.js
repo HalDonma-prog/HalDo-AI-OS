@@ -1,26 +1,25 @@
 // ============================================================
-// HALDO AI OS 18
+// HALDO AI OS 20
 // AI ENGINE
-// PROFESSIONAL ULTIMATE FOUNDATION
-// PART 85
+// CORE AI ORCHESTRATION LAYER
 // ============================================================
 
 (function (window, document) {
 
     "use strict";
 
+    window.HalDoOS =
+        window.HalDoOS || {};
+
     if (
         window.HalDoAIEngine &&
-        window.HalDoAIEngine.__haldoAI18
+        window.HalDoAIEngine.__haldoAI20
     ) {
         return;
     }
 
-    window.HalDoOS =
-        window.HalDoOS || {};
-
     // ========================================================
-    // CONFIGURATION
+    // CONFIG
     // ========================================================
 
     const CONFIG = {
@@ -29,51 +28,33 @@
             "HalDo AI Engine",
 
         version:
-            "18.0.0",
+            "20.0.0",
 
         mode:
-            "Professional Ultimate Foundation",
+            "Professional Ultimate",
 
-        maxHistory:
-            500,
+        defaultHistoryLimit:
+            50,
 
-        maxTextLength:
-            100000,
+        defaultMemoryLimit:
+            10,
 
-        defaultLanguage:
-            "de",
+        providerTimeout:
+            60000,
 
-        minimumProviderConfidence:
-            0.50,
-
-        enableCorrection:
+        allowProviderFallback:
             true,
 
-        enableWriting:
+        allowCommands:
             true,
 
-        enableReading:
+        allowMemory:
             true,
 
-        enableRewriting:
+        allowConversation:
             true,
 
-        enableSummarization:
-            true,
-
-        enableTranslation:
-            true,
-
-        enableAnalysis:
-            true,
-
-        enableMemory:
-            true,
-
-        enableConversation:
-            true,
-
-        enableLocalProcessing:
+        allowLanguage:
             true
 
     };
@@ -108,46 +89,14 @@
         lastResponse:
             null,
 
-        currentLanguage:
-            CONFIG.defaultLanguage,
-
-        provider:
+        currentProvider:
             null,
 
-        providers:
-            {},
-
-        history:
-            [],
+        currentLanguage:
+            "de",
 
         errors:
-            [],
-
-        capabilities:
-            {
-
-                correction:
-                    CONFIG.enableCorrection,
-
-                writing:
-                    CONFIG.enableWriting,
-
-                reading:
-                    CONFIG.enableReading,
-
-                rewriting:
-                    CONFIG.enableRewriting,
-
-                summarization:
-                    CONFIG.enableSummarization,
-
-                translation:
-                    CONFIG.enableTranslation,
-
-                analysis:
-                    CONFIG.enableAnalysis
-
-            }
+            []
 
     };
 
@@ -210,7 +159,8 @@
         );
 
         if (
-            set.size === 0
+            set.size ===
+            0
         ) {
 
             listeners.delete(
@@ -283,21 +233,6 @@
 
     }
 
-    function normalize(
-        value
-    ) {
-
-        return clean(
-            value
-        )
-        .toLowerCase()
-        .replace(
-            /\s+/g,
-            " "
-        );
-
-    }
-
     function createId(
         prefix = "engine"
     ) {
@@ -314,60 +249,25 @@
 
     }
 
-    function limitText(
-        text
-    ) {
+    // ========================================================
+    // MODULE ACCESS
+    // ========================================================
 
-        const value =
-            clean(
-                text
-            );
+    function getProvider() {
 
-        if (
-            value.length <=
-            CONFIG.maxTextLength
-        ) {
-
-            return value;
-
-        }
-
-        return value.slice(
-            0,
-            CONFIG.maxTextLength
+        return (
+            window.HalDoAIProvider ||
+            window.HalDoOS?.aiProvider ||
+            null
         );
 
     }
-
-    // ========================================================
-    // MODULE CONNECTIONS
-    // ========================================================
 
     function getCore() {
 
         return (
             window.HalDoAICore ||
             window.HalDoOS?.aiCore ||
-            null
-        );
-
-    }
-
-    function getChat() {
-
-        return (
-            window.HalDoAIChat ||
-            window.HalDoOS?.aiChat ||
-            null
-        );
-
-    }
-
-    function getLanguage() {
-
-        return (
-            window.HalDoAILanguage ||
-            window.HalDoOS?.aiLanguage ||
             null
         );
 
@@ -393,6 +293,26 @@
 
     }
 
+    function getLanguage() {
+
+        return (
+            window.HalDoAILanguage ||
+            window.HalDoOS?.aiLanguage ||
+            null
+        );
+
+    }
+
+    function getCommands() {
+
+        return (
+            window.HalDoAICommands ||
+            window.HalDoOS?.aiCommands ||
+            null
+        );
+
+    }
+
     function getKernel() {
 
         return (
@@ -411,1086 +331,198 @@
         text
     ) {
 
+        if (
+            !CONFIG.allowLanguage
+        ) {
+
+            return {
+
+                language:
+                    state.currentLanguage,
+
+                confidence:
+                    0
+
+            };
+
+        }
+
         const language =
             getLanguage();
 
         if (
-            language &&
-            typeof language.detectLanguage ===
+            !language ||
+            typeof language.detectLanguage !==
             "function"
         ) {
 
-            try {
-
-                const result =
-                    language.detectLanguage(
-                        text
-                    );
-
-                if (
-                    result?.language
-                ) {
-
-                    state.currentLanguage =
-                        result.language;
-
-                }
-
-                return result;
-
-            } catch (error) {
-
-                recordError(
-                    error
-                );
-
-            }
-
-        }
-
-        return {
-
-            language:
-                state.currentLanguage,
-
-            confidence:
-                0
-
-        };
-
-    }
-
-    // ========================================================
-    // TEXT TYPE DETECTION
-    // ========================================================
-
-    function detectTask(
-        input,
-        options = {}
-    ) {
-
-        const text =
-            normalize(
-                input
-            );
-
-        if (
-            options.task
-        ) {
-
-            return normalize(
-                options.task
-            );
-
-        }
-
-        /*
-         * Korrektur
-         */
-
-        if (
-            /rechtschreib|grammatik|grammatikal|fehler|korrigier|korrektur|verbessere den text|korrigiere den text|correct|grammar|spell/.test(
-                text
-            )
-        ) {
-
-            return "correction";
-
-        }
-
-        /*
-         * Formulieren
-         */
-
-        if (
-            /formuliere|formulieren|schreib|schreiben|verfasse|erstelle einen text|text erstellen|write|writing|compose|draft/.test(
-                text
-            )
-        ) {
-
-            return "writing";
-
-        }
-
-        /*
-         * Umschreiben
-         */
-
-        if (
-            /umschreib|umformulieren|anders formulieren|professioneller|freundlicher|kürzer|länger|rewrite|rephrase|paraphrase/.test(
-                text
-            )
-        ) {
-
-            return "rewriting";
-
-        }
-
-        /*
-         * Zusammenfassung
-         */
-
-        if (
-            /zusammenfass|kurz zusammen|kurzfassung|fasse .* zusammen|summary|summarize/.test(
-                text
-            )
-        ) {
-
-            return "summarization";
-
-        }
-
-        /*
-         * Übersetzung
-         */
-
-        if (
-            /übersetz|translation|translate|auf deutsch|auf englisch|auf kurdisch|auf êzîdî|auf ezidi/.test(
-                text
-            )
-        ) {
-
-            return "translation";
-
-        }
-
-        /*
-         * Analyse / Lesen
-         */
-
-        if (
-            /analys|erkläre|erklär|lies|lese|verstehe|bedeutung|analyse|analyze|explain|read/.test(
-                text
-            )
-        ) {
-
-            return "analysis";
-
-        }
-
-        return "conversation";
-
-    }
-
-    // ========================================================
-    // TEXT ANALYSIS
-    // ========================================================
-
-    function analyzeText(
-        text
-    ) {
-
-        const value =
-            limitText(
-                text
-            );
-
-        const words =
-            value
-                ? value.split(
-                    /\s+/
-                ).filter(
-                    Boolean
-                )
-                : [];
-
-        const sentences =
-            value
-                ? value
-                    .split(
-                        /[.!?]+/
-                    )
-                    .map(
-                        item =>
-                            item.trim()
-                    )
-                    .filter(
-                        Boolean
-                    )
-                : [];
-
-        const paragraphs =
-            value
-                ? value
-                    .split(
-                        /\n\s*\n/
-                    )
-                    .map(
-                        item =>
-                            item.trim()
-                    )
-                    .filter(
-                        Boolean
-                    )
-                : [];
-
-        const characters =
-            value.length;
-
-        const letters =
-            (
-                value.match(
-                    /[A-Za-zÄÖÜäöüßÀ-ÿ]/g
-                ) ||
-                []
-            ).length;
-
-        const numbers =
-            (
-                value.match(
-                    /\d/g
-                ) ||
-                []
-            ).length;
-
-        const questionMarks =
-            (
-                value.match(
-                    /\?/g
-                ) ||
-                []
-            ).length;
-
-        const exclamations =
-            (
-                value.match(
-                    /!/g
-                ) ||
-                []
-            ).length;
-
-        const averageWordsPerSentence =
-            sentences.length
-                ? Number(
-                    (
-                        words.length /
-                        sentences.length
-                    ).toFixed(
-                        2
-                    )
-                )
-                : 0;
-
-        return {
-
-            ok:
-                true,
-
-            type:
-                "text-analysis",
-
-            text:
-                value,
-
-            statistics: {
-
-                characters,
-
-                letters,
-
-                numbers,
-
-                words:
-                    words.length,
-
-                sentences:
-                    sentences.length,
-
-                paragraphs:
-                    paragraphs.length,
-
-                questionMarks,
-
-                exclamations,
-
-                averageWordsPerSentence
-
-            },
-
-            language:
-                detectLanguage(
-                    value
-                )
-
-        };
-
-    }
-
-    // ========================================================
-    // LOCAL CORRECTION ENGINE
-    // ========================================================
-
-    function correctBasicGerman(
-        text
-    ) {
-
-        let result =
-            clean(
-                text
-            );
-
-        const corrections = [];
-
-        /*
-         * Häufige einfache Fehler.
-         */
-
-        const replacements = [
-
-            [
-                /\bseid dem\b/gi,
-                "seit dem"
-            ],
-
-            [
-                /\bseid ihr\b/gi,
-                "seid ihr"
-            ],
-
-            [
-                /\bseit ihr\b/gi,
-                "seid ihr"
-            ],
-
-            [
-                /\bseid gestern\b/gi,
-                "seit gestern"
-            ],
-
-            [
-                /\bseid heute\b/gi,
-                "seit heute"
-            ],
-
-            [
-                /\bdas selbe\b/gi,
-                "dasselbe"
-            ],
-
-            [
-                /\bzum Beispiel\b/gi,
-                "zum Beispiel"
-            ],
-
-            [
-                /\baufjedenfall\b/gi,
-                "auf jeden Fall"
-            ],
-
-            [
-                /\bimmernoch\b/gi,
-                "immer noch"
-            ],
-
-            [
-                /\nvielen dank\b/gi,
-                "\nVielen Dank"
-            ],
-
-            [
-                /\bHallo,\s*ich\b/g,
-                "Hallo, ich"
-            ]
-
-        ];
-
-        for (
-            const [
-                pattern,
-                replacement
-            ] of replacements
-        ) {
-
-            const before =
-                result;
-
-            result =
-                result.replace(
-                    pattern,
-                    replacement
-                );
-
-            if (
-                before !==
-                result
-            ) {
-
-                corrections.push({
-
-                    type:
-                        "spelling",
-
-                    replacement
-
-                });
-
-            }
-
-        }
-
-        /*
-         * Mehrfache Leerzeichen.
-         */
-
-        const beforeSpaces =
-            result;
-
-        result =
-            result
-                .replace(
-                    /[ \t]+/g,
-                    " "
-                )
-                .replace(
-                    /\n{3,}/g,
-                    "\n\n"
-                )
-                .trim();
-
-        if (
-            beforeSpaces !==
-            result
-        ) {
-
-            corrections.push({
-
-                type:
-                    "spacing",
-
-                description:
-                    "Überflüssige Leerzeichen bereinigt."
-
-            });
-
-        }
-
-        /*
-         * Leerzeichen vor Satzzeichen.
-         */
-
-        const beforePunctuation =
-            result;
-
-        result =
-            result.replace(
-                /\s+([,.!?;:])/g,
-                "$1"
-            );
-
-        if (
-            beforePunctuation !==
-            result
-        ) {
-
-            corrections.push({
-
-                type:
-                    "punctuation",
-
-                description:
-                    "Satzzeichen korrigiert."
-
-            });
-
-        }
-
-        /*
-         * Satzanfang groß schreiben.
-         */
-
-        result =
-            result.replace(
-                /(^|[.!?]\s+)([a-zäöü])/g,
-                (
-                    match,
-                    prefix,
-                    letter
-                ) =>
-                    prefix +
-                    letter.toUpperCase()
-            );
-
-        return {
-
-            ok:
-                true,
-
-            type:
-                "correction",
-
-            original:
-                text,
-
-            corrected:
-                result,
-
-            changed:
-                result !==
-                clean(
-                    text
-                ),
-
-            corrections,
-
-            limitations: [
-
-                "Die lokale Korrektur ist keine vollständige linguistische Grammatikprüfung.",
-
-                "Für eine vollständige semantische Korrektur wird ein aktiver AI-Provider benötigt."
-
-            ]
-
-        };
-
-    }
-
-    // ========================================================
-    // LOCAL WRITING ENGINE
-    // ========================================================
-
-    function localWriting(
-        input,
-        options = {}
-    ) {
-
-        const task =
-            detectTask(
-                input,
-                options
-            );
-
-        if (
-            task ===
-            "correction"
-        ) {
-
-            return correctBasicGerman(
-                input
-            );
-
-        }
-
-        if (
-            task ===
-            "analysis"
-        ) {
-
-            return analyzeText(
-                input
-            );
-
-        }
-
-        /*
-         * Kein erfundener AI-Text.
-         */
-
-        return {
-
-            ok:
-                false,
-
-            type:
-                "local-writing-unavailable",
-
-            message:
-                "Für diese Schreibaufgabe ist ein aktiver AI-Provider erforderlich.",
-
-            task,
-
-            input
-
-        };
-
-    }
-
-    // ========================================================
-    // PROVIDER SYSTEM
-    // ========================================================
-
-    function registerProvider(
-        id,
-        provider
-    ) {
-
-        const key =
-            normalize(
-                id
-            );
-
-        if (
-            !key ||
-            !provider
-        ) {
-
-            return false;
-
-        }
-
-        state.providers[
-            key
-        ] =
-            provider;
-
-        if (
-            !state.provider
-        ) {
-
-            state.provider =
-                key;
-
-        }
-
-        emit(
-            "provider-registered",
-            {
-
-                id:
-                    key,
-
-                provider
-
-            }
-        );
-
-        return true;
-
-    }
-
-    function unregisterProvider(
-        id
-    ) {
-
-        const key =
-            normalize(
-                id
-            );
-
-        if (
-            !state.providers[
-                key
-            ]
-        ) {
-
-            return false;
-
-        }
-
-        delete state.providers[
-            key
-        ];
-
-        if (
-            state.provider ===
-            key
-        ) {
-
-            state.provider =
-                Object.keys(
-                    state.providers
-                )[0] ||
-                null;
-
-        }
-
-        emit(
-            "provider-unregistered",
-            {
-                id:
-                    key
-            }
-        );
-
-        return true;
-
-    }
-
-    function setProvider(
-        id
-    ) {
-
-        const key =
-            normalize(
-                id
-            );
-
-        if (
-            !state.providers[
-                key
-            ]
-        ) {
-
             return {
-
-                ok:
-                    false,
-
-                error:
-                    "PROVIDER_NOT_FOUND"
-
-            };
-
-        }
-
-        state.provider =
-            key;
-
-        emit(
-            "provider-changed",
-            {
-                provider:
-                    key
-            }
-        );
-
-        return {
-
-            ok:
-                true,
-
-            provider:
-                key
-
-        };
-
-    }
-
-    function getProvider() {
-
-        if (
-            state.provider &&
-            state.providers[
-                state.provider
-            ]
-        ) {
-
-            return state.providers[
-                state.provider
-            ];
-
-        }
-
-        const first =
-            Object.keys(
-                state.providers
-            )[0];
-
-        return first
-            ? state.providers[
-                first
-            ]
-            : null;
-
-    }
-
-    // ========================================================
-    // PROVIDER EXECUTION
-    // ========================================================
-
-    async function executeProvider(
-        input,
-        context = {}
-    ) {
-
-        const provider =
-            getProvider();
-
-        if (
-            !provider
-        ) {
-
-            return null;
-
-        }
-
-        const methods = [
-
-            "generate",
-            "generateResponse",
-            "respond",
-            "process",
-            "ask",
-            "complete",
-            "chat"
-
-        ];
-
-        for (
-            const method of methods
-        ) {
-
-            if (
-                typeof provider[
-                    method
-                ] !==
-                "function"
-            ) {
-                continue;
-            }
-
-            try {
-
-                const result =
-                    await provider[
-                        method
-                    ](
-                        input,
-                        context
-                    );
-
-                if (
-                    result !==
-                    undefined &&
-                    result !==
-                    null
-                ) {
-
-                    return normalizeResult(
-                        result,
-                        context
-                    );
-
-                }
-
-            } catch (error) {
-
-                recordError(
-                    error
-                );
-
-            }
-
-        }
-
-        return null;
-
-    }
-
-    // ========================================================
-    // CHAT FALLBACK
-    // ========================================================
-
-    async function executeChat(
-        input,
-        context = {}
-    ) {
-
-        const chat =
-            getChat();
-
-        if (
-            !chat
-        ) {
-
-            return null;
-
-        }
-
-        const methods = [
-
-            "sendMessage",
-            "send",
-            "ask",
-            "respond",
-            "processMessage"
-
-        ];
-
-        for (
-            const method of methods
-        ) {
-
-            if (
-                typeof chat[
-                    method
-                ] !==
-                "function"
-            ) {
-                continue;
-            }
-
-            try {
-
-                const result =
-                    await chat[
-                        method
-                    ](
-                        input,
-                        context
-                    );
-
-                if (
-                    result !==
-                    undefined &&
-                    result !==
-                    null
-                ) {
-
-                    return normalizeResult(
-                        result,
-                        context
-                    );
-
-                }
-
-            } catch (error) {
-
-                recordError(
-                    error
-                );
-
-            }
-
-        }
-
-        return null;
-
-    }
-
-    // ========================================================
-    // RESULT NORMALIZATION
-    // ========================================================
-
-    function normalizeResult(
-        result,
-        context = {}
-    ) {
-
-        if (
-            typeof result ===
-            "string"
-        ) {
-
-            return {
-
-                ok:
-                    true,
-
-                type:
-                    "text",
-
-                text:
-                    result,
-
-                content:
-                    result,
-
-                task:
-                    context.task ||
-                    "conversation",
 
                 language:
-                    context.language ||
-                    state.currentLanguage
+                    state.currentLanguage,
+
+                confidence:
+                    0
 
             };
 
         }
 
-        if (
-            typeof result !==
-            "object"
-        ) {
+        try {
+
+            const result =
+                language.detectLanguage(
+                    text
+                );
+
+            if (
+                result?.language
+            ) {
+
+                state.currentLanguage =
+                    result.language;
+
+            }
+
+            return result || {
+
+                language:
+                    state.currentLanguage,
+
+                confidence:
+                    0
+
+            };
+
+        } catch (error) {
+
+            recordError(
+                error
+            );
 
             return {
 
-                ok:
-                    true,
+                language:
+                    state.currentLanguage,
 
-                type:
-                    "value",
-
-                value:
-                    result,
-
-                task:
-                    context.task ||
-                    "conversation"
+                confidence:
+                    0
 
             };
 
         }
-
-        const text =
-            result.text ??
-            result.content ??
-            result.message ??
-            "";
-
-        return {
-
-            ok:
-                result.ok !== false,
-
-            ...result,
-
-            text:
-                clean(
-                    text
-                ),
-
-            content:
-                result.content ??
-                clean(
-                    text
-                ),
-
-            task:
-                result.task ||
-                context.task ||
-                "conversation",
-
-            language:
-                result.language ||
-                context.language ||
-                state.currentLanguage
-
-        };
 
     }
 
     // ========================================================
-    // MEMORY
+    // CONVERSATION CONTEXT
     // ========================================================
 
-    async function recall(
-        query,
-        options = {}
+    function getConversationMessages(
+        limit
     ) {
 
         if (
-            !CONFIG.enableMemory
+            !CONFIG.allowConversation
+        ) {
+            return [];
+        }
+
+        const conversation =
+            getConversation();
+
+        if (!conversation) {
+            return [];
+        }
+
+        const methods = [
+
+            "getMessages",
+            "getHistory",
+            "getConversation"
+
+        ];
+
+        for (
+            const method of methods
         ) {
 
-            return [];
+            if (
+                typeof conversation[method] !==
+                "function"
+            ) {
+                continue;
+            }
 
+            try {
+
+                const result =
+                    conversation[method](
+                        limit
+                    );
+
+                if (
+                    Array.isArray(
+                        result
+                    )
+                ) {
+
+                    return result;
+
+                }
+
+            } catch (error) {
+
+                recordError(
+                    error
+                );
+
+            }
+
+        }
+
+        return [];
+
+    }
+
+    // ========================================================
+    // MEMORY CONTEXT
+    // ========================================================
+
+    async function getMemoryContext(
+        query,
+        limit
+    ) {
+
+        if (
+            !CONFIG.allowMemory
+        ) {
+            return [];
         }
 
         const memory =
             getMemory();
 
-        if (
-            !memory
-        ) {
-
+        if (!memory) {
             return [];
-
         }
 
+        const methods = [
+
+            "recall",
+            "search",
+            "find",
+            "query",
+            "retrieve"
+
+        ];
+
         for (
-            const method of [
-                "recall",
-                "search",
-                "find",
-                "query",
-                "retrieve"
-            ]
+            const method of methods
         ) {
 
             if (
-                typeof memory[
-                    method
-                ] !==
+                typeof memory[method] !==
                 "function"
             ) {
                 continue;
@@ -1499,11 +531,11 @@
             try {
 
                 const result =
-                    await memory[
-                        method
-                    ](
+                    await memory[method](
                         query,
-                        options
+                        {
+                            limit
+                        }
                     );
 
                 if (
@@ -1526,138 +558,13 @@
 
                 }
 
-            } catch (error) {}
+            } catch (error) {
 
-        }
-
-        return [];
-
-    }
-
-    async function remember(
-        data
-    ) {
-
-        if (
-            !CONFIG.enableMemory
-        ) {
-
-            return false;
-
-        }
-
-        const memory =
-            getMemory();
-
-        if (
-            !memory
-        ) {
-
-            return false;
-
-        }
-
-        for (
-            const method of [
-                "remember",
-                "add",
-                "store",
-                "save",
-                "rememberMessage"
-            ]
-        ) {
-
-            if (
-                typeof memory[
-                    method
-                ] !==
-                "function"
-            ) {
-                continue;
-            }
-
-            try {
-
-                await memory[
-                    method
-                ](
-                    data
+                recordError(
+                    error
                 );
 
-                return true;
-
-            } catch (error) {}
-
-        }
-
-        return false;
-
-    }
-
-    // ========================================================
-    // CONVERSATION
-    // ========================================================
-
-    function getConversationMessages(
-        limit = 50
-    ) {
-
-        if (
-            !CONFIG.enableConversation
-        ) {
-
-            return [];
-
-        }
-
-        const conversation =
-            getConversation();
-
-        if (
-            !conversation
-        ) {
-
-            return [];
-
-        }
-
-        for (
-            const method of [
-                "getMessages",
-                "getHistory",
-                "getConversation"
-            ]
-        ) {
-
-            if (
-                typeof conversation[
-                    method
-                ] !==
-                "function"
-            ) {
-                continue;
             }
-
-            try {
-
-                const result =
-                    conversation[
-                        method
-                    ](
-                        limit
-                    );
-
-                if (
-                    Array.isArray(
-                        result
-                    )
-                ) {
-
-                    return result;
-
-                }
-
-            } catch (error) {}
 
         }
 
@@ -1666,16 +573,404 @@
     }
 
     // ========================================================
-    // MAIN ENGINE
+    // COMMAND CONTEXT
     // ========================================================
 
-    async function process(
+    function detectCommand(
+        text
+    ) {
+
+        if (
+            !CONFIG.allowCommands
+        ) {
+
+            return {
+
+                command:
+                    null,
+
+                confidence:
+                    0
+
+            };
+
+        }
+
+        const commands =
+            getCommands();
+
+        if (
+            !commands ||
+            typeof commands.detectCommand !==
+            "function"
+        ) {
+
+            return {
+
+                command:
+                    null,
+
+                confidence:
+                    0
+
+            };
+
+        }
+
+        try {
+
+            return (
+                commands.detectCommand(
+                    text
+                ) || {
+
+                    command:
+                        null,
+
+                    confidence:
+                        0
+
+                }
+            );
+
+        } catch (error) {
+
+            recordError(
+                error
+            );
+
+            return {
+
+                command:
+                    null,
+
+                confidence:
+                    0
+
+            };
+
+        }
+
+    }
+
+    // ========================================================
+    // BUILD CONTEXT
+    // ========================================================
+
+    async function buildContext(
+        input,
+        options = {}
+    ) {
+
+        const language =
+            detectLanguage(
+                input
+            );
+
+        const messages =
+            getConversationMessages(
+                options.historyLimit ??
+                CONFIG.defaultHistoryLimit
+            );
+
+        const memories =
+            await getMemoryContext(
+                input,
+                options.memoryLimit ??
+                CONFIG.defaultMemoryLimit
+            );
+
+        const command =
+            detectCommand(
+                input
+            );
+
+        return {
+
+            requestId:
+                options.requestId ||
+                createId(
+                    "context"
+                ),
+
+            input,
+
+            language:
+                language?.language ||
+                state.currentLanguage,
+
+            languageDetection:
+                language,
+
+            messages,
+
+            memories,
+
+            command,
+
+            system: {
+
+                name:
+                    "HalDo AI OS",
+
+                version:
+                    "20.0.0",
+
+                mode:
+                    CONFIG.mode
+
+            },
+
+            timestamp:
+                Date.now()
+
+        };
+
+    }
+
+    // ========================================================
+    // PROVIDER SELECTION
+    // ========================================================
+
+    function selectProvider(
+        options = {}
+    ) {
+
+        const provider =
+            getProvider();
+
+        if (!provider) {
+            return null;
+        }
+
+        let selected =
+            null;
+
+        if (
+            options.provider &&
+            typeof provider.get ===
+            "function"
+        ) {
+
+            selected =
+                provider.get(
+                    options.provider
+                );
+
+        }
+
+        if (
+            !selected &&
+            typeof provider.findAvailable ===
+            "function"
+        ) {
+
+            selected =
+                provider.findAvailable(
+                    {
+                        id:
+                            options.provider,
+
+                        capability:
+                            options.capability
+
+                    }
+                );
+
+        }
+
+        if (
+            selected
+        ) {
+
+            state.currentProvider =
+                selected.id;
+
+        }
+
+        return selected;
+
+    }
+
+    // ========================================================
+    // NORMALIZE RESPONSE
+    // ========================================================
+
+    function normalizeResponse(
+        result,
+        context,
+        providerId
+    ) {
+
+        if (
+            typeof result ===
+            "string"
+        ) {
+
+            return {
+
+                ok:
+                    true,
+
+                type:
+                    "text",
+
+                text:
+                    result,
+
+                content:
+                    result,
+
+                provider:
+                    providerId,
+
+                requestId:
+                    context.requestId,
+
+                language:
+                    context.language,
+
+                timestamp:
+                    Date.now()
+
+            };
+
+        }
+
+        if (
+            result ===
+            null ||
+            result ===
+            undefined
+        ) {
+
+            return {
+
+                ok:
+                    false,
+
+                type:
+                    "empty-response",
+
+                text:
+                    "",
+
+                content:
+                    "",
+
+                provider:
+                    providerId,
+
+                requestId:
+                    context.requestId,
+
+                language:
+                    context.language,
+
+                timestamp:
+                    Date.now()
+
+            };
+
+        }
+
+        if (
+            typeof result !==
+            "object"
+        ) {
+
+            return {
+
+                ok:
+                    true,
+
+                type:
+                    "value",
+
+                value:
+                    result,
+
+                text:
+                    String(
+                        result
+                    ),
+
+                provider:
+                    providerId,
+
+                requestId:
+                    context.requestId,
+
+                language:
+                    context.language,
+
+                timestamp:
+                    Date.now()
+
+            };
+
+        }
+
+        const text =
+            result.text ??
+            result.content ??
+            result.message ??
+            "";
+
+        return {
+
+            ...result,
+
+            ok:
+                result.ok !==
+                false,
+
+            type:
+                result.type ||
+                "text",
+
+            text:
+                String(
+                    text
+                ),
+
+            content:
+                result.content ??
+                String(
+                    text
+                ),
+
+            provider:
+                result.provider ||
+                providerId,
+
+            requestId:
+                result.requestId ||
+                context.requestId,
+
+            language:
+                result.language ||
+                context.language,
+
+            timestamp:
+                result.timestamp ||
+                Date.now()
+
+        };
+
+    }
+
+    // ========================================================
+    // GENERATE
+    // ========================================================
+
+    async function generate(
         input,
         options = {}
     ) {
 
         const text =
-            limitText(
+            clean(
                 input
             );
 
@@ -1687,19 +982,20 @@
                     false,
 
                 type:
-                    "error",
+                    "validation-error",
 
                 error:
                     "EMPTY_INPUT",
 
-                message:
-                    "Keine Eingabe vorhanden."
+                text:
+                    ""
 
             };
 
         }
 
         const requestId =
+            options.requestId ||
             createId(
                 "request"
             );
@@ -1712,40 +1008,13 @@
 
         state.requestCount++;
 
-        const language =
-            detectLanguage(
-                text
-            );
-
-        const task =
-            detectTask(
-                text,
-                options
-            );
-
-        const memories =
-            await recall(
-                text,
-                {
-                    limit:
-                        options.memoryLimit ||
-                        10
-                }
-            );
-
-        const request = {
+        state.lastRequest = {
 
             id:
                 requestId,
 
             input:
                 text,
-
-            task,
-
-            language:
-                language?.language ||
-                state.currentLanguage,
 
             timestamp:
                 startedAt,
@@ -1754,180 +1023,49 @@
 
         };
 
-        state.lastRequest =
-            request;
-
         emit(
             "request-start",
             {
-                request
+                request:
+                    state.lastRequest
             }
         );
 
         try {
 
-            /*
-             * Kontext für Provider und Chat.
-             */
+            // ------------------------------------------------
+            // 1. Kontext aufbauen
+            // ------------------------------------------------
 
-            const context = {
-
-                requestId,
-
-                task,
-
-                language:
-                    request.language,
-
-                languageDetection:
-                    language,
-
-                memories,
-
-                messages:
-                    getConversationMessages(
-                        options.historyLimit ||
-                        50
-                    ),
-
-                mode:
-                    CONFIG.mode,
-
-                engine:
+            const context =
+                await buildContext(
+                    text,
                     {
+                        ...options,
 
-                        name:
-                            CONFIG.name,
-
-                        version:
-                            CONFIG.version
-
+                        requestId
                     }
-
-            };
+                );
 
             emit(
-                "task-detected",
+                "context-ready",
                 {
-
-                    request,
-
-                    task,
-
                     context
-
                 }
             );
 
-            /*
-             * Lokale Analyse.
-             */
+            // ------------------------------------------------
+            // 2. Provider bestimmen
+            // ------------------------------------------------
 
-            if (
-                task ===
-                "analysis" &&
-                options.localOnly !==
-                false
-            ) {
-
-                const analysis =
-                    analyzeText(
-                        text
-                    );
-
-                if (
-                    options.preferLocal ||
-                    !getProvider()
-                ) {
-
-                    return finalize(
-                        analysis,
-                        request,
-                        startedAt
-                    );
-
-                }
-
-            }
-
-            /*
-             * Lokale Korrektur zuerst,
-             * wenn ausdrücklich gewünscht.
-             */
-
-            if (
-                task ===
-                "correction" &&
-                options.localOnly ===
-                true
-            ) {
-
-                return finalize(
-                    correctBasicGerman(
-                        text
-                    ),
-                    request,
-                    startedAt
+            const provider =
+                selectProvider(
+                    options
                 );
 
-            }
+            if (!provider) {
 
-            /*
-             * 1. Externer/registrierter Provider
-             */
-
-            let result =
-                await executeProvider(
-                    text,
-                    context
-                );
-
-            /*
-             * 2. AI Chat
-             */
-
-            if (
-                !result
-            ) {
-
-                result =
-                    await executeChat(
-                        text,
-                        context
-                    );
-
-            }
-
-            /*
-             * 3. Lokale Verarbeitung
-             */
-
-            if (
-                !result &&
-                CONFIG.enableLocalProcessing
-            ) {
-
-                result =
-                    localWriting(
-                        text,
-                        {
-                            ...options,
-                            task
-                        }
-                    );
-
-            }
-
-            /*
-             * Kein Provider und keine
-             * lokale Antwort.
-             */
-
-            if (
-                !result
-            ) {
-
-                result = {
+                const response = {
 
                     ok:
                         false,
@@ -1935,23 +1073,129 @@
                     type:
                         "no-provider",
 
-                    task,
+                    error:
+                        "NO_AI_PROVIDER_AVAILABLE",
 
                     text:
                         "",
 
-                    message:
-                        "Kein aktiver AI-Provider ist momentan verbunden."
+                    content:
+                        "",
+
+                    requestId,
+
+                    language:
+                        context.language,
+
+                    timestamp:
+                        Date.now(),
+
+                    duration:
+                        Date.now() -
+                        startedAt
 
                 };
 
+                state.lastResponse =
+                    response;
+
+                state.failedRequests++;
+
+                emit(
+                    "response",
+                    {
+                        response
+                    }
+                );
+
+                return response;
+
             }
 
-            return finalize(
-                result,
-                request,
-                startedAt
+            emit(
+                "provider-selected",
+                {
+                    provider:
+                        provider.id,
+
+                    context
+                }
             );
+
+            // ------------------------------------------------
+            // 3. Provider ausführen
+            // ------------------------------------------------
+
+            const providerManager =
+                getProvider();
+
+            if (
+                !providerManager ||
+                typeof providerManager.generate !==
+                "function"
+            ) {
+
+                throw new Error(
+                    "AI_PROVIDER_ENGINE_UNAVAILABLE"
+                );
+
+            }
+
+            const result =
+                await providerManager.generate(
+                    text,
+                    {
+
+                        ...options,
+
+                        requestId,
+
+                        context,
+
+                        provider:
+                            provider.id
+
+                    }
+                );
+
+            // ------------------------------------------------
+            // 4. Antwort normalisieren
+            // ------------------------------------------------
+
+            const response =
+                normalizeResponse(
+                    result,
+                    context,
+                    provider.id
+                );
+
+            response.duration =
+                Date.now() -
+                startedAt;
+
+            state.lastResponse =
+                response;
+
+            if (
+                response.ok
+            ) {
+
+                state.successfulRequests++;
+
+            } else {
+
+                state.failedRequests++;
+
+            }
+
+            emit(
+                "response",
+                {
+                    response
+                }
+            );
+
+            return response;
 
         } catch (error) {
 
@@ -1967,23 +1211,21 @@
                     false,
 
                 type:
-                    "error",
-
-                requestId,
-
-                task,
-
-                input:
-                    text,
-
-                language:
-                    request.language,
+                    "engine-error",
 
                 error:
-                    error?.message ||
+                    error.message ||
                     String(
                         error
                     ),
+
+                text:
+                    "",
+
+                content:
+                    "",
+
+                requestId,
 
                 timestamp:
                     Date.now(),
@@ -2001,7 +1243,9 @@
                 "response-error",
                 {
                     response,
+
                     error
+
                 }
             );
 
@@ -2012,30 +1256,11 @@
             state.processing =
                 false;
 
-            request.finishedAt =
-                Date.now();
-
-            request.duration =
-                request.finishedAt -
-                startedAt;
-
-            state.history.push(
-                request
-            );
-
-            if (
-                state.history.length >
-                CONFIG.maxHistory
-            ) {
-
-                state.history.shift();
-
-            }
-
             emit(
                 "request-end",
                 {
-                    request
+                    request:
+                        state.lastRequest
                 }
             );
 
@@ -2044,313 +1269,53 @@
     }
 
     // ========================================================
-    // FINALIZE RESPONSE
+    // ALIASES
     // ========================================================
 
-    async function finalize(
-        result,
-        request,
-        startedAt
-    ) {
-
-        const normalized =
-            normalizeResult(
-                result,
-                {
-                    task:
-                        request.task,
-
-                    language:
-                        request.language
-                }
-            );
-
-        const response = {
-
-            ...normalized,
-
-            requestId:
-                request.id,
-
-            input:
-                request.input,
-
-            task:
-                request.task,
-
-            language:
-                request.language,
-
-            timestamp:
-                Date.now(),
-
-            duration:
-                Date.now() -
-                startedAt
-
-        };
-
-        state.lastResponse =
-            response;
-
-        if (
-            response.ok
-        ) {
-
-            state.successfulRequests++;
-
-        } else {
-
-            state.failedRequests++;
-
-        }
-
-        /*
-         * Conversation speichern.
-         */
-
-        const conversation =
-            getConversation();
-
-        if (
-            CONFIG.enableConversation &&
-            conversation
-        ) {
-
-            for (
-                const method of [
-                    "addMessage",
-                    "add",
-                    "pushMessage",
-                    "appendMessage"
-                ]
-            ) {
-
-                if (
-                    typeof conversation[
-                        method
-                    ] !==
-                    "function"
-                ) {
-                    continue;
-                }
-
-                try {
-
-                    await conversation[
-                        method
-                    ]({
-
-                        role:
-                            "assistant",
-
-                        content:
-                            response.text ||
-                            response.content ||
-                            "",
-
-                        text:
-                            response.text ||
-                            response.content ||
-                            "",
-
-                        task:
-                            request.task,
-
-                        requestId:
-                            request.id,
-
-                        language:
-                            request.language,
-
-                        timestamp:
-                            Date.now()
-
-                    });
-
-                    break;
-
-                } catch (error) {}
-
-            }
-
-        }
-
-        /*
-         * Memory speichern.
-         */
-
-        await remember({
-
-            type:
-                "ai-engine-request",
-
-            requestId:
-                request.id,
-
-            task:
-                request.task,
-
-            language:
-                request.language,
-
-            input:
-                request.input,
-
-            response:
-                response.text ||
-                response.content ||
-                "",
-
-            timestamp:
-                Date.now()
-
-        });
-
-        emit(
-            "response",
-            {
-                response
-            }
-        );
-
-        return response;
-
-    }
-
-    // ========================================================
-    // SPECIALIZED FUNCTIONS
-    // ========================================================
-
-    async function correct(
-        text,
+    async function ask(
+        input,
         options = {}
     ) {
 
-        return process(
-            text,
-            {
-
-                ...options,
-
-                task:
-                    "correction"
-
-            }
+        return generate(
+            input,
+            options
         );
 
     }
 
-    async function write(
-        instruction,
+    async function respond(
+        input,
         options = {}
     ) {
 
-        return process(
-            instruction,
-            {
-
-                ...options,
-
-                task:
-                    "writing"
-
-            }
+        return generate(
+            input,
+            options
         );
 
     }
 
-    async function rewrite(
-        text,
+    async function process(
+        input,
         options = {}
     ) {
 
-        return process(
-            text,
-            {
-
-                ...options,
-
-                task:
-                    "rewriting"
-
-            }
+        return generate(
+            input,
+            options
         );
 
     }
 
-    async function summarize(
-        text,
+    async function complete(
+        input,
         options = {}
     ) {
 
-        return process(
-            text,
-            {
-
-                ...options,
-
-                task:
-                    "summarization"
-
-            }
-        );
-
-    }
-
-    async function translate(
-        text,
-        options = {}
-    ) {
-
-        return process(
-            text,
-            {
-
-                ...options,
-
-                task:
-                    "translation"
-
-            }
-        );
-
-    }
-
-    async function analyze(
-        text,
-        options = {}
-    ) {
-
-        return process(
-            text,
-            {
-
-                ...options,
-
-                task:
-                    "analysis"
-
-            }
-        );
-
-    }
-
-    async function read(
-        text,
-        options = {}
-    ) {
-
-        return process(
-            text,
-            {
-
-                ...options,
-
-                task:
-                    "analysis"
-
-            }
+        return generate(
+            input,
+            options
         );
 
     }
@@ -2360,6 +1325,9 @@
     // ========================================================
 
     function getStatus() {
+
+        const provider =
+            getProvider();
 
         return {
 
@@ -2390,53 +1358,23 @@
             failedRequests:
                 state.failedRequests,
 
+            currentProvider:
+                state.currentProvider,
+
             currentLanguage:
                 state.currentLanguage,
 
-            provider:
-                state.provider,
+            providerConnected:
+                Boolean(
+                    provider
+                ),
 
-            providerCount:
-                Object.keys(
-                    state.providers
-                ).length,
-
-            historyCount:
-                state.history.length,
-
-            capabilities:
-                {
-                    ...state.capabilities
-                },
-
-            modules: {
-
-                core:
-                    Boolean(
-                        getCore()
-                    ),
-
-                chat:
-                    Boolean(
-                        getChat()
-                    ),
-
-                language:
-                    Boolean(
-                        getLanguage()
-                    ),
-
-                memory:
-                    Boolean(
-                        getMemory()
-                    ),
-
-                conversation:
-                    Boolean(
-                        getConversation()
-                    )
-
-            },
+            providerStatus:
+                provider &&
+                typeof provider.getStatus ===
+                "function"
+                    ? provider.getStatus()
+                    : null,
 
             lastRequest:
                 state.lastRequest,
@@ -2452,7 +1390,7 @@
     }
 
     // ========================================================
-    // ERROR MANAGEMENT
+    // ERROR
     // ========================================================
 
     function recordError(
@@ -2460,11 +1398,6 @@
     ) {
 
         const entry = {
-
-            id:
-                createId(
-                    "error"
-                ),
 
             timestamp:
                 Date.now(),
@@ -2497,19 +1430,6 @@
 
     }
 
-    function clearErrors() {
-
-        state.errors =
-            [];
-
-        emit(
-            "errors-cleared"
-        );
-
-        return true;
-
-    }
-
     // ========================================================
     // INITIALIZE
     // ========================================================
@@ -2527,10 +1447,6 @@
         state.initialized =
             true;
 
-        /*
-         * Sprache übernehmen.
-         */
-
         const language =
             getLanguage();
 
@@ -2543,103 +1459,65 @@
             try {
 
                 state.currentLanguage =
-                    language.getLanguage() ||
-                    CONFIG.defaultLanguage;
+                    language.getLanguage();
 
             } catch (error) {}
 
         }
 
-        /*
-         * Core beobachten.
-         */
-
-        const core =
-            getCore();
+        const provider =
+            getProvider();
 
         if (
-            core &&
-            typeof core.on ===
+            provider &&
+            typeof provider.on ===
             "function"
         ) {
 
-            core.on(
-                "language-changed",
+            provider.on(
+                "provider-selected",
                 detail => {
 
                     if (
-                        detail?.language
+                        detail?.provider?.id
                     ) {
 
-                        state.currentLanguage =
-                            detail.language;
+                        state.currentProvider =
+                            detail.provider.id;
 
                     }
 
                     emit(
-                        "language-changed",
+                        "provider-selected",
                         detail
                     );
 
                 }
             );
 
-        }
-
-        /*
-         * Language Engine beobachten.
-         */
-
-        if (
-            language &&
-            typeof language.on ===
-            "function"
-        ) {
-
-            language.on(
-                "language-changed",
+            provider.on(
+                "response",
                 detail => {
 
-                    if (
-                        detail?.language
-                    ) {
-
-                        state.currentLanguage =
-                            detail.language;
-
-                    }
-
                     emit(
-                        "language-changed",
+                        "provider-response",
                         detail
                     );
 
                 }
             );
 
-        }
+            provider.on(
+                "error",
+                detail => {
 
-        /*
-         * Kernel registrieren.
-         */
+                    emit(
+                        "provider-error",
+                        detail
+                    );
 
-        const kernel =
-            getKernel();
-
-        if (
-            kernel &&
-            typeof kernel.registerModule ===
-            "function"
-        ) {
-
-            try {
-
-                kernel.registerModule(
-                    "ai-engine",
-                    api
-                );
-
-            } catch (error) {}
+                }
+            );
 
         }
 
@@ -2673,7 +1551,7 @@
 
     const api = {
 
-        __haldoAI18:
+        __haldoAI20:
             true,
 
         config:
@@ -2689,79 +1567,34 @@
 
         emit,
 
-        process,
-
-        ask:
-            process,
-
-        send:
-            process,
-
-        generate:
-            process,
+        generate,
 
         generateResponse:
-            process,
+            generate,
 
-        correct,
+        ask,
 
-        write,
+        respond,
 
-        rewrite,
+        process,
 
-        summarize,
+        complete,
 
-        translate,
-
-        analyze,
-
-        read,
-
-        analyzeText,
-
-        detectTask,
+        buildContext,
 
         detectLanguage,
 
-        registerProvider,
+        detectCommand,
 
-        unregisterProvider,
+        getConversationMessages,
 
-        setProvider,
+        getMemoryContext,
 
-        getProvider,
+        selectProvider,
 
-        getStatus,
+        normalizeResponse,
 
-        getHistory:
-            () =>
-                state.history.slice(),
-
-        clearHistory:
-            () => {
-
-                state.history =
-                    [];
-
-                emit(
-                    "history-cleared"
-                );
-
-                return true;
-
-            },
-
-        clearErrors,
-
-        getErrors:
-            () =>
-                state.errors.slice(),
-
-        getProviders:
-            () =>
-                ({
-                    ...state.providers
-                })
+        getStatus
 
     };
 
@@ -2776,6 +1609,40 @@
         api;
 
     // ========================================================
+    // KERNEL CONNECTION
+    // ========================================================
+
+    function registerWithKernel() {
+
+        const kernel =
+            getKernel();
+
+        if (
+            kernel &&
+            typeof kernel.registerModule ===
+            "function"
+        ) {
+
+            try {
+
+                kernel.registerModule(
+                    "ai-engine",
+                    api
+                );
+
+            } catch (error) {
+
+                recordError(
+                    error
+                );
+
+            }
+
+        }
+
+    }
+
+    // ========================================================
     // BOOT
     // ========================================================
 
@@ -2785,6 +1652,8 @@
 
             await initialize();
 
+            registerWithKernel();
+
         } catch (error) {
 
             recordError(
@@ -2792,7 +1661,8 @@
             );
 
             console.error(
-                "[HalDoAIEngine] Initialization failed:",
+                "[HalDoAIEngine] " +
+                "Initialization failed:",
                 error
             );
 
@@ -2823,5 +1693,6 @@
 })(window, document);
 
 // ============================================================
-// END OF PART 85
+// END OF HALDO AI OS 20
+// AI ENGINE
 // ============================================================
