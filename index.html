@@ -55767,8 +55767,8 @@
             }
      <!-- =========================================================
          HALDO AI OS 20
-         APPLICATION SERVICE / DEPENDENCY ENGINE
-         TEIL 58
+         COMPLETE APPLICATION MANIFEST / SCHEMA ENGINE
+         TEIL 59
          ========================================================= -->
 
     <script>
@@ -55779,23 +55779,138 @@
 
 
         /* =====================================================
+           ENGINE REFERENCES
+           ===================================================== */
+
+        const appState =
+            window.HalDoAppState20 ||
+            null;
+
+
+        const messageBus =
+            window.HalDoMessageBus20 ||
+            null;
+
+
+        const commandEngine =
+            window.HalDoCommandEngine20 ||
+            null;
+
+
+        const serviceEngine =
+            window.HalDoServiceEngine20 ||
+            null;
+
+
+        /* =====================================================
            STATE
            ===================================================== */
 
-        const services =
+        const manifests =
             new Map();
 
 
-        const appDependencies =
+        const validationResults =
             new Map();
 
 
-        const serviceWaiters =
-            new Map();
+        /* =====================================================
+           CONSTANTS
+           ===================================================== */
+
+        const SCHEMA_VERSION =
+            "20.0.0";
 
 
-        const health =
-            new Map();
+        const COMPONENT_TYPES = [
+
+            "shell",
+
+            "header",
+
+            "toolbar",
+
+            "sidebar",
+
+            "navigation",
+
+            "content",
+
+            "panel",
+
+            "card",
+
+            "list",
+
+            "grid",
+
+            "form",
+
+            "settings",
+
+            "footer",
+
+            "status",
+
+            "dialog",
+
+            "modal",
+
+            "custom"
+
+        ];
+
+
+        const DATA_TYPES = [
+
+            "string",
+
+            "number",
+
+            "boolean",
+
+            "object",
+
+            "array",
+
+            "date",
+
+            "json",
+
+            "file",
+
+            "image",
+
+            "audio",
+
+            "video"
+
+        ];
+
+
+        const PERMISSIONS = [
+
+            "storage",
+
+            "notifications",
+
+            "microphone",
+
+            "camera",
+
+            "files",
+
+            "network",
+
+            "ai",
+
+            "voice",
+
+            "system",
+
+            "clipboard"
+
+        ];
 
 
         /* =====================================================
@@ -55809,6 +55924,39 @@
             return String(
                 value || ""
             ).trim();
+
+        }
+
+
+        function clone(
+            value
+        ) {
+
+            if (
+                value ===
+                undefined
+            ) {
+
+                return undefined;
+
+            }
+
+
+            try {
+
+                return JSON.parse(
+                    JSON.stringify(
+                        value
+                    )
+                );
+
+            } catch (
+                error
+            ) {
+
+                return value;
+
+            }
 
         }
 
@@ -55834,7 +55982,7 @@
             ) {
 
                 console.warn(
-                    "[HalDo Service Engine 20]",
+                    "[HalDo Manifest Engine 20]",
                     error
                 );
 
@@ -55844,85 +55992,33 @@
 
 
         /* =====================================================
-           SERVICE STATUS
+           DEFAULT MANIFEST
            ===================================================== */
 
-        const STATUS = {
-
-            REGISTERED:
-                "registered",
-
-            STARTING:
-                "starting",
-
-            READY:
-                "ready",
-
-            STOPPING:
-                "stopping",
-
-            STOPPED:
-                "stopped",
-
-            ERROR:
-                "error",
-
-            UNAVAILABLE:
-                "unavailable"
-
-        };
-
-
-        /* =====================================================
-           REGISTER SERVICE
-           ===================================================== */
-
-        function register(
-            definition
+        function createDefaultManifest(
+            appId,
+            definition = {}
         ) {
-
-            if (
-                !definition ||
-                typeof definition !==
-                "object"
-            ) {
-
-                return null;
-
-            }
-
 
             const id =
                 normalize(
-                    definition.id
+                    appId
                 );
 
 
-            if (!id) {
+            return {
 
-                return null;
-
-            }
-
-
-            const existing =
-                services.get(
-                    id
-                );
-
-
-            if (existing) {
-
-                return existing;
-
-            }
-
-
-            const service = {
+                schemaVersion:
+                    SCHEMA_VERSION,
 
                 id,
 
                 name:
+                    definition.name ||
+                    id,
+
+                title:
+                    definition.title ||
                     definition.name ||
                     id,
 
@@ -55934,964 +56030,869 @@
                     definition.version ||
                     "1.0.0",
 
-                status:
-                    STATUS.REGISTERED,
+                icon:
+                    definition.icon ||
+                    "◈",
 
-                provider:
-                    definition.provider ||
+                category:
+                    definition.category ||
+                    "system",
+
+                author:
+                    definition.author ||
                     "HalDo AI OS",
+
+                enabled:
+                    definition.enabled !==
+                    false,
+
+                visible:
+                    definition.visible !==
+                    false,
+
+                singleton:
+                    definition.singleton ===
+                    true,
+
+                /* ---------------------------------------------
+                   WINDOW
+                   --------------------------------------------- */
+
+                window: {
+
+                    width:
+                        definition.window &&
+                        definition.window.width
+                            ? definition.window.width
+                            : 900,
+
+                    height:
+                        definition.window &&
+                        definition.window.height
+                            ? definition.window.height
+                            : 600,
+
+                    minWidth:
+                        definition.window &&
+                        definition.window.minWidth
+                            ? definition.window.minWidth
+                            : 320,
+
+                    minHeight:
+                        definition.window &&
+                        definition.window.minHeight
+                            ? definition.window.minHeight
+                            : 240,
+
+                    resizable:
+                        !(
+                            definition.window &&
+                            definition.window.resizable ===
+                            false
+                        ),
+
+                    maximizable:
+                        !(
+                            definition.window &&
+                            definition.window.maximizable ===
+                            false
+                        ),
+
+                    minimizable:
+                        !(
+                            definition.window &&
+                            definition.window.minimizable ===
+                            false
+                        )
+
+                },
+
+
+                /* ---------------------------------------------
+                   UI
+                   --------------------------------------------- */
+
+                ui: {
+
+                    theme:
+                        definition.ui &&
+                        definition.ui.theme
+                            ? definition.ui.theme
+                            : "system",
+
+                    layout:
+                        definition.ui &&
+                        definition.ui.layout
+                            ? definition.ui.layout
+                            : "standard",
+
+                    components:
+                        definition.ui &&
+                        Array.isArray(
+                            definition.ui.components
+                        )
+                            ? clone(
+                                definition.ui.components
+                            )
+                            : [],
+
+                    responsive:
+                        !(
+                            definition.ui &&
+                            definition.ui.responsive ===
+                            false
+                        )
+
+                },
+
+
+                /* ---------------------------------------------
+                   NAVIGATION
+                   --------------------------------------------- */
+
+                navigation: {
+
+                    defaultRoute:
+                        definition.navigation &&
+                        definition.navigation.defaultRoute
+                            ? definition.navigation.defaultRoute
+                            : "home",
+
+                    routes:
+                        definition.navigation &&
+                        Array.isArray(
+                            definition.navigation.routes
+                        )
+                            ? clone(
+                                definition.navigation.routes
+                            )
+                            : [],
+
+                    history:
+                        !(
+                            definition.navigation &&
+                            definition.navigation.history ===
+                            false
+                        )
+
+                },
+
+
+                /* ---------------------------------------------
+                   SETTINGS
+                   --------------------------------------------- */
+
+                settings: {
+
+                    enabled:
+                        definition.settings &&
+                        definition.settings.enabled ===
+                        false
+                            ? false
+                            : true,
+
+                    sections:
+                        definition.settings &&
+                        Array.isArray(
+                            definition.settings.sections
+                        )
+                            ? clone(
+                                definition.settings.sections
+                            )
+                            : [],
+
+                    defaults:
+                        definition.settings &&
+                        definition.settings.defaults
+                            ? clone(
+                                definition.settings.defaults
+                            )
+                            : {}
+
+                },
+
+
+                /* ---------------------------------------------
+                   DATA
+                   --------------------------------------------- */
+
+                data: {
+
+                    models:
+                        definition.data &&
+                        Array.isArray(
+                            definition.data.models
+                        )
+                            ? clone(
+                                definition.data.models
+                            )
+                            : [],
+
+                    defaults:
+                        definition.data &&
+                        definition.data.defaults
+                            ? clone(
+                                definition.data.defaults
+                            )
+                            : {},
+
+                    persistent:
+                        !(
+                            definition.data &&
+                            definition.data.persistent ===
+                            false
+                        ),
+
+                    version:
+                        definition.data &&
+                        definition.data.version
+                            ? definition.data.version
+                            : 1
+
+                },
+
+
+                /* ---------------------------------------------
+                   STORAGE
+                   --------------------------------------------- */
+
+                storage: {
+
+                    enabled:
+                        definition.storage &&
+                        definition.storage.enabled ===
+                        false
+                            ? false
+                            : true,
+
+                    namespace:
+                        definition.storage &&
+                        definition.storage.namespace
+                            ? definition.storage.namespace
+                            : `app:${id}`,
+
+                    autoSave:
+                        !(
+                            definition.storage &&
+                            definition.storage.autoSave ===
+                            false
+                        ),
+
+                    autoRestore:
+                        !(
+                            definition.storage &&
+                            definition.storage.autoRestore ===
+                            false
+                        )
+
+                },
+
+
+                /* ---------------------------------------------
+                   PERMISSIONS
+                   --------------------------------------------- */
+
+                permissions:
+                    Array.isArray(
+                        definition.permissions
+                    )
+                        ? [
+                            ...new Set(
+                                definition.permissions
+                                    .map(
+                                        permission =>
+                                            normalize(
+                                                permission
+                                            )
+                                    )
+                                    .filter(
+                                        Boolean
+                                    )
+                            )
+                        ]
+                        : [],
+
+
+                /* ---------------------------------------------
+                   SERVICES
+                   --------------------------------------------- */
+
+                services:
+                    Array.isArray(
+                        definition.services
+                    )
+                        ? clone(
+                            definition.services
+                        )
+                        : [],
+
 
                 dependencies:
                     Array.isArray(
                         definition.dependencies
                     )
-                        ? [
-                            ...definition.dependencies
-                        ]
+                        ? clone(
+                            definition.dependencies
+                        )
                         : [],
 
-                init:
-                    typeof definition.init ===
-                    "function"
-                        ? definition.init
-                        : null,
 
-                start:
-                    typeof definition.start ===
-                    "function"
-                        ? definition.start
-                        : null,
+                /* ---------------------------------------------
+                   COMMANDS
+                   --------------------------------------------- */
 
-                stop:
-                    typeof definition.stop ===
-                    "function"
-                        ? definition.stop
-                        : null,
+                commands:
+                    Array.isArray(
+                        definition.commands
+                    )
+                        ? clone(
+                            definition.commands
+                        )
+                        : [],
 
-                destroy:
-                    typeof definition.destroy ===
-                    "function"
-                        ? definition.destroy
-                        : null,
 
-                healthCheck:
-                    typeof definition.healthCheck ===
-                    "function"
-                        ? definition.healthCheck
-                        : null,
+                /* ---------------------------------------------
+                   EVENTS
+                   --------------------------------------------- */
 
-                api:
-                    definition.api ||
-                    {},
+                events: {
+
+                    listens:
+                        definition.events &&
+                        Array.isArray(
+                            definition.events.listens
+                        )
+                            ? clone(
+                                definition.events.listens
+                            )
+                            : [],
+
+                    emits:
+                        definition.events &&
+                        Array.isArray(
+                            definition.events.emits
+                        )
+                            ? clone(
+                                definition.events.emits
+                            )
+                            : []
+
+                },
+
+
+                /* ---------------------------------------------
+                   AI
+                   --------------------------------------------- */
+
+                ai: {
+
+                    enabled:
+                        definition.ai &&
+                        definition.ai.enabled ===
+                        true,
+
+                    capabilities:
+                        definition.ai &&
+                        Array.isArray(
+                            definition.ai.capabilities
+                        )
+                            ? clone(
+                                definition.ai.capabilities
+                            )
+                            : [],
+
+                    context:
+                        definition.ai &&
+                        definition.ai.context
+                            ? clone(
+                                definition.ai.context
+                            )
+                            : {},
+
+                    memory:
+                        definition.ai &&
+                        definition.ai.memory ===
+                        true
+
+                },
+
+
+                /* ---------------------------------------------
+                   VOICE
+                   --------------------------------------------- */
+
+                voice: {
+
+                    enabled:
+                        definition.voice &&
+                        definition.voice.enabled ===
+                        true,
+
+                    commands:
+                        definition.voice &&
+                        Array.isArray(
+                            definition.voice.commands
+                        )
+                            ? clone(
+                                definition.voice.commands
+                            )
+                            : []
+
+                },
+
+
+                /* ---------------------------------------------
+                   LANGUAGE
+                   --------------------------------------------- */
+
+                language: {
+
+                    default:
+                        definition.language &&
+                        definition.language.default
+                            ? definition.language.default
+                            : "de",
+
+                    supported:
+                        definition.language &&
+                        Array.isArray(
+                            definition.language.supported
+                        )
+                            ? clone(
+                                definition.language.supported
+                            )
+                            : [
+
+                                "de",
+
+                                "en"
+
+                            ],
+
+                    ezidi:
+                        definition.language &&
+                        definition.language.ezidi ===
+                        true
+
+                },
+
+
+                /* ---------------------------------------------
+                   NOTIFICATIONS
+                   --------------------------------------------- */
+
+                notifications: {
+
+                    enabled:
+                        definition.notifications &&
+                        definition.notifications.enabled ===
+                        false
+                            ? false
+                            : true,
+
+                    channels:
+                        definition.notifications &&
+                        Array.isArray(
+                            definition.notifications.channels
+                        )
+                            ? clone(
+                                definition.notifications.channels
+                            )
+                            : []
+
+                },
+
+
+                /* ---------------------------------------------
+                   ERROR HANDLING
+                   --------------------------------------------- */
+
+                errorHandling: {
+
+                    strategy:
+                        definition.errorHandling &&
+                        definition.errorHandling.strategy
+                            ? definition.errorHandling.strategy
+                            : "safe",
+
+                    retry:
+                        definition.errorHandling &&
+                        definition.errorHandling.retry ===
+                        true,
+
+                    maxRetries:
+                        definition.errorHandling &&
+                        Number.isFinite(
+                            definition.errorHandling.maxRetries
+                        )
+                            ? definition.errorHandling.maxRetries
+                            : 3,
+
+                    recover:
+                        definition.errorHandling &&
+                        definition.errorHandling.recover ===
+                        true
+
+                },
+
+
+                /* ---------------------------------------------
+                   LIFECYCLE
+                   --------------------------------------------- */
+
+                lifecycle: {
+
+                    autoStart:
+                        !(
+                            definition.lifecycle &&
+                            definition.lifecycle.autoStart ===
+                            false
+                        ),
+
+                    keepAlive:
+                        definition.lifecycle &&
+                        definition.lifecycle.keepAlive ===
+                        true,
+
+                    destroyOnClose:
+                        !(
+                            definition.lifecycle &&
+                            definition.lifecycle.destroyOnClose ===
+                            false
+                        )
+
+                },
+
+
+                /* ---------------------------------------------
+                   METADATA
+                   --------------------------------------------- */
 
                 metadata:
-                    definition.metadata ||
-                    {},
-
-                registeredAt:
-                    Date.now(),
-
-                startedAt:
-                    null,
-
-                stoppedAt:
-                    null,
-
-                error:
-                    null
+                    definition.metadata
+                        ? clone(
+                            definition.metadata
+                        )
+                        : {}
 
             };
 
-
-            services.set(
-                id,
-                service
-            );
-
-
-            health.set(
-                id,
-                {
-
-                    status:
-                        STATUS.REGISTERED,
-
-                    checkedAt:
-                        Date.now(),
-
-                    healthy:
-                        false
-
-                }
-            );
-
-
-            emit(
-                "service:registered",
-                {
-
-                    service
-
-                }
-            );
-
-
-            return service;
-
         }
 
 
         /* =====================================================
-           GET SERVICE
+           VALIDATE COMPONENT
            ===================================================== */
 
-        function get(
-            serviceId
+        function validateComponent(
+            component,
+            path
         ) {
 
-            return (
-                services.get(
-                    normalize(
-                        serviceId
-                    )
-                ) ||
-                null
-            );
-
-        }
-
-
-        /* =====================================================
-           HAS SERVICE
-           ===================================================== */
-
-        function has(
-            serviceId
-        ) {
-
-            return !!get(
-                serviceId
-            );
-
-        }
-
-
-        /* =====================================================
-           SERVICE READY
-           ===================================================== */
-
-        function isReady(
-            serviceId
-        ) {
-
-            const service =
-                get(
-                    serviceId
-                );
-
-
-            return !!(
-                service &&
-                service.status ===
-                STATUS.READY
-            );
-
-        }
-
-
-        /* =====================================================
-           DEPENDENCY CHECK
-           ===================================================== */
-
-        function checkDependencies(
-            dependencies = []
-        ) {
-
-            const result = {
-
-                ready:
-                    true,
-
-                missing: [],
-
-                unavailable: [],
-
-                error: []
-
-            };
-
-
-            dependencies.forEach(
-                dependency => {
-
-                    const id =
-                        typeof dependency ===
-                        "string"
-                            ? dependency
-                            : dependency &&
-                              dependency.id;
-
-
-                    if (!id) {
-
-                        return;
-
-                    }
-
-
-                    const service =
-                        get(
-                            id
-                        );
-
-
-                    if (!service) {
-
-                        result.ready =
-                            false;
-
-                        result.missing.push(
-                            id
-                        );
-
-                        return;
-
-                    }
-
-
-                    if (
-                        service.status ===
-                        STATUS.ERROR
-                    ) {
-
-                        result.ready =
-                            false;
-
-                        result.error.push(
-                            id
-                        );
-
-                        return;
-
-                    }
-
-
-                    if (
-                        service.status !==
-                        STATUS.READY
-                    ) {
-
-                        result.ready =
-                            false;
-
-                        result.unavailable.push(
-                            id
-                        );
-
-                    }
-
-                }
-            );
-
-
-            return result;
-
-        }
-
-
-        /* =====================================================
-           WAIT FOR SERVICE
-           ===================================================== */
-
-        function waitFor(
-            serviceId,
-            options = {}
-        ) {
-
-            serviceId =
-                normalize(
-                    serviceId
-                );
+            const errors = [];
 
 
             if (
-                isReady(
-                    serviceId
+                !component ||
+                typeof component !==
+                "object"
+            ) {
+
+                errors.push(
+                    `${path}: component must be an object`
+                );
+
+
+                return errors;
+
+            }
+
+
+            if (
+                !component.type
+            ) {
+
+                errors.push(
+                    `${path}: missing type`
+                );
+
+            } else if (
+                !COMPONENT_TYPES.includes(
+                    component.type
                 )
             ) {
 
-                return Promise.resolve(
-                    get(
-                        serviceId
-                    )
+                errors.push(
+                    `${path}: unknown component type "${component.type}"`
                 );
 
             }
 
 
-            const timeout =
-                Number.isFinite(
-                    options.timeout
+            if (
+                component.id !==
+                undefined &&
+                !normalize(
+                    component.id
                 )
-                    ? options.timeout
-                    : 10000;
+            ) {
+
+                errors.push(
+                    `${path}: invalid component id`
+                );
+
+            }
 
 
-            return new Promise(
-                (
-                    resolve,
-                    reject
-                ) => {
+            return errors;
 
-                    if (
-                        !serviceWaiters.has(
-                            serviceId
-                        )
-                    ) {
-
-                        serviceWaiters.set(
-                            serviceId,
-                            new Set()
-                        );
-
-                    }
+        }
 
 
-                    const waiter = {
+        /* =====================================================
+           VALIDATE DATA MODEL
+           ===================================================== */
 
-                        resolve,
+        function validateDataModel(
+            model,
+            path
+        ) {
 
-                        reject,
-
-                        timer:
-                            setTimeout(
-                                () => {
-
-                                    const set =
-                                        serviceWaiters.get(
-                                            serviceId
-                                        );
+            const errors = [];
 
 
-                                    if (set) {
+            if (
+                !model ||
+                typeof model !==
+                "object"
+            ) {
 
-                                        set.delete(
-                                            waiter
-                                        );
-
-                                    }
+                errors.push(
+                    `${path}: model must be an object`
+                );
 
 
-                                    reject(
-                                        new Error(
-                                            `Service timeout: ${serviceId}`
-                                        )
-                                    );
+                return errors;
 
-                                },
-                                timeout
+            }
+
+
+            if (
+                !normalize(
+                    model.id
+                )
+            ) {
+
+                errors.push(
+                    `${path}: missing model id`
+                );
+
+            }
+
+
+            if (
+                model.fields &&
+                typeof model.fields ===
+                "object"
+            ) {
+
+                Object.entries(
+                    model.fields
+                ).forEach(
+                    (
+                        [
+                            fieldId,
+                            field
+                        ]
+                    ) => {
+
+                        if (
+                            !field ||
+                            typeof field !==
+                            "object"
+                        ) {
+
+                            errors.push(
+                                `${path}.fields.${fieldId}: invalid field`
+                            );
+
+                            return;
+
+                        }
+
+
+                        if (
+                            field.type &&
+                            !DATA_TYPES.includes(
+                                field.type
                             )
+                        ) {
 
-                    };
+                            errors.push(
+                                `${path}.fields.${fieldId}: unknown data type "${field.type}"`
+                            );
 
+                        }
 
-                    serviceWaiters
-                        .get(
-                            serviceId
-                        )
-                        .add(
-                            waiter
-                        );
-
-                }
-            );
-
-        }
-
-
-        /* =====================================================
-           RESOLVE WAITERS
-           ===================================================== */
-
-        function resolveWaiters(
-            serviceId,
-            service
-        ) {
-
-            const set =
-                serviceWaiters.get(
-                    serviceId
+                    }
                 );
-
-
-            if (!set) {
-
-                return;
 
             }
 
 
-            serviceWaiters.delete(
-                serviceId
-            );
-
-
-            [
-                ...set
-            ].forEach(
-                waiter => {
-
-                    clearTimeout(
-                        waiter.timer
-                    );
-
-
-                    waiter.resolve(
-                        service
-                    );
-
-                }
-            );
+            return errors;
 
         }
 
 
         /* =====================================================
-           REJECT WAITERS
+           VALIDATE ROUTE
            ===================================================== */
 
-        function rejectWaiters(
-            serviceId,
-            error
+        function validateRoute(
+            route,
+            path
         ) {
 
-            const set =
-                serviceWaiters.get(
-                    serviceId
+            const errors = [];
+
+
+            if (
+                !route ||
+                typeof route !==
+                "object"
+            ) {
+
+                errors.push(
+                    `${path}: route must be an object`
                 );
 
 
-            if (!set) {
-
-                return;
+                return errors;
 
             }
 
 
-            serviceWaiters.delete(
-                serviceId
-            );
+            if (
+                !normalize(
+                    route.id
+                )
+            ) {
 
-
-            [
-                ...set
-            ].forEach(
-                waiter => {
-
-                    clearTimeout(
-                        waiter.timer
-                    );
-
-
-                    waiter.reject(
-                        error
-                    );
-
-                }
-            );
-
-        }
-
-
-        /* =====================================================
-           INIT SERVICE
-           ===================================================== */
-
-        async function initialize(
-            serviceId,
-            context = {}
-        ) {
-
-            const service =
-                get(
-                    serviceId
-                );
-
-
-            if (!service) {
-
-                throw new Error(
-                    `Service not found: ${serviceId}`
+                errors.push(
+                    `${path}: missing route id`
                 );
 
             }
 
 
             if (
-                service.status ===
-                STATUS.READY
+                !normalize(
+                    route.title
+                )
             ) {
 
-                return service;
-
-            }
-
-
-            if (
-                service.status ===
-                STATUS.STARTING
-            ) {
-
-                return waitFor(
-                    serviceId
+                errors.push(
+                    `${path}: missing route title`
                 );
 
             }
 
 
-            const dependencies =
-                checkDependencies(
-                    service.dependencies
-                );
-
-
-            if (
-                !dependencies.ready
-            ) {
-
-                service.status =
-                    STATUS.UNAVAILABLE;
-
-
-                const error =
-                    new Error(
-                        `Dependencies unavailable for ${serviceId}`
-                    );
-
-
-                service.error =
-                    error;
-
-
-                emit(
-                    "service:unavailable",
-                    {
-
-                        service,
-
-                        dependencies
-
-                    }
-                );
-
-
-                throw error;
-
-            }
-
-
-            service.status =
-                STATUS.STARTING;
-
-
-            service.error =
-                null;
-
-
-            emit(
-                "service:starting",
-                {
-
-                    service
-
-                }
-            );
-
-
-            try {
-
-                if (
-                    service.init
-                ) {
-
-                    await service.init(
-                        {
-
-                            service,
-
-                            context,
-
-                            engine:
-                                publicAPI
-
-                        }
-                    );
-
-                }
-
-
-                if (
-                    service.start
-                ) {
-
-                    await service.start(
-                        {
-
-                            service,
-
-                            context,
-
-                            engine:
-                                publicAPI
-
-                        }
-                    );
-
-                }
-
-
-                service.status =
-                    STATUS.READY;
-
-
-                service.startedAt =
-                    Date.now();
-
-
-                health.set(
-                    service.id,
-                    {
-
-                        status:
-                            STATUS.READY,
-
-                        checkedAt:
-                            Date.now(),
-
-                        healthy:
-                            true
-
-                    }
-                );
-
-
-                resolveWaiters(
-                    service.id,
-                    service
-                );
-
-
-                emit(
-                    "service:ready",
-                    {
-
-                        service
-
-                    }
-                );
-
-
-                return service;
-
-            } catch (
-                error
-            ) {
-
-                service.status =
-                    STATUS.ERROR;
-
-
-                service.error =
-                    error;
-
-
-                health.set(
-                    service.id,
-                    {
-
-                        status:
-                            STATUS.ERROR,
-
-                        checkedAt:
-                            Date.now(),
-
-                        healthy:
-                            false,
-
-                        error
-
-                    }
-                );
-
-
-                rejectWaiters(
-                    service.id,
-                    error
-                );
-
-
-                emit(
-                    "service:error",
-                    {
-
-                        service,
-
-                        error
-
-                    }
-                );
-
-
-                throw error;
-
-            }
+            return errors;
 
         }
 
 
         /* =====================================================
-           STOP SERVICE
+           VALIDATE SETTINGS
            ===================================================== */
 
-        async function stop(
-            serviceId,
-            context = {}
+        function validateSetting(
+            setting,
+            path
         ) {
 
-            const service =
-                get(
-                    serviceId
+            const errors = [];
+
+
+            if (
+                !setting ||
+                typeof setting !==
+                "object"
+            ) {
+
+                errors.push(
+                    `${path}: setting must be an object`
                 );
 
 
-            if (!service) {
-
-                return false;
+                return errors;
 
             }
 
 
             if (
-                service.status ===
-                STATUS.STOPPED ||
-                service.status ===
-                STATUS.REGISTERED
+                !normalize(
+                    setting.id
+                )
             ) {
 
-                return true;
+                errors.push(
+                    `${path}: missing setting id`
+                );
 
             }
 
 
-            service.status =
-                STATUS.STOPPING;
-
-
-            emit(
-                "service:stopping",
-                {
-
-                    service
-
-                }
-            );
-
-
-            try {
-
-                if (
-                    service.stop
-                ) {
-
-                    await service.stop(
-                        {
-
-                            service,
-
-                            context,
-
-                            engine:
-                                publicAPI
-
-                        }
-                    );
-
-                }
-
-
-                service.status =
-                    STATUS.STOPPED;
-
-
-                service.stoppedAt =
-                    Date.now();
-
-
-                health.set(
-                    service.id,
-                    {
-
-                        status:
-                            STATUS.STOPPED,
-
-                        checkedAt:
-                            Date.now(),
-
-                        healthy:
-                            false
-
-                    }
-                );
-
-
-                emit(
-                    "service:stopped",
-                    {
-
-                        service
-
-                    }
-                );
-
-
-                return true;
-
-            } catch (
-                error
+            if (
+                setting.type &&
+                !DATA_TYPES.includes(
+                    setting.type
+                )
             ) {
 
-                service.status =
-                    STATUS.ERROR;
-
-
-                service.error =
-                    error;
-
-
-                emit(
-                    "service:error",
-                    {
-
-                        service,
-
-                        error
-
-                    }
+                errors.push(
+                    `${path}: unknown setting type "${setting.type}"`
                 );
 
-
-                return false;
-
             }
+
+
+            return errors;
 
         }
 
 
         /* =====================================================
-           DESTROY SERVICE
+           VALIDATE MANIFEST
            ===================================================== */
 
-        async function destroy(
-            serviceId,
-            context = {}
+        function validate(
+            manifest
         ) {
 
-            const service =
-                get(
-                    serviceId
-                );
+            const errors = [];
+
+            const warnings = [];
 
 
-            if (!service) {
-
-                return false;
-
-            }
-
-
-            try {
-
-                if (
-                    service.destroy
-                ) {
-
-                    await service.destroy(
-                        {
-
-                            service,
-
-                            context,
-
-                            engine:
-                                publicAPI
-
-                        }
-                    );
-
-                }
-
-            } catch (
-                error
+            if (
+                !manifest ||
+                typeof manifest !==
+                "object"
             ) {
-
-                console.warn(
-                    "[HalDo Service Engine 20]",
-                    error
-                );
-
-            }
-
-
-            services.delete(
-                service.id
-            );
-
-
-            health.delete(
-                service.id
-            );
-
-
-            emit(
-                "service:destroyed",
-                {
-
-                    serviceId
-
-                }
-            );
-
-
-            return true;
-
-        }
-
-
-        /* =====================================================
-           HEALTH CHECK
-           ===================================================== */
-
-        async function checkHealth(
-            serviceId
-        ) {
-
-            const service =
-                get(
-                    serviceId
-                );
-
-
-            if (!service) {
 
                 return {
 
-                    serviceId,
-
-                    healthy:
+                    valid:
                         false,
 
-                    status:
-                        STATUS.UNAVAILABLE
+                    errors: [
+                        "Manifest must be an object"
+                    ],
+
+                    warnings
 
                 };
 
@@ -56899,313 +56900,365 @@
 
 
             if (
-                !service.healthCheck
+                !normalize(
+                    manifest.id
+                )
             ) {
 
-                const healthy =
-                    service.status ===
-                    STATUS.READY;
-
-
-                const result = {
-
-                    serviceId,
-
-                    healthy,
-
-                    status:
-                        service.status,
-
-                    checkedAt:
-                        Date.now()
-
-                };
-
-
-                health.set(
-                    serviceId,
-                    result
+                errors.push(
+                    "Missing app id"
                 );
-
-
-                return result;
 
             }
 
 
-            try {
+            if (
+                !normalize(
+                    manifest.name
+                )
+            ) {
 
-                const result =
-                    await service.healthCheck(
-                        {
+                errors.push(
+                    "Missing app name"
+                );
 
-                            service,
-
-                            engine:
-                                publicAPI
-
-                        }
-                    );
+            }
 
 
-                const healthy =
-                    result === true ||
+            if (
+                !normalize(
+                    manifest.version
+                )
+            ) {
+
+                errors.push(
+                    "Missing app version"
+                );
+
+            }
+
+
+            /* ---------------------------------------------
+               UI
+               --------------------------------------------- */
+
+            if (
+                manifest.ui &&
+                Array.isArray(
+                    manifest.ui.components
+                )
+            ) {
+
+                manifest.ui.components.forEach(
                     (
-                        result &&
-                        result.healthy ===
-                        true
-                    );
+                        component,
+                        index
+                    ) => {
 
+                        errors.push(
+                            ...validateComponent(
+                                component,
+                                `ui.components[${index}]`
+                            )
+                        );
 
-                const status =
-                    healthy
-                        ? STATUS.READY
-                        : STATUS.ERROR;
-
-
-                const healthResult = {
-
-                    serviceId,
-
-                    healthy,
-
-                    status,
-
-                    checkedAt:
-                        Date.now(),
-
-                    details:
-                        result
-
-                };
-
-
-                health.set(
-                    serviceId,
-                    healthResult
+                    }
                 );
 
-
-                emit(
-                    "service:health",
-                    healthResult
-                );
+            }
 
 
-                return healthResult;
+            /* ---------------------------------------------
+               NAVIGATION
+               --------------------------------------------- */
 
-            } catch (
-                error
+            if (
+                manifest.navigation &&
+                Array.isArray(
+                    manifest.navigation.routes
+                )
             ) {
 
-                const result = {
+                manifest.navigation.routes.forEach(
+                    (
+                        route,
+                        index
+                    ) => {
 
-                    serviceId,
+                        errors.push(
+                            ...validateRoute(
+                                route,
+                                `navigation.routes[${index}]`
+                            )
+                        );
 
-                    healthy:
-                        false,
-
-                    status:
-                        STATUS.ERROR,
-
-                    checkedAt:
-                        Date.now(),
-
-                    error
-
-                };
-
-
-                health.set(
-                    serviceId,
-                    result
+                    }
                 );
-
-
-                emit(
-                    "service:health:error",
-                    result
-                );
-
-
-                return result;
-
-            }
-
-        }
-
-
-        /* =====================================================
-           APP DEPENDENCY REGISTRATION
-           ===================================================== */
-
-        function registerAppDependencies(
-            appId,
-            dependencies = []
-        ) {
-
-            appId =
-                normalize(
-                    appId
-                );
-
-
-            if (!appId) {
-
-                return false;
 
             }
 
 
-            const normalized =
-                dependencies
-                    .map(
-                        dependency => {
+            /* ---------------------------------------------
+               SETTINGS
+               --------------------------------------------- */
 
-                            if (
-                                typeof dependency ===
-                                "string"
-                            ) {
+            if (
+                manifest.settings &&
+                Array.isArray(
+                    manifest.settings.sections
+                )
+            ) {
 
-                                return {
+                manifest.settings.sections.forEach(
+                    (
+                        section,
+                        sectionIndex
+                    ) => {
 
-                                    id:
-                                        dependency,
+                        if (
+                            !section ||
+                            typeof section !==
+                            "object"
+                        ) {
 
-                                    required:
-                                        true
+                            errors.push(
+                                `settings.sections[${sectionIndex}] is invalid`
+                            );
 
-                                };
-
-                            }
-
-
-                            return {
-
-                                id:
-                                    dependency &&
-                                    dependency.id,
-
-                                required:
-                                    dependency &&
-                                    dependency.required !==
-                                    false,
-
-                                optional:
-                                    dependency &&
-                                    dependency.optional ===
-                                    true
-
-                            };
+                            return;
 
                         }
-                    )
-                    .filter(
-                        dependency =>
-                            !!dependency.id
+
+
+                        if (
+                            Array.isArray(
+                                section.settings
+                            )
+                        ) {
+
+                            section.settings.forEach(
+                                (
+                                    setting,
+                                    settingIndex
+                                ) => {
+
+                                    errors.push(
+                                        ...validateSetting(
+                                            setting,
+                                            `settings.sections[${sectionIndex}].settings[${settingIndex}]`
+                                        )
+                                    );
+
+                                }
+                            );
+
+                        }
+
+                    }
+                );
+
+            }
+
+
+            /* ---------------------------------------------
+               DATA
+               --------------------------------------------- */
+
+            if (
+                manifest.data &&
+                Array.isArray(
+                    manifest.data.models
+                )
+            ) {
+
+                manifest.data.models.forEach(
+                    (
+                        model,
+                        index
+                    ) => {
+
+                        errors.push(
+                            ...validateDataModel(
+                                model,
+                                `data.models[${index}]`
+                            )
+                        );
+
+                    }
+                );
+
+            }
+
+
+            /* ---------------------------------------------
+               PERMISSIONS
+               --------------------------------------------- */
+
+            if (
+                Array.isArray(
+                    manifest.permissions
+                )
+            ) {
+
+                manifest.permissions.forEach(
+                    permission => {
+
+                        if (
+                            !PERMISSIONS.includes(
+                                permission
+                            )
+                        ) {
+
+                            warnings.push(
+                                `Unknown permission: ${permission}`
+                            );
+
+                        }
+
+                    }
+                );
+
+            }
+
+
+            /* ---------------------------------------------
+               DEFAULT ROUTE
+               --------------------------------------------- */
+
+            if (
+                manifest.navigation &&
+                manifest.navigation.routes.length &&
+                manifest.navigation.defaultRoute
+            ) {
+
+                const exists =
+                    manifest.navigation.routes.some(
+                        route =>
+                            route.id ===
+                            manifest.navigation.defaultRoute
                     );
 
 
-            appDependencies.set(
-                appId,
-                normalized
-            );
+                if (!exists) {
 
-
-            emit(
-                "app:dependencies:registered",
-                {
-
-                    appId,
-
-                    dependencies:
-                        normalized
+                    warnings.push(
+                        `Default route "${manifest.navigation.defaultRoute}" is not defined`
+                    );
 
                 }
-            );
+
+            }
 
 
-            return true;
+            /* ---------------------------------------------
+               STORAGE
+               --------------------------------------------- */
 
-        }
+            if (
+                manifest.storage &&
+                manifest.storage.enabled &&
+                !manifest.storage.namespace
+            ) {
 
-
-        /* =====================================================
-           GET APP DEPENDENCIES
-           ===================================================== */
-
-        function getAppDependencies(
-            appId
-        ) {
-
-            return (
-                appDependencies.get(
-                    normalize(
-                        appId
-                    )
-                ) ||
-                []
-            );
-
-        }
-
-
-        /* =====================================================
-           CHECK APP DEPENDENCIES
-           ===================================================== */
-
-        function checkAppDependencies(
-            appId
-        ) {
-
-            const dependencies =
-                getAppDependencies(
-                    appId
+                errors.push(
+                    "Storage namespace is required when storage is enabled"
                 );
 
+            }
 
-            const required =
-                dependencies.filter(
-                    dependency =>
-                        dependency.required !==
-                        false &&
-                        dependency.optional !==
-                        true
+
+            /* ---------------------------------------------
+               DEPENDENCIES
+               --------------------------------------------- */
+
+            if (
+                Array.isArray(
+                    manifest.dependencies
+                )
+            ) {
+
+                manifest.dependencies.forEach(
+                    (
+                        dependency,
+                        index
+                    ) => {
+
+                        const id =
+                            typeof dependency ===
+                            "string"
+                                ? dependency
+                                : dependency &&
+                                  dependency.id;
+
+
+                        if (!normalize(id)) {
+
+                            errors.push(
+                                `dependencies[${index}] has no service id`
+                            );
+
+                        }
+
+                    }
                 );
 
+            }
 
-            const optional =
-                dependencies.filter(
-                    dependency =>
-                        dependency.optional ===
-                        true
+
+            /* ---------------------------------------------
+               COMMANDS
+               --------------------------------------------- */
+
+            if (
+                Array.isArray(
+                    manifest.commands
+                )
+            ) {
+
+                manifest.commands.forEach(
+                    (
+                        command,
+                        index
+                    ) => {
+
+                        if (
+                            typeof command ===
+                            "string"
+                        ) {
+
+                            return;
+
+                        }
+
+
+                        if (
+                            !command ||
+                            !normalize(
+                                command.id
+                            )
+                        ) {
+
+                            errors.push(
+                                `commands[${index}] has no id`
+                            );
+
+                        }
+
+                    }
                 );
 
-
-            const requiredResult =
-                checkDependencies(
-                    required
-                );
-
-
-            const optionalResult =
-                checkDependencies(
-                    optional
-                );
+            }
 
 
             return {
 
-                appId,
+                valid:
+                    errors.length ===
+                    0,
 
-                ready:
-                    requiredResult.ready,
+                errors,
 
-                required:
-                    requiredResult,
-
-                optional:
-                    optionalResult,
+                warnings,
 
                 checkedAt:
                     Date.now()
@@ -57216,99 +57269,112 @@
 
 
         /* =====================================================
-           WAIT FOR APP DEPENDENCIES
+           REGISTER MANIFEST
            ===================================================== */
 
-        async function waitForApp(
+        function register(
             appId,
-            options = {}
+            definition = {}
         ) {
 
-            const timeout =
-                Number.isFinite(
-                    options.timeout
-                )
-                    ? options.timeout
-                    : 15000;
+            appId =
+                normalize(
+                    appId ||
+                    definition.id
+                );
 
 
-            const startedAt =
-                Date.now();
+            if (!appId) {
+
+                return null;
+
+            }
 
 
-            while (
-                Date.now() -
-                startedAt <
-                timeout
+            const manifest =
+                createDefaultManifest(
+                    appId,
+                    definition
+                );
+
+
+            const validation =
+                validate(
+                    manifest
+                );
+
+
+            validationResults.set(
+                appId,
+                validation
+            );
+
+
+            if (
+                !validation.valid
             ) {
 
-                const result =
-                    checkAppDependencies(
-                        appId
-                    );
+                emit(
+                    "app:manifest:error",
+                    {
 
+                        appId,
 
-                if (
-                    result.ready
-                ) {
+                        manifest,
 
-                    return result;
-
-                }
-
-
-                const pending =
-                    result.required.unavailable;
-
-
-                if (
-                    pending.length
-                ) {
-
-                    try {
-
-                        await Promise.race(
-                            pending.map(
-                                serviceId =>
-                                    waitFor(
-                                        serviceId,
-                                        {
-
-                                            timeout:
-                                                Math.max(
-                                                    500,
-                                                    timeout -
-                                                    (
-                                                        Date.now() -
-                                                        startedAt
-                                                    )
-                                                )
-
-                                        }
-                                    )
-                            )
-                        );
-
-                    } catch (
-                        error
-                    ) {
-
-                        /*
-                         * Weiter prüfen.
-                         * Ein anderer Dienst kann
-                         * inzwischen bereit sein.
-                         */
+                        validation
 
                     }
+                );
 
-                } else {
 
-                    await new Promise(
-                        resolve =>
-                            setTimeout(
-                                resolve,
-                                50
-                            )
+                return {
+
+                    manifest,
+
+                    validation
+
+                };
+
+            }
+
+
+            manifests.set(
+                appId,
+                manifest
+            );
+
+
+            /* ---------------------------------------------
+               STATE DEFAULTS
+               --------------------------------------------- */
+
+            if (
+                appState &&
+                typeof appState.create ===
+                "function"
+            ) {
+
+                try {
+
+                    appState.create(
+                        appId,
+                        manifest.data.defaults,
+                        {
+
+                            restore:
+                                manifest.storage.autoRestore
+
+                        }
+                    );
+
+                } catch (
+                    error
+                ) {
+
+                    console.warn(
+                        "[HalDo Manifest Engine 20]",
+                        error
                     );
 
                 }
@@ -57316,15 +57382,445 @@
             }
 
 
-            throw new Error(
-                `App dependencies timeout: ${appId}`
+            /* ---------------------------------------------
+               SERVICE DEPENDENCIES
+               --------------------------------------------- */
+
+            if (
+                serviceEngine &&
+                typeof serviceEngine.registerAppDependencies ===
+                "function"
+            ) {
+
+                serviceEngine.registerAppDependencies(
+                    appId,
+                    manifest.dependencies
+                );
+
+            }
+
+
+            /* ---------------------------------------------
+               COMMANDS
+               --------------------------------------------- */
+
+            if (
+                commandEngine &&
+                Array.isArray(
+                    manifest.commands
+                )
+            ) {
+
+                manifest.commands.forEach(
+                    command => {
+
+                        if (
+                            typeof command !==
+                            "object"
+                        ) {
+
+                            return;
+
+                        }
+
+
+                        if (
+                            typeof command.execute !==
+                            "function"
+                        ) {
+
+                            return;
+
+                        }
+
+
+                        try {
+
+                            commandEngine.register(
+                                {
+
+                                    ...command,
+
+                                    appId
+
+                                }
+                            );
+
+                        } catch (
+                            error
+                        ) {
+
+                            console.warn(
+                                "[HalDo Manifest Engine 20]",
+                                error
+                            );
+
+                        }
+
+                    }
+                );
+
+            }
+
+
+            emit(
+                "app:manifest:registered",
+                {
+
+                    appId,
+
+                    manifest,
+
+                    validation
+
+                }
+            );
+
+
+            return {
+
+                manifest,
+
+                validation
+
+            };
+
+        }
+
+
+        /* =====================================================
+           GET MANIFEST
+           ===================================================== */
+
+        function get(
+            appId
+        ) {
+
+            return (
+                manifests.get(
+                    normalize(
+                        appId
+                    )
+                ) ||
+                null
             );
 
         }
 
 
         /* =====================================================
-           AUTO APP DEPENDENCY BRIDGE
+           HAS MANIFEST
+           ===================================================== */
+
+        function has(
+            appId
+        ) {
+
+            return manifests.has(
+                normalize(
+                    appId
+                )
+            );
+
+        }
+
+
+        /* =====================================================
+           GET VALIDATION
+           ===================================================== */
+
+        function getValidation(
+            appId
+        ) {
+
+            return (
+                validationResults.get(
+                    normalize(
+                        appId
+                    )
+                ) ||
+                null
+            );
+
+        }
+
+
+        /* =====================================================
+           UPDATE MANIFEST
+           ===================================================== */
+
+        function update(
+            appId,
+            patch = {}
+        ) {
+
+            const current =
+                get(
+                    appId
+                );
+
+
+            if (!current) {
+
+                return register(
+                    appId,
+                    patch
+                );
+
+            }
+
+
+            const updated =
+                createDefaultManifest(
+                    appId,
+                    {
+
+                        ...current,
+
+                        ...patch,
+
+                        ui: {
+
+                            ...current.ui,
+
+                            ...(patch.ui ||
+                                {})
+
+                        },
+
+                        navigation: {
+
+                            ...current.navigation,
+
+                            ...(patch.navigation ||
+                                {})
+
+                        },
+
+                        settings: {
+
+                            ...current.settings,
+
+                            ...(patch.settings ||
+                                {})
+
+                        },
+
+                        data: {
+
+                            ...current.data,
+
+                            ...(patch.data ||
+                                {})
+
+                        },
+
+                        storage: {
+
+                            ...current.storage,
+
+                            ...(patch.storage ||
+                                {})
+
+                        },
+
+                        window: {
+
+                            ...current.window,
+
+                            ...(patch.window ||
+                                {})
+
+                        }
+
+                    }
+                );
+
+
+            const validation =
+                validate(
+                    updated
+                );
+
+
+            validationResults.set(
+                appId,
+                validation
+            );
+
+
+            if (
+                !validation.valid
+            ) {
+
+                emit(
+                    "app:manifest:error",
+                    {
+
+                        appId,
+
+                        manifest:
+                            updated,
+
+                        validation
+
+                    }
+                );
+
+
+                return {
+
+                    manifest:
+                        current,
+
+                    validation
+
+                };
+
+            }
+
+
+            manifests.set(
+                appId,
+                updated
+            );
+
+
+            emit(
+                "app:manifest:updated",
+                {
+
+                    appId,
+
+                    manifest:
+                        updated,
+
+                    validation
+
+                }
+            );
+
+
+            return {
+
+                manifest:
+                    updated,
+
+                validation
+
+            };
+
+        }
+
+
+        /* =====================================================
+           REMOVE MANIFEST
+           ===================================================== */
+
+        function remove(
+            appId
+        ) {
+
+            appId =
+                normalize(
+                    appId
+                );
+
+
+            if (
+                !manifests.has(
+                    appId
+                )
+            ) {
+
+                return false;
+
+            }
+
+
+            manifests.delete(
+                appId
+            );
+
+
+            validationResults.delete(
+                appId
+            );
+
+
+            if (
+                commandEngine &&
+                typeof commandEngine.unregisterAppCommands ===
+                "function"
+            ) {
+
+                commandEngine.unregisterAppCommands(
+                    appId
+                );
+
+            }
+
+
+            emit(
+                "app:manifest:removed",
+                {
+
+                    appId
+
+                }
+            );
+
+
+            return true;
+
+        }
+
+
+        /* =====================================================
+           LIST MANIFESTS
+           ===================================================== */
+
+        function list() {
+
+            return [
+                ...manifests.values()
+            ];
+
+        }
+
+
+        /* =====================================================
+           CREATE APP BLUEPRINT
+           ===================================================== */
+
+        function createBlueprint(
+            definition = {}
+        ) {
+
+            const appId =
+                normalize(
+                    definition.id ||
+                    definition.name
+                );
+
+
+            if (!appId) {
+
+                return null;
+
+            }
+
+
+            return createDefaultManifest(
+                appId,
+                definition
+            );
+
+        }
+
+
+        /* =====================================================
+           AUTO BRIDGE WITH APP LIFECYCLE
            ===================================================== */
 
         document.addEventListener(
@@ -57354,62 +57850,86 @@
                 }
 
 
+                if (
+                    has(
+                        appId
+                    )
+                ) {
+
+                    return;
+
+                }
+
+
                 const definition =
                     instance.definition ||
                     {};
 
 
-                if (
-                    Array.isArray(
-                        definition.dependencies
-                    )
-                ) {
-
-                    registerAppDependencies(
-                        appId,
-                        definition.dependencies
-                    );
-
-                }
+                register(
+                    appId,
+                    definition
+                );
 
             }
         );
 
 
         /* =====================================================
-           LIST SERVICES
+           MESSAGE BUS BRIDGE
            ===================================================== */
 
-        function listServices() {
+        if (
+            messageBus &&
+            typeof messageBus.on ===
+            "function"
+        ) {
 
-            return [
-                ...services.values()
-            ];
-
-        }
-
-
-        /* =====================================================
-           LIST HEALTH
-           ===================================================== */
-
-        function listHealth() {
-
-            return [
-                ...health.entries()
-            ].map(
+            messageBus.on(
+                "app:manifest:request",
                 (
-                    [
-                        serviceId,
-                        value
-                    ]
-                ) => ({
+                    payload,
+                    message
+                ) => {
 
-                    serviceId,
+                    const appId =
+                        payload &&
+                        payload.appId;
 
-                    ...value
 
-                })
+                    if (!appId) {
+
+                        return;
+
+                    }
+
+
+                    const manifest =
+                        get(
+                            appId
+                        );
+
+
+                    if (
+                        messageBus &&
+                        typeof messageBus.respond ===
+                        "function"
+                    ) {
+
+                        messageBus.respond(
+                            message,
+                            {
+
+                                appId,
+
+                                manifest
+
+                            }
+                        );
+
+                    }
+
+                }
             );
 
         }
@@ -57419,9 +57939,21 @@
            PUBLIC API
            ===================================================== */
 
-        const publicAPI = {
+        const manifestEngine = {
 
-            STATUS,
+            SCHEMA_VERSION,
+
+            COMPONENT_TYPES,
+
+            DATA_TYPES,
+
+            PERMISSIONS,
+
+            createBlueprint,
+
+            createDefaultManifest,
+
+            validate,
 
             register,
 
@@ -57429,31 +57961,13 @@
 
             has,
 
-            isReady,
+            getValidation,
 
-            initialize,
+            update,
 
-            stop,
+            remove,
 
-            destroy,
-
-            waitFor,
-
-            checkDependencies,
-
-            checkHealth,
-
-            registerAppDependencies,
-
-            getAppDependencies,
-
-            checkAppDependencies,
-
-            waitForApp,
-
-            listServices,
-
-            listHealth
+            list
 
         };
 
@@ -57462,8 +57976,8 @@
            GLOBAL API
            ===================================================== */
 
-        window.HalDoServiceEngine20 =
-            publicAPI;
+        window.HalDoAppManifest20 =
+            manifestEngine;
 
 
         if (
@@ -57476,8 +57990,8 @@
         }
 
 
-        window.HalDoOS.serviceEngine20 =
-            publicAPI;
+        window.HalDoOS.appManifest20 =
+            manifestEngine;
 
 
         /* =====================================================
@@ -57485,21 +57999,30 @@
            ===================================================== */
 
         emit(
-            "service-engine:ready",
+            "app:manifest:ready",
             {
 
                 version:
-                    "20.0.0",
+                    SCHEMA_VERSION,
 
                 timestamp:
-                    Date.now()
+                    Date.now(),
+
+                componentTypes:
+                    COMPONENT_TYPES.length,
+
+                dataTypes:
+                    DATA_TYPES.length,
+
+                permissions:
+                    PERMISSIONS.length
 
             }
         );
 
 
         console.info(
-            "%cHalDo AI OS 20%c Service / Dependency Engine bereit",
+            "%cHalDo AI OS 20%c Complete App Manifest / Schema Engine bereit",
             "color:#42e6ff;font-weight:800;",
             "color:#ffffff;"
         );
