@@ -1,7 +1,29 @@
 // ============================================================
-// HALDO AI OS 18
-// AI CORE
-// PART 84
+// HALDO AI OS 20
+// AI PROVIDER
+// ============================================================
+// Zentrale Provider-Schicht für HalDo AI.
+// Verbindet AI Core / AI Chat mit einem echten KI-Backend.
+//
+// Unterstützt:
+// - eigenen HalDo AI Endpoint
+// - OpenAI-kompatible Endpoints
+// - Streaming-Vorbereitung
+// - Konversationskontext
+// - System-Prompt
+// - Sprache
+// - Fehlerbehandlung
+// - Timeout
+// - AbortController
+// - Provider-Status
+// - Events
+// - Kernel-Verbindung
+//
+// WICHTIG:
+// API-Schlüssel sollten bei einer veröffentlichten Web-App
+// NICHT direkt im Frontend gespeichert werden.
+// Bevorzugt wird ein eigener sicherer Backend-Endpunkt.
+//
 // ============================================================
 
 (function (window, document) {
@@ -9,8 +31,8 @@
     "use strict";
 
     if (
-        window.HalDoAICore &&
-        window.HalDoAICore.__haldoAI18
+        window.HalDoAIProvider &&
+        window.HalDoAIProvider.__haldoAI20
     ) {
         return;
     }
@@ -18,43 +40,59 @@
     window.HalDoOS =
         window.HalDoOS || {};
 
+    // ========================================================
+    // CONFIG
+    // ========================================================
+
     const CONFIG = {
 
         name:
-            "HalDo AI Core",
+            "HalDo AI Provider",
 
         version:
-            "18.0.0",
+            "20.0.0",
 
         mode:
-            "Professional Ultimate Foundation",
+            "Professional Ultimate AI",
 
-        maxRequests:
-            1000,
-
-        commandThreshold:
-            0.55,
-
-        autoDetectLanguage:
+        enabled:
             true,
 
-        rememberConversation:
-            true,
+        provider:
+            "haldo",
 
-        enableCommands:
-            true,
+        endpoint:
+            "/api/ai",
 
-        enableMemory:
-            true,
+        model:
+            "",
 
-        enableSpeech:
-            true
+        timeout:
+            60000,
+
+        maxTokens:
+            4096,
+
+        temperature:
+            0.7,
+
+        stream:
+            false,
+
+        autoConnect:
+            false,
+
+        retryCount:
+            1,
+
+        retryDelay:
+            800
 
     };
 
-    // --------------------------------------------------------
+    // ========================================================
     // STATE
-    // --------------------------------------------------------
+    // ========================================================
 
     const state = {
 
@@ -62,6 +100,9 @@
             false,
 
         ready:
+            false,
+
+        connected:
             false,
 
         processing:
@@ -82,8 +123,14 @@
         lastResponse:
             null,
 
-        currentLanguage:
-            "de",
+        lastError:
+            null,
+
+        activeProvider:
+            CONFIG.provider,
+
+        activeModel:
+            CONFIG.model,
 
         errors:
             [],
@@ -93,9 +140,9 @@
 
     };
 
-    // --------------------------------------------------------
+    // ========================================================
     // EVENTS
-    // --------------------------------------------------------
+    // ========================================================
 
     const listeners =
         new Map();
@@ -187,7 +234,7 @@
                 } catch (error) {
 
                     console.error(
-                        "[HalDoAICore]",
+                        "[HalDoAIProvider]",
                         error
                     );
 
@@ -201,7 +248,7 @@
 
             document.dispatchEvent(
                 new CustomEvent(
-                    `haldo:ai-core:${event}`,
+                    `haldo:ai-provider:${event}`,
                     {
                         detail
                     }
@@ -212,9 +259,9 @@
 
     }
 
-    // --------------------------------------------------------
+    // ========================================================
     // UTILITIES
-    // --------------------------------------------------------
+    // ========================================================
 
     function clean(
         value
@@ -227,7 +274,7 @@
     }
 
     function createId(
-        prefix = "ai"
+        prefix = "provider"
     ) {
 
         return (
@@ -242,771 +289,337 @@
 
     }
 
-    // --------------------------------------------------------
-    // MODULE CONNECTIONS
-    // --------------------------------------------------------
-
-    function getLanguage() {
-
-        return (
-            window.HalDoAILanguage ||
-            window.HalDoOS?.aiLanguage ||
-            null
-        );
-
-    }
-
-    function getCommands() {
-
-        return (
-            window.HalDoAICommands ||
-            window.HalDoOS?.aiCommands ||
-            null
-        );
-
-    }
-
-    function getMemory() {
-
-        return (
-            window.HalDoAIMemory ||
-            window.HalDoOS?.aiMemory ||
-            null
-        );
-
-    }
-
-    function getConversation() {
-
-        return (
-            window.HalDoConversationState ||
-            window.HalDoOS?.conversationState ||
-            null
-        );
-
-    }
-
-    function getChat() {
-
-        return (
-            window.HalDoAIChat ||
-            window.HalDoOS?.aiChat ||
-            null
-        );
-
-    }
-
-    function getEngine() {
-
-        return (
-            window.HalDoAIEngine ||
-            window.HalDoOS?.aiEngine ||
-            null
-        );
-
-    }
-
-    function getSpeech() {
-
-        return (
-            window.HalDoAISpeech ||
-            window.HalDoOS?.aiSpeech ||
-            null
-        );
-
-    }
-
-    function getVoice() {
-
-        return (
-            window.HalDoAIVoice ||
-            window.HalDoOS?.aiVoice ||
-            null
-        );
-
-    }
-
-    function getKernel() {
-
-        return (
-            window.HalDoKernel ||
-            window.HalDoOS?.kernel ||
-            null
-        );
-
-    }
-
-    // --------------------------------------------------------
-    // LANGUAGE
-    // --------------------------------------------------------
-
-    function detectLanguage(
-        text
+    function sleep(
+        milliseconds
     ) {
 
-        const language =
-            getLanguage();
-
-        if (
-            !CONFIG.autoDetectLanguage ||
-            !language ||
-            typeof language.detectLanguage !==
-            "function"
-        ) {
-
-            return {
-
-                language:
-                    state.currentLanguage,
-
-                confidence:
-                    0
-
-            };
-
-        }
-
-        try {
-
-            const result =
-                language.detectLanguage(
-                    text
-                );
-
-            if (
-                result?.language
-            ) {
-
-                state.currentLanguage =
-                    result.language;
-
-            }
-
-            return result;
-
-        } catch (error) {
-
-            recordError(
-                error
-            );
-
-            return {
-
-                language:
-                    state.currentLanguage,
-
-                confidence:
-                    0
-
-            };
-
-        }
-
-    }
-
-    async function setLanguage(
-        language,
-        options = {}
-    ) {
-
-        const manager =
-            getLanguage();
-
-        if (
-            !manager ||
-            typeof manager.setLanguage !==
-            "function"
-        ) {
-
-            return {
-
-                ok:
-                    false,
-
-                error:
-                    "LANGUAGE_ENGINE_UNAVAILABLE"
-
-            };
-
-        }
-
-        try {
-
-            const result =
-                await manager.setLanguage(
-                    language,
-                    options
-                );
-
-            if (
-                result?.ok
-            ) {
-
-                state.currentLanguage =
-                    result.language ||
-                    language;
-
-            }
-
-            return result;
-
-        } catch (error) {
-
-            recordError(
-                error
-            );
-
-            return {
-
-                ok:
-                    false,
-
-                error:
-                    error.message
-
-            };
-
-        }
-
-    }
-
-    // --------------------------------------------------------
-    // COMMAND PROCESSING
-    // --------------------------------------------------------
-
-    function detectCommand(
-        text
-    ) {
-
-        const commands =
-            getCommands();
-
-        if (
-            !CONFIG.enableCommands ||
-            !commands ||
-            typeof commands.detectCommand !==
-            "function"
-        ) {
-
-            return {
-
-                command:
-                    null,
-
-                confidence:
-                    0
-
-            };
-
-        }
-
-        try {
-
-            return commands.detectCommand(
-                text
-            );
-
-        } catch (error) {
-
-            recordError(
-                error
-            );
-
-            return {
-
-                command:
-                    null,
-
-                confidence:
-                    0
-
-            };
-
-        }
-
-    }
-
-    async function executeCommand(
-        text,
-        options = {}
-    ) {
-
-        const commands =
-            getCommands();
-
-        if (
-            !CONFIG.enableCommands ||
-            !commands ||
-            typeof commands.execute !==
-            "function"
-        ) {
-
-            return {
-
-                ok:
-                    false,
-
-                handled:
-                    false,
-
-                error:
-                    "COMMAND_ENGINE_UNAVAILABLE"
-
-            };
-
-        }
-
-        try {
-
-            const result =
-                await commands.execute(
-                    text,
-                    options
-                );
-
-            return {
-
-                ...result,
-
-                handled:
-                    Boolean(
-                        result?.command ||
-                        result?.result?.type
-                    )
-
-            };
-
-        } catch (error) {
-
-            recordError(
-                error
-            );
-
-            return {
-
-                ok:
-                    false,
-
-                handled:
-                    false,
-
-                error:
-                    error.message
-
-            };
-
-        }
-
-    }
-
-    // --------------------------------------------------------
-    // MEMORY
-    // --------------------------------------------------------
-
-    async function remember(
-        data
-    ) {
-
-        if (
-            !CONFIG.enableMemory
-        ) {
-
-            return false;
-
-        }
-
-        const memory =
-            getMemory();
-
-        if (!memory) {
-            return false;
-        }
-
-        const methods = [
-
-            "remember",
-            "add",
-            "store",
-            "save",
-            "rememberMessage"
-
-        ];
-
-        for (
-            const method of methods
-        ) {
-
-            if (
-                typeof memory[method] !==
-                "function"
-            ) {
-                continue;
-            }
-
-            try {
-
-                await memory[method](
-                    data
-                );
-
-                return true;
-
-            } catch (error) {}
-
-        }
-
-        return false;
-
-    }
-
-    async function recall(
-        query,
-        options = {}
-    ) {
-
-        if (
-            !CONFIG.enableMemory
-        ) {
-
-            return [];
-
-        }
-
-        const memory =
-            getMemory();
-
-        if (!memory) {
-            return [];
-        }
-
-        const methods = [
-
-            "recall",
-            "search",
-            "find",
-            "query",
-            "retrieve"
-
-        ];
-
-        for (
-            const method of methods
-        ) {
-
-            if (
-                typeof memory[method] !==
-                "function"
-            ) {
-                continue;
-            }
-
-            try {
-
-                const result =
-                    await memory[method](
-                        query,
-                        options
-                    );
-
-                return Array.isArray(
-                    result
+        return new Promise(
+            resolve =>
+                window.setTimeout(
+                    resolve,
+                    milliseconds
                 )
-                    ? result
-                    : result
-                        ? [result]
-                        : [];
-
-            } catch (error) {}
-
-        }
-
-        return [];
+        );
 
     }
 
-    // --------------------------------------------------------
-    // CONVERSATION
-    // --------------------------------------------------------
+    // ========================================================
+    // CONFIGURATION
+    // ========================================================
 
-    async function addMessage(
-        message
+    function configure(
+        options = {}
     ) {
 
         if (
-            !CONFIG.rememberConversation
+            !options ||
+            typeof options !==
+            "object"
         ) {
-            return false;
+
+            return getConfig();
+
         }
 
-        const conversation =
-            getConversation();
+        const allowed = [
 
-        if (!conversation) {
-            return false;
-        }
-
-        const methods = [
-
-            "addMessage",
-            "add",
-            "pushMessage",
-            "appendMessage"
+            "enabled",
+            "provider",
+            "endpoint",
+            "model",
+            "timeout",
+            "maxTokens",
+            "temperature",
+            "stream",
+            "autoConnect",
+            "retryCount",
+            "retryDelay"
 
         ];
 
         for (
-            const method of methods
+            const key of allowed
         ) {
 
             if (
-                typeof conversation[method] !==
-                "function"
-            ) {
-                continue;
-            }
-
-            try {
-
-                await conversation[method](
-                    message
-                );
-
-                return true;
-
-            } catch (error) {}
-
-        }
-
-        return false;
-
-    }
-
-    function getMessages(
-        limit = 50
-    ) {
-
-        const conversation =
-            getConversation();
-
-        if (!conversation) {
-            return [];
-        }
-
-        const methods = [
-
-            "getMessages",
-            "getHistory",
-            "getConversation"
-
-        ];
-
-        for (
-            const method of methods
-        ) {
-
-            if (
-                typeof conversation[method] !==
-                "function"
-            ) {
-                continue;
-            }
-
-            try {
-
-                const result =
-                    conversation[method](
-                        limit
-                    );
-
-                if (
-                    Array.isArray(
-                        result
+                Object.prototype
+                    .hasOwnProperty
+                    .call(
+                        options,
+                        key
                     )
-                ) {
+            ) {
 
-                    return result;
+                CONFIG[key] =
+                    options[key];
 
-                }
-
-            } catch (error) {}
+            }
 
         }
 
-        return [];
+        state.activeProvider =
+            CONFIG.provider;
+
+        state.activeModel =
+            CONFIG.model;
+
+        emit(
+            "configured",
+            getConfig()
+        );
+
+        return getConfig();
 
     }
 
-    // --------------------------------------------------------
-    // AI ENGINE
-    // --------------------------------------------------------
+    function getConfig() {
 
-    async function generateResponse(
+        return {
+            ...CONFIG
+        };
+
+    }
+
+    // ========================================================
+    // REQUEST BUILDING
+    // ========================================================
+
+    function buildMessages(
         input,
         context = {}
     ) {
 
-        /*
-         * Bereits vorhandene AI Engine verwenden.
-         */
+        const messages = [];
 
-        const engine =
-            getEngine();
+        const systemPrompt =
+            context.systemPrompt ||
+            context.system?.prompt ||
+            "";
 
-        if (
-            engine
+        if (systemPrompt) {
+
+            messages.push({
+
+                role:
+                    "system",
+
+                content:
+                    clean(
+                        systemPrompt
+                    )
+
+            });
+
+        }
+
+        const history =
+            Array.isArray(
+                context.messages
+            )
+                ? context.messages
+                : [];
+
+        for (
+            const message of history
         ) {
 
-            const methods = [
+            if (
+                !message ||
+                !message.role
+            ) {
+                continue;
+            }
 
-                "generate",
-                "generateResponse",
-                "respond",
-                "process",
-                "ask",
-                "complete"
+            let role =
+                message.role;
 
-            ];
-
-            for (
-                const method of methods
+            if (
+                role !== "system" &&
+                role !== "user" &&
+                role !== "assistant"
             ) {
 
-                if (
-                    typeof engine[method] !==
-                    "function"
-                ) {
-                    continue;
-                }
-
-                try {
-
-                    const result =
-                        await engine[method](
-                            input,
-                            context
-                        );
-
-                    if (
-                        result !==
-                        undefined &&
-                        result !==
-                        null
-                    ) {
-
-                        return normalizeAIResult(
-                            result
-                        );
-
-                    }
-
-                } catch (error) {
-
-                    recordError(
-                        error
-                    );
-
-                }
+                role =
+                    role === "ai"
+                        ? "assistant"
+                        : "user";
 
             }
+
+            const content =
+                message.content ??
+                message.text ??
+                "";
+
+            if (
+                !clean(content)
+            ) {
+                continue;
+            }
+
+            messages.push({
+
+                role,
+
+                content:
+                    clean(content)
+
+            });
 
         }
 
         /*
-         * Vorhandenen AI Chat verwenden.
+         * Die aktuelle Eingabe nur hinzufügen,
+         * wenn sie nicht bereits im Verlauf enthalten ist.
          */
 
-        const chat =
-            getChat();
-
-        if (
-            chat
-        ) {
-
-            const methods = [
-
-                "sendMessage",
-                "send",
-                "ask",
-                "respond",
-                "processMessage"
-
+        const last =
+            messages[
+                messages.length - 1
             ];
 
-            for (
-                const method of methods
-            ) {
+        if (
+            !last ||
+            last.role !== "user" ||
+            last.content !==
+                clean(input)
+        ) {
 
-                if (
-                    typeof chat[method] !==
-                    "function"
-                ) {
-                    continue;
-                }
+            messages.push({
 
-                try {
+                role:
+                    "user",
 
-                    const result =
-                        await chat[method](
-                            input,
-                            context
-                        );
+                content:
+                    clean(input)
 
-                    if (
-                        result !==
-                        undefined &&
-                        result !==
-                        null
-                    ) {
-
-                        return normalizeAIResult(
-                            result
-                        );
-
-                    }
-
-                } catch (error) {
-
-                    recordError(
-                        error
-                    );
-
-                }
-
-            }
+            });
 
         }
 
-        /*
-         * Kein Backend vorhanden:
-         * Core meldet sauber zurück,
-         * statt einen falschen AI-Response
-         * zu erfinden.
-         */
+        return messages;
+
+    }
+
+    function buildPayload(
+        input,
+        context = {}
+    ) {
+
+        const messages =
+            buildMessages(
+                input,
+                context
+            );
 
         return {
 
-            ok:
-                false,
-
-            type:
-                "no-ai-provider",
-
-            message:
-                "Kein aktiver AI-Provider ist momentan verbunden.",
-
             provider:
-                null
+                CONFIG.provider,
+
+            model:
+                CONFIG.model,
+
+            messages,
+
+            language:
+                context.language ||
+                null,
+
+            conversationId:
+                context.conversationId ||
+                null,
+
+            requestId:
+                context.requestId ||
+                null,
+
+            temperature:
+                CONFIG.temperature,
+
+            max_tokens:
+                CONFIG.maxTokens,
+
+            stream:
+                CONFIG.stream,
+
+            metadata:
+                context.metadata ||
+                {},
+
+            haldo: {
+
+                name:
+                    "HalDo AI",
+
+                os:
+                    "HalDo AI OS",
+
+                version:
+                    "20.0.0",
+
+                mode:
+                    CONFIG.mode
+
+            }
 
         };
 
     }
 
-    function normalizeAIResult(
-        result
+    // ========================================================
+    // FETCH WITH TIMEOUT
+    // ========================================================
+
+    async function fetchWithTimeout(
+        url,
+        options = {},
+        timeout =
+            CONFIG.timeout
+    ) {
+
+        const controller =
+            new AbortController();
+
+        const timer =
+            window.setTimeout(
+                () => {
+                    controller.abort();
+                },
+                timeout
+            );
+
+        try {
+
+            return await fetch(
+                url,
+                {
+                    ...options,
+                    signal:
+                        controller.signal
+                }
+            );
+
+        } finally {
+
+            window.clearTimeout(
+                timer
+            );
+
+        }
+
+    }
+
+    // ========================================================
+    // RESPONSE NORMALIZATION
+    // ========================================================
+
+    function normalizeResponse(
+        data
     ) {
 
         if (
-            typeof result ===
+            typeof data ===
             "string"
         ) {
 
@@ -1015,34 +628,138 @@
                 ok:
                     true,
 
-                type:
-                    "text",
-
                 text:
-                    result,
+                    data,
 
                 content:
-                    result
+                    data,
+
+                provider:
+                    state.activeProvider,
+
+                model:
+                    state.activeModel
 
             };
 
         }
 
         if (
-            typeof result !==
+            !data ||
+            typeof data !==
             "object"
         ) {
 
             return {
 
                 ok:
+                    false,
+
+                text:
+                    "",
+
+                content:
+                    "",
+
+                error:
+                    "INVALID_PROVIDER_RESPONSE"
+
+            };
+
+        }
+
+        /*
+         * HalDo Backend Format
+         */
+
+        if (
+            typeof data.text ===
+            "string"
+        ) {
+
+            return {
+
+                ...data,
+
+                ok:
+                    data.ok !== false,
+
+                text:
+                    data.text,
+
+                content:
+                    data.content ??
+                    data.text
+
+            };
+
+        }
+
+        /*
+         * OpenAI-kompatibles Format
+         */
+
+        const openAIText =
+            data.choices?.[0]?.message
+                ?.content;
+
+        if (
+            typeof openAIText ===
+            "string"
+        ) {
+
+            return {
+
+                ...data,
+
+                ok:
                     true,
 
-                type:
-                    "value",
+                text:
+                    openAIText,
 
-                value:
-                    result
+                content:
+                    openAIText,
+
+                provider:
+                    data.provider ||
+                    state.activeProvider,
+
+                model:
+                    data.model ||
+                    state.activeModel
+
+            };
+
+        }
+
+        /*
+         * Alternative Response-Formate
+         */
+
+        const alternative =
+            data.response ??
+            data.answer ??
+            data.content ??
+            data.message;
+
+        if (
+            typeof alternative ===
+            "string"
+        ) {
+
+            return {
+
+                ...data,
+
+                ok:
+                    data.ok !== false,
+
+                text:
+                    alternative,
+
+                content:
+                    alternative
 
             };
 
@@ -1050,34 +767,33 @@
 
         return {
 
-            ok:
-                result.ok !== false,
+            ...data,
 
-            ...result,
+            ok:
+                data.ok !== false,
 
             text:
-                result.text ??
-                result.content ??
-                result.message ??
+                "",
+
+            content:
                 ""
 
         };
 
     }
 
-    // --------------------------------------------------------
-    // MAIN REQUEST PIPELINE
-    // --------------------------------------------------------
+    // ========================================================
+    // HTTP REQUEST
+    // ========================================================
 
-    async function process(
+    async function request(
         input,
+        context = {},
         options = {}
     ) {
 
         const text =
-            clean(
-                input
-            );
+            clean(input);
 
         if (!text) {
 
@@ -1096,9 +812,55 @@
 
         }
 
+        if (!CONFIG.enabled) {
+
+            return {
+
+                ok:
+                    false,
+
+                error:
+                    "AI_PROVIDER_DISABLED",
+
+                text:
+                    ""
+
+            };
+
+        }
+
+        const endpoint =
+            clean(
+                options.endpoint ||
+                CONFIG.endpoint
+            );
+
+        if (!endpoint) {
+
+            return {
+
+                ok:
+                    false,
+
+                error:
+                    "AI_ENDPOINT_MISSING",
+
+                text:
+                    ""
+
+            };
+
+        }
+
         const requestId =
             createId(
-                "request"
+                "ai"
+            );
+
+        const payload =
+            buildPayload(
+                text,
+                context
             );
 
         const startedAt =
@@ -1107,9 +869,12 @@
         state.processing =
             true;
 
+        state.connected =
+            false;
+
         state.requestCount++;
 
-        const request = {
+        const requestInfo = {
 
             id:
                 requestId,
@@ -1117,402 +882,227 @@
             input:
                 text,
 
+            provider:
+                CONFIG.provider,
+
+            model:
+                CONFIG.model,
+
+            endpoint,
+
             timestamp:
-                startedAt,
-
-            language:
-                state.currentLanguage,
-
-            options
+                startedAt
 
         };
 
         state.lastRequest =
-            request;
+            requestInfo;
 
         emit(
             "request-start",
             {
-                request
+                request:
+                    requestInfo
             }
         );
 
+        let lastError =
+            null;
+
+        const attempts =
+            Math.max(
+                0,
+                Number(
+                    CONFIG.retryCount
+                ) || 0
+            ) + 1;
+
         try {
 
-            /*
-             * 1. Sprache erkennen
-             */
-
-            const language =
-                detectLanguage(
-                    text
-                );
-
-            request.language =
-                language?.language ||
-                state.currentLanguage;
-
-            /*
-             * 2. Eingabe speichern
-             */
-
-            await addMessage({
-
-                role:
-                    "user",
-
-                content:
-                    text,
-
-                text:
-                    text,
-
-                language:
-                    request.language,
-
-                timestamp:
-                    Date.now()
-
-            });
-
-            /*
-             * 3. Relevante Erinnerungen
-             */
-
-            const memories =
-                await recall(
-                    text,
-                    {
-                        limit:
-                            options.memoryLimit ||
-                            10
-                    }
-                );
-
-            /*
-             * 4. Befehl erkennen
-             */
-
-            const detectedCommand =
-                detectCommand(
-                    text
-                );
-
-            emit(
-                "command-detected",
-                {
-
-                    input:
-                        text,
-
-                    detection:
-                        detectedCommand
-
-                }
-            );
-
-            /*
-             * 5. Wenn klarer Systembefehl:
-             * Befehl ausführen.
-             */
-
-            if (
-                CONFIG.enableCommands &&
-                detectedCommand?.command &&
-                detectedCommand.confidence >=
-                    CONFIG.commandThreshold &&
-                !options.forceAI
+            for (
+                let attempt = 0;
+                attempt < attempts;
+                attempt++
             ) {
 
-                const commandResult =
-                    await executeCommand(
-                        text,
-                        options
-                    );
+                try {
 
-                if (
-                    commandResult &&
-                    (
-                        commandResult.ok ||
-                        commandResult.result ||
-                        commandResult.requiresConfirmation
-                    )
-                ) {
+                    const response =
+                        await fetchWithTimeout(
+                            endpoint,
+                            {
 
-                    const response = {
+                                method:
+                                    "POST",
 
-                        ok:
-                            commandResult.ok !==
-                            false,
+                                headers: {
 
-                        type:
-                            "command",
+                                    "Content-Type":
+                                        "application/json",
 
-                        requestId,
+                                    "Accept":
+                                        "application/json"
 
-                        input:
-                            text,
+                                },
 
-                        language:
-                            request.language,
+                                body:
+                                    JSON.stringify(
+                                        payload
+                                    )
 
-                        command:
-                            detectedCommand.command.id,
+                            },
+                            options.timeout ||
+                            CONFIG.timeout
+                        );
 
-                        confidence:
-                            detectedCommand.confidence,
+                    let data =
+                        null;
 
-                        result:
-                            commandResult,
+                    const contentType =
+                        response.headers
+                            .get(
+                                "content-type"
+                            ) ||
+                        "";
 
-                        timestamp:
-                            Date.now(),
+                    if (
+                        contentType.includes(
+                            "application/json"
+                        )
+                    ) {
 
-                        duration:
-                            Date.now() -
-                            startedAt
+                        data =
+                            await response.json();
 
-                    };
+                    } else {
+
+                        data =
+                            await response.text();
+
+                    }
+
+                    if (
+                        !response.ok
+                    ) {
+
+                        const error =
+                            new Error(
+                                data?.error ||
+                                data?.message ||
+                                `AI provider HTTP ${response.status}`
+                            );
+
+                        error.status =
+                            response.status;
+
+                        throw error;
+
+                    }
+
+                    const result =
+                        normalizeResponse(
+                            data
+                        );
+
+                    result.requestId =
+                        requestId;
+
+                    result.duration =
+                        Date.now() -
+                        startedAt;
+
+                    result.timestamp =
+                        Date.now();
+
+                    state.connected =
+                        true;
 
                     state.lastResponse =
-                        response;
+                        result;
 
                     state.successfulRequests++;
-
-                    await addMessage({
-
-                        role:
-                            "system",
-
-                        type:
-                            "command-result",
-
-                        command:
-                            detectedCommand.command.id,
-
-                        content:
-                            response,
-
-                        timestamp:
-                            Date.now()
-
-                    });
-
-                    await remember({
-
-                        type:
-                            "command",
-
-                        input:
-                            text,
-
-                        command:
-                            detectedCommand.command.id,
-
-                        result:
-                            commandResult,
-
-                        timestamp:
-                            Date.now()
-
-                    });
 
                     emit(
                         "response",
                         {
-                            response
+                            response:
+                                result
                         }
                     );
 
-                    return response;
+                    return result;
 
-                }
+                } catch (error) {
 
-            }
+                    lastError =
+                        error;
 
-            /*
-             * 6. AI-Kontext vorbereiten
-             */
+                    if (
+                        attempt <
+                        attempts - 1
+                    ) {
 
-            const context = {
-
-                requestId,
-
-                language:
-                    request.language,
-
-                detectedLanguage:
-                    language,
-
-                memories,
-
-                messages:
-                    getMessages(
-                        options.historyLimit ||
-                        50
-                    ),
-
-                command:
-                    detectedCommand,
-
-                system:
-                    {
-
-                        mode:
-                            CONFIG.mode,
-
-                        version:
-                            CONFIG.version
+                        await sleep(
+                            CONFIG.retryDelay
+                        );
 
                     }
 
-            };
-
-            /*
-             * 7. AI Engine / Chat
-             */
-
-            const aiResult =
-                await generateResponse(
-                    text,
-                    context
-                );
-
-            /*
-             * 8. AI Antwort speichern
-             */
-
-            const response = {
-
-                ok:
-                    aiResult.ok !==
-                    false,
-
-                type:
-                    aiResult.type ||
-                    "text",
-
-                requestId,
-
-                input:
-                    text,
-
-                language:
-                    request.language,
-
-                text:
-                    aiResult.text ||
-                    "",
-
-                content:
-                    aiResult.content ||
-                    aiResult.text ||
-                    "",
-
-                result:
-                    aiResult,
-
-                timestamp:
-                    Date.now(),
-
-                duration:
-                    Date.now() -
-                    startedAt
-
-            };
-
-            state.lastResponse =
-                response;
-
-            if (
-                response.ok
-            ) {
-
-                state.successfulRequests++;
-
-            } else {
-
-                state.failedRequests++;
+                }
 
             }
 
-            await addMessage({
-
-                role:
-                    "assistant",
-
-                content:
-                    response.text,
-
-                text:
-                    response.text,
-
-                language:
-                    request.language,
-
-                requestId,
-
-                timestamp:
-                    Date.now()
-
-            });
-
-            await remember({
-
-                type:
-                    "conversation",
-
-                requestId,
-
-                language:
-                    request.language,
-
-                user:
-                    text,
-
-                assistant:
-                    response.text,
-
-                timestamp:
-                    Date.now()
-
-            });
-
-            emit(
-                "response",
-                {
-                    response
-                }
+            throw (
+                lastError ||
+                new Error(
+                    "AI_PROVIDER_REQUEST_FAILED"
+                )
             );
-
-            return response;
 
         } catch (error) {
 
             state.failedRequests++;
 
+            state.connected =
+                false;
+
+            state.lastError = {
+
+                message:
+                    error?.message ||
+                    String(
+                        error
+                    ),
+
+                timestamp:
+                    Date.now(),
+
+                requestId
+
+            };
+
             recordError(
                 error
             );
 
-            const response = {
+            const result = {
 
                 ok:
                     false,
 
                 type:
-                    "error",
+                    "provider-error",
 
                 requestId,
 
-                input:
-                    text,
+                text:
+                    "",
 
-                language:
-                    state.currentLanguage,
+                content:
+                    "",
 
                 error:
-                    error.message ||
+                    error?.message ||
                     String(
                         error
                     ),
@@ -1527,52 +1117,30 @@
             };
 
             state.lastResponse =
-                response;
+                result;
 
             emit(
                 "response-error",
                 {
-                    response,
+                    response:
+                        result,
 
                     error
-
                 }
             );
 
-            return response;
+            return result;
 
         } finally {
 
             state.processing =
                 false;
 
-            const finishedAt =
-                Date.now();
-
-            request.finishedAt =
-                finishedAt;
-
-            request.duration =
-                finishedAt -
-                startedAt;
-
-            state.history.push(
-                request
-            );
-
-            if (
-                state.history.length >
-                CONFIG.maxRequests
-            ) {
-
-                state.history.shift();
-
-            }
-
             emit(
                 "request-end",
                 {
-                    request
+                    request:
+                        requestInfo
                 }
             );
 
@@ -1580,267 +1148,173 @@
 
     }
 
-    // --------------------------------------------------------
-    // CONVENIENCE METHODS
-    // --------------------------------------------------------
+    // ========================================================
+    // CONNECTIVITY TEST
+    // ========================================================
+
+    async function testConnection(
+        options = {}
+    ) {
+
+        const endpoint =
+            clean(
+                options.endpoint ||
+                CONFIG.endpoint
+            );
+
+        if (!endpoint) {
+
+            return {
+
+                ok:
+                    false,
+
+                connected:
+                    false,
+
+                error:
+                    "AI_ENDPOINT_MISSING"
+
+            };
+
+        }
+
+        try {
+
+            const response =
+                await fetchWithTimeout(
+                    endpoint,
+                    {
+
+                        method:
+                            "OPTIONS",
+
+                        headers: {
+
+                            "Accept":
+                                "application/json"
+
+                        }
+
+                    },
+                    options.timeout ||
+                    10000
+                );
+
+            const connected =
+                response.ok ||
+                response.status ===
+                    405 ||
+                response.status ===
+                    404;
+
+            state.connected =
+                connected;
+
+            return {
+
+                ok:
+                    connected,
+
+                connected,
+
+                status:
+                    response.status,
+
+                endpoint
+
+            };
+
+        } catch (error) {
+
+            state.connected =
+                false;
+
+            return {
+
+                ok:
+                    false,
+
+                connected:
+                    false,
+
+                endpoint,
+
+                error:
+                    error?.message ||
+                    String(
+                        error
+                    )
+
+            };
+
+        }
+
+    }
+
+    // ========================================================
+    // MAIN AI METHODS
+    // ========================================================
 
     async function ask(
         input,
+        context = {},
         options = {}
     ) {
 
-        return process(
+        return request(
             input,
+            context,
             options
         );
 
     }
 
-    async function send(
+    async function generate(
         input,
+        context = {},
         options = {}
     ) {
 
-        return process(
+        return request(
             input,
+            context,
             options
         );
 
     }
 
-    async function execute(
+    async function respond(
         input,
+        context = {},
         options = {}
     ) {
 
-        return process(
+        return request(
             input,
+            context,
             options
         );
 
     }
 
-    // --------------------------------------------------------
-    // SPEECH
-    // --------------------------------------------------------
-
-    async function speak(
-        text,
+    async function process(
+        input,
+        context = {},
         options = {}
     ) {
 
-        if (
-            !CONFIG.enableSpeech
-        ) {
-
-            return {
-
-                ok:
-                    false,
-
-                error:
-                    "SPEECH_DISABLED"
-
-            };
-
-        }
-
-        const voice =
-            getVoice();
-
-        const speech =
-            getSpeech();
-
-        const target =
-            voice ||
-            speech;
-
-        if (!target) {
-
-            return {
-
-                ok:
-                    false,
-
-                error:
-                    "VOICE_ENGINE_UNAVAILABLE"
-
-            };
-
-        }
-
-        const methods = [
-
-            "speak",
-            "say",
-            "synthesize"
-
-        ];
-
-        for (
-            const method of methods
-        ) {
-
-            if (
-                typeof target[method] !==
-                "function"
-            ) {
-                continue;
-            }
-
-            try {
-
-                const result =
-                    await target[method](
-                        text,
-                        options
-                    );
-
-                return {
-
-                    ok:
-                        result !==
-                        false,
-
-                    result
-
-                };
-
-            } catch (error) {
-
-                recordError(
-                    error
-                );
-
-            }
-
-        }
-
-        return {
-
-            ok:
-                false,
-
-            error:
-                "SPEAK_METHOD_UNAVAILABLE"
-
-        };
+        return request(
+            input,
+            context,
+            options
+        );
 
     }
 
-    // --------------------------------------------------------
-    // STATUS
-    // --------------------------------------------------------
-
-    function getStatus() {
-
-        const language =
-            getLanguage();
-
-        const commands =
-            getCommands();
-
-        const memory =
-            getMemory();
-
-        const conversation =
-            getConversation();
-
-        const engine =
-            getEngine();
-
-        return {
-
-            name:
-                CONFIG.name,
-
-            version:
-                CONFIG.version,
-
-            mode:
-                CONFIG.mode,
-
-            initialized:
-                state.initialized,
-
-            ready:
-                state.ready,
-
-            processing:
-                state.processing,
-
-            requestCount:
-                state.requestCount,
-
-            successfulRequests:
-                state.successfulRequests,
-
-            failedRequests:
-                state.failedRequests,
-
-            currentLanguage:
-                state.currentLanguage,
-
-            modules: {
-
-                language:
-                    Boolean(
-                        language
-                    ),
-
-                commands:
-                    Boolean(
-                        commands
-                    ),
-
-                memory:
-                    Boolean(
-                        memory
-                    ),
-
-                conversation:
-                    Boolean(
-                        conversation
-                    ),
-
-                engine:
-                    Boolean(
-                        engine
-                    ),
-
-                chat:
-                    Boolean(
-                        getChat()
-                    ),
-
-                speech:
-                    Boolean(
-                        getSpeech()
-                    ),
-
-                voice:
-                    Boolean(
-                        getVoice()
-                    )
-
-            },
-
-            lastRequest:
-                state.lastRequest,
-
-            lastResponse:
-                state.lastResponse,
-
-            errors:
-                state.errors.length
-
-        };
-
-    }
-
-    // --------------------------------------------------------
-    // ERROR
-    // --------------------------------------------------------
+    // ========================================================
+    // ERROR HANDLING
+    // ========================================================
 
     function recordError(
         error
@@ -1879,11 +1353,79 @@
 
     }
 
-    // --------------------------------------------------------
-    // INITIALIZE
-    // --------------------------------------------------------
+    // ========================================================
+    // STATUS
+    // ========================================================
 
-    async function initialize() {
+    function getStatus() {
+
+        return {
+
+            name:
+                CONFIG.name,
+
+            version:
+                CONFIG.version,
+
+            mode:
+                CONFIG.mode,
+
+            enabled:
+                CONFIG.enabled,
+
+            initialized:
+                state.initialized,
+
+            ready:
+                state.ready,
+
+            connected:
+                state.connected,
+
+            processing:
+                state.processing,
+
+            provider:
+                state.activeProvider,
+
+            model:
+                state.activeModel,
+
+            endpoint:
+                CONFIG.endpoint,
+
+            requestCount:
+                state.requestCount,
+
+            successfulRequests:
+                state.successfulRequests,
+
+            failedRequests:
+                state.failedRequests,
+
+            lastRequest:
+                state.lastRequest,
+
+            lastResponse:
+                state.lastResponse,
+
+            lastError:
+                state.lastError,
+
+            errors:
+                state.errors.length
+
+        };
+
+    }
+
+    // ========================================================
+    // INITIALIZE
+    // ========================================================
+
+    async function initialize(
+        options = {}
+    ) {
 
         if (
             state.initialized
@@ -1893,126 +1435,18 @@
 
         }
 
+        configure(
+            options
+        );
+
         state.initialized =
             true;
 
-        /*
-         * Aktuelle Sprache übernehmen.
-         */
+        state.activeProvider =
+            CONFIG.provider;
 
-        const language =
-            getLanguage();
-
-        if (
-            language &&
-            typeof language.getLanguage ===
-            "function"
-        ) {
-
-            try {
-
-                state.currentLanguage =
-                    language.getLanguage();
-
-            } catch (error) {}
-
-        }
-
-        /*
-         * Sprachwechsel beobachten.
-         */
-
-        if (
-            language &&
-            typeof language.on ===
-            "function"
-        ) {
-
-            language.on(
-                "language-changed",
-                detail => {
-
-                    if (
-                        detail?.language
-                    ) {
-
-                        state.currentLanguage =
-                            detail.language;
-
-                    }
-
-                    emit(
-                        "language-changed",
-                        detail
-                    );
-
-                }
-            );
-
-        }
-
-        /*
-         * Command Events verbinden.
-         */
-
-        const commands =
-            getCommands();
-
-        if (
-            commands &&
-            typeof commands.on ===
-            "function"
-        ) {
-
-            commands.on(
-                "executed",
-                detail => {
-
-                    emit(
-                        "command-executed",
-                        detail
-                    );
-
-                }
-            );
-
-            commands.on(
-                "error",
-                detail => {
-
-                    emit(
-                        "command-error",
-                        detail
-                    );
-
-                }
-            );
-
-        }
-
-        /*
-         * Kernel registrieren.
-         */
-
-        const kernel =
-            getKernel();
-
-        if (
-            kernel &&
-            typeof kernel.registerModule ===
-            "function"
-        ) {
-
-            try {
-
-                kernel.registerModule(
-                    "ai-core",
-                    api
-                );
-
-            } catch (error) {}
-
-        }
+        state.activeModel =
+            CONFIG.model;
 
         emit(
             "initialized",
@@ -2038,13 +1472,13 @@
 
     }
 
-    // --------------------------------------------------------
+    // ========================================================
     // PUBLIC API
-    // --------------------------------------------------------
+    // ========================================================
 
     const api = {
 
-        __haldoAI18:
+        __haldoAI20:
             true,
 
         config:
@@ -2054,97 +1488,93 @@
 
         initialize,
 
+        configure,
+
+        getConfig,
+
         on,
 
         off,
 
         emit,
 
-        process,
+        request,
 
         ask,
 
-        send,
+        generate,
 
-        execute,
+        respond,
 
-        generateResponse,
+        process,
 
-        detectLanguage,
+        testConnection,
 
-        setLanguage,
+        buildMessages,
 
-        detectCommand,
+        buildPayload,
 
-        executeCommand,
+        normalizeResponse,
 
-        remember,
-
-        recall,
-
-        addMessage,
-
-        getMessages,
-
-        speak,
-
-        getStatus,
-
-        getModules: () => ({
-
-            language:
-                getLanguage(),
-
-            commands:
-                getCommands(),
-
-            memory:
-                getMemory(),
-
-            conversation:
-                getConversation(),
-
-            chat:
-                getChat(),
-
-            engine:
-                getEngine(),
-
-            speech:
-                getSpeech(),
-
-            voice:
-                getVoice()
-
-        })
+        getStatus
 
     };
 
-    // --------------------------------------------------------
+    // ========================================================
     // GLOBAL REGISTRATION
-    // --------------------------------------------------------
+    // ========================================================
 
-    window.HalDoAICore =
+    window.HalDoAIProvider =
         api;
 
-    window.HalDoOS.aiCore =
+    window.HalDoOS.aiProvider =
         api;
 
-    /*
-     * Kompatibilitätsalias.
-     */
+    // ========================================================
+    // KERNEL REGISTRATION
+    // ========================================================
 
-    window.HalDoAI =
-        window.HalDoAI ||
-        api;
+    function registerWithKernel() {
 
-    // --------------------------------------------------------
+        const kernel =
+            window.HalDoKernel ||
+            window.HalDoOS?.kernel ||
+            null;
+
+        if (
+            kernel &&
+            typeof kernel.registerModule ===
+            "function"
+        ) {
+
+            try {
+
+                kernel.registerModule(
+                    "ai-provider",
+                    api
+                );
+
+            } catch (error) {
+
+                recordError(
+                    error
+                );
+
+            }
+
+        }
+
+    }
+
+    // ========================================================
     // BOOT
-    // --------------------------------------------------------
+    // ========================================================
 
     async function boot() {
 
         try {
+
+            registerWithKernel();
 
             await initialize();
 
@@ -2155,8 +1585,7 @@
             );
 
             console.error(
-                "[HalDoAICore] " +
-                "Initialization failed:",
+                "[HalDoAIProvider] Initialization failed:",
                 error
             );
 
@@ -2187,5 +1616,5 @@
 })(window, document);
 
 // ============================================================
-// END OF PART 84
+// END OF HALDO AI OS 20 — AI PROVIDER
 // ============================================================
