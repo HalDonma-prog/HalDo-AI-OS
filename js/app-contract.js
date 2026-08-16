@@ -1,427 +1,191 @@
-/* ============================================================
-   HALDO AI OS 20
-   PROFESSIONAL ULTIMATE FOUNDATION
-   ------------------------------------------------------------
-   Datei:
-       js/app-contract.js
-
-   ZENTRALER APP CONTRACT
-
-   Zweck:
-   - Einheitliche Struktur für ALLE HalDo Apps
-   - App-Metadaten
-   - Lifecycle
-   - UI
-   - Navigation
-   - Settings
-   - Storage
-   - Events
-   - AI
-   - Sprache
-   - Voice
-   - Dependencies
-   - Permissions
-   - Window-Konfiguration
-   - State Management
-   - Diagnostics
-   - Health Check
-   - sichere Erweiterbarkeit
-
-   WICHTIG:
-   Dieser Contract ersetzt KEINE einzelne App.
-
-   Er definiert die gemeinsame Architektur, nach der
-   jede zukünftige HalDo-App vollständig aufgebaut wird.
-
-   HALDO AI OS 20
-   ============================================================ */
-
-"use strict";
+// ============================================================
+// HALDO AI OS 20
+// APP CONTRACT
+// ============================================================
 
 (function (window, document) {
 
-    /* ========================================================
-       01 — FOUNDATION
-       ======================================================== */
+    "use strict";
+
+    if (
+        window.HalDoAppContract &&
+        window.HalDoAppContract.__haldoAI20
+    ) {
+        return;
+    }
 
     window.HalDoOS =
         window.HalDoOS || {};
 
-    const HalDoOS =
-        window.HalDoOS;
+    const VERSION = "20.0.0";
 
+    // --------------------------------------------------------
+    // UTILITIES
+    // --------------------------------------------------------
 
-    /* ========================================================
-       02 — META
-       ======================================================== */
-
-    const VERSION =
-        "20.0.0";
-
-    const MODULE_ID =
-        "app-contract";
-
-    const NAME =
-        "HalDo AI OS 20 Application Contract";
-
-
-    /* ========================================================
-       03 — CONSTANTS
-       ======================================================== */
-
-    const LIFECYCLE = Object.freeze({
-
-        CREATED:
-            "created",
-
-        INITIALIZING:
-            "initializing",
-
-        INITIALIZED:
-            "initialized",
-
-        STARTING:
-            "starting",
-
-        RUNNING:
-            "running",
-
-        ACTIVATING:
-            "activating",
-
-        ACTIVE:
-            "active",
-
-        MINIMIZED:
-            "minimized",
-
-        MAXIMIZED:
-            "maximized",
-
-        PIP:
-            "pip",
-
-        DEACTIVATING:
-            "deactivating",
-
-        STOPPING:
-            "stopping",
-
-        STOPPED:
-            "stopped",
-
-        CLOSING:
-            "closing",
-
-        CLOSED:
-            "closed",
-
-        ERROR:
-            "error",
-
-        DISABLED:
-            "disabled"
-
-    });
-
-
-    const CATEGORIES = Object.freeze({
-
-        SYSTEM:
-            "system",
-
-        AI:
-            "ai",
-
-        COMMUNICATION:
-            "communication",
-
-        PRODUCTIVITY:
-            "productivity",
-
-        MEDIA:
-            "media",
-
-        INTERNET:
-            "internet",
-
-        EDUCATION:
-            "education",
-
-        CREATIVE:
-            "creative",
-
-        TOOLS:
-            "tools",
-
-        SECURITY:
-            "security",
-
-        SETTINGS:
-            "settings",
-
-        FILES:
-            "files",
-
-        DEVELOPMENT:
-            "development",
-
-        LANGUAGE:
-            "language",
-
-        ACCESSIBILITY:
-            "accessibility",
-
-        OTHER:
-            "other"
-
-    });
-
-
-    const PERMISSIONS = Object.freeze({
-
-        STORAGE:
-            "storage",
-
-        AI:
-            "ai",
-
-        MICROPHONE:
-            "microphone",
-
-        CAMERA:
-            "camera",
-
-        NETWORK:
-            "network",
-
-        NOTIFICATIONS:
-            "notifications",
-
-        FILES:
-            "files",
-
-        SYSTEM:
-            "system",
-
-        CLIPBOARD:
-            "clipboard",
-
-        LOCATION:
-            "location",
-
-        VOICE:
-            "voice",
-
-        LANGUAGE:
-            "language"
-
-    });
-
-
-    /* ========================================================
-       04 — SAFE HELPERS
-       ======================================================== */
-
-    function normalizeId(
-        value
-    ) {
-
-        return String(
-            value || ""
-        )
-        .trim()
-        .toLowerCase()
-        .replace(
-            /[^a-z0-9äöüßîêç_-]+/gi,
-            "-"
-        )
-        .replace(
-            /-+/g,
-            "-"
-        )
-        .replace(
-            /^-|-$/g,
-            "");
-
+    function clean(value) {
+        return String(value ?? "").trim();
     }
 
+    function createId(prefix = "app") {
 
-    function isObject(
-        value
-    ) {
-
-        return !!(
-            value &&
-            typeof value === "object" &&
-            !Array.isArray(value)
+        return (
+            prefix +
+            "-" +
+            Date.now().toString(36) +
+            "-" +
+            Math.random()
+                .toString(36)
+                .slice(2, 9)
         );
 
     }
 
-
-    function isFunction(
-        value
-    ) {
-
-        return typeof value ===
-            "function";
-
+    function now() {
+        return Date.now();
     }
 
+    // --------------------------------------------------------
+    // APP STATES
+    // --------------------------------------------------------
 
-    function clone(
-        value
-    ) {
+    const STATES = Object.freeze({
 
-        if (
-            value === null ||
-            value === undefined
-        ) {
+        CREATED: "created",
+        READY: "ready",
+        OPENING: "opening",
+        OPEN: "open",
+        ACTIVE: "active",
+        MINIMIZED: "minimized",
+        CLOSING: "closing",
+        CLOSED: "closed",
+        ERROR: "error"
 
-            return value;
+    });
 
-        }
+    // --------------------------------------------------------
+    // REQUIRED APP CONTRACT
+    // --------------------------------------------------------
 
+    function createAppDefinition(definition = {}) {
 
-        if (
-            Array.isArray(
-                value
-            )
-        ) {
+        const id =
+            clean(
+                definition.id
+            ) ||
+            createId("app");
 
-            return value.map(
-                clone
-            );
+        const name =
+            clean(
+                definition.name
+            ) ||
+            id;
 
-        }
+        return {
 
+            id,
 
-        if (
-            typeof value ===
-            "object"
-        ) {
+            name,
 
-            const result = {};
+            title:
+                clean(
+                    definition.title
+                ) ||
+                name,
 
-            Object.keys(
-                value
-            ).forEach(
-                key => {
+            description:
+                clean(
+                    definition.description
+                ),
 
-                    if (
-                        typeof value[key] ===
-                        "function"
-                    ) {
+            version:
+                clean(
+                    definition.version
+                ) ||
+                VERSION,
 
-                        result[key] =
-                            value[key];
+            icon:
+                definition.icon ||
+                null,
 
-                    } else {
+            category:
+                clean(
+                    definition.category
+                ) ||
+                "system",
 
-                        result[key] =
-                            clone(
-                                value[key]
-                            );
+            state:
+                STATES.CREATED,
 
-                    }
+            enabled:
+                definition.enabled !== false,
 
-                }
-            );
+            visible:
+                definition.visible !== false,
 
-            return result;
+            singleton:
+                definition.singleton !== false,
 
-        }
+            permissions:
+                Array.isArray(
+                    definition.permissions
+                )
+                    ? [
+                        ...definition.permissions
+                    ]
+                    : [],
 
+            settings:
+                definition.settings ||
+                {},
 
-        return value;
+            metadata:
+                definition.metadata ||
+                {},
 
-    }
+            dependencies:
+                Array.isArray(
+                    definition.dependencies
+                )
+                    ? [
+                        ...definition.dependencies
+                    ]
+                    : [],
 
+            createdAt:
+                now(),
 
-    function merge(
-        base,
-        extra
-    ) {
-
-        const result = {
-
-            ...(isObject(base)
-                ? base
-                : {})
+            updatedAt:
+                now()
 
         };
 
-
-        if (
-            !isObject(extra)
-        ) {
-
-            return result;
-
-        }
-
-
-        Object.keys(
-            extra
-        ).forEach(
-            key => {
-
-                if (
-                    isObject(
-                        extra[key]
-                    ) &&
-                    isObject(
-                        result[key]
-                    )
-                ) {
-
-                    result[key] =
-                        merge(
-                            result[key],
-                            extra[key]
-                        );
-
-                } else {
-
-                    result[key] =
-                        extra[key];
-
-                }
-
-            }
-        );
-
-
-        return result;
-
     }
 
+    // --------------------------------------------------------
+    // APP INSTANCE
+    // --------------------------------------------------------
 
-    function timestamp() {
+    function createAppInstance(
+        definition,
+        options = {}
+    ) {
 
-        return Date.now();
+        const app =
+            createAppDefinition(
+                definition
+            );
 
-    }
+        const instanceId =
+            createId(
+                app.id
+            );
 
-
-    function isoTime() {
-
-        return new Date()
-            .toISOString();
-
-    }
-
-
-    /* ========================================================
-       05 — EVENTS
-       ======================================================== */
-
-    function createEventBus() {
+        let state =
+            STATES.CREATED;
 
         const listeners =
             new Map();
-
 
         function on(
             event,
@@ -429,15 +193,11 @@
         ) {
 
             if (
-                !isFunction(
-                    callback
-                )
+                typeof callback !==
+                "function"
             ) {
-
-                return function () {};
-
+                return () => {};
             }
-
 
             if (
                 !listeners.has(
@@ -452,29 +212,17 @@
 
             }
 
+            listeners
+                .get(event)
+                .add(callback);
 
-            const set =
-                listeners.get(
-                    event
-                );
-
-
-            set.add(
-                callback
-            );
-
-
-            return function () {
-
+            return () =>
                 off(
                     event,
                     callback
                 );
 
-            };
-
         }
-
 
         function off(
             event,
@@ -482,22 +230,15 @@
         ) {
 
             const set =
-                listeners.get(
-                    event
-                );
-
+                listeners.get(event);
 
             if (!set) {
-
                 return;
-
             }
-
 
             set.delete(
                 callback
             );
-
 
             if (
                 set.size ===
@@ -512,110 +253,311 @@
 
         }
 
-
         function emit(
             event,
-            payload = null
+            detail = {}
         ) {
 
             const set =
-                listeners.get(
-                    event
-                );
+                listeners.get(event);
 
+            if (set) {
 
-            if (!set) {
-
-                return;
-
-            }
-
-
-            Array.from(
-                set
-            ).forEach(
-                callback => {
+                for (
+                    const callback of set
+                ) {
 
                     try {
 
                         callback(
-                            payload
+                            detail
                         );
 
-                    } catch (exception) {
+                    } catch (error) {
 
                         console.error(
-                            "[HalDo App Contract]",
-                            exception
+                            "[HalDoAppContract]",
+                            error
                         );
 
                     }
 
                 }
-            );
 
-        }
+            }
 
+            try {
 
-        function clear(
-            event
-        ) {
+                document.dispatchEvent(
+                    new CustomEvent(
+                        `haldo:app:${event}`,
+                        {
+                            detail: {
 
-            if (
-                event
-            ) {
+                                appId:
+                                    app.id,
 
-                listeners.delete(
-                    event
+                                instanceId,
+
+                                ...detail
+
+                            }
+                        }
+                    )
                 );
 
-            } else {
-
-                listeners.clear();
-
-            }
+            } catch (error) {}
 
         }
 
-
-        function count(
-            event
+        function setState(
+            nextState
         ) {
 
             if (
-                event
+                !Object.values(
+                    STATES
+                ).includes(
+                    nextState
+                )
             ) {
 
-                const set =
-                    listeners.get(
-                        event
-                    );
-
-                return set
-                    ? set.size
-                    : 0;
+                return false;
 
             }
 
+            const previousState =
+                state;
 
-            let total = 0;
+            state =
+                nextState;
 
-            listeners.forEach(
-                set => {
+            app.state =
+                nextState;
 
-                    total +=
-                        set.size;
+            app.updatedAt =
+                now();
+
+            emit(
+                "state-changed",
+                {
+
+                    previousState,
+
+                    state:
+                        nextState
 
                 }
             );
 
-
-            return total;
+            return true;
 
         }
 
+        function getState() {
+            return state;
+        }
+
+        async function initialize(
+            context = {}
+        ) {
+
+            setState(
+                STATES.READY
+            );
+
+            emit(
+                "initialized",
+                {
+                    context
+                }
+            );
+
+            return {
+                ok: true,
+                app,
+                instanceId,
+                state
+            };
+
+        }
+
+        async function open(
+            context = {}
+        ) {
+
+            if (
+                state ===
+                STATES.OPEN ||
+                state ===
+                STATES.ACTIVE
+            ) {
+
+                setState(
+                    STATES.ACTIVE
+                );
+
+                return {
+                    ok: true,
+                    alreadyOpen: true
+                };
+
+            }
+
+            setState(
+                STATES.OPENING
+            );
+
+            try {
+
+                emit(
+                    "opening",
+                    {
+                        context
+                    }
+                );
+
+                setState(
+                    STATES.OPEN
+                );
+
+                setState(
+                    STATES.ACTIVE
+                );
+
+                emit(
+                    "opened",
+                    {
+                        context
+                    }
+                );
+
+                return {
+                    ok: true,
+                    app,
+                    instanceId,
+                    state
+                };
+
+            } catch (error) {
+
+                setState(
+                    STATES.ERROR
+                );
+
+                emit(
+                    "error",
+                    {
+                        error
+                    }
+                );
+
+                return {
+                    ok: false,
+                    error:
+                        error.message ||
+                        String(error)
+                };
+
+            }
+
+        }
+
+        async function close(
+            context = {}
+        ) {
+
+            if (
+                state ===
+                STATES.CLOSED
+            ) {
+
+                return {
+                    ok: true,
+                    alreadyClosed: true
+                };
+
+            }
+
+            setState(
+                STATES.CLOSING
+            );
+
+            emit(
+                "closing",
+                {
+                    context
+                }
+            );
+
+            setState(
+                STATES.CLOSED
+            );
+
+            emit(
+                "closed",
+                {
+                    context
+                }
+            );
+
+            return {
+                ok: true,
+                app,
+                instanceId,
+                state
+            };
+
+        }
+
+        function minimize() {
+
+            if (
+                state !==
+                STATES.OPEN &&
+                state !==
+                STATES.ACTIVE
+            ) {
+
+                return false;
+
+            }
+
+            return setState(
+                STATES.MINIMIZED
+            );
+
+        }
+
+        function activate() {
+
+            if (
+                state !==
+                STATES.MINIMIZED
+            ) {
+
+                return false;
+
+            }
+
+            return setState(
+                STATES.ACTIVE
+            );
+
+        }
 
         return {
+
+            __haldoAI20App:
+                true,
+
+            app,
+
+            instanceId,
+
+            options,
+
+            STATES,
 
             on,
 
@@ -623,2014 +565,169 @@
 
             emit,
 
-            clear,
+            setState,
 
-            count
+            getState,
 
-        };
+            initialize,
 
-    }
+            open,
 
+            close,
 
-    /* ========================================================
-       06 — DEFAULT STATE
-       ======================================================== */
+            minimize,
 
-    function createDefaultState(
-        appId
-    ) {
+            activate,
 
-        const id =
-            normalizeId(
-                appId
-            );
+            getDefinition() {
 
+                return {
+                    ...app
+                };
 
-        return {
-
-            appId:
-                id,
-
-            lifecycle:
-                LIFECYCLE.CREATED,
-
-            open:
-                false,
-
-            active:
-                false,
-
-            initialized:
-                false,
-
-            started:
-                false,
-
-            minimized:
-                false,
-
-            maximized:
-                false,
-
-            pip:
-                false,
-
-            loading:
-                false,
-
-            ready:
-                false,
-
-            error:
-                null,
-
-            windowId:
-                null,
-
-            route:
-                null,
-
-            createdAt:
-                timestamp(),
-
-            updatedAt:
-                timestamp(),
-
-            lastActivatedAt:
-                null,
-
-            lastDeactivatedAt:
-                null,
-
-            lastOpenedAt:
-                null,
-
-            lastClosedAt:
-                null
+            }
 
         };
 
     }
 
-
-    /* ========================================================
-       07 — DEFAULT WINDOW
-       ======================================================== */
-
-    function createDefaultWindow(
-        definition
-    ) {
-
-        const app =
-            definition || {};
-
-
-        return {
-
-            id:
-                "window-" +
-                normalizeId(
-                    app.id
-                ),
-
-            appId:
-                normalizeId(
-                    app.id
-                ),
-
-            title:
-                app.title ||
-                app.name ||
-                "HalDo App",
-
-            icon:
-                app.icon ||
-                "◈",
-
-            width:
-                app.window?.width ||
-                1100,
-
-            height:
-                app.window?.height ||
-                700,
-
-            minWidth:
-                app.window?.minWidth ||
-                320,
-
-            minHeight:
-                app.window?.minHeight ||
-                240,
-
-            resizable:
-                app.window?.resizable !==
-                false,
-
-            draggable:
-                app.window?.draggable !==
-                false,
-
-            maximizable:
-                app.window?.maximizable !==
-                false,
-
-            minimizable:
-                app.window?.minimizable !==
-                false,
-
-            closable:
-                app.window?.closable !==
-                false,
-
-            singleton:
-                app.singleton !==
-                false,
-
-            pip:
-                app.window?.pip ===
-                true,
-
-            fullscreen:
-                app.window?.fullscreen ===
-                false
-
-        };
-
-    }
-
-
-    /* ========================================================
-       08 — DEFAULT SETTINGS
-       ======================================================== */
-
-    function createDefaultSettings() {
-
-        return {
-
-            language:
-                "auto",
-
-            theme:
-                "system",
-
-            notifications:
-                true,
-
-            sounds:
-                true,
-
-            voice:
-                false,
-
-            ai:
-                true,
-
-            animations:
-                true,
-
-            rememberState:
-                true,
-
-            rememberWindow:
-                true,
-
-            startup:
-                false,
-
-            privacyMode:
-                false,
-
-            accessibility:
-                {
-
-                    reducedMotion:
-                        false,
-
-                    highContrast:
-                        false,
-
-                    largeText:
-                        false
-
-                }
-
-        };
-
-    }
-
-
-    /* ========================================================
-       09 — DEFAULT DEFINITION
-       ======================================================== */
-
-    function createDefinition(
-        definition = {}
-    ) {
-
-        const id =
-            normalizeId(
-                definition.id ||
-                definition.appId
-            );
-
-
-        if (!id) {
-
-            throw new Error(
-                "App Contract: Jede App benötigt eine ID."
-            );
-
-        }
-
-
-        const result =
-            merge(
-                {
-
-                    id:
-
-                        id,
-
-                    name:
-                        definition.name ||
-                        id,
-
-                    title:
-                        definition.title ||
-                        definition.name ||
-                        id,
-
-                    version:
-                        definition.version ||
-                        VERSION,
-
-                    description:
-                        definition.description ||
-                        "",
-
-                    category:
-                        definition.category ||
-                        CATEGORIES.OTHER,
-
-                    icon:
-                        definition.icon ||
-                        "◈",
-
-                    author:
-                        definition.author ||
-                        "HalDo AI",
-
-                    enabled:
-                        definition.enabled !==
-                        false,
-
-                    visible:
-                        definition.visible !==
-                        false,
-
-                    experimental:
-                        definition.experimental ===
-                        true,
-
-                    singleton:
-                        definition.singleton !==
-                        false,
-
-                    route:
-                        definition.route ||
-                        "/app/" +
-                        id,
-
-                    tags:
-                        Array.isArray(
-                            definition.tags
-                        )
-                            ? [
-                                ...definition.tags
-                            ]
-                            : [],
-
-                    keywords:
-                        Array.isArray(
-                            definition.keywords
-                        )
-                            ? [
-                                ...definition.keywords
-                            ]
-                            : [],
-
-                    dependencies:
-                        Array.isArray(
-                            definition.dependencies
-                        )
-                            ? [
-                                ...definition.dependencies
-                            ]
-                            : [],
-
-                    optionalDependencies:
-                        Array.isArray(
-                            definition.optionalDependencies
-                        )
-                            ? [
-                                ...definition.optionalDependencies
-                            ]
-                            : [],
-
-                    permissions:
-                        Array.isArray(
-                            definition.permissions
-                        )
-                            ? [
-                                ...definition.permissions
-                            ]
-                            : [],
-
-                    settings:
-                        createDefaultSettings(),
-
-                    window:
-                        {},
-
-                    state:
-                        {},
-
-                    metadata:
-                        {},
-
-                    api:
-                        {},
-
-                    ui:
-                        {},
-
-                    navigation:
-                        {},
-
-                    storage:
-                        {},
-
-                    ai:
-                        {},
-
-                    language:
-                        {},
-
-                    voice:
-                        {},
-
-                    lifecycle:
-                        {},
-
-                    diagnostics:
-                        {},
-
-                    security:
-                        {},
-
-                    accessibility:
-                        {}
-
-                },
-
-                definition
-            );
-
-
-        result.id =
-            id;
-
-
-        result.window =
-            merge(
-                createDefaultWindow(
-                    result
-                ),
-                definition.window || {}
-            );
-
-
-        result.settings =
-            merge(
-                createDefaultSettings(),
-                definition.settings || {}
-            );
-
-
-        result.dependencies =
-            Array.isArray(
-                result.dependencies
-            )
-                ? result.dependencies
-                : [];
-
-
-        result.permissions =
-            Array.isArray(
-                result.permissions
-            )
-                ? result.permissions
-                : [];
-
-
-        return result;
-
-    }
-
-
-    /* ========================================================
-       10 — VALIDATION
-       ======================================================== */
+    // --------------------------------------------------------
+    // VALIDATION
+    // --------------------------------------------------------
 
     function validate(
         definition
     ) {
 
         const errors = [];
-        const warnings = [];
-
 
         if (
-            !definition
+            !definition ||
+            typeof definition !==
+            "object"
         ) {
 
             errors.push(
-                "App Definition fehlt."
+                "APP_DEFINITION_REQUIRED"
             );
 
-
             return {
-
-                valid:
-                    false,
-
-                errors,
-
-                warnings
-
+                valid: false,
+                errors
             };
 
         }
 
-
-        const id =
-            normalizeId(
+        if (
+            !clean(
                 definition.id
-            );
-
-
-        if (!id) {
-
-            errors.push(
-                "App ID fehlt."
-            );
-
-        }
-
-
-        if (
-            !definition.name
-        ) {
-
-            warnings.push(
-                "App Name fehlt."
-            );
-
-        }
-
-
-        if (
-            !definition.title
-        ) {
-
-            warnings.push(
-                "App Title fehlt."
-            );
-
-        }
-
-
-        if (
-            definition.dependencies &&
-            !Array.isArray(
-                definition.dependencies
             )
         ) {
 
             errors.push(
-                "dependencies muss ein Array sein."
+                "APP_ID_REQUIRED"
             );
 
         }
 
-
         if (
-            definition.permissions &&
-            !Array.isArray(
-                definition.permissions
+            !clean(
+                definition.name
             )
         ) {
 
             errors.push(
-                "permissions muss ein Array sein."
+                "APP_NAME_REQUIRED"
             );
 
         }
-
-
-        if (
-            definition.tags &&
-            !Array.isArray(
-                definition.tags
-            )
-        ) {
-
-            errors.push(
-                "tags muss ein Array sein."
-            );
-
-        }
-
-
-        if (
-            definition.keywords &&
-            !Array.isArray(
-                definition.keywords
-            )
-        ) {
-
-            errors.push(
-                "keywords muss ein Array sein."
-            );
-
-        }
-
-
-        const lifecycle =
-            definition.lifecycle;
-
-
-        if (
-            lifecycle &&
-            !isObject(
-                lifecycle
-            )
-        ) {
-
-            errors.push(
-                "lifecycle muss ein Objekt sein."
-            );
-
-        }
-
 
         return {
 
             valid:
-                errors.length ===
-                0,
+                errors.length === 0,
 
-            errors,
-
-            warnings
+            errors
 
         };
 
     }
 
-
-    /* ========================================================
-       11 — APP CONTEXT
-       ======================================================== */
-
-    function createContext(
-        definition,
-        services = {}
-    ) {
-
-        const app =
-            createDefinition(
-                definition
-            );
-
-
-        const state =
-            createDefaultState(
-                app.id
-            );
-
-
-        const events =
-            createEventBus();
-
-
-        const context = {
-
-            app,
-
-            state,
-
-            events,
-
-            services,
-
-            version:
-                VERSION,
-
-            createdAt:
-                timestamp(),
-
-            createdAtISO:
-                isoTime(),
-
-            getState:
-                function () {
-
-                    return clone(
-                        state
-                    );
-
-                },
-
-            setState:
-                function (
-                    changes
-                ) {
-
-                    Object.assign(
-                        state,
-                        changes || {},
-                        {
-                            updatedAt:
-                                timestamp()
-                        }
-                    );
-
-
-                    events.emit(
-                        "state-changed",
-                        clone(
-                            state
-                        )
-                    );
-
-
-                    return state;
-
-                },
-
-            emit:
-                function (
-                    event,
-                    data
-                ) {
-
-                    events.emit(
-                        event,
-                        data
-                    );
-
-                },
-
-            on:
-                function (
-                    event,
-                    callback
-                ) {
-
-                    return events.on(
-                        event,
-                        callback
-                    );
-
-                }
-
-        };
-
-
-        return context;
-
-    }
-
-
-    /* ========================================================
-       12 — LIFECYCLE NORMALIZATION
-       ======================================================== */
-
-    function normalizeLifecycle(
-        lifecycle
-    ) {
-
-        if (
-            !isObject(
-                lifecycle
-            )
-        ) {
-
-            return {};
-
-        }
-
-
-        return {
-
-            init:
-                isFunction(
-                    lifecycle.init
-                )
-                    ? lifecycle.init
-                    : null,
-
-            start:
-                isFunction(
-                    lifecycle.start
-                )
-                    ? lifecycle.start
-                    : null,
-
-            activate:
-                isFunction(
-                    lifecycle.activate
-                )
-                    ? lifecycle.activate
-                    : null,
-
-            deactivate:
-                isFunction(
-                    lifecycle.deactivate
-                )
-                    ? lifecycle.deactivate
-                    : null,
-
-            minimize:
-                isFunction(
-                    lifecycle.minimize
-                )
-                    ? lifecycle.minimize
-                    : null,
-
-            restore:
-                isFunction(
-                    lifecycle.restore
-                )
-                    ? lifecycle.restore
-                    : null,
-
-            stop:
-                isFunction(
-                    lifecycle.stop
-                )
-                    ? lifecycle.stop
-                    : null,
-
-            close:
-                isFunction(
-                    lifecycle.close
-                )
-                    ? lifecycle.close
-                    : null,
-
-            destroy:
-                isFunction(
-                    lifecycle.destroy
-                )
-                    ? lifecycle.destroy
-                    : null
-
-        };
-
-    }
-
-
-    /* ========================================================
-       13 — UI CONTRACT
-       ======================================================== */
-
-    function normalizeUI(
-        ui
-    ) {
-
-        if (
-            !isObject(
-                ui
-            )
-        ) {
-
-            return {};
-
-        }
-
-
-        return {
-
-            mount:
-                ui.mount ||
-                null,
-
-            container:
-                ui.container ||
-                null,
-
-            template:
-                ui.template ||
-                null,
-
-            render:
-                isFunction(
-                    ui.render
-                )
-                    ? ui.render
-                    : null,
-
-            update:
-                isFunction(
-                    ui.update
-                )
-                    ? ui.update
-                    : null,
-
-            destroy:
-                isFunction(
-                    ui.destroy
-                )
-                    ? ui.destroy
-                    : null,
-
-            refresh:
-                isFunction(
-                    ui.refresh
-                )
-                    ? ui.refresh
-                    : null
-
-        };
-
-    }
-
-
-    /* ========================================================
-       14 — NAVIGATION CONTRACT
-       ======================================================== */
-
-    function normalizeNavigation(
-        navigation
-    ) {
-
-        if (
-            !isObject(
-                navigation
-            )
-        ) {
-
-            return {
-
-                routes:
-                    [],
-
-                defaultRoute:
-                    null
-
-            };
-
-        }
-
-
-        return {
-
-            routes:
-                Array.isArray(
-                    navigation.routes
-                )
-                    ? navigation.routes
-                    : [],
-
-            defaultRoute:
-                navigation.defaultRoute ||
-                null,
-
-            onNavigate:
-                isFunction(
-                    navigation.onNavigate
-                )
-                    ? navigation.onNavigate
-                    : null,
-
-            onBack:
-                isFunction(
-                    navigation.onBack
-                )
-                    ? navigation.onBack
-                    : null,
-
-            onForward:
-                isFunction(
-                    navigation.onForward
-                )
-                    ? navigation.onForward
-                    : null
-
-        };
-
-    }
-
-
-    /* ========================================================
-       15 — STORAGE CONTRACT
-       ======================================================== */
-
-    function normalizeStorage(
-        storage
-    ) {
-
-        if (
-            !isObject(
-                storage
-            )
-        ) {
-
-            return {};
-
-        }
-
-
-        return {
-
-            namespace:
-                storage.namespace ||
-                null,
-
-            persistent:
-                storage.persistent !==
-                false,
-
-            autosave:
-                storage.autosave !==
-                false,
-
-            save:
-                isFunction(
-                    storage.save
-                )
-                    ? storage.save
-                    : null,
-
-            load:
-                isFunction(
-                    storage.load
-                )
-                    ? storage.load
-                    : null,
-
-            clear:
-                isFunction(
-                    storage.clear
-                )
-                    ? storage.clear
-                    : null
-
-        };
-
-    }
-
-
-    /* ========================================================
-       16 — AI CONTRACT
-       ======================================================== */
-
-    function normalizeAI(
-        ai
-    ) {
-
-        if (
-            !isObject(
-                ai
-            )
-        ) {
-
-            return {
-
-                enabled:
-                    true
-
-            };
-
-        }
-
-
-        return {
-
-            enabled:
-                ai.enabled !==
-                false,
-
-            model:
-                ai.model ||
-                "haldo-default",
-
-            systemPrompt:
-                ai.systemPrompt ||
-                "",
-
-            capabilities:
-                Array.isArray(
-                    ai.capabilities
-                )
-                    ? ai.capabilities
-                    : [],
-
-            chat:
-                isFunction(
-                    ai.chat
-                )
-                    ? ai.chat
-                    : null,
-
-            command:
-                isFunction(
-                    ai.command
-                )
-                    ? ai.command
-                    : null,
-
-            analyze:
-                isFunction(
-                    ai.analyze
-                )
-                    ? ai.analyze
-                    : null
-
-        };
-
-    }
-
-
-    /* ========================================================
-       17 — LANGUAGE CONTRACT
-       ======================================================== */
-
-    function normalizeLanguage(
-        language
-    ) {
-
-        if (
-            !isObject(
-                language
-            )
-        ) {
-
-            return {
-
-                enabled:
-                    true,
-
-                defaultLanguage:
-                    "auto",
-
-                supportedLanguages:
-                    []
-
-            };
-
-        }
-
-
-        return {
-
-            enabled:
-                language.enabled !==
-                false,
-
-            defaultLanguage:
-                language.defaultLanguage ||
-                "auto",
-
-            supportedLanguages:
-                Array.isArray(
-                    language.supportedLanguages
-                )
-                    ? language.supportedLanguages
-                    : [],
-
-            translate:
-                isFunction(
-                    language.translate
-                )
-                    ? language.translate
-                    : null,
-
-            setLanguage:
-                isFunction(
-                    language.setLanguage
-                )
-                    ? language.setLanguage
-                    : null
-
-        };
-
-    }
-
-
-    /* ========================================================
-       18 — VOICE CONTRACT
-       ======================================================== */
-
-    function normalizeVoice(
-        voice
-    ) {
-
-        if (
-            !isObject(
-                voice
-            )
-        ) {
-
-            return {
-
-                enabled:
-                    false
-
-            };
-
-        }
-
-
-        return {
-
-            enabled:
-                voice.enabled ===
-                true,
-
-            input:
-                voice.input !==
-                false,
-
-            output:
-                voice.output !==
-                false,
-
-            speak:
-                isFunction(
-                    voice.speak
-                )
-                    ? voice.speak
-                    : null,
-
-            stop:
-                isFunction(
-                    voice.stop
-                )
-                    ? voice.stop
-                    : null,
-
-            listen:
-                isFunction(
-                    voice.listen
-                )
-                    ? voice.listen
-                    : null
-
-        };
-
-    }
-
-
-    /* ========================================================
-       19 — NORMALIZE CONTRACT
-       ======================================================== */
-
-    function normalize(
-        definition,
-        services = {}
-    ) {
-
-        const validation =
-            validate(
-                definition
-            );
-
-
-        if (
-            !validation.valid
-        ) {
-
-            return {
-
-                valid:
-                    false,
-
-                errors:
-                    validation.errors,
-
-                warnings:
-                    validation.warnings,
-
-                app:
-                    null,
-
-                context:
-                    null
-
-            };
-
-        }
-
-
-        const app =
-            createDefinition(
-                definition
-            );
-
-
-        app.lifecycle =
-            normalizeLifecycle(
-                app.lifecycle
-            );
-
-
-        app.ui =
-            normalizeUI(
-                app.ui
-            );
-
-
-        app.navigation =
-            normalizeNavigation(
-                app.navigation
-            );
-
-
-        app.storage =
-            normalizeStorage(
-                app.storage
-            );
-
-
-        app.ai =
-            normalizeAI(
-                app.ai
-            );
-
-
-        app.language =
-            normalizeLanguage(
-                app.language
-            );
-
-
-        app.voice =
-            normalizeVoice(
-                app.voice
-            );
-
-
-        const context =
-            createContext(
-                app,
-                services
-            );
-
-
-        return {
-
-            valid:
-                true,
-
-            errors:
-                validation.errors,
-
-            warnings:
-                validation.warnings,
-
-            app,
-
-            context
-
-        };
-
-    }
-
-
-    /* ========================================================
-       20 — SERVICE DISCOVERY
-       ======================================================== */
-
-    function getServices() {
-
-        return {
-
-            kernel:
-                window.HalDoKernel ||
-                HalDoOS.kernel ||
-                null,
-
-            system:
-                window.HalDoSystem ||
-                HalDoOS.system ||
-                null,
-
-            appManager:
-                window.HalDoAppManager ||
-                HalDoOS.appManager ||
-                null,
-
-            appRegistry:
-                window.HalDoAppRegistry ||
-                HalDoOS.appRegistry ||
-                null,
-
-            appRouter:
-                window.HalDoAppRouter ||
-                HalDoOS.appRouter ||
-                null,
-
-            windowManager:
-                window.HalDoWindowManager ||
-                HalDoOS.windowManager ||
-                null,
-
-            launcher:
-                window.HalDoLauncher ||
-                HalDoOS.launcher ||
-                null,
-
-            ai:
-                window.HalDoAI ||
-                HalDoOS.ai ||
-                null,
-
-            aiCore:
-                window.HalDoAICore ||
-                HalDoOS.aiCore ||
-                null,
-
-            language:
-                window.HalDoLanguage ||
-                HalDoOS.language ||
-                null,
-
-            languageManager:
-                window.HalDoLanguageManager ||
-                HalDoOS.languageManager ||
-                null,
-
-            voice:
-                window.HalDoVoice ||
-                HalDoOS.voice ||
-                null,
-
-            storage:
-                window.HalDoStorage ||
-                HalDoOS.storage ||
-                null,
-
-            storageManager:
-                window.HalDoStorageManager ||
-                HalDoOS.storageManager ||
-                null
-
-        };
-
-    }
-
-
-    /* ========================================================
-       21 — APP FACTORY
-       ======================================================== */
-
-    function createApp(
-        definition,
-        services
-    ) {
-
-        const result =
-            normalize(
-                definition,
-                services ||
-                getServices()
-            );
-
-
-        if (
-            !result.valid
-        ) {
-
-            throw new Error(
-                "Ungültige HalDo App: " +
-                result.errors.join(
-                    " | "
-                )
-            );
-
-        }
-
-
-        const app =
-            result.app;
-
-
-        const context =
-            result.context;
-
-
-        /*
-         * Lifecycle-Kompatibilität:
-         *
-         * Der App Manager arbeitet mit
-         * app.init(), app.start(), usw.
-         *
-         * Deshalb werden die Contract-Lifecycle-
-         * Funktionen zusätzlich direkt auf die
-         * App gespiegelt.
-         */
-
-        const lifecycle =
-            app.lifecycle;
-
-
-        app.init =
-            lifecycle.init ||
-            null;
-
-
-        app.start =
-            lifecycle.start ||
-            null;
-
-
-        app.onActivate =
-            lifecycle.activate ||
-            null;
-
-
-        app.onDeactivate =
-            lifecycle.deactivate ||
-            null;
-
-
-        app.minimize =
-            lifecycle.minimize ||
-            null;
-
-
-        app.restore =
-            lifecycle.restore ||
-            null;
-
-
-        app.stop =
-            lifecycle.stop ||
-            null;
-
-
-        app.close =
-            lifecycle.close ||
-            null;
-
-
-        app.destroy =
-            lifecycle.destroy ||
-            null;
-
-
-        /*
-         * Contract Services
-         */
-
-        app.services =
-            services ||
-            getServices();
-
-
-        /*
-         * Contract Context
-         */
-
-        app.context =
-            context;
-
-
-        /*
-         * Contract API
-         */
-
-        app.contract = {
-
-            version:
-                VERSION,
-
-            validate:
-                function () {
-
-                    return validate(
-                        app
-                    );
-
-                },
-
-            getState:
-                function () {
-
-                    return context.getState();
-
-                },
-
-            setState:
-                function (
-                    changes
-                ) {
-
-                    return context.setState(
-                        changes
-                    );
-
-                },
-
-            on:
-                context.on,
-
-            emit:
-                context.emit,
-
-            getServices:
-                getServices
-
-        };
-
-
-        return app;
-
-    }
-
-
-    /* ========================================================
-       22 — APP CONTRACT INSTANCE
-       ======================================================== */
-
-    function createContract(
-        definition,
-        services
-    ) {
-
-        const app =
-            createApp(
-                definition,
-                services
-            );
-
-
-        return {
-
-            app,
-
-            context:
-                app.context,
-
-            services:
-                app.services,
-
-            version:
-                VERSION,
-
-            id:
-                app.id,
-
-            name:
-                app.name,
-
-            validate:
-                function () {
-
-                    return validate(
-                        app
-                    );
-
-                },
-
-            getState:
-                function () {
-
-                    return app.context
-                        .getState();
-
-                },
-
-            setState:
-                function (
-                    changes
-                ) {
-
-                    return app.context
-                        .setState(
-                            changes
-                        );
-
-                },
-
-            on:
-                function (
-                    event,
-                    callback
-                ) {
-
-                    return app.context
-                        .on(
-                            event,
-                            callback
-                        );
-
-                },
-
-            emit:
-                function (
-                    event,
-                    data
-                ) {
-
-                    return app.context
-                        .emit(
-                            event,
-                            data
-                        );
-
-                }
-
-        };
-
-    }
-
-
-    /* ========================================================
-       23 — CONTRACT DIAGNOSTICS
-       ======================================================== */
-
-    function diagnostics() {
-
-        const services =
-            getServices();
-
-
-        return {
-
-            name:
-                NAME,
-
-            module:
-                MODULE_ID,
-
-            version:
-                VERSION,
-
-            healthy:
-                true,
-
-            services: {
-
-                kernel:
-                    !!services.kernel,
-
-                system:
-                    !!services.system,
-
-                appManager:
-                    !!services.appManager,
-
-                appRegistry:
-                    !!services.appRegistry,
-
-                appRouter:
-                    !!services.appRouter,
-
-                windowManager:
-                    !!services.windowManager,
-
-                launcher:
-                    !!services.launcher,
-
-                ai:
-                    !!services.ai,
-
-                aiCore:
-                    !!services.aiCore,
-
-                language:
-                    !!services.language,
-
-                languageManager:
-                    !!services.languageManager,
-
-                voice:
-                    !!services.voice,
-
-                storage:
-                    !!services.storage,
-
-                storageManager:
-                    !!services.storageManager
-
-            },
-
-            timestamp:
-                isoTime()
-
-        };
-
-    }
-
-
-    /* ========================================================
-       24 — PUBLIC API
-       ======================================================== */
+    // --------------------------------------------------------
+    // PUBLIC API
+    // --------------------------------------------------------
 
     const api = {
 
-        name:
-            NAME,
-
-        module:
-            MODULE_ID,
+        __haldoAI20:
+            true,
 
         version:
             VERSION,
 
+        STATES,
 
-        /* Constants */
+        clean,
 
-        LIFECYCLE:
-            LIFECYCLE,
+        createId,
 
-        CATEGORIES:
-            CATEGORIES,
+        createAppDefinition,
 
-        PERMISSIONS:
-            PERMISSIONS,
+        createAppInstance,
 
-
-        /* Helpers */
-
-        normalizeId:
-            normalizeId,
-
-        clone:
-            clone,
-
-        merge:
-            merge,
-
-
-        /* Definition */
-
-        createDefinition:
-            createDefinition,
-
-        validate:
-            validate,
-
-        normalize:
-            normalize,
-
-
-        /* Context */
-
-        createContext:
-            createContext,
-
-        createEventBus:
-            createEventBus,
-
-
-        /* App */
-
-        createApp:
-            createApp,
-
-        createContract:
-            createContract,
-
-
-        /* Defaults */
-
-        createDefaultState:
-            createDefaultState,
-
-        createDefaultWindow:
-            createDefaultWindow,
-
-        createDefaultSettings:
-            createDefaultSettings,
-
-
-        /* Services */
-
-        getServices:
-            getServices,
-
-
-        /* Diagnostics */
-
-        diagnostics:
-            diagnostics
+        validate
 
     };
 
-
-    /* ========================================================
-       25 — GLOBAL EXPORTS
-       ======================================================== */
+    // --------------------------------------------------------
+    // GLOBAL REGISTRATION
+    // --------------------------------------------------------
 
     window.HalDoAppContract =
         api;
 
-
-    window.HalDoOSAppContract =
+    window.HalDoOS.appContract =
         api;
 
+    // --------------------------------------------------------
+    // KERNEL REGISTRATION
+    // --------------------------------------------------------
 
-    HalDoOS.appContract =
-        api;
-
-
-    /* ========================================================
-       26 — KERNEL CONNECTION
-       ======================================================== */
-
-    function connectKernel() {
+    try {
 
         const kernel =
             window.HalDoKernel ||
-            HalDoOS.kernel ||
-            null;
+            window.HalDoOS.kernel;
 
+        if (
+            kernel &&
+            typeof kernel.registerModule ===
+            "function"
+        ) {
 
-        if (!kernel) {
-
-            return false;
+            kernel.registerModule(
+                "app-contract",
+                api
+            );
 
         }
 
+    } catch (error) {
 
-        try {
-
-            if (
-                typeof kernel.registerModule ===
-                "function"
-            ) {
-
-                kernel.registerModule(
-                    MODULE_ID,
-                    api
-                );
-
-            }
-
-
-            if (
-                typeof kernel.setModuleReady ===
-                "function"
-            ) {
-
-                kernel.setModuleReady(
-                    MODULE_ID,
-                    true
-                );
-
-            }
-
-
-            return true;
-
-        } catch (exception) {
-
-            console.error(
-                "[HalDo App Contract]",
-                exception
-            );
-
-
-            return false;
-
-        }
-
-    }
-
-
-    /* ========================================================
-       27 — INITIALIZATION
-       ======================================================== */
-
-    function initialize() {
-
-        connectKernel();
-
-
-        try {
-
-            if (
-                HalDoOS.events &&
-                typeof HalDoOS.events.emit ===
-                "function"
-            ) {
-
-                HalDoOS.events.emit(
-                    "app-contract:ready",
-                    {
-                        version:
-                            VERSION,
-
-                        diagnostics:
-                            diagnostics()
-                    }
-                );
-
-            }
-
-        } catch (_) {}
-
-
-        try {
-
-            console.log(
-                "[HalDo App Contract]",
-                "HalDo AI OS 20 App Contract bereit.",
-                VERSION
-            );
-
-        } catch (_) {}
-
-
-        return api;
-
-    }
-
-
-    /* ========================================================
-       28 — DOM BOOT
-       ======================================================== */
-
-    if (
-        document.readyState ===
-        "loading"
-    ) {
-
-        document.addEventListener(
-            "DOMContentLoaded",
-            initialize,
-            {
-                once:
-                    true
-            }
+        console.warn(
+            "[HalDoAppContract] " +
+            "Kernel registration failed:",
+            error
         );
 
-    } else {
-
-        initialize();
-
     }
 
-
-    /* ========================================================
-       END
-       HALDO AI OS 20 APP CONTRACT
-       ============================================================ */
+    console.log(
+        "[HalDoAppContract] HalDo AI OS 20 App Contract ready."
+    );
 
 })(window, document);
+
+// ============================================================
+// END OF APP CONTRACT
+// ============================================================
