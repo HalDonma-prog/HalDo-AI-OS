@@ -55206,4 +55206,1811 @@
     })();
 
     </script>
-    
+        <!-- =========================================================
+         HALDO AI OS 20
+         APPLICATION COMMAND / ACTION ENGINE
+         TEIL 57
+         ========================================================= -->
+
+    <script>
+
+    (() => {
+
+        "use strict";
+
+
+        /* =====================================================
+           REFERENCES
+           ===================================================== */
+
+        const messageBus =
+            window.HalDoMessageBus20 ||
+            null;
+
+
+        const appState =
+            window.HalDoAppState20 ||
+            null;
+
+
+        const windowControls =
+            window.HalDoWindowControls20 ||
+            null;
+
+
+        /* =====================================================
+           STATE
+           ===================================================== */
+
+        const commands =
+            new Map();
+
+
+        const appCommands =
+            new Map();
+
+
+        const executionHistory = [];
+
+        const MAX_HISTORY =
+            500;
+
+
+        /* =====================================================
+           UTILITIES
+           ===================================================== */
+
+        function normalize(
+            value
+        ) {
+
+            return String(
+                value || ""
+            ).trim();
+
+        }
+
+
+        function emit(
+            name,
+            detail = {}
+        ) {
+
+            try {
+
+                document.dispatchEvent(
+                    new CustomEvent(
+                        `haldo:${name}`,
+                        {
+                            detail
+                        }
+                    )
+                );
+
+            } catch (
+                error
+            ) {
+
+                console.warn(
+                    "[HalDo Command Engine 20]",
+                    error
+                );
+
+            }
+
+        }
+
+
+        function clone(
+            value
+        ) {
+
+            if (
+                value ===
+                undefined
+            ) {
+
+                return undefined;
+
+            }
+
+
+            try {
+
+                return JSON.parse(
+                    JSON.stringify(
+                        value
+                    )
+                );
+
+            } catch (
+                error
+            ) {
+
+                return value;
+
+            }
+
+        }
+
+
+        function record(
+            entry
+        ) {
+
+            executionHistory.push(
+                entry
+            );
+
+
+            if (
+                executionHistory.length >
+                MAX_HISTORY
+            ) {
+
+                executionHistory.splice(
+                    0,
+                    executionHistory.length -
+                    MAX_HISTORY
+                );
+
+            }
+
+        }
+
+
+        /* =====================================================
+           COMMAND REGISTRATION
+           ===================================================== */
+
+        function register(
+            definition
+        ) {
+
+            if (
+                !definition ||
+                typeof definition !==
+                "object"
+            ) {
+
+                return null;
+
+            }
+
+
+            const id =
+                normalize(
+                    definition.id
+                );
+
+
+            if (!id) {
+
+                return null;
+
+            }
+
+
+            if (
+                typeof definition.execute !==
+                "function"
+            ) {
+
+                return null;
+
+            }
+
+
+            const command = {
+
+                id,
+
+                title:
+                    definition.title ||
+                    id,
+
+                description:
+                    definition.description ||
+                    "",
+
+                category:
+                    definition.category ||
+                    "general",
+
+                shortcut:
+                    definition.shortcut ||
+                    null,
+
+                appId:
+                    definition.appId ||
+                    null,
+
+                enabled:
+                    definition.enabled !==
+                    false,
+
+                visible:
+                    definition.visible !==
+                    false,
+
+                execute:
+                    definition.execute,
+
+                canExecute:
+                    typeof definition.canExecute ===
+                    "function"
+                        ? definition.canExecute
+                        : null,
+
+                createdAt:
+                    Date.now(),
+
+                metadata:
+                    definition.metadata ||
+                    {}
+
+            };
+
+
+            commands.set(
+                id,
+                command
+            );
+
+
+            if (
+                command.appId
+            ) {
+
+                registerAppCommand(
+                    command.appId,
+                    command
+                );
+
+            }
+
+
+            emit(
+                "command:registered",
+                {
+
+                    command
+
+                }
+            );
+
+
+            return command;
+
+        }
+
+
+        /* =====================================================
+           UNREGISTER
+           ===================================================== */
+
+        function unregister(
+            commandId
+        ) {
+
+            commandId =
+                normalize(
+                    commandId
+                );
+
+
+            const command =
+                commands.get(
+                    commandId
+                );
+
+
+            if (!command) {
+
+                return false;
+
+            }
+
+
+            commands.delete(
+                commandId
+            );
+
+
+            if (
+                command.appId
+            ) {
+
+                const set =
+                    appCommands.get(
+                        command.appId
+                    );
+
+
+                if (set) {
+
+                    set.delete(
+                        commandId
+                    );
+
+
+                    if (
+                        set.size ===
+                        0
+                    ) {
+
+                        appCommands.delete(
+                            command.appId
+                        );
+
+                    }
+
+                }
+
+            }
+
+
+            emit(
+                "command:unregistered",
+                {
+
+                    commandId
+
+                }
+            );
+
+
+            return true;
+
+        }
+
+
+        /* =====================================================
+           GET COMMAND
+           ===================================================== */
+
+        function get(
+            commandId
+        ) {
+
+            return (
+                commands.get(
+                    normalize(
+                        commandId
+                    )
+                ) ||
+                null
+            );
+
+        }
+
+
+        /* =====================================================
+           REGISTER APP COMMAND
+           ===================================================== */
+
+        function registerAppCommand(
+            appId,
+            definition
+        ) {
+
+            appId =
+                normalize(
+                    appId
+                );
+
+
+            if (!appId) {
+
+                return null;
+
+            }
+
+
+            let command;
+
+
+            if (
+                typeof definition ===
+                "function"
+            ) {
+
+                command =
+                    register(
+                        {
+
+                            id:
+                                `app:${appId}:${Date.now()}:${Math.random()
+                                    .toString(36)
+                                    .slice(2, 8)}`,
+
+                            appId,
+
+                            execute:
+                                definition
+
+                        }
+                    );
+
+            } else {
+
+                command =
+                    definition &&
+                    definition.id
+                        ? (
+                            commands.get(
+                                definition.id
+                            ) ||
+                            register(
+                                {
+
+                                    ...definition,
+
+                                    appId
+
+                                }
+                            )
+                        )
+                        : null;
+
+            }
+
+
+            if (!command) {
+
+                return null;
+
+            }
+
+
+            if (
+                !appCommands.has(
+                    appId
+                )
+            ) {
+
+                appCommands.set(
+                    appId,
+                    new Set()
+                );
+
+            }
+
+
+            appCommands
+                .get(
+                    appId
+                )
+                .add(
+                    command.id
+                );
+
+
+            return command;
+
+        }
+
+
+        /* =====================================================
+           UNREGISTER APP COMMANDS
+           ===================================================== */
+
+        function unregisterAppCommands(
+            appId
+        ) {
+
+            appId =
+                normalize(
+                    appId
+                );
+
+
+            const set =
+                appCommands.get(
+                    appId
+                );
+
+
+            if (!set) {
+
+                return false;
+
+            }
+
+
+            [
+                ...set
+            ].forEach(
+                commandId => {
+
+                    commands.delete(
+                        commandId
+                    );
+
+                }
+            );
+
+
+            appCommands.delete(
+                appId
+            );
+
+
+            emit(
+                "command:app:cleared",
+                {
+
+                    appId
+
+                }
+            );
+
+
+            return true;
+
+        }
+
+
+        /* =====================================================
+           CAN EXECUTE
+           ===================================================== */
+
+        function canExecute(
+            command,
+            context = {}
+        ) {
+
+            if (!command) {
+
+                return false;
+
+            }
+
+
+            if (
+                command.enabled ===
+                false
+            ) {
+
+                return false;
+
+            }
+
+
+            if (
+                typeof command.canExecute !==
+                "function"
+            ) {
+
+                return true;
+
+            }
+
+
+            try {
+
+                return (
+                    command.canExecute(
+                        context
+                    ) !== false
+                );
+
+            } catch (
+                error
+            ) {
+
+                return false;
+
+            }
+
+        }
+
+
+        /* =====================================================
+           EXECUTE
+           ===================================================== */
+
+        async function execute(
+            commandId,
+            payload = {},
+            context = {}
+        ) {
+
+            commandId =
+                normalize(
+                    commandId
+                );
+
+
+            const command =
+                get(
+                    commandId
+                );
+
+
+            const executionId =
+                `exec-${Date.now()}-${Math.random()
+                    .toString(36)
+                    .slice(2, 10)}`;
+
+
+            if (!command) {
+
+                const error =
+                    new Error(
+                        `Command not found: ${commandId}`
+                    );
+
+
+                record({
+
+                    executionId,
+
+                    commandId,
+
+                    success:
+                        false,
+
+                    error:
+                        error.message,
+
+                    timestamp:
+                        Date.now()
+
+                });
+
+
+                emit(
+                    "command:error",
+                    {
+
+                        executionId,
+
+                        commandId,
+
+                        error
+
+                    }
+                );
+
+
+                throw error;
+
+            }
+
+
+            const executionContext = {
+
+                ...context,
+
+                commandId,
+
+                executionId,
+
+                timestamp:
+                    Date.now()
+
+            };
+
+
+            if (
+                !canExecute(
+                    command,
+                    executionContext
+                )
+            ) {
+
+                const error =
+                    new Error(
+                        `Command disabled: ${commandId}`
+                    );
+
+
+                record({
+
+                    executionId,
+
+                    commandId,
+
+                    success:
+                        false,
+
+                    error:
+                        error.message,
+
+                    timestamp:
+                        Date.now()
+
+                });
+
+
+                emit(
+                    "command:blocked",
+                    {
+
+                        executionId,
+
+                        commandId,
+
+                        error
+
+                    }
+                );
+
+
+                throw error;
+
+            }
+
+
+            emit(
+                "command:before-execute",
+                {
+
+                    executionId,
+
+                    commandId,
+
+                    payload:
+                        clone(
+                            payload
+                        ),
+
+                    context:
+                        executionContext
+
+                }
+            );
+
+
+            try {
+
+                const result =
+                    await command.execute(
+                        payload,
+                        executionContext
+                    );
+
+
+                const historyEntry = {
+
+                    executionId,
+
+                    commandId,
+
+                    appId:
+                        command.appId,
+
+                    payload:
+                        clone(
+                            payload
+                        ),
+
+                    result:
+                        clone(
+                            result
+                        ),
+
+                    success:
+                        true,
+
+                    timestamp:
+                        Date.now()
+
+                };
+
+
+                record(
+                    historyEntry
+                );
+
+
+                emit(
+                    "command:executed",
+                    historyEntry
+                );
+
+
+                if (
+                    messageBus &&
+                    typeof messageBus.publish ===
+                    "function"
+                ) {
+
+                    messageBus.publish(
+                        "command:executed",
+                        historyEntry,
+                        {
+
+                            sender:
+                                command.appId ||
+                                "system",
+
+                            dom:
+                                false
+
+                        }
+                    );
+
+                }
+
+
+                return result;
+
+            } catch (
+                error
+            ) {
+
+                const historyEntry = {
+
+                    executionId,
+
+                    commandId,
+
+                    appId:
+                        command.appId,
+
+                    payload:
+                        clone(
+                            payload
+                        ),
+
+                    success:
+                        false,
+
+                    error:
+                        error &&
+                        error.message
+                            ? error.message
+                            : String(
+                                error
+                            ),
+
+                    timestamp:
+                        Date.now()
+
+                };
+
+
+                record(
+                    historyEntry
+                );
+
+
+                emit(
+                    "command:error",
+                    {
+
+                        ...historyEntry,
+
+                        error
+
+                    }
+                );
+
+
+                throw error;
+
+            }
+
+        }
+
+
+        /* =====================================================
+           EXECUTE APP COMMAND
+           ===================================================== */
+
+        async function executeApp(
+            appId,
+            commandName,
+            payload = {},
+            context = {}
+        ) {
+
+            appId =
+                normalize(
+                    appId
+                );
+
+
+            commandName =
+                normalize(
+                    commandName
+                );
+
+
+            if (
+                !appId ||
+                !commandName
+            ) {
+
+                throw new Error(
+                    "App ID and command name are required"
+                );
+
+            }
+
+
+            const directId =
+                `${appId}:${commandName}`;
+
+
+            let command =
+                get(
+                    directId
+                );
+
+
+            if (!command) {
+
+                command =
+                    get(
+                        `app:${appId}:${commandName}`
+                    );
+
+            }
+
+
+            if (!command) {
+
+                const set =
+                    appCommands.get(
+                        appId
+                    );
+
+
+                if (set) {
+
+                    for (
+                        const id
+                        of set
+                    ) {
+
+                        const candidate =
+                            get(
+                                id
+                            );
+
+
+                        if (
+                            candidate &&
+                            (
+                                candidate.name ===
+                                commandName ||
+                                candidate.id.endsWith(
+                                    `:${commandName}`
+                                )
+                            )
+                        ) {
+
+                            command =
+                                candidate;
+
+                            break;
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+
+            if (!command) {
+
+                throw new Error(
+                    `App command not found: ${appId}/${commandName}`
+                );
+
+            }
+
+
+            return execute(
+                command.id,
+                payload,
+                {
+
+                    ...context,
+
+                    appId
+
+                }
+            );
+
+        }
+
+
+        /* =====================================================
+           BUILT-IN WINDOW COMMANDS
+           ===================================================== */
+
+        register({
+
+            id:
+                "window:focus",
+
+            title:
+                "Fenster fokussieren",
+
+            category:
+                "window",
+
+            execute(
+                payload
+            ) {
+
+                if (
+                    !windowControls
+                ) {
+
+                    return false;
+
+                }
+
+
+                return windowControls.focus(
+                    payload.appId
+                );
+
+            }
+
+        });
+
+
+        register({
+
+            id:
+                "window:minimize",
+
+            title:
+                "Fenster minimieren",
+
+            category:
+                "window",
+
+            execute(
+                payload
+            ) {
+
+                if (
+                    !windowControls
+                ) {
+
+                    return false;
+
+                }
+
+
+                return windowControls.minimize(
+                    payload.appId
+                );
+
+            }
+
+        });
+
+
+        register({
+
+            id:
+                "window:maximize",
+
+            title:
+                "Fenster maximieren",
+
+            category:
+                "window",
+
+            execute(
+                payload
+            ) {
+
+                if (
+                    !windowControls
+                ) {
+
+                    return false;
+
+                }
+
+
+                return windowControls.maximize(
+                    payload.appId
+                );
+
+            }
+
+        });
+
+
+        register({
+
+            id:
+                "window:restore",
+
+            title:
+                "Fenster wiederherstellen",
+
+            category:
+                "window",
+
+            execute(
+                payload
+            ) {
+
+                if (
+                    !windowControls
+                ) {
+
+                    return false;
+
+                }
+
+
+                return windowControls.restore(
+                    payload.appId
+                );
+
+            }
+
+        });
+
+
+        register({
+
+            id:
+                "window:toggle-maximize",
+
+            title:
+                "Maximieren umschalten",
+
+            category:
+                "window",
+
+            execute(
+                payload
+            ) {
+
+                if (
+                    !windowControls
+                ) {
+
+                    return false;
+
+                }
+
+
+                return windowControls.toggleMaximize(
+                    payload.appId
+                );
+
+            }
+
+        });
+
+
+        register({
+
+            id:
+                "window:close",
+
+            title:
+                "Fenster schließen",
+
+            category:
+                "window",
+
+            execute(
+                payload
+            ) {
+
+                if (
+                    !windowControls
+                ) {
+
+                    return false;
+
+                }
+
+
+                return windowControls.close(
+                    payload.appId
+                );
+
+            }
+
+        });
+
+
+        /* =====================================================
+           BUILT-IN STATE COMMANDS
+           ===================================================== */
+
+        register({
+
+            id:
+                "state:get",
+
+            title:
+                "App-Zustand lesen",
+
+            category:
+                "state",
+
+            execute(
+                payload
+            ) {
+
+                if (
+                    !appState
+                ) {
+
+                    return null;
+
+                }
+
+
+                return appState.getValue(
+                    payload.appId,
+                    payload.path,
+                    payload.fallback
+                );
+
+            }
+
+        });
+
+
+        register({
+
+            id:
+                "state:set",
+
+            title:
+                "App-Zustand ändern",
+
+            category:
+                "state",
+
+            execute(
+                payload
+            ) {
+
+                if (
+                    !appState
+                ) {
+
+                    return false;
+
+                }
+
+
+                return appState.setValue(
+                    payload.appId,
+                    payload.path,
+                    payload.value,
+                    {
+
+                        save:
+                            payload.save ===
+                            true
+
+                    }
+                );
+
+            }
+
+        });
+
+
+        register({
+
+            id:
+                "state:save",
+
+            title:
+                "App-Zustand speichern",
+
+            category:
+                "state",
+
+            execute(
+                payload
+            ) {
+
+                if (
+                    !appState
+                ) {
+
+                    return false;
+
+                }
+
+
+                return appState.save(
+                    payload.appId
+                );
+
+            }
+
+        });
+
+
+        register({
+
+            id:
+                "state:reset",
+
+            title:
+                "App-Zustand zurücksetzen",
+
+            category:
+                "state",
+
+            execute(
+                payload
+            ) {
+
+                if (
+                    !appState
+                ) {
+
+                    return false;
+
+                }
+
+
+                return appState.reset(
+                    payload.appId,
+                    payload.initialState ||
+                    {},
+                    {
+
+                        save:
+                            payload.save ===
+                            true,
+
+                        removeSaved:
+                            payload.removeSaved ===
+                            true
+
+                    }
+                );
+
+            }
+
+        });
+
+
+        /* =====================================================
+           MESSAGE COMMAND
+           ===================================================== */
+
+        register({
+
+            id:
+                "message:publish",
+
+            title:
+                "Nachricht senden",
+
+            category:
+                "communication",
+
+            execute(
+                payload
+            ) {
+
+                if (
+                    !messageBus
+                ) {
+
+                    return false;
+
+                }
+
+
+                return messageBus.publish(
+                    payload.channel,
+                    payload.payload ||
+                    {},
+                    {
+
+                        sender:
+                            payload.sender ||
+                            "system",
+
+                        metadata:
+                            payload.metadata ||
+                            {}
+
+                    }
+                );
+
+            }
+
+        });
+
+
+        /* =====================================================
+           COMMAND QUERY
+           ===================================================== */
+
+        function list(
+            options = {}
+        ) {
+
+            let result =
+                [
+                    ...commands.values()
+                ];
+
+
+            if (
+                options.category
+            ) {
+
+                result =
+                    result.filter(
+                        command =>
+                            command.category ===
+                            options.category
+                    );
+
+            }
+
+
+            if (
+                options.appId
+            ) {
+
+                result =
+                    result.filter(
+                        command =>
+                            command.appId ===
+                            options.appId
+                    );
+
+            }
+
+
+            if (
+                options.visibleOnly
+            ) {
+
+                result =
+                    result.filter(
+                        command =>
+                            command.visible !==
+                            false
+                    );
+
+            }
+
+
+            return result;
+
+        }
+
+
+        /* =====================================================
+           HISTORY
+           ===================================================== */
+
+        function getHistory(
+            options = {}
+        ) {
+
+            const limit =
+                Number.isFinite(
+                    options.limit
+                )
+                    ? options.limit
+                    : 100;
+
+
+            return executionHistory
+                .slice(
+                    Math.max(
+                        0,
+                        executionHistory.length -
+                        limit
+                    )
+                )
+                .map(
+                    entry =>
+                        ({
+                            ...entry
+                        })
+                );
+
+        }
+
+
+        function clearHistory() {
+
+            executionHistory.length =
+                0;
+
+
+            emit(
+                "command:history:cleared",
+                {
+
+                    timestamp:
+                        Date.now()
+
+                }
+            );
+
+        }
+
+
+        /* =====================================================
+           KEYBOARD SHORTCUTS
+           ===================================================== */
+
+        const shortcutMap =
+            new Map();
+
+
+        function registerShortcut(
+            shortcut,
+            commandId
+        ) {
+
+            shortcut =
+                normalize(
+                    shortcut
+                );
+
+
+            if (
+                !shortcut ||
+                !commands.has(
+                    commandId
+                )
+            ) {
+
+                return false;
+
+            }
+
+
+            shortcutMap.set(
+                shortcut.toLowerCase(),
+                commandId
+            );
+
+
+            return true;
+
+        }
+
+
+        function normalizeShortcut(
+            event
+        ) {
+
+            const parts = [];
+
+
+            if (
+                event.ctrlKey
+            ) {
+
+                parts.push(
+                    "ctrl"
+                );
+
+            }
+
+
+            if (
+                event.altKey
+            ) {
+
+                parts.push(
+                    "alt"
+                );
+
+            }
+
+
+            if (
+                event.shiftKey
+            ) {
+
+                parts.push(
+                    "shift"
+                );
+
+            }
+
+
+            if (
+                event.metaKey
+            ) {
+
+                parts.push(
+                    "meta"
+                );
+
+            }
+
+
+            parts.push(
+                String(
+                    event.key
+                ).toLowerCase()
+            );
+
+
+            return parts.join(
+                "+"
+            );
+
+        }
+
+
+        document.addEventListener(
+            "keydown",
+            event => {
+
+                const shortcut =
+                    normalizeShortcut(
+                        event
+                    );
+
+
+                const commandId =
+                    shortcutMap.get(
+                        shortcut
+                    );
+
+
+                if (!commandId) {
+
+                    return;
+
+                }
+
+
+                event.preventDefault();
+
+
+                execute(
+                    commandId,
+                    {},
+                    {
+
+                        source:
+                            "keyboard",
+
+                        event
+
+                    }
+                ).catch(
+                    error => {
+
+                        console.warn(
+                            "[HalDo Command Engine 20]",
+                            error
+                        );
+
+                    }
+                );
+
+            }
+        );
+
+
+        /* =====================================================
+           DEFAULT SHORTCUTS
+           ===================================================== */
+
+        registerShortcut(
+            "ctrl+shift+w",
+            "window:close"
+        );
+
+
+        registerShortcut(
+            "ctrl+shift+m",
+            "window:minimize"
+        );
+
+
+        registerShortcut(
+            "ctrl+shift+f",
+            "window:focus"
+        );
+
+
+        /* =====================================================
+           PUBLIC API
+           ===================================================== */
+
+        const commandEngine = {
+
+            register,
+
+            unregister,
+
+            get,
+
+            list,
+
+            execute,
+
+            executeApp,
+
+            registerAppCommand,
+
+            unregisterAppCommands,
+
+            canExecute,
+
+            registerShortcut,
+
+            getHistory,
+
+            clearHistory
+
+        };
+
+
+        /* =====================================================
+           GLOBAL API
+           ===================================================== */
+
+        window.HalDoCommandEngine20 =
+            commandEngine;
+
+
+        if (
+            !window.HalDoOS
+        ) {
+
+            window.HalDoOS =
+                {};
+
+        }
+
+
+        window.HalDoOS.commandEngine20 =
+            commandEngine;
+
+
+        /* =====================================================
+           READY
+           ===================================================== */
+
+        emit(
+            "command-engine:ready",
+            {
+
+                version:
+                    "20.0.0",
+
+                timestamp:
+                    Date.now(),
+
+                commandCount:
+                    commands.size
+
+            }
+        );
+
+
+        console.info(
+            "%cHalDo AI OS 20%c Command / Action Engine bereit",
+            "color:#42e6ff;font-weight:800;",
+            "color:#ffffff;"
+        );
+
+
+    })();
+
+    </script>
