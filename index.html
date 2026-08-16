@@ -53792,1310 +53792,6 @@
     </script>
         <!-- =========================================================
          HALDO AI OS 20
-         DESKTOP / TASKBAR APP BRIDGE
-         TEIL 54
-         ========================================================= -->
-
-    <script>
-
-    (() => {
-
-        "use strict";
-
-
-        /* =====================================================
-           REFERENCES
-           ===================================================== */
-
-        const appLayer =
-            document.getElementById(
-                "haldo-app-layer"
-            );
-
-
-        const windowControls =
-            window.HalDoWindowControls20 ||
-            null;
-
-
-        /* =====================================================
-           STATE
-           ===================================================== */
-
-        const state = {
-
-            tasks:
-                new Map(),
-
-            initialized:
-                false
-
-        };
-
-
-        /* =====================================================
-           EVENT
-           ===================================================== */
-
-        function emit(
-            name,
-            detail = {}
-        ) {
-
-            document.dispatchEvent(
-                new CustomEvent(
-                    `haldo:${name}`,
-                    {
-
-                        detail
-
-                    }
-                )
-            );
-
-        }
-
-
-        /* =====================================================
-           TASKBAR RESOLUTION
-           ===================================================== */
-
-        function resolveTaskbar() {
-
-            const selectors = [
-
-                "#haldo-taskbar",
-
-                "#taskbar",
-
-                ".haldo-taskbar",
-
-                "[data-haldo-taskbar]"
-
-            ];
-
-
-            for (
-                const selector
-                of selectors
-            ) {
-
-                const element =
-                    document.querySelector(
-                        selector
-                    );
-
-
-                if (element) {
-
-                    return element;
-
-                }
-
-            }
-
-
-            return null;
-
-        }
-
-
-        /* =====================================================
-           TASKBAR CONTAINER
-           ===================================================== */
-
-        function resolveTaskContainer(
-            taskbar
-        ) {
-
-            if (!taskbar) {
-
-                return null;
-
-            }
-
-
-            const selectors = [
-
-                ".haldo-taskbar-apps",
-
-                ".haldo-taskbar-items",
-
-                "[data-haldo-taskbar-apps]"
-
-            ];
-
-
-            for (
-                const selector
-                of selectors
-            ) {
-
-                const element =
-                    taskbar.querySelector(
-                        selector
-                    );
-
-
-                if (element) {
-
-                    return element;
-
-                }
-
-            }
-
-
-            let container =
-                taskbar.querySelector(
-                    ".haldo-taskbar-app-container"
-                );
-
-
-            if (!container) {
-
-                container =
-                    document.createElement(
-                        "div"
-                    );
-
-
-                container.className =
-                    "haldo-taskbar-app-container";
-
-
-                container.dataset.haldoTaskbarApps =
-                    "true";
-
-
-                container.style.display =
-                    "flex";
-
-
-                container.style.alignItems =
-                    "center";
-
-
-                container.style.gap =
-                    "6px";
-
-
-                container.style.minWidth =
-                    "0";
-
-
-                taskbar.appendChild(
-                    container
-                );
-
-            }
-
-
-            return container;
-
-        }
-
-
-        /* =====================================================
-           TASK BUTTON STYLE
-           ===================================================== */
-
-        const style =
-            document.createElement(
-                "style"
-            );
-
-
-        style.id =
-            "haldo-taskbar-bridge-style";
-
-
-        style.textContent = `
-
-            .haldo-taskbar-app-container {
-
-                display:
-                    flex;
-
-                align-items:
-                    center;
-
-                gap:
-                    6px;
-
-                min-width:
-                    0;
-
-            }
-
-
-            .haldo-taskbar-app {
-
-                position:
-                    relative;
-
-                display:
-                    inline-flex;
-
-                align-items:
-                    center;
-
-                justify-content:
-                    center;
-
-                gap:
-                    7px;
-
-                min-width:
-                    38px;
-
-                max-width:
-                    180px;
-
-                height:
-                    34px;
-
-                padding:
-                    0 10px;
-
-                border:
-                    1px solid
-                    rgba(255,255,255,0.07);
-
-                border-radius:
-                    10px;
-
-                color:
-                    rgba(245,247,251,0.68);
-
-                background:
-                    rgba(255,255,255,0.035);
-
-                cursor:
-                    pointer;
-
-                user-select:
-                    none;
-
-                transition:
-                    160ms ease;
-
-            }
-
-
-            .haldo-taskbar-app:hover {
-
-                color:
-                    #ffffff;
-
-                background:
-                    rgba(255,255,255,0.08);
-
-                border-color:
-                    rgba(255,255,255,0.13);
-
-            }
-
-
-            .haldo-taskbar-app.is-active {
-
-                color:
-                    #ffffff;
-
-                border-color:
-                    rgba(66,230,255,0.24);
-
-                background:
-                    rgba(66,230,255,0.08);
-
-                box-shadow:
-                    0 0 18px
-                    rgba(66,230,255,0.08);
-
-            }
-
-
-            .haldo-taskbar-app.is-minimized {
-
-                opacity:
-                    0.52;
-
-            }
-
-
-            .haldo-taskbar-app-icon {
-
-                flex:
-                    0 0 auto;
-
-                display:
-                    inline-grid;
-
-                place-items:
-                    center;
-
-                width:
-                    20px;
-
-                height:
-                    20px;
-
-                font-size:
-                    12px;
-
-            }
-
-
-            .haldo-taskbar-app-label {
-
-                min-width:
-                    0;
-
-                overflow:
-                    hidden;
-
-                text-overflow:
-                    ellipsis;
-
-                white-space:
-                    nowrap;
-
-                font-size:
-                    10px;
-
-                font-weight:
-                    650;
-
-            }
-
-
-            .haldo-taskbar-app-indicator {
-
-                position:
-                    absolute;
-
-                left:
-                    50%;
-
-                bottom:
-                    2px;
-
-                width:
-                    14px;
-
-                height:
-                    2px;
-
-                border-radius:
-                    999px;
-
-                background:
-                    #42e6ff;
-
-                transform:
-                    translateX(-50%);
-
-                opacity:
-                    0;
-
-                transition:
-                    160ms ease;
-
-            }
-
-
-            .haldo-taskbar-app.is-active
-            .haldo-taskbar-app-indicator {
-
-                opacity:
-                    1;
-
-            }
-
-
-            @media (max-width: 640px) {
-
-                .haldo-taskbar-app {
-
-                    min-width:
-                        34px;
-
-                    width:
-                        34px;
-
-                    padding:
-                        0;
-
-                }
-
-
-                .haldo-taskbar-app-label {
-
-                    display:
-                        none;
-
-                }
-
-            }
-
-        `;
-
-
-        document.head.appendChild(
-            style
-        );
-
-
-        /* =====================================================
-           GET WINDOW
-           ===================================================== */
-
-        function getWindow(
-            appId
-        ) {
-
-            if (!appLayer) {
-
-                return null;
-
-            }
-
-
-            const windows =
-                appLayer.querySelectorAll(
-                    ".haldo-app-window"
-                );
-
-
-            for (
-                const element
-                of windows
-            ) {
-
-                if (
-                    element.dataset.appId ===
-                    appId
-                ) {
-
-                    return element;
-
-                }
-
-            }
-
-
-            return null;
-
-        }
-
-
-        /* =====================================================
-           APP META
-           ===================================================== */
-
-        function resolveMeta(
-            appId
-        ) {
-
-            const instance =
-                window.HalDoAppLifecycle20 &&
-                typeof window.HalDoAppLifecycle20.get ===
-                "function"
-                    ? window.HalDoAppLifecycle20.get(
-                        appId
-                    )
-                    : null;
-
-
-            const definition =
-                instance &&
-                instance.definition
-                    ? instance.definition
-                    : null;
-
-
-            return {
-
-                title:
-                    definition &&
-                    (
-                        definition.title ||
-                        definition.name
-                    )
-                        ? (
-                            definition.title ||
-                            definition.name
-                        )
-                        : appId,
-
-                icon:
-                    definition &&
-                    definition.icon
-                        ? definition.icon
-                        : "◈"
-
-            };
-
-        }
-
-
-        /* =====================================================
-           CREATE TASK
-           ===================================================== */
-
-        function createTask(
-            appId
-        ) {
-
-            const taskbar =
-                resolveTaskbar();
-
-
-            if (!taskbar) {
-
-                return null;
-
-            }
-
-
-            const container =
-                resolveTaskContainer(
-                    taskbar
-                );
-
-
-            if (!container) {
-
-                return null;
-
-            }
-
-
-            if (
-                state.tasks.has(
-                    appId
-                )
-            ) {
-
-                return state.tasks.get(
-                    appId
-                );
-
-            }
-
-
-            const meta =
-                resolveMeta(
-                    appId
-                );
-
-
-            const button =
-                document.createElement(
-                    "button"
-                );
-
-
-            button.type =
-                "button";
-
-
-            button.className =
-                "haldo-taskbar-app";
-
-
-            button.dataset.appId =
-                appId;
-
-
-            button.title =
-                meta.title;
-
-
-            button.setAttribute(
-                "aria-label",
-                meta.title
-            );
-
-
-            button.innerHTML = `
-
-                <span
-                    class="haldo-taskbar-app-icon"
-                    aria-hidden="true"
-                >
-                    ${meta.icon}
-                </span>
-
-                <span
-                    class="haldo-taskbar-app-label"
-                >
-                    ${meta.title}
-                </span>
-
-                <span
-                    class="haldo-taskbar-app-indicator"
-                ></span>
-
-            `;
-
-
-            button.addEventListener(
-                "click",
-                event => {
-
-                    event.preventDefault();
-
-                    toggleTask(
-                        appId
-                    );
-
-                }
-            );
-
-
-            container.appendChild(
-                button
-            );
-
-
-            const task = {
-
-                appId,
-
-                button,
-
-                createdAt:
-                    Date.now()
-
-            };
-
-
-            state.tasks.set(
-                appId,
-                task
-            );
-
-
-            emit(
-                "taskbar:app:created",
-                {
-
-                    appId,
-
-                    button
-
-                }
-            );
-
-
-            return task;
-
-        }
-
-
-        /* =====================================================
-           REMOVE TASK
-           ===================================================== */
-
-        function removeTask(
-            appId
-        ) {
-
-            const task =
-                state.tasks.get(
-                    appId
-                );
-
-
-            if (!task) {
-
-                return false;
-
-            }
-
-
-            if (
-                task.button &&
-                task.button.parentNode
-            ) {
-
-                task.button.remove();
-
-            }
-
-
-            state.tasks.delete(
-                appId
-            );
-
-
-            emit(
-                "taskbar:app:removed",
-                {
-
-                    appId
-
-                }
-            );
-
-
-            return true;
-
-        }
-
-
-        /* =====================================================
-           UPDATE TASK
-           ===================================================== */
-
-        function updateTask(
-            appId
-        ) {
-
-            const task =
-                state.tasks.get(
-                    appId
-                );
-
-
-            const element =
-                getWindow(
-                    appId
-                );
-
-
-            if (!task) {
-
-                return;
-
-            }
-
-
-            const button =
-                task.button;
-
-
-            button.classList.toggle(
-                "is-active",
-                !!(
-                    element &&
-                    element.classList.contains(
-                        "is-active"
-                    )
-                )
-            );
-
-
-            button.classList.toggle(
-                "is-minimized",
-                !!(
-                    element &&
-                    element.classList.contains(
-                        "is-minimized"
-                    )
-                )
-            );
-
-        }
-
-
-        /* =====================================================
-           UPDATE ALL
-           ===================================================== */
-
-        function updateAll() {
-
-            state.tasks.forEach(
-                task => {
-
-                    updateTask(
-                        task.appId
-                    );
-
-                }
-            );
-
-        }
-
-
-        /* =====================================================
-           TOGGLE TASK
-           ===================================================== */
-
-        function toggleTask(
-            appId
-        ) {
-
-            const element =
-                getWindow(
-                    appId
-                );
-
-
-            if (!element) {
-
-                emit(
-                    "taskbar:app:missing",
-                    {
-
-                        appId
-
-                    }
-                );
-
-
-                return false;
-
-            }
-
-
-            const minimized =
-                element.classList.contains(
-                    "is-minimized"
-                );
-
-
-            const active =
-                element.classList.contains(
-                    "is-active"
-                );
-
-
-            if (
-                minimized ||
-                !active
-            ) {
-
-                if (
-                    windowControls &&
-                    typeof windowControls.focus ===
-                    "function"
-                ) {
-
-                    windowControls.focus(
-                        appId
-                    );
-
-                } else {
-
-                    element.classList.remove(
-                        "is-minimized"
-                    );
-
-
-                    element.classList.add(
-                        "is-active"
-                    );
-
-                }
-
-
-                emit(
-                    "taskbar:app:restored",
-                    {
-
-                        appId
-
-                    }
-                );
-
-            } else {
-
-                if (
-                    windowControls &&
-                    typeof windowControls.minimize ===
-                    "function"
-                ) {
-
-                    windowControls.minimize(
-                        appId
-                    );
-
-                } else {
-
-                    element.classList.remove(
-                        "is-active"
-                    );
-
-
-                    element.classList.add(
-                        "is-minimized"
-                    );
-
-                }
-
-
-                emit(
-                    "taskbar:app:minimized",
-                    {
-
-                        appId
-
-                    }
-                );
-
-            }
-
-
-            updateAll();
-
-
-            return true;
-
-        }
-
-
-        /* =====================================================
-           WINDOW EVENTS
-           ===================================================== */
-
-        document.addEventListener(
-            "haldo:window:registered",
-            event => {
-
-                const appId =
-                    event.detail &&
-                    event.detail.appId;
-
-
-                if (!appId) {
-
-                    return;
-
-                }
-
-
-                createTask(
-                    appId
-                );
-
-
-                updateTask(
-                    appId
-                );
-
-            }
-        );
-
-
-        document.addEventListener(
-            "haldo:window:focused",
-            event => {
-
-                const appId =
-                    event.detail &&
-                    event.detail.appId;
-
-
-                if (!appId) {
-
-                    return;
-
-                }
-
-
-                createTask(
-                    appId
-                );
-
-
-                updateAll();
-
-            }
-        );
-
-
-        document.addEventListener(
-            "haldo:window:minimized",
-            event => {
-
-                const appId =
-                    event.detail &&
-                    event.detail.appId;
-
-
-                if (!appId) {
-
-                    return;
-
-                }
-
-
-                createTask(
-                    appId
-                );
-
-
-                updateAll();
-
-            }
-        );
-
-
-        document.addEventListener(
-            "haldo:window:closed",
-            event => {
-
-                const appId =
-                    event.detail &&
-                    event.detail.appId;
-
-
-                if (!appId) {
-
-                    return;
-
-                }
-
-
-                removeTask(
-                    appId
-                );
-
-            }
-        );
-
-
-        document.addEventListener(
-            "haldo:window:restored",
-            event => {
-
-                const appId =
-                    event.detail &&
-                    event.detail.appId;
-
-
-                if (!appId) {
-
-                    return;
-
-                }
-
-
-                createTask(
-                    appId
-                );
-
-
-                updateAll();
-
-            }
-        );
-
-
-        /* =====================================================
-           APP OPEN BRIDGE
-           ===================================================== */
-
-        document.addEventListener(
-            "haldo:app:launch:opened",
-            event => {
-
-                const appId =
-                    event.detail &&
-                    event.detail.appId;
-
-
-                if (!appId) {
-
-                    return;
-
-                }
-
-
-                window.setTimeout(
-                    () => {
-
-                        createTask(
-                            appId
-                        );
-
-                        updateAll();
-
-                    },
-                    20
-                );
-
-            }
-        );
-
-
-        /* =====================================================
-           APP CLOSE BRIDGE
-           ===================================================== */
-
-        document.addEventListener(
-            "haldo:app:launch:closed",
-            event => {
-
-                const appId =
-                    event.detail &&
-                    event.detail.appId;
-
-
-                if (!appId) {
-
-                    return;
-
-                }
-
-
-                window.setTimeout(
-                    () => {
-
-                        removeTask(
-                            appId
-                        );
-
-                    },
-                    200
-                );
-
-            }
-        );
-
-
-        /* =====================================================
-           PUBLIC API
-           ===================================================== */
-
-        const taskbarBridge = {
-
-            createTask,
-
-            removeTask,
-
-            updateTask,
-
-            updateAll,
-
-            toggleTask,
-
-            get(
-                appId
-            ) {
-
-                return (
-                    state.tasks.get(
-                        appId
-                    ) ||
-                    null
-                );
-
-            },
-
-            list() {
-
-                return [
-                    ...state.tasks.values()
-                ];
-
-            }
-
-        };
-
-
-        /* =====================================================
-           GLOBAL API
-           ===================================================== */
-
-        window.HalDoTaskbarBridge20 =
-            taskbarBridge;
-
-
-        if (
-            !window.HalDoOS
-        ) {
-
-            window.HalDoOS =
-                {};
-
-        }
-
-
-        window.HalDoOS.taskbarBridge20 =
-            taskbarBridge;
-
-
-        /* =====================================================
-           INITIALIZE
-           ===================================================== */
-
-        function initialize() {
-
-            if (
-                state.initialized
-            ) {
-
-                return;
-
-            }
-
-
-            state.initialized =
-                true;
-
-
-            if (appLayer) {
-
-                appLayer
-                    .querySelectorAll(
-                        ".haldo-app-window"
-                    )
-                    .forEach(
-                        element => {
-
-                            if (
-                                element.dataset.appId
-                            ) {
-
-                                createTask(
-                                    element.dataset.appId
-                                );
-
-                            }
-
-                        }
-                    );
-
-            }
-
-
-            updateAll();
-
-
-            emit(
-                "taskbar:bridge:ready",
-                {
-
-                    version:
-                        "20.0.0",
-
-                    timestamp:
-                        Date.now()
-
-                }
-            );
-
-
-            console.info(
-                "%cHalDo AI OS 20%c Taskbar App Bridge bereit",
-                "color:#42e6ff;font-weight:800;",
-                "color:#ffffff;"
-            );
-
-        }
-
-
-        initialize();
-
-
-    })();
-
-    </script>
-        <!-- =========================================================
-         HALDO AI OS 20
          APPLICATION SESSION / STATE ENGINE
          TEIL 55
          ========================================================= -->
@@ -55953,8 +54649,8 @@
     <!-
         <!-- =========================================================
          HALDO AI OS 20
-         APPLICATION COMMAND / ACTION ENGINE
-         TEIL 57
+         APPLICATION EVENT / MESSAGE BUS
+         TEIL 56
          ========================================================= -->
 
     <script>
@@ -55965,44 +54661,25 @@
 
 
         /* =====================================================
-           REFERENCES
-           ===================================================== */
-
-        const messageBus =
-            window.HalDoMessageBus20 ||
-            null;
-
-
-        const appState =
-            window.HalDoAppState20 ||
-            null;
-
-
-        const windowControls =
-            window.HalDoWindowControls20 ||
-            null;
-
-
-        /* =====================================================
            STATE
            ===================================================== */
 
-        const commands =
+        const channels =
             new Map();
 
 
-        const appCommands =
+        const onceChannels =
             new Map();
 
 
-        const executionHistory = [];
+        const history = [];
 
         const MAX_HISTORY =
             500;
 
 
         /* =====================================================
-           UTILITIES
+           UTILS
            ===================================================== */
 
         function normalize(
@@ -56016,7 +54693,7 @@
         }
 
 
-        function emit(
+        function emitDOM(
             name,
             detail = {}
         ) {
@@ -56037,7 +54714,7 @@
             ) {
 
                 console.warn(
-                    "[HalDo Command Engine 20]",
+                    "[HalDo Message Bus 20]",
                     error
                 );
 
@@ -56046,56 +54723,31 @@
         }
 
 
-        function clone(
-            value
-        ) {
-
-            if (
-                value ===
-                undefined
-            ) {
-
-                return undefined;
-
-            }
-
-
-            try {
-
-                return JSON.parse(
-                    JSON.stringify(
-                        value
-                    )
-                );
-
-            } catch (
-                error
-            ) {
-
-                return value;
-
-            }
-
-        }
-
-
         function record(
-            entry
+            type,
+            payload
         ) {
 
-            executionHistory.push(
-                entry
-            );
+            history.push({
+
+                type,
+
+                payload,
+
+                timestamp:
+                    Date.now()
+
+            });
 
 
             if (
-                executionHistory.length >
+                history.length >
                 MAX_HISTORY
             ) {
 
-                executionHistory.splice(
+                history.splice(
                     0,
-                    executionHistory.length -
+                    history.length -
                     MAX_HISTORY
                 );
 
@@ -56105,1336 +54757,660 @@
 
 
         /* =====================================================
-           COMMAND REGISTRATION
+           SUBSCRIBE
            ===================================================== */
 
-        function register(
-            definition
+        function on(
+            channel,
+            callback,
+            options = {}
         ) {
 
-            if (
-                !definition ||
-                typeof definition !==
-                "object"
-            ) {
-
-                return null;
-
-            }
-
-
-            const id =
+            channel =
                 normalize(
-                    definition.id
+                    channel
                 );
 
 
-            if (!id) {
-
-                return null;
-
-            }
-
-
             if (
-                typeof definition.execute !==
+                !channel ||
+                typeof callback !==
                 "function"
             ) {
 
-                return null;
+                return () => {};
 
             }
 
 
-            const command = {
-
-                id,
-
-                title:
-                    definition.title ||
-                    id,
-
-                description:
-                    definition.description ||
-                    "",
-
-                category:
-                    definition.category ||
-                    "general",
-
-                shortcut:
-                    definition.shortcut ||
-                    null,
-
-                appId:
-                    definition.appId ||
-                    null,
-
-                enabled:
-                    definition.enabled !==
-                    false,
-
-                visible:
-                    definition.visible !==
-                    false,
-
-                execute:
-                    definition.execute,
-
-                canExecute:
-                    typeof definition.canExecute ===
-                    "function"
-                        ? definition.canExecute
-                        : null,
-
-                createdAt:
-                    Date.now(),
-
-                metadata:
-                    definition.metadata ||
-                    {}
-
-            };
-
-
-            commands.set(
-                id,
-                command
-            );
+            const target =
+                options.once
+                    ? onceChannels
+                    : channels;
 
 
             if (
-                command.appId
-            ) {
-
-                registerAppCommand(
-                    command.appId,
-                    command
-                );
-
-            }
-
-
-            emit(
-                "command:registered",
-                {
-
-                    command
-
-                }
-            );
-
-
-            return command;
-
-        }
-
-
-        /* =====================================================
-           UNREGISTER
-           ===================================================== */
-
-        function unregister(
-            commandId
-        ) {
-
-            commandId =
-                normalize(
-                    commandId
-                );
-
-
-            const command =
-                commands.get(
-                    commandId
-                );
-
-
-            if (!command) {
-
-                return false;
-
-            }
-
-
-            commands.delete(
-                commandId
-            );
-
-
-            if (
-                command.appId
-            ) {
-
-                const set =
-                    appCommands.get(
-                        command.appId
-                    );
-
-
-                if (set) {
-
-                    set.delete(
-                        commandId
-                    );
-
-
-                    if (
-                        set.size ===
-                        0
-                    ) {
-
-                        appCommands.delete(
-                            command.appId
-                        );
-
-                    }
-
-                }
-
-            }
-
-
-            emit(
-                "command:unregistered",
-                {
-
-                    commandId
-
-                }
-            );
-
-
-            return true;
-
-        }
-
-
-        /* =====================================================
-           GET COMMAND
-           ===================================================== */
-
-        function get(
-            commandId
-        ) {
-
-            return (
-                commands.get(
-                    normalize(
-                        commandId
-                    )
-                ) ||
-                null
-            );
-
-        }
-
-
-        /* =====================================================
-           REGISTER APP COMMAND
-           ===================================================== */
-
-        function registerAppCommand(
-            appId,
-            definition
-        ) {
-
-            appId =
-                normalize(
-                    appId
-                );
-
-
-            if (!appId) {
-
-                return null;
-
-            }
-
-
-            let command;
-
-
-            if (
-                typeof definition ===
-                "function"
-            ) {
-
-                command =
-                    register(
-                        {
-
-                            id:
-                                `app:${appId}:${Date.now()}:${Math.random()
-                                    .toString(36)
-                                    .slice(2, 8)}`,
-
-                            appId,
-
-                            execute:
-                                definition
-
-                        }
-                    );
-
-            } else {
-
-                command =
-                    definition &&
-                    definition.id
-                        ? (
-                            commands.get(
-                                definition.id
-                            ) ||
-                            register(
-                                {
-
-                                    ...definition,
-
-                                    appId
-
-                                }
-                            )
-                        )
-                        : null;
-
-            }
-
-
-            if (!command) {
-
-                return null;
-
-            }
-
-
-            if (
-                !appCommands.has(
-                    appId
+                !target.has(
+                    channel
                 )
             ) {
 
-                appCommands.set(
-                    appId,
+                target.set(
+                    channel,
                     new Set()
                 );
 
             }
 
 
-            appCommands
-                .get(
-                    appId
-                )
-                .add(
-                    command.id
+            const listeners =
+                target.get(
+                    channel
                 );
 
 
-            return command;
+            listeners.add(
+                callback
+            );
+
+
+            return () => {
+
+                listeners.delete(
+                    callback
+                );
+
+
+                if (
+                    listeners.size ===
+                    0
+                ) {
+
+                    target.delete(
+                        channel
+                    );
+
+                }
+
+            };
 
         }
 
 
         /* =====================================================
-           UNREGISTER APP COMMANDS
+           ONCE
            ===================================================== */
 
-        function unregisterAppCommands(
-            appId
+        function once(
+            channel,
+            callback
         ) {
 
-            appId =
-                normalize(
-                    appId
-                );
-
-
-            const set =
-                appCommands.get(
-                    appId
-                );
-
-
-            if (!set) {
-
-                return false;
-
-            }
-
-
-            [
-                ...set
-            ].forEach(
-                commandId => {
-
-                    commands.delete(
-                        commandId
-                    );
-
-                }
-            );
-
-
-            appCommands.delete(
-                appId
-            );
-
-
-            emit(
-                "command:app:cleared",
+            return on(
+                channel,
+                callback,
                 {
-
-                    appId
-
+                    once:
+                        true
                 }
             );
 
-
-            return true;
-
         }
 
 
         /* =====================================================
-           CAN EXECUTE
+           OFF
            ===================================================== */
 
-        function canExecute(
-            command,
-            context = {}
+        function off(
+            channel,
+            callback
         ) {
 
-            if (!command) {
-
-                return false;
-
-            }
-
-
-            if (
-                command.enabled ===
-                false
-            ) {
-
-                return false;
-
-            }
-
-
-            if (
-                typeof command.canExecute !==
-                "function"
-            ) {
-
-                return true;
-
-            }
-
-
-            try {
-
-                return (
-                    command.canExecute(
-                        context
-                    ) !== false
-                );
-
-            } catch (
-                error
-            ) {
-
-                return false;
-
-            }
-
-        }
-
-
-        /* =====================================================
-           EXECUTE
-           ===================================================== */
-
-        async function execute(
-            commandId,
-            payload = {},
-            context = {}
-        ) {
-
-            commandId =
+            channel =
                 normalize(
-                    commandId
+                    channel
                 );
 
 
-            const command =
-                get(
-                    commandId
-                );
+            if (!channel) {
+
+                return false;
+
+            }
 
 
-            const executionId =
-                `exec-${Date.now()}-${Math.random()
-                    .toString(36)
-                    .slice(2, 10)}`;
+            let removed =
+                false;
 
 
-            if (!command) {
+            const targets = [
 
-                const error =
-                    new Error(
-                        `Command not found: ${commandId}`
-                    );
+                channels,
 
+                onceChannels
 
-                record({
-
-                    executionId,
-
-                    commandId,
-
-                    success:
-                        false,
-
-                    error:
-                        error.message,
-
-                    timestamp:
-                        Date.now()
-
-                });
+            ];
 
 
-                emit(
-                    "command:error",
-                    {
+            targets.forEach(
+                target => {
 
-                        executionId,
+                    const listeners =
+                        target.get(
+                            channel
+                        );
 
-                        commandId,
 
-                        error
+                    if (!listeners) {
+
+                        return;
 
                     }
+
+
+                    if (
+                        typeof callback ===
+                        "function"
+                    ) {
+
+                        if (
+                            listeners.delete(
+                                callback
+                            )
+                        ) {
+
+                            removed =
+                                true;
+
+                        }
+
+                    } else {
+
+                        target.delete(
+                            channel
+                        );
+
+
+                        removed =
+                            true;
+
+                    }
+
+                }
+            );
+
+
+            return removed;
+
+        }
+
+
+        /* =====================================================
+           PUBLISH
+           ===================================================== */
+
+        function publish(
+            channel,
+            payload = {},
+            options = {}
+        ) {
+
+            channel =
+                normalize(
+                    channel
                 );
 
 
-                throw error;
+            if (!channel) {
+
+                return false;
 
             }
 
 
-            const executionContext = {
+            const message = {
 
-                ...context,
+                id:
+                    `msg-${Date.now()}-${Math.random()
+                        .toString(36)
+                        .slice(2, 10)}`,
 
-                commandId,
+                channel,
 
-                executionId,
+                payload,
+
+                sender:
+                    options.sender ||
+                    "system",
 
                 timestamp:
-                    Date.now()
+                    Date.now(),
+
+                metadata:
+                    options.metadata ||
+                    {}
 
             };
 
 
-            if (
-                !canExecute(
-                    command,
-                    executionContext
-                )
-            ) {
-
-                const error =
-                    new Error(
-                        `Command disabled: ${commandId}`
-                    );
-
-
-                record({
-
-                    executionId,
-
-                    commandId,
-
-                    success:
-                        false,
-
-                    error:
-                        error.message,
-
-                    timestamp:
-                        Date.now()
-
-                });
-
-
-                emit(
-                    "command:blocked",
-                    {
-
-                        executionId,
-
-                        commandId,
-
-                        error
-
-                    }
-                );
-
-
-                throw error;
-
-            }
-
-
-            emit(
-                "command:before-execute",
-                {
-
-                    executionId,
-
-                    commandId,
-
-                    payload:
-                        clone(
-                            payload
-                        ),
-
-                    context:
-                        executionContext
-
-                }
+            record(
+                "publish",
+                message
             );
 
 
-            try {
-
-                const result =
-                    await command.execute(
-                        payload,
-                        executionContext
-                    );
-
-
-                const historyEntry = {
-
-                    executionId,
-
-                    commandId,
-
-                    appId:
-                        command.appId,
-
-                    payload:
-                        clone(
-                            payload
-                        ),
-
-                    result:
-                        clone(
-                            result
-                        ),
-
-                    success:
-                        true,
-
-                    timestamp:
-                        Date.now()
-
-                };
-
-
-                record(
-                    historyEntry
+            const normal =
+                channels.get(
+                    channel
                 );
 
 
-                emit(
-                    "command:executed",
-                    historyEntry
+            const oneTime =
+                onceChannels.get(
+                    channel
                 );
 
 
-                if (
-                    messageBus &&
-                    typeof messageBus.publish ===
-                    "function"
-                ) {
+            if (normal) {
 
-                    messageBus.publish(
-                        "command:executed",
-                        historyEntry,
-                        {
+                normal.forEach(
+                    callback => {
 
-                            sender:
-                                command.appId ||
-                                "system",
+                        try {
 
-                            dom:
-                                false
-
-                        }
-                    );
-
-                }
-
-
-                return result;
-
-            } catch (
-                error
-            ) {
-
-                const historyEntry = {
-
-                    executionId,
-
-                    commandId,
-
-                    appId:
-                        command.appId,
-
-                    payload:
-                        clone(
-                            payload
-                        ),
-
-                    success:
-                        false,
-
-                    error:
-                        error &&
-                        error.message
-                            ? error.message
-                            : String(
-                                error
-                            ),
-
-                    timestamp:
-                        Date.now()
-
-                };
-
-
-                record(
-                    historyEntry
-                );
-
-
-                emit(
-                    "command:error",
-                    {
-
-                        ...historyEntry,
-
-                        error
-
-                    }
-                );
-
-
-                throw error;
-
-            }
-
-        }
-
-
-        /* =====================================================
-           EXECUTE APP COMMAND
-           ===================================================== */
-
-        async function executeApp(
-            appId,
-            commandName,
-            payload = {},
-            context = {}
-        ) {
-
-            appId =
-                normalize(
-                    appId
-                );
-
-
-            commandName =
-                normalize(
-                    commandName
-                );
-
-
-            if (
-                !appId ||
-                !commandName
-            ) {
-
-                throw new Error(
-                    "App ID and command name are required"
-                );
-
-            }
-
-
-            const directId =
-                `${appId}:${commandName}`;
-
-
-            let command =
-                get(
-                    directId
-                );
-
-
-            if (!command) {
-
-                command =
-                    get(
-                        `app:${appId}:${commandName}`
-                    );
-
-            }
-
-
-            if (!command) {
-
-                const set =
-                    appCommands.get(
-                        appId
-                    );
-
-
-                if (set) {
-
-                    for (
-                        const id
-                        of set
-                    ) {
-
-                        const candidate =
-                            get(
-                                id
+                            callback(
+                                payload,
+                                message
                             );
 
-
-                        if (
-                            candidate &&
-                            (
-                                candidate.name ===
-                                commandName ||
-                                candidate.id.endsWith(
-                                    `:${commandName}`
-                                )
-                            )
+                        } catch (
+                            error
                         ) {
 
-                            command =
-                                candidate;
+                            console.error(
+                                "[HalDo Message Bus 20]",
+                                error
+                            );
 
-                            break;
+                            emitDOM(
+                                "message:error",
+                                {
+
+                                    channel,
+
+                                    error,
+
+                                    message
+
+                                }
+                            );
 
                         }
 
                     }
-
-                }
-
-            }
-
-
-            if (!command) {
-
-                throw new Error(
-                    `App command not found: ${appId}/${commandName}`
                 );
 
             }
 
 
-            return execute(
-                command.id,
-                payload,
-                {
+            if (oneTime) {
 
-                    ...context,
-
-                    appId
-
-                }
-            );
-
-        }
-
-
-        /* =====================================================
-           BUILT-IN WINDOW COMMANDS
-           ===================================================== */
-
-        register({
-
-            id:
-                "window:focus",
-
-            title:
-                "Fenster fokussieren",
-
-            category:
-                "window",
-
-            execute(
-                payload
-            ) {
-
-                if (
-                    !windowControls
-                ) {
-
-                    return false;
-
-                }
-
-
-                return windowControls.focus(
-                    payload.appId
-                );
-
-            }
-
-        });
-
-
-        register({
-
-            id:
-                "window:minimize",
-
-            title:
-                "Fenster minimieren",
-
-            category:
-                "window",
-
-            execute(
-                payload
-            ) {
-
-                if (
-                    !windowControls
-                ) {
-
-                    return false;
-
-                }
-
-
-                return windowControls.minimize(
-                    payload.appId
-                );
-
-            }
-
-        });
-
-
-        register({
-
-            id:
-                "window:maximize",
-
-            title:
-                "Fenster maximieren",
-
-            category:
-                "window",
-
-            execute(
-                payload
-            ) {
-
-                if (
-                    !windowControls
-                ) {
-
-                    return false;
-
-                }
-
-
-                return windowControls.maximize(
-                    payload.appId
-                );
-
-            }
-
-        });
-
-
-        register({
-
-            id:
-                "window:restore",
-
-            title:
-                "Fenster wiederherstellen",
-
-            category:
-                "window",
-
-            execute(
-                payload
-            ) {
-
-                if (
-                    !windowControls
-                ) {
-
-                    return false;
-
-                }
-
-
-                return windowControls.restore(
-                    payload.appId
-                );
-
-            }
-
-        });
-
-
-        register({
-
-            id:
-                "window:toggle-maximize",
-
-            title:
-                "Maximieren umschalten",
-
-            category:
-                "window",
-
-            execute(
-                payload
-            ) {
-
-                if (
-                    !windowControls
-                ) {
-
-                    return false;
-
-                }
-
-
-                return windowControls.toggleMaximize(
-                    payload.appId
-                );
-
-            }
-
-        });
-
-
-        register({
-
-            id:
-                "window:close",
-
-            title:
-                "Fenster schließen",
-
-            category:
-                "window",
-
-            execute(
-                payload
-            ) {
-
-                if (
-                    !windowControls
-                ) {
-
-                    return false;
-
-                }
-
-
-                return windowControls.close(
-                    payload.appId
-                );
-
-            }
-
-        });
-
-
-        /* =====================================================
-           BUILT-IN STATE COMMANDS
-           ===================================================== */
-
-        register({
-
-            id:
-                "state:get",
-
-            title:
-                "App-Zustand lesen",
-
-            category:
-                "state",
-
-            execute(
-                payload
-            ) {
-
-                if (
-                    !appState
-                ) {
-
-                    return null;
-
-                }
-
-
-                return appState.getValue(
-                    payload.appId,
-                    payload.path,
-                    payload.fallback
-                );
-
-            }
-
-        });
-
-
-        register({
-
-            id:
-                "state:set",
-
-            title:
-                "App-Zustand ändern",
-
-            category:
-                "state",
-
-            execute(
-                payload
-            ) {
-
-                if (
-                    !appState
-                ) {
-
-                    return false;
-
-                }
-
-
-                return appState.setValue(
-                    payload.appId,
-                    payload.path,
-                    payload.value,
-                    {
-
-                        save:
-                            payload.save ===
-                            true
-
-                    }
-                );
-
-            }
-
-        });
-
-
-        register({
-
-            id:
-                "state:save",
-
-            title:
-                "App-Zustand speichern",
-
-            category:
-                "state",
-
-            execute(
-                payload
-            ) {
-
-                if (
-                    !appState
-                ) {
-
-                    return false;
-
-                }
-
-
-                return appState.save(
-                    payload.appId
-                );
-
-            }
-
-        });
-
-
-        register({
-
-            id:
-                "state:reset",
-
-            title:
-                "App-Zustand zurücksetzen",
-
-            category:
-                "state",
-
-            execute(
-                payload
-            ) {
-
-                if (
-                    !appState
-                ) {
-
-                    return false;
-
-                }
-
-
-                return appState.reset(
-                    payload.appId,
-                    payload.initialState ||
-                    {},
-                    {
-
-                        save:
-                            payload.save ===
-                            true,
-
-                        removeSaved:
-                            payload.removeSaved ===
-                            true
-
-                    }
-                );
-
-            }
-
-        });
-
-
-        /* =====================================================
-           MESSAGE COMMAND
-           ===================================================== */
-
-        register({
-
-            id:
-                "message:publish",
-
-            title:
-                "Nachricht senden",
-
-            category:
-                "communication",
-
-            execute(
-                payload
-            ) {
-
-                if (
-                    !messageBus
-                ) {
-
-                    return false;
-
-                }
-
-
-                return messageBus.publish(
-                    payload.channel,
-                    payload.payload ||
-                    {},
-                    {
-
-                        sender:
-                            payload.sender ||
-                            "system",
-
-                        metadata:
-                            payload.metadata ||
-                            {}
-
-                    }
-                );
-
-            }
-
-        });
-
-
-        /* =====================================================
-           COMMAND QUERY
-           ===================================================== */
-
-        function list(
-            options = {}
-        ) {
-
-            let result =
-                [
-                    ...commands.values()
+                const callbacks = [
+                    ...oneTime
                 ];
 
 
-            if (
-                options.category
-            ) {
-
-                result =
-                    result.filter(
-                        command =>
-                            command.category ===
-                            options.category
-                    );
-
-            }
+                onceChannels.delete(
+                    channel
+                );
 
 
-            if (
-                options.appId
-            ) {
+                callbacks.forEach(
+                    callback => {
 
-                result =
-                    result.filter(
-                        command =>
-                            command.appId ===
-                            options.appId
-                    );
+                        try {
 
-            }
+                            callback(
+                                payload,
+                                message
+                            );
 
+                        } catch (
+                            error
+                        ) {
 
-            if (
-                options.visibleOnly
-            ) {
+                            console.error(
+                                "[HalDo Message Bus 20]",
+                                error
+                            );
 
-                result =
-                    result.filter(
-                        command =>
-                            command.visible !==
-                            false
-                    );
+                        }
+
+                    }
+                );
 
             }
 
 
-            return result;
+            if (
+                options.dom !==
+                false
+            ) {
+
+                emitDOM(
+                    `bus:${channel}`,
+                    message
+                );
+
+            }
+
+
+            emitDOM(
+                "message:published",
+                message
+            );
+
+
+            return message;
+
+        }
+
+
+        /* =====================================================
+           REQUEST / RESPONSE
+           ===================================================== */
+
+        function request(
+            channel,
+            payload = {},
+            options = {}
+        ) {
+
+            const timeout =
+                Number.isFinite(
+                    options.timeout
+                )
+                    ? options.timeout
+                    : 5000;
+
+
+            return new Promise(
+                (
+                    resolve,
+                    reject
+                ) => {
+
+                    let completed =
+                        false;
+
+
+                    const responseChannel =
+                        `${channel}:response:${Date.now()}:${Math.random()
+                            .toString(36)
+                            .slice(2, 8)}`;
+
+
+                    const cleanup =
+                        on(
+                            responseChannel,
+                            (
+                                response
+                            ) => {
+
+                                if (
+                                    completed
+                                ) {
+
+                                    return;
+
+                                }
+
+
+                                completed =
+                                    true;
+
+
+                                clearTimeout(
+                                    timer
+                                );
+
+
+                                off(
+                                    responseChannel
+                                );
+
+
+                                resolve(
+                                    response
+                                );
+
+                            }
+                        );
+
+
+                    const timer =
+                        setTimeout(
+                            () => {
+
+                                if (
+                                    completed
+                                ) {
+
+                                    return;
+
+                                }
+
+
+                                completed =
+                                    true;
+
+
+                                cleanup();
+
+
+                                reject(
+                                    new Error(
+                                        `Timeout waiting for ${channel}`
+                                    )
+                                );
+
+                            },
+                            timeout
+                        );
+
+
+                    publish(
+                        channel,
+                        payload,
+                        {
+
+                            sender:
+                                options.sender ||
+                                "request",
+
+                            metadata: {
+
+                                responseChannel
+
+                            }
+
+                        }
+                    );
+
+                }
+            );
+
+        }
+
+
+        /* =====================================================
+           RESPOND
+           ===================================================== */
+
+        function respond(
+            message,
+            payload = {}
+        ) {
+
+            if (
+                !message ||
+                !message.metadata ||
+                !message.metadata.responseChannel
+            ) {
+
+                return false;
+
+            }
+
+
+            return publish(
+                message.metadata.responseChannel,
+                payload,
+                {
+
+                    sender:
+                        message.channel,
+
+                    dom:
+                        false
+
+                }
+            );
+
+        }
+
+
+        /* =====================================================
+           APP CHANNEL
+           ===================================================== */
+
+        function appChannel(
+            appId,
+            event
+        ) {
+
+            return (
+                `app:${appId}:${event}`
+            );
+
+        }
+
+
+        /* =====================================================
+           APP PUBLISH
+           ===================================================== */
+
+        function publishApp(
+            appId,
+            event,
+            payload = {}
+        ) {
+
+            if (!appId || !event) {
+
+                return false;
+
+            }
+
+
+            return publish(
+                appChannel(
+                    appId,
+                    event
+                ),
+                payload,
+                {
+
+                    sender:
+                        appId
+
+                }
+            );
+
+        }
+
+
+        /* =====================================================
+           APP SUBSCRIBE
+           ===================================================== */
+
+        function onApp(
+            appId,
+            event,
+            callback
+        ) {
+
+            if (
+                !appId ||
+                !event
+            ) {
+
+                return () => {};
+
+            }
+
+
+            return on(
+                appChannel(
+                    appId,
+                    event
+                ),
+                callback
+            );
+
+        }
+
+
+        /* =====================================================
+           BROADCAST
+           ===================================================== */
+
+        function broadcast(
+            event,
+            payload = {},
+            options = {}
+        ) {
+
+            return publish(
+                `broadcast:${event}`,
+                payload,
+                {
+
+                    sender:
+                        options.sender ||
+                        "system",
+
+                    metadata:
+                        options.metadata ||
+                        {}
+
+                }
+            );
+
+        }
+
+
+        /* =====================================================
+           APP BROADCAST
+           ===================================================== */
+
+        function broadcastFromApp(
+            appId,
+            event,
+            payload = {}
+        ) {
+
+            return broadcast(
+                event,
+                payload,
+                {
+
+                    sender:
+                        appId
+
+                }
+            );
 
         }
 
@@ -57455,32 +55431,61 @@
                     : 100;
 
 
-            return executionHistory
+            const channel =
+                options.channel
+                    ? normalize(
+                        options.channel
+                    )
+                    : null;
+
+
+            let result =
+                history;
+
+
+            if (channel) {
+
+                result =
+                    result.filter(
+                        item =>
+                            item.payload &&
+                            item.payload.channel ===
+                            channel
+                    );
+
+            }
+
+
+            return result
                 .slice(
                     Math.max(
                         0,
-                        executionHistory.length -
+                        result.length -
                         limit
                     )
                 )
                 .map(
-                    entry =>
+                    item =>
                         ({
-                            ...entry
+                            ...item
                         })
                 );
 
         }
 
 
+        /* =====================================================
+           CLEAR HISTORY
+           ===================================================== */
+
         function clearHistory() {
 
-            executionHistory.length =
+            history.length =
                 0;
 
 
-            emit(
-                "command:history:cleared",
+            emitDOM(
+                "message:history:cleared",
                 {
 
                     timestamp:
@@ -57493,155 +55498,140 @@
 
 
         /* =====================================================
-           KEYBOARD SHORTCUTS
+           CHANNEL INSPECTION
            ===================================================== */
 
-        const shortcutMap =
-            new Map();
+        function listChannels() {
+
+            const result =
+                new Set();
 
 
-        function registerShortcut(
-            shortcut,
-            commandId
-        ) {
+            channels.forEach(
+                (
+                    _,
+                    channel
+                ) => {
 
-            shortcut =
-                normalize(
-                    shortcut
-                );
-
-
-            if (
-                !shortcut ||
-                !commands.has(
-                    commandId
-                )
-            ) {
-
-                return false;
-
-            }
-
-
-            shortcutMap.set(
-                shortcut.toLowerCase(),
-                commandId
-            );
-
-
-            return true;
-
-        }
-
-
-        function normalizeShortcut(
-            event
-        ) {
-
-            const parts = [];
-
-
-            if (
-                event.ctrlKey
-            ) {
-
-                parts.push(
-                    "ctrl"
-                );
-
-            }
-
-
-            if (
-                event.altKey
-            ) {
-
-                parts.push(
-                    "alt"
-                );
-
-            }
-
-
-            if (
-                event.shiftKey
-            ) {
-
-                parts.push(
-                    "shift"
-                );
-
-            }
-
-
-            if (
-                event.metaKey
-            ) {
-
-                parts.push(
-                    "meta"
-                );
-
-            }
-
-
-            parts.push(
-                String(
-                    event.key
-                ).toLowerCase()
-            );
-
-
-            return parts.join(
-                "+"
-            );
-
-        }
-
-
-        document.addEventListener(
-            "keydown",
-            event => {
-
-                const shortcut =
-                    normalizeShortcut(
-                        event
+                    result.add(
+                        channel
                     );
-
-
-                const commandId =
-                    shortcutMap.get(
-                        shortcut
-                    );
-
-
-                if (!commandId) {
-
-                    return;
 
                 }
+            );
 
 
-                event.preventDefault();
+            onceChannels.forEach(
+                (
+                    _,
+                    channel
+                ) => {
+
+                    result.add(
+                        channel
+                    );
+
+                }
+            );
 
 
-                execute(
-                    commandId,
-                    {},
-                    {
+            return [
+                ...result
+            ];
 
-                        source:
-                            "keyboard",
+        }
 
-                        event
 
-                    }
-                ).catch(
-                    error => {
+        function listenerCount(
+            channel
+        ) {
 
-                        console.warn(
-                            "[HalDo Command Engine 20]",
-                            error
+            channel =
+                normalize(
+                    channel
+                );
+
+
+            const normal =
+                channels.get(
+                    channel
+                );
+
+
+            const oneTime =
+                onceChannels.get(
+                    channel
+                );
+
+
+            return (
+                (normal
+                    ? normal.size
+                    : 0) +
+                (oneTime
+                    ? oneTime.size
+                    : 0)
+            );
+
+        }
+
+
+        /* =====================================================
+           AUTOMATIC APP LIFECYCLE CHANNELS
+           ===================================================== */
+
+        const lifecycleEvents = [
+
+            "created",
+
+            "ready",
+
+            "started",
+
+            "activated",
+
+            "deactivated",
+
+            "paused",
+
+            "resumed",
+
+            "stopped",
+
+            "destroyed",
+
+            "error"
+
+        ];
+
+
+        lifecycleEvents.forEach(
+            eventName => {
+
+                document.addEventListener(
+                    `haldo:app:lifecycle:${eventName}`,
+                    event => {
+
+                        const detail =
+                            event.detail ||
+                            {};
+
+
+                        const appId =
+                            detail.appId;
+
+
+                        if (!appId) {
+
+                            return;
+
+                        }
+
+
+                        publishApp(
+                            appId,
+                            `lifecycle:${eventName}`,
+                            detail
                         );
 
                     }
@@ -57652,24 +55642,114 @@
 
 
         /* =====================================================
-           DEFAULT SHORTCUTS
+           WINDOW BRIDGE
            ===================================================== */
 
-        registerShortcut(
-            "ctrl+shift+w",
-            "window:close"
+        const windowEvents = [
+
+            "focused",
+
+            "minimized",
+
+            "maximized",
+
+            "restored",
+
+            "closed"
+
+        ];
+
+
+        windowEvents.forEach(
+            eventName => {
+
+                document.addEventListener(
+                    `haldo:window:${eventName}`,
+                    event => {
+
+                        const detail =
+                            event.detail ||
+                            {};
+
+
+                        const appId =
+                            detail.appId;
+
+
+                        if (!appId) {
+
+                            return;
+
+                        }
+
+
+                        publishApp(
+                            appId,
+                            `window:${eventName}`,
+                            detail
+                        );
+
+                    }
+                );
+
+            }
         );
 
 
-        registerShortcut(
-            "ctrl+shift+m",
-            "window:minimize"
-        );
+        /* =====================================================
+           STATE BRIDGE
+           ===================================================== */
+
+        const stateEvents = [
+
+            "created",
+
+            "changed",
+
+            "saved",
+
+            "loaded",
+
+            "reset",
+
+            "destroyed"
+
+        ];
 
 
-        registerShortcut(
-            "ctrl+shift+f",
-            "window:focus"
+        stateEvents.forEach(
+            eventName => {
+
+                document.addEventListener(
+                    `haldo:app:state:${eventName}`,
+                    event => {
+
+                        const detail =
+                            event.detail ||
+                            {};
+
+
+                        const appId =
+                            detail.appId;
+
+
+                        if (!appId) {
+
+                            return;
+
+                        }
+
+
+                        publishApp(
+                            appId,
+                            `state:${eventName}`,
+                            detail
+                        );
+
+                    }
+                );
+
+            }
         );
 
 
@@ -57677,31 +55757,37 @@
            PUBLIC API
            ===================================================== */
 
-        const commandEngine = {
+        const messageBus = {
 
-            register,
+            on,
 
-            unregister,
+            once,
 
-            get,
+            off,
 
-            list,
+            publish,
 
-            execute,
+            request,
 
-            executeApp,
+            respond,
 
-            registerAppCommand,
+            appChannel,
 
-            unregisterAppCommands,
+            publishApp,
 
-            canExecute,
+            onApp,
 
-            registerShortcut,
+            broadcast,
+
+            broadcastFromApp,
 
             getHistory,
 
-            clearHistory
+            clearHistory,
+
+            listChannels,
+
+            listenerCount
 
         };
 
@@ -57710,8 +55796,8 @@
            GLOBAL API
            ===================================================== */
 
-        window.HalDoCommandEngine20 =
-            commandEngine;
+        window.HalDoMessageBus20 =
+            messageBus;
 
 
         if (
@@ -57724,33 +55810,30 @@
         }
 
 
-        window.HalDoOS.commandEngine20 =
-            commandEngine;
+        window.HalDoOS.messageBus20 =
+            messageBus;
 
 
         /* =====================================================
            READY
            ===================================================== */
 
-        emit(
-            "command-engine:ready",
+        emitDOM(
+            "message-bus:ready",
             {
 
                 version:
                     "20.0.0",
 
                 timestamp:
-                    Date.now(),
-
-                commandCount:
-                    commands.size
+                    Date.now()
 
             }
         );
 
 
         console.info(
-            "%cHalDo AI OS 20%c Command / Action Engine bereit",
+            "%cHalDo AI OS 20%c Application Message Bus bereit",
             "color:#42e6ff;font-weight:800;",
             "color:#ffffff;"
         );
@@ -57759,4 +55842,3 @@
     })();
 
     </script>
-    
