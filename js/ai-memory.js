@@ -1,242 +1,236 @@
-// ============================================================
-// HALDO AI OS 18
-// AI MEMORY
-// PART 85
-// ============================================================
+/* ============================================================
+   HALDO AI OS 20
+   PROFESSIONAL ULTIMATE AI FOUNDATION
+   ------------------------------------------------------------
+   Datei:
+       js/ai-memory.js
+
+   HALDO AI MEMORY ENGINE
+
+   Aufgaben:
+   - Gesprächserinnerungen
+   - Sitzungsdaten
+   - Nachrichten speichern
+   - Kontextverwaltung
+   - wichtige Informationen markieren
+   - Langzeit-/Kurzzeitkontext
+   - Suche in Erinnerungen
+   - Memory-Tags
+   - Memory-Lebensdauer
+   - Prioritäten
+   - Storage-Verbindung
+   - Conversation-State-Verbindung
+   - AI-Core-Verbindung
+   - Events
+   - Diagnostics
+   - Health Check
+   - sichere Erweiterbarkeit
+
+   HALDO AI OS 18 → 20
+   ============================================================ */
+
+"use strict";
 
 (function (window, document) {
 
-    "use strict";
-
-    if (
-        window.HalDoAIMemory &&
-        window.HalDoAIMemory.__haldoAI18
-    ) {
-        return;
-    }
+    /* ========================================================
+       01 — FOUNDATION
+       ======================================================== */
 
     window.HalDoOS =
         window.HalDoOS || {};
 
+    const HalDoOS =
+        window.HalDoOS;
+
+
+    /* ========================================================
+       02 — META
+       ======================================================== */
+
+    const VERSION =
+        "20.0.0";
+
+    const MODULE_ID =
+        "ai-memory";
+
+    const NAME =
+        "HalDo AI Memory Engine";
+
+
+    /* ========================================================
+       03 — CONFIGURATION
+       ======================================================== */
+
     const CONFIG = {
 
-        name:
-            "HalDo AI Memory",
+        maxShortTermMessages:
+            100,
 
-        version:
-            "18.0.0",
-
-        mode:
-            "Professional Ultimate Foundation",
-
-        storageKey:
-            "haldo-ai-memory",
-
-        maxMemories:
-            2000,
-
-        maxHistory:
-            500,
+        maxLongTermMemories:
+            1000,
 
         maxSearchResults:
-            50,
+            100,
+
+        storageKey:
+            "haldo.ai.memory.v20",
+
+        sessionKey:
+            "haldo.ai.memory.session.v20",
 
         autoSave:
             true,
 
-        enabled:
-            true,
-
-        rememberConversation:
-            true,
-
-        rememberCorrections:
-            true,
-
-        rememberWriting:
-            true,
-
-        rememberReading:
+        persistent:
             true
 
     };
 
-    // --------------------------------------------------------
-    // STATE
-    // --------------------------------------------------------
+
+    /* ========================================================
+       04 — STATE
+       ======================================================== */
 
     const state = {
 
         initialized:
             false,
 
+        initializing:
+            false,
+
         ready:
             false,
 
-        memoryCount:
-            0,
+        failed:
+            false,
 
-        searchCount:
-            0,
+        sessionId:
+            null,
 
-        writeCount:
-            0,
-
-        readCount:
-            0,
-
-        correctionCount:
-            0,
-
-        errors:
+        messages:
             [],
 
         memories:
             [],
 
-        history:
+        context:
             [],
 
-        lastMemory:
-            null,
+        statistics: {
 
-        lastSearch:
-            null
+            messagesAdded:
+                0,
+
+            memoriesAdded:
+                0,
+
+            memoriesRemoved:
+                0,
+
+            searches:
+                0,
+
+            saves:
+                0,
+
+            loads:
+                0,
+
+            errors:
+                0
+
+        },
+
+        listeners:
+            new Map(),
+
+        connections: {
+
+            storage:
+                false,
+
+            conversationState:
+                false,
+
+            aiCore:
+                false,
+
+            system:
+                false,
+
+            kernel:
+                false
+
+        }
 
     };
 
-    // --------------------------------------------------------
-    // EVENTS
-    // --------------------------------------------------------
 
-    const listeners =
-        new Map();
+    /* ========================================================
+       05 — LOGGING
+       ======================================================== */
 
-    function on(
-        event,
-        callback
-    ) {
-
-        if (
-            typeof callback !==
-            "function"
-        ) {
-            return () => {};
-        }
-
-        if (
-            !listeners.has(event)
-        ) {
-
-            listeners.set(
-                event,
-                new Set()
-            );
-
-        }
-
-        listeners
-            .get(event)
-            .add(callback);
-
-        return () =>
-            off(
-                event,
-                callback
-            );
-
-    }
-
-    function off(
-        event,
-        callback
-    ) {
-
-        const set =
-            listeners.get(event);
-
-        if (!set) {
-            return;
-        }
-
-        set.delete(
-            callback
-        );
-
-        if (
-            set.size ===
-            0
-        ) {
-
-            listeners.delete(
-                event
-            );
-
-        }
-
-    }
-
-    function emit(
-        event,
-        detail = {}
-    ) {
-
-        const set =
-            listeners.get(event);
-
-        if (set) {
-
-            for (
-                const callback of set
-            ) {
-
-                try {
-
-                    callback(
-                        detail
-                    );
-
-                } catch (error) {
-
-                    console.error(
-                        "[HalDoAIMemory]",
-                        error
-                    );
-
-                }
-
-            }
-
-        }
+    function log() {
 
         try {
 
-            document.dispatchEvent(
-                new CustomEvent(
-                    `haldo:ai-memory:${event}`,
-                    {
-                        detail
-                    }
-                )
+            console.log(
+                "[HalDo AI Memory]",
+                ...arguments
             );
 
-        } catch (error) {}
+        } catch (_) {}
 
     }
 
-    // --------------------------------------------------------
-    // UTILITIES
-    // --------------------------------------------------------
 
-    function clean(
-        value
+    function warn() {
+
+        try {
+
+            console.warn(
+                "[HalDo AI Memory]",
+                ...arguments
+            );
+
+        } catch (_) {}
+
+    }
+
+
+    function errorLog() {
+
+        try {
+
+            console.error(
+                "[HalDo AI Memory]",
+                ...arguments
+            );
+
+        } catch (_) {}
+
+    }
+
+
+    /* ========================================================
+       06 — HELPERS
+       ======================================================== */
+
+    function hasMethod(
+        object,
+        method
     ) {
 
-        return String(
-            value ?? ""
-        ).trim();
+        return !!(
+            object &&
+            typeof object[method] ===
+            "function"
+        );
 
     }
+
 
     function createId(
         prefix = "memory"
@@ -254,20 +248,6 @@
 
     }
 
-    function normalizeText(
-        value
-    ) {
-
-        return clean(
-            value
-        )
-            .toLowerCase()
-            .replace(
-                /\s+/g,
-                " "
-            );
-
-    }
 
     function now() {
 
@@ -275,79 +255,572 @@
 
     }
 
-    // --------------------------------------------------------
-    // STORAGE CONNECTION
-    // --------------------------------------------------------
+
+    function normalizeText(
+        value
+    ) {
+
+        return String(
+            value === undefined ||
+            value === null
+                ? ""
+                : value
+        ).trim();
+
+    }
+
+
+    function clone(
+        value
+    ) {
+
+        if (
+            value === null ||
+            value === undefined
+        ) {
+
+            return value;
+
+        }
+
+        if (
+            Array.isArray(
+                value
+            )
+        ) {
+
+            return value.map(
+                clone
+            );
+
+        }
+
+        if (
+            typeof value ===
+            "object"
+        ) {
+
+            const result = {};
+
+            Object.keys(
+                value
+            ).forEach(
+                key => {
+
+                    result[key] =
+                        clone(
+                            value[key]
+                        );
+
+                }
+            );
+
+            return result;
+
+        }
+
+        return value;
+
+    }
+
+
+    function normalizeTags(
+        tags
+    ) {
+
+        if (
+            !Array.isArray(
+                tags
+            )
+        ) {
+
+            return [];
+
+        }
+
+        return Array.from(
+            new Set(
+                tags
+                    .map(
+                        tag =>
+                            normalizeText(
+                                tag
+                            ).toLowerCase()
+                    )
+                    .filter(Boolean)
+            )
+        );
+
+    }
+
+
+    /* ========================================================
+       07 — SERVICE LOOKUPS
+       ======================================================== */
+
+    function getKernel() {
+
+        return (
+            window.HalDoKernel ||
+            HalDoOS.kernel ||
+            null
+        );
+
+    }
+
+
+    function getSystem() {
+
+        return (
+            window.HalDoSystem ||
+            HalDoOS.system ||
+            null
+        );
+
+    }
+
 
     function getStorage() {
 
         return (
             window.HalDoStorage ||
+            HalDoOS.storage ||
             window.HalDoStorageManager ||
-            window.HalDoOS?.storage ||
-            window.HalDoOS?.storageManager ||
+            HalDoOS.storageManager ||
             null
         );
 
     }
 
-    async function storageSet(
-        key,
-        value
+
+    function getConversationState() {
+
+        return (
+            window.HalDoConversationState ||
+            HalDoOS.conversationState ||
+            null
+        );
+
+    }
+
+
+    function getAICore() {
+
+        return (
+            window.HalDoAICore ||
+            HalDoOS.aiCore ||
+            null
+        );
+
+    }
+
+
+    /* ========================================================
+       08 — EVENTS
+       ======================================================== */
+
+    function on(
+        event,
+        callback
     ) {
 
-        const storage =
-            getStorage();
+        if (
+            typeof callback !==
+            "function"
+        ) {
 
-        if (storage) {
-
-            for (
-                const method of [
-                    "set",
-                    "save",
-                    "write",
-                    "store"
-                ]
-            ) {
-
-                if (
-                    typeof storage[method] !==
-                    "function"
-                ) {
-                    continue;
-                }
-
-                try {
-
-                    await storage[method](
-                        key,
-                        value
-                    );
-
-                    return true;
-
-                } catch (error) {}
-
-            }
+            return function () {};
 
         }
 
+        if (
+            !state.listeners.has(
+                event
+            )
+        ) {
+
+            state.listeners.set(
+                event,
+                new Set()
+            );
+
+        }
+
+        const listeners =
+            state.listeners.get(
+                event
+            );
+
+        listeners.add(
+            callback
+        );
+
+        return function () {
+
+            off(
+                event,
+                callback
+            );
+
+        };
+
+    }
+
+
+    function off(
+        event,
+        callback
+    ) {
+
+        const listeners =
+            state.listeners.get(
+                event
+            );
+
+        if (!listeners) {
+
+            return;
+
+        }
+
+        listeners.delete(
+            callback
+        );
+
+        if (
+            listeners.size ===
+            0
+        ) {
+
+            state.listeners.delete(
+                event
+            );
+
+        }
+
+    }
+
+
+    function emit(
+        event,
+        data = null
+    ) {
+
+        const listeners =
+            state.listeners.get(
+                event
+            );
+
+        if (listeners) {
+
+            Array.from(
+                listeners
+            ).forEach(
+                callback => {
+
+                    try {
+
+                        callback(
+                            data
+                        );
+
+                    } catch (
+                        exception
+                    ) {
+
+                        reportError(
+                            exception,
+                            "Event: " +
+                            event
+                        );
+
+                    }
+
+                }
+            );
+
+        }
+
+
+        const events =
+            HalDoOS.events;
+
+        if (
+            events &&
+            hasMethod(
+                events,
+                "emit"
+            )
+        ) {
+
+            try {
+
+                events.emit(
+                    "ai-memory:" +
+                    event,
+                    data
+                );
+
+            } catch (_) {}
+
+        }
+
+
+        const kernel =
+            getKernel();
+
+        if (
+            kernel &&
+            hasMethod(
+                kernel,
+                "emit"
+            )
+        ) {
+
+            try {
+
+                kernel.emit(
+                    "ai-memory:" +
+                    event,
+                    data
+                );
+
+            } catch (_) {}
+
+        }
+
+    }
+
+
+    /* ========================================================
+       09 — ERROR HANDLING
+       ======================================================== */
+
+    function reportError(
+        exception,
+        context =
+            "AI Memory"
+    ) {
+
+        state.statistics.errors +=
+            1;
+
+        const normalized =
+            exception instanceof Error
+                ? exception
+                : new Error(
+                    String(
+                        exception
+                    )
+                );
+
+        const record = {
+
+            name:
+                normalized.name,
+
+            message:
+                normalized.message,
+
+            stack:
+                normalized.stack ||
+                "",
+
+            context,
+
+            timestamp:
+                new Date()
+                    .toISOString()
+
+        };
+
+        errorLog(
+            "[HalDo AI Memory]",
+            record
+        );
+
+        emit(
+            "error",
+            record
+        );
+
+        const kernel =
+            getKernel();
+
+        if (
+            kernel &&
+            hasMethod(
+                kernel,
+                "reportError"
+            )
+        ) {
+
+            try {
+
+                kernel.reportError(
+                    normalized,
+                    context
+                );
+
+            } catch (_) {}
+
+        }
+
+        return record;
+
+    }
+
+
+    /* ========================================================
+       10 — SESSION
+       ======================================================== */
+
+    function createSession(
+        metadata = {}
+    ) {
+
+        state.sessionId =
+            createId(
+                "session"
+            );
+
+        state.messages = [];
+        state.context = [];
+
+        const session = {
+
+            id:
+                state.sessionId,
+
+            createdAt:
+                now(),
+
+            updatedAt:
+                now(),
+
+            metadata:
+                clone(
+                    metadata
+                )
+
+        };
+
         try {
 
-            localStorage.setItem(
-                key,
+            window.localStorage.setItem(
+                CONFIG.sessionKey,
                 JSON.stringify(
-                    value
+                    session
+                )
+            );
+
+        } catch (_) {}
+
+        emit(
+            "session-created",
+            session
+        );
+
+        return clone(
+            session
+        );
+
+    }
+
+
+    function getSessionId() {
+
+        if (
+            !state.sessionId
+        ) {
+
+            createSession();
+
+        }
+
+        return state.sessionId;
+
+    }
+
+
+    function loadSession() {
+
+        try {
+
+            const raw =
+                window.localStorage.getItem(
+                    CONFIG.sessionKey
+                );
+
+            if (!raw) {
+
+                return createSession();
+
+            }
+
+            const session =
+                JSON.parse(
+                    raw
+                );
+
+            if (
+                session &&
+                session.id
+            ) {
+
+                state.sessionId =
+                    session.id;
+
+                return clone(
+                    session
+                );
+
+            }
+
+        } catch (
+            exception
+        ) {
+
+            reportError(
+                exception,
+                "Session laden"
+            );
+
+        }
+
+        return createSession();
+
+    }
+
+
+    function saveSession() {
+
+        try {
+
+            const session = {
+
+                id:
+                    getSessionId(),
+
+                createdAt:
+                    state.sessionCreatedAt ||
+                    now(),
+
+                updatedAt:
+                    now()
+
+            };
+
+            window.localStorage.setItem(
+                CONFIG.sessionKey,
+                JSON.stringify(
+                    session
                 )
             );
 
             return true;
 
-        } catch (error) {
-
-            recordError(
-                error
-            );
+        } catch (_) {
 
             return false;
 
@@ -355,1146 +828,454 @@
 
     }
 
-    async function storageGet(
-        key,
-        fallback = null
+
+    /* ========================================================
+       11 — MESSAGE CREATION
+       ======================================================== */
+
+    function createMessage(
+        role,
+        content,
+        metadata = {}
     ) {
 
-        const storage =
-            getStorage();
+        const normalizedRole =
+            normalizeText(
+                role
+            ).toLowerCase() ||
+            "user";
 
-        if (storage) {
-
-            for (
-                const method of [
-                    "get",
-                    "load",
-                    "read",
-                    "retrieve"
-                ]
-            ) {
-
-                if (
-                    typeof storage[method] !==
-                    "function"
-                ) {
-                    continue;
-                }
-
-                try {
-
-                    const value =
-                        await storage[method](
-                            key
-                        );
-
-                    if (
-                        value !==
-                        undefined &&
-                        value !==
-                        null
-                    ) {
-
-                        return value;
-
-                    }
-
-                } catch (error) {}
-
-            }
-
-        }
-
-        try {
-
-            const raw =
-                localStorage.getItem(
-                    key
-                );
-
-            if (!raw) {
-
-                return fallback;
-
-            }
-
-            return JSON.parse(
-                raw
+        const normalizedContent =
+            normalizeText(
+                content
             );
-
-        } catch (error) {
-
-            return fallback;
-
-        }
-
-    }
-
-    async function persist() {
-
-        if (
-            !CONFIG.autoSave
-        ) {
-            return false;
-        }
-
-        const payload = {
-
-            version:
-                CONFIG.version,
-
-            updatedAt:
-                now(),
-
-            memories:
-                state.memories
-
-        };
-
-        return storageSet(
-            CONFIG.storageKey,
-            payload
-        );
-
-    }
-
-    // --------------------------------------------------------
-    // MEMORY NORMALIZATION
-    // --------------------------------------------------------
-
-    function normalizeMemory(
-        input,
-        options = {}
-    ) {
-
-        let data = {};
-
-        if (
-            typeof input ===
-            "string"
-        ) {
-
-            data.content =
-                input;
-
-        } else if (
-            input &&
-            typeof input ===
-            "object"
-        ) {
-
-            data = {
-                ...input
-            };
-
-        }
-
-        const content =
-            clean(
-                data.content ??
-                data.text ??
-                data.message ??
-                data.value ??
-                ""
-            );
-
-        const type =
-            clean(
-                data.type ||
-                options.type ||
-                "general"
-            ) || "general";
-
-        const language =
-            clean(
-                data.language ||
-                options.language ||
-                window.HalDoAILanguage?.getLanguage?.() ||
-                "de"
-            ) || "de";
-
-        const tags =
-            Array.isArray(
-                data.tags
-            )
-                ? [
-                    ...new Set(
-                        data.tags
-                            .map(
-                                tag =>
-                                    clean(tag)
-                            )
-                            .filter(
-                                Boolean
-                            )
-                    )
-                ]
-                : [];
 
         return {
 
             id:
-                data.id ||
-                createId(),
+                createId(
+                    "message"
+                ),
 
-            type,
+            sessionId:
+                getSessionId(),
 
-            content,
+            role:
+                normalizedRole,
 
-            text:
-                content,
+            content:
+                normalizedContent,
 
-            language,
-
-            tags,
-
-            source:
-                data.source ||
-                options.source ||
-                "ai",
-
-            importance:
-                Number.isFinite(
-                    Number(
-                        data.importance
-                    )
-                )
-                    ? Number(
-                        data.importance
-                    )
-                    : 0.5,
-
-            confidence:
-                Number.isFinite(
-                    Number(
-                        data.confidence
-                    )
-                )
-                    ? Number(
-                        data.confidence
-                    )
-                    : 1,
+            timestamp:
+                now(),
 
             metadata:
-                data.metadata &&
-                typeof data.metadata ===
-                "object"
-                    ? {
-                        ...data.metadata
-                    }
-                    : {},
-
-            createdAt:
-                data.createdAt ||
-                now(),
-
-            updatedAt:
-                now(),
-
-            accessCount:
-                Number(
-                    data.accessCount
-                ) || 0,
-
-            lastAccessedAt:
-                data.lastAccessedAt ||
-                null
+                clone(
+                    metadata
+                )
 
         };
 
     }
 
-    // --------------------------------------------------------
-    // ADD / REMEMBER
-    // --------------------------------------------------------
 
-    async function remember(
-        input,
+    /* ========================================================
+       12 — ADD MESSAGE
+       ======================================================== */
+
+    function addMessage(
+        role,
+        content,
+        metadata = {}
+    ) {
+
+        const message =
+            createMessage(
+                role,
+                content,
+                metadata
+            );
+
+        if (
+            !message.content
+        ) {
+
+            return null;
+
+        }
+
+        state.messages.push(
+            message
+        );
+
+        if (
+            state.messages.length >
+            CONFIG.maxShortTermMessages
+        ) {
+
+            state.messages =
+                state.messages.slice(
+                    -CONFIG.maxShortTermMessages
+                );
+
+        }
+
+        state.statistics.messagesAdded +=
+            1;
+
+        emit(
+            "message-added",
+            clone(
+                message
+            )
+        );
+
+        if (
+            CONFIG.autoSave
+        ) {
+
+            save();
+
+        }
+
+        syncConversationState();
+
+        return clone(
+            message
+        );
+
+    }
+
+
+    function addUserMessage(
+        content,
+        metadata = {}
+    ) {
+
+        return addMessage(
+            "user",
+            content,
+            metadata
+        );
+
+    }
+
+
+    function addAssistantMessage(
+        content,
+        metadata = {}
+    ) {
+
+        return addMessage(
+            "assistant",
+            content,
+            metadata
+        );
+
+    }
+
+
+    function addSystemMessage(
+        content,
+        metadata = {}
+    ) {
+
+        return addMessage(
+            "system",
+            content,
+            metadata
+        );
+
+    }
+
+
+    /* ========================================================
+       13 — MESSAGE ACCESS
+       ======================================================== */
+
+    function getMessages(
         options = {}
     ) {
 
+        let result =
+            state.messages.slice();
+
         if (
-            !CONFIG.enabled
+            options.role
         ) {
 
-            return {
-
-                ok:
-                    false,
-
-                error:
-                    "MEMORY_DISABLED"
-
-            };
+            result =
+                result.filter(
+                    message =>
+                        message.role ===
+                        options.role
+                );
 
         }
 
-        const memory =
-            normalizeMemory(
-                input,
-                options
+        if (
+            options.limit
+        ) {
+
+            result =
+                result.slice(
+                    -Math.max(
+                        1,
+                        Number(
+                            options.limit
+                        )
+                    )
+                );
+
+        }
+
+        return clone(
+            result
+        );
+
+    }
+
+
+    function getRecentMessages(
+        limit = 20
+    ) {
+
+        return getMessages({
+            limit
+        });
+
+    }
+
+
+    function getLastMessage() {
+
+        if (
+            state.messages.length ===
+            0
+        ) {
+
+            return null;
+
+        }
+
+        return clone(
+            state.messages[
+                state.messages.length - 1
+            ]
+        );
+
+    }
+
+
+    function clearMessages() {
+
+        const count =
+            state.messages.length;
+
+        state.messages = [];
+
+        emit(
+            "messages-cleared",
+            {
+                count:
+                    count
+            }
+        );
+
+        if (
+            CONFIG.autoSave
+        ) {
+
+            save();
+
+        }
+
+        syncConversationState();
+
+        return true;
+
+    }
+
+
+    /* ========================================================
+       14 — LONG TERM MEMORY
+       ======================================================== */
+
+    function addMemory(
+        content,
+        options = {}
+    ) {
+
+        const text =
+            normalizeText(
+                content
             );
 
-        if (!memory.content) {
+        if (!text) {
 
-            return {
-
-                ok:
-                    false,
-
-                error:
-                    "EMPTY_MEMORY"
-
-            };
+            return null;
 
         }
 
-        /*
-         * Bestimmte Memory-Typen können
-         * über die Konfiguration gesteuert
-         * werden.
-         */
+        const memory = {
 
-        if (
-            memory.type ===
-            "conversation" &&
-            !CONFIG.rememberConversation
-        ) {
+            id:
+                createId(
+                    "memory"
+                ),
 
-            return {
+            content:
+                text,
 
-                ok:
-                    false,
+            type:
+                options.type ||
+                "general",
 
-                error:
-                    "CONVERSATION_MEMORY_DISABLED"
+            category:
+                options.category ||
+                "general",
 
-            };
+            importance:
+                Number(
+                    options.importance
+                ) || 1,
 
-        }
+            priority:
+                Number(
+                    options.priority
+                ) || 1,
 
-        if (
-            memory.type ===
-            "correction" &&
-            !CONFIG.rememberCorrections
-        ) {
+            tags:
+                normalizeTags(
+                    options.tags
+                ),
 
-            return {
+            source:
+                options.source ||
+                "haldo-ai",
 
-                ok:
-                    false,
+            pinned:
+                options.pinned ===
+                true,
 
-                error:
-                    "CORRECTION_MEMORY_DISABLED"
+            createdAt:
+                now(),
 
-            };
+            updatedAt:
+                now(),
 
-        }
+            expiresAt:
+                options.expiresAt ||
+                null,
 
-        if (
-            memory.type ===
-            "writing" &&
-            !CONFIG.rememberWriting
-        ) {
+            metadata:
+                clone(
+                    options.metadata ||
+                    {}
+                )
 
-            return {
-
-                ok:
-                    false,
-
-                error:
-                    "WRITING_MEMORY_DISABLED"
-
-            };
-
-        }
-
-        if (
-            memory.type ===
-            "reading" &&
-            !CONFIG.rememberReading
-        ) {
-
-            return {
-
-                ok:
-                    false,
-
-                error:
-                    "READING_MEMORY_DISABLED"
-
-            };
-
-        }
-
-        /*
-         * Duplikate erkennen.
-         */
-
-        const duplicate =
-            state.memories.find(
-                item =>
-                    normalizeText(
-                        item.content
-                    ) ===
-                    normalizeText(
-                        memory.content
-                    ) &&
-                    item.type ===
-                    memory.type
-            );
-
-        if (duplicate) {
-
-            duplicate.updatedAt =
-                now();
-
-            duplicate.accessCount++;
-
-            state.lastMemory =
-                duplicate;
-
-            await persist();
-
-            emit(
-                "memory-updated",
-                {
-                    memory:
-                        duplicate
-                }
-            );
-
-            return {
-
-                ok:
-                    true,
-
-                created:
-                    false,
-
-                updated:
-                    true,
-
-                memory:
-                    duplicate
-
-            };
-
-        }
+        };
 
         state.memories.push(
             memory
         );
 
-        state.memoryCount =
-            state.memories.length;
-
-        state.writeCount++;
-
-        state.lastMemory =
-            memory;
-
-        state.history.push({
-
-            action:
-                "remember",
-
-            memoryId:
-                memory.id,
-
-            timestamp:
-                now()
-
-        });
-
-        if (
-            state.history.length >
-            CONFIG.maxHistory
-        ) {
-
-            state.history.shift();
-
-        }
-
-        /*
-         * Maximale Anzahl verwalten.
-         */
-
         if (
             state.memories.length >
-            CONFIG.maxMemories
+            CONFIG.maxLongTermMemories
         ) {
 
-            state.memories.sort(
-                (a, b) =>
-                    (
-                        Number(
-                            b.importance
-                        ) +
-                        Number(
-                            b.updatedAt
-                        ) / 1e15
-                    ) -
-                    (
-                        Number(
-                            a.importance
-                        ) +
-                        Number(
-                            a.updatedAt
-                        ) / 1e15
-                    )
-            );
-
             state.memories =
-                state.memories.slice(
-                    0,
-                    CONFIG.maxMemories
-                );
-
-            state.memoryCount =
-                state.memories.length;
+                state.memories
+                    .sort(
+                        (
+                            a,
+                            b
+                        ) =>
+                            b.importance -
+                            a.importance
+                    )
+                    .slice(
+                        0,
+                        CONFIG.maxLongTermMemories
+                    );
 
         }
 
-        await persist();
+        state.statistics.memoriesAdded +=
+            1;
 
         emit(
             "memory-added",
-            {
+            clone(
                 memory
-            }
-        );
-
-        return {
-
-            ok:
-                true,
-
-            created:
-                true,
-
-            updated:
-                false,
-
-            memory
-
-        };
-
-    }
-
-    async function add(
-        input,
-        options = {}
-    ) {
-
-        return remember(
-            input,
-            options
-        );
-
-    }
-
-    async function store(
-        input,
-        options = {}
-    ) {
-
-        return remember(
-            input,
-            options
-        );
-
-    }
-
-    async function save(
-        input,
-        options = {}
-    ) {
-
-        return remember(
-            input,
-            options
-        );
-
-    }
-
-    async function rememberMessage(
-        message,
-        options = {}
-    ) {
-
-        return remember(
-            {
-
-                ...(
-                    typeof message ===
-                    "object"
-                        ? message
-                        : {
-                            content:
-                                message
-                        }
-                ),
-
-                type:
-                    options.type ||
-                    "conversation"
-
-            },
-            options
-        );
-
-    }
-
-    // --------------------------------------------------------
-    // SEARCH / RECALL
-    // --------------------------------------------------------
-
-    function calculateScore(
-        memory,
-        query,
-        options = {}
-    ) {
-
-        const normalizedQuery =
-            normalizeText(
-                query
-            );
-
-        if (!normalizedQuery) {
-
-            return 0;
-
-        }
-
-        const content =
-            normalizeText(
-                memory.content
-            );
-
-        const tags =
-            memory.tags
-                .map(
-                    tag =>
-                        normalizeText(
-                            tag
-                        )
-                );
-
-        let score =
-            0;
-
-        /*
-         * Exakter Inhalt.
-         */
-
-        if (
-            content ===
-            normalizedQuery
-        ) {
-
-            score +=
-                1;
-
-        }
-
-        /*
-         * Gesamte Query enthalten.
-         */
-
-        if (
-            content.includes(
-                normalizedQuery
             )
-        ) {
-
-            score +=
-                0.7;
-
-        }
-
-        /*
-         * Wörter vergleichen.
-         */
-
-        const words =
-            normalizedQuery
-                .split(
-                    /\s+/
-                )
-                .filter(
-                    word =>
-                        word.length >
-                        1
-                );
+        );
 
         if (
-            words.length
+            CONFIG.autoSave
         ) {
 
-            let matches =
-                0;
-
-            for (
-                const word of words
-            ) {
-
-                if (
-                    content.includes(
-                        word
-                    )
-                ) {
-
-                    matches++;
-
-                }
-
-                if (
-                    tags.some(
-                        tag =>
-                            tag.includes(
-                                word
-                            )
-                    )
-                ) {
-
-                    matches +=
-                        0.5;
-
-                }
-
-            }
-
-            score +=
-                (
-                    matches /
-                    words.length
-                ) *
-                0.8;
+            save();
 
         }
 
-        /*
-         * Typ bevorzugen.
-         */
-
-        if (
-            options.type &&
-            memory.type ===
-            options.type
-        ) {
-
-            score +=
-                0.4;
-
-        }
-
-        /*
-         * Sprache bevorzugen.
-         */
-
-        if (
-            options.language &&
-            memory.language ===
-            options.language
-        ) {
-
-            score +=
-                0.15;
-
-        }
-
-        /*
-         * Wichtigkeit.
-         */
-
-        score +=
-            Math.max(
-                0,
-                Math.min(
-                    1,
-                    Number(
-                        memory.importance
-                    )
-                )
-            ) *
-            0.2;
-
-        return score;
+        return clone(
+            memory
+        );
 
     }
 
-    async function recall(
-        query,
-        options = {}
+
+    function getMemory(
+        memoryId
     ) {
 
-        if (
-            !CONFIG.enabled
-        ) {
-
-            return [];
-
-        }
-
-        const input =
-            clean(
-                query
+        const id =
+            normalizeText(
+                memoryId
             );
 
-        state.searchCount++;
-
-        if (!input) {
-
-            return [];
-
-        }
-
-        const limit =
-            Math.min(
-                Number(
-                    options.limit
-                ) || 10,
-                CONFIG.maxSearchResults
-            );
-
-        const results =
-            state.memories
-                .map(
-                    memory => ({
-
-                        memory,
-
-                        score:
-                            calculateScore(
-                                memory,
-                                input,
-                                options
-                            )
-
-                    })
-                )
-                .filter(
-                    item =>
-                        item.score >
-                        (
-                            Number(
-                                options.threshold
-                            ) ||
-                            0.05
-                        )
-                )
-                .sort(
-                    (a, b) =>
-                        b.score -
-                        a.score
-                )
-                .slice(
-                    0,
-                    limit
-                );
-
-        for (
-            const item of results
-        ) {
-
-            item.memory.accessCount++;
-
-            item.memory.lastAccessedAt =
-                now();
-
-        }
-
-        state.lastSearch = {
-
-            query:
-                input,
-
-            count:
-                results.length,
-
-            timestamp:
-                now()
-
-        };
-
-        emit(
-            "memory-recalled",
-            {
-
-                query:
-                    input,
-
-                results
-
-            }
-        );
-
-        return results.map(
-            item => ({
-
-                ...item.memory,
-
-                score:
-                    item.score
-
-            })
-        );
-
-    }
-
-    async function search(
-        query,
-        options = {}
-    ) {
-
-        return recall(
-            query,
-            options
-        );
-
-    }
-
-    async function find(
-        query,
-        options = {}
-    ) {
-
-        return recall(
-            query,
-            options
-        );
-
-    }
-
-    async function query(
-        text,
-        options = {}
-    ) {
-
-        return recall(
-            text,
-            options
-        );
-
-    }
-
-    async function retrieve(
-        text,
-        options = {}
-    ) {
-
-        return recall(
-            text,
-            options
-        );
-
-    }
-
-    // --------------------------------------------------------
-    // SPECIALIZED MEMORY
-    // --------------------------------------------------------
-
-    async function rememberConversation(
-        user,
-        assistant,
-        options = {}
-    ) {
-
-        return remember(
-            {
-
-                type:
-                    "conversation",
-
-                content:
-                    `User: ${clean(user)}\nAssistant: ${clean(assistant)}`,
-
-                language:
-                    options.language,
-
-                tags:
-                    [
-                        "conversation",
-                        "chat"
-                    ],
-
-                metadata:
-                    {
-                        requestId:
-                            options.requestId ||
-                            null
-                    }
-
-            },
-            options
-        );
-
-    }
-
-    async function rememberCorrection(
-        original,
-        corrected,
-        options = {}
-    ) {
-
-        const originalText =
-            clean(
-                original
-            );
-
-        const correctedText =
-            clean(
-                corrected
-            );
-
-        return remember(
-            {
-
-                type:
-                    "correction",
-
-                content:
-                    correctedText,
-
-                tags:
-                    [
-                        "correction",
-                        "grammar",
-                        "spelling",
-                        "writing"
-                    ],
-
-                metadata:
-                    {
-
-                        original:
-                            originalText,
-
-                        corrected:
-                            correctedText,
-
-                        language:
-                            options.language ||
-                            "de"
-
-                    },
-
-                language:
-                    options.language
-
-            },
-            options
-        );
-
-    }
-
-    async function rememberWriting(
-        text,
-        options = {}
-    ) {
-
-        return remember(
-            {
-
-                type:
-                    "writing",
-
-                content:
-                    text,
-
-                tags:
-                    [
-                        "writing",
-                        "formulation"
-                    ],
-
-                metadata:
-                    {
-                        purpose:
-                            options.purpose ||
-                            "general"
-                    },
-
-                language:
-                    options.language
-
-            },
-            options
-        );
-
-    }
-
-    async function rememberReading(
-        text,
-        options = {}
-    ) {
-
-        return remember(
-            {
-
-                type:
-                    "reading",
-
-                content:
-                    text,
-
-                tags:
-                    [
-                        "reading",
-                        "analysis"
-                    ],
-
-                metadata:
-                    {
-                        source:
-                            options.source ||
-                            null
-                    },
-
-                language:
-                    options.language
-
-            },
-            options
-        );
-
-    }
-
-    // --------------------------------------------------------
-    // GET MEMORY
-    // --------------------------------------------------------
-
-    function get(
-        id
-    ) {
-
-        return (
+        const memory =
             state.memories.find(
-                memory =>
-                    memory.id ===
+                item =>
+                    item.id ===
                     id
-            ) ||
-            null
-        );
+            );
+
+        return memory
+            ? clone(memory)
+            : null;
 
     }
 
-    function getAll(
+
+    function getMemories(
         options = {}
     ) {
 
-        let memories =
-            [
-                ...state.memories
-            ];
+        let result =
+            state.memories.slice();
+
+        if (
+            options.category
+        ) {
+
+            result =
+                result.filter(
+                    memory =>
+                        memory.category ===
+                        options.category
+                );
+
+        }
 
         if (
             options.type
         ) {
 
-            memories =
-                memories.filter(
+            result =
+                result.filter(
                     memory =>
                         memory.type ===
                         options.type
@@ -1503,47 +1284,52 @@
         }
 
         if (
-            options.language
+            options.tag
         ) {
 
-            memories =
-                memories.filter(
+            const tag =
+                normalizeText(
+                    options.tag
+                ).toLowerCase();
+
+            result =
+                result.filter(
                     memory =>
-                        memory.language ===
-                        options.language
+                        memory.tags.includes(
+                            tag
+                        )
                 );
 
         }
 
         if (
-            Number.isFinite(
-                Number(
-                    options.limit
-                )
-            )
+            options.pinned
         ) {
 
-            memories =
-                memories.slice(
-                    0,
-                    Number(
-                        options.limit
-                    )
+            result =
+                result.filter(
+                    memory =>
+                        memory.pinned ===
+                        true
                 );
 
         }
 
-        return memories;
+        return clone(
+            result
+        );
 
     }
 
-    // --------------------------------------------------------
-    // REMOVE / CLEAR
-    // --------------------------------------------------------
 
-    async function remove(
-        id
+    function removeMemory(
+        memoryId
     ) {
+
+        const id =
+            normalizeText(
+                memoryId
+            );
 
         const index =
             state.memories.findIndex(
@@ -1553,265 +1339,776 @@
             );
 
         if (
-            index ===
-            -1
+            index === -1
         ) {
 
-            return {
-
-                ok:
-                    false,
-
-                error:
-                    "MEMORY_NOT_FOUND"
-
-            };
+            return false;
 
         }
 
-        const removed =
-            state.memories.splice(
-                index,
-                1
-            )[0];
+        state.memories.splice(
+            index,
+            1
+        );
 
-        state.memoryCount =
-            state.memories.length;
-
-        await persist();
+        state.statistics.memoriesRemoved +=
+            1;
 
         emit(
             "memory-removed",
             {
-                memory:
-                    removed
+                memoryId:
+                    id
             }
         );
 
-        return {
+        save();
 
-            ok:
-                true,
-
-            memory:
-                removed
-
-        };
+        return true;
 
     }
 
-    async function clear(
-        options = {}
+
+    function updateMemory(
+        memoryId,
+        changes = {}
     ) {
 
-        if (
-            options.type
-        ) {
-
-            state.memories =
-                state.memories.filter(
-                    memory =>
-                        memory.type !==
-                        options.type
-                );
-
-        } else {
-
-            state.memories =
-                [];
-
-        }
-
-        state.memoryCount =
-            state.memories.length;
-
-        await persist();
-
-        emit(
-            "memory-cleared",
-            {
-                type:
-                    options.type ||
-                    null
-            }
-        );
-
-        return {
-
-            ok:
-                true,
-
-            count:
-                state.memoryCount
-
-        };
-
-    }
-
-    // --------------------------------------------------------
-    // IMPORT / EXPORT
-    // --------------------------------------------------------
-
-    function exportMemory() {
-
-        return {
-
-            version:
-                CONFIG.version,
-
-            exportedAt:
-                now(),
-
-            memories:
-                state.memories.map(
-                    memory => ({
-                        ...memory
-                    })
-                )
-
-        };
-
-    }
-
-    async function importMemory(
-        data,
-        options = {}
-    ) {
-
-        if (
-            !data
-        ) {
-
-            return {
-
-                ok:
-                    false,
-
-                error:
-                    "INVALID_MEMORY_DATA"
-
-            };
-
-        }
-
-        const memories =
-            Array.isArray(
-                data
-            )
-                ? data
-                : Array.isArray(
-                    data.memories
-                )
-                    ? data.memories
-                    : [];
-
-        let imported =
-            0;
-
-        for (
-            const item of memories
-        ) {
-
-            const memory =
-                normalizeMemory(
-                    item
-                );
-
-            if (!memory.content) {
-                continue;
-            }
-
-            const exists =
-                state.memories.some(
-                    current =>
-                        current.id ===
-                        memory.id
-                );
-
-            if (
-                exists &&
-                !options.overwrite
-            ) {
-
-                continue;
-
-            }
-
-            const index =
-                state.memories.findIndex(
-                    current =>
-                        current.id ===
-                        memory.id
-                );
-
-            if (
-                index >=
-                0
-            ) {
-
-                state.memories[
-                    index
-                ] = memory;
-
-            } else {
-
-                state.memories.push(
-                    memory
-                );
-
-            }
-
-            imported++;
-
-        }
-
-        state.memories =
-            state.memories.slice(
-                -CONFIG.maxMemories
+        const id =
+            normalizeText(
+                memoryId
             );
 
-        state.memoryCount =
-            state.memories.length;
+        const memory =
+            state.memories.find(
+                item =>
+                    item.id ===
+                    id
+            );
 
-        await persist();
+        if (!memory) {
+
+            return null;
+
+        }
+
+        if (
+            changes.content !==
+            undefined
+        ) {
+
+            memory.content =
+                normalizeText(
+                    changes.content
+                );
+
+        }
+
+        if (
+            changes.importance !==
+            undefined
+        ) {
+
+            memory.importance =
+                Number(
+                    changes.importance
+                ) || 1;
+
+        }
+
+        if (
+            changes.priority !==
+            undefined
+        ) {
+
+            memory.priority =
+                Number(
+                    changes.priority
+                ) || 1;
+
+        }
+
+        if (
+            changes.tags !==
+            undefined
+        ) {
+
+            memory.tags =
+                normalizeTags(
+                    changes.tags
+                );
+
+        }
+
+        if (
+            changes.pinned !==
+            undefined
+        ) {
+
+            memory.pinned =
+                changes.pinned ===
+                true;
+
+        }
+
+        memory.updatedAt =
+            now();
 
         emit(
-            "memory-imported",
+            "memory-updated",
+            clone(
+                memory
+            )
+        );
+
+        save();
+
+        return clone(
+            memory
+        );
+
+    }
+
+
+    /* ========================================================
+       15 — MEMORY SEARCH
+       ======================================================== */
+
+    function searchMemories(
+        query,
+        options = {}
+    ) {
+
+        const value =
+            normalizeText(
+                query
+            ).toLowerCase();
+
+        if (!value) {
+
+            return [];
+
+        }
+
+        state.statistics.searches +=
+            1;
+
+        const words =
+            value
+                .split(
+                    /\s+/
+                )
+                .filter(Boolean);
+
+        const results =
+            state.memories
+                .map(
+                    memory => {
+
+                        const haystack =
+                            (
+                                memory.content +
+                                " " +
+                                memory.category +
+                                " " +
+                                memory.type +
+                                " " +
+                                memory.tags.join(
+                                    " "
+                                )
+                            )
+                            .toLowerCase();
+
+                        let score = 0;
+
+                        if (
+                            haystack.includes(
+                                value
+                            )
+                        ) {
+
+                            score += 10;
+
+                        }
+
+                        words.forEach(
+                            word => {
+
+                                if (
+                                    haystack.includes(
+                                        word
+                                    )
+                                ) {
+
+                                    score += 2;
+
+                                }
+
+                            }
+                        );
+
+                        score +=
+                            memory.importance *
+                            0.5;
+
+                        score +=
+                            memory.priority *
+                            0.25;
+
+                        if (
+                            memory.pinned
+                        ) {
+
+                            score += 5;
+
+                        }
+
+                        return {
+
+                            memory:
+                                memory,
+
+                            score:
+                                score
+
+                        };
+
+                    }
+                )
+                .filter(
+                    item =>
+                        item.score >
+                        0
+                )
+                .sort(
+                    (
+                        a,
+                        b
+                    ) =>
+                        b.score -
+                        a.score
+                )
+                .slice(
+                    0,
+                    options.limit ||
+                    CONFIG.maxSearchResults
+                );
+
+        emit(
+            "memory-search",
             {
-                imported
+                query:
+                    query,
+
+                count:
+                    results.length
             }
         );
 
+        return clone(
+            results
+        );
+
+    }
+
+
+    /* ========================================================
+       16 — CONTEXT
+       ======================================================== */
+
+    function addContext(
+        item
+    ) {
+
+        if (
+            item === null ||
+            item === undefined
+        ) {
+
+            return false;
+
+        }
+
+        state.context.push(
+            clone(
+                item
+            )
+        );
+
+        if (
+            state.context.length >
+            100
+        ) {
+
+            state.context =
+                state.context.slice(
+                    -100
+                );
+
+        }
+
+        emit(
+            "context-added",
+            clone(
+                item
+            )
+        );
+
+        return true;
+
+    }
+
+
+    function getContext(
+        limit = 20
+    ) {
+
+        return clone(
+            state.context.slice(
+                -Math.max(
+                    1,
+                    Number(
+                        limit
+                    )
+                )
+            )
+        );
+
+    }
+
+
+    function clearContext() {
+
+        state.context = [];
+
+        emit(
+            "context-cleared"
+        );
+
+        return true;
+
+    }
+
+
+    /* ========================================================
+       17 — AI CONTEXT
+       ======================================================== */
+
+    function getAIContext(
+        options = {}
+    ) {
+
+        const recent =
+            getRecentMessages(
+                options.messageLimit ||
+                20
+            );
+
+        const memories =
+            options.query
+                ? searchMemories(
+                    options.query,
+                    {
+                        limit:
+                            options.memoryLimit ||
+                            10
+                    }
+                )
+                : getMemories({
+                    pinned:
+                        true
+                }).slice(
+                    0,
+                    options.memoryLimit ||
+                    10
+                );
+
         return {
 
-            ok:
-                true,
+            sessionId:
+                getSessionId(),
 
-            imported,
+            messages:
+                recent,
 
-            count:
-                state.memoryCount
+            memories:
+                memories.map(
+                    item =>
+                        item.memory ||
+                        item
+                ),
+
+            context:
+                getContext(
+                    options.contextLimit ||
+                    20
+                )
 
         };
 
     }
 
-    // --------------------------------------------------------
-    // STATUS
-    // --------------------------------------------------------
 
-    function getStatus() {
+    /* ========================================================
+       18 — CONVERSATION STATE
+       ======================================================== */
+
+    function syncConversationState() {
+
+        const conversation =
+            getConversationState();
+
+        if (!conversation) {
+
+            state.connections.conversationState =
+                false;
+
+            return false;
+
+        }
+
+        state.connections.conversationState =
+            true;
+
+        try {
+
+            if (
+                hasMethod(
+                    conversation,
+                    "setMessages"
+                )
+            ) {
+
+                conversation.setMessages(
+                    clone(
+                        state.messages
+                    )
+                );
+
+            }
+
+            else if (
+                hasMethod(
+                    conversation,
+                    "addMessage"
+                )
+            ) {
+
+                /*
+                 * Bestehende Implementierungen
+                 * werden nicht blind überschrieben.
+                 */
+
+            }
+
+            return true;
+
+        } catch (
+            exception
+        ) {
+
+            reportError(
+                exception,
+                "Conversation State Synchronisation"
+            );
+
+            return false;
+
+        }
+
+    }
+
+
+    /* ========================================================
+       19 — STORAGE
+       ======================================================== */
+
+    function save() {
+
+        const payload = {
+
+            version:
+                VERSION,
+
+            sessionId:
+                getSessionId(),
+
+            messages:
+                clone(
+                    state.messages
+                ),
+
+            memories:
+                clone(
+                    state.memories
+                ),
+
+            context:
+                clone(
+                    state.context
+                ),
+
+            timestamp:
+                now()
+
+        };
+
+        const storage =
+            getStorage();
+
+        try {
+
+            if (
+                storage &&
+                hasMethod(
+                    storage,
+                    "set"
+                )
+            ) {
+
+                storage.set(
+                    CONFIG.storageKey,
+                    payload
+                );
+
+                state.connections.storage =
+                    true;
+
+            }
+
+            else {
+
+                window.localStorage.setItem(
+                    CONFIG.storageKey,
+                    JSON.stringify(
+                        payload
+                    )
+                );
+
+            }
+
+            state.statistics.saves +=
+                1;
+
+            emit(
+                "saved"
+            );
+
+            return true;
+
+        } catch (
+            exception
+        ) {
+
+            reportError(
+                exception,
+                "Memory speichern"
+            );
+
+            return false;
+
+        }
+
+    }
+
+
+    function load() {
+
+        const storage =
+            getStorage();
+
+        try {
+
+            let payload =
+                null;
+
+            if (
+                storage &&
+                hasMethod(
+                    storage,
+                    "get"
+                )
+            ) {
+
+                payload =
+                    storage.get(
+                        CONFIG.storageKey
+                    );
+
+                state.connections.storage =
+                    true;
+
+            }
+
+            else {
+
+                const raw =
+                    window.localStorage.getItem(
+                        CONFIG.storageKey
+                    );
+
+                payload =
+                    raw
+                        ? JSON.parse(
+                            raw
+                        )
+                        : null;
+
+            }
+
+            if (
+                payload &&
+                typeof payload ===
+                "object"
+            ) {
+
+                state.sessionId =
+                    payload.sessionId ||
+                    state.sessionId;
+
+                state.messages =
+                    Array.isArray(
+                        payload.messages
+                    )
+                        ? payload.messages
+                        : [];
+
+                state.memories =
+                    Array.isArray(
+                        payload.memories
+                    )
+                        ? payload.memories
+                        : [];
+
+                state.context =
+                    Array.isArray(
+                        payload.context
+                    )
+                        ? payload.context
+                        : [];
+
+            }
+
+            state.statistics.loads +=
+                1;
+
+            emit(
+                "loaded"
+            );
+
+            return true;
+
+        } catch (
+            exception
+        ) {
+
+            reportError(
+                exception,
+                "Memory laden"
+            );
+
+            return false;
+
+        }
+
+    }
+
+
+    /* ========================================================
+       20 — MEMORY CLEANUP
+       ======================================================== */
+
+    function cleanupExpired() {
+
+        const current =
+            now();
+
+        const before =
+            state.memories.length;
+
+        state.memories =
+            state.memories.filter(
+                memory =>
+                    !memory.expiresAt ||
+                    memory.expiresAt >
+                    current ||
+                    memory.pinned
+            );
+
+        const removed =
+            before -
+            state.memories.length;
+
+        if (
+            removed > 0
+        ) {
+
+            state.statistics.memoriesRemoved +=
+                removed;
+
+            emit(
+                "expired-cleanup",
+                {
+                    removed:
+                        removed
+                }
+            );
+
+            save();
+
+        }
+
+        return removed;
+
+    }
+
+
+    /* ========================================================
+       21 — CONNECTIONS
+       ======================================================== */
+
+    function refreshConnections() {
+
+        state.connections.kernel =
+            !!getKernel();
+
+        state.connections.system =
+            !!getSystem();
+
+        state.connections.storage =
+            !!getStorage();
+
+        state.connections.conversationState =
+            !!getConversationState();
+
+        state.connections.aiCore =
+            !!getAICore();
+
+        return {
+            ...state.connections
+        };
+
+    }
+
+
+    /* ========================================================
+       22 — DIAGNOSTICS
+       ======================================================== */
+
+    function diagnostics() {
+
+        refreshConnections();
 
         return {
 
             name:
-                CONFIG.name,
+                NAME,
 
             version:
-                CONFIG.version,
+                VERSION,
 
-            mode:
-                CONFIG.mode,
+            module:
+                MODULE_ID,
 
             initialized:
                 state.initialized,
@@ -1819,291 +2116,394 @@
             ready:
                 state.ready,
 
-            enabled:
-                CONFIG.enabled,
+            failed:
+                state.failed,
+
+            sessionId:
+                state.sessionId,
+
+            messageCount:
+                state.messages.length,
 
             memoryCount:
                 state.memories.length,
 
-            searchCount:
-                state.searchCount,
+            contextCount:
+                state.context.length,
 
-            writeCount:
-                state.writeCount,
+            connections:
+                {
+                    ...state.connections
+                },
 
-            readCount:
-                state.readCount,
-
-            correctionCount:
-                state.correctionCount,
-
-            lastMemory:
-                state.lastMemory,
-
-            lastSearch:
-                state.lastSearch,
-
-            errors:
-                state.errors.length
-
-        };
-
-    }
-
-    // --------------------------------------------------------
-    // ERROR
-    // --------------------------------------------------------
-
-    function recordError(
-        error
-    ) {
-
-        const entry = {
+            statistics:
+                {
+                    ...state.statistics
+                },
 
             timestamp:
-                now(),
-
-            message:
-                error?.message ||
-                String(
-                    error
-                )
+                new Date()
+                    .toISOString()
 
         };
 
-        state.errors.push(
-            entry
-        );
-
-        if (
-            state.errors.length >
-            100
-        ) {
-
-            state.errors.shift();
-
-        }
-
-        emit(
-            "error",
-            entry
-        );
-
     }
 
-    // --------------------------------------------------------
-    // INITIALIZE
-    // --------------------------------------------------------
 
-    async function initialize() {
+    /* ========================================================
+       23 — HEALTH CHECK
+       ======================================================== */
+
+    function healthCheck() {
+
+        refreshConnections();
+
+        const problems = [];
 
         if (
-            state.initialized
+            !state.ready
         ) {
 
-            return getStatus();
-
-        }
-
-        state.initialized =
-            true;
-
-        try {
-
-            const stored =
-                await storageGet(
-                    CONFIG.storageKey,
-                    null
-                );
-
-            if (
-                stored &&
-                Array.isArray(
-                    stored.memories
-                )
-            ) {
-
-                state.memories =
-                    stored.memories
-                        .map(
-                            memory =>
-                                normalizeMemory(
-                                    memory
-                                )
-                        )
-                        .filter(
-                            memory =>
-                                Boolean(
-                                    memory.content
-                                )
-                        )
-                        .slice(
-                            -CONFIG.maxMemories
-                        );
-
-            }
-
-            state.memoryCount =
-                state.memories.length;
-
-        } catch (error) {
-
-            recordError(
-                error
+            problems.push(
+                "AI Memory ist noch nicht bereit."
             );
 
         }
 
-        /*
-         * Kernel-Verbindung.
-         */
-
-        const kernel =
-            window.HalDoKernel ||
-            window.HalDoOS?.kernel;
-
         if (
-            kernel &&
-            typeof kernel.registerModule ===
-            "function"
+            !state.connections.storage
         ) {
 
-            try {
-
-                kernel.registerModule(
-                    "ai-memory",
-                    api
-                );
-
-            } catch (error) {}
+            problems.push(
+                "Storage ist nicht verbunden."
+            );
 
         }
 
-        emit(
-            "initialized",
-            getStatus()
-        );
+        return {
 
-        window.setTimeout(
-            () => {
+            healthy:
+                problems.length ===
+                0,
 
-                state.ready =
-                    true;
+            problems:
+                problems,
 
-                emit(
-                    "ready",
-                    getStatus()
-                );
+            messageCount:
+                state.messages.length,
 
-            },
-            0
-        );
+            memoryCount:
+                state.memories.length,
 
-        return getStatus();
+            sessionId:
+                state.sessionId,
+
+            timestamp:
+                new Date()
+                    .toISOString()
+
+        };
 
     }
 
-    // --------------------------------------------------------
-    // PUBLIC API
-    // --------------------------------------------------------
+
+    /* ========================================================
+       24 — PUBLIC API
+       ======================================================== */
 
     const api = {
 
-        __haldoAI18:
-            true,
+        name:
+            NAME,
+
+        version:
+            VERSION,
+
+        module:
+            MODULE_ID,
 
         config:
-            CONFIG,
+            {
+                ...CONFIG
+            },
 
-        state,
 
-        initialize,
+        /* Events */
 
-        on,
+        on:
+            on,
 
-        off,
+        off:
+            off,
 
-        emit,
+        emit:
+            emit,
 
-        remember,
 
-        add,
+        /* Session */
 
-        store,
+        createSession:
+            createSession,
 
-        save,
+        loadSession:
+            loadSession,
 
-        rememberMessage,
+        saveSession:
+            saveSession,
 
-        rememberConversation,
+        getSessionId:
+            getSessionId,
 
-        rememberCorrection,
 
-        rememberWriting,
+        /* Messages */
 
-        rememberReading,
+        addMessage:
+            addMessage,
 
-        recall,
+        addUserMessage:
+            addUserMessage,
 
-        search,
+        addAssistantMessage:
+            addAssistantMessage,
 
-        find,
+        addSystemMessage:
+            addSystemMessage,
 
-        query,
+        getMessages:
+            getMessages,
 
-        retrieve,
+        getRecentMessages:
+            getRecentMessages,
 
-        get,
+        getLastMessage:
+            getLastMessage,
 
-        getAll,
+        clearMessages:
+            clearMessages,
 
-        remove,
 
-        clear,
+        /* Memories */
 
-        exportMemory,
+        addMemory:
+            addMemory,
 
-        importMemory,
+        getMemory:
+            getMemory,
 
-        getStatus
+        getMemories:
+            getMemories,
+
+        updateMemory:
+            updateMemory,
+
+        removeMemory:
+            removeMemory,
+
+        searchMemories:
+            searchMemories,
+
+
+        /* Context */
+
+        addContext:
+            addContext,
+
+        getContext:
+            getContext,
+
+        clearContext:
+            clearContext,
+
+        getAIContext:
+            getAIContext,
+
+
+        /* Storage */
+
+        save:
+            save,
+
+        load:
+            load,
+
+        cleanupExpired:
+            cleanupExpired,
+
+
+        /* Connections */
+
+        refreshConnections:
+            refreshConnections,
+
+
+        /* Diagnostics */
+
+        diagnostics:
+            diagnostics,
+
+        healthCheck:
+            healthCheck,
+
+
+        /* State */
+
+        getState:
+            function () {
+
+                return {
+
+                    initialized:
+                        state.initialized,
+
+                    initializing:
+                        state.initializing,
+
+                    ready:
+                        state.ready,
+
+                    failed:
+                        state.failed,
+
+                    sessionId:
+                        state.sessionId,
+
+                    messageCount:
+                        state.messages.length,
+
+                    memoryCount:
+                        state.memories.length,
+
+                    contextCount:
+                        state.context.length,
+
+                    connections:
+                        {
+                            ...state.connections
+                        }
+
+                };
+
+            }
 
     };
 
-    // --------------------------------------------------------
-    // GLOBAL REGISTRATION
-    // --------------------------------------------------------
+
+    /* ========================================================
+       25 — GLOBAL EXPORT
+       ======================================================== */
 
     window.HalDoAIMemory =
         api;
 
-    window.HalDoOS.aiMemory =
+    window.HalDoOSAIMemory =
         api;
 
-    // --------------------------------------------------------
-    // BOOT
-    // --------------------------------------------------------
+    HalDoOS.aiMemory =
+        api;
 
-    async function boot() {
 
-        try {
+    /* ========================================================
+       26 — INITIALIZATION
+       ======================================================== */
 
-            await initialize();
+    async function initialize() {
 
-        } catch (error) {
+        if (
+            state.ready
+        ) {
 
-            recordError(
-                error
-            );
-
-            console.error(
-                "[HalDoAIMemory] " +
-                "Initialization failed:",
-                error
-            );
+            return api;
 
         }
 
+        if (
+            state.initializing
+        ) {
+
+            return api;
+
+        }
+
+        state.initializing =
+            true;
+
+        state.initialized =
+            true;
+
+        state.failed =
+            false;
+
+
+        emit(
+            "initializing",
+            {
+                version:
+                    VERSION
+            }
+        );
+
+
+        refreshConnections();
+
+        loadSession();
+
+        load();
+
+        cleanupExpired();
+
+        syncConversationState();
+
+
+        state.ready =
+            true;
+
+        state.initializing =
+            false;
+
+
+        emit(
+            "ready",
+            diagnostics()
+        );
+
+
+        log(
+            "AI Memory Engine bereit.",
+            VERSION
+        );
+
+
+        return api;
+
     }
+
+
+    /* ========================================================
+       27 — BOOT
+       ======================================================== */
+
+    function boot() {
+
+        initialize()
+            .catch(
+                exception => {
+
+                    state.initializing =
+                        false;
+
+                    state.failed =
+                        true;
+
+                    reportError(
+                        exception,
+                        "AI Memory Initialisierung"
+                    );
+
+                }
+            );
+
+    }
+
 
     if (
         document.readyState ===
@@ -2119,14 +2519,19 @@
             }
         );
 
-    } else {
+    }
+
+    else {
 
         boot();
 
     }
 
-})(window, document);
 
-// ============================================================
-// END OF PART 85
-// ============================================================
+    /* ========================================================
+       END
+       HALDO AI OS 20
+       AI MEMORY ENGINE
+       ============================================================ */
+
+})(window, document);
