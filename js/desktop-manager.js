@@ -1,1727 +1,2072 @@
-/*
+// ============================================================
+// HALDO AI OS 20
+// DESKTOP MANAGER
+// Complete Desktop / Main Menu Coordination Layer
+// ============================================================
 
-============================================================
+(function (window, document) {
 
- HALDO AI OS 18
+    "use strict";
 
- DESKTOP MANAGER
+    if (
+        window.HalDoDesktopManager &&
+        window.HalDoDesktopManager.__haldoOS20
+    ) {
+        return;
+    }
 
- Professional Ultimate Foundation
+    window.HalDoOS =
+        window.HalDoOS || {};
 
-============================================================
+    // --------------------------------------------------------
+    // CONFIG
+    // --------------------------------------------------------
 
- Datei:
-
- js/desktop-manager.js
-
- Aufgabe:
-
- - HalDo Desktop verwalten
-
- - Desktop-Bereich aufbauen
-
- - Schnellzugriff
-
- - Desktop-Apps
-
- - Verbindung mit App Launcher
-
- - Verbindung mit Window Manager
-
- - responsive Vorbereitung
-
- - Statusverwaltung
-
-============================================================
-
-*/
-
-"use strict";
-
-(function (window) {
-
-    /* ========================================================
-
-       DESKTOP MANAGER
-
-       ======================================================== */
-
-    const HalDoDesktopManager = {
+    const CONFIG = {
 
         name:
-
             "HalDo Desktop Manager",
 
         version:
+            "20.0.0",
 
-            "18.0.0",
+        mode:
+            "Professional Ultimate",
 
-        status:
+        autoInitialize:
+            true,
 
-            "CREATED",
+        menuAnimation:
+            true,
+
+        preventDuplicateApps:
+            true,
+
+        sortApps:
+            true,
+
+        rememberDesktopState:
+            true,
+
+        enableKeyboardNavigation:
+            true,
+
+        enableEvents:
+            true
+
+    };
+
+    // --------------------------------------------------------
+    // STATE
+    // --------------------------------------------------------
+
+    const state = {
 
         initialized:
-
             false,
 
-        /* ====================================================
+        ready:
+            false,
 
-           VERBINDUNGEN
-
-           ==================================================== */
-
-        launcher:
-
-            null,
-
-        windowManager:
-
-            null,
-
-        appManager:
-
-            null,
-
-        registry:
-
-            null,
-
-        /* ====================================================
-
-           ELEMENTE
-
-           ==================================================== */
-
-        desktop:
-
-            null,
-
-        desktopLayer:
-
-            null,
-
-        quickAccess:
-
-            null,
-
-        statusBar:
-
-            null,
-
-        /* ====================================================
-
-           EINSTELLUNGEN
-
-           ==================================================== */
-
-        showQuickAccess:
-
+        desktopVisible:
             true,
 
-        showStatusBar:
+        menuOpen:
+            false,
 
-            true,
+        settingsOpen:
+            false,
 
-        /* ====================================================
+        activeApp:
+            null,
 
-           EVENTS
+        selectedApp:
+            null,
 
-           ==================================================== */
+        apps:
+            [],
 
-        listeners:
+        categories:
+            [],
 
-            new Map(),
+        errors:
+            [],
 
-        /* ====================================================
+        lastAction:
+            null,
 
-           INITIALIZE
+        lastUpdate:
+            null,
 
-           ==================================================== */
+        initializedAt:
+            null
 
-        initialize() {
+    };
 
-            if (
+    // --------------------------------------------------------
+    // EVENTS
+    // --------------------------------------------------------
 
-                this.initialized
+    const listeners =
+        new Map();
 
-            ) {
+    function on(
+        event,
+        callback
+    ) {
 
-                return true;
+        if (
+            typeof callback !==
+            "function"
+        ) {
+            return () => {};
+        }
 
-            }
-
-            this.status =
-
-                "INITIALIZING";
-
-            this.connect();
-
-            this.createDesktop();
-
-            this.createDesktopLayer();
-
-            this.createQuickAccess();
-
-            this.createStatusBar();
-
-            this.bindEvents();
-
-            this.initialized =
-
-                true;
-
-            this.status =
-
-                "READY";
-
-            this.emit(
-
-                "ready",
-
-                this.getStatus()
-
-            );
-
-            this.log(
-
-                "Desktop Manager ist bereit."
-
-            );
-
-            return true;
-
-        },
-
-        /* ====================================================
-
-           VERBINDUNGEN
-
-           ==================================================== */
-
-        connect() {
-
-            this.launcher =
-
-                window.HalDoAppLauncher ||
-
-                null;
-
-            this.windowManager =
-
-                window.HalDoWindowManager ||
-
-                null;
-
-            this.appManager =
-
-                window.HalDoAppManager ||
-
-                null;
-
-            this.registry =
-
-                window.HalDoAppRegistry ||
-
-                null;
-
-            return true;
-
-        },
-
-        /* ====================================================
-
-           DESKTOP
-
-           ==================================================== */
-
-        createDesktop() {
-
-            let desktop =
-
-                document.querySelector(
-
-                    "[data-haldo-desktop-shell]"
-
-                );
-
-            if (
-
-                !desktop
-
-            ) {
-
-                desktop =
-
-                    document.createElement(
-
-                        "div"
-
-                    );
-
-                desktop.id =
-
-                    "haldo-desktop-shell";
-
-                desktop.className =
-
-                    "haldo-desktop-shell";
-
-                desktop.setAttribute(
-
-                    "data-haldo-desktop-shell",
-
-                    "true"
-
-                );
-
-                document.body.appendChild(
-
-                    desktop
-
-                );
-
-            }
-
-            this.desktop =
-
-                desktop;
-
-            return desktop;
-
-        },
-
-        /* ====================================================
-
-           DESKTOP LAYER
-
-           ==================================================== */
-
-        createDesktopLayer() {
-
-            if (
-
-                !this.desktop
-
-            ) {
-
-                this.createDesktop();
-
-            }
-
-            let layer =
-
-                this.desktop.querySelector(
-
-                    "[data-haldo-desktop-layer]"
-
-                );
-
-            if (
-
-                !layer
-
-            ) {
-
-                layer =
-
-                    document.createElement(
-
-                        "div"
-
-                    );
-
-                layer.className =
-
-                    "haldo-desktop-layer";
-
-                layer.setAttribute(
-
-                    "data-haldo-desktop-layer",
-
-                    "true"
-
-                );
-
-                this.desktop.appendChild(
-
-                    layer
-
-                );
-
-            }
-
-            this.desktopLayer =
-
-                layer;
-
-            return layer;
-
-        },
-
-        /* ====================================================
-
-           QUICK ACCESS
-
-           ==================================================== */
-
-        createQuickAccess() {
-
-            if (
-
-                !this.showQuickAccess
-
-            ) {
-
-                return null;
-
-            }
-
-            if (
-
-                !this.desktop
-
-            ) {
-
-                this.createDesktop();
-
-            }
-
-            let quickAccess =
-
-                this.desktop.querySelector(
-
-                    "[data-haldo-quick-access]"
-
-                );
-
-            if (
-
-                !quickAccess
-
-            ) {
-
-                quickAccess =
-
-                    document.createElement(
-
-                        "aside"
-
-                    );
-
-                quickAccess.className =
-
-                    "haldo-quick-access";
-
-                quickAccess.setAttribute(
-
-                    "data-haldo-quick-access",
-
-                    "true"
-
-                );
-
-                this.desktop.appendChild(
-
-                    quickAccess
-
-                );
-
-            }
-
-            this.quickAccess =
-
-                quickAccess;
-
-            this.renderQuickAccess();
-
-            return quickAccess;
-
-        },
-
-        /* ====================================================
-
-           QUICK ACCESS RENDERN
-
-           ==================================================== */
-
-        renderQuickAccess() {
-
-            if (
-
-                !this.quickAccess
-
-            ) {
-
-                return false;
-
-            }
-
-            this.quickAccess.innerHTML =
-
-                "";
-
-            const title =
-
-                document.createElement(
-
-                    "div"
-
-                );
-
-            title.className =
-
-                "haldo-quick-access-title";
-
-            title.textContent =
-
-                "Schnellzugriff";
-
-            this.quickAccess.appendChild(
-
-                title
-
-            );
-
-            const apps = [
-
-                {
-
-                    id:
-
-                        "ai-assistant",
-
-                    label:
-
-                        "HalDo AI"
-
-                },
-
-                {
-
-                    id:
-
-                        "app-center",
-
-                    label:
-
-                        "Apps"
-
-                },
-
-                {
-
-                    id:
-
-                        "text-editor",
-
-                    label:
-
-                        "Editor"
-
-                },
-
-                {
-
-                    id:
-
-                        "gallery",
-
-                    label:
-
-                        "Galerie"
-
-                },
-
-                {
-
-                    id:
-
-                        "todo",
-
-                    label:
-
-                        "Aufgaben"
-
-                },
-
-                {
-
-                    id:
-
-                        "control-center",
-
-                    label:
-
-                        "Kontrolle"
-
-                }
-
-            ];
-
-            const available =
-
-                apps.filter(
-
-                    item =>
-
-                        this.hasApp(
-
-                            item.id
-
-                        )
-
-                );
-
-            available.forEach(
-
-                item => {
-
-                    const button =
-
-                        document.createElement(
-
-                            "button"
-
-                        );
-
-                    button.type =
-
-                        "button";
-
-                    button.className =
-
-                        "haldo-quick-access-button";
-
-                    button.dataset.appId =
-
-                        item.id;
-
-                    button.textContent =
-
-                        item.label;
-
-                    button.addEventListener(
-
-                        "click",
-
-                        () => {
-
-                            this.openApp(
-
-                                item.id
-
-                            );
-
-                        }
-
-                    );
-
-                    this.quickAccess.appendChild(
-
-                        button
-
-                    );
-
-                }
-
-            );
-
-            return true;
-
-        },
-
-        /* ====================================================
-
-           STATUS BAR
-
-           ==================================================== */
-
-        createStatusBar() {
-
-            if (
-
-                !this.showStatusBar
-
-            ) {
-
-                return null;
-
-            }
-
-            if (
-
-                !this.desktop
-
-            ) {
-
-                this.createDesktop();
-
-            }
-
-            let bar =
-
-                this.desktop.querySelector(
-
-                    "[data-haldo-status-bar]"
-
-                );
-
-            if (
-
-                !bar
-
-            ) {
-
-                bar =
-
-                    document.createElement(
-
-                        "footer"
-
-                    );
-
-                bar.className =
-
-                    "haldo-status-bar";
-
-                bar.setAttribute(
-
-                    "data-haldo-status-bar",
-
-                    "true"
-
-                );
-
-                this.desktop.appendChild(
-
-                    bar
-
-                );
-
-            }
-
-            this.statusBar =
-
-                bar;
-
-            this.renderStatusBar();
-
-            return bar;
-
-        },
-
-        /* ====================================================
-
-           STATUS BAR RENDERN
-
-           ==================================================== */
-
-        renderStatusBar() {
-
-            if (
-
-                !this.statusBar
-
-            ) {
-
-                return false;
-
-            }
-
-            this.statusBar.innerHTML =
-
-                "";
-
-            const left =
-
-                document.createElement(
-
-                    "div"
-
-                );
-
-            left.className =
-
-                "haldo-status-left";
-
-            left.textContent =
-
-                "HalDo AI OS 18";
-
-            const center =
-
-                document.createElement(
-
-                    "div"
-
-                );
-
-            center.className =
-
-                "haldo-status-center";
-
-            center.textContent =
-
-                "Bereit";
-
-            const right =
-
-                document.createElement(
-
-                    "div"
-
-                );
-
-            right.className =
-
-                "haldo-status-right";
-
-            right.textContent =
-
-                this.getTime();
-
-            this.statusBar.appendChild(
-
-                left
-
-            );
-
-            this.statusBar.appendChild(
-
-                center
-
-            );
-
-            this.statusBar.appendChild(
-
-                right
-
-            );
-
-            return true;
-
-        },
-
-        /* ====================================================
-
-           UHRZEIT
-
-           ==================================================== */
-
-        getTime() {
-
-            const now =
-
-                new Date();
-
-            return now.toLocaleTimeString(
-
-                "de-DE",
-
-                {
-
-                    hour:
-
-                        "2-digit",
-
-                    minute:
-
-                        "2-digit"
-
-                }
-
-            );
-
-        },
-
-        /* ====================================================
-
-           APP VORHANDEN?
-
-           ==================================================== */
-
-        hasApp(
-
-            id
-
+        if (
+            !listeners.has(event)
         ) {
 
-            if (
-
-                !this.appManager
-
-            ) {
-
-                this.connect();
-
-            }
-
-            if (
-
-                !this.appManager
-
-            ) {
-
-                return false;
-
-            }
-
-            return this.appManager.has(
-
-                id
-
+            listeners.set(
+                event,
+                new Set()
             );
 
-        },
+        }
 
-        /* ====================================================
+        listeners
+            .get(event)
+            .add(callback);
 
-           APP ÖFFNEN
+        return () =>
+            off(
+                event,
+                callback
+            );
 
-           ==================================================== */
+    }
 
-        openApp(
+    function off(
+        event,
+        callback
+    ) {
 
-            id
+        const set =
+            listeners.get(event);
 
+        if (!set) {
+            return;
+        }
+
+        set.delete(
+            callback
+        );
+
+        if (
+            set.size ===
+            0
         ) {
 
-            this.connect();
+            listeners.delete(
+                event
+            );
 
-            /*
+        }
 
-            ----------------------------------------------------
+    }
 
-            Window Manager bevorzugen
+    function emit(
+        event,
+        detail = {}
+    ) {
 
-            ----------------------------------------------------
+        const set =
+            listeners.get(event);
 
-            */
+        if (set) {
 
-            if (
-
-                this.windowManager
-
+            for (
+                const callback of set
             ) {
 
-                const result =
+                try {
 
-                    this.windowManager.open(
-
-                        id
-
+                    callback(
+                        detail
                     );
 
-                if (
+                } catch (error) {
 
-                    result
+                    console.error(
+                        "[HalDoDesktopManager]",
+                        error
+                    );
 
-                ) {
+                }
 
-                    this.emit(
+            }
 
-                        "app-opened",
+        }
 
+        if (
+            CONFIG.enableEvents
+        ) {
+
+            try {
+
+                document.dispatchEvent(
+                    new CustomEvent(
+                        `haldo:desktop:${event}`,
                         {
-
-                            id
-
+                            detail
                         }
-
-                    );
-
-                    return result;
-
-                }
-
-            }
-
-            /*
-
-            ----------------------------------------------------
-
-            Launcher als Fallback
-
-            ----------------------------------------------------
-
-            */
-
-            if (
-
-                this.launcher
-
-            ) {
-
-                return this.launcher.openApp(
-
-                    id
-
+                    )
                 );
 
-            }
+            } catch (error) {}
 
-            return false;
+        }
 
-        },
+    }
 
-        /* ====================================================
+    // --------------------------------------------------------
+    // UTILITIES
+    // --------------------------------------------------------
 
-           LAUNCHER ÖFFNEN
+    function clean(
+        value
+    ) {
 
-           ==================================================== */
+        return String(
+            value ?? ""
+        ).trim();
 
-        openLauncher() {
+    }
 
-            this.connect();
+    function createId(
+        prefix = "desktop"
+    ) {
 
-            if (
+        return (
+            prefix +
+            "-" +
+            Date.now().toString(36) +
+            "-" +
+            Math.random()
+                .toString(36)
+                .slice(2, 8)
+        );
 
-                !this.launcher
+    }
 
-            ) {
+    function normalizeApp(
+        app
+    ) {
 
-                return false;
+        if (!app) {
+            return null;
+        }
 
-            }
-
-            return this.launcher.open();
-
-        },
-
-        /* ====================================================
-
-           WINDOW MANAGER ÖFFNEN
-
-           ==================================================== */
-
-        openWindow(
-
-            id,
-
-            options = {}
-
+        if (
+            typeof app ===
+            "string"
         ) {
-
-            this.connect();
-
-            if (
-
-                !this.windowManager
-
-            ) {
-
-                return false;
-
-            }
-
-            return this.windowManager.open(
-
-                id,
-
-                options
-
-            );
-
-        },
-
-        /* ====================================================
-
-           DESKTOP REFRESH
-
-           ==================================================== */
-
-        refresh() {
-
-            this.connect();
-
-            this.renderQuickAccess();
-
-            this.renderStatusBar();
-
-            this.emit(
-
-                "refreshed",
-
-                this.getStatus()
-
-            );
-
-            return true;
-
-        },
-
-        /* ====================================================
-
-           DESKTOP SICHTBAR
-
-           ==================================================== */
-
-        show() {
-
-            if (
-
-                !this.desktop
-
-            ) {
-
-                this.createDesktop();
-
-            }
-
-            this.desktop.classList.add(
-
-                "is-visible"
-
-            );
-
-            this.desktop.setAttribute(
-
-                "aria-hidden",
-
-                "false"
-
-            );
-
-            return true;
-
-        },
-
-        /* ====================================================
-
-           DESKTOP VERSTECKEN
-
-           ==================================================== */
-
-        hide() {
-
-            if (
-
-                !this.desktop
-
-            ) {
-
-                return false;
-
-            }
-
-            this.desktop.classList.remove(
-
-                "is-visible"
-
-            );
-
-            this.desktop.setAttribute(
-
-                "aria-hidden",
-
-                "true"
-
-            );
-
-            return true;
-
-        },
-
-        /* ====================================================
-
-           EVENT-BINDINGS
-
-           ==================================================== */
-
-        bindEvents() {
-
-            /*
-
-            ----------------------------------------------------
-
-            Launcher Ready
-
-            ----------------------------------------------------
-
-            */
-
-            window.addEventListener(
-
-                "haldo:launcher-ready",
-
-                () => {
-
-                    this.connect();
-
-                    this.refresh();
-
-                }
-
-            );
-
-            /*
-
-            ----------------------------------------------------
-
-            App Registry
-
-            ----------------------------------------------------
-
-            */
-
-            window.addEventListener(
-
-                "haldo:app-registry-ready",
-
-                () => {
-
-                    this.connect();
-
-                    this.refresh();
-
-                }
-
-            );
-
-            /*
-
-            ----------------------------------------------------
-
-            Resize
-
-            ----------------------------------------------------
-
-            */
-
-            window.addEventListener(
-
-                "resize",
-
-                () => {
-
-                    this.handleResize();
-
-                }
-
-            );
-
-            /*
-
-            ----------------------------------------------------
-
-            Keyboard
-
-            ----------------------------------------------------
-
-            */
-
-            document.addEventListener(
-
-                "keydown",
-
-                event => {
-
-                    /*
-
-                    Ctrl + Space
-
-                    öffnet Launcher
-
-                    */
-
-                    if (
-
-                        event.ctrlKey &&
-
-                        event.code ===
-
-                        "Space"
-
-                    ) {
-
-                        event.preventDefault();
-
-                        this.openLauncher();
-
-                    }
-
-                }
-
-            );
-
-            return true;
-
-        },
-
-        /* ====================================================
-
-           RESIZE
-
-           ==================================================== */
-
-        handleResize() {
-
-            const width =
-
-                window.innerWidth;
-
-            if (
-
-                width <= 600
-
-            ) {
-
-                this.desktop.classList.add(
-
-                    "is-mobile"
-
-                );
-
-            } else {
-
-                this.desktop.classList.remove(
-
-                    "is-mobile"
-
-                );
-
-            }
-
-            if (
-
-                width <= 900
-
-            ) {
-
-                this.desktop.classList.add(
-
-                    "is-tablet"
-
-                );
-
-            } else {
-
-                this.desktop.classList.remove(
-
-                    "is-tablet"
-
-                );
-
-            }
-
-            this.emit(
-
-                "resize",
-
-                {
-
-                    width,
-
-                    height:
-
-                        window.innerHeight
-
-                }
-
-            );
-
-            return true;
-
-        },
-
-        /* ====================================================
-
-           STATUS
-
-           ==================================================== */
-
-        getStatus() {
 
             return {
 
+                id:
+                    app,
+
                 name:
+                    app,
 
-                    this.name,
+                title:
+                    app,
 
-                version:
-
-                    this.version,
-
-                status:
-
-                    this.status,
-
-                initialized:
-
-                    this.initialized,
-
-                hasDesktop:
-
-                    Boolean(
-
-                        this.desktop
-
-                    ),
-
-                hasQuickAccess:
-
-                    Boolean(
-
-                        this.quickAccess
-
-                    ),
-
-                hasStatusBar:
-
-                    Boolean(
-
-                        this.statusBar
-
-                    ),
-
-                viewport:
-
-                    {
-
-                        width:
-
-                            window.innerWidth,
-
-                        height:
-
-                            window.innerHeight
-
-                    }
+                category:
+                    "other"
 
             };
 
-        },
+        }
 
-        /* ====================================================
-
-           EVENTS
-
-           ==================================================== */
-
-        on(
-
-            eventName,
-
-            callback
-
+        if (
+            typeof app !==
+            "object"
         ) {
 
-            if (
+            return null;
 
-                typeof callback !==
+        }
 
-                "function"
-
-            ) {
-
-                return false;
-
-            }
-
-            if (
-
-                !this.listeners.has(
-
-                    eventName
-
-                )
-
-            ) {
-
-                this.listeners.set(
-
-                    eventName,
-
-                    []
-
-                );
-
-            }
-
-            this.listeners
-
-                .get(
-
-                    eventName
-
-                )
-
-                .push(
-
-                    callback
-
-                );
-
-            return true;
-
-        },
-
-        /* ====================================================
-
-           OFF
-
-           ==================================================== */
-
-        off(
-
-            eventName,
-
-            callback
-
-        ) {
-
-            const listeners =
-
-                this.listeners.get(
-
-                    eventName
-
-                );
-
-            if (
-
-                !listeners
-
-            ) {
-
-                return false;
-
-            }
-
-            const index =
-
-                listeners.indexOf(
-
-                    callback
-
-                );
-
-            if (
-
-                index ===
-
-                -1
-
-            ) {
-
-                return false;
-
-            }
-
-            listeners.splice(
-
-                index,
-
-                1
-
+        const id =
+            clean(
+                app.id ||
+                app.appId ||
+                app.key ||
+                app.name ||
+                app.title
             );
 
-            return true;
+        if (!id) {
+            return null;
+        }
 
-        },
+        return {
 
-        /* ====================================================
+            ...app,
 
-           EMIT
+            id,
 
-           ==================================================== */
+            appId:
+                app.appId ||
+                id,
 
-        emit(
+            name:
+                app.name ||
+                app.title ||
+                id,
 
-            eventName,
+            title:
+                app.title ||
+                app.name ||
+                id,
 
-            data = null
+            category:
+                clean(
+                    app.category ||
+                    app.group ||
+                    "other"
+                ) || "other"
 
+        };
+
+    }
+
+    function uniqueApps(
+        apps
+    ) {
+
+        const map =
+            new Map();
+
+        for (
+            const item of apps
         ) {
 
-            const listeners =
-
-                this.listeners.get(
-
-                    eventName
-
+            const app =
+                normalizeApp(
+                    item
                 );
 
-            if (
-
-                !listeners
-
-            ) {
-
-                return;
-
+            if (!app) {
+                continue;
             }
 
-            listeners
-
-                .slice()
-
-                .forEach(
-
-                    callback => {
-
-                        try {
-
-                            callback(
-
-                                data
-
-                            );
-
-                        } catch (
-
-                            error
-
-                        ) {
-
-                            console.error(
-
-                                "[HalDo Desktop Manager]",
-
-                                error
-
-                            );
-
-                        }
-
-                    }
-
-                );
-
-        },
-
-        /* ====================================================
-
-           LOG
-
-           ==================================================== */
-
-        log(
-
-            message,
-
-            data = null
-
-        ) {
+            const key =
+                app.id.toLowerCase();
 
             if (
-
-                data !== null
-
+                CONFIG.preventDuplicateApps &&
+                map.has(key)
             ) {
 
-                console.log(
+                const existing =
+                    map.get(key);
 
-                    "[HalDo Desktop Manager]",
-
-                    message,
-
-                    data
-
+                map.set(
+                    key,
+                    {
+                        ...existing,
+                        ...app
+                    }
                 );
 
             } else {
 
-                console.log(
-
-                    "[HalDo Desktop Manager]",
-
-                    message
-
+                map.set(
+                    key,
+                    app
                 );
 
             }
 
         }
 
-    };
-
-    /* ========================================================
-
-       GLOBAL API
-
-       ======================================================== */
-
-    window.HalDoDesktopManager =
-
-        HalDoDesktopManager;
-
-    if (
-
-        !window.HalDo
-
-    ) {
-
-        window.HalDo = {};
+        return Array.from(
+            map.values()
+        );
 
     }
 
-    window.HalDo.desktop =
+    function sortApps(
+        apps
+    ) {
 
-        HalDoDesktopManager;
+        if (
+            !CONFIG.sortApps
+        ) {
 
-    /* ========================================================
+            return apps;
 
-       START
+        }
 
-       ======================================================== */
+        return [
+            ...apps
+        ].sort(
+            (a, b) => {
 
-    function start() {
+                const categoryA =
+                    clean(
+                        a.category
+                    ).toLowerCase();
 
-        HalDoDesktopManager.initialize();
+                const categoryB =
+                    clean(
+                        b.category
+                    ).toLowerCase();
+
+                if (
+                    categoryA !==
+                    categoryB
+                ) {
+
+                    return categoryA.localeCompare(
+                        categoryB
+                    );
+
+                }
+
+                return clean(
+                    a.name
+                ).localeCompare(
+                    clean(
+                        b.name
+                    )
+                );
+
+            }
+        );
 
     }
 
-    if (
+    // --------------------------------------------------------
+    // MODULE ACCESS
+    // --------------------------------------------------------
 
-        document.readyState ===
+    function getKernel() {
 
-        "loading"
+        return (
+            window.HalDoKernel ||
+            window.HalDoOS?.kernel ||
+            null
+        );
 
+    }
+
+    function getSystem() {
+
+        return (
+            window.HalDoSystem ||
+            window.HalDoOS?.system ||
+            null
+        );
+
+    }
+
+    function getAppManager() {
+
+        return (
+            window.HalDoAppManager ||
+            window.HalDoOS?.appManager ||
+            null
+        );
+
+    }
+
+    function getAppRegistry() {
+
+        return (
+            window.HalDoAppRegistry ||
+            window.HalDoOS?.appRegistry ||
+            null
+        );
+
+    }
+
+    function getAppLauncher() {
+
+        return (
+            window.HalDoAppLauncher ||
+            window.HalDoOS?.appLauncher ||
+            null
+        );
+
+    }
+
+    function getLauncher() {
+
+        return (
+            window.HalDoLauncher ||
+            window.HalDoOS?.launcher ||
+            null
+        );
+
+    }
+
+    function getRouter() {
+
+        return (
+            window.HalDoAppRouter ||
+            window.HalDoOS?.appRouter ||
+            null
+        );
+
+    }
+
+    function getWindowManager() {
+
+        return (
+            window.HalDoWindowManager ||
+            window.HalDoOS?.windowManager ||
+            null
+        );
+
+    }
+
+    // --------------------------------------------------------
+    // APP DISCOVERY
+    // --------------------------------------------------------
+
+    function readAppsFromModule(
+        module
     ) {
 
-        document.addEventListener(
+        if (!module) {
+            return [];
+        }
 
-            "DOMContentLoaded",
+        const methods = [
 
-            start,
+            "getApps",
+            "getAllApps",
+            "listApps",
+            "getRegisteredApps",
+            "getAvailableApps"
 
-            {
+        ];
 
-                once: true
+        for (
+            const method of methods
+        ) {
+
+            if (
+                typeof module[method] !==
+                "function"
+            ) {
+                continue;
+            }
+
+            try {
+
+                const result =
+                    module[method]();
+
+                if (
+                    Array.isArray(result)
+                ) {
+
+                    return result;
+
+                }
+
+            } catch (error) {
+
+                recordError(
+                    error
+                );
 
             }
 
-        );
+        }
 
-    } else {
+        if (
+            Array.isArray(
+                module.apps
+            )
+        ) {
 
-        start();
+            return module.apps;
+
+        }
+
+        if (
+            Array.isArray(
+                module.registry
+            )
+        ) {
+
+            return module.registry;
+
+        }
+
+        return [];
 
     }
 
-    console.log(
+    function discoverApps() {
 
-        "=============================================="
+        let apps = [];
 
-    );
+        const registry =
+            getAppRegistry();
 
-    console.log(
+        const manager =
+            getAppManager();
 
-        "HalDo AI OS 18 Desktop Manager"
+        const launcher =
+            getAppLauncher();
 
-    );
+        const launcherLegacy =
+            getLauncher();
 
-    console.log(
+        apps = apps.concat(
+            readAppsFromModule(
+                registry
+            )
+        );
 
-        "Desktop Manager geladen."
+        apps = apps.concat(
+            readAppsFromModule(
+                manager
+            )
+        );
 
-    );
+        apps = apps.concat(
+            readAppsFromModule(
+                launcher
+            )
+        );
 
-    console.log(
+        apps = apps.concat(
+            readAppsFromModule(
+                launcherLegacy
+            )
+        );
 
-        "=============================================="
+        apps =
+            uniqueApps(
+                apps
+            );
 
-    );
+        apps =
+            sortApps(
+                apps
+            );
 
-})(window);
+        state.apps =
+            apps;
+
+        state.categories =
+            getCategories(
+                apps
+            );
+
+        state.lastUpdate =
+            Date.now();
+
+        emit(
+            "apps-updated",
+            {
+
+                apps:
+                    [...apps],
+
+                categories:
+                    [...state.categories]
+
+            }
+        );
+
+        return [
+            ...apps
+        ];
+
+    }
+
+    function getCategories(
+        apps = state.apps
+    ) {
+
+        const categories =
+            new Set();
+
+        for (
+            const app of apps
+        ) {
+
+            if (
+                app?.category
+            ) {
+
+                categories.add(
+                    clean(
+                        app.category
+                    )
+                );
+
+            }
+
+        }
+
+        return Array.from(
+            categories
+        ).sort(
+            (a, b) =>
+                a.localeCompare(
+                    b
+                )
+        );
+
+    }
+
+    function getApps(
+        options = {}
+    ) {
+
+        let apps =
+            [...state.apps];
+
+        if (
+            options.category
+        ) {
+
+            const category =
+                clean(
+                    options.category
+                ).toLowerCase();
+
+            apps =
+                apps.filter(
+                    app =>
+                        clean(
+                            app.category
+                        ).toLowerCase() ===
+                        category
+                );
+
+        }
+
+        if (
+            options.search
+        ) {
+
+            const query =
+                clean(
+                    options.search
+                ).toLowerCase();
+
+            apps =
+                apps.filter(
+                    app => {
+
+                        return [
+
+                            app.id,
+                            app.name,
+                            app.title,
+                            app.description,
+                            app.category
+
+                        ]
+                            .map(
+                                value =>
+                                    clean(
+                                        value
+                                    ).toLowerCase()
+                            )
+                            .some(
+                                value =>
+                                    value.includes(
+                                        query
+                                    )
+                            );
+
+                    }
+                );
+
+        }
+
+        return apps;
+
+    }
+
+    // --------------------------------------------------------
+    // APP STARTING
+    // --------------------------------------------------------
+
+    async function launchApp(
+        appOrId,
+        options = {}
+    ) {
+
+        const app =
+            typeof appOrId ===
+            "object"
+                ? normalizeApp(
+                    appOrId
+                )
+                : normalizeApp(
+                    state.apps.find(
+                        item =>
+                            item.id ===
+                            appOrId ||
+                            item.appId ===
+                            appOrId ||
+                            item.name ===
+                            appOrId
+                    )
+                );
+
+        if (!app) {
+
+            const error =
+                new Error(
+                    `App nicht gefunden: ${appOrId}`
+                );
+
+            recordError(
+                error
+            );
+
+            emit(
+                "app-launch-error",
+                {
+                    app:
+                        appOrId,
+
+                    error
+                }
+            );
+
+            return {
+
+                ok:
+                    false,
+
+                error:
+                    error.message
+
+            };
+
+        }
+
+        state.selectedApp =
+            app;
+
+        emit(
+            "app-launch-start",
+            {
+
+                app,
+
+                options
+
+            }
+        );
+
+        const modules = [
+
+            getAppLauncher(),
+            getLauncher(),
+            getAppManager(),
+            getRouter()
+
+        ];
+
+        const methods = [
+
+            "launch",
+            "openApp",
+            "startApp",
+            "open",
+            "navigate",
+            "route"
+
+        ];
+
+        for (
+            const module of modules
+        ) {
+
+            if (!module) {
+                continue;
+            }
+
+            for (
+                const method of methods
+            ) {
+
+                if (
+                    typeof module[method] !==
+                    "function"
+                ) {
+                    continue;
+                }
+
+                try {
+
+                    const result =
+                        await module[method](
+                            app.id,
+                            options
+                        );
+
+                    state.activeApp =
+                        app;
+
+                    state.lastAction = {
+
+                        type:
+                            "launch-app",
+
+                        app:
+                            app.id,
+
+                        timestamp:
+                            Date.now()
+
+                    };
+
+                    emit(
+                        "app-launched",
+                        {
+
+                            app,
+
+                            result
+
+                        }
+                    );
+
+                    return {
+
+                        ok:
+                            result?.ok !==
+                            false,
+
+                        app,
+
+                        result
+
+                    };
+
+                } catch (error) {
+
+                    recordError(
+                        error
+                    );
+
+                }
+
+            }
+
+        }
+
+        /*
+         * Fallback:
+         * Wenn die App selbst eine URL/route besitzt,
+         * kann der Router direkt verwendet werden.
+         */
+
+        const router =
+            getRouter();
+
+        if (
+            router &&
+            typeof router.navigate ===
+            "function"
+        ) {
+
+            try {
+
+                const route =
+                    app.route ||
+                    `/apps/${app.id}`;
+
+                const result =
+                    await router.navigate(
+                        route,
+                        options
+                    );
+
+                state.activeApp =
+                    app;
+
+                emit(
+                    "app-launched",
+                    {
+
+                        app,
+
+                        result
+
+                    }
+                );
+
+                return {
+
+                    ok:
+                        true,
+
+                    app,
+
+                    result
+
+                };
+
+            } catch (error) {
+
+                recordError(
+                    error
+                );
+
+            }
+
+        }
+
+        return {
+
+            ok:
+                false,
+
+            app,
+
+            error:
+                "APP_LAUNCHER_UNAVAILABLE"
+
+        };
+
+    }
+
+    // --------------------------------------------------------
+    // SETTINGS
+    // --------------------------------------------------------
+
+    async function openSettings(
+        options = {}
+    ) {
+
+        state.settingsOpen =
+            true;
+
+        state.lastAction = {
+
+            type:
+                "open-settings",
+
+            timestamp:
+                Date.now()
+
+        };
+
+        emit(
+            "settings-open",
+            {
+                options
+            }
+        );
+
+        const settingsIds = [
+
+            "settings",
+            "haldo-settings",
+            "system-settings"
+
+        ];
+
+        for (
+            const id of settingsIds
+        ) {
+
+            const result =
+                await launchApp(
+                    id,
+                    options
+                );
+
+            if (
+                result.ok
+            ) {
+
+                return result;
+
+            }
+
+        }
+
+        /*
+         * Falls noch keine Settings-App registriert
+         * wurde, kein falsches Fenster erzeugen.
+         */
+
+        return {
+
+            ok:
+                false,
+
+            error:
+                "SETTINGS_APP_NOT_AVAILABLE"
+
+        };
+
+    }
+
+    function closeSettings() {
+
+        state.settingsOpen =
+            false;
+
+        emit(
+            "settings-close"
+        );
+
+        return {
+
+            ok:
+                true
+
+        };
+
+    }
+
+    // --------------------------------------------------------
+    // MAIN MENU
+    // --------------------------------------------------------
+
+    function openMenu(
+        options = {}
+    ) {
+
+        if (
+            state.menuOpen
+        ) {
+
+            emit(
+                "menu-already-open"
+            );
+
+            return {
+
+                ok:
+                    true,
+
+                open:
+                    true
+
+            };
+
+        }
+
+        state.menuOpen =
+            true;
+
+        state.lastAction = {
+
+            type:
+                "open-menu",
+
+            timestamp:
+                Date.now()
+
+        };
+
+        discoverApps();
+
+        emit(
+            "menu-open",
+            {
+
+                apps:
+                    getApps(),
+
+                categories:
+                    getCategories(),
+
+                options
+
+            }
+        );
+
+        return {
+
+            ok:
+                true,
+
+            open:
+                true,
+
+            apps:
+                getApps(),
+
+            categories:
+                getCategories()
+
+        };
+
+    }
+
+    function closeMenu() {
+
+        if (
+            !state.menuOpen
+        ) {
+
+            return {
+
+                ok:
+                    true,
+
+                open:
+                    false
+
+            };
+
+        }
+
+        state.menuOpen =
+            false;
+
+        state.lastAction = {
+
+            type:
+                "close-menu",
+
+            timestamp:
+                Date.now()
+
+        };
+
+        emit(
+            "menu-close"
+        );
+
+        return {
+
+            ok:
+                true,
+
+            open:
+                false
+
+        };
+
+    }
+
+    function toggleMenu() {
+
+        return state.menuOpen
+            ? closeMenu()
+            : openMenu();
+
+    }
+
+    // --------------------------------------------------------
+    // DESKTOP
+    // --------------------------------------------------------
+
+    function showDesktop() {
+
+        state.desktopVisible =
+            true;
+
+        emit(
+            "desktop-show"
+        );
+
+        return {
+
+            ok:
+                true,
+
+            visible:
+                true
+
+        };
+
+    }
+
+    function hideDesktop() {
+
+        state.desktopVisible =
+            false;
+
+        emit(
+            "desktop-hide"
+        );
+
+        return {
+
+            ok:
+                true,
+
+            visible:
+                false
+
+        };
+
+    }
+
+    function toggleDesktop() {
+
+        return state.desktopVisible
+            ? hideDesktop()
+            : showDesktop();
+
+    }
+
+    // --------------------------------------------------------
+    // ACTIVE APP
+    // --------------------------------------------------------
+
+    function setActiveApp(
+        app
+    ) {
+
+        const normalized =
+            normalizeApp(
+                app
+            );
+
+        state.activeApp =
+            normalized;
+
+        emit(
+            "active-app-changed",
+            {
+
+                app:
+                    normalized
+
+            }
+        );
+
+        return normalized;
+
+    }
+
+    function getActiveApp() {
+
+        return state.activeApp;
+
+    }
+
+    // --------------------------------------------------------
+    // WINDOW MANAGEMENT
+    // --------------------------------------------------------
+
+    async function closeActiveApp() {
+
+        const app =
+            state.activeApp;
+
+        if (!app) {
+
+            return {
+
+                ok:
+                    false,
+
+                error:
+                    "NO_ACTIVE_APP"
+
+            };
+
+        }
+
+        const manager =
+            getWindowManager();
+
+        if (manager) {
+
+            const methods = [
+
+                "close",
+                "closeWindow",
+                "closeApp",
+                "destroy"
+
+            ];
+
+            for (
+                const method of methods
+            ) {
+
+                if (
+                    typeof manager[method] !==
+                    "function"
+                ) {
+                    continue;
+                }
+
+                try {
+
+                    const result =
+                        await manager[method](
+                            app.id
+                        );
+
+                    state.activeApp =
+                        null;
+
+                    emit(
+                        "app-closed",
+                        {
+
+                            app,
+
+                            result
+
+                        }
+                    );
+
+                    return {
+
+                        ok:
+                            result?.ok !==
+                            false,
+
+                        result
+
+                    };
+
+                } catch (error) {
+
+                    recordError(
+                        error
+                    );
+
+                }
+
+            }
+
+        }
+
+        state.activeApp =
+            null;
+
+        emit(
+            "app-closed",
+            {
+                app
+            }
+        );
+
+        return {
+
+            ok:
+                true
+
+        };
+
+    }
+
+    // --------------------------------------------------------
+    // KEYBOARD
+    // --------------------------------------------------------
+
+    function handleKeyboard(
+        event
+    ) {
+
+        if (
+            !CONFIG.enableKeyboardNavigation ||
+            !event
+        ) {
+
+            return;
+
+        }
+
+        const key =
+            event.key;
+
+        /*
+         * Escape:
+         * Menü schließen.
+         */
+
+        if (
+            key ===
+            "Escape"
+        ) {
+
+            if (
+                state.menuOpen
+            ) {
+
+                closeMenu();
+
+            }
+
+            return;
+
+        }
+
+        /*
+         * Meta/Control + K:
+         * Hauptmenü öffnen.
+         */
+
+        if (
+            (
+                event.ctrlKey ||
+                event.metaKey
+            ) &&
+            key.toLowerCase() ===
+            "k"
+        ) {
+
+            event.preventDefault();
+
+            toggleMenu();
+
+        }
+
+    }
+
+    // --------------------------------------------------------
+    // SYSTEM EVENTS
+    // --------------------------------------------------------
+
+    function connectModuleEvents() {
+
+        const modules = [
+
+            getAppManager(),
+            getAppLauncher(),
+            getLauncher(),
+            getRouter(),
+            getWindowManager()
+
+        ];
+
+        for (
+            const module of modules
+        ) {
+
+            if (
+                !module ||
+                typeof module.on !==
+                "function"
+            ) {
+                continue;
+            }
+
+            try {
+
+                module.on(
+                    "app-opened",
+                    detail => {
+
+                        const app =
+                            detail?.app ||
+                            detail;
+
+                        if (app) {
+
+                            setActiveApp(
+                                app
+                            );
+
+                        }
+
+                    }
+                );
+
+                module.on(
+                    "app-closed",
+                    detail => {
+
+                        if (
+                            state.activeApp &&
+                            detail?.app?.id ===
+                            state.activeApp.id
+                        ) {
+
+                            state.activeApp =
+                                null;
+
+                        }
+
+                    }
+                );
+
+                module.on(
+                    "apps-changed",
+                    () => {
+
+                        discoverApps();
+
+                    }
+                );
+
+                module.on(
+                    "registered",
+                    () => {
+
+                        discoverApps();
+
+                    }
+                );
+
+            } catch (error) {
+
+                recordError(
+                    error
+                );
+
+            }
+
+        }
+
+    }
+
+    // --------------------------------------------------------
+    // SYSTEM STATUS
+    // --------------------------------------------------------
+
+    function getStatus() {
+
+        return {
+
+            name:
+                CONFIG.name,
+
+            version:
+                CONFIG.version,
+
+            mode:
+                CONFIG.mode,
+
+            initialized:
+                state.initialized,
+
+            ready:
+                state.ready,
+
+            desktopVisible:
+                state.desktopVisible,
+
+            menuOpen:
+                state.menuOpen,
+
+            settingsOpen:
+                state.settingsOpen,
+
+            activeApp:
+                state.activeApp,
+
+            selectedApp:
+                state.selectedApp,
+
+            appCount:
+                state.apps.length,
+
+            categories:
+                [...state.categories],
+
+            lastAction:
+                state.lastAction,
+
+            lastUpdate:
+                state.lastUpdate,
+
+            errors:
+                state.errors.length
+
+        };
+
+    }
+
+    // --------------------------------------------------------
+    // ERROR HANDLING
+    // --------------------------------------------------------
+
+    function recordError(
+        error
+    ) {
+
+        const entry = {
+
+            id:
+                createId(
+                    "error"
+                ),
+
+            message:
+                error?.message ||
+                String(
+                    error
+                ),
+
+            timestamp:
+                Date.now()
+
+        };
+
+        state.errors.push(
+            entry
+        );
+
+        if (
+            state.errors.length >
+            100
+        ) {
+
+            state.errors.shift();
+
+        }
+
+        emit(
+            "error",
+            entry
+        );
+
+        return entry;
+
+    }
+
+    // --------------------------------------------------------
+    // REFRESH
+    // --------------------------------------------------------
+
+    function refresh() {
+
+        const apps =
+            discoverApps();
+
+        emit(
+            "refresh",
+            {
+
+                apps,
+
+                status:
+                    getStatus()
+
+            }
+        );
+
+        return apps;
+
+    }
+
+    // --------------------------------------------------------
+    // INITIALIZE
+    // --------------------------------------------------------
+
+    async function initialize() {
+
+        if (
+            state.initialized
+        ) {
+
+            return getStatus();
+
+        }
+
+        state.initialized =
+            true;
+
+        state.initializedAt =
+            Date.now();
+
+        try {
+
+            connectModuleEvents();
+
+            discoverApps();
+
+            if (
+                CONFIG.enableKeyboardNavigation
+            ) {
+
+                document.addEventListener(
+                    "keydown",
+                    handleKeyboard
+                );
+
+            }
+
+            /*
+             * Kernel registrieren.
+             */
+
+            const kernel =
+                getKernel();
+
+            if (
+                kernel &&
+                typeof kernel.registerModule ===
+                "function"
+            ) {
+
+                try {
+
+                    kernel.registerModule(
+                        "desktop-manager",
+                        api
+                    );
+
+                } catch (error) {
+
+                    recordError(
+                        error
+                    );
+
+                }
+
+            }
+
+            /*
+             * System informieren.
+             */
+
+            const system =
+                getSystem();
+
+            if (
+                system &&
+                typeof system.registerService ===
+                "function"
+            ) {
+
+                try {
+
+                    system.registerService(
+                        "desktop",
+                        api
+                    );
+
+                } catch (error) {}
+
+            }
+
+            emit(
+                "initialized",
+                getStatus()
+            );
+
+            /*
+             * Ready erst nach der Initialisierung
+             * melden, damit andere Module Zeit haben,
+             * ihre Registrierung abzuschließen.
+             */
+
+            window.setTimeout(
+                () => {
+
+                    state.ready =
+                        true;
+
+                    discoverApps();
+
+                    emit(
+                        "ready",
+                        getStatus()
+                    );
+
+                },
+                0
+            );
+
+        } catch (error) {
+
+            recordError(
+                error
+            );
+
+        }
+
+        return getStatus();
+
+    }
+
+    // --------------------------------------------------------
+    // DESTROY
+    // --------------------------------------------------------
+
+    function destroy() {
+
+        try {
+
+            document.removeEventListener(
+                "keydown",
+                handleKeyboard
+            );
+
+        } catch (error) {}
+
+        listeners.clear();
+
+        state.initialized =
+            false;
+
+        state.ready =
+            false;
+
+        state.menuOpen =
+            false;
+
+        state.settingsOpen =
+            false;
+
+        state.activeApp =
+            null;
+
+        state.selectedApp =
+            null;
+
+        emit(
+            "destroyed"
+        );
+
+    }
+
+    // --------------------------------------------------------
+    // PUBLIC API
+    // --------------------------------------------------------
+
+    const api = {
+
+        __haldoOS20:
+            true,
+
+        config:
+            CONFIG,
+
+        state,
+
+        initialize,
+
+        destroy,
+
+        on,
+
+        off,
+
+        emit,
+
+        refresh,
+
+        discoverApps,
+
+        getApps,
+
+        getCategories,
+
+        launchApp,
+
+        openSettings,
+
+        closeSettings,
+
+        openMenu,
+
+        closeMenu,
+
+        toggleMenu,
+
+        showDesktop,
+
+        hideDesktop,
+
+        toggleDesktop,
+
+        setActiveApp,
+
+        getActiveApp,
+
+        closeActiveApp,
+
+        getStatus,
+
+        recordError
+
+    };
+
+    // --------------------------------------------------------
+    // GLOBAL REGISTRATION
+    // --------------------------------------------------------
+
+    window.HalDoDesktopManager =
+        api;
+
+    window.HalDoOS.desktopManager =
+        api;
+
+    /*
+     * Kompatibilitätsnamen.
+     */
+
+    window.HalDoDesktop =
+        window.HalDoDesktop ||
+        api;
+
+    // --------------------------------------------------------
+    // BOOT
+    // --------------------------------------------------------
+
+    async function boot() {
+
+        try {
+
+            await initialize();
+
+        } catch (error) {
+
+            recordError(
+                error
+            );
+
+            console.error(
+                "[HalDoDesktopManager] " +
+                "Initialization failed:",
+                error
+            );
+
+        }
+
+    }
+
+    if (
+        CONFIG.autoInitialize
+    ) {
+
+        if (
+            document.readyState ===
+            "loading"
+        ) {
+
+            document.addEventListener(
+                "DOMContentLoaded",
+                boot,
+                {
+                    once:
+                        true
+                }
+            );
+
+        } else {
+
+            boot();
+
+        }
+
+    }
+
+})(window, document);
+
+// ============================================================
+// END OF HALDO AI OS 20 DESKTOP MANAGER
+// ============================================================
