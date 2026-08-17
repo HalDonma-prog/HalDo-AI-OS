@@ -5067,3 +5067,187 @@
        ======================================================== */
 
 })(window, document);
+/* ============================================================
+   HALDO AI OS 20
+   APP PLATFORM BRIDGE
+   ------------------------------------------------------------
+   Verbindet den bestehenden App Manager mit der zentralen
+   HalDo App Platform, ohne bestehende Funktionen zu entfernen.
+   ============================================================ */
+
+(function (window) {
+    "use strict";
+
+    function connectAppPlatform() {
+
+        const platform =
+            window.HalDoAppPlatform;
+
+        const manager =
+            window.HalDoAppManager ||
+            window.HalDoAppManagerSystem ||
+            null;
+
+        if (!platform) {
+            return false;
+        }
+
+        if (!manager) {
+            console.warn(
+                "[HalDo App Manager] App Platform wartet auf den bestehenden App Manager."
+            );
+
+            return false;
+        }
+
+        /*
+         * Plattform verfügbar machen
+         */
+        manager.appPlatform =
+            platform;
+
+        /*
+         * Zentrale App-Methoden nur ergänzen,
+         * wenn sie im bestehenden Manager noch
+         * nicht vorhanden sind.
+         */
+
+        if (typeof manager.openApp !== "function") {
+
+            manager.openApp =
+                function (appId, options = {}) {
+
+                    return platform.openApp(
+                        appId,
+                        options
+                    );
+                };
+        }
+
+        if (typeof manager.closeApp !== "function") {
+
+            manager.closeApp =
+                function (appId) {
+
+                    return platform.closeApp(
+                        appId
+                    );
+                };
+        }
+
+        if (typeof manager.getApp !== "function") {
+
+            manager.getApp =
+                function (appId) {
+
+                    return platform.getApp(
+                        appId
+                    );
+                };
+        }
+
+        if (typeof manager.getRunningApps !== "function") {
+
+            manager.getRunningApps =
+                function () {
+
+                    return platform.getRunningApps();
+                };
+        }
+
+        /*
+         * Bestehende App-Events beobachten.
+         */
+
+        platform.on(
+            "app:opened",
+            detail => {
+
+                window.dispatchEvent(
+                    new CustomEvent(
+                        "haldo:app-opened",
+                        {
+                            detail
+                        }
+                    )
+                );
+            }
+        );
+
+        platform.on(
+            "app:closed",
+            detail => {
+
+                window.dispatchEvent(
+                    new CustomEvent(
+                        "haldo:app-closed",
+                        {
+                            detail
+                        }
+                    )
+                );
+            }
+        );
+
+        platform.on(
+            "app:error",
+            detail => {
+
+                window.dispatchEvent(
+                    new CustomEvent(
+                        "haldo:app-error",
+                        {
+                            detail
+                        }
+                    )
+                );
+            }
+        );
+
+        window.dispatchEvent(
+            new CustomEvent(
+                "haldo:app-platform-connected",
+                {
+                    detail: {
+                        manager,
+                        platform
+                    }
+                }
+            )
+        );
+
+        console.info(
+            "[HalDo AI OS 20] App Platform ↔ App Manager verbunden."
+        );
+
+        return true;
+    }
+
+    /*
+     * Verbindung versuchen.
+     */
+
+    if (document.readyState === "loading") {
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            connectAppPlatform,
+            { once: true }
+        );
+
+    } else {
+
+        connectAppPlatform();
+    }
+
+    /*
+     * Falls die Plattform später geladen wird,
+     * erneut verbinden.
+     */
+
+    window.addEventListener(
+        "haldo:platform-ready",
+        connectAppPlatform
+    );
+
+})(window);
