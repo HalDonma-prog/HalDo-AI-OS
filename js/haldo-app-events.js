@@ -1,25 +1,34 @@
 /*
  * ============================================================
  * HalDo AI OS 20
- * Universal App Event & Communication Bus
+ * Universal App Event Bus
  * ============================================================
  *
  * Datei:
  *   js/haldo-app-events.js
  *
  * Zweck:
- *   Zentrale Kommunikation zwischen allen HalDo Apps.
+ *   Zentrale Kommunikation zwischen allen HalDo-Modulen
+ *   und allen HalDo-Apps.
  *
- * Beispiele:
+ * Prinzip:
  *
- *   Kalender → Navigation
- *   Navigation → Verkehr
- *   AI → Kalender
- *   AI → Musik
- *   Einstellungen → alle Apps
- *   Sprache → alle Apps
- *   Cosmic World → System
- *   System → Apps
+ *   App A
+ *      │
+ *      ▼
+ *   Event Bus
+ *      │
+ *      ├── App B
+ *      ├── App C
+ *      ├── AI
+ *      ├── System
+ *      ├── Navigation
+ *      ├── Calendar
+ *      └── weitere Systeme
+ *
+ * Bestehende APIs werden nicht blind überschrieben.
+ * Falls bereits ein kompatibler Event Bus vorhanden ist,
+ * wird dieser erkannt und nach Möglichkeit integriert.
  *
  * ============================================================
  */
@@ -43,286 +52,110 @@
         new Map();
 
 
-    const appSubscriptions =
+    const appListeners =
         new Map();
 
 
-    const history = [];
+    const history =
+        [];
 
 
-    const MAX_HISTORY =
-        300;
+    const maxHistory =
+        500;
 
 
-    const Bus = {
+    let ready =
+        false;
+
+
+    let eventSequence =
+        0;
+
+
+    const EventBus = {
 
         name:
-            "HalDo V20 App Event Bus",
+            "HalDo V20 Universal App Event Bus",
 
         version:
-            "20.0.0",
-
-        ready:
-            false
+            "20.0.0"
     };
 
 
     /* ========================================================
-       NORMALIZE
+       INTERNAL HELPERS
     ======================================================== */
 
-    Bus.normalize = function (value) {
-
-        return String(value || "")
-            .trim()
-            .toLowerCase()
-            .replace(/\s+/g, "-");
-    };
-
-
-    /* ========================================================
-       EVENT KEY
-    ======================================================== */
-
-    Bus.key = function (
-        eventName
+    function normalizeId(
+        id
     ) {
 
         return String(
-            eventName || ""
+            id || ""
         )
         .trim()
-        .toLowerCase();
-    };
+        .toLowerCase()
+        .replace(/\s+/g, "-");
+    }
 
 
-    /* ========================================================
-       SUBSCRIBE
-    ======================================================== */
-
-    Bus.on = function (
+    function createEvent(
         eventName,
-        handler,
+        data,
         options
     ) {
 
-        const key =
-            Bus.key(eventName);
+        const opts =
+            options || {};
 
 
-        if (
-            !key ||
-            typeof handler !==
-            "function"
-        ) {
-
-            return function () {};
-        }
-
-
-        if (
-            !listeners.has(key)
-        ) {
-
-            listeners.set(
-                key,
-                new Set()
-            );
-        }
-
-
-        const set =
-            listeners.get(key);
-
-
-        set.add(handler);
-
-
-        const once =
-            options &&
-            options.once === true;
-
-
-        let active = true;
-
-
-        const unsubscribe =
-            function () {
-
-                if (!active) {
-                    return;
-                }
-
-
-                active = false;
-
-                set.delete(
-                    handler
-                );
-
-
-                if (
-                    set.size === 0
-                ) {
-
-                    listeners.delete(
-                        key
-                    );
-                }
-            };
-
-
-        if (once) {
-
-            const original =
-                handler;
-
-
-            const wrapped =
-                function () {
-
-                    unsubscribe();
-
-                    return original.apply(
-                        this,
-                        arguments
-                    );
-                };
-
-
-            set.delete(
-                handler
-            );
-
-            set.add(
-                wrapped
-            );
-
-
-            return function () {
-
-                set.delete(
-                    wrapped
-                );
-
-            };
-        }
-
-
-        return unsubscribe;
-    };
-
-
-    /* ========================================================
-       ONCE
-    ======================================================== */
-
-    Bus.once = function (
-        eventName,
-        handler
-    ) {
-
-        return Bus.on(
-            eventName,
-            handler,
-            {
-                once:
-                    true
-            }
-        );
-    };
-
-
-    /* ========================================================
-       OFF
-    ======================================================== */
-
-    Bus.off = function (
-        eventName,
-        handler
-    ) {
-
-        const key =
-            Bus.key(eventName);
-
-
-        const set =
-            listeners.get(key);
-
-
-        if (!set) {
-            return;
-        }
-
-
-        if (
-            typeof handler ===
-            "function"
-        ) {
-
-            set.delete(
-                handler
-            );
-
-        } else {
-
-            set.clear();
-        }
-
-
-        if (
-            set.size === 0
-        ) {
-
-            listeners.delete(
-                key
-            );
-        }
-    };
-
-
-    /* ========================================================
-       EMIT
-    ======================================================== */
-
-    Bus.emit = function (
-        eventName,
-        data,
-        metadata
-    ) {
-
-        const key =
-            Bus.key(eventName);
-
-
-        if (!key) {
-            return false;
-        }
-
-
-        const event = {
+        return {
 
             id:
-                "evt-" +
+                "haldo-event-" +
                 Date.now() +
                 "-" +
-                Math.random()
-                    .toString(36)
-                    .slice(2),
+                (++eventSequence),
 
             name:
-                key,
+                String(
+                    eventName || ""
+                ),
 
             data:
-                data || {},
+                data,
 
-            metadata:
-                metadata || {},
+            source:
+                opts.source ||
+                opts.sourceApp ||
+                "system",
+
+            sourceApp:
+                opts.sourceApp ||
+                null,
+
+            targetApp:
+                opts.targetApp ||
+                null,
 
             timestamp:
-                Date.now()
-        };
+                Date.now(),
 
+            internal:
+                opts.internal === true,
+
+            broadcast:
+                opts.broadcast !== false,
+
+            metadata:
+                opts.metadata || {}
+        };
+    }
+
+
+    function storeHistory(
+        event
+    ) {
 
         history.push(
             event
@@ -331,860 +164,1313 @@
 
         while (
             history.length >
-            MAX_HISTORY
+            maxHistory
         ) {
 
             history.shift();
         }
+    }
 
 
-        /*
-         * Internal listeners
-         */
+    function getHandlers(
+        eventName
+    ) {
 
-        const set =
-            listeners.get(key);
-
-
-        if (set) {
-
-            Array.from(
-                set
-            ).forEach(
-                function (handler) {
-
-                    try {
-
-                        handler(
-                            event
-                        );
-
-                    } catch (error) {
-
-                        console.error(
-                            "[HalDo Event Bus]",
-                            error
-                        );
-
-                        Bus.emit(
-                            "system:error",
-                            {
-                                source:
-                                    "app-events",
-
-                                event:
-                                    key,
-
-                                error:
-                                    error
-                            },
-                            {
-                                internal:
-                                    true
-                            }
-                        );
-                    }
-
-                }
-            );
-        }
+        return listeners.get(
+            eventName
+        );
+    }
 
 
-        /*
-         * Wildcard listeners
-         */
-
-        const wildcard =
-            listeners.get("*");
-
-
-        if (wildcard) {
-
-            Array.from(
-                wildcard
-            ).forEach(
-                function (handler) {
-
-                    try {
-
-                        handler(
-                            event
-                        );
-
-                    } catch (error) {
-
-                        console.error(
-                            "[HalDo Event Bus]",
-                            error
-                        );
-                    }
-
-                }
-            );
-        }
-
-
-        /*
-         * Browser event
-         */
+    function invokeHandler(
+        handler,
+        event
+    ) {
 
         try {
 
-            document.dispatchEvent(
-                new CustomEvent(
-                    "haldo:app-event",
-                    {
-                        detail:
-                            event
+            const result =
+                handler(
+                    event
+                );
+
+
+            if (
+                result &&
+                typeof result.catch ===
+                "function"
+            ) {
+
+                result.catch(
+                    function (error) {
+
+                        console.error(
+                            "[HalDo Event Bus]",
+                            "Async Handler Fehler:",
+                            error
+                        );
+
                     }
-                )
-            );
+                );
+            }
+
+
+            return result;
 
         } catch (error) {
 
-            console.warn(
-                "[HalDo Event Bus] " +
-                "Browser Event fehlgeschlagen.",
+            console.error(
+                "[HalDo Event Bus]",
+                "Handler Fehler:",
                 error
             );
+
+
+            return null;
         }
-
-
-        return event;
-    };
+    }
 
 
     /* ========================================================
-       APP SUBSCRIBE
+       SUBSCRIBE
     ======================================================== */
 
-    Bus.subscribeApp = function (
-        appId,
-        eventName,
-        handler
-    ) {
-
-        const normalizedApp =
-            Bus.normalize(appId);
-
-
-        if (
-            !appSubscriptions.has(
-                normalizedApp
-            )
+    EventBus.on =
+        function (
+            eventName,
+            handler,
+            options
         ) {
 
-            appSubscriptions.set(
-                normalizedApp,
-                new Set()
-            );
-        }
+            if (
+                !eventName ||
+                typeof handler !==
+                "function"
+            ) {
+
+                return function () {};
+            }
 
 
-        const unsubscribe =
-            Bus.on(
-                eventName,
-                handler
-            );
+            const name =
+                String(
+                    eventName
+                );
 
 
-        appSubscriptions
-            .get(normalizedApp)
-            .add(
-                unsubscribe
-            );
+            if (
+                !listeners.has(
+                    name
+                )
+            ) {
+
+                listeners.set(
+                    name,
+                    new Set()
+                );
+            }
 
 
-        return function () {
+            const record = {
 
-            unsubscribe();
+                handler:
+                    handler,
+
+                once:
+                    Boolean(
+                        options &&
+                        options.once
+                    ),
+
+                owner:
+                    options &&
+                    options.owner
+                        ? normalizeId(
+                            options.owner
+                        )
+                        : null
+            };
+
 
             const set =
-                appSubscriptions.get(
-                    normalizedApp
+                listeners.get(
+                    name
+                );
+
+
+            set.add(
+                record
+            );
+
+
+            return function () {
+
+                set.delete(
+                    record
+                );
+
+            };
+        };
+
+
+    /* ========================================================
+       ONCE
+    ======================================================== */
+
+    EventBus.once =
+        function (
+            eventName,
+            handler,
+            options
+        ) {
+
+            return EventBus.on(
+                eventName,
+                handler,
+                Object.assign(
+                    {},
+                    options || {},
+                    {
+                        once:
+                            true
+                    }
+                )
+            );
+        };
+
+
+    /* ========================================================
+       OFF
+    ======================================================== */
+
+    EventBus.off =
+        function (
+            eventName,
+            handler
+        ) {
+
+            const set =
+                listeners.get(
+                    String(
+                        eventName
+                    )
+                );
+
+
+            if (!set) {
+                return false;
+            }
+
+
+            let removed =
+                false;
+
+
+            Array.from(
+                set
+            )
+            .forEach(
+                function (
+                    record
+                ) {
+
+                    if (
+                        record.handler ===
+                        handler
+                    ) {
+
+                        set.delete(
+                            record
+                        );
+
+                        removed =
+                            true;
+                    }
+
+                }
+            );
+
+
+            return removed;
+        };
+
+
+    /* ========================================================
+       EMIT
+    ======================================================== */
+
+    EventBus.emit =
+        function (
+            eventName,
+            data,
+            options
+        ) {
+
+            const event =
+                createEvent(
+                    eventName,
+                    data,
+                    options
+                );
+
+
+            storeHistory(
+                event
+            );
+
+
+            const set =
+                getHandlers(
+                    event.name
                 );
 
 
             if (set) {
 
-                set.delete(
-                    unsubscribe
+                Array.from(
+                    set
+                )
+                .forEach(
+                    function (
+                        record
+                    ) {
+
+                        invokeHandler(
+                            record.handler,
+                            event
+                        );
+
+
+                        if (
+                            record.once
+                        ) {
+
+                            set.delete(
+                                record
+                            );
+                        }
+
+                    }
+                );
+            }
+
+
+            /*
+             * Wildcard listeners.
+             */
+
+            const wildcard =
+                getHandlers(
+                    "*"
                 );
 
 
-                if (
-                    set.size === 0
-                ) {
+            if (wildcard) {
 
-                    appSubscriptions.delete(
-                        normalizedApp
-                    );
-                }
+                Array.from(
+                    wildcard
+                )
+                .forEach(
+                    function (
+                        record
+                    ) {
+
+                        invokeHandler(
+                            record.handler,
+                            event
+                        );
+
+
+                        if (
+                            record.once
+                        ) {
+
+                            wildcard.delete(
+                                record
+                            );
+                        }
+
+                    }
+                );
             }
+
+
+            /*
+             * Browser CustomEvent.
+             *
+             * Dadurch können auch ältere oder
+             * externe Module zuhören.
+             */
+
+            try {
+
+                window.dispatchEvent(
+                    new CustomEvent(
+                        "haldo:" +
+                        event.name,
+                        {
+                            detail:
+                                event
+                        }
+                    )
+                );
+
+            } catch (error) {
+
+                /*
+                 * Ältere Browser / Testumgebungen
+                 * dürfen den Bus nicht zerstören.
+                 */
+
+            }
+
+
+            return event;
         };
-    };
 
 
     /* ========================================================
-       UNSUBSCRIBE APP
+       APP EVENT
     ======================================================== */
 
-    Bus.unsubscribeApp = function (
-        appId
-    ) {
+    EventBus.appEvent =
+        function (
+            appId,
+            eventName,
+            data,
+            options
+        ) {
 
-        const normalizedApp =
-            Bus.normalize(appId);
+            const id =
+                normalizeId(
+                    appId
+                );
 
 
-        const set =
-            appSubscriptions.get(
-                normalizedApp
+            return EventBus.emit(
+                eventName,
+                data,
+                Object.assign(
+                    {},
+                    options || {},
+                    {
+
+                        source:
+                            id,
+
+                        sourceApp:
+                            id
+                    }
+                )
             );
-
-
-        if (!set) {
-            return;
-        }
-
-
-        Array.from(
-            set
-        ).forEach(
-            function (unsubscribe) {
-
-                try {
-
-                    unsubscribe();
-
-                } catch (error) {
-
-                    console.warn(
-                        "[HalDo Event Bus]",
-                        error
-                    );
-                }
-
-            }
-        );
-
-
-        appSubscriptions.delete(
-            normalizedApp
-        );
-    };
+        };
 
 
     /* ========================================================
-       APP MESSAGE
+       SEND TO APP
     ======================================================== */
 
-    Bus.send = function (
-        sourceApp,
-        targetApp,
-        eventName,
-        data
-    ) {
+    EventBus.send =
+        function (
+            sourceApp,
+            targetApp,
+            eventName,
+            data,
+            options
+        ) {
 
-        const source =
-            Bus.normalize(
-                sourceApp
+            const source =
+                normalizeId(
+                    sourceApp
+                );
+
+
+            const target =
+                normalizeId(
+                    targetApp
+                );
+
+
+            const event =
+                createEvent(
+                    eventName,
+                    data,
+                    Object.assign(
+                        {},
+                        options || {},
+                        {
+
+                            source:
+                                source,
+
+                            sourceApp:
+                                source,
+
+                            targetApp:
+                                target,
+
+                            broadcast:
+                                false
+                        }
+                    )
+                );
+
+
+            storeHistory(
+                event
             );
 
 
-        const target =
-            Bus.normalize(
-                targetApp
-            );
+            /*
+             * Ziel-App Listener
+             */
+
+            const targetSet =
+                appListeners.get(
+                    target
+                );
 
 
-        return Bus.emit(
-            "app:message",
-            {
+            if (
+                targetSet
+            ) {
 
-                sourceApp:
-                    source,
+                Array.from(
+                    targetSet
+                )
+                .forEach(
+                    function (
+                        record
+                    ) {
 
-                targetApp:
-                    target,
+                        if (
+                            record.eventName ===
+                            eventName ||
+                            record.eventName ===
+                            "*"
+                        ) {
 
-                event:
-                    Bus.key(
-                        eventName
-                    ),
+                            invokeHandler(
+                                record.handler,
+                                event
+                            );
 
-                data:
-                    data || {}
-            },
-            {
 
-                sourceApp:
-                    source,
+                            if (
+                                record.once
+                            ) {
 
-                targetApp:
-                    target,
+                                targetSet.delete(
+                                    record
+                                );
+                            }
+                        }
 
-                communication:
-                    true
+                    }
+                );
             }
-        );
-    };
+
+
+            /*
+             * Globale Listener erhalten
+             * ebenfalls das Event.
+             */
+
+            const globalSet =
+                listeners.get(
+                    eventName
+                );
+
+
+            if (
+                globalSet
+            ) {
+
+                Array.from(
+                    globalSet
+                )
+                .forEach(
+                    function (
+                        record
+                    ) {
+
+                        invokeHandler(
+                            record.handler,
+                            event
+                        );
+
+
+                        if (
+                            record.once
+                        ) {
+
+                            globalSet.delete(
+                                record
+                            );
+                        }
+
+                    }
+                );
+            }
+
+
+            /*
+             * Browser Bridge
+             */
+
+            try {
+
+                window.dispatchEvent(
+                    new CustomEvent(
+                        "haldo:app-message",
+                        {
+                            detail:
+                                event
+                        }
+                    )
+                );
+
+            } catch (error) {
+                /* Safe fallback */
+            }
+
+
+            return event;
+        };
 
 
     /* ========================================================
        BROADCAST
     ======================================================== */
 
-    Bus.broadcast = function (
-        sourceApp,
-        eventName,
-        data
-    ) {
+    EventBus.broadcast =
+        function (
+            sourceApp,
+            eventName,
+            data,
+            options
+        ) {
 
-        const source =
-            Bus.normalize(
-                sourceApp
+            const source =
+                normalizeId(
+                    sourceApp
+                );
+
+
+            return EventBus.emit(
+                eventName,
+                data,
+                Object.assign(
+                    {},
+                    options || {},
+                    {
+
+                        source:
+                            source,
+
+                        sourceApp:
+                            source,
+
+                        broadcast:
+                            true
+                    }
+                )
             );
-
-
-        return Bus.emit(
-            "app:broadcast",
-            {
-
-                sourceApp:
-                    source,
-
-                event:
-                    Bus.key(
-                        eventName
-                    ),
-
-                data:
-                    data || {}
-            },
-            {
-
-                sourceApp:
-                    source,
-
-                broadcast:
-                    true
-            }
-        );
-    };
-
-
-    /* ========================================================
-       APP-SPECIFIC EVENT
-    ======================================================== */
-
-    Bus.appEvent = function (
-        appId,
-        eventName,
-        data
-    ) {
-
-        const app =
-            Bus.normalize(
-                appId
-            );
-
-
-        const event =
-            Bus.key(
-                eventName
-            );
-
-
-        return Bus.emit(
-            "app:" +
-            app +
-            ":" +
-            event,
-            data || {},
-            {
-
-                appId:
-                    app,
-
-                appEvent:
-                    true
-            }
-        );
-    };
+        };
 
 
     /* ========================================================
        SYSTEM EVENT
     ======================================================== */
 
-    Bus.system = function (
-        eventName,
-        data
-    ) {
-
-        return Bus.emit(
-            "system:" +
-            Bus.key(
-                eventName
-            ),
-            data || {},
-            {
-
-                system:
-                    true
-            }
-        );
-    };
-
-
-    /* ========================================================
-       USER EVENT
-    ======================================================== */
-
-    Bus.user = function (
-        eventName,
-        data
-    ) {
-
-        return Bus.emit(
-            "user:" +
-            Bus.key(
-                eventName
-            ),
-            data || {},
-            {
-
-                user:
-                    true
-            }
-        );
-    };
-
-
-    /* ========================================================
-       GET HISTORY
-    ======================================================== */
-
-    Bus.getHistory = function (
-        filter
-    ) {
-
-        if (
-            typeof filter !==
-            "function"
+    EventBus.system =
+        function (
+            eventName,
+            data,
+            options
         ) {
 
-            return history.slice();
-        }
+            return EventBus.emit(
+                eventName,
+                data,
+                Object.assign(
+                    {},
+                    options || {},
+                    {
+
+                        source:
+                            "system",
+
+                        sourceApp:
+                            null,
+
+                        internal:
+                            true
+                    }
+                )
+            );
+        };
 
 
-        return history.filter(
+    /* ========================================================
+       SUBSCRIBE APP
+    ======================================================== */
+
+    EventBus.subscribeApp =
+        function (
+            appId,
+            eventName,
+            handler,
+            options
+        ) {
+
+            const id =
+                normalizeId(
+                    appId
+                );
+
+
+            if (
+                !id ||
+                typeof handler !==
+                "function"
+            ) {
+
+                return function () {};
+            }
+
+
+            if (
+                !appListeners.has(
+                    id
+                )
+            ) {
+
+                appListeners.set(
+                    id,
+                    new Set()
+                );
+            }
+
+
+            const record = {
+
+                eventName:
+                    String(
+                        eventName ||
+                        "*"
+                    ),
+
+                handler:
+                    handler,
+
+                once:
+                    Boolean(
+                        options &&
+                        options.once
+                    )
+            };
+
+
+            const set =
+                appListeners.get(
+                    id
+                );
+
+
+            set.add(
+                record
+            );
+
+
+            return function () {
+
+                set.delete(
+                    record
+                );
+
+            };
+        };
+
+
+    /* ========================================================
+       UNSUBSCRIBE APP
+    ======================================================== */
+
+    EventBus.unsubscribeApp =
+        function (
+            appId,
+            eventName,
+            handler
+        ) {
+
+            const id =
+                normalizeId(
+                    appId
+                );
+
+
+            const set =
+                appListeners.get(
+                    id
+                );
+
+
+            if (!set) {
+                return false;
+            }
+
+
+            let removed =
+                false;
+
+
+            Array.from(
+                set
+            )
+            .forEach(
+                function (
+                    record
+                ) {
+
+                    const eventMatches =
+                        !eventName ||
+                        record.eventName ===
+                        eventName;
+
+
+                    const handlerMatches =
+                        !handler ||
+                        record.handler ===
+                        handler;
+
+
+                    if (
+                        eventMatches &&
+                        handlerMatches
+                    ) {
+
+                        set.delete(
+                            record
+                        );
+
+                        removed =
+                            true;
+                    }
+
+                }
+            );
+
+
+            return removed;
+        };
+
+
+    /* ========================================================
+       APP EVENT LISTENER HELPER
+    ======================================================== */
+
+    EventBus.listen =
+        function (
+            appId,
+            eventName,
+            handler,
+            options
+        ) {
+
+            return EventBus.subscribeApp(
+                appId,
+                eventName,
+                handler,
+                options
+            );
+        };
+
+
+    /* ========================================================
+       WAIT FOR EVENT
+    ======================================================== */
+
+    EventBus.waitFor =
+        function (
+            eventName,
+            timeout
+        ) {
+
+            const wait =
+                Number(
+                    timeout || 10000
+                );
+
+
+            return new Promise(
+                function (
+                    resolve,
+                    reject
+                ) {
+
+                    let timer =
+                        null;
+
+
+                    const unsubscribe =
+                        EventBus.once(
+                            eventName,
+                            function (
+                                event
+                            ) {
+
+                                if (
+                                    timer
+                                ) {
+
+                                    clearTimeout(
+                                        timer
+                                    );
+                                }
+
+
+                                resolve(
+                                    event
+                                );
+
+                            }
+                        );
+
+
+                    timer =
+                        setTimeout(
+                            function () {
+
+                                unsubscribe();
+
+
+                                reject(
+                                    new Error(
+                                        "Timeout beim Warten auf Event: " +
+                                        eventName
+                                    )
+                                );
+
+                            },
+                            wait
+                        );
+
+                }
+            );
+        };
+
+
+    /* ========================================================
+       HISTORY
+    ======================================================== */
+
+    EventBus.getHistory =
+        function (
             filter
-        );
-    };
+        ) {
+
+            if (
+                !filter
+            ) {
+
+                return history.slice();
+            }
+
+
+            return history.filter(
+                function (
+                    event
+                ) {
+
+                    if (
+                        filter.name &&
+                        event.name !==
+                        filter.name
+                    ) {
+
+                        return false;
+                    }
+
+
+                    if (
+                        filter.sourceApp &&
+                        event.sourceApp !==
+                        normalizeId(
+                            filter.sourceApp
+                        )
+                    ) {
+
+                        return false;
+                    }
+
+
+                    if (
+                        filter.targetApp &&
+                        event.targetApp !==
+                        normalizeId(
+                            filter.targetApp
+                        )
+                    ) {
+
+                        return false;
+                    }
+
+
+                    return true;
+                }
+            );
+        };
 
 
     /* ========================================================
        CLEAR HISTORY
     ======================================================== */
 
-    Bus.clearHistory = function () {
+    EventBus.clearHistory =
+        function () {
 
-        history.length = 0;
-    };
-
-
-    /* ========================================================
-       APP CONNECTION
-    ======================================================== */
-
-    Bus.connectApps = function (
-        sourceApp,
-        targetApp,
-        eventName,
-        handler
-    ) {
-
-        const source =
-            Bus.normalize(
-                sourceApp
-            );
-
-
-        const target =
-            Bus.normalize(
-                targetApp
-            );
-
-
-        const event =
-            Bus.key(
-                eventName
-            );
-
-
-        return Bus.on(
-            "app:message",
-            function (message) {
-
-                if (!message) {
-                    return;
-                }
-
-
-                const data =
-                    message.data || {};
-
-
-                if (
-                    message.metadata &&
-                    message.metadata.targetApp !==
-                    target
-                ) {
-
-                    return;
-                }
-
-
-                if (
-                    message.data &&
-                    message.data.targetApp &&
-                    Bus.normalize(
-                        message.data.targetApp
-                    ) !== target
-                ) {
-
-                    return;
-                }
-
-
-                if (
-                    message.data &&
-                    message.data.sourceApp &&
-                    Bus.normalize(
-                        message.data.sourceApp
-                    ) !== source
-                ) {
-
-                    return;
-                }
-
-
-                if (
-                    Bus.key(
-                        message.data &&
-                        message.data.event
-                    ) !== event
-                ) {
-
-                    return;
-                }
-
-
-                try {
-
-                    handler(
-                        data,
-                        message
-                    );
-
-                } catch (error) {
-
-                    console.error(
-                        "[HalDo Event Bus]",
-                        error
-                    );
-                }
-
-            }
-        );
-    };
+            history.length =
+                0;
+        };
 
 
     /* ========================================================
-       APP CONTEXT
+       APP EVENT HISTORY
     ======================================================== */
 
-    Bus.createAppContext = function (
-        appId
-    ) {
+    EventBus.getAppHistory =
+        function (
+            appId
+        ) {
 
-        const id =
-            Bus.normalize(
-                appId
-            );
+            const id =
+                normalizeId(
+                    appId
+                );
 
 
-        return {
-
-            appId:
-                id,
-
-            on:
+            return history.filter(
                 function (
-                    eventName,
-                    handler
+                    event
                 ) {
 
-                    return Bus.subscribeApp(
-                        id,
-                        eventName,
-                        handler
-                    );
-                },
-
-
-            emit:
-                function (
-                    eventName,
-                    data
-                ) {
-
-                    return Bus.appEvent(
-                        id,
-                        eventName,
-                        data
-                    );
-                },
-
-
-            send:
-                function (
-                    targetApp,
-                    eventName,
-                    data
-                ) {
-
-                    return Bus.send(
-                        id,
-                        targetApp,
-                        eventName,
-                        data
-                    );
-                },
-
-
-            broadcast:
-                function (
-                    eventName,
-                    data
-                ) {
-
-                    return Bus.broadcast(
-                        id,
-                        eventName,
-                        data
-                    );
-                },
-
-
-            system:
-                function (
-                    eventName,
-                    data
-                ) {
-
-                    return Bus.system(
-                        eventName,
-                        data
-                    );
-                },
-
-
-            user:
-                function (
-                    eventName,
-                    data
-                ) {
-
-                    return Bus.user(
-                        eventName,
-                        data
-                    );
-                },
-
-
-            destroy:
-                function () {
-
-                    Bus.unsubscribeApp(
+                    return (
+                        event.sourceApp ===
+                        id ||
+                        event.targetApp ===
                         id
                     );
+
                 }
+            );
         };
-    };
 
 
     /* ========================================================
-       STATUS
+       EVENT NAMES
     ======================================================== */
 
-    Bus.getStatus = function () {
+    EventBus.names =
+        {
 
-        return {
+            SYSTEM_READY:
+                "system:ready",
 
-            name:
-                Bus.name,
+            SYSTEM_ERROR:
+                "system:error",
 
-            version:
-                Bus.version,
+            APP_REGISTERED:
+                "app:registered",
 
-            ready:
-                Bus.ready,
+            APP_UPDATED:
+                "app:updated",
 
-            eventTypes:
-                listeners.size,
+            APP_OPEN:
+                "app:open",
 
-            subscribedApps:
-                appSubscriptions.size,
+            APP_CLOSE:
+                "app:close",
 
-            historySize:
-                history.length,
+            APP_STARTED:
+                "app:started",
 
-            timestamp:
-                Date.now()
+            APP_STOPPED:
+                "app:stopped",
+
+            APP_ERROR:
+                "app:error",
+
+            APP_STATE_CHANGED:
+                "app:state-changed",
+
+            LANGUAGE_CHANGED:
+                "language:changed",
+
+            THEME_CHANGED:
+                "theme:changed",
+
+            SETTINGS_CHANGED:
+                "settings:changed",
+
+            STORAGE_CHANGED:
+                "storage:changed",
+
+            LOCATION_CHANGED:
+                "location:changed",
+
+            NAVIGATION_STARTED:
+                "navigation:started",
+
+            NAVIGATION_UPDATED:
+                "navigation:updated",
+
+            NAVIGATION_ARRIVED:
+                "navigation:arrived",
+
+            CALENDAR_EVENT_CREATED:
+                "calendar:event-created",
+
+            CALENDAR_EVENT_UPDATED:
+                "calendar:event-updated",
+
+            CALENDAR_EVENT_REMOVED:
+                "calendar:event-removed",
+
+            MUSIC_STARTED:
+                "music:started",
+
+            MUSIC_STOPPED:
+                "music:stopped",
+
+            VIDEO_STARTED:
+                "video:started",
+
+            VIDEO_STOPPED:
+                "video:stopped",
+
+            AI_MESSAGE:
+                "ai:message",
+
+            AI_RESPONSE:
+                "ai:response",
+
+            VOICE_STARTED:
+                "voice:started",
+
+            VOICE_STOPPED:
+                "voice:stopped",
+
+            COSMIC_STATE_CHANGED:
+                "cosmic:state-changed",
+
+            COSMIC_EVENT:
+                "cosmic:event",
+
+            COSMIC_WELCOME:
+                "cosmic:welcome",
+
+            NOTIFICATION:
+                "notification:show"
         };
-    };
+
+
+    /* ========================================================
+       CONNECT EXISTING EVENT SYSTEM
+    ======================================================== */
+
+    function connectExistingBus() {
+
+        /*
+         * Bereits vorhandener HalDoAppEvents-Bus.
+         *
+         * Falls diese Datei selbst zuerst geladen wird,
+         * existiert dieser noch nicht.
+         */
+
+        const existing =
+            window.HalDoOS &&
+            window.HalDoOS.appEvents;
+
+
+        if (
+            existing &&
+            existing !== EventBus &&
+            typeof existing.on ===
+            "function"
+        ) {
+
+            try {
+
+                existing.on(
+                    "*",
+                    function (
+                        event
+                    ) {
+
+                        if (
+                            event &&
+                            event.name
+                        ) {
+
+                            EventBus.emit(
+                                event.name,
+                                event.data,
+                                {
+
+                                    source:
+                                        event.source,
+
+                                    sourceApp:
+                                        event.sourceApp,
+
+                                    targetApp:
+                                        event.targetApp,
+
+                                    internal:
+                                        true
+                                }
+                            );
+                        }
+
+                    }
+                );
+
+            } catch (error) {
+
+                console.warn(
+                    "[HalDo Event Bus]",
+                    "Bestehender Bus konnte nicht angebunden werden.",
+                    error
+                );
+            }
+        }
+    }
+
+
+    /* ========================================================
+       GLOBAL API
+    ======================================================== */
+
+    EventBus.getStatus =
+        function () {
+
+            return {
+
+                name:
+                    EventBus.name,
+
+                version:
+                    EventBus.version,
+
+                ready:
+                    ready,
+
+                globalListeners:
+                    listeners.size,
+
+                appChannels:
+                    appListeners.size,
+
+                history:
+                    history.length,
+
+                timestamp:
+                    Date.now()
+            };
+        };
 
 
     /* ========================================================
        INITIALIZE
     ======================================================== */
 
-    Bus.init = function () {
+    EventBus.init =
+        function () {
 
-        if (Bus.ready) {
-            return Bus;
-        }
+            if (
+                ready
+            ) {
 
-
-        Bus.ready =
-            true;
-
-
-        /*
-         * Bridge to existing Kernel
-         */
-
-        const kernel =
-            window.HalDoKernel;
-
-
-        if (
-            kernel &&
-            typeof kernel.on ===
-            "function"
-        ) {
-
-            kernel.on(
-                "app:open",
-                function (data) {
-
-                    Bus.emit(
-                        "app:open",
-                        data || {},
-                        {
-                            kernel:
-                                true
-                        }
-                    );
-
-                }
-            );
-
-
-            kernel.on(
-                "app:close",
-                function (data) {
-
-                    Bus.emit(
-                        "app:close",
-                        data || {},
-                        {
-                            kernel:
-                                true
-                        }
-                    );
-
-                }
-            );
-
-
-            kernel.on(
-                "language:changed",
-                function (data) {
-
-                    Bus.emit(
-                        "language:changed",
-                        data || {},
-                        {
-                            kernel:
-                                true
-                        }
-                    );
-
-                }
-            );
-
-
-            kernel.on(
-                "system:ready",
-                function (data) {
-
-                    Bus.emit(
-                        "system:ready",
-                        data || {},
-                        {
-                            kernel:
-                                true
-                        }
-                    );
-
-                }
-            );
-        }
-
-
-        /*
-         * Global exports
-         */
-
-        window.HalDoAppEvents =
-            Bus;
-
-
-        HalDoOS.appEvents =
-            Bus;
-
-
-        V20.appEvents =
-            Bus;
-
-
-        Bus.emit(
-            "system:app-events-ready",
-            Bus.getStatus(),
-            {
-                internal:
-                    true
+                return EventBus;
             }
-        );
 
 
-        console.log(
-            "[HalDo AI OS 20] " +
-            "App Communication Bus bereit."
-        );
+            /*
+             * Globale APIs.
+             */
+
+            window.HalDoAppEvents =
+                EventBus;
 
 
-        return Bus;
-    };
+            window.HalDoV20AppEvents =
+                EventBus;
+
+
+            HalDoOS.appEvents =
+                EventBus;
+
+
+            V20.appEvents =
+                EventBus;
+
+
+            connectExistingBus();
+
+
+            ready =
+                true;
+
+
+            /*
+             * Runtime informieren.
+             */
+
+            EventBus.emit(
+                "system:event-bus-ready",
+                EventBus.getStatus(),
+                {
+
+                    source:
+                        "system",
+
+                    internal:
+                        true
+                }
+            );
+
+
+            console.log(
+                "[HalDo AI OS 20]",
+                "Universal App Event Bus bereit."
+            );
+
+
+            return EventBus;
+        };
 
 
     /* ========================================================
-       START
+       BOOT
     ======================================================== */
+
+    function boot() {
+
+        try {
+
+            EventBus.init();
+
+        } catch (error) {
+
+            console.error(
+                "[HalDo AI OS 20]",
+                "Event Bus Startfehler:",
+                error
+            );
+        }
+    }
+
 
     if (
         document.readyState ===
@@ -1193,11 +1479,7 @@
 
         document.addEventListener(
             "DOMContentLoaded",
-            function () {
-
-                Bus.init();
-
-            },
+            boot,
             {
                 once:
                     true
@@ -1206,7 +1488,7 @@
 
     } else {
 
-        Bus.init();
+        boot();
     }
 
 
