@@ -1,25 +1,37 @@
 /* ============================================================
    HALDO AI OS 20
-   SETTINGS APP
+   SETTINGS APPLICATION
    ------------------------------------------------------------
    Datei:
        js/apps/settings/settings-app.js
 
-   Vollständige Settings-Anwendung
-
+   Vollständige Settings-App
+   ------------------------------------------------------------
    VERBINDET:
-   - App Contract
-   - App Manager
-   - App Registry
-   - Kernel
-   - System
-   - Storage
-   - Language
-   - Voice
-   - AI
-   - Êzîdî Keyboard
-   - Notifications
-   - Home / Launcher über App Manager
+
+   • HalDo App Contract
+   • HalDo App Manager
+   • HalDo App Registry
+   • HalDo Kernel
+   • HalDo System
+   • HalDo Router
+   • HalDo Window Manager
+   • HalDo Storage
+   • HalDo Language
+   • HalDo Voice
+   • HalDo AI
+   • HalDo Keyboard / Êzîdî Keyboard
+   • Theme / Appearance
+   • Notifications
+   • System Events
+
+   Ziel:
+   Eine echte, erweiterbare Settings-Anwendung für
+   HalDo AI OS 20.
+
+   Die Home-/Hauptmenü-Oberfläche bleibt die zentrale
+   Oberfläche. Settings wird ausschließlich als App
+   geöffnet und besitzt ihren eigenen internen Zustand.
 
    ============================================================ */
 
@@ -47,12 +59,34 @@
         "Settings";
 
     const APP_TITLE =
-        "HalDo Einstellungen";
+        "HalDo AI OS Einstellungen";
 
 
     /* ========================================================
        02 — SERVICE ACCESS
        ======================================================== */
+
+    function getKernel() {
+
+        return (
+            window.HalDoKernel ||
+            HalDoOS.kernel ||
+            null
+        );
+
+    }
+
+
+    function getSystem() {
+
+        return (
+            window.HalDoSystem ||
+            HalDoOS.system ||
+            null
+        );
+
+    }
+
 
     function getAppManager() {
 
@@ -77,33 +111,22 @@
     }
 
 
-    function getContract() {
+    function getRouter() {
 
         return (
-            window.HalDoAppContract ||
-            HalDoOS.appContract ||
+            window.HalDoAppRouter ||
+            HalDoOS.appRouter ||
             null
         );
 
     }
 
 
-    function getKernel() {
+    function getWindowManager() {
 
         return (
-            window.HalDoKernel ||
-            HalDoOS.kernel ||
-            null
-        );
-
-    }
-
-
-    function getSystem() {
-
-        return (
-            window.HalDoSystem ||
-            HalDoOS.system ||
+            window.HalDoWindowManager ||
+            HalDoOS.windowManager ||
             null
         );
 
@@ -115,6 +138,8 @@
         return (
             window.HalDoStorage ||
             HalDoOS.storage ||
+            window.HalDoStorageManager ||
+            HalDoOS.storageManager ||
             null
         );
 
@@ -128,6 +153,8 @@
             HalDoOS.languageManager ||
             window.HalDoLanguage ||
             HalDoOS.language ||
+            window.HalDoLanguageSystem ||
+            HalDoOS.languageSystem ||
             null
         );
 
@@ -139,6 +166,8 @@
         return (
             window.HalDoVoice ||
             HalDoOS.voice ||
+            window.HalDoVoiceSystem ||
+            HalDoOS.voiceSystem ||
             null
         );
 
@@ -152,6 +181,8 @@
             HalDoOS.ai ||
             window.HalDoAICore ||
             HalDoOS.aiCore ||
+            window.HalDoAIEngine ||
+            HalDoOS.aiEngine ||
             null
         );
 
@@ -164,6 +195,7 @@
             window.HalDoEzidiKeyboard ||
             window.HalDoKeyboard ||
             HalDoOS.keyboard ||
+            HalDoOS.ezidiKeyboard ||
             null
         );
 
@@ -181,224 +213,21 @@
     }
 
 
-    function method(
+    /* ========================================================
+       03 — HELPERS
+       ======================================================== */
+
+    function hasMethod(
         object,
-        name
+        method
     ) {
 
         return !!(
             object &&
-            typeof object[name] ===
-            "function"
+            typeof object[method] === "function"
         );
 
     }
-
-
-    /* ========================================================
-       03 — INTERNAL STATE
-       ======================================================== */
-
-    const state = {
-
-        initialized:
-            false,
-
-        started:
-            false,
-
-        open:
-            false,
-
-        active:
-            false,
-
-        mounted:
-            false,
-
-        currentSection:
-            "general",
-
-        root:
-            null,
-
-        settings: {
-
-            language:
-                "de",
-
-            appearance:
-                "system",
-
-            accentColor:
-                "blue",
-
-            animations:
-                true,
-
-            sounds:
-                true,
-
-            voiceEnabled:
-                true,
-
-            aiEnabled:
-                true,
-
-            notifications:
-                true,
-
-            keyboard:
-                "standard",
-
-            autoStart:
-                true,
-
-            privacyMode:
-                false
-
-        },
-
-        listeners:
-            new Map()
-
-    };
-
-
-    /* ========================================================
-       04 — EVENTS
-       ======================================================== */
-
-    function on(
-        event,
-        callback
-    ) {
-
-        if (
-            typeof callback !==
-            "function"
-        ) {
-
-            return function () {};
-
-        }
-
-        if (
-            !state.listeners.has(
-                event
-            )
-        ) {
-
-            state.listeners.set(
-                event,
-                new Set()
-            );
-
-        }
-
-        const listeners =
-            state.listeners.get(
-                event
-            );
-
-        listeners.add(
-            callback
-        );
-
-        return function () {
-
-            listeners.delete(
-                callback
-            );
-
-        };
-
-    }
-
-
-    function emit(
-        event,
-        detail = {}
-    ) {
-
-        const listeners =
-            state.listeners.get(
-                event
-            );
-
-        if (listeners) {
-
-            Array.from(
-                listeners
-            ).forEach(
-                callback => {
-
-                    try {
-
-                        callback(
-                            detail
-                        );
-
-                    } catch (error) {
-
-                        console.error(
-                            "[HalDo Settings]",
-                            error
-                        );
-
-                    }
-
-                }
-            );
-
-        }
-
-
-        try {
-
-            document.dispatchEvent(
-                new CustomEvent(
-                    "haldo:settings:" + event,
-                    {
-                        detail
-                    }
-                )
-            );
-
-        } catch (_) {}
-
-
-        const manager =
-            getAppManager();
-
-        if (
-            manager &&
-            method(
-                manager,
-                "emit"
-            )
-        ) {
-
-            try {
-
-                manager.emit(
-                    "settings:" + event,
-                    detail
-                );
-
-            } catch (_) {}
-
-        }
-
-    }
-
-
-    /* ========================================================
-       05 — STORAGE
-       ======================================================== */
-
-    const STORAGE_KEY =
-        "haldo.os20.settings.app";
 
 
     function clone(
@@ -415,9 +244,7 @@
         }
 
         if (
-            Array.isArray(
-                value
-            )
+            Array.isArray(value)
         ) {
 
             return value.map(
@@ -427,21 +254,16 @@
         }
 
         if (
-            typeof value ===
-            "object"
+            typeof value === "object"
         ) {
 
             const result = {};
 
-            Object.keys(
-                value
-            ).forEach(
+            Object.keys(value).forEach(
                 key => {
 
                     result[key] =
-                        clone(
-                            value[key]
-                        );
+                        clone(value[key]);
 
                 }
             );
@@ -455,2462 +277,98 @@
     }
 
 
-    function loadSettings() {
-
-        const manager =
-            getAppManager();
-
-        if (
-            manager &&
-            method(
-                manager,
-                "loadAppSettings"
-            )
-        ) {
-
-            try {
-
-                const result =
-                    manager.loadAppSettings(
-                        APP_ID
-                    );
-
-                if (
-                    result &&
-                    typeof result.then ===
-                    "function"
-                ) {
-
-                    return result.then(
-                        value => {
-
-                            if (
-                                value &&
-                                typeof value ===
-                                "object"
-                            ) {
-
-                                Object.assign(
-                                    state.settings,
-                                    value
-                                );
-
-                            }
-
-                            return state.settings;
-
-                        }
-                    );
-
-                }
-
-                if (
-                    result &&
-                    typeof result ===
-                    "object"
-                ) {
-
-                    Object.assign(
-                        state.settings,
-                        result
-                    );
-
-                    return state.settings;
-
-                }
-
-            } catch (error) {
-
-                console.warn(
-                    "[HalDo Settings] Manager storage failed:",
-                    error
-                );
-
-            }
-
-        }
-
-
-        const storage =
-            getStorage();
-
-        if (
-            storage &&
-            method(
-                storage,
-                "get"
-            )
-        ) {
-
-            try {
-
-                const result =
-                    storage.get(
-                        STORAGE_KEY
-                    );
-
-                if (
-                    result &&
-                    typeof result.then ===
-                    "function"
-                ) {
-
-                    return result.then(
-                        value => {
-
-                            if (
-                                value &&
-                                typeof value ===
-                                "object"
-                            ) {
-
-                                Object.assign(
-                                    state.settings,
-                                    value
-                                );
-
-                            }
-
-                            return state.settings;
-
-                        }
-                    );
-
-                }
-
-                if (
-                    result &&
-                    typeof result ===
-                    "object"
-                ) {
-
-                    Object.assign(
-                        state.settings,
-                        result
-                    );
-
-                    return state.settings;
-
-                }
-
-            } catch (error) {
-
-                console.warn(
-                    "[HalDo Settings] Storage read failed:",
-                    error
-                );
-
-            }
-
-        }
-
-
-        try {
-
-            const raw =
-                window.localStorage.getItem(
-                    STORAGE_KEY
-                );
-
-            if (raw) {
-
-                const parsed =
-                    JSON.parse(
-                        raw
-                    );
-
-                if (
-                    parsed &&
-                    typeof parsed ===
-                    "object"
-                ) {
-
-                    Object.assign(
-                        state.settings,
-                        parsed
-                    );
-
-                }
-
-            }
-
-        } catch (_) {}
-
-        return state.settings;
-
-    }
-
-
-    function saveSettings() {
-
-        const snapshot =
-            clone(
-                state.settings
-            );
-
-
-        const manager =
-            getAppManager();
-
-        if (
-            manager &&
-            method(
-                manager,
-                "setSettings"
-            )
-        ) {
-
-            try {
-
-                const result =
-                    manager.setSettings(
-                        APP_ID,
-                        snapshot
-                    );
-
-                if (
-                    result &&
-                    typeof result.then ===
-                    "function"
-                ) {
-
-                    result.catch(
-                        error =>
-                            console.warn(
-                                "[HalDo Settings]",
-                                error
-                            )
-                    );
-
-                }
-
-                return true;
-
-            } catch (_) {}
-
-        }
-
-
-        const storage =
-            getStorage();
-
-        if (
-            storage &&
-            method(
-                storage,
-                "set"
-            )
-        ) {
-
-            try {
-
-                storage.set(
-                    STORAGE_KEY,
-                    snapshot
-                );
-
-                return true;
-
-            } catch (_) {}
-
-        }
-
-
-        try {
-
-            window.localStorage.setItem(
-                STORAGE_KEY,
-                JSON.stringify(
-                    snapshot
-                )
-            );
-
-            return true;
-
-        } catch (_) {
-
-            return false;
-
-        }
-
-    }
-
-
-    /* ========================================================
-       06 — SETTING UPDATE
-       ======================================================== */
-
-    function setSetting(
-        key,
-        value
-    ) {
-
-        if (
-            !Object.prototype.hasOwnProperty.call(
-                state.settings,
-                key
-            )
-        ) {
-
-            return false;
-
-        }
-
-        const previous =
-            state.settings[key];
-
-        state.settings[key] =
-            value;
-
-        saveSettings();
-
-        applySetting(
-            key,
-            value
-        );
-
-        emit(
-            "setting-changed",
-            {
-
-                key,
-
-                value,
-
-                previous
-
-            }
-        );
-
-        render();
-
-        return true;
-
-    }
-
-
-    function applySetting(
-        key,
-        value
-    ) {
-
-        /* ----------------------------------------
-           Appearance
-           ---------------------------------------- */
-
-        if (
-            key ===
-            "appearance"
-        ) {
-
-            applyAppearance(
-                value
-            );
-
-        }
-
-
-        /* ----------------------------------------
-           Accent
-           ---------------------------------------- */
-
-        if (
-            key ===
-            "accentColor"
-        ) {
-
-            try {
-
-                document.documentElement
-                    .setAttribute(
-                        "data-haldo-accent",
-                        String(
-                            value
-                        )
-                    );
-
-            } catch (_) {}
-
-        }
-
-
-        /* ----------------------------------------
-           Animations
-           ---------------------------------------- */
-
-        if (
-            key ===
-            "animations"
-        ) {
-
-            try {
-
-                document.documentElement
-                    .setAttribute(
-                        "data-haldo-animations",
-                        value
-                            ? "enabled"
-                            : "disabled"
-                    );
-
-            } catch (_) {}
-
-        }
-
-
-        /* ----------------------------------------
-           Language
-           ---------------------------------------- */
-
-        if (
-            key ===
-            "language"
-        ) {
-
-            const language =
-                getLanguage();
-
-            if (
-                language &&
-                method(
-                    language,
-                    "setLanguage"
-                )
-            ) {
-
-                try {
-
-                    language.setLanguage(
-                        value
-                    );
-
-                } catch (_) {}
-
-            }
-
-        }
-
-
-        /* ----------------------------------------
-           Voice
-           ---------------------------------------- */
-
-        if (
-            key ===
-            "voiceEnabled"
-        ) {
-
-            const voice =
-                getVoice();
-
-            if (
-                voice &&
-                method(
-                    voice,
-                    value
-                        ? "enable"
-                        : "disable"
-                )
-            ) {
-
-                try {
-
-                    voice[
-                        value
-                            ? "enable"
-                            : "disable"
-                    ]();
-
-                } catch (_) {}
-
-            }
-
-        }
-
-    }
-
-
-    function applyAppearance(
-        appearance
-    ) {
-
-        let mode =
-            String(
-                appearance ||
-                "system"
-            );
-
-        if (
-            mode !== "dark" &&
-            mode !== "light" &&
-            mode !== "system"
-        ) {
-
-            mode =
-                "system";
-
-        }
-
-        try {
-
-            document.documentElement
-                .setAttribute(
-                    "data-haldo-appearance",
-                    mode
-                );
-
-        } catch (_) {}
-
-        if (
-            mode ===
-            "dark"
-        ) {
-
-            document.documentElement
-                .classList
-                .add(
-                    "haldo-dark"
-                );
-
-        } else if (
-            mode ===
-            "light"
-        ) {
-
-            document.documentElement
-                .classList
-                .remove(
-                    "haldo-dark"
-                );
-
-        } else {
-
-            try {
-
-                const dark =
-                    window.matchMedia &&
-                    window.matchMedia(
-                        "(prefers-color-scheme: dark)"
-                    ).matches;
-
-                document.documentElement
-                    .classList
-                    .toggle(
-                        "haldo-dark",
-                        !!dark
-                    );
-
-            } catch (_) {}
-
-        }
-
-    }
-
-
-    /* ========================================================
-       07 — CSS
-       ======================================================== */
-
-    function installStyles() {
-
-        if (
-            document.getElementById(
-                "haldo-settings-app-style"
-            )
-        ) {
-
-            return;
-
-        }
-
-
-        const style =
-            document.createElement(
-                "style"
-            );
-
-        style.id =
-            "haldo-settings-app-style";
-
-
-        style.textContent = `
-
-            .haldo-settings-app {
-                width: 100%;
-                height: 100%;
-                min-height: 100%;
-                display: flex;
-                flex-direction: column;
-                overflow: hidden;
-                background:
-                    linear-gradient(
-                        145deg,
-                        rgba(10, 18, 35, .98),
-                        rgba(18, 28, 52, .96)
-                    );
-                color: #f5f7fb;
-                font-family:
-                    Inter,
-                    -apple-system,
-                    BlinkMacSystemFont,
-                    "Segoe UI",
-                    sans-serif;
-            }
-
-            .haldo-settings-header {
-                min-height: 72px;
-                display: flex;
-                align-items: center;
-                gap: 16px;
-                padding: 14px 20px;
-                border-bottom:
-                    1px solid
-                    rgba(255,255,255,.10);
-                background:
-                    rgba(255,255,255,.035);
-                backdrop-filter:
-                    blur(18px);
-            }
-
-            .haldo-settings-logo {
-                width: 44px;
-                height: 44px;
-                border-radius: 13px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                background:
-                    linear-gradient(
-                        135deg,
-                        rgba(42,130,255,.35),
-                        rgba(132,72,255,.35)
-                    );
-                border:
-                    1px solid
-                    rgba(255,255,255,.12);
-                overflow: hidden;
-            }
-
-            .haldo-settings-logo img {
-                width: 100%;
-                height: 100%;
-                object-fit: contain;
-            }
-
-            .haldo-settings-heading {
-                flex: 1;
-                min-width: 0;
-            }
-
-            .haldo-settings-heading h1 {
-                margin: 0;
-                font-size: 20px;
-                font-weight: 700;
-            }
-
-            .haldo-settings-heading p {
-                margin: 4px 0 0;
-                color: rgba(255,255,255,.60);
-                font-size: 12px;
-            }
-
-            .haldo-settings-body {
-                flex: 1;
-                min-height: 0;
-                display: flex;
-                overflow: hidden;
-            }
-
-            .haldo-settings-nav {
-                width: 250px;
-                flex: 0 0 250px;
-                padding: 14px;
-                overflow-y: auto;
-                border-right:
-                    1px solid
-                    rgba(255,255,255,.08);
-                background:
-                    rgba(0,0,0,.12);
-            }
-
-            .haldo-settings-nav button {
-                width: 100%;
-                border: 0;
-                color: rgba(255,255,255,.78);
-                background: transparent;
-                text-align: left;
-                padding: 12px 13px;
-                margin-bottom: 5px;
-                border-radius: 12px;
-                cursor: pointer;
-                font: inherit;
-                transition:
-                    background .18s ease,
-                    color .18s ease,
-                    transform .18s ease;
-            }
-
-            .haldo-settings-nav button:hover {
-                background:
-                    rgba(255,255,255,.07);
-                color: white;
-                transform: translateX(2px);
-            }
-
-            .haldo-settings-nav button.active {
-                background:
-                    rgba(52,126,255,.20);
-                color: white;
-                box-shadow:
-                    inset 0 0 0 1px
-                    rgba(92,158,255,.18);
-            }
-
-            .haldo-settings-nav-icon {
-                display: inline-block;
-                width: 28px;
-            }
-
-            .haldo-settings-content {
-                flex: 1;
-                min-width: 0;
-                overflow-y: auto;
-                padding: 24px;
-            }
-
-            .haldo-settings-section-title {
-                margin: 0 0 8px;
-                font-size: 26px;
-                font-weight: 750;
-            }
-
-            .haldo-settings-section-description {
-                margin: 0 0 22px;
-                color: rgba(255,255,255,.58);
-                line-height: 1.55;
-            }
-
-            .haldo-settings-card {
-                border:
-                    1px solid
-                    rgba(255,255,255,.09);
-                border-radius: 18px;
-                padding: 6px;
-                margin-bottom: 16px;
-                background:
-                    rgba(255,255,255,.035);
-            }
-
-            .haldo-settings-row {
-                min-height: 64px;
-                display: flex;
-                align-items: center;
-                gap: 18px;
-                padding: 13px 15px;
-                border-bottom:
-                    1px solid
-                    rgba(255,255,255,.065);
-            }
-
-            .haldo-settings-row:last-child {
-                border-bottom: 0;
-            }
-
-            .haldo-settings-row-main {
-                flex: 1;
-                min-width: 0;
-            }
-
-            .haldo-settings-row-title {
-                font-size: 14px;
-                font-weight: 650;
-            }
-
-            .haldo-settings-row-description {
-                margin-top: 4px;
-                color: rgba(255,255,255,.50);
-                font-size: 12px;
-                line-height: 1.45;
-            }
-
-            .haldo-settings-select,
-            .haldo-settings-input {
-                min-width: 150px;
-                border:
-                    1px solid
-                    rgba(255,255,255,.12);
-                border-radius: 10px;
-                padding: 9px 11px;
-                background:
-                    rgba(0,0,0,.22);
-                color: white;
-                outline: none;
-            }
-
-            .haldo-settings-select:focus,
-            .haldo-settings-input:focus {
-                border-color:
-                    rgba(76,145,255,.65);
-            }
-
-            .haldo-settings-switch {
-                width: 48px;
-                height: 28px;
-                border-radius: 999px;
-                border: 0;
-                padding: 3px;
-                background:
-                    rgba(255,255,255,.16);
-                cursor: pointer;
-                transition:
-                    background .18s ease;
-            }
-
-            .haldo-settings-switch span {
-                display: block;
-                width: 22px;
-                height: 22px;
-                border-radius: 50%;
-                background: white;
-                transition:
-                    transform .18s ease;
-            }
-
-            .haldo-settings-switch.on {
-                background:
-                    rgb(55,135,255);
-            }
-
-            .haldo-settings-switch.on span {
-                transform:
-                    translateX(20px);
-            }
-
-            .haldo-settings-action {
-                border: 1px solid
-                    rgba(255,255,255,.12);
-                border-radius: 11px;
-                padding: 9px 14px;
-                background:
-                    rgba(255,255,255,.06);
-                color: white;
-                cursor: pointer;
-            }
-
-            .haldo-settings-action:hover {
-                background:
-                    rgba(255,255,255,.10);
-            }
-
-            .haldo-settings-danger {
-                border-color:
-                    rgba(255,80,90,.25);
-            }
-
-            .haldo-settings-status {
-                display: inline-flex;
-                align-items: center;
-                gap: 7px;
-                color: rgba(255,255,255,.58);
-                font-size: 12px;
-            }
-
-            .haldo-settings-status-dot {
-                width: 8px;
-                height: 8px;
-                border-radius: 50%;
-                background: #40d98b;
-            }
-
-            @media (max-width: 700px) {
-
-                .haldo-settings-body {
-                    flex-direction: column;
-                }
-
-                .haldo-settings-nav {
-                    width: auto;
-                    flex: 0 0 auto;
-                    border-right: 0;
-                    border-bottom:
-                        1px solid
-                        rgba(255,255,255,.08);
-                    display: flex;
-                    overflow-x: auto;
-                    gap: 6px;
-                }
-
-                .haldo-settings-nav button {
-                    width: auto;
-                    min-width: max-content;
-                    margin: 0;
-                }
-
-                .haldo-settings-content {
-                    padding: 18px;
-                }
-
-                .haldo-settings-row {
-                    align-items: flex-start;
-                    flex-direction: column;
-                    gap: 10px;
-                }
-
-                .haldo-settings-select,
-                .haldo-settings-input {
-                    width: 100%;
-                }
-
-            }
-
-        `;
-
-        document.head.appendChild(
-            style
-        );
-
-    }
-
-
-    /* ========================================================
-       08 — NAVIGATION
-       ======================================================== */
-
-    const sections = [
-
-        {
-            id:
-                "general",
-            icon:
-                "⚙️",
-            title:
-                "Allgemein",
-            description:
-                "Grundlegende Einstellungen für HalDo AI OS 20."
-        },
-
-        {
-            id:
-                "appearance",
-            icon:
-                "🎨",
-            title:
-                "Darstellung",
-            description:
-                "Aussehen, Farben und Animationen des Systems."
-        },
-
-        {
-            id:
-                "language",
-            icon:
-                "🌐",
-            title:
-                "Sprache",
-            description:
-                "Sprache der Oberfläche und Kommunikation."
-        },
-
-        {
-            id:
-                "voice",
-            icon:
-                "🗣️",
-            title:
-                "Stimme",
-            description:
-                "Sprachfunktionen und Sprachsteuerung."
-        },
-
-        {
-            id:
-                "ai",
-            icon:
-                "✦",
-            title:
-                "HalDo AI",
-            description:
-                "KI-Funktionen und AI-Verhalten."
-        },
-
-        {
-            id:
-                "keyboard",
-            icon:
-                "⌨️",
-            title:
-                "Tastatur",
-            description:
-                "Tastatur und Êzîdî-Eingabe."
-        },
-
-        {
-            id:
-                "notifications",
-            icon:
-                "🔔",
-            title:
-                "Benachrichtigungen",
-            description:
-                "System- und App-Benachrichtigungen."
-        },
-
-        {
-            id:
-                "privacy",
-            icon:
-                "🔐",
-            title:
-                "Datenschutz",
-            description:
-                "Datenschutz und App-Berechtigungen."
-        },
-
-        {
-            id:
-                "storage",
-            icon:
-                "💾",
-            title:
-                "Speicher",
-            description:
-                "Gespeicherte App- und Systemdaten."
-        },
-
-        {
-            id:
-                "system",
-            icon:
-                "🖥️",
-            title:
-                "System",
-            description:
-                "HalDo AI OS Systeminformationen."
-        },
-
-        {
-            id:
-                "diagnostics",
-            icon:
-                "🩺",
-            title:
-                "Diagnose",
-            description:
-                "System- und App-Gesundheitsprüfung."
-        }
-
-    ];
-
-
-    /* ========================================================
-       09 — HTML HELPERS
-       ======================================================== */
-
-    function escapeHTML(
+    function clean(
         value
     ) {
 
         return String(
             value ?? ""
-        )
-        .replace(
-            /&/g,
-            "&amp;"
-        )
-        .replace(
-            /</g,
-            "&lt;"
-        )
-        .replace(
-            />/g,
-            "&gt;"
-        )
-        .replace(
-            /"/g,
-            "&quot;"
-        )
-        .replace(
-            /'/g,
-            "&#039;"
-        );
+        ).trim();
 
     }
 
 
-    function switchHTML(
-        key
+    function now() {
+
+        return Date.now();
+
+    }
+
+
+    function emit(
+        event,
+        detail = {}
     ) {
 
-        const enabled =
-            !!state.settings[key];
+        const payload = {
 
-        return `
-            <button
-                class="haldo-settings-switch ${
-                    enabled ? "on" : ""
-                }"
-                data-setting-switch="${key}"
-                aria-pressed="${
-                    enabled
-                        ? "true"
-                        : "false"
-                }"
-                type="button"
-            >
-                <span></span>
-            </button>
-        `;
+            appId:
+                APP_ID,
 
-    }
+            source:
+                "settings",
 
+            timestamp:
+                now(),
 
-    function selectHTML(
-        key,
-        options
-    ) {
+            ...detail
 
-        const value =
-            state.settings[key];
+        };
 
-        return `
-            <select
-                class="haldo-settings-select"
-                data-setting-select="${key}"
-            >
-                ${
-                    options.map(
-                        option => `
-                            <option
-                                value="${escapeHTML(option.value)}"
-                                ${
-                                    String(
-                                        option.value
-                                    ) ===
-                                    String(
-                                        value
-                                    )
-                                        ? "selected"
-                                        : ""
-                                }
-                            >
-                                ${escapeHTML(option.label)}
-                            </option>
-                        `
-                    ).join("")
-                }
-            </select>
-        `;
 
-    }
+        try {
 
+            document.dispatchEvent(
+                new CustomEvent(
+                    "haldo:settings:" + event,
+                    {
+                        detail:
+                            payload
+                    }
+                )
+            );
 
-    function row(
-        title,
-        description,
-        control
-    ) {
+        } catch (_) {}
 
-        return `
-            <div class="haldo-settings-row">
-
-                <div
-                    class="haldo-settings-row-main"
-                >
-
-                    <div
-                        class="haldo-settings-row-title"
-                    >
-                        ${escapeHTML(title)}
-                    </div>
-
-                    <div
-                        class="haldo-settings-row-description"
-                    >
-                        ${escapeHTML(description)}
-                    </div>
-
-                </div>
-
-                ${control}
-
-            </div>
-        `;
-
-    }
-
-
-    /* ========================================================
-       10 — SECTION CONTENT
-       ======================================================== */
-
-    function renderGeneral() {
-
-        return `
-
-            <div class="haldo-settings-card">
-
-                ${row(
-                    "Automatisch starten",
-                    "HalDo Apps dürfen ihre benötigten Dienste beim Start vorbereiten.",
-                    switchHTML("autoStart")
-                )}
-
-                ${row(
-                    "Systemklänge",
-                    "Aktiviert oder deaktiviert allgemeine UI- und Systemklänge.",
-                    switchHTML("sounds")
-                )}
-
-            </div>
-
-            <div class="haldo-settings-card">
-
-                ${row(
-                    "HalDo AI",
-                    "Zentrale KI-Funktionen des Betriebssystems.",
-                    switchHTML("aiEnabled")
-                )}
-
-                ${row(
-                    "Sprachfunktionen",
-                    "Erlaubt HalDo AI OS die verfügbaren Sprachdienste zu verwenden.",
-                    switchHTML("voiceEnabled")
-                )}
-
-                ${row(
-                    "Benachrichtigungen",
-                    "System- und App-Benachrichtigungen aktivieren.",
-                    switchHTML("notifications")
-                )}
-
-            </div>
-
-        `;
-
-    }
-
-
-    function renderAppearance() {
-
-        return `
-
-            <div class="haldo-settings-card">
-
-                ${row(
-                    "Erscheinungsbild",
-                    "Wähle zwischen Hell, Dunkel oder der Systemeinstellung.",
-                    selectHTML(
-                        "appearance",
-                        [
-                            {
-                                value:
-                                    "system",
-                                label:
-                                    "System"
-                            },
-                            {
-                                value:
-                                    "dark",
-                                label:
-                                    "Dunkel"
-                            },
-                            {
-                                value:
-                                    "light",
-                                label:
-                                    "Hell"
-                            }
-                        ]
-                    )
-                )}
-
-                ${row(
-                    "Akzentfarbe",
-                    "Primäre Akzentfarbe für HalDo AI OS.",
-                    selectHTML(
-                        "accentColor",
-                        [
-                            {
-                                value:
-                                    "blue",
-                                label:
-                                    "HalDo Blue"
-                            },
-                            {
-                                value:
-                                    "red",
-                                label:
-                                    "Red"
-                            },
-                            {
-                                value:
-                                    "purple",
-                                label:
-                                    "Purple"
-                            },
-                            {
-                                value:
-                                    "cyan",
-                                label:
-                                    "Cyan"
-                            }
-                        ]
-                    )
-                )}
-
-                ${row(
-                    "Animationen",
-                    "Logo-, Fenster- und UI-Animationen.",
-                    switchHTML("animations")
-                )}
-
-            </div>
-
-        `;
-
-    }
-
-
-    function renderLanguage() {
-
-        return `
-
-            <div class="haldo-settings-card">
-
-                ${row(
-                    "Systemsprache",
-                    "Sprache der HalDo AI OS Oberfläche.",
-                    selectHTML(
-                        "language",
-                        [
-                            {
-                                value:
-                                    "de",
-                                label:
-                                    "Deutsch"
-                            },
-                            {
-                                value:
-                                    "en",
-                                label:
-                                    "English"
-                            },
-                            {
-                                value:
-                                    "ku",
-                                label:
-                                    "Kurdî"
-                            },
-                            {
-                                value:
-                                    "ar",
-                                label:
-                                    "العربية"
-                            },
-                            {
-                                value:
-                                    "tr",
-                                label:
-                                    "Türkçe"
-                            },
-                            {
-                                value:
-                                    "fr",
-                                label:
-                                    "Français"
-                            },
-                            {
-                                value:
-                                    "es",
-                                label:
-                                    "Español"
-                            }
-                        ]
-                    )
-                )}
-
-            </div>
-
-        `;
-
-    }
-
-
-    function renderVoice() {
-
-        const voice =
-            getVoice();
-
-        const connected =
-            !!voice;
-
-        return `
-
-            <div class="haldo-settings-card">
-
-                ${row(
-                    "Sprachsteuerung",
-                    "HalDo Voice verwenden, sofern der Sprachdienst verfügbar ist.",
-                    switchHTML("voiceEnabled")
-                )}
-
-                <div
-                    class="haldo-settings-row"
-                >
-
-                    <div
-                        class="haldo-settings-row-main"
-                    >
-
-                        <div
-                            class="haldo-settings-row-title"
-                        >
-                            Voice Service
-                        </div>
-
-                        <div
-                            class="haldo-settings-row-description"
-                        >
-                            Verbindung zum vorhandenen HalDo Voice-Modul.
-                        </div>
-
-                    </div>
-
-                    <span
-                        class="haldo-settings-status"
-                    >
-                        <span
-                            class="haldo-settings-status-dot"
-                            style="${
-                                connected
-                                    ? ""
-                                    : "background:#ff5964"
-                            }"
-                        ></span>
-
-                        ${
-                            connected
-                                ? "Verbunden"
-                                : "Nicht verfügbar"
-                        }
-
-                    </span>
-
-                </div>
-
-            </div>
-
-        `;
-
-    }
-
-
-    function renderAI() {
-
-        const ai =
-            getAI();
-
-        const connected =
-            !!ai;
-
-        return `
-
-            <div class="haldo-settings-card">
-
-                ${row(
-                    "HalDo AI aktiv",
-                    "Aktiviert die Verbindung zu den vorhandenen AI-Diensten.",
-                    switchHTML("aiEnabled")
-                )}
-
-                <div
-                    class="haldo-settings-row"
-                >
-
-                    <div
-                        class="haldo-settings-row-main"
-                    >
-
-                        <div
-                            class="haldo-settings-row-title"
-                        >
-                            AI Core
-                        </div>
-
-                        <div
-                            class="haldo-settings-row-description"
-                        >
-                            Status des zentralen HalDo AI Dienstes.
-                        </div>
-
-                    </div>
-
-                    <span
-                        class="haldo-settings-status"
-                    >
-                        <span
-                            class="haldo-settings-status-dot"
-                            style="${
-                                connected
-                                    ? ""
-                                    : "background:#ff5964"
-                            }"
-                        ></span>
-
-                        ${
-                            connected
-                                ? "Verbunden"
-                                : "Nicht verfügbar"
-                        }
-
-                    </span>
-
-                </div>
-
-            </div>
-
-        `;
-
-    }
-
-
-    function renderKeyboard() {
-
-        const keyboard =
-            getKeyboard();
-
-        const connected =
-            !!keyboard;
-
-        return `
-
-            <div class="haldo-settings-card">
-
-                ${row(
-                    "Aktive Tastatur",
-                    "Wähle die Standard-Eingabemethode.",
-                    selectHTML(
-                        "keyboard",
-                        [
-                            {
-                                value:
-                                    "standard",
-                                label:
-                                    "Standard"
-                            },
-                            {
-                                value:
-                                    "ezidi",
-                                label:
-                                    "Êzîdî"
-                            }
-                        ]
-                    )
-                )}
-
-                <div
-                    class="haldo-settings-row"
-                >
-
-                    <div
-                        class="haldo-settings-row-main"
-                    >
-
-                        <div
-                            class="haldo-settings-row-title"
-                        >
-                            Êzîdî Keyboard Service
-                        </div>
-
-                        <div
-                            class="haldo-settings-row-description"
-                        >
-                            Verbindung zum vorhandenen Êzîdî-Tastaturmodul.
-                        </div>
-
-                    </div>
-
-                    <span
-                        class="haldo-settings-status"
-                    >
-
-                        <span
-                            class="haldo-settings-status-dot"
-                            style="${
-                                connected
-                                    ? ""
-                                    : "background:#ff5964"
-                            }"
-                        ></span>
-
-                        ${
-                            connected
-                                ? "Verbunden"
-                                : "Nicht verfügbar"
-                        }
-
-                    </span>
-
-                </div>
-
-            </div>
-
-        `;
-
-    }
-
-
-    function renderNotifications() {
-
-        const notifications =
-            getNotifications();
-
-        return `
-
-            <div class="haldo-settings-card">
-
-                ${row(
-                    "Benachrichtigungen",
-                    "Systemweite Benachrichtigungen aktivieren.",
-                    switchHTML("notifications")
-                )}
-
-                <div
-                    class="haldo-settings-row"
-                >
-
-                    <div
-                        class="haldo-settings-row-main"
-                    >
-
-                        <div
-                            class="haldo-settings-row-title"
-                        >
-                            Notification Service
-                        </div>
-
-                        <div
-                            class="haldo-settings-row-description"
-                        >
-                            Verbindung zum vorhandenen Notification-System.
-                        </div>
-
-                    </div>
-
-                    <span
-                        class="haldo-settings-status"
-                    >
-
-                        <span
-                            class="haldo-settings-status-dot"
-                            style="${
-                                notifications
-                                    ? ""
-                                    : "background:#ff5964"
-                            }"
-                        ></span>
-
-                        ${
-                            notifications
-                                ? "Verbunden"
-                                : "Nicht verfügbar"
-                        }
-
-                    </span>
-
-                </div>
-
-            </div>
-
-        `;
-
-    }
-
-
-    function renderPrivacy() {
-
-        return `
-
-            <div class="haldo-settings-card">
-
-                ${row(
-                    "Privatsphäre-Modus",
-                    "Reduziert lokale Speicherung und optionale Systeminformationen.",
-                    switchHTML("privacyMode")
-                )}
-
-            </div>
-
-        `;
-
-    }
-
-
-    function renderStorage() {
-
-        const storage =
-            getStorage();
-
-        const connected =
-            !!storage;
-
-        return `
-
-            <div class="haldo-settings-card">
-
-                <div
-                    class="haldo-settings-row"
-                >
-
-                    <div
-                        class="haldo-settings-row-main"
-                    >
-
-                        <div
-                            class="haldo-settings-row-title"
-                        >
-                            Storage Service
-                        </div>
-
-                        <div
-                            class="haldo-settings-row-description"
-                        >
-                            Zentraler HalDo Storage-Dienst.
-                        </div>
-
-                    </div>
-
-                    <span
-                        class="haldo-settings-status"
-                    >
-
-                        <span
-                            class="haldo-settings-status-dot"
-                            style="${
-                                connected
-                                    ? ""
-                                    : "background:#ff5964"
-                            }"
-                        ></span>
-
-                        ${
-                            connected
-                                ? "Verbunden"
-                                : "Fallback / nicht verfügbar"
-                        }
-
-                    </span>
-
-                </div>
-
-                <div
-                    class="haldo-settings-row"
-                >
-
-                    <div
-                        class="haldo-settings-row-main"
-                    >
-
-                        <div
-                            class="haldo-settings-row-title"
-                        >
-                            Einstellungen zurücksetzen
-                        </div>
-
-                        <div
-                            class="haldo-settings-row-description"
-                        >
-                            Setzt ausschließlich die Einstellungen dieser App zurück.
-                        </div>
-
-                    </div>
-
-                    <button
-                        type="button"
-                        class="haldo-settings-action haldo-settings-danger"
-                        data-action="reset"
-                    >
-                        Zurücksetzen
-                    </button>
-
-                </div>
-
-            </div>
-
-        `;
-
-    }
-
-
-    function renderSystem() {
-
-        const system =
-            getSystem();
 
         const kernel =
             getKernel();
 
-        return `
-
-            <div class="haldo-settings-card">
-
-                <div
-                    class="haldo-settings-row"
-                >
-
-                    <div
-                        class="haldo-settings-row-main"
-                    >
-
-                        <div
-                            class="haldo-settings-row-title"
-                        >
-                            HalDo AI OS
-                        </div>
-
-                        <div
-                            class="haldo-settings-row-description"
-                        >
-                            Zentrale Betriebssysteminformationen.
-                        </div>
-
-                    </div>
-
-                    <span
-                        class="haldo-settings-status"
-                    >
-                        Version 20.0.0
-                    </span>
-
-                </div>
-
-                <div
-                    class="haldo-settings-row"
-                >
-
-                    <div
-                        class="haldo-settings-row-main"
-                    >
-
-                        <div
-                            class="haldo-settings-row-title"
-                        >
-                            System Service
-                        </div>
-
-                        <div
-                            class="haldo-settings-row-description"
-                        >
-                            Verbindung zum zentralen System.
-                        </div>
-
-                    </div>
-
-                    <span
-                        class="haldo-settings-status"
-                    >
-
-                        <span
-                            class="haldo-settings-status-dot"
-                            style="${
-                                system
-                                    ? ""
-                                    : "background:#ff5964"
-                            }"
-                        ></span>
-
-                        ${
-                            system
-                                ? "Verbunden"
-                                : "Nicht verfügbar"
-                        }
-
-                    </span>
-
-                </div>
-
-                <div
-                    class="haldo-settings-row"
-                >
-
-                    <div
-                        class="haldo-settings-row-main"
-                    >
-
-                        <div
-                            class="haldo-settings-row-title"
-                        >
-                            Kernel
-                        </div>
-
-                        <div
-                            class="haldo-settings-row-description"
-                        >
-                            Zentrale Kernel-Verbindung.
-                        </div>
-
-                    </div>
-
-                    <span
-                        class="haldo-settings-status"
-                    >
-
-                        <span
-                            class="haldo-settings-status-dot"
-                            style="${
-                                kernel
-                                    ? ""
-                                    : "background:#ff5964"
-                            }"
-                        ></span>
-
-                        ${
-                            kernel
-                                ? "Verbunden"
-                                : "Nicht verfügbar"
-                        }
-
-                    </span>
-
-                </div>
-
-            </div>
-
-        `;
-
-    }
-
-
-    function renderDiagnostics() {
-
-        const manager =
-            getAppManager();
-
-        let diagnostics =
-            null;
-
-        let health =
-            null;
 
         if (
-            manager &&
-            method(
-                manager,
-                "diagnostics"
+            kernel &&
+            hasMethod(
+                kernel,
+                "emit"
             )
         ) {
 
             try {
 
-                diagnostics =
-                    manager.diagnostics();
+                kernel.emit(
+                    "settings:" + event,
+                    payload
+                );
 
             } catch (_) {}
 
         }
 
-        if (
-            manager &&
-            method(
-                manager,
-                "healthCheck"
-            )
-        ) {
 
-            try {
-
-                health =
-                    manager.healthCheck();
-
-            } catch (_) {}
-
-        }
-
-        const healthy =
-            health &&
-            health.healthy === true;
-
-        return `
-
-            <div class="haldo-settings-card">
-
-                <div
-                    class="haldo-settings-row"
-                >
-
-                    <div
-                        class="haldo-settings-row-main"
-                    >
-
-                        <div
-                            class="haldo-settings-row-title"
-                        >
-                            Application Manager
-                        </div>
-
-                        <div
-                            class="haldo-settings-row-description"
-                        >
-                            ${
-                                diagnostics
-                                    ? (
-                                        diagnostics.appCount ??
-                                        0
-                                    ) +
-                                    " Apps registriert"
-                                    : "Diagnose nicht verfügbar"
-                            }
-                        </div>
-
-                    </div>
-
-                    <span
-                        class="haldo-settings-status"
-                    >
-
-                        <span
-                            class="haldo-settings-status-dot"
-                            style="${
-                                diagnostics
-                                    ? ""
-                                    : "background:#ff5964"
-                            }"
-                        ></span>
-
-                        ${
-                            diagnostics
-                                ? "Aktiv"
-                                : "Nicht verfügbar"
-                        }
-
-                    </span>
-
-                </div>
-
-                <div
-                    class="haldo-settings-row"
-                >
-
-                    <div
-                        class="haldo-settings-row-main"
-                    >
-
-                        <div
-                            class="haldo-settings-row-title"
-                        >
-                            System Health
-                        </div>
-
-                        <div
-                            class="haldo-settings-row-description"
-                        >
-                            Prüfung der wichtigsten OS-Verbindungen.
-                        </div>
-
-                    </div>
-
-                    <span
-                        class="haldo-settings-status"
-                    >
-
-                        <span
-                            class="haldo-settings-status-dot"
-                            style="${
-                                healthy
-                                    ? ""
-                                    : "background:#ff5964"
-                            }"
-                        ></span>
-
-                        ${
-                            healthy
-                                ? "Healthy"
-                                : "Prüfung erforderlich"
-                        }
-
-                    </span>
-
-                </div>
-
-            </div>
-
-            <div class="haldo-settings-card">
-
-                <div
-                    class="haldo-settings-row"
-                >
-
-                    <div
-                        class="haldo-settings-row-main"
-                    >
-
-                        <div
-                            class="haldo-settings-row-title"
-                        >
-                            Diagnose aktualisieren
-                        </div>
-
-                        <div
-                            class="haldo-settings-row-description"
-                        >
-                            Führt die Diagnose erneut aus.
-                        </div>
-
-                    </div>
-
-                    <button
-                        type="button"
-                        class="haldo-settings-action"
-                        data-action="diagnostics"
-                    >
-                        Prüfen
-                    </button>
-
-                </div>
-
-            </div>
-
-        `;
-
-    }
-
-
-    function renderSection() {
-
-        switch (
-            state.currentSection
-        ) {
-
-            case "appearance":
-                return renderAppearance();
-
-            case "language":
-                return renderLanguage();
-
-            case "voice":
-                return renderVoice();
-
-            case "ai":
-                return renderAI();
-
-            case "keyboard":
-                return renderKeyboard();
-
-            case "notifications":
-                return renderNotifications();
-
-            case "privacy":
-                return renderPrivacy();
-
-            case "storage":
-                return renderStorage();
-
-            case "system":
-                return renderSystem();
-
-            case "diagnostics":
-                return renderDiagnostics();
-
-            case "general":
-            default:
-                return renderGeneral();
-
-        }
+        return payload;
 
     }
 
 
     /* ========================================================
-       11 — RENDER
+       04 — DEFAULT SETTINGS
        ======================================================== */
 
-    function render() {
+    const DEFAULT_SETTINGS = {
 
-        if (!state.root) {
+        appearance: {
 
-            return;
-
-        }
-
-        const section =
-            sections.find(
-                item =>
-                    item.id ===
-                    state.currentSection
-            ) ||
-            sections[0];
-
-
-        state.root.innerHTML = `
-
-            <div
-                class="haldo-settings-app"
-            >
-
-                <header
-                    class="haldo-settings-header"
-                >
-
-                    <div
-                        class="haldo-settings-logo"
-                    >
-
-                        <img
-                            src="assets/logo/logo.png"
-                            alt="HalDo"
-                            onerror="
-                                this.style.display='none'
-                            "
-                        />
-
-                    </div>
-
-                    <div
-                        class="haldo-settings-heading"
-                    >
-
-                        <h1>
-                            ${APP_TITLE}
-                        </h1>
-
-                        <p>
-                            HalDo AI OS 20 · Professional Ultimate
-                        </p>
-
-                    </div>
-
-                </header>
-
-                <div
-                    class="haldo-settings-body"
-                >
-
-                    <nav
-                        class="haldo-settings-nav"
-                        aria-label="Settings Navigation"
-                    >
-
-                        ${
-                            sections.map(
-                                item => `
-                                    <button
-                                        type="button"
-                                        class="${
-                                            item.id ===
-                                            state.currentSection
-                                                ? "active"
-                                                : ""
-                                        }"
-                                        data-section="${
-                                            item.id
-                                        }"
-                                    >
-
-                                        <span
-                                            class="haldo-settings-nav-icon"
-                                        >
-                                            ${item.icon}
-                                        </span>
-
-                                        ${escapeHTML(
-                                            item.title
-                                        )}
-
-                                    </button>
-                                `
-                            ).join("")
-                        }
-
-                    </nav>
-
-                    <main
-                        class="haldo-settings-content"
-                    >
-
-                        <h2
-                            class="haldo-settings-section-title"
-                        >
-                            ${escapeHTML(
-                                section.title
-                            )}
-                        </h2>
-
-                        <p
-                            class="haldo-settings-section-description"
-                        >
-                            ${escapeHTML(
-                                section.description
-                            )}
-                        </p>
-
-                        ${renderSection()}
-
-                    </main>
-
-                </div>
-
-            </div>
-
-        `;
-
-        bindEvents();
-
-    }
-
-
-    /* ========================================================
-       12 — EVENTS / UI
-       ======================================================== */
-
-    function bindEvents() {
-
-        if (!state.root) {
-
-            return;
-
-        }
-
-
-        state.root
-            .querySelectorAll(
-                "[data-section]"
-            )
-            .forEach(
-                button => {
-
-                    button.addEventListener(
-                        "click",
-                        function () {
-
-                            state.currentSection =
-                                this.dataset.section ||
-                                "general";
-
-                            render();
-
-                            emit(
-                                "section-changed",
-                                {
-                                    section:
-                                        state.currentSection
-                                }
-                            );
-
-                        }
-                    );
-
-                }
-            );
-
-
-        state.root
-            .querySelectorAll(
-                "[data-setting-switch]"
-            )
-            .forEach(
-                button => {
-
-                    button.addEventListener(
-                        "click",
-                        function () {
-
-                            const key =
-                                this.dataset.settingSwitch;
-
-                            setSetting(
-                                key,
-                                !state.settings[key]
-                            );
-
-                        }
-                    );
-
-                }
-            );
-
-
-        state.root
-            .querySelectorAll(
-                "[data-setting-select]"
-            )
-            .forEach(
-                select => {
-
-                    select.addEventListener(
-                        "change",
-                        function () {
-
-                            const key =
-                                this.dataset.settingSelect;
-
-                            setSetting(
-                                key,
-                                this.value
-                            );
-
-                        }
-                    );
-
-                }
-            );
-
-
-        const resetButton =
-            state.root.querySelector(
-                '[data-action="reset"]'
-            );
-
-        if (resetButton) {
-
-            resetButton.addEventListener(
-                "click",
-                function () {
-
-                    resetSettings();
-
-                }
-            );
-
-        }
-
-
-        const diagnosticsButton =
-            state.root.querySelector(
-                '[data-action="diagnostics"]'
-            );
-
-        if (diagnosticsButton) {
-
-            diagnosticsButton.addEventListener(
-                "click",
-                function () {
-
-                    render();
-
-                    emit(
-                        "diagnostics-requested"
-                    );
-
-                }
-            );
-
-        }
-
-    }
-
-
-    /* ========================================================
-       13 — RESET
-       ======================================================== */
-
-    function getDefaultSettings() {
-
-        return {
-
-            language:
-                "de",
-
-            appearance:
+            theme:
                 "system",
 
             accentColor:
@@ -2919,53 +377,729 @@
             animations:
                 true,
 
+            transparency:
+                true,
+
+            glowEffects:
+                true,
+
+            reducedMotion:
+                false
+
+        },
+
+
+        language: {
+
+            interfaceLanguage:
+                "de",
+
+            aiLanguage:
+                "de",
+
+            voiceLanguage:
+                "de",
+
+            fallbackLanguage:
+                "en"
+
+        },
+
+
+        voice: {
+
+            enabled:
+                true,
+
+            autoSpeak:
+                false,
+
+            recognition:
+                true,
+
+            wakeWord:
+                false,
+
+            volume:
+                1,
+
+            rate:
+                1,
+
+            pitch:
+                1
+
+        },
+
+
+        ai: {
+
+            enabled:
+                true,
+
+            suggestions:
+                true,
+
+            conversationMemory:
+                true,
+
+            personalization:
+                true,
+
+            voiceAssistant:
+                true
+
+        },
+
+
+        keyboard: {
+
+            layout:
+                "qwertz",
+
+            ezidi:
+                true,
+
+            autocorrect:
+                true,
+
+            suggestions:
+                true,
+
+            haptic:
+                true
+
+        },
+
+
+        notifications: {
+
+            enabled:
+                true,
+
             sounds:
                 true,
 
-            voiceEnabled:
+            badges:
                 true,
 
-            aiEnabled:
+            desktop:
+                true
+
+        },
+
+
+        system: {
+
+            autoStartApps:
                 true,
 
-            notifications:
+            restoreApps:
                 true,
 
-            keyboard:
-                "standard",
-
-            autoStart:
+            diagnostics:
                 true,
 
-            privacyMode:
+            developerMode:
                 false
+
+        },
+
+
+        privacy: {
+
+            analytics:
+                false,
+
+            usageData:
+                false,
+
+            localHistory:
+                true
+
+        }
+
+    };
+
+
+    /* ========================================================
+       05 — INTERNAL STATE
+       ======================================================== */
+
+    const state = {
+
+        initialized:
+            false,
+
+        ready:
+            false,
+
+        opened:
+            false,
+
+        active:
+            false,
+
+        mounted:
+            false,
+
+        currentSection:
+            "overview",
+
+        settings:
+            clone(
+                DEFAULT_SETTINGS
+            ),
+
+        originalSettings:
+            null,
+
+        dirty:
+            false,
+
+        container:
+            null,
+
+        listeners:
+            new Map(),
+
+        statistics: {
+
+            opens:
+                0,
+
+            closes:
+                0,
+
+            saves:
+                0,
+
+            resets:
+                0,
+
+            changes:
+                0,
+
+            errors:
+                0
+
+        }
+
+    };
+
+
+    /* ========================================================
+       06 — EVENTS
+       ======================================================== */
+
+    function on(
+        event,
+        callback
+    ) {
+
+        if (
+            typeof callback !== "function"
+        ) {
+
+            return function () {};
+
+        }
+
+
+        if (
+            !state.listeners.has(event)
+        ) {
+
+            state.listeners.set(
+                event,
+                new Set()
+            );
+
+        }
+
+
+        const set =
+            state.listeners.get(event);
+
+        set.add(callback);
+
+
+        return function () {
+
+            off(
+                event,
+                callback
+            );
 
         };
 
     }
 
 
-    function resetSettings() {
+    function off(
+        event,
+        callback
+    ) {
 
-        state.settings =
-            getDefaultSettings();
+        const set =
+            state.listeners.get(event);
 
-        saveSettings();
+        if (!set) {
 
-        Object.keys(
-            state.settings
-        ).forEach(
-            key => {
+            return;
 
-                applySetting(
-                    key,
-                    state.settings[key]
-                );
+        }
+
+
+        set.delete(callback);
+
+
+        if (
+            set.size === 0
+        ) {
+
+            state.listeners.delete(event);
+
+        }
+
+    }
+
+
+    function notify(
+        event,
+        data = {}
+    ) {
+
+        const set =
+            state.listeners.get(event);
+
+        if (!set) {
+
+            return;
+
+        }
+
+
+        Array.from(set).forEach(
+            callback => {
+
+                try {
+
+                    callback(
+                        data
+                    );
+
+                } catch (error) {
+
+                    console.error(
+                        "[HalDo Settings]",
+                        error
+                    );
+
+                }
 
             }
         );
 
+    }
+
+
+    /* ========================================================
+       07 — ERROR HANDLING
+       ======================================================== */
+
+    function reportError(
+        exception,
+        context
+    ) {
+
+        state.statistics.errors +=
+            1;
+
+
+        const error =
+            exception instanceof Error
+                ? exception
+                : new Error(
+                    String(exception)
+                );
+
+
+        const record = {
+
+            name:
+                error.name,
+
+            message:
+                error.message,
+
+            stack:
+                error.stack ||
+                "",
+
+            context:
+                context ||
+                "Settings",
+
+            timestamp:
+                new Date().toISOString()
+
+        };
+
+
+        console.error(
+            "[HalDo Settings]",
+            record
+        );
+
+
+        emit(
+            "error",
+            {
+                error:
+                    record
+            }
+        );
+
+
+        const kernel =
+            getKernel();
+
+
+        if (
+            kernel &&
+            hasMethod(
+                kernel,
+                "reportError"
+            )
+        ) {
+
+            try {
+
+                kernel.reportError(
+                    error,
+                    "Settings: " +
+                    (
+                        context ||
+                        "unknown"
+                    )
+                );
+
+            } catch (_) {}
+
+        }
+
+
+        return record;
+
+    }
+
+
+    /* ========================================================
+       08 — STORAGE
+       ======================================================== */
+
+    const STORAGE_KEY =
+        "haldo.os20.settings";
+
+
+    function mergeDeep(
+        base,
+        changes
+    ) {
+
+        const result =
+            clone(base);
+
+
+        Object.keys(
+            changes || {}
+        ).forEach(
+            key => {
+
+                const value =
+                    changes[key];
+
+
+                if (
+                    value &&
+                    typeof value === "object" &&
+                    !Array.isArray(value) &&
+                    result[key] &&
+                    typeof result[key] === "object" &&
+                    !Array.isArray(result[key])
+                ) {
+
+                    result[key] =
+                        mergeDeep(
+                            result[key],
+                            value
+                        );
+
+                } else {
+
+                    result[key] =
+                        clone(value);
+
+                }
+
+            }
+        );
+
+
+        return result;
+
+    }
+
+
+    async function storageGet() {
+
+        const storage =
+            getStorage();
+
+
+        try {
+
+            if (
+                storage &&
+                hasMethod(
+                    storage,
+                    "get"
+                )
+            ) {
+
+                const value =
+                    storage.get(
+                        STORAGE_KEY
+                    );
+
+
+                if (
+                    value &&
+                    typeof value.then ===
+                    "function"
+                ) {
+
+                    return await value;
+
+                }
+
+
+                return value;
+
+            }
+
+
+            const raw =
+                window.localStorage.getItem(
+                    STORAGE_KEY
+                );
+
+
+            return raw
+                ? JSON.parse(raw)
+                : null;
+
+        } catch (error) {
+
+            reportError(
+                error,
+                "Settings Storage Read"
+            );
+
+            return null;
+
+        }
+
+    }
+
+
+    async function storageSet(
+        value
+    ) {
+
+        const storage =
+            getStorage();
+
+
+        try {
+
+            if (
+                storage &&
+                hasMethod(
+                    storage,
+                    "set"
+                )
+            ) {
+
+                const result =
+                    storage.set(
+                        STORAGE_KEY,
+                        value
+                    );
+
+
+                if (
+                    result &&
+                    typeof result.then ===
+                    "function"
+                ) {
+
+                    await result;
+
+                }
+
+                return true;
+
+            }
+
+
+            window.localStorage.setItem(
+                STORAGE_KEY,
+                JSON.stringify(value)
+            );
+
+
+            return true;
+
+        } catch (error) {
+
+            reportError(
+                error,
+                "Settings Storage Write"
+            );
+
+            return false;
+
+        }
+
+    }
+
+
+    async function loadSettings() {
+
+        const stored =
+            await storageGet();
+
+
+        state.settings =
+            mergeDeep(
+                DEFAULT_SETTINGS,
+                stored &&
+                typeof stored === "object"
+                    ? stored
+                    : {}
+            );
+
+
+        state.originalSettings =
+            clone(
+                state.settings
+            );
+
+
+        state.dirty =
+            false;
+
+
+        emit(
+            "settings-loaded",
+            {
+                settings:
+                    clone(
+                        state.settings
+                    )
+            }
+        );
+
+
+        return clone(
+            state.settings
+        );
+
+    }
+
+
+    async function saveSettings() {
+
+        const success =
+            await storageSet(
+                state.settings
+            );
+
+
+        if (!success) {
+
+            return false;
+
+        }
+
+
+        state.originalSettings =
+            clone(
+                state.settings
+            );
+
+
+        state.dirty =
+            false;
+
+
+        state.statistics.saves +=
+            1;
+
+
+        emit(
+            "settings-saved",
+            {
+                settings:
+                    clone(
+                        state.settings
+                    )
+            }
+        );
+
+
+        notify(
+            "saved",
+            {
+                settings:
+                    clone(
+                        state.settings
+                    )
+            }
+        );
+
+
+        return true;
+
+    }
+
+
+    async function resetSettings() {
+
+        state.settings =
+            clone(
+                DEFAULT_SETTINGS
+            );
+
+
+        state.dirty =
+            true;
+
+
+        state.statistics.resets +=
+            1;
+
+
+        applyAllSettings();
+
+
+        await saveSettings();
+
+
         render();
+
 
         emit(
             "settings-reset",
@@ -2977,48 +1111,665 @@
             }
         );
 
-        notify(
-            "HalDo Einstellungen wurden zurückgesetzt."
-        );
+
+        return true;
 
     }
 
 
     /* ========================================================
-       14 — NOTIFICATION
+       09 — SETTING ACCESS
        ======================================================== */
 
-    function notify(
-        message
+    function getSetting(
+        path,
+        fallback = undefined
     ) {
 
-        const notifications =
-            getNotifications();
+        const parts =
+            String(
+                path || ""
+            )
+            .split(".")
+            .filter(Boolean);
+
+
+        let value =
+            state.settings;
+
+
+        for (
+            const part of parts
+        ) {
+
+            if (
+                value === null ||
+                value === undefined ||
+                !Object.prototype.hasOwnProperty.call(
+                    value,
+                    part
+                )
+            ) {
+
+                return fallback;
+
+            }
+
+
+            value =
+                value[part];
+
+        }
+
+
+        return value;
+
+    }
+
+
+    function setSetting(
+        path,
+        value,
+        options = {}
+    ) {
+
+        const parts =
+            String(
+                path || ""
+            )
+            .split(".")
+            .filter(Boolean);
+
 
         if (
-            notifications &&
-            method(
-                notifications,
-                "show"
+            parts.length === 0
+        ) {
+
+            return false;
+
+        }
+
+
+        let target =
+            state.settings;
+
+
+        for (
+            let index = 0;
+            index < parts.length - 1;
+            index += 1
+        ) {
+
+            const part =
+                parts[index];
+
+
+            if (
+                !target[part] ||
+                typeof target[part] !== "object"
+            ) {
+
+                target[part] = {};
+
+            }
+
+
+            target =
+                target[part];
+
+        }
+
+
+        const finalKey =
+            parts[parts.length - 1];
+
+
+        target[finalKey] =
+            clone(value);
+
+
+        state.dirty =
+            true;
+
+
+        state.statistics.changes +=
+            1;
+
+
+        if (
+            options.apply !== false
+        ) {
+
+            applySetting(
+                path,
+                value
+            );
+
+        }
+
+
+        emit(
+            "setting-changed",
+            {
+
+                path,
+
+                value:
+                    clone(value),
+
+                settings:
+                    clone(
+                        state.settings
+                    )
+
+            }
+        );
+
+
+        notify(
+            "change",
+            {
+                path,
+                value
+            }
+        );
+
+
+        return true;
+
+    }
+
+
+    /* ========================================================
+       10 — SYSTEM INTEGRATION
+       ======================================================== */
+
+    function applyAppearance() {
+
+        const appearance =
+            state.settings.appearance;
+
+
+        const root =
+            document.documentElement;
+
+
+        if (!root) {
+
+            return;
+
+        }
+
+
+        root.dataset.haldoTheme =
+            appearance.theme;
+
+        root.dataset.haldoAccent =
+            appearance.accentColor;
+
+        root.dataset.haldoAnimations =
+            appearance.animations
+                ? "on"
+                : "off";
+
+        root.dataset.haldoTransparency =
+            appearance.transparency
+                ? "on"
+                : "off";
+
+        root.dataset.haldoGlow =
+            appearance.glowEffects
+                ? "on"
+                : "off";
+
+
+        if (
+            appearance.reducedMotion
+        ) {
+
+            root.classList.add(
+                "haldo-reduced-motion"
+            );
+
+        } else {
+
+            root.classList.remove(
+                "haldo-reduced-motion"
+            );
+
+        }
+
+
+        emit(
+            "appearance-applied",
+            {
+                appearance:
+                    clone(
+                        appearance
+                    )
+            }
+        );
+
+    }
+
+
+    function applyLanguage() {
+
+        const language =
+            getLanguage();
+
+
+        const settings =
+            state.settings.language;
+
+
+        if (!language) {
+
+            return;
+
+        }
+
+
+        const interfaceLanguage =
+            settings.interfaceLanguage;
+
+
+        const methods = [
+
+            "setLanguage",
+
+            "changeLanguage",
+
+            "setCurrentLanguage",
+
+            "useLanguage"
+
+        ];
+
+
+        for (
+            const method of methods
+        ) {
+
+            if (
+                hasMethod(
+                    language,
+                    method
+                )
+            ) {
+
+                try {
+
+                    language[method](
+                        interfaceLanguage
+                    );
+
+                    break;
+
+                } catch (_) {}
+
+            }
+
+        }
+
+
+        emit(
+            "language-applied",
+            {
+                language:
+                    clone(
+                        settings
+                    )
+            }
+        );
+
+    }
+
+
+    function applyVoice() {
+
+        const voice =
+            getVoice();
+
+
+        const settings =
+            state.settings.voice;
+
+
+        if (!voice) {
+
+            return;
+
+        }
+
+
+        if (
+            hasMethod(
+                voice,
+                "setEnabled"
             )
         ) {
 
             try {
 
-                notifications.show(
-                    message
+                voice.setEnabled(
+                    !!settings.enabled
                 );
-
-                return;
 
             } catch (_) {}
 
         }
 
+
+        if (
+            hasMethod(
+                voice,
+                "setVolume"
+            )
+        ) {
+
+            try {
+
+                voice.setVolume(
+                    settings.volume
+                );
+
+            } catch (_) {}
+
+        }
+
+
+        if (
+            hasMethod(
+                voice,
+                "setRate"
+            )
+        ) {
+
+            try {
+
+                voice.setRate(
+                    settings.rate
+                );
+
+            } catch (_) {}
+
+        }
+
+
+        if (
+            hasMethod(
+                voice,
+                "setPitch"
+            )
+        ) {
+
+            try {
+
+                voice.setPitch(
+                    settings.pitch
+                );
+
+            } catch (_) {}
+
+        }
+
+
         emit(
-            "notification",
+            "voice-applied",
             {
-                message
+                voice:
+                    clone(
+                        settings
+                    )
+            }
+        );
+
+    }
+
+
+    function applyKeyboard() {
+
+        const keyboard =
+            getKeyboard();
+
+
+        const settings =
+            state.settings.keyboard;
+
+
+        if (!keyboard) {
+
+            return;
+
+        }
+
+
+        if (
+            hasMethod(
+                keyboard,
+                "setLayout"
+            )
+        ) {
+
+            try {
+
+                keyboard.setLayout(
+                    settings.layout
+                );
+
+            } catch (_) {}
+
+        }
+
+
+        if (
+            hasMethod(
+                keyboard,
+                "setEnabled"
+            )
+        ) {
+
+            try {
+
+                keyboard.setEnabled(
+                    !!settings.ezidi
+                );
+
+            } catch (_) {}
+
+        }
+
+
+        emit(
+            "keyboard-applied",
+            {
+                keyboard:
+                    clone(
+                        settings
+                    )
+            }
+        );
+
+    }
+
+
+    function applyAI() {
+
+        const ai =
+            getAI();
+
+
+        const settings =
+            state.settings.ai;
+
+
+        if (!ai) {
+
+            return;
+
+        }
+
+
+        if (
+            hasMethod(
+                ai,
+                "setEnabled"
+            )
+        ) {
+
+            try {
+
+                ai.setEnabled(
+                    !!settings.enabled
+                );
+
+            } catch (_) {}
+
+        }
+
+
+        if (
+            hasMethod(
+                ai,
+                "setMemoryEnabled"
+            )
+        ) {
+
+            try {
+
+                ai.setMemoryEnabled(
+                    !!settings.conversationMemory
+                );
+
+            } catch (_) {}
+
+        }
+
+
+        emit(
+            "ai-applied",
+            {
+                ai:
+                    clone(
+                        settings
+                    )
+            }
+        );
+
+    }
+
+
+    function applyNotifications() {
+
+        const notifications =
+            getNotifications();
+
+
+        const settings =
+            state.settings.notifications;
+
+
+        if (!notifications) {
+
+            return;
+
+        }
+
+
+        if (
+            hasMethod(
+                notifications,
+                "setEnabled"
+            )
+        ) {
+
+            try {
+
+                notifications.setEnabled(
+                    !!settings.enabled
+                );
+
+            } catch (_) {}
+
+        }
+
+
+        emit(
+            "notifications-applied",
+            {
+                notifications:
+                    clone(
+                        settings
+                    )
+            }
+        );
+
+    }
+
+
+    function applySetting(
+        path
+    ) {
+
+        const section =
+            String(
+                path || ""
+            )
+            .split(".")[0];
+
+
+        switch (section) {
+
+            case "appearance":
+                applyAppearance();
+                break;
+
+            case "language":
+                applyLanguage();
+                break;
+
+            case "voice":
+                applyVoice();
+                break;
+
+            case "keyboard":
+                applyKeyboard();
+                break;
+
+            case "ai":
+                applyAI();
+                break;
+
+            case "notifications":
+                applyNotifications();
+                break;
+
+            default:
+                break;
+
+        }
+
+    }
+
+
+    function applyAllSettings() {
+
+        applyAppearance();
+        applyLanguage();
+        applyVoice();
+        applyKeyboard();
+        applyAI();
+        applyNotifications();
+
+
+        emit(
+            "all-settings-applied",
+            {
+                settings:
+                    clone(
+                        state.settings
+                    )
             }
         );
 
@@ -3026,12 +1777,1923 @@
 
 
     /* ========================================================
-       15 — MOUNT
+       11 — SETTINGS SECTIONS
        ======================================================== */
 
-    function mount(
-        container
+    const SECTIONS = [
+
+        {
+            id:
+                "overview",
+
+            title:
+                "Übersicht",
+
+            icon:
+                "⚙",
+
+            description:
+                "Zentrale Einstellungen von HalDo AI OS."
+        },
+
+        {
+            id:
+                "appearance",
+
+            title:
+                "Darstellung",
+
+            icon:
+                "◐",
+
+            description:
+                "Theme, Farben, Animationen und Effekte."
+        },
+
+        {
+            id:
+                "language",
+
+            title:
+                "Sprache",
+
+            icon:
+                "文",
+
+            description:
+                "System-, AI- und Sprachassistent-Sprache."
+        },
+
+        {
+            id:
+                "ai",
+
+            title:
+                "HalDo AI",
+
+            icon:
+                "✦",
+
+            description:
+                "AI, Gedächtnis, Vorschläge und Assistenz."
+        },
+
+        {
+            id:
+                "voice",
+
+            title:
+                "Stimme",
+
+            icon:
+                "◉",
+
+            description:
+                "Sprachausgabe und Sprachsteuerung."
+        },
+
+        {
+            id:
+                "keyboard",
+
+            title:
+                "Tastatur",
+
+            icon:
+                "⌨",
+
+            description:
+                "Layouts einschließlich Êzîdî-Tastatur."
+        },
+
+        {
+            id:
+                "notifications",
+
+            title:
+                "Benachrichtigungen",
+
+            icon:
+                "◇",
+
+            description:
+                "Systembenachrichtigungen und Hinweise."
+        },
+
+        {
+            id:
+                "system",
+
+            title:
+                "System",
+
+            icon:
+                "▣",
+
+            description:
+                "Systemverhalten und Startoptionen."
+        },
+
+        {
+            id:
+                "privacy",
+
+            title:
+                "Datenschutz",
+
+            icon:
+                "◈",
+
+            description:
+                "Lokale Daten und Privatsphäre."
+        },
+
+        {
+            id:
+                "about",
+
+            title:
+                "Über HalDo",
+
+            icon:
+                "ⓘ",
+
+            description:
+                "Version und Systeminformationen."
+        }
+
+    ];
+
+
+    /* ========================================================
+       12 — UI CREATION
+       ======================================================== */
+
+    function createElement(
+        tag,
+        className,
+        text
     ) {
+
+        const element =
+            document.createElement(
+                tag
+            );
+
+
+        if (className) {
+
+            element.className =
+                className;
+
+        }
+
+
+        if (
+            text !== undefined
+        ) {
+
+            element.textContent =
+                text;
+
+        }
+
+
+        return element;
+
+    }
+
+
+    function createToggle(
+        path,
+        label,
+        description
+    ) {
+
+        const wrapper =
+            createElement(
+                "label",
+                "haldo-settings-row"
+            );
+
+
+        const text =
+            createElement(
+                "div",
+                "haldo-settings-row-text"
+            );
+
+
+        const title =
+            createElement(
+                "div",
+                "haldo-settings-row-title",
+                label
+            );
+
+
+        const desc =
+            createElement(
+                "div",
+                "haldo-settings-row-description",
+                description
+            );
+
+
+        text.appendChild(title);
+        text.appendChild(desc);
+
+
+        const input =
+            document.createElement(
+                "input"
+            );
+
+
+        input.type =
+            "checkbox";
+
+        input.checked =
+            !!getSetting(
+                path
+            );
+
+
+        input.dataset.setting =
+            path;
+
+
+        input.addEventListener(
+            "change",
+            () => {
+
+                setSetting(
+                    path,
+                    input.checked
+                );
+
+            }
+        );
+
+
+        wrapper.appendChild(text);
+        wrapper.appendChild(input);
+
+
+        return wrapper;
+
+    }
+
+
+    function createSelect(
+        path,
+        label,
+        description,
+        options
+    ) {
+
+        const wrapper =
+            createElement(
+                "div",
+                "haldo-settings-row"
+            );
+
+
+        const text =
+            createElement(
+                "div",
+                "haldo-settings-row-text"
+            );
+
+
+        text.appendChild(
+            createElement(
+                "div",
+                "haldo-settings-row-title",
+                label
+            )
+        );
+
+
+        text.appendChild(
+            createElement(
+                "div",
+                "haldo-settings-row-description",
+                description
+            )
+        );
+
+
+        const select =
+            document.createElement(
+                "select"
+            );
+
+
+        select.dataset.setting =
+            path;
+
+
+        const current =
+            getSetting(
+                path
+            );
+
+
+        options.forEach(
+            option => {
+
+                const item =
+                    document.createElement(
+                        "option"
+                    );
+
+
+                item.value =
+                    option.value;
+
+                item.textContent =
+                    option.label;
+
+
+                if (
+                    option.value ===
+                    current
+                ) {
+
+                    item.selected =
+                        true;
+
+                }
+
+
+                select.appendChild(
+                    item
+                );
+
+            }
+        );
+
+
+        select.addEventListener(
+            "change",
+            () => {
+
+                setSetting(
+                    path,
+                    select.value
+                );
+
+            }
+        );
+
+
+        wrapper.appendChild(text);
+        wrapper.appendChild(select);
+
+
+        return wrapper;
+
+    }
+
+
+    function createSlider(
+        path,
+        label,
+        description,
+        min,
+        max,
+        step
+    ) {
+
+        const wrapper =
+            createElement(
+                "div",
+                "haldo-settings-row"
+            );
+
+
+        const text =
+            createElement(
+                "div",
+                "haldo-settings-row-text"
+            );
+
+
+        text.appendChild(
+            createElement(
+                "div",
+                "haldo-settings-row-title",
+                label
+            )
+        );
+
+
+        text.appendChild(
+            createElement(
+                "div",
+                "haldo-settings-row-description",
+                description
+            )
+        );
+
+
+        const input =
+            document.createElement(
+                "input"
+            );
+
+
+        input.type =
+            "range";
+
+        input.min =
+            String(min);
+
+        input.max =
+            String(max);
+
+        input.step =
+            String(step);
+
+        input.value =
+            String(
+                getSetting(
+                    path,
+                    min
+                )
+            );
+
+
+        input.dataset.setting =
+            path;
+
+
+        input.addEventListener(
+            "input",
+            () => {
+
+                setSetting(
+                    path,
+                    Number(
+                        input.value
+                    )
+                );
+
+            }
+        );
+
+
+        wrapper.appendChild(text);
+        wrapper.appendChild(input);
+
+
+        return wrapper;
+
+    }
+
+
+    /* ========================================================
+       13 — SECTION RENDERING
+       ======================================================== */
+
+    function renderOverview(
+        content
+    ) {
+
+        const title =
+            createElement(
+                "h2",
+                "",
+                "HalDo AI OS Einstellungen"
+            );
+
+
+        const description =
+            createElement(
+                "p",
+                "",
+                "Alle wichtigen System-, AI-, Sprach-, Tastatur- und Darstellungseinstellungen an einem zentralen Ort."
+            );
+
+
+        content.appendChild(title);
+        content.appendChild(description);
+
+
+        const grid =
+            createElement(
+                "div",
+                "haldo-settings-overview-grid"
+            );
+
+
+        SECTIONS
+            .filter(
+                section =>
+                    section.id !==
+                    "overview"
+            )
+            .forEach(
+                section => {
+
+                    const card =
+                        createElement(
+                            "button",
+                            "haldo-settings-card"
+                        );
+
+
+                    card.type =
+                        "button";
+
+
+                    const icon =
+                        createElement(
+                            "span",
+                            "haldo-settings-card-icon",
+                            section.icon
+                        );
+
+
+                    const cardTitle =
+                        createElement(
+                            "strong",
+                            "",
+                            section.title
+                        );
+
+
+                    const cardDescription =
+                        createElement(
+                            "span",
+                            "",
+                            section.description
+                        );
+
+
+                    card.appendChild(icon);
+                    card.appendChild(cardTitle);
+                    card.appendChild(
+                        cardDescription
+                    );
+
+
+                    card.addEventListener(
+                        "click",
+                        () => {
+
+                            navigate(
+                                section.id
+                            );
+
+                        }
+                    );
+
+
+                    grid.appendChild(
+                        card
+                    );
+
+                }
+            );
+
+
+        content.appendChild(grid);
+
+    }
+
+
+    function renderAppearance(
+        content
+    ) {
+
+        content.appendChild(
+            createElement(
+                "h2",
+                "",
+                "Darstellung"
+            )
+        );
+
+
+        content.appendChild(
+            createSelect(
+                "appearance.theme",
+                "Theme",
+                "Wähle die Darstellung des HalDo AI OS.",
+                [
+                    {
+                        value:
+                            "system",
+                        label:
+                            "System"
+                    },
+                    {
+                        value:
+                            "light",
+                        label:
+                            "Hell"
+                    },
+                    {
+                        value:
+                            "dark",
+                        label:
+                            "Dunkel"
+                    }
+                ]
+            )
+        );
+
+
+        content.appendChild(
+            createSelect(
+                "appearance.accentColor",
+                "Akzentfarbe",
+                "Zentrale Farbe für die HalDo-Oberfläche.",
+                [
+                    {
+                        value:
+                            "blue",
+                        label:
+                            "Blau"
+                    },
+                    {
+                        value:
+                            "red",
+                        label:
+                            "Rot"
+                    },
+                    {
+                        value:
+                            "purple",
+                        label:
+                            "Violett"
+                    },
+                    {
+                        value:
+                            "cyan",
+                        label:
+                            "Cyan"
+                    },
+                    {
+                        value:
+                            "green",
+                        label:
+                            "Grün"
+                    }
+                ]
+            )
+        );
+
+
+        content.appendChild(
+            createToggle(
+                "appearance.animations",
+                "Animationen",
+                "Aktiviert flüssige Bewegungen innerhalb des Systems."
+            )
+        );
+
+
+        content.appendChild(
+            createToggle(
+                "appearance.transparency",
+                "Transparenz",
+                "Verwendet transparente und gläserne Oberflächen."
+            )
+        );
+
+
+        content.appendChild(
+            createToggle(
+                "appearance.glowEffects",
+                "Leuchteffekte",
+                "Aktiviert HalDo-Glow- und Lichtanimationen."
+            )
+        );
+
+
+        content.appendChild(
+            createToggle(
+                "appearance.reducedMotion",
+                "Weniger Bewegung",
+                "Reduziert Animationen für eine ruhigere Oberfläche."
+            )
+        );
+
+    }
+
+
+    function renderLanguage(
+        content
+    ) {
+
+        content.appendChild(
+            createElement(
+                "h2",
+                "",
+                "Sprache"
+            )
+        );
+
+
+        content.appendChild(
+            createSelect(
+                "language.interfaceLanguage",
+                "Systemsprache",
+                "Sprache der HalDo-Oberfläche.",
+                [
+                    {
+                        value:
+                            "de",
+                        label:
+                            "Deutsch"
+                    },
+                    {
+                        value:
+                            "en",
+                        label:
+                            "English"
+                    },
+                    {
+                        value:
+                            "ku",
+                        label:
+                            "Kurdî"
+                    },
+                    {
+                        value:
+                            "ar",
+                        label:
+                            "العربية"
+                    },
+                    {
+                        value:
+                            "tr",
+                        label:
+                            "Türkçe"
+                    },
+                    {
+                        value:
+                            "fr",
+                        label:
+                            "Français"
+                    },
+                    {
+                        value:
+                            "es",
+                        label:
+                            "Español"
+                    }
+                ]
+            )
+        );
+
+
+        content.appendChild(
+            createSelect(
+                "language.aiLanguage",
+                "AI-Sprache",
+                "Sprache für die Unterhaltung mit HalDo AI.",
+                [
+                    {
+                        value:
+                            "de",
+                        label:
+                            "Deutsch"
+                    },
+                    {
+                        value:
+                            "en",
+                        label:
+                            "English"
+                    },
+                    {
+                        value:
+                            "ku",
+                        label:
+                            "Kurdî"
+                    },
+                    {
+                        value:
+                            "ar",
+                        label:
+                            "العربية"
+                    },
+                    {
+                        value:
+                            "tr",
+                        label:
+                            "Türkçe"
+                    }
+                ]
+            )
+        );
+
+
+        content.appendChild(
+            createSelect(
+                "language.voiceLanguage",
+                "Sprachsprache",
+                "Sprache der Spracherkennung und Sprachausgabe.",
+                [
+                    {
+                        value:
+                            "de",
+                        label:
+                            "Deutsch"
+                    },
+                    {
+                        value:
+                            "en",
+                        label:
+                            "English"
+                    },
+                    {
+                        value:
+                            "ku",
+                        label:
+                            "Kurdî"
+                    },
+                    {
+                        value:
+                            "ar",
+                        label:
+                            "العربية"
+                    },
+                    {
+                        value:
+                            "tr",
+                        label:
+                            "Türkçe"
+                    }
+                ]
+            )
+        );
+
+    }
+
+
+    function renderAI(
+        content
+    ) {
+
+        content.appendChild(
+            createElement(
+                "h2",
+                "",
+                "HalDo AI"
+            )
+        );
+
+
+        content.appendChild(
+            createToggle(
+                "ai.enabled",
+                "HalDo AI aktiv",
+                "Aktiviert die zentrale HalDo AI-Funktion."
+            )
+        );
+
+
+        content.appendChild(
+            createToggle(
+                "ai.suggestions",
+                "Intelligente Vorschläge",
+                "HalDo kann kontextbezogene Vorschläge anbieten."
+            )
+        );
+
+
+        content.appendChild(
+            createToggle(
+                "ai.conversationMemory",
+                "Gesprächsgedächtnis",
+                "Ermöglicht die Verwendung gespeicherter Gesprächszustände."
+            )
+        );
+
+
+        content.appendChild(
+            createToggle(
+                "ai.personalization",
+                "Personalisierung",
+                "Passt Antworten und Systemverhalten an gespeicherte Einstellungen an."
+            )
+        );
+
+
+        content.appendChild(
+            createToggle(
+                "ai.voiceAssistant",
+                "AI-Sprachassistent",
+                "Erlaubt die Verbindung von HalDo AI mit der Sprachfunktion."
+            )
+        );
+
+    }
+
+
+    function renderVoice(
+        content
+    ) {
+
+        content.appendChild(
+            createElement(
+                "h2",
+                "",
+                "Stimme"
+            )
+        );
+
+
+        content.appendChild(
+            createToggle(
+                "voice.enabled",
+                "Sprachsystem aktiv",
+                "Aktiviert die zentrale HalDo-Sprachfunktion."
+            )
+        );
+
+
+        content.appendChild(
+            createToggle(
+                "voice.autoSpeak",
+                "Automatisch sprechen",
+                "HalDo kann Antworten automatisch vorlesen."
+            )
+        );
+
+
+        content.appendChild(
+            createToggle(
+                "voice.recognition",
+                "Spracherkennung",
+                "Erlaubt Sprachbefehle und Spracheingabe."
+            )
+        );
+
+
+        content.appendChild(
+            createToggle(
+                "voice.wakeWord",
+                "Wake Word",
+                "Bereitet die Sprachaktivierung über ein Schlüsselwort vor."
+            )
+        );
+
+
+        content.appendChild(
+            createSlider(
+                "voice.volume",
+                "Lautstärke",
+                "Lautstärke der Sprachausgabe.",
+                0,
+                1,
+                0.05
+            )
+        );
+
+
+        content.appendChild(
+            createSlider(
+                "voice.rate",
+                "Sprechgeschwindigkeit",
+                "Geschwindigkeit der Sprachausgabe.",
+                0.5,
+                2,
+                0.05
+            )
+        );
+
+
+        content.appendChild(
+            createSlider(
+                "voice.pitch",
+                "Tonhöhe",
+                "Tonhöhe der Sprachausgabe.",
+                0,
+                2,
+                0.05
+            )
+        );
+
+    }
+
+
+    function renderKeyboard(
+        content
+    ) {
+
+        content.appendChild(
+            createElement(
+                "h2",
+                "",
+                "Tastatur"
+            )
+        );
+
+
+        content.appendChild(
+            createSelect(
+                "keyboard.layout",
+                "Standardlayout",
+                "Grundlayout der Systemtastatur.",
+                [
+                    {
+                        value:
+                            "qwertz",
+                        label:
+                            "Deutsch QWERTZ"
+                    },
+                    {
+                        value:
+                            "qwerty",
+                        label:
+                            "QWERTY"
+                    },
+                    {
+                        value:
+                            "azerty",
+                        label:
+                            "AZERTY"
+                    }
+                ]
+            )
+        );
+
+
+        content.appendChild(
+            createToggle(
+                "keyboard.ezidi",
+                "Êzîdî-Tastatur",
+                "Aktiviert das vorbereitete Êzîdî-Tastatursystem."
+            )
+        );
+
+
+        content.appendChild(
+            createToggle(
+                "keyboard.autocorrect",
+                "Autokorrektur",
+                "Korrigiert häufige Eingabefehler."
+            )
+        );
+
+
+        content.appendChild(
+            createToggle(
+                "keyboard.suggestions",
+                "Wortvorschläge",
+                "Zeigt passende Wörter während der Eingabe."
+            )
+        );
+
+
+        content.appendChild(
+            createToggle(
+                "keyboard.haptic",
+                "Haptisches Feedback",
+                "Aktiviert haptisches Feedback, sofern das Gerät es unterstützt."
+            )
+        );
+
+    }
+
+
+    function renderNotifications(
+        content
+    ) {
+
+        content.appendChild(
+            createElement(
+                "h2",
+                "",
+                "Benachrichtigungen"
+            )
+        );
+
+
+        content.appendChild(
+            createToggle(
+                "notifications.enabled",
+                "Benachrichtigungen",
+                "Aktiviert System- und App-Benachrichtigungen."
+            )
+        );
+
+
+        content.appendChild(
+            createToggle(
+                "notifications.sounds",
+                "Benachrichtigungstöne",
+                "Spielt Töne bei Benachrichtigungen."
+            )
+        );
+
+
+        content.appendChild(
+            createToggle(
+                "notifications.badges",
+                "App-Badges",
+                "Zeigt Zähler und Statusmarkierungen an."
+            )
+        );
+
+
+        content.appendChild(
+            createToggle(
+                "notifications.desktop",
+                "Desktop-Hinweise",
+                "Erlaubt sichtbare Hinweise auf der Hauptoberfläche."
+            )
+        );
+
+    }
+
+
+    function renderSystem(
+        content
+    ) {
+
+        content.appendChild(
+            createElement(
+                "h2",
+                "",
+                "System"
+            )
+        );
+
+
+        content.appendChild(
+            createToggle(
+                "system.autoStartApps",
+                "Apps automatisch starten",
+                "Erlaubt vorgesehenen System-Apps beim Systemstart zu starten."
+            )
+        );
+
+
+        content.appendChild(
+            createToggle(
+                "system.restoreApps",
+                "Apps wiederherstellen",
+                "Versucht beim Neustart vorher geöffnete Apps wiederherzustellen."
+            )
+        );
+
+
+        content.appendChild(
+            createToggle(
+                "system.diagnostics",
+                "Systemdiagnose",
+                "Aktiviert die interne Diagnose- und Gesundheitsprüfung."
+            )
+        );
+
+
+        content.appendChild(
+            createToggle(
+                "system.developerMode",
+                "Entwicklermodus",
+                "Aktiviert zusätzliche Entwicklungs- und Diagnosefunktionen."
+            )
+        );
+
+
+        const diagnosticButton =
+            createElement(
+                "button",
+                "haldo-settings-action",
+                "Systemdiagnose ausführen"
+            );
+
+
+        diagnosticButton.type =
+            "button";
+
+
+        diagnosticButton.addEventListener(
+            "click",
+            () => {
+
+                runDiagnostics();
+
+            }
+        );
+
+
+        content.appendChild(
+            diagnosticButton
+        );
+
+    }
+
+
+    function renderPrivacy(
+        content
+    ) {
+
+        content.appendChild(
+            createElement(
+                "h2",
+                "",
+                "Datenschutz"
+            )
+        );
+
+
+        content.appendChild(
+            createToggle(
+                "privacy.analytics",
+                "Analyse-Daten",
+                "Derzeit standardmäßig deaktiviert."
+            )
+        );
+
+
+        content.appendChild(
+            createToggle(
+                "privacy.usageData",
+                "Nutzungsdaten",
+                "Derzeit standardmäßig deaktiviert."
+            )
+        );
+
+
+        content.appendChild(
+            createToggle(
+                "privacy.localHistory",
+                "Lokale Historie",
+                "Speichert Einstellungen und lokale Systemzustände auf dem Gerät."
+            )
+        );
+
+    }
+
+
+    function renderAbout(
+        content
+    ) {
+
+        content.appendChild(
+            createElement(
+                "h2",
+                "",
+                "Über HalDo AI OS"
+            )
+        );
+
+
+        const system =
+            getSystem();
+
+
+        const info = {
+
+            "HalDo AI OS":
+                VERSION,
+
+            "Settings App":
+                VERSION,
+
+            "System":
+                system &&
+                (
+                    system.version ||
+                    system.VERSION ||
+                    "verbunden"
+                ),
+
+            "App Manager":
+                getAppManager()
+                    ? "verbunden"
+                    : "nicht verbunden",
+
+            "App Registry":
+                getRegistry()
+                    ? "verbunden"
+                    : "nicht verbunden",
+
+            "Storage":
+                getStorage()
+                    ? "verbunden"
+                    : "nicht verbunden",
+
+            "Language":
+                getLanguage()
+                    ? "verbunden"
+                    : "nicht verbunden",
+
+            "Voice":
+                getVoice()
+                    ? "verbunden"
+                    : "nicht verbunden",
+
+            "AI":
+                getAI()
+                    ? "verbunden"
+                    : "nicht verbunden",
+
+            "Keyboard":
+                getKeyboard()
+                    ? "verbunden"
+                    : "nicht verbunden"
+
+        };
+
+
+        Object.entries(info)
+            .forEach(
+                ([label, value]) => {
+
+                    const row =
+                        createElement(
+                            "div",
+                            "haldo-settings-info-row"
+                        );
+
+
+                    row.appendChild(
+                        createElement(
+                            "span",
+                            "",
+                            label
+                        )
+                    );
+
+
+                    row.appendChild(
+                        createElement(
+                            "strong",
+                            "",
+                            String(value)
+                        )
+                    );
+
+
+                    content.appendChild(
+                        row
+                    );
+
+                }
+            );
+
+    }
+
+
+    function renderSection(
+        section,
+        content
+    ) {
+
+        switch (
+            section
+        ) {
+
+            case "overview":
+                renderOverview(
+                    content
+                );
+                break;
+
+            case "appearance":
+                renderAppearance(
+                    content
+                );
+                break;
+
+            case "language":
+                renderLanguage(
+                    content
+                );
+                break;
+
+            case "ai":
+                renderAI(
+                    content
+                );
+                break;
+
+            case "voice":
+                renderVoice(
+                    content
+                );
+                break;
+
+            case "keyboard":
+                renderKeyboard(
+                    content
+                );
+                break;
+
+            case "notifications":
+                renderNotifications(
+                    content
+                );
+                break;
+
+            case "system":
+                renderSystem(
+                    content
+                );
+                break;
+
+            case "privacy":
+                renderPrivacy(
+                    content
+                );
+                break;
+
+            case "about":
+                renderAbout(
+                    content
+                );
+                break;
+
+            default:
+                renderOverview(
+                    content
+                );
+                break;
+
+        }
+
+    }
+
+
+    /* ========================================================
+       14 — MAIN UI
+       ======================================================== */
+
+    function render() {
+
+        if (
+            !state.container
+        ) {
+
+            return false;
+
+        }
+
+
+        const root =
+            state.container;
+
+
+        root.innerHTML =
+            "";
+
+
+        root.classList.add(
+            "haldo-settings-app"
+        );
+
+
+        const shell =
+            createElement(
+                "div",
+                "haldo-settings-shell"
+            );
+
+
+        const sidebar =
+            createElement(
+                "aside",
+                "haldo-settings-sidebar"
+            );
+
+
+        const header =
+            createElement(
+                "div",
+                "haldo-settings-header"
+            );
+
+
+        header.appendChild(
+            createElement(
+                "div",
+                "haldo-settings-logo",
+                "H"
+            )
+        );
+
+
+        const headerText =
+            createElement(
+                "div"
+            );
+
+
+        headerText.appendChild(
+            createElement(
+                "strong",
+                "",
+                "HalDo AI OS"
+            )
+        );
+
+
+        headerText.appendChild(
+            createElement(
+                "span",
+                "",
+                "Settings"
+            )
+        );
+
+
+        header.appendChild(
+            headerText
+        );
+
+
+        sidebar.appendChild(
+            header
+        );
+
+
+        const navigation =
+            createElement(
+                "nav",
+                "haldo-settings-navigation"
+            );
+
+
+        SECTIONS.forEach(
+            section => {
+
+                const button =
+                    createElement(
+                        "button",
+                        "haldo-settings-nav-item"
+                    );
+
+
+                button.type =
+                    "button";
+
+
+                if (
+                    section.id ===
+                    state.currentSection
+                ) {
+
+                    button.classList.add(
+                        "active"
+                    );
+
+                }
+
+
+                const icon =
+                    createElement(
+                        "span",
+                        "haldo-settings-nav-icon",
+                        section.icon
+                    );
+
+
+                const text =
+                    createElement(
+                        "span",
+                        "",
+                        section.title
+                    );
+
+
+                button.appendChild(icon);
+                button.appendChild(text);
+
+
+                button.addEventListener(
+                    "click",
+                    () => {
+
+                        navigate(
+                            section.id
+                        );
+
+                    }
+                );
+
+
+                navigation.appendChild(
+                    button
+                );
+
+            }
+        );
+
+
+        sidebar.appendChild(
+            navigation
+        );
+
+
+        const main =
+            createElement(
+                "main",
+                "haldo-settings-main"
+            );
+
+
+        const topbar =
+            createElement(
+                "div",
+                "haldo-settings-topbar"
+            );
+
+
+        const current =
+            SECTIONS.find(
+                section =>
+                    section.id ===
+                    state.currentSection
+            ) ||
+            SECTIONS[0];
+
+
+        topbar.appendChild(
+            createElement(
+                "div",
+                "haldo-settings-current-title",
+                current.title
+            )
+        );
+
+
+        if (
+            state.dirty
+        ) {
+
+            topbar.appendChild(
+                createElement(
+                    "span",
+                    "haldo-settings-dirty",
+                    "Ungespeicherte Änderungen"
+                )
+            );
+
+        }
+
+
+        const content =
+            createElement(
+                "section",
+                "haldo-settings-content"
+            );
+
+
+        renderSection(
+            state.currentSection,
+            content
+        );
+
+
+        const actions =
+            createElement(
+                "div",
+                "haldo-settings-actions"
+            );
+
+
+        const saveButton =
+            createElement(
+                "button",
+                "haldo-settings-primary-action",
+                "Änderungen speichern"
+            );
+
+
+        saveButton.type =
+            "button";
+
+
+        saveButton.disabled =
+            !state.dirty;
+
+
+        saveButton.addEventListener(
+            "click",
+            async () => {
+
+                await saveSettings();
+
+                render();
+
+            }
+        );
+
+
+        const resetButton =
+            createElement(
+                "button",
+                "haldo-settings-secondary-action",
+                "Zurücksetzen"
+            );
+
+
+        resetButton.type =
+            "button";
+
+
+        resetButton.addEventListener(
+            "click",
+            async () => {
+
+                await resetSettings();
+
+            }
+        );
+
+
+        actions.appendChild(
+            resetButton
+        );
+
+        actions.appendChild(
+            saveButton
+        );
+
+
+        main.appendChild(
+            topbar
+        );
+
+        main.appendChild(
+            content
+        );
+
+        main.appendChild(
+            actions
+        );
+
+
+        shell.appendChild(
+            sidebar
+        );
+
+        shell.appendChild(
+            main
+        );
+
+
+        root.appendChild(
+            shell
+        );
+
+
+        state.mounted =
+            true;
+
+
+        return true;
+
+    }
+
+
+    /* ========================================================
+       15 — NAVIGATION
+       ======================================================== */
+
+    function navigate(
+        section
+    ) {
+
+        const exists =
+            SECTIONS.some(
+                item =>
+                    item.id ===
+                    section
+            );
+
+
+        if (!exists) {
+
+            section =
+                "overview";
+
+        }
+
+
+        state.currentSection =
+            section;
+
+
+        emit(
+            "section-changed",
+            {
+                section
+            }
+        );
+
+
+        render();
+
+
+        return section;
+
+    }
+
+
+    function getCurrentSection() {
+
+        return state.currentSection;
+
+    }
+
+
+    /* ========================================================
+       16 — CONTAINER
+       ======================================================== */
+
+    function resolveContainer(
+        options = {}
+    ) {
+
+        if (
+            options.container instanceof
+            HTMLElement
+        ) {
+
+            return options.container;
+
+        }
+
+
+        if (
+            typeof options.container ===
+            "string"
+        ) {
+
+            const element =
+                document.querySelector(
+                    options.container
+                );
+
+
+            if (element) {
+
+                return element;
+
+            }
+
+        }
+
+
+        const selectors = [
+
+            `[data-haldo-app="${APP_ID}"]`,
+
+            `#haldo-app-${APP_ID}`,
+
+            "#haldo-settings-app",
+
+            ".haldo-settings-app"
+
+        ];
+
+
+        for (
+            const selector of selectors
+        ) {
+
+            try {
+
+                const element =
+                    document.querySelector(
+                        selector
+                    );
+
+
+                if (element) {
+
+                    return element;
+
+                }
+
+            } catch (_) {}
+
+        }
+
+
+        return null;
+
+    }
+
+
+    function mount(
+        options = {}
+    ) {
+
+        const container =
+            resolveContainer(
+                options
+            );
+
 
         if (!container) {
 
@@ -3039,15 +3701,13 @@
 
         }
 
-        installStyles();
 
-        state.root =
+        state.container =
             container;
 
-        state.mounted =
-            true;
 
         render();
+
 
         emit(
             "mounted",
@@ -3055,6 +3715,7 @@
                 container
             }
         );
+
 
         return true;
 
@@ -3064,23 +3725,26 @@
     function unmount() {
 
         if (
-            state.root
+            state.container
         ) {
 
-            state.root.innerHTML =
+            state.container.innerHTML =
                 "";
 
         }
 
-        state.root =
+
+        state.container =
             null;
 
         state.mounted =
             false;
 
+
         emit(
             "unmounted"
         );
+
 
         return true;
 
@@ -3088,10 +3752,140 @@
 
 
     /* ========================================================
-       16 — APP LIFECYCLE
+       17 — DIAGNOSTICS
        ======================================================== */
 
-    async function init(
+    function runDiagnostics() {
+
+        const appManager =
+            getAppManager();
+
+
+        let result = null;
+
+
+        try {
+
+            if (
+                appManager &&
+                hasMethod(
+                    appManager,
+                    "diagnostics"
+                )
+            ) {
+
+                result =
+                    appManager.diagnostics();
+
+            } else {
+
+                result = {
+
+                    settings:
+                        true,
+
+                    appManager:
+                        !!appManager,
+
+                    kernel:
+                        !!getKernel(),
+
+                    system:
+                        !!getSystem(),
+
+                    registry:
+                        !!getRegistry(),
+
+                    storage:
+                        !!getStorage(),
+
+                    language:
+                        !!getLanguage(),
+
+                    voice:
+                        !!getVoice(),
+
+                    ai:
+                        !!getAI(),
+
+                    keyboard:
+                        !!getKeyboard()
+
+                };
+
+            }
+
+        } catch (error) {
+
+            reportError(
+                error,
+                "Settings Diagnostics"
+            );
+
+            result = {
+
+                healthy:
+                    false,
+
+                error:
+                    error.message
+
+            };
+
+        }
+
+
+        emit(
+            "diagnostics",
+            {
+                result
+            }
+        );
+
+
+        const notifications =
+            getNotifications();
+
+
+        if (
+            notifications &&
+            hasMethod(
+                notifications,
+                "notify"
+            )
+        ) {
+
+            try {
+
+                notifications.notify(
+                    {
+                        title:
+                            "HalDo Systemdiagnose",
+
+                        message:
+                            "Die Systemdiagnose wurde ausgeführt.",
+
+                        type:
+                            "system"
+
+                    }
+                );
+
+            } catch (_) {}
+
+        }
+
+
+        return result;
+
+    }
+
+
+    /* ========================================================
+       18 — APP LIFECYCLE
+       ======================================================== */
+
+    async function initialize(
         context = {}
     ) {
 
@@ -3103,30 +3897,183 @@
 
         }
 
-        loadSettings();
 
-        Object.keys(
-            state.settings
-        ).forEach(
-            key => {
+        try {
 
-                applySetting(
-                    key,
-                    state.settings[key]
-                );
+            await loadSettings();
 
-            }
+            state.initialized =
+                true;
+
+
+            applyAllSettings();
+
+
+            emit(
+                "initialized",
+                {
+                    context
+                }
+            );
+
+
+            return true;
+
+        } catch (error) {
+
+            reportError(
+                error,
+                "Settings Initialize"
+            );
+
+
+            return false;
+
+        }
+
+    }
+
+
+    async function open(
+        options = {}
+    ) {
+
+        await initialize(
+            options
         );
 
-        state.initialized =
+
+        state.opened =
             true;
 
+        state.active =
+            true;
+
+
+        state.statistics.opens +=
+            1;
+
+
+        if (
+            options.section
+        ) {
+
+            navigate(
+                options.section
+            );
+
+        }
+
+
+        mount(
+            options
+        );
+
+
         emit(
-            "initialized",
+            "opened",
             {
-                context
+                options
             }
         );
+
+
+        return {
+
+            ok:
+                true,
+
+            appId:
+                APP_ID,
+
+            section:
+                state.currentSection
+
+        };
+
+    }
+
+
+    async function activate() {
+
+        state.active =
+            true;
+
+
+        emit(
+            "activated"
+        );
+
+
+        return true;
+
+    }
+
+
+    async function deactivate() {
+
+        state.active =
+            false;
+
+
+        emit(
+            "deactivated"
+        );
+
+
+        return true;
+
+    }
+
+
+    async function minimize() {
+
+        emit(
+            "minimized"
+        );
+
+
+        return true;
+
+    }
+
+
+    async function restore() {
+
+        state.active =
+            true;
+
+
+        emit(
+            "restored"
+        );
+
+
+        return true;
+
+    }
+
+
+    async function close() {
+
+        unmount();
+
+
+        state.opened =
+            false;
+
+        state.active =
+            false;
+
+
+        state.statistics.closes +=
+            1;
+
+
+        emit(
+            "closed"
+        );
+
 
         return true;
 
@@ -3137,148 +4084,19 @@
         context = {}
     ) {
 
-        if (
-            !state.initialized
-        ) {
+        await initialize(
+            context
+        );
 
-            await init(
-                context
-            );
 
-        }
-
-        state.started =
+        state.ready =
             true;
 
-        emit(
-            "started",
-            {
-                context
-            }
-        );
-
-        return true;
-
-    }
-
-
-    async function open(
-        context = {}
-    ) {
-
-        if (
-            !state.started
-        ) {
-
-            await start(
-                context
-            );
-
-        }
-
-        state.open =
-            true;
-
-        state.active =
-            true;
 
         emit(
-            "opened",
-            {
-                context
-            }
+            "started"
         );
 
-        return true;
-
-    }
-
-
-    async function activate(
-        context = {}
-    ) {
-
-        state.active =
-            true;
-
-        emit(
-            "activated",
-            {
-                context
-            }
-        );
-
-        return true;
-
-    }
-
-
-    async function deactivate(
-        context = {}
-    ) {
-
-        state.active =
-            false;
-
-        emit(
-            "deactivated",
-            {
-                context
-            }
-        );
-
-        return true;
-
-    }
-
-
-    async function minimize() {
-
-        state.active =
-            false;
-
-        emit(
-            "minimized"
-        );
-
-        return true;
-
-    }
-
-
-    async function restore() {
-
-        state.open =
-            true;
-
-        state.active =
-            true;
-
-        emit(
-            "restored"
-        );
-
-        return true;
-
-    }
-
-
-    async function close(
-        context = {}
-    ) {
-
-        state.open =
-            false;
-
-        state.active =
-            false;
-
-        emit(
-            "closed",
-            {
-                context
-            }
-        );
 
         return true;
 
@@ -3287,12 +4105,17 @@
 
     async function stop() {
 
-        state.started =
+        state.active =
             false;
+
+        state.opened =
+            false;
+
 
         emit(
             "stopped"
         );
+
 
         return true;
 
@@ -3300,100 +4123,12 @@
 
 
     /* ========================================================
-       17 — DIAGNOSTICS
-       ======================================================== */
-
-    function diagnostics() {
-
-        return {
-
-            id:
-                APP_ID,
-
-            name:
-                APP_NAME,
-
-            version:
-                VERSION,
-
-            initialized:
-                state.initialized,
-
-            started:
-                state.started,
-
-            open:
-                state.open,
-
-            active:
-                state.active,
-
-            mounted:
-                state.mounted,
-
-            currentSection:
-                state.currentSection,
-
-            services: {
-
-                kernel:
-                    !!getKernel(),
-
-                system:
-                    !!getSystem(),
-
-                appManager:
-                    !!getAppManager(),
-
-                registry:
-                    !!getRegistry(),
-
-                contract:
-                    !!getContract(),
-
-                storage:
-                    !!getStorage(),
-
-                language:
-                    !!getLanguage(),
-
-                voice:
-                    !!getVoice(),
-
-                ai:
-                    !!getAI(),
-
-                keyboard:
-                    !!getKeyboard(),
-
-                notifications:
-                    !!getNotifications()
-
-            },
-
-            settings:
-                clone(
-                    state.settings
-                ),
-
-            timestamp:
-                new Date().toISOString()
-
-        };
-
-    }
-
-
-    /* ========================================================
-       18 — APP DEFINITION
+       19 — APP DEFINITION
        ======================================================== */
 
     const definition = {
 
         id:
-            APP_ID,
-
-        appId:
             APP_ID,
 
         name:
@@ -3403,16 +4138,16 @@
             APP_TITLE,
 
         description:
-            "Zentrale Einstellungen für HalDo AI OS 20.",
+            "Zentrale Einstellungs- und Systemverwaltungs-App von HalDo AI OS 20.",
 
         version:
             VERSION,
 
-        icon:
-            "⚙️",
-
         category:
             "system",
+
+        icon:
+            "⚙",
 
         enabled:
             true,
@@ -3423,16 +4158,22 @@
         singleton:
             true,
 
+        route:
+            "settings",
+
         permissions: [
 
             "system.settings",
-            "storage.read",
-            "storage.write",
+
+            "storage.local",
+
             "language.manage",
+
             "voice.manage",
+
             "ai.manage",
-            "keyboard.manage",
-            "notifications.manage"
+
+            "keyboard.manage"
 
         ],
 
@@ -3441,82 +4182,105 @@
         tags: [
 
             "settings",
+
             "system",
+
             "configuration",
+
+            "preferences",
+
             "haldo",
-            "os"
+
+            "ai"
 
         ],
 
         keywords: [
 
-            "Einstellungen",
-            "Settings",
-            "System",
-            "Sprache",
-            "AI",
-            "Voice",
-            "Keyboard",
-            "Storage"
+            "einstellungen",
+
+            "system",
+
+            "sprache",
+
+            "ai",
+
+            "voice",
+
+            "keyboard",
+
+            "theme",
+
+            "privacy"
 
         ],
 
-        route:
-            "/settings",
-
         settings:
-            getDefaultSettings(),
+            DEFAULT_SETTINGS,
 
         metadata: {
 
-            os:
-                "HalDo AI OS 20",
+            systemApp:
+                true,
 
-            foundation:
-                "Professional Ultimate",
-
-            appType:
-                "system",
+            coreApp:
+                true,
 
             central:
+                true,
+
+            homeIntegrated:
+                true,
+
+            internalNavigation:
                 true
 
         },
 
-        init,
 
-        start,
+        init:
+            initialize,
 
-        open,
+        start:
+            start,
 
-        activate,
+        open:
+            open,
 
-        deactivate,
+        activate:
+            activate,
 
-        minimize,
+        deactivate:
+            deactivate,
 
-        restore,
+        minimize:
+            minimize,
 
-        close,
+        restore:
+            restore,
 
-        stop
+        close:
+            close,
+
+        stop:
+            stop
 
     };
 
 
     /* ========================================================
-       19 — APP API
+       20 — PUBLIC API
        ======================================================== */
 
     const api = {
 
-        __haldoAI20App:
+        __haldoAI20Settings:
             true,
 
-        id:
-            APP_ID,
+        version:
+            VERSION,
 
-        appId:
+        id:
             APP_ID,
 
         name:
@@ -3525,18 +4289,12 @@
         title:
             APP_TITLE,
 
-        version:
-            VERSION,
-
         definition,
 
-        state,
 
-        on,
+        /* Lifecycle */
 
-        emit,
-
-        init,
+        initialize,
 
         start,
 
@@ -3554,11 +4312,25 @@
 
         stop,
 
+
+        /* UI */
+
         mount,
 
         unmount,
 
         render,
+
+        navigate,
+
+        getCurrentSection,
+
+
+        /* Settings */
+
+        getSetting,
+
+        setSetting,
 
         getSettings() {
 
@@ -3568,204 +4340,144 @@
 
         },
 
-        setSetting,
+        saveSettings,
+
+        loadSettings,
 
         resetSettings,
 
-        getCurrentSection() {
 
-            return state.currentSection;
+        /* Integration */
+
+        applySetting,
+
+        applyAllSettings,
+
+
+        /* Diagnostics */
+
+        runDiagnostics,
+
+
+        /* Events */
+
+        on,
+
+        off,
+
+        emit,
+
+
+        /* State */
+
+        getState() {
+
+            return {
+
+                initialized:
+                    state.initialized,
+
+                ready:
+                    state.ready,
+
+                opened:
+                    state.opened,
+
+                active:
+                    state.active,
+
+                mounted:
+                    state.mounted,
+
+                currentSection:
+                    state.currentSection,
+
+                dirty:
+                    state.dirty,
+
+                settings:
+                    clone(
+                        state.settings
+                    ),
+
+                statistics:
+                    {
+                        ...state.statistics
+                    }
+
+            };
 
         },
 
-        setSection(
-            section
-        ) {
 
-            const exists =
-                sections.some(
-                    item =>
-                        item.id ===
-                        section
-                );
+        /* Metadata */
 
-            if (!exists) {
+        getDefinition() {
 
-                return false;
-
-            }
-
-            state.currentSection =
-                section;
-
-            render();
-
-            return true;
-
-        },
-
-        getSections() {
-
-            return sections.map(
-                item => ({
-                    ...item
-                })
+            return clone(
+                definition
             );
 
-        },
-
-        diagnostics
+        }
 
     };
 
 
     /* ========================================================
-       20 — GLOBAL EXPORT
+       21 — GLOBAL REGISTRATION
        ======================================================== */
 
     window.HalDoSettingsApp =
         api;
 
-    window.HalDoOS.settingsApp =
+    HalDoOS.settingsApp =
         api;
 
 
     /* ========================================================
-       21 — REGISTRY REGISTRATION
+       22 — REGISTRY REGISTRATION
        ======================================================== */
 
-    function registerApp() {
-
-        const manager =
-            getAppManager();
+    function registerWithRegistry() {
 
         const registry =
             getRegistry();
 
-        let registered =
-            false;
-
-
-        /*
-         * App Manager ist die bevorzugte
-         * zentrale Registrierungsstelle.
-         */
 
         if (
-            manager &&
-            method(
-                manager,
-                "registerApp"
-            )
-        ) {
-
-            try {
-
-                manager.registerApp(
-                    definition
-                );
-
-                registered =
-                    true;
-
-            } catch (error) {
-
-                console.warn(
-                    "[HalDo Settings] App Manager registration failed:",
-                    error
-                );
-
-            }
-
-        }
-
-
-        /*
-         * Fallback auf Registry.
-         */
-
-        if (
-            !registered &&
-            registry &&
-            method(
+            !registry ||
+            !hasMethod(
                 registry,
                 "register"
             )
         ) {
 
-            try {
-
-                registry.register(
-                    definition
-                );
-
-                registered =
-                    true;
-
-            } catch (error) {
-
-                console.warn(
-                    "[HalDo Settings] Registry registration failed:",
-                    error
-                );
-
-            }
-
-        }
-
-
-        emit(
-            "registered",
-            {
-                registered
-            }
-        );
-
-
-        return registered;
-
-    }
-
-
-    /* ========================================================
-       22 — KERNEL REGISTRATION
-       ======================================================== */
-
-    function registerKernel() {
-
-        const kernel =
-            getKernel();
-
-        if (!kernel) {
-
             return false;
 
         }
 
+
         try {
 
-            if (
-                method(
-                    kernel,
-                    "registerModule"
-                )
-            ) {
+            registry.register(
+                definition
+            );
 
-                kernel.registerModule(
-                    "settings-app",
-                    api
-                );
 
-            }
+            emit(
+                "registered"
+            );
+
 
             return true;
 
         } catch (error) {
 
-            console.warn(
-                "[HalDo Settings] Kernel registration failed:",
-                error
+            reportError(
+                error,
+                "Settings Registry Registration"
             );
+
 
             return false;
 
@@ -3775,35 +4487,144 @@
 
 
     /* ========================================================
-       23 — BOOT
+       23 — APP MANAGER REGISTRATION
        ======================================================== */
 
-    function boot() {
+    function registerWithAppManager() {
 
-        installStyles();
+        const manager =
+            getAppManager();
 
-        registerKernel();
 
-        registerApp();
+        if (
+            !manager ||
+            !hasMethod(
+                manager,
+                "register"
+            )
+        ) {
 
-        init()
-            .catch(
-                error => {
+            return false;
 
-                    console.error(
-                        "[HalDo Settings] Boot failed:",
-                        error
-                    );
+        }
 
-                }
+
+        try {
+
+            manager.register(
+                definition
             );
 
-        console.log(
-            "[HalDo Settings] Settings App 20.0.0 ready."
-        );
+
+            emit(
+                "manager-registered"
+            );
+
+
+            return true;
+
+        } catch (error) {
+
+            reportError(
+                error,
+                "Settings App Manager Registration"
+            );
+
+
+            return false;
+
+        }
 
     }
 
+
+    /* ========================================================
+       24 — BOOTSTRAP
+       ======================================================== */
+
+    function bootstrap() {
+
+        try {
+
+            registerWithRegistry();
+
+            registerWithAppManager();
+
+
+            const kernel =
+                getKernel();
+
+
+            if (
+                kernel &&
+                hasMethod(
+                    kernel,
+                    "registerModule"
+                )
+            ) {
+
+                try {
+
+                    kernel.registerModule(
+                        "settings-app",
+                        api
+                    );
+
+                } catch (_) {}
+
+            }
+
+
+            if (
+                kernel &&
+                hasMethod(
+                    kernel,
+                    "setModuleReady"
+                )
+            ) {
+
+                try {
+
+                    kernel.setModuleReady(
+                        "settings-app",
+                        true
+                    );
+
+                } catch (_) {}
+
+            }
+
+
+            emit(
+                "ready",
+                {
+                    version:
+                        VERSION
+                }
+            );
+
+
+            console.log(
+                "[HalDo Settings] " +
+                "Settings App 20.0.0 bereit."
+            );
+
+
+        } catch (error) {
+
+            reportError(
+                error,
+                "Settings Bootstrap"
+            );
+
+        }
+
+    }
+
+
+    /* ========================================================
+       25 — DOM BOOT
+       ======================================================== */
 
     if (
         document.readyState ===
@@ -3812,7 +4633,7 @@
 
         document.addEventListener(
             "DOMContentLoaded",
-            boot,
+            bootstrap,
             {
                 once:
                     true
@@ -3821,13 +4642,15 @@
 
     } else {
 
-        boot();
+        bootstrap();
 
     }
 
 
     /* ========================================================
-       END OF SETTINGS APP
-       ======================================================== */
+       END
+       HALDO AI OS 20
+       SETTINGS APPLICATION
+       ============================================================ */
 
 })(window, document);
