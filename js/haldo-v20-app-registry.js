@@ -1,518 +1,634 @@
 /*
  * ============================================================
  * HalDo AI OS 20
- * V20 Universal App Registry
+ * Universal Application Registry
  * ============================================================
  *
  * Datei:
  *   js/haldo-v20-app-registry.js
  *
  * Aufgabe:
- *   Zentrale Verwaltung aller V20-Apps.
+ *   Zentrale Verwaltung aller V20-Anwendungen.
  *
- *   - registrieren
- *   - aktivieren/deaktivieren
- *   - suchen
- *   - Kategorien
- *   - Berechtigungen
- *   - Abhängigkeiten
- *   - App-Metadaten
- *   - Events
+ * Verbindung:
  *
- * Bestehende app-registry.js wird NICHT ersetzt.
- * Diese Schicht arbeitet zunächst zusätzlich.
+ *   Manifest
+ *       ↓
+ *   Registry
+ *       ↓
+ *   App Manager
+ *       ↓
+ *   Router
+ *       ↓
+ *   Window Manager
+ *       ↓
+ *   App Runtime
+ *       ↓
+ *   Event Bus
+ *
  * ============================================================
  */
 
 (function (window, document) {
+
     "use strict";
+
 
     const HalDoOS =
         window.HalDoOS =
         window.HalDoOS || {};
 
+
     const V20 =
-        window.HalDoV20 ||
-        null;
+        window.HalDoV20 =
+        window.HalDoV20 || {};
 
 
-    /* ---------------------------------------------------------
-       REGISTRY
-    --------------------------------------------------------- */
+    const registry =
+        new Map();
+
+
+    const runningApps =
+        new Map();
+
+
+    const appStates =
+        new Map();
+
+
+    const appInstances =
+        new Map();
+
+
+    const listeners =
+        new Map();
+
 
     const Registry = {
 
-        name: "HalDo V20 App Registry",
+        name:
+            "HalDo V20 Application Registry",
 
-        version: "20.0.0",
+        version:
+            "20.0.0",
 
-        ready: false,
-
-        apps: new Map(),
-
-        categories: new Map(),
-
-        listeners: new Map()
+        ready:
+            false
     };
 
 
-    /* ---------------------------------------------------------
-       EVENT SYSTEM
-    --------------------------------------------------------- */
+    /* ========================================================
+       NORMALIZE
+    ======================================================== */
 
-    Registry.on = function (
+    function normalizeId(id) {
+
+        return String(id || "")
+            .trim()
+            .toLowerCase()
+            .replace(/\s+/g, "-");
+    }
+
+
+    function clone(value) {
+
+        if (
+            value === null ||
+            value === undefined
+        ) {
+
+            return value;
+        }
+
+
+        try {
+
+            return JSON.parse(
+                JSON.stringify(value)
+            );
+
+        } catch (error) {
+
+            return value;
+        }
+    }
+
+
+    /* ========================================================
+       INTERNAL EVENT
+    ======================================================== */
+
+    function emit(
         eventName,
-        callback
+        data
     ) {
 
-        if (
-            typeof eventName !== "string" ||
-            typeof callback !== "function"
-        ) {
-            return function () {};
-        }
-
-        if (
-            !Registry.listeners.has(eventName)
-        ) {
-            Registry.listeners.set(
-                eventName,
-                new Set()
+        const handlers =
+            listeners.get(
+                eventName
             );
-        }
-
-        const listeners =
-            Registry.listeners.get(eventName);
-
-        listeners.add(callback);
-
-        return function () {
-            listeners.delete(callback);
-        };
-    };
 
 
-    Registry.emit = function (
-        eventName,
-        detail
-    ) {
-
-        const listeners =
-            Registry.listeners.get(eventName);
-
-        if (listeners) {
-
-            listeners.forEach(
-                function (callback) {
-
-                    try {
-
-                        callback({
-                            name: eventName,
-                            detail:
-                                detail || {},
-                            timestamp:
-                                Date.now()
-                        });
-
-                    } catch (error) {
-
-                        console.error(
-                            "[HalDo Registry]",
-                            error
-                        );
-                    }
-                }
-            );
+        if (!handlers) {
+            return;
         }
 
 
-        if (
-            V20 &&
-            typeof V20.emit ===
-            "function"
-        ) {
-
-            V20.emit(
-                "registry:" + eventName,
-                detail || {}
-            );
-        }
-    };
-
-
-    /* ---------------------------------------------------------
-       NORMALIZE APP
-    --------------------------------------------------------- */
-
-    Registry.normalize = function (
-        definition
-    ) {
-
-        definition =
-            definition || {};
-
-        const id = String(
-            definition.id ||
-            definition.appId ||
-            definition.name ||
-            ""
-        )
-        .trim()
-        .toLowerCase()
-        .replace(
-            /\s+/g,
-            "-"
-        );
-
-        if (!id) {
-
-            throw new Error(
-                "HalDo V20 Registry: " +
-                "App ID fehlt."
-            );
-        }
-
-
-        return {
-
-            id: id,
-
-            name:
-                definition.name ||
-                id,
-
-            version:
-                definition.version ||
-                "20.0.0",
-
-            category:
-                definition.category ||
-                "other",
-
-            icon:
-                definition.icon ||
-                "◈",
-
-            description:
-                definition.description ||
-                "",
-
-            enabled:
-                definition.enabled !== false,
-
-            system:
-                definition.system === true,
-
-            experimental:
-                definition.experimental === true,
-
-            permissions:
-                Array.isArray(
-                    definition.permissions
-                )
-                    ? definition.permissions
-                    : [],
-
-            dependencies:
-                Array.isArray(
-                    definition.dependencies
-                )
-                    ? definition.dependencies
-                    : [],
-
-            capabilities:
-                Array.isArray(
-                    definition.capabilities
-                )
-                    ? definition.capabilities
-                    : [],
-
-            keywords:
-                Array.isArray(
-                    definition.keywords
-                )
-                    ? definition.keywords
-                    : [],
-
-            iconType:
-                definition.iconType ||
-                "emoji",
-
-            launchMode:
-                definition.launchMode ||
-                "window",
-
-            createdAt:
-                definition.createdAt ||
-                Date.now(),
-
-            metadata:
-                definition.metadata ||
-                {},
-
-            instance:
-                definition.instance ||
-                null
-        };
-    };
-
-
-    /* ---------------------------------------------------------
-       REGISTER
-    --------------------------------------------------------- */
-
-    Registry.register = function (
-        definition
-    ) {
-
-        const app =
-            Registry.normalize(
-                definition
-            );
-
-        const existing =
-            Registry.apps.get(
-                app.id
-            );
-
-
-        /*
-         * Aktualisierung einer bestehenden App
-         */
-
-        if (existing) {
-
-            const updated =
-                Object.assign(
-                    {},
-                    existing,
-                    app,
-                    {
-                        updatedAt:
-                            Date.now()
-                    }
-                );
-
-            Registry.apps.set(
-                app.id,
-                updated
-            );
-
-            Registry.addToCategory(
-                updated
-            );
-
-            Registry.emit(
-                "updated",
-                {
-                    app: updated
-                }
-            );
-
-            return updated;
-        }
-
-
-        /*
-         * Neue App
-         */
-
-        Registry.apps.set(
-            app.id,
-            app
-        );
-
-        Registry.addToCategory(
-            app
-        );
-
-        Registry.emit(
-            "registered",
-            {
-                app: app
-            }
-        );
-
-        return app;
-    };
-
-
-    /* ---------------------------------------------------------
-       BULK REGISTER
-    --------------------------------------------------------- */
-
-    Registry.registerMany = function (
-        definitions
-    ) {
-
-        if (
-            !Array.isArray(definitions)
-        ) {
-            return [];
-        }
-
-        const registered = [];
-
-        definitions.forEach(
-            function (definition) {
+        Array.from(
+            handlers
+        ).forEach(
+            function (handler) {
 
                 try {
 
-                    registered.push(
-                        Registry.register(
-                            definition
-                        )
+                    handler(
+                        data
                     );
 
                 } catch (error) {
 
                     console.error(
-                        "[HalDo Registry] " +
-                        "Registration failed:",
+                        "[HalDo Registry]",
                         error
                     );
                 }
+
             }
         );
-
-        return registered;
-    };
+    }
 
 
-    /* ---------------------------------------------------------
-       CATEGORY
-    --------------------------------------------------------- */
+    /* ========================================================
+       ON
+    ======================================================== */
 
-    Registry.addToCategory = function (
-        app
+    Registry.on = function (
+        eventName,
+        handler
     ) {
 
         if (
-            !Registry.categories.has(
-                app.category
+            !eventName ||
+            typeof handler !==
+            "function"
+        ) {
+
+            return function () {};
+        }
+
+
+        if (
+            !listeners.has(
+                eventName
             )
         ) {
 
-            Registry.categories.set(
-                app.category,
+            listeners.set(
+                eventName,
                 new Set()
             );
         }
 
-        Registry.categories
-            .get(app.category)
-            .add(app.id);
-    };
 
-
-    Registry.getCategory = function (
-        category
-    ) {
-
-        const ids =
-            Registry.categories.get(
-                String(category)
+        const set =
+            listeners.get(
+                eventName
             );
 
-        if (!ids) {
-            return [];
+
+        set.add(
+            handler
+        );
+
+
+        return function () {
+
+            set.delete(
+                handler
+            );
+
+        };
+    };
+
+
+    /* ========================================================
+       REGISTER
+    ======================================================== */
+
+    Registry.register = function (
+        definition
+    ) {
+
+        if (
+            !definition ||
+            !definition.id
+        ) {
+
+            console.error(
+                "[HalDo Registry]",
+                "Ungültige App-Definition."
+            );
+
+            return false;
         }
 
-        return Array.from(ids)
-            .map(function (id) {
-                return Registry.apps.get(id);
-            })
-            .filter(Boolean);
-    };
+
+        const id =
+            normalizeId(
+                definition.id
+            );
 
 
-    Registry.getCategories = function () {
+        const existing =
+            registry.get(
+                id
+            );
 
-        return Array.from(
-            Registry.categories.keys()
+
+        if (existing) {
+
+            /*
+             * Vorhandene Definition erweitern,
+             * statt sie blind zu löschen.
+             */
+
+            const merged =
+                Object.assign(
+                    {},
+                    existing,
+                    definition,
+                    {
+
+                        id:
+                            id,
+
+                        dependencies:
+                            Array.from(
+                                new Set(
+                                    [
+                                        ...(existing.dependencies || []),
+                                        ...(definition.dependencies || [])
+                                    ]
+                                )
+                            ),
+
+                        services:
+                            Array.from(
+                                new Set(
+                                    [
+                                        ...(existing.services || []),
+                                        ...(definition.services || [])
+                                    ]
+                                )
+                            ),
+
+                        permissions:
+                            Array.from(
+                                new Set(
+                                    [
+                                        ...(existing.permissions || []),
+                                        ...(definition.permissions || [])
+                                    ]
+                                )
+                            ),
+
+                        keywords:
+                            Array.from(
+                                new Set(
+                                    [
+                                        ...(existing.keywords || []),
+                                        ...(definition.keywords || [])
+                                    ]
+                                )
+                            )
+                    }
+                );
+
+
+            registry.set(
+                id,
+                merged
+            );
+
+
+            emit(
+                "app:updated",
+                clone(merged)
+            );
+
+
+            return merged;
+        }
+
+
+        const normalized =
+            Object.assign(
+                {
+
+                    id:
+                        id,
+
+                    name:
+                        id,
+
+                    category:
+                        "Sonstige",
+
+                    icon:
+                        "▣",
+
+                    version:
+                        "20.0.0",
+
+                    enabled:
+                        true,
+
+                    system:
+                        false,
+
+                    singleton:
+                        false,
+
+                    dependencies:
+                        [],
+
+                    services:
+                        [],
+
+                    permissions:
+                        [],
+
+                    keywords:
+                        [],
+
+                    settings:
+                        {},
+
+                    metadata:
+                        {}
+
+                },
+
+                definition,
+                {
+
+                    id:
+                        id
+                }
+            );
+
+
+        registry.set(
+            id,
+            normalized
         );
+
+
+        appStates.set(
+            id,
+            {
+
+                id:
+                    id,
+
+                registered:
+                    true,
+
+                enabled:
+                    normalized.enabled !== false,
+
+                state:
+                    "registered",
+
+                running:
+                    false,
+
+                initialized:
+                    false,
+
+                error:
+                    null,
+
+                createdAt:
+                    Date.now(),
+
+                updatedAt:
+                    Date.now()
+            }
+        );
+
+
+        emit(
+            "app:registered",
+            clone(normalized)
+        );
+
+
+        return normalized;
     };
 
 
-    /* ---------------------------------------------------------
-       GET APP
-    --------------------------------------------------------- */
+    /* ========================================================
+       UNREGISTER
+    ======================================================== */
+
+    Registry.unregister = function (
+        id
+    ) {
+
+        const appId =
+            normalizeId(id);
+
+
+        if (
+            runningApps.has(
+                appId
+            )
+        ) {
+
+            Registry.stop(
+                appId
+            );
+        }
+
+
+        const removed =
+            registry.delete(
+                appId
+            );
+
+
+        appStates.delete(
+            appId
+        );
+
+
+        appInstances.delete(
+            appId
+        );
+
+
+        if (removed) {
+
+            emit(
+                "app:unregistered",
+                {
+                    id:
+                        appId
+                }
+            );
+        }
+
+
+        return removed;
+    };
+
+
+    /* ========================================================
+       GET
+    ======================================================== */
 
     Registry.get = function (
         id
     ) {
 
-        if (!id) {
-            return null;
-        }
-
-        return Registry.apps.get(
-            String(id)
-                .trim()
-                .toLowerCase()
-                .replace(
-                    /\s+/g,
-                    "-"
-                )
+        return registry.get(
+            normalizeId(id)
         ) || null;
     };
 
 
-    /* ---------------------------------------------------------
-       ALL APPS
-    --------------------------------------------------------- */
+    Registry.has = function (
+        id
+    ) {
 
-    Registry.getAll = function () {
-
-        return Array.from(
-            Registry.apps.values()
+        return registry.has(
+            normalizeId(id)
         );
     };
 
 
-    /* ---------------------------------------------------------
+    /* ========================================================
+       GET ALL
+    ======================================================== */
+
+    Registry.getAll = function () {
+
+        return Array.from(
+            registry.values()
+        )
+        .sort(
+            function (a, b) {
+
+                return (
+                    (a.priority || 999) -
+                    (b.priority || 999)
+                );
+
+            }
+        );
+    };
+
+
+    /* ========================================================
        SEARCH
-    --------------------------------------------------------- */
+    ======================================================== */
 
     Registry.search = function (
         query
     ) {
 
-        query =
+        const q =
             String(query || "")
                 .trim()
                 .toLowerCase();
 
-        if (!query) {
+
+        if (!q) {
+
             return Registry.getAll();
         }
 
+
         return Registry.getAll()
-            .filter(function (app) {
+            .filter(
+                function (app) {
 
-                const text = [
-                    app.id,
-                    app.name,
-                    app.description,
-                    app.category
-                ]
-                .concat(
-                    app.keywords || []
-                )
-                .join(" ")
-                .toLowerCase();
+                    const searchable =
+                        [
+                            app.id,
+                            app.name,
+                            app.category,
+                            ...(app.keywords || [])
+                        ]
+                        .join(" ")
+                        .toLowerCase();
 
-                return text.indexOf(
-                    query
-                ) !== -1;
-            });
+
+                    return searchable.includes(
+                        q
+                    );
+
+                }
+            );
     };
 
 
-    /* ---------------------------------------------------------
+    /* ========================================================
+       CATEGORY
+    ======================================================== */
+
+    Registry.getCategories =
+        function () {
+
+            return [
+                ...new Set(
+                    Registry.getAll()
+                        .map(
+                            function (app) {
+
+                                return app.category;
+
+                            }
+                        )
+                )
+            ];
+        };
+
+
+    Registry.getByCategory =
+        function (
+            category
+        ) {
+
+            const value =
+                String(
+                    category || ""
+                )
+                .trim()
+                .toLowerCase();
+
+
+            return Registry.getAll()
+                .filter(
+                    function (app) {
+
+                        return (
+                            String(
+                                app.category
+                            )
+                            .toLowerCase() ===
+                            value
+                        );
+
+                    }
+                );
+        };
+
+
+    /* ========================================================
        ENABLE / DISABLE
-    --------------------------------------------------------- */
+    ======================================================== */
 
     Registry.enable = function (
         id
@@ -521,18 +637,40 @@
         const app =
             Registry.get(id);
 
+
         if (!app) {
             return false;
         }
 
-        app.enabled = true;
 
-        Registry.emit(
-            "enabled",
+        app.enabled =
+            true;
+
+
+        const state =
+            appStates.get(
+                app.id
+            );
+
+
+        if (state) {
+
+            state.enabled =
+                true;
+
+            state.updatedAt =
+                Date.now();
+        }
+
+
+        emit(
+            "app:enabled",
             {
-                app: app
+                id:
+                    app.id
             }
         );
+
 
         return true;
     };
@@ -545,320 +683,889 @@
         const app =
             Registry.get(id);
 
-        if (!app) {
-            return false;
-        }
-
-        /*
-         * System-Apps werden nicht
-         * versehentlich deaktiviert.
-         */
-
-        if (app.system) {
-
-            Registry.emit(
-                "disable-blocked",
-                {
-                    app: app
-                }
-            );
-
-            return false;
-        }
-
-        app.enabled = false;
-
-        Registry.emit(
-            "disabled",
-            {
-                app: app
-            }
-        );
-
-        return true;
-    };
-
-
-    /* ---------------------------------------------------------
-       PERMISSIONS
-    --------------------------------------------------------- */
-
-    Registry.hasPermission = function (
-        id,
-        permission
-    ) {
-
-        const app =
-            Registry.get(id);
 
         if (!app) {
             return false;
         }
 
-        return (
-            app.permissions ||
-            []
-        ).indexOf(
-            permission
-        ) !== -1;
-    };
-
-
-    Registry.grantPermission = function (
-        id,
-        permission
-    ) {
-
-        const app =
-            Registry.get(id);
-
-        if (!app || !permission) {
-            return false;
-        }
 
         if (
-            !Array.isArray(
-                app.permissions
+            runningApps.has(
+                app.id
             )
         ) {
-            app.permissions = [];
-        }
 
-        if (
-            app.permissions.indexOf(
-                permission
-            ) === -1
-        ) {
-
-            app.permissions.push(
-                permission
+            Registry.stop(
+                app.id
             );
         }
 
-        Registry.emit(
-            "permission-granted",
+
+        app.enabled =
+            false;
+
+
+        const state =
+            appStates.get(
+                app.id
+            );
+
+
+        if (state) {
+
+            state.enabled =
+                false;
+
+            state.updatedAt =
+                Date.now();
+        }
+
+
+        emit(
+            "app:disabled",
             {
-                app: app,
-                permission:
-                    permission
+                id:
+                    app.id
             }
         );
+
 
         return true;
     };
 
 
-    Registry.revokePermission = function (
-        id,
-        permission
-    ) {
+    /* ========================================================
+       STATE
+    ======================================================== */
 
-        const app =
-            Registry.get(id);
-
-        if (!app) {
-            return false;
-        }
-
-        app.permissions =
-            (
-                app.permissions ||
-                []
-            ).filter(
-                function (item) {
-                    return item !== permission;
-                }
-            );
-
-        Registry.emit(
-            "permission-revoked",
-            {
-                app: app,
-                permission:
-                    permission
-            }
-        );
-
-        return true;
-    };
-
-
-    /* ---------------------------------------------------------
-       DEPENDENCY CHECK
-    --------------------------------------------------------- */
-
-    Registry.checkDependencies = function (
+    Registry.getState = function (
         id
     ) {
 
-        const app =
-            Registry.get(id);
+        const state =
+            appStates.get(
+                normalizeId(id)
+            );
 
-        if (!app) {
+
+        return state
+            ? clone(state)
+            : null;
+    };
+
+
+    Registry.setState = function (
+        id,
+        state,
+        extra
+    ) {
+
+        const appId =
+            normalizeId(id);
+
+
+        if (!registry.has(appId)) {
+            return false;
+        }
+
+
+        const current =
+            appStates.get(
+                appId
+            ) || {
+
+                id:
+                    appId
+            };
+
+
+        Object.assign(
+            current,
+            {
+
+                state:
+                    state,
+
+                updatedAt:
+                    Date.now()
+            },
+
+            extra || {}
+        );
+
+
+        appStates.set(
+            appId,
+            current
+        );
+
+
+        emit(
+            "app:state-changed",
+            clone(current)
+        );
+
+
+        return true;
+    };
+
+
+    /* ========================================================
+       INSTANCE
+    ======================================================== */
+
+    Registry.setInstance =
+        function (
+            id,
+            instance
+        ) {
+
+            const appId =
+                normalizeId(id);
+
+
+            if (!registry.has(appId)) {
+                return false;
+            }
+
+
+            appInstances.set(
+                appId,
+                instance
+            );
+
+
+            return true;
+        };
+
+
+    Registry.getInstance =
+        function (
+            id
+        ) {
+
+            return (
+                appInstances.get(
+                    normalizeId(id)
+                ) ||
+                null
+            );
+        };
+
+
+    /* ========================================================
+       DEPENDENCY CHECK
+    ======================================================== */
+
+    Registry.checkDependencies =
+        function (
+            id
+        ) {
+
+            const app =
+                Registry.get(id);
+
+
+            if (!app) {
+
+                return {
+
+                    valid:
+                        false,
+
+                    missing:
+                        [
+                            normalizeId(id)
+                        ]
+                };
+            }
+
+
+            const missing =
+                [];
+
+
+            (app.dependencies || [])
+                .forEach(
+                    function (
+                        dependency
+                    ) {
+
+                        const depId =
+                            normalizeId(
+                                dependency
+                            );
+
+
+                        if (
+                            !registry.has(
+                                depId
+                            )
+                        ) {
+
+                            missing.push(
+                                depId
+                            );
+                        }
+
+                    }
+                );
+
 
             return {
-                valid: false,
-                missing: []
+
+                valid:
+                    missing.length === 0,
+
+                missing:
+                    missing
             };
-        }
-
-        const missing = [];
-
-        (
-            app.dependencies ||
-            []
-        ).forEach(
-            function (dependency) {
-
-                if (
-                    !Registry.get(
-                        dependency
-                    )
-                ) {
-                    missing.push(
-                        dependency
-                    );
-                }
-            }
-        );
-
-        return {
-
-            valid:
-                missing.length === 0,
-
-            missing:
-                missing
         };
-    };
 
 
-    /* ---------------------------------------------------------
-       REMOVE
-    --------------------------------------------------------- */
+    /* ========================================================
+       START
+    ======================================================== */
 
-    Registry.unregister = function (
-        id
+    Registry.start = async function (
+        id,
+        context
     ) {
 
         const app =
             Registry.get(id);
 
+
         if (!app) {
-            return false;
-        }
 
-        if (app.system) {
-
-            console.warn(
-                "[HalDo Registry] " +
-                "System-App darf nicht " +
-                "entfernt werden:",
+            throw new Error(
+                "App nicht registriert: " +
                 id
             );
-
-            return false;
         }
 
-        Registry.apps.delete(
-            app.id
-        );
 
         if (
-            Registry.categories.has(
-                app.category
+            app.enabled === false
+        ) {
+
+            throw new Error(
+                "App ist deaktiviert: " +
+                app.id
+            );
+        }
+
+
+        const dependencyResult =
+            Registry.checkDependencies(
+                app.id
+            );
+
+
+        if (
+            !dependencyResult.valid
+        ) {
+
+            throw new Error(
+                "Fehlende Abhängigkeiten: " +
+                dependencyResult.missing.join(
+                    ", "
+                )
+            );
+        }
+
+
+        if (
+            app.singleton &&
+            runningApps.has(
+                app.id
             )
         ) {
 
-            Registry.categories
-                .get(app.category)
-                .delete(app.id);
+            return Registry.getInstance(
+                app.id
+            );
         }
 
-        Registry.emit(
-            "unregistered",
+
+        Registry.setState(
+            app.id,
+            "starting",
             {
-                app: app
+                running:
+                    false
             }
         );
+
+
+        let instance =
+            Registry.getInstance(
+                app.id
+            );
+
+
+        try {
+
+            /*
+             * Falls bereits ein Runtime-System
+             * vorhanden ist, verwenden wir es.
+             */
+
+            const runtime =
+                window.HalDoAppRuntime;
+
+
+            if (
+                runtime &&
+                typeof runtime.start ===
+                "function"
+            ) {
+
+                instance =
+                    await runtime.start(
+                        app.id,
+                        context || {}
+                    );
+
+            } else if (
+                instance &&
+                typeof instance.start ===
+                "function"
+            ) {
+
+                await instance.start(
+                    context || {}
+                );
+
+            }
+
+
+            if (instance) {
+
+                Registry.setInstance(
+                    app.id,
+                    instance
+                );
+            }
+
+
+            runningApps.set(
+                app.id,
+                {
+
+                    startedAt:
+                        Date.now(),
+
+                    context:
+                        context || {}
+                }
+            );
+
+
+            Registry.setState(
+                app.id,
+                "running",
+                {
+
+                    running:
+                        true,
+
+                    initialized:
+                        true,
+
+                    error:
+                        null
+                }
+            );
+
+
+            emit(
+                "app:started",
+                {
+
+                    id:
+                        app.id,
+
+                    instance:
+                        instance
+                }
+            );
+
+
+            return instance;
+
+        } catch (error) {
+
+            Registry.setState(
+                app.id,
+                "error",
+                {
+
+                    running:
+                        false,
+
+                    error:
+                        error
+                        .message ||
+                        String(error)
+                }
+            );
+
+
+            emit(
+                "app:error",
+                {
+
+                    id:
+                        app.id,
+
+                    error:
+                        error
+                }
+            );
+
+
+            throw error;
+        }
+    };
+
+
+    /* ========================================================
+       STOP
+    ======================================================== */
+
+    Registry.stop = async function (
+        id
+    ) {
+
+        const appId =
+            normalizeId(id);
+
+
+        if (
+            !runningApps.has(
+                appId
+            )
+        ) {
+
+            return false;
+        }
+
+
+        const instance =
+            Registry.getInstance(
+                appId
+            );
+
+
+        try {
+
+            if (
+                instance &&
+                typeof instance.stop ===
+                "function"
+            ) {
+
+                await instance.stop();
+            }
+
+
+            const runtime =
+                window.HalDoAppRuntime;
+
+
+            if (
+                runtime &&
+                typeof runtime.stop ===
+                "function"
+            ) {
+
+                await runtime.stop(
+                    appId
+                );
+            }
+
+
+        } catch (error) {
+
+            console.warn(
+                "[HalDo Registry]",
+                "Fehler beim Stoppen:",
+                appId,
+                error
+            );
+        }
+
+
+        runningApps.delete(
+            appId
+        );
+
+
+        Registry.setState(
+            appId,
+            "stopped",
+            {
+                running:
+                    false
+            }
+        );
+
+
+        emit(
+            "app:stopped",
+            {
+                id:
+                    appId
+            }
+        );
+
 
         return true;
     };
 
 
-    /* ---------------------------------------------------------
-       STATUS
-    --------------------------------------------------------- */
+    /* ========================================================
+       RESTART
+    ======================================================== */
 
-    Registry.getStatus = function () {
+    Registry.restart = async function (
+        id,
+        context
+    ) {
 
-        return {
+        await Registry.stop(
+            id
+        );
 
-            name:
-                Registry.name,
 
-            version:
-                Registry.version,
+        return Registry.start(
+            id,
+            context
+        );
+    };
 
-            ready:
-                Registry.ready,
 
-            appCount:
-                Registry.apps.size,
+    /* ========================================================
+       RUNNING APPS
+    ======================================================== */
 
-            categoryCount:
-                Registry.categories.size,
+    Registry.getRunning =
+        function () {
 
-            categories:
-                Registry.getCategories(),
-
-            timestamp:
-                Date.now()
+            return Array.from(
+                runningApps.keys()
+            );
         };
-    };
 
 
-    /* ---------------------------------------------------------
+    Registry.isRunning =
+        function (id) {
+
+            return runningApps.has(
+                normalizeId(id)
+            );
+        };
+
+
+    /* ========================================================
+       APP COUNT
+    ======================================================== */
+
+    Registry.count =
+        function () {
+
+            return registry.size;
+        };
+
+
+    /* ========================================================
+       IMPORT MANIFEST
+    ======================================================== */
+
+    Registry.loadManifest =
+        function () {
+
+            const manifest =
+                window.HalDoV20AppManifest;
+
+
+            if (
+                !manifest ||
+                typeof manifest.getAll !==
+                "function"
+            ) {
+
+                return 0;
+            }
+
+
+            const apps =
+                manifest.getAll();
+
+
+            let registered =
+                0;
+
+
+            apps.forEach(
+                function (definition) {
+
+                    if (
+                        Registry.register(
+                            definition
+                        )
+                    ) {
+
+                        registered++;
+                    }
+
+                }
+            );
+
+
+            return registered;
+        };
+
+
+    /* ========================================================
+       STATUS
+    ======================================================== */
+
+    Registry.getStatus =
+        function () {
+
+            return {
+
+                name:
+                    Registry.name,
+
+                version:
+                    Registry.version,
+
+                ready:
+                    Registry.ready,
+
+                registeredApps:
+                    registry.size,
+
+                runningApps:
+                    runningApps.size,
+
+                registered:
+                    Registry.getAll()
+                        .map(
+                            function (app) {
+
+                                return app.id;
+
+                            }
+                        ),
+
+                running:
+                    Registry.getRunning(),
+
+                timestamp:
+                    Date.now()
+            };
+        };
+
+
+    /* ========================================================
        INITIALIZE
-    --------------------------------------------------------- */
+    ======================================================== */
 
-    Registry.init = function () {
+    Registry.init =
+        function () {
 
-        if (Registry.ready) {
+            if (
+                Registry.ready
+            ) {
+
+                return Registry;
+            }
+
+
+            /*
+             * Manifest laden
+             */
+
+            Registry.loadManifest();
+
+
+            /*
+             * Event-Bus Verbindung
+             */
+
+            const bus =
+                window.HalDoAppEvents;
+
+
+            if (
+                bus &&
+                typeof bus.on ===
+                "function"
+            ) {
+
+                bus.on(
+                    "app:open",
+                    function (
+                        event
+                    ) {
+
+                        const data =
+                            event &&
+                            event.data
+                                ? event.data
+                                : event;
+
+
+                        if (
+                            data &&
+                            data.appId
+                        ) {
+
+                            Registry.start(
+                                data.appId,
+                                data
+                            )
+                            .catch(
+                                function (
+                                    error
+                                ) {
+
+                                    console.error(
+                                        "[HalDo Registry]",
+                                        error
+                                    );
+
+                                }
+                            );
+                        }
+
+                    }
+                );
+
+
+                bus.on(
+                    "app:close",
+                    function (
+                        event
+                    ) {
+
+                        const data =
+                            event &&
+                            event.data
+                                ? event.data
+                                : event;
+
+
+                        if (
+                            data &&
+                            data.appId
+                        ) {
+
+                            Registry.stop(
+                                data.appId
+                            )
+                            .catch(
+                                function (
+                                    error
+                                ) {
+
+                                    console.error(
+                                        "[HalDo Registry]",
+                                        error
+                                    );
+
+                                }
+                            );
+                        }
+
+                    }
+                );
+            }
+
+
+            Registry.ready =
+                true;
+
+
+            /*
+             * Globale APIs
+             */
+
+            window.HalDoV20AppRegistry =
+                Registry;
+
+
+            HalDoOS.appRegistry =
+                Registry;
+
+
+            V20.appRegistry =
+                Registry;
+
+
+            /*
+             * Registry Ready Event
+             */
+
+            emit(
+                "registry:ready",
+                Registry.getStatus()
+            );
+
+
+            if (
+                window.HalDoAppEvents &&
+                typeof window.HalDoAppEvents.emit ===
+                "function"
+            ) {
+
+                window.HalDoAppEvents.emit(
+                    "system:app-registry-ready",
+                    Registry.getStatus(),
+                    {
+                        internal:
+                            true
+                    }
+                );
+            }
+
+
+            console.log(
+                "[HalDo AI OS 20]",
+                "App Registry bereit:",
+                Registry.count(),
+                "Apps"
+            );
+
+
             return Registry;
+        };
+
+
+    /* ========================================================
+       STARTUP
+    ======================================================== */
+
+    function boot() {
+
+        try {
+
+            Registry.init();
+
+        } catch (error) {
+
+            console.error(
+                "[HalDo AI OS 20]",
+                "App Registry konnte nicht starten.",
+                error
+            );
         }
+    }
 
-        Registry.ready = true;
-
-        Registry.emit(
-            "ready",
-            Registry.getStatus()
-        );
-
-        console.log(
-            "%c[HalDo AI OS 20]",
-            "font-weight:bold;",
-            "Universal App Registry bereit."
-        );
-
-        return Registry;
-    };
-
-
-    /* ---------------------------------------------------------
-       GLOBAL API
-    --------------------------------------------------------- */
-
-    window.HalDoV20AppRegistry =
-        Registry;
-
-    HalDoOS.v20AppRegistry =
-        Registry;
-
-
-    /* ---------------------------------------------------------
-       START
-    --------------------------------------------------------- */
 
     if (
         document.readyState ===
@@ -867,17 +1574,16 @@
 
         document.addEventListener(
             "DOMContentLoaded",
-            function () {
-                Registry.init();
-            },
+            boot,
             {
-                once: true
+                once:
+                    true
             }
         );
 
     } else {
 
-        Registry.init();
+        boot();
     }
 
 
