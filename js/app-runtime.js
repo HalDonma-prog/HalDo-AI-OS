@@ -1,307 +1,91 @@
-/* ============================================================
+/* =========================================================
    HALDO AI OS 20
-   PROFESSIONAL APP RUNTIME
-   ------------------------------------------------------------
+   APP RUNTIME
+   ---------------------------------------------------------
    Datei:
-       js/app-runtime.js
-
-   Pfad:
        /js/app-runtime.js
 
-   HALDO APPLICATION RUNTIME 20
+   Zweck:
+       Zentrale Runtime für echte HalDo-Apps.
 
-   Verantwortlich für:
+   Architektur:
 
-   - App Lifecycle
-   - App Runtime States
-   - Registry Verbindung
-   - App Manager Verbindung
-   - Router Verbindung
-   - Window Manager Verbindung
-   - Kernel Verbindung
-   - Event Bus Verbindung
-   - Dependency Checks
-   - App Initialization
-   - App Launch
-   - App Close
-   - App Pause
-   - App Resume
-   - App Focus
-   - App Blur
-   - Singleton Handling
-   - Runtime Context
-   - App State
-   - Runtime Diagnostics
-   - Runtime Health
-   - zukünftige Service Bridges
+       Kernel
+          ↓
+       System
+          ↓
+       App Runtime
+          ↓
+       App Manager
+          ↓
+       App Registry / Manifest
+          ↓
+       konkrete App
+          ↓
+       Storage / AI / Language / Voice /
+       Router / Window Manager / Event Bus
+
+   Lifecycle:
+
+       install
+       initialize
+       mount
+       activate
+       deactivate
+       destroy
 
    WICHTIG:
+       Diese Datei enthält NICHT die komplette Logik
+       jeder einzelnen App.
 
-   Die Registry bleibt die zentrale Quelle für App-Metadaten.
-
-   Diese Runtime erzeugt keine zweite App-Registry.
-
-   ============================================================ */
+       Sie stellt den gemeinsamen Runtime-Kontext bereit,
+       damit jede App ihre eigene vollständige Oberfläche,
+       Logik, Daten, Events und Dienste besitzen kann.
+   ========================================================= */
 
 "use strict";
 
-(function (window, document) {
 
-    /* ============================================================
-       01 — FOUNDATION
-       ============================================================ */
-
-    window.HalDoOS =
-        window.HalDoOS || {};
-
-    const HalDoOS =
-        window.HalDoOS;
+(function (global) {
 
 
-    /* ============================================================
-       02 — META
-       ============================================================ */
+    /* =====================================================
+       01 — CONSTANTS
+       ===================================================== */
 
     const VERSION =
         "20.0.0";
 
-    const MODULE_ID =
-        "app-runtime";
+    const RUNTIME_NAME =
+        "HalDo AI OS App Runtime";
 
-    const NAME =
-        "HalDo AI OS 20 Application Runtime";
 
+    /* =====================================================
+       02 — INTERNAL HELPERS
+       ===================================================== */
 
-    /* ============================================================
-       03 — RUNTIME STATES
-       ============================================================ */
+    function isObject(value) {
 
-    const STATES = Object.freeze({
-
-        REGISTERED:
-            "registered",
-
-        INITIALIZING:
-            "initializing",
-
-        READY:
-            "ready",
-
-        OPENING:
-            "opening",
-
-        OPEN:
-            "open",
-
-        ACTIVE:
-            "active",
-
-        BACKGROUND:
-            "background",
-
-        MINIMIZED:
-            "minimized",
-
-        CLOSING:
-            "closing",
-
-        CLOSED:
-            "closed",
-
-        ERROR:
-            "error"
-
-    });
-
-
-    /* ============================================================
-       04 — STATE
-       ============================================================ */
-
-    const state = {
-
-        initialized:
-            false,
-
-        initializing:
-            false,
-
-        ready:
-            false,
-
-        failed:
-            false,
-
-        runtimes:
-            new Map(),
-
-        listeners:
-            new Map(),
-
-        activeAppId:
-            null,
-
-        statistics: {
-
-            initialized:
-                0,
-
-            launched:
-                0,
-
-            closed:
-                0,
-
-            paused:
-                0,
-
-            resumed:
-                0,
-
-            focused:
-                0,
-
-            blurred:
-                0,
-
-            minimized:
-                0,
-
-            errors:
-                0,
-
-            blocked:
-                0
-
-        },
-
-        connections: {
-
-            kernel:
-                false,
-
-            registry:
-                false,
-
-            manager:
-                false,
-
-            router:
-                false,
-
-            windowManager:
-                false,
-
-            storage:
-                false,
-
-            ai:
-                false,
-
-            language:
-                false
-
-        }
-
-    };
-
-
-    /* ============================================================
-       05 — LOGGING
-       ============================================================ */
-
-    function log() {
-
-        try {
-
-            console.log(
-                "[HalDo App Runtime]",
-                ...arguments
-            );
-
-        } catch (_) {}
-
-    }
-
-
-    function warn() {
-
-        try {
-
-            console.warn(
-                "[HalDo App Runtime]",
-                ...arguments
-            );
-
-        } catch (_) {}
-
-    }
-
-
-    function errorLog() {
-
-        try {
-
-            console.error(
-                "[HalDo App Runtime]",
-                ...arguments
-            );
-
-        } catch (_) {}
-
-    }
-
-
-    /* ============================================================
-       06 — HELPERS
-       ============================================================ */
-
-    function hasMethod(
-        object,
-        method
-    ) {
-
-        return !!(
-            object &&
-            typeof object[method] === "function"
+        return (
+            value !== null &&
+            typeof value === "object"
         );
 
     }
 
 
-    function now() {
+    function isFunction(value) {
 
-        return Date.now();
-
-    }
-
-
-    function normalizeId(
-        value
-    ) {
-
-        return String(
-            value || ""
-        )
-        .trim()
-        .toLowerCase()
-        .replace(
-            /[^a-z0-9äöüßîêç_-]+/gi,
-            "-"
-        )
-        .replace(
-            /-+/g,
-            "-"
-        )
-        .replace(
-            /^-|-$/g,
-            "");
+        return (
+            typeof value === "function"
+        );
 
     }
 
 
-    function clone(
-        value
+    function safeString(
+        value,
+        fallback = ""
     ) {
 
         if (
@@ -309,120 +93,115 @@
             value === undefined
         ) {
 
-            return value;
+            return fallback;
 
         }
 
+        return String(value);
 
-        if (
-            Array.isArray(value)
-        ) {
+    }
 
-            return value.map(
-                clone
+
+    function createError(
+        message,
+        cause = null
+    ) {
+
+        const error =
+            new Error(
+                safeString(
+                    message,
+                    "HalDo App Runtime Error"
+                )
+            );
+
+        error.name =
+            "HalDoAppRuntimeError";
+
+        if (cause) {
+
+            error.cause =
+                cause;
+
+        }
+
+        return error;
+
+    }
+
+
+    function dispatch(
+        name,
+        detail = {}
+    ) {
+
+        try {
+
+            global.dispatchEvent(
+                new CustomEvent(
+                    name,
+                    {
+                        detail
+                    }
+                )
+            );
+
+        } catch (error) {
+
+            console.error(
+                "[HalDo App Runtime] Event error:",
+                error
             );
 
         }
 
-
-        if (
-            typeof value === "object"
-        ) {
-
-            const result = {};
-
-            Object.keys(value)
-                .forEach(
-                    key => {
-
-                        const item =
-                            value[key];
-
-
-                        if (
-                            typeof item ===
-                            "function"
-                        ) {
-
-                            result[key] =
-                                item;
-
-                        } else {
-
-                            result[key] =
-                                clone(
-                                    item
-                                );
-
-                        }
-
-                    }
-                );
-
-            return result;
-
-        }
-
-
-        return value;
-
     }
 
 
-    /* ============================================================
-       07 — SERVICE LOOKUPS
-       ============================================================ */
+    /* =====================================================
+       03 — SERVICE LOOKUP
+       ===================================================== */
+
+    function getOS() {
+
+        return (
+            global.HalDoOS ||
+            null
+        );
+
+    }
+
 
     function getKernel() {
 
+        const os =
+            getOS();
+
         return (
-            window.HalDoKernel ||
-            HalDoOS.kernel ||
+            global.HalDoKernel ||
+            global.HalDoOSKernel ||
+            (
+                os &&
+                os.kernel
+            ) ||
             null
         );
 
     }
 
 
-    function getRegistry() {
+    function getSystem() {
+
+        const os =
+            getOS();
 
         return (
-            window.HalDoAppRegistry ||
-            window.HalDoOSAppRegistry ||
-            HalDoOS.appRegistry ||
-            null
-        );
-
-    }
-
-
-    function getManager() {
-
-        return (
-            window.HalDoAppManager ||
-            HalDoOS.appManager ||
-            null
-        );
-
-    }
-
-
-    function getRouter() {
-
-        return (
-            window.HalDoAppRouter ||
-            HalDoOS.appRouter ||
-            null
-        );
-
-    }
-
-
-    function getWindowManager() {
-
-        return (
-            window.HalDoWindowManager ||
-            HalDoOS.windowManager ||
+            global.HalDoSystem ||
+            global.HalDoOSSystem ||
+            (
+                os &&
+                os.system
+            ) ||
             null
         );
 
@@ -431,20 +210,19 @@
 
     function getStorage() {
 
-        return (
-            window.HalDoStorage ||
-            HalDoOS.storage ||
-            null
-        );
-
-    }
-
-
-    function getAI() {
+        const os =
+            getOS();
 
         return (
-            window.HalDoAICore ||
-            HalDoOS.aiCore ||
+            global.HalDoStorage ||
+            global.HalDoStorageManager ||
+            (
+                os &&
+                (
+                    os.storage ||
+                    os.storageManager
+                )
+            ) ||
             null
         );
 
@@ -453,26 +231,212 @@
 
     function getLanguage() {
 
+        const os =
+            getOS();
+
         return (
-            window.HalDoLanguageManager ||
-            HalDoOS.languageManager ||
+            global.HalDoLanguage ||
+            global.HalDoLanguageManager ||
+            (
+                os &&
+                (
+                    os.language ||
+                    os.languageManager
+                )
+            ) ||
             null
         );
 
     }
 
 
-    /* ============================================================
-       08 — EVENTS
-       ============================================================ */
+    function getAI() {
 
-    function on(
-        event,
-        callback
+        const os =
+            getOS();
+
+        return (
+            global.HalDoAI ||
+            global.HalDoAICore ||
+            (
+                os &&
+                (
+                    os.ai ||
+                    os.aiCore
+                )
+            ) ||
+            null
+        );
+
+    }
+
+
+    function getVoice() {
+
+        const os =
+            getOS();
+
+        return (
+            global.HalDoVoice ||
+            global.HalDoAIVoice ||
+            (
+                os &&
+                (
+                    os.voice ||
+                    os.aiVoice
+                )
+            ) ||
+            null
+        );
+
+    }
+
+
+    function getRouter() {
+
+        const os =
+            getOS();
+
+        return (
+            global.HalDoAppRouter ||
+            global.HalDoRouter ||
+            (
+                os &&
+                (
+                    os.router ||
+                    os.appRouter
+                )
+            ) ||
+            null
+        );
+
+    }
+
+
+    function getWindowManager() {
+
+        const os =
+            getOS();
+
+        return (
+            global.HalDoWindowManager ||
+            (
+                os &&
+                os.windowManager
+            ) ||
+            null
+        );
+
+    }
+
+
+    function getEventBus() {
+
+        const os =
+            getOS();
+
+        return (
+            global.HalDoEventBus ||
+            (
+                os &&
+                os.eventBus
+            ) ||
+            null
+        );
+
+    }
+
+
+    /* =====================================================
+       04 — EVENT BUS BRIDGE
+       ===================================================== */
+
+    function emitEvent(
+        eventName,
+        detail = {}
+    ) {
+
+        const bus =
+            getEventBus();
+
+
+        if (
+            bus
+        ) {
+
+            try {
+
+                if (
+                    isFunction(
+                        bus.emit
+                    )
+                ) {
+
+                    return bus.emit(
+                        eventName,
+                        detail
+                    );
+
+                }
+
+
+                if (
+                    isFunction(
+                        bus.dispatch
+                    )
+                ) {
+
+                    return bus.dispatch(
+                        eventName,
+                        detail
+                    );
+
+                }
+
+
+                if (
+                    isFunction(
+                        bus.publish
+                    )
+                ) {
+
+                    return bus.publish(
+                        eventName,
+                        detail
+                    );
+
+                }
+
+            } catch (error) {
+
+                console.error(
+                    "[HalDo App Runtime] EventBus:",
+                    error
+                );
+
+            }
+
+        }
+
+
+        dispatch(
+            "haldo:" + eventName,
+            detail
+        );
+
+
+        return true;
+
+    }
+
+
+    function listenEvent(
+        eventName,
+        handler
     ) {
 
         if (
-            typeof callback !== "function"
+            !isFunction(handler)
         ) {
 
             return function () {};
@@ -480,34 +444,107 @@
         }
 
 
+        const bus =
+            getEventBus();
+
+
         if (
-            !state.listeners.has(event)
+            bus
         ) {
 
-            state.listeners.set(
-                event,
-                new Set()
-            );
+            try {
+
+                if (
+                    isFunction(
+                        bus.on
+                    )
+                ) {
+
+                    const result =
+                        bus.on(
+                            eventName,
+                            handler
+                        );
+
+                    if (
+                        isFunction(result)
+                    ) {
+
+                        return result;
+
+                    }
+
+                }
+
+
+                if (
+                    isFunction(
+                        bus.subscribe
+                    )
+                ) {
+
+                    const result =
+                        bus.subscribe(
+                            eventName,
+                            handler
+                        );
+
+                    if (
+                        isFunction(result)
+                    ) {
+
+                        return result;
+
+                    }
+
+                }
+
+            } catch (error) {
+
+                console.error(
+                    "[HalDo App Runtime] EventBus listen:",
+                    error
+                );
+
+            }
 
         }
 
 
-        const listeners =
-            state.listeners.get(
-                event
-            );
+        const wrapped =
+            function (event) {
+
+                try {
+
+                    handler(
+                        event.detail !== undefined
+                            ? event.detail
+                            : event
+                    );
+
+                } catch (error) {
+
+                    console.error(
+                        "[HalDo App Runtime] Listener:",
+                        error
+                    );
+
+                }
+
+            };
 
 
-        listeners.add(
-            callback
+        global.addEventListener(
+            "haldo:" + eventName,
+            wrapped
         );
 
 
         return function () {
 
-            off(
-                event,
-                callback
+            global.removeEventListener(
+                "haldo:" + eventName,
+                wrapped
             );
 
         };
@@ -515,73 +552,89 @@
     }
 
 
-    function off(
-        event,
-        callback
-    ) {
+    /* =====================================================
+       05 — APP STATE
+       ===================================================== */
 
-        const listeners =
-            state.listeners.get(
-                event
-            );
+    class AppState {
 
 
-        if (!listeners) {
-
-            return;
-
-        }
-
-
-        listeners.delete(
-            callback
-        );
-
-
-        if (
-            listeners.size === 0
+        constructor(
+            initial = {}
         ) {
 
-            state.listeners.delete(
-                event
-            );
+            this.values =
+                isObject(initial)
+                    ? {
+                        ...initial
+                    }
+                    : {};
+
+            this.listeners =
+                new Set();
 
         }
 
-    }
+
+        get(
+            key,
+            fallback = undefined
+        ) {
+
+            if (
+                Object.prototype.hasOwnProperty.call(
+                    this.values,
+                    key
+                )
+            ) {
+
+                return this.values[key];
+
+            }
+
+            return fallback;
+
+        }
 
 
-    function emit(
-        event,
-        data = null
-    ) {
+        set(
+            key,
+            value
+        ) {
 
-        const listeners =
-            state.listeners.get(
-                event
-            );
+            const oldValue =
+                this.values[key];
 
 
-        if (listeners) {
+            this.values[key] =
+                value;
 
-            Array.from(
-                listeners
-            )
-            .forEach(
-                callback => {
+
+            const payload = {
+
+                key,
+
+                value,
+
+                oldValue
+
+            };
+
+
+            this.listeners.forEach(
+                listener => {
 
                     try {
 
-                        callback(
-                            data
+                        listener(
+                            payload
                         );
 
-                    } catch (exception) {
+                    } catch (error) {
 
-                        reportError(
-                            exception,
-                            "Runtime Event: " +
-                            event
+                        console.error(
+                            "[HalDo App State]",
+                            error
                         );
 
                     }
@@ -589,2105 +642,2802 @@
                 }
             );
 
+
+            return value;
+
         }
 
 
-        const events =
-            HalDoOS.events;
-
-
-        if (
-            events &&
-            hasMethod(
-                events,
-                "emit"
-            )
+        update(
+            values
         ) {
 
-            try {
+            if (
+                !isObject(values)
+            ) {
 
-                events.emit(
-                    "app-runtime:" + event,
-                    data
-                );
+                return this.values;
 
-            } catch (_) {}
+            }
+
+
+            Object.keys(
+                values
+            ).forEach(
+                key => {
+
+                    this.set(
+                        key,
+                        values[key]
+                    );
+
+                }
+            );
+
+
+            return this.values;
 
         }
 
 
-        const kernel =
-            getKernel();
-
-
-        if (
-            kernel &&
-            hasMethod(
-                kernel,
-                "emit"
-            )
+        remove(
+            key
         ) {
 
-            try {
+            if (
+                !Object.prototype.hasOwnProperty.call(
+                    this.values,
+                    key
+                )
+            ) {
 
-                kernel.emit(
-                    "app-runtime:" + event,
-                    data
-                );
+                return false;
 
-            } catch (_) {}
+            }
 
-        }
 
-    }
+            const oldValue =
+                this.values[key];
 
 
-    /* ============================================================
-       09 — ERROR HANDLING
-       ============================================================ */
+            delete this.values[key];
 
-    function reportError(
-        exception,
-        context =
-            "Application Runtime"
-    ) {
 
-        state.statistics.errors +=
-            1;
+            this.listeners.forEach(
+                listener => {
 
+                    try {
 
-        const normalized =
-            exception instanceof Error
-                ? exception
-                : new Error(
-                    String(
-                        exception
-                    )
-                );
+                        listener({
 
+                            key,
 
-        const record = {
+                            value:
+                                undefined,
 
-            name:
-                normalized.name,
+                            oldValue,
 
-            message:
-                normalized.message,
+                            removed:
+                                true
 
-            stack:
-                normalized.stack || "",
+                        });
 
-            context,
+                    } catch (error) {
 
-            timestamp:
-                new Date().toISOString()
+                        console.error(
+                            "[HalDo App State]",
+                            error
+                        );
 
-        };
+                    }
 
+                }
+            );
 
-        errorLog(
-            "[HalDo App Runtime]",
-            record
-        );
-
-
-        emit(
-            "error",
-            record
-        );
-
-
-        const kernel =
-            getKernel();
-
-
-        if (
-            kernel &&
-            hasMethod(
-                kernel,
-                "reportError"
-            )
-        ) {
-
-            try {
-
-                kernel.reportError(
-                    normalized,
-                    context
-                );
-
-            } catch (_) {}
-
-        }
-
-
-        return record;
-
-    }
-
-
-    /* ============================================================
-       10 — RUNTIME RECORD
-       ============================================================ */
-
-    function createRuntime(
-        app
-    ) {
-
-        return {
-
-            appId:
-                app.id,
-
-            state:
-                STATES.REGISTERED,
-
-            createdAt:
-                now(),
-
-            initializedAt:
-                null,
-
-            openedAt:
-                null,
-
-            closedAt:
-                null,
-
-            lastActiveAt:
-                null,
-
-            lastStateChange:
-                now(),
-
-            launchCount:
-                0,
-
-            errorCount:
-                0,
-
-            windowId:
-                null,
-
-            route:
-                app.route || null,
-
-            context:
-                {},
-
-            instance:
-                null,
-
-            services:
-                {},
-
-            initialized:
-                false,
-
-            open:
-                false,
-
-            active:
-                false,
-
-            minimized:
-                false,
-
-            background:
-                false,
-
-            error:
-                null
-
-        };
-
-    }
-
-
-    /* ============================================================
-       11 — STATE TRANSITION
-       ============================================================ */
-
-    function setState(
-        runtime,
-        nextState,
-        metadata = {}
-    ) {
-
-        if (!runtime) {
-
-            return false;
-
-        }
-
-
-        const previous =
-            runtime.state;
-
-
-        if (
-            previous === nextState
-        ) {
 
             return true;
 
         }
 
 
-        runtime.state =
-            nextState;
-
-        runtime.lastStateChange =
-            now();
-
-
-        if (
-            nextState === STATES.OPEN
+        has(
+            key
         ) {
 
-            runtime.open =
-                true;
-
-            runtime.closedAt =
-                null;
-
-            runtime.openedAt =
-                runtime.openedAt ||
-                now();
+            return Object.prototype.hasOwnProperty.call(
+                this.values,
+                key
+            );
 
         }
 
 
-        if (
-            nextState === STATES.ACTIVE
-        ) {
+        all() {
 
-            runtime.active =
-                true;
-
-            runtime.background =
-                false;
-
-            runtime.minimized =
-                false;
-
-            runtime.lastActiveAt =
-                now();
+            return {
+                ...this.values
+            };
 
         }
 
 
-        if (
-            nextState === STATES.BACKGROUND
+        subscribe(
+            listener
         ) {
 
-            runtime.active =
-                false;
+            if (
+                !isFunction(listener)
+            ) {
 
-            runtime.background =
-                true;
-
-        }
-
-
-        if (
-            nextState === STATES.MINIMIZED
-        ) {
-
-            runtime.active =
-                false;
-
-            runtime.minimized =
-                true;
-
-        }
-
-
-        if (
-            nextState === STATES.CLOSED
-        ) {
-
-            runtime.open =
-                false;
-
-            runtime.active =
-                false;
-
-            runtime.background =
-                false;
-
-            runtime.minimized =
-                false;
-
-            runtime.closedAt =
-                now();
-
-        }
-
-
-        if (
-            nextState === STATES.ERROR
-        ) {
-
-            runtime.open =
-                false;
-
-            runtime.active =
-                false;
-
-        }
-
-
-        emit(
-            "state-changed",
-            {
-
-                appId:
-                    runtime.appId,
-
-                previous,
-
-                state:
-                    nextState,
-
-                runtime:
-                    clone(
-                        runtime
-                    ),
-
-                metadata:
-                    clone(
-                        metadata
-                    )
+                return function () {};
 
             }
-        );
 
 
-        return true;
+            this.listeners.add(
+                listener
+            );
+
+
+            return () => {
+
+                this.listeners.delete(
+                    listener
+                );
+
+            };
+
+        }
+
+
+        clear() {
+
+            this.values =
+                {};
+
+        }
 
     }
 
 
-    /* ============================================================
-       12 — REGISTRY ACCESS
-       ============================================================ */
+    /* =====================================================
+       06 — APP STORAGE BRIDGE
+       ===================================================== */
 
-    function getApp(
-        appId
-    ) {
-
-        const registry =
-            getRegistry();
+    class AppStorage {
 
 
-        if (
-            !registry
+        constructor(
+            appId
         ) {
 
-            return null;
+            this.appId =
+                appId;
+
+            this.prefix =
+                "haldo.app." +
+                appId +
+                ".";
 
         }
 
 
-        if (
-            hasMethod(
-                registry,
-                "getApp"
-            )
+        getStorageManager() {
+
+            return getStorage();
+
+        }
+
+
+        makeKey(
+            key
         ) {
 
-            return registry.getApp(
-                appId
+            return (
+                this.prefix +
+                safeString(key)
             );
 
         }
 
 
-        if (
-            hasMethod(
-                registry,
-                "get"
-            )
+        async get(
+            key,
+            fallback = null
         ) {
 
-            return registry.get(
-                appId
-            );
-
-        }
+            const storage =
+                this.getStorageManager();
 
 
-        return null;
+            if (
+                storage
+            ) {
 
-    }
+                try {
 
+                    if (
+                        isFunction(
+                            storage.get
+                        )
+                    ) {
 
-    /* ============================================================
-       13 — ENSURE RUNTIME
-       ============================================================ */
+                        const result =
+                            await storage.get(
+                                this.makeKey(
+                                    key
+                                )
+                            );
 
-    function ensureRuntime(
-        app
-    ) {
+                        return (
+                            result === undefined
+                                ? fallback
+                                : result
+                        );
 
-        if (!app) {
-
-            return null;
-
-        }
-
-
-        const id =
-            normalizeId(
-                app.id ||
-                app.appId
-            );
-
-
-        if (!id) {
-
-            return null;
-
-        }
+                    }
 
 
-        if (
-            !state.runtimes.has(id)
-        ) {
+                    if (
+                        isFunction(
+                            storage.read
+                        )
+                    ) {
 
-            state.runtimes.set(
-                id,
-                createRuntime({
-                    ...app,
-                    id
-                })
-            );
+                        const result =
+                            await storage.read(
+                                this.makeKey(
+                                    key
+                                )
+                            );
 
-        }
+                        return (
+                            result === undefined
+                                ? fallback
+                                : result
+                        );
 
+                    }
 
-        const runtime =
-            state.runtimes.get(
-                id
-            );
+                } catch (error) {
 
+                    console.error(
+                        "[HalDo App Storage]",
+                        error
+                    );
 
-        runtime.route =
-            app.route ||
-            runtime.route ||
-            null;
+                }
 
+            }
 
-        return runtime;
-
-    }
-
-
-    /* ============================================================
-       14 — DEPENDENCIES
-       ============================================================ */
-
-    function checkDependencies(
-        app
-    ) {
-
-        const registry =
-            getRegistry();
-
-
-        if (
-            registry &&
-            hasMethod(
-                registry,
-                "checkDependencies"
-            )
-        ) {
 
             try {
 
-                return registry.checkDependencies(
-                    app
-                );
+                const raw =
+                    global.localStorage.getItem(
+                        this.makeKey(
+                            key
+                        )
+                    );
 
-            } catch (exception) {
 
-                reportError(
-                    exception,
-                    "Dependency Check"
+                if (
+                    raw === null
+                ) {
+
+                    return fallback;
+
+                }
+
+
+                try {
+
+                    return JSON.parse(
+                        raw
+                    );
+
+                } catch (_) {
+
+                    return raw;
+
+                }
+
+            } catch (error) {
+
+                console.error(
+                    "[HalDo App Storage]",
+                    error
                 );
 
             }
 
-        }
 
-
-        return {
-
-            valid:
-                true,
-
-            missing:
-                [],
-
-            disabled:
-                [],
-
-            circular:
-                [],
-
-            chain:
-                []
-
-        };
-
-    }
-
-
-    /* ============================================================
-       15 — SERVICE CONTEXT
-       ============================================================ */
-
-    function createServiceContext(
-        app,
-        runtime
-    ) {
-
-        return {
-
-            app,
-
-            runtime,
-
-            kernel:
-                getKernel(),
-
-            registry:
-                getRegistry(),
-
-            appManager:
-                getManager(),
-
-            router:
-                getRouter(),
-
-            windowManager:
-                getWindowManager(),
-
-            storage:
-                getStorage(),
-
-            ai:
-                getAI(),
-
-            language:
-                getLanguage(),
-
-            runtimeAPI:
-                api
-
-        };
-
-    }
-
-
-    /* ============================================================
-       16 — INITIALIZE APP
-       ============================================================ */
-
-    async function initializeApp(
-        appId,
-        options = {}
-    ) {
-
-        const app =
-            getApp(
-                appId
-            );
-
-
-        if (!app) {
-
-            return null;
+            return fallback;
 
         }
 
 
-        const runtime =
-            ensureRuntime(
-                app
-            );
-
-
-        if (!runtime) {
-
-            return null;
-
-        }
-
-
-        if (
-            runtime.initialized
+        async set(
+            key,
+            value
         ) {
 
-            return clone(
-                runtime
-            );
-
-        }
-
-
-        const dependencies =
-            checkDependencies(
-                app
-            );
-
-
-        if (
-            !dependencies.valid
-        ) {
-
-            runtime.error =
-                dependencies;
-
-            runtime.errorCount +=
-                1;
-
-            setState(
-                runtime,
-                STATES.ERROR,
-                {
-
-                    reason:
-                        "dependencies",
-
-                    dependencies
-
-                }
-            );
-
-
-            state.statistics.blocked +=
-                1;
-
-
-            return null;
-
-        }
-
-
-        setState(
-            runtime,
-            STATES.INITIALIZING
-        );
-
-
-        try {
-
-            runtime.context =
-                {
-                    ...runtime.context,
-                    ...(options.context || {})
-                };
-
-
-            runtime.services =
-                createServiceContext(
-                    app,
-                    runtime
-                );
-
-
-            /*
-             * App-spezifisches Initialisierungsmodul.
-             */
-
-            let instance =
-                runtime.instance;
+            const storage =
+                this.getStorageManager();
 
 
             if (
-                !instance &&
-                app.module &&
-                typeof app.module ===
-                    "object"
+                storage
             ) {
 
-                instance =
-                    app.module;
+                try {
+
+                    if (
+                        isFunction(
+                            storage.set
+                        )
+                    ) {
+
+                        await storage.set(
+                            this.makeKey(
+                                key
+                            ),
+                            value
+                        );
+
+                        return value;
+
+                    }
+
+
+                    if (
+                        isFunction(
+                            storage.write
+                        )
+                    ) {
+
+                        await storage.write(
+                            this.makeKey(
+                                key
+                            ),
+                            value
+                        );
+
+                        return value;
+
+                    }
+
+                } catch (error) {
+
+                    console.error(
+                        "[HalDo App Storage]",
+                        error
+                    );
+
+                }
 
             }
+
+
+            try {
+
+                global.localStorage.setItem(
+                    this.makeKey(
+                        key
+                    ),
+                    JSON.stringify(
+                        value
+                    )
+                );
+
+            } catch (error) {
+
+                console.error(
+                    "[HalDo App Storage]",
+                    error
+                );
+
+            }
+
+
+            return value;
+
+        }
+
+
+        async remove(
+            key
+        ) {
+
+            const storage =
+                this.getStorageManager();
 
 
             if (
-                instance &&
-                hasMethod(
-                    instance,
-                    "initialize"
-                )
+                storage
             ) {
 
-                await instance.initialize(
-                    runtime.services
-                );
+                try {
 
-            } else if (
-                instance &&
-                hasMethod(
-                    instance,
-                    "init"
-                )
-            ) {
+                    if (
+                        isFunction(
+                            storage.remove
+                        )
+                    ) {
 
-                await instance.init(
-                    runtime.services
-                );
+                        await storage.remove(
+                            this.makeKey(
+                                key
+                            )
+                        );
+
+                        return true;
+
+                    }
+
+
+                    if (
+                        isFunction(
+                            storage.delete
+                        )
+                    ) {
+
+                        await storage.delete(
+                            this.makeKey(
+                                key
+                            )
+                        );
+
+                        return true;
+
+                    }
+
+                } catch (error) {
+
+                    console.error(
+                        "[HalDo App Storage]",
+                        error
+                    );
+
+                }
 
             }
 
 
-            runtime.instance =
-                instance || null;
+            try {
 
-            runtime.initialized =
-                true;
-
-            runtime.initializedAt =
-                now();
-
-
-            state.statistics.initialized +=
-                1;
-
-
-            setState(
-                runtime,
-                STATES.READY
-            );
-
-
-            emit(
-                "app-initialized",
-                {
-
-                    app:
-                        clone(app),
-
-                    runtime:
-                        clone(runtime)
-
-                }
-            );
-
-
-            return clone(
-                runtime
-            );
-
-        } catch (exception) {
-
-            runtime.error =
-                reportError(
-                    exception,
-                    "App Initialization: " +
-                    app.id
+                global.localStorage.removeItem(
+                    this.makeKey(
+                        key
+                    )
                 );
 
-            runtime.errorCount +=
-                1;
+            } catch (_) {}
 
 
-            setState(
-                runtime,
-                STATES.ERROR
-            );
+            return true;
+
+        }
 
 
-            return null;
+        async clear() {
+
+            const storage =
+                this.getStorageManager();
+
+
+            if (
+                storage
+            ) {
+
+                try {
+
+                    if (
+                        isFunction(
+                            storage.clearNamespace
+                        )
+                    ) {
+
+                        await storage.clearNamespace(
+                            this.prefix
+                        );
+
+                        return true;
+
+                    }
+
+                } catch (error) {
+
+                    console.error(
+                        "[HalDo App Storage]",
+                        error
+                    );
+
+                }
+
+            }
+
+
+            try {
+
+                const keys = [];
+
+
+                for (
+                    let index = 0;
+                    index <
+                    global.localStorage.length;
+                    index++
+                ) {
+
+                    const key =
+                        global.localStorage.key(
+                            index
+                        );
+
+
+                    if (
+                        key &&
+                        key.startsWith(
+                            this.prefix
+                        )
+                    ) {
+
+                        keys.push(
+                            key
+                        );
+
+                    }
+
+                }
+
+
+                keys.forEach(
+                    key => {
+
+                        global.localStorage.removeItem(
+                            key
+                        );
+
+                    }
+                );
+
+            } catch (_) {}
+
+
+            return true;
 
         }
 
     }
 
 
-    /* ============================================================
-       17 — OPEN
-       ============================================================ */
+    /* =====================================================
+       07 — DOM EVENT CLEANUP
+       ===================================================== */
 
-    async function open(
-        appId,
-        options = {}
-    ) {
-
-        const app =
-            getApp(
-                appId
-            );
+    class CleanupManager {
 
 
-        if (!app) {
+        constructor() {
 
-            return null;
+            this.cleanups =
+                new Set();
 
         }
 
 
-        if (
-            app.enabled === false
+        add(
+            cleanup
         ) {
 
-            state.statistics.blocked +=
-                1;
+            if (
+                isFunction(cleanup)
+            ) {
 
+                this.cleanups.add(
+                    cleanup
+                );
 
-            emit(
-                "launch-blocked",
-                {
+            }
 
-                    app:
-                        clone(app),
-
-                    reason:
-                        "disabled"
-
-                }
-            );
-
-
-            return null;
+            return cleanup;
 
         }
 
 
-        const runtime =
-            ensureRuntime(
-                app
-            );
-
-
-        if (!runtime) {
-
-            return null;
-
-        }
-
-
-        /*
-         * Singleton:
-         * bereits offene App aktivieren.
-         */
-
-        if (
-            app.singleton !== false &&
-            runtime.open
+        event(
+            target,
+            eventName,
+            handler,
+            options
         ) {
 
-            await focus(
-                app.id
-            );
+            if (
+                !target ||
+                !isFunction(
+                    target.addEventListener
+                )
+            ) {
+
+                return function () {};
+
+            }
 
 
-            return clone(
-                runtime
-            );
-
-        }
-
-
-        const initialized =
-            await initializeApp(
-                app.id,
+            target.addEventListener(
+                eventName,
+                handler,
                 options
             );
 
 
-        if (!initialized) {
+            const cleanup =
+                () => {
 
-            return null;
+                    try {
 
-        }
-
-
-        setState(
-            runtime,
-            STATES.OPENING
-        );
-
-
-        try {
-
-            const manager =
-                getManager();
-
-
-            let managerResult =
-                null;
-
-
-            /*
-             * Der App Manager bleibt der bevorzugte
-             * Orchestrator, wenn er bereits eine
-             * kompatible open()-API besitzt.
-             *
-             * Schutz gegen Rekursion:
-             * Falls der Manager intern wieder die
-             * Runtime aufruft, darf hier kein endloser
-             * Kreislauf entstehen.
-             */
-
-            if (
-                manager &&
-                hasMethod(
-                    manager,
-                    "open"
-                ) &&
-                options.viaRuntimeManager !== false
-            ) {
-
-                managerResult =
-                    await manager.open(
-                        app.id,
-                        {
-                            ...options,
-                            fromRuntime:
-                                true
-                        }
-                    );
-
-            } else {
-
-                const router =
-                    getRouter();
-
-
-                if (
-                    router &&
-                    hasMethod(
-                        router,
-                        "navigate"
-                    ) &&
-                    app.route
-                ) {
-
-                    managerResult =
-                        await router.navigate(
-                            app.route,
+                        target.removeEventListener(
+                            eventName,
+                            handler,
                             options
                         );
 
-                }
+                    } catch (_) {}
 
-            }
-
-
-            runtime.open =
-                true;
-
-            runtime.openedAt =
-                now();
-
-            runtime.launchCount +=
-                1;
+                };
 
 
-            state.statistics.launched +=
-                1;
-
-
-            setState(
-                runtime,
-                STATES.OPEN
+            this.add(
+                cleanup
             );
 
 
-            await focus(
-                app.id
-            );
-
-
-            emit(
-                "opened",
-                {
-
-                    app:
-                        clone(app),
-
-                    runtime:
-                        clone(runtime),
-
-                    result:
-                        managerResult
-
-                }
-            );
-
-
-            return clone(
-                runtime
-            );
-
-        } catch (exception) {
-
-            runtime.error =
-                reportError(
-                    exception,
-                    "App Open: " +
-                    app.id
-                );
-
-            runtime.errorCount +=
-                1;
-
-
-            setState(
-                runtime,
-                STATES.ERROR
-            );
-
-
-            emit(
-                "open-failed",
-                {
-
-                    app:
-                        clone(app),
-
-                    runtime:
-                        clone(runtime),
-
-                    error:
-                        exception
-
-                }
-            );
-
-
-            return null;
-
-        }
-
-    }
-
-
-    /* ============================================================
-       18 — CLOSE
-       ============================================================ */
-
-    async function close(
-        appId,
-        options = {}
-    ) {
-
-        const id =
-            normalizeId(
-                appId
-            );
-
-
-        const runtime =
-            state.runtimes.get(
-                id
-            );
-
-
-        if (!runtime) {
-
-            return false;
+            return cleanup;
 
         }
 
 
-        const app =
-            getApp(
-                id
-            );
+        timeout(
+            callback,
+            delay
+        ) {
 
-
-        setState(
-            runtime,
-            STATES.CLOSING
-        );
-
-
-        try {
-
-            if (
-                runtime.instance &&
-                hasMethod(
-                    runtime.instance,
-                    "close"
-                )
-            ) {
-
-                await runtime.instance.close(
-                    createServiceContext(
-                        app,
-                        runtime
-                    )
+            const timer =
+                setTimeout(
+                    callback,
+                    delay
                 );
 
-            }
 
+            this.add(
+                () => {
 
-            const manager =
-                getManager();
-
-
-            if (
-                manager &&
-                hasMethod(
-                    manager,
-                    "close"
-                )
-            ) {
-
-                await manager.close(
-                    id,
-                    {
-                        ...options,
-                        fromRuntime:
-                            true
-                    }
-                );
-
-            } else {
-
-                const windowManager =
-                    getWindowManager();
-
-
-                if (
-                    windowManager &&
-                    hasMethod(
-                        windowManager,
-                        "close"
-                    )
-                ) {
-
-                    await windowManager.close(
-                        runtime.windowId ||
-                        id
+                    clearTimeout(
+                        timer
                     );
 
                 }
-
-            }
-
-
-            runtime.active =
-                false;
-
-            runtime.open =
-                false;
-
-
-            state.statistics.closed +=
-                1;
-
-
-            setState(
-                runtime,
-                STATES.CLOSED
             );
 
 
-            if (
-                state.activeAppId === id
-            ) {
-
-                state.activeAppId =
-                    null;
-
-            }
-
-
-            emit(
-                "closed",
-                {
-
-                    app:
-                        clone(app),
-
-                    runtime:
-                        clone(runtime)
-
-                }
-            );
-
-
-            return true;
-
-        } catch (exception) {
-
-            runtime.error =
-                reportError(
-                    exception,
-                    "App Close: " +
-                    id
-                );
-
-            runtime.errorCount +=
-                1;
-
-
-            setState(
-                runtime,
-                STATES.ERROR
-            );
-
-
-            return false;
+            return timer;
 
         }
 
-    }
 
-
-    /* ============================================================
-       19 — PAUSE
-       ============================================================ */
-
-    async function pause(
-        appId
-    ) {
-
-        const id =
-            normalizeId(
-                appId
-            );
-
-
-        const runtime =
-            state.runtimes.get(
-                id
-            );
-
-
-        if (
-            !runtime ||
-            !runtime.open
+        interval(
+            callback,
+            delay
         ) {
 
-            return false;
-
-        }
-
-
-        try {
-
-            if (
-                runtime.instance &&
-                hasMethod(
-                    runtime.instance,
-                    "pause"
-                )
-            ) {
-
-                await runtime.instance.pause(
-                    createServiceContext(
-                        getApp(id),
-                        runtime
-                    )
+            const timer =
+                setInterval(
+                    callback,
+                    delay
                 );
 
-            }
 
+            this.add(
+                () => {
 
-            setState(
-                runtime,
-                STATES.BACKGROUND
-            );
-
-
-            state.statistics.paused +=
-                1;
-
-
-            emit(
-                "paused",
-                {
-
-                    appId:
-                        id,
-
-                    runtime:
-                        clone(runtime)
-
-                }
-            );
-
-
-            return true;
-
-        } catch (exception) {
-
-            reportError(
-                exception,
-                "App Pause: " +
-                id
-            );
-
-
-            return false;
-
-        }
-
-    }
-
-
-    /* ============================================================
-       20 — RESUME
-       ============================================================ */
-
-    async function resume(
-        appId
-    ) {
-
-        const id =
-            normalizeId(
-                appId
-            );
-
-
-        const runtime =
-            state.runtimes.get(
-                id
-            );
-
-
-        if (
-            !runtime ||
-            !runtime.open
-        ) {
-
-            return false;
-
-        }
-
-
-        try {
-
-            if (
-                runtime.instance &&
-                hasMethod(
-                    runtime.instance,
-                    "resume"
-                )
-            ) {
-
-                await runtime.instance.resume(
-                    createServiceContext(
-                        getApp(id),
-                        runtime
-                    )
-                );
-
-            }
-
-
-            setState(
-                runtime,
-                STATES.OPEN
-            );
-
-
-            state.statistics.resumed +=
-                1;
-
-
-            emit(
-                "resumed",
-                {
-
-                    appId:
-                        id,
-
-                    runtime:
-                        clone(runtime)
-
-                }
-            );
-
-
-            return true;
-
-        } catch (exception) {
-
-            reportError(
-                exception,
-                "App Resume: " +
-                id
-            );
-
-
-            return false;
-
-        }
-
-    }
-
-
-    /* ============================================================
-       21 — FOCUS
-       ============================================================ */
-
-    async function focus(
-        appId
-    ) {
-
-        const id =
-            normalizeId(
-                appId
-            );
-
-
-        const runtime =
-            state.runtimes.get(
-                id
-            );
-
-
-        if (
-            !runtime
-        ) {
-
-            return false;
-
-        }
-
-
-        const previousId =
-            state.activeAppId;
-
-
-        if (
-            previousId &&
-            previousId !== id
-        ) {
-
-            await blur(
-                previousId
-            );
-
-        }
-
-
-        const windowManager =
-            getWindowManager();
-
-
-        try {
-
-            if (
-                windowManager &&
-                hasMethod(
-                    windowManager,
-                    "focus"
-                )
-            ) {
-
-                await windowManager.focus(
-                    runtime.windowId ||
-                    id
-                );
-
-            }
-
-
-            runtime.active =
-                true;
-
-            runtime.background =
-                false;
-
-            runtime.minimized =
-                false;
-
-            state.activeAppId =
-                id;
-
-
-            state.statistics.focused +=
-                1;
-
-
-            setState(
-                runtime,
-                STATES.ACTIVE
-            );
-
-
-            emit(
-                "focused",
-                {
-
-                    appId:
-                        id,
-
-                    previousAppId:
-                        previousId,
-
-                    runtime:
-                        clone(runtime)
-
-                }
-            );
-
-
-            return true;
-
-        } catch (exception) {
-
-            reportError(
-                exception,
-                "App Focus: " +
-                id
-            );
-
-
-            return false;
-
-        }
-
-    }
-
-
-    /* ============================================================
-       22 — BLUR
-       ============================================================ */
-
-    async function blur(
-        appId
-    ) {
-
-        const id =
-            normalizeId(
-                appId
-            );
-
-
-        const runtime =
-            state.runtimes.get(
-                id
-            );
-
-
-        if (!runtime) {
-
-            return false;
-
-        }
-
-
-        try {
-
-            if (
-                runtime.instance &&
-                hasMethod(
-                    runtime.instance,
-                    "blur"
-                )
-            ) {
-
-                await runtime.instance.blur(
-                    createServiceContext(
-                        getApp(id),
-                        runtime
-                    )
-                );
-
-            }
-
-
-            runtime.active =
-                false;
-
-
-            if (
-                state.activeAppId === id
-            ) {
-
-                state.activeAppId =
-                    null;
-
-            }
-
-
-            state.statistics.blurred +=
-                1;
-
-
-            setState(
-                runtime,
-                STATES.BACKGROUND
-            );
-
-
-            emit(
-                "blurred",
-                {
-
-                    appId:
-                        id,
-
-                    runtime:
-                        clone(runtime)
-
-                }
-            );
-
-
-            return true;
-
-        } catch (exception) {
-
-            reportError(
-                exception,
-                "App Blur: " +
-                id
-            );
-
-
-            return false;
-
-        }
-
-    }
-
-
-    /* ============================================================
-       23 — MINIMIZE
-       ============================================================ */
-
-    async function minimize(
-        appId
-    ) {
-
-        const id =
-            normalizeId(
-                appId
-            );
-
-
-        const runtime =
-            state.runtimes.get(
-                id
-            );
-
-
-        if (!runtime) {
-
-            return false;
-
-        }
-
-
-        try {
-
-            const windowManager =
-                getWindowManager();
-
-
-            if (
-                windowManager &&
-                hasMethod(
-                    windowManager,
-                    "minimize"
-                )
-            ) {
-
-                await windowManager.minimize(
-                    runtime.windowId ||
-                    id
-                );
-
-            }
-
-
-            runtime.active =
-                false;
-
-            runtime.minimized =
-                true;
-
-
-            if (
-                state.activeAppId === id
-            ) {
-
-                state.activeAppId =
-                    null;
-
-            }
-
-
-            state.statistics.minimized +=
-                1;
-
-
-            setState(
-                runtime,
-                STATES.MINIMIZED
-            );
-
-
-            emit(
-                "minimized",
-                {
-
-                    appId:
-                        id,
-
-                    runtime:
-                        clone(runtime)
-
-                }
-            );
-
-
-            return true;
-
-        } catch (exception) {
-
-            reportError(
-                exception,
-                "App Minimize: " +
-                id
-            );
-
-
-            return false;
-
-        }
-
-    }
-
-
-    /* ============================================================
-       24 — RUNTIME ACCESS
-       ============================================================ */
-
-    function getRuntime(
-        appId
-    ) {
-
-        const runtime =
-            state.runtimes.get(
-                normalizeId(
-                    appId
-                )
-            );
-
-
-        return runtime
-            ? clone(runtime)
-            : null;
-
-    }
-
-
-    function getAppState(
-        appId
-    ) {
-
-        const runtime =
-            state.runtimes.get(
-                normalizeId(
-                    appId
-                )
-            );
-
-
-        if (!runtime) {
-
-            return null;
-
-        }
-
-
-        return {
-
-            appId:
-                runtime.appId,
-
-            state:
-                runtime.state,
-
-            open:
-                runtime.open,
-
-            active:
-                runtime.active,
-
-            minimized:
-                runtime.minimized,
-
-            background:
-                runtime.background,
-
-            initialized:
-                runtime.initialized,
-
-            windowId:
-                runtime.windowId,
-
-            launchCount:
-                runtime.launchCount,
-
-            errorCount:
-                runtime.errorCount
-
-        };
-
-    }
-
-
-    function getAllRuntimes() {
-
-        return Array.from(
-            state.runtimes.values()
-        )
-        .map(
-            clone
-        );
-
-    }
-
-
-    function getOpenApps() {
-
-        return getAllRuntimes()
-            .filter(
-                runtime =>
-                    runtime.open === true
-            );
-
-    }
-
-
-    function getActiveApp() {
-
-        if (
-            !state.activeAppId
-        ) {
-
-            return null;
-
-        }
-
-
-        return getRuntime(
-            state.activeAppId
-        );
-
-    }
-
-
-    function isOpen(
-        appId
-    ) {
-
-        const runtime =
-            state.runtimes.get(
-                normalizeId(
-                    appId
-                )
-            );
-
-
-        return !!(
-            runtime &&
-            runtime.open
-        );
-
-    }
-
-
-    /* ============================================================
-       25 — CONNECTIONS
-       ============================================================ */
-
-    function refreshConnections() {
-
-        state.connections.kernel =
-            !!getKernel();
-
-        state.connections.registry =
-            !!getRegistry();
-
-        state.connections.manager =
-            !!getManager();
-
-        state.connections.router =
-            !!getRouter();
-
-        state.connections.windowManager =
-            !!getWindowManager();
-
-        state.connections.storage =
-            !!getStorage();
-
-        state.connections.ai =
-            !!getAI();
-
-        state.connections.language =
-            !!getLanguage();
-
-
-        return getConnectionStatus();
-
-    }
-
-
-    function getConnectionStatus() {
-
-        return {
-
-            kernel:
-                !!getKernel(),
-
-            registry:
-                !!getRegistry(),
-
-            manager:
-                !!getManager(),
-
-            router:
-                !!getRouter(),
-
-            windowManager:
-                !!getWindowManager(),
-
-            storage:
-                !!getStorage(),
-
-            ai:
-                !!getAI(),
-
-            language:
-                !!getLanguage()
-
-        };
-
-    }
-
-
-    /* ============================================================
-       26 — REGISTRY EVENTS
-       ============================================================ */
-
-    function connectRegistryEvents() {
-
-        const registry =
-            getRegistry();
-
-
-        if (
-            !registry ||
-            !hasMethod(
-                registry,
-                "on"
-            )
-        ) {
-
-            return false;
-
-        }
-
-
-        registry.on(
-            "registered",
-            payload => {
-
-                if (
-                    payload &&
-                    payload.app
-                ) {
-
-                    ensureRuntime(
-                        payload.app
-                    );
-
-                    emit(
-                        "app-registered",
-                        payload
+                    clearInterval(
+                        timer
                     );
 
                 }
-
-            }
-        );
+            );
 
 
-        registry.on(
-            "updated",
-            payload => {
+            return timer;
 
-                if (
-                    payload &&
-                    payload.app
-                ) {
+        }
 
-                    const runtime =
-                        state.runtimes.get(
-                            payload.app.id
+
+        addEventBusListener(
+            eventName,
+            handler
+        ) {
+
+            const cleanup =
+                listenEvent(
+                    eventName,
+                    handler
+                );
+
+
+            this.add(
+                cleanup
+            );
+
+
+            return cleanup;
+
+        }
+
+
+        clear() {
+
+            const list =
+                Array.from(
+                    this.cleanups
+                );
+
+
+            this.cleanups.clear();
+
+
+            list.forEach(
+                cleanup => {
+
+                    try {
+
+                        cleanup();
+
+                    } catch (error) {
+
+                        console.error(
+                            "[HalDo App Cleanup]",
+                            error
                         );
 
-
-                    if (runtime) {
-
-                        runtime.route =
-                            payload.app.route ||
-                            runtime.route;
-
                     }
 
+                }
+            );
 
-                    emit(
-                        "app-updated",
-                        payload
+        }
+
+    }
+
+
+    /* =====================================================
+       08 — APP SERVICES
+       ===================================================== */
+
+    class AppServices {
+
+
+        constructor(
+            runtime
+        ) {
+
+            this.runtime =
+                runtime;
+
+        }
+
+
+        get kernel() {
+
+            return getKernel();
+
+        }
+
+
+        get system() {
+
+            return getSystem();
+
+        }
+
+
+        get storage() {
+
+            return this.runtime.storage;
+
+        }
+
+
+        get language() {
+
+            return getLanguage();
+
+        }
+
+
+        get ai() {
+
+            return getAI();
+
+        }
+
+
+        get voice() {
+
+            return getVoice();
+
+        }
+
+
+        get router() {
+
+            return getRouter();
+
+        }
+
+
+        get windowManager() {
+
+            return getWindowManager();
+
+        }
+
+
+        get eventBus() {
+
+            return getEventBus();
+
+        }
+
+
+        emit(
+            eventName,
+            detail
+        ) {
+
+            return emitEvent(
+                eventName,
+                {
+                    appId:
+                        this.runtime.id,
+
+                    ...detail
+                }
+            );
+
+        }
+
+
+        on(
+            eventName,
+            handler
+        ) {
+
+            return this.runtime.cleanup
+                .addEventBusListener(
+                    eventName,
+                    handler
+                );
+
+        }
+
+    }
+
+
+    /* =====================================================
+       09 — APP CONTEXT
+       ===================================================== */
+
+    class AppContext {
+
+
+        constructor(
+            runtime,
+            app
+        ) {
+
+            this.runtime =
+                runtime;
+
+            this.app =
+                app;
+
+            this.id =
+                runtime.id;
+
+            this.manifest =
+                runtime.manifest;
+
+            this.state =
+                runtime.state;
+
+            this.storage =
+                runtime.storage;
+
+            this.cleanup =
+                runtime.cleanup;
+
+            this.services =
+                runtime.services;
+
+            this.container =
+                runtime.container;
+
+        }
+
+
+        get kernel() {
+
+            return this.services.kernel;
+
+        }
+
+
+        get system() {
+
+            return this.services.system;
+
+        }
+
+
+        get language() {
+
+            return this.services.language;
+
+        }
+
+
+        get ai() {
+
+            return this.services.ai;
+
+        }
+
+
+        get voice() {
+
+            return this.services.voice;
+
+        }
+
+
+        get router() {
+
+            return this.services.router;
+
+        }
+
+
+        get windowManager() {
+
+            return this.services.windowManager;
+
+        }
+
+
+        get eventBus() {
+
+            return this.services.eventBus;
+
+        }
+
+
+        emit(
+            eventName,
+            detail = {}
+        ) {
+
+            return this.services.emit(
+                eventName,
+                detail
+            );
+
+        }
+
+
+        on(
+            eventName,
+            handler
+        ) {
+
+            return this.services.on(
+                eventName,
+                handler
+            );
+
+        }
+
+
+        translate(
+            key,
+            fallback = key
+        ) {
+
+            const language =
+                this.language;
+
+
+            if (
+                !language
+            ) {
+
+                return fallback;
+
+            }
+
+
+            try {
+
+                if (
+                    isFunction(
+                        language.t
+                    )
+                ) {
+
+                    return language.t(
+                        key,
+                        fallback
                     );
 
                 }
 
-            }
-        );
-
-
-        registry.on(
-            "removed",
-            payload => {
 
                 if (
-                    payload &&
-                    payload.app
+                    isFunction(
+                        language.translate
+                    )
                 ) {
 
-                    state.runtimes.delete(
-                        payload.app.id
+                    return language.translate(
+                        key,
+                        fallback
                     );
+
+                }
+
+
+                if (
+                    isFunction(
+                        language.get
+                    )
+                ) {
+
+                    return language.get(
+                        key,
+                        fallback
+                    );
+
+                }
+
+            } catch (error) {
+
+                console.error(
+                    "[HalDo App Language]",
+                    error
+                );
+
+            }
+
+
+            return fallback;
+
+        }
+
+
+        async askAI(
+            text,
+            options = {}
+        ) {
+
+            const ai =
+                this.ai;
+
+
+            if (
+                !ai
+            ) {
+
+                return null;
+
+            }
+
+
+            const methods = [
+
+                "chat",
+
+                "ask",
+
+                "respond",
+
+                "process",
+
+                "generate"
+
+            ];
+
+
+            for (
+                const method of methods
+            ) {
+
+                if (
+                    isFunction(
+                        ai[method]
+                    )
+                ) {
+
+                    try {
+
+                        const result =
+                            await ai[method](
+                                text,
+                                options
+                            );
+
+
+                        if (
+                            typeof result ===
+                            "string"
+                        ) {
+
+                            return result;
+
+                        }
+
+
+                        if (
+                            result &&
+                            typeof result.text ===
+                            "string"
+                        ) {
+
+                            return result.text;
+
+                        }
+
+
+                        if (
+                            result &&
+                            typeof result.response ===
+                            "string"
+                        ) {
+
+                            return result.response;
+
+                        }
+
+                    } catch (error) {
+
+                        console.error(
+                            "[HalDo App AI]",
+                            error
+                        );
+
+                    }
+
+                }
+
+            }
+
+
+            return null;
+
+        }
+
+
+        async speak(
+            text,
+            options = {}
+        ) {
+
+            const voice =
+                this.voice;
+
+
+            if (
+                !voice
+            ) {
+
+                return false;
+
+            }
+
+
+            try {
+
+                if (
+                    isFunction(
+                        voice.speak
+                    )
+                ) {
+
+                    return await voice.speak(
+                        text,
+                        options
+                    );
+
+                }
+
+
+                if (
+                    isFunction(
+                        voice.say
+                    )
+                ) {
+
+                    return await voice.say(
+                        text,
+                        options
+                    );
+
+                }
+
+            } catch (error) {
+
+                console.error(
+                    "[HalDo App Voice]",
+                    error
+                );
+
+            }
+
+
+            return false;
+
+        }
+
+
+        navigate(
+            route,
+            options = {}
+        ) {
+
+            const router =
+                this.router;
+
+
+            if (
+                !router
+            ) {
+
+                return false;
+
+            }
+
+
+            try {
+
+                if (
+                    isFunction(
+                        router.navigate
+                    )
+                ) {
+
+                    return router.navigate(
+                        route,
+                        options
+                    );
+
+                }
+
+
+                if (
+                    isFunction(
+                        router.go
+                    )
+                ) {
+
+                    return router.go(
+                        route,
+                        options
+                    );
+
+                }
+
+
+                if (
+                    isFunction(
+                        router.open
+                    )
+                ) {
+
+                    return router.open(
+                        route,
+                        options
+                    );
+
+                }
+
+            } catch (error) {
+
+                console.error(
+                    "[HalDo App Router]",
+                    error
+                );
+
+            }
+
+
+            return false;
+
+        }
+
+
+        createElement(
+            tag,
+            options = {}
+        ) {
+
+            const element =
+                document.createElement(
+                    tag
+                );
+
+
+            if (
+                options.className
+            ) {
+
+                element.className =
+                    options.className;
+
+            }
+
+
+            if (
+                options.text !== undefined
+            ) {
+
+                element.textContent =
+                    options.text;
+
+            }
+
+
+            if (
+                options.html !== undefined
+            ) {
+
+                element.innerHTML =
+                    options.html;
+
+            }
+
+
+            if (
+                isObject(
+                    options.attributes
+                )
+            ) {
+
+                Object.entries(
+                    options.attributes
+                ).forEach(
+                    ([key, value]) => {
+
+                        element.setAttribute(
+                            key,
+                            value
+                        );
+
+                    }
+                );
+
+            }
+
+
+            return element;
+
+        }
+
+
+        mount(
+            element
+        ) {
+
+            if (
+                !element
+            ) {
+
+                return null;
+
+            }
+
+
+            this.container.innerHTML =
+                "";
+
+
+            this.container.appendChild(
+                element
+            );
+
+
+            this.runtime.element =
+                element;
+
+
+            return element;
+
+        }
+
+
+        setTitle(
+            title
+        ) {
+
+            this.runtime.setTitle(
+                title
+            );
+
+        }
+
+
+        log(
+            ...args
+        ) {
+
+            console.log(
+                "[HalDo App:" +
+                this.id +
+                "]",
+                ...args
+            );
+
+        }
+
+
+        warn(
+            ...args
+        ) {
+
+            console.warn(
+                "[HalDo App:" +
+                this.id +
+                "]",
+                ...args
+            );
+
+        }
+
+
+        error(
+            ...args
+        ) {
+
+            console.error(
+                "[HalDo App:" +
+                this.id +
+                "]",
+                ...args
+            );
+
+        }
+
+    }
+
+
+    /* =====================================================
+       10 — APP RUNTIME INSTANCE
+       ===================================================== */
+
+    class AppRuntime {
+
+
+        constructor(
+            app,
+            options = {}
+        ) {
+
+            if (
+                !isObject(app)
+            ) {
+
+                throw createError(
+                    "Eine gültige App-Definition ist erforderlich."
+                );
+
+            }
+
+
+            this.app =
+                app;
+
+
+            this.id =
+                safeString(
+                    app.id ||
+                    app.appId ||
+                    app.name
+                );
+
+
+            if (
+                !this.id
+            ) {
+
+                throw createError(
+                    "Die App besitzt keine gültige ID."
+                );
+
+            }
+
+
+            this.manifest =
+                isObject(
+                    app.manifest
+                )
+                    ? {
+                        ...app.manifest
+                    }
+                    : {
+                        ...app
+                    };
+
+
+            this.options =
+                options;
+
+
+            this.status =
+                "created";
+
+
+            this.element =
+                null;
+
+
+            this.container =
+                options.container ||
+                null;
+
+
+            this.state =
+                new AppState(
+                    app.state ||
+                    {}
+                );
+
+
+            this.storage =
+                new AppStorage(
+                    this.id
+                );
+
+
+            this.cleanup =
+                new CleanupManager();
+
+
+            this.services =
+                new AppServices(
+                    this
+                );
+
+
+            this.context =
+                new AppContext(
+                    this,
+                    app
+                );
+
+
+            this.startedAt =
+                null;
+
+
+            this.initializedAt =
+                null;
+
+
+            this.error =
+                null;
+
+
+            this.lifecycle =
+                {
+
+                    install:
+                        false,
+
+                    initialize:
+                        false,
+
+                    mount:
+                        false,
+
+                    activate:
+                        false
+
+                };
+
+        }
+
+
+        setStatus(
+            status
+        ) {
+
+            this.status =
+                status;
+
+
+            emitEvent(
+                "app:status",
+                {
+
+                    appId:
+                        this.id,
+
+                    status,
+
+                    runtime:
+                        this
+
+                }
+            );
+
+
+            return status;
+
+        }
+
+
+        setTitle(
+            title
+        ) {
+
+            this.title =
+                safeString(
+                    title,
+                    this.id
+                );
+
+
+            if (
+                this.options.titleElement
+            ) {
+
+                this.options.titleElement.textContent =
+                    this.title;
+
+            }
+
+
+            emitEvent(
+                "app:title",
+                {
+
+                    appId:
+                        this.id,
+
+                    title:
+                        this.title
+
+                }
+            );
+
+        }
+
+
+        resolveContainer() {
+
+            if (
+                this.container &&
+                this.container.nodeType
+            ) {
+
+                return this.container;
+
+            }
+
+
+            if (
+                this.options.containerId
+            ) {
+
+                const found =
+                    document.getElementById(
+                        this.options.containerId
+                    );
+
+
+                if (
+                    found
+                ) {
+
+                    this.container =
+                        found;
+
+                    return found;
+
+                }
+
+            }
+
+
+            const created =
+                document.createElement(
+                    "div"
+                );
+
+
+            created.className =
+                "haldo-app-runtime-container";
+
+
+            created.dataset.appId =
+                this.id;
+
+
+            this.container =
+                created;
+
+
+            return created;
+
+        }
+
+
+        async install() {
+
+            if (
+                this.lifecycle.install
+            ) {
+
+                return this;
+
+            }
+
+
+            this.setStatus(
+                "installing"
+            );
+
+
+            try {
+
+                const method =
+                    this.app.install;
+
+
+                if (
+                    isFunction(method)
+                ) {
+
+                    await method.call(
+                        this.app,
+                        this.context
+                    );
+
+                }
+
+
+                this.lifecycle.install =
+                    true;
+
+
+                this.setStatus(
+                    "installed"
+                );
+
+
+                emitEvent(
+                    "app:installed",
+                    {
+
+                        appId:
+                            this.id,
+
+                        runtime:
+                            this
+
+                    }
+                );
+
+
+                return this;
+
+            } catch (error) {
+
+                return this.fail(
+                    error,
+                    "install"
+                );
+
+            }
+
+        }
+
+
+        async initialize() {
+
+            if (
+                this.lifecycle.initialize
+            ) {
+
+                return this;
+
+            }
+
+
+            if (
+                !this.lifecycle.install
+            ) {
+
+                await this.install();
+
+            }
+
+
+            this.setStatus(
+                "initializing"
+            );
+
+
+            try {
+
+                const method =
+                    this.app.initialize ||
+                    this.app.init;
+
+
+                if (
+                    isFunction(method)
+                ) {
+
+                    await method.call(
+                        this.app,
+                        this.context
+                    );
+
+                }
+
+
+                this.lifecycle.initialize =
+                    true;
+
+
+                this.initializedAt =
+                    Date.now();
+
+
+                this.setStatus(
+                    "initialized"
+                );
+
+
+                emitEvent(
+                    "app:initialized",
+                    {
+
+                        appId:
+                            this.id,
+
+                        runtime:
+                            this
+
+                    }
+                );
+
+
+                return this;
+
+            } catch (error) {
+
+                return this.fail(
+                    error,
+                    "initialize"
+                );
+
+            }
+
+        }
+
+
+        async mount() {
+
+            if (
+                this.lifecycle.mount
+            ) {
+
+                return this;
+
+            }
+
+
+            if (
+                !this.lifecycle.initialize
+            ) {
+
+                await this.initialize();
+
+            }
+
+
+            this.setStatus(
+                "mounting"
+            );
+
+
+            try {
+
+                this.resolveContainer();
+
+
+                let result =
+                    null;
+
+
+                if (
+                    isFunction(
+                        this.app.mount
+                    )
+                ) {
+
+                    result =
+                        await this.app.mount.call(
+                            this.app,
+                            this.context
+                        );
+
+                } else if (
+                    isFunction(
+                        this.app.render
+                    )
+                ) {
+
+                    result =
+                        await this.app.render.call(
+                            this.app,
+                            this.context
+                        );
+
+                } else if (
+                    isFunction(
+                        this.app.createView
+                    )
+                ) {
+
+                    result =
+                        await this.app.createView.call(
+                            this.app,
+                            this.context
+                        );
+
+                }
+
+
+                if (
+                    result instanceof Node
+                ) {
+
+                    this.element =
+                        result;
 
 
                     if (
-                        state.activeAppId ===
-                        payload.app.id
+                        this.container &&
+                        result.parentNode !==
+                        this.container
                     ) {
 
-                        state.activeAppId =
-                            null;
+                        this.container.innerHTML =
+                            "";
+
+                        this.container.appendChild(
+                            result
+                        );
 
                     }
 
+                }
 
-                    emit(
-                        "app-removed",
-                        payload
+
+                this.lifecycle.mount =
+                    true;
+
+
+                this.setStatus(
+                    "mounted"
+                );
+
+
+                emitEvent(
+                    "app:mounted",
+                    {
+
+                        appId:
+                            this.id,
+
+                        runtime:
+                            this,
+
+                        element:
+                            this.element
+
+                    }
+                );
+
+
+                return this;
+
+            } catch (error) {
+
+                return this.fail(
+                    error,
+                    "mount"
+                );
+
+            }
+
+        }
+
+
+        async activate() {
+
+            if (
+                this.lifecycle.activate
+            ) {
+
+                return this;
+
+            }
+
+
+            if (
+                !this.lifecycle.mount
+            ) {
+
+                await this.mount();
+
+            }
+
+
+            this.setStatus(
+                "activating"
+            );
+
+
+            try {
+
+                if (
+                    isFunction(
+                        this.app.activate
+                    )
+                ) {
+
+                    await this.app.activate.call(
+                        this.app,
+                        this.context
+                    );
+
+                } else if (
+                    isFunction(
+                        this.app.start
+                    )
+                ) {
+
+                    await this.app.start.call(
+                        this.app,
+                        this.context
                     );
 
                 }
 
+
+                this.lifecycle.activate =
+                    true;
+
+
+                this.startedAt =
+                    Date.now();
+
+
+                this.setStatus(
+                    "active"
+                );
+
+
+                emitEvent(
+                    "app:activated",
+                    {
+
+                        appId:
+                            this.id,
+
+                        runtime:
+                            this
+
+                    }
+                );
+
+
+                return this;
+
+            } catch (error) {
+
+                return this.fail(
+                    error,
+                    "activate"
+                );
+
             }
-        );
+
+        }
+
+
+        async start() {
+
+            await this.install();
+
+            await this.initialize();
+
+            await this.mount();
+
+            await this.activate();
+
+
+            return this;
+
+        }
+
+
+        async deactivate() {
+
+            if (
+                !this.lifecycle.activate
+            ) {
+
+                return this;
+
+            }
+
+
+            this.setStatus(
+                "deactivating"
+            );
+
+
+            try {
+
+                const method =
+                    this.app.deactivate ||
+                    this.app.stop;
+
+
+                if (
+                    isFunction(method)
+                ) {
+
+                    await method.call(
+                        this.app,
+                        this.context
+                    );
+
+                }
+
+
+                this.lifecycle.activate =
+                    false;
+
+
+                this.setStatus(
+                    "inactive"
+                );
+
+
+                emitEvent(
+                    "app:deactivated",
+                    {
+
+                        appId:
+                            this.id,
+
+                        runtime:
+                            this
+
+                    }
+                );
+
+
+                return this;
+
+            } catch (error) {
+
+                return this.fail(
+                    error,
+                    "deactivate"
+                );
+
+            }
+
+        }
+
+
+        async destroy() {
+
+            this.setStatus(
+                "destroying"
+            );
+
+
+            try {
+
+                if (
+                    isFunction(
+                        this.app.destroy
+                    )
+                ) {
+
+                    await this.app.destroy.call(
+                        this.app,
+                        this.context
+                    );
+
+                }
+
+
+                this.cleanup.clear();
+
+
+                if (
+                    this.container
+                ) {
+
+                    try {
+
+                        this.container.innerHTML =
+                            "";
+
+                    } catch (_) {}
+
+                }
+
+
+                this.element =
+                    null;
+
+
+                this.lifecycle =
+                    {
+
+                        install:
+                            false,
+
+                        initialize:
+                            false,
+
+                        mount:
+                            false,
+
+                        activate:
+                            false
+
+                    };
+
+
+                this.setStatus(
+                    "destroyed"
+                );
+
+
+                emitEvent(
+                    "app:destroyed",
+                    {
+
+                        appId:
+                            this.id,
+
+                        runtime:
+                            this
+
+                    }
+                );
+
+
+                return true;
+
+            } catch (error) {
+
+                this.fail(
+                    error,
+                    "destroy"
+                );
+
+
+                return false;
+
+            }
+
+        }
+
+
+        async fail(
+            error,
+            stage
+        ) {
+
+            this.error =
+                error instanceof Error
+                    ? error
+                    : new Error(
+                        safeString(
+                            error
+                        )
+                    );
+
+
+            this.status =
+                "error";
+
+
+            console.error(
+                "[HalDo App Runtime]",
+                this.id,
+                stage,
+                this.error
+            );
+
+
+            emitEvent(
+                "app:error",
+                {
+
+                    appId:
+                        this.id,
+
+                    stage,
+
+                    error:
+                        this.error,
+
+                    runtime:
+                        this
+
+                }
+            );
+
+
+            /*
+             * Fehler werden nicht still verschluckt.
+             * Der App Manager kann anhand des Runtime-Status
+             * entscheiden, ob die App geschlossen oder erneut
+             * gestartet werden soll.
+             */
+
+            throw this.error;
+
+        }
+
+
+        diagnostics() {
+
+            return {
+
+                id:
+                    this.id,
+
+                version:
+                    this.manifest.version ||
+                    this.app.version ||
+                    null,
+
+                status:
+                    this.status,
+
+                lifecycle:
+                    {
+                        ...this.lifecycle
+                    },
+
+                hasContainer:
+                    Boolean(
+                        this.container
+                    ),
+
+                hasElement:
+                    Boolean(
+                        this.element
+                    ),
+
+                startedAt:
+                    this.startedAt,
+
+                initializedAt:
+                    this.initializedAt,
+
+                error:
+                    this.error
+                        ? this.error.message
+                        : null
+
+            };
+
+        }
+
+    }
+
+
+    /* =====================================================
+       11 — RUNTIME MANAGER
+       ===================================================== */
+
+    class AppRuntimeManager {
+
+
+        constructor() {
+
+            this.version =
+                VERSION;
+
+            this.name =
+                RUNTIME_NAME;
+
+            this.instances =
+                new Map();
+
+            this.ready =
+                false;
+
+            this.startedAt =
+                Date.now();
+
+        }
+
+
+        register(
+            app,
+            options = {}
+        ) {
+
+            if (
+                !isObject(app)
+            ) {
+
+                throw createError(
+                    "Ungültige App-Definition."
+                );
+
+            }
+
+
+            const id =
+                safeString(
+                    app.id ||
+                    app.appId ||
+                    app.name
+                );
+
+
+            if (
+                !id
+            ) {
+
+                throw createError(
+                    "App-ID fehlt."
+                );
+
+            }
+
+
+            if (
+                this.instances.has(id)
+            ) {
+
+                return this.instances.get(
+                    id
+                );
+
+            }
+
+
+            const runtime =
+                new AppRuntime(
+                    app,
+                    options
+                );
+
+
+            this.instances.set(
+                id,
+                runtime
+            );
+
+
+            emitEvent(
+                "app:runtime-registered",
+                {
+
+                    appId:
+                        id,
+
+                    runtime
+
+                }
+            );
+
+
+            return runtime;
+
+        }
+
+
+        create(
+            app,
+            options = {}
+        ) {
+
+            return this.register(
+                app,
+                options
+            );
+
+        }
+
+
+        get(
+            id
+        ) {
+
+            return this.instances.get(
+                safeString(id)
+            ) || null;
+
+        }
+
+
+        has(
+            id
+        ) {
+
+            return this.instances.has(
+                safeString(id)
+            );
+
+        }
+
+
+        remove(
+            id
+        ) {
+
+            const runtime =
+                this.get(
+                    id
+                );
+
+
+            if (
+                !runtime
+            ) {
+
+                return false;
+
+            }
+
+
+            this.instances.delete(
+                safeString(id)
+            );
+
+
+            return true;
+
+        }
+
+
+        async start(
+            app,
+            options = {}
+        ) {
+
+            const runtime =
+                app instanceof AppRuntime
+                    ? app
+                    : this.register(
+                        app,
+                        options
+                    );
+
+
+            await runtime.start();
+
+
+            return runtime;
+
+        }
+
+
+        async stop(
+            id
+        ) {
+
+            const runtime =
+                this.get(
+                    id
+                );
+
+
+            if (
+                !runtime
+            ) {
+
+                return false;
+
+            }
+
+
+            await runtime.deactivate();
+
+
+            return true;
+
+        }
+
+
+        async destroy(
+            id
+        ) {
+
+            const runtime =
+                this.get(
+                    id
+                );
+
+
+            if (
+                !runtime
+            ) {
+
+                return false;
+
+            }
+
+
+            await runtime.destroy();
+
+
+            this.remove(
+                id
+            );
+
+
+            return true;
+
+        }
+
+
+        getAll() {
+
+            return Array.from(
+                this.instances.values()
+            );
+
+        }
+
+
+        diagnostics() {
+
+            return {
+
+                name:
+                    this.name,
+
+                version:
+                    this.version,
+
+                ready:
+                    this.ready,
+
+                count:
+                    this.instances.size,
+
+                apps:
+                    this.getAll()
+                        .map(
+                            runtime =>
+                                runtime.diagnostics()
+                        )
+
+            };
+
+        }
+
+
+        setReady() {
+
+            this.ready =
+                true;
+
+
+            emitEvent(
+                "app-runtime-ready",
+                {
+
+                    runtime:
+                        this
+
+                }
+            );
+
+
+            return true;
+
+        }
+
+    }
+
+
+    /* =====================================================
+       12 — GLOBAL RUNTIME
+       ===================================================== */
+
+    const runtimeManager =
+        new AppRuntimeManager();
+
+
+    global.HalDoAppRuntime =
+        runtimeManager;
+
+
+    global.HalDoAppRuntimeManager =
+        runtimeManager;
+
+
+    global.HalDoAppRuntimeClass =
+        AppRuntime;
+
+
+    global.HalDoAppContext =
+        AppContext;
+
+
+    global.HalDoAppState =
+        AppState;
+
+
+    /* =====================================================
+       13 — HALDO OS CONNECTION
+       ===================================================== */
+
+    function connectToOS() {
+
+        const os =
+            getOS();
+
+
+        if (
+            !os
+        ) {
+
+            return false;
+
+        }
+
+
+        try {
+
+            os.appRuntime =
+                runtimeManager;
+
+        } catch (_) {}
+
+
+        try {
+
+            if (
+                !os.runtime
+            ) {
+
+                os.runtime =
+                    runtimeManager;
+
+            }
+
+        } catch (_) {}
 
 
         return true;
@@ -2695,369 +3445,22 @@
     }
 
 
-    /* ============================================================
-       27 — DIAGNOSTICS
-       ============================================================ */
+    /* =====================================================
+       14 — RUNTIME READY
+       ===================================================== */
 
-    function diagnostics() {
+    function initializeRuntime() {
 
-        return {
+        connectToOS();
 
-            name:
-                NAME,
+        runtimeManager.setReady();
 
-            version:
-                VERSION,
-
-            module:
-                MODULE_ID,
-
-            initialized:
-                state.initialized,
-
-            initializing:
-                state.initializing,
-
-            ready:
-                state.ready,
-
-            failed:
-                state.failed,
-
-            activeAppId:
-                state.activeAppId,
-
-            runtimeCount:
-                state.runtimes.size,
-
-            openCount:
-                getOpenApps().length,
-
-            connections:
-                getConnectionStatus(),
-
-            statistics:
-                {
-                    ...state.statistics
-                },
-
-            runtimes:
-                getAllRuntimes(),
-
-            timestamp:
-                new Date().toISOString()
-
-        };
-
-    }
-
-
-    /* ============================================================
-       28 — HEALTH
-       ============================================================ */
-
-    function healthCheck() {
-
-        const problems = [];
-
-
-        const connections =
-            getConnectionStatus();
-
-
-        if (
-            !connections.registry
-        ) {
-
-            problems.push(
-                "App Registry nicht verbunden."
-            );
-
-        }
-
-
-        const registry =
-            getRegistry();
-
-
-        if (
-            !registry
-        ) {
-
-            problems.push(
-                "App Registry fehlt."
-            );
-
-        }
-
-
-        const runtimeErrors =
-            getAllRuntimes()
-                .filter(
-                    runtime =>
-                        runtime.state ===
-                        STATES.ERROR
-                );
-
-
-        if (
-            runtimeErrors.length
-        ) {
-
-            problems.push(
-                runtimeErrors.length +
-                " App Runtime(s) befinden sich im Fehlerzustand."
-            );
-
-        }
-
-
-        return {
-
-            healthy:
-                problems.length === 0,
-
-            problems,
-
-            connections,
-
-            runtimeCount:
-                state.runtimes.size,
-
-            openCount:
-                getOpenApps().length,
-
-            activeAppId:
-                state.activeAppId,
-
-            timestamp:
-                new Date().toISOString()
-
-        };
-
-    }
-
-
-    /* ============================================================
-       29 — PUBLIC API
-       ============================================================ */
-
-    const api = {
-
-        name:
-            NAME,
-
-        version:
-            VERSION,
-
-        module:
-            MODULE_ID,
-
-        states:
-            STATES,
-
-        on,
-
-        off,
-
-        emit,
-
-        initializeApp,
-
-        open,
-
-        close,
-
-        pause,
-
-        resume,
-
-        focus,
-
-        blur,
-
-        minimize,
-
-        getRuntime,
-
-        getAppState,
-
-        getAllRuntimes,
-
-        getOpenApps,
-
-        getActiveApp,
-
-        isOpen,
-
-        refreshConnections,
-
-        getConnectionStatus,
-
-        diagnostics,
-
-        healthCheck,
-
-        getState:
-            function () {
-
-                return {
-
-                    initialized:
-                        state.initialized,
-
-                    initializing:
-                        state.initializing,
-
-                    ready:
-                        state.ready,
-
-                    failed:
-                        state.failed,
-
-                    runtimeCount:
-                        state.runtimes.size,
-
-                    openCount:
-                        getOpenApps().length,
-
-                    activeAppId:
-                        state.activeAppId,
-
-                    connections:
-                        getConnectionStatus()
-
-                };
-
-            }
-
-    };
-
-
-    /* ============================================================
-       30 — GLOBAL EXPORT
-       ============================================================ */
-
-    window.HalDoAppRuntime =
-        api;
-
-    window.HalDoOSAppRuntime =
-        api;
-
-    HalDoOS.appRuntime =
-        api;
-
-
-    HalDoOS.services =
-        HalDoOS.services || {};
-
-    HalDoOS.services.appRuntime =
-        api;
-
-
-    /* ============================================================
-       31 — KERNEL CONNECTION
-       ============================================================ */
-
-    function connectKernel() {
-
-        const kernel =
-            getKernel();
-
-
-        if (!kernel) {
-
-            return false;
-
-        }
-
-
-        try {
-
-            if (
-                hasMethod(
-                    kernel,
-                    "registerModule"
-                )
-            ) {
-
-                kernel.registerModule(
-                    MODULE_ID,
-                    api
-                );
-
-            }
-
-
-            if (
-                hasMethod(
-                    kernel,
-                    "setModuleReady"
-                )
-            ) {
-
-                kernel.setModuleReady(
-                    MODULE_ID,
-                    true
-                );
-
-            }
-
-
-            return true;
-
-        } catch (exception) {
-
-            reportError(
-                exception,
-                "Runtime Kernel Connection"
-            );
-
-
-            return false;
-
-        }
-
-    }
-
-
-    /* ============================================================
-       32 — INITIALIZATION
-       ============================================================ */
-
-    async function initialize() {
-
-        if (
-            state.ready
-        ) {
-
-            return api;
-
-        }
-
-
-        if (
-            state.initializing
-        ) {
-
-            return api;
-
-        }
-
-
-        state.initializing =
-            true;
-
-        state.initialized =
-            true;
-
-        state.failed =
-            false;
-
-
-        emit(
-            "initializing",
+        dispatch(
+            "haldo:app-runtime-ready",
             {
+
+                runtime:
+                    runtimeManager,
 
                 version:
                     VERSION
@@ -3065,140 +3468,56 @@
             }
         );
 
-
-        try {
-
-            refreshConnections();
-
-            connectKernel();
-
-            connectRegistryEvents();
+    }
 
 
-            /*
-             * Bereits registrierte Apps als Runtime
-             * vorbereiten, aber NICHT automatisch öffnen.
-             */
+    /* =====================================================
+       15 — KERNEL / SYSTEM EVENTS
+       ===================================================== */
 
-            const registry =
-                getRegistry();
+    listenEvent(
+        "kernel:ready",
+        function () {
 
+            connectToOS();
 
-            if (
-                registry &&
-                hasMethod(
-                    registry,
-                    "getAll"
-                )
-            ) {
-
-                registry.getAll()
-                    .forEach(
-                        app => {
-
-                            ensureRuntime(
-                                app
-                            );
-
-                        }
-                    );
-
-            }
-
-
-            refreshConnections();
-
-
-            state.ready =
-                true;
-
-            state.initializing =
-                false;
-
-
-            emit(
-                "ready",
+            emitEvent(
+                "app-runtime:kernel-ready",
                 {
 
-                    version:
-                        VERSION,
-
-                    runtimeCount:
-                        state.runtimes.size
+                    runtime:
+                        runtimeManager
 
                 }
             );
-
-
-            log(
-                "HalDo AI OS 20 App Runtime bereit.",
-                "Runtimes:",
-                state.runtimes.size
-            );
-
-
-            return api;
-
-        } catch (exception) {
-
-            state.initializing =
-                false;
-
-            state.failed =
-                true;
-
-
-            reportError(
-                exception,
-                "Runtime Initialisierung"
-            );
-
-
-            throw exception;
 
         }
-
-    }
-
-
-    /* ============================================================
-       33 — BOOT
-       ============================================================ */
-
-    function boot() {
-
-        initialize()
-            .catch(
-                exception => {
-
-                    state.failed =
-                        true;
-
-                    state.initializing =
-                        false;
+    );
 
 
-                    reportError(
-                        exception,
-                        "Runtime Boot"
-                    );
+    listenEvent(
+        "system:ready",
+        function () {
+
+            connectToOS();
+
+            emitEvent(
+                "app-runtime:system-ready",
+                {
+
+                    runtime:
+                        runtimeManager
 
                 }
             );
 
-    }
+        }
+    );
 
 
-    api.initialize =
-        initialize;
-
-    api.boot =
-        boot;
-
-
-    /* ============================================================
-       34 — DOM START
-       ============================================================ */
+    /* =====================================================
+       16 — DOM READY
+       ===================================================== */
 
     if (
         document.readyState ===
@@ -3207,7 +3526,7 @@
 
         document.addEventListener(
             "DOMContentLoaded",
-            boot,
+            initializeRuntime,
             {
                 once:
                     true
@@ -3216,14 +3535,82 @@
 
     } else {
 
-        boot();
+        initializeRuntime();
 
     }
 
 
-    /* ============================================================
-       END
-       HALDO AI OS 20 APPLICATION RUNTIME
-       ============================================================ */
+    /* =====================================================
+       17 — PUBLIC API
+       ===================================================== */
 
-})(window, document);
+    runtimeManager.api = {
+
+        version:
+            VERSION,
+
+        register:
+            runtimeManager.register.bind(
+                runtimeManager
+            ),
+
+        create:
+            runtimeManager.create.bind(
+                runtimeManager
+            ),
+
+        get:
+            runtimeManager.get.bind(
+                runtimeManager
+            ),
+
+        has:
+            runtimeManager.has.bind(
+                runtimeManager
+            ),
+
+        start:
+            runtimeManager.start.bind(
+                runtimeManager
+            ),
+
+        stop:
+            runtimeManager.stop.bind(
+                runtimeManager
+            ),
+
+        destroy:
+            runtimeManager.destroy.bind(
+                runtimeManager
+            ),
+
+        getAll:
+            runtimeManager.getAll.bind(
+                runtimeManager
+            ),
+
+        diagnostics:
+            runtimeManager.diagnostics.bind(
+                runtimeManager
+            )
+
+    };
+
+
+    /* =====================================================
+       18 — LOG
+       ===================================================== */
+
+    console.info(
+        "[HalDo AI OS 20]",
+        RUNTIME_NAME,
+        VERSION,
+        "bereit."
+    );
+
+
+    /* =====================================================
+       END
+       ===================================================== */
+
+})(window);
