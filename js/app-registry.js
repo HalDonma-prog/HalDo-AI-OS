@@ -1,13 +1,16 @@
 /* ============================================================
    HALDO AI OS 20
-   PROFESSIONAL ULTIMATE FOUNDATION
+   PROFESSIONAL APPLICATION REGISTRY
    ------------------------------------------------------------
    Datei:
        js/app-registry.js
 
+   Pfad:
+       /js/app-registry.js
+
    HALDO APPLICATION REGISTRY 20
 
-   Zentrale Verwaltung aller Anwendungen.
+   Zentrale, verbindliche Registry für sämtliche HalDo Apps.
 
    Verantwortlich für:
 
@@ -20,8 +23,8 @@
    - App Dependencies
    - App Capabilities
    - App Status
-   - App Aktivierung
-   - App Deaktivierung
+   - App Aktivierung / Deaktivierung
+   - App Sichtbarkeit
    - App Suche
    - App Filter
    - App Updates
@@ -34,14 +37,24 @@
    - System Verbindung
    - App Manager Verbindung
    - Router Verbindung
-   - zukünftige AI-Verbindungen
+   - Window Manager Verbindung
+   - AI Verbindung
+   - Language Verbindung
+   - zukünftige Service Bridges
 
    WICHTIG:
 
-   Diese Registry ist nicht nur eine Liste.
+   Diese Registry ist die zentrale Quelle für App-Metadaten.
 
-   Jede App soll später über diesen Contract
-   vollständig mit HalDo AI OS 20 verbunden werden.
+   Apps sollen nicht nur "angezeigt" werden.
+
+   Jede App kann später über diesen Contract vollständig
+   mit Runtime, Kernel, System, Storage, AI, Sprache,
+   Window Manager, Router und App Manager verbunden werden.
+
+   Bestehende Funktionen werden nicht blind entfernt.
+   Diese Datei ist als zentrale Foundation für die weitere
+   Zusammenführung des gesamten HalDo AI OS gedacht.
 
    ============================================================ */
 
@@ -49,9 +62,9 @@
 
 (function (window, document) {
 
-    /* ========================================================
+    /* ============================================================
        01 — FOUNDATION
-       ======================================================== */
+       ============================================================ */
 
     window.HalDoOS =
         window.HalDoOS || {};
@@ -60,9 +73,9 @@
         window.HalDoOS;
 
 
-    /* ========================================================
+    /* ============================================================
        02 — META
-       ======================================================== */
+       ============================================================ */
 
     const VERSION =
         "20.0.0";
@@ -73,10 +86,16 @@
     const NAME =
         "HalDo AI OS 20 Application Registry";
 
+    const STORAGE_KEY =
+        "haldo.ai.os.20.app-registry";
 
-    /* ========================================================
+    const DEFAULT_CATEGORY =
+        "system";
+
+
+    /* ============================================================
        03 — STATE
-       ======================================================== */
+       ============================================================ */
 
     const state = {
 
@@ -122,6 +141,15 @@
                 0,
 
             searches:
+                0,
+
+            launches:
+                0,
+
+            persistenceLoads:
+                0,
+
+            persistenceSaves:
                 0
 
         },
@@ -160,9 +188,9 @@
     };
 
 
-    /* ========================================================
+    /* ============================================================
        04 — LOGGING
-       ======================================================== */
+       ============================================================ */
 
     function log() {
 
@@ -206,9 +234,9 @@
     }
 
 
-    /* ========================================================
-       05 — HELPERS
-       ======================================================== */
+    /* ============================================================
+       05 — GENERIC HELPERS
+       ============================================================ */
 
     function hasMethod(
         object,
@@ -217,9 +245,15 @@
 
         return !!(
             object &&
-            typeof object[method] ===
-            "function"
+            typeof object[method] === "function"
         );
+
+    }
+
+
+    function now() {
+
+        return Date.now();
 
     }
 
@@ -248,6 +282,44 @@
     }
 
 
+    function normalizeStringArray(
+        value
+    ) {
+
+        if (
+            !Array.isArray(value)
+        ) {
+
+            return [];
+
+        }
+
+        return value
+            .map(
+                item =>
+                    String(
+                        item || ""
+                    )
+                    .trim()
+            )
+            .filter(Boolean);
+
+    }
+
+
+    function uniqueArray(
+        values
+    ) {
+
+        return Array.from(
+            new Set(
+                values || []
+            )
+        );
+
+    }
+
+
     function clone(
         value
     ) {
@@ -263,9 +335,7 @@
 
 
         if (
-            Array.isArray(
-                value
-            )
+            Array.isArray(value)
         ) {
 
             return value.map(
@@ -276,27 +346,24 @@
 
 
         if (
-            typeof value ===
-            "object"
+            typeof value === "object"
         ) {
 
             const result = {};
 
-            Object.keys(
-                value
-            ).forEach(
-                key => {
+            Object.keys(value)
+                .forEach(
+                    key => {
 
-                    result[key] =
-                        typeof value[key] ===
-                        "function"
-                            ? value[key]
-                            : clone(
-                                value[key]
-                            );
+                        result[key] =
+                            typeof value[key] === "function"
+                                ? value[key]
+                                : clone(
+                                    value[key]
+                                );
 
-                }
-            );
+                    }
+                );
 
             return result;
 
@@ -308,16 +375,9 @@
     }
 
 
-    function now() {
-
-        return Date.now();
-
-    }
-
-
-    /* ========================================================
+    /* ============================================================
        06 — SERVICE LOOKUPS
-       ======================================================== */
+       ============================================================ */
 
     function getKernel() {
 
@@ -418,9 +478,9 @@
     }
 
 
-    /* ========================================================
-       07 — EVENTS
-       ======================================================== */
+    /* ============================================================
+       07 — INTERNAL EVENT SYSTEM
+       ============================================================ */
 
     function on(
         event,
@@ -428,8 +488,7 @@
     ) {
 
         if (
-            typeof callback !==
-            "function"
+            typeof callback !== "function"
         ) {
 
             return function () {};
@@ -438,9 +497,7 @@
 
 
         if (
-            !state.listeners.has(
-                event
-            )
+            !state.listeners.has(event)
         ) {
 
             state.listeners.set(
@@ -452,14 +509,10 @@
 
 
         const listeners =
-            state.listeners.get(
-                event
-            );
+            state.listeners.get(event);
 
 
-        listeners.add(
-            callback
-        );
+        listeners.add(callback);
 
 
         return function () {
@@ -480,9 +533,7 @@
     ) {
 
         const listeners =
-            state.listeners.get(
-                event
-            );
+            state.listeners.get(event);
 
 
         if (!listeners) {
@@ -498,8 +549,7 @@
 
 
         if (
-            listeners.size ===
-            0
+            listeners.size === 0
         ) {
 
             state.listeners.delete(
@@ -517,38 +567,39 @@
     ) {
 
         const listeners =
-            state.listeners.get(
-                event
-            );
+            state.listeners.get(event);
 
 
         if (listeners) {
 
-            Array.from(
-                listeners
-            ).forEach(
-                callback => {
+            Array.from(listeners)
+                .forEach(
+                    callback => {
 
-                    try {
+                        try {
 
-                        callback(
-                            data
-                        );
+                            callback(
+                                data
+                            );
 
-                    } catch (exception) {
+                        } catch (exception) {
 
-                        reportError(
-                            exception,
-                            "Event: " + event
-                        );
+                            reportError(
+                                exception,
+                                "Event: " + event
+                            );
+
+                        }
 
                     }
-
-                }
-            );
+                );
 
         }
 
+
+        /*
+         * Verbindung zur zentralen HalDo EventBus API.
+         */
 
         const events =
             HalDoOS.events;
@@ -565,8 +616,7 @@
             try {
 
                 events.emit(
-                    "app-registry:" +
-                    event,
+                    "app-registry:" + event,
                     data
                 );
 
@@ -574,6 +624,10 @@
 
         }
 
+
+        /*
+         * Verbindung zum Kernel Event Bus.
+         */
 
         const kernel =
             getKernel();
@@ -590,8 +644,7 @@
             try {
 
                 kernel.emit(
-                    "app-registry:" +
-                    event,
+                    "app-registry:" + event,
                     data
                 );
 
@@ -602,9 +655,9 @@
     }
 
 
-    /* ========================================================
+    /* ============================================================
        08 — ERROR HANDLING
-       ======================================================== */
+       ============================================================ */
 
     function reportError(
         exception,
@@ -612,8 +665,7 @@
             "Application Registry"
     ) {
 
-        state.statistics.errors +=
-            1;
+        state.statistics.errors += 1;
 
 
         const normalized =
@@ -635,8 +687,7 @@
                 normalized.message,
 
             stack:
-                normalized.stack ||
-                "",
+                normalized.stack || "",
 
             context,
 
@@ -687,9 +738,9 @@
     }
 
 
-    /* ========================================================
-       09 — CONTRACT NORMALIZATION
-       ======================================================== */
+    /* ============================================================
+       09 — APP CONTRACT NORMALIZATION
+       ============================================================ */
 
     function normalizeDefinition(
         definition
@@ -697,8 +748,7 @@
 
         if (
             !definition ||
-            typeof definition !==
-            "object"
+            typeof definition !== "object"
         ) {
 
             throw new Error(
@@ -731,73 +781,65 @@
         }
 
 
-        const tags =
-            Array.isArray(
-                source.tags
-            )
-                ? source.tags
-                    .map(
-                        item =>
-                            String(
-                                item
-                            )
-                            .trim()
-                    )
-                    .filter(Boolean)
-                : [];
-
-
-        const keywords =
-            Array.isArray(
-                source.keywords
-            )
-                ? source.keywords
-                    .map(
-                        item =>
-                            String(
-                                item
-                            )
-                            .trim()
-                    )
-                    .filter(Boolean)
-                : [];
-
-
         const dependencies =
-            Array.isArray(
-                source.dependencies
-            )
-                ? source.dependencies
-                    .map(
-                        normalizeId
-                    )
-                    .filter(Boolean)
-                : [];
+            uniqueArray(
+                normalizeStringArray(
+                    source.dependencies
+                )
+                .map(
+                    normalizeId
+                )
+                .filter(Boolean)
+            );
 
 
         const permissions =
-            Array.isArray(
-                source.permissions
-            )
-                ? source.permissions
-                : [];
+            uniqueArray(
+                normalizeStringArray(
+                    source.permissions
+                )
+            );
 
 
         const capabilities =
-            Array.isArray(
-                source.capabilities
-            )
-                ? source.capabilities
-                : [];
+            uniqueArray(
+                normalizeStringArray(
+                    source.capabilities
+                )
+            );
+
+
+        const tags =
+            uniqueArray(
+                normalizeStringArray(
+                    source.tags
+                )
+            );
+
+
+        const keywords =
+            uniqueArray(
+                normalizeStringArray(
+                    source.keywords
+                )
+            );
 
 
         const category =
             String(
                 source.category ||
-                "system"
+                DEFAULT_CATEGORY
             )
             .trim()
             .toLowerCase();
+
+
+        const createdAt =
+            Number(
+                source.createdAt
+            ) > 0
+                ? Number(source.createdAt)
+                : now();
 
 
         const app = {
@@ -833,24 +875,25 @@
                 VERSION,
 
             enabled:
-                source.enabled !==
-                false,
+                source.enabled !== false,
 
             visible:
-                source.visible !==
-                false,
+                source.visible !== false,
 
             singleton:
-                source.singleton !==
-                false,
+                source.singleton !== false,
 
             system:
-                source.system ===
-                true,
+                source.system === true,
 
             core:
-                source.core ===
-                true,
+                source.core === true,
+
+            experimental:
+                source.experimental === true,
+
+            beta:
+                source.beta === true,
 
             tags,
 
@@ -866,9 +909,19 @@
                 source.route ||
                 "/apps/" + id,
 
-            createdAt:
-                source.createdAt ||
-                now(),
+            entry:
+                source.entry ||
+                null,
+
+            module:
+                source.module ||
+                null,
+
+            iconUrl:
+                source.iconUrl ||
+                null,
+
+            createdAt,
 
             updatedAt:
                 now(),
@@ -884,9 +937,9 @@
     }
 
 
-    /* ========================================================
+    /* ============================================================
        10 — CONTRACT VALIDATION
-       ======================================================== */
+       ============================================================ */
 
     function validate(
         definition
@@ -897,8 +950,7 @@
 
         if (
             !definition ||
-            typeof definition !==
-            "object"
+            typeof definition !== "object"
         ) {
 
             errors.push(
@@ -917,13 +969,15 @@
         }
 
 
-        if (
-            !normalizeId(
+        const id =
+            normalizeId(
                 definition.id ||
                 definition.appId ||
                 definition.name
-            )
-        ) {
+            );
+
+
+        if (!id) {
 
             errors.push(
                 "App ID fehlt."
@@ -933,7 +987,7 @@
 
 
         if (
-            definition.dependencies &&
+            definition.dependencies !== undefined &&
             !Array.isArray(
                 definition.dependencies
             )
@@ -947,7 +1001,7 @@
 
 
         if (
-            definition.permissions &&
+            definition.permissions !== undefined &&
             !Array.isArray(
                 definition.permissions
             )
@@ -961,7 +1015,7 @@
 
 
         if (
-            definition.capabilities &&
+            definition.capabilities !== undefined &&
             !Array.isArray(
                 definition.capabilities
             )
@@ -974,11 +1028,38 @@
         }
 
 
+        if (
+            definition.tags !== undefined &&
+            !Array.isArray(
+                definition.tags
+            )
+        ) {
+
+            errors.push(
+                "tags muss ein Array sein."
+            );
+
+        }
+
+
+        if (
+            definition.keywords !== undefined &&
+            !Array.isArray(
+                definition.keywords
+            )
+        ) {
+
+            errors.push(
+                "keywords muss ein Array sein."
+            );
+
+        }
+
+
         return {
 
             valid:
-                errors.length ===
-                0,
+                errors.length === 0,
 
             errors
 
@@ -987,9 +1068,50 @@
     }
 
 
-    /* ========================================================
-       11 — REGISTER
-       ======================================================== */
+    /* ============================================================
+       11 — CATEGORY INDEX
+       ============================================================ */
+
+    function rebuildCategoryIndex() {
+
+        state.categories.clear();
+
+
+        state.apps.forEach(
+            app => {
+
+                const category =
+                    app.category ||
+                    DEFAULT_CATEGORY;
+
+
+                if (
+                    !state.categories.has(
+                        category
+                    )
+                ) {
+
+                    state.categories.set(
+                        category,
+                        new Set()
+                    );
+
+                }
+
+
+                state.categories
+                    .get(category)
+                    .add(app.id);
+
+            }
+        );
+
+    }
+
+
+    /* ============================================================
+       12 — REGISTER
+       ============================================================ */
 
     function register(
         definition
@@ -1028,12 +1150,15 @@
                 );
 
 
-            if (existing) {
+            /*
+             * Bestehende App:
+             *
+             * niemals blind entfernen.
+             * Neue Informationen erweitern den
+             * vorhandenen Contract.
+             */
 
-                /*
-                 * Bestehende App wird erweitert,
-                 * nicht blind gelöscht.
-                 */
+            if (existing) {
 
                 const merged = {
 
@@ -1049,6 +1174,32 @@
                         now()
 
                 };
+
+
+                /*
+                 * Core/System-Eigenschaften dürfen
+                 * nicht versehentlich durch einen
+                 * späteren Teil-Contract verloren gehen.
+                 */
+
+                if (
+                    existing.core === true
+                ) {
+
+                    merged.core =
+                        true;
+
+                }
+
+
+                if (
+                    existing.system === true
+                ) {
+
+                    merged.system =
+                        true;
+
+                }
 
 
                 state.apps.set(
@@ -1067,6 +1218,7 @@
                 emit(
                     "updated",
                     {
+
                         app:
                             clone(
                                 merged
@@ -1076,6 +1228,7 @@
                             clone(
                                 existing
                             )
+
                     }
                 );
 
@@ -1103,10 +1256,12 @@
             emit(
                 "registered",
                 {
+
                     app:
                         clone(
                             app
                         )
+
                 }
             );
 
@@ -1141,9 +1296,40 @@
     }
 
 
-    /* ========================================================
-       12 — GET
-       ======================================================== */
+    /*
+     * Mehrere Apps gleichzeitig registrieren.
+     */
+
+    function registerMany(
+        definitions
+    ) {
+
+        if (
+            !Array.isArray(
+                definitions
+            )
+        ) {
+
+            return [];
+
+        }
+
+
+        return definitions
+            .map(
+                definition =>
+                    register(
+                        definition
+                    )
+            )
+            .filter(Boolean);
+
+    }
+
+
+    /* ============================================================
+       13 — GET / ACCESS
+       ============================================================ */
 
     function get(
         appId
@@ -1199,9 +1385,12 @@
     }
 
 
-    /* ========================================================
-       13 — GET ALL
-       ======================================================== */
+    function getCount() {
+
+        return state.apps.size;
+
+    }
+
 
     function getAll() {
 
@@ -1222,63 +1411,67 @@
     }
 
 
-    function getCount() {
+    /* ============================================================
+       14 — ENABLED / VISIBLE FILTERS
+       ============================================================ */
 
-        return state.apps.size;
+    function getEnabledApps() {
+
+        return getAll()
+            .filter(
+                app =>
+                    app.enabled !== false
+            );
+
+    }
+
+
+    function getVisibleApps() {
+
+        return getAll()
+            .filter(
+                app =>
+                    app.visible !== false &&
+                    app.enabled !== false
+            );
 
     }
 
 
-    /* ========================================================
-       14 — CATEGORY INDEX
-       ======================================================== */
+    function getSystemApps() {
 
-    function rebuildCategoryIndex() {
-
-        state.categories.clear();
-
-
-        state.apps.forEach(
-            app => {
-
-                const category =
-                    app.category ||
-                    "system";
-
-
-                if (
-                    !state.categories.has(
-                        category
-                    )
-                ) {
-
-                    state.categories.set(
-                        category,
-                        new Set()
-                    );
-
-                }
-
-
-                state.categories
-                    .get(
-                        category
-                    )
-                    .add(
-                        app.id
-                    );
-
-            }
-        );
+        return getAll()
+            .filter(
+                app =>
+                    app.system === true ||
+                    app.core === true
+            );
 
     }
 
+
+    function getUserApps() {
+
+        return getAll()
+            .filter(
+                app =>
+                    app.system !== true &&
+                    app.core !== true
+            );
+
+    }
+
+
+    /* ============================================================
+       15 — CATEGORIES
+       ============================================================ */
 
     function getCategories() {
 
         return Array.from(
             state.categories.keys()
-        );
+        )
+        .sort();
 
     }
 
@@ -1320,9 +1513,9 @@
     }
 
 
-    /* ========================================================
-       15 — SEARCH
-       ======================================================== */
+    /* ============================================================
+       16 — SEARCH
+       ============================================================ */
 
     function search(
         query,
@@ -1341,58 +1534,143 @@
             .toLowerCase();
 
 
-        if (!value) {
+        let results =
+            getAll();
 
-            return getAll();
+
+        if (value) {
+
+            results =
+                results.filter(
+                    app => {
+
+                        const fields = [
+
+                            app.id,
+
+                            app.name,
+
+                            app.title,
+
+                            app.description,
+
+                            app.category,
+
+                            app.version,
+
+                            ...(app.tags ||
+                                []),
+
+                            ...(app.keywords ||
+                                []),
+
+                            ...(app.capabilities ||
+                                [])
+
+                        ];
+
+
+                        return fields.some(
+                            field =>
+                                String(
+                                    field || ""
+                                )
+                                .toLowerCase()
+                                .includes(
+                                    value
+                                )
+                        );
+
+                    }
+                );
 
         }
 
 
-        const results =
-            getAll()
-            .filter(
-                app => {
+        if (
+            options.category
+        ) {
 
-                    const fields = [
-
-                        app.id,
-
-                        app.name,
-
-                        app.title,
-
-                        app.description,
-
-                        app.category,
-
-                        app.version,
-
-                        ...(app.tags ||
-                            []),
-
-                        ...(app.keywords ||
-                            [])
-
-                    ];
+            const category =
+                String(
+                    options.category
+                )
+                .trim()
+                .toLowerCase();
 
 
-                    return fields.some(
-                        field => {
+            results =
+                results.filter(
+                    app =>
+                        app.category ===
+                        category
+                );
 
-                            return String(
-                                field ||
-                                ""
-                            )
-                            .toLowerCase()
-                            .includes(
-                                value
-                            );
+        }
 
-                        }
-                    );
 
-                }
-            );
+        if (
+            options.enabled !== undefined
+        ) {
+
+            results =
+                results.filter(
+                    app =>
+                        app.enabled ===
+                        Boolean(
+                            options.enabled
+                        )
+                );
+
+        }
+
+
+        if (
+            options.visible !== undefined
+        ) {
+
+            results =
+                results.filter(
+                    app =>
+                        app.visible ===
+                        Boolean(
+                            options.visible
+                        )
+                );
+
+        }
+
+
+        if (
+            options.system !== undefined
+        ) {
+
+            results =
+                results.filter(
+                    app =>
+                        app.system ===
+                        Boolean(
+                            options.system
+                        )
+                );
+
+        }
+
+
+        if (
+            options.core !== undefined
+        ) {
+
+            results =
+                results.filter(
+                    app =>
+                        app.core ===
+                        Boolean(
+                            options.core
+                        )
+                );
+
+        }
 
 
         if (
@@ -1402,12 +1680,13 @@
             ) > 0
         ) {
 
-            return results.slice(
-                0,
-                Number(
-                    options.limit
-                )
-            );
+            results =
+                results.slice(
+                    0,
+                    Number(
+                        options.limit
+                    )
+                );
 
         }
 
@@ -1417,9 +1696,9 @@
     }
 
 
-    /* ========================================================
-       16 — UPDATE
-       ======================================================== */
+    /* ============================================================
+       17 — UPDATE
+       ============================================================ */
 
     function update(
         appId,
@@ -1452,52 +1731,98 @@
         }
 
 
-        const merged =
-            normalizeDefinition({
+        try {
 
-                ...existing,
+            const merged =
+                normalizeDefinition({
 
-                ...(changes || {}),
+                    ...existing,
 
-                id
+                    ...(changes || {}),
 
-            });
+                    id
 
-
-        state.apps.set(
-            id,
-            merged
-        );
+                });
 
 
-        rebuildCategoryIndex();
+            /*
+             * Core/System Status schützen.
+             */
 
+            if (
+                existing.core === true
+            ) {
 
-        state.statistics.updated +=
-            1;
+                merged.core =
+                    true;
 
-
-        emit(
-            "updated",
-            {
-                app:
-                    clone(
-                        merged
-                    )
             }
-        );
 
 
-        return clone(
-            merged
-        );
+            if (
+                existing.system === true
+            ) {
+
+                merged.system =
+                    true;
+
+            }
+
+
+            state.apps.set(
+                id,
+                merged
+            );
+
+
+            rebuildCategoryIndex();
+
+
+            state.statistics.updated +=
+                1;
+
+
+            emit(
+                "updated",
+                {
+
+                    app:
+                        clone(
+                            merged
+                        ),
+
+                    previous:
+                        clone(
+                            existing
+                        )
+
+                }
+            );
+
+
+            return clone(
+                merged
+            );
+
+        } catch (exception) {
+
+            reportError(
+                exception,
+                "App Update: " +
+                id
+            );
+
+
+            return null;
+
+        }
 
     }
 
 
-    /* ========================================================
-       17 — REMOVE
-       ======================================================== */
+    /* ============================================================
+       18 — REMOVE
+       ============================================================ */
 
     function remove(
         appId
@@ -1523,18 +1848,73 @@
 
 
         /*
-         * System/Core Apps werden nicht
-         * versehentlich entfernt.
+         * Core Apps dürfen nicht entfernt werden.
          */
 
         if (
-            existing.core ===
-            true
+            existing.core === true
         ) {
 
             warn(
                 "Core-App darf nicht entfernt werden:",
                 id
+            );
+
+
+            return false;
+
+        }
+
+
+        /*
+         * Andere Apps dürfen nicht entfernt werden,
+         * wenn sie von ihnen abhängig sind.
+         */
+
+        const dependents =
+            getAll()
+                .filter(
+                    app =>
+                        app.id !== id &&
+                        Array.isArray(
+                            app.dependencies
+                        ) &&
+                        app.dependencies
+                            .map(
+                                normalizeId
+                            )
+                            .includes(id)
+                );
+
+
+        if (
+            dependents.length
+        ) {
+
+            warn(
+                "App kann nicht entfernt werden. Abhängige Apps:",
+                dependents.map(
+                    app =>
+                        app.id
+                )
+            );
+
+
+            emit(
+                "remove-blocked",
+                {
+
+                    app:
+                        clone(
+                            existing
+                        ),
+
+                    dependents:
+                        dependents.map(
+                            clone
+                        )
+
+                }
             );
 
 
@@ -1558,10 +1938,12 @@
         emit(
             "removed",
             {
+
                 app:
                     clone(
                         existing
                     )
+
             }
         );
 
@@ -1582,9 +1964,9 @@
     }
 
 
-    /* ========================================================
-       18 — ENABLE
-       ======================================================== */
+    /* ============================================================
+       19 — ENABLE
+       ============================================================ */
 
     function enable(
         appId
@@ -1610,8 +1992,7 @@
 
 
         if (
-            app.enabled !==
-            true
+            app.enabled !== true
         ) {
 
             app.enabled =
@@ -1628,10 +2009,12 @@
             emit(
                 "enabled",
                 {
+
                     app:
                         clone(
                             app
                         )
+
                 }
             );
 
@@ -1654,9 +2037,9 @@
     }
 
 
-    /* ========================================================
-       19 — DISABLE
-       ======================================================== */
+    /* ============================================================
+       20 — DISABLE
+       ============================================================ */
 
     function disable(
         appId
@@ -1682,8 +2065,7 @@
 
 
         if (
-            app.core ===
-            true
+            app.core === true
         ) {
 
             warn(
@@ -1697,26 +2079,34 @@
         }
 
 
-        app.enabled =
-            false;
+        if (
+            app.enabled !== false
+        ) {
 
-        app.updatedAt =
-            now();
+            app.enabled =
+                false;
+
+            app.updatedAt =
+                now();
 
 
-        state.statistics.disabled +=
-            1;
+            state.statistics.disabled +=
+                1;
 
 
-        emit(
-            "disabled",
-            {
-                app:
-                    clone(
-                        app
-                    )
-            }
-        );
+            emit(
+                "disabled",
+                {
+
+                    app:
+                        clone(
+                            app
+                        )
+
+                }
+            );
+
+        }
 
 
         return true;
@@ -1735,20 +2125,95 @@
     }
 
 
-    /* ========================================================
-       20 — APP DEPENDENCIES
-       ======================================================== */
+    /* ============================================================
+       21 — VISIBILITY
+       ============================================================ */
 
-    function checkDependencies(
+    function setVisible(
+        appId,
+        visible
+    ) {
+
+        const id =
+            normalizeId(
+                appId
+            );
+
+
+        const app =
+            state.apps.get(
+                id
+            );
+
+
+        if (!app) {
+
+            return false;
+
+        }
+
+
+        app.visible =
+            Boolean(
+                visible
+            );
+
+        app.updatedAt =
+            now();
+
+
+        emit(
+            "visibility-changed",
+            {
+
+                app:
+                    clone(
+                        app
+                    )
+
+            }
+        );
+
+
+        return true;
+
+    }
+
+
+    function isVisible(
         appId
     ) {
 
         const app =
-            typeof appId ===
-            "object"
-                ? appId
-                : get(
+            state.apps.get(
+                normalizeId(
                     appId
+                )
+            );
+
+
+        return !!(
+            app &&
+            app.visible !== false
+        );
+
+    }
+
+
+    /* ============================================================
+       22 — DEPENDENCY ENGINE
+       ============================================================ */
+
+    function checkDependencies(
+        appOrId,
+        options = {}
+    ) {
+
+        const app =
+            typeof appOrId === "object"
+                ? appOrId
+                : get(
+                    appOrId
                 );
 
 
@@ -1766,6 +2231,9 @@
                     [],
 
                 circular:
+                    [],
+
+                chain:
                     []
 
             };
@@ -1774,90 +2242,176 @@
 
 
         const missing = [];
-
         const disabled = [];
-
         const circular = [];
+        const chain = [];
 
 
-        (app.dependencies || [])
+        const visited =
+            new Set();
+
+
+        function walk(
+            currentId,
+            rootId
+        ) {
+
+            const id =
+                normalizeId(
+                    currentId
+                );
+
+
+            if (!id) {
+
+                return;
+
+            }
+
+
+            if (
+                visited.has(id)
+            ) {
+
+                return;
+
+            }
+
+
+            visited.add(id);
+
+
+            if (
+                id === rootId
+            ) {
+
+                circular.push(
+                    id
+                );
+
+                return;
+
+            }
+
+
+            const dependency =
+                state.apps.get(
+                    id
+                );
+
+
+            if (!dependency) {
+
+                missing.push(
+                    id
+                );
+
+                return;
+
+            }
+
+
+            chain.push(
+                id
+            );
+
+
+            if (
+                dependency.enabled === false
+            ) {
+
+                disabled.push(
+                    id
+                );
+
+            }
+
+
+            (
+                dependency.dependencies ||
+                []
+            )
             .forEach(
-                dependencyId => {
+                dependencyId =>
+                    walk(
+                        dependencyId,
+                        rootId
+                    )
+            );
 
-                    const id =
-                        normalizeId(
-                            dependencyId
-                        );
-
-
-                    const dependency =
-                        state.apps.get(
-                            id
-                        );
+        }
 
 
-                    if (!dependency) {
+        (
+            app.dependencies ||
+            []
+        )
+        .forEach(
+            dependencyId => {
 
-                        missing.push(
-                            id
-                        );
-
-                        return;
-
-                    }
-
-
-                    if (
-                        dependency.enabled ===
-                        false
-                    ) {
-
-                        disabled.push(
-                            id
-                        );
-
-                    }
+                const id =
+                    normalizeId(
+                        dependencyId
+                    );
 
 
-                    if (
-                        id ===
-                        app.id
-                    ) {
+                if (
+                    id === app.id
+                ) {
 
-                        circular.push(
-                            id
-                        );
+                    circular.push(
+                        id
+                    );
 
-                    }
+                    return;
 
                 }
-            );
+
+
+                walk(
+                    id,
+                    app.id
+                );
+
+            }
+        );
 
 
         return {
 
             valid:
-                missing.length ===
-                0 &&
-                disabled.length ===
-                0 &&
-                circular.length ===
-                0,
+                missing.length === 0 &&
+                disabled.length === 0 &&
+                circular.length === 0,
 
-            missing,
+            missing:
+                uniqueArray(
+                    missing
+                ),
 
-            disabled,
+            disabled:
+                uniqueArray(
+                    disabled
+                ),
 
-            circular
+            circular:
+                uniqueArray(
+                    circular
+                ),
+
+            chain:
+                uniqueArray(
+                    chain
+                )
 
         };
 
     }
 
 
-    /* ========================================================
-       21 — PERMISSIONS
-       ======================================================== */
+    /* ============================================================
+       23 — PERMISSIONS
+       ============================================================ */
 
     function hasPermission(
         appId,
@@ -1877,29 +2431,33 @@
         }
 
 
+        const target =
+            String(
+                permission || ""
+            )
+            .trim()
+            .toLowerCase();
+
+
         return (
             app.permissions || []
         )
-        .map(
+        .some(
             item =>
                 String(
                     item
                 )
-                .toLowerCase()
-        )
-        .includes(
-            String(
-                permission || ""
-            )
-            .toLowerCase()
+                .trim()
+                .toLowerCase() ===
+                target
         );
 
     }
 
 
-    /* ========================================================
-       22 — CAPABILITIES
-       ======================================================== */
+    /* ============================================================
+       24 — CAPABILITIES
+       ============================================================ */
 
     function hasCapability(
         appId,
@@ -1919,29 +2477,33 @@
         }
 
 
+        const target =
+            String(
+                capability || ""
+            )
+            .trim()
+            .toLowerCase();
+
+
         return (
             app.capabilities || []
         )
-        .map(
+        .some(
             item =>
                 String(
                     item
                 )
-                .toLowerCase()
-        )
-        .includes(
-            String(
-                capability || ""
-            )
-            .toLowerCase()
+                .trim()
+                .toLowerCase() ===
+                target
         );
 
     }
 
 
-    /* ========================================================
-       23 — OPEN STATE
-       ======================================================== */
+    /* ============================================================
+       25 — APP STATE
+       ============================================================ */
 
     function isOpen(
         appId
@@ -1959,16 +2521,28 @@
             )
         ) {
 
-            const appState =
-                manager.getAppState(
+            try {
+
+                const appState =
+                    manager.getAppState(
+                        appId
+                    );
+
+
+                return !!(
+                    appState &&
+                    appState.open
+                );
+
+            } catch (exception) {
+
+                reportError(
+                    exception,
+                    "App State: " +
                     appId
                 );
 
-
-            return !!(
-                appState &&
-                appState.open
-            );
+            }
 
         }
 
@@ -1978,43 +2552,24 @@
     }
 
 
-    /* ========================================================
-       24 — LAUNCH
-       ======================================================== */
+    /* ============================================================
+       26 — LAUNCH
+       ============================================================ */
 
     async function launch(
         appId,
         options = {}
     ) {
 
-        const manager =
-            getAppManager();
-
-
-        if (
-            !manager ||
-            !hasMethod(
-                manager,
-                "open"
-            )
-        ) {
-
-            reportError(
-                new Error(
-                    "App Manager nicht verfügbar."
-                ),
-                "Registry Launch"
+        const id =
+            normalizeId(
+                appId
             );
-
-
-            return null;
-
-        }
 
 
         const app =
             get(
-                appId
+                id
             );
 
 
@@ -2026,9 +2581,24 @@
 
 
         if (
-            app.enabled ===
-            false
+            app.enabled === false
         ) {
+
+            emit(
+                "launch-blocked",
+                {
+
+                    app:
+                        clone(
+                            app
+                        ),
+
+                    reason:
+                        "disabled"
+
+                }
+            );
+
 
             return null;
 
@@ -2049,6 +2619,107 @@
                 new Error(
                     "App Dependencies nicht erfüllt."
                 ),
+                "Registry Launch: " + id
+            );
+
+
+            emit(
+                "launch-blocked",
+                {
+
+                    app:
+                        clone(
+                            app
+                        ),
+
+                    reason:
+                        "dependencies",
+
+                    dependencies
+
+                }
+            );
+
+
+            return null;
+
+        }
+
+
+        const manager =
+            getAppManager();
+
+
+        if (
+            !manager ||
+            !hasMethod(
+                manager,
+                "open"
+            )
+        ) {
+
+            /*
+             * Router als zweiter Weg.
+             */
+
+            const router =
+                getRouter();
+
+
+            if (
+                router &&
+                hasMethod(
+                    router,
+                    "navigate"
+                )
+            ) {
+
+                try {
+
+                    const result =
+                        await router.navigate(
+                            app.route || id,
+                            options
+                        );
+
+
+                    state.statistics.launches +=
+                        1;
+
+
+                    emit(
+                        "launched",
+                        {
+
+                            app:
+                                clone(
+                                    app
+                                ),
+
+                            result
+
+                        }
+                    );
+
+
+                    return result;
+
+                } catch (exception) {
+
+                    reportError(
+                        exception,
+                        "Router Launch: " + id
+                    );
+
+                }
+
+            }
+
+
+            reportError(
+                new Error(
+                    "App Manager und Router nicht verfügbar."
+                ),
                 "Registry Launch"
             );
 
@@ -2060,17 +2731,55 @@
 
         try {
 
-            return await manager.open(
-                app.id,
-                options
+            const result =
+                await manager.open(
+                    id,
+                    options
+                );
+
+
+            state.statistics.launches +=
+                1;
+
+
+            emit(
+                "launched",
+                {
+
+                    app:
+                        clone(
+                            app
+                        ),
+
+                    result
+
+                }
             );
+
+
+            return result;
 
         } catch (exception) {
 
             reportError(
                 exception,
-                "App Launch: " +
-                app.id
+                "App Launch: " + id
+            );
+
+
+            emit(
+                "launch-failed",
+                {
+
+                    app:
+                        clone(
+                            app
+                        ),
+
+                    error:
+                        exception
+
+                }
             );
 
 
@@ -2081,9 +2790,9 @@
     }
 
 
-    /* ========================================================
-       25 — APP CONTRACT CONNECTION
-       ======================================================== */
+    /* ============================================================
+       27 — APP CONTRACT CONNECTION
+       ============================================================ */
 
     function connectAppContract() {
 
@@ -2105,14 +2814,44 @@
             true;
 
 
+        /*
+         * Falls ein zukünftiger App Contract eine
+         * Registry-Verbindung anbietet, wird diese genutzt.
+         */
+
+        try {
+
+            if (
+                hasMethod(
+                    contract,
+                    "setRegistry"
+                )
+            ) {
+
+                contract.setRegistry(
+                    api
+                );
+
+            }
+
+        } catch (exception) {
+
+            reportError(
+                exception,
+                "App Contract Connection"
+            );
+
+        }
+
+
         return true;
 
     }
 
 
-    /* ========================================================
-       26 — SERVICE CONNECTIONS
-       ======================================================== */
+    /* ============================================================
+       28 — SERVICE CONNECTIONS
+       ============================================================ */
 
     function refreshConnections() {
 
@@ -2196,23 +2935,39 @@
     }
 
 
-    /* ========================================================
-       27 — PERSISTENCE
-       ======================================================== */
+    /* ============================================================
+       29 — PERSISTENCE
+       ============================================================ */
 
     function getStorageKey() {
 
-        return (
-            "haldo.ai.os.20.app-registry"
-        );
+        return STORAGE_KEY;
+
+    }
+
+
+    function serialize() {
+
+        return {
+
+            version:
+                VERSION,
+
+            savedAt:
+                new Date().toISOString(),
+
+            apps:
+                getAll()
+
+        };
 
     }
 
 
     function save() {
 
-        const data =
-            getAll();
+        const payload =
+            serialize();
 
 
         try {
@@ -2229,12 +2984,30 @@
                 )
             ) {
 
-                storage.set(
-                    getStorageKey(),
-                    data
-                );
+                const result =
+                    storage.set(
+                        getStorageKey(),
+                        payload
+                    );
 
-                return true;
+
+                if (
+                    result !== false
+                ) {
+
+                    state.statistics.persistenceSaves +=
+                        1;
+
+
+                    emit(
+                        "saved",
+                        payload
+                    );
+
+
+                    return true;
+
+                }
 
             }
 
@@ -2242,25 +3015,45 @@
 
             reportError(
                 exception,
-                "Registry Storage"
+                "Registry Storage Save"
             );
 
         }
 
+
+        /*
+         * Fallback auf LocalStorage.
+         */
 
         try {
 
             window.localStorage.setItem(
                 getStorageKey(),
                 JSON.stringify(
-                    data
+                    payload
                 )
+            );
+
+
+            state.statistics.persistenceSaves +=
+                1;
+
+
+            emit(
+                "saved",
+                payload
             );
 
 
             return true;
 
-        } catch (_) {
+        } catch (exception) {
+
+            reportError(
+                exception,
+                "Registry LocalStorage Save"
+            );
+
 
             return false;
 
@@ -2269,7 +3062,45 @@
     }
 
 
+    function extractStoredApps(
+        data
+    ) {
+
+        if (
+            Array.isArray(data)
+        ) {
+
+            return data;
+
+        }
+
+
+        if (
+            data &&
+            Array.isArray(
+                data.apps
+            )
+        ) {
+
+            return data.apps;
+
+        }
+
+
+        return [];
+
+    }
+
+
     function load() {
+
+        let loaded =
+            false;
+
+
+        /*
+         * Zuerst HalDo Storage.
+         */
 
         try {
 
@@ -2291,21 +3122,33 @@
                     );
 
 
-                if (
-                    Array.isArray(
+                const apps =
+                    extractStoredApps(
                         data
-                    )
-                ) {
-
-                    data.forEach(
-                        app =>
-                            register(
-                                app
-                            )
                     );
 
 
-                    return true;
+                if (
+                    apps.length
+                ) {
+
+                    apps.forEach(
+                        definition => {
+
+                            try {
+
+                                register(
+                                    definition
+                                );
+
+                            } catch (_) {}
+
+                        }
+                    );
+
+
+                    loaded =
+                        true;
 
                 }
 
@@ -2321,63 +3164,208 @@
         }
 
 
-        try {
+        /*
+         * LocalStorage Fallback.
+         */
 
-            const raw =
-                window.localStorage.getItem(
-                    getStorageKey()
+        if (!loaded) {
+
+            try {
+
+                const raw =
+                    window.localStorage.getItem(
+                        getStorageKey()
+                    );
+
+
+                if (raw) {
+
+                    const data =
+                        JSON.parse(
+                            raw
+                        );
+
+
+                    const apps =
+                        extractStoredApps(
+                            data
+                        );
+
+
+                    if (
+                        apps.length
+                    ) {
+
+                        apps.forEach(
+                            definition => {
+
+                                try {
+
+                                    register(
+                                        definition
+                                    );
+
+                                } catch (_) {}
+
+                            }
+                        );
+
+
+                        loaded =
+                            true;
+
+                    }
+
+                }
+
+            } catch (exception) {
+
+                reportError(
+                    exception,
+                    "Registry LocalStorage Load"
                 );
-
-
-            if (!raw) {
-
-                return false;
 
             }
 
-
-            const data =
-                JSON.parse(
-                    raw
-                );
+        }
 
 
-            if (
-                Array.isArray(
-                    data
-                )
-            ) {
+        if (loaded) {
 
-                data.forEach(
-                    app =>
-                        register(
-                            app
-                        )
-                );
+            state.statistics.persistenceLoads +=
+                1;
 
 
-                return true;
+            rebuildCategoryIndex();
 
-            }
 
-        } catch (exception) {
+            emit(
+                "loaded",
+                {
 
-            reportError(
-                exception,
-                "Registry LocalStorage Load"
+                    appCount:
+                        getCount()
+
+                }
             );
 
         }
 
 
-        return false;
+        return loaded;
 
     }
 
 
-    /* ========================================================
-       28 — DIAGNOSTICS
-       ======================================================== */
+    /* ============================================================
+       30 — IMPORT / EXPORT
+       ============================================================ */
+
+    function exportApps() {
+
+        return serialize();
+
+    }
+
+
+    function importApps(
+        payload,
+        options = {}
+    ) {
+
+        const apps =
+            extractStoredApps(
+                payload
+            );
+
+
+        if (
+            !apps.length
+        ) {
+
+            return {
+
+                imported:
+                    0,
+
+                failed:
+                    0
+
+            };
+
+        }
+
+
+        let imported =
+            0;
+
+        let failed =
+            0;
+
+
+        apps.forEach(
+            definition => {
+
+                const result =
+                    register(
+                        definition
+                    );
+
+
+                if (result) {
+
+                    imported +=
+                        1;
+
+                } else {
+
+                    failed +=
+                        1;
+
+                }
+
+            }
+        );
+
+
+        if (
+            options.save === true
+        ) {
+
+            save();
+
+        }
+
+
+        emit(
+            "imported",
+            {
+
+                imported,
+
+                failed,
+
+                appCount:
+                    getCount()
+
+            }
+        );
+
+
+        return {
+
+            imported,
+
+            failed
+
+        };
+
+    }
+
+
+    /* ============================================================
+       31 — DIAGNOSTICS
+       ============================================================ */
 
     function diagnostics() {
 
@@ -2391,6 +3379,9 @@
 
             module:
                 MODULE_ID,
+
+            storageKey:
+                STORAGE_KEY,
 
             initialized:
                 state.initialized,
@@ -2420,40 +3411,43 @@
 
             apps:
                 getAll()
-                .map(
-                    app => ({
+                    .map(
+                        app => ({
 
-                        id:
-                            app.id,
+                            id:
+                                app.id,
 
-                        name:
-                            app.name,
+                            name:
+                                app.name,
 
-                        title:
-                            app.title,
+                            title:
+                                app.title,
 
-                        version:
-                            app.version,
+                            version:
+                                app.version,
 
-                        category:
-                            app.category,
+                            category:
+                                app.category,
 
-                        enabled:
-                            app.enabled,
+                            enabled:
+                                app.enabled,
 
-                        core:
-                            app.core,
+                            visible:
+                                app.visible,
 
-                        system:
-                            app.system,
+                            core:
+                                app.core,
 
-                        dependencies:
-                            checkDependencies(
-                                app
-                            )
+                            system:
+                                app.system,
 
-                    })
-                ),
+                            dependencies:
+                                checkDependencies(
+                                    app
+                                )
+
+                        })
+                    ),
 
             timestamp:
                 new Date().toISOString()
@@ -2463,17 +3457,22 @@
     }
 
 
-    /* ========================================================
-       29 — HEALTH CHECK
-       ======================================================== */
+    /* ============================================================
+       32 — HEALTH CHECK
+       ============================================================ */
 
     function healthCheck() {
 
-        const problems = [];
+        const problems =
+            [];
+
+
+        const connections =
+            getConnectionStatus();
 
 
         if (
-            !getKernel()
+            !connections.kernel
         ) {
 
             problems.push(
@@ -2484,7 +3483,7 @@
 
 
         if (
-            !getSystem()
+            !connections.system
         ) {
 
             problems.push(
@@ -2494,56 +3493,44 @@
         }
 
 
-        if (
-            !getAppContract()
-        ) {
-
-            problems.push(
-                "App Contract nicht verbunden."
-            );
-
-        }
-
-
         const dependencyProblems =
             [];
 
 
-        getAll().forEach(
-            app => {
+        getAll()
+            .forEach(
+                app => {
 
-                const result =
-                    checkDependencies(
-                        app
-                    );
+                    const result =
+                        checkDependencies(
+                            app
+                        );
 
 
-                if (
-                    !result.valid
-                ) {
+                    if (
+                        !result.valid
+                    ) {
 
-                    dependencyProblems.push({
+                        dependencyProblems.push({
 
-                        appId:
-                            app.id,
+                            appId:
+                                app.id,
 
-                        ...result
+                            ...result
 
-                    });
+                        });
+
+                    }
 
                 }
-
-            }
-        );
+            );
 
 
         return {
 
             healthy:
-                problems.length ===
-                0 &&
-                dependencyProblems.length ===
-                0,
+                problems.length === 0 &&
+                dependencyProblems.length === 0,
 
             problems,
 
@@ -2555,6 +3542,8 @@
             categories:
                 getCategories(),
 
+            connections,
+
             timestamp:
                 new Date().toISOString()
 
@@ -2563,9 +3552,191 @@
     }
 
 
-    /* ========================================================
-       30 — PUBLIC API
-       ======================================================== */
+    /* ============================================================
+       33 — CLEAR NON-CORE
+       ============================================================ */
+
+    function clearNonCore() {
+
+        const removed = [];
+
+
+        Array.from(
+            state.apps.values()
+        )
+        .forEach(
+            app => {
+
+                if (
+                    app.core === true
+                ) {
+
+                    return;
+
+                }
+
+
+                state.apps.delete(
+                    app.id
+                );
+
+
+                removed.push(
+                    app.id
+                );
+
+            }
+        );
+
+
+        rebuildCategoryIndex();
+
+
+        if (
+            removed.length
+        ) {
+
+            state.statistics.removed +=
+                removed.length;
+
+
+            emit(
+                "cleared",
+                {
+
+                    removed
+
+                }
+            );
+
+        }
+
+
+        return removed;
+
+    }
+
+
+    /* ============================================================
+       34 — RESET
+       ============================================================ */
+
+    function reset(
+        options = {}
+    ) {
+
+        const removed =
+            clearNonCore();
+
+
+        if (
+            options.clearStorage === true
+        ) {
+
+            try {
+
+                const storage =
+                    getStorage();
+
+
+                if (
+                    storage &&
+                    hasMethod(
+                        storage,
+                        "remove"
+                    )
+                ) {
+
+                    storage.remove(
+                        getStorageKey()
+                    );
+
+                }
+
+            } catch (_) {}
+
+
+            try {
+
+                window.localStorage.removeItem(
+                    getStorageKey()
+                );
+
+            } catch (_) {}
+
+        }
+
+
+        emit(
+            "reset",
+            {
+
+                removed,
+
+                storageCleared:
+                    options.clearStorage === true
+
+            }
+        );
+
+
+        return true;
+
+    }
+
+
+    /* ============================================================
+       35 — STATISTICS
+       ============================================================ */
+
+    function getStatistics() {
+
+        return {
+
+            ...state.statistics
+
+        };
+
+    }
+
+
+    /* ============================================================
+       36 — STATE
+       ============================================================ */
+
+    function getState() {
+
+        return {
+
+            initialized:
+                state.initialized,
+
+            initializing:
+                state.initializing,
+
+            ready:
+                state.ready,
+
+            failed:
+                state.failed,
+
+            appCount:
+                getCount(),
+
+            categories:
+                getCategories(),
+
+            connections:
+                getConnectionStatus()
+
+        };
+
+    }
+
+
+    /* ============================================================
+       37 — PUBLIC API
+       ============================================================ */
 
     const api = {
 
@@ -2578,38 +3749,20 @@
         module:
             MODULE_ID,
 
-
-        /* State */
-
-        getState:
-            function () {
-
-                return {
-
-                    initialized:
-                        state.initialized,
-
-                    initializing:
-                        state.initializing,
-
-                    ready:
-                        state.ready,
-
-                    failed:
-                        state.failed,
-
-                    appCount:
-                        getCount(),
-
-                    connections:
-                        getConnectionStatus()
-
-                };
-
-            },
+        storageKey:
+            STORAGE_KEY,
 
 
-        /* Events */
+        /*
+         * State
+         */
+
+        getState,
+
+
+        /*
+         * Events
+         */
 
         on,
 
@@ -2618,11 +3771,15 @@
         emit,
 
 
-        /* Registration */
+        /*
+         * Registration
+         */
 
         register,
 
         registerApp,
+
+        registerMany,
 
         update,
 
@@ -2631,7 +3788,9 @@
         removeApp,
 
 
-        /* Access */
+        /*
+         * Access
+         */
 
         get,
 
@@ -2646,19 +3805,38 @@
         getCount,
 
 
-        /* Categories */
+        /*
+         * Filters
+         */
+
+        getEnabledApps,
+
+        getVisibleApps,
+
+        getSystemApps,
+
+        getUserApps,
+
+
+        /*
+         * Categories
+         */
 
         getCategories,
 
         getByCategory,
 
 
-        /* Search */
+        /*
+         * Search
+         */
 
         search,
 
 
-        /* Status */
+        /*
+         * Status
+         */
 
         enable,
 
@@ -2668,61 +3846,88 @@
 
         disableApp,
 
+        setVisible,
 
-        /* Dependencies */
+        isVisible,
+
+
+        /*
+         * Dependencies
+         */
 
         checkDependencies,
+
+
+        /*
+         * Security / Capabilities
+         */
 
         hasPermission,
 
         hasCapability,
 
 
-        /* Runtime */
+        /*
+         * Runtime
+         */
 
         isOpen,
 
         launch,
 
 
-        /* Persistence */
-
-        save,
-
-        load,
-
-
-        /* Connections */
+        /*
+         * Connections
+         */
 
         refreshConnections,
 
         getConnectionStatus,
 
 
-        /* Diagnostics */
+        /*
+         * Persistence
+         */
+
+        save,
+
+        load,
+
+        exportApps,
+
+        importApps,
+
+
+        /*
+         * Diagnostics
+         */
 
         diagnostics,
 
         healthCheck,
 
 
-        /* Statistics */
+        /*
+         * Maintenance
+         */
 
-        getStatistics:
-            function () {
+        clearNonCore,
 
-                return {
-                    ...state.statistics
-                };
+        reset,
 
-            }
+
+        /*
+         * Statistics
+         */
+
+        getStatistics
 
     };
 
 
-    /* ========================================================
-       31 — GLOBAL EXPORT
-       ======================================================== */
+    /* ============================================================
+       38 — GLOBAL EXPORT
+       ============================================================ */
 
     window.HalDoAppRegistry =
         api;
@@ -2734,9 +3939,9 @@
         api;
 
 
-    /* ========================================================
-       32 — KERNEL CONNECTION
-       ======================================================== */
+    /* ============================================================
+       39 — KERNEL CONNECTION
+       ============================================================ */
 
     function connectKernel() {
 
@@ -2746,12 +3951,19 @@
 
         if (!kernel) {
 
+            state.connections.kernel =
+                false;
+
             return false;
 
         }
 
 
         try {
+
+            /*
+             * Vorhandene Kernel API verwenden.
+             */
 
             if (
                 hasMethod(
@@ -2804,9 +4016,250 @@
     }
 
 
-    /* ========================================================
-       33 — INITIALIZATION
-       ======================================================== */
+    /* ============================================================
+       40 — SYSTEM CONNECTION
+       ============================================================ */
+
+    function connectSystem() {
+
+        const system =
+            getSystem();
+
+
+        if (!system) {
+
+            state.connections.system =
+                false;
+
+            return false;
+
+        }
+
+
+        state.connections.system =
+            true;
+
+
+        try {
+
+            if (
+                hasMethod(
+                    system,
+                    "registerModule"
+                )
+            ) {
+
+                system.registerModule(
+                    MODULE_ID,
+                    api
+                );
+
+            }
+
+        } catch (exception) {
+
+            reportError(
+                exception,
+                "System Connection"
+            );
+
+        }
+
+
+        return true;
+
+    }
+
+
+    /* ============================================================
+       41 — MANAGER CONNECTION
+       ============================================================ */
+
+    function connectAppManager() {
+
+        const manager =
+            getAppManager();
+
+
+        if (!manager) {
+
+            state.connections.appManager =
+                false;
+
+            return false;
+
+        }
+
+
+        state.connections.appManager =
+            true;
+
+
+        try {
+
+            if (
+                hasMethod(
+                    manager,
+                    "setRegistry"
+                )
+            ) {
+
+                manager.setRegistry(
+                    api
+                );
+
+            }
+
+        } catch (exception) {
+
+            reportError(
+                exception,
+                "App Manager Connection"
+            );
+
+        }
+
+
+        return true;
+
+    }
+
+
+    /* ============================================================
+       42 — ROUTER CONNECTION
+       ============================================================ */
+
+    function connectRouter() {
+
+        const router =
+            getRouter();
+
+
+        if (!router) {
+
+            state.connections.router =
+                false;
+
+            return false;
+
+        }
+
+
+        state.connections.router =
+            true;
+
+
+        try {
+
+            if (
+                hasMethod(
+                    router,
+                    "setRegistry"
+                )
+            ) {
+
+                router.setRegistry(
+                    api
+                );
+
+            }
+
+        } catch (exception) {
+
+            reportError(
+                exception,
+                "Router Connection"
+            );
+
+        }
+
+
+        return true;
+
+    }
+
+
+    /* ============================================================
+       43 — WINDOW MANAGER CONNECTION
+       ============================================================ */
+
+    function connectWindowManager() {
+
+        const manager =
+            getWindowManager();
+
+
+        if (!manager) {
+
+            state.connections.windowManager =
+                false;
+
+            return false;
+
+        }
+
+
+        state.connections.windowManager =
+            true;
+
+
+        try {
+
+            if (
+                hasMethod(
+                    manager,
+                    "setAppRegistry"
+                )
+            ) {
+
+                manager.setAppRegistry(
+                    api
+                );
+
+            }
+
+        } catch (exception) {
+
+            reportError(
+                exception,
+                "Window Manager Connection"
+            );
+
+        }
+
+
+        return true;
+
+    }
+
+
+    /* ============================================================
+       44 — FULL SERVICE CONNECTION
+       ============================================================ */
+
+    function connectServices() {
+
+        refreshConnections();
+
+        connectSystem();
+
+        connectAppManager();
+
+        connectRouter();
+
+        connectWindowManager();
+
+        connectAppContract();
+
+
+        return getConnectionStatus();
+
+    }
+
+
+    /* ============================================================
+       45 — INITIALIZATION
+       ============================================================ */
 
     async function initialize() {
 
@@ -2841,68 +4294,105 @@
         emit(
             "initializing",
             {
+
                 version:
                     VERSION
-            }
-        );
-
-
-        refreshConnections();
-
-        connectKernel();
-
-        connectAppContract();
-
-
-        /*
-         * Bereits gespeicherte Registry-Daten
-         * vorsichtig laden.
-         */
-
-        load();
-
-
-        rebuildCategoryIndex();
-
-
-        state.ready =
-            true;
-
-        state.initializing =
-            false;
-
-
-        emit(
-            "ready",
-            {
-                version:
-                    VERSION,
-
-                appCount:
-                    getCount(),
-
-                diagnostics:
-                    diagnostics()
 
             }
         );
 
 
-        log(
-            "HalDo AI OS 20 App Registry bereit.",
-            "Apps:",
-            getCount()
-        );
+        try {
+
+            /*
+             * Zuerst vorhandene Services verbinden.
+             */
+
+            connectServices();
 
 
-        return api;
+            /*
+             * Bereits gespeicherte Registry-Daten
+             * vorsichtig laden.
+             */
+
+            load();
+
+
+            /*
+             * Kategorieindex neu erstellen.
+             */
+
+            rebuildCategoryIndex();
+
+
+            /*
+             * Services erneut verbinden, da Storage/
+             * Kernel/Manager ggf. während des Bootvorgangs
+             * verfügbar geworden sind.
+             */
+
+            connectServices();
+
+
+            state.ready =
+                true;
+
+            state.initializing =
+                false;
+
+
+            emit(
+                "ready",
+                {
+
+                    version:
+                        VERSION,
+
+                    appCount:
+                        getCount(),
+
+                    diagnostics:
+                        diagnostics()
+
+                }
+            );
+
+
+            log(
+                "HalDo AI OS 20 App Registry bereit.",
+                "Apps:",
+                getCount()
+            );
+
+
+            return api;
+
+        } catch (exception) {
+
+            state.initializing =
+                false;
+
+            state.failed =
+                true;
+
+
+            reportError(
+                exception,
+                "Registry Initialisierung"
+            );
+
+
+            throw exception;
+
+        }
 
     }
 
 
-    /* ========================================================
-       34 — BOOT
-       ======================================================== */
+    /* ============================================================
+       46 — BOOT
+       ============================================================ */
 
     function boot() {
 
@@ -2919,7 +4409,7 @@
 
                     reportError(
                         exception,
-                        "Registry Initialisierung"
+                        "Registry Boot"
                     );
 
                 }
@@ -2928,9 +4418,21 @@
     }
 
 
-    /* ========================================================
-       35 — DOM START
-       ======================================================== */
+    /* ============================================================
+       47 — PUBLIC INITIALIZE
+       ============================================================ */
+
+    api.initialize =
+        initialize;
+
+
+    api.boot =
+        boot;
+
+
+    /* ============================================================
+       48 — DOM START
+       ============================================================ */
 
     if (
         document.readyState ===
@@ -2953,9 +4455,9 @@
     }
 
 
-    /* ========================================================
-       FINAL
-       ======================================================== */
+    /* ============================================================
+       49 — FINAL GLOBAL REFERENCES
+       ============================================================ */
 
     HalDoOS.appRegistry =
         api;
@@ -2967,10 +4469,23 @@
         api;
 
 
+    /*
+     * Optionaler zentraler Service-Eintrag.
+     *
+     * Andere Module können dadurch später erkennen,
+     * dass die Registry vorhanden ist.
+     */
+
+    HalDoOS.services =
+        HalDoOS.services || {};
+
+    HalDoOS.services.appRegistry =
+        api;
+
+
+    /* ============================================================
+       END
+       HALDO AI OS 20 APPLICATION REGISTRY
+       ============================================================ */
+
 })(window, document);
-
-
-/* ============================================================
-   END
-   HALDO AI OS 20 APPLICATION REGISTRY
-   ============================================================ */
