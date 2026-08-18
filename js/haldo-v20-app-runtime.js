@@ -7,15 +7,20 @@
  * Datei:
  *   js/haldo-v20-app-runtime.js
  *
+ * Version:
+ *   20.0.1
+ *
  * Aufgabe:
- *   - Apps anhand des zentralen Manifests verwalten
- *   - Apps öffnen / schließen / starten / stoppen
- *   - App-Lebenszyklen kontrollieren
- *   - Event-Bus anbinden
- *   - Service Bridge anbinden
- *   - bestehende HalDo-App-Systeme berücksichtigen
- *   - Fehler isolieren
- *   - Status zentral verwalten
+ *   - zentrale V20 App Runtime
+ *   - Manifest -> Registry/Runtime Verbindung
+ *   - App-Lifecycle
+ *   - Event-Bus Verbindung
+ *   - Service-Bridge Verbindung
+ *   - Window-Manager-Kompatibilität
+ *   - Legacy App-Manager-Kompatibilität
+ *   - Fehlerisolierung
+ *   - Runtime-Status
+ *   - sichere Boot-Reihenfolge
  *
  * ============================================================
  */
@@ -24,6 +29,10 @@
 
     "use strict";
 
+
+    /* ========================================================
+       GLOBAL NAMESPACE
+    ======================================================== */
 
     const HalDoOS =
         window.HalDoOS =
@@ -35,21 +44,50 @@
         window.HalDoV20 || {};
 
 
+    /* ========================================================
+       RUNTIME
+    ======================================================== */
+
     const Runtime = {
 
         name:
             "HalDo V20 Universal App Runtime",
 
         version:
-            "20.0.0",
+            "20.0.1",
 
         ready:
             false,
 
         initialized:
-            false
+            false,
+
+        booting:
+            false,
+
+        destroyed:
+            false,
+
+        legacyAppManager:
+            null,
+
+        registry:
+            null,
+
+        manifest:
+            null,
+
+        events:
+            null,
+
+        serviceBridge:
+            null
     };
 
+
+    /* ========================================================
+       INTERNAL STATE
+    ======================================================== */
 
     const instances =
         new Map();
@@ -59,11 +97,11 @@
         new Map();
 
 
-    const lifecycle =
-        new Map();
-
-
     let bootPromise =
+        null;
+
+
+    let eventConnection =
         null;
 
 
@@ -71,9 +109,7 @@
        HELPERS
     ======================================================== */
 
-    function normalizeId(
-        value
-    ) {
+    function normalizeId(value) {
 
         return String(
             value || ""
@@ -90,6 +126,20 @@
             window.HalDoV20AppManifest ||
             HalDoOS.appManifest ||
             V20.appManifest ||
+            null
+        );
+
+    }
+
+
+    function getRegistry() {
+
+        return (
+            window.HalDoV20AppRegistry ||
+            HalDoOS.appRegistryV20 ||
+            V20.appRegistry ||
+            window.HalDoAppRegistry ||
+            HalDoOS.appRegistry ||
             null
         );
 
@@ -121,9 +171,7 @@
     }
 
 
-    function getAppDefinition(
-        appId
-    ) {
+    function getAppDefinition(appId) {
 
         const manifest =
             getManifest();
@@ -132,21 +180,70 @@
             return null;
         }
 
-        return manifest.get(
-            normalizeId(appId)
-        );
+
+        const id =
+            normalizeId(appId);
+
+
+        try {
+
+            if (
+                typeof manifest.get ===
+                "function"
+            ) {
+
+                return manifest.get(id) || null;
+
+            }
+
+
+            if (
+                typeof manifest.getApp ===
+                "function"
+            ) {
+
+                return manifest.getApp(id) || null;
+
+            }
+
+
+            if (
+                manifest.apps &&
+                typeof manifest.apps ===
+                "object"
+            ) {
+
+                return (
+                    manifest.apps[id] ||
+                    null
+                );
+
+            }
+
+        } catch (error) {
+
+            console.error(
+                "[HalDo V20 Runtime]",
+                "Manifest-Abfrage fehlgeschlagen:",
+                error
+            );
+
+        }
+
+
+        return null;
 
     }
 
 
-    function createRecord(
-        definition
-    ) {
+    function createRecord(definition) {
 
         return {
 
             id:
-                definition.id,
+                normalizeId(
+                    definition.id
+                ),
 
             definition:
                 definition,
@@ -172,6 +269,12 @@
             openedAt:
                 null,
 
+            closedAt:
+                null,
+
+            createdAt:
+                Date.now(),
+
             error:
                 null,
 
@@ -184,8 +287,12 @@
             state:
                 {},
 
+            subscriptions:
+                [],
+
             lifecycle:
                 {
+
                     created:
                         Date.now(),
 
@@ -204,6 +311,7 @@
                     errors:
                         0
                 }
+
         };
 
     }
@@ -224,13 +332,27 @@
             "function"
         ) {
 
-            return events.emit(
-                eventName,
-                data,
-                options
-            );
+            try {
+
+                return events.emit(
+                    eventName,
+                    data,
+                    options
+                );
+
+            } catch (error) {
+
+                console.warn(
+                    "[HalDo V20 Runtime]",
+                    "Event konnte nicht gesendet werden:",
+                    eventName,
+                    error
+                );
+
+            }
 
         }
+
 
         return null;
 
@@ -246,26 +368,43 @@
         const events =
             getEvents();
 
+
         if (
             events &&
             typeof events.appEvent ===
             "function"
         ) {
 
-            return events.appEvent(
-                appId,
-                eventName,
-                data
-            );
+            try {
+
+                return events.appEvent(
+                    appId,
+                    eventName,
+                    data
+                );
+
+            } catch (error) {
+
+                console.warn(
+                    "[HalDo V20 Runtime]",
+                    "App-Event konnte nicht gesendet werden:",
+                    eventName,
+                    error
+                );
+
+            }
 
         }
+
 
         return emit(
             eventName,
             data,
             {
+
                 sourceApp:
-                    appId
+                    normalizeId(appId)
+
             }
         );
 
@@ -278,19 +417,37 @@
         extra
     ) {
 
+        if (!record) {
+            return;
+        }
+
+
+        const previous =
+            record.status;
+
+
         record.status =
             status;
 
+
         const payload =
             Object.assign(
+
                 {
+
                     appId:
                         record.id,
 
+                    previousStatus:
+                        previous,
+
                     status:
                         status
+
                 },
+
                 extra || {}
+
             );
 
 
@@ -303,13 +460,28 @@
     }
 
 
-    function getRecord(
-        appId
+    function getRecord(appId) {
+
+        return (
+            instances.get(
+                normalizeId(appId)
+            ) ||
+            null
+        );
+
+    }
+
+
+    function safeFunction(
+        object,
+        method
     ) {
 
-        return instances.get(
-            normalizeId(appId)
-        ) || null;
+        return !!(
+            object &&
+            typeof object[method] ===
+            "function"
+        );
 
     }
 
@@ -318,9 +490,7 @@
        APP CONTEXT
     ======================================================== */
 
-    function createContext(
-        record
-    ) {
+    function createContext(record) {
 
         const definition =
             record.definition;
@@ -342,7 +512,9 @@
 
 
             /*
-             * Event API
+             * ------------------------------------------------
+             * EVENT API
+             * ------------------------------------------------
              */
 
             emit:
@@ -379,6 +551,7 @@
                     const events =
                         getEvents();
 
+
                     if (
                         events &&
                         typeof events.send ===
@@ -395,6 +568,7 @@
 
                     }
 
+
                     return null;
 
                 },
@@ -409,6 +583,7 @@
 
                     const events =
                         getEvents();
+
 
                     if (
                         events &&
@@ -425,6 +600,7 @@
 
                     }
 
+
                     return null;
 
                 },
@@ -440,20 +616,75 @@
                     const events =
                         getEvents();
 
+
                     if (
                         events &&
                         typeof events.subscribeApp ===
                         "function"
                     ) {
 
-                        return events.subscribeApp(
-                            record.id,
-                            eventName,
-                            handler,
-                            options
+                        const unsubscribe =
+                            events.subscribeApp(
+                                record.id,
+                                eventName,
+                                handler,
+                                options
+                            );
+
+
+                        if (
+                            typeof unsubscribe ===
+                            "function"
+                        ) {
+
+                            record.subscriptions.push(
+                                unsubscribe
+                            );
+
+                        }
+
+
+                        return (
+                            unsubscribe ||
+                            function () {}
                         );
 
                     }
+
+
+                    if (
+                        events &&
+                        typeof events.on ===
+                        "function"
+                    ) {
+
+                        const unsubscribe =
+                            events.on(
+                                eventName,
+                                handler,
+                                options
+                            );
+
+
+                        if (
+                            typeof unsubscribe ===
+                            "function"
+                        ) {
+
+                            record.subscriptions.push(
+                                unsubscribe
+                            );
+
+                        }
+
+
+                        return (
+                            unsubscribe ||
+                            function () {}
+                        );
+
+                    }
+
 
                     return function () {};
 
@@ -470,27 +701,87 @@
                     const events =
                         getEvents();
 
+
                     if (
                         events &&
                         typeof events.subscribeApp ===
                         "function"
                     ) {
 
-                        return events.subscribeApp(
-                            record.id,
-                            eventName,
-                            handler,
-                            Object.assign(
-                                {},
-                                options || {},
-                                {
-                                    once:
-                                        true
-                                }
-                            )
+                        const unsubscribe =
+                            events.subscribeApp(
+
+                                record.id,
+
+                                eventName,
+
+                                handler,
+
+                                Object.assign(
+                                    {},
+                                    options || {},
+                                    {
+                                        once:
+                                            true
+                                    }
+                                )
+
+                            );
+
+
+                        if (
+                            typeof unsubscribe ===
+                            "function"
+                        ) {
+
+                            record.subscriptions.push(
+                                unsubscribe
+                            );
+
+                        }
+
+
+                        return (
+                            unsubscribe ||
+                            function () {}
                         );
 
                     }
+
+
+                    if (
+                        events &&
+                        typeof events.once ===
+                        "function"
+                    ) {
+
+                        const unsubscribe =
+                            events.once(
+                                eventName,
+                                handler,
+                                options
+                            );
+
+
+                        if (
+                            typeof unsubscribe ===
+                            "function"
+                        ) {
+
+                            record.subscriptions.push(
+                                unsubscribe
+                            );
+
+                        }
+
+
+                        return (
+                            unsubscribe ||
+                            function () {}
+                        );
+
+                    }
+
 
                     return function () {};
 
@@ -498,7 +789,9 @@
 
 
             /*
-             * Runtime API
+             * ------------------------------------------------
+             * RUNTIME API
+             * ------------------------------------------------
              */
 
             openApp:
@@ -551,6 +844,30 @@
                 },
 
 
+            restartApp:
+                function (
+                    appId
+                ) {
+
+                    return Runtime.restart(
+                        appId
+                    );
+
+                },
+
+
+            destroyApp:
+                function (
+                    appId
+                ) {
+
+                    return Runtime.destroy(
+                        appId
+                    );
+
+                },
+
+
             getApp:
                 function (
                     appId
@@ -564,7 +881,9 @@
 
 
             /*
-             * Service Bridge
+             * ------------------------------------------------
+             * SERVICE BRIDGE
+             * ------------------------------------------------
              */
 
             services:
@@ -572,7 +891,9 @@
 
 
             /*
-             * Storage helper
+             * ------------------------------------------------
+             * STORAGE
+             * ------------------------------------------------
              */
 
             storage:
@@ -585,16 +906,43 @@
 
                             try {
 
-                                return localStorage.getItem(
-                                    "haldo:" +
-                                    record.id +
-                                    ":" +
-                                    key
-                                );
+                                const value =
+                                    localStorage.getItem(
+                                        "haldo:" +
+                                        record.id +
+                                        ":" +
+                                        key
+                                    );
+
+
+                                if (
+                                    value ===
+                                    null
+                                ) {
+
+                                    return null;
+
+                                }
+
+
+                                try {
+
+                                    return JSON.parse(
+                                        value
+                                    );
+
+                                } catch (
+                                    parseError
+                                ) {
+
+                                    return value;
+
+                                }
 
                             } catch (error) {
 
                                 return null;
+
                             }
 
                         },
@@ -609,23 +957,30 @@
                             try {
 
                                 localStorage.setItem(
+
                                     "haldo:" +
                                     record.id +
                                     ":" +
                                     key,
+
                                     typeof value ===
                                     "string"
+
                                         ? value
+
                                         : JSON.stringify(
                                             value
                                         )
+
                                 );
+
 
                                 return true;
 
                             } catch (error) {
 
                                 return false;
+
                             }
 
                         },
@@ -645,11 +1000,13 @@
                                     key
                                 );
 
+
                                 return true;
 
                             } catch (error) {
 
                                 return false;
+
                             }
 
                         }
@@ -658,7 +1015,9 @@
 
 
             /*
-             * Logging
+             * ------------------------------------------------
+             * LOGGING
+             * ------------------------------------------------
              */
 
             log:
@@ -668,6 +1027,7 @@
                         Array.from(
                             arguments
                         );
+
 
                     console.log(
                         "[HalDo App:" +
@@ -687,6 +1047,7 @@
                             arguments
                         );
 
+
                     console.warn(
                         "[HalDo App:" +
                         record.id +
@@ -704,6 +1065,7 @@
                         Array.from(
                             arguments
                         );
+
 
                     console.error(
                         "[HalDo App:" +
@@ -730,9 +1092,7 @@
        SCRIPT LOADING
     ======================================================== */
 
-    function loadScript(
-        src
-    ) {
+    function loadScript(src) {
 
         if (!src) {
 
@@ -745,10 +1105,41 @@
         }
 
 
+        const normalizedSrc =
+            String(src).trim();
+
+
+        if (!normalizedSrc) {
+
+            return Promise.reject(
+                new Error(
+                    "Ungültige App-Einstiegsdatei."
+                )
+            );
+
+        }
+
+
+        const escapedSrc =
+            window.CSS &&
+            typeof CSS.escape ===
+            "function"
+
+                ? CSS.escape(
+                    normalizedSrc
+                )
+
+                : normalizedSrc
+                    .replace(
+                        /["\\]/g,
+                        "\\$&"
+                    );
+
+
         const existing =
             document.querySelector(
                 'script[data-haldo-app-src="' +
-                CSS.escape(src) +
+                escapedSrc +
                 '"]'
             );
 
@@ -763,11 +1154,13 @@
 
 
         if (
-            loading.has(src)
+            loading.has(
+                normalizedSrc
+            )
         ) {
 
             return loading.get(
-                src
+                normalizedSrc
             );
 
         }
@@ -787,7 +1180,7 @@
 
 
                     script.src =
-                        src;
+                        normalizedSrc;
 
 
                     script.async =
@@ -795,7 +1188,7 @@
 
 
                     script.dataset.haldoAppSrc =
-                        src;
+                        normalizedSrc;
 
 
                     script.onload =
@@ -814,7 +1207,7 @@
                             reject(
                                 new Error(
                                     "App-Datei konnte nicht geladen werden: " +
-                                    src
+                                    normalizedSrc
                                 )
                             );
 
@@ -830,8 +1223,19 @@
 
 
         loading.set(
-            src,
+            normalizedSrc,
             promise
+        );
+
+
+        promise.finally(
+            function () {
+
+                loading.delete(
+                    normalizedSrc
+                );
+
+            }
         );
 
 
@@ -844,9 +1248,7 @@
        FIND MODULE
     ======================================================== */
 
-    function findModule(
-        definition
-    ) {
+    function findModule(definition) {
 
         const moduleName =
             definition.module;
@@ -856,12 +1258,6 @@
             return null;
         }
 
-
-        /*
-         * Standard:
-         *
-         * window["haldo-app-example"]
-         */
 
         if (
             window[moduleName]
@@ -873,10 +1269,6 @@
 
         }
 
-
-        /*
-         * Varianten für bestehende Module.
-         */
 
         const variants = [
 
@@ -926,10 +1318,6 @@
         }
 
 
-        /*
-         * HalDoOS namespace
-         */
-
         if (
             HalDoOS[moduleName]
         ) {
@@ -940,10 +1328,6 @@
 
         }
 
-
-        /*
-         * V20 namespace
-         */
 
         if (
             V20[moduleName]
@@ -965,14 +1349,21 @@
        INITIALIZE APP
     ======================================================== */
 
-    async function initialize(
-        appId
-    ) {
+    async function initialize(appId) {
 
         const id =
             normalizeId(
                 appId
             );
+
+
+        if (!id) {
+
+            throw new Error(
+                "Keine gültige App-ID angegeben."
+            );
+
+        }
 
 
         const definition =
@@ -1003,6 +1394,7 @@
                 createRecord(
                     definition
                 );
+
 
             instances.set(
                 id,
@@ -1046,10 +1438,6 @@
                     );
 
 
-                    /*
-                     * App-Datei laden.
-                     */
-
                     if (
                         definition.entry
                     ) {
@@ -1061,10 +1449,6 @@
                     }
 
 
-                    /*
-                     * Modul suchen.
-                     */
-
                     const module =
                         findModule(
                             definition
@@ -1075,20 +1459,11 @@
                         module;
 
 
-                    /*
-                     * App-Kontext erstellen.
-                     */
-
                     const context =
                         createContext(
                             record
                         );
 
-
-                    /*
-                     * Falls ein Modul eine
-                     * eigene Factory besitzt.
-                     */
 
                     if (
                         module &&
@@ -1109,10 +1484,6 @@
 
                     }
 
-
-                    /*
-                     * init()
-                     */
 
                     if (
                         record.instance &&
@@ -1147,11 +1518,13 @@
                         id,
                         "app:registered",
                         {
+
                             appId:
                                 id,
 
                             definition:
                                 definition
+
                         }
                     );
 
@@ -1163,6 +1536,7 @@
                     record.error =
                         error;
 
+
                     record.lifecycle.errors++;
 
 
@@ -1170,8 +1544,10 @@
                         record,
                         "error",
                         {
+
                             error:
                                 error.message
+
                         }
                     );
 
@@ -1180,11 +1556,13 @@
                         id,
                         "app:error",
                         {
+
                             appId:
                                 id,
 
                             error:
                                 error.message
+
                         }
                     );
 
@@ -1242,9 +1620,10 @@
             try {
 
                 if (
-                    record.instance &&
-                    typeof record.instance.start ===
-                    "function"
+                    safeFunction(
+                        record.instance,
+                        "start"
+                    )
                 ) {
 
                     await record.instance.start(
@@ -1252,9 +1631,10 @@
                     );
 
                 } else if (
-                    record.module &&
-                    typeof record.module.start ===
-                    "function"
+                    safeFunction(
+                        record.module,
+                        "start"
+                    )
                 ) {
 
                     await record.module.start(
@@ -1294,6 +1674,7 @@
                 record.error =
                     error;
 
+
                 record.lifecycle.errors++;
 
 
@@ -1301,8 +1682,10 @@
                     record,
                     "error",
                     {
+
                         error:
                             error.message
+
                     }
                 );
 
@@ -1334,12 +1717,23 @@
             }
 
 
+            if (
+                record.status ===
+                "stopped"
+            ) {
+
+                return true;
+
+            }
+
+
             try {
 
                 if (
-                    record.instance &&
-                    typeof record.instance.stop ===
-                    "function"
+                    safeFunction(
+                        record.instance,
+                        "stop"
+                    )
                 ) {
 
                     await record.instance.stop(
@@ -1347,9 +1741,10 @@
                     );
 
                 } else if (
-                    record.module &&
-                    typeof record.module.stop ===
-                    "function"
+                    safeFunction(
+                        record.module,
+                        "stop"
+                    )
                 ) {
 
                     await record.module.stop(
@@ -1376,8 +1771,10 @@
                     record.id,
                     "app:stopped",
                     {
+
                         appId:
                             record.id
+
                     }
                 );
 
@@ -1389,6 +1786,7 @@
                 record.error =
                     error;
 
+
                 record.lifecycle.errors++;
 
 
@@ -1396,8 +1794,10 @@
                     record,
                     "error",
                     {
+
                         error:
                             error.message
+
                     }
                 );
 
@@ -1438,23 +1838,27 @@
             try {
 
                 if (
-                    record.instance &&
-                    typeof record.instance.open ===
-                    "function"
+                    safeFunction(
+                        record.instance,
+                        "open"
+                    )
                 ) {
 
                     await record.instance.open(
-                        opts
+                        opts,
+                        record.context
                     );
 
                 } else if (
-                    record.module &&
-                    typeof record.module.open ===
-                    "function"
+                    safeFunction(
+                        record.module,
+                        "open"
+                    )
                 ) {
 
                     await record.module.open(
-                        opts
+                        opts,
+                        record.context
                     );
 
                 }
@@ -1477,23 +1881,27 @@
                     id,
                     "app:open",
                     {
+
                         appId:
                             id,
 
                         options:
                             opts
+
                     }
                 );
 
 
                 /*
-                 * Bestehendes HalDo Window Manager
-                 * System informieren.
+                 * ------------------------------------------------
+                 * WINDOW MANAGER BRIDGE
+                 * ------------------------------------------------
                  */
 
                 const windowManager =
                     window.HalDoWindowManager ||
-                    HalDoOS.windowManager;
+                    HalDoOS.windowManager ||
+                    window.HalDoOSWindowManager;
 
 
                 if (
@@ -1504,15 +1912,17 @@
 
                     try {
 
-                        windowManager.openApp(
-                            id,
-                            opts
+                        await Promise.resolve(
+                            windowManager.openApp(
+                                id,
+                                opts
+                            )
                         );
 
                     } catch (error) {
 
                         console.warn(
-                            "[HalDo Runtime]",
+                            "[HalDo V20 Runtime]",
                             "Window Manager konnte App nicht öffnen.",
                             error
                         );
@@ -1529,6 +1939,7 @@
                 record.error =
                     error;
 
+
                 record.lifecycle.errors++;
 
 
@@ -1536,8 +1947,10 @@
                     record,
                     "error",
                     {
+
                         error:
                             error.message
+
                     }
                 );
 
@@ -1572,9 +1985,10 @@
             try {
 
                 if (
-                    record.instance &&
-                    typeof record.instance.close ===
-                    "function"
+                    safeFunction(
+                        record.instance,
+                        "close"
+                    )
                 ) {
 
                     await record.instance.close(
@@ -1582,9 +1996,10 @@
                     );
 
                 } else if (
-                    record.module &&
-                    typeof record.module.close ===
-                    "function"
+                    safeFunction(
+                        record.module,
+                        "close"
+                    )
                 ) {
 
                     await record.module.close(
@@ -1592,6 +2007,10 @@
                     );
 
                 }
+
+
+                record.closedAt =
+                    Date.now();
 
 
                 record.lifecycle.closes++;
@@ -1607,10 +2026,45 @@
                     record.id,
                     "app:close",
                     {
+
                         appId:
                             record.id
+
                     }
                 );
+
+
+                const windowManager =
+                    window.HalDoWindowManager ||
+                    HalDoOS.windowManager ||
+                    window.HalDoOSWindowManager;
+
+
+                if (
+                    windowManager &&
+                    typeof windowManager.closeApp ===
+                    "function"
+                ) {
+
+                    try {
+
+                        await Promise.resolve(
+                            windowManager.closeApp(
+                                record.id
+                            )
+                        );
+
+                    } catch (error) {
+
+                        console.warn(
+                            "[HalDo V20 Runtime]",
+                            "Window Manager konnte App nicht schließen.",
+                            error
+                        );
+
+                    }
+
+                }
 
 
                 return true;
@@ -1620,7 +2074,20 @@
                 record.error =
                     error;
 
+
                 record.lifecycle.errors++;
+
+
+                setStatus(
+                    record,
+                    "error",
+                    {
+
+                        error:
+                            error.message
+
+                    }
+                );
 
 
                 return false;
@@ -1639,13 +2106,19 @@
             appId
         ) {
 
+            const id =
+                normalizeId(
+                    appId
+                );
+
+
             await Runtime.stop(
-                appId
+                id
             );
 
 
             return Runtime.start(
-                appId
+                id
             );
 
         };
@@ -1679,15 +2152,28 @@
 
             try {
 
+                if (
+                    record.status ===
+                    "open"
+                ) {
+
+                    await Runtime.close(
+                        id
+                    );
+
+                }
+
+
                 await Runtime.stop(
                     id
                 );
 
 
                 if (
-                    record.instance &&
-                    typeof record.instance.destroy ===
-                    "function"
+                    safeFunction(
+                        record.instance,
+                        "destroy"
+                    )
                 ) {
 
                     await record.instance.destroy(
@@ -1695,9 +2181,10 @@
                     );
 
                 } else if (
-                    record.module &&
-                    typeof record.module.destroy ===
-                    "function"
+                    safeFunction(
+                        record.module,
+                        "destroy"
+                    )
                 ) {
 
                     await record.module.destroy(
@@ -1705,6 +2192,34 @@
                     );
 
                 }
+
+
+                record.subscriptions
+                    .forEach(
+                        function (
+                            unsubscribe
+                        ) {
+
+                            try {
+
+                                unsubscribe();
+
+                            } catch (error) {
+
+                                console.warn(
+                                    "[HalDo V20 Runtime]",
+                                    "Event-Abmeldung fehlgeschlagen.",
+                                    error
+                                );
+
+                            }
+
+                        }
+                    );
+
+
+                record.subscriptions =
+                    [];
 
 
                 instances.delete(
@@ -1716,8 +2231,10 @@
                     id,
                     "app:destroyed",
                     {
+
                         appId:
                             id
+
                     }
                 );
 
@@ -1727,7 +2244,7 @@
             } catch (error) {
 
                 console.error(
-                    "[HalDo Runtime]",
+                    "[HalDo V20 Runtime]",
                     "Destroy-Fehler:",
                     error
                 );
@@ -1774,6 +2291,12 @@
                 instance:
                     record.instance,
 
+                module:
+                    record.module,
+
+                element:
+                    record.element,
+
                 state:
                     record.state,
 
@@ -1784,7 +2307,19 @@
                     Object.assign(
                         {},
                         record.lifecycle
-                    )
+                    ),
+
+                startedAt:
+                    record.startedAt,
+
+                stoppedAt:
+                    record.stoppedAt,
+
+                openedAt:
+                    record.openedAt,
+
+                closedAt:
+                    record.closedAt
 
             };
 
@@ -1830,17 +2365,75 @@
             if (!manifest) {
 
                 console.warn(
-                    "[HalDo Runtime]",
+                    "[HalDo V20 Runtime]",
                     "App Manifest noch nicht verfügbar."
                 );
+
 
                 return 0;
 
             }
 
 
-            const definitions =
-                manifest.getAll();
+            Runtime.manifest =
+                manifest;
+
+
+            const registry =
+                getRegistry();
+
+
+            Runtime.registry =
+                registry;
+
+
+            let definitions =
+                [];
+
+
+            try {
+
+                if (
+                    typeof manifest.getAll ===
+                    "function"
+                ) {
+
+                    definitions =
+                        manifest.getAll() ||
+                        [];
+
+                } else if (
+                    Array.isArray(
+                        manifest
+                    )
+                ) {
+
+                    definitions =
+                        manifest;
+
+                } else if (
+                    Array.isArray(
+                        manifest.apps
+                    )
+                ) {
+
+                    definitions =
+                        manifest.apps;
+
+                }
+
+            } catch (error) {
+
+                console.error(
+                    "[HalDo V20 Runtime]",
+                    "Manifest konnte nicht gelesen werden:",
+                    error
+                );
+
+
+                return 0;
+
+            }
 
 
             let count =
@@ -1853,17 +2446,41 @@
                 ) {
 
                     if (
-                        !instances.has(
+                        !definition ||
+                        !definition.id
+                    ) {
+
+                        return;
+
+                    }
+
+
+                    const id =
+                        normalizeId(
                             definition.id
+                        );
+
+
+                    if (
+                        !instances.has(
+                            id
                         )
                     ) {
 
                         instances.set(
-                            definition.id,
+                            id,
                             createRecord(
-                                definition
+                                Object.assign(
+                                    {},
+                                    definition,
+                                    {
+                                        id:
+                                            id
+                                    }
+                                )
                             )
                         );
+
 
                         count++;
 
@@ -1879,7 +2496,128 @@
 
 
     /* ========================================================
-       OPEN BY EVENT
+       REGISTER SINGLE APP
+    ======================================================== */
+
+    Runtime.register =
+        function (
+            definition
+        ) {
+
+            if (
+                !definition ||
+                !definition.id
+            ) {
+
+                return null;
+
+            }
+
+
+            const id =
+                normalizeId(
+                    definition.id
+                );
+
+
+            const existing =
+                getRecord(
+                    id
+                );
+
+
+            if (existing) {
+
+                existing.definition =
+                    Object.assign(
+                        {},
+                        existing.definition,
+                        definition
+                    );
+
+
+                return existing;
+
+            }
+
+
+            const record =
+                createRecord(
+                    Object.assign(
+                        {},
+                        definition,
+                        {
+                            id:
+                                id
+                        }
+                    )
+                );
+
+
+            instances.set(
+                id,
+                record
+            );
+
+
+            emitApp(
+                id,
+                "app:registered",
+                {
+
+                    appId:
+                        id,
+
+                    definition:
+                        record.definition
+
+                }
+            );
+
+
+            return record;
+
+        };
+
+
+    /* ========================================================
+       UNREGISTER
+    ======================================================== */
+
+    Runtime.unregister =
+        async function (
+            appId
+        ) {
+
+            const id =
+                normalizeId(
+                    appId
+                );
+
+
+            const record =
+                getRecord(
+                    id
+                );
+
+
+            if (!record) {
+                return false;
+            }
+
+
+            await Runtime.destroy(
+                id
+            );
+
+
+            return true;
+
+        };
+
+
+    /* ========================================================
+       EVENT CONNECTION
     ======================================================== */
 
     function connectEvents() {
@@ -1888,98 +2626,199 @@
             getEvents();
 
 
+        if (!events) {
+            return false;
+        }
+
+
         if (
-            !events ||
-            typeof events.on !==
-            "function"
+            eventConnection
         ) {
 
-            return;
+            return true;
 
         }
 
 
+        Runtime.events =
+            events;
+
+
         /*
-         * Andere Apps können:
-         *
-         * app:open
-         *
-         * mit targetApp senden.
+         * ------------------------------------------------
+         * app:open-request
+         * ------------------------------------------------
          */
 
-        events.on(
-            "app:open-request",
-            function (
-                event
-            ) {
-
-                const data =
-                    event.data ||
-                    {};
+        let unsubscribe =
+            null;
 
 
-                const target =
-                    data.appId ||
-                    event.targetApp;
+        if (
+            typeof events.on ===
+            "function"
+        ) {
+
+            unsubscribe =
+                events.on(
+                    "app:open-request",
+                    function (
+                        event
+                    ) {
+
+                        const data =
+                            event &&
+                            event.data
+                                ? event.data
+                                : {};
 
 
-                if (
-                    target
-                ) {
-
-                    Runtime.open(
-                        target,
-                        data.options || {}
-                    )
-                    .catch(
-                        function (error) {
-
-                            console.error(
-                                "[HalDo Runtime]",
-                                error
+                        const target =
+                            data.appId ||
+                            data.targetApp ||
+                            (
+                                event &&
+                                event.targetApp
                             );
 
+
+                        if (!target) {
+                            return;
                         }
-                    );
 
-                }
 
-            }
-        );
+                        Runtime.open(
+                            target,
+                            data.options || {}
+                        )
+                        .catch(
+                            function (
+                                error
+                            ) {
+
+                                console.error(
+                                    "[HalDo V20 Runtime]",
+                                    "App konnte über Event nicht geöffnet werden:",
+                                    error
+                                );
+
+                            }
+                        );
+
+                    }
+                );
+
+        }
+
+
+        eventConnection = {
+
+            unsubscribe:
+                typeof unsubscribe ===
+                "function"
+
+                    ? unsubscribe
+
+                    : null
+
+        };
+
+
+        return true;
 
     }
 
 
     /* ========================================================
-       COMPATIBILITY WITH EXISTING APP MANAGER
+       SERVICE BRIDGE CONNECTION
+    ======================================================== */
+
+    function connectServiceBridge() {
+
+        const bridge =
+            getServiceBridge();
+
+
+        Runtime.serviceBridge =
+            bridge;
+
+
+        return !!bridge;
+
+    }
+
+
+    /* ========================================================
+       LEGACY APP MANAGER
     ======================================================== */
 
     function connectExistingAppManager() {
 
         const manager =
             window.HalDoAppManager ||
-            HalDoOS.appManager;
+            HalDoOS.appManager ||
+            null;
 
 
         if (!manager) {
-            return;
+
+            Runtime.legacyAppManager =
+                null;
+
+
+            return false;
+
         }
 
-
-        /*
-         * Wir ersetzen den bestehenden Manager NICHT.
-         *
-         * Wir stellen lediglich eine Verbindung her.
-         */
 
         Runtime.legacyAppManager =
             manager;
 
 
         console.log(
-            "[HalDo Runtime]",
-            "Bestehender App Manager erkannt."
+            "[HalDo V20 Runtime]",
+            "Bestehender App Manager erkannt und kompatibel angebunden."
         );
+
+
+        return true;
+
+    }
+
+
+    /* ========================================================
+       REGISTRY CONNECTION
+    ======================================================== */
+
+    function connectRegistry() {
+
+        const registry =
+            getRegistry();
+
+
+        Runtime.registry =
+            registry;
+
+
+        if (
+            registry &&
+            typeof registry ===
+            "object"
+        ) {
+
+            /*
+             * Der V20 Runtime gehört zur
+             * Registry-Lebenszyklus-Schicht.
+             *
+             * Die Registry wird nicht ersetzt.
+             */
+
+            return true;
+
+        }
+
+
+        return false;
 
     }
 
@@ -1992,10 +2831,21 @@
         async function () {
 
             if (
-                Runtime.initialized
+                Runtime.initialized &&
+                Runtime.ready
             ) {
 
                 return Runtime;
+
+            }
+
+
+            if (
+                Runtime.destroyed
+            ) {
+
+                Runtime.destroyed =
+                    false;
 
             }
 
@@ -2004,11 +2854,49 @@
                 true;
 
 
-            registerAll();
+            /*
+             * Abhängigkeiten erneut ermitteln.
+             */
 
+            Runtime.manifest =
+                getManifest();
+
+
+            Runtime.registry =
+                getRegistry();
+
+
+            Runtime.events =
+                getEvents();
+
+
+            Runtime.serviceBridge =
+                getServiceBridge();
+
+
+            /*
+             * ------------------------------------------------
+             * WICHTIG:
+             *
+             * Hier wird ausdrücklich die Runtime-Methode
+             * aufgerufen.
+             *
+             * NICHT:
+             *     registerAll();
+             *
+             * SONDERN:
+             *     Runtime.registerAll();
+             * ------------------------------------------------
+             */
+
+            Runtime.registerAll();
+
+
+            connectRegistry();
 
             connectEvents();
 
+            connectServiceBridge();
 
             connectExistingAppManager();
 
@@ -2021,24 +2909,96 @@
                 "system:app-runtime-ready",
                 Runtime.getStatus(),
                 {
+
                     source:
                         "system",
 
                     internal:
                         true
+
                 }
             );
 
 
             console.log(
                 "[HalDo AI OS 20]",
-                "Universal App Runtime bereit."
+                "Universal App Runtime bereit.",
+                Runtime.getStatus()
             );
 
 
             return Runtime;
 
         };
+
+
+    /* ========================================================
+       WAIT FOR MANIFEST
+    ======================================================== */
+
+    function waitForManifest(
+        timeout
+    ) {
+
+        const maxWait =
+            Number.isFinite(timeout)
+                ? timeout
+                : 10000;
+
+
+        const started =
+            Date.now();
+
+
+        return new Promise(
+            function (
+                resolve
+            ) {
+
+                function check() {
+
+                    if (
+                        getManifest()
+                    ) {
+
+                        resolve(
+                            true
+                        );
+
+                        return;
+
+                    }
+
+
+                    if (
+                        Date.now() -
+                        started >=
+                        maxWait
+                    ) {
+
+                        resolve(
+                            false
+                        );
+
+                        return;
+
+                    }
+
+
+                    setTimeout(
+                        check,
+                        25
+                    );
+
+                }
+
+
+                check();
+
+            }
+        );
+
+    }
 
 
     /* ========================================================
@@ -2057,58 +3017,33 @@
             }
 
 
+            Runtime.booting =
+                true;
+
+
             bootPromise =
-                new Promise(
-                    function (
-                        resolve
-                    ) {
+                (async function () {
 
-                        function start() {
-
-                            Runtime.init()
-                                .then(
-                                    resolve
-                                )
-                                .catch(
-                                    function (
-                                        error
-                                    ) {
-
-                                        console.error(
-                                            "[HalDo Runtime]",
-                                            "Bootfehler:",
-                                            error
-                                        );
-
-                                        resolve(
-                                            Runtime
-                                        );
-
-                                    }
-                                );
-
-                        }
-
+                    try {
 
                         /*
-                         * Manifest zuerst.
+                         * Manifest möglichst früh suchen.
                          */
 
                         if (
-                            getManifest()
+                            !getManifest()
                         ) {
 
-                            start();
-
-                            return;
+                            await waitForManifest(
+                                10000
+                            );
 
                         }
 
 
                         /*
-                         * Falls index.html die Dateien
-                         * in einer anderen Reihenfolge lädt,
-                         * kurz auf DOMContentLoaded warten.
+                         * Falls der DOM noch lädt,
+                         * auf DOMContentLoaded warten.
                          */
 
                         if (
@@ -2116,26 +3051,79 @@
                             "loading"
                         ) {
 
-                            document.addEventListener(
-                                "DOMContentLoaded",
-                                start,
-                                {
-                                    once:
-                                        true
+                            await new Promise(
+                                function (
+                                    resolve
+                                ) {
+
+                                    document.addEventListener(
+                                        "DOMContentLoaded",
+                                        resolve,
+                                        {
+                                            once:
+                                                true
+                                        }
+                                    );
+
                                 }
-                            );
-
-                        } else {
-
-                            setTimeout(
-                                start,
-                                0
                             );
 
                         }
 
+
+                        await Runtime.init();
+
+
+                        return Runtime;
+
+                    } catch (error) {
+
+                        console.error(
+                            "[HalDo V20 Runtime]",
+                            "Bootfehler:",
+                            error
+                        );
+
+
+                        Runtime.ready =
+                            false;
+
+
+                        emit(
+                            "system:app-runtime-error",
+                            {
+
+                                error:
+                                    error.message
+
+                            },
+                            {
+
+                                source:
+                                    "system",
+
+                                internal:
+                                    true
+
+                            }
+                        );
+
+
+                        /*
+                         * Die Runtime darf nicht die
+                         * komplette Shell blockieren.
+                         */
+
+                        return Runtime;
+
+                    } finally {
+
+                        Runtime.booting =
+                            false;
+
                     }
-                );
+
+                })();
 
 
             return bootPromise;
@@ -2150,10 +3138,22 @@
     Runtime.getStatus =
         function () {
 
+            let registered =
+                0;
+
+            let initialized =
+                0;
+
             let running =
                 0;
 
             let open =
+                0;
+
+            let stopped =
+                0;
+
+            let loadingCount =
                 0;
 
             let errors =
@@ -2164,6 +3164,19 @@
                 function (
                     record
                 ) {
+
+                    registered++;
+
+
+                    if (
+                        record.status ===
+                        "initialized"
+                    ) {
+
+                        initialized++;
+
+                    }
+
 
                     if (
                         record.status ===
@@ -2181,6 +3194,26 @@
                     ) {
 
                         open++;
+
+                    }
+
+
+                    if (
+                        record.status ===
+                        "stopped"
+                    ) {
+
+                        stopped++;
+
+                    }
+
+
+                    if (
+                        record.status ===
+                        "loading"
+                    ) {
+
+                        loadingCount++;
 
                     }
 
@@ -2212,14 +3245,41 @@
                 initialized:
                     Runtime.initialized,
 
+                booting:
+                    Runtime.booting,
+
+                manifestAvailable:
+                    !!getManifest(),
+
+                registryAvailable:
+                    !!getRegistry(),
+
+                eventBusAvailable:
+                    !!getEvents(),
+
+                serviceBridgeAvailable:
+                    !!getServiceBridge(),
+
+                legacyAppManagerAvailable:
+                    !!Runtime.legacyAppManager,
+
                 registeredApps:
-                    instances.size,
+                    registered,
+
+                initializedApps:
+                    initialized,
 
                 runningApps:
                     running,
 
                 openApps:
                     open,
+
+                stoppedApps:
+                    stopped,
+
+                loadingApps:
+                    loadingCount,
 
                 errorApps:
                     errors,
@@ -2233,17 +3293,103 @@
 
 
     /* ========================================================
+       HEALTH CHECK
+    ======================================================== */
+
+    Runtime.health =
+        function () {
+
+            const status =
+                Runtime.getStatus();
+
+
+            return {
+
+                ok:
+                    !!(
+                        status.ready &&
+                        status.manifestAvailable
+                    ),
+
+                status:
+                    status,
+
+                checks:
+                    {
+
+                        runtime:
+                            true,
+
+                        manifest:
+                            status.manifestAvailable,
+
+                        registry:
+                            status.registryAvailable,
+
+                        eventBus:
+                            status.eventBusAvailable,
+
+                        serviceBridge:
+                            status.serviceBridgeAvailable
+
+                    }
+
+            };
+
+        };
+
+
+    /* ========================================================
+       LEGACY COMPATIBILITY HELPERS
+    ======================================================== */
+
+    Runtime.openApp =
+        Runtime.open;
+
+
+    Runtime.closeApp =
+        Runtime.close;
+
+
+    Runtime.startApp =
+        Runtime.start;
+
+
+    Runtime.stopApp =
+        Runtime.stop;
+
+
+    Runtime.restartApp =
+        Runtime.restart;
+
+
+    Runtime.destroyApp =
+        Runtime.destroy;
+
+
+    Runtime.getApp =
+        Runtime.get;
+
+
+    Runtime.getApps =
+        Runtime.getAll;
+
+
+    /* ========================================================
        GLOBAL API
     ======================================================== */
 
     window.HalDoV20AppRuntime =
         Runtime;
 
+
     window.HalDoAppRuntime =
         Runtime;
 
+
     HalDoOS.appRuntime =
         Runtime;
+
 
     V20.appRuntime =
         Runtime;
