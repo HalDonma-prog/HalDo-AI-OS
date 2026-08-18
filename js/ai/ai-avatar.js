@@ -8,36 +8,47 @@
    Pfad:
        /js/ai/ai-avatar.js
 
+   Ersetzungsart:
+       KOMPLETTEN INHALT ERSETZEN
+
    Verantwortlich für:
 
-   - lebendiger HalDo AI Avatar
+   - lebendigen HalDo AI Avatar
    - HalDo Logo als Avatar
-   - Avatar Zustände
-   - Atmung / Glow
-   - Sprechen
-   - Zuhören
-   - Denken
-   - Emotionen
-   - AI Verbindung
+   - Avatar innerhalb der zentralen Sonne
+   - sanfte Atmung
+   - Glow
+   - Blick-/Lichtreaktionen
+   - Listening
+   - Thinking
+   - Speaking
+   - Happy
+   - Calm
+   - Excited
+   - Processing
+   - Error
+   - AI-Core Verbindung
+   - AI-Chat Verbindung
    - Voice Verbindung
-   - Event Bus Verbindung
+   - Speech Verbindung
+   - Conversation State Verbindung
    - App Registry Verbindung
-   - Cosmic World Verbindung
-   - Sonnenzentrum Verbindung
-   - Animationen
-   - Accessibility
-   - Fehlerbehandlung
+   - Event-System Verbindung
+   - Benutzerinteraktion
+   - Maus-/Touch-Reaktionen
+   - zukünftige Gesicht-/Mimik-Animationen
+   - zukünftige Lip-Sync-Anbindung
+   - zukünftige Emotion Engine
+   - zentrale Avatar API
 
    WICHTIG:
 
-   Kein Roboter-Emoji.
+   Diese Datei ist eine FOUNDATION.
 
-   Der Avatar verwendet das echte HalDo Logo:
+   Sie entfernt keine vorhandenen AI-Funktionen.
+   Sie versucht vorhandene HalDo APIs zu erkennen und
+   verbindet sich mit ihnen, sobald diese verfügbar sind.
 
-       assets/logo/logo.png
-
-   Der Avatar soll nicht wie ein statisches Bild wirken,
-   sondern wie eine lebendige digitale Persönlichkeit.
    ============================================================ */
 
 "use strict";
@@ -66,7 +77,7 @@
         "ai-avatar";
 
     const NAME =
-        "HalDo AI Avatar";
+        "HalDo AI Avatar Engine 20";
 
     const LOGO_PATH =
         "assets/logo/logo.png";
@@ -93,6 +104,12 @@
         mounted:
             false,
 
+        visible:
+            true,
+
+        enabled:
+            true,
+
         state:
             "idle",
 
@@ -100,10 +117,10 @@
             "idle",
 
         emotion:
-            "neutral",
+            "calm",
 
         intensity:
-            0.5,
+            0.55,
 
         speaking:
             false,
@@ -114,38 +131,58 @@
         thinking:
             false,
 
-        muted:
+        processing:
             false,
 
-        visible:
-            true,
-
-        enabled:
-            true,
-
-        voiceConnected:
+        interacting:
             false,
 
-        aiConnected:
-            false,
+        connected: {
 
-        registryConnected:
-            false,
+            aiCore:
+                false,
 
-        kernelConnected:
-            false,
+            aiChat:
+                false,
 
-        systemConnected:
-            false,
+            aiSpeech:
+                false,
 
-        container:
-            null,
+            aiVoice:
+                false,
 
-        image:
-            null,
+            conversation:
+                false,
 
-        glow:
-            null,
+            appRegistry:
+                false,
+
+            events:
+                false
+
+        },
+
+        elements: {
+
+            root:
+                null,
+
+            logo:
+                null,
+
+            image:
+                null,
+
+            glow:
+                null,
+
+            halo:
+                null,
+
+            status:
+                null
+
+        },
 
         listeners:
             new Map(),
@@ -153,30 +190,37 @@
         timers:
             new Set(),
 
+        animationFrame:
+            null,
+
+        pointer: {
+
+            x:
+                0,
+
+            y:
+                0,
+
+            active:
+                false
+
+        },
+
         statistics: {
 
             stateChanges:
                 0,
 
-            emotionChanges:
+            interactions:
                 0,
 
-            speechStarts:
+            aiEvents:
                 0,
 
-            speechEnds:
+            voiceEvents:
                 0,
 
-            listeningStarts:
-                0,
-
-            listeningEnds:
-                0,
-
-            thinkingStarts:
-                0,
-
-            thinkingEnds:
+            speechEvents:
                 0,
 
             errors:
@@ -250,54 +294,132 @@
     }
 
 
+    function now() {
+
+        return Date.now();
+
+    }
+
+
     function clamp(
         value,
-        min = 0,
-        max = 1
+        min,
+        max
     ) {
 
-        return Math.min(
-            max,
-            Math.max(
-                min,
-                Number(value) || 0
+        return Math.max(
+            min,
+            Math.min(
+                max,
+                value
             )
         );
 
     }
 
 
-    function normalize(
+    function normalizeState(
         value
     ) {
 
-        return String(
-            value || ""
+        const allowed = [
+
+            "idle",
+
+            "calm",
+
+            "listening",
+
+            "thinking",
+
+            "speaking",
+
+            "happy",
+
+            "excited",
+
+            "processing",
+
+            "focused",
+
+            "error"
+
+        ];
+
+
+        const normalized =
+            String(
+                value || ""
+            )
+            .trim()
+            .toLowerCase();
+
+
+        return allowed.includes(
+            normalized
         )
-        .trim()
-        .toLowerCase();
+            ? normalized
+            : "idle";
 
     }
 
 
-    function createElement(
-        tag,
-        className
+    function safeClone(
+        value
     ) {
 
-        const element =
-            document.createElement(
-                tag
-            );
+        if (
+            value === null ||
+            value === undefined
+        ) {
 
-        if (className) {
-
-            element.className =
-                className;
+            return value;
 
         }
 
-        return element;
+
+        if (
+            Array.isArray(value)
+        ) {
+
+            return value.map(
+                safeClone
+            );
+
+        }
+
+
+        if (
+            typeof value === "object"
+        ) {
+
+            const result = {};
+
+            Object.keys(value)
+                .forEach(
+                    key => {
+
+                        if (
+                            typeof value[key] !==
+                            "function"
+                        ) {
+
+                            result[key] =
+                                safeClone(
+                                    value[key]
+                                );
+
+                        }
+
+                    }
+                );
+
+            return result;
+
+        }
+
+
+        return value;
 
     }
 
@@ -306,54 +428,64 @@
        06 — SERVICE LOOKUPS
        ============================================================ */
 
-    function getKernel() {
-
-        return (
-            window.HalDoKernel ||
-            HalDoOS.kernel ||
-            null
-        );
-
-    }
-
-
-    function getSystem() {
-
-        return (
-            window.HalDoSystem ||
-            HalDoOS.system ||
-            null
-        );
-
-    }
-
-
     function getAICore() {
 
         return (
             window.HalDoAICore ||
             HalDoOS.aiCore ||
-            window.HalDoAI ||
             null
         );
 
     }
 
 
-    function getVoice() {
+    function getAIChat() {
 
         return (
-            window.HalDoVoice ||
-            HalDoOS.voice ||
-            window.HalDoSpeech ||
-            HalDoOS.speech ||
+            window.HalDoAIChat ||
+            HalDoOS.aiChat ||
             null
         );
 
     }
 
 
-    function getRegistry() {
+    function getAISpeech() {
+
+        return (
+            window.HalDoAISpeech ||
+            HalDoOS.aiSpeech ||
+            null
+        );
+
+    }
+
+
+    function getAIVoice() {
+
+        return (
+            window.HalDoAIVoice ||
+            window.HalDoVoice ||
+            HalDoOS.aiVoice ||
+            HalDoOS.voice ||
+            null
+        );
+
+    }
+
+
+    function getConversationState() {
+
+        return (
+            window.HalDoConversationState ||
+            HalDoOS.conversationState ||
+            null
+        );
+
+    }
+
+
+    function getAppRegistry() {
 
         return (
             window.HalDoAppRegistry ||
@@ -364,8 +496,19 @@
     }
 
 
+    function getEvents() {
+
+        return (
+            HalDoOS.events ||
+            window.HalDoEvents ||
+            null
+        );
+
+    }
+
+
     /* ============================================================
-       07 — INTERNAL EVENTS
+       07 — EVENT SYSTEM
        ============================================================ */
 
     function on(
@@ -497,12 +640,8 @@
         }
 
 
-        /*
-         * HalDoOS Event Bus
-         */
-
         const events =
-            HalDoOS.events;
+            getEvents();
 
 
         if (
@@ -516,7 +655,8 @@
             try {
 
                 events.emit(
-                    "ai-avatar:" + event,
+                    "ai-avatar:" +
+                    event,
                     data
                 );
 
@@ -525,12 +665,9 @@
         }
 
 
-        /*
-         * Kernel Event Bus
-         */
-
         const kernel =
-            getKernel();
+            window.HalDoKernel ||
+            HalDoOS.kernel;
 
 
         if (
@@ -544,7 +681,8 @@
             try {
 
                 kernel.emit(
-                    "ai-avatar:" + event,
+                    "ai-avatar:" +
+                    event,
                     data
                 );
 
@@ -561,8 +699,7 @@
 
     function reportError(
         exception,
-        context =
-            "HalDo AI Avatar"
+        context
     ) {
 
         state.statistics.errors +=
@@ -590,10 +727,13 @@
             stack:
                 normalized.stack || "",
 
-            context,
+            context:
+                context ||
+                "HalDo AI Avatar",
 
             timestamp:
-                new Date().toISOString()
+                new Date()
+                    .toISOString()
 
         };
 
@@ -610,596 +750,18 @@
         );
 
 
-        const kernel =
-            getKernel();
-
-
-        if (
-            kernel &&
-            hasMethod(
-                kernel,
-                "reportError"
-            )
-        ) {
-
-            try {
-
-                kernel.reportError(
-                    normalized,
-                    context
-                );
-
-            } catch (_) {}
-
-        }
-
-
         return record;
 
     }
 
 
     /* ============================================================
-       09 — CSS
+       09 — DOM DISCOVERY
        ============================================================ */
 
-    function injectStyles() {
-
-        if (
-            document.getElementById(
-                "haldo-ai-avatar-styles"
-            )
-        ) {
-
-            return;
-
-        }
-
-
-        const style =
-            document.createElement(
-                "style"
-            );
-
-
-        style.id =
-            "haldo-ai-avatar-styles";
-
-
-        style.textContent = `
-
-            .haldo-ai-avatar {
-
-                position:
-                    relative;
-
-                width:
-                    min(
-                        30vw,
-                        340px
-                    );
-
-                height:
-                    min(
-                        30vw,
-                        340px
-                    );
-
-                min-width:
-                    150px;
-
-                min-height:
-                    150px;
-
-                display:
-                    flex;
-
-                align-items:
-                    center;
-
-                justify-content:
-                    center;
-
-                border-radius:
-                    50%;
-
-                user-select:
-                    none;
-
-                pointer-events:
-                    auto;
-
-                isolation:
-                    isolate;
-
-                transform:
-                    translateZ(0);
-
-                transition:
-                    transform
-                    500ms
-                    ease,
-                    opacity
-                    400ms
-                    ease,
-                    filter
-                    500ms
-                    ease;
-
-                animation:
-                    haldoAvatarFloat
-                    6s
-                    ease-in-out
-                    infinite;
-
-            }
-
-
-            .haldo-ai-avatar::before {
-
-                content:
-                    "";
-
-                position:
-                    absolute;
-
-                inset:
-                    -22%;
-
-                border-radius:
-                    50%;
-
-                background:
-                    radial-gradient(
-                        circle,
-                        rgba(
-                            255,
-                            236,
-                            166,
-                            .48
-                        ) 0%,
-                        rgba(
-                            255,
-                            206,
-                            92,
-                            .22
-                        ) 32%,
-                        rgba(
-                            255,
-                            185,
-                            70,
-                            .08
-                        ) 58%,
-                        transparent
-                        76%
-                    );
-
-                filter:
-                    blur(
-                        12px
-                    );
-
-                z-index:
-                    -2;
-
-                opacity:
-                    .85;
-
-                animation:
-                    haldoAvatarAura
-                    4.8s
-                    ease-in-out
-                    infinite;
-
-            }
-
-
-            .haldo-ai-avatar::after {
-
-                content:
-                    "";
-
-                position:
-                    absolute;
-
-                inset:
-                    -8%;
-
-                border:
-                    1px
-                    solid
-                    rgba(
-                        255,
-                        238,
-                        180,
-                        .28
-                    );
-
-                border-radius:
-                    50%;
-
-                box-shadow:
-                    0
-                    0
-                    35px
-                    rgba(
-                        255,
-                        220,
-                        130,
-                        .25
-                    );
-
-                pointer-events:
-                    none;
-
-                z-index:
-                    -1;
-
-                animation:
-                    haldoAvatarRing
-                    7s
-                    linear
-                    infinite;
-
-            }
-
-
-            .haldo-ai-avatar-image {
-
-                width:
-                    72%;
-
-                height:
-                    72%;
-
-                object-fit:
-                    contain;
-
-                border-radius:
-                    50%;
-
-                display:
-                    block;
-
-                filter:
-                    drop-shadow(
-                        0
-                        0
-                        10px
-                        rgba(
-                            255,
-                            226,
-                            145,
-                            .5
-                        )
-                    );
-
-                transform:
-                    translateZ(0);
-
-                transition:
-                    transform
-                    350ms
-                    ease,
-                    filter
-                    350ms
-                    ease;
-
-                animation:
-                    haldoAvatarBreathing
-                    4.5s
-                    ease-in-out
-                    infinite;
-
-            }
-
-
-            .haldo-ai-avatar-glow {
-
-                position:
-                    absolute;
-
-                inset:
-                    15%;
-
-                border-radius:
-                    50%;
-
-                pointer-events:
-                    none;
-
-                background:
-                    radial-gradient(
-                        circle,
-                        rgba(
-                            255,
-                            242,
-                            190,
-                            .34
-                        ),
-                        rgba(
-                            255,
-                            220,
-                            130,
-                            .12
-                        ) 40%,
-                        transparent 70%
-                    );
-
-                mix-blend-mode:
-                    screen;
-
-                opacity:
-                    .55;
-
-                animation:
-                    haldoAvatarGlow
-                    3.8s
-                    ease-in-out
-                    infinite;
-
-            }
-
-
-            .haldo-ai-avatar-listening {
-
-                transform:
-                    scale(
-                        1.035
-                    );
-
-            }
-
-
-            .haldo-ai-avatar-thinking {
-
-                animation-duration:
-                    4s;
-
-            }
-
-
-            .haldo-ai-avatar-speaking {
-
-                transform:
-                    scale(
-                        1.045
-                    );
-
-            }
-
-
-            .haldo-ai-avatar-happy
-            .haldo-ai-avatar-image {
-
-                filter:
-                    drop-shadow(
-                        0
-                        0
-                        18px
-                        rgba(
-                            255,
-                            231,
-                            140,
-                            .82
-                        )
-                    );
-
-            }
-
-
-            .haldo-ai-avatar-excited
-            .haldo-ai-avatar-image {
-
-                filter:
-                    drop-shadow(
-                        0
-                        0
-                        25px
-                        rgba(
-                            255,
-                            235,
-                            160,
-                            .95
-                        )
-                    );
-
-                transform:
-                    scale(
-                        1.055
-                    );
-
-            }
-
-
-            .haldo-ai-avatar-sad {
-
-                filter:
-                    saturate(
-                        .78
-                    );
-
-            }
-
-
-            .haldo-ai-avatar-error {
-
-                filter:
-                    saturate(
-                        .65
-                    );
-
-            }
-
-
-            @keyframes haldoAvatarBreathing {
-
-                0%,
-                100% {
-
-                    transform:
-                        scale(
-                            1
-                        );
-
-                }
-
-                50% {
-
-                    transform:
-                        scale(
-                            1.025
-                        );
-
-                }
-
-            }
-
-
-            @keyframes haldoAvatarFloat {
-
-                0%,
-                100% {
-
-                    margin-top:
-                        0;
-
-                }
-
-                50% {
-
-                    margin-top:
-                        -5px;
-
-                }
-
-            }
-
-
-            @keyframes haldoAvatarAura {
-
-                0%,
-                100% {
-
-                    transform:
-                        scale(
-                            .96
-                        );
-
-                    opacity:
-                        .65;
-
-                }
-
-                50% {
-
-                    transform:
-                        scale(
-                            1.08
-                        );
-
-                    opacity:
-                        1;
-
-                }
-
-            }
-
-
-            @keyframes haldoAvatarGlow {
-
-                0%,
-                100% {
-
-                    transform:
-                        scale(
-                            .94
-                        );
-
-                    opacity:
-                        .35;
-
-                }
-
-                50% {
-
-                    transform:
-                        scale(
-                            1.08
-                        );
-
-                    opacity:
-                        .72;
-
-                }
-
-            }
-
-
-            @keyframes haldoAvatarRing {
-
-                from {
-
-                    transform:
-                        rotate(
-                            0deg
-                        )
-                        scale(
-                            .98
-                        );
-
-                }
-
-                to {
-
-                    transform:
-                        rotate(
-                            360deg
-                        )
-                        scale(
-                            .98
-                        );
-
-                }
-
-            }
-
-        `;
-
-
-        document.head.appendChild(
-            style
-        );
-
-    }
-
-
-    /* ============================================================
-       10 — CONTAINER DISCOVERY
-       ============================================================ */
-
-    function findContainer() {
-
-        const selectors = [
-
-            "[data-haldo-ai-avatar]",
-
-            "#haldo-ai-avatar",
-
-            "#haldo-ai-center-avatar",
-
-            ".haldo-ai-avatar-container",
-
-            ".haldo-ai-center",
-
-            ".haldo-sun-center",
-
-            ".sun-center",
-
-            ".cosmic-ai-center"
-
-        ];
-
+    function findFirst(
+        selectors
+    ) {
 
         for (
             const selector of selectors
@@ -1229,215 +791,309 @@
     }
 
 
+    function findRoot() {
+
+        return findFirst([
+
+            "#haldo-ai-avatar",
+
+            ".haldo-ai-avatar",
+
+            "[data-haldo-ai-avatar]",
+
+            "#ai-avatar",
+
+            ".ai-avatar"
+
+        ]);
+
+    }
+
+
+    function findLogo() {
+
+        return findFirst([
+
+            "#haldo-ai-avatar img",
+
+            ".haldo-ai-avatar img",
+
+            "[data-haldo-ai-avatar] img",
+
+            "#haldo-ai-logo",
+
+            ".haldo-ai-logo",
+
+            ".haldo-logo"
+
+        ]);
+
+    }
+
+
+    function findSunCenter() {
+
+        return findFirst([
+
+            "#haldo-sun-center",
+
+            ".haldo-sun-center",
+
+            "#sun-center",
+
+            ".sun-center",
+
+            ".cosmic-sun-center",
+
+            ".cosmic-sun",
+
+            ".solar-center"
+
+        ]);
+
+    }
+
+
     /* ============================================================
-       11 — MOUNT
+       10 — CREATE AVATAR
        ============================================================ */
 
-    function mount(
-        container = null
-    ) {
+    function createAvatarRoot() {
 
-        try {
-
-            injectStyles();
+        let root =
+            findRoot();
 
 
-            const target =
-                container ||
-                findContainer();
+        if (root) {
+
+            return root;
+
+        }
 
 
-            if (!target) {
-
-                warn(
-                    "Kein Avatar-Container gefunden."
-                );
+        const sun =
+            findSunCenter();
 
 
-                return false;
+        if (!sun) {
 
-            }
+            return null;
 
-
-            state.container =
-                typeof target ===
-                "string"
-
-                    ? document.querySelector(
-                        target
-                    )
-
-                    : target;
+        }
 
 
-            if (!state.container) {
-
-                return false;
-
-            }
-
-
-            /*
-             * Bereits vorhandenen Avatar verwenden.
-             */
-
-            let avatar =
-                state.container.querySelector(
-                    ".haldo-ai-avatar"
-                );
-
-
-            if (!avatar) {
-
-                avatar =
-                    createElement(
-                        "div",
-                        "haldo-ai-avatar"
-                    );
-
-            }
-
-
-            let glow =
-                avatar.querySelector(
-                    ".haldo-ai-avatar-glow"
-                );
-
-
-            if (!glow) {
-
-                glow =
-                    createElement(
-                        "div",
-                        "haldo-ai-avatar-glow"
-                    );
-
-                avatar.appendChild(
-                    glow
-                );
-
-            }
-
-
-            let image =
-                avatar.querySelector(
-                    ".haldo-ai-avatar-image"
-                );
-
-
-            if (!image) {
-
-                image =
-                    createElement(
-                        "img",
-                        "haldo-ai-avatar-image"
-                    );
-
-                avatar.appendChild(
-                    image
-                );
-
-            }
-
-
-            image.src =
-                LOGO_PATH;
-
-            image.alt =
-                "HalDo AI";
-
-
-            image.draggable =
-                false;
-
-
-            image.decoding =
-                "async";
-
-
-            state.image =
-                image;
-
-            state.glow =
-                glow;
-
-
-            if (
-                !avatar.parentElement ||
-                avatar.parentElement !==
-                    state.container
-            ) {
-
-                state.container.appendChild(
-                    avatar
-                );
-
-            }
-
-
-            state.container.setAttribute(
-                "data-haldo-ai-mounted",
-                "true"
+        root =
+            document.createElement(
+                "div"
             );
 
 
-            state.container.setAttribute(
-                "aria-label",
-                "HalDo AI"
-            );
+        root.id =
+            "haldo-ai-avatar";
 
 
-            state.mounted =
-                true;
+        root.className =
+            "haldo-ai-avatar";
 
 
-            updateVisualState();
+        root.setAttribute(
+            "data-haldo-ai-avatar",
+            "true"
+        );
 
 
-            emit(
-                "mounted",
-                {
-
-                    container:
-                        state.container,
-
-                    image:
-                        image
-
-                }
-            );
+        root.setAttribute(
+            "aria-label",
+            "HalDo AI"
+        );
 
 
-            log(
-                "HalDo AI Avatar montiert."
-            );
+        root.setAttribute(
+            "role",
+            "img"
+        );
 
 
-            return true;
+        sun.appendChild(
+            root
+        );
 
-        } catch (exception) {
 
-            reportError(
-                exception,
-                "Avatar Mount"
-            );
+        return root;
 
+    }
+
+
+    function createAvatarElements() {
+
+        const root =
+            createAvatarRoot();
+
+
+        if (!root) {
 
             return false;
 
         }
 
+
+        state.elements.root =
+            root;
+
+
+        let image =
+            findLogo();
+
+
+        /*
+         * Wenn kein vorhandenes Logo-Element existiert,
+         * wird das offizielle HalDo Logo verwendet.
+         */
+
+        if (!image) {
+
+            image =
+                document.createElement(
+                    "img"
+                );
+
+
+            image.className =
+                "haldo-ai-avatar-image";
+
+
+            image.alt =
+                "HalDo AI";
+
+
+            image.src =
+                LOGO_PATH;
+
+
+            root.appendChild(
+                image
+            );
+
+        }
+
+
+        image.classList.add(
+            "haldo-ai-avatar-image"
+        );
+
+
+        image.setAttribute(
+            "draggable",
+            "false"
+        );
+
+
+        state.elements.image =
+            image;
+
+
+        let glow =
+            root.querySelector(
+                ".haldo-ai-avatar-glow"
+            );
+
+
+        if (!glow) {
+
+            glow =
+                document.createElement(
+                    "span"
+                );
+
+
+            glow.className =
+                "haldo-ai-avatar-glow";
+
+
+            root.appendChild(
+                glow
+            );
+
+        }
+
+
+        state.elements.glow =
+            glow;
+
+
+        let halo =
+            root.querySelector(
+                ".haldo-ai-avatar-halo"
+            );
+
+
+        if (!halo) {
+
+            halo =
+                document.createElement(
+                    "span"
+                );
+
+
+            halo.className =
+                "haldo-ai-avatar-halo";
+
+
+            root.appendChild(
+                halo
+            );
+
+        }
+
+
+        state.elements.halo =
+            halo;
+
+
+        let status =
+            root.querySelector(
+                ".haldo-ai-avatar-status"
+            );
+
+
+        if (!status) {
+
+            status =
+                document.createElement(
+                    "span"
+                );
+
+
+            status.className =
+                "haldo-ai-avatar-status";
+
+
+            root.appendChild(
+                status
+            );
+
+        }
+
+
+        state.elements.status =
+            status;
+
+
+        return true;
+
     }
 
 
     /* ============================================================
-       12 — UNMOUNT
+       11 — BASE STYLES
        ============================================================ */
 
-    function unmount() {
+    function ensureStyles() {
 
         if (
-            !state.container
+            document.getElementById(
+                "haldo-ai-avatar-engine-style"
+            )
         ) {
 
             return;
@@ -1445,209 +1101,591 @@
         }
 
 
-        const avatar =
-            state.container.querySelector(
-                ".haldo-ai-avatar"
+        const style =
+            document.createElement(
+                "style"
             );
 
 
-        if (avatar) {
+        style.id =
+            "haldo-ai-avatar-engine-style";
 
-            avatar.remove();
+
+        style.textContent = `
+
+            #haldo-ai-avatar,
+            .haldo-ai-avatar {
+
+                position:
+                    absolute;
+
+                left:
+                    50%;
+
+                top:
+                    50%;
+
+                width:
+                    clamp(
+                        90px,
+                        13vw,
+                        180px
+                    );
+
+                aspect-ratio:
+                    1 / 1;
+
+                transform:
+                    translate(
+                        -50%,
+                        -50%
+                    );
+
+                display:
+                    flex;
+
+                align-items:
+                    center;
+
+                justify-content:
+                    center;
+
+                pointer-events:
+                    auto;
+
+                z-index:
+                    20;
+
+                isolation:
+                    isolate;
+
+                cursor:
+                    pointer;
+
+                transition:
+                    opacity
+                    700ms ease,
+                    filter
+                    500ms ease;
+
+            }
+
+
+            .haldo-ai-avatar-image {
+
+                position:
+                    relative;
+
+                z-index:
+                    4;
+
+                width:
+                    74%;
+
+                height:
+                    74%;
+
+                object-fit:
+                    contain;
+
+                user-select:
+                    none;
+
+                -webkit-user-drag:
+                    none;
+
+                filter:
+                    drop-shadow(
+                        0 0 10px
+                        rgba(
+                            255,
+                            255,
+                            255,
+                            .45
+                        )
+                    );
+
+                animation:
+                    haldoAvatarBreathing
+                    4.8s
+                    ease-in-out
+                    infinite;
+
+                transition:
+                    transform
+                    400ms ease,
+                    filter
+                    400ms ease;
+
+            }
+
+
+            .haldo-ai-avatar-glow {
+
+                position:
+                    absolute;
+
+                inset:
+                    5%;
+
+                z-index:
+                    1;
+
+                border-radius:
+                    50%;
+
+                background:
+                    radial-gradient(
+                        circle,
+                        rgba(
+                            255,
+                            255,
+                            255,
+                            .34
+                        ) 0%,
+                        rgba(
+                            255,
+                            220,
+                            120,
+                            .20
+                        ) 28%,
+                        rgba(
+                            255,
+                            190,
+                            60,
+                            .10
+                        ) 52%,
+                        transparent
+                        74%
+                    );
+
+                filter:
+                    blur(12px);
+
+                opacity:
+                    .75;
+
+                animation:
+                    haldoAvatarGlow
+                    3.6s
+                    ease-in-out
+                    infinite;
+
+            }
+
+
+            .haldo-ai-avatar-halo {
+
+                position:
+                    absolute;
+
+                inset:
+                    -8%;
+
+                z-index:
+                    0;
+
+                border-radius:
+                    50%;
+
+                border:
+                    1px solid
+                    rgba(
+                        255,
+                        245,
+                        190,
+                        .18
+                    );
+
+                box-shadow:
+                    0 0 18px
+                    rgba(
+                        255,
+                        220,
+                        120,
+                        .14
+                    ),
+                    inset
+                    0 0 18px
+                    rgba(
+                        255,
+                        240,
+                        180,
+                        .10
+                    );
+
+                animation:
+                    haldoAvatarHalo
+                    8s
+                    linear
+                    infinite;
+
+            }
+
+
+            .haldo-ai-avatar-status {
+
+                position:
+                    absolute;
+
+                bottom:
+                    -12px;
+
+                left:
+                    50%;
+
+                transform:
+                    translateX(-50%);
+
+                z-index:
+                    10;
+
+                min-width:
+                    8px;
+
+                min-height:
+                    8px;
+
+                border-radius:
+                    50%;
+
+                opacity:
+                    .75;
+
+                background:
+                    rgba(
+                        255,
+                        255,
+                        255,
+                        .8
+                    );
+
+                box-shadow:
+                    0 0 12px
+                    rgba(
+                        255,
+                        255,
+                        255,
+                        .65
+                    );
+
+                transition:
+                    all
+                    350ms ease;
+
+            }
+
+
+            @keyframes haldoAvatarBreathing {
+
+                0%,
+                100% {
+
+                    transform:
+                        scale(
+                            1
+                        );
+
+                }
+
+                50% {
+
+                    transform:
+                        scale(
+                            1.035
+                        );
+
+                }
+
+            }
+
+
+            @keyframes haldoAvatarGlow {
+
+                0%,
+                100% {
+
+                    transform:
+                        scale(
+                            .92
+                        );
+
+                    opacity:
+                        .55;
+
+                }
+
+                50% {
+
+                    transform:
+                        scale(
+                            1.08
+                        );
+
+                    opacity:
+                        .95;
+
+                }
+
+            }
+
+
+            @keyframes haldoAvatarHalo {
+
+                from {
+
+                    transform:
+                        rotate(
+                            0deg
+                        );
+
+                }
+
+                to {
+
+                    transform:
+                        rotate(
+                            360deg
+                        );
+
+                }
+
+            }
+
+
+            #haldo-ai-avatar[data-state="listening"]
+            .haldo-ai-avatar-image {
+
+                transform:
+                    scale(
+                        1.06
+                    );
+
+            }
+
+
+            #haldo-ai-avatar[data-state="thinking"]
+            .haldo-ai-avatar-image {
+
+                transform:
+                    scale(
+                        1.025
+                    );
+
+            }
+
+
+            #haldo-ai-avatar[data-state="speaking"]
+            .haldo-ai-avatar-image {
+
+                animation:
+                    haldoAvatarSpeaking
+                    .85s
+                    ease-in-out
+                    infinite;
+
+            }
+
+
+            #haldo-ai-avatar[data-state="happy"]
+            .haldo-ai-avatar-image {
+
+                transform:
+                    scale(
+                        1.055
+                    );
+
+            }
+
+
+            #haldo-ai-avatar[data-state="excited"]
+            .haldo-ai-avatar-image {
+
+                animation:
+                    haldoAvatarExcited
+                    1.4s
+                    ease-in-out
+                    infinite;
+
+            }
+
+
+            #haldo-ai-avatar[data-state="error"]
+            .haldo-ai-avatar-image {
+
+                filter:
+                    drop-shadow(
+                        0 0 16px
+                        rgba(
+                            255,
+                            120,
+                            120,
+                            .55
+                        )
+                    );
+
+            }
+
+
+            @keyframes haldoAvatarSpeaking {
+
+                0%,
+                100% {
+
+                    transform:
+                        scale(
+                            1
+                        );
+
+                }
+
+                50% {
+
+                    transform:
+                        scale(
+                            1.045
+                        );
+
+                }
+
+            }
+
+
+            @keyframes haldoAvatarExcited {
+
+                0%,
+                100% {
+
+                    transform:
+                        scale(
+                            1
+                        )
+                        rotate(
+                            -1deg
+                        );
+
+                }
+
+                25% {
+
+                    transform:
+                        scale(
+                            1.06
+                        )
+                        rotate(
+                            1deg
+                        );
+
+                }
+
+                50% {
+
+                    transform:
+                        scale(
+                            1.025
+                        )
+                        rotate(
+                            -1deg
+                        );
+
+                }
+
+                75% {
+
+                    transform:
+                        scale(
+                            1.07
+                        )
+                        rotate(
+                            1deg
+                        );
+
+                }
+
+            }
+
+        `;
+
+
+        document.head.appendChild(
+            style
+        );
+
+    }
+
+
+    /* ============================================================
+       12 — APPLY VISUAL STATE
+       ============================================================ */
+
+    function applyState() {
+
+        const root =
+            state.elements.root;
+
+
+        if (!root) {
+
+            return;
 
         }
 
 
-        state.image =
-            null;
+        root.dataset.state =
+            state.state;
 
-        state.glow =
-            null;
 
-        state.mounted =
-            false;
+        root.dataset.emotion =
+            state.emotion;
+
+
+        root.style.opacity =
+            state.visible
+                ? "1"
+                : "0";
+
+
+        root.style.pointerEvents =
+            state.visible
+                ? "auto"
+                : "none";
+
+
+        if (
+            state.elements.status
+        ) {
+
+            state.elements.status
+                .setAttribute(
+                    "aria-label",
+                    "HalDo AI " +
+                    state.state
+                );
+
+        }
 
 
         emit(
-            "unmounted"
+            "visual-state",
+            {
+
+                state:
+                    state.state,
+
+                emotion:
+                    state.emotion,
+
+                intensity:
+                    state.intensity
+
+            }
         );
 
     }
 
 
     /* ============================================================
-       13 — VISUAL STATE
-       ============================================================ */
-
-    function updateVisualState() {
-
-        if (
-            !state.mounted ||
-            !state.container
-        ) {
-
-            return;
-
-        }
-
-
-        const avatar =
-            state.container.querySelector(
-                ".haldo-ai-avatar"
-            );
-
-
-        if (!avatar) {
-
-            return;
-
-        }
-
-
-        const classes = [
-
-            "haldo-ai-avatar-listening",
-
-            "haldo-ai-avatar-thinking",
-
-            "haldo-ai-avatar-speaking",
-
-            "haldo-ai-avatar-happy",
-
-            "haldo-ai-avatar-excited",
-
-            "haldo-ai-avatar-sad",
-
-            "haldo-ai-avatar-error"
-
-        ];
-
-
-        avatar.classList.remove(
-            ...classes
-        );
-
-
-        const current =
-            normalize(
-                state.state
-            );
-
-
-        if (
-            current ===
-            "listening"
-        ) {
-
-            avatar.classList.add(
-                "haldo-ai-avatar-listening"
-            );
-
-        }
-
-
-        if (
-            current ===
-            "thinking"
-        ) {
-
-            avatar.classList.add(
-                "haldo-ai-avatar-thinking"
-            );
-
-        }
-
-
-        if (
-            current ===
-            "speaking"
-        ) {
-
-            avatar.classList.add(
-                "haldo-ai-avatar-speaking"
-            );
-
-        }
-
-
-        const emotion =
-            normalize(
-                state.emotion
-            );
-
-
-        if (
-            emotion ===
-            "happy"
-        ) {
-
-            avatar.classList.add(
-                "haldo-ai-avatar-happy"
-            );
-
-        }
-
-
-        if (
-            emotion ===
-            "excited"
-        ) {
-
-            avatar.classList.add(
-                "haldo-ai-avatar-excited"
-            );
-
-        }
-
-
-        if (
-            emotion ===
-            "sad"
-        ) {
-
-            avatar.classList.add(
-                "haldo-ai-avatar-sad"
-            );
-
-        }
-
-
-        if (
-            emotion ===
-            "error"
-        ) {
-
-            avatar.classList.add(
-                "haldo-ai-avatar-error"
-            );
-
-        }
-
-
-        avatar.dataset.state =
-            state.state;
-
-        avatar.dataset.emotion =
-            state.emotion;
-
-        avatar.dataset.intensity =
-            String(
-                state.intensity
-            );
-
-
-        avatar.setAttribute(
-            "aria-live",
-            state.speaking
-                ? "polite"
-                : "off"
-        );
-
-    }
-
-
-    /* ============================================================
-       14 — SET STATE
+       13 — STATE ENGINE
        ============================================================ */
 
     function setState(
@@ -1655,117 +1693,116 @@
         options = {}
     ) {
 
-        const value =
-            normalize(
-                nextState
-            ) ||
-            "idle";
-
-
-        const allowed = [
-
-            "idle",
-
-            "listening",
-
-            "thinking",
-
-            "speaking",
-
-            "happy",
-
-            "sad",
-
-            "excited",
-
-            "error",
-
-            "sleeping"
-
-        ];
-
-
         const normalized =
-            allowed.includes(
-                value
-            )
-                ? value
-                : "idle";
+            normalizeState(
+                nextState
+            );
 
 
-        const previous =
-            state.state;
+        if (
+            state.state ===
+            normalized &&
+            !options.force
+        ) {
+
+            return getState();
+
+        }
 
 
         state.previousState =
-            previous;
+            state.state;
+
 
         state.state =
             normalized;
-
-
-        if (
-            normalized ===
-            "listening"
-        ) {
-
-            state.listening =
-                true;
-
-        } else if (
-            options.keepListening !==
-            true
-        ) {
-
-            state.listening =
-                false;
-
-        }
-
-
-        if (
-            normalized ===
-            "thinking"
-        ) {
-
-            state.thinking =
-                true;
-
-        } else if (
-            options.keepThinking !==
-            true
-        ) {
-
-            state.thinking =
-                false;
-
-        }
-
-
-        if (
-            normalized ===
-            "speaking"
-        ) {
-
-            state.speaking =
-                true;
-
-        } else if (
-            options.keepSpeaking !==
-            true
-        ) {
-
-            state.speaking =
-                false;
-
-        }
 
 
         state.statistics.stateChanges +=
             1;
 
 
-        updateVisualState();
+        const emotionMap = {
+
+            idle:
+                "calm",
+
+            calm:
+                "calm",
+
+            listening:
+                "attentive",
+
+            thinking:
+                "focused",
+
+            speaking:
+                "warm",
+
+            happy:
+                "happy",
+
+            excited:
+                "excited",
+
+            processing:
+                "focused",
+
+            focused:
+                "focused",
+
+            error:
+                "concerned"
+
+        };
+
+
+        state.emotion =
+            options.emotion ||
+            emotionMap[
+                normalized
+            ] ||
+            "calm";
+
+
+        state.intensity =
+            clamp(
+                options.intensity !==
+                    undefined
+                    ? Number(
+                        options.intensity
+                    )
+                    : getDefaultIntensity(
+                        normalized
+                    ),
+                0,
+                1
+            );
+
+
+        state.speaking =
+            normalized ===
+            "speaking";
+
+
+        state.listening =
+            normalized ===
+            "listening";
+
+
+        state.thinking =
+            normalized ===
+            "thinking";
+
+
+        state.processing =
+            normalized ===
+                "processing" ||
+            normalized ===
+                "thinking";
+
+
+        applyState();
 
 
         emit(
@@ -1775,7 +1812,8 @@
                 state:
                     normalized,
 
-                previous,
+                previousState:
+                    state.previousState,
 
                 emotion:
                     state.emotion,
@@ -1787,184 +1825,166 @@
         );
 
 
-        return normalized;
+        return getState();
+
+    }
+
+
+    function getDefaultIntensity(
+        avatarState
+    ) {
+
+        const values = {
+
+            idle:
+                .45,
+
+            calm:
+                .40,
+
+            listening:
+                .72,
+
+            thinking:
+                .62,
+
+            speaking:
+                .75,
+
+            happy:
+                .80,
+
+            excited:
+                .95,
+
+            processing:
+                .68,
+
+            focused:
+                .64,
+
+            error:
+                .52
+
+        };
+
+
+        return values[
+            avatarState
+        ] || .5;
 
     }
 
 
     /* ============================================================
-       15 — EMOTION
+       14 — SHORTCUT STATES
        ============================================================ */
 
-    function setEmotion(
-        emotion,
-        intensity = 0.5
-    ) {
+    function idle() {
 
-        const value =
-            normalize(
-                emotion
-            ) ||
-            "neutral";
-
-
-        const previous =
-            state.emotion;
-
-
-        state.emotion =
-            value;
-
-
-        state.intensity =
-            clamp(
-                intensity
-            );
-
-
-        state.statistics.emotionChanges +=
-            1;
-
-
-        updateVisualState();
-
-
-        emit(
-            "emotion-changed",
-            {
-
-                emotion:
-                    value,
-
-                previous,
-
-                intensity:
-                    state.intensity
-
-            }
-        );
-
-
-        return value;
-
-    }
-
-
-    /* ============================================================
-       16 — CONVENIENCE EMOTIONS
-       ============================================================ */
-
-    function happy(
-        intensity = 0.75
-    ) {
-
-        setEmotion(
-            "happy",
-            intensity
-        );
-
-        setState(
-            "happy"
-        );
-
-        return api;
-
-    }
-
-
-    function excited(
-        intensity = 0.9
-    ) {
-
-        setEmotion(
-            "excited",
-            intensity
-        );
-
-        setState(
-            "excited"
-        );
-
-        return api;
-
-    }
-
-
-    function sad(
-        intensity = 0.45
-    ) {
-
-        setEmotion(
-            "sad",
-            intensity
-        );
-
-        setState(
-            "sad"
-        );
-
-        return api;
-
-    }
-
-
-    function neutral() {
-
-        setEmotion(
-            "neutral",
-            0.5
-        );
-
-        setState(
+        return setState(
             "idle"
         );
 
-        return api;
+    }
+
+
+    function calm() {
+
+        return setState(
+            "calm"
+        );
 
     }
 
 
-    function errorState() {
+    function listen() {
 
-        setEmotion(
-            "error",
-            0.7
+        return setState(
+            "listening"
         );
 
-        setState(
+    }
+
+
+    function think() {
+
+        return setState(
+            "thinking"
+        );
+
+    }
+
+
+    function speak() {
+
+        return setState(
+            "speaking"
+        );
+
+    }
+
+
+    function happy() {
+
+        return setState(
+            "happy"
+        );
+
+    }
+
+
+    function excited() {
+
+        return setState(
+            "excited"
+        );
+
+    }
+
+
+    function process() {
+
+        return setState(
+            "processing"
+        );
+
+    }
+
+
+    function focus() {
+
+        return setState(
+            "focused"
+        );
+
+    }
+
+
+    function showError() {
+
+        return setState(
             "error"
         );
 
-        return api;
-
     }
 
 
     /* ============================================================
-       17 — LISTENING
+       15 — VISIBILITY
        ============================================================ */
 
-    function startListening() {
+    function show() {
 
-        state.listening =
+        state.visible =
             true;
 
 
-        state.statistics.listeningStarts +=
-            1;
-
-
-        setState(
-            "listening",
-            {
-                keepListening:
-                    true
-            }
-        );
+        applyState();
 
 
         emit(
-            "listening-start"
+            "shown"
         );
 
 
@@ -1973,680 +1993,670 @@
     }
 
 
-    function stopListening() {
+    function hide() {
 
-        state.listening =
+        state.visible =
             false;
 
 
-        state.statistics.listeningEnds +=
-            1;
-
-
-        if (
-            state.state ===
-            "listening"
-        ) {
-
-            setState(
-                "idle"
-            );
-
-        }
+        applyState();
 
 
         emit(
-            "listening-end"
+            "hidden"
         );
 
 
         return true;
+
+    }
+
+
+    function toggle() {
+
+        return state.visible
+            ? hide()
+            : show();
 
     }
 
 
     /* ============================================================
-       18 — THINKING
+       16 — POINTER / TOUCH INTERACTION
        ============================================================ */
 
-    function startThinking() {
+    function handlePointerMove(
+        event
+    ) {
 
-        state.thinking =
+        const root =
+            state.elements.root;
+
+
+        if (!root) {
+
+            return;
+
+        }
+
+
+        const rect =
+            root.getBoundingClientRect();
+
+
+        const clientX =
+            event.clientX !== undefined
+                ? event.clientX
+                : (
+                    event.touches &&
+                    event.touches[0]
+                        ? event.touches[0]
+                            .clientX
+                        : rect.left +
+                          rect.width / 2
+                );
+
+
+        const clientY =
+            event.clientY !== undefined
+                ? event.clientY
+                : (
+                    event.touches &&
+                    event.touches[0]
+                        ? event.touches[0]
+                            .clientY
+                        : rect.top +
+                          rect.height / 2
+                );
+
+
+        const x =
+            clamp(
+                (
+                    clientX -
+                    (
+                        rect.left +
+                        rect.width / 2
+                    )
+                ) /
+                (
+                    rect.width / 2
+                ),
+                -1,
+                1
+            );
+
+
+        const y =
+            clamp(
+                (
+                    clientY -
+                    (
+                        rect.top +
+                        rect.height / 2
+                    )
+                ) /
+                (
+                    rect.height / 2
+                ),
+                -1,
+                1
+            );
+
+
+        state.pointer.x =
+            x;
+
+
+        state.pointer.y =
+            y;
+
+
+        state.pointer.active =
             true;
 
 
-        state.statistics.thinkingStarts +=
-            1;
-
-
-        setState(
-            "thinking",
-            {
-                keepThinking:
-                    true
-            }
-        );
-
-
-        emit(
-            "thinking-start"
-        );
-
-
-        return true;
-
-    }
-
-
-    function stopThinking() {
-
-        state.thinking =
-            false;
-
-
-        state.statistics.thinkingEnds +=
-            1;
-
-
-        if (
-            state.state ===
-            "thinking"
-        ) {
-
-            setState(
-                "idle"
-            );
-
-        }
-
-
-        emit(
-            "thinking-end"
-        );
-
-
-        return true;
-
-    }
-
-
-    /* ============================================================
-       19 — SPEAKING
-       ============================================================ */
-
-    function startSpeaking(
-        text = ""
-    ) {
-
-        state.speaking =
+        state.interacting =
             true;
 
 
-        state.statistics.speechStarts +=
+        state.statistics.interactions +=
             1;
 
 
-        setState(
-            "speaking",
-            {
-                keepSpeaking:
-                    true
-            }
-        );
-
-
         emit(
-            "speech-start",
+            "pointer",
             {
 
-                text:
-                    String(
-                        text || ""
-                    )
+                x,
+
+                y,
+
+                event
 
             }
         );
-
-
-        return true;
 
     }
 
 
-    function stopSpeaking() {
+    function handlePointerLeave() {
 
-        state.speaking =
+        state.pointer.active =
             false;
 
+        state.pointer.x =
+            0;
 
-        state.statistics.speechEnds +=
+        state.pointer.y =
+            0;
+
+        state.interacting =
+            false;
+
+    }
+
+
+    function handleClick() {
+
+        state.statistics.interactions +=
             1;
 
 
-        if (
-            state.state ===
-            "speaking"
-        ) {
-
-            setState(
-                "idle"
-            );
-
-        }
-
-
         emit(
-            "speech-end"
-        );
+            "interaction",
+            {
 
+                type:
+                    "click",
 
-        return true;
-
-    }
-
-
-    /* ============================================================
-       20 — AI RESPONSE CONNECTION
-       ============================================================ */
-
-    async function respond(
-        prompt,
-        options = {}
-    ) {
-
-        const ai =
-            getAICore();
-
-
-        if (!ai) {
-
-            warn(
-                "AI Core nicht verfügbar."
-            );
-
-
-            errorState();
-
-
-            return null;
-
-        }
-
-
-        try {
-
-            startThinking();
-
-
-            state.aiConnected =
-                true;
-
-
-            let result;
-
-
-            if (
-                hasMethod(
-                    ai,
-                    "respond"
-                )
-            ) {
-
-                result =
-                    await ai.respond(
-                        prompt,
-                        options
-                    );
-
-            } else if (
-                hasMethod(
-                    ai,
-                    "chat"
-                )
-            ) {
-
-                result =
-                    await ai.chat(
-                        prompt,
-                        options
-                    );
-
-            } else if (
-                hasMethod(
-                    ai,
-                    "ask"
-                )
-            ) {
-
-                result =
-                    await ai.ask(
-                        prompt,
-                        options
-                    );
-
-            } else {
-
-                throw new Error(
-                    "AI Core besitzt keine unterstützte Antwortfunktion."
-                );
+                state:
+                    getState()
 
             }
-
-
-            stopThinking();
-
-
-            emit(
-                "ai-response",
-                {
-
-                    prompt,
-
-                    response:
-                        result
-
-                }
-            );
-
-
-            return result;
-
-        } catch (exception) {
-
-            stopThinking();
-
-            reportError(
-                exception,
-                "AI Response"
-            );
-
-
-            errorState();
-
-
-            return null;
-
-        }
-
-    }
-
-
-    /* ============================================================
-       21 — VOICE CONNECTION
-       ============================================================ */
-
-    async function speak(
-        text,
-        options = {}
-    ) {
-
-        const message =
-            String(
-                text || ""
-            )
-            .trim();
-
-
-        if (!message) {
-
-            return false;
-
-        }
-
-
-        const voice =
-            getVoice();
-
-
-        startSpeaking(
-            message
-        );
-
-
-        try {
-
-            state.voiceConnected =
-                !!voice;
-
-
-            if (
-                voice
-            ) {
-
-                if (
-                    hasMethod(
-                        voice,
-                        "speak"
-                    )
-                ) {
-
-                    await voice.speak(
-                        message,
-                        options
-                    );
-
-                } else if (
-                    hasMethod(
-                        voice,
-                        "say"
-                    )
-                ) {
-
-                    await voice.say(
-                        message,
-                        options
-                    );
-
-                } else if (
-                    hasMethod(
-                        voice,
-                        "synthesize"
-                    )
-                ) {
-
-                    await voice.synthesize(
-                        message,
-                        options
-                    );
-
-                } else {
-
-                    await browserSpeak(
-                        message,
-                        options
-                    );
-
-                }
-
-            } else {
-
-                await browserSpeak(
-                    message,
-                    options
-                );
-
-            }
-
-
-            stopSpeaking();
-
-
-            return true;
-
-        } catch (exception) {
-
-            stopSpeaking();
-
-
-            reportError(
-                exception,
-                "Avatar Speak"
-            );
-
-
-            return false;
-
-        }
-
-    }
-
-
-    /* ============================================================
-       22 — BROWSER SPEECH FALLBACK
-       ============================================================ */
-
-    function browserSpeak(
-        text,
-        options = {}
-    ) {
-
-        return new Promise(
-            resolve => {
-
-                try {
-
-                    if (
-                        !window.speechSynthesis ||
-                        typeof window.SpeechSynthesisUtterance !==
-                            "function"
-                    ) {
-
-                        resolve(
-                            false
-                        );
-
-                        return;
-
-                    }
-
-
-                    const utterance =
-                        new SpeechSynthesisUtterance(
-                            text
-                        );
-
-
-                    if (
-                        options.lang
-                    ) {
-
-                        utterance.lang =
-                            options.lang;
-
-                    }
-
-
-                    if (
-                        options.rate !==
-                        undefined
-                    ) {
-
-                        utterance.rate =
-                            options.rate;
-
-                    }
-
-
-                    if (
-                        options.pitch !==
-                        undefined
-                    ) {
-
-                        utterance.pitch =
-                            options.pitch;
-
-                    }
-
-
-                    if (
-                        options.volume !==
-                        undefined
-                    ) {
-
-                        utterance.volume =
-                            options.volume;
-
-                    }
-
-
-                    utterance.onend =
-                        function () {
-
-                            resolve(
-                                true
-                            );
-
-                        };
-
-
-                    utterance.onerror =
-                        function () {
-
-                            resolve(
-                                false
-                            );
-
-                        };
-
-
-                    window.speechSynthesis.speak(
-                        utterance
-                    );
-
-                } catch (_) {
-
-                    resolve(
-                        false
-                    );
-
-                }
-
-            }
-        );
-
-    }
-
-
-    /* ============================================================
-       23 — AVATAR REACTION
-       ============================================================ */
-
-    function react(
-        reaction,
-        intensity = 0.7
-    ) {
-
-        const value =
-            normalize(
-                reaction
-            );
-
-
-        switch (
-            value
-        ) {
-
-            case "happy":
-
-            case "smile":
-
-            case "joy":
-
-                return happy(
-                    intensity
-                );
-
-
-            case "excited":
-
-            case "celebrate":
-
-            case "wow":
-
-                return excited(
-                    intensity
-                );
-
-
-            case "sad":
-
-            case "sorry":
-
-                return sad(
-                    intensity
-                );
-
-
-            case "error":
-
-            case "confused":
-
-                return errorState();
-
-
-            case "thinking":
-
-                startThinking();
-
-                return api;
-
-
-            case "listening":
-
-                startListening();
-
-                return api;
-
-
-            case "speaking":
-
-                startSpeaking();
-
-                return api;
-
-
-            default:
-
-                return neutral();
-
-        }
-
-    }
-
-
-    /* ============================================================
-       24 — GENTLE WELCOME
-       ============================================================ */
-
-    async function welcome() {
-
-        happy(
-            0.68
-        );
-
-
-        emit(
-            "welcome"
         );
 
 
         /*
-         * Kein automatischer Sprachstart.
-         *
-         * Browser blockieren häufig Audio ohne
-         * Benutzerinteraktion.
+         * Ein kurzer freundlicher Reaktionsimpuls.
          */
 
-        return true;
+        const previous =
+            state.state;
+
+
+        happy();
+
+
+        const timer =
+            window.setTimeout(
+                () => {
+
+                    if (
+                        state.state ===
+                        "happy"
+                    ) {
+
+                        setState(
+                            previous
+                        );
+
+                    }
+
+                    state.timers.delete(
+                        timer
+                    );
+
+                },
+                1200
+            );
+
+
+        state.timers.add(
+            timer
+        );
 
     }
 
 
     /* ============================================================
-       25 — APP REGISTRY CONNECTION
+       17 — ANIMATION LOOP
        ============================================================ */
 
-    function connectRegistry() {
+    function animationLoop(
+        timestamp
+    ) {
 
-        const registry =
-            getRegistry();
+        if (
+            !state.ready
+        ) {
 
+            state.animationFrame =
+                window.requestAnimationFrame(
+                    animationLoop
+                );
 
-        if (!registry) {
-
-            state.registryConnected =
-                false;
-
-            return false;
+            return;
 
         }
 
 
-        state.registryConnected =
-            true;
+        const image =
+            state.elements.image;
 
 
-        try {
+        const glow =
+            state.elements.glow;
+
+
+        if (
+            image
+        ) {
+
+            const pointerX =
+                state.pointer.x *
+                2.5;
+
+
+            const pointerY =
+                state.pointer.y *
+                1.8;
+
+
+            const time =
+                Number(
+                    timestamp
+                ) || 0;
+
+
+            const breathing =
+                Math.sin(
+                    time / 2400
+                ) *
+                0.8;
+
+
+            const translateX =
+                clamp(
+                    pointerX +
+                    breathing,
+                    -5,
+                    5
+                );
+
+
+            const translateY =
+                clamp(
+                    pointerY,
+                    -4,
+                    4
+                );
+
+
+            if (
+                state.state !==
+                    "speaking" &&
+                state.state !==
+                    "excited"
+            ) {
+
+                image.style.transform =
+                    "translate(" +
+                    translateX +
+                    "px, " +
+                    translateY +
+                    "px)";
+
+            }
+
+        }
+
+
+        if (
+            glow
+        ) {
+
+            const pulse =
+                (
+                    Math.sin(
+                        (
+                            Number(
+                                timestamp
+                            ) || 0
+                        ) /
+                        900
+                    ) +
+                    1
+                ) /
+                2;
+
+
+            const opacity =
+                .48 +
+                (
+                    pulse *
+                    .35 *
+                    state.intensity
+                );
+
+
+            glow.style.opacity =
+                String(
+                    opacity
+                );
+
+        }
+
+
+        state.animationFrame =
+            window.requestAnimationFrame(
+                animationLoop
+            );
+
+    }
+
+
+    /* ============================================================
+       18 — AI EVENT BRIDGE
+       ============================================================ */
+
+    function connectAIEvents() {
+
+        const aiCore =
+            getAICore();
+
+
+        const aiChat =
+            getAIChat();
+
+
+        const speech =
+            getAISpeech();
+
+
+        const voice =
+            getAIVoice();
+
+
+        const conversation =
+            getConversationState();
+
+
+        /*
+         * AI CORE
+         */
+
+        if (aiCore) {
+
+            state.connected.aiCore =
+                true;
+
+
+            if (
+                hasMethod(
+                    aiCore,
+                    "on"
+                )
+            ) {
+
+                const events = [
+
+                    "thinking",
+                    "processing",
+                    "ready",
+                    "response-start",
+                    "response-end",
+                    "error",
+                    "idle"
+
+                ];
+
+
+                events.forEach(
+                    eventName => {
+
+                        try {
+
+                            aiCore.on(
+                                eventName,
+                                payload =>
+                                    handleAIEvent(
+                                        eventName,
+                                        payload
+                                    )
+                            );
+
+                        } catch (_) {}
+
+                    }
+                );
+
+            }
+
+        }
+
+
+        /*
+         * AI CHAT
+         */
+
+        if (aiChat) {
+
+            state.connected.aiChat =
+                true;
+
+
+            if (
+                hasMethod(
+                    aiChat,
+                    "on"
+                )
+            ) {
+
+                const events = [
+
+                    "message-start",
+                    "message-end",
+                    "thinking",
+                    "response",
+                    "response-start",
+                    "response-end",
+                    "error"
+
+                ];
+
+
+                events.forEach(
+                    eventName => {
+
+                        try {
+
+                            aiChat.on(
+                                eventName,
+                                payload =>
+                                    handleAIEvent(
+                                        eventName,
+                                        payload
+                                    )
+                            );
+
+                        } catch (_) {}
+
+                    }
+                );
+
+            }
+
+        }
+
+
+        /*
+         * SPEECH
+         */
+
+        if (speech) {
+
+            state.connected.aiSpeech =
+                true;
+
+
+            if (
+                hasMethod(
+                    speech,
+                    "on"
+                )
+            ) {
+
+                [
+
+                    "start",
+                    "end",
+                    "speech-start",
+                    "speech-end",
+                    "listening",
+                    "recognized",
+                    "error"
+
+                ]
+                .forEach(
+                    eventName => {
+
+                        try {
+
+                            speech.on(
+                                eventName,
+                                payload =>
+                                    handleSpeechEvent(
+                                        eventName,
+                                        payload
+                                    )
+                            );
+
+                        } catch (_) {}
+
+                    }
+                );
+
+            }
+
+        }
+
+
+        /*
+         * VOICE
+         */
+
+        if (voice) {
+
+            state.connected.aiVoice =
+                true;
+
+
+            if (
+                hasMethod(
+                    voice,
+                    "on"
+                )
+            ) {
+
+                [
+
+                    "start",
+                    "end",
+                    "speaking",
+                    "speech-start",
+                    "speech-end",
+                    "error"
+
+                ]
+                .forEach(
+                    eventName => {
+
+                        try {
+
+                            voice.on(
+                                eventName,
+                                payload =>
+                                    handleVoiceEvent(
+                                        eventName,
+                                        payload
+                                    )
+                            );
+
+                        } catch (_) {}
+
+                    }
+                );
+
+            }
+
+        }
+
+
+        /*
+         * CONVERSATION STATE
+         */
+
+        if (conversation) {
+
+            state.connected.conversation =
+                true;
+
+
+            if (
+                hasMethod(
+                    conversation,
+                    "on"
+                )
+            ) {
+
+                [
+
+                    "state-changed",
+                    "message",
+                    "user-message",
+                    "assistant-message",
+                    "thinking",
+                    "speaking"
+
+                ]
+                .forEach(
+                    eventName => {
+
+                        try {
+
+                            conversation.on(
+                                eventName,
+                                payload =>
+                                    handleAIEvent(
+                                        eventName,
+                                        payload
+                                    )
+                            );
+
+                        } catch (_) {}
+
+                    }
+                );
+
+            }
+
+        }
+
+
+        /*
+         * APP REGISTRY
+         */
+
+        const registry =
+            getAppRegistry();
+
+
+        if (registry) {
+
+            state.connected.appRegistry =
+                true;
+
 
             if (
                 hasMethod(
@@ -2657,11 +2667,11 @@
 
                 registry.on(
                     "launched",
-                    data => {
+                    payload => {
 
                         emit(
-                            "app-launched",
-                            data
+                            "app-opened",
+                            payload
                         );
 
                     }
@@ -2670,16 +2680,13 @@
 
                 registry.on(
                     "launch-failed",
-                    data => {
+                    payload => {
 
-                        react(
-                            "error"
-                        );
-
+                        showError();
 
                         emit(
-                            "app-launch-failed",
-                            data
+                            "app-error",
+                            payload
                         );
 
                     }
@@ -2687,139 +2694,536 @@
 
             }
 
-        } catch (exception) {
+        }
 
-            reportError(
-                exception,
-                "Registry Connection"
-            );
+
+        /*
+         * Zentrales Event System.
+         */
+
+        const events =
+            getEvents();
+
+
+        if (events) {
+
+            state.connected.events =
+                true;
+
+
+            if (
+                hasMethod(
+                    events,
+                    "on"
+                )
+            ) {
+
+                [
+
+                    "ai:thinking",
+                    "ai:processing",
+                    "ai:speaking",
+                    "ai:listening",
+                    "ai:ready",
+                    "ai:error",
+                    "voice:start",
+                    "voice:end",
+                    "speech:start",
+                    "speech:end"
+
+                ]
+                .forEach(
+                    eventName => {
+
+                        try {
+
+                            events.on(
+                                eventName,
+                                payload =>
+                                    handleGlobalEvent(
+                                        eventName,
+                                        payload
+                                    )
+                            );
+
+                        } catch (_) {}
+
+                    }
+                );
+
+            }
+
+        }
+
+    }
+
+
+    function handleAIEvent(
+        eventName,
+        payload
+    ) {
+
+        state.statistics.aiEvents +=
+            1;
+
+
+        switch (
+            eventName
+        ) {
+
+            case "thinking":
+            case "processing":
+            case "response-start":
+            case "message-start":
+
+                think();
+
+                break;
+
+
+            case "response":
+            case "response-end":
+            case "message-end":
+
+                happy();
+
+                scheduleReturnToIdle(
+                    1800
+                );
+
+                break;
+
+
+            case "ready":
+            case "idle":
+
+                idle();
+
+                break;
+
+
+            case "error":
+
+                showError();
+
+                scheduleReturnToIdle(
+                    2200
+                );
+
+                break;
 
         }
 
 
-        return true;
+        emit(
+            "ai-event",
+            {
+
+                event:
+                    eventName,
+
+                payload:
+                    safeClone(
+                        payload
+                    )
+
+            }
+        );
+
+    }
+
+
+    function handleSpeechEvent(
+        eventName,
+        payload
+    ) {
+
+        state.statistics.speechEvents +=
+            1;
+
+
+        switch (
+            eventName
+        ) {
+
+            case "start":
+            case "speech-start":
+            case "listening":
+
+                listen();
+
+                break;
+
+
+            case "recognized":
+            case "speech-end":
+            case "end":
+
+                think();
+
+                break;
+
+
+            case "error":
+
+                showError();
+
+                scheduleReturnToIdle(
+                    1800
+                );
+
+                break;
+
+        }
+
+
+        emit(
+            "speech-event",
+            {
+
+                event:
+                    eventName,
+
+                payload:
+                    safeClone(
+                        payload
+                    )
+
+            }
+        );
+
+    }
+
+
+    function handleVoiceEvent(
+        eventName,
+        payload
+    ) {
+
+        state.statistics.voiceEvents +=
+            1;
+
+
+        switch (
+            eventName
+        ) {
+
+            case "start":
+            case "speaking":
+            case "speech-start":
+
+                speak();
+
+                break;
+
+
+            case "end":
+            case "speech-end":
+
+                happy();
+
+                scheduleReturnToIdle(
+                    1300
+                );
+
+                break;
+
+
+            case "error":
+
+                showError();
+
+                scheduleReturnToIdle(
+                    1800
+                );
+
+                break;
+
+        }
+
+
+        emit(
+            "voice-event",
+            {
+
+                event:
+                    eventName,
+
+                payload:
+                    safeClone(
+                        payload
+                    )
+
+            }
+        );
+
+    }
+
+
+    function handleGlobalEvent(
+        eventName,
+        payload
+    ) {
+
+        const event =
+            String(
+                eventName || ""
+            )
+            .toLowerCase();
+
+
+        if (
+            event.includes(
+                "thinking"
+            ) ||
+            event.includes(
+                "processing"
+            )
+        ) {
+
+            think();
+
+        }
+
+
+        else if (
+            event.includes(
+                "speaking"
+            ) ||
+            event.includes(
+                "voice:start"
+            ) ||
+            event.includes(
+                "speech:start"
+            )
+        ) {
+
+            speak();
+
+        }
+
+
+        else if (
+            event.includes(
+                "listening"
+            )
+        ) {
+
+            listen();
+
+        }
+
+
+        else if (
+            event.includes(
+                "error"
+            )
+        ) {
+
+            showError();
+
+        }
+
+
+        else if (
+            event.includes(
+                "ready"
+            )
+        ) {
+
+            idle();
+
+        }
+
+
+        emit(
+            "global-event",
+            {
+
+                event:
+                    eventName,
+
+                payload:
+                    safeClone(
+                        payload
+                    )
+
+            }
+        );
 
     }
 
 
     /* ============================================================
-       26 — KERNEL CONNECTION
+       19 — RETURN TO IDLE
        ============================================================ */
 
-    function connectKernel() {
+    function scheduleReturnToIdle(
+        delay
+    ) {
 
-        const kernel =
-            getKernel();
+        const timer =
+            window.setTimeout(
+                () => {
+
+                    if (
+                        state.state ===
+                            "happy" ||
+                        state.state ===
+                            "error"
+                    ) {
+
+                        idle();
+
+                    }
 
 
-        if (!kernel) {
+                    state.timers.delete(
+                        timer
+                    );
 
-            state.kernelConnected =
-                false;
+                },
+                Number(
+                    delay
+                ) || 1000
+            );
 
-            return false;
+
+        state.timers.add(
+            timer
+        );
+
+    }
+
+
+    /* ============================================================
+       20 — DOM INTERACTION
+       ============================================================ */
+
+    function connectDOMEvents() {
+
+        const root =
+            state.elements.root;
+
+
+        if (!root) {
+
+            return;
 
         }
 
 
-        state.kernelConnected =
-            true;
-
-
-        try {
-
-            if (
-                hasMethod(
-                    kernel,
-                    "registerModule"
-                )
-            ) {
-
-                kernel.registerModule(
-                    MODULE_ID,
-                    api
-                );
-
-            }
-
-
-            if (
-                hasMethod(
-                    kernel,
-                    "setModuleReady"
-                )
-            ) {
-
-                kernel.setModuleReady(
-                    MODULE_ID,
+        root.addEventListener(
+            "pointermove",
+            handlePointerMove,
+            {
+                passive:
                     true
-                );
-
             }
-
-        } catch (exception) {
-
-            reportError(
-                exception,
-                "Kernel Connection"
-            );
-
-        }
+        );
 
 
-        return true;
+        root.addEventListener(
+            "pointerleave",
+            handlePointerLeave,
+            {
+                passive:
+                    true
+            }
+        );
+
+
+        root.addEventListener(
+            "pointerdown",
+            handlePointerMove,
+            {
+                passive:
+                    true
+            }
+        );
+
+
+        root.addEventListener(
+            "click",
+            handleClick
+        );
+
+
+        root.addEventListener(
+            "touchmove",
+            handlePointerMove,
+            {
+                passive:
+                    true
+            }
+        );
+
+
+        root.addEventListener(
+            "touchend",
+            handlePointerLeave,
+            {
+                passive:
+                    true
+            }
+        );
 
     }
 
 
     /* ============================================================
-       27 — SYSTEM CONNECTION
+       21 — MOUNT
        ============================================================ */
 
-    function connectSystem() {
+    function mount() {
 
-        const system =
-            getSystem();
+        if (
+            state.mounted
+        ) {
+
+            return true;
+
+        }
 
 
-        if (!system) {
+        ensureStyles();
 
-            state.systemConnected =
-                false;
+
+        const created =
+            createAvatarElements();
+
+
+        if (!created) {
+
+            /*
+             * Die zentrale Sonne kann eventuell erst
+             * später durch die Cosmic World erzeugt werden.
+             */
 
             return false;
 
         }
 
 
-        state.systemConnected =
+        connectDOMEvents();
+
+
+        state.mounted =
             true;
 
 
-        try {
+        applyState();
 
-            if (
-                hasMethod(
-                    system,
-                    "registerModule"
-                )
-            ) {
 
-                system.registerModule(
-                    MODULE_ID,
-                    api
-                );
+        emit(
+            "mounted",
+            {
+
+                logo:
+                    LOGO_PATH
 
             }
-
-        } catch (exception) {
-
-            reportError(
-                exception,
-                "System Connection"
-            );
-
-        }
+        );
 
 
         return true;
@@ -2828,38 +3232,84 @@
 
 
     /* ============================================================
-       28 — CONNECTION STATUS
+       22 — REFRESH MOUNT
+       ============================================================ */
+
+    function refreshMount() {
+
+        if (
+            state.elements.root &&
+            document.body.contains(
+                state.elements.root
+            )
+        ) {
+
+            return true;
+
+        }
+
+
+        state.mounted =
+            false;
+
+
+        state.elements.root =
+            null;
+
+
+        state.elements.image =
+            null;
+
+
+        state.elements.glow =
+            null;
+
+
+        state.elements.halo =
+            null;
+
+
+        state.elements.status =
+            null;
+
+
+        return mount();
+
+    }
+
+
+    /* ============================================================
+       23 — CONNECTION STATUS
        ============================================================ */
 
     function refreshConnections() {
 
-        state.kernelConnected =
-            !!getKernel();
-
-        state.systemConnected =
-            !!getSystem();
-
-        state.aiConnected =
+        state.connected.aiCore =
             !!getAICore();
 
-        state.voiceConnected =
-            !!getVoice();
 
-        state.registryConnected =
-            !!getRegistry();
+        state.connected.aiChat =
+            !!getAIChat();
 
 
-        connectKernel();
-
-        connectSystem();
-
-        connectRegistry();
+        state.connected.aiSpeech =
+            !!getAISpeech();
 
 
-        emit(
-            "connections-refreshed",
-            getConnectionStatus()
-        );
+        state.connected.aiVoice =
+            !!getAIVoice();
+
+
+        state.connected.conversation =
+            !!getConversationState();
+
+
+        state.connected.appRegistry =
+            !!getAppRegistry();
+
+
+        state.connected.events =
+            !!getEvents();
 
 
         return getConnectionStatus();
@@ -2871,20 +3321,7 @@
 
         return {
 
-            kernel:
-                state.kernelConnected,
-
-            system:
-                state.systemConnected,
-
-            ai:
-                state.aiConnected,
-
-            voice:
-                state.voiceConnected,
-
-            registry:
-                state.registryConnected
+            ...state.connected
 
         };
 
@@ -2892,134 +3329,71 @@
 
 
     /* ============================================================
-       29 — ENABLE / DISABLE
+       24 — PUBLIC STATE
        ============================================================ */
 
-    function enable() {
+    function getState() {
 
-        state.enabled =
-            true;
+        return {
 
-        if (
-            state.container
-        ) {
+            initialized:
+                state.initialized,
 
-            state.container.style.display =
-                "";
+            initializing:
+                state.initializing,
 
-        }
+            ready:
+                state.ready,
 
+            failed:
+                state.failed,
 
-        emit(
-            "enabled"
-        );
+            mounted:
+                state.mounted,
 
+            visible:
+                state.visible,
 
-        return true;
+            enabled:
+                state.enabled,
 
-    }
+            state:
+                state.state,
 
+            previousState:
+                state.previousState,
 
-    function disable() {
+            emotion:
+                state.emotion,
 
-        state.enabled =
-            false;
+            intensity:
+                state.intensity,
 
-        if (
-            state.container
-        ) {
+            speaking:
+                state.speaking,
 
-            state.container.style.display =
-                "none";
+            listening:
+                state.listening,
 
-        }
+            thinking:
+                state.thinking,
 
+            processing:
+                state.processing,
 
-        emit(
-            "disabled"
-        );
+            interacting:
+                state.interacting,
 
+            connected:
+                getConnectionStatus()
 
-        return true;
-
-    }
-
-
-    function setVisible(
-        visible
-    ) {
-
-        state.visible =
-            Boolean(
-                visible
-            );
-
-
-        if (
-            state.container
-        ) {
-
-            state.container.style.opacity =
-                state.visible
-                    ? "1"
-                    : "0";
-
-            state.container.style.pointerEvents =
-                state.visible
-                    ? ""
-                    : "none";
-
-        }
-
-
-        emit(
-            "visibility-changed",
-            {
-
-                visible:
-                    state.visible
-
-            }
-        );
-
-
-        return state.visible;
+        };
 
     }
 
 
     /* ============================================================
-       30 — MUTE
-       ============================================================ */
-
-    function setMuted(
-        muted
-    ) {
-
-        state.muted =
-            Boolean(
-                muted
-            );
-
-
-        emit(
-            "mute-changed",
-            {
-
-                muted:
-                    state.muted
-
-            }
-        );
-
-
-        return state.muted;
-
-    }
-
-
-    /* ============================================================
-       31 — DIAGNOSTICS
+       25 — DIAGNOSTICS
        ============================================================ */
 
     function diagnostics() {
@@ -3038,58 +3412,36 @@
             logo:
                 LOGO_PATH,
 
-            initialized:
-                state.initialized,
-
-            initializing:
-                state.initializing,
-
-            ready:
-                state.ready,
-
-            failed:
-                state.failed,
-
-            mounted:
-                state.mounted,
-
-            enabled:
-                state.enabled,
-
-            visible:
-                state.visible,
-
             state:
-                state.state,
-
-            previousState:
-                state.previousState,
-
-            emotion:
-                state.emotion,
-
-            intensity:
-                state.intensity,
-
-            speaking:
-                state.speaking,
-
-            listening:
-                state.listening,
-
-            thinking:
-                state.thinking,
-
-            connections:
-                getConnectionStatus(),
+                getState(),
 
             statistics:
                 {
                     ...state.statistics
                 },
 
+            elementStatus: {
+
+                root:
+                    !!state.elements.root,
+
+                image:
+                    !!state.elements.image,
+
+                glow:
+                    !!state.elements.glow,
+
+                halo:
+                    !!state.elements.halo,
+
+                status:
+                    !!state.elements.status
+
+            },
+
             timestamp:
-                new Date().toISOString()
+                new Date()
+                    .toISOString()
 
         };
 
@@ -3097,118 +3449,408 @@
 
 
     /* ============================================================
-       32 — HEALTH
+       26 — ENABLE / DISABLE
        ============================================================ */
 
-    function healthCheck() {
+    function enable() {
 
-        const problems = [];
+        state.enabled =
+            true;
 
 
-        if (!state.mounted) {
+        show();
 
-            problems.push(
-                "Avatar ist noch nicht montiert."
-            );
+
+        emit(
+            "enabled"
+        );
+
+
+        return true;
+
+    }
+
+
+    function disable() {
+
+        state.enabled =
+            false;
+
+
+        hide();
+
+
+        emit(
+            "disabled"
+        );
+
+
+        return true;
+
+    }
+
+
+    /* ============================================================
+       27 — RESET
+       ============================================================ */
+
+    function reset() {
+
+        state.previousState =
+            "idle";
+
+
+        state.state =
+            "idle";
+
+
+        state.emotion =
+            "calm";
+
+
+        state.intensity =
+            .55;
+
+
+        state.speaking =
+            false;
+
+
+        state.listening =
+            false;
+
+
+        state.thinking =
+            false;
+
+
+        state.processing =
+            false;
+
+
+        state.interacting =
+            false;
+
+
+        state.pointer.x =
+            0;
+
+
+        state.pointer.y =
+            0;
+
+
+        applyState();
+
+
+        emit(
+            "reset"
+        );
+
+
+        return true;
+
+    }
+
+
+    /* ============================================================
+       28 — PUBLIC API
+       ============================================================ */
+
+    const api = {
+
+        name:
+            NAME,
+
+        version:
+            VERSION,
+
+        module:
+            MODULE_ID,
+
+        logo:
+            LOGO_PATH,
+
+
+        /*
+         * Initialization
+         */
+
+        initialize,
+
+        boot,
+
+        mount,
+
+        refreshMount,
+
+
+        /*
+         * State
+         */
+
+        getState,
+
+        setState,
+
+        reset,
+
+
+        /*
+         * Shortcut states
+         */
+
+        idle,
+
+        calm,
+
+        listen,
+
+        think,
+
+        speak,
+
+        happy,
+
+        excited,
+
+        process,
+
+        focus,
+
+        showError,
+
+
+        /*
+         * Visibility
+         */
+
+        show,
+
+        hide,
+
+        toggle,
+
+        enable,
+
+        disable,
+
+
+        /*
+         * Events
+         */
+
+        on,
+
+        off,
+
+        emit,
+
+
+        /*
+         * Connections
+         */
+
+        refreshConnections,
+
+        getConnectionStatus,
+
+
+        /*
+         * Diagnostics
+         */
+
+        diagnostics
+
+    };
+
+
+    /* ============================================================
+       29 — GLOBAL EXPORTS
+       ============================================================ */
+
+    window.HalDoAIAvatar =
+        api;
+
+    window.HalDoAIAvatarEngine =
+        api;
+
+    HalDoOS.aiAvatar =
+        api;
+
+
+    HalDoOS.services =
+        HalDoOS.services ||
+        {};
+
+
+    HalDoOS.services.aiAvatar =
+        api;
+
+
+    /* ============================================================
+       30 — APP REGISTRY CONTRACT
+       ============================================================ */
+
+    function registerWithAppRegistry() {
+
+        const registry =
+            getAppRegistry();
+
+
+        if (
+            !registry ||
+            !hasMethod(
+                registry,
+                "register"
+            )
+        ) {
+
+            return false;
 
         }
 
 
-        if (!state.enabled) {
+        try {
 
-            problems.push(
-                "Avatar ist deaktiviert."
+            registry.register({
+
+                id:
+                    "ai-avatar",
+
+                name:
+                    "HalDo AI Avatar",
+
+                title:
+                    "HalDo AI Avatar",
+
+                description:
+                    "Lebendiger visueller HalDo AI Avatar in der zentralen Cosmic-Sonne.",
+
+                category:
+                    "ai",
+
+                icon:
+                    "haldo-logo",
+
+                iconUrl:
+                    LOGO_PATH,
+
+                version:
+                    VERSION,
+
+                enabled:
+                    true,
+
+                visible:
+                    true,
+
+                singleton:
+                    true,
+
+                system:
+                    true,
+
+                core:
+                    true,
+
+                capabilities: [
+
+                    "ai-avatar",
+
+                    "ai-visual",
+
+                    "emotion",
+
+                    "interaction",
+
+                    "listening-state",
+
+                    "thinking-state",
+
+                    "speaking-state",
+
+                    "voice-state",
+
+                    "cosmic-center"
+
+                ],
+
+                permissions: [
+
+                    "ui",
+
+                    "ai",
+
+                    "voice",
+
+                    "events"
+
+                ],
+
+                dependencies: [
+
+                    "ai-core"
+
+                ],
+
+                tags: [
+
+                    "haldo",
+
+                    "ai",
+
+                    "avatar",
+
+                    "cosmic",
+
+                    "sun",
+
+                    "logo"
+
+                ],
+
+                keywords: [
+
+                    "HalDo AI",
+
+                    "Avatar",
+
+                    "Logo",
+
+                    "Sonne",
+
+                    "Cosmic World",
+
+                    "AI Assistant"
+
+                ]
+
+            });
+
+
+            return true;
+
+        } catch (exception) {
+
+            reportError(
+                exception,
+                "App Registry Registration"
             );
+
+
+            return false;
 
         }
 
-
-        return {
-
-            healthy:
-                problems.length === 0,
-
-            problems,
-
-            mounted:
-                state.mounted,
-
-            enabled:
-                state.enabled,
-
-            connections:
-                getConnectionStatus(),
-
-            timestamp:
-                new Date().toISOString()
-
-        };
-
     }
 
 
     /* ============================================================
-       33 — STATE ACCESS
+       31 — INITIALIZATION
        ============================================================ */
 
-    function getState() {
-
-        return {
-
-            initialized:
-                state.initialized,
-
-            ready:
-                state.ready,
-
-            mounted:
-                state.mounted,
-
-            enabled:
-                state.enabled,
-
-            visible:
-                state.visible,
-
-            state:
-                state.state,
-
-            previousState:
-                state.previousState,
-
-            emotion:
-                state.emotion,
-
-            intensity:
-                state.intensity,
-
-            speaking:
-                state.speaking,
-
-            listening:
-                state.listening,
-
-            thinking:
-                state.thinking,
-
-            muted:
-                state.muted,
-
-            connections:
-                getConnectionStatus()
-
-        };
-
-    }
-
-
-    /* ============================================================
-       34 — INITIALIZATION
-       ============================================================ */
-
-    async function initialize(
-        options = {}
-    ) {
+    async function initialize() {
 
         if (
             state.ready
@@ -3251,41 +3893,64 @@
 
         try {
 
-            injectStyles();
+            /*
+             * Erst DOM/Styles vorbereiten.
+             */
 
+            ensureStyles();
+
+
+            mount();
+
+
+            /*
+             * Services verbinden.
+             */
 
             refreshConnections();
 
 
+            connectAIEvents();
+
+
+            registerWithAppRegistry();
+
+
             /*
-             * Container kann vom Cosmic UI später
-             * bereitgestellt werden.
+             * Noch einmal mounten, falls die Cosmic World
+             * während des Bootvorgangs später entstanden ist.
+             */
+
+            refreshMount();
+
+
+            /*
+             * Startzustand.
+             */
+
+            setState(
+                "idle",
+                {
+                    force:
+                        true
+                }
+            );
+
+
+            /*
+             * Animation starten.
              */
 
             if (
-                options.container
+                !state.animationFrame
             ) {
 
-                mount(
-                    options.container
-                );
-
-            } else {
-
-                mount();
+                state.animationFrame =
+                    window.requestAnimationFrame(
+                        animationLoop
+                    );
 
             }
-
-
-            setState(
-                "idle"
-            );
-
-
-            setEmotion(
-                "neutral",
-                0.5
-            );
 
 
             state.ready =
@@ -3297,7 +3962,18 @@
 
             emit(
                 "ready",
-                diagnostics()
+                {
+
+                    version:
+                        VERSION,
+
+                    state:
+                        getState(),
+
+                    diagnostics:
+                        diagnostics()
+
+                }
             );
 
 
@@ -3319,7 +3995,7 @@
 
             reportError(
                 exception,
-                "Avatar Initialization"
+                "Avatar Initialisierung"
             );
 
 
@@ -3331,14 +4007,28 @@
 
 
     /* ============================================================
-       35 — BOOT
+       32 — BOOT
        ============================================================ */
 
     function boot() {
 
+        /*
+         * Cosmic World / Sonne kann nach dem Avatar geladen
+         * werden. Deshalb versuchen wir den Mount mehrfach
+         * vorsichtig während des frühen Bootvorgangs.
+         */
+
         initialize()
             .catch(
                 exception => {
+
+                    state.failed =
+                        true;
+
+
+                    state.initializing =
+                        false;
+
 
                     reportError(
                         exception,
@@ -3348,181 +4038,80 @@
                 }
             );
 
+
+        const retryDelays = [
+
+            300,
+
+            900,
+
+            1800,
+
+            3500
+
+        ];
+
+
+        retryDelays.forEach(
+            delay => {
+
+                const timer =
+                    window.setTimeout(
+                        () => {
+
+                            if (
+                                !state.mounted
+                            ) {
+
+                                refreshMount();
+
+                            }
+
+
+                            if (
+                                !state.connected.aiCore ||
+                                !state.connected.aiChat ||
+                                !state.connected.aiVoice
+                            ) {
+
+                                refreshConnections();
+
+                            }
+
+
+                            state.timers.delete(
+                                timer
+                            );
+
+                        },
+                        delay
+                    );
+
+
+                state.timers.add(
+                    timer
+                );
+
+            }
+        );
+
     }
 
 
     /* ============================================================
-       36 — PUBLIC API
+       33 — PUBLIC BOOT
        ============================================================ */
 
-    const api = {
-
-        name:
-            NAME,
-
-        version:
-            VERSION,
-
-        module:
-            MODULE_ID,
-
-        logo:
-            LOGO_PATH,
+    api.initialize =
+        initialize;
 
 
-        /*
-         * Lifecycle
-         */
-
-        initialize,
-
-        boot,
-
-        mount,
-
-        unmount,
-
-
-        /*
-         * Events
-         */
-
-        on,
-
-        off,
-
-        emit,
-
-
-        /*
-         * State
-         */
-
-        getState,
-
-        setState,
-
-
-        /*
-         * Emotion
-         */
-
-        setEmotion,
-
-        happy,
-
-        excited,
-
-        sad,
-
-        neutral,
-
-        errorState,
-
-        react,
-
-
-        /*
-         * Voice
-         */
-
-        speak,
-
-        startSpeaking,
-
-        stopSpeaking,
-
-
-        /*
-         * Listening
-         */
-
-        startListening,
-
-        stopListening,
-
-
-        /*
-         * Thinking
-         */
-
-        startThinking,
-
-        stopThinking,
-
-
-        /*
-         * AI
-         */
-
-        respond,
-
-
-        /*
-         * System
-         */
-
-        enable,
-
-        disable,
-
-        setVisible,
-
-        setMuted,
-
-
-        /*
-         * Connections
-         */
-
-        refreshConnections,
-
-        getConnectionStatus,
-
-
-        /*
-         * Diagnostics
-         */
-
-        diagnostics,
-
-        healthCheck,
-
-        getStatistics:
-            function () {
-
-                return {
-                    ...state.statistics
-                };
-
-            }
-
-    };
+    api.boot =
+        boot;
 
 
     /* ============================================================
-       37 — GLOBAL EXPORTS
-       ============================================================ */
-
-    window.HalDoAIAvatar =
-        api;
-
-    window.HalDoOSAIAvatar =
-        api;
-
-    HalDoOS.aiAvatar =
-        api;
-
-    HalDoOS.services =
-        HalDoOS.services ||
-        {};
-
-    HalDoOS.services.aiAvatar =
-        api;
-
-
-    /* ============================================================
-       38 — DOM BOOT
+       34 — DOM START
        ============================================================ */
 
     if (
@@ -3547,13 +4136,30 @@
 
 
     /* ============================================================
-       39 — FINAL
+       35 — FINAL REFERENCES
        ============================================================ */
 
-    log(
-        "HalDo AI Avatar Engine geladen.",
-        VERSION
-    );
+    window.HalDoAIAvatar =
+        api;
 
+    window.HalDoAIAvatarEngine =
+        api;
+
+    HalDoOS.aiAvatar =
+        api;
+
+    HalDoOS.services =
+        HalDoOS.services ||
+        {};
+
+    HalDoOS.services.aiAvatar =
+        api;
+
+
+    /* ============================================================
+       END
+       HALDO AI OS 20
+       HALDO AI AVATAR ENGINE
+       ============================================================ */
 
 })(window, document);
