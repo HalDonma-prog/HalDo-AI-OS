@@ -1,34 +1,45 @@
 /* ============================================================
    HALDO AI OS 20
-   PROFESSIONAL ULTIMATE FOUNDATION
+   PROFESSIONAL APP RUNTIME
    ------------------------------------------------------------
    Datei:
        js/app-runtime.js
 
-   HALDO APPLICATION RUNTIME
+   Pfad:
+       /js/app-runtime.js
 
-   Aufgabe:
-   - App Contract ausführen
-   - App Lifecycle verwalten
-   - App State verwalten
-   - App Events
-   - App Settings
-   - App Storage
-   - App Context
-   - App Dependencies
-   - App Services
-   - App Diagnostics
-   - App Error Handling
-   - Verbindung zum App Manager
-   - Verbindung zum Kernel
-   - Verbindung zum System
-   - sichere Erweiterbarkeit
+   HALDO APPLICATION RUNTIME 20
+
+   Verantwortlich für:
+
+   - App Lifecycle
+   - App Runtime States
+   - Registry Verbindung
+   - App Manager Verbindung
+   - Router Verbindung
+   - Window Manager Verbindung
+   - Kernel Verbindung
+   - Event Bus Verbindung
+   - Dependency Checks
+   - App Initialization
+   - App Launch
+   - App Close
+   - App Pause
+   - App Resume
+   - App Focus
+   - App Blur
+   - Singleton Handling
+   - Runtime Context
+   - App State
+   - Runtime Diagnostics
+   - Runtime Health
+   - zukünftige Service Bridges
 
    WICHTIG:
-   Diese Runtime ist die gemeinsame technische
-   Grundlage für ALLE HalDo AI OS 20 Apps.
 
-   Jede vollständige App soll diese Runtime verwenden.
+   Die Registry bleibt die zentrale Quelle für App-Metadaten.
+
+   Diese Runtime erzeugt keine zweite App-Registry.
 
    ============================================================ */
 
@@ -36,9 +47,9 @@
 
 (function (window, document) {
 
-    /* ========================================================
-       01 — HALDO FOUNDATION
-       ======================================================== */
+    /* ============================================================
+       01 — FOUNDATION
+       ============================================================ */
 
     window.HalDoOS =
         window.HalDoOS || {};
@@ -47,9 +58,9 @@
         window.HalDoOS;
 
 
-    /* ========================================================
+    /* ============================================================
        02 — META
-       ======================================================== */
+       ============================================================ */
 
     const VERSION =
         "20.0.0";
@@ -58,129 +69,192 @@
         "app-runtime";
 
     const NAME =
-        "HalDo AI OS Application Runtime";
+        "HalDo AI OS 20 Application Runtime";
 
 
-    /* ========================================================
-       03 — REFERENCES
-       ======================================================== */
+    /* ============================================================
+       03 — RUNTIME STATES
+       ============================================================ */
 
-    function getAppManager() {
+    const STATES = Object.freeze({
 
-        return (
-            window.HalDoAppManager ||
-            HalDoOS.appManager ||
-            null
-        );
+        REGISTERED:
+            "registered",
+
+        INITIALIZING:
+            "initializing",
+
+        READY:
+            "ready",
+
+        OPENING:
+            "opening",
+
+        OPEN:
+            "open",
+
+        ACTIVE:
+            "active",
+
+        BACKGROUND:
+            "background",
+
+        MINIMIZED:
+            "minimized",
+
+        CLOSING:
+            "closing",
+
+        CLOSED:
+            "closed",
+
+        ERROR:
+            "error"
+
+    });
+
+
+    /* ============================================================
+       04 — STATE
+       ============================================================ */
+
+    const state = {
+
+        initialized:
+            false,
+
+        initializing:
+            false,
+
+        ready:
+            false,
+
+        failed:
+            false,
+
+        runtimes:
+            new Map(),
+
+        listeners:
+            new Map(),
+
+        activeAppId:
+            null,
+
+        statistics: {
+
+            initialized:
+                0,
+
+            launched:
+                0,
+
+            closed:
+                0,
+
+            paused:
+                0,
+
+            resumed:
+                0,
+
+            focused:
+                0,
+
+            blurred:
+                0,
+
+            minimized:
+                0,
+
+            errors:
+                0,
+
+            blocked:
+                0
+
+        },
+
+        connections: {
+
+            kernel:
+                false,
+
+            registry:
+                false,
+
+            manager:
+                false,
+
+            router:
+                false,
+
+            windowManager:
+                false,
+
+            storage:
+                false,
+
+            ai:
+                false,
+
+            language:
+                false
+
+        }
+
+    };
+
+
+    /* ============================================================
+       05 — LOGGING
+       ============================================================ */
+
+    function log() {
+
+        try {
+
+            console.log(
+                "[HalDo App Runtime]",
+                ...arguments
+            );
+
+        } catch (_) {}
 
     }
 
 
-    function getContract() {
+    function warn() {
 
-        return (
-            window.HalDoAppContract ||
-            HalDoOS.appContract ||
-            null
-        );
+        try {
 
-    }
+            console.warn(
+                "[HalDo App Runtime]",
+                ...arguments
+            );
 
-
-    function getKernel() {
-
-        return (
-            window.HalDoKernel ||
-            HalDoOS.kernel ||
-            null
-        );
+        } catch (_) {}
 
     }
 
 
-    function getSystem() {
+    function errorLog() {
 
-        return (
-            window.HalDoSystem ||
-            HalDoOS.system ||
-            null
-        );
+        try {
 
-    }
+            console.error(
+                "[HalDo App Runtime]",
+                ...arguments
+            );
 
-
-    function getStorage() {
-
-        return (
-            window.HalDoStorage ||
-            HalDoOS.storage ||
-            window.HalDoStorageManager ||
-            HalDoOS.storageManager ||
-            null
-        );
+        } catch (_) {}
 
     }
 
 
-    function getLanguage() {
-
-        return (
-            window.HalDoLanguageSystem ||
-            HalDoOS.languageSystem ||
-            window.HalDoLanguageManager ||
-            HalDoOS.languageManager ||
-            null
-        );
-
-    }
-
-
-    function getAI() {
-
-        return (
-            window.HalDoAI ||
-            HalDoOS.ai ||
-            window.HalDoAICore ||
-            HalDoOS.aiCore ||
-            null
-        );
-
-    }
-
-
-    function getRouter() {
-
-        return (
-            window.HalDoAppRouter ||
-            HalDoOS.appRouter ||
-            null
-        );
-
-    }
-
-
-    function getWindowManager() {
-
-        return (
-            window.HalDoWindowManager ||
-            HalDoOS.windowManager ||
-            null
-        );
-
-    }
-
-
-    /* ========================================================
-       04 — INTERNAL RUNTIMES
-       ======================================================== */
-
-    const runtimes =
-        new Map();
-
-
-    /* ========================================================
-       05 — SAFE HELPERS
-       ======================================================== */
+    /* ============================================================
+       06 — HELPERS
+       ============================================================ */
 
     function hasMethod(
         object,
@@ -189,9 +263,15 @@
 
         return !!(
             object &&
-            typeof object[method] ===
-            "function"
+            typeof object[method] === "function"
         );
+
+    }
+
+
+    function now() {
+
+        return Date.now();
 
     }
 
@@ -235,9 +315,7 @@
 
 
         if (
-            Array.isArray(
-                value
-            )
+            Array.isArray(value)
         ) {
 
             return value.map(
@@ -248,36 +326,38 @@
 
 
         if (
-            typeof value ===
-            "object"
+            typeof value === "object"
         ) {
 
             const result = {};
 
-            Object.keys(
-                value
-            ).forEach(
-                key => {
+            Object.keys(value)
+                .forEach(
+                    key => {
 
-                    if (
-                        typeof value[key] ===
-                        "function"
-                    ) {
-
-                        result[key] =
+                        const item =
                             value[key];
 
-                    } else {
 
-                        result[key] =
-                            clone(
-                                value[key]
-                            );
+                        if (
+                            typeof item ===
+                            "function"
+                        ) {
+
+                            result[key] =
+                                item;
+
+                        } else {
+
+                            result[key] =
+                                clone(
+                                    item
+                                );
+
+                        }
 
                     }
-
-                }
-            );
+                );
 
             return result;
 
@@ -289,2143 +369,714 @@
     }
 
 
-    /* ========================================================
-       06 — ERROR NORMALIZATION
-       ======================================================== */
+    /* ============================================================
+       07 — SERVICE LOOKUPS
+       ============================================================ */
 
-    function normalizeError(
-        exception
-    ) {
+    function getKernel() {
 
-        if (
-            exception instanceof Error
-        ) {
-
-            return exception;
-
-        }
-
-
-        return new Error(
-            String(
-                exception
-            )
+        return (
+            window.HalDoKernel ||
+            HalDoOS.kernel ||
+            null
         );
 
     }
 
 
-    /* ========================================================
-       07 — RUNTIME CLASS
-       ======================================================== */
+    function getRegistry() {
 
-    class HalDoAppRuntime {
+        return (
+            window.HalDoAppRegistry ||
+            window.HalDoOSAppRegistry ||
+            HalDoOS.appRegistry ||
+            null
+        );
 
-        constructor(
-            definition,
-            options = {}
+    }
+
+
+    function getManager() {
+
+        return (
+            window.HalDoAppManager ||
+            HalDoOS.appManager ||
+            null
+        );
+
+    }
+
+
+    function getRouter() {
+
+        return (
+            window.HalDoAppRouter ||
+            HalDoOS.appRouter ||
+            null
+        );
+
+    }
+
+
+    function getWindowManager() {
+
+        return (
+            window.HalDoWindowManager ||
+            HalDoOS.windowManager ||
+            null
+        );
+
+    }
+
+
+    function getStorage() {
+
+        return (
+            window.HalDoStorage ||
+            HalDoOS.storage ||
+            null
+        );
+
+    }
+
+
+    function getAI() {
+
+        return (
+            window.HalDoAICore ||
+            HalDoOS.aiCore ||
+            null
+        );
+
+    }
+
+
+    function getLanguage() {
+
+        return (
+            window.HalDoLanguageManager ||
+            HalDoOS.languageManager ||
+            null
+        );
+
+    }
+
+
+    /* ============================================================
+       08 — EVENTS
+       ============================================================ */
+
+    function on(
+        event,
+        callback
+    ) {
+
+        if (
+            typeof callback !== "function"
         ) {
 
-            this.definition =
-                definition || {};
-
-            this.id =
-                normalizeId(
-                    definition &&
-                    definition.id
-                );
-
-            this.options =
-                {
-                    ...options
-                };
-
-
-            this.version =
-                VERSION;
-
-
-            this.createdAt =
-                Date.now();
-
-
-            this.initialized =
-                false;
-
-
-            this.started =
-                false;
-
-
-            this.destroyed =
-                false;
-
-
-            this.state = {
-
-                status:
-                    "created",
-
-                open:
-                    false,
-
-                active:
-                    false,
-
-                minimized:
-                    false,
-
-                maximized:
-                    false,
-
-                pip:
-                    false
-
-            };
-
-
-            this.settings = {};
-
-
-            this.storage = {};
-
-
-            this.events =
-                new Map();
-
-
-            this.errors =
-                [];
-
-
-            this.statistics = {
-
-                initializes:
-                    0,
-
-                starts:
-                    0,
-
-                stops:
-                    0,
-
-                opens:
-                    0,
-
-                closes:
-                    0,
-
-                activates:
-                    0,
-
-                errors:
-                    0
-
-            };
-
-
-            this.context =
-                null;
+            return function () {};
 
         }
 
 
-        /* ====================================================
-           RUNTIME EVENTS
-           ==================================================== */
-
-        on(
-            event,
-            callback
+        if (
+            !state.listeners.has(event)
         ) {
 
-            if (
-                typeof callback !==
-                "function"
-            ) {
-
-                return function () {};
-
-            }
-
-
-            if (
-                !this.events.has(
-                    event
-                )
-            ) {
-
-                this.events.set(
-                    event,
-                    new Set()
-                );
-
-            }
-
-
-            this.events
-                .get(event)
-                .add(
-                    callback
-                );
-
-
-            return () => {
-
-                this.off(
-                    event,
-                    callback
-                );
-
-            };
+            state.listeners.set(
+                event,
+                new Set()
+            );
 
         }
 
 
-        off(
-            event,
+        const listeners =
+            state.listeners.get(
+                event
+            );
+
+
+        listeners.add(
             callback
-        ) {
-
-            const listeners =
-                this.events.get(
-                    event
-                );
+        );
 
 
-            if (!listeners) {
+        return function () {
 
-                return;
-
-            }
-
-
-            listeners.delete(
+            off(
+                event,
                 callback
             );
 
+        };
 
-            if (
-                listeners.size ===
-                0
-            ) {
-
-                this.events.delete(
-                    event
-                );
-
-            }
-
-        }
+    }
 
 
-        emit(
-            event,
-            data = null
-        ) {
+    function off(
+        event,
+        callback
+    ) {
 
-            const listeners =
-                this.events.get(
-                    event
-                );
-
-
-            if (listeners) {
-
-                Array.from(
-                    listeners
-                ).forEach(
-                    callback => {
-
-                        try {
-
-                            callback(
-                                data
-                            );
-
-                        } catch (exception) {
-
-                            this.reportError(
-                                exception,
-                                "Runtime Event: " +
-                                event
-                            );
-
-                        }
-
-                    }
-                );
-
-            }
-
-
-            const manager =
-                getAppManager();
-
-
-            if (
-                manager &&
-                hasMethod(
-                    manager,
-                    "emit"
-                )
-            ) {
-
-                try {
-
-                    manager.emit(
-                        "runtime:" +
-                        event,
-
-                        {
-                            appId:
-                                this.id,
-
-                            data:
-                                data
-                        }
-                    );
-
-                } catch (_) {}
-
-            }
-
-        }
-
-
-        /* ====================================================
-           ERROR HANDLING
-           ==================================================== */
-
-        reportError(
-            exception,
-            context = "App Runtime"
-        ) {
-
-            const error =
-                normalizeError(
-                    exception
-                );
-
-
-            const record = {
-
-                appId:
-                    this.id,
-
-                name:
-                    error.name,
-
-                message:
-                    error.message,
-
-                stack:
-                    error.stack ||
-                    "",
-
-                context:
-                    context,
-
-                time:
-                    Date.now()
-
-            };
-
-
-            this.errors.push(
-                record
+        const listeners =
+            state.listeners.get(
+                event
             );
 
 
-            if (
-                this.errors.length >
-                100
-            ) {
+        if (!listeners) {
 
-                this.errors.shift();
+            return;
 
-            }
+        }
 
 
-            this.statistics.errors +=
-                1;
+        listeners.delete(
+            callback
+        );
 
 
-            this.emit(
-                "error",
-                record
+        if (
+            listeners.size === 0
+        ) {
+
+            state.listeners.delete(
+                event
+            );
+
+        }
+
+    }
+
+
+    function emit(
+        event,
+        data = null
+    ) {
+
+        const listeners =
+            state.listeners.get(
+                event
             );
 
 
-            const manager =
-                getAppManager();
+        if (listeners) {
 
+            Array.from(
+                listeners
+            )
+            .forEach(
+                callback => {
 
-            if (
-                manager &&
-                hasMethod(
-                    manager,
-                    "emit"
-                )
-            ) {
+                    try {
 
-                try {
-
-                    manager.emit(
-                        "app-runtime-error",
-                        record
-                    );
-
-                } catch (_) {}
-
-            }
-
-
-            const kernel =
-                getKernel();
-
-
-            if (
-                kernel &&
-                hasMethod(
-                    kernel,
-                    "reportError"
-                )
-            ) {
-
-                try {
-
-                    kernel.reportError(
-                        error,
-                        "App: " +
-                        this.id +
-                        " / " +
-                        context
-                    );
-
-                } catch (_) {}
-
-            }
-
-
-            return record;
-
-        }
-
-
-        /* ====================================================
-           CONTRACT
-           ==================================================== */
-
-        validateContract() {
-
-            const contract =
-                getContract();
-
-
-            if (
-                !contract
-            ) {
-
-                return {
-
-                    valid:
-                        true,
-
-                    available:
-                        false,
-
-                    errors:
-                        []
-
-                };
-
-            }
-
-
-            try {
-
-                if (
-                    hasMethod(
-                        contract,
-                        "validate"
-                    )
-                ) {
-
-                    const result =
-                        contract.validate(
-                            this.definition
-                        );
-
-
-                    return (
-                        result || {
-                            valid:
-                                true,
-
-                            errors:
-                                []
-                        }
-                    );
-
-                }
-
-            } catch (exception) {
-
-                this.reportError(
-                    exception,
-                    "Contract Validation"
-                );
-
-
-                return {
-
-                    valid:
-                        false,
-
-                    errors:
-                        [
-                            exception.message
-                        ]
-
-                };
-
-            }
-
-
-            return {
-
-                valid:
-                    true,
-
-                available:
-                    true,
-
-                errors:
-                    []
-
-            };
-
-        }
-
-
-        /* ====================================================
-           CONTEXT
-           ==================================================== */
-
-        createContext() {
-
-            const runtime =
-                this;
-
-
-            this.context = {
-
-                app:
-                    this.definition,
-
-                id:
-                    this.id,
-
-                version:
-                    VERSION,
-
-                runtime:
-                    runtime,
-
-                manager:
-                    getAppManager(),
-
-                kernel:
-                    getKernel(),
-
-                system:
-                    getSystem(),
-
-                router:
-                    getRouter(),
-
-                windowManager:
-                    getWindowManager(),
-
-                storage:
-                    this.storage,
-
-                settings:
-                    this.settings,
-
-                state:
-                    this.state,
-
-                language:
-                    getLanguage(),
-
-                ai:
-                    getAI(),
-
-                emit:
-                    function (
-                        event,
-                        data
-                    ) {
-
-                        runtime.emit(
-                            event,
+                        callback(
                             data
                         );
 
-                    },
+                    } catch (exception) {
 
-                on:
-                    function (
-                        event,
-                        callback
-                    ) {
-
-                        return runtime.on(
-                            event,
-                            callback
-                        );
-
-                    },
-
-                setState:
-                    function (
-                        changes
-                    ) {
-
-                        return runtime.setState(
-                            changes
-                        );
-
-                    },
-
-                getState:
-                    function () {
-
-                        return runtime.getState();
-
-                    },
-
-                getSettings:
-                    function () {
-
-                        return runtime.getSettings();
-
-                    },
-
-                setSettings:
-                    function (
-                        changes
-                    ) {
-
-                        return runtime.setSettings(
-                            changes
-                        );
-
-                    },
-
-                getStorage:
-                    function (
-                        key,
-                        fallback
-                    ) {
-
-                        return runtime.getStorage(
-                            key,
-                            fallback
-                        );
-
-                    },
-
-                setStorage:
-                    function (
-                        key,
-                        value
-                    ) {
-
-                        return runtime.setStorage(
-                            key,
-                            value
+                        reportError(
+                            exception,
+                            "Runtime Event: " +
+                            event
                         );
 
                     }
 
-            };
-
-
-            return this.context;
-
-        }
-
-
-        /* ====================================================
-           SETTINGS
-           ==================================================== */
-
-        loadSettings() {
-
-            const manager =
-                getAppManager();
-
-
-            try {
-
-                if (
-                    manager &&
-                    hasMethod(
-                        manager,
-                        "loadAppSettings"
-                    )
-                ) {
-
-                    this.settings =
-                        manager.loadAppSettings(
-                            this.id
-                        ) || {};
-
-                    return this.settings;
-
                 }
-
-
-                const raw =
-                    window.localStorage.getItem(
-                        "haldo.app.settings." +
-                        this.id
-                    );
-
-
-                if (raw) {
-
-                    this.settings =
-                        JSON.parse(
-                            raw
-                        ) || {};
-
-                }
-
-            } catch (exception) {
-
-                this.reportError(
-                    exception,
-                    "Settings laden"
-                );
-
-            }
-
-
-            return this.settings;
+            );
 
         }
 
 
-        getSettings() {
-
-            return {
-                ...this.settings
-            };
-
-        }
+        const events =
+            HalDoOS.events;
 
 
-        setSettings(
-            changes
+        if (
+            events &&
+            hasMethod(
+                events,
+                "emit"
+            )
         ) {
 
-            this.settings = {
-
-                ...this.settings,
-
-                ...(changes || {})
-
-            };
-
-
-            const manager =
-                getAppManager();
-
-
             try {
 
-                if (
-                    manager &&
-                    hasMethod(
-                        manager,
-                        "setSettings"
-                    )
-                ) {
-
-                    manager.setSettings(
-                        this.id,
-                        this.settings
-                    );
-
-                } else {
-
-                    window.localStorage.setItem(
-                        "haldo.app.settings." +
-                        this.id,
-
-                        JSON.stringify(
-                            this.settings
-                        )
-                    );
-
-                }
-
-            } catch (exception) {
-
-                this.reportError(
-                    exception,
-                    "Settings speichern"
+                events.emit(
+                    "app-runtime:" + event,
+                    data
                 );
 
-            }
-
-
-            this.emit(
-                "settings-changed",
-                {
-                    settings:
-                        this.getSettings()
-                }
-            );
-
-
-            return this.getSettings();
+            } catch (_) {}
 
         }
 
 
-        resetSettings() {
+        const kernel =
+            getKernel();
 
-            this.settings = {};
 
-
-            const manager =
-                getAppManager();
-
+        if (
+            kernel &&
+            hasMethod(
+                kernel,
+                "emit"
+            )
+        ) {
 
             try {
 
-                if (
-                    manager &&
-                    hasMethod(
-                        manager,
-                        "resetSettings"
-                    )
-                ) {
-
-                    manager.resetSettings(
-                        this.id
-                    );
-
-                }
-
-            } catch (exception) {
-
-                this.reportError(
-                    exception,
-                    "Settings zurücksetzen"
+                kernel.emit(
+                    "app-runtime:" + event,
+                    data
                 );
 
-            }
+            } catch (_) {}
+
+        }
+
+    }
 
 
-            this.emit(
-                "settings-reset"
-            );
+    /* ============================================================
+       09 — ERROR HANDLING
+       ============================================================ */
 
+    function reportError(
+        exception,
+        context =
+            "Application Runtime"
+    ) {
+
+        state.statistics.errors +=
+            1;
+
+
+        const normalized =
+            exception instanceof Error
+                ? exception
+                : new Error(
+                    String(
+                        exception
+                    )
+                );
+
+
+        const record = {
+
+            name:
+                normalized.name,
+
+            message:
+                normalized.message,
+
+            stack:
+                normalized.stack || "",
+
+            context,
+
+            timestamp:
+                new Date().toISOString()
+
+        };
+
+
+        errorLog(
+            "[HalDo App Runtime]",
+            record
+        );
+
+
+        emit(
+            "error",
+            record
+        );
+
+
+        const kernel =
+            getKernel();
+
+
+        if (
+            kernel &&
+            hasMethod(
+                kernel,
+                "reportError"
+            )
+        ) {
+
+            try {
+
+                kernel.reportError(
+                    normalized,
+                    context
+                );
+
+            } catch (_) {}
+
+        }
+
+
+        return record;
+
+    }
+
+
+    /* ============================================================
+       10 — RUNTIME RECORD
+       ============================================================ */
+
+    function createRuntime(
+        app
+    ) {
+
+        return {
+
+            appId:
+                app.id,
+
+            state:
+                STATES.REGISTERED,
+
+            createdAt:
+                now(),
+
+            initializedAt:
+                null,
+
+            openedAt:
+                null,
+
+            closedAt:
+                null,
+
+            lastActiveAt:
+                null,
+
+            lastStateChange:
+                now(),
+
+            launchCount:
+                0,
+
+            errorCount:
+                0,
+
+            windowId:
+                null,
+
+            route:
+                app.route || null,
+
+            context:
+                {},
+
+            instance:
+                null,
+
+            services:
+                {},
+
+            initialized:
+                false,
+
+            open:
+                false,
+
+            active:
+                false,
+
+            minimized:
+                false,
+
+            background:
+                false,
+
+            error:
+                null
+
+        };
+
+    }
+
+
+    /* ============================================================
+       11 — STATE TRANSITION
+       ============================================================ */
+
+    function setState(
+        runtime,
+        nextState,
+        metadata = {}
+    ) {
+
+        if (!runtime) {
+
+            return false;
+
+        }
+
+
+        const previous =
+            runtime.state;
+
+
+        if (
+            previous === nextState
+        ) {
 
             return true;
 
         }
 
 
-        /* ====================================================
-           STORAGE
-           ==================================================== */
+        runtime.state =
+            nextState;
 
-        storageKey(
-            key
+        runtime.lastStateChange =
+            now();
+
+
+        if (
+            nextState === STATES.OPEN
         ) {
 
-            return (
-                "haldo.app.data." +
-                this.id +
-                "." +
-                String(
-                    key || "default"
-                )
-            );
+            runtime.open =
+                true;
+
+            runtime.closedAt =
+                null;
+
+            runtime.openedAt =
+                runtime.openedAt ||
+                now();
 
         }
 
 
-        getStorage(
-            key,
-            fallback = null
+        if (
+            nextState === STATES.ACTIVE
         ) {
 
-            const normalizedKey =
-                String(
-                    key || "default"
-                );
+            runtime.active =
+                true;
 
+            runtime.background =
+                false;
 
-            try {
+            runtime.minimized =
+                false;
 
-                const raw =
-                    window.localStorage.getItem(
-                        this.storageKey(
-                            normalizedKey
-                        )
-                    );
-
-
-                if (
-                    raw === null
-                ) {
-
-                    return fallback;
-
-                }
-
-
-                return JSON.parse(
-                    raw
-                );
-
-            } catch (exception) {
-
-                this.reportError(
-                    exception,
-                    "Storage lesen"
-                );
-
-
-                return fallback;
-
-            }
+            runtime.lastActiveAt =
+                now();
 
         }
 
 
-        setStorage(
-            key,
-            value
+        if (
+            nextState === STATES.BACKGROUND
         ) {
 
-            try {
+            runtime.active =
+                false;
 
-                window.localStorage.setItem(
-                    this.storageKey(
-                        key
-                    ),
-
-                    JSON.stringify(
-                        value
-                    )
-                );
-
-
-                this.storage[
-                    key
-                ] =
-                    clone(
-                        value
-                    );
-
-
-                this.emit(
-                    "storage-changed",
-                    {
-                        key:
-                            key,
-
-                        value:
-                            clone(
-                                value
-                            )
-                    }
-                );
-
-
-                return true;
-
-            } catch (exception) {
-
-                this.reportError(
-                    exception,
-                    "Storage speichern"
-                );
-
-
-                return false;
-
-            }
+            runtime.background =
+                true;
 
         }
 
 
-        removeStorage(
-            key
+        if (
+            nextState === STATES.MINIMIZED
         ) {
 
-            try {
+            runtime.active =
+                false;
 
-                window.localStorage.removeItem(
-                    this.storageKey(
-                        key
-                    )
-                );
-
-
-                delete this.storage[
-                    key
-                ];
-
-
-                this.emit(
-                    "storage-removed",
-                    {
-                        key:
-                            key
-                    }
-                );
-
-
-                return true;
-
-            } catch (exception) {
-
-                this.reportError(
-                    exception,
-                    "Storage entfernen"
-                );
-
-
-                return false;
-
-            }
+            runtime.minimized =
+                true;
 
         }
 
 
-        clearStorage() {
-
-            try {
-
-                const prefix =
-                    "haldo.app.data." +
-                    this.id +
-                    ".";
-
-
-                const keys = [];
-
-                for (
-                    let index = 0;
-                    index <
-                    window.localStorage.length;
-                    index += 1
-                ) {
-
-                    const key =
-                        window.localStorage.key(
-                            index
-                        );
-
-
-                    if (
-                        key &&
-                        key.indexOf(
-                            prefix
-                        ) === 0
-                    ) {
-
-                        keys.push(
-                            key
-                        );
-
-                    }
-
-                }
-
-
-                keys.forEach(
-                    key => {
-
-                        window.localStorage.removeItem(
-                            key
-                        );
-
-                    }
-                );
-
-
-                this.storage = {};
-
-
-                this.emit(
-                    "storage-cleared"
-                );
-
-
-                return true;
-
-            } catch (exception) {
-
-                this.reportError(
-                    exception,
-                    "Storage löschen"
-                );
-
-
-                return false;
-
-            }
-
-        }
-
-
-        /* ====================================================
-           STATE
-           ==================================================== */
-
-        setState(
-            changes
+        if (
+            nextState === STATES.CLOSED
         ) {
 
-            const previous = {
-                ...this.state
-            };
+            runtime.open =
+                false;
 
+            runtime.active =
+                false;
 
-            Object.assign(
-                this.state,
-                changes || {}
-            );
+            runtime.background =
+                false;
 
+            runtime.minimized =
+                false;
 
-            const manager =
-                getAppManager();
-
-
-            if (
-                manager &&
-                hasMethod(
-                    manager,
-                    "updateAppState"
-                )
-            ) {
-
-                try {
-
-                    manager.updateAppState(
-                        this.id,
-                        this.state
-                    );
-
-                } catch (exception) {
-
-                    this.reportError(
-                        exception,
-                        "App Manager State"
-                    );
-
-                }
-
-            }
-
-
-            this.emit(
-                "state-changed",
-                {
-
-                    previous:
-                        previous,
-
-                    current:
-                        this.getState()
-
-                }
-            );
-
-
-            return this.getState();
+            runtime.closedAt =
+                now();
 
         }
 
 
-        getState() {
-
-            return {
-                ...this.state
-            };
-
-        }
-
-
-        /* ====================================================
-           DEPENDENCIES
-           ==================================================== */
-
-        checkDependencies() {
-
-            const manager =
-                getAppManager();
-
-
-            if (
-                manager &&
-                hasMethod(
-                    manager,
-                    "checkDependencies"
-                )
-            ) {
-
-                try {
-
-                    return manager.checkDependencies(
-                        this.definition
-                    );
-
-                } catch (exception) {
-
-                    this.reportError(
-                        exception,
-                        "Dependencies"
-                    );
-
-                }
-
-            }
-
-
-            const dependencies =
-                Array.isArray(
-                    this.definition.dependencies
-                )
-                    ? this.definition.dependencies
-                    : [];
-
-
-            const missing = [];
-
-
-            dependencies.forEach(
-                dependency => {
-
-                    if (
-                        manager &&
-                        hasMethod(
-                            manager,
-                            "has"
-                        )
-                    ) {
-
-                        if (
-                            !manager.has(
-                                dependency
-                            )
-                        ) {
-
-                            missing.push(
-                                dependency
-                            );
-
-                        }
-
-                    }
-
-                }
-            );
-
-
-            return {
-
-                valid:
-                    missing.length ===
-                    0,
-
-                missing:
-                    missing
-
-            };
-
-        }
-
-
-        /* ====================================================
-           LIFECYCLE — INIT
-           ==================================================== */
-
-        async initialize() {
-
-            if (
-                this.destroyed
-            ) {
-
-                throw new Error(
-                    "Runtime wurde bereits zerstört."
-                );
-
-            }
-
-
-            if (
-                this.initialized
-            ) {
-
-                return true;
-
-            }
-
-
-            const validation =
-                this.validateContract();
-
-
-            if (
-                validation &&
-                validation.valid ===
-                false
-            ) {
-
-                throw new Error(
-                    "App Contract ungültig: " +
-                    JSON.stringify(
-                        validation.errors ||
-                        []
-                    )
-                );
-
-            }
-
-
-            const dependencies =
-                this.checkDependencies();
-
-
-            if (
-                dependencies &&
-                dependencies.valid ===
-                false
-            ) {
-
-                throw new Error(
-                    "Fehlende App Dependencies: " +
-                    (
-                        dependencies.missing ||
-                        []
-                    ).join(
-                        ", "
-                    )
-                );
-
-            }
-
-
-            this.loadSettings();
-
-
-            this.createContext();
-
-
-            try {
-
-                if (
-                    typeof this.definition.init ===
-                    "function"
-                ) {
-
-                    await this.definition.init(
-                        this.context
-                    );
-
-                }
-
-
-                this.initialized =
-                    true;
-
-
-                this.statistics.initializes +=
-                    1;
-
-
-                this.setState(
-                    {
-                        status:
-                            "initialized"
-                    }
-                );
-
-
-                this.emit(
-                    "initialized",
-                    {
-                        app:
-                            this.definition
-                    }
-                );
-
-
-                return true;
-
-            } catch (exception) {
-
-                this.reportError(
-                    exception,
-                    "App Initialize"
-                );
-
-
-                this.setState(
-                    {
-                        status:
-                            "error"
-                    }
-                );
-
-
-                return false;
-
-            }
-
-        }
-
-
-        /* ====================================================
-           LIFECYCLE — START
-           ==================================================== */
-
-        async start(
-            options = {}
+        if (
+            nextState === STATES.ERROR
         ) {
 
-            if (
-                !this.initialized
-            ) {
+            runtime.open =
+                false;
 
-                const initialized =
-                    await this.initialize();
-
-
-                if (!initialized) {
-
-                    return false;
-
-                }
-
-            }
-
-
-            if (
-                this.started
-            ) {
-
-                return true;
-
-            }
-
-
-            try {
-
-                if (
-                    typeof this.definition.start ===
-                    "function"
-                ) {
-
-                    await this.definition.start(
-                        {
-
-                            ...this.context,
-
-                            options:
-                                options
-
-                        }
-                    );
-
-                }
-
-
-                this.started =
-                    true;
-
-
-                this.statistics.starts +=
-                    1;
-
-
-                this.setState(
-                    {
-                        status:
-                            "running"
-                    }
-                );
-
-
-                this.emit(
-                    "started",
-                    {
-                        options:
-                            options
-                    }
-                );
-
-
-                return true;
-
-            } catch (exception) {
-
-                this.reportError(
-                    exception,
-                    "App Start"
-                );
-
-
-                this.setState(
-                    {
-                        status:
-                            "error"
-                    }
-                );
-
-
-                return false;
-
-            }
+            runtime.active =
+                false;
 
         }
 
 
-        /* ====================================================
-           LIFECYCLE — OPEN
-           ==================================================== */
-
-        async open(
-            options = {}
-        ) {
-
-            const started =
-                await this.start(
-                    options
-                );
-
-
-            if (!started) {
-
-                return false;
-
-            }
-
-
-            try {
-
-                if (
-                    typeof this.definition.open ===
-                    "function"
-                ) {
-
-                    await this.definition.open(
-                        {
-
-                            ...this.context,
-
-                            options:
-                                options
-
-                        }
-                    );
-
-                }
-
-
-                this.statistics.opens +=
-                    1;
-
-
-                this.setState(
-                    {
-
-                        open:
-                            true,
-
-                        active:
-                            true,
-
-                        minimized:
-                            false,
-
-                        status:
-                            "open"
-
-                    }
-                );
-
-
-                this.emit(
-                    "opened",
-                    {
-                        options:
-                            options
-                    }
-                );
-
-
-                return true;
-
-            } catch (exception) {
-
-                this.reportError(
-                    exception,
-                    "App Open"
-                );
-
-
-                return false;
-
-            }
-
-        }
-
-
-        /* ====================================================
-           LIFECYCLE — ACTIVATE
-           ==================================================== */
-
-        async activate() {
-
-            try {
-
-                if (
-                    typeof this.definition.onActivate ===
-                    "function"
-                ) {
-
-                    await this.definition.onActivate(
-                        this.context
-                    );
-
-                }
-
-
-                this.statistics.activates +=
-                    1;
-
-
-                this.setState(
-                    {
-                        active:
-                            true,
-
-                        minimized:
-                            false
-                    }
-                );
-
-
-                this.emit(
-                    "activated"
-                );
-
-
-                return true;
-
-            } catch (exception) {
-
-                this.reportError(
-                    exception,
-                    "App Activate"
-                );
-
-
-                return false;
-
-            }
-
-        }
-
-
-        /* ====================================================
-           LIFECYCLE — DEACTIVATE
-           ==================================================== */
-
-        async deactivate() {
-
-            try {
-
-                if (
-                    typeof this.definition.onDeactivate ===
-                    "function"
-                ) {
-
-                    await this.definition.onDeactivate(
-                        this.context
-                    );
-
-                }
-
-
-                this.setState(
-                    {
-                        active:
-                            false
-                    }
-                );
-
-
-                this.emit(
-                    "deactivated"
-                );
-
-
-                return true;
-
-            } catch (exception) {
-
-                this.reportError(
-                    exception,
-                    "App Deactivate"
-                );
-
-
-                return false;
-
-            }
-
-        }
-
-
-        /* ====================================================
-           LIFECYCLE — MINIMIZE
-           ==================================================== */
-
-        async minimize() {
-
-            try {
-
-                if (
-                    typeof this.definition.minimize ===
-                    "function"
-                ) {
-
-                    await this.definition.minimize(
-                        this.context
-                    );
-
-                }
-
-
-                this.setState(
-                    {
-
-                        minimized:
-                            true,
-
-                        active:
-                            false
-
-                    }
-                );
-
-
-                this.emit(
-                    "minimized"
-                );
-
-
-                return true;
-
-            } catch (exception) {
-
-                this.reportError(
-                    exception,
-                    "App Minimize"
-                );
-
-
-                return false;
-
-            }
-
-        }
-
-
-        /* ====================================================
-           LIFECYCLE — RESTORE
-           ==================================================== */
-
-        async restore() {
-
-            try {
-
-                if (
-                    typeof this.definition.restore ===
-                    "function"
-                ) {
-
-                    await this.definition.restore(
-                        this.context
-                    );
-
-                }
-
-
-                this.setState(
-                    {
-
-                        minimized:
-                            false,
-
-                        active:
-                            true
-
-                    }
-                );
-
-
-                this.emit(
-                    "restored"
-                );
-
-
-                return true;
-
-            } catch (exception) {
-
-                this.reportError(
-                    exception,
-                    "App Restore"
-                );
-
-
-                return false;
-
-            }
-
-        }
-
-
-        /* ====================================================
-           LIFECYCLE — CLOSE
-           ==================================================== */
-
-        async close(
-            options = {}
-        ) {
-
-            try {
-
-                if (
-                    typeof this.definition.close ===
-                    "function"
-                ) {
-
-                    await this.definition.close(
-                        {
-
-                            ...this.context,
-
-                            options:
-                                options
-
-                        }
-                    );
-
-                }
-
-
-                this.statistics.closes +=
-                    1;
-
-
-                this.setState(
-                    {
-
-                        open:
-                            false,
-
-                        active:
-                            false,
-
-                        minimized:
-                            false,
-
-                        maximized:
-                            false,
-
-                        pip:
-                            false,
-
-                        status:
-                            "closed"
-
-                    }
-                );
-
-
-                this.emit(
-                    "closed",
-                    {
-                        options:
-                            options
-                    }
-                );
-
-
-                return true;
-
-            } catch (exception) {
-
-                this.reportError(
-                    exception,
-                    "App Close"
-                );
-
-
-                return false;
-
-            }
-
-        }
-
-
-        /* ====================================================
-           LIFECYCLE — STOP
-           ==================================================== */
-
-        async stop() {
-
-            try {
-
-                if (
-                    typeof this.definition.stop ===
-                    "function"
-                ) {
-
-                    await this.definition.stop(
-                        this.context
-                    );
-
-                }
-
-
-                this.started =
-                    false;
-
-
-                this.statistics.stops +=
-                    1;
-
-
-                this.setState(
-                    {
-                        status:
-                            "stopped"
-                    }
-                );
-
-
-                this.emit(
-                    "stopped"
-                );
-
-
-                return true;
-
-            } catch (exception) {
-
-                this.reportError(
-                    exception,
-                    "App Stop"
-                );
-
-
-                return false;
-
-            }
-
-        }
-
-
-        /* ====================================================
-           DESTROY
-           ==================================================== */
-
-        async destroy() {
-
-            try {
-
-                if (
-                    this.started
-                ) {
-
-                    await this.stop();
-
-                }
-
-
-                if (
-                    typeof this.definition.destroy ===
-                    "function"
-                ) {
-
-                    await this.definition.destroy(
-                        this.context
-                    );
-
-                }
-
-
-                this.destroyed =
-                    true;
-
-
-                this.initialized =
-                    false;
-
-
-                this.started =
-                    false;
-
-
-                this.emit(
-                    "destroyed"
-                );
-
-
-                this.events.clear();
-
-
-                return true;
-
-            } catch (exception) {
-
-                this.reportError(
-                    exception,
-                    "App Destroy"
-                );
-
-
-                return false;
-
-            }
-
-        }
-
-
-        /* ====================================================
-           DIAGNOSTICS
-           ==================================================== */
-
-        diagnostics() {
-
-            return {
-
-                name:
-                    NAME,
-
-                version:
-                    VERSION,
-
-                runtime:
-                    MODULE_ID,
+        emit(
+            "state-changed",
+            {
 
                 appId:
-                    this.id,
+                    runtime.appId,
 
-                initialized:
-                    this.initialized,
-
-                started:
-                    this.started,
-
-                destroyed:
-                    this.destroyed,
+                previous,
 
                 state:
-                    this.getState(),
+                    nextState,
 
-                settings:
-                    this.getSettings(),
+                runtime:
+                    clone(
+                        runtime
+                    ),
 
-                dependencies:
-                    this.checkDependencies(),
+                metadata:
+                    clone(
+                        metadata
+                    )
 
-                statistics:
-                    {
-                        ...this.statistics
-                    },
+            }
+        );
 
-                errors:
-                    this.errors.slice(),
 
-                timestamp:
-                    new Date().toISOString()
-
-            };
-
-        }
+        return true;
 
     }
 
 
-    /* ========================================================
-       08 — RUNTIME FACTORY
-       ======================================================== */
+    /* ============================================================
+       12 — REGISTRY ACCESS
+       ============================================================ */
 
-    function create(
-        definition,
-        options = {}
+    function getApp(
+        appId
     ) {
 
+        const registry =
+            getRegistry();
+
+
         if (
-            !definition ||
-            !definition.id
+            !registry
         ) {
 
-            throw new Error(
-                "Eine App Definition mit id ist erforderlich."
+            return null;
+
+        }
+
+
+        if (
+            hasMethod(
+                registry,
+                "getApp"
+            )
+        ) {
+
+            return registry.getApp(
+                appId
             );
+
+        }
+
+
+        if (
+            hasMethod(
+                registry,
+                "get"
+            )
+        ) {
+
+            return registry.get(
+                appId
+            );
+
+        }
+
+
+        return null;
+
+    }
+
+
+    /* ============================================================
+       13 — ENSURE RUNTIME
+       ============================================================ */
+
+    function ensureRuntime(
+        app
+    ) {
+
+        if (!app) {
+
+            return null;
 
         }
 
 
         const id =
             normalizeId(
-                definition.id
+                app.id ||
+                app.appId
             );
 
 
+        if (!id) {
+
+            return null;
+
+        }
+
+
         if (
-            runtimes.has(
-                id
-            )
+            !state.runtimes.has(id)
         ) {
 
-            return runtimes.get(
-                id
+            state.runtimes.set(
+                id,
+                createRuntime({
+                    ...app,
+                    id
+                })
             );
 
         }
 
 
         const runtime =
-            new HalDoAppRuntime(
-                definition,
-                options
+            state.runtimes.get(
+                id
             );
 
 
-        runtimes.set(
-            id,
-            runtime
-        );
+        runtime.route =
+            app.route ||
+            runtime.route ||
+            null;
 
 
         return runtime;
@@ -2433,42 +1084,609 @@
     }
 
 
-    function get(
-        appId
+    /* ============================================================
+       14 — DEPENDENCIES
+       ============================================================ */
+
+    function checkDependencies(
+        app
     ) {
 
-        return (
-            runtimes.get(
-                normalizeId(
-                    appId
-                )
-            ) ||
-            null
-        );
-
-    }
+        const registry =
+            getRegistry();
 
 
-    function has(
-        appId
-    ) {
-
-        return runtimes.has(
-            normalizeId(
-                appId
+        if (
+            registry &&
+            hasMethod(
+                registry,
+                "checkDependencies"
             )
-        );
+        ) {
+
+            try {
+
+                return registry.checkDependencies(
+                    app
+                );
+
+            } catch (exception) {
+
+                reportError(
+                    exception,
+                    "Dependency Check"
+                );
+
+            }
+
+        }
+
+
+        return {
+
+            valid:
+                true,
+
+            missing:
+                [],
+
+            disabled:
+                [],
+
+            circular:
+                [],
+
+            chain:
+                []
+
+        };
 
     }
 
 
-    async function destroy(
-        appId
+    /* ============================================================
+       15 — SERVICE CONTEXT
+       ============================================================ */
+
+    function createServiceContext(
+        app,
+        runtime
     ) {
+
+        return {
+
+            app,
+
+            runtime,
+
+            kernel:
+                getKernel(),
+
+            registry:
+                getRegistry(),
+
+            appManager:
+                getManager(),
+
+            router:
+                getRouter(),
+
+            windowManager:
+                getWindowManager(),
+
+            storage:
+                getStorage(),
+
+            ai:
+                getAI(),
+
+            language:
+                getLanguage(),
+
+            runtimeAPI:
+                api
+
+        };
+
+    }
+
+
+    /* ============================================================
+       16 — INITIALIZE APP
+       ============================================================ */
+
+    async function initializeApp(
+        appId,
+        options = {}
+    ) {
+
+        const app =
+            getApp(
+                appId
+            );
+
+
+        if (!app) {
+
+            return null;
+
+        }
+
 
         const runtime =
-            get(
+            ensureRuntime(
+                app
+            );
+
+
+        if (!runtime) {
+
+            return null;
+
+        }
+
+
+        if (
+            runtime.initialized
+        ) {
+
+            return clone(
+                runtime
+            );
+
+        }
+
+
+        const dependencies =
+            checkDependencies(
+                app
+            );
+
+
+        if (
+            !dependencies.valid
+        ) {
+
+            runtime.error =
+                dependencies;
+
+            runtime.errorCount +=
+                1;
+
+            setState(
+                runtime,
+                STATES.ERROR,
+                {
+
+                    reason:
+                        "dependencies",
+
+                    dependencies
+
+                }
+            );
+
+
+            state.statistics.blocked +=
+                1;
+
+
+            return null;
+
+        }
+
+
+        setState(
+            runtime,
+            STATES.INITIALIZING
+        );
+
+
+        try {
+
+            runtime.context =
+                {
+                    ...runtime.context,
+                    ...(options.context || {})
+                };
+
+
+            runtime.services =
+                createServiceContext(
+                    app,
+                    runtime
+                );
+
+
+            /*
+             * App-spezifisches Initialisierungsmodul.
+             */
+
+            let instance =
+                runtime.instance;
+
+
+            if (
+                !instance &&
+                app.module &&
+                typeof app.module ===
+                    "object"
+            ) {
+
+                instance =
+                    app.module;
+
+            }
+
+
+            if (
+                instance &&
+                hasMethod(
+                    instance,
+                    "initialize"
+                )
+            ) {
+
+                await instance.initialize(
+                    runtime.services
+                );
+
+            } else if (
+                instance &&
+                hasMethod(
+                    instance,
+                    "init"
+                )
+            ) {
+
+                await instance.init(
+                    runtime.services
+                );
+
+            }
+
+
+            runtime.instance =
+                instance || null;
+
+            runtime.initialized =
+                true;
+
+            runtime.initializedAt =
+                now();
+
+
+            state.statistics.initialized +=
+                1;
+
+
+            setState(
+                runtime,
+                STATES.READY
+            );
+
+
+            emit(
+                "app-initialized",
+                {
+
+                    app:
+                        clone(app),
+
+                    runtime:
+                        clone(runtime)
+
+                }
+            );
+
+
+            return clone(
+                runtime
+            );
+
+        } catch (exception) {
+
+            runtime.error =
+                reportError(
+                    exception,
+                    "App Initialization: " +
+                    app.id
+                );
+
+            runtime.errorCount +=
+                1;
+
+
+            setState(
+                runtime,
+                STATES.ERROR
+            );
+
+
+            return null;
+
+        }
+
+    }
+
+
+    /* ============================================================
+       17 — OPEN
+       ============================================================ */
+
+    async function open(
+        appId,
+        options = {}
+    ) {
+
+        const app =
+            getApp(
                 appId
+            );
+
+
+        if (!app) {
+
+            return null;
+
+        }
+
+
+        if (
+            app.enabled === false
+        ) {
+
+            state.statistics.blocked +=
+                1;
+
+
+            emit(
+                "launch-blocked",
+                {
+
+                    app:
+                        clone(app),
+
+                    reason:
+                        "disabled"
+
+                }
+            );
+
+
+            return null;
+
+        }
+
+
+        const runtime =
+            ensureRuntime(
+                app
+            );
+
+
+        if (!runtime) {
+
+            return null;
+
+        }
+
+
+        /*
+         * Singleton:
+         * bereits offene App aktivieren.
+         */
+
+        if (
+            app.singleton !== false &&
+            runtime.open
+        ) {
+
+            await focus(
+                app.id
+            );
+
+
+            return clone(
+                runtime
+            );
+
+        }
+
+
+        const initialized =
+            await initializeApp(
+                app.id,
+                options
+            );
+
+
+        if (!initialized) {
+
+            return null;
+
+        }
+
+
+        setState(
+            runtime,
+            STATES.OPENING
+        );
+
+
+        try {
+
+            const manager =
+                getManager();
+
+
+            let managerResult =
+                null;
+
+
+            /*
+             * Der App Manager bleibt der bevorzugte
+             * Orchestrator, wenn er bereits eine
+             * kompatible open()-API besitzt.
+             *
+             * Schutz gegen Rekursion:
+             * Falls der Manager intern wieder die
+             * Runtime aufruft, darf hier kein endloser
+             * Kreislauf entstehen.
+             */
+
+            if (
+                manager &&
+                hasMethod(
+                    manager,
+                    "open"
+                ) &&
+                options.viaRuntimeManager !== false
+            ) {
+
+                managerResult =
+                    await manager.open(
+                        app.id,
+                        {
+                            ...options,
+                            fromRuntime:
+                                true
+                        }
+                    );
+
+            } else {
+
+                const router =
+                    getRouter();
+
+
+                if (
+                    router &&
+                    hasMethod(
+                        router,
+                        "navigate"
+                    ) &&
+                    app.route
+                ) {
+
+                    managerResult =
+                        await router.navigate(
+                            app.route,
+                            options
+                        );
+
+                }
+
+            }
+
+
+            runtime.open =
+                true;
+
+            runtime.openedAt =
+                now();
+
+            runtime.launchCount +=
+                1;
+
+
+            state.statistics.launched +=
+                1;
+
+
+            setState(
+                runtime,
+                STATES.OPEN
+            );
+
+
+            await focus(
+                app.id
+            );
+
+
+            emit(
+                "opened",
+                {
+
+                    app:
+                        clone(app),
+
+                    runtime:
+                        clone(runtime),
+
+                    result:
+                        managerResult
+
+                }
+            );
+
+
+            return clone(
+                runtime
+            );
+
+        } catch (exception) {
+
+            runtime.error =
+                reportError(
+                    exception,
+                    "App Open: " +
+                    app.id
+                );
+
+            runtime.errorCount +=
+                1;
+
+
+            setState(
+                runtime,
+                STATES.ERROR
+            );
+
+
+            emit(
+                "open-failed",
+                {
+
+                    app:
+                        clone(app),
+
+                    runtime:
+                        clone(runtime),
+
+                    error:
+                        exception
+
+                }
+            );
+
+
+            return null;
+
+        }
+
+    }
+
+
+    /* ============================================================
+       18 — CLOSE
+       ============================================================ */
+
+    async function close(
+        appId,
+        options = {}
+    ) {
+
+        const id =
+            normalizeId(
+                appId
+            );
+
+
+        const runtime =
+            state.runtimes.get(
+                id
             );
 
 
@@ -2479,37 +1697,1007 @@
         }
 
 
-        const result =
-            await runtime.destroy();
+        const app =
+            getApp(
+                id
+            );
 
 
-        runtimes.delete(
+        setState(
+            runtime,
+            STATES.CLOSING
+        );
+
+
+        try {
+
+            if (
+                runtime.instance &&
+                hasMethod(
+                    runtime.instance,
+                    "close"
+                )
+            ) {
+
+                await runtime.instance.close(
+                    createServiceContext(
+                        app,
+                        runtime
+                    )
+                );
+
+            }
+
+
+            const manager =
+                getManager();
+
+
+            if (
+                manager &&
+                hasMethod(
+                    manager,
+                    "close"
+                )
+            ) {
+
+                await manager.close(
+                    id,
+                    {
+                        ...options,
+                        fromRuntime:
+                            true
+                    }
+                );
+
+            } else {
+
+                const windowManager =
+                    getWindowManager();
+
+
+                if (
+                    windowManager &&
+                    hasMethod(
+                        windowManager,
+                        "close"
+                    )
+                ) {
+
+                    await windowManager.close(
+                        runtime.windowId ||
+                        id
+                    );
+
+                }
+
+            }
+
+
+            runtime.active =
+                false;
+
+            runtime.open =
+                false;
+
+
+            state.statistics.closed +=
+                1;
+
+
+            setState(
+                runtime,
+                STATES.CLOSED
+            );
+
+
+            if (
+                state.activeAppId === id
+            ) {
+
+                state.activeAppId =
+                    null;
+
+            }
+
+
+            emit(
+                "closed",
+                {
+
+                    app:
+                        clone(app),
+
+                    runtime:
+                        clone(runtime)
+
+                }
+            );
+
+
+            return true;
+
+        } catch (exception) {
+
+            runtime.error =
+                reportError(
+                    exception,
+                    "App Close: " +
+                    id
+                );
+
+            runtime.errorCount +=
+                1;
+
+
+            setState(
+                runtime,
+                STATES.ERROR
+            );
+
+
+            return false;
+
+        }
+
+    }
+
+
+    /* ============================================================
+       19 — PAUSE
+       ============================================================ */
+
+    async function pause(
+        appId
+    ) {
+
+        const id =
             normalizeId(
                 appId
-            )
-        );
+            );
 
 
-        return result;
+        const runtime =
+            state.runtimes.get(
+                id
+            );
+
+
+        if (
+            !runtime ||
+            !runtime.open
+        ) {
+
+            return false;
+
+        }
+
+
+        try {
+
+            if (
+                runtime.instance &&
+                hasMethod(
+                    runtime.instance,
+                    "pause"
+                )
+            ) {
+
+                await runtime.instance.pause(
+                    createServiceContext(
+                        getApp(id),
+                        runtime
+                    )
+                );
+
+            }
+
+
+            setState(
+                runtime,
+                STATES.BACKGROUND
+            );
+
+
+            state.statistics.paused +=
+                1;
+
+
+            emit(
+                "paused",
+                {
+
+                    appId:
+                        id,
+
+                    runtime:
+                        clone(runtime)
+
+                }
+            );
+
+
+            return true;
+
+        } catch (exception) {
+
+            reportError(
+                exception,
+                "App Pause: " +
+                id
+            );
+
+
+            return false;
+
+        }
 
     }
 
 
-    function getAll() {
+    /* ============================================================
+       20 — RESUME
+       ============================================================ */
+
+    async function resume(
+        appId
+    ) {
+
+        const id =
+            normalizeId(
+                appId
+            );
+
+
+        const runtime =
+            state.runtimes.get(
+                id
+            );
+
+
+        if (
+            !runtime ||
+            !runtime.open
+        ) {
+
+            return false;
+
+        }
+
+
+        try {
+
+            if (
+                runtime.instance &&
+                hasMethod(
+                    runtime.instance,
+                    "resume"
+                )
+            ) {
+
+                await runtime.instance.resume(
+                    createServiceContext(
+                        getApp(id),
+                        runtime
+                    )
+                );
+
+            }
+
+
+            setState(
+                runtime,
+                STATES.OPEN
+            );
+
+
+            state.statistics.resumed +=
+                1;
+
+
+            emit(
+                "resumed",
+                {
+
+                    appId:
+                        id,
+
+                    runtime:
+                        clone(runtime)
+
+                }
+            );
+
+
+            return true;
+
+        } catch (exception) {
+
+            reportError(
+                exception,
+                "App Resume: " +
+                id
+            );
+
+
+            return false;
+
+        }
+
+    }
+
+
+    /* ============================================================
+       21 — FOCUS
+       ============================================================ */
+
+    async function focus(
+        appId
+    ) {
+
+        const id =
+            normalizeId(
+                appId
+            );
+
+
+        const runtime =
+            state.runtimes.get(
+                id
+            );
+
+
+        if (
+            !runtime
+        ) {
+
+            return false;
+
+        }
+
+
+        const previousId =
+            state.activeAppId;
+
+
+        if (
+            previousId &&
+            previousId !== id
+        ) {
+
+            await blur(
+                previousId
+            );
+
+        }
+
+
+        const windowManager =
+            getWindowManager();
+
+
+        try {
+
+            if (
+                windowManager &&
+                hasMethod(
+                    windowManager,
+                    "focus"
+                )
+            ) {
+
+                await windowManager.focus(
+                    runtime.windowId ||
+                    id
+                );
+
+            }
+
+
+            runtime.active =
+                true;
+
+            runtime.background =
+                false;
+
+            runtime.minimized =
+                false;
+
+            state.activeAppId =
+                id;
+
+
+            state.statistics.focused +=
+                1;
+
+
+            setState(
+                runtime,
+                STATES.ACTIVE
+            );
+
+
+            emit(
+                "focused",
+                {
+
+                    appId:
+                        id,
+
+                    previousAppId:
+                        previousId,
+
+                    runtime:
+                        clone(runtime)
+
+                }
+            );
+
+
+            return true;
+
+        } catch (exception) {
+
+            reportError(
+                exception,
+                "App Focus: " +
+                id
+            );
+
+
+            return false;
+
+        }
+
+    }
+
+
+    /* ============================================================
+       22 — BLUR
+       ============================================================ */
+
+    async function blur(
+        appId
+    ) {
+
+        const id =
+            normalizeId(
+                appId
+            );
+
+
+        const runtime =
+            state.runtimes.get(
+                id
+            );
+
+
+        if (!runtime) {
+
+            return false;
+
+        }
+
+
+        try {
+
+            if (
+                runtime.instance &&
+                hasMethod(
+                    runtime.instance,
+                    "blur"
+                )
+            ) {
+
+                await runtime.instance.blur(
+                    createServiceContext(
+                        getApp(id),
+                        runtime
+                    )
+                );
+
+            }
+
+
+            runtime.active =
+                false;
+
+
+            if (
+                state.activeAppId === id
+            ) {
+
+                state.activeAppId =
+                    null;
+
+            }
+
+
+            state.statistics.blurred +=
+                1;
+
+
+            setState(
+                runtime,
+                STATES.BACKGROUND
+            );
+
+
+            emit(
+                "blurred",
+                {
+
+                    appId:
+                        id,
+
+                    runtime:
+                        clone(runtime)
+
+                }
+            );
+
+
+            return true;
+
+        } catch (exception) {
+
+            reportError(
+                exception,
+                "App Blur: " +
+                id
+            );
+
+
+            return false;
+
+        }
+
+    }
+
+
+    /* ============================================================
+       23 — MINIMIZE
+       ============================================================ */
+
+    async function minimize(
+        appId
+    ) {
+
+        const id =
+            normalizeId(
+                appId
+            );
+
+
+        const runtime =
+            state.runtimes.get(
+                id
+            );
+
+
+        if (!runtime) {
+
+            return false;
+
+        }
+
+
+        try {
+
+            const windowManager =
+                getWindowManager();
+
+
+            if (
+                windowManager &&
+                hasMethod(
+                    windowManager,
+                    "minimize"
+                )
+            ) {
+
+                await windowManager.minimize(
+                    runtime.windowId ||
+                    id
+                );
+
+            }
+
+
+            runtime.active =
+                false;
+
+            runtime.minimized =
+                true;
+
+
+            if (
+                state.activeAppId === id
+            ) {
+
+                state.activeAppId =
+                    null;
+
+            }
+
+
+            state.statistics.minimized +=
+                1;
+
+
+            setState(
+                runtime,
+                STATES.MINIMIZED
+            );
+
+
+            emit(
+                "minimized",
+                {
+
+                    appId:
+                        id,
+
+                    runtime:
+                        clone(runtime)
+
+                }
+            );
+
+
+            return true;
+
+        } catch (exception) {
+
+            reportError(
+                exception,
+                "App Minimize: " +
+                id
+            );
+
+
+            return false;
+
+        }
+
+    }
+
+
+    /* ============================================================
+       24 — RUNTIME ACCESS
+       ============================================================ */
+
+    function getRuntime(
+        appId
+    ) {
+
+        const runtime =
+            state.runtimes.get(
+                normalizeId(
+                    appId
+                )
+            );
+
+
+        return runtime
+            ? clone(runtime)
+            : null;
+
+    }
+
+
+    function getAppState(
+        appId
+    ) {
+
+        const runtime =
+            state.runtimes.get(
+                normalizeId(
+                    appId
+                )
+            );
+
+
+        if (!runtime) {
+
+            return null;
+
+        }
+
+
+        return {
+
+            appId:
+                runtime.appId,
+
+            state:
+                runtime.state,
+
+            open:
+                runtime.open,
+
+            active:
+                runtime.active,
+
+            minimized:
+                runtime.minimized,
+
+            background:
+                runtime.background,
+
+            initialized:
+                runtime.initialized,
+
+            windowId:
+                runtime.windowId,
+
+            launchCount:
+                runtime.launchCount,
+
+            errorCount:
+                runtime.errorCount
+
+        };
+
+    }
+
+
+    function getAllRuntimes() {
 
         return Array.from(
-            runtimes.values()
+            state.runtimes.values()
+        )
+        .map(
+            clone
         );
 
     }
 
 
-    function getCount() {
+    function getOpenApps() {
 
-        return runtimes.size;
+        return getAllRuntimes()
+            .filter(
+                runtime =>
+                    runtime.open === true
+            );
 
     }
 
+
+    function getActiveApp() {
+
+        if (
+            !state.activeAppId
+        ) {
+
+            return null;
+
+        }
+
+
+        return getRuntime(
+            state.activeAppId
+        );
+
+    }
+
+
+    function isOpen(
+        appId
+    ) {
+
+        const runtime =
+            state.runtimes.get(
+                normalizeId(
+                    appId
+                )
+            );
+
+
+        return !!(
+            runtime &&
+            runtime.open
+        );
+
+    }
+
+
+    /* ============================================================
+       25 — CONNECTIONS
+       ============================================================ */
+
+    function refreshConnections() {
+
+        state.connections.kernel =
+            !!getKernel();
+
+        state.connections.registry =
+            !!getRegistry();
+
+        state.connections.manager =
+            !!getManager();
+
+        state.connections.router =
+            !!getRouter();
+
+        state.connections.windowManager =
+            !!getWindowManager();
+
+        state.connections.storage =
+            !!getStorage();
+
+        state.connections.ai =
+            !!getAI();
+
+        state.connections.language =
+            !!getLanguage();
+
+
+        return getConnectionStatus();
+
+    }
+
+
+    function getConnectionStatus() {
+
+        return {
+
+            kernel:
+                !!getKernel(),
+
+            registry:
+                !!getRegistry(),
+
+            manager:
+                !!getManager(),
+
+            router:
+                !!getRouter(),
+
+            windowManager:
+                !!getWindowManager(),
+
+            storage:
+                !!getStorage(),
+
+            ai:
+                !!getAI(),
+
+            language:
+                !!getLanguage()
+
+        };
+
+    }
+
+
+    /* ============================================================
+       26 — REGISTRY EVENTS
+       ============================================================ */
+
+    function connectRegistryEvents() {
+
+        const registry =
+            getRegistry();
+
+
+        if (
+            !registry ||
+            !hasMethod(
+                registry,
+                "on"
+            )
+        ) {
+
+            return false;
+
+        }
+
+
+        registry.on(
+            "registered",
+            payload => {
+
+                if (
+                    payload &&
+                    payload.app
+                ) {
+
+                    ensureRuntime(
+                        payload.app
+                    );
+
+                    emit(
+                        "app-registered",
+                        payload
+                    );
+
+                }
+
+            }
+        );
+
+
+        registry.on(
+            "updated",
+            payload => {
+
+                if (
+                    payload &&
+                    payload.app
+                ) {
+
+                    const runtime =
+                        state.runtimes.get(
+                            payload.app.id
+                        );
+
+
+                    if (runtime) {
+
+                        runtime.route =
+                            payload.app.route ||
+                            runtime.route;
+
+                    }
+
+
+                    emit(
+                        "app-updated",
+                        payload
+                    );
+
+                }
+
+            }
+        );
+
+
+        registry.on(
+            "removed",
+            payload => {
+
+                if (
+                    payload &&
+                    payload.app
+                ) {
+
+                    state.runtimes.delete(
+                        payload.app.id
+                    );
+
+
+                    if (
+                        state.activeAppId ===
+                        payload.app.id
+                    ) {
+
+                        state.activeAppId =
+                            null;
+
+                    }
+
+
+                    emit(
+                        "app-removed",
+                        payload
+                    );
+
+                }
+
+            }
+        );
+
+
+        return true;
+
+    }
+
+
+    /* ============================================================
+       27 — DIAGNOSTICS
+       ============================================================ */
 
     function diagnostics() {
 
@@ -2524,14 +2712,37 @@
             module:
                 MODULE_ID,
 
+            initialized:
+                state.initialized,
+
+            initializing:
+                state.initializing,
+
+            ready:
+                state.ready,
+
+            failed:
+                state.failed,
+
+            activeAppId:
+                state.activeAppId,
+
             runtimeCount:
-                getCount(),
+                state.runtimes.size,
+
+            openCount:
+                getOpenApps().length,
+
+            connections:
+                getConnectionStatus(),
+
+            statistics:
+                {
+                    ...state.statistics
+                },
 
             runtimes:
-                getAll().map(
-                    runtime =>
-                        runtime.diagnostics()
-                ),
+                getAllRuntimes(),
 
             timestamp:
                 new Date().toISOString()
@@ -2541,9 +2752,95 @@
     }
 
 
-    /* ========================================================
-       09 — PUBLIC API
-       ======================================================== */
+    /* ============================================================
+       28 — HEALTH
+       ============================================================ */
+
+    function healthCheck() {
+
+        const problems = [];
+
+
+        const connections =
+            getConnectionStatus();
+
+
+        if (
+            !connections.registry
+        ) {
+
+            problems.push(
+                "App Registry nicht verbunden."
+            );
+
+        }
+
+
+        const registry =
+            getRegistry();
+
+
+        if (
+            !registry
+        ) {
+
+            problems.push(
+                "App Registry fehlt."
+            );
+
+        }
+
+
+        const runtimeErrors =
+            getAllRuntimes()
+                .filter(
+                    runtime =>
+                        runtime.state ===
+                        STATES.ERROR
+                );
+
+
+        if (
+            runtimeErrors.length
+        ) {
+
+            problems.push(
+                runtimeErrors.length +
+                " App Runtime(s) befinden sich im Fehlerzustand."
+            );
+
+        }
+
+
+        return {
+
+            healthy:
+                problems.length === 0,
+
+            problems,
+
+            connections,
+
+            runtimeCount:
+                state.runtimes.size,
+
+            openCount:
+                getOpenApps().length,
+
+            activeAppId:
+                state.activeAppId,
+
+            timestamp:
+                new Date().toISOString()
+
+        };
+
+    }
+
+
+    /* ============================================================
+       29 — PUBLIC API
+       ============================================================ */
 
     const api = {
 
@@ -2556,38 +2853,90 @@
         module:
             MODULE_ID,
 
+        states:
+            STATES,
 
-        Runtime:
-            HalDoAppRuntime,
+        on,
 
+        off,
 
-        create:
-            create,
+        emit,
 
-        get:
-            get,
+        initializeApp,
 
-        has:
-            has,
+        open,
 
-        destroy:
-            destroy,
+        close,
 
-        getAll:
-            getAll,
+        pause,
 
-        getCount:
-            getCount,
+        resume,
 
-        diagnostics:
-            diagnostics
+        focus,
+
+        blur,
+
+        minimize,
+
+        getRuntime,
+
+        getAppState,
+
+        getAllRuntimes,
+
+        getOpenApps,
+
+        getActiveApp,
+
+        isOpen,
+
+        refreshConnections,
+
+        getConnectionStatus,
+
+        diagnostics,
+
+        healthCheck,
+
+        getState:
+            function () {
+
+                return {
+
+                    initialized:
+                        state.initialized,
+
+                    initializing:
+                        state.initializing,
+
+                    ready:
+                        state.ready,
+
+                    failed:
+                        state.failed,
+
+                    runtimeCount:
+                        state.runtimes.size,
+
+                    openCount:
+                        getOpenApps().length,
+
+                    activeAppId:
+                        state.activeAppId,
+
+                    connections:
+                        getConnectionStatus()
+
+                };
+
+            }
 
     };
 
 
-    /* ========================================================
-       10 — GLOBAL EXPORT
-       ======================================================== */
+    /* ============================================================
+       30 — GLOBAL EXPORT
+       ============================================================ */
 
     window.HalDoAppRuntime =
         api;
@@ -2599,9 +2948,16 @@
         api;
 
 
-    /* ========================================================
-       11 — KERNEL CONNECTION
-       ======================================================== */
+    HalDoOS.services =
+        HalDoOS.services || {};
+
+    HalDoOS.services.appRuntime =
+        api;
+
+
+    /* ============================================================
+       31 — KERNEL CONNECTION
+       ============================================================ */
 
     function connectKernel() {
 
@@ -2652,9 +3008,9 @@
 
         } catch (exception) {
 
-            console.error(
-                "[HalDo App Runtime]",
-                exception
+            reportError(
+                exception,
+                "Runtime Kernel Connection"
             );
 
 
@@ -2665,23 +3021,184 @@
     }
 
 
-    /* ========================================================
-       12 — STARTUP
-       ======================================================== */
+    /* ============================================================
+       32 — INITIALIZATION
+       ============================================================ */
 
-    function initialize() {
+    async function initialize() {
 
-        connectKernel();
+        if (
+            state.ready
+        ) {
+
+            return api;
+
+        }
 
 
-        console.log(
-            "[HalDo App Runtime]",
-            VERSION,
-            "bereit."
+        if (
+            state.initializing
+        ) {
+
+            return api;
+
+        }
+
+
+        state.initializing =
+            true;
+
+        state.initialized =
+            true;
+
+        state.failed =
+            false;
+
+
+        emit(
+            "initializing",
+            {
+
+                version:
+                    VERSION
+
+            }
         );
+
+
+        try {
+
+            refreshConnections();
+
+            connectKernel();
+
+            connectRegistryEvents();
+
+
+            /*
+             * Bereits registrierte Apps als Runtime
+             * vorbereiten, aber NICHT automatisch öffnen.
+             */
+
+            const registry =
+                getRegistry();
+
+
+            if (
+                registry &&
+                hasMethod(
+                    registry,
+                    "getAll"
+                )
+            ) {
+
+                registry.getAll()
+                    .forEach(
+                        app => {
+
+                            ensureRuntime(
+                                app
+                            );
+
+                        }
+                    );
+
+            }
+
+
+            refreshConnections();
+
+
+            state.ready =
+                true;
+
+            state.initializing =
+                false;
+
+
+            emit(
+                "ready",
+                {
+
+                    version:
+                        VERSION,
+
+                    runtimeCount:
+                        state.runtimes.size
+
+                }
+            );
+
+
+            log(
+                "HalDo AI OS 20 App Runtime bereit.",
+                "Runtimes:",
+                state.runtimes.size
+            );
+
+
+            return api;
+
+        } catch (exception) {
+
+            state.initializing =
+                false;
+
+            state.failed =
+                true;
+
+
+            reportError(
+                exception,
+                "Runtime Initialisierung"
+            );
+
+
+            throw exception;
+
+        }
 
     }
 
+
+    /* ============================================================
+       33 — BOOT
+       ============================================================ */
+
+    function boot() {
+
+        initialize()
+            .catch(
+                exception => {
+
+                    state.failed =
+                        true;
+
+                    state.initializing =
+                        false;
+
+
+                    reportError(
+                        exception,
+                        "Runtime Boot"
+                    );
+
+                }
+            );
+
+    }
+
+
+    api.initialize =
+        initialize;
+
+    api.boot =
+        boot;
+
+
+    /* ============================================================
+       34 — DOM START
+       ============================================================ */
 
     if (
         document.readyState ===
@@ -2690,7 +3207,7 @@
 
         document.addEventListener(
             "DOMContentLoaded",
-            initialize,
+            boot,
             {
                 once:
                     true
@@ -2699,15 +3216,14 @@
 
     } else {
 
-        initialize();
+        boot();
 
     }
 
 
+    /* ============================================================
+       END
+       HALDO AI OS 20 APPLICATION RUNTIME
+       ============================================================ */
+
 })(window, document);
-
-
-/* ============================================================
-   END
-   HALDO AI OS 20 APPLICATION RUNTIME
-   ============================================================ */
