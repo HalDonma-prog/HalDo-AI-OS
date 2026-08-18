@@ -1,6 +1,6 @@
 /* ============================================================
    HALDO AI OS 20
-   HALDO AI AVATAR SERVICE
+   HALDO AI AVATAR CONTROLLER
    ------------------------------------------------------------
    Datei:
        js/ai/ai-avatar.js
@@ -8,49 +8,36 @@
    Pfad:
        /js/ai/ai-avatar.js
 
-   Aufgabe:
-       Zentraler Service für den lebendigen HalDo AI Avatar.
-
-   Der Avatar ist KEIN Emoji und KEIN Roboter.
-
-   Grundlage:
-       Das vorhandene HalDo Logo-Bild.
-
    Verantwortlich für:
 
-   - HalDo AI Avatar State
-   - Idle / Atmung
-   - Listening
-   - Thinking
-   - Speaking
-   - Responding
-   - Welcome
-   - Error
-   - Offline
-   - Avatar Events
-   - AI-Verbindung
-   - Voice-Verbindung
-   - Speech-Verbindung
-   - Language-Verbindung
-   - Chat-Verbindung
-   - Sonnenzentrum-Verbindung
-   - App Registry-Verbindung
-   - Kernel-Verbindung
-   - System-Verbindung
-   - Logo Asset
-   - Animation Hooks
+   - lebendigen HalDo AI Avatar
+   - vorhandenes HalDo Logo als Avatar-Grundlage
+   - zentrale Position im Sonnenbereich
+   - Atmung / sanfte Bewegung
+   - Glow / Lichtreaktionen
+   - AI-Zustände
+   - Chat-Reaktionen
+   - Sprach-/Voice-Reaktionen
+   - Thinking / Listening / Speaking / Idle
+   - Event-Verbindungen
+   - AI-Core Verbindung
+   - Language Manager Verbindung
+   - Voice Verbindung
+   - Cosmic World Verbindung
+   - App Registry Verbindung
+   - Storage für Avatar-Einstellungen
+   - Fehlerbehandlung
    - Accessibility
-   - Reduced Motion
-   - Cosmic Welcome
-   - Avatar Diagnostics
-   - zukünftige Emotion-/Expression-Erweiterungen
+   - zukünftige Emotionen / Gesichtszustände
 
    WICHTIG:
 
-   Diese Datei enthält NICHT die komplette Sonnen-UI.
+   Das HalDo-Logo bleibt die visuelle Identität.
 
-   Sie ist die zentrale Logikschicht zwischen HalDo AI
-   und der visuellen Avatar-Oberfläche.
+   KEIN 🤖-Emoji.
+
+   Die Datei erzeugt keine eigene künstliche Logo-Grafik,
+   wenn ein vorhandenes HalDo-Logo verfügbar ist.
 
    ============================================================ */
 
@@ -80,13 +67,30 @@
         "ai-avatar";
 
     const NAME =
-        "HalDo AI Avatar Service 20";
+        "HalDo AI Avatar";
 
-    const DEFAULT_LOGO =
-        "assets/logo/logo.png";
+    const STORAGE_KEY =
+        "haldo.ai.os.20.ai-avatar";
 
-    const FALLBACK_LOGO =
-        "logo.png";
+
+    /*
+     * Das vorhandene Logo ist die verbindliche Grundlage.
+     *
+     * Mehrere mögliche Pfade werden unterstützt, damit das
+     * Projekt flexibel bleibt.
+     */
+
+    const DEFAULT_LOGO_PATHS = [
+
+        "assets/logo/logo.png",
+
+        "./assets/logo/logo.png",
+
+        "logo.png",
+
+        "./logo.png"
+
+    ];
 
 
     /* ============================================================
@@ -107,26 +111,23 @@
         failed:
             false,
 
-        state:
-            "idle",
-
-        previousState:
-            null,
-
-        expression:
-            "calm",
-
-        activity:
-            "resting",
-
-        intensity:
-            0.35,
+        mounted:
+            false,
 
         visible:
             true,
 
         enabled:
             true,
+
+        state:
+            "idle",
+
+        previousState:
+            "idle",
+
+        emotion:
+            "warm",
 
         speaking:
             false,
@@ -137,20 +138,62 @@
         thinking:
             false,
 
-        responding:
+        processing:
             false,
 
-        welcome:
+        connected:
             false,
 
-        online:
-            navigator.onLine !== false,
+        logoPath:
+            null,
 
-        reducedMotion:
-            false,
+        rootElement:
+            null,
 
-        mountedElements:
-            new Set(),
+        avatarElement:
+            null,
+
+        imageElement:
+            null,
+
+        glowElement:
+            null,
+
+        statusElement:
+            null,
+
+        animationFrame:
+            null,
+
+        lastFrame:
+            0,
+
+        pulse:
+            0,
+
+        energy:
+            0,
+
+        targetEnergy:
+            0,
+
+        rotation:
+            0,
+
+        scale:
+            1,
+
+        targetScale:
+            1,
+
+        opacity:
+            1,
+
+        targetOpacity:
+            1,
+
+        eventUnsubscribers:
+            [],
 
         listeners:
             new Map(),
@@ -163,59 +206,65 @@
             system:
                 false,
 
-            registry:
-                false,
-
-            aiCore:
-                false,
-
-            chat:
-                false,
-
-            voice:
-                false,
-
-            speech:
+            ai:
                 false,
 
             language:
                 false,
 
-            cosmicSound:
+            voice:
+                false,
+
+            registry:
+                false,
+
+            cosmic:
+                false,
+
+            storage:
                 false
 
         },
 
-        statistics: {
+        settings: {
 
-            stateChanges:
-                0,
+            enabled:
+                true,
 
-            expressions:
-                0,
+            idleAnimation:
+                true,
 
-            mounts:
-                0,
+            glow:
+                true,
 
-            unmounts:
-                0,
+            breathing:
+                true,
 
-            events:
-                0,
+            speakingReaction:
+                true,
 
-            errors:
-                0
+            listeningReaction:
+                true,
 
-        },
+            thinkingReaction:
+                true,
 
-        lastInteraction:
-            Date.now(),
+            soundReaction:
+                true,
 
-        lastStateChange:
-            Date.now(),
+            reducedMotion:
+                false,
 
-        lastError:
-            null
+            opacity:
+                1,
+
+            intensity:
+                1,
+
+            logoPath:
+                null
+
+        }
 
     };
 
@@ -283,6 +332,23 @@
     }
 
 
+    function clamp(
+        value,
+        min,
+        max
+    ) {
+
+        return Math.min(
+            max,
+            Math.max(
+                min,
+                value
+            )
+        );
+
+    }
+
+
     function now() {
 
         return Date.now();
@@ -343,23 +409,6 @@
     }
 
 
-    function safeString(
-        value,
-        fallback = ""
-    ) {
-
-        const result =
-            String(
-                value ?? ""
-            )
-            .trim();
-
-        return result ||
-            fallback;
-
-    }
-
-
     /* ============================================================
        06 — SERVICE LOOKUPS
        ============================================================ */
@@ -386,18 +435,6 @@
     }
 
 
-    function getRegistry() {
-
-        return (
-            window.HalDoAppRegistry ||
-            window.HalDoOSAppRegistry ||
-            HalDoOS.appRegistry ||
-            null
-        );
-
-    }
-
-
     function getAICore() {
 
         return (
@@ -409,46 +446,7 @@
     }
 
 
-    function getChat() {
-
-        return (
-            window.HalDoAIChat ||
-            window.HalDoChat ||
-            HalDoOS.aiChat ||
-            HalDoOS.chat ||
-            null
-        );
-
-    }
-
-
-    function getVoice() {
-
-        return (
-            window.HalDoVoice ||
-            window.HalDoAIVoice ||
-            HalDoOS.voice ||
-            HalDoOS.aiVoice ||
-            null
-        );
-
-    }
-
-
-    function getSpeech() {
-
-        return (
-            window.HalDoSpeech ||
-            window.HalDoAISpeech ||
-            HalDoOS.speech ||
-            HalDoOS.aiSpeech ||
-            null
-        );
-
-    }
-
-
-    function getLanguage() {
+    function getLanguageManager() {
 
         return (
             window.HalDoLanguageManager ||
@@ -459,13 +457,47 @@
     }
 
 
-    function getCosmicSound() {
+    function getVoice() {
 
         return (
-            window.HalDoCosmicSound ||
-            window.HalDoCosmicWelcome ||
-            HalDoOS.cosmicSound ||
-            HalDoOS.cosmicWelcome ||
+            window.HalDoVoice ||
+            window.HalDoVoiceManager ||
+            HalDoOS.voice ||
+            HalDoOS.voiceManager ||
+            null
+        );
+
+    }
+
+
+    function getRegistry() {
+
+        return (
+            window.HalDoAppRegistry ||
+            HalDoOS.appRegistry ||
+            null
+        );
+
+    }
+
+
+    function getCosmic() {
+
+        return (
+            window.HalDoCosmicWorld ||
+            HalDoOS.cosmicWorld ||
+            HalDoOS.cosmic ||
+            null
+        );
+
+    }
+
+
+    function getStorage() {
+
+        return (
+            window.HalDoStorage ||
+            HalDoOS.storage ||
             null
         );
 
@@ -566,26 +598,6 @@
         data = null
     ) {
 
-        state.statistics.events +=
-            1;
-
-
-        const payload = {
-
-            event,
-
-            timestamp:
-                new Date().toISOString(),
-
-            state:
-                state.state,
-
-            data:
-                clone(data)
-
-        };
-
-
         const listeners =
             state.listeners.get(
                 event
@@ -601,17 +613,14 @@
                         try {
 
                             callback(
-                                clone(
-                                    payload
-                                )
+                                data
                             );
 
                         } catch (exception) {
 
                             reportError(
                                 exception,
-                                "Avatar Event: " +
-                                event
+                                "Avatar Event: " + event
                             );
 
                         }
@@ -621,10 +630,6 @@
 
         }
 
-
-        /*
-         * HalDoOS Event Bus
-         */
 
         const events =
             HalDoOS.events;
@@ -642,17 +647,13 @@
 
                 events.emit(
                     "ai-avatar:" + event,
-                    payload
+                    data
                 );
 
             } catch (_) {}
 
         }
 
-
-        /*
-         * Kernel Event Bus
-         */
 
         const kernel =
             getKernel();
@@ -670,7 +671,7 @@
 
                 kernel.emit(
                     "ai-avatar:" + event,
-                    payload
+                    data
                 );
 
             } catch (_) {}
@@ -689,10 +690,6 @@
         context =
             "HalDo AI Avatar"
     ) {
-
-        state.statistics.errors +=
-            1;
-
 
         const normalized =
             exception instanceof Error
@@ -721,10 +718,6 @@
                 new Date().toISOString()
 
         };
-
-
-        state.lastError =
-            record;
 
 
         errorLog(
@@ -769,798 +762,333 @@
 
 
     /* ============================================================
-       09 — AVATAR STATES
+       09 — LOGO PATH
        ============================================================ */
 
-    const STATES = {
-
-        IDLE:
-            "idle",
-
-        LISTENING:
-            "listening",
-
-        THINKING:
-            "thinking",
-
-        SPEAKING:
-            "speaking",
-
-        RESPONDING:
-            "responding",
-
-        WELCOME:
-            "welcome",
-
-        ERROR:
-            "error",
-
-        OFFLINE:
-            "offline"
-
-    };
-
-
-    const EXPRESSIONS = {
-
-        CALM:
-            "calm",
-
-        HAPPY:
-            "happy",
-
-        ATTENTIVE:
-            "attentive",
-
-        THINKING:
-            "thinking",
-
-        SPEAKING:
-            "speaking",
-
-        WARM:
-            "warm",
-
-        ERROR:
-            "error",
-
-        OFFLINE:
-            "offline"
-
-    };
-
-
-    const ACTIVITY = {
-
-        RESTING:
-            "resting",
-
-        LISTENING:
-            "listening",
-
-        PROCESSING:
-            "processing",
-
-        SPEAKING:
-            "speaking",
-
-        WELCOMING:
-            "welcoming"
-
-    };
-
-
-    /* ============================================================
-       10 — STATE NORMALIZATION
-       ============================================================ */
-
-    function normalizeState(
-        value
-    ) {
-
-        const target =
-            safeString(
-                value,
-                STATES.IDLE
-            )
-            .toLowerCase();
-
+    function findLogoPath() {
 
         if (
-            Object.values(
-                STATES
-            ).includes(
-                target
-            )
+            state.settings.logoPath
         ) {
 
-            return target;
-
-        }
-
-
-        return STATES.IDLE;
-
-    }
-
-
-    /* ============================================================
-       11 — STATE → EXPRESSION
-       ============================================================ */
-
-    function expressionForState(
-        avatarState
-    ) {
-
-        switch (
-            avatarState
-        ) {
-
-            case STATES.LISTENING:
-
-                return EXPRESSIONS.ATTENTIVE;
-
-
-            case STATES.THINKING:
-
-                return EXPRESSIONS.THINKING;
-
-
-            case STATES.SPEAKING:
-
-                return EXPRESSIONS.SPEAKING;
-
-
-            case STATES.RESPONDING:
-
-                return EXPRESSIONS.HAPPY;
-
-
-            case STATES.WELCOME:
-
-                return EXPRESSIONS.WARM;
-
-
-            case STATES.ERROR:
-
-                return EXPRESSIONS.ERROR;
-
-
-            case STATES.OFFLINE:
-
-                return EXPRESSIONS.OFFLINE;
-
-
-            case STATES.IDLE:
-
-            default:
-
-                return EXPRESSIONS.CALM;
-
-        }
-
-    }
-
-
-    /* ============================================================
-       12 — STATE → ACTIVITY
-       ============================================================ */
-
-    function activityForState(
-        avatarState
-    ) {
-
-        switch (
-            avatarState
-        ) {
-
-            case STATES.LISTENING:
-
-                return ACTIVITY.LISTENING;
-
-
-            case STATES.THINKING:
-
-                return ACTIVITY.PROCESSING;
-
-
-            case STATES.SPEAKING:
-
-                return ACTIVITY.SPEAKING;
-
-
-            case STATES.RESPONDING:
-
-                return ACTIVITY.SPEAKING;
-
-
-            case STATES.WELCOME:
-
-                return ACTIVITY.WELCOMING;
-
-
-            default:
-
-                return ACTIVITY.RESTING;
-
-        }
-
-    }
-
-
-    /* ============================================================
-       13 — STATE FLAGS
-       ============================================================ */
-
-    function updateFlags(
-        avatarState
-    ) {
-
-        state.speaking =
-            avatarState ===
-            STATES.SPEAKING;
-
-        state.listening =
-            avatarState ===
-            STATES.LISTENING;
-
-        state.thinking =
-            avatarState ===
-            STATES.THINKING;
-
-        state.responding =
-            avatarState ===
-            STATES.RESPONDING;
-
-        state.welcome =
-            avatarState ===
-            STATES.WELCOME;
-
-    }
-
-
-    /* ============================================================
-       14 — SET STATE
-       ============================================================ */
-
-    function setState(
-        nextState,
-        options = {}
-    ) {
-
-        const normalized =
-            normalizeState(
-                nextState
-            );
-
-
-        const previous =
-            state.state;
-
-
-        if (
-            previous === normalized &&
-            options.force !== true
-        ) {
-
-            return getState();
-
-        }
-
-
-        state.previousState =
-            previous;
-
-
-        state.state =
-            normalized;
-
-
-        state.expression =
-            options.expression ||
-            expressionForState(
-                normalized
-            );
-
-
-        state.activity =
-            options.activity ||
-            activityForState(
-                normalized
-            );
-
-
-        state.intensity =
-            typeof options.intensity ===
-            "number"
-                ? Math.max(
-                    0,
-                    Math.min(
-                        1,
-                        options.intensity
-                    )
-                )
-                : defaultIntensity(
-                    normalized
-                );
-
-
-        updateFlags(
-            normalized
-        );
-
-
-        state.lastStateChange =
-            now();
-
-
-        state.lastInteraction =
-            now();
-
-
-        state.statistics.stateChanges +=
-            1;
-
-
-        emit(
-            "state-changed",
-            {
-
-                previous,
-
-                current:
-                    normalized,
-
-                expression:
-                    state.expression,
-
-                activity:
-                    state.activity,
-
-                intensity:
-                    state.intensity,
-
-                reason:
-                    options.reason ||
-                    null
-
-            }
-        );
-
-
-        emit(
-            normalized,
-            {
-
-                previous,
-
-                current:
-                    normalized,
-
-                expression:
-                    state.expression,
-
-                activity:
-                    state.activity,
-
-                intensity:
-                    state.intensity
-
-            }
-        );
-
-
-        updateMountedElements();
-
-
-        return getState();
-
-    }
-
-
-    function defaultIntensity(
-        avatarState
-    ) {
-
-        switch (
-            avatarState
-        ) {
-
-            case STATES.WELCOME:
-
-                return 0.75;
-
-
-            case STATES.LISTENING:
-
-                return 0.55;
-
-
-            case STATES.THINKING:
-
-                return 0.65;
-
-
-            case STATES.SPEAKING:
-
-                return 0.70;
-
-
-            case STATES.RESPONDING:
-
-                return 0.68;
-
-
-            case STATES.ERROR:
-
-                return 0.25;
-
-
-            case STATES.OFFLINE:
-
-                return 0.15;
-
-
-            default:
-
-                return 0.35;
-
-        }
-
-    }
-
-
-    /* ============================================================
-       15 — SHORTCUT STATES
-       ============================================================ */
-
-    function idle(
-        options = {}
-    ) {
-
-        return setState(
-            STATES.IDLE,
-            options
-        );
-
-    }
-
-
-    function listening(
-        options = {}
-    ) {
-
-        return setState(
-            STATES.LISTENING,
-            options
-        );
-
-    }
-
-
-    function thinking(
-        options = {}
-    ) {
-
-        return setState(
-            STATES.THINKING,
-            options
-        );
-
-    }
-
-
-    function speaking(
-        options = {}
-    ) {
-
-        return setState(
-            STATES.SPEAKING,
-            options
-        );
-
-    }
-
-
-    function responding(
-        options = {}
-    ) {
-
-        return setState(
-            STATES.RESPONDING,
-            options
-        );
-
-    }
-
-
-    function welcome(
-        options = {}
-    ) {
-
-        return setState(
-            STATES.WELCOME,
-            {
-
-                intensity:
-                    0.80,
-
-                ...options
-
-            }
-        );
-
-    }
-
-
-    function errorState(
-        options = {}
-    ) {
-
-        return setState(
-            STATES.ERROR,
-            options
-        );
-
-    }
-
-
-    function offline(
-        options = {}
-    ) {
-
-        return setState(
-            STATES.OFFLINE,
-            options
-        );
-
-    }
-
-
-    /* ============================================================
-       16 — EXPRESSION
-       ============================================================ */
-
-    function setExpression(
-        expression,
-        options = {}
-    ) {
-
-        const value =
-            safeString(
-                expression,
-                EXPRESSIONS.CALM
-            )
-            .toLowerCase();
-
-
-        state.expression =
-            value;
-
-
-        if (
-            typeof options.intensity ===
-            "number"
-        ) {
-
-            state.intensity =
-                Math.max(
-                    0,
-                    Math.min(
-                        1,
-                        options.intensity
-                    )
-                );
-
-        }
-
-
-        state.statistics.expressions +=
-            1;
-
-
-        emit(
-            "expression-changed",
-            {
-
-                expression:
-                    state.expression,
-
-                intensity:
-                    state.intensity
-
-            }
-        );
-
-
-        updateMountedElements();
-
-
-        return state.expression;
-
-    }
-
-
-    /* ============================================================
-       17 — LOGO
-       ============================================================ */
-
-    function getLogoSource() {
-
-        /*
-         * Zuerst ein explizit gesetztes Asset.
-         */
-
-        if (
-            HalDoOS.assets &&
-            HalDoOS.assets.logo
-        ) {
-
-            return safeString(
-                HalDoOS.assets.logo,
-                DEFAULT_LOGO
-            );
+            return state.settings.logoPath;
 
         }
 
 
         if (
-            window.HalDoLogo
+            window.HALDO_LOGO_PATH
         ) {
 
-            return safeString(
-                window.HalDoLogo,
-                DEFAULT_LOGO
-            );
+            return window.HALDO_LOGO_PATH;
 
         }
 
 
-        /*
-         * HalDo AI OS 20 Standard.
-         */
+        if (
+            HalDoOS.logoPath
+        ) {
 
-        return DEFAULT_LOGO;
+            return HalDoOS.logoPath;
+
+        }
+
+
+        return DEFAULT_LOGO_PATHS[0];
 
     }
 
 
-    function setLogoSource(
-        source
-    ) {
+    function resolveLogoPath() {
 
-        const value =
-            safeString(
-                source,
-                DEFAULT_LOGO
-            );
+        return new Promise(
+            resolve => {
+
+                const paths = [];
+
+                if (
+                    state.settings.logoPath
+                ) {
+
+                    paths.push(
+                        state.settings.logoPath
+                    );
+
+                }
 
 
-        HalDoOS.assets =
-            HalDoOS.assets || {};
+                if (
+                    window.HALDO_LOGO_PATH
+                ) {
 
-        HalDoOS.assets.logo =
-            value;
+                    paths.push(
+                        window.HALDO_LOGO_PATH
+                    );
+
+                }
 
 
-        emit(
-            "logo-changed",
-            {
+                DEFAULT_LOGO_PATHS
+                    .forEach(
+                        path => {
 
-                source:
-                    value
+                            if (
+                                !paths.includes(
+                                    path
+                                )
+                            ) {
+
+                                paths.push(
+                                    path
+                                );
+
+                            }
+
+                        }
+                    );
+
+
+                let index = 0;
+
+
+                function testNext() {
+
+                    if (
+                        index >=
+                        paths.length
+                    ) {
+
+                        resolve(
+                            findLogoPath()
+                        );
+
+                        return;
+
+                    }
+
+
+                    const path =
+                        paths[index++];
+
+
+                    const image =
+                        new Image();
+
+
+                    image.onload =
+                        function () {
+
+                            resolve(
+                                path
+                            );
+
+                        };
+
+
+                    image.onerror =
+                        function () {
+
+                            testNext();
+
+                        };
+
+
+                    image.src =
+                        path;
+
+                }
+
+
+                testNext();
 
             }
         );
-
-
-        updateMountedElements();
-
-
-        return value;
 
     }
 
 
     /* ============================================================
-       18 — REDUCED MOTION
+       10 — ROOT CREATION
        ============================================================ */
 
-    function detectReducedMotion() {
+    function createRoot() {
 
-        try {
+        if (
+            state.rootElement
+        ) {
 
-            if (
-                window.matchMedia
-            ) {
+            return state.rootElement;
 
-                return window.matchMedia(
-                    "(prefers-reduced-motion: reduce)"
-                ).matches;
-
-            }
-
-        } catch (_) {}
+        }
 
 
-        return false;
-
-    }
-
-
-    function setReducedMotion(
-        enabled
-    ) {
-
-        state.reducedMotion =
-            Boolean(
-                enabled
-            );
-
-
-        updateMountedElements();
-
-
-        emit(
-            "reduced-motion-changed",
-            {
-
-                enabled:
-                    state.reducedMotion
-
-            }
-        );
-
-
-        return state.reducedMotion;
-
-    }
-
-
-    /* ============================================================
-       19 — DOM AVATAR ELEMENT
-       ============================================================ */
-
-    function createAvatarElement(
-        options = {}
-    ) {
-
-        const wrapper =
+        const root =
             document.createElement(
                 "div"
             );
 
 
-        wrapper.className =
+        root.className =
             "haldo-ai-avatar";
 
 
-        wrapper.dataset.haldoAvatar =
-            "true";
+        root.setAttribute(
+            "data-haldo-ai-avatar",
+            "true"
+        );
 
 
-        wrapper.dataset.state =
-            state.state;
-
-
-        wrapper.dataset.expression =
-            state.expression;
-
-
-        wrapper.dataset.activity =
-            state.activity;
-
-
-        wrapper.setAttribute(
+        root.setAttribute(
             "role",
             "img"
         );
 
 
-        wrapper.setAttribute(
+        root.setAttribute(
             "aria-label",
             "HalDo AI"
         );
+
+
+        root.style.position =
+            "relative";
+
+
+        root.style.display =
+            "inline-flex";
+
+
+        root.style.alignItems =
+            "center";
+
+
+        root.style.justifyContent =
+            "center";
+
+
+        root.style.width =
+            "clamp(90px, 14vw, 190px)";
+
+
+        root.style.height =
+            "clamp(90px, 14vw, 190px)";
+
+
+        root.style.pointerEvents =
+            "auto";
+
+
+        root.style.userSelect =
+            "none";
+
+
+        root.style.transformOrigin =
+            "center center";
+
+
+        root.style.willChange =
+            "transform, opacity, filter";
+
+
+        state.rootElement =
+            root;
+
+
+        return root;
+
+    }
+
+
+    /* ============================================================
+       11 — GLOW
+       ============================================================ */
+
+    function createGlow() {
+
+        if (
+            state.glowElement
+        ) {
+
+            return state.glowElement;
+
+        }
+
+
+        const glow =
+            document.createElement(
+                "div"
+            );
+
+
+        glow.className =
+            "haldo-ai-avatar-glow";
+
+
+        glow.setAttribute(
+            "aria-hidden",
+            "true"
+        );
+
+
+        Object.assign(
+            glow.style,
+            {
+
+                position:
+                    "absolute",
+
+                inset:
+                    "-35%",
+
+                borderRadius:
+                    "50%",
+
+                background:
+                    "radial-gradient(circle, rgba(255,255,255,.48) 0%, rgba(255,220,120,.25) 28%, rgba(120,180,255,.10) 52%, transparent 74%)",
+
+                filter:
+                    "blur(14px)",
+
+                opacity:
+                    "0.65",
+
+                transform:
+                    "scale(1)",
+
+                pointerEvents:
+                    "none",
+
+                transition:
+                    "opacity .35s ease"
+
+            }
+        );
+
+
+        state.glowElement =
+            glow;
+
+
+        return glow;
+
+    }
+
+
+    /* ============================================================
+       12 — IMAGE
+       ============================================================ */
+
+    function createImage(
+        logoPath
+    ) {
+
+        if (
+            state.imageElement
+        ) {
+
+            return state.imageElement;
+
+        }
 
 
         const image =
@@ -1574,8 +1102,7 @@
 
 
         image.src =
-            options.logo ||
-            getLogoSource();
+            logoPath;
 
 
         image.alt =
@@ -1590,216 +1117,181 @@
             "async";
 
 
-        image.loading =
-            "eager";
+        Object.assign(
+            image.style,
+            {
 
+                position:
+                    "relative",
 
-        wrapper.appendChild(
-            image
+                zIndex:
+                    "3",
+
+                width:
+                    "72%",
+
+                height:
+                    "72%",
+
+                objectFit:
+                    "contain",
+
+                display:
+                    "block",
+
+                filter:
+                    "drop-shadow(0 0 12px rgba(255,255,255,.28))",
+
+                transformOrigin:
+                    "center center",
+
+                willChange:
+                    "transform, filter"
+
+            }
         );
 
 
-        /*
-         * Sanfte Glow-Ebene.
-         */
-
-        const glow =
-            document.createElement(
-                "span"
-            );
+        state.imageElement =
+            image;
 
 
-        glow.className =
-            "haldo-ai-avatar-glow";
-
-
-        glow.setAttribute(
-            "aria-hidden",
-            "true"
-        );
-
-
-        wrapper.appendChild(
-            glow
-        );
-
-
-        /*
-         * Atem-/Bewegungsebene.
-         */
-
-        const aura =
-            document.createElement(
-                "span"
-            );
-
-
-        aura.className =
-            "haldo-ai-avatar-aura";
-
-
-        aura.setAttribute(
-            "aria-hidden",
-            "true"
-        );
-
-
-        wrapper.appendChild(
-            aura
-        );
-
-
-        /*
-         * Zustandssynchronisierung.
-         */
-
-        applyElementState(
-            wrapper
-        );
-
-
-        return wrapper;
+        return image;
 
     }
 
 
     /* ============================================================
-       20 — APPLY DOM STATE
+       13 — STATUS
        ============================================================ */
 
-    function applyElementState(
-        element
-    ) {
+    function createStatus() {
 
         if (
-            !element
+            state.statusElement
         ) {
 
-            return;
+            return state.statusElement;
 
         }
 
 
-        element.dataset.state =
-            state.state;
-
-
-        element.dataset.expression =
-            state.expression;
-
-
-        element.dataset.activity =
-            state.activity;
-
-
-        element.dataset.intensity =
-            String(
-                state.intensity
+        const status =
+            document.createElement(
+                "span"
             );
 
 
-        element.dataset.enabled =
-            String(
-                state.enabled
-            );
+        status.className =
+            "haldo-ai-avatar-status";
 
 
-        element.dataset.visible =
-            String(
-                state.visible
-            );
+        status.setAttribute(
+            "aria-hidden",
+            "true"
+        );
 
 
-        element.dataset.reducedMotion =
-            String(
-                state.reducedMotion
-            );
+        Object.assign(
+            status.style,
+            {
+
+                position:
+                    "absolute",
+
+                bottom:
+                    "-8px",
+
+                left:
+                    "50%",
+
+                transform:
+                    "translateX(-50%)",
+
+                zIndex:
+                    "5",
+
+                padding:
+                    "3px 9px",
+
+                borderRadius:
+                    "999px",
+
+                fontSize:
+                    "10px",
+
+                lineHeight:
+                    "1",
+
+                letterSpacing:
+                    ".08em",
+
+                textTransform:
+                    "uppercase",
+
+                color:
+                    "rgba(255,255,255,.82)",
+
+                background:
+                    "rgba(10,15,35,.45)",
+
+                border:
+                    "1px solid rgba(255,255,255,.12)",
+
+                backdropFilter:
+                    "blur(8px)",
+
+                opacity:
+                    "0",
+
+                transition:
+                    "opacity .25s ease"
+
+            }
+        );
 
 
-        if (
-            state.visible &&
-            state.enabled
-        ) {
-
-            element.removeAttribute(
-                "hidden"
-            );
-
-        } else {
-
-            element.setAttribute(
-                "hidden",
-                ""
-            );
-
-        }
+        state.statusElement =
+            status;
 
 
-        const image =
-            element.querySelector(
-                ".haldo-ai-avatar-image"
-            );
-
-
-        if (
-            image &&
-            image.src !== getLogoSource()
-        ) {
-
-            image.src =
-                getLogoSource();
-
-        }
-
-    }
-
-
-    function updateMountedElements() {
-
-        state.mountedElements
-            .forEach(
-                element => {
-
-                    try {
-
-                        applyElementState(
-                            element
-                        );
-
-                    } catch (exception) {
-
-                        reportError(
-                            exception,
-                            "Avatar DOM Update"
-                        );
-
-                    }
-
-                }
-            );
+        return status;
 
     }
 
 
     /* ============================================================
-       21 — MOUNT
+       14 — MOUNT
        ============================================================ */
 
-    function mount(
-        target,
-        options = {}
+    async function mount(
+        target
     ) {
 
-        let container =
-            target;
+        if (
+            !target
+        ) {
+
+            target =
+                document.querySelector(
+                    "[data-haldo-ai-center]"
+                ) ||
+                document.querySelector(
+                    "#haldo-ai-center"
+                ) ||
+                document.querySelector(
+                    ".haldo-ai-center"
+                ) ||
+                document.body;
+
+        }
 
 
         if (
-            typeof target ===
-            "string"
+            typeof target === "string"
         ) {
 
-            container =
+            target =
                 document.querySelector(
                     target
                 );
@@ -1808,125 +1300,402 @@
 
 
         if (
-            !container
+            !target
         ) {
 
-            reportError(
-                new Error(
-                    "Avatar Mount-Ziel nicht gefunden."
-                ),
-                "Avatar Mount"
+            throw new Error(
+                "Kein Avatar-Mount-Ziel gefunden."
             );
-
-
-            return null;
 
         }
 
 
-        const avatar =
-            createAvatarElement(
-                options
+        const root =
+            createRoot();
+
+
+        if (
+            root.parentElement !== target
+        ) {
+
+            target.appendChild(
+                root
+            );
+
+        }
+
+
+        const glow =
+            createGlow();
+
+
+        if (
+            glow.parentElement !== root
+        ) {
+
+            root.appendChild(
+                glow
+            );
+
+        }
+
+
+        const logoPath =
+            await resolveLogoPath();
+
+
+        state.logoPath =
+            logoPath;
+
+
+        const image =
+            createImage(
+                logoPath
             );
 
 
-        container.appendChild(
-            avatar
-        );
+        if (
+            image.parentElement !== root
+        ) {
+
+            root.appendChild(
+                image
+            );
+
+        }
 
 
-        state.mountedElements.add(
-            avatar
-        );
+        const status =
+            createStatus();
 
 
-        state.statistics.mounts +=
-            1;
+        if (
+            status.parentElement !== root
+        ) {
+
+            root.appendChild(
+                status
+            );
+
+        }
+
+
+        state.mounted =
+            true;
+
+
+        state.visible =
+            true;
+
+
+        updateVisualState();
 
 
         emit(
             "mounted",
             {
 
-                element:
-                    avatar,
+                logoPath,
 
-                target:
-                    container
+                target
 
             }
         );
 
 
-        return avatar;
+        return root;
 
     }
 
 
     /* ============================================================
-       22 — UNMOUNT
+       15 — UNMOUNT
        ============================================================ */
 
-    function unmount(
-        element
-    ) {
+    function unmount() {
 
-        if (
-            !element
-        ) {
-
-            return false;
-
-        }
+        stopAnimation();
 
 
         if (
-            state.mountedElements.has(
-                element
-            )
+            state.rootElement &&
+            state.rootElement.parentElement
         ) {
 
-            state.mountedElements.delete(
-                element
-            );
-
-        }
-
-
-        try {
-
-            if (
-                element.parentNode
-            ) {
-
-                element.parentNode.removeChild(
-                    element
+            state.rootElement.parentElement
+                .removeChild(
+                    state.rootElement
                 );
 
-            }
-
-        } catch (exception) {
-
-            reportError(
-                exception,
-                "Avatar Unmount"
-            );
-
-
-            return false;
-
         }
 
 
-        state.statistics.unmounts +=
-            1;
+        state.mounted =
+            false;
+
+
+        state.rootElement =
+            null;
+
+        state.avatarElement =
+            null;
+
+        state.imageElement =
+            null;
+
+        state.glowElement =
+            null;
+
+        state.statusElement =
+            null;
 
 
         emit(
-            "unmounted",
+            "unmounted"
+        );
+
+
+        return true;
+
+    }
+
+
+    /* ============================================================
+       16 — STATE DEFINITIONS
+       ============================================================ */
+
+    const AVATAR_STATES = {
+
+        idle: {
+
+            energy:
+                0.18,
+
+            scale:
+                1,
+
+            status:
+                "",
+
+            glow:
+                0.52
+
+        },
+
+        listening: {
+
+            energy:
+                0.48,
+
+            scale:
+                1.025,
+
+            status:
+                "listening",
+
+            glow:
+                0.78
+
+        },
+
+        thinking: {
+
+            energy:
+                0.62,
+
+            scale:
+                1.035,
+
+            status:
+                "thinking",
+
+            glow:
+                0.92
+
+        },
+
+        speaking: {
+
+            energy:
+                0.76,
+
+            scale:
+                1.045,
+
+            status:
+                "speaking",
+
+            glow:
+                1
+
+        },
+
+        processing: {
+
+            energy:
+                0.56,
+
+            scale:
+                1.025,
+
+            status:
+                "processing",
+
+            glow:
+                0.82
+
+        },
+
+        happy: {
+
+            energy:
+                0.88,
+
+            scale:
+                1.055,
+
+            status:
+                "happy",
+
+            glow:
+                1
+
+        },
+
+        warm: {
+
+            energy:
+                0.36,
+
+            scale:
+                1.015,
+
+            status:
+                "",
+
+            glow:
+                0.68
+
+        },
+
+        sleeping: {
+
+            energy:
+                0.05,
+
+            scale:
+                0.985,
+
+            status:
+                "",
+
+            glow:
+                0.25
+
+        }
+
+    };
+
+
+    /* ============================================================
+       17 — SET STATE
+       ============================================================ */
+
+    function setState(
+        nextState,
+        options = {}
+    ) {
+
+        const normalized =
+            String(
+                nextState || "idle"
+            )
+            .trim()
+            .toLowerCase();
+
+
+        if (
+            !AVATAR_STATES[
+                normalized
+            ]
+        ) {
+
+            warn(
+                "Unbekannter Avatar State:",
+                normalized
+            );
+
+            return false;
+
+        }
+
+
+        const previous =
+            state.state;
+
+
+        state.previousState =
+            previous;
+
+
+        state.state =
+            normalized;
+
+
+        state.targetEnergy =
+            AVATAR_STATES[
+                normalized
+            ].energy;
+
+
+        state.targetScale =
+            AVATAR_STATES[
+                normalized
+            ].scale;
+
+
+        if (
+            options.emotion
+        ) {
+
+            state.emotion =
+                String(
+                    options.emotion
+                );
+
+        }
+
+
+        state.speaking =
+            normalized === "speaking";
+
+
+        state.listening =
+            normalized === "listening";
+
+
+        state.thinking =
+            normalized === "thinking";
+
+
+        state.processing =
+            normalized === "processing";
+
+
+        updateVisualState();
+
+
+        emit(
+            "state-changed",
             {
 
-                element
+                previous,
+
+                state:
+                    normalized,
+
+                emotion:
+                    state.emotion
 
             }
         );
@@ -1937,23 +1706,562 @@
     }
 
 
-    function unmountAll() {
+    /* ============================================================
+       18 — CONVENIENCE STATES
+       ============================================================ */
 
-        Array.from(
-            state.mountedElements
-        )
-        .forEach(
-            element =>
-                unmount(
-                    element
-                )
+    function idle() {
+
+        return setState(
+            "idle"
+        );
+
+    }
+
+
+    function listen() {
+
+        return setState(
+            "listening"
+        );
+
+    }
+
+
+    function think() {
+
+        return setState(
+            "thinking"
+        );
+
+    }
+
+
+    function speak() {
+
+        return setState(
+            "speaking"
+        );
+
+    }
+
+
+    function process() {
+
+        return setState(
+            "processing"
+        );
+
+    }
+
+
+    function happy() {
+
+        return setState(
+            "happy",
+            {
+                emotion:
+                    "happy"
+            }
+        );
+
+    }
+
+
+    function warm() {
+
+        return setState(
+            "warm",
+            {
+                emotion:
+                    "warm"
+            }
         );
 
     }
 
 
     /* ============================================================
-       23 — ENABLE / DISABLE
+       19 — VISUAL UPDATE
+       ============================================================ */
+
+    function updateVisualState() {
+
+        if (
+            !state.rootElement
+        ) {
+
+            return;
+
+        }
+
+
+        const definition =
+            AVATAR_STATES[
+                state.state
+            ] ||
+            AVATAR_STATES.idle;
+
+
+        const intensity =
+            clamp(
+                Number(
+                    state.settings.intensity
+                ) || 1,
+                0,
+                2
+            );
+
+
+        const glow =
+            definition.glow *
+            intensity;
+
+
+        state.targetEnergy =
+            definition.energy *
+            intensity;
+
+
+        state.targetScale =
+            1 +
+            (
+                definition.scale - 1
+            ) *
+            intensity;
+
+
+        state.targetOpacity =
+            state.visible &&
+            state.enabled
+                ? clamp(
+                    Number(
+                        state.settings.opacity
+                    ) || 1,
+                    0,
+                    1
+                )
+                : 0;
+
+
+        state.rootElement.style.opacity =
+            String(
+                state.opacity
+            );
+
+
+        if (
+            state.glowElement
+        ) {
+
+            state.glowElement.style.opacity =
+                String(
+                    clamp(
+                        glow,
+                        0,
+                        1
+                    )
+                );
+
+        }
+
+
+        if (
+            state.statusElement
+        ) {
+
+            const text =
+                definition.status;
+
+
+            state.statusElement.textContent =
+                text;
+
+
+            state.statusElement.style.opacity =
+                text
+                    ? "1"
+                    : "0";
+
+        }
+
+    }
+
+
+    /* ============================================================
+       20 — ANIMATION
+       ============================================================ */
+
+    function animationLoop(
+        timestamp
+    ) {
+
+        if (
+            !state.mounted
+        ) {
+
+            state.animationFrame =
+                null;
+
+            return;
+
+        }
+
+
+        if (
+            !state.lastFrame
+        ) {
+
+            state.lastFrame =
+                timestamp;
+
+        }
+
+
+        const delta =
+            Math.min(
+                100,
+                timestamp -
+                state.lastFrame
+            );
+
+
+        state.lastFrame =
+            timestamp;
+
+
+        const seconds =
+            timestamp /
+            1000;
+
+
+        /*
+         * Sanfte Energie-Interpolation.
+         */
+
+        state.energy +=
+            (
+                state.targetEnergy -
+                state.energy
+            ) *
+            Math.min(
+                1,
+                delta *
+                0.008
+            );
+
+
+        state.scale +=
+            (
+                state.targetScale -
+                state.scale
+            ) *
+            Math.min(
+                1,
+                delta *
+                0.008
+            );
+
+
+        state.opacity +=
+            (
+                state.targetOpacity -
+                state.opacity
+            ) *
+            Math.min(
+                1,
+                delta *
+                0.008
+            );
+
+
+        /*
+         * HalDo AI "Atmung".
+         */
+
+        const breathingEnabled =
+            state.settings.breathing &&
+            state.settings.idleAnimation &&
+            !state.settings.reducedMotion;
+
+
+        let breathing =
+            0;
+
+
+        if (
+            breathingEnabled
+        ) {
+
+            breathing =
+                Math.sin(
+                    seconds *
+                    1.35
+                ) *
+                0.012;
+
+        }
+
+
+        /*
+         * Leichte lebendige Bewegung.
+         */
+
+        const floating =
+            !state.settings.reducedMotion
+                ? Math.sin(
+                    seconds *
+                    0.72
+                ) *
+                1.7
+                : 0;
+
+
+        /*
+         * State-spezifische Reaktion.
+         */
+
+        let reaction =
+            0;
+
+
+        if (
+            state.state ===
+            "speaking"
+        ) {
+
+            reaction =
+                Math.sin(
+                    seconds *
+                    7
+                ) *
+                0.018 *
+                state.energy;
+
+        }
+
+
+        if (
+            state.state ===
+            "listening"
+        ) {
+
+            reaction =
+                Math.sin(
+                    seconds *
+                    3.5
+                ) *
+                0.012;
+
+        }
+
+
+        if (
+            state.state ===
+            "thinking"
+        ) {
+
+            reaction =
+                Math.sin(
+                    seconds *
+                    2.1
+                ) *
+                0.009;
+
+        }
+
+
+        const finalScale =
+            state.scale +
+            breathing +
+            reaction;
+
+
+        state.rotation =
+            Math.sin(
+                seconds *
+                0.38
+            ) *
+            1.4;
+
+
+        if (
+            state.rootElement
+        ) {
+
+            state.rootElement.style.transform =
+                "translate3d(0," +
+                floating +
+                "px,0) " +
+                "scale(" +
+                finalScale +
+                ") " +
+                "rotate(" +
+                state.rotation +
+                "deg)";
+
+        }
+
+
+        if (
+            state.imageElement
+        ) {
+
+            const imagePulse =
+                1 +
+                (
+                    Math.sin(
+                        seconds *
+                        2.2
+                    ) *
+                    0.008 *
+                    state.energy
+                );
+
+
+            const brightness =
+                1 +
+                state.energy *
+                0.22;
+
+
+            state.imageElement.style.transform =
+                "scale(" +
+                imagePulse +
+                ")";
+
+
+            state.imageElement.style.filter =
+                "drop-shadow(0 0 " +
+                (
+                    10 +
+                    state.energy *
+                    18
+                ) +
+                "px rgba(255,255,255,.34)) " +
+                "brightness(" +
+                brightness +
+                ")";
+
+        }
+
+
+        if (
+            state.glowElement
+        ) {
+
+            const glowPulse =
+                1 +
+                Math.sin(
+                    seconds *
+                    1.6
+                ) *
+                0.055 *
+                state.energy;
+
+
+            state.glowElement.style.transform =
+                "scale(" +
+                glowPulse +
+                ")";
+
+        }
+
+
+        state.animationFrame =
+            window.requestAnimationFrame(
+                animationLoop
+            );
+
+    }
+
+
+    function startAnimation() {
+
+        if (
+            state.animationFrame !== null
+        ) {
+
+            return;
+
+        }
+
+
+        state.lastFrame =
+            0;
+
+
+        state.animationFrame =
+            window.requestAnimationFrame(
+                animationLoop
+            );
+
+    }
+
+
+    function stopAnimation() {
+
+        if (
+            state.animationFrame !== null
+        ) {
+
+            window.cancelAnimationFrame(
+                state.animationFrame
+            );
+
+        }
+
+
+        state.animationFrame =
+            null;
+
+    }
+
+
+    /* ============================================================
+       21 — VISIBILITY
+       ============================================================ */
+
+    function show() {
+
+        state.visible =
+            true;
+
+
+        updateVisualState();
+
+
+        emit(
+            "shown"
+        );
+
+
+        return true;
+
+    }
+
+
+    function hide() {
+
+        state.visible =
+            false;
+
+
+        updateVisualState();
+
+
+        emit(
+            "hidden"
+        );
+
+
+        return true;
+
+    }
+
+
+    /* ============================================================
+       22 — ENABLE / DISABLE
        ============================================================ */
 
     function enable() {
@@ -1962,17 +2270,15 @@
             true;
 
 
-        updateMountedElements();
+        state.settings.enabled =
+            true;
+
+
+        show();
 
 
         emit(
-            "enabled",
-            {
-
-                enabled:
-                    true
-
-            }
+            "enabled"
         );
 
 
@@ -1987,17 +2293,15 @@
             false;
 
 
-        updateMountedElements();
+        state.settings.enabled =
+            false;
+
+
+        hide();
 
 
         emit(
-            "disabled",
-            {
-
-                enabled:
-                    false
-
-            }
+            "disabled"
         );
 
 
@@ -2006,287 +2310,164 @@
     }
 
 
-    function setVisible(
-        visible
+    /* ============================================================
+       23 — AI REACTIONS
+       ============================================================ */
+
+    function reactToUserMessage(
+        message
     ) {
 
-        state.visible =
-            Boolean(
-                visible
-            );
+        if (
+            !message
+        ) {
+
+            return;
+
+        }
 
 
-        updateMountedElements();
+        listen();
 
 
         emit(
-            "visibility-changed",
+            "user-message",
             {
 
-                visible:
-                    state.visible
+                message
 
             }
         );
 
-
-        return state.visible;
-
     }
 
 
-    /* ============================================================
-       24 — INTERACTION
-       ============================================================ */
-
-    function interact(
-        type = "interaction",
-        data = null
+    function reactToThinking(
+        active = true
     ) {
 
-        state.lastInteraction =
-            now();
+        if (
+            active
+        ) {
+
+            think();
+
+        } else {
+
+            idle();
+
+        }
 
 
         emit(
-            "interaction",
+            "thinking",
             {
 
-                type:
-                    safeString(
-                        type,
-                        "interaction"
-                    ),
+                active
 
-                data:
-                    clone(
-                        data
-                    )
-
-            }
-        );
-
-
-        /*
-         * Eine normale Interaktion soll den Avatar
-         * aufmerksam machen, aber keinen laufenden
-         * Sprech-/Denkzustand zerstören.
-         */
-
-        if (
-            state.state ===
-            STATES.IDLE
-        ) {
-
-            setExpression(
-                EXPRESSIONS.ATTENTIVE,
-                {
-                    intensity:
-                        0.50
-                }
-            );
-
-        }
-
-
-        return getState();
-
-    }
-
-
-    /* ============================================================
-       25 — AI EVENTS
-       ============================================================ */
-
-    function handleAIStart() {
-
-        thinking(
-            {
-                reason:
-                    "ai-start"
             }
         );
 
     }
 
 
-    function handleAIResponse(
-        data
-    ) {
-
-        responding(
-            {
-                reason:
-                    "ai-response",
-
-                data
-            }
-        );
-
-    }
-
-
-    function handleAIError(
-        data
-    ) {
-
-        errorState(
-            {
-                reason:
-                    "ai-error",
-
-                data
-            }
-        );
-
-    }
-
-
-    /* ============================================================
-       26 — VOICE EVENTS
-       ============================================================ */
-
-    function handleListeningStart() {
-
-        listening(
-            {
-                reason:
-                    "voice-listening"
-            }
-        );
-
-    }
-
-
-    function handleListeningEnd() {
-
-        if (
-            state.state ===
-            STATES.LISTENING
-        ) {
-
-            idle(
-                {
-                    reason:
-                        "voice-listening-end"
-                }
-            );
-
-        }
-
-    }
-
-
-    function handleSpeechStart() {
-
-        speaking(
-            {
-                reason:
-                    "speech-start"
-            }
-        );
-
-    }
-
-
-    function handleSpeechEnd() {
-
-        if (
-            state.state ===
-            STATES.SPEAKING
-        ) {
-
-            idle(
-                {
-                    reason:
-                        "speech-end"
-                }
-            );
-
-        }
-
-    }
-
-
-    /* ============================================================
-       27 — SERVICE EVENT CONNECTION
-       ============================================================ */
-
-    function subscribeToService(
-        service,
-        eventNames,
-        handler
+    function reactToSpeaking(
+        active = true
     ) {
 
         if (
-            !service ||
-            typeof handler !==
-            "function"
+            active
         ) {
 
-            return false;
+            speak();
+
+        } else {
+
+            idle();
 
         }
 
 
-        const names =
-            Array.isArray(
-                eventNames
-            )
-                ? eventNames
-                : [eventNames];
+        emit(
+            "speaking",
+            {
 
-
-        let connected =
-            false;
-
-
-        names.forEach(
-            eventName => {
-
-                try {
-
-                    if (
-                        hasMethod(
-                            service,
-                            "on"
-                        )
-                    ) {
-
-                        service.on(
-                            eventName,
-                            handler
-                        );
-
-                        connected =
-                            true;
-
-                    }
-
-                } catch (exception) {
-
-                    reportError(
-                        exception,
-                        "Service Event Connection: " +
-                        eventName
-                    );
-
-                }
+                active
 
             }
         );
 
+    }
 
-        return connected;
+
+    function reactToListening(
+        active = true
+    ) {
+
+        if (
+            active
+        ) {
+
+            listen();
+
+        } else {
+
+            idle();
+
+        }
+
+
+        emit(
+            "listening",
+            {
+
+                active
+
+            }
+        );
+
+    }
+
+
+    function reactToAudioLevel(
+        level
+    ) {
+
+        const normalized =
+            clamp(
+                Number(
+                    level
+                ) || 0,
+                0,
+                1
+            );
+
+
+        state.targetEnergy =
+            Math.max(
+                state.targetEnergy,
+                normalized
+            );
+
+
+        emit(
+            "audio-level",
+            {
+
+                level:
+                    normalized
+
+            }
+        );
 
     }
 
 
     /* ============================================================
-       28 — CONNECT AI CORE
+       24 — AI CORE CONNECTION
        ============================================================ */
 
-    function connectAICore() {
+    function connectAI() {
 
         const ai =
             getAICore();
@@ -2294,7 +2475,7 @@
 
         if (!ai) {
 
-            state.connections.aiCore =
+            state.connections.ai =
                 false;
 
             return false;
@@ -2302,123 +2483,194 @@
         }
 
 
-        let connected =
-            false;
+        state.connections.ai =
+            true;
 
 
-        connected =
-            subscribeToService(
-                ai,
-                [
+        /*
+         * Unterschiedliche mögliche AI-Core APIs werden
+         * bewusst unterstützt, damit die Registry nicht
+         * von einer einzigen zukünftigen Implementierung
+         * abhängig ist.
+         */
+
+        try {
+
+            if (
+                hasMethod(
+                    ai,
+                    "on"
+                )
+            ) {
+
+                const events = [
+
                     "thinking",
+
+                    "ai:thinking",
+
                     "processing",
-                    "request-start",
-                    "ai:start",
-                    "generation-start"
-                ],
-                handleAIStart
-            ) ||
-            connected;
+
+                    "ai:processing",
+
+                    "speaking",
+
+                    "ai:speaking",
+
+                    "response-start",
+
+                    "response-end"
+
+                ];
 
 
-        connected =
-            subscribeToService(
-                ai,
-                [
-                    "response",
-                    "response-ready",
-                    "ai:response",
-                    "generation-complete"
-                ],
-                handleAIResponse
-            ) ||
-            connected;
+                events.forEach(
+                    eventName => {
+
+                        const unsubscribe =
+                            ai.on(
+                                eventName,
+                                data => {
+
+                                    handleAIEvent(
+                                        eventName,
+                                        data
+                                    );
+
+                                }
+                            );
 
 
-        connected =
-            subscribeToService(
-                ai,
-                [
-                    "error",
-                    "ai:error"
-                ],
-                handleAIError
-            ) ||
-            connected;
+                        if (
+                            typeof unsubscribe ===
+                            "function"
+                        ) {
 
+                            state.eventUnsubscribers
+                                .push(
+                                    unsubscribe
+                                );
 
-        state.connections.aiCore =
-            connected || !!ai;
+                        }
 
+                    }
+                );
 
-        return state.connections.aiCore;
+            }
 
-    }
+        } catch (exception) {
 
-
-    /* ============================================================
-       29 — CONNECT CHAT
-       ============================================================ */
-
-    function connectChat() {
-
-        const chat =
-            getChat();
-
-
-        if (!chat) {
-
-            state.connections.chat =
-                false;
-
-            return false;
+            reportError(
+                exception,
+                "AI Connection"
+            );
 
         }
 
 
-        let connected =
-            false;
+        return true;
+
+    }
 
 
-        connected =
-            subscribeToService(
-                chat,
-                [
-                    "thinking",
-                    "message-start",
-                    "send-start",
-                    "processing"
-                ],
-                handleAIStart
-            ) ||
-            connected;
+    function handleAIEvent(
+        eventName,
+        data
+    ) {
+
+        const name =
+            String(
+                eventName || ""
+            )
+            .toLowerCase();
 
 
-        connected =
-            subscribeToService(
-                chat,
-                [
-                    "response",
-                    "message",
-                    "response-ready",
-                    "message-complete"
-                ],
-                handleAIResponse
-            ) ||
-            connected;
+        if (
+            name.includes(
+                "thinking"
+            )
+        ) {
+
+            reactToThinking(
+                data !== false
+            );
+
+            return;
+
+        }
 
 
-        state.connections.chat =
-            connected || !!chat;
+        if (
+            name.includes(
+                "processing"
+            )
+        ) {
+
+            if (
+                data === false
+            ) {
+
+                idle();
+
+            } else {
+
+                process();
+
+            }
+
+            return;
+
+        }
 
 
-        return state.connections.chat;
+        if (
+            name.includes(
+                "speaking"
+            )
+        ) {
+
+            reactToSpeaking(
+                data !== false
+            );
+
+            return;
+
+        }
+
+
+        if (
+            name.includes(
+                "response-start"
+            )
+        ) {
+
+            think();
+
+            return;
+
+        }
+
+
+        if (
+            name.includes(
+                "response-end"
+            )
+        ) {
+
+            happy();
+
+            window.setTimeout(
+                idle,
+                1200
+            );
+
+        }
 
     }
 
 
     /* ============================================================
-       30 — CONNECT VOICE
+       25 — VOICE CONNECTION
        ============================================================ */
 
     function connectVoice() {
@@ -2437,84 +2689,206 @@
         }
 
 
-        let connected =
-            false;
-
-
-        connected =
-            subscribeToService(
-                voice,
-                [
-                    "listening",
-                    "listen-start",
-                    "recording-start"
-                ],
-                handleListeningStart
-            ) ||
-            connected;
-
-
-        connected =
-            subscribeToService(
-                voice,
-                [
-                    "listen-end",
-                    "listening-end",
-                    "recording-end"
-                ],
-                handleListeningEnd
-            ) ||
-            connected;
-
-
-        connected =
-            subscribeToService(
-                voice,
-                [
-                    "speaking",
-                    "speech-start",
-                    "voice-start"
-                ],
-                handleSpeechStart
-            ) ||
-            connected;
-
-
-        connected =
-            subscribeToService(
-                voice,
-                [
-                    "speech-end",
-                    "speaking-end",
-                    "voice-end"
-                ],
-                handleSpeechEnd
-            ) ||
-            connected;
-
-
         state.connections.voice =
-            connected || !!voice;
+            true;
 
 
-        return state.connections.voice;
+        try {
+
+            if (
+                hasMethod(
+                    voice,
+                    "on"
+                )
+            ) {
+
+                const events = [
+
+                    "start",
+
+                    "started",
+
+                    "speaking",
+
+                    "speech-start",
+
+                    "speech-end",
+
+                    "end",
+
+                    "ended",
+
+                    "listening",
+
+                    "listening-start",
+
+                    "listening-end",
+
+                    "volume",
+
+                    "audio-level"
+
+                ];
+
+
+                events.forEach(
+                    eventName => {
+
+                        const unsubscribe =
+                            voice.on(
+                                eventName,
+                                data => {
+
+                                    handleVoiceEvent(
+                                        eventName,
+                                        data
+                                    );
+
+                                }
+                            );
+
+
+                        if (
+                            typeof unsubscribe ===
+                            "function"
+                        ) {
+
+                            state.eventUnsubscribers
+                                .push(
+                                    unsubscribe
+                                );
+
+                        }
+
+                    }
+                );
+
+            }
+
+        } catch (exception) {
+
+            reportError(
+                exception,
+                "Voice Connection"
+            );
+
+        }
+
+
+        return true;
+
+    }
+
+
+    function handleVoiceEvent(
+        eventName,
+        data
+    ) {
+
+        const name =
+            String(
+                eventName || ""
+            )
+            .toLowerCase();
+
+
+        if (
+            name.includes(
+                "volume"
+            ) ||
+            name.includes(
+                "audio-level"
+            )
+        ) {
+
+            const level =
+                typeof data ===
+                "number"
+                    ? data
+                    : (
+                        data &&
+                        (
+                            data.level ??
+                            data.volume
+                        )
+                    );
+
+
+            reactToAudioLevel(
+                level
+            );
+
+
+            return;
+
+        }
+
+
+        if (
+            name.includes(
+                "speech-start"
+            ) ||
+            name === "start" ||
+            name === "started" ||
+            name === "speaking"
+        ) {
+
+            reactToSpeaking(
+                true
+            );
+
+
+            return;
+
+        }
+
+
+        if (
+            name.includes(
+                "speech-end"
+            ) ||
+            name === "end" ||
+            name === "ended"
+        ) {
+
+            reactToSpeaking(
+                false
+            );
+
+
+            return;
+
+        }
+
+
+        if (
+            name.includes(
+                "listening"
+            )
+        ) {
+
+            reactToListening(
+                data !== false
+            );
+
+        }
 
     }
 
 
     /* ============================================================
-       31 — CONNECT SPEECH
+       26 — COSMIC CONNECTION
        ============================================================ */
 
-    function connectSpeech() {
+    function connectCosmic() {
 
-        const speech =
-            getSpeech();
+        const cosmic =
+            getCosmic();
 
 
-        if (!speech) {
+        if (!cosmic) {
 
-            state.connections.speech =
+            state.connections.cosmic =
                 false;
 
             return false;
@@ -2522,47 +2896,56 @@
         }
 
 
-        let connected =
-            false;
+        state.connections.cosmic =
+            true;
 
 
-        connected =
-            subscribeToService(
-                speech,
-                [
-                    "start",
-                    "speech-start",
-                    "speaking"
-                ],
-                handleSpeechStart
-            ) ||
-            connected;
+        try {
+
+            if (
+                hasMethod(
+                    cosmic,
+                    "setAIAvatar"
+                )
+            ) {
+
+                cosmic.setAIAvatar(
+                    api
+                );
+
+            }
 
 
-        connected =
-            subscribeToService(
-                speech,
-                [
-                    "end",
-                    "speech-end",
-                    "complete"
-                ],
-                handleSpeechEnd
-            ) ||
-            connected;
+            if (
+                hasMethod(
+                    cosmic,
+                    "setCenterAvatar"
+                )
+            ) {
+
+                cosmic.setCenterAvatar(
+                    api
+                );
+
+            }
+
+        } catch (exception) {
+
+            reportError(
+                exception,
+                "Cosmic Connection"
+            );
+
+        }
 
 
-        state.connections.speech =
-            connected || !!speech;
-
-
-        return state.connections.speech;
+        return true;
 
     }
 
 
     /* ============================================================
-       32 — CONNECT REGISTRY
+       27 — REGISTRY CONNECTION
        ============================================================ */
 
     function connectRegistry() {
@@ -2597,16 +2980,19 @@
                 registry.register({
 
                     id:
-                        "haldo-ai-avatar",
+                        MODULE_ID,
+
+                    appId:
+                        MODULE_ID,
 
                     name:
-                        "HalDo AI Avatar",
+                        NAME,
 
                     title:
-                        "HalDo AI Avatar",
+                        "HalDo AI",
 
                     description:
-                        "Lebendiger visueller Avatar für HalDo AI.",
+                        "Lebendiger zentraler HalDo AI Avatar.",
 
                     category:
                         "ai",
@@ -2614,73 +3000,42 @@
                     version:
                         VERSION,
 
-                    icon:
-                        null,
-
-                    iconUrl:
-                        getLogoSource(),
-
                     system:
                         true,
 
                     core:
                         true,
 
-                    singleton:
-                        true,
-
                     visible:
-                        true,
-
-                    enabled:
-                        true,
+                        false,
 
                     capabilities: [
 
                         "ai-avatar",
 
-                        "visual-ai",
+                        "ai-presence",
 
-                        "ai-state",
+                        "visual-reaction",
 
-                        "ai-expression",
+                        "voice-reaction",
 
-                        "ai-listening",
+                        "chat-reaction",
 
-                        "ai-thinking",
-
-                        "ai-speaking",
-
-                        "ai-response",
-
-                        "avatar-animation",
-
-                        "avatar-logo",
-
-                        "cosmic-welcome"
+                        "cosmic-center"
 
                     ],
 
                     permissions: [
 
-                        "ui.avatar",
+                        "ai",
 
-                        "ui.animation",
+                        "ui",
 
-                        "ai.state",
+                        "events",
 
-                        "voice.state"
+                        "voice"
 
-                    ],
-
-                    dependencies: [
-
-                        "app-registry"
-
-                    ],
-
-                    route:
-                        null
+                    ]
 
                 });
 
@@ -2702,18 +3057,18 @@
 
 
     /* ============================================================
-       33 — CONNECT COSMIC SOUND
+       28 — LANGUAGE CONNECTION
        ============================================================ */
 
-    function connectCosmicSound() {
+    function connectLanguage() {
 
-        const sound =
-            getCosmicSound();
+        const language =
+            getLanguageManager();
 
 
-        if (!sound) {
+        if (!language) {
 
-            state.connections.cosmicSound =
+            state.connections.language =
                 false;
 
             return false;
@@ -2721,7 +3076,7 @@
         }
 
 
-        state.connections.cosmicSound =
+        state.connections.language =
             true;
 
 
@@ -2731,52 +3086,44 @@
 
 
     /* ============================================================
-       34 — CONNECT SERVICES
+       29 — SERVICE CONNECTIONS
        ============================================================ */
 
-    function connectServices() {
-
-        const kernel =
-            getKernel();
-
-
-        const system =
-            getSystem();
-
+    function refreshConnections() {
 
         state.connections.kernel =
-            !!kernel;
+            !!getKernel();
 
 
         state.connections.system =
-            !!system;
+            !!getSystem();
 
 
-        connectRegistry();
+        state.connections.storage =
+            !!getStorage();
 
-        connectAICore();
 
-        connectChat();
+        connectAI();
 
         connectVoice();
 
-        connectSpeech();
+        connectCosmic();
 
-        connectCosmicSound();
+        connectRegistry();
+
+        connectLanguage();
 
 
-        state.connections.language =
-            !!getLanguage();
+        state.connected =
+            Object.values(
+                state.connections
+            )
+            .some(Boolean);
 
 
         emit(
-            "connections-refreshed",
-            {
-
-                connections:
-                    getConnectionStatus()
-
-            }
+            "connections-changed",
+            getConnectionStatus()
         );
 
 
@@ -2785,218 +3132,176 @@
     }
 
 
-    /* ============================================================
-       35 — CONNECTION STATUS
-       ============================================================ */
-
     function getConnectionStatus() {
 
-        return {
+        return clone(
+            state.connections
+        );
 
-            kernel:
-                !!getKernel(),
+    }
 
-            system:
-                !!getSystem(),
 
-            registry:
-                !!getRegistry(),
+    /* ============================================================
+       30 — STORAGE
+       ============================================================ */
 
-            aiCore:
-                !!getAICore(),
+    function save() {
 
-            chat:
-                !!getChat(),
+        const payload = {
 
-            voice:
-                !!getVoice(),
+            version:
+                VERSION,
 
-            speech:
-                !!getSpeech(),
+            settings:
+                clone(
+                    state.settings
+                ),
 
-            language:
-                !!getLanguage(),
+            visible:
+                state.visible,
 
-            cosmicSound:
-                !!getCosmicSound()
+            enabled:
+                state.enabled,
+
+            timestamp:
+                new Date().toISOString()
 
         };
 
-    }
+
+        try {
+
+            const storage =
+                getStorage();
 
 
-    /* ============================================================
-       36 — ONLINE / OFFLINE
-       ============================================================ */
+            if (
+                storage &&
+                hasMethod(
+                    storage,
+                    "set"
+                )
+            ) {
 
-    function handleOnline() {
-
-        state.online =
-            true;
-
-
-        emit(
-            "online",
-            {
-
-                online:
-                    true
-
-            }
-        );
+                const result =
+                    storage.set(
+                        STORAGE_KEY,
+                        payload
+                    );
 
 
-        if (
-            state.state ===
-            STATES.OFFLINE
-        ) {
+                if (
+                    result !== false
+                ) {
 
-            idle(
-                {
-                    reason:
-                        "online"
+                    emit(
+                        "saved",
+                        payload
+                    );
+
+
+                    return true;
+
                 }
+
+            }
+
+        } catch (exception) {
+
+            reportError(
+                exception,
+                "Avatar Storage Save"
             );
 
         }
 
-    }
 
+        try {
 
-    function handleOffline() {
-
-        state.online =
-            false;
-
-
-        offline(
-            {
-                reason:
-                    "offline"
-            }
-        );
-
-
-        emit(
-            "offline",
-            {
-
-                online:
-                    false
-
-            }
-        );
-
-    }
-
-
-    /* ============================================================
-       37 — AVATAR SETTINGS
-       ============================================================ */
-
-    function setIntensity(
-        intensity
-    ) {
-
-        const value =
-            Number(
-                intensity
-            );
-
-
-        if (
-            !Number.isFinite(
-                value
-            )
-        ) {
-
-            return state.intensity;
-
-        }
-
-
-        state.intensity =
-            Math.max(
-                0,
-                Math.min(
-                    1,
-                    value
+            window.localStorage.setItem(
+                STORAGE_KEY,
+                JSON.stringify(
+                    payload
                 )
             );
 
 
-        updateMountedElements();
+            emit(
+                "saved",
+                payload
+            );
 
 
-        emit(
-            "intensity-changed",
-            {
+            return true;
 
-                intensity:
-                    state.intensity
+        } catch (exception) {
 
-            }
-        );
+            reportError(
+                exception,
+                "Avatar LocalStorage Save"
+            );
 
 
-        return state.intensity;
+            return false;
+
+        }
 
     }
 
 
-    /* ============================================================
-       38 — COSMIC WELCOME
-       ============================================================ */
+    function load() {
 
-    async function playWelcome(
-        options = {}
-    ) {
+        let data =
+            null;
 
-        welcome(
-            {
-                reason:
-                    "cosmic-welcome",
 
-                intensity:
-                    0.85,
+        try {
 
-                ...options
+            const storage =
+                getStorage();
+
+
+            if (
+                storage &&
+                hasMethod(
+                    storage,
+                    "get"
+                )
+            ) {
+
+                data =
+                    storage.get(
+                        STORAGE_KEY
+                    );
 
             }
-        );
+
+        } catch (exception) {
+
+            reportError(
+                exception,
+                "Avatar Storage Load"
+            );
+
+        }
 
 
-        const sound =
-            getCosmicSound();
-
-
-        if (
-            sound
-        ) {
+        if (!data) {
 
             try {
 
-                if (
-                    hasMethod(
-                        sound,
-                        "playWelcome"
-                    )
-                ) {
-
-                    await sound.playWelcome(
-                        options
+                const raw =
+                    window.localStorage.getItem(
+                        STORAGE_KEY
                     );
 
-                } else if (
-                    hasMethod(
-                        sound,
-                        "play"
-                    )
-                ) {
 
-                    await sound.play(
-                        "welcome"
-                    );
+                if (raw) {
+
+                    data =
+                        JSON.parse(
+                            raw
+                        );
 
                 }
 
@@ -3004,186 +3309,253 @@
 
                 reportError(
                     exception,
-                    "Cosmic Welcome"
+                    "Avatar LocalStorage Load"
                 );
 
             }
+
+        }
+
+
+        if (
+            !data ||
+            typeof data !==
+            "object"
+        ) {
+
+            return false;
+
+        }
+
+
+        if (
+            data.settings &&
+            typeof data.settings ===
+            "object"
+        ) {
+
+            state.settings = {
+
+                ...state.settings,
+
+                ...data.settings
+
+            };
+
+        }
+
+
+        if (
+            typeof data.visible ===
+            "boolean"
+        ) {
+
+            state.visible =
+                data.visible;
+
+        }
+
+
+        if (
+            typeof data.enabled ===
+            "boolean"
+        ) {
+
+            state.enabled =
+                data.enabled;
 
         }
 
 
         emit(
-            "welcome-started",
-            {
-
-                options:
-                    clone(options)
-
-            }
+            "loaded",
+            data
         );
 
 
-        const duration =
-            Number(
-                options.duration ||
-                1800
-            );
+        return true;
+
+    }
 
 
-        window.setTimeout(
-            () => {
+    /* ============================================================
+       31 — SETTINGS
+       ============================================================ */
 
-                if (
-                    state.state ===
-                    STATES.WELCOME
-                ) {
+    function getSettings() {
 
-                    idle(
-                        {
-                            reason:
-                                "welcome-complete"
-                        }
-                    );
+        return clone(
+            state.settings
+        );
 
-                }
+    }
 
 
-                emit(
-                    "welcome-complete",
-                    null
+    function setSettings(
+        changes = {},
+        options = {}
+    ) {
+
+        if (
+            !changes ||
+            typeof changes !==
+            "object"
+        ) {
+
+            return getSettings();
+
+        }
+
+
+        state.settings = {
+
+            ...state.settings,
+
+            ...changes
+
+        };
+
+
+        if (
+            changes.enabled !== undefined
+        ) {
+
+            state.enabled =
+                Boolean(
+                    changes.enabled
                 );
 
-            },
-            Math.max(
-                300,
-                duration
-            )
+        }
+
+
+        if (
+            changes.opacity !== undefined
+        ) {
+
+            state.settings.opacity =
+                clamp(
+                    Number(
+                        changes.opacity
+                    ) || 0,
+                    0,
+                    1
+                );
+
+        }
+
+
+        if (
+            changes.intensity !== undefined
+        ) {
+
+            state.settings.intensity =
+                clamp(
+                    Number(
+                        changes.intensity
+                    ) || 0,
+                    0,
+                    2
+                );
+
+        }
+
+
+        if (
+            changes.logoPath
+        ) {
+
+            state.settings.logoPath =
+                String(
+                    changes.logoPath
+                );
+
+        }
+
+
+        updateVisualState();
+
+
+        if (
+            options.save !== false
+        ) {
+
+            save();
+
+        }
+
+
+        emit(
+            "settings-changed",
+            getSettings()
         );
 
 
-        return getState();
+        return getSettings();
 
     }
 
 
     /* ============================================================
-       39 — TALKING CONTROL
+       32 — ACCESSIBILITY
        ============================================================ */
 
-    function beginListening(
-        options = {}
+    function setReducedMotion(
+        enabled
     ) {
 
-        return listening(
-            {
-                reason:
-                    "begin-listening",
+        state.settings.reducedMotion =
+            Boolean(
+                enabled
+            );
 
-                ...options
-
-            }
-        );
-
-    }
-
-
-    function endListening(
-        options = {}
-    ) {
 
         if (
-            state.state ===
-            STATES.LISTENING
+            state.rootElement
         ) {
 
-            return idle(
-                {
-                    reason:
-                        "end-listening",
-
-                    ...options
-
-                }
-            );
+            state.rootElement.style.transition =
+                state.settings.reducedMotion
+                    ? "none"
+                    : "";
 
         }
 
 
-        return getState();
-
-    }
+        updateVisualState();
 
 
-    function beginThinking(
-        options = {}
-    ) {
-
-        return thinking(
+        emit(
+            "reduced-motion-changed",
             {
-                reason:
-                    "begin-thinking",
 
-                ...options
+                enabled:
+                    state.settings.reducedMotion
 
             }
         );
 
-    }
 
-
-    function beginSpeaking(
-        options = {}
-    ) {
-
-        return speaking(
-            {
-                reason:
-                    "begin-speaking",
-
-                ...options
-
-            }
-        );
-
-    }
-
-
-    function endSpeaking(
-        options = {}
-    ) {
-
-        if (
-            state.state ===
-            STATES.SPEAKING ||
-            state.state ===
-            STATES.RESPONDING
-        ) {
-
-            return idle(
-                {
-                    reason:
-                        "end-speaking",
-
-                    ...options
-
-                }
-            );
-
-        }
-
-
-        return getState();
+        return true;
 
     }
 
 
     /* ============================================================
-       40 — STATE ACCESS
+       33 — DIAGNOSTICS
        ============================================================ */
 
-    function getState() {
+    function diagnostics() {
 
         return {
+
+            name:
+                NAME,
+
+            version:
+                VERSION,
+
+            module:
+                MODULE_ID,
 
             initialized:
                 state.initialized,
@@ -3197,97 +3569,32 @@
             failed:
                 state.failed,
 
+            mounted:
+                state.mounted,
+
+            visible:
+                state.visible,
+
+            enabled:
+                state.enabled,
+
             state:
                 state.state,
 
             previousState:
                 state.previousState,
 
-            expression:
-                state.expression,
+            emotion:
+                state.emotion,
 
-            activity:
-                state.activity,
-
-            intensity:
-                state.intensity,
-
-            enabled:
-                state.enabled,
-
-            visible:
-                state.visible,
-
-            online:
-                state.online,
-
-            speaking:
-                state.speaking,
-
-            listening:
-                state.listening,
-
-            thinking:
-                state.thinking,
-
-            responding:
-                state.responding,
-
-            welcome:
-                state.welcome,
-
-            reducedMotion:
-                state.reducedMotion,
-
-            logo:
-                getLogoSource()
-
-        };
-
-    }
-
-
-    /* ============================================================
-       41 — DIAGNOSTICS
-       ============================================================ */
-
-    function diagnostics() {
-
-        return {
-
-            name:
-                NAME,
-
-            module:
-                MODULE_ID,
-
-            version:
-                VERSION,
-
-            state:
-                getState(),
+            logoPath:
+                state.logoPath,
 
             connections:
                 getConnectionStatus(),
 
-            mounted:
-                state.mountedElements.size,
-
-            statistics:
-                {
-                    ...state.statistics
-                },
-
-            lastInteraction:
-                state.lastInteraction,
-
-            lastStateChange:
-                state.lastStateChange,
-
-            lastError:
-                clone(
-                    state.lastError
-                ),
+            settings:
+                getSettings(),
 
             timestamp:
                 new Date().toISOString()
@@ -3298,73 +3605,7 @@
 
 
     /* ============================================================
-       42 — HEALTH CHECK
-       ============================================================ */
-
-    function healthCheck() {
-
-        const connections =
-            getConnectionStatus();
-
-
-        const problems = [];
-
-
-        if (
-            !connections.registry
-        ) {
-
-            problems.push(
-                "App Registry nicht verbunden."
-            );
-
-        }
-
-
-        if (
-            !connections.aiCore
-        ) {
-
-            problems.push(
-                "AI Core noch nicht verbunden."
-            );
-
-        }
-
-
-        if (
-            !connections.language
-        ) {
-
-            problems.push(
-                "Language Manager noch nicht verbunden."
-            );
-
-        }
-
-
-        return {
-
-            healthy:
-                problems.length === 0,
-
-            problems,
-
-            connections,
-
-            state:
-                getState(),
-
-            timestamp:
-                new Date().toISOString()
-
-        };
-
-    }
-
-
-    /* ============================================================
-       43 — PUBLIC API
+       34 — PUBLIC API
        ============================================================ */
 
     const api = {
@@ -3372,115 +3613,94 @@
         name:
             NAME,
 
-        module:
-            MODULE_ID,
-
         version:
             VERSION,
 
+        module:
+            MODULE_ID,
 
-        STATES,
 
-        EXPRESSIONS,
+        /*
+         * Initialization
+         */
 
-        ACTIVITY,
+        initialize:
+            initialize,
+
+        boot:
+            boot,
+
+
+        /*
+         * Mount
+         */
+
+        mount,
+
+        unmount,
 
 
         /*
          * State
          */
 
-        getState,
+        getState:
+            () => state.state,
 
         setState,
 
         idle,
 
-        listening,
+        listen,
 
-        thinking,
+        think,
 
-        speaking,
+        speak,
 
-        responding,
+        process,
 
-        welcome,
+        happy,
 
-        error:
-            errorState,
-
-        offline,
+        warm,
 
 
         /*
-         * Expression
+         * AI reactions
          */
 
-        setExpression,
+        reactToUserMessage,
 
+        reactToThinking,
 
-        /*
-         * Logo
-         */
+        reactToSpeaking,
 
-        getLogoSource,
+        reactToListening,
 
-        setLogoSource,
-
-
-        /*
-         * DOM
-         */
-
-        createAvatarElement,
-
-        mount,
-
-        unmount,
-
-        unmountAll,
+        reactToAudioLevel,
 
 
         /*
          * Visibility
          */
 
+        show,
+
+        hide,
+
         enable,
 
         disable,
 
-        setVisible,
-
 
         /*
-         * Interaction
+         * Settings
          */
 
-        interact,
+        getSettings,
 
-        setIntensity,
+        setSettings,
 
-
-        /*
-         * Voice / AI control
-         */
-
-        beginListening,
-
-        endListening,
-
-        beginThinking,
-
-        beginSpeaking,
-
-        endSpeaking,
-
-
-        /*
-         * Cosmic Welcome
-         */
-
-        playWelcome,
+        setReducedMotion,
 
 
         /*
@@ -3498,39 +3718,37 @@
          * Connections
          */
 
-        connectServices,
+        refreshConnections,
 
         getConnectionStatus,
+
+
+        /*
+         * Persistence
+         */
+
+        save,
+
+        load,
 
 
         /*
          * Diagnostics
          */
 
-        diagnostics,
-
-        healthCheck,
-
-
-        /*
-         * Accessibility
-         */
-
-        setReducedMotion,
-
-        detectReducedMotion
+        diagnostics
 
     };
 
 
     /* ============================================================
-       44 — GLOBAL EXPORT
+       35 — GLOBAL EXPORT
        ============================================================ */
 
     window.HalDoAIAvatar =
         api;
 
-    window.HalDoAvatar =
+    window.HalDoOSAIAvatar =
         api;
 
     HalDoOS.aiAvatar =
@@ -3545,23 +3763,7 @@
 
 
     /* ============================================================
-       45 — ONLINE / OFFLINE EVENTS
-       ============================================================ */
-
-    window.addEventListener(
-        "online",
-        handleOnline
-    );
-
-
-    window.addEventListener(
-        "offline",
-        handleOffline
-    );
-
-
-    /* ============================================================
-       46 — INITIALIZATION
+       36 — INITIALIZATION
        ============================================================ */
 
     async function initialize() {
@@ -3594,69 +3796,57 @@
             false;
 
 
+        emit(
+            "initializing",
+            {
+
+                version:
+                    VERSION
+
+            }
+        );
+
+
         try {
 
-            /*
-             * Accessibility zuerst.
-             */
+            load();
 
-            state.reducedMotion =
-                detectReducedMotion();
+
+            refreshConnections();
 
 
             /*
-             * Standardlogo sicherstellen.
+             * Automatisch einen sinnvollen zentralen
+             * Avatar-Mount suchen.
              */
+
+            const target =
+                document.querySelector(
+                    "[data-haldo-ai-center]"
+                ) ||
+                document.querySelector(
+                    "#haldo-ai-center"
+                ) ||
+                document.querySelector(
+                    ".haldo-ai-center"
+                );
+
 
             if (
-                !getLogoSource()
+                target
             ) {
 
-                setLogoSource(
-                    DEFAULT_LOGO
+                await mount(
+                    target
                 );
 
             }
 
 
-            /*
-             * Services verbinden.
-             */
-
-            connectServices();
+            startAnimation();
 
 
-            /*
-             * Offline-Zustand respektieren.
-             */
-
-            if (
-                navigator.onLine === false
-            ) {
-
-                state.online =
-                    false;
-
-                offline(
-                    {
-                        reason:
-                            "initial-offline"
-                    }
-                );
-
-            } else {
-
-                state.online =
-                    true;
-
-                idle(
-                    {
-                        reason:
-                            "initialization"
-                    }
-                );
-
-            }
+            updateVisualState();
 
 
             state.ready =
@@ -3670,14 +3860,8 @@
                 "ready",
                 {
 
-                    version:
-                        VERSION,
-
-                    state:
-                        getState(),
-
-                    connections:
-                        getConnectionStatus()
+                    diagnostics:
+                        diagnostics()
 
                 }
             );
@@ -3701,7 +3885,7 @@
 
             reportError(
                 exception,
-                "Avatar Initialisierung"
+                "Avatar Initialization"
             );
 
 
@@ -3713,7 +3897,36 @@
 
 
     /* ============================================================
-       47 — BOOT
+       37 — EVENT CONNECTION RETRY
+       ============================================================ */
+
+    function retryConnections() {
+
+        /*
+         * Andere Core-Module können später als der Avatar
+         * geladen werden. Deshalb wird die Verbindung
+         * wiederholt überprüft.
+         */
+
+        refreshConnections();
+
+
+        if (
+            state.mounted
+        ) {
+
+            startAnimation();
+
+        }
+
+
+        return getConnectionStatus();
+
+    }
+
+
+    /* ============================================================
+       38 — BOOT
        ============================================================ */
 
     function boot() {
@@ -3724,9 +3937,6 @@
 
                     state.failed =
                         true;
-
-                    state.initializing =
-                        false;
 
 
                     reportError(
@@ -3740,85 +3950,8 @@
     }
 
 
-    api.initialize =
-        initialize;
-
-    api.boot =
-        boot;
-
-
     /* ============================================================
-       48 — KERNEL MODULE REGISTRATION
-       ============================================================ */
-
-    function connectKernel() {
-
-        const kernel =
-            getKernel();
-
-
-        if (!kernel) {
-
-            return false;
-
-        }
-
-
-        try {
-
-            if (
-                hasMethod(
-                    kernel,
-                    "registerModule"
-                )
-            ) {
-
-                kernel.registerModule(
-                    MODULE_ID,
-                    api
-                );
-
-            }
-
-
-            if (
-                hasMethod(
-                    kernel,
-                    "setModuleReady"
-                )
-            ) {
-
-                kernel.setModuleReady(
-                    MODULE_ID,
-                    true
-                );
-
-            }
-
-
-            state.connections.kernel =
-                true;
-
-
-            return true;
-
-        } catch (exception) {
-
-            reportError(
-                exception,
-                "Kernel Registration"
-            );
-
-
-            return false;
-
-        }
-
-    }
-
-
-    /* ============================================================
-       49 — DOM START
+       39 — DOM READY
        ============================================================ */
 
     if (
@@ -3828,13 +3961,7 @@
 
         document.addEventListener(
             "DOMContentLoaded",
-            () => {
-
-                connectKernel();
-
-                boot();
-
-            },
+            boot,
             {
                 once:
                     true
@@ -3843,37 +3970,79 @@
 
     } else {
 
-        connectKernel();
-
         boot();
 
     }
 
 
     /* ============================================================
-       50 — FINAL REFERENCES
+       40 — SYSTEM EVENTS
        ============================================================ */
 
-    window.HalDoAIAvatar =
-        api;
+    window.addEventListener(
+        "beforeunload",
+        function () {
 
-    window.HalDoAvatar =
-        api;
+            try {
 
-    HalDoOS.aiAvatar =
-        api;
+                save();
 
-    HalDoOS.services =
-        HalDoOS.services || {};
+            } catch (_) {}
 
-    HalDoOS.services.aiAvatar =
-        api;
+        }
+    );
+
+
+    /*
+     * Reduced Motion des Browsers berücksichtigen.
+     */
+
+    try {
+
+        const media =
+            window.matchMedia(
+                "(prefers-reduced-motion: reduce)"
+            );
+
+
+        if (
+            media.matches
+        ) {
+
+            setReducedMotion(
+                true
+            );
+
+        }
+
+
+        if (
+            hasMethod(
+                media,
+                "addEventListener"
+            )
+        ) {
+
+            media.addEventListener(
+                "change",
+                event => {
+
+                    setReducedMotion(
+                        event.matches
+                    );
+
+                }
+            );
+
+        }
+
+    } catch (_) {}
 
 
     /* ============================================================
        END
        HALDO AI OS 20
-       HALDO AI AVATAR SERVICE
+       HALDO AI AVATAR CONTROLLER
        ============================================================ */
 
 })(window, document);
