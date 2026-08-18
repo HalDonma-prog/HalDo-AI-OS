@@ -1,42 +1,39 @@
 /*
  * ============================================================
  * HalDo AI OS 20
- * V20 Central Bridge
+ * V20 Core Bridge
  * ============================================================
  *
  * Datei:
  *   js/haldo-v20-bridge.js
  *
  * Zweck:
- *   Zentrale defensive Verbindungs- und Kompatibilitätsschicht
- *   für HalDo AI OS 20.
+ *   Zentrale V20-Verbindungsschicht.
  *
  * WICHTIG:
+ *   Diese Datei ersetzt kein bestehendes HalDo-System.
+ *   Sie stellt einen stabilen gemeinsamen V20-Namespace bereit
+ *   und verbindet vorhandene Systeme defensiv miteinander.
  *
- *   Diese Datei ersetzt KEIN bestehendes System.
+ * Architektur:
  *
- *   Sie verbindet:
- *
- *      Kernel
- *      System
- *      App Manager
- *      App Registry
- *      App Runtime
- *      Router
- *      Launcher
- *      Window Manager
- *      Storage
- *      Language
- *      AI
- *      Voice
- *      Notifications
- *      Cosmic
- *      Service Bridge
- *      Universal App Event Bus
- *
- *   miteinander.
- *
- *   Bestehende globale APIs werden nicht blind überschrieben.
+ *   HalDoOS
+ *      │
+ *      └── HalDoV20
+ *             │
+ *             ├── coreBridge
+ *             ├── serviceBridge
+ *             ├── appEvents
+ *             ├── appRegistry
+ *             ├── appRuntime
+ *             ├── appManager
+ *             ├── router
+ *             ├── windowManager
+ *             ├── storage
+ *             ├── language
+ *             ├── ai
+ *             ├── voice
+ *             └── cosmic
  *
  * ============================================================
  */
@@ -47,7 +44,7 @@
 
 
     /* ========================================================
-       GLOBAL OBJECTS
+       GLOBAL ROOTS
     ======================================================== */
 
     const HalDoOS =
@@ -56,11 +53,12 @@
 
 
     /*
-     * Das zentrale V20-Namespace darf NICHT mehr durch diese
-     * Datei ersetzt werden.
+     * WICHTIG:
      *
-     * Service Bridge und App Event Bus können bereits vorher
-     * Eigenschaften daran registriert haben.
+     * HalDoV20 darf NICHT mehr blind ersetzt werden.
+     *
+     * Andere V20-Dateien können bereits Eigenschaften daran
+     * angelegt haben.
      */
 
     const V20 =
@@ -69,13 +67,13 @@
 
 
     /* ========================================================
-       BRIDGE OBJECT
+       CORE BRIDGE
     ======================================================== */
 
     const Bridge = {
 
         name:
-            "haldo-v20-bridge",
+            "HalDo V20 Core Bridge",
 
         version:
             "20.0.0",
@@ -92,20 +90,15 @@
         listeners:
             new Map(),
 
-        config: {
+        config:
+            {
+                debug:
+                    true,
 
-            debug:
-                true,
+                version:
+                    "20.0.0"
+            }
 
-            version:
-                "20.0.0"
-        },
-
-        serviceBridge:
-            null,
-
-        eventBus:
-            null
     };
 
 
@@ -119,7 +112,6 @@
             if (
                 !Bridge.config.debug
             ) {
-
                 return;
             }
 
@@ -134,9 +126,7 @@
 
             } catch (error) {
 
-                /*
-                 * Logging darf niemals das System stoppen.
-                 */
+                /* Safe fallback */
 
             }
         };
@@ -155,9 +145,7 @@
 
             } catch (error) {
 
-                /*
-                 * Safe fallback.
-                 */
+                /* Safe fallback */
 
             }
         };
@@ -176,922 +164,14 @@
 
             } catch (error) {
 
-                /*
-                 * Safe fallback.
-                 */
+                /* Safe fallback */
 
             }
         };
 
 
     /* ========================================================
-       NORMALIZE ID
-    ======================================================== */
-
-    function normalizeId(
-        value
-    ) {
-
-        return String(
-            value || ""
-        )
-        .trim()
-        .toLowerCase()
-        .replace(/\s+/g, "-");
-    }
-
-
-    /* ========================================================
-       FIND GLOBAL
-    ======================================================== */
-
-    function findGlobal(
-        names
-    ) {
-
-        for (
-            let i = 0;
-            i < names.length;
-            i++
-        ) {
-
-            const name =
-                names[i];
-
-
-            if (
-                !name
-            ) {
-
-                continue;
-            }
-
-
-            /*
-             * Unterstützt:
-             *
-             *   HalDoKernel
-             *   HalDoOS.kernel
-             *   HalDoV20.serviceBridge
-             */
-
-            if (
-                typeof name ===
-                "string" &&
-                name.includes(".")
-            ) {
-
-                const parts =
-                    name.split(".");
-
-
-                let current =
-                    window;
-
-
-                for (
-                    let p = 0;
-                    p < parts.length;
-                    p++
-                ) {
-
-                    if (
-                        current &&
-                        parts[p] in current
-                    ) {
-
-                        current =
-                            current[
-                                parts[p]
-                            ];
-
-                    } else {
-
-                        current =
-                            null;
-
-                        break;
-                    }
-                }
-
-
-                if (
-                    current
-                ) {
-
-                    return current;
-                }
-
-            } else {
-
-                const value =
-                    typeof name ===
-                    "string"
-                        ? window[name]
-                        : name;
-
-
-                if (
-                    value
-                ) {
-
-                    return value;
-                }
-            }
-        }
-
-
-        return null;
-    }
-
-
-    /* ========================================================
-       SYSTEM DISCOVERY
-    ======================================================== */
-
-    Bridge.discoverSystems =
-        function () {
-
-            const discovered =
-                {};
-
-
-            /*
-             * Kernel
-             */
-
-            const kernel =
-                findGlobal(
-                    [
-                        "HalDoKernel",
-                        "HalDoOS.kernel"
-                    ]
-                );
-
-
-            if (
-                kernel
-            ) {
-
-                discovered.kernel =
-                    kernel;
-            }
-
-
-            /*
-             * System
-             */
-
-            const system =
-                findGlobal(
-                    [
-                        "HalDoSystem",
-                        "HalDoOS.system"
-                    ]
-                );
-
-
-            if (
-                system
-            ) {
-
-                discovered.system =
-                    system;
-            }
-
-
-            /*
-             * App Manager
-             */
-
-            const appManager =
-                findGlobal(
-                    [
-                        "HalDoAppManager",
-                        "HalDoOS.appManager"
-                    ]
-                );
-
-
-            if (
-                appManager
-            ) {
-
-                discovered.appManager =
-                    appManager;
-            }
-
-
-            /*
-             * App Registry
-             */
-
-            const appRegistry =
-                findGlobal(
-                    [
-                        "HalDoV20AppRegistry",
-                        "HalDoAppRegistry",
-                        "HalDoOS.appRegistry"
-                    ]
-                );
-
-
-            if (
-                appRegistry
-            ) {
-
-                discovered.appRegistry =
-                    appRegistry;
-            }
-
-
-            /*
-             * App Runtime
-             */
-
-            const appRuntime =
-                findGlobal(
-                    [
-                        "HalDoAppRuntime",
-                        "HalDoV20.appRuntime",
-                        "HalDoOS.appRuntime"
-                    ]
-                );
-
-
-            if (
-                appRuntime
-            ) {
-
-                discovered.appRuntime =
-                    appRuntime;
-            }
-
-
-            /*
-             * Router
-             */
-
-            const router =
-                findGlobal(
-                    [
-                        "HalDoAppRouter",
-                        "HalDoRouter",
-                        "HalDoOS.appRouter"
-                    ]
-                );
-
-
-            if (
-                router
-            ) {
-
-                discovered.appRouter =
-                    router;
-            }
-
-
-            /*
-             * Launcher
-             */
-
-            const launcher =
-                findGlobal(
-                    [
-                        "HalDoLauncher",
-                        "HalDoOS.launcher"
-                    ]
-                );
-
-
-            if (
-                launcher
-            ) {
-
-                discovered.launcher =
-                    launcher;
-            }
-
-
-            /*
-             * Window Manager
-             */
-
-            const windowManager =
-                findGlobal(
-                    [
-                        "HalDoWindowManager",
-                        "HalDoOS.windowManager"
-                    ]
-                );
-
-
-            if (
-                windowManager
-            ) {
-
-                discovered.windowManager =
-                    windowManager;
-            }
-
-
-            /*
-             * Storage
-             */
-
-            const storage =
-                findGlobal(
-                    [
-                        "HalDoStorage",
-                        "HalDoOS.storage"
-                    ]
-                );
-
-
-            if (
-                storage
-            ) {
-
-                discovered.storage =
-                    storage;
-            }
-
-
-            /*
-             * Storage Manager
-             */
-
-            const storageManager =
-                findGlobal(
-                    [
-                        "HalDoStorageManager",
-                        "HalDoOS.storageManager"
-                    ]
-                );
-
-
-            if (
-                storageManager
-            ) {
-
-                discovered.storageManager =
-                    storageManager;
-            }
-
-
-            /*
-             * AI
-             */
-
-            const ai =
-                findGlobal(
-                    [
-                        "HalDoAI",
-                        "HalDoAICore",
-                        "HalDoOS.ai",
-                        "HalDoOS.aiCore"
-                    ]
-                );
-
-
-            if (
-                ai
-            ) {
-
-                discovered.ai =
-                    ai;
-            }
-
-
-            /*
-             * AI Core
-             */
-
-            const aiCore =
-                findGlobal(
-                    [
-                        "HalDoAICore",
-                        "HalDoOS.aiCore"
-                    ]
-                );
-
-
-            if (
-                aiCore
-            ) {
-
-                discovered.aiCore =
-                    aiCore;
-            }
-
-
-            /*
-             * Voice
-             */
-
-            const voice =
-                findGlobal(
-                    [
-                        "HalDoVoice",
-                        "HalDoOS.voice"
-                    ]
-                );
-
-
-            if (
-                voice
-            ) {
-
-                discovered.voice =
-                    voice;
-            }
-
-
-            /*
-             * Speech
-             */
-
-            const speech =
-                findGlobal(
-                    [
-                        "HalDoSpeech",
-                        "HalDoAISpeech",
-                        "HalDoOS.speech",
-                        "HalDoOS.aiSpeech"
-                    ]
-                );
-
-
-            if (
-                speech
-            ) {
-
-                discovered.speech =
-                    speech;
-            }
-
-
-            /*
-             * Language
-             */
-
-            const language =
-                findGlobal(
-                    [
-                        "HalDoLanguage",
-                        "HalDoLanguageManager",
-                        "HalDoLanguageSystem",
-                        "HalDoOS.language",
-                        "HalDoOS.languageManager",
-                        "HalDoOS.languageSystem"
-                    ]
-                );
-
-
-            if (
-                language
-            ) {
-
-                discovered.language =
-                    language;
-            }
-
-
-            /*
-             * Notifications
-             */
-
-            const notifications =
-                findGlobal(
-                    [
-                        "HalDoNotifications",
-                        "HalDoOS.notifications"
-                    ]
-                );
-
-
-            if (
-                notifications
-            ) {
-
-                discovered.notifications =
-                    notifications;
-            }
-
-
-            /*
-             * Settings
-             */
-
-            const settings =
-                findGlobal(
-                    [
-                        "HalDoSettings",
-                        "HalDoConfigManager",
-                        "HalDoOS.settings",
-                        "HalDoOS.config"
-                    ]
-                );
-
-
-            if (
-                settings
-            ) {
-
-                discovered.settings =
-                    settings;
-            }
-
-
-            /*
-             * Cosmic
-             */
-
-            const cosmic =
-                findGlobal(
-                    [
-                        "HalDoCosmic",
-                        "HalDoCosmicEngine",
-                        "HalDoOS.cosmic"
-                    ]
-                );
-
-
-            if (
-                cosmic
-            ) {
-
-                discovered.cosmic =
-                    cosmic;
-            }
-
-
-            /*
-             * Cosmic Welcome
-             */
-
-            const cosmicWelcome =
-                findGlobal(
-                    [
-                        "HalDoCosmicWelcome",
-                        "HalDoOS.cosmicWelcome"
-                    ]
-                );
-
-
-            if (
-                cosmicWelcome
-            ) {
-
-                discovered.cosmicWelcome =
-                    cosmicWelcome;
-            }
-
-
-            /*
-             * Logo
-             */
-
-            const logo =
-                findGlobal(
-                    [
-                        "HalDoLogo",
-                        "HalDoLogoEngine",
-                        "HalDoOS.logo"
-                    ]
-                );
-
-
-            if (
-                logo
-            ) {
-
-                discovered.logo =
-                    logo;
-            }
-
-
-            /*
-             * EZIDI Keyboard
-             */
-
-            const ezidiKeyboard =
-                findGlobal(
-                    [
-                        "HalDoEzidiKeyboard",
-                        "HalDoOS.ezidiKeyboard"
-                    ]
-                );
-
-
-            if (
-                ezidiKeyboard
-            ) {
-
-                discovered.ezidiKeyboard =
-                    ezidiKeyboard;
-            }
-
-
-            /*
-             * Module Manager
-             */
-
-            const moduleManager =
-                findGlobal(
-                    [
-                        "HalDoModuleManager",
-                        "HalDoOS.moduleManager"
-                    ]
-                );
-
-
-            if (
-                moduleManager
-            ) {
-
-                discovered.moduleManager =
-                    moduleManager;
-            }
-
-
-            /*
-             * Shell
-             */
-
-            const shell =
-                findGlobal(
-                    [
-                        "HalDoShellManager",
-                        "HalDoOS.shell"
-                    ]
-                );
-
-
-            if (
-                shell
-            ) {
-
-                discovered.shell =
-                    shell;
-            }
-
-
-            /*
-             * Desktop
-             */
-
-            const desktop =
-                findGlobal(
-                    [
-                        "HalDoDesktopManager",
-                        "HalDoOS.desktop"
-                    ]
-                );
-
-
-            if (
-                desktop
-            ) {
-
-                discovered.desktop =
-                    desktop;
-            }
-
-
-            /*
-             * Service Bridge
-             */
-
-            const serviceBridge =
-                findGlobal(
-                    [
-                        "HalDoV20ServiceBridge",
-                        "HalDoOS.serviceBridge",
-                        "HalDoV20.serviceBridge"
-                    ]
-                );
-
-
-            if (
-                serviceBridge
-            ) {
-
-                discovered.serviceBridge =
-                    serviceBridge;
-
-                Bridge.serviceBridge =
-                    serviceBridge;
-            }
-
-
-            /*
-             * Universal App Event Bus
-             */
-
-            const eventBus =
-                findGlobal(
-                    [
-                        "HalDoAppEvents",
-                        "HalDoV20AppEvents",
-                        "HalDoOS.appEvents",
-                        "HalDoV20.appEvents"
-                    ]
-                );
-
-
-            if (
-                eventBus
-            ) {
-
-                discovered.eventBus =
-                    eventBus;
-
-                Bridge.eventBus =
-                    eventBus;
-            }
-
-
-            Bridge.systems =
-                discovered;
-
-
-            Bridge.log(
-                "System discovery complete:",
-                Object.keys(
-                    discovered
-                )
-            );
-
-
-            return discovered;
-        };
-
-
-    /* ========================================================
-       GET SYSTEM
-    ======================================================== */
-
-    Bridge.getSystem =
-        function (
-            name
-        ) {
-
-            if (
-                !name
-            ) {
-
-                return null;
-            }
-
-
-            return (
-                Bridge.systems[
-                    name
-                ] ||
-                null
-            );
-        };
-
-
-    /* ========================================================
-       REFRESH CONNECTIONS
-    ======================================================== */
-
-    Bridge.refresh =
-        function () {
-
-            Bridge.discoverSystems();
-
-
-            return Bridge;
-        };
-
-
-    /* ========================================================
-       SAFE CALL
-    ======================================================== */
-
-    Bridge.call =
-        function (
-            object,
-            method,
-            ...args
-        ) {
-
-            if (
-                !object
-            ) {
-
-                return {
-
-                    success:
-                        false,
-
-                    value:
-                        null,
-
-                    error:
-                        "Object unavailable"
-                };
-            }
-
-
-            if (
-                typeof object[
-                    method
-                ] !==
-                "function"
-            ) {
-
-                return {
-
-                    success:
-                        false,
-
-                    value:
-                        null,
-
-                    error:
-                        "Method unavailable: " +
-                        method
-                };
-            }
-
-
-            try {
-
-                return {
-
-                    success:
-                        true,
-
-                    value:
-                        object[
-                            method
-                        ].apply(
-                            object,
-                            args
-                        ),
-
-                    error:
-                        null
-                };
-
-            } catch (error) {
-
-                Bridge.error(
-                    "Method failed:",
-                    method,
-                    error
-                );
-
-
-                return {
-
-                    success:
-                        false,
-
-                    value:
-                        null,
-
-                    error:
-                        error
-                };
-            }
-        };
-
-
-    /* ========================================================
-       EVENT BUS CONNECTION
-    ======================================================== */
-
-    Bridge.connectEventBus =
-        function () {
-
-            const bus =
-                Bridge.systems.eventBus ||
-                window.HalDoAppEvents;
-
-
-            if (
-                !bus
-            ) {
-
-                return null;
-            }
-
-
-            Bridge.eventBus =
-                bus;
-
-
-            return bus;
-        };
-
-
-    /* ========================================================
-       BRIDGE EVENT LISTENERS
+       INTERNAL EVENT LISTENERS
     ======================================================== */
 
     Bridge.on =
@@ -1140,6 +220,7 @@
                 set.delete(
                     callback
                 );
+
             };
         };
 
@@ -1152,14 +233,13 @@
 
             const set =
                 Bridge.listeners.get(
-                    eventName
+                    String(
+                        eventName
+                    )
                 );
 
 
-            if (
-                !set
-            ) {
-
+            if (!set) {
                 return false;
             }
 
@@ -1170,32 +250,39 @@
         };
 
 
+    /* ========================================================
+       EMIT
+    ======================================================== */
+
     Bridge.emit =
         function (
             eventName,
-            data,
-            options
+            detail
         ) {
+
+            if (
+                typeof eventName !==
+                "string"
+            ) {
+
+                return;
+            }
+
 
             const payload = {
 
                 name:
-                    String(
-                        eventName ||
-                        ""
-                    ),
+                    eventName,
 
                 detail:
-                    data || {},
+                    detail || {},
 
                 timestamp:
                     Date.now(),
 
                 source:
-                    options &&
-                    options.source
-                        ? options.source
-                        : "haldo-v20-bridge"
+                    "haldo-v20-core-bridge"
+
             };
 
 
@@ -1205,38 +292,76 @@
 
             const set =
                 Bridge.listeners.get(
-                    payload.name
+                    eventName
                 );
 
 
-            if (
-                set
-            ) {
+            if (set) {
 
                 Array.from(
                     set
                 )
                 .forEach(
                     function (
-                        handler
+                        callback
                     ) {
 
                         try {
 
-                            handler(
+                            callback(
                                 payload
                             );
 
                         } catch (error) {
 
                             Bridge.error(
-                                "Bridge listener failed:",
+                                "Bridge listener error:",
                                 error
                             );
                         }
 
                     }
                 );
+            }
+
+
+            /*
+             * Globaler V20 Event Bus
+             */
+
+            const eventBus =
+                window.HalDoAppEvents ||
+                V20.appEvents;
+
+
+            if (
+                eventBus &&
+                eventBus !== Bridge &&
+                typeof eventBus.emit ===
+                "function"
+            ) {
+
+                try {
+
+                    eventBus.emit(
+                        eventName,
+                        detail || {},
+                        {
+                            source:
+                                "haldo-v20-core-bridge",
+
+                            internal:
+                                true
+                        }
+                    );
+
+                } catch (error) {
+
+                    Bridge.warn(
+                        "Event Bus forwarding failed:",
+                        eventName
+                    );
+                }
             }
 
 
@@ -1249,7 +374,7 @@
                 document.dispatchEvent(
                     new CustomEvent(
                         "haldo:" +
-                        payload.name,
+                        eventName,
                         {
                             detail:
                                 payload
@@ -1259,91 +384,8 @@
 
             } catch (error) {
 
-                Bridge.warn(
-                    "DOM event failed:",
-                    payload.name
-                );
-            }
+                /* Safe fallback */
 
-
-            /*
-             * Universal App Event Bus
-             *
-             * Dieser Bus ist die zentrale Event-Schicht.
-             */
-
-            const bus =
-                Bridge.eventBus ||
-                window.HalDoAppEvents;
-
-
-            if (
-                bus &&
-                bus !== Bridge &&
-                typeof bus.emit ===
-                "function"
-            ) {
-
-                try {
-
-                    bus.emit(
-                        payload.name,
-                        payload.detail,
-                        {
-
-                            source:
-                                payload.source,
-
-                            internal:
-                                true,
-
-                            metadata:
-                                {
-                                    bridge:
-                                        true
-                                }
-                        }
-                    );
-
-                } catch (error) {
-
-                    Bridge.warn(
-                        "Event Bus forwarding failed:",
-                        payload.name
-                    );
-                }
-            }
-
-
-            /*
-             * Kernel Event Bus
-             */
-
-            const kernel =
-                Bridge.systems.kernel;
-
-
-            if (
-                kernel &&
-                typeof kernel.emit ===
-                "function"
-            ) {
-
-                try {
-
-                    kernel.emit(
-                        "v20:" +
-                        payload.name,
-                        payload.detail
-                    );
-
-                } catch (error) {
-
-                    Bridge.warn(
-                        "Kernel forwarding failed:",
-                        payload.name
-                    );
-                }
             }
 
 
@@ -1352,35 +394,586 @@
 
 
     /* ========================================================
+       SYSTEM DISCOVERY HELPERS
+    ======================================================== */
+
+    function firstAvailable(
+        candidates
+    ) {
+
+        for (
+            let i = 0;
+            i < candidates.length;
+            i++
+        ) {
+
+            if (
+                candidates[i]
+            ) {
+
+                return candidates[i];
+            }
+        }
+
+
+        return null;
+    }
+
+
+    /* ========================================================
+       DISCOVER SYSTEMS
+    ======================================================== */
+
+    Bridge.discoverSystems =
+        function () {
+
+            const discovered = {};
+
+
+            /*
+             * Kernel
+             */
+
+            discovered.kernel =
+                firstAvailable(
+                    [
+                        window.HalDoKernel,
+                        HalDoOS.kernel,
+                        V20.kernel
+                    ]
+                );
+
+
+            /*
+             * System
+             */
+
+            discovered.system =
+                firstAvailable(
+                    [
+                        window.HalDoSystem,
+                        HalDoOS.system
+                    ]
+                );
+
+
+            /*
+             * App Manager
+             */
+
+            discovered.appManager =
+                firstAvailable(
+                    [
+                        window.HalDoAppManager,
+                        HalDoOS.appManager
+                    ]
+                );
+
+
+            /*
+             * Registry
+             */
+
+            discovered.appRegistry =
+                firstAvailable(
+                    [
+                        window.HalDoV20AppRegistry,
+                        window.HalDoAppRegistry,
+                        HalDoOS.appRegistry,
+                        V20.appRegistry
+                    ]
+                );
+
+
+            /*
+             * Runtime
+             */
+
+            discovered.appRuntime =
+                firstAvailable(
+                    [
+                        window.HalDoAppRuntime,
+                        window.HalDoV20AppRuntime,
+                        HalDoOS.appRuntime,
+                        V20.appRuntime
+                    ]
+                );
+
+
+            /*
+             * Router
+             */
+
+            discovered.appRouter =
+                firstAvailable(
+                    [
+                        window.HalDoAppRouter,
+                        window.HalDoRouter,
+                        HalDoOS.appRouter,
+                        V20.router
+                    ]
+                );
+
+
+            /*
+             * Launcher
+             */
+
+            discovered.launcher =
+                firstAvailable(
+                    [
+                        window.HalDoLauncher,
+                        HalDoOS.launcher
+                    ]
+                );
+
+
+            /*
+             * Window Manager
+             */
+
+            discovered.windowManager =
+                firstAvailable(
+                    [
+                        window.HalDoWindowManager,
+                        HalDoOS.windowManager
+                    ]
+                );
+
+
+            /*
+             * Storage
+             */
+
+            discovered.storage =
+                firstAvailable(
+                    [
+                        window.HalDoStorage,
+                        HalDoOS.storage
+                    ]
+                );
+
+
+            /*
+             * Storage Manager
+             */
+
+            discovered.storageManager =
+                firstAvailable(
+                    [
+                        window.HalDoStorageManager,
+                        HalDoOS.storageManager
+                    ]
+                );
+
+
+            /*
+             * AI
+             */
+
+            discovered.ai =
+                firstAvailable(
+                    [
+                        window.HalDoAI,
+                        window.HalDoAICore,
+                        HalDoOS.ai,
+                        HalDoOS.aiCore
+                    ]
+                );
+
+
+            /*
+             * AI Core
+             */
+
+            discovered.aiCore =
+                firstAvailable(
+                    [
+                        window.HalDoAICore,
+                        HalDoOS.aiCore
+                    ]
+                );
+
+
+            /*
+             * Voice
+             */
+
+            discovered.voice =
+                firstAvailable(
+                    [
+                        window.HalDoVoice,
+                        HalDoOS.voice
+                    ]
+                );
+
+
+            /*
+             * Speech
+             */
+
+            discovered.speech =
+                firstAvailable(
+                    [
+                        window.HalDoSpeech,
+                        window.HalDoAISpeech,
+                        HalDoOS.speech,
+                        HalDoOS.aiSpeech
+                    ]
+                );
+
+
+            /*
+             * Language
+             */
+
+            discovered.language =
+                firstAvailable(
+                    [
+                        window.HalDoLanguageManager,
+                        window.HalDoLanguageSystem,
+                        window.HalDoLanguage,
+                        HalDoOS.languageManager,
+                        HalDoOS.languageSystem,
+                        HalDoOS.language
+                    ]
+                );
+
+
+            /*
+             * Notifications
+             */
+
+            discovered.notifications =
+                firstAvailable(
+                    [
+                        window.HalDoNotifications,
+                        HalDoOS.notifications
+                    ]
+                );
+
+
+            /*
+             * Settings
+             */
+
+            discovered.settings =
+                firstAvailable(
+                    [
+                        window.HalDoSettings,
+                        window.HalDoConfigManager,
+                        HalDoOS.settings,
+                        HalDoOS.config
+                    ]
+                );
+
+
+            /*
+             * Cosmic
+             */
+
+            discovered.cosmic =
+                firstAvailable(
+                    [
+                        window.HalDoCosmicEngine,
+                        window.HalDoCosmic,
+                        HalDoOS.cosmic,
+                        V20.cosmic
+                    ]
+                );
+
+
+            /*
+             * Cosmic Welcome
+             */
+
+            discovered.cosmicWelcome =
+                firstAvailable(
+                    [
+                        window.HalDoCosmicWelcome,
+                        HalDoOS.cosmicWelcome,
+                        V20.cosmicWelcome
+                    ]
+                );
+
+
+            /*
+             * Logo / AI Avatar
+             */
+
+            discovered.logo =
+                firstAvailable(
+                    [
+                        window.HalDoLogo,
+                        window.HalDoLogoEngine,
+                        HalDoOS.logo
+                    ]
+                );
+
+
+            /*
+             * EZIDI Keyboard
+             */
+
+            discovered.ezidiKeyboard =
+                firstAvailable(
+                    [
+                        window.HalDoEzidiKeyboard,
+                        HalDoOS.ezidiKeyboard
+                    ]
+                );
+
+
+            /*
+             * Existing Event Bus
+             */
+
+            discovered.appEvents =
+                firstAvailable(
+                    [
+                        window.HalDoAppEvents,
+                        window.HalDoV20AppEvents,
+                        HalDoOS.appEvents,
+                        V20.appEvents
+                    ]
+                );
+
+
+            /*
+             * Service Bridge
+             */
+
+            discovered.serviceBridge =
+                firstAvailable(
+                    [
+                        window.HalDoV20ServiceBridge,
+                        HalDoOS.serviceBridge,
+                        V20.serviceBridge
+                    ]
+                );
+
+
+            Bridge.systems =
+                discovered;
+
+
+            /*
+             * Direkte V20-Verbindungen
+             */
+
+            Bridge.appRegistry =
+                discovered.appRegistry ||
+                null;
+
+            Bridge.appRuntime =
+                discovered.appRuntime ||
+                null;
+
+            Bridge.appManager =
+                discovered.appManager ||
+                null;
+
+            Bridge.router =
+                discovered.appRouter ||
+                null;
+
+            Bridge.windowManager =
+                discovered.windowManager ||
+                null;
+
+            Bridge.storageSystem =
+                discovered.storage ||
+                discovered.storageManager ||
+                null;
+
+            Bridge.languageSystem =
+                discovered.language ||
+                null;
+
+            Bridge.ai =
+                discovered.ai ||
+                discovered.aiCore ||
+                null;
+
+            Bridge.voice =
+                discovered.voice ||
+                discovered.speech ||
+                null;
+
+            Bridge.cosmic =
+                discovered.cosmic ||
+                null;
+
+            Bridge.cosmicWelcome =
+                discovered.cosmicWelcome ||
+                null;
+
+
+            Bridge.log(
+                "System discovery complete:",
+                Object.keys(
+                    discovered
+                ).filter(
+                    function (key) {
+                        return Boolean(
+                            discovered[key]
+                        );
+                    }
+                )
+            );
+
+
+            return discovered;
+        };
+
+
+    /* ========================================================
+       GET SYSTEM
+    ======================================================== */
+
+    Bridge.getSystem =
+        function (
+            name
+        ) {
+
+            return (
+                Bridge.systems[
+                    String(
+                        name
+                    )
+                ] ||
+                null
+            );
+        };
+
+
+    /* ========================================================
+       SAFE METHOD CALL
+    ======================================================== */
+
+    Bridge.call =
+        async function (
+            object,
+            method,
+            ...args
+        ) {
+
+            if (!object) {
+
+                return {
+
+                    success:
+                        false,
+
+                    value:
+                        null,
+
+                    error:
+                        "Object unavailable"
+
+                };
+            }
+
+
+            if (
+                typeof object[
+                    method
+                ] !==
+                "function"
+            ) {
+
+                return {
+
+                    success:
+                        false,
+
+                    value:
+                        null,
+
+                    error:
+                        "Method unavailable: " +
+                        method
+
+                };
+            }
+
+
+            try {
+
+                const value =
+                    await object[
+                        method
+                    ](
+                        ...args
+                    );
+
+
+                return {
+
+                    success:
+                        true,
+
+                    value:
+                        value,
+
+                    error:
+                        null
+
+                };
+
+            } catch (error) {
+
+                Bridge.error(
+                    "Method failed:",
+                    method,
+                    error
+                );
+
+
+                return {
+
+                    success:
+                        false,
+
+                    value:
+                        null,
+
+                    error:
+                        error
+
+                };
+            }
+        };
+
+
+    /* ========================================================
        REGISTER APP
     ======================================================== */
 
     Bridge.registerApp =
-        function (
+        async function (
             definition
         ) {
 
-            if (
-                !definition
-            ) {
+            if (!definition) {
 
                 throw new Error(
-                    "HalDo V20: App definition is required."
+                    "HalDo V20: App definition required."
                 );
             }
 
 
             const id =
-                normalizeId(
+                String(
                     definition.id ||
                     definition.appId ||
-                    definition.name
-                );
+                    definition.name ||
+                    ""
+                )
+                .trim();
 
 
-            if (
-                !id
-            ) {
+            if (!id) {
 
                 throw new Error(
                     "HalDo V20: App requires an id."
@@ -1389,8 +982,8 @@
 
 
             /*
-             * Bestehende Definition erweitern,
-             * nicht blind entfernen.
+             * Bereits registrierte App nicht
+             * blind zerstören.
              */
 
             const existing =
@@ -1401,41 +994,45 @@
 
             const app =
                 Object.assign(
-
+                    {},
+                    existing || {},
                     {
-
                         id:
                             id,
 
                         name:
+                            definition.name ||
+                            existing?.name ||
                             id,
 
                         version:
+                            definition.version ||
+                            existing?.version ||
                             "20.0.0",
 
                         enabled:
-                            true,
+                            definition.enabled !==
+                            undefined
+                                ? definition.enabled
+                                : (
+                                    existing?.enabled !==
+                                    undefined
+                                        ? existing.enabled
+                                        : true
+                                ),
 
                         state:
+                            existing?.state ||
                             "registered",
 
                         createdAt:
-                            existing &&
-                            existing.createdAt
-                                ? existing.createdAt
-                                : Date.now()
+                            existing?.createdAt ||
+                            Date.now(),
 
+                        updatedAt:
+                            Date.now()
                     },
-
-                    existing || {},
-
-                    definition,
-
-                    {
-
-                        id:
-                            id
-                    }
+                    definition
                 );
 
 
@@ -1446,23 +1043,18 @@
 
 
             /*
-             * App Registry bevorzugen.
+             * Vorhandene Registry verwenden.
              */
 
             const registry =
                 Bridge.systems.appRegistry;
 
 
-            if (
-                registry
-            ) {
+            if (registry) {
 
                 const methods = [
-
                     "register",
-
                     "registerApp",
-
                     "add"
                 ];
 
@@ -1480,32 +1072,30 @@
                     if (
                         typeof registry[
                             method
-                        ] !==
+                        ] ===
                         "function"
                     ) {
 
-                        continue;
-                    }
+                        try {
+
+                            await registry[
+                                method
+                            ](
+                                app
+                            );
 
 
-                    try {
+                            break;
 
-                        registry[
-                            method
-                        ](
-                            app
-                        );
+                        } catch (error) {
 
-
-                        break;
-
-                    } catch (error) {
-
-                        Bridge.warn(
-                            "Registry registration failed:",
-                            id,
-                            method
-                        );
+                            Bridge.warn(
+                                "Registry registration failed:",
+                                id,
+                                method,
+                                error
+                            );
+                        }
                     }
                 }
             }
@@ -1514,15 +1104,8 @@
             Bridge.emit(
                 "app:registered",
                 {
-
                     app:
                         app
-                },
-
-                {
-
-                    source:
-                        id
                 }
             );
 
@@ -1540,17 +1123,16 @@
             id
         ) {
 
-            return Bridge.apps.get(
-                normalizeId(
-                    id
-                )
-            ) || null;
+            return (
+                Bridge.apps.get(
+                    String(
+                        id
+                    )
+                ) ||
+                null
+            );
         };
 
-
-    /* ========================================================
-       GET APPS
-    ======================================================== */
 
     Bridge.getApps =
         function () {
@@ -1566,19 +1148,15 @@
     ======================================================== */
 
     Bridge.openApp =
-        function (
+        async function (
             id,
             options
         ) {
 
             id =
-                normalizeId(
+                String(
                     id
                 );
-
-
-            const opts =
-                options || {};
 
 
             const app =
@@ -1590,7 +1168,6 @@
             Bridge.emit(
                 "app:before-open",
                 {
-
                     id:
                         id,
 
@@ -1598,15 +1175,98 @@
                         app,
 
                     options:
-                        opts
-                },
-
-                {
-
-                    source:
-                        id
+                        options || {}
                 }
             );
+
+
+            /*
+             * Runtime zuerst.
+             *
+             * Das ist für V20 wichtig:
+             * Eine App soll nicht nur navigiert,
+             * sondern tatsächlich gestartet werden.
+             */
+
+            const runtime =
+                Bridge.systems.appRuntime;
+
+
+            if (runtime) {
+
+                const methods = [
+                    "openApp",
+                    "launchApp",
+                    "startApp",
+                    "open",
+                    "launch",
+                    "start"
+                ];
+
+
+                for (
+                    let i = 0;
+                    i < methods.length;
+                    i++
+                ) {
+
+                    const method =
+                        methods[i];
+
+
+                    if (
+                        typeof runtime[
+                            method
+                        ] ===
+                        "function"
+                    ) {
+
+                        try {
+
+                            const result =
+                                await runtime[
+                                    method
+                                ](
+                                    id,
+                                    options || {}
+                                );
+
+
+                            if (app) {
+
+                                app.state =
+                                    "open";
+
+                                app.updatedAt =
+                                    Date.now();
+                            }
+
+
+                            Bridge.emit(
+                                "app:opened",
+                                {
+                                    id:
+                                        id,
+
+                                    result:
+                                        result
+                                }
+                            );
+
+
+                            return result;
+
+                        } catch (error) {
+
+                            Bridge.warn(
+                                "Runtime app open failed:",
+                                id,
+                                error
+                            );
+                        }
+                    }
+                }
+            }
 
 
             /*
@@ -1617,18 +1277,12 @@
                 Bridge.systems.appManager;
 
 
-            if (
-                manager
-            ) {
+            if (manager) {
 
                 const methods = [
-
                     "openApp",
-
                     "launchApp",
-
                     "open",
-
                     "launch"
                 ];
 
@@ -1646,185 +1300,69 @@
                     if (
                         typeof manager[
                             method
-                        ] !==
+                        ] ===
                         "function"
                     ) {
 
-                        continue;
-                    }
+                        try {
+
+                            const result =
+                                await manager[
+                                    method
+                                ](
+                                    id,
+                                    options || {}
+                                );
 
 
-                    try {
+                            if (app) {
 
-                        const result =
-                            manager[
-                                method
-                            ](
-                                id,
-                                opts
+                                app.state =
+                                    "open";
+                            }
+
+
+                            Bridge.emit(
+                                "app:opened",
+                                {
+                                    id:
+                                        id,
+
+                                    result:
+                                        result
+                                }
                             );
 
 
-                        if (
-                            app
-                        ) {
+                            return result;
 
-                            app.state =
-                                "open";
+                        } catch (error) {
+
+                            Bridge.warn(
+                                "App Manager failed:",
+                                id,
+                                error
+                            );
                         }
-
-
-                        Bridge.emit(
-                            "app:opened",
-                            {
-
-                                id:
-                                    id,
-
-                                result:
-                                    result
-                            },
-
-                            {
-
-                                source:
-                                    id
-                            }
-                        );
-
-
-                        return result;
-
-                    } catch (error) {
-
-                        Bridge.warn(
-                            "App Manager failed:",
-                            id,
-                            error
-                        );
                     }
                 }
             }
 
 
             /*
-             * App Runtime
-             */
-
-            const runtime =
-                Bridge.systems.appRuntime;
-
-
-            if (
-                runtime
-            ) {
-
-                const methods = [
-
-                    "openApp",
-
-                    "launchApp",
-
-                    "startApp",
-
-                    "open"
-                ];
-
-
-                for (
-                    let i = 0;
-                    i < methods.length;
-                    i++
-                ) {
-
-                    const method =
-                        methods[i];
-
-
-                    if (
-                        typeof runtime[
-                            method
-                        ] !==
-                        "function"
-                    ) {
-
-                        continue;
-                    }
-
-
-                    try {
-
-                        const result =
-                            runtime[
-                                method
-                            ](
-                                id,
-                                opts
-                            );
-
-
-                        if (
-                            app
-                        ) {
-
-                            app.state =
-                                "open";
-                        }
-
-
-                        Bridge.emit(
-                            "app:opened",
-                            {
-
-                                id:
-                                    id,
-
-                                result:
-                                    result
-                            },
-
-                            {
-
-                                source:
-                                    id
-                            }
-                        );
-
-
-                        return result;
-
-                    } catch (error) {
-
-                        Bridge.warn(
-                            "App Runtime failed:",
-                            id,
-                            error
-                        );
-                    }
-                }
-            }
-
-
-            /*
-             * Router Fallback
+             * Router fallback
              */
 
             const router =
                 Bridge.systems.appRouter;
 
 
-            if (
-                router
-            ) {
+            if (router) {
 
                 const methods = [
-
                     "navigateToApp",
-
                     "openApp",
-
                     "navigate",
-
                     "route"
                 ];
 
@@ -1842,59 +1380,51 @@
                     if (
                         typeof router[
                             method
-                        ] !==
+                        ] ===
                         "function"
                     ) {
 
-                        continue;
-                    }
+                        try {
+
+                            const result =
+                                await router[
+                                    method
+                                ](
+                                    id,
+                                    options || {}
+                                );
 
 
-                    try {
+                            Bridge.emit(
+                                "app:opened",
+                                {
+                                    id:
+                                        id,
 
-                        const result =
-                            router[
-                                method
-                            ](
-                                id,
-                                opts
+                                    result:
+                                        result
+                                }
                             );
 
 
-                        Bridge.emit(
-                            "app:opened",
-                            {
+                            return result;
 
-                                id:
-                                    id,
+                        } catch (error) {
 
-                                result:
-                                    result
-                            },
-
-                            {
-
-                                source:
-                                    id
-                            }
-                        );
-
-
-                        return result;
-
-                    } catch (error) {
-
-                        Bridge.warn(
-                            "Router fallback failed:",
-                            id
-                        );
+                            Bridge.warn(
+                                "Router fallback failed:",
+                                id,
+                                error
+                            );
+                        }
                     }
                 }
             }
 
 
             /*
-             * DOM fallback
+             * Letzter Fallback:
+             * DOM App Open Request
              */
 
             try {
@@ -1903,15 +1433,14 @@
                     new CustomEvent(
                         "haldo:app-open-request",
                         {
+                            detail:
+                                {
+                                    id:
+                                        id,
 
-                            detail: {
-
-                                id:
-                                    id,
-
-                                options:
-                                    opts
-                            }
+                                    options:
+                                        options || {}
+                                }
                         }
                     )
                 );
@@ -1920,7 +1449,7 @@
 
                 Bridge.warn(
                     "DOM app-open fallback failed:",
-                    id
+                    error
                 );
             }
 
@@ -1934,12 +1463,12 @@
     ======================================================== */
 
     Bridge.closeApp =
-        function (
+        async function (
             id
         ) {
 
             id =
-                normalizeId(
+                String(
                     id
                 );
 
@@ -1950,20 +1479,93 @@
                 );
 
 
+            const runtime =
+                Bridge.systems.appRuntime;
+
+
+            if (runtime) {
+
+                const methods = [
+                    "closeApp",
+                    "stopApp",
+                    "close",
+                    "stop"
+                ];
+
+
+                for (
+                    let i = 0;
+                    i < methods.length;
+                    i++
+                ) {
+
+                    const method =
+                        methods[i];
+
+
+                    if (
+                        typeof runtime[
+                            method
+                        ] ===
+                        "function"
+                    ) {
+
+                        try {
+
+                            const result =
+                                await runtime[
+                                    method
+                                ](
+                                    id
+                                );
+
+
+                            if (app) {
+
+                                app.state =
+                                    "closed";
+
+                                app.updatedAt =
+                                    Date.now();
+                            }
+
+
+                            Bridge.emit(
+                                "app:closed",
+                                {
+                                    id:
+                                        id,
+
+                                    result:
+                                        result
+                                }
+                            );
+
+
+                            return result;
+
+                        } catch (error) {
+
+                            Bridge.warn(
+                                "Runtime close failed:",
+                                id,
+                                error
+                            );
+                        }
+                    }
+                }
+            }
+
+
             const manager =
                 Bridge.systems.appManager;
 
 
-            if (
-                manager
-            ) {
+            if (manager) {
 
                 const methods = [
-
                     "closeApp",
-
                     "close",
-
                     "stopApp"
                 ];
 
@@ -1981,57 +1583,49 @@
                     if (
                         typeof manager[
                             method
-                        ] !==
+                        ] ===
                         "function"
                     ) {
 
-                        continue;
-                    }
+                        try {
+
+                            const result =
+                                await manager[
+                                    method
+                                ](
+                                    id
+                                );
 
 
-                    try {
+                            if (app) {
 
-                        const result =
-                            manager[
-                                method
-                            ](
-                                id
+                                app.state =
+                                    "closed";
+                            }
+
+
+                            Bridge.emit(
+                                "app:closed",
+                                {
+                                    id:
+                                        id,
+
+                                    result:
+                                        result
+                                }
                             );
 
 
-                        if (
-                            app
-                        ) {
+                            return result;
 
-                            app.state =
-                                "closed";
+                        } catch (error) {
+
+                            Bridge.warn(
+                                "App close failed:",
+                                id,
+                                error
+                            );
                         }
-
-
-                        Bridge.emit(
-                            "app:closed",
-                            {
-
-                                id:
-                                    id
-                            },
-
-                            {
-
-                                source:
-                                    id
-                            }
-                        );
-
-
-                        return result;
-
-                    } catch (error) {
-
-                        Bridge.warn(
-                            "App close failed:",
-                            id
-                        );
                     }
                 }
             }
@@ -2048,7 +1642,7 @@
     Bridge.storage = {
 
         get:
-            function (
+            async function (
                 key,
                 fallback
             ) {
@@ -2058,16 +1652,11 @@
                     Bridge.systems.storageManager;
 
 
-                if (
-                    storage
-                ) {
+                if (storage) {
 
                     const methods = [
-
                         "get",
-
                         "getItem",
-
                         "read"
                     ];
 
@@ -2085,44 +1674,34 @@
                         if (
                             typeof storage[
                                 method
-                            ] !==
+                            ] ===
                             "function"
                         ) {
 
-                            continue;
-                        }
+                            try {
+
+                                const value =
+                                    await storage[
+                                        method
+                                    ](
+                                        key
+                                    );
 
 
-                        try {
+                                return (
+                                    value ===
+                                    undefined ||
+                                    value ===
+                                    null
+                                )
+                                    ? fallback
+                                    : value;
 
-                            const value =
-                                storage[
-                                    method
-                                ](
-                                    key
-                                );
+                            } catch (error) {
 
+                                /* Continue */
 
-                            /*
-                             * Promise-Werte nicht
-                             * künstlich verändern.
-                             */
-
-                            if (
-                                value !==
-                                undefined &&
-                                value !==
-                                null
-                            ) {
-
-                                return value;
                             }
-
-                        } catch (error) {
-
-                            /*
-                             * Nächsten Adapter versuchen.
-                             */
                         }
                     }
                 }
@@ -2164,7 +1743,7 @@
 
 
         set:
-            function (
+            async function (
                 key,
                 value
             ) {
@@ -2174,18 +1753,12 @@
                     Bridge.systems.storageManager;
 
 
-                if (
-                    storage
-                ) {
+                if (storage) {
 
                     const methods = [
-
                         "set",
-
                         "setItem",
-
                         "write",
-
                         "save"
                     ];
 
@@ -2203,50 +1776,39 @@
                         if (
                             typeof storage[
                                 method
-                            ] !==
+                            ] ===
                             "function"
                         ) {
 
-                            continue;
-                        }
+                            try {
+
+                                await storage[
+                                    method
+                                ](
+                                    key,
+                                    value
+                                );
 
 
-                        try {
+                                Bridge.emit(
+                                    "storage:changed",
+                                    {
+                                        key:
+                                            key,
 
-                            storage[
-                                method
-                            ](
-                                key,
-                                value
-                            );
-
-
-                            Bridge.emit(
-                                "storage:changed",
-                                {
-
-                                    key:
-                                        key,
-
-                                    value:
-                                        value
-                                },
-
-                                {
-
-                                    source:
-                                        "storage"
-                                }
-                            );
+                                        value:
+                                            value
+                                    }
+                                );
 
 
-                            return true;
+                                return true;
 
-                        } catch (error) {
+                            } catch (error) {
 
-                            /*
-                             * Nächsten Adapter versuchen.
-                             */
+                                /* Continue */
+
+                            }
                         }
                     }
                 }
@@ -2265,18 +1827,11 @@
                     Bridge.emit(
                         "storage:changed",
                         {
-
                             key:
                                 key,
 
                             value:
                                 value
-                        },
-
-                        {
-
-                            source:
-                                "storage"
                         }
                     );
 
@@ -2304,20 +1859,16 @@
     Bridge.language = {
 
         get:
-            function () {
+            async function () {
 
                 const language =
                     Bridge.systems.language;
 
 
-                if (
-                    language
-                ) {
+                if (language) {
 
                     const methods = [
-
                         "getCurrentLanguage",
-
                         "getLanguage"
                     ];
 
@@ -2335,41 +1886,24 @@
                         if (
                             typeof language[
                                 method
-                            ] !==
+                            ] ===
                             "function"
                         ) {
 
-                            continue;
-                        }
+                            try {
 
-
-                        try {
-
-                            const result =
-                                language[
+                                return await language[
                                     method
                                 ]();
 
+                            } catch (error) {
 
-                            if (
-                                result
-                            ) {
+                                /* Continue */
 
-                                return result;
                             }
-
-                        } catch (error) {
-
-                            /*
-                             * Continue.
-                             */
                         }
                     }
 
-
-                    /*
-                     * Property fallback.
-                     */
 
                     if (
                         typeof language.currentLanguage ===
@@ -2389,7 +1923,7 @@
 
 
         set:
-            function (
+            async function (
                 languageCode
             ) {
 
@@ -2401,27 +1935,15 @@
                 }
 
 
-                const code =
-                    String(
-                        languageCode
-                    )
-                    .trim();
-
-
                 const language =
                     Bridge.systems.language;
 
 
-                if (
-                    language
-                ) {
+                if (language) {
 
                     const methods = [
-
                         "setLanguage",
-
                         "changeLanguage",
-
                         "switchLanguage"
                     ];
 
@@ -2439,88 +1961,59 @@
                         if (
                             typeof language[
                                 method
-                            ] !==
+                            ] ===
                             "function"
                         ) {
 
-                            continue;
-                        }
+                            try {
+
+                                await language[
+                                    method
+                                ](
+                                    languageCode
+                                );
 
 
-                        try {
-
-                            language[
-                                method
-                            ](
-                                code
-                            );
+                                document.documentElement.lang =
+                                    languageCode;
 
 
-                            document.documentElement.lang =
-                                code;
+                                Bridge.emit(
+                                    "language:changed",
+                                    {
+                                        language:
+                                            languageCode
+                                    }
+                                );
 
 
-                            Bridge.storage.set(
-                                "haldo.language",
-                                code
-                            );
+                                return true;
 
+                            } catch (error) {
 
-                            Bridge.emit(
-                                "language:changed",
-                                {
+                                /* Continue */
 
-                                    language:
-                                        code
-                                },
-
-                                {
-
-                                    source:
-                                        "language"
-                                }
-                            );
-
-
-                            return true;
-
-                        } catch (error) {
-
-                            Bridge.warn(
-                                "Language API failed:",
-                                method
-                            );
+                            }
                         }
                     }
                 }
 
 
-                /*
-                 * Fallback.
-                 */
-
                 document.documentElement.lang =
-                    code;
+                    languageCode;
 
 
-                Bridge.storage.set(
+                await Bridge.storage.set(
                     "haldo.language",
-                    code
+                    languageCode
                 );
 
 
                 Bridge.emit(
                     "language:changed",
                     {
-
                         language:
-                            code
-                    },
-
-                    {
-
-                        source:
-                            "language"
+                            languageCode
                     }
                 );
 
@@ -2531,7 +2024,7 @@
 
 
     /* ========================================================
-       NOTIFICATION
+       NOTIFICATIONS
     ======================================================== */
 
     Bridge.notify =
@@ -2545,18 +2038,12 @@
                 Bridge.systems.notifications;
 
 
-            if (
-                notifications
-            ) {
+            if (notifications) {
 
                 const methods = [
-
                     "notify",
-
                     "show",
-
                     "add",
-
                     "create"
                 ];
 
@@ -2574,38 +2061,33 @@
                     if (
                         typeof notifications[
                             method
-                        ] !==
+                        ] ===
                         "function"
                     ) {
 
-                        continue;
-                    }
+                        try {
 
+                            return notifications[
+                                method
+                            ](
+                                title,
+                                message,
+                                options || {}
+                            );
 
-                    try {
+                        } catch (error) {
 
-                        return notifications[
-                            method
-                        ](
-                            title,
-                            message,
-                            options || {}
-                        );
+                            /* Continue */
 
-                    } catch (error) {
-
-                        /*
-                         * Continue.
-                         */
+                        }
                     }
                 }
             }
 
 
-            Bridge.emit(
+            return Bridge.emit(
                 "notification:show",
                 {
-
                     title:
                         title,
 
@@ -2614,195 +2096,267 @@
 
                     options:
                         options || {}
-                },
-
-                {
-
-                    source:
-                        "notifications"
                 }
             );
-
-
-            return null;
         };
 
 
     /* ========================================================
-       APP SERVICES
+       CONNECT SERVICES
     ======================================================== */
 
-    Bridge.getAppServices =
+    Bridge.connectServices =
+        function () {
+
+            /*
+             * Service Bridge
+             */
+
+            const serviceBridge =
+                window.HalDoV20ServiceBridge ||
+                HalDoOS.serviceBridge ||
+                V20.serviceBridge;
+
+
+            if (
+                serviceBridge &&
+                serviceBridge !== Bridge
+            ) {
+
+                Bridge.systems.serviceBridge =
+                    serviceBridge;
+
+
+                /*
+                 * Fehlende Systeme aus der
+                 * Service Bridge übernehmen.
+                 */
+
+                const names = [
+                    "kernel",
+                    "system",
+                    "app-manager",
+                    "app-registry",
+                    "app-runtime",
+                    "router",
+                    "window-manager",
+                    "storage",
+                    "storage-manager",
+                    "language-manager",
+                    "language-system",
+                    "ai",
+                    "voice",
+                    "speech",
+                    "notifications",
+                    "config",
+                    "desktop",
+                    "ezidi-keyboard",
+                    "cosmic",
+                    "cosmic-welcome"
+                ];
+
+
+                const aliases = {
+
+                    "app-manager":
+                        "appManager",
+
+                    "app-registry":
+                        "appRegistry",
+
+                    "app-runtime":
+                        "appRuntime",
+
+                    "window-manager":
+                        "windowManager",
+
+                    "storage-manager":
+                        "storageManager",
+
+                    "language-manager":
+                        "language",
+
+                    "language-system":
+                        "language",
+
+                    "ezidi-keyboard":
+                        "ezidiKeyboard",
+
+                    "cosmic":
+                        "cosmic",
+
+                    "cosmic-welcome":
+                        "cosmicWelcome"
+
+                };
+
+
+                names.forEach(
+                    function (
+                        name
+                    ) {
+
+                        const property =
+                            aliases[name] ||
+                            name;
+
+
+                        if (
+                            !Bridge.systems[
+                                property
+                            ] &&
+                            typeof serviceBridge.get ===
+                            "function"
+                        ) {
+
+                            const service =
+                                serviceBridge.get(
+                                    name
+                                );
+
+
+                            if (service) {
+
+                                Bridge.systems[
+                                    property
+                                ] =
+                                    service;
+                            }
+                        }
+                    }
+                );
+
+
+                Bridge.systems.appManager =
+                    Bridge.systems.appManager ||
+                    Bridge.appManager ||
+                    null;
+
+                Bridge.systems.appRegistry =
+                    Bridge.systems.appRegistry ||
+                    Bridge.appRegistry ||
+                    null;
+
+                Bridge.systems.appRuntime =
+                    Bridge.systems.appRuntime ||
+                    Bridge.appRuntime ||
+                    null;
+            }
+
+
+            return Bridge.systems;
+        };
+
+
+    /* ========================================================
+       CREATE APP CONTEXT
+    ======================================================== */
+
+    Bridge.createAppContext =
         function (
             appId
         ) {
 
-            const serviceBridge =
-                Bridge.serviceBridge ||
-                window.HalDoV20ServiceBridge;
+            const id =
+                String(
+                    appId ||
+                    ""
+                )
+                .trim();
 
-
-            /*
-             * Wenn die Universal Service Bridge vorhanden
-             * ist, verwenden wir deren zentrale API.
-             */
-
-            if (
-                serviceBridge &&
-                typeof serviceBridge.createAppServices ===
-                "function"
-            ) {
-
-                try {
-
-                    return serviceBridge.createAppServices(
-                        appId
-                    );
-
-                } catch (error) {
-
-                    Bridge.warn(
-                        "Service Bridge app context failed:",
-                        error
-                    );
-                }
-            }
-
-
-            /*
-             * Defensive Fallback-Struktur.
-             */
 
             return {
 
                 appId:
-                    appId,
+                    id,
+
+                bridge:
+                    Bridge,
+
+                v20:
+                    V20,
 
                 kernel:
-                    Bridge.systems.kernel ||
-                    null,
+                    Bridge.getSystem(
+                        "kernel"
+                    ),
 
                 system:
-                    Bridge.systems.system ||
-                    null,
-
-                appManager:
-                    Bridge.systems.appManager ||
-                    null,
+                    Bridge.getSystem(
+                        "system"
+                    ),
 
                 registry:
-                    Bridge.systems.appRegistry ||
-                    null,
+                    Bridge.getSystem(
+                        "appRegistry"
+                    ),
 
                 runtime:
-                    Bridge.systems.appRuntime ||
-                    null,
+                    Bridge.getSystem(
+                        "appRuntime"
+                    ),
+
+                appManager:
+                    Bridge.getSystem(
+                        "appManager"
+                    ),
 
                 router:
-                    Bridge.systems.appRouter ||
-                    null,
+                    Bridge.getSystem(
+                        "appRouter"
+                    ),
 
                 windowManager:
-                    Bridge.systems.windowManager ||
-                    null,
+                    Bridge.getSystem(
+                        "windowManager"
+                    ),
 
                 storage:
-                    Bridge.systems.storage ||
-                    Bridge.systems.storageManager ||
-                    null,
+                    Bridge.storage,
 
                 language:
-                    Bridge.systems.language ||
-                    null,
+                    Bridge.language,
 
                 ai:
-                    Bridge.systems.ai ||
-                    Bridge.systems.aiCore ||
-                    null,
+                    Bridge.getSystem(
+                        "ai"
+                    ),
 
                 voice:
-                    Bridge.systems.voice ||
-                    null,
-
-                speech:
-                    Bridge.systems.speech ||
-                    null,
+                    Bridge.getSystem(
+                        "voice"
+                    ),
 
                 notifications:
-                    Bridge.systems.notifications ||
-                    null,
-
-                config:
-                    Bridge.systems.settings ||
-                    null,
-
-                modules:
-                    Bridge.systems.moduleManager ||
-                    null,
-
-                shell:
-                    Bridge.systems.shell ||
-                    null,
-
-                desktop:
-                    Bridge.systems.desktop ||
-                    null,
-
-                ezidiKeyboard:
-                    Bridge.systems.ezidiKeyboard ||
-                    null,
+                    Bridge.getSystem(
+                        "notifications"
+                    ),
 
                 cosmic:
-                    Bridge.systems.cosmic ||
-                    null,
+                    Bridge.getSystem(
+                        "cosmic"
+                    ),
 
                 cosmicWelcome:
-                    Bridge.systems.cosmicWelcome ||
+                    Bridge.getSystem(
+                        "cosmicWelcome"
+                    ),
+
+                ezidiKeyboard:
+                    Bridge.getSystem(
+                        "ezidiKeyboard"
+                    ),
+
+                events:
+                    window.HalDoAppEvents ||
+                    V20.appEvents ||
                     null,
 
-                serviceBridge:
-                    serviceBridge ||
-                    null,
-
-                eventBus:
-                    Bridge.eventBus ||
+                services:
+                    Bridge.systems.serviceBridge ||
                     null
+
             };
-        };
-
-
-    /* ========================================================
-       CONNECT APP EVENT BUS
-    ======================================================== */
-
-    Bridge.connectAppEvents =
-        function () {
-
-            const bus =
-                Bridge.systems.eventBus ||
-                window.HalDoAppEvents ||
-                window.HalDoV20AppEvents;
-
-
-            if (
-                !bus
-            ) {
-
-                return false;
-            }
-
-
-            Bridge.eventBus =
-                bus;
-
-
-            /*
-             * App Event Bus ist bereits selbständig.
-             * Wir verwenden ihn lediglich als zentrale
-             * Kommunikationsschicht.
-             */
-
-            return true;
         };
 
 
@@ -2827,27 +2381,56 @@
                 systems:
                     Object.keys(
                         Bridge.systems
+                    ).filter(
+                        function (
+                            key
+                        ) {
+
+                            return Boolean(
+                                Bridge.systems[
+                                    key
+                                ]
+                            );
+                        }
                     ),
-
-                services:
-                    Bridge.serviceBridge &&
-                    typeof Bridge.serviceBridge.getStatus ===
-                    "function"
-                        ? Bridge.serviceBridge.getStatus()
-                        : null,
-
-                eventBus:
-                    Bridge.eventBus &&
-                    typeof Bridge.eventBus.getStatus ===
-                    "function"
-                        ? Bridge.eventBus.getStatus()
-                        : null,
 
                 apps:
                     Bridge.apps.size,
 
-                language:
-                    Bridge.language.get(),
+                hasServiceBridge:
+                    Boolean(
+                        Bridge.systems.serviceBridge
+                    ),
+
+                hasEventBus:
+                    Boolean(
+                        Bridge.systems.appEvents
+                    ),
+
+                hasRuntime:
+                    Boolean(
+                        Bridge.systems.appRuntime
+                    ),
+
+                hasRegistry:
+                    Boolean(
+                        Bridge.systems.appRegistry
+                    ),
+
+                hasAI:
+                    Boolean(
+                        Bridge.systems.ai
+                    ),
+
+                hasVoice:
+                    Boolean(
+                        Bridge.systems.voice
+                    ),
+
+                hasCosmic:
+                    Boolean(
+                        Bridge.systems.cosmic
+                    ),
 
                 timestamp:
                     Date.now()
@@ -2856,15 +2439,7 @@
 
 
     /* ========================================================
-       ALIAS STATUS
-    ======================================================== */
-
-    Bridge.getStatus =
-        Bridge.status;
-
-
-    /* ========================================================
-       INITIALIZATION
+       INITIALIZE
     ======================================================== */
 
     Bridge.init =
@@ -2879,244 +2454,139 @@
 
 
             Bridge.log(
-                "Initializing HalDo AI OS 20 Central Bridge..."
+                "Initializing HalDo AI OS 20 Core Bridge..."
             );
 
 
             /*
-             * Zuerst vorhandene Systeme erkennen.
+             * Systeme suchen.
              */
 
             Bridge.discoverSystems();
 
 
             /*
-             * Service Bridge verbinden.
+             * Service Bridge anbinden.
              */
 
-            const serviceBridge =
-                Bridge.systems.serviceBridge ||
-                window.HalDoV20ServiceBridge;
-
-
-            if (
-                serviceBridge
-            ) {
-
-                Bridge.serviceBridge =
-                    serviceBridge;
-            }
+            Bridge.connectServices();
 
 
             /*
-             * Event Bus verbinden.
+             * Event Bus nach Discovery erneut prüfen.
              */
 
-            Bridge.connectEventBus();
+            Bridge.systems.appEvents =
+                window.HalDoAppEvents ||
+                window.HalDoV20AppEvents ||
+                HalDoOS.appEvents ||
+                V20.appEvents ||
+                Bridge.systems.appEvents ||
+                null;
 
 
             /*
              * Gespeicherte Sprache laden.
              */
 
-            const savedLanguage =
-                Bridge.storage.get(
-                    "haldo.language",
-                    null
-                );
+            try {
+
+                const raw =
+                    window.localStorage.getItem(
+                        "haldo.language"
+                    );
 
 
-            if (
-                savedLanguage &&
-                typeof savedLanguage ===
-                "string"
-            ) {
+                if (raw) {
 
-                try {
+                    let language =
+                        raw;
 
-                    document.documentElement.lang =
-                        savedLanguage;
 
-                } catch (error) {
+                    try {
 
-                    /*
-                     * Ignore.
-                     */
+                        language =
+                            JSON.parse(
+                                raw
+                            );
+
+                    } catch (error) {
+
+                        /* Plain string */
+
+                    }
+
+
+                    if (
+                        language
+                    ) {
+
+                        document.documentElement.lang =
+                            language;
+                    }
                 }
+
+            } catch (error) {
+
+                Bridge.warn(
+                    "Language restore failed."
+                );
             }
 
+
+            /*
+             * Ready setzen.
+             */
 
             Bridge.ready =
                 true;
 
 
             /*
-             * Zentrale Verweise auf HalDoOS.
+             * V20 Namespace:
+             *
+             * NICHT ersetzen!
+             * Nur Eigenschaften ergänzen.
              */
+
+            V20.coreBridge =
+                Bridge;
+
+            V20.bridge =
+                Bridge;
+
+            V20.version =
+                V20.version ||
+                "20.0.0";
+
+
+            /*
+             * HalDoOS
+             */
+
+            HalDoOS.v20 =
+                V20;
 
             HalDoOS.v20Bridge =
                 Bridge;
 
 
-            HalDoOS.v20 =
-                V20;
-
-
             /*
-             * V20 Namespace NICHT ersetzen.
-             *
-             * Bereits vorhandene:
-             *
-             *   V20.serviceBridge
-             *   V20.appEvents
-             *   V20.appRegistry
-             *   V20.appRuntime
-             *
-             * bleiben erhalten.
+             * Globaler direkter Zugriff.
              */
 
-            V20.bridge =
-                Bridge;
-
-
-            V20.v20Bridge =
+            window.HalDoV20CoreBridge =
                 Bridge;
 
 
             /*
-             * Kompatibilitätsreferenzen.
-             */
-
-            if (
-                !V20.getSystem
-            ) {
-
-                V20.getSystem =
-                    Bridge.getSystem;
-            }
-
-
-            if (
-                !V20.registerApp
-            ) {
-
-                V20.registerApp =
-                    Bridge.registerApp;
-            }
-
-
-            if (
-                !V20.getApp
-            ) {
-
-                V20.getApp =
-                    Bridge.getApp;
-            }
-
-
-            if (
-                !V20.getApps
-            ) {
-
-                V20.getApps =
-                    Bridge.getApps;
-            }
-
-
-            if (
-                !V20.openApp
-            ) {
-
-                V20.openApp =
-                    Bridge.openApp;
-            }
-
-
-            if (
-                !V20.closeApp
-            ) {
-
-                V20.closeApp =
-                    Bridge.closeApp;
-            }
-
-
-            /*
-             * Zentrale Event Bus Referenz.
-             */
-
-            if (
-                Bridge.eventBus &&
-                !V20.appEvents
-            ) {
-
-                V20.appEvents =
-                    Bridge.eventBus;
-            }
-
-
-            /*
-             * Zentrale Service Bridge Referenz.
-             */
-
-            if (
-                Bridge.serviceBridge &&
-                !V20.serviceBridge
-            ) {
-
-                V20.serviceBridge =
-                    Bridge.serviceBridge;
-            }
-
-
-            /*
-             * System Event.
+             * Event Bus informieren.
              */
 
             Bridge.emit(
-                "v20:ready",
-                Bridge.status(),
-                {
-
-                    source:
-                        "system",
-
-                    internal:
-                        true
-                }
+                "v20:core-ready",
+                Bridge.status()
             );
-
-
-            /*
-             * Universal App Event Bus direkt
-             * informieren, falls vorhanden.
-             */
-
-            const eventBus =
-                Bridge.eventBus;
-
-
-            if (
-                eventBus &&
-                typeof eventBus.system ===
-                "function"
-            ) {
-
-                try {
-
-                    eventBus.system(
-                        "system:v20-bridge-ready",
-                        Bridge.status()
-                    );
-
-                } catch (error) {
-
-                    Bridge.warn(
-                        "Event Bus ready notification failed:",
-                        error
-                    );
-                }
-            }
 
 
             /*
@@ -3136,22 +2606,22 @@
                 try {
 
                     kernel.emit(
-                        "system:v20-bridge-ready",
+                        "v20:core-ready",
                         Bridge.status()
                     );
 
                 } catch (error) {
 
                     Bridge.warn(
-                        "Kernel ready notification failed:",
-                        error
+                        "Kernel notification failed."
                     );
                 }
             }
 
 
             Bridge.log(
-                "HalDo AI OS 20 Central Bridge ready."
+                "HalDo AI OS 20 Core Bridge ready.",
+                Bridge.status()
             );
 
 
@@ -3161,53 +2631,42 @@
 
     /* ========================================================
        GLOBAL API
-    ======================================================== */
+       ======================================================== */
 
     /*
      * WICHTIG:
      *
-     * NICHT:
+     * Kein:
      *
-     *   window.HalDoV20 = Bridge
+     *   window.HalDoV20 = Bridge;
      *
-     * Dadurch würden Service Bridge und Event Bus
-     * aus dem gemeinsamen Namespace verschwinden.
+     * mehr!
      *
-     * Stattdessen:
-     *
-     *   window.HalDoV20.bridge
+     * Dadurch bleiben Service Bridge, Event Bus,
+     * Registry usw. im gemeinsamen Namespace erhalten.
      */
+
+    V20.coreBridge =
+        Bridge;
 
     V20.bridge =
         Bridge;
 
 
-    V20.v20Bridge =
-        Bridge;
+    HalDoOS.v20 =
+        V20;
 
 
     HalDoOS.v20Bridge =
         Bridge;
 
 
-    /*
-     * Legacy direkter Zugriff.
-     *
-     * Nur setzen, wenn noch kein anderer direkter
-     * V20-Eintrag vorhanden ist.
-     */
-
-    if (
-        !window.HalDoV20Bridge
-    ) {
-
-        window.HalDoV20Bridge =
-            Bridge;
-    }
+    window.HalDoV20CoreBridge =
+        Bridge;
 
 
     /* ========================================================
-       DOM READY BOOT
+       BOOT
     ======================================================== */
 
     function boot() {
@@ -3219,7 +2678,7 @@
         } catch (error) {
 
             Bridge.error(
-                "HalDo AI OS 20 Bridge Startfehler:",
+                "HalDo AI OS 20 Core Bridge Startfehler:",
                 error
             );
         }
@@ -3256,47 +2715,28 @@
             event
         ) {
 
-            try {
+            Bridge.emit(
+                "system:error",
+                {
 
-                Bridge.emit(
-                    "system:error",
-                    {
+                    message:
+                        event.message ||
+                        "Unknown error",
 
-                        message:
-                            event.message ||
-                            "Unknown error",
+                    filename:
+                        event.filename ||
+                        null,
 
-                        filename:
-                            event.filename ||
-                            null,
+                    line:
+                        event.lineno ||
+                        null,
 
-                        line:
-                            event.lineno ||
-                            null,
+                    column:
+                        event.colno ||
+                        null
 
-                        column:
-                            event.colno ||
-                            null,
-
-                        error:
-                            event.error ||
-                            null
-                    },
-
-                    {
-
-                        source:
-                            "system"
-                    }
-                );
-
-            } catch (error) {
-
-                /*
-                 * Error Bridge darf einen globalen
-                 * Browserfehler niemals verschlimmern.
-                 */
-            }
+                }
+            );
         }
     );
 
@@ -3307,30 +2747,16 @@
             event
         ) {
 
-            try {
+            Bridge.emit(
+                "system:unhandled-rejection",
+                {
 
-                Bridge.emit(
-                    "system:unhandled-rejection",
-                    {
+                    reason:
+                        event.reason ||
+                        "Unknown rejection"
 
-                        reason:
-                            event.reason ||
-                            "Unknown rejection"
-                    },
-
-                    {
-
-                        source:
-                            "system"
-                    }
-                );
-
-            } catch (error) {
-
-                /*
-                 * Safe fallback.
-                 */
-            }
+                }
+            );
         }
     );
 
