@@ -1,41 +1,63 @@
 /* ============================================================
    HALDO AI OS 20
-   APP CONTRACT
+   PROFESSIONAL APP CONTRACT
    ------------------------------------------------------------
    Datei:
-       js/app-contract.js
+       /js/app-contract.js
 
-   ZENTRALER APP-VERTRAG 20.0.1
+   Version:
+       20.1.0
 
-   Der Contract ist die gemeinsame Runtime-Schnittstelle
-   zwischen jeder HalDo-App und der HalDo-Plattform.
+   ZENTRALE VERTRAGSSCHICHT FÜR ALLE HALDO-APPS
 
-   Verbindet:
+   Verantwortlich für:
 
-   App
-   App Manager
-   App Registry
-   Kernel
-   System
-   Router
-   Window Manager
-   Launcher
-   Storage
-   AI
-   Language
-   Voice
-   Notifications
-   Keyboard
-   Events
-   Permissions
-   Capabilities
-   Settings
-   State
-   Lifecycle
-   Diagnostics
+   - App Manifest
+   - App Definition
+   - App Context
+   - Lifecycle Contract
+   - Permissions
+   - Capabilities
+   - Dependencies
+   - Settings
+   - State
+   - Events
+   - Services
+   - Runtime API
+   - Validation
+   - Diagnostics
+   - Compatibility
+   - Versioning
 
-   Bestehende Funktionen werden nicht absichtlich entfernt.
-   Unbekannte App-Felder bleiben erhalten.
+   Architektur:
+
+       App
+        │
+        ▼
+   App Contract
+        │
+        ├── Manifest
+        ├── Context
+        ├── Lifecycle
+        ├── Permissions
+        ├── Capabilities
+        ├── Dependencies
+        ├── State
+        ├── Settings
+        └── Services
+             │
+             ▼
+        App Manager
+             │
+       ┌─────┼─────┐
+       ▼     ▼     ▼
+    Router Window Storage
+       │
+       ├── AI
+       ├── Language
+       ├── Voice
+       ├── Notifications
+       └── Keyboard
 
    HALDO AI OS 20
    ============================================================ */
@@ -48,111 +70,33 @@
        01 — FOUNDATION
        ======================================================== */
 
-    window.HalDoOS = window.HalDoOS || {};
+    window.HalDoOS =
+        window.HalDoOS || {};
 
-    const HalDoOS = window.HalDoOS;
-
-    const VERSION = "20.0.1";
-    const MODULE_ID = "app-contract";
-    const NAME = "HalDo AI OS 20 App Contract";
+    const HalDoOS =
+        window.HalDoOS;
 
 
     /* ========================================================
-       02 — INTERNAL STATE
+       02 — META
        ======================================================== */
 
-    const state = {
+    const VERSION =
+        "20.1.0";
 
-        initialized: false,
-        initializing: false,
-        ready: false,
-        failed: false,
+    const MODULE_ID =
+        "app-contract";
 
-        manifests: new Map(),
-        contexts: new Map(),
-        validators: new Map(),
+    const NAME =
+        "HalDo AI OS 20 Application Contract";
 
-        lifecycleStates: new Map(),
 
-        statistics: {
-
-            manifestsCreated: 0,
-            contextsCreated: 0,
-            validations: 0,
-            validationErrors: 0,
-            executions: 0,
-            executionErrors: 0,
-            events: 0
-
-        }
-
-    };
+    const CONTRACT_VERSION =
+        "1.0.0";
 
 
     /* ========================================================
-       03 — DEFAULT LIFECYCLE
-       ======================================================== */
-
-    const DEFAULT_LIFECYCLE = [
-
-        "created",
-        "initializing",
-        "initialized",
-        "starting",
-        "running",
-        "opening",
-        "open",
-        "active",
-        "inactive",
-        "minimized",
-        "restoring",
-        "closing",
-        "closed",
-        "stopping",
-        "stopped",
-        "suspended",
-        "error"
-
-    ];
-
-
-    /* ========================================================
-       04 — DEFAULT PERMISSIONS
-       ======================================================== */
-
-    const DEFAULT_PERMISSIONS = [
-
-        "storage",
-        "notifications",
-        "keyboard",
-        "language",
-        "voice",
-        "ai",
-        "window",
-        "router"
-
-    ];
-
-
-    /* ========================================================
-       05 — DEFAULT CAPABILITIES
-       ======================================================== */
-
-    const DEFAULT_CAPABILITIES = [
-
-        "open",
-        "close",
-        "activate",
-        "minimize",
-        "restore",
-        "settings",
-        "state"
-
-    ];
-
-
-    /* ========================================================
-       06 — SERVICE ACCESS
+       03 — SERVICE ACCESS
        ======================================================== */
 
     function getKernel() {
@@ -166,55 +110,11 @@
     }
 
 
-    function getAppManager() {
+    function getSystem() {
 
         return (
-            window.HalDoAppManager ||
-            HalDoOS.appManager ||
-            null
-        );
-
-    }
-
-
-    function getRegistry() {
-
-        return (
-            window.HalDoAppRegistry ||
-            HalDoOS.appRegistry ||
-            null
-        );
-
-    }
-
-
-    function getRouter() {
-
-        return (
-            window.HalDoAppRouter ||
-            HalDoOS.appRouter ||
-            null
-        );
-
-    }
-
-
-    function getWindowManager() {
-
-        return (
-            window.HalDoWindowManager ||
-            HalDoOS.windowManager ||
-            null
-        );
-
-    }
-
-
-    function getLauncher() {
-
-        return (
-            window.HalDoLauncher ||
-            HalDoOS.launcher ||
+            window.HalDoSystem ||
+            HalDoOS.system ||
             null
         );
 
@@ -232,19 +132,6 @@
     }
 
 
-    function getAI() {
-
-        return (
-            window.HalDoAI ||
-            HalDoOS.ai ||
-            window.HalDoAICore ||
-            HalDoOS.aiCore ||
-            null
-        );
-
-    }
-
-
     function getLanguage() {
 
         return (
@@ -252,6 +139,19 @@
             HalDoOS.languageManager ||
             window.HalDoLanguage ||
             HalDoOS.language ||
+            null
+        );
+
+    }
+
+
+    function getAI() {
+
+        return (
+            window.HalDoAI ||
+            HalDoOS.ai ||
+            window.HalDoAICore ||
+            HalDoOS.aiCore ||
             null
         );
 
@@ -292,11 +192,66 @@
     }
 
 
-    function getSystem() {
+    function getRouter() {
 
         return (
-            HalDoOS.system ||
-            window.HalDoSystem ||
+            window.HalDoAppRouter ||
+            HalDoOS.appRouter ||
+            null
+        );
+
+    }
+
+
+    function getWindowManager() {
+
+        return (
+            window.HalDoWindowManager ||
+            HalDoOS.windowManager ||
+            null
+        );
+
+    }
+
+
+    function getLauncher() {
+
+        return (
+            window.HalDoLauncher ||
+            HalDoOS.launcher ||
+            null
+        );
+
+    }
+
+
+    function getRegistry() {
+
+        return (
+            window.HalDoAppRegistry ||
+            HalDoOS.appRegistry ||
+            null
+        );
+
+    }
+
+
+    function getPlatform() {
+
+        return (
+            window.HalDoAppPlatform ||
+            HalDoOS.appPlatform ||
+            null
+        );
+
+    }
+
+
+    function getAppManager() {
+
+        return (
+            window.HalDoAppManager ||
+            HalDoOS.appManager ||
             null
         );
 
@@ -304,14 +259,18 @@
 
 
     /* ========================================================
-       07 — HELPERS
+       04 — HELPERS
        ======================================================== */
 
-    function hasMethod(object, method) {
+    function hasMethod(
+        object,
+        method
+    ) {
 
         return !!(
             object &&
-            typeof object[method] === "function"
+            typeof object[method] ===
+            "function"
         );
 
     }
@@ -326,8 +285,14 @@
                 /[^a-z0-9äöüßîêç_-]+/gi,
                 "-"
             )
-            .replace(/-+/g, "-")
-            .replace(/^-|-$/g, "");
+            .replace(
+                /-+/g,
+                "-"
+            )
+            .replace(
+                /^-|-$/g,
+                ""
+            );
 
     }
 
@@ -343,19 +308,29 @@
 
         if (Array.isArray(value)) {
 
-            return value.map(clone);
+            return value.map(
+                item =>
+                    clone(item)
+            );
 
         }
 
-        if (typeof value === "object") {
+        if (
+            typeof value ===
+            "object"
+        ) {
 
             const result = {};
 
-            Object.keys(value).forEach(key => {
+            Object.keys(value)
+                .forEach(key => {
 
-                result[key] = clone(value[key]);
+                    result[key] =
+                        clone(
+                            value[key]
+                        );
 
-            });
+                });
 
             return result;
 
@@ -366,74 +341,98 @@
     }
 
 
-    function now() {
+    function safePromise(value) {
 
-        return Date.now();
+        if (
+            value &&
+            typeof value.then ===
+            "function"
+        ) {
 
-    }
-
-
-    function uniqueArray(value) {
-
-        if (!Array.isArray(value)) {
-
-            return [];
+            return value;
 
         }
 
-        return Array.from(
-            new Set(
-                value
-                    .filter(item =>
-                        item !== null &&
-                        item !== undefined &&
-                        String(item).trim() !== ""
-                    )
-                    .map(item =>
-                        typeof item === "string"
-                            ? item.trim()
-                            : item
-                    )
-            )
+        return Promise.resolve(
+            value
         );
 
     }
 
 
-    function safeCall(
-        object,
-        method,
-        args = [],
-        fallback = null
+    function dispatch(
+        name,
+        detail
     ) {
-
-        if (!hasMethod(object, method)) {
-
-            return fallback;
-
-        }
 
         try {
 
-            return object[method](...args);
-
-        } catch (exception) {
-
-            warn(
-                "Service-Aufruf fehlgeschlagen:",
-                method,
-                exception
+            window.dispatchEvent(
+                new CustomEvent(
+                    name,
+                    {
+                        detail:
+                            detail || null
+                    }
+                )
             );
 
-            return fallback;
-
-        }
+        } catch (_) {}
 
     }
 
 
     /* ========================================================
-       08 — LOGGING
+       05 — INTERNAL STATE
+       ======================================================== */
+
+    const state = {
+
+        initialized:
+            false,
+
+        initializing:
+            false,
+
+        ready:
+            false,
+
+        failed:
+            false,
+
+        manifests:
+            new Map(),
+
+        contexts:
+            new Map(),
+
+        statistics: {
+
+            manifestsCreated:
+                0,
+
+            manifestsValidated:
+                0,
+
+            validationErrors:
+                0,
+
+            contextsCreated:
+                0,
+
+            lifecycleCalls:
+                0,
+
+            errors:
+                0
+
+        }
+
+    };
+
+
+    /* ========================================================
+       06 — LOGGING
        ======================================================== */
 
     function log() {
@@ -479,115 +478,322 @@
 
 
     /* ========================================================
-       09 — EVENTS
+       07 — EVENTS
        ======================================================== */
 
-    function emit(event, data = null) {
+    const listeners =
+        new Map();
 
-        state.statistics.events += 1;
 
-        const payload = {
+    function on(
+        event,
+        callback
+    ) {
 
-            source: MODULE_ID,
-            event,
-            data,
-            timestamp: new Date().toISOString()
+        if (
+            typeof callback !==
+            "function"
+        ) {
+
+            return function () {};
+
+        }
+
+        if (
+            !listeners.has(event)
+        ) {
+
+            listeners.set(
+                event,
+                new Set()
+            );
+
+        }
+
+        const set =
+            listeners.get(event);
+
+        set.add(callback);
+
+        return function () {
+
+            off(
+                event,
+                callback
+            );
 
         };
 
+    }
 
-        const events = HalDoOS.events;
 
-        if (
-            events &&
-            hasMethod(events, "emit")
-        ) {
+    function off(
+        event,
+        callback
+    ) {
 
-            safeCall(
-                events,
-                "emit",
-                [
-                    "app-contract:" + event,
-                    payload
-                ]
+        const set =
+            listeners.get(event);
+
+        if (!set) {
+            return;
+        }
+
+        set.delete(callback);
+
+        if (!set.size) {
+
+            listeners.delete(
+                event
             );
 
         }
 
+    }
 
-        const kernel = getKernel();
+
+    function emit(
+        event,
+        data = null
+    ) {
+
+        const set =
+            listeners.get(event);
+
+        if (set) {
+
+            Array.from(set)
+                .forEach(
+                    callback => {
+
+                        try {
+
+                            callback(
+                                data
+                            );
+
+                        } catch (
+                            exception
+                        ) {
+
+                            reportError(
+                                exception,
+                                "Event: " +
+                                event
+                            );
+
+                        }
+
+                    }
+                );
+
+        }
+
+
+        const kernel =
+            getKernel();
 
         if (
             kernel &&
-            hasMethod(kernel, "emit")
+            hasMethod(
+                kernel,
+                "emit"
+            )
         ) {
 
-            safeCall(
-                kernel,
-                "emit",
-                [
-                    "app-contract:" + event,
-                    payload
-                ]
-            );
+            try {
+
+                kernel.emit(
+                    "app-contract:" +
+                    event,
+                    data
+                );
+
+            } catch (_) {}
 
         }
 
 
-        try {
+        const events =
+            HalDoOS.events;
 
-            window.dispatchEvent(
-                new CustomEvent(
-                    "haldo:app-contract:" + event,
-                    {
-                        detail: payload
-                    }
-                )
-            );
+        if (
+            events &&
+            hasMethod(
+                events,
+                "emit"
+            )
+        ) {
 
-        } catch (_) {}
+            try {
+
+                events.emit(
+                    "app-contract:" +
+                    event,
+                    data
+                );
+
+            } catch (_) {}
+
+        }
 
 
-        return payload;
+        dispatch(
+            "haldo:app-contract:" +
+            event,
+            data
+        );
 
     }
+
+
+    /* ========================================================
+       08 — ERROR HANDLING
+       ======================================================== */
+
+    function reportError(
+        exception,
+        context =
+            "App Contract"
+    ) {
+
+        state.statistics.errors +=
+            1;
+
+        const normalized =
+            exception instanceof Error
+                ? exception
+                : new Error(
+                    String(exception)
+                );
+
+        const record = {
+
+            name:
+                normalized.name,
+
+            message:
+                normalized.message,
+
+            stack:
+                normalized.stack ||
+                "",
+
+            context,
+
+            time:
+                Date.now()
+
+        };
+
+        errorLog(record);
+
+        emit(
+            "error",
+            record
+        );
+
+        const kernel =
+            getKernel();
+
+        if (
+            kernel &&
+            hasMethod(
+                kernel,
+                "reportError"
+            )
+        ) {
+
+            try {
+
+                kernel.reportError(
+                    normalized,
+                    context
+                );
+
+            } catch (_) {}
+
+        }
+
+        return record;
+
+    }
+
+
+    /* ========================================================
+       09 — DEFAULT ARRAYS
+       ======================================================== */
+
+    const DEFAULT_PERMISSIONS = [
+
+        "storage"
+
+    ];
+
+
+    const DEFAULT_CAPABILITIES = [
+
+        "window",
+
+        "state",
+
+        "settings",
+
+        "events"
+
+    ];
+
+
+    const DEFAULT_DEPENDENCIES = [];
 
 
     /* ========================================================
        10 — MANIFEST CREATION
        ======================================================== */
 
-    function createManifest(definition = {}) {
+    function createManifest(
+        definition = {}
+    ) {
 
-        const source = definition || {};
+        const source =
+            (
+                definition &&
+                typeof definition ===
+                "object"
+            )
+                ? definition
+                : {};
 
-        const rawId =
-            source.id ||
-            source.appId ||
-            source.name ||
-            source.title ||
-            "";
 
-        const id = normalizeId(rawId);
-
-        if (!id) {
-
-            throw new Error(
-                "App Contract: App-ID fehlt."
+        const id =
+            normalizeId(
+                source.id ||
+                source.appId ||
+                source.name
             );
-
-        }
 
 
         const manifest = {
 
-            /* Identity */
+            contract: {
+
+                name:
+                    NAME,
+
+                version:
+                    CONTRACT_VERSION
+
+            },
+
 
             id,
-            appId: id,
+
+            appId:
+                id,
 
             name:
                 source.name ||
+                source.title ||
                 id,
 
             title:
@@ -601,45 +807,34 @@
 
             version:
                 source.version ||
-                VERSION,
+                "1.0.0",
 
-
-            /* Visual */
-
-            icon:
-                source.icon ||
-                "◈",
-
-            logo:
-                source.logo ||
-                null,
-
-            color:
-                source.color ||
-                null,
-
-
-            /* Classification */
+            author:
+                source.author ||
+                "HalDo",
 
             category:
                 source.category ||
                 "system",
 
-            subcategory:
-                source.subcategory ||
-                null,
+            icon:
+                source.icon ||
+                "◈",
 
-            tags:
-                uniqueArray(source.tags),
+            route:
+                source.route ||
+                (
+                    id
+                        ? "/apps/" + id
+                        : null
+                ),
 
-            keywords:
-                uniqueArray(source.keywords),
-
-
-            /* Runtime */
 
             enabled:
                 source.enabled !== false,
+
+            visible:
+                source.visible !== false,
 
             singleton:
                 source.singleton !== false,
@@ -648,285 +843,233 @@
                 source.multiInstance === true,
 
             multiWindow:
-                source.multiWindow !== false,
+                source.multiWindow === true,
 
             pip:
                 source.pip === true,
 
 
-            /* Routing */
-
-            route:
-                source.route ||
-                null,
-
-            entry:
-                source.entry ||
-                null,
-
-
-            /* Dependencies */
-
             dependencies:
-                uniqueArray(
+                Array.isArray(
                     source.dependencies
-                ),
+                )
+                    ? clone(
+                        source.dependencies
+                    )
+                    : clone(
+                        DEFAULT_DEPENDENCIES
+                    ),
 
-            optionalDependencies:
-                uniqueArray(
-                    source.optionalDependencies
-                ),
-
-
-            /* Permissions */
 
             permissions:
-                uniqueArray(
-                    Array.isArray(source.permissions)
-                        ? source.permissions
-                        : DEFAULT_PERMISSIONS
-                ),
+                Array.isArray(
+                    source.permissions
+                )
+                    ? clone(
+                        source.permissions
+                    )
+                    : clone(
+                        DEFAULT_PERMISSIONS
+                    ),
 
-
-            /* Capabilities */
 
             capabilities:
-                uniqueArray(
-                    Array.isArray(source.capabilities)
-                        ? source.capabilities
-                        : DEFAULT_CAPABILITIES
-                ),
+                Array.isArray(
+                    source.capabilities
+                )
+                    ? clone(
+                        source.capabilities
+                    )
+                    : clone(
+                        DEFAULT_CAPABILITIES
+                    ),
 
 
-            /* Settings */
-
-            defaultSettings:
-                clone(
-                    source.defaultSettings ||
-                    source.settings ||
-                    {}
-                ),
+            tags:
+                Array.isArray(
+                    source.tags
+                )
+                    ? clone(source.tags)
+                    : [],
 
 
-            /* Lifecycle */
+            keywords:
+                Array.isArray(
+                    source.keywords
+                )
+                    ? clone(source.keywords)
+                    : [],
+
+
+            settings:
+                (
+                    source.settings &&
+                    typeof source.settings ===
+                    "object"
+                )
+                    ? clone(
+                        source.settings
+                    )
+                    : {},
+
+
+            metadata:
+                (
+                    source.metadata &&
+                    typeof source.metadata ===
+                    "object"
+                )
+                    ? clone(
+                        source.metadata
+                    )
+                    : {},
+
 
             lifecycle:
-                uniqueArray(
-                    Array.isArray(source.lifecycle)
-                        ? source.lifecycle
-                        : DEFAULT_LIFECYCLE
+                createLifecycleDefinition(
+                    source
                 ),
 
 
-            /* Lifecycle hooks */
+            runtime: {
 
-            init:
-                typeof source.init === "function"
-                    ? source.init
-                    : null,
+                entry:
+                    source.entry ||
+                    null,
 
-            start:
-                typeof source.start === "function"
-                    ? source.start
-                    : null,
+                module:
+                    source.module ||
+                    null,
 
-            open:
-                typeof source.open === "function"
-                    ? source.open
-                    : null,
+                sandbox:
+                    source.sandbox === true,
 
-            activate:
-                typeof source.activate === "function"
-                    ? source.activate
-                    : null,
+                persistent:
+                    source.persistent === true
 
-            onActivate:
-                typeof source.onActivate === "function"
-                    ? source.onActivate
-                    : null,
-
-            deactivate:
-                typeof source.deactivate === "function"
-                    ? source.deactivate
-                    : null,
-
-            onDeactivate:
-                typeof source.onDeactivate === "function"
-                    ? source.onDeactivate
-                    : null,
-
-            minimize:
-                typeof source.minimize === "function"
-                    ? source.minimize
-                    : null,
-
-            restore:
-                typeof source.restore === "function"
-                    ? source.restore
-                    : null,
-
-            close:
-                typeof source.close === "function"
-                    ? source.close
-                    : null,
-
-            stop:
-                typeof source.stop === "function"
-                    ? source.stop
-                    : null,
-
-            created:
-                typeof source.created === "function"
-                    ? source.created
-                    : null,
-
-            initializing:
-                typeof source.initializing === "function"
-                    ? source.initializing
-                    : null,
-
-            initialized:
-                typeof source.initialized === "function"
-                    ? source.initialized
-                    : null,
-
-            starting:
-                typeof source.starting === "function"
-                    ? source.starting
-                    : null,
-
-            running:
-                typeof source.running === "function"
-                    ? source.running
-                    : null,
-
-            opening:
-                typeof source.opening === "function"
-                    ? source.opening
-                    : null,
-
-            active:
-                typeof source.active === "function"
-                    ? source.active
-                    : null,
-
-            inactive:
-                typeof source.inactive === "function"
-                    ? source.inactive
-                    : null,
-
-            restoring:
-                typeof source.restoring === "function"
-                    ? source.restoring
-                    : null,
-
-            closing:
-                typeof source.closing === "function"
-                    ? source.closing
-                    : null,
-
-            closed:
-                typeof source.closed === "function"
-                    ? source.closed
-                    : null,
-
-            stopping:
-                typeof source.stopping === "function"
-                    ? source.stopping
-                    : null,
-
-            stopped:
-                typeof source.stopped === "function"
-                    ? source.stopped
-                    : null,
-
-            suspended:
-                typeof source.suspended === "function"
-                    ? source.suspended
-                    : null,
-
-            error:
-                typeof source.error === "function"
-                    ? source.error
-                    : null,
+            },
 
 
-            /* App data */
+            state: {
 
-            data:
-                clone(source.data || {}),
+                persistent:
+                    source.persistentState === true,
 
-            ui:
-                clone(source.ui || {}),
+                initial:
+                    (
+                        source.initialState &&
+                        typeof source.initialState ===
+                        "object"
+                    )
+                        ? clone(
+                            source.initialState
+                        )
+                        : {}
+
+            },
 
 
-            /* Metadata */
+            handlers: {
 
-            author:
-                source.author ||
-                "HalDo AI OS",
+                init:
+                    typeof source.init ===
+                    "function",
 
-            license:
-                source.license ||
-                null,
+                start:
+                    typeof source.start ===
+                    "function",
 
-            platform:
-                source.platform ||
-                "HalDo AI OS 20",
+                open:
+                    typeof source.open ===
+                    "function",
+
+                activate:
+                    typeof source.activate ===
+                    "function",
+
+                deactivate:
+                    typeof source.deactivate ===
+                    "function",
+
+                minimize:
+                    typeof source.minimize ===
+                    "function",
+
+                restore:
+                    typeof source.restore ===
+                    "function",
+
+                close:
+                    typeof source.close ===
+                    "function",
+
+                stop:
+                    typeof source.stop ===
+                    "function"
+
+            },
+
 
             createdAt:
-                source.createdAt ||
-                now(),
-
-            updatedAt:
-                now()
+                new Date().toISOString()
 
         };
 
 
         /*
-         * Zusätzliche app-spezifische Felder bleiben erhalten.
+         * Original App-Funktionen werden
+         * nicht entfernt.
          */
 
-        Object.keys(source).forEach(key => {
+        manifest.init =
+            source.init;
 
-            if (
-                !Object.prototype.hasOwnProperty.call(
-                    manifest,
-                    key
-                )
-            ) {
+        manifest.start =
+            source.start;
 
-                manifest[key] = clone(source[key]);
+        manifest.open =
+            source.open;
 
-            }
+        manifest.activate =
+            source.activate;
 
-        });
+        manifest.deactivate =
+            source.deactivate;
+
+        manifest.minimize =
+            source.minimize;
+
+        manifest.restore =
+            source.restore;
+
+        manifest.close =
+            source.close;
+
+        manifest.stop =
+            source.stop;
+
+        manifest.onActivate =
+            source.onActivate;
+
+        manifest.onDeactivate =
+            source.onDeactivate;
 
 
-        state.manifests.set(id, manifest);
+        state.manifests.set(
+            id,
+            manifest
+        );
 
-        state.statistics.manifestsCreated += 1;
-
-
-        if (!state.lifecycleStates.has(id)) {
-
-            state.lifecycleStates.set(
-                id,
-                "created"
-            );
-
-        }
-
+        state.statistics.manifestsCreated +=
+            1;
 
         emit(
             "manifest-created",
             {
-                appId: id,
-                manifest: clone(manifest)
+                app:
+                    clone(manifest)
             }
         );
-
 
         return manifest;
 
@@ -934,171 +1077,100 @@
 
 
     /* ========================================================
-       11 — MANIFEST ACCESS
+       11 — LIFECYCLE DEFINITION
        ======================================================== */
 
-    function getManifest(appId) {
+    function createLifecycleDefinition(
+        source = {}
+    ) {
 
-        const id = normalizeId(appId);
+        return {
 
-        if (!id) {
+            created:
+                true,
 
-            return null;
+            initialized:
+                typeof source.init ===
+                "function",
 
-        }
+            started:
+                typeof source.start ===
+                "function",
 
+            opened:
+                typeof source.open ===
+                "function",
 
-        if (state.manifests.has(id)) {
+            activated:
+                (
+                    typeof source.activate ===
+                    "function" ||
+                    typeof source.onActivate ===
+                    "function"
+                ),
 
-            return clone(
-                state.manifests.get(id)
-            );
+            deactivated:
+                (
+                    typeof source.deactivate ===
+                    "function" ||
+                    typeof source.onDeactivate ===
+                    "function"
+                ),
 
-        }
+            minimized:
+                typeof source.minimize ===
+                "function",
 
+            restored:
+                typeof source.restore ===
+                "function",
 
-        const manager = getAppManager();
+            closed:
+                typeof source.close ===
+                "function",
 
-        if (
-            manager &&
-            hasMethod(manager, "get")
-        ) {
+            stopped:
+                typeof source.stop ===
+                "function"
 
-            try {
-
-                const app = manager.get(id);
-
-                if (app) {
-
-                    /*
-                     * Direkt intern speichern, damit getManifest()
-                     * nicht rekursiv immer neue Manifests erzeugt.
-                     */
-
-                    return createManifest(app);
-
-                }
-
-            } catch (_) {}
-
-        }
-
-
-        const registry = getRegistry();
-
-        if (
-            registry &&
-            hasMethod(registry, "get")
-        ) {
-
-            try {
-
-                const app = registry.get(id);
-
-                if (app) {
-
-                    return createManifest(app);
-
-                }
-
-            } catch (_) {}
-
-        }
-
-
-        return null;
-
-    }
-
-
-    function getAllManifests() {
-
-        return Array.from(
-            state.manifests.values()
-        ).map(clone);
-
-    }
-
-
-    function unregisterManifest(appId) {
-
-        const id = normalizeId(appId);
-
-        if (!id) {
-
-            return false;
-
-        }
-
-        const removed =
-            state.manifests.delete(id);
-
-        if (removed) {
-
-            state.contexts.delete(id);
-            state.lifecycleStates.delete(id);
-
-            emit(
-                "manifest-removed",
-                {
-                    appId: id
-                }
-            );
-
-        }
-
-        return removed;
+        };
 
     }
 
 
     /* ========================================================
-       12 — VALIDATION
+       12 — MANIFEST VALIDATION
        ======================================================== */
 
-    function validate(definition) {
-
-        state.statistics.validations += 1;
+    function validateManifest(
+        manifest
+    ) {
 
         const errors = [];
         const warnings = [];
 
 
-        if (
-            !definition ||
-            typeof definition !== "object" ||
-            Array.isArray(definition)
-        ) {
+        if (!manifest) {
 
             errors.push(
-                "App Definition muss ein Objekt sein."
+                "Manifest fehlt."
             );
-
-            state.statistics.validationErrors += 1;
 
             return {
 
-                valid: false,
+                valid:
+                    false,
+
                 errors,
-                warnings,
-                appId: null,
-                timestamp:
-                    new Date().toISOString()
+
+                warnings
 
             };
 
         }
 
 
-        const id = normalizeId(
-            definition.id ||
-            definition.appId ||
-            definition.name ||
-            definition.title
-        );
-
-
-        if (!id) {
+        if (!manifest.id) {
 
             errors.push(
                 "App-ID fehlt."
@@ -1107,360 +1179,237 @@
         }
 
 
-        if (
-            !definition.name &&
-            !definition.title
-        ) {
+        if (!manifest.name) {
 
-            warnings.push(
-                "App besitzt weder name noch title."
+            errors.push(
+                "App-Name fehlt."
             );
 
         }
 
 
-        const arrayFields = [
-
-            "dependencies",
-            "optionalDependencies",
-            "permissions",
-            "capabilities",
-            "tags",
-            "keywords",
-            "lifecycle"
-
-        ];
-
-
-        arrayFields.forEach(field => {
-
-            if (
-                definition[field] !== undefined &&
-                !Array.isArray(definition[field])
-            ) {
-
-                errors.push(
-                    field +
-                    " muss ein Array sein."
-                );
-
-            }
-
-        });
-
-
-        const hookFields = [
-
-            "created",
-            "init",
-            "initializing",
-            "initialized",
-            "start",
-            "starting",
-            "running",
-            "open",
-            "opening",
-            "activate",
-            "active",
-            "onActivate",
-            "deactivate",
-            "inactive",
-            "onDeactivate",
-            "minimize",
-            "restore",
-            "restoring",
-            "close",
-            "closing",
-            "closed",
-            "stop",
-            "stopping",
-            "stopped",
-            "suspended",
-            "error"
-
-        ];
-
-
-        hookFields.forEach(hook => {
-
-            if (
-                definition[hook] !== undefined &&
-                typeof definition[hook] !== "function"
-            ) {
-
-                errors.push(
-                    hook +
-                    " muss eine Funktion sein."
-                );
-
-            }
-
-        });
-
-
         if (
-            definition.singleton === true &&
-            definition.multiInstance === true
+            !manifest.version
         ) {
 
             warnings.push(
-                "singleton und multiInstance sind gleichzeitig aktiviert."
+                "App-Version fehlt."
             );
 
         }
 
 
-        if (errors.length > 0) {
+        if (
+            !Array.isArray(
+                manifest.dependencies
+            )
+        ) {
 
-            state.statistics.validationErrors += 1;
+            errors.push(
+                "Dependencies müssen ein Array sein."
+            );
 
         }
 
 
-        return {
+        if (
+            !Array.isArray(
+                manifest.permissions
+            )
+        ) {
+
+            errors.push(
+                "Permissions müssen ein Array sein."
+            );
+
+        }
+
+
+        if (
+            !Array.isArray(
+                manifest.capabilities
+            )
+        ) {
+
+            errors.push(
+                "Capabilities müssen ein Array sein."
+            );
+
+        }
+
+
+        if (
+            manifest.multiInstance &&
+            manifest.singleton
+        ) {
+
+            warnings.push(
+                "multiInstance=true und singleton=true sind widersprüchlich."
+            );
+
+        }
+
+
+        if (
+            manifest.pip &&
+            !manifest.capabilities.includes(
+                "pip"
+            )
+        ) {
+
+            warnings.push(
+                "PIP aktiviert, aber Capability 'pip' fehlt."
+            );
+
+        }
+
+
+        state.statistics.manifestsValidated +=
+            1;
+
+        state.statistics.validationErrors +=
+            errors.length;
+
+
+        const result = {
 
             valid:
                 errors.length === 0,
 
             errors,
+
             warnings,
 
-            appId: id,
+            appId:
+                manifest.id,
 
-            timestamp:
-                new Date().toISOString()
+            contractVersion:
+                CONTRACT_VERSION
 
         };
-
-    }
-
-
-    function isValid(definition) {
-
-        return validate(definition).valid;
-
-    }
-
-
-    /* ========================================================
-       13 — CUSTOM VALIDATORS
-       ======================================================== */
-
-    function registerValidator(
-        name,
-        validator
-    ) {
-
-        if (
-            !name ||
-            typeof validator !== "function"
-        ) {
-
-            return false;
-
-        }
-
-
-        state.validators.set(
-            String(name),
-            validator
-        );
 
 
         emit(
-            "validator-registered",
-            {
-                name: String(name)
-            }
+            "manifest-validated",
+            result
         );
 
 
-        return true;
-
-    }
-
-
-    function validateWithValidators(definition) {
-
-        const results = [];
-
-        state.validators.forEach(
-            (validator, name) => {
-
-                try {
-
-                    const result =
-                        validator(definition);
-
-                    results.push({
-
-                        name,
-
-                        valid:
-                            result !== false
-
-                    });
-
-                } catch (exception) {
-
-                    results.push({
-
-                        name,
-
-                        valid: false,
-
-                        error:
-                            exception &&
-                            exception.message
-                                ? exception.message
-                                : String(exception)
-
-                    });
-
-                }
-
-            }
-        );
-
-
-        return results;
+        return result;
 
     }
 
 
     /* ========================================================
-       14 — DEPENDENCIES
+       13 — NORMALIZE
        ======================================================== */
 
-    function dependencyExists(dependency) {
+    function normalizeManifest(
+        definition
+    ) {
 
-        const id = normalizeId(dependency);
+        const manifest =
+            createManifest(
+                definition
+            );
 
-        if (!id) {
-
-            return false;
-
-        }
-
-
-        const manager = getAppManager();
-
-        if (
-            manager &&
-            hasMethod(manager, "has")
-        ) {
-
-            try {
-
-                if (manager.has(id)) {
-
-                    return true;
-
-                }
-
-            } catch (_) {}
-
-        }
-
-
-        const registry = getRegistry();
-
-        if (
-            registry &&
-            hasMethod(registry, "has")
-        ) {
-
-            try {
-
-                if (registry.has(id)) {
-
-                    return true;
-
-                }
-
-            } catch (_) {}
-
-        }
-
-
-        if (
-            state.manifests.has(id)
-        ) {
-
-            return true;
-
-        }
-
-
-        return false;
+        return manifest;
 
     }
 
 
-    function resolveDependencies(manifest) {
+    /* ========================================================
+       14 — GET MANIFEST
+       ======================================================== */
 
-        const app = manifest || {};
+    function getManifest(
+        appId
+    ) {
 
-        const dependencies =
-            uniqueArray(app.dependencies);
+        const id =
+            normalizeId(appId);
 
-        const optional =
-            uniqueArray(app.optionalDependencies);
+        return clone(
+            state.manifests.get(id) ||
+            null
+        );
 
-
-        const available = [];
-        const missing = [];
-        const optionalAvailable = [];
-        const optionalMissing = [];
-
-
-        dependencies.forEach(dependency => {
-
-            if (
-                dependencyExists(dependency)
-            ) {
-
-                available.push(dependency);
-
-            } else {
-
-                missing.push(dependency);
-
-            }
-
-        });
+    }
 
 
-        optional.forEach(dependency => {
+    function hasManifest(
+        appId
+    ) {
 
-            if (
-                dependencyExists(dependency)
-            ) {
+        return !!getManifest(
+            appId
+        );
 
-                optionalAvailable.push(dependency);
+    }
 
-            } else {
 
-                optionalMissing.push(dependency);
+    function getAllManifests() {
 
-            }
+        return Array.from(
+            state.manifests.values()
+        )
+        .map(clone);
 
-        });
+    }
 
+
+    /* ========================================================
+       15 — SERVICE BRIDGE
+       ======================================================== */
+
+    function createServices() {
 
         return {
 
-            valid:
-                missing.length === 0,
+            kernel:
+                getKernel(),
 
-            dependencies,
-            optionalDependencies: optional,
+            system:
+                getSystem(),
 
-            available,
-            missing,
+            storage:
+                getStorage(),
 
-            optionalAvailable,
-            optionalMissing
+            ai:
+                getAI(),
+
+            language:
+                getLanguage(),
+
+            voice:
+                getVoice(),
+
+            notifications:
+                getNotifications(),
+
+            keyboard:
+                getKeyboard(),
+
+            router:
+                getRouter(),
+
+            windowManager:
+                getWindowManager(),
+
+            launcher:
+                getLauncher(),
+
+            registry:
+                getRegistry(),
+
+            platform:
+                getPlatform(),
+
+            appManager:
+                getAppManager(),
+
+            contract:
+                api
 
         };
 
@@ -1468,368 +1417,269 @@
 
 
     /* ========================================================
-       15 — CONTEXT
+       16 — CONTEXT API
        ======================================================== */
 
     function createContext(
         app,
-        services = {}
+        options = {}
     ) {
 
         const manifest =
-            app &&
-            app.id
-                ? createManifest(app)
-                : createManifest(app || {});
+            normalizeManifest(
+                app || {}
+            );
 
 
-        const appId = manifest.id;
+        const appId =
+            normalizeId(
+                manifest.id
+            );
 
 
-        const manager =
-            services.appManager ||
-            getAppManager();
+        const services = {
+
+            ...createServices(),
+
+            ...(options.services || {})
+
+        };
+
+
+        let localState =
+            clone(
+                manifest.state.initial ||
+                {}
+            );
+
+
+        let localSettings =
+            clone(
+                manifest.settings ||
+                {}
+            );
 
 
         const context = {
 
-            /* Identity */
+            app,
+            manifest,
 
             appId,
-            id: appId,
 
-            app:
-                clone(manifest),
+            version:
+                manifest.version,
 
-
-            /* Core */
-
-            kernel:
-                services.kernel ||
-                getKernel(),
-
-            system:
-                services.system ||
-                getSystem(),
-
-            registry:
-                services.registry ||
-                getRegistry(),
-
-            router:
-                services.router ||
-                getRouter(),
-
-            windowManager:
-                services.windowManager ||
-                getWindowManager(),
-
-            launcher:
-                services.launcher ||
-                getLauncher(),
-
-            appManager:
-                manager,
+            contractVersion:
+                CONTRACT_VERSION,
 
 
-            /* Platform */
-
-            storage:
-                services.storage ||
-                getStorage(),
-
-            ai:
-                services.ai ||
-                getAI(),
-
-            language:
-                services.language ||
-                getLanguage(),
-
-            voice:
-                services.voice ||
-                getVoice(),
-
-            notifications:
-                services.notifications ||
-                getNotifications(),
-
-            keyboard:
-                services.keyboard ||
-                getKeyboard(),
+            services,
 
 
-            /* Runtime */
-
-            createdAt: now(),
-
-            state: "created",
-
-
-            /* State */
+            /*
+             * State
+             */
 
             getState() {
 
-                if (
-                    manager &&
-                    hasMethod(manager, "getAppState")
-                ) {
-
-                    return safeCall(
-                        manager,
-                        "getAppState",
-                        [appId],
-                        null
-                    );
-
-                }
-
-                return null;
-
-            },
-
-
-            updateState(changes = {}) {
+                const manager =
+                    getAppManager();
 
                 if (
                     manager &&
-                    hasMethod(manager, "updateAppState")
+                    hasMethod(
+                        manager,
+                        "getAppState"
+                    )
                 ) {
 
-                    return safeCall(
-                        manager,
-                        "updateAppState",
-                        [appId, changes],
-                        null
-                    );
+                    const systemState =
+                        manager.getAppState(
+                            appId
+                        );
+
+                    return {
+
+                        ...clone(
+                            localState
+                        ),
+
+                        ...(
+                            systemState || {}
+                        )
+
+                    };
 
                 }
 
-                return null;
+                return clone(
+                    localState
+                );
 
             },
 
 
-            /* Settings */
+            updateState(
+                changes = {}
+            ) {
 
-            getSettings() {
+                localState = {
 
-                if (
-                    manager &&
-                    hasMethod(manager, "getSettings")
-                ) {
+                    ...localState,
 
-                    return safeCall(
-                        manager,
-                        "getSettings",
-                        [appId],
-                        {}
-                    );
-
-                }
-
-                return {};
-
-            },
-
-
-            updateSettings(changes = {}) {
-
-                return this.setSettings(changes);
-
-            },
-
-
-            setSettings(changes = {}) {
-
-                if (
-                    manager &&
-                    hasMethod(manager, "setSettings")
-                ) {
-
-                    return safeCall(
-                        manager,
-                        "setSettings",
-                        [appId, changes],
-                        null
-                    );
-
-                }
-
-                return null;
-
-            },
-
-
-            /* App navigation */
-
-            openApp(targetAppId, options = {}) {
-
-                if (
-                    manager &&
-                    hasMethod(manager, "open")
-                ) {
-
-                    return safeCall(
-                        manager,
-                        "open",
-                        [targetAppId, options],
-                        null
-                    );
-
-                }
-
-                return null;
-
-            },
-
-
-            closeApp(targetAppId, options = {}) {
-
-                if (
-                    manager &&
-                    hasMethod(manager, "close")
-                ) {
-
-                    return safeCall(
-                        manager,
-                        "close",
-                        [targetAppId, options],
-                        false
-                    );
-
-                }
-
-                return false;
-
-            },
-
-
-            activateApp(targetAppId) {
-
-                if (
-                    manager &&
-                    hasMethod(manager, "activate")
-                ) {
-
-                    return safeCall(
-                        manager,
-                        "activate",
-                        [targetAppId],
-                        false
-                    );
-
-                }
-
-                return false;
-
-            },
-
-
-            minimizeApp(targetAppId) {
-
-                if (
-                    manager &&
-                    hasMethod(manager, "minimize")
-                ) {
-
-                    return safeCall(
-                        manager,
-                        "minimize",
-                        [targetAppId],
-                        false
-                    );
-
-                }
-
-                return false;
-
-            },
-
-
-            restoreApp(targetAppId) {
-
-                if (
-                    manager &&
-                    hasMethod(manager, "restore")
-                ) {
-
-                    return safeCall(
-                        manager,
-                        "restore",
-                        [targetAppId],
-                        false
-                    );
-
-                }
-
-                return false;
-
-            },
-
-
-            /* Events */
-
-            emit(event, data = null) {
-
-                const payload = {
-
-                    appId,
-
-                    event,
-                    data,
-
-                    timestamp:
-                        new Date().toISOString()
+                    ...clone(changes)
 
                 };
 
 
+                const manager =
+                    getAppManager();
+
                 if (
                     manager &&
-                    hasMethod(manager, "emit")
+                    hasMethod(
+                        manager,
+                        "updateAppState"
+                    )
                 ) {
 
-                    safeCall(
-                        manager,
-                        "emit",
-                        [event, payload]
-                    );
+                    try {
+
+                        return manager.updateAppState(
+                            appId,
+                            changes
+                        );
+
+                    } catch (
+                        exception
+                    ) {
+
+                        reportError(
+                            exception,
+                            "Context State: " +
+                            appId
+                        );
+
+                    }
 
                 }
 
-
-                try {
-
-                    window.dispatchEvent(
-                        new CustomEvent(
-                            "haldo:app:" + event,
-                            {
-                                detail: payload
-                            }
-                        )
-                    );
-
-                } catch (_) {}
-
-
-                return payload;
+                return clone(
+                    localState
+                );
 
             },
 
 
-            on(event, callback) {
+            /*
+             * Settings
+             */
+
+            getSettings() {
+
+                const manager =
+                    getAppManager();
 
                 if (
                     manager &&
-                    hasMethod(manager, "on")
+                    hasMethod(
+                        manager,
+                        "getSettings"
+                    )
                 ) {
 
-                    return safeCall(
+                    return manager.getSettings(
+                        appId
+                    );
+
+                }
+
+                return clone(
+                    localSettings
+                );
+
+            },
+
+
+            updateSettings(
+                changes = {}
+            ) {
+
+                localSettings = {
+
+                    ...localSettings,
+
+                    ...clone(changes)
+
+                };
+
+
+                const manager =
+                    getAppManager();
+
+                if (
+                    manager &&
+                    hasMethod(
                         manager,
-                        "on",
-                        [event, callback],
-                        function () {}
+                        "setSettings"
+                    )
+                ) {
+
+                    try {
+
+                        return manager.setSettings(
+                            appId,
+                            changes
+                        );
+
+                    } catch (
+                        exception
+                    ) {
+
+                        reportError(
+                            exception,
+                            "Context Settings: " +
+                            appId
+                        );
+
+                    }
+
+                }
+
+                return clone(
+                    localSettings
+                );
+
+            },
+
+
+            /*
+             * Events
+             */
+
+            on(
+                event,
+                callback
+            ) {
+
+                const manager =
+                    getAppManager();
+
+                if (
+                    manager &&
+                    hasMethod(
+                        manager,
+                        "on"
+                    )
+                ) {
+
+                    return manager.on(
+                        "app:" +
+                        appId +
+                        ":" +
+                        event,
+                        callback
                     );
 
                 }
@@ -1839,29 +1689,256 @@
             },
 
 
-            /* Contract */
+            off(
+                event,
+                callback
+            ) {
 
-            hasCapability(capability) {
+                const manager =
+                    getAppManager();
 
-                return manifest.capabilities.includes(
-                    capability
-                );
+                if (
+                    manager &&
+                    hasMethod(
+                        manager,
+                        "off"
+                    )
+                ) {
+
+                    return manager.off(
+                        "app:" +
+                        appId +
+                        ":" +
+                        event,
+                        callback
+                    );
+
+                }
 
             },
 
 
-            hasPermission(permission) {
+            emit(
+                event,
+                data = null
+            ) {
 
-                return manifest.permissions.includes(
-                    permission
-                );
+                const manager =
+                    getAppManager();
+
+                if (
+                    manager &&
+                    hasMethod(
+                        manager,
+                        "emit"
+                    )
+                ) {
+
+                    return manager.emit(
+                        "app:" +
+                        appId +
+                        ":" +
+                        event,
+                        {
+                            appId,
+                            data
+                        }
+                    );
+
+                }
+
+                return null;
 
             },
 
 
-            getManifest() {
+            /*
+             * App lifecycle helpers
+             */
 
-                return clone(manifest);
+            async open(
+                targetAppId,
+                options = {}
+            ) {
+
+                const manager =
+                    getAppManager();
+
+                if (
+                    manager &&
+                    hasMethod(
+                        manager,
+                        "open"
+                    )
+                ) {
+
+                    return manager.open(
+                        targetAppId,
+                        options
+                    );
+
+                }
+
+                return null;
+
+            },
+
+
+            async close(
+                targetAppId =
+                    appId,
+                options = {}
+            ) {
+
+                const manager =
+                    getAppManager();
+
+                if (
+                    manager &&
+                    hasMethod(
+                        manager,
+                        "close"
+                    )
+                ) {
+
+                    return manager.close(
+                        targetAppId,
+                        options
+                    );
+
+                }
+
+                return false;
+
+            },
+
+
+            async activate(
+                targetAppId =
+                    appId
+            ) {
+
+                const manager =
+                    getAppManager();
+
+                if (
+                    manager &&
+                    hasMethod(
+                        manager,
+                        "activate"
+                    )
+                ) {
+
+                    return manager.activate(
+                        targetAppId
+                    );
+
+                }
+
+                return false;
+
+            },
+
+
+            async minimize(
+                targetAppId =
+                    appId
+            ) {
+
+                const manager =
+                    getAppManager();
+
+                if (
+                    manager &&
+                    hasMethod(
+                        manager,
+                        "minimize"
+                    )
+                ) {
+
+                    return manager.minimize(
+                        targetAppId
+                    );
+
+                }
+
+                return false;
+
+            },
+
+
+            async restore(
+                targetAppId =
+                    appId
+            ) {
+
+                const manager =
+                    getAppManager();
+
+                if (
+                    manager &&
+                    hasMethod(
+                        manager,
+                        "restore"
+                    )
+                ) {
+
+                    return manager.restore(
+                        targetAppId
+                    );
+
+                }
+
+                return false;
+
+            },
+
+
+            /*
+             * Diagnostics
+             */
+
+            diagnostics() {
+
+                return {
+
+                    appId,
+
+                    manifest:
+                        clone(manifest),
+
+                    contractVersion:
+                        CONTRACT_VERSION,
+
+                    services:
+                        Object.keys(
+                            services
+                        ).reduce(
+                            (
+                                result,
+                                key
+                            ) => {
+
+                                result[key] =
+                                    !!services[key];
+
+                                return result;
+
+                            },
+                            {}
+                        ),
+
+                    state:
+                        clone(
+                            localState
+                        ),
+
+                    settings:
+                        clone(
+                            localSettings
+                        )
+
+                };
 
             }
 
@@ -1873,14 +1950,15 @@
             context
         );
 
-
-        state.statistics.contextsCreated += 1;
+        state.statistics.contextsCreated +=
+            1;
 
 
         emit(
             "context-created",
             {
-                appId
+                appId,
+                context
             }
         );
 
@@ -1890,371 +1968,147 @@
     }
 
 
-    function getContext(appId) {
-
-        const id = normalizeId(appId);
-
-        if (!id) {
-
-            return null;
-
-        }
-
-
-        const existing =
-            state.contexts.get(id);
-
-
-        if (existing) {
-
-            return existing;
-
-        }
-
-
-        const manifest =
-            getManifest(id);
-
-
-        if (!manifest) {
-
-            return null;
-
-        }
-
-
-        return createContext(
-            manifest
-        );
-
-    }
-
-
-    function destroyContext(appId) {
-
-        const id = normalizeId(appId);
-
-        if (
-            !state.contexts.has(id)
-        ) {
-
-            return false;
-
-        }
-
-
-        state.contexts.delete(id);
-
-
-        emit(
-            "context-destroyed",
-            {
-                appId: id
-            }
-        );
-
-
-        return true;
-
-    }
-
-
     /* ========================================================
-       16 — PERMISSIONS
+       17 — LIFECYCLE INVOCATION
        ======================================================== */
 
-    function getPermissions(appId) {
-
-        const manifest =
-            getManifest(appId);
-
-        if (!manifest) {
-
-            return [];
-
-        }
-
-        return clone(
-            manifest.permissions
-        );
-
-    }
-
-
-    function hasPermission(
-        appId,
-        permission
-    ) {
-
-        return getPermissions(appId)
-            .includes(permission);
-
-    }
-
-
-    /* ========================================================
-       17 — CAPABILITIES
-       ======================================================== */
-
-    function getCapabilities(appId) {
-
-        const manifest =
-            getManifest(appId);
-
-        if (!manifest) {
-
-            return [];
-
-        }
-
-        return clone(
-            manifest.capabilities
-        );
-
-    }
-
-
-    function hasCapability(
-        appId,
-        capability
-    ) {
-
-        return getCapabilities(appId)
-            .includes(capability);
-
-    }
-
-
-    /* ========================================================
-       18 — LIFECYCLE STATE
-       ======================================================== */
-
-    function getLifecycleState(appId) {
-
-        const id = normalizeId(appId);
-
-        return (
-            state.lifecycleStates.get(id) ||
-            null
-        );
-
-    }
-
-
-    function setLifecycleState(
-        appId,
-        lifecycle
-    ) {
-
-        const id = normalizeId(appId);
-
-        if (!id) {
-
-            return false;
-
-        }
-
-
-        if (
-            !DEFAULT_LIFECYCLE.includes(
-                lifecycle
-            )
-        ) {
-
-            return false;
-
-        }
-
-
-        state.lifecycleStates.set(
-            id,
-            lifecycle
-        );
-
-
-        const context =
-            state.contexts.get(id);
-
-
-        if (context) {
-
-            context.state = lifecycle;
-
-        }
-
-
-        emit(
-            "lifecycle-state-changed",
-            {
-                appId: id,
-                lifecycle
-            }
-        );
-
-
-        return true;
-
-    }
-
-
-    /* ========================================================
-       19 — LIFECYCLE EXECUTION
-       ======================================================== */
-
-    async function execute(
-        appId,
+    async function invokeLifecycle(
+        app,
         lifecycle,
         payload = {}
     ) {
 
-        state.statistics.executions += 1;
-
-
-        const manifest =
-            getManifest(appId);
-
-
-        if (!manifest) {
-
-            state.statistics.executionErrors += 1;
-
-            throw new Error(
-                "App Contract: App nicht gefunden: " +
-                appId
-            );
-
+        if (!app) {
+            return false;
         }
 
 
-        if (
-            !DEFAULT_LIFECYCLE.includes(
-                lifecycle
-            )
-        ) {
-
-            state.statistics.executionErrors += 1;
-
-            throw new Error(
-                "App Contract: Unbekannter Lifecycle: " +
-                lifecycle
+        const id =
+            normalizeId(
+                app.id ||
+                app.appId
             );
-
-        }
-
-
-        const hook =
-            manifest[lifecycle];
-
-
-        setLifecycleState(
-            manifest.id,
-            lifecycle
-        );
-
-
-        emit(
-            "lifecycle-before",
-            {
-                appId: manifest.id,
-                lifecycle,
-                payload
-            }
-        );
-
-
-        if (
-            typeof hook !== "function"
-        ) {
-
-            emit(
-                "lifecycle-after",
-                {
-                    appId: manifest.id,
-                    lifecycle,
-                    result: null
-                }
-            );
-
-            return null;
-
-        }
 
 
         const context =
-            getContext(
-                manifest.id
+            state.contexts.get(id) ||
+            createContext(
+                app
             );
 
 
-        const contractPayload = {
+        const data = {
 
-            ...payload,
+            app,
 
-            app:
-                clone(manifest),
+            appId:
+                id,
 
             context,
 
-            contract:
-                api
+            manager:
+                getAppManager(),
+
+            services:
+                context.services,
+
+            ...payload
 
         };
+
+
+        const handlers = {
+
+            init:
+                app.init,
+
+            start:
+                app.start,
+
+            open:
+                app.open,
+
+            activate:
+                app.activate,
+
+            deactivate:
+                app.deactivate,
+
+            minimize:
+                app.minimize,
+
+            restore:
+                app.restore,
+
+            close:
+                app.close,
+
+            stop:
+                app.stop,
+
+            onActivate:
+                app.onActivate,
+
+            onDeactivate:
+                app.onDeactivate
+
+        };
+
+
+        const handler =
+            handlers[lifecycle];
+
+
+        if (
+            typeof handler !==
+            "function"
+        ) {
+
+            return true;
+
+        }
+
+
+        state.statistics.lifecycleCalls +=
+            1;
 
 
         try {
 
             const result =
-                hook(contractPayload);
-
-
-            const resolved =
-                result &&
-                typeof result.then === "function"
-                    ? await result
-                    : result;
-
+                await safePromise(
+                    handler(
+                        data
+                    )
+                );
 
             emit(
-                "lifecycle-after",
+                "lifecycle",
                 {
-                    appId: manifest.id,
+
+                    appId:
+                        id,
+
                     lifecycle,
-                    result: resolved
+
+                    result
+
                 }
             );
 
-
-            return resolved;
+            return result !== false;
 
         } catch (exception) {
 
-            state.statistics.executionErrors += 1;
-
-            setLifecycleState(
-                manifest.id,
-                "error"
+            reportError(
+                exception,
+                "Lifecycle " +
+                lifecycle +
+                ": " +
+                id
             );
 
-
-            errorLog(
-                "[App Contract]",
-                lifecycle,
-                manifest.id,
-                exception
-            );
-
-
-            emit(
-                "lifecycle-error",
-                {
-                    appId: manifest.id,
-                    lifecycle,
-                    error: exception
-                }
-            );
-
-
-            throw exception;
+            return false;
 
         }
 
@@ -2262,25 +2116,562 @@
 
 
     /* ========================================================
-       20 — PLATFORM INFORMATION
+       18 — PERMISSIONS
        ======================================================== */
 
-    function getPlatformInfo() {
+    function getPermissions(
+        manifest
+    ) {
+
+        if (!manifest) {
+            return [];
+        }
+
+        return Array.isArray(
+            manifest.permissions
+        )
+            ? clone(
+                manifest.permissions
+            )
+            : [];
+
+    }
+
+
+    function hasPermission(
+        manifest,
+        permission,
+        granted = null
+    ) {
+
+        const required =
+            getPermissions(
+                manifest
+            );
+
+
+        if (
+            !required.includes(
+                permission
+            )
+        ) {
+
+            return true;
+
+        }
+
+
+        if (
+            Array.isArray(granted)
+        ) {
+
+            return granted.includes(
+                permission
+            );
+
+        }
+
+
+        return false;
+
+    }
+
+
+    function validatePermissions(
+        manifest,
+        granted = []
+    ) {
+
+        const required =
+            getPermissions(
+                manifest
+            );
+
+
+        const missing =
+            required.filter(
+                permission =>
+                    !granted.includes(
+                        permission
+                    )
+            );
+
 
         return {
 
-            name: NAME,
-            version: VERSION,
-            module: MODULE_ID,
+            valid:
+                missing.length === 0,
 
-            lifecycle:
-                clone(DEFAULT_LIFECYCLE),
+            required,
+
+            granted:
+                clone(granted),
+
+            missing
+
+        };
+
+    }
+
+
+    /* ========================================================
+       19 — CAPABILITIES
+       ======================================================== */
+
+    function getCapabilities(
+        manifest
+    ) {
+
+        if (!manifest) {
+            return [];
+        }
+
+        return Array.isArray(
+            manifest.capabilities
+        )
+            ? clone(
+                manifest.capabilities
+            )
+            : [];
+
+    }
+
+
+    function hasCapability(
+        manifest,
+        capability
+    ) {
+
+        return getCapabilities(
+            manifest
+        ).includes(
+            capability
+        );
+
+    }
+
+
+    /* ========================================================
+       20 — DEPENDENCIES
+       ======================================================== */
+
+    function getDependencies(
+        manifest
+    ) {
+
+        if (!manifest) {
+            return [];
+        }
+
+        return Array.isArray(
+            manifest.dependencies
+        )
+            ? clone(
+                manifest.dependencies
+            )
+            : [];
+
+    }
+
+
+    function validateDependencies(
+        manifest
+    ) {
+
+        const registry =
+            getRegistry();
+
+
+        const dependencies =
+            getDependencies(
+                manifest
+            );
+
+
+        const missing = [];
+
+
+        dependencies.forEach(
+            dependency => {
+
+                const id =
+                    normalizeId(
+                        dependency
+                    );
+
+
+                let exists =
+                    false;
+
+
+                if (
+                    registry &&
+                    hasMethod(
+                        registry,
+                        "has"
+                    )
+                ) {
+
+                    try {
+
+                        exists =
+                            !!registry.has(
+                                id
+                            );
+
+                    } catch (_) {}
+
+                }
+
+
+                if (!exists) {
+
+                    const manager =
+                        getAppManager();
+
+                    if (
+                        manager &&
+                        hasMethod(
+                            manager,
+                            "has"
+                        )
+                    ) {
+
+                        try {
+
+                            exists =
+                                !!manager.has(
+                                    id
+                                );
+
+                        } catch (_) {}
+
+                    }
+
+                }
+
+
+                if (!exists) {
+
+                    missing.push(
+                        id
+                    );
+
+                }
+
+            }
+        );
+
+
+        return {
+
+            valid:
+                missing.length === 0,
+
+            dependencies,
+
+            missing
+
+        };
+
+    }
+
+
+    /* ========================================================
+       21 — COMPATIBILITY
+       ======================================================== */
+
+    function checkCompatibility(
+        manifest
+    ) {
+
+        const problems = [];
+
+
+        if (!manifest) {
+
+            problems.push(
+                "Manifest fehlt."
+            );
+
+        }
+
+
+        if (
+            manifest &&
+            manifest.contract &&
+            manifest.contract.version
+        ) {
+
+            const version =
+                String(
+                    manifest.contract.version
+                );
+
+
+            if (
+                version !==
+                CONTRACT_VERSION
+            ) {
+
+                /*
+                 * Keine harte Ablehnung:
+                 * spätere Contract-Versionen
+                 * dürfen kompatibel bleiben.
+                 */
+
+                warn(
+                    "Contract-Version unterscheidet sich:",
+                    version,
+                    "→",
+                    CONTRACT_VERSION
+                );
+
+            }
+
+        }
+
+
+        return {
+
+            compatible:
+                problems.length === 0,
+
+            problems,
+
+            contractVersion:
+                CONTRACT_VERSION
+
+        };
+
+    }
+
+
+    /* ========================================================
+       22 — APP DEFINITION VALIDATION
+       ======================================================== */
+
+    function validateApp(
+        definition
+    ) {
+
+        const manifest =
+            normalizeManifest(
+                definition
+            );
+
+
+        const manifestResult =
+            validateManifest(
+                manifest
+            );
+
+
+        const dependencyResult =
+            validateDependencies(
+                manifest
+            );
+
+
+        const compatibility =
+            checkCompatibility(
+                manifest
+            );
+
+
+        const valid =
+            manifestResult.valid &&
+            dependencyResult.valid &&
+            compatibility.compatible;
+
+
+        return {
+
+            valid,
+
+            manifest:
+                manifestResult,
+
+            dependencies:
+                dependencyResult,
+
+            compatibility,
 
             permissions:
-                clone(DEFAULT_PERMISSIONS),
+                getPermissions(
+                    manifest
+                ),
 
             capabilities:
-                clone(DEFAULT_CAPABILITIES),
+                getCapabilities(
+                    manifest
+                )
+
+        };
+
+    }
+
+
+    /* ========================================================
+       23 — CONTRACT SNAPSHOT
+       ======================================================== */
+
+    function getSnapshot() {
+
+        return {
+
+            name:
+                NAME,
+
+            version:
+                VERSION,
+
+            module:
+                MODULE_ID,
+
+            contractVersion:
+                CONTRACT_VERSION,
+
+            initialized:
+                state.initialized,
+
+            initializing:
+                state.initializing,
+
+            ready:
+                state.ready,
+
+            failed:
+                state.failed,
+
+            manifestCount:
+                state.manifests.size,
+
+            contextCount:
+                state.contexts.size,
+
+            statistics:
+                {
+                    ...state.statistics
+                },
+
+            services:
+                {
+
+                    kernel:
+                        !!getKernel(),
+
+                    system:
+                        !!getSystem(),
+
+                    storage:
+                        !!getStorage(),
+
+                    ai:
+                        !!getAI(),
+
+                    language:
+                        !!getLanguage(),
+
+                    voice:
+                        !!getVoice(),
+
+                    notifications:
+                        !!getNotifications(),
+
+                    keyboard:
+                        !!getKeyboard(),
+
+                    router:
+                        !!getRouter(),
+
+                    windowManager:
+                        !!getWindowManager(),
+
+                    launcher:
+                        !!getLauncher(),
+
+                    registry:
+                        !!getRegistry(),
+
+                    platform:
+                        !!getPlatform(),
+
+                    appManager:
+                        !!getAppManager()
+
+                },
+
+            timestamp:
+                new Date().toISOString()
+
+        };
+
+    }
+
+
+    /* ========================================================
+       24 — DIAGNOSTICS
+       ======================================================== */
+
+    function diagnostics() {
+
+        return getSnapshot();
+
+    }
+
+
+    /* ========================================================
+       25 — HEALTH CHECK
+       ======================================================== */
+
+    function healthCheck() {
+
+        const problems = [];
+
+
+        if (
+            !getKernel()
+        ) {
+
+            problems.push(
+                "Kernel nicht verbunden."
+            );
+
+        }
+
+
+        if (
+            !getSystem()
+        ) {
+
+            problems.push(
+                "System nicht verbunden."
+            );
+
+        }
+
+
+        if (
+            !getAppManager()
+        ) {
+
+            problems.push(
+                "App Manager nicht verbunden."
+            );
+
+        }
+
+
+        return {
+
+            healthy:
+                problems.length === 0,
+
+            problems,
+
+            contractVersion:
+                CONTRACT_VERSION,
 
             manifestCount:
                 state.manifests.size,
@@ -2297,224 +2688,115 @@
 
 
     /* ========================================================
-       21 — DIAGNOSTICS
-       ======================================================== */
-
-    function diagnostics() {
-
-        return {
-
-            name: NAME,
-            version: VERSION,
-            module: MODULE_ID,
-
-            initialized:
-                state.initialized,
-
-            initializing:
-                state.initializing,
-
-            ready:
-                state.ready,
-
-            failed:
-                state.failed,
-
-            manifests:
-                state.manifests.size,
-
-            contexts:
-                state.contexts.size,
-
-            validators:
-                state.validators.size,
-
-            lifecycleStates:
-                state.lifecycleStates.size,
-
-            statistics:
-                {
-                    ...state.statistics
-                },
-
-            services: {
-
-                kernel:
-                    !!getKernel(),
-
-                appManager:
-                    !!getAppManager(),
-
-                registry:
-                    !!getRegistry(),
-
-                router:
-                    !!getRouter(),
-
-                windowManager:
-                    !!getWindowManager(),
-
-                launcher:
-                    !!getLauncher(),
-
-                storage:
-                    !!getStorage(),
-
-                ai:
-                    !!getAI(),
-
-                language:
-                    !!getLanguage(),
-
-                voice:
-                    !!getVoice(),
-
-                notifications:
-                    !!getNotifications(),
-
-                keyboard:
-                    !!getKeyboard(),
-
-                system:
-                    !!getSystem()
-
-            },
-
-            timestamp:
-                new Date().toISOString()
-
-        };
-
-    }
-
-
-    /* ========================================================
-       22 — HEALTH CHECK
-       ======================================================== */
-
-    function healthCheck() {
-
-        const problems = [];
-
-
-        if (!getKernel()) {
-
-            problems.push(
-                "Kernel nicht verbunden."
-            );
-
-        }
-
-
-        if (!getAppManager()) {
-
-            problems.push(
-                "App Manager nicht verbunden."
-            );
-
-        }
-
-
-        if (!getRegistry()) {
-
-            problems.push(
-                "App Registry nicht verbunden."
-            );
-
-        }
-
-
-        return {
-
-            healthy:
-                problems.length === 0,
-
-            problems,
-
-            diagnostics:
-                diagnostics(),
-
-            timestamp:
-                new Date().toISOString()
-
-        };
-
-    }
-
-
-    /* ========================================================
-       23 — PUBLIC API
+       26 — PUBLIC API
        ======================================================== */
 
     const api = {
 
-        name: NAME,
-        version: VERSION,
-        module: MODULE_ID,
+        name:
+            NAME,
+
+        version:
+            VERSION,
+
+        module:
+            MODULE_ID,
+
+        contractVersion:
+            CONTRACT_VERSION,
+
+
+        /* Events */
+
+        on,
+
+        off,
+
+        emit,
 
 
         /* Manifest */
 
         createManifest,
+
+        normalizeManifest,
+
+        validateManifest,
+
         getManifest,
+
+        hasManifest,
+
         getAllManifests,
-        unregisterManifest,
-
-
-        /* Validation */
-
-        validate,
-        isValid,
-        registerValidator,
-        validateWithValidators,
-
-
-        /* Dependencies */
-
-        resolveDependencies,
-        dependencyExists,
 
 
         /* Context */
 
         createContext,
-        getContext,
-        destroyContext,
+
+        getContext(
+            appId
+        ) {
+
+            return (
+                state.contexts.get(
+                    normalizeId(appId)
+                ) ||
+                null
+            );
+
+        },
+
+
+        /* Lifecycle */
+
+        createLifecycleDefinition,
+
+        invokeLifecycle,
 
 
         /* Permissions */
 
         getPermissions,
+
         hasPermission,
+
+        validatePermissions,
 
 
         /* Capabilities */
 
         getCapabilities,
+
         hasCapability,
 
 
-        /* Lifecycle */
+        /* Dependencies */
 
-        execute,
-        getLifecycleState,
-        setLifecycleState,
+        getDependencies,
 
-
-        /* Platform */
-
-        getPlatformInfo,
+        validateDependencies,
 
 
-        /* Events */
+        /* Validation */
 
-        emit,
+        validateApp,
+
+        checkCompatibility,
+
+
+        /* Services */
+
+        createServices,
 
 
         /* Diagnostics */
 
         diagnostics,
+
         healthCheck,
+
+        getSnapshot,
 
 
         /* State */
@@ -2539,10 +2821,7 @@
                     state.manifests.size,
 
                 contextCount:
-                    state.contexts.size,
-
-                lifecycleStateCount:
-                    state.lifecycleStates.size
+                    state.contexts.size
 
             };
 
@@ -2552,124 +2831,64 @@
 
 
     /* ========================================================
-       24 — GLOBAL EXPORT
+       27 — GLOBAL EXPORT
        ======================================================== */
 
-    window.HalDoAppContract = api;
-    window.HalDoOSAppContract = api;
+    window.HalDoAppContract =
+        api;
 
-    HalDoOS.appContract = api;
+    window.HalDoOSAppContract =
+        api;
+
+    HalDoOS.appContract =
+        api;
 
 
     /* ========================================================
-       25 — INITIALIZATION
+       28 — INITIALIZATION
        ======================================================== */
 
     function initialize() {
 
         if (state.ready) {
-
             return api;
-
         }
 
 
         if (state.initializing) {
-
             return api;
-
         }
 
 
-        state.initializing = true;
-        state.initialized = true;
-        state.failed = false;
+        state.initializing =
+            true;
+
+        state.failed =
+            false;
+
+
+        emit(
+            "initializing",
+            {
+                version:
+                    VERSION,
+
+                contractVersion:
+                    CONTRACT_VERSION
+            }
+        );
 
 
         try {
 
-            /*
-             * Bereits vorhandene Apps übernehmen.
-             */
+            state.initialized =
+                true;
 
-            const manager =
-                getAppManager();
+            state.ready =
+                true;
 
-
-            if (
-                manager &&
-                hasMethod(manager, "getAll")
-            ) {
-
-                try {
-
-                    const apps =
-                        manager.getAll() || [];
-
-
-                    apps.forEach(app => {
-
-                        try {
-
-                            if (
-                                app &&
-                                (
-                                    app.id ||
-                                    app.appId ||
-                                    app.name ||
-                                    app.title
-                                )
-                            ) {
-
-                                const id =
-                                    normalizeId(
-                                        app.id ||
-                                        app.appId ||
-                                        app.name ||
-                                        app.title
-                                    );
-
-
-                                /*
-                                 * Bereits vorhandene Manifests
-                                 * nicht unnötig neu erzeugen.
-                                 */
-
-                                if (
-                                    !state.manifests.has(id)
-                                ) {
-
-                                    createManifest(app);
-
-                                }
-
-                            }
-
-                        } catch (exception) {
-
-                            warn(
-                                "Manifest konnte nicht übernommen werden.",
-                                exception
-                            );
-
-                        }
-
-                    });
-
-                } catch (exception) {
-
-                    warn(
-                        "App Manager konnte nicht gelesen werden.",
-                        exception
-                    );
-
-                }
-
-            }
-
-
-            state.ready = true;
-            state.initializing = false;
+            state.initializing =
+                false;
 
 
             const kernel =
@@ -2678,7 +2897,10 @@
 
             if (
                 kernel &&
-                hasMethod(kernel, "registerModule")
+                hasMethod(
+                    kernel,
+                    "registerModule"
+                )
             ) {
 
                 try {
@@ -2695,7 +2917,10 @@
 
             if (
                 kernel &&
-                hasMethod(kernel, "setModuleReady")
+                hasMethod(
+                    kernel,
+                    "setModuleReady"
+                )
             ) {
 
                 try {
@@ -2710,52 +2935,97 @@
             }
 
 
+            const payload = {
+
+                version:
+                    VERSION,
+
+                contractVersion:
+                    CONTRACT_VERSION,
+
+                diagnostics:
+                    diagnostics()
+
+            };
+
+
             emit(
                 "ready",
-                {
-                    version: VERSION
-                }
+                payload
+            );
+
+
+            dispatch(
+                "haldo:app-contract-ready",
+                payload
             );
 
 
             log(
                 "HalDo AI OS 20 App Contract bereit.",
+                "Version:",
                 VERSION
             );
 
 
+            return api;
+
         } catch (exception) {
 
-            state.initializing = false;
-            state.failed = true;
+            state.initializing =
+                false;
+
+            state.failed =
+                true;
 
 
-            errorLog(
-                "[HalDo App Contract]",
-                exception
+            reportError(
+                exception,
+                "App Contract Initialisierung"
             );
 
+
+            return api;
+
         }
-
-
-        return api;
 
     }
 
 
     /* ========================================================
-       26 — BOOT
+       29 — BOOT
        ======================================================== */
 
     function boot() {
 
-        initialize();
+        initialize()
+            .catch(
+                exception => {
+
+                    state.initializing =
+                        false;
+
+                    state.failed =
+                        true;
+
+                    reportError(
+                        exception,
+                        "App Contract Boot"
+                    );
+
+                }
+            );
 
     }
 
 
+    /* ========================================================
+       30 — DOM START
+       ======================================================== */
+
     if (
-        document.readyState === "loading"
+        document.readyState ===
+        "loading"
     ) {
 
         document.addEventListener(
@@ -2774,19 +3044,23 @@
 
 
     /* ========================================================
-       27 — FINAL EXPORT
+       31 — FINAL EXPORT
        ======================================================== */
 
-    HalDoOS.appContract = api;
+    HalDoOS.appContract =
+        api;
 
-    window.HalDoAppContract = api;
-    window.HalDoOSAppContract = api;
+    window.HalDoAppContract =
+        api;
+
+    window.HalDoOSAppContract =
+        api;
 
 
     /* ========================================================
        END
        HALDO AI OS 20
-       APP CONTRACT
-       ============================================================ */
+       APP CONTRACT 20.1
+       ======================================================== */
 
 })(window, document);
