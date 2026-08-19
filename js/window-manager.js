@@ -1,2101 +1,2238 @@
-/*
-
-============================================================
-
- HALDO AI OS 18
-
- WINDOW MANAGER
-
- Professional Ultimate Foundation
-
-============================================================
-
- Datei:
-
- js/window-manager.js
-
- Aufgabe:
-
- - Verwaltung geöffneter App-Fenster
-
- - App-Fenster erstellen
-
- - App-Fenster öffnen
-
- - App-Fenster schließen
-
- - Minimieren
-
- - Maximieren
-
- - Wiederherstellen
-
- - Fokusverwaltung
-
- - Z-Index-Verwaltung
-
- - Fensterpositionen
-
- - Fenstergrößen
-
- - Mobile Unterstützung
-
- - Vorbereitung für Desktop / Tablet / iPhone
-
-============================================================
-
-*/
-
-"use strict";
-
-(function (window) {
-
-    /* ========================================================
-
-       WINDOW MANAGER
-
-       ======================================================== */
-
-    const HalDoWindowManager = {
-
-        name:
-
-            "HalDo Window Manager",
-
-        version:
-
-            "18.0.0",
-
-        status:
-
-            "CREATED",
-
-        initialized:
-
-            false,
-
-        /* ====================================================
-
-           CORE
-
-           ==================================================== */
-
-        appManager:
-
-            null,
-
-        launcher:
-
-            null,
-
-        /* ====================================================
-
-           WINDOWS
-
-           ==================================================== */
-
-        windows:
-
-            new Map(),
-
-        activeWindow:
-
-            null,
-
-        zIndex:
-
-            1000,
-
-        /* ====================================================
-
-           CONTAINER
-
-           ==================================================== */
-
-        desktop:
-
-            null,
-
-        /* ====================================================
-
-           EVENTS
-
-           ==================================================== */
-
-        listeners:
-
-            new Map(),
-
-        /* ====================================================
-
-           INITIALIZE
-
-           ==================================================== */
-
-        initialize() {
-
-            if (
-
-                this.initialized
-
-            ) {
-
-                return true;
-
-            }
-
-            this.status =
-
-                "INITIALIZING";
-
-            this.connect();
-
-            this.createDesktop();
-
-            this.initialized =
-
-                true;
-
-            this.status =
-
-                "READY";
-
-            this.emit(
-
-                "ready",
-
-                this.getStatus()
-
-            );
-
-            this.log(
-
-                "Window Manager ist bereit."
-
-            );
-
-            return true;
-
-        },
-
-        /* ====================================================
-
-           VERBINDEN
-
-           ==================================================== */
-
-        connect() {
-
-            this.appManager =
-
-                window.HalDoAppManager ||
-
-                null;
-
-            this.launcher =
-
-                window.HalDoAppLauncher ||
-
-                null;
-
-            return true;
-
-        },
-
-        /* ====================================================
-
-           DESKTOP ERSTELLEN
-
-           ==================================================== */
-
-        createDesktop() {
-
-            let desktop =
-
-                document.querySelector(
-
-                    "[data-haldo-desktop]"
-
-                );
-
-            if (
-
-                !desktop
-
-            ) {
-
-                desktop =
-
-                    document.createElement(
-
-                        "main"
-
-                    );
-
-                desktop.id =
-
-                    "haldo-desktop";
-
-                desktop.className =
-
-                    "haldo-desktop";
-
-                desktop.setAttribute(
-
-                    "data-haldo-desktop",
-
-                    "true"
-
-                );
-
-                document.body.appendChild(
-
-                    desktop
-
-                );
-
-            }
-
-            this.desktop =
-
-                desktop;
-
-            return desktop;
-
-        },
-
-        /* ====================================================
-
-           APP-FENSTER ÖFFNEN
-
-           ==================================================== */
-
-        open(
-
-            appId,
-
-            options = {}
-
-        ) {
-
-            this.connect();
-
-            if (
-
-                !this.desktop
-
-            ) {
-
-                this.createDesktop();
-
-            }
-
-            /*
-
-            ----------------------------------------------------
-
-            Bereits geöffnet?
-
-            ----------------------------------------------------
-
-            */
-
-            if (
-
-                this.windows.has(
-
-                    appId
-
-                )
-
-            ) {
-
-                const existing =
-
-                    this.windows.get(
-
-                        appId
-
-                    );
-
-                this.focus(
-
-                    appId
-
-                );
-
-                return existing;
-
-            }
-
-            /*
-
-            ----------------------------------------------------
-
-            APP ERMITTELN
-
-            ----------------------------------------------------
-
-            */
-
-            let app =
-
-                null;
-
-            if (
-
-                this.appManager
-
-            ) {
-
-                app =
-
-                    this.appManager.get(
-
-                        appId
-
-                    );
-
-            }
-
-            if (
-
-                !app
-
-            ) {
-
-                this.log(
-
-                    `App nicht gefunden: ${appId}`
-
-                );
-
-                return null;
-
-            }
-
-            /*
-
-            ----------------------------------------------------
-
-            WINDOW
-
-            ----------------------------------------------------
-
-            */
-
-            const windowData = {
-
-                id:
-
-                    `window-${appId}`,
-
-                appId:
-
-                    app.id,
-
-                title:
-
-                    app.name,
-
-                minimized:
-
-                    false,
-
-                maximized:
-
-                    false,
-
-                focused:
-
-                    false,
-
-                createdAt:
-
-                    Date.now(),
-
-                element:
-
-                    null
-
+/* ============================================================
+ * HalDo AI OS 20
+ * Window Manager
+ *
+ * Verantwortlich für:
+ *  - App-Fenster
+ *  - Fensterposition
+ *  - Fenstergröße
+ *  - Aktivierung
+ *  - Minimieren
+ *  - Maximieren
+ *  - Wiederherstellen
+ *  - Schließen
+ *  - Drag & Drop
+ *  - Z-Index
+ *  - Multi-Window
+ *  - Mobile Anpassung
+ *
+ * Architektur:
+ *
+ * Kernel
+ *   ↓
+ * System
+ *   ↓
+ * Event Bus
+ *   ↓
+ * App Runtime
+ *   ↓
+ * App Manager
+ *   ↓
+ * App Router
+ *   ↓
+ * Window Manager
+ *   ↓
+ * Application Window
+ *
+ * ============================================================ */
+
+(function (global) {
+    "use strict";
+
+    const VERSION = "20.0.0";
+
+    class HalDoWindowManager {
+
+        constructor(options = {}) {
+
+            this.version = VERSION;
+
+            this.options = {
+                containerSelector: options.containerSelector || "#haldo-window-layer",
+                desktopSelector: options.desktopSelector || "#haldo-desktop",
+                defaultWidth: options.defaultWidth || 760,
+                defaultHeight: options.defaultHeight || 540,
+                minWidth: options.minWidth || 320,
+                minHeight: options.minHeight || 220,
+                topOffset: options.topOffset || 70,
+                cascadeOffset: options.cascadeOffset || 28
             };
 
-            /*
+            this.windows = new Map();
 
-            ----------------------------------------------------
+            this.activeWindowId = null;
 
-            ELEMENT
+            this.zIndex = 1000;
 
-            ----------------------------------------------------
+            this.windowSequence = 0;
 
-            */
+            this.initialized = false;
+
+            this.dragState = null;
+
+            this.resizeState = null;
+
+            this.boundEvents = false;
+
+            this.eventBus = null;
+
+            this.appManager = null;
+
+            this.appRouter = null;
+
+            this.runtime = null;
+
+            this.system = null;
+
+            this.kernel = null;
+        }
+
+
+        /* =====================================================
+         * INITIALISIERUNG
+         * ===================================================== */
+
+        init() {
+
+            if (this.initialized) {
+                return this;
+            }
+
+            this.resolveDependencies();
+
+            this.ensureWindowLayer();
+
+            this.bindGlobalEvents();
+
+            this.initialized = true;
+
+            this.emit("window-manager:ready", {
+                version: this.version
+            });
+
+            return this;
+        }
+
+
+        /* =====================================================
+         * ABHÄNGIGKEITEN
+         * ===================================================== */
+
+        resolveDependencies() {
+
+            this.eventBus =
+                global.HalDoAppEvents ||
+                global.HalDoEventBus ||
+                global.HalDoEvents ||
+                null;
+
+            this.appManager =
+                global.HalDoAppManager ||
+                (global.HalDoOS && global.HalDoOS.appManager) ||
+                null;
+
+            this.appRouter =
+                global.HalDoAppRouter ||
+                (global.HalDoOS && global.HalDoOS.appRouter) ||
+                null;
+
+            this.runtime =
+                global.HalDoAppRuntime ||
+                (global.HalDoOS && global.HalDoOS.appRuntime) ||
+                null;
+
+            this.system =
+                global.HalDoSystem ||
+                (global.HalDoOS && global.HalDoOS.system) ||
+                null;
+
+            this.kernel =
+                global.HalDoKernel ||
+                (global.HalDoOS && global.HalDoOS.kernel) ||
+                null;
+        }
+
+
+        /* =====================================================
+         * WINDOW LAYER
+         * ===================================================== */
+
+        ensureWindowLayer() {
+
+            let layer = document.querySelector(
+                this.options.containerSelector
+            );
+
+            if (!layer) {
+
+                layer = document.createElement("div");
+
+                layer.id = "haldo-window-layer";
+
+                layer.className = "haldo-window-layer";
+
+                Object.assign(layer.style, {
+                    position: "fixed",
+                    inset: "0",
+                    pointerEvents: "none",
+                    overflow: "hidden",
+                    zIndex: "100"
+                });
+
+                document.body.appendChild(layer);
+            }
+
+            this.layer = layer;
+
+            return layer;
+        }
+
+
+        /* =====================================================
+         * WINDOW ÖFFNEN
+         * ===================================================== */
+
+        open(app, options = {}) {
+
+            if (!this.initialized) {
+                this.init();
+            }
+
+            const normalized = this.normalizeApp(app, options);
+
+            const existing = this.findWindowByAppId(
+                normalized.id
+            );
+
+            if (existing && !options.newInstance) {
+
+                if (existing.minimized) {
+                    this.restore(existing.id);
+                }
+
+                this.focus(existing.id);
+
+                return existing;
+            }
+
+            const windowId =
+                options.windowId ||
+                this.createWindowId(normalized.id);
+
+            const geometry =
+                this.calculateInitialGeometry(
+                    normalized,
+                    options
+                );
+
+            const record = {
+
+                id: windowId,
+
+                appId: normalized.id,
+
+                title: normalized.title,
+
+                icon: normalized.icon,
+
+                component: normalized.component,
+
+                element: null,
+
+                state: "normal",
+
+                minimized: false,
+
+                maximized: false,
+
+                focused: false,
+
+                x: geometry.x,
+
+                y: geometry.y,
+
+                width: geometry.width,
+
+                height: geometry.height,
+
+                previousGeometry: null,
+
+                createdAt: Date.now(),
+
+                updatedAt: Date.now(),
+
+                instance: options.instance || null,
+
+                data: options.data || {},
+
+                options: options
+            };
 
             const element =
+                this.createWindowElement(record);
 
-                document.createElement(
+            record.element = element;
 
-                    "section"
+            this.windows.set(
+                windowId,
+                record
+            );
 
+            this.layer.appendChild(element);
+
+            this.applyGeometry(record);
+
+            this.focus(windowId);
+
+            this.mountContent(record, normalized, options);
+
+            this.emit("window:opened", {
+                windowId,
+                appId: record.appId,
+                title: record.title
+            });
+
+            return record;
+        }
+
+
+        /* =====================================================
+         * APP NORMALISIEREN
+         * ===================================================== */
+
+        normalizeApp(app, options = {}) {
+
+            if (typeof app === "string") {
+
+                return {
+                    id: app,
+                    title:
+                        options.title ||
+                        this.humanizeAppId(app),
+                    icon:
+                        options.icon ||
+                        "",
+                    component:
+                        options.component ||
+                        null
+                };
+            }
+
+            if (!app || typeof app !== "object") {
+
+                throw new Error(
+                    "HalDoWindowManager: Ungültige App."
                 );
+            }
 
-            element.className =
+            return {
 
+                id:
+                    app.id ||
+                    app.appId ||
+                    app.name ||
+                    this.createWindowId("app"),
+
+                title:
+                    app.title ||
+                    app.name ||
+                    app.label ||
+                    this.humanizeAppId(
+                        app.id ||
+                        app.appId ||
+                        app.name ||
+                        "App"
+                    ),
+
+                icon:
+                    app.icon ||
+                    app.logo ||
+                    "",
+
+                component:
+                    app.component ||
+                    app.module ||
+                    app.element ||
+                    null
+            };
+        }
+
+
+        /* =====================================================
+         * WINDOW ID
+         * ===================================================== */
+
+        createWindowId(appId) {
+
+            this.windowSequence++;
+
+            return (
+                "haldo-window-" +
+                String(appId)
+                    .replace(/[^a-zA-Z0-9_-]/g, "-") +
+                "-" +
+                this.windowSequence
+            );
+        }
+
+
+        /* =====================================================
+         * INITIALGEOMETRIE
+         * ===================================================== */
+
+        calculateInitialGeometry(app, options = {}) {
+
+            const viewportWidth =
+                window.innerWidth;
+
+            const viewportHeight =
+                window.innerHeight;
+
+            let width =
+                Number(options.width) ||
+                this.options.defaultWidth;
+
+            let height =
+                Number(options.height) ||
+                this.options.defaultHeight;
+
+            width = Math.min(
+                width,
+                viewportWidth - 30
+            );
+
+            height = Math.min(
+                height,
+                viewportHeight - 100
+            );
+
+            width = Math.max(
+                width,
+                this.options.minWidth
+            );
+
+            height = Math.max(
+                height,
+                this.options.minHeight
+            );
+
+            const count =
+                this.windows.size;
+
+            let x =
+                Number(options.x);
+
+            let y =
+                Number(options.y);
+
+            if (!Number.isFinite(x)) {
+
+                x =
+                    Math.max(
+                        15,
+                        (
+                            viewportWidth -
+                            width
+                        ) / 2
+                    );
+
+                x +=
+                    (count % 5) *
+                    this.options.cascadeOffset;
+            }
+
+            if (!Number.isFinite(y)) {
+
+                y =
+                    this.options.topOffset;
+
+                y +=
+                    (count % 5) *
+                    this.options.cascadeOffset;
+            }
+
+            x = Math.min(
+                x,
+                Math.max(
+                    10,
+                    viewportWidth - width - 10
+                )
+            );
+
+            y = Math.min(
+                y,
+                Math.max(
+                    50,
+                    viewportHeight - height - 10
+                )
+            );
+
+            return {
+                x,
+                y,
+                width,
+                height
+            };
+        }
+
+
+        /* =====================================================
+         * WINDOW ELEMENT
+         * ===================================================== */
+
+        createWindowElement(record) {
+
+            const windowElement =
+                document.createElement("section");
+
+            windowElement.className =
                 "haldo-window";
 
-            element.id =
+            windowElement.dataset.windowId =
+                record.id;
 
-                windowData.id;
+            windowElement.dataset.appId =
+                record.appId;
 
-            element.dataset.appId =
-
-                app.id;
-
-            element.setAttribute(
-
-                "role",
-
-                "dialog"
-
+            Object.assign(
+                windowElement.style,
+                {
+                    position: "fixed",
+                    display: "flex",
+                    flexDirection: "column",
+                    boxSizing: "border-box",
+                    pointerEvents: "auto",
+                    overflow: "hidden",
+                    minWidth:
+                        this.options.minWidth + "px",
+                    minHeight:
+                        this.options.minHeight + "px",
+                    borderRadius: "14px",
+                    background:
+                        "var(--haldo-window-background, #111827)",
+                    color:
+                        "var(--haldo-window-color, #ffffff)",
+                    boxShadow:
+                        "0 20px 60px rgba(0,0,0,.35)",
+                    border:
+                        "1px solid rgba(255,255,255,.12)",
+                    transition:
+                        "box-shadow .15s ease, opacity .15s ease",
+                    userSelect: "none"
+                }
             );
 
-            element.setAttribute(
 
-                "aria-label",
+            /* =================================================
+             * TITLE BAR
+             * ================================================= */
 
-                app.name
+            const titleBar =
+                document.createElement("header");
 
+            titleBar.className =
+                "haldo-window-titlebar";
+
+            Object.assign(
+                titleBar.style,
+                {
+                    height: "48px",
+                    minHeight: "48px",
+                    display: "flex",
+                    alignItems: "center",
+                    padding: "0 10px 0 14px",
+                    gap: "10px",
+                    cursor: "grab",
+                    background:
+                        "var(--haldo-titlebar-background, rgba(255,255,255,.06))",
+                    borderBottom:
+                        "1px solid rgba(255,255,255,.08)"
+                }
             );
 
-            /*
 
-            ----------------------------------------------------
+            /* =================================================
+             * ICON
+             * ================================================= */
 
-            POSITION
+            const icon =
+                document.createElement("div");
 
-            ----------------------------------------------------
+            icon.className =
+                "haldo-window-icon";
 
-            */
+            Object.assign(
+                icon.style,
+                {
+                    width: "28px",
+                    height: "28px",
+                    flex: "0 0 28px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    overflow: "hidden",
+                    borderRadius: "7px"
+                }
+            );
 
-            const offset =
+            if (record.icon) {
 
-                this.windows.size *
+                const image =
+                    document.createElement("img");
 
-                24;
+                image.src = record.icon;
 
-            element.style.left =
+                image.alt =
+                    record.title;
 
-                `${40 + offset}px`;
+                image.draggable = false;
 
-            element.style.top =
-
-                `${40 + offset}px`;
-
-            element.style.width =
-
-                options.width ||
-
-                "min(92vw, 900px)";
-
-            element.style.height =
-
-                options.height ||
-
-                "min(78vh, 650px)";
-
-            /*
-
-            ----------------------------------------------------
-
-            HEADER
-
-            ----------------------------------------------------
-
-            */
-
-            const header =
-
-                document.createElement(
-
-                    "header"
-
+                Object.assign(
+                    image.style,
+                    {
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "contain"
+                    }
                 );
 
-            header.className =
+                icon.appendChild(image);
+            }
 
-                "haldo-window-header";
 
-            /*
-
-            ----------------------------------------------------
-
-            TITLE
-
-            ----------------------------------------------------
-
-            */
+            /* =================================================
+             * TITLE
+             * ================================================= */
 
             const title =
-
-                document.createElement(
-
-                    "div"
-
-                );
+                document.createElement("div");
 
             title.className =
-
                 "haldo-window-title";
 
             title.textContent =
+                record.title;
 
-                app.name;
+            Object.assign(
+                title.style,
+                {
+                    flex: "1",
+                    minWidth: "0",
+                    overflow: "hidden",
+                    whiteSpace: "nowrap",
+                    textOverflow: "ellipsis",
+                    fontSize: "14px",
+                    fontWeight: "600"
+                }
+            );
 
-            /*
 
-            ----------------------------------------------------
-
-            CONTROLS
-
-            ----------------------------------------------------
-
-            */
+            /* =================================================
+             * CONTROLS
+             * ================================================= */
 
             const controls =
-
-                document.createElement(
-
-                    "div"
-
-                );
+                document.createElement("div");
 
             controls.className =
-
                 "haldo-window-controls";
 
-            /*
+            Object.assign(
+                controls.style,
+                {
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "4px"
+                }
+            );
 
-            MINIMIZE
-
-            */
 
             const minimize =
-
-                document.createElement(
-
-                    "button"
-
+                this.createWindowButton(
+                    "minimize",
+                    "−"
                 );
-
-            minimize.type =
-
-                "button";
-
-            minimize.className =
-
-                "haldo-window-button minimize";
-
-            minimize.textContent =
-
-                "−";
-
-            minimize.setAttribute(
-
-                "aria-label",
-
-                "Minimieren"
-
-            );
-
-            minimize.addEventListener(
-
-                "click",
-
-                event => {
-
-                    event.stopPropagation();
-
-                    this.minimize(
-
-                        appId
-
-                    );
-
-                }
-
-            );
-
-            /*
-
-            MAXIMIZE
-
-            */
 
             const maximize =
-
-                document.createElement(
-
-                    "button"
-
+                this.createWindowButton(
+                    "maximize",
+                    "□"
                 );
-
-            maximize.type =
-
-                "button";
-
-            maximize.className =
-
-                "haldo-window-button maximize";
-
-            maximize.textContent =
-
-                "□";
-
-            maximize.setAttribute(
-
-                "aria-label",
-
-                "Maximieren"
-
-            );
-
-            maximize.addEventListener(
-
-                "click",
-
-                event => {
-
-                    event.stopPropagation();
-
-                    this.toggleMaximize(
-
-                        appId
-
-                    );
-
-                }
-
-            );
-
-            /*
-
-            CLOSE
-
-            */
 
             const close =
-
-                document.createElement(
-
-                    "button"
-
+                this.createWindowButton(
+                    "close",
+                    "×"
                 );
 
-            close.type =
 
-                "button";
-
-            close.className =
-
-                "haldo-window-button close";
-
-            close.textContent =
-
-                "×";
-
-            close.setAttribute(
-
-                "aria-label",
-
-                "Schließen"
-
-            );
-
-            close.addEventListener(
-
+            minimize.addEventListener(
                 "click",
-
                 event => {
 
                     event.stopPropagation();
 
-                    this.close(
-
-                        appId
-
-                    );
-
+                    this.minimize(record.id);
                 }
-
             );
 
-            controls.appendChild(
 
-                minimize
+            maximize.addEventListener(
+                "click",
+                event => {
 
+                    event.stopPropagation();
+
+                    if (record.maximized) {
+                        this.restore(record.id);
+                    } else {
+                        this.maximize(record.id);
+                    }
+                }
             );
 
-            controls.appendChild(
 
-                maximize
+            close.addEventListener(
+                "click",
+                event => {
 
+                    event.stopPropagation();
+
+                    this.close(record.id);
+                }
             );
 
-            controls.appendChild(
 
-                close
+            controls.appendChild(minimize);
 
-            );
+            controls.appendChild(maximize);
 
-            header.appendChild(
+            controls.appendChild(close);
 
-                title
 
-            );
+            titleBar.appendChild(icon);
 
-            header.appendChild(
+            titleBar.appendChild(title);
 
-                controls
+            titleBar.appendChild(controls);
 
-            );
 
-            /*
-
-            ----------------------------------------------------
-
-            CONTENT
-
-            ----------------------------------------------------
-
-            */
+            /* =================================================
+             * CONTENT
+             * ================================================= */
 
             const content =
-
-                document.createElement(
-
-                    "div"
-
-                );
+                document.createElement("main");
 
             content.className =
-
                 "haldo-window-content";
 
-            content.dataset.appContent =
-
-                app.id;
-
-            /*
-
-            ----------------------------------------------------
-
-            APP PLACEHOLDER
-
-            ----------------------------------------------------
-
-            */
-
-            const placeholder =
-
-                document.createElement(
-
-                    "div"
-
-                );
-
-            placeholder.className =
-
-                "haldo-app-placeholder";
-
-            placeholder.innerHTML = `
-
-                <div class="haldo-app-placeholder-icon">
-
-                    ${this.getIcon(app)}
-
-                </div>
-
-                <h2></h2>
-
-                <p></p>
-
-            `;
-
-            placeholder
-
-                .querySelector("h2")
-
-                .textContent =
-
-                app.name;
-
-            placeholder
-
-                .querySelector("p")
-
-                .textContent =
-
-                app.description ||
-
-                "HalDo App";
-
-            content.appendChild(
-
-                placeholder
-
+            Object.assign(
+                content.style,
+                {
+                    position: "relative",
+                    flex: "1",
+                    minHeight: "0",
+                    overflow: "auto",
+                    userSelect: "text"
+                }
             );
 
-            /*
 
-            ----------------------------------------------------
+            /* =================================================
+             * RESIZE HANDLE
+             * ================================================= */
 
-            ZUSAMMENSETZEN
+            const resizeHandle =
+                document.createElement("div");
 
-            ----------------------------------------------------
+            resizeHandle.className =
+                "haldo-window-resize-handle";
 
-            */
-
-            element.appendChild(
-
-                header
-
+            Object.assign(
+                resizeHandle.style,
+                {
+                    position: "absolute",
+                    right: "0",
+                    bottom: "0",
+                    width: "18px",
+                    height: "18px",
+                    cursor: "nwse-resize",
+                    zIndex: "20"
+                }
             );
 
-            element.appendChild(
 
+            windowElement.appendChild(
+                titleBar
+            );
+
+            windowElement.appendChild(
                 content
-
             );
 
-            /*
+            windowElement.appendChild(
+                resizeHandle
+            );
 
-            ----------------------------------------------------
 
-            CLICK / FOCUS
+            /* =================================================
+             * EVENTS
+             * ================================================= */
 
-            ----------------------------------------------------
-
-            */
-
-            element.addEventListener(
-
+            windowElement.addEventListener(
                 "pointerdown",
-
                 () => {
-
-                    this.focus(
-
-                        appId
-
-                    );
-
+                    this.focus(record.id);
                 }
-
             );
 
-            /*
 
-            ----------------------------------------------------
-
-            DESKTOP
-
-            ----------------------------------------------------
-
-            */
-
-            this.desktop.appendChild(
-
-                element
-
-            );
-
-            windowData.element =
-
-                element;
-
-            this.windows.set(
-
-                appId,
-
-                windowData
-
-            );
-
-            /*
-
-            ----------------------------------------------------
-
-            FOCUS
-
-            ----------------------------------------------------
-
-            */
-
-            this.focus(
-
-                appId
-
-            );
-
-            /*
-
-            ----------------------------------------------------
-
-            APP MANAGER
-
-            ----------------------------------------------------
-
-            */
-
-            if (
-
-                this.appManager
-
-            ) {
-
-                this.appManager.open(
-
-                    appId
-
-                );
-
-            }
-
-            this.emit(
-
-                "window-opened",
-
-                windowData
-
-            );
-
-            return windowData;
-
-        },
-
-        /* ====================================================
-
-           ICON
-
-           ==================================================== */
-
-        getIcon(
-
-            app
-
-        ) {
-
-            if (
-
-                app &&
-
-                typeof app.icon ===
-
-                "string"
-
-            ) {
-
-                if (
-
-                    app.icon.includes(
-
-                        ".png"
-
-                    ) ||
-
-                    app.icon.includes(
-
-                        ".jpg"
-
-                    ) ||
-
-                    app.icon.includes(
-
-                        ".jpeg"
-
-                    ) ||
-
-                    app.icon.includes(
-
-                        ".webp"
-
-                    ) ||
-
-                    app.icon.includes(
-
-                        ".svg"
-
-                    )
-
-                ) {
-
-                    const image =
-
-                        document.createElement(
-
-                            "img"
-
-                        );
-
-                    image.src =
-
-                        app.icon;
-
-                    image.alt =
-
-                        app.name;
-
-                    return image.outerHTML;
-
-                }
-
-                return app.icon;
-
-            }
-
-            return "▦";
-
-        },
-
-        /* ====================================================
-
-           FOCUS
-
-           ==================================================== */
-
-        focus(
-
-            appId
-
-        ) {
-
-            const target =
-
-                this.windows.get(
-
-                    appId
-
-                );
-
-            if (
-
-                !target
-
-            ) {
-
-                return false;
-
-            }
-
-            this.windows.forEach(
-
-                item => {
-
-                    item.focused =
-
-                        false;
+            titleBar.addEventListener(
+                "dblclick",
+                event => {
 
                     if (
-
-                        item.element
-
+                        event.target.closest(
+                            ".haldo-window-controls"
+                        )
                     ) {
-
-                        item.element.classList.remove(
-
-                            "is-focused"
-
-                        );
-
+                        return;
                     }
 
+                    if (record.maximized) {
+                        this.restore(record.id);
+                    } else {
+                        this.maximize(record.id);
+                    }
                 }
-
             );
+
+
+            titleBar.addEventListener(
+                "pointerdown",
+                event => {
+
+                    if (event.button !== 0) {
+                        return;
+                    }
+
+                    if (
+                        event.target.closest(
+                            ".haldo-window-controls"
+                        )
+                    ) {
+                        return;
+                    }
+
+                    this.startDrag(
+                        record.id,
+                        event
+                    );
+                }
+            );
+
+
+            resizeHandle.addEventListener(
+                "pointerdown",
+                event => {
+
+                    if (event.button !== 0) {
+                        return;
+                    }
+
+                    event.preventDefault();
+
+                    this.startResize(
+                        record.id,
+                        event
+                    );
+                }
+            );
+
+
+            return windowElement;
+        }
+
+
+        /* =====================================================
+         * BUTTON
+         * ===================================================== */
+
+        createWindowButton(type, label) {
+
+            const button =
+                document.createElement("button");
+
+            button.type = "button";
+
+            button.className =
+                "haldo-window-button haldo-window-button-" +
+                type;
+
+            button.textContent = label;
+
+            button.setAttribute(
+                "aria-label",
+                type
+            );
+
+            Object.assign(
+                button.style,
+                {
+                    width: "32px",
+                    height: "30px",
+                    border: "0",
+                    borderRadius: "7px",
+                    background: "transparent",
+                    color: "inherit",
+                    cursor: "pointer",
+                    fontSize: "16px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center"
+                }
+            );
+
+            return button;
+        }
+
+
+        /* =====================================================
+         * CONTENT MOUNTEN
+         * ===================================================== */
+
+        mountContent(record, app, options) {
+
+            const content =
+                record.element.querySelector(
+                    ".haldo-window-content"
+                );
+
+            if (!content) {
+                return;
+            }
+
+
+            /* Bereits vorhandenes DOM-Element */
+
+            if (
+                app.component instanceof HTMLElement
+            ) {
+
+                content.appendChild(
+                    app.component
+                );
+
+                return;
+            }
+
+
+            /* Factory */
+
+            if (
+                typeof app.component === "function"
+            ) {
+
+                try {
+
+                    const result =
+                        app.component({
+                            appId: record.appId,
+                            windowId: record.id,
+                            data: record.data,
+                            window: record
+                        });
+
+                    if (
+                        result instanceof HTMLElement
+                    ) {
+                        content.appendChild(result);
+                    }
+
+                    else if (
+                        typeof result === "string"
+                    ) {
+                        content.innerHTML =
+                            result;
+                    }
+
+                    return;
+
+                } catch (error) {
+
+                    this.showError(
+                        content,
+                        error
+                    );
+
+                    return;
+                }
+            }
+
+
+            /* Runtime */
+
+            if (
+                this.runtime &&
+                typeof this.runtime.mountApp === "function"
+            ) {
+
+                try {
+
+                    const result =
+                        this.runtime.mountApp(
+                            record.appId,
+                            content,
+                            {
+                                windowId: record.id,
+                                data: record.data
+                            }
+                        );
+
+                    if (
+                        result &&
+                        typeof result.then === "function"
+                    ) {
+
+                        result.catch(
+                            error => {
+                                this.showError(
+                                    content,
+                                    error
+                                );
+                            }
+                        );
+                    }
+
+                    return;
+
+                } catch (error) {
+
+                    this.showError(
+                        content,
+                        error
+                    );
+
+                    return;
+                }
+            }
+
+
+            /* App Manager */
+
+            if (
+                this.appManager &&
+                typeof this.appManager.mountApp === "function"
+            ) {
+
+                try {
+
+                    this.appManager.mountApp(
+                        record.appId,
+                        content,
+                        {
+                            windowId: record.id,
+                            data: record.data
+                        }
+                    );
+
+                    return;
+
+                } catch (error) {
+
+                    this.showError(
+                        content,
+                        error
+                    );
+
+                    return;
+                }
+            }
+
+
+            /* Fallback */
+
+            content.innerHTML = `
+                <div style="
+                    min-height:100%;
+                    display:flex;
+                    align-items:center;
+                    justify-content:center;
+                    padding:30px;
+                    box-sizing:border-box;
+                    text-align:center;
+                    font-family:system-ui,sans-serif;
+                ">
+                    <div>
+                        <strong style="
+                            display:block;
+                            font-size:20px;
+                            margin-bottom:8px;
+                        ">
+                            ${this.escapeHTML(record.title)}
+                        </strong>
+
+                        <span style="
+                            opacity:.7;
+                        ">
+                            App-Runtime wird vorbereitet.
+                        </span>
+                    </div>
+                </div>
+            `;
+        }
+
+
+        /* =====================================================
+         * FEHLERANZEIGE
+         * ===================================================== */
+
+        showError(container, error) {
+
+            container.innerHTML = `
+                <div style="
+                    padding:30px;
+                    font-family:system-ui,sans-serif;
+                ">
+                    <h3>
+                        HalDo App Fehler
+                    </h3>
+
+                    <p style="opacity:.7;">
+                        Die Anwendung konnte nicht geladen werden.
+                    </p>
+
+                    <pre style="
+                        white-space:pre-wrap;
+                        overflow:auto;
+                        padding:12px;
+                        border-radius:8px;
+                        background:rgba(255,0,0,.08);
+                    ">${this.escapeHTML(
+                        error?.message ||
+                        String(error)
+                    )}</pre>
+                </div>
+            `;
+        }
+
+
+        /* =====================================================
+         * FOCUS
+         * ===================================================== */
+
+        focus(windowId) {
+
+            const record =
+                this.windows.get(windowId);
+
+            if (!record) {
+                return null;
+            }
 
             this.zIndex++;
 
-            target.focused =
+            record.element.style.zIndex =
+                String(this.zIndex);
 
-                true;
+            this.windows.forEach(
+                windowRecord => {
 
-            this.activeWindow =
+                    windowRecord.focused =
+                        windowRecord.id === windowId;
 
-                appId;
+                    if (
+                        windowRecord.element
+                    ) {
 
-            target.element.style.zIndex =
-
-                String(
-
-                    this.zIndex
-
-                );
-
-            target.element.classList.add(
-
-                "is-focused"
-
+                        windowRecord.element.classList.toggle(
+                            "is-active",
+                            windowRecord.id === windowId
+                        );
+                    }
+                }
             );
 
+            record.focused = true;
+
+            this.activeWindowId =
+                windowId;
+
+            record.updatedAt =
+                Date.now();
+
             this.emit(
+                "window:focused",
+                {
+                    windowId,
+                    appId: record.appId
+                }
+            );
 
-                "window-focused",
+            return record;
+        }
 
-                target
 
+        /* =====================================================
+         * MINIMIEREN
+         * ===================================================== */
+
+        minimize(windowId) {
+
+            const record =
+                this.windows.get(windowId);
+
+            if (!record) {
+                return false;
+            }
+
+            record.minimized = true;
+
+            record.state = "minimized";
+
+            record.element.style.display =
+                "none";
+
+            record.focused = false;
+
+            if (
+                this.activeWindowId === windowId
+            ) {
+                this.activeWindowId = null;
+
+                this.focusNextWindow();
+            }
+
+            this.emit(
+                "window:minimized",
+                {
+                    windowId,
+                    appId: record.appId
+                }
             );
 
             return true;
+        }
 
-        },
 
-        /* ====================================================
+        /* =====================================================
+         * WIEDERHERSTELLEN
+         * ===================================================== */
 
-           MINIMIZE
+        restore(windowId) {
 
-           ==================================================== */
+            const record =
+                this.windows.get(windowId);
 
-        minimize(
-
-            appId
-
-        ) {
-
-            const target =
-
-                this.windows.get(
-
-                    appId
-
-                );
-
-            if (
-
-                !target
-
-            ) {
-
+            if (!record) {
                 return false;
-
             }
 
-            target.minimized =
+            if (record.maximized) {
 
-                true;
+                record.maximized = false;
 
-            target.element.classList.add(
+                record.state = "normal";
 
-                "is-minimized"
+                if (
+                    record.previousGeometry
+                ) {
 
-            );
+                    record.x =
+                        record.previousGeometry.x;
+
+                    record.y =
+                        record.previousGeometry.y;
+
+                    record.width =
+                        record.previousGeometry.width;
+
+                    record.height =
+                        record.previousGeometry.height;
+                }
+            }
+
+            record.minimized = false;
+
+            record.state = "normal";
+
+            record.element.style.display =
+                "flex";
+
+            this.applyGeometry(record);
+
+            this.focus(windowId);
 
             this.emit(
-
-                "window-minimized",
-
-                target
-
+                "window:restored",
+                {
+                    windowId,
+                    appId: record.appId
+                }
             );
 
             return true;
+        }
 
-        },
 
-        /* ====================================================
+        /* =====================================================
+         * MAXIMIEREN
+         * ===================================================== */
 
-           RESTORE
+        maximize(windowId) {
 
-           ==================================================== */
+            const record =
+                this.windows.get(windowId);
 
-        restore(
-
-            appId
-
-        ) {
-
-            const target =
-
-                this.windows.get(
-
-                    appId
-
-                );
-
-            if (
-
-                !target
-
-            ) {
-
+            if (!record) {
                 return false;
-
             }
 
-            target.minimized =
+            if (record.maximized) {
+                return true;
+            }
 
-                false;
+            record.previousGeometry = {
+                x: record.x,
+                y: record.y,
+                width: record.width,
+                height: record.height
+            };
 
-            target.element.classList.remove(
+            record.maximized = true;
 
-                "is-minimized"
+            record.minimized = false;
 
-            );
+            record.state = "maximized";
 
-            this.focus(
+            record.element.style.display =
+                "flex";
 
-                appId
+            record.element.style.left = "0px";
 
-            );
+            record.element.style.top = "0px";
+
+            record.element.style.width =
+                "100vw";
+
+            record.element.style.height =
+                "100vh";
+
+            this.focus(windowId);
 
             this.emit(
-
-                "window-restored",
-
-                target
-
+                "window:maximized",
+                {
+                    windowId,
+                    appId: record.appId
+                }
             );
 
             return true;
+        }
 
-        },
 
-        /* ====================================================
+        /* =====================================================
+         * SCHLIESSEN
+         * ===================================================== */
 
-           MAXIMIZE
+        close(windowId) {
 
-           ==================================================== */
+            const record =
+                this.windows.get(windowId);
 
-        maximize(
-
-            appId
-
-        ) {
-
-            const target =
-
-                this.windows.get(
-
-                    appId
-
-                );
-
-            if (
-
-                !target
-
-            ) {
-
+            if (!record) {
                 return false;
-
             }
-
-            target.maximized =
-
-                true;
-
-            target.element.classList.add(
-
-                "is-maximized"
-
-            );
-
-            this.focus(
-
-                appId
-
-            );
 
             this.emit(
-
-                "window-maximized",
-
-                target
-
+                "window:before-close",
+                {
+                    windowId,
+                    appId: record.appId
+                }
             );
 
-            return true;
+            try {
 
-        },
+                if (
+                    this.runtime &&
+                    typeof this.runtime.unmountApp ===
+                    "function"
+                ) {
 
-        /* ====================================================
+                    this.runtime.unmountApp(
+                        record.appId,
+                        record.element,
+                        {
+                            windowId
+                        }
+                    );
+                }
 
-           TOGGLE MAXIMIZE
+            } catch (error) {
 
-           ==================================================== */
-
-        toggleMaximize(
-
-            appId
-
-        ) {
-
-            const target =
-
-                this.windows.get(
-
-                    appId
-
+                console.warn(
+                    "HalDo Window Manager:",
+                    error
                 );
-
-            if (
-
-                !target
-
-            ) {
-
-                return false;
-
             }
 
             if (
-
-                target.maximized
-
+                record.element &&
+                record.element.parentNode
             ) {
 
-                return this.restoreSize(
-
-                    appId
-
+                record.element.parentNode.removeChild(
+                    record.element
                 );
-
-            }
-
-            return this.maximize(
-
-                appId
-
-            );
-
-        },
-
-        /* ====================================================
-
-           RESTORE SIZE
-
-           ==================================================== */
-
-        restoreSize(
-
-            appId
-
-        ) {
-
-            const target =
-
-                this.windows.get(
-
-                    appId
-
-                );
-
-            if (
-
-                !target
-
-            ) {
-
-                return false;
-
-            }
-
-            target.maximized =
-
-                false;
-
-            target.element.classList.remove(
-
-                "is-maximized"
-
-            );
-
-            this.focus(
-
-                appId
-
-            );
-
-            this.emit(
-
-                "window-size-restored",
-
-                target
-
-            );
-
-            return true;
-
-        },
-
-        /* ====================================================
-
-           SCHLIESSEN
-
-           ==================================================== */
-
-        close(
-
-            appId
-
-        ) {
-
-            const target =
-
-                this.windows.get(
-
-                    appId
-
-                );
-
-            if (
-
-                !target
-
-            ) {
-
-                return false;
-
-            }
-
-            if (
-
-                target.element
-
-            ) {
-
-                target.element.remove();
-
             }
 
             this.windows.delete(
-
-                appId
-
+                windowId
             );
 
             if (
-
-                this.activeWindow ===
-
-                appId
-
+                this.activeWindowId ===
+                windowId
             ) {
 
-                this.activeWindow =
-
+                this.activeWindowId =
                     null;
 
-                const remaining =
-
-                    [
-
-                        ...this.windows.keys()
-
-                    ];
-
-                if (
-
-                    remaining.length >
-
-                    0
-
-                ) {
-
-                    this.focus(
-
-                        remaining[
-
-                            remaining.length - 1
-
-                        ]
-
-                    );
-
-                }
-
-            }
-
-            if (
-
-                this.appManager
-
-            ) {
-
-                this.appManager.close(
-
-                    appId
-
-                );
-
+                this.focusNextWindow();
             }
 
             this.emit(
-
-                "window-closed",
-
+                "window:closed",
                 {
-
-                    appId
-
+                    windowId,
+                    appId: record.appId
                 }
-
             );
 
             return true;
+        }
 
-        },
 
-        /* ====================================================
-
-           ALLE SCHLIESSEN
-
-           ==================================================== */
+        /* =====================================================
+         * ALLE FENSTER SCHLIESSEN
+         * ===================================================== */
 
         closeAll() {
 
             const ids =
-
-                [
-
-                    ...this.windows.keys()
-
-                ];
+                Array.from(
+                    this.windows.keys()
+                );
 
             ids.forEach(
+                id => this.close(id)
+            );
+        }
 
-                id => {
 
-                    this.close(
+        /* =====================================================
+         * NÄCHSTES FENSTER
+         * ===================================================== */
 
-                        id
+        focusNextWindow() {
 
-                    );
+            const visible =
+                Array.from(
+                    this.windows.values()
+                )
+                .filter(
+                    record =>
+                        !record.minimized
+                )
+                .sort(
+                    (a, b) =>
+                        Number(
+                            b.element.style.zIndex
+                        ) -
+                        Number(
+                            a.element.style.zIndex
+                        )
+                );
 
+            if (visible.length) {
+                this.focus(
+                    visible[0].id
+                );
+            }
+        }
+
+
+        /* =====================================================
+         * DRAG START
+         * ===================================================== */
+
+        startDrag(windowId, event) {
+
+            const record =
+                this.windows.get(windowId);
+
+            if (!record || record.maximized) {
+                return;
+            }
+
+            this.focus(windowId);
+
+            this.dragState = {
+
+                windowId,
+
+                startX: event.clientX,
+
+                startY: event.clientY,
+
+                originalX: record.x,
+
+                originalY: record.y
+            };
+
+            event.currentTarget.setPointerCapture?.(
+                event.pointerId
+            );
+        }
+
+
+        /* =====================================================
+         * RESIZE START
+         * ===================================================== */
+
+        startResize(windowId, event) {
+
+            const record =
+                this.windows.get(windowId);
+
+            if (!record || record.maximized) {
+                return;
+            }
+
+            this.focus(windowId);
+
+            this.resizeState = {
+
+                windowId,
+
+                startX: event.clientX,
+
+                startY: event.clientY,
+
+                originalWidth:
+                    record.width,
+
+                originalHeight:
+                    record.height
+            };
+        }
+
+
+        /* =====================================================
+         * GLOBALE POINTER EVENTS
+         * ===================================================== */
+
+        bindGlobalEvents() {
+
+            if (this.boundEvents) {
+                return;
+            }
+
+            this.boundEvents = true;
+
+
+            document.addEventListener(
+                "pointermove",
+                event => {
+
+                    if (this.dragState) {
+
+                        this.handleDrag(
+                            event
+                        );
+                    }
+
+                    if (this.resizeState) {
+
+                        this.handleResize(
+                            event
+                        );
+                    }
                 }
-
             );
 
-            return true;
 
-        },
+            document.addEventListener(
+                "pointerup",
+                () => {
 
-        /* ====================================================
+                    this.dragState =
+                        null;
 
-           MINIMIEREN ALLE
+                    this.resizeState =
+                        null;
+                }
+            );
 
-           ==================================================== */
 
-        minimizeAll() {
+            window.addEventListener(
+                "resize",
+                () => {
+
+                    this.handleViewportResize();
+                }
+            );
+        }
+
+
+        /* =====================================================
+         * DRAG
+         * ===================================================== */
+
+        handleDrag(event) {
+
+            const state =
+                this.dragState;
+
+            if (!state) {
+                return;
+            }
+
+            const record =
+                this.windows.get(
+                    state.windowId
+                );
+
+            if (!record) {
+                return;
+            }
+
+            const deltaX =
+                event.clientX -
+                state.startX;
+
+            const deltaY =
+                event.clientY -
+                state.startY;
+
+            record.x =
+                state.originalX +
+                deltaX;
+
+            record.y =
+                state.originalY +
+                deltaY;
+
+            const maxX =
+                Math.max(
+                    10,
+                    window.innerWidth -
+                    record.width -
+                    10
+                );
+
+            const maxY =
+                Math.max(
+                    50,
+                    window.innerHeight -
+                    record.height -
+                    10
+                );
+
+            record.x =
+                Math.max(
+                    10,
+                    Math.min(
+                        record.x,
+                        maxX
+                    )
+                );
+
+            record.y =
+                Math.max(
+                    50,
+                    Math.min(
+                        record.y,
+                        maxY
+                    )
+                );
+
+            this.applyGeometry(
+                record
+            );
+        }
+
+
+        /* =====================================================
+         * RESIZE
+         * ===================================================== */
+
+        handleResize(event) {
+
+            const state =
+                this.resizeState;
+
+            if (!state) {
+                return;
+            }
+
+            const record =
+                this.windows.get(
+                    state.windowId
+                );
+
+            if (!record) {
+                return;
+            }
+
+            const deltaX =
+                event.clientX -
+                state.startX;
+
+            const deltaY =
+                event.clientY -
+                state.startY;
+
+            record.width =
+                Math.max(
+                    this.options.minWidth,
+                    state.originalWidth +
+                    deltaX
+                );
+
+            record.height =
+                Math.max(
+                    this.options.minHeight,
+                    state.originalHeight +
+                    deltaY
+                );
+
+            record.width =
+                Math.min(
+                    record.width,
+                    window.innerWidth -
+                    record.x -
+                    10
+                );
+
+            record.height =
+                Math.min(
+                    record.height,
+                    window.innerHeight -
+                    record.y -
+                    10
+                );
+
+            this.applyGeometry(
+                record
+            );
+        }
+
+
+        /* =====================================================
+         * VIEWPORT RESIZE
+         * ===================================================== */
+
+        handleViewportResize() {
 
             this.windows.forEach(
+                record => {
 
-                item => {
+                    if (
+                        record.maximized
+                    ) {
+                        return;
+                    }
 
-                    this.minimize(
+                    record.width =
+                        Math.min(
+                            record.width,
+                            window.innerWidth -
+                            record.x -
+                            10
+                        );
 
-                        item.appId
+                    record.height =
+                        Math.min(
+                            record.height,
+                            window.innerHeight -
+                            record.y -
+                            10
+                        );
 
+                    record.x =
+                        Math.max(
+                            10,
+                            Math.min(
+                                record.x,
+                                window.innerWidth -
+                                record.width -
+                                10
+                            )
+                        );
+
+                    record.y =
+                        Math.max(
+                            50,
+                            Math.min(
+                                record.y,
+                                window.innerHeight -
+                                record.height -
+                                10
+                            )
+                        );
+
+                    this.applyGeometry(
+                        record
                     );
-
                 }
-
             );
+        }
 
-            return true;
 
-        },
+        /* =====================================================
+         * GEOMETRIE ANWENDEN
+         * ===================================================== */
 
-        /* ====================================================
+        applyGeometry(record) {
 
-           MAXIMIEREN ALLE
+            if (!record.element) {
+                return;
+            }
 
-           ==================================================== */
+            record.element.style.left =
+                `${record.x}px`;
 
-        maximizeAll() {
+            record.element.style.top =
+                `${record.y}px`;
 
-            this.windows.forEach(
+            record.element.style.width =
+                `${record.width}px`;
 
-                item => {
+            record.element.style.height =
+                `${record.height}px`;
+        }
 
-                    this.maximize(
 
-                        item.appId
+        /* =====================================================
+         * APP-FENSTER SUCHEN
+         * ===================================================== */
 
-                    );
+        findWindowByAppId(appId) {
 
-                }
+            return Array.from(
+                this.windows.values()
+            ).find(
+                record =>
+                    record.appId === appId
+            ) || null;
+        }
 
-            );
 
-            return true;
+        /* =====================================================
+         * WINDOW SUCHEN
+         * ===================================================== */
 
-        },
-
-        /* ====================================================
-
-           GET WINDOW
-
-           ==================================================== */
-
-        get(
-
-            appId
-
-        ) {
+        get(windowId) {
 
             return this.windows.get(
-
-                appId
-
+                windowId
             ) || null;
+        }
 
-        },
 
-        /* ====================================================
-
-           GET ALL
-
-           ==================================================== */
+        /* =====================================================
+         * ALLE FENSTER
+         * ===================================================== */
 
         getAll() {
 
-            return [
-
-                ...this.windows.values()
-
-            ];
-
-        },
-
-        /* ====================================================
-
-           GET RUNNING
-
-           ==================================================== */
-
-        getRunning() {
-
-            return this.getAll();
-
-        },
-
-        /* ====================================================
-
-           IS OPEN
-
-           ==================================================== */
-
-        isOpen(
-
-            appId
-
-        ) {
-
-            return this.windows.has(
-
-                appId
-
+            return Array.from(
+                this.windows.values()
             );
+        }
 
-        },
 
-        /* ====================================================
-
-           AKTIVES FENSTER
-
-           ==================================================== */
+        /* =====================================================
+         * AKTIVES FENSTER
+         * ===================================================== */
 
         getActive() {
 
-            if (
-
-                !this.activeWindow
-
-            ) {
-
+            if (!this.activeWindowId) {
                 return null;
-
             }
 
             return this.get(
+                this.activeWindowId
+            );
+        }
 
-                this.activeWindow
 
+        /* =====================================================
+         * APP SCHLIESSEN
+         * ===================================================== */
+
+        closeApp(appId) {
+
+            const records =
+                Array.from(
+                    this.windows.values()
+                )
+                .filter(
+                    record =>
+                        record.appId === appId
+                );
+
+            records.forEach(
+                record =>
+                    this.close(record.id)
             );
 
-        },
+            return records.length;
+        }
 
-        /* ====================================================
 
-           STATUS
+        /* =====================================================
+         * APP MINIMIEREN
+         * ===================================================== */
 
-           ==================================================== */
+        minimizeApp(appId) {
+
+            const record =
+                this.findWindowByAppId(
+                    appId
+                );
+
+            if (!record) {
+                return false;
+            }
+
+            return this.minimize(
+                record.id
+            );
+        }
+
+
+        /* =====================================================
+         * APP FOKUS
+         * ===================================================== */
+
+        focusApp(appId) {
+
+            const record =
+                this.findWindowByAppId(
+                    appId
+                );
+
+            if (!record) {
+                return false;
+            }
+
+            this.restore(
+                record.id
+            );
+
+            this.focus(
+                record.id
+            );
+
+            return true;
+        }
+
+
+        /* =====================================================
+         * ESCAPE HTML
+         * ===================================================== */
+
+        escapeHTML(value) {
+
+            return String(value)
+                .replace(
+                    /&/g,
+                    "&amp;"
+                )
+                .replace(
+                    /</g,
+                    "&lt;"
+                )
+                .replace(
+                    />/g,
+                    "&gt;"
+                )
+                .replace(
+                    /"/g,
+                    "&quot;"
+                )
+                .replace(
+                    /'/g,
+                    "&#039;"
+                );
+        }
+
+
+        /* =====================================================
+         * APP-ID → TITEL
+         * ===================================================== */
+
+        humanizeAppId(id) {
+
+            return String(id || "App")
+                .replace(
+                    /^haldo[-_]?/i,
+                    ""
+                )
+                .replace(
+                    /[-_]+/g,
+                    " "
+                )
+                .replace(
+                    /\b\w/g,
+                    letter =>
+                        letter.toUpperCase()
+                );
+        }
+
+
+        /* =====================================================
+         * EVENT
+         * ===================================================== */
+
+        emit(eventName, detail = {}) {
+
+            try {
+
+                document.dispatchEvent(
+                    new CustomEvent(
+                        eventName,
+                        {
+                            detail
+                        }
+                    )
+                );
+
+            } catch (error) {
+
+                console.warn(
+                    "HalDo Window Event:",
+                    error
+                );
+            }
+
+
+            /* Event Bus */
+
+            try {
+
+                if (
+                    this.eventBus &&
+                    typeof this.eventBus.emit ===
+                    "function"
+                ) {
+
+                    this.eventBus.emit(
+                        eventName,
+                        detail
+                    );
+                }
+
+            } catch (error) {
+
+                console.warn(
+                    "HalDo Event Bus:",
+                    error
+                );
+            }
+        }
+
+
+        /* =====================================================
+         * STATUS
+         * ===================================================== */
 
         getStatus() {
 
             return {
 
-                name:
-
-                    this.name,
-
                 version:
-
                     this.version,
 
-                status:
-
-                    this.status,
-
                 initialized:
-
                     this.initialized,
 
                 windowCount:
-
                     this.windows.size,
 
-                activeWindow:
+                activeWindowId:
+                    this.activeWindowId,
 
-                    this.activeWindow,
-
-                zIndex:
-
-                    this.zIndex
-
+                windows:
+                    this.getAll().map(
+                        record => ({
+                            id:
+                                record.id,
+                            appId:
+                                record.appId,
+                            title:
+                                record.title,
+                            state:
+                                record.state,
+                            minimized:
+                                record.minimized,
+                            maximized:
+                                record.maximized,
+                            focused:
+                                record.focused,
+                            x:
+                                record.x,
+                            y:
+                                record.y,
+                            width:
+                                record.width,
+                            height:
+                                record.height
+                        })
+                    )
             };
-
-        },
-
-        /* ====================================================
-
-           EVENTS
-
-           ==================================================== */
-
-        on(
-
-            eventName,
-
-            callback
-
-        ) {
-
-            if (
-
-                typeof callback !==
-
-                "function"
-
-            ) {
-
-                return false;
-
-            }
-
-            if (
-
-                !this.listeners.has(
-
-                    eventName
-
-                )
-
-            ) {
-
-                this.listeners.set(
-
-                    eventName,
-
-                    []
-
-                );
-
-            }
-
-            this.listeners
-
-                .get(
-
-                    eventName
-
-                )
-
-                .push(
-
-                    callback
-
-                );
-
-            return true;
-
-        },
-
-        /* ====================================================
-
-           OFF
-
-           ==================================================== */
-
-        off(
-
-            eventName,
-
-            callback
-
-        ) {
-
-            const listeners =
-
-                this.listeners.get(
-
-                    eventName
-
-                );
-
-            if (
-
-                !listeners
-
-            ) {
-
-                return false;
-
-            }
-
-            const index =
-
-                listeners.indexOf(
-
-                    callback
-
-                );
-
-            if (
-
-                index ===
-
-                -1
-
-            ) {
-
-                return false;
-
-            }
-
-            listeners.splice(
-
-                index,
-
-                1
-
-            );
-
-            return true;
-
-        },
-
-        /* ====================================================
-
-           EMIT
-
-           ==================================================== */
-
-        emit(
-
-            eventName,
-
-            data = null
-
-        ) {
-
-            const listeners =
-
-                this.listeners.get(
-
-                    eventName
-
-                );
-
-            if (
-
-                !listeners
-
-            ) {
-
-                return;
-
-            }
-
-            listeners
-
-                .slice()
-
-                .forEach(
-
-                    callback => {
-
-                        try {
-
-                            callback(
-
-                                data
-
-                            );
-
-                        } catch (
-
-                            error
-
-                        ) {
-
-                            console.error(
-
-                                "[HalDo Window Manager]",
-
-                                error
-
-                            );
-
-                        }
-
-                    }
-
-                );
-
-        },
-
-        /* ====================================================
-
-           LOG
-
-           ==================================================== */
-
-        log(
-
-            message,
-
-            data = null
-
-        ) {
-
-            if (
-
-                data !== null
-
-            ) {
-
-                console.log(
-
-                    "[HalDo Window Manager]",
-
-                    message,
-
-                    data
-
-                );
-
-            } else {
-
-                console.log(
-
-                    "[HalDo Window Manager]",
-
-                    message
-
-                );
-
-            }
-
         }
 
-    };
 
-    /* ========================================================
+        /* =====================================================
+         * DESTROY
+         * ===================================================== */
 
-       GLOBAL
+        destroy() {
 
-       ======================================================== */
+            this.closeAll();
 
-    window.HalDoWindowManager =
+            this.windows.clear();
 
-        HalDoWindowManager;
+            this.activeWindowId =
+                null;
 
-    if (
+            this.initialized =
+                false;
 
-        !window.HalDo
+            this.dragState =
+                null;
 
-    ) {
-
-        window.HalDo = {};
-
+            this.resizeState =
+                null;
+        }
     }
 
-    window.HalDo.windows =
-
-        HalDoWindowManager;
 
     /* ========================================================
+     * GLOBALE REGISTRIERUNG
+     * ======================================================== */
 
-       START
+    const manager =
+        new HalDoWindowManager();
 
-       ======================================================== */
 
-    function start() {
+    global.HalDoWindowManager =
+        manager;
 
-        HalDoWindowManager.initialize();
 
+    global.HalDoWindowManagerClass =
+        HalDoWindowManager;
+
+
+    if (!global.HalDoOS) {
+        global.HalDoOS = {};
     }
 
-    if (
 
+    global.HalDoOS.windowManager =
+        manager;
+
+
+    /* ========================================================
+     * AUTOMATISCHE INITIALISIERUNG
+     * ======================================================== */
+
+    if (
         document.readyState ===
-
         "loading"
-
     ) {
 
         document.addEventListener(
-
             "DOMContentLoaded",
-
-            start,
-
+            () => {
+                manager.init();
+            },
             {
-
                 once: true
-
             }
-
         );
 
     } else {
 
-        start();
-
+        manager.init();
     }
 
-    console.log(
 
-        "=============================================="
+    /* ========================================================
+     * GLOBALER API-ZUGRIFF
+     * ======================================================== */
 
-    );
+    global.HalDoWindow = {
 
-    console.log(
+        open:
+            (...args) =>
+                manager.open(...args),
 
-        "HalDo AI OS 18 Window Manager"
+        close:
+            (...args) =>
+                manager.close(...args),
 
-    );
+        minimize:
+            (...args) =>
+                manager.minimize(...args),
 
-    console.log(
+        maximize:
+            (...args) =>
+                manager.maximize(...args),
 
-        "Fensterverwaltung geladen."
+        restore:
+            (...args) =>
+                manager.restore(...args),
 
-    );
+        focus:
+            (...args) =>
+                manager.focus(...args),
 
-    console.log(
+        get:
+            (...args) =>
+                manager.get(...args),
 
-        "=============================================="
+        getAll:
+            (...args) =>
+                manager.getAll(...args),
 
-    );
+        getActive:
+            () =>
+                manager.getActive(),
+
+        closeApp:
+            (...args) =>
+                manager.closeApp(...args),
+
+        focusApp:
+            (...args) =>
+                manager.focusApp(...args),
+
+        minimizeApp:
+            (...args) =>
+                manager.minimizeApp(...args),
+
+        status:
+            () =>
+                manager.getStatus()
+    };
+
 
 })(window);
