@@ -1,1 +1,2973 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#050711">
+  <meta name="color-scheme" content="dark">
+  <title>HalDo AI OS 20</title>
 
+  <style>
+    :root {
+      --bg: #03050d;
+      --panel: rgba(12, 17, 34, .88);
+      --panel-2: rgba(20, 27, 50, .92);
+      --border: rgba(255,255,255,.12);
+      --text: #f5f7ff;
+      --muted: #9da8c5;
+      --accent: #6ea8ff;
+      --accent-2: #9b6cff;
+      --danger: #ff5f6d;
+      --success: #46d99a;
+      --shadow: 0 25px 80px rgba(0,0,0,.55);
+      --radius: 18px;
+      --taskbar-height: 72px;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont,
+                   "Segoe UI", sans-serif;
+    }
+
+    button,
+    input,
+    textarea,
+    select {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    #haldo-os {
+      position: fixed;
+      inset: 0;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 50% 40%, rgba(74, 91, 180, .16), transparent 35%),
+        radial-gradient(circle at 15% 80%, rgba(79, 117, 255, .08), transparent 30%),
+        #03050d;
+    }
+
+    /* =========================================================
+       COSMIC WORLD
+       ========================================================= */
+
+    #cosmic-world {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      perspective: 1000px;
+    }
+
+    #star-layer,
+    #star-layer-2 {
+      position: absolute;
+      inset: -10%;
+      pointer-events: none;
+    }
+
+    .star {
+      position: absolute;
+      border-radius: 50%;
+      background: white;
+      opacity: .5;
+      animation: twinkle 3s ease-in-out infinite;
+    }
+
+    @keyframes twinkle {
+      0%,100% { opacity: .18; transform: scale(.8); }
+      50% { opacity: .85; transform: scale(1.25); }
+    }
+
+    #cosmic-nebula {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 30% 30%, rgba(104, 76, 255, .11), transparent 22%),
+        radial-gradient(circle at 75% 55%, rgba(53, 140, 255, .10), transparent 25%),
+        radial-gradient(circle at 50% 85%, rgba(255, 75, 173, .06), transparent 20%);
+      filter: blur(12px);
+    }
+
+    #solar-system {
+      position: absolute;
+      left: 50%;
+      top: 46%;
+      width: 10px;
+      height: 10px;
+      transform: translate(-50%, -50%);
+    }
+
+    #sun {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 130px;
+      height: 130px;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      border: 0;
+      background:
+        radial-gradient(circle at 35% 30%, #fff, #d8e5ff 14%,
+        #7ca8ff 35%, #6557ff 60%, #392f9e 100%);
+      box-shadow:
+        0 0 35px rgba(113, 136, 255, .85),
+        0 0 90px rgba(98, 86, 255, .5),
+        0 0 180px rgba(77, 111, 255, .25);
+      z-index: 20;
+      color: white;
+      font-weight: 800;
+      letter-spacing: .5px;
+    }
+
+    #sun span {
+      display: block;
+      transform: translateY(48px);
+      text-shadow: 0 2px 15px black;
+      font-size: 12px;
+    }
+
+    .orbit {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      border: 1px solid rgba(255,255,255,.09);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+
+    .orbit-1 { width: 240px; height: 140px; }
+    .orbit-2 { width: 390px; height: 220px; }
+    .orbit-3 { width: 550px; height: 310px; }
+    .orbit-4 { width: 730px; height: 420px; }
+
+    .planet {
+      position: absolute;
+      border-radius: 50%;
+      border: 0;
+      z-index: 25;
+      box-shadow: 0 0 18px rgba(255,255,255,.18);
+    }
+
+    #planet-1 {
+      width: 15px;
+      height: 15px;
+      background: #b9c4d9;
+    }
+
+    #planet-2 {
+      width: 23px;
+      height: 23px;
+      background: #b68cff;
+    }
+
+    #planet-earth {
+      width: 34px;
+      height: 34px;
+      background:
+        radial-gradient(circle at 35% 35%, #7fe0ff 0 18%, transparent 19%),
+        radial-gradient(circle at 65% 55%, #5abf8a 0 18%, transparent 19%),
+        radial-gradient(circle, #3274df 0 65%, #163d9a 100%);
+    }
+
+    #planet-4 {
+      width: 27px;
+      height: 27px;
+      background: #ff816e;
+    }
+
+    .orbit-moving {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform-origin: center;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    #move-1 {
+      width: 240px;
+      height: 140px;
+      margin-left: -120px;
+      margin-top: -70px;
+      animation: orbit1 8s linear infinite;
+    }
+
+    #move-2 {
+      width: 390px;
+      height: 220px;
+      margin-left: -195px;
+      margin-top: -110px;
+      animation: orbit2 14s linear infinite reverse;
+    }
+
+    #move-3 {
+      width: 550px;
+      height: 310px;
+      margin-left: -275px;
+      margin-top: -155px;
+      animation: orbit3 22s linear infinite;
+    }
+
+    #move-4 {
+      width: 730px;
+      height: 420px;
+      margin-left: -365px;
+      margin-top: -210px;
+      animation: orbit4 31s linear infinite reverse;
+    }
+
+    #move-1 .planet,
+    #move-2 .planet,
+    #move-3 .planet,
+    #move-4 .planet {
+      left: 50%;
+      top: 0;
+      transform: translate(-50%, -50%);
+    }
+
+    @keyframes orbit1 {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes orbit2 {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes orbit3 {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes orbit4 {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    #moon-orbit {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 62px;
+      height: 62px;
+      margin-left: -31px;
+      margin-top: -31px;
+      border: 1px solid rgba(255,255,255,.15);
+      border-radius: 50%;
+      animation: moonOrbit 4s linear infinite;
+    }
+
+    #moon {
+      position: absolute;
+      left: 50%;
+      top: 0;
+      width: 9px;
+      height: 9px;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      background: #dce3ef;
+      box-shadow: 0 0 8px rgba(255,255,255,.5);
+    }
+
+    @keyframes moonOrbit {
+      from { transform: rotate(0); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* =========================================================
+       TOP BAR
+       ========================================================= */
+
+    #topbar {
+      position: absolute;
+      top: 16px;
+      left: 18px;
+      right: 18px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 5000;
+      pointer-events: none;
+    }
+
+    .top-group {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      pointer-events: auto;
+    }
+
+    .glass {
+      background: rgba(10,15,30,.66);
+      border: 1px solid var(--border);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      box-shadow: 0 10px 35px rgba(0,0,0,.25);
+    }
+
+    .top-pill {
+      min-height: 40px;
+      padding: 0 14px;
+      border-radius: 13px;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      font-size: 13px;
+    }
+
+    .top-button {
+      border: 1px solid var(--border);
+      background: rgba(10,15,30,.66);
+      color: white;
+      min-width: 42px;
+      height: 40px;
+      border-radius: 13px;
+    }
+
+    .top-button:hover,
+    .dock-button:hover,
+    .launcher-app:hover {
+      background: rgba(255,255,255,.11);
+    }
+
+    /* =========================================================
+       DOCK
+       ========================================================= */
+
+    #dock {
+      position: absolute;
+      bottom: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      min-height: 58px;
+      max-width: calc(100% - 24px);
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px;
+      border-radius: 19px;
+      z-index: 5000;
+    }
+
+    .dock-button {
+      width: 48px;
+      height: 48px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: white;
+      border-radius: 14px;
+      font-size: 21px;
+    }
+
+    .dock-button.active {
+      border-color: rgba(110,168,255,.5);
+      background: rgba(110,168,255,.12);
+    }
+
+    #home-button {
+      background: linear-gradient(135deg, rgba(110,168,255,.35), rgba(155,108,255,.35));
+      border-color: rgba(255,255,255,.18);
+    }
+
+    /* =========================================================
+       LAUNCHER
+       ========================================================= */
+
+    #launcher {
+      position: absolute;
+      left: 50%;
+      bottom: 88px;
+      width: min(920px, calc(100% - 30px));
+      max-height: min(720px, calc(100% - 125px));
+      transform: translate(-50%, 20px) scale(.97);
+      opacity: 0;
+      visibility: hidden;
+      z-index: 4500;
+      padding: 20px;
+      border-radius: 24px;
+      transition: .22s ease;
+      overflow: auto;
+    }
+
+    #launcher.open {
+      transform: translate(-50%, 0) scale(1);
+      opacity: 1;
+      visibility: visible;
+    }
+
+    #launcher-header {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    #app-search {
+      flex: 1;
+      height: 48px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,.25);
+      color: white;
+      outline: none;
+      padding: 0 16px;
+    }
+
+    #app-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(105px, 1fr));
+      gap: 10px;
+    }
+
+    .launcher-app {
+      min-height: 100px;
+      border: 1px solid transparent;
+      border-radius: 16px;
+      color: white;
+      background: transparent;
+      padding: 12px 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .launcher-app .app-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(145deg, rgba(110,168,255,.28), rgba(155,108,255,.22));
+      border: 1px solid rgba(255,255,255,.12);
+      font-size: 22px;
+    }
+
+    .launcher-app .app-name {
+      font-size: 12px;
+      text-align: center;
+    }
+
+    /* =========================================================
+       WINDOWS
+       ========================================================= */
+
+    #windows {
+      position: absolute;
+      inset: 0;
+      z-index: 1000;
+      pointer-events: none;
+    }
+
+    .window {
+      position: absolute;
+      width: min(760px, calc(100% - 30px));
+      height: min(560px, calc(100% - 150px));
+      min-width: 320px;
+      min-height: 240px;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      border-radius: 20px;
+      overflow: hidden;
+      pointer-events: auto;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(255,255,255,.13);
+      background: rgba(8,12,25,.92);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .window.hidden-window {
+      display: none;
+    }
+
+    .window-header {
+      height: 54px;
+      flex: 0 0 54px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 10px 0 16px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(255,255,255,.035);
+      user-select: none;
+    }
+
+    .window-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .window-controls {
+      display: flex;
+      gap: 5px;
+    }
+
+    .window-control {
+      width: 34px;
+      height: 34px;
+      border: 0;
+      border-radius: 9px;
+      color: white;
+      background: transparent;
+    }
+
+    .window-control:hover {
+      background: rgba(255,255,255,.09);
+    }
+
+    .window-control.close:hover {
+      background: rgba(255,95,109,.22);
+    }
+
+    .window-body {
+      flex: 1;
+      overflow: auto;
+      padding: 18px;
+    }
+
+    /* =========================================================
+       COMMON APP UI
+       ========================================================= */
+
+    .app-layout {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      height: 100%;
+    }
+
+    .hero {
+      padding: 22px;
+      border-radius: 18px;
+      background:
+        linear-gradient(135deg, rgba(110,168,255,.13), rgba(155,108,255,.09));
+      border: 1px solid rgba(255,255,255,.08);
+    }
+
+    .hero h2 {
+      margin: 0 0 6px;
+      font-size: 24px;
+    }
+
+    .hero p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .btn {
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.055);
+      color: white;
+      border-radius: 11px;
+      padding: 10px 14px;
+    }
+
+    .btn:hover {
+      background: rgba(255,255,255,.10);
+    }
+
+    .btn.primary {
+      background: linear-gradient(135deg, rgba(110,168,255,.38), rgba(155,108,255,.30));
+      border-color: rgba(110,168,255,.35);
+    }
+
+    .btn.danger {
+      border-color: rgba(255,95,109,.35);
+    }
+
+    .input,
+    .textarea,
+    .select {
+      width: 100%;
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,.24);
+      color: white;
+      border-radius: 11px;
+      padding: 11px 12px;
+      outline: none;
+    }
+
+    .textarea {
+      resize: vertical;
+      min-height: 120px;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px;
+    }
+
+    .card {
+      padding: 16px;
+      border-radius: 15px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.035);
+    }
+
+    .card h3 {
+      margin: 0 0 6px;
+      font-size: 15px;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .list {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .list-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: rgba(255,255,255,.025);
+    }
+
+    .empty {
+      color: var(--muted);
+      padding: 25px;
+      text-align: center;
+    }
+
+    /* =========================================================
+       AI APP
+       ========================================================= */
+
+    .chat-messages {
+      flex: 1;
+      min-height: 0;
+      overflow: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 4px;
+    }
+
+    .message {
+      max-width: 82%;
+      padding: 11px 13px;
+      border-radius: 15px;
+      line-height: 1.45;
+      white-space: pre-wrap;
+    }
+
+    .message.user {
+      align-self: flex-end;
+      background: rgba(110,168,255,.20);
+      border: 1px solid rgba(110,168,255,.23);
+    }
+
+    .message.ai {
+      align-self: flex-start;
+      background: rgba(255,255,255,.055);
+      border: 1px solid var(--border);
+    }
+
+    .chat-input {
+      display: flex;
+      gap: 8px;
+      padding-top: 8px;
+    }
+
+    /* =========================================================
+       CALENDAR
+       ========================================================= */
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 5px;
+    }
+
+    .calendar-day {
+      min-height: 55px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.025);
+      border-radius: 9px;
+      color: white;
+      padding: 7px;
+      text-align: left;
+    }
+
+    .calendar-day:hover {
+      background: rgba(110,168,255,.10);
+    }
+
+    .calendar-day.today {
+      border-color: rgba(110,168,255,.65);
+      background: rgba(110,168,255,.12);
+    }
+
+    /* =========================================================
+       NOTIFICATIONS
+       ========================================================= */
+
+    #notifications {
+      position: absolute;
+      right: 18px;
+      top: 78px;
+      width: min(360px, calc(100% - 36px));
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      z-index: 9000;
+      pointer-events: none;
+    }
+
+    .notification {
+      pointer-events: auto;
+      padding: 14px;
+      border-radius: 14px;
+      background: rgba(10,15,30,.90);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      animation: notificationIn .22s ease;
+    }
+
+    @keyframes notificationIn {
+      from { opacity: 0; transform: translateX(20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    /* =========================================================
+       BOOT
+       ========================================================= */
+
+    #boot-screen {
+      position: absolute;
+      inset: 0;
+      z-index: 10000;
+      display: grid;
+      place-items: center;
+      background:
+        radial-gradient(circle at center, rgba(75,92,210,.25), transparent 35%),
+        #02040b;
+      transition: opacity .8s ease, visibility .8s ease;
+    }
+
+    #boot-screen.done {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .boot-content {
+      text-align: center;
+    }
+
+    .boot-logo {
+      width: 130px;
+      height: 130px;
+      margin: 0 auto 22px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-size: 38px;
+      font-weight: 900;
+      letter-spacing: -2px;
+      background:
+        radial-gradient(circle at 35% 30%, white, #a9c5ff 16%,
+        #6c7fff 40%, #4035a5 70%, #17153c);
+      box-shadow:
+        0 0 35px rgba(110,168,255,.8),
+        0 0 120px rgba(110,168,255,.35);
+      animation: bootSpin 2.6s ease-in-out infinite;
+    }
+
+    @keyframes bootSpin {
+      0% { transform: rotate(0) scale(.85); }
+      50% { transform: rotate(180deg) scale(1); }
+      100% { transform: rotate(360deg) scale(.85); }
+    }
+
+    .boot-title {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: .5px;
+    }
+
+    .boot-status {
+      margin-top: 9px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    /* =========================================================
+       RESPONSIVE
+       ========================================================= */
+
+    @media (max-width: 700px) {
+      #topbar {
+        left: 10px;
+        right: 10px;
+      }
+
+      .top-pill {
+        padding: 0 10px;
+      }
+
+      .window {
+        width: calc(100% - 16px);
+        height: calc(100% - 120px);
+      }
+
+      #solar-system {
+        transform: translate(-50%, -50%) scale(.68);
+      }
+
+      #dock {
+        bottom: 8px;
+      }
+
+      .dock-button {
+        width: 43px;
+        height: 43px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+<div id="haldo-os">
+
+  <!-- =======================================================
+       COSMIC WORLD
+       ======================================================== -->
+
+  <div id="cosmic-world">
+    <div id="star-layer"></div>
+    <div id="star-layer-2"></div>
+    <div id="cosmic-nebula"></div>
+
+    <div id="solar-system">
+      <div class="orbit orbit-1"></div>
+      <div class="orbit orbit-2"></div>
+      <div class="orbit orbit-3"></div>
+      <div class="orbit orbit-4"></div>
+
+      <button id="sun" title="HalDo AI Zentrum">
+        <span>HALDO AI</span>
+      </button>
+
+      <div id="move-1" class="orbit-moving">
+        <button id="planet-1" class="planet" title="Planet 1"></button>
+      </div>
+
+      <div id="move-2" class="orbit-moving">
+        <button id="planet-2" class="planet" title="Planet 2"></button>
+      </div>
+
+      <div id="move-3" class="orbit-moving">
+        <button id="planet-earth" class="planet" title="Erde"></button>
+        <div id="moon-orbit">
+          <div id="moon"></div>
+        </div>
+      </div>
+
+      <div id="move-4" class="orbit-moving">
+        <button id="planet-4" class="planet" title="Planet 4"></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =======================================================
+       TOP BAR
+       ======================================================== -->
+
+  <header id="topbar">
+    <div class="top-group">
+      <button class="top-button" id="top-home" title="HalDo Home">◈</button>
+      <div class="top-pill glass">
+        <strong>HalDo AI OS</strong>
+        <span class="muted">20</span>
+      </div>
+    </div>
+
+    <div class="top-group">
+      <button class="top-button" id="search-button" title="Suchen">⌕</button>
+      <div class="top-pill glass" id="clock">--:--</div>
+      <button class="top-button" id="notification-button" title="Benachrichtigungen">♢</button>
+    </div>
+  </header>
+
+  <!-- =======================================================
+       WINDOWS
+       ======================================================== -->
+
+  <main id="windows"></main>
+
+  <!-- =======================================================
+       LAUNCHER
+       ======================================================== -->
+
+  <section id="launcher" class="glass">
+    <div id="launcher-header">
+      <input
+        id="app-search"
+        type="search"
+        placeholder="Apps suchen..."
+        autocomplete="off"
+      >
+      <button class="btn" id="close-launcher">Schließen</button>
+    </div>
+
+    <div id="app-grid"></div>
+  </section>
+
+  <!-- =======================================================
+       NOTIFICATIONS
+       ======================================================== -->
+
+  <div id="notifications"></div>
+
+  <!-- =======================================================
+       DOCK
+       ======================================================== -->
+
+  <nav id="dock" class="glass">
+    <button class="dock-button" data-app="ai" title="HalDo AI">✦</button>
+    <button class="dock-button" data-app="files" title="Dateien">▣</button>
+    <button class="dock-button" data-app="calendar" title="Kalender">□</button>
+    <button class="dock-button" data-app="notes" title="Notizen">✎</button>
+    <button class="dock-button" data-app="calculator" title="Rechner">＋</button>
+    <button class="dock-button" data-app="settings" title="Einstellungen">⚙</button>
+    <button class="dock-button" id="home-button" title="App Launcher">⌘</button>
+  </nav>
+
+  <!-- =======================================================
+       BOOT
+       ======================================================== -->
+
+  <section id="boot-screen">
+    <div class="boot-content">
+      <div class="boot-logo">H</div>
+      <div class="boot-title">HalDo AI</div>
+      <div class="boot-status" id="boot-status">System wird gestartet...</div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+/* ============================================================
+   HALDO AI OS 20
+   SELF-CONTAINED RUNTIME
+   ============================================================ */
+
+(() => {
+  "use strict";
+
+  const VERSION = "20.0.0";
+
+  /* ==========================================================
+     EVENT BUS
+     ========================================================== */
+
+  class EventBus {
+    constructor() {
+      this.listeners = new Map();
+    }
+
+    on(event, handler) {
+      if (!this.listeners.has(event)) {
+        this.listeners.set(event, new Set());
+      }
+
+      this.listeners.get(event).add(handler);
+
+      return () => this.off(event, handler);
+    }
+
+    off(event, handler) {
+      this.listeners.get(event)?.delete(handler);
+    }
+
+    emit(event, detail = {}) {
+      const listeners = this.listeners.get(event);
+
+      if (!listeners) {
+        return;
+      }
+
+      for (const handler of listeners) {
+        try {
+          handler(detail);
+        } catch (error) {
+          console.error("[HalDo Event]", event, error);
+        }
+      }
+    }
+  }
+
+  const Events = new EventBus();
+
+  /* ==========================================================
+     STORAGE
+     ========================================================== */
+
+  class StorageService {
+    constructor(prefix = "haldo-os-20") {
+      this.prefix = prefix;
+    }
+
+    key(key) {
+      return `${this.prefix}:${key}`;
+    }
+
+    save(key, value) {
+      try {
+        localStorage.setItem(
+          this.key(key),
+          JSON.stringify(value)
+        );
+
+        Events.emit("storage:saved", { key, value });
+
+        return true;
+      } catch (error) {
+        console.error(error);
+        return false;
+      }
+    }
+
+    load(key, fallback = null) {
+      try {
+        const raw = localStorage.getItem(this.key(key));
+
+        if (raw === null) {
+          return fallback;
+        }
+
+        return JSON.parse(raw);
+      } catch (error) {
+        console.error(error);
+        return fallback;
+      }
+    }
+
+    remove(key) {
+      localStorage.removeItem(this.key(key));
+      Events.emit("storage:removed", { key });
+    }
+
+    clear() {
+      const prefix = this.prefix + ":";
+
+      for (let i = localStorage.length - 1; i >= 0; i--) {
+        const key = localStorage.key(i);
+
+        if (key?.startsWith(prefix)) {
+          localStorage.removeItem(key);
+        }
+      }
+
+      Events.emit("storage:cleared");
+    }
+  }
+
+  const Storage = new StorageService();
+
+  /* ==========================================================
+     SYSTEM
+     ========================================================== */
+
+  const System = {
+    version: VERSION,
+    started: false,
+    online: navigator.onLine,
+
+    info() {
+      return {
+        name: "HalDo AI OS",
+        version: VERSION,
+        platform: navigator.platform,
+        language: navigator.language,
+        online: navigator.onLine,
+        screen: {
+          width: window.innerWidth,
+          height: window.innerHeight
+        }
+      };
+    }
+  };
+
+  window.addEventListener("online", () => {
+    System.online = true;
+    Events.emit("system:online");
+  });
+
+  window.addEventListener("offline", () => {
+    System.online = false;
+    Events.emit("system:offline");
+  });
+
+  /* ==========================================================
+     NOTIFICATION SERVICE
+     ========================================================== */
+
+  function notify(title, message, timeout = 3500) {
+    const container = document.getElementById("notifications");
+
+    const item = document.createElement("div");
+    item.className = "notification";
+
+    item.innerHTML = `
+      <strong>${escapeHtml(title)}</strong>
+      <div class="muted" style="margin-top:5px">
+        ${escapeHtml(message)}
+      </div>
+    `;
+
+    container.appendChild(item);
+
+    setTimeout(() => {
+      item.remove();
+    }, timeout);
+
+    Events.emit("notification:create", {
+      title,
+      message
+    });
+  }
+
+  /* ==========================================================
+     UTILS
+     ========================================================== */
+
+  function escapeHtml(value) {
+    return String(value)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  function formatDate(date) {
+    return new Intl.DateTimeFormat("de-DE", {
+      dateStyle: "medium"
+    }).format(date);
+  }
+
+  /* ==========================================================
+     WINDOW MANAGER
+     ========================================================== */
+
+  class WindowManager {
+    constructor() {
+      this.container = document.getElementById("windows");
+      this.windows = new Map();
+      this.z = 1000;
+    }
+
+    open(appId, title, icon, content) {
+      const existing = this.windows.get(appId);
+
+      if (existing) {
+        existing.classList.remove("hidden-window");
+        this.focus(appId);
+        return existing;
+      }
+
+      const windowElement = document.createElement("section");
+
+      windowElement.className = "window";
+      windowElement.dataset.app = appId;
+      windowElement.style.zIndex = ++this.z;
+
+      windowElement.innerHTML = `
+        <header class="window-header">
+          <div class="window-title">
+            <span>${icon}</span>
+            <span>${escapeHtml(title)}</span>
+          </div>
+
+          <div class="window-controls">
+            <button
+              class="window-control minimize"
+              title="Minimieren"
+            >−</button>
+
+            <button
+              class="window-control maximize"
+              title="Maximieren"
+            >□</button>
+
+            <button
+              class="window-control close"
+              title="Schließen"
+            >×</button>
+          </div>
+        </header>
+
+        <div class="window-body"></div>
+      `;
+
+      const body = windowElement.querySelector(".window-body");
+
+      if (typeof content === "string") {
+        body.innerHTML = content;
+      } else if (content instanceof HTMLElement) {
+        body.appendChild(content);
+      }
+
+      this.container.appendChild(windowElement);
+      this.windows.set(appId, windowElement);
+
+      windowElement.addEventListener("mousedown", () => {
+        this.focus(appId);
+      });
+
+      windowElement
+        .querySelector(".close")
+        .addEventListener("click", () => {
+          this.close(appId);
+        });
+
+      windowElement
+        .querySelector(".minimize")
+        .addEventListener("click", () => {
+          windowElement.classList.add("hidden-window");
+          Events.emit("window:minimize", { appId });
+        });
+
+      windowElement
+        .querySelector(".maximize")
+        .addEventListener("click", () => {
+          windowElement.classList.toggle("maximized");
+
+          if (windowElement.classList.contains("maximized")) {
+            windowElement.style.left = "10px";
+            windowElement.style.top = "75px";
+            windowElement.style.width = "calc(100% - 20px)";
+            windowElement.style.height = "calc(100% - 155px)";
+            windowElement.style.transform = "none";
+          } else {
+            windowElement.style.left = "50%";
+            windowElement.style.top = "50%";
+            windowElement.style.width = "";
+            windowElement.style.height = "";
+            windowElement.style.transform =
+              "translate(-50%, -50%)";
+          }
+
+          this.focus(appId);
+        });
+
+      Events.emit("window:create", {
+        appId,
+        element: windowElement
+      });
+
+      this.focus(appId);
+
+      return windowElement;
+    }
+
+    focus(appId) {
+      const element = this.windows.get(appId);
+
+      if (!element) {
+        return;
+      }
+
+      element.style.zIndex = ++this.z;
+
+      Events.emit("window:focus", {
+        appId,
+        element
+      });
+    }
+
+    close(appId) {
+      const element = this.windows.get(appId);
+
+      if (!element) {
+        return;
+      }
+
+      element.remove();
+      this.windows.delete(appId);
+
+      Events.emit("window:close", { appId });
+    }
+
+    closeAll() {
+      for (const appId of this.windows.keys()) {
+        this.close(appId);
+      }
+    }
+  }
+
+  const WindowManagerInstance = new WindowManager();
+
+  /* ==========================================================
+     APP REGISTRY
+     ========================================================== */
+
+  class AppRegistry {
+    constructor() {
+      this.apps = new Map();
+    }
+
+    register(app) {
+      if (!app?.id) {
+        throw new Error("App benötigt eine ID.");
+      }
+
+      this.apps.set(app.id, app);
+
+      Events.emit("app:registered", {
+        app
+      });
+    }
+
+    get(id) {
+      return this.apps.get(id);
+    }
+
+    all() {
+      return [...this.apps.values()];
+    }
+  }
+
+  const Registry = new AppRegistry();
+
+  /* ==========================================================
+     APP RUNTIME
+     ========================================================== */
+
+  class AppRuntime {
+    open(id) {
+      const app = Registry.get(id);
+
+      if (!app) {
+        notify("HalDo AI", `App "${id}" wurde nicht gefunden.`);
+        return;
+      }
+
+      const content = app.render();
+
+      WindowManagerInstance.open(
+        app.id,
+        app.name,
+        app.icon,
+        content
+      );
+
+      Events.emit("app:open", { app });
+    }
+  }
+
+  const Runtime = new AppRuntime();
+
+  /* ==========================================================
+     HALDO AI
+     ========================================================== */
+
+  function createAIApp() {
+    const root = document.createElement("div");
+
+    root.className = "app-layout";
+
+    root.innerHTML = `
+      <div class="hero">
+        <h2>HalDo AI</h2>
+        <p>
+          Zentrale HalDo-KI-Schnittstelle. Dieser lokale Runtime-Modus
+          verarbeitet grundlegende Systembefehle direkt im OS.
+        </p>
+      </div>
+
+      <div class="chat-messages"></div>
+
+      <div class="chat-input">
+        <input
+          class="input"
+          placeholder="Schreibe etwas an HalDo AI..."
+        >
+
+        <button class="btn primary">Senden</button>
+      </div>
+    `;
+
+    const messages = root.querySelector(".chat-messages");
+    const input = root.querySelector("input");
+    const send = root.querySelector("button");
+
+    const addMessage = (text, type) => {
+      const message = document.createElement("div");
+      message.className = `message ${type}`;
+      message.textContent = text;
+      messages.appendChild(message);
+      messages.scrollTop = messages.scrollHeight;
+    };
+
+    addMessage(
+      "Hallo! Ich bin HalDo AI. Wie kann ich dir helfen?",
+      "ai"
+    );
+
+    const answer = text => {
+      const value = text.toLowerCase().trim();
+
+      if (!value) {
+        return "Schreibe mir zuerst eine Nachricht.";
+      }
+
+      if (
+        value.includes("hallo") ||
+        value.includes("hi") ||
+        value.includes("hey")
+      ) {
+        return "Hallo Bruder. ❤️💙 Ich bin bereit.";
+      }
+
+      if (value.includes("zeit") || value.includes("uhr")) {
+        return `Aktuelle Uhrzeit: ${new Date().toLocaleTimeString("de-DE")}`;
+      }
+
+      if (value.includes("datum")) {
+        return `Heute ist ${formatDate(new Date())}.`;
+      }
+
+      if (value.includes("system")) {
+        return `HalDo AI OS ${VERSION} läuft. Online: ${
+          System.online ? "Ja" : "Nein"
+        }.`;
+      }
+
+      if (value.includes("kalender")) {
+        Runtime.open("calendar");
+        return "Ich habe den Kalender geöffnet.";
+      }
+
+      if (value.includes("notiz")) {
+        Runtime.open("notes");
+        return "Ich habe die Notizen geöffnet.";
+      }
+
+      if (value.includes("einstellung")) {
+        Runtime.open("settings");
+        return "Ich habe die Einstellungen geöffnet.";
+      }
+
+      return `Ich habe deine Nachricht empfangen: "${text}"`;
+    };
+
+    const sendMessage = () => {
+      const text = input.value.trim();
+
+      if (!text) {
+        return;
+      }
+
+      addMessage(text, "user");
+      input.value = "";
+
+      setTimeout(() => {
+        addMessage(answer(text), "ai");
+      }, 250);
+    };
+
+    send.addEventListener("click", sendMessage);
+
+    input.addEventListener("keydown", event => {
+      if (event.key === "Enter") {
+        sendMessage();
+      }
+    });
+
+    return root;
+  }
+
+  /* ==========================================================
+     NOTES APP
+     ========================================================== */
+
+  function createNotesApp() {
+    const root = document.createElement("div");
+
+    root.className = "app-layout";
+
+    const notes = Storage.load("notes", []);
+
+    root.innerHTML = `
+      <div class="hero">
+        <h2>Notizen</h2>
+        <p>
+          Notizen werden lokal im HalDo Storage gespeichert.
+        </p>
+      </div>
+
+      <input
+        class="input"
+        id="note-title"
+        placeholder="Titel"
+      >
+
+      <textarea
+        class="textarea"
+        id="note-content"
+        placeholder="Deine Notiz..."
+      ></textarea>
+
+      <div class="toolbar">
+        <button class="btn primary" id="save-note">
+          Notiz speichern
+        </button>
+
+        <button class="btn danger" id="clear-notes">
+          Alle löschen
+        </button>
+      </div>
+
+      <div class="list" id="notes-list"></div>
+    `;
+
+    const title = root.querySelector("#note-title");
+    const content = root.querySelector("#note-content");
+    const list = root.querySelector("#notes-list");
+
+    const render = () => {
+      list.innerHTML = "";
+
+      if (!notes.length) {
+        list.innerHTML = `
+          <div class="empty">
+            Noch keine Notizen vorhanden.
+          </div>
+        `;
+        return;
+      }
+
+      notes.forEach((note, index) => {
+        const item = document.createElement("div");
+        item.className = "list-item";
+
+        item.innerHTML = `
+          <div>
+            <strong>${escapeHtml(note.title)}</strong>
+            <div class="muted">
+              ${escapeHtml(note.content)}
+            </div>
+          </div>
+
+          <button class="btn danger">
+            ×
+          </button>
+        `;
+
+        item.querySelector("button").addEventListener(
+          "click",
+          () => {
+            notes.splice(index, 1);
+            Storage.save("notes", notes);
+            render();
+            notify("Notizen", "Notiz gelöscht.");
+          }
+        );
+
+        list.appendChild(item);
+      });
+    };
+
+    root.querySelector("#save-note").addEventListener(
+      "click",
+      () => {
+        const noteTitle = title.value.trim() || "Unbenannte Notiz";
+        const noteContent = content.value.trim();
+
+        if (!noteContent) {
+          notify("Notizen", "Bitte einen Inhalt eingeben.");
+          return;
+        }
+
+        notes.unshift({
+          id: crypto.randomUUID
+            ? crypto.randomUUID()
+            : String(Date.now()),
+          title: noteTitle,
+          content: noteContent,
+          createdAt: new Date().toISOString()
+        });
+
+        Storage.save("notes", notes);
+
+        title.value = "";
+        content.value = "";
+
+        render();
+
+        notify(
+          "Notizen",
+          "Notiz wurde gespeichert."
+        );
+      }
+    );
+
+    root.querySelector("#clear-notes").addEventListener(
+      "click",
+      () => {
+        if (!confirm("Alle Notizen löschen?")) {
+          return;
+        }
+
+        notes.length = 0;
+        Storage.save("notes", notes);
+        render();
+
+        notify(
+          "Notizen",
+          "Alle Notizen wurden gelöscht."
+        );
+      }
+    );
+
+    render();
+
+    return root;
+  }
+
+  /* ==========================================================
+     CALENDAR APP
+     ========================================================== */
+
+  function createCalendarApp() {
+    const root = document.createElement("div");
+
+    root.className = "app-layout";
+
+    const now = new Date();
+    let current = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      1
+    );
+
+    const events = Storage.load("calendar-events", []);
+
+    root.innerHTML = `
+      <div class="hero">
+        <h2 id="calendar-title"></h2>
+
+        <div class="toolbar" style="margin-top:12px">
+          <button class="btn" id="previous-month">←</button>
+          <button class="btn" id="today-month">Heute</button>
+          <button class="btn" id="next-month">→</button>
+          <button class="btn primary" id="add-event">
+            + Termin
+          </button>
+        </div>
+      </div>
+
+      <div class="calendar-grid" id="calendar-grid"></div>
+
+      <div class="list" id="calendar-events"></div>
+    `;
+
+    const title = root.querySelector("#calendar-title");
+    const grid = root.querySelector("#calendar-grid");
+    const eventList = root.querySelector("#calendar-events");
+
+    const render = () => {
+      const year = current.getFullYear();
+      const month = current.getMonth();
+
+      title.textContent =
+        new Intl.DateTimeFormat("de-DE", {
+          month: "long",
+          year: "numeric"
+        }).format(current);
+
+      grid.innerHTML = "";
+
+      [
+        "Mo",
+        "Di",
+        "Mi",
+        "Do",
+        "Fr",
+        "Sa",
+        "So"
+      ].forEach(day => {
+        const element = document.createElement("div");
+
+        element.className = "muted";
+        element.style.textAlign = "center";
+        element.style.padding = "5px";
+        element.textContent = day;
+
+        grid.appendChild(element);
+      });
+
+      const firstDay =
+        new Date(year, month, 1).getDay() || 7;
+
+      const days =
+        new Date(year, month + 1, 0).getDate();
+
+      for (let i = 1; i < firstDay; i++) {
+        grid.appendChild(document.createElement("div"));
+      }
+
+      for (let day = 1; day <= days; day++) {
+        const button = document.createElement("button");
+
+        button.className = "calendar-day";
+        button.textContent = day;
+
+        if (
+          day === now.getDate() &&
+          month === now.getMonth() &&
+          year === now.getFullYear()
+        ) {
+          button.classList.add("today");
+        }
+
+        button.addEventListener("click", () => {
+          const date =
+            `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+
+          const eventTitle = prompt(
+            `Termin für ${date}:`
+          );
+
+          if (!eventTitle?.trim()) {
+            return;
+          }
+
+          events.push({
+            id: Date.now(),
+            date,
+            title: eventTitle.trim()
+          });
+
+          Storage.save(
+            "calendar-events",
+            events
+          );
+
+          render();
+
+          notify(
+            "Kalender",
+            "Termin gespeichert."
+          );
+        });
+
+        grid.appendChild(button);
+      }
+
+      eventList.innerHTML = "";
+
+      const monthEvents = events.filter(event => {
+        const date = new Date(event.date);
+
+        return (
+          date.getFullYear() === year &&
+          date.getMonth() === month
+        );
+      });
+
+      if (!monthEvents.length) {
+        eventList.innerHTML = `
+          <div class="empty">
+            Keine Termine in diesem Monat.
+          </div>
+        `;
+        return;
+      }
+
+      monthEvents.forEach(event => {
+        const item = document.createElement("div");
+
+        item.className = "list-item";
+
+        item.innerHTML = `
+          <div>
+            <strong>${escapeHtml(event.title)}</strong>
+            <div class="muted">${event.date}</div>
+          </div>
+
+          <button class="btn danger">×</button>
+        `;
+
+        item.querySelector("button").addEventListener(
+          "click",
+          () => {
+            const index = events.findIndex(
+              value => value.id === event.id
+            );
+
+            if (index >= 0) {
+              events.splice(index, 1);
+              Storage.save(
+                "calendar-events",
+                events
+              );
+              render();
+            }
+          }
+        );
+
+        eventList.appendChild(item);
+      });
+    };
+
+    root.querySelector("#previous-month")
+      .addEventListener("click", () => {
+        current.setMonth(current.getMonth() - 1);
+        render();
+      });
+
+    root.querySelector("#next-month")
+      .addEventListener("click", () => {
+        current.setMonth(current.getMonth() + 1);
+        render();
+      });
+
+    root.querySelector("#today-month")
+      .addEventListener("click", () => {
+        current = new Date(
+          now.getFullYear(),
+          now.getMonth(),
+          1
+        );
+        render();
+      });
+
+    root.querySelector("#add-event")
+      .addEventListener("click", () => {
+        const date = prompt(
+          "Datum eingeben, z. B. 2026-08-25:"
+        );
+
+        if (!date) {
+          return;
+        }
+
+        const title = prompt("Terminname:");
+
+        if (!title?.trim()) {
+          return;
+        }
+
+        events.push({
+          id: Date.now(),
+          date,
+          title: title.trim()
+        });
+
+        Storage.save(
+          "calendar-events",
+          events
+        );
+
+        render();
+
+        notify(
+          "Kalender",
+          "Termin gespeichert."
+        );
+      });
+
+    render();
+
+    return root;
+  }
+
+  /* ==========================================================
+     CALCULATOR
+     ========================================================== */
+
+  function createCalculatorApp() {
+    const root = document.createElement("div");
+
+    root.className = "app-layout";
+
+    root.innerHTML = `
+      <div class="hero">
+        <h2>Rechner</h2>
+        <p>Ein einfacher HalDo-Systemrechner.</p>
+      </div>
+
+      <input
+        class="input"
+        id="calc-display"
+        readonly
+        value="0"
+        style="font-size:26px;text-align:right"
+      >
+
+      <div
+        class="card-grid"
+        id="calc-buttons"
+        style="grid-template-columns:repeat(4,1fr)"
+      ></div>
+    `;
+
+    const display = root.querySelector("#calc-display");
+    const buttons = root.querySelector("#calc-buttons");
+
+    const values = [
+      "7", "8", "9", "/",
+      "4", "5", "6", "*",
+      "1", "2", "3", "-",
+      "0", ".", "=", "+",
+      "C"
+    ];
+
+    let expression = "";
+
+    values.forEach(value => {
+      const button = document.createElement("button");
+
+      button.className = "btn";
+      button.textContent = value;
+      button.style.minHeight = "55px";
+
+      button.addEventListener("click", () => {
+        if (value === "C") {
+          expression = "";
+          display.value = "0";
+          return;
+        }
+
+        if (value === "=") {
+          try {
+            if (!/^[0-9+\-*/.()\s]+$/.test(expression)) {
+              throw new Error("Ungültiger Ausdruck");
+            }
+
+            const result = Function(
+              `"use strict"; return (${expression})`
+            )();
+
+            expression = String(result);
+            display.value = expression;
+          } catch {
+            expression = "";
+            display.value = "Fehler";
+          }
+
+          return;
+        }
+
+        expression += value;
+        display.value = expression;
+      });
+
+      buttons.appendChild(button);
+    });
+
+    return root;
+  }
+
+  /* ==========================================================
+     FILES APP
+     ========================================================== */
+
+  function createFilesApp() {
+    const root = document.createElement("div");
+
+    root.className = "app-layout";
+
+    const files =
+      Storage.load("virtual-files", [
+        {
+          id: 1,
+          name: "Willkommen.txt",
+          content: "Willkommen bei HalDo AI OS 20."
+        }
+      ]);
+
+    root.innerHTML = `
+      <div class="hero">
+        <h2>Dateien</h2>
+        <p>
+          Lokaler virtueller HalDo-Dateispeicher.
+        </p>
+      </div>
+
+      <div class="toolbar">
+        <button class="btn primary" id="new-file">
+          + Datei
+        </button>
+
+        <button class="btn danger" id="clear-files">
+          Speicher leeren
+        </button>
+      </div>
+
+      <div class="list" id="file-list"></div>
+    `;
+
+    const list = root.querySelector("#file-list");
+
+    const render = () => {
+      list.innerHTML = "";
+
+      files.forEach(file => {
+        const item = document.createElement("div");
+
+        item.className = "list-item";
+
+        item.innerHTML = `
+          <div>
+            <strong>▣ ${escapeHtml(file.name)}</strong>
+            <div class="muted">
+              ${escapeHtml(file.content.slice(0, 100))}
+            </div>
+          </div>
+
+          <div class="toolbar">
+            <button class="btn open-file">
+              Öffnen
+            </button>
+
+            <button class="btn danger delete-file">
+              ×
+            </button>
+          </div>
+        `;
+
+        item.querySelector(".open-file")
+          .addEventListener("click", () => {
+            alert(file.content);
+          });
+
+        item.querySelector(".delete-file")
+          .addEventListener("click", () => {
+            const index = files.findIndex(
+              value => value.id === file.id
+            );
+
+            if (index >= 0) {
+              files.splice(index, 1);
+              Storage.save(
+                "virtual-files",
+                files
+              );
+              render();
+            }
+          });
+
+        list.appendChild(item);
+      });
+    };
+
+    root.querySelector("#new-file")
+      .addEventListener("click", () => {
+        const name = prompt(
+          "Dateiname:"
+        );
+
+        if (!name?.trim()) {
+          return;
+        }
+
+        const content = prompt(
+          "Dateiinhalt:"
+        ) ?? "";
+
+        files.push({
+          id: Date.now(),
+          name: name.trim(),
+          content
+        });
+
+        Storage.save(
+          "virtual-files",
+          files
+        );
+
+        render();
+
+        notify(
+          "Dateien",
+          "Datei wurde erstellt."
+        );
+      });
+
+    root.querySelector("#clear-files")
+      .addEventListener("click", () => {
+        if (!confirm("Alle virtuellen Dateien löschen?")) {
+          return;
+        }
+
+        files.length = 0;
+
+        Storage.save(
+          "virtual-files",
+          files
+        );
+
+        render();
+      });
+
+    render();
+
+    return root;
+  }
+
+  /* ==========================================================
+     SETTINGS
+     ========================================================== */
+
+  function createSettingsApp() {
+    const root = document.createElement("div");
+
+    root.className = "app-layout";
+
+    const settings = Storage.load(
+      "settings",
+      {
+        cosmic: true,
+        notifications: true,
+        animation: true
+      }
+    );
+
+    root.innerHTML = `
+      <div class="hero">
+        <h2>Einstellungen</h2>
+        <p>
+          Zentrale Einstellungen von HalDo AI OS.
+        </p>
+      </div>
+
+      <div class="card-grid">
+        <div class="card">
+          <h3>Cosmic World</h3>
+          <p class="muted">
+            Animierte HalDo-Welt anzeigen.
+          </p>
+          <button class="btn" id="toggle-cosmic">
+            —
+          </button>
+        </div>
+
+        <div class="card">
+          <h3>Benachrichtigungen</h3>
+          <p class="muted">
+            Systembenachrichtigungen aktivieren.
+          </p>
+          <button class="btn" id="toggle-notifications">
+            —
+          </button>
+        </div>
+
+        <div class="card">
+          <h3>Animationen</h3>
+          <p class="muted">
+            UI-Animationen aktivieren.
+          </p>
+          <button class="btn" id="toggle-animation">
+            —
+          </button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>System</h3>
+        <p class="muted">
+          HalDo AI OS ${VERSION}
+        </p>
+
+        <button class="btn danger" id="reset">
+          Lokale HalDo-Daten zurücksetzen
+        </button>
+      </div>
+    `;
+
+    const updateButtons = () => {
+      root.querySelector("#toggle-cosmic")
+        .textContent =
+        settings.cosmic ? "Aktiviert" : "Deaktiviert";
+
+      root.querySelector("#toggle-notifications")
+        .textContent =
+        settings.notifications ? "Aktiviert" : "Deaktiviert";
+
+      root.querySelector("#toggle-animation")
+        .textContent =
+        settings.animation ? "Aktiviert" : "Deaktiviert";
+
+      document.getElementById("cosmic-world")
+        .style.display =
+        settings.cosmic ? "" : "none";
+
+      document.documentElement
+        .style.setProperty(
+          "--animation-enabled",
+          settings.animation ? "1" : "0"
+        );
+    };
+
+    root.querySelector("#toggle-cosmic")
+      .addEventListener("click", () => {
+        settings.cosmic = !settings.cosmic;
+        Storage.save("settings", settings);
+        updateButtons();
+      });
+
+    root.querySelector("#toggle-notifications")
+      .addEventListener("click", () => {
+        settings.notifications =
+          !settings.notifications;
+
+        Storage.save("settings", settings);
+        updateButtons();
+      });
+
+    root.querySelector("#toggle-animation")
+      .addEventListener("click", () => {
+        settings.animation =
+          !settings.animation;
+
+        Storage.save("settings", settings);
+        updateButtons();
+      });
+
+    root.querySelector("#reset")
+      .addEventListener("click", () => {
+        if (!confirm(
+          "Alle lokalen HalDo-Daten löschen?"
+        )) {
+          return;
+        }
+
+        Storage.clear();
+        location.reload();
+      });
+
+    updateButtons();
+
+    return root;
+  }
+
+  /* ==========================================================
+     SYSTEM INFO
+     ========================================================== */
+
+  function createSystemApp() {
+    const root = document.createElement("div");
+
+    root.className = "app-layout";
+
+    const info = System.info();
+
+    root.innerHTML = `
+      <div class="hero">
+        <h2>Systeminformationen</h2>
+        <p>
+          Laufzeitinformationen von HalDo AI OS.
+        </p>
+      </div>
+
+      <div class="card-grid">
+        <div class="card">
+          <h3>System</h3>
+          <p class="muted">
+            ${escapeHtml(info.name)}
+          </p>
+        </div>
+
+        <div class="card">
+          <h3>Version</h3>
+          <p class="muted">
+            ${escapeHtml(info.version)}
+          </p>
+        </div>
+
+        <div class="card">
+          <h3>Plattform</h3>
+          <p class="muted">
+            ${escapeHtml(info.platform)}
+          </p>
+        </div>
+
+        <div class="card">
+          <h3>Sprache</h3>
+          <p class="muted">
+            ${escapeHtml(info.language)}
+          </p>
+        </div>
+
+        <div class="card">
+          <h3>Verbindung</h3>
+          <p class="muted">
+            ${info.online ? "Online" : "Offline"}
+          </p>
+        </div>
+
+        <div class="card">
+          <h3>Display</h3>
+          <p class="muted">
+            ${info.screen.width} × ${info.screen.height}
+          </p>
+        </div>
+      </div>
+
+      <button class="btn primary" id="test-notification">
+        Systembenachrichtigung testen
+      </button>
+    `;
+
+    root.querySelector("#test-notification")
+      .addEventListener("click", () => {
+        notify(
+          "HalDo System",
+          "Das Benachrichtigungssystem funktioniert."
+        );
+      });
+
+    return root;
+  }
+
+  /* ==========================================================
+     CLOCK APP
+     ========================================================== */
+
+  function createClockApp() {
+    const root = document.createElement("div");
+
+    root.className = "app-layout";
+
+    root.innerHTML = `
+      <div class="hero">
+        <h2>Uhr</h2>
+        <p>Systemzeit von HalDo AI OS.</p>
+      </div>
+
+      <div
+        id="big-clock"
+        style="
+          font-size:64px;
+          text-align:center;
+          font-weight:800;
+          padding:35px 10px;
+        "
+      ></div>
+
+      <div
+        id="big-date"
+        class="muted"
+        style="text-align:center"
+      ></div>
+    `;
+
+    const clock = root.querySelector("#big-clock");
+    const date = root.querySelector("#big-date");
+
+    const update = () => {
+      const now = new Date();
+
+      clock.textContent =
+        now.toLocaleTimeString("de-DE");
+
+      date.textContent =
+        formatDate(now);
+    };
+
+    update();
+
+    const timer = setInterval(
+      update,
+      1000
+    );
+
+    const originalRemove =
+      root.remove.bind(root);
+
+    root.remove = () => {
+      clearInterval(timer);
+      originalRemove();
+    };
+
+    return root;
+  }
+
+  /* ==========================================================
+     TASKS APP
+     ========================================================== */
+
+  function createTasksApp() {
+    const root = document.createElement("div");
+
+    root.className = "app-layout";
+
+    const tasks =
+      Storage.load("tasks", []);
+
+    root.innerHTML = `
+      <div class="hero">
+        <h2>Aufgaben</h2>
+        <p>
+          Aufgaben erstellen, erledigen und dauerhaft speichern.
+        </p>
+      </div>
+
+      <div class="toolbar">
+        <input
+          class="input"
+          id="task-input"
+          placeholder="Neue Aufgabe..."
+        >
+
+        <button class="btn primary" id="add-task">
+          Hinzufügen
+        </button>
+      </div>
+
+      <div class="list" id="task-list"></div>
+    `;
+
+    const input = root.querySelector("#task-input");
+    const list = root.querySelector("#task-list");
+
+    const render = () => {
+      list.innerHTML = "";
+
+      if (!tasks.length) {
+        list.innerHTML = `
+          <div class="empty">
+            Keine Aufgaben.
+          </div>
+        `;
+        return;
+      }
+
+      tasks.forEach((task, index) => {
+        const item = document.createElement("div");
+
+        item.className = "list-item";
+
+        item.innerHTML = `
+          <label style="display:flex;gap:10px;align-items:center">
+            <input type="checkbox"
+              ${task.done ? "checked" : ""}
+            >
+            <span style="
+              text-decoration:
+              ${task.done ? "line-through" : "none"}
+            ">
+              ${escapeHtml(task.text)}
+            </span>
+          </label>
+
+          <button class="btn danger">×</button>
+        `;
+
+        item.querySelector("input")
+          .addEventListener("change", event => {
+            task.done = event.target.checked;
+            Storage.save("tasks", tasks);
+            render();
+          });
+
+        item.querySelector("button")
+          .addEventListener("click", () => {
+            tasks.splice(index, 1);
+            Storage.save("tasks", tasks);
+            render();
+          });
+
+        list.appendChild(item);
+      });
+    };
+
+    const add = () => {
+      const text = input.value.trim();
+
+      if (!text) {
+        return;
+      }
+
+      tasks.push({
+        id: Date.now(),
+        text,
+        done: false
+      });
+
+      Storage.save("tasks", tasks);
+
+      input.value = "";
+
+      render();
+
+      notify(
+        "Aufgaben",
+        "Aufgabe hinzugefügt."
+      );
+    };
+
+    root.querySelector("#add-task")
+      .addEventListener("click", add);
+
+    input.addEventListener(
+      "keydown",
+      event => {
+        if (event.key === "Enter") {
+          add();
+        }
+      }
+    );
+
+    render();
+
+    return root;
+  }
+
+  /* ==========================================================
+     REGISTER APPS
+     ========================================================== */
+
+  Registry.register({
+    id: "ai",
+    name: "HalDo AI",
+    icon: "✦",
+    render: createAIApp
+  });
+
+  Registry.register({
+    id: "files",
+    name: "Dateien",
+    icon: "▣",
+    render: createFilesApp
+  });
+
+  Registry.register({
+    id: "calendar",
+    name: "Kalender",
+    icon: "□",
+    render: createCalendarApp
+  });
+
+  Registry.register({
+    id: "notes",
+    name: "Notizen",
+    icon: "✎",
+    render: createNotesApp
+  });
+
+  Registry.register({
+    id: "calculator",
+    name: "Rechner",
+    icon: "＋",
+    render: createCalculatorApp
+  });
+
+  Registry.register({
+    id: "settings",
+    name: "Einstellungen",
+    icon: "⚙",
+    render: createSettingsApp
+  });
+
+  Registry.register({
+    id: "system",
+    name: "System",
+    icon: "◈",
+    render: createSystemApp
+  });
+
+  Registry.register({
+    id: "clock",
+    name: "Uhr",
+    icon: "◷",
+    render: createClockApp
+  });
+
+  Registry.register({
+    id: "tasks",
+    name: "Aufgaben",
+    icon: "✓",
+    render: createTasksApp
+  });
+
+  /* ==========================================================
+     LAUNCHER
+     ========================================================== */
+
+  const launcher =
+    document.getElementById("launcher");
+
+  const appGrid =
+    document.getElementById("app-grid");
+
+  const appSearch =
+    document.getElementById("app-search");
+
+  function renderLauncher(filter = "") {
+    appGrid.innerHTML = "";
+
+    const query =
+      filter.trim().toLowerCase();
+
+    Registry.all()
+      .filter(app =>
+        app.name
+          .toLowerCase()
+          .includes(query)
+      )
+      .forEach(app => {
+        const button =
+          document.createElement("button");
+
+        button.className = "launcher-app";
+
+        button.innerHTML = `
+          <span class="app-icon">
+            ${app.icon}
+          </span>
+
+          <span class="app-name">
+            ${escapeHtml(app.name)}
+          </span>
+        `;
+
+        button.addEventListener(
+          "click",
+          () => {
+            Runtime.open(app.id);
+            closeLauncher();
+          }
+        );
+
+        appGrid.appendChild(button);
+      });
+  }
+
+  function openLauncher() {
+    launcher.classList.add("open");
+    appSearch.focus();
+    renderLauncher(appSearch.value);
+  }
+
+  function closeLauncher() {
+    launcher.classList.remove("open");
+  }
+
+  function toggleLauncher() {
+    if (launcher.classList.contains("open")) {
+      closeLauncher();
+    } else {
+      openLauncher();
+    }
+  }
+
+  document
+    .getElementById("home-button")
+    .addEventListener(
+      "click",
+      toggleLauncher
+    );
+
+  document
+    .getElementById("top-home")
+    .addEventListener(
+      "click",
+      () => Runtime.open("ai")
+    );
+
+  document
+    .getElementById("close-launcher")
+    .addEventListener(
+      "click",
+      closeLauncher
+    );
+
+  appSearch.addEventListener(
+    "input",
+    () => {
+      renderLauncher(
+        appSearch.value
+      );
+    }
+  );
+
+  /* ==========================================================
+     DOCK
+     ========================================================== */
+
+  document
+    .querySelectorAll(".dock-button[data-app]")
+    .forEach(button => {
+      button.addEventListener(
+        "click",
+        () => {
+          Runtime.open(
+            button.dataset.app
+          );
+        }
+      );
+    });
+
+  document
+    .getElementById("sun")
+    .addEventListener(
+      "click",
+      () => Runtime.open("ai")
+    );
+
+  document
+    .getElementById("planet-earth")
+    .addEventListener(
+      "click",
+      () => Runtime.open("system")
+    );
+
+  /* ==========================================================
+     SEARCH
+     ========================================================== */
+
+  document
+    .getElementById("search-button")
+    .addEventListener(
+      "click",
+      openLauncher
+    );
+
+  /* ==========================================================
+     NOTIFICATION BUTTON
+     ========================================================== */
+
+  document
+    .getElementById("notification-button")
+    .addEventListener(
+      "click",
+      () => {
+        notify(
+          "HalDo AI OS",
+          "Das System läuft. Alle lokalen Kernsysteme sind aktiv."
+        );
+      }
+    );
+
+  /* ==========================================================
+     CLOCK
+     ========================================================== */
+
+  const clockElement =
+    document.getElementById("clock");
+
+  function updateClock() {
+    clockElement.textContent =
+      new Date().toLocaleTimeString(
+        "de-DE",
+        {
+          hour: "2-digit",
+          minute: "2-digit"
+        }
+      );
+  }
+
+  updateClock();
+  setInterval(updateClock, 1000);
+
+  /* ==========================================================
+     STAR GENERATOR
+     ========================================================== */
+
+  function createStars(container, count, sizeMin, sizeMax) {
+    for (let i = 0; i < count; i++) {
+      const star = document.createElement("span");
+
+      star.className = "star";
+
+      const size =
+        Math.random() *
+          (sizeMax - sizeMin) +
+          sizeMin;
+
+      star.style.width =
+        `${size}px`;
+
+      star.style.height =
+        `${size}px`;
+
+      star.style.left =
+        `${Math.random() * 100}%`;
+
+      star.style.top =
+        `${Math.random() * 100}%`;
+
+      star.style.animationDelay =
+        `${Math.random() * 4}s`;
+
+      star.style.animationDuration =
+        `${2 + Math.random() * 5}s`;
+
+      container.appendChild(star);
+    }
+  }
+
+  createStars(
+    document.getElementById("star-layer"),
+    150,
+    1,
+    2.5
+  );
+
+  createStars(
+    document.getElementById("star-layer-2"),
+    70,
+    1.5,
+    4
+  );
+
+  /* ==========================================================
+     KEYBOARD
+     ========================================================== */
+
+  document.addEventListener(
+    "keydown",
+    event => {
+      if (
+        event.key === "Escape" &&
+        launcher.classList.contains("open")
+      ) {
+        closeLauncher();
+      }
+
+      if (
+        event.key === "/" &&
+        !["INPUT", "TEXTAREA"].includes(
+          document.activeElement?.tagName
+        )
+      ) {
+        event.preventDefault();
+        openLauncher();
+      }
+    }
+  );
+
+  /* ==========================================================
+     BOOT
+     ========================================================== */
+
+  async function boot() {
+    const status =
+      document.getElementById("boot-status");
+
+    const stages = [
+      "Kernel wird gestartet...",
+      "System Core wird initialisiert...",
+      "Event Bus wird verbunden...",
+      "Service Layer wird aktiviert...",
+      "App Registry wird geladen...",
+      "App Runtime wird gestartet...",
+      "Window System wird bereitgestellt...",
+      "HalDo AI OS 20 ist bereit."
+    ];
+
+    for (const stage of stages) {
+      status.textContent = stage;
+
+      await new Promise(
+        resolve =>
+          setTimeout(resolve, 180)
+      );
+    }
+
+    System.started = true;
+
+    Events.emit(
+      "kernel:ready",
+      {
+        version: VERSION
+      }
+    );
+
+    Events.emit(
+      "system:ready",
+      {
+        version: VERSION
+      }
+    );
+
+    document
+      .getElementById("boot-screen")
+      .classList.add("done");
+
+    notify(
+      "HalDo AI OS",
+      `HalDo AI OS ${VERSION} ist gestartet.`
+    );
+  }
+
+  /* ==========================================================
+     GLOBAL HALDO API
+     ========================================================== */
+
+  window.HalDoOS = {
+    version: VERSION,
+    system: System,
+    events: Events,
+    storage: Storage,
+    registry: Registry,
+    runtime: Runtime,
+    windows: WindowManagerInstance,
+    notify,
+    openApp: id => Runtime.open(id)
+  };
+
+  window.HalDoSystem = System;
+
+  /* ==========================================================
+     START
+     ========================================================== */
+
+  renderLauncher();
+
+  boot();
+
+})();
+</script>
+
+</body>
+</html>
