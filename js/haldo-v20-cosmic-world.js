@@ -1,2811 +1,766 @@
-/*
- * ============================================================
- * HalDo AI OS 20
- * Cosmic World
- * ============================================================
- *
- * Datei:
- *   js/haldo-v20-cosmic-world.js
- *
- * Zweck:
- *   Sichtbare lebendige Cosmic World für HalDo AI OS 20.
- *
- * Enthält:
- *   - Sonne
- *   - Erde
- *   - Mond
- *   - Merkur
- *   - Venus
- *   - Mars
- *   - Jupiter
- *   - Saturn + Ringe
- *   - Uranus
- *   - Neptun
- *   - Sterne
- *   - HalDo AI Zentral-Avatar
- *   - Orbit-Animationen
- *   - Touch / Pointer Interaktion
- *   - Event-Bus Integration
- *
- * Bestehende Systeme werden nicht ersetzt.
- * ============================================================
- */
+/* ============================================================
+   HalDo AI OS 20
+   Cosmic World Engine
+   ------------------------------------------------------------
+   Lebendiges Sonnensystem für die HalDo OS Shell.
+
+   Funktionen:
+   - Sonne
+   - HalDo Logo in der Sonne
+   - Erde + Mond
+   - zusätzliche Planeten
+   - individuelle Umlaufbahnen
+   - individuelle Richtungen
+   - individuelle Geschwindigkeiten
+   - individuelle Rotation
+   - leuchtende Sterne
+   - Galaxien / Nebel
+   - klickbare Sonne
+   - responsive Darstellung
+   - Event-System-Kompatibilität
+   ============================================================ */
 
 (function (window, document) {
-
     "use strict";
 
-
-    const HalDoOS =
-        window.HalDoOS =
-        window.HalDoOS || {};
-
-
-    const V20 =
-        window.HalDoV20 =
-        window.HalDoV20 || {};
-
+    const VERSION = "20.0.0-cosmic";
 
     const state = {
-
-        ready: false,
-
         running: false,
-
-        root: null,
-
-        canvas: null,
-
-        context: null,
-
+        paused: false,
+        initialized: false,
         animationFrame: null,
-
-        width: 0,
-
-        height: 0,
-
-        dpr: 1,
-
-        time: 0,
-
         lastTime: 0,
-
-        pointer: {
-
-            x: 0,
-
-            y: 0,
-
-            active: false
-        },
-
-        selectedPlanet: null,
-
-        planets: [],
-
-        stars: [],
-
-        aiPulse: 0,
-
-        cosmicEnergy: 0
+        elapsed: 0,
+        sunClicks: 0
     };
 
-
-    const CosmicWorld = {
-
-        name:
-            "HalDo V20 Cosmic World",
-
-        version:
-            "20.0.0",
-
-        ready:
-            false
-    };
-
-
-    /* ========================================================
-       PLANETS
-    ======================================================== */
-
-    const PLANET_DEFINITIONS = [
-
+    const planets = [
         {
-            id:
-                "mercury",
-
-            name:
-                "Merkur",
-
-            orbit:
-                0.105,
-
-            radius:
-                0.014,
-
-            speed:
-                1.55,
-
-            color:
-                "#aaa8a0",
-
-            glow:
-                "#d7d2c8"
+            id: "mercury",
+            name: "Mercury",
+            radius: 3,
+            orbitX: 105,
+            orbitY: 48,
+            angle: 0.3,
+            speed: 0.00055,
+            direction: 1,
+            rotation: 0.012,
+            colorA: "#d7c7b0",
+            colorB: "#8e7963",
+            glow: "#d8c6ad"
         },
-
         {
-            id:
-                "venus",
-
-            name:
-                "Venus",
-
-            orbit:
-                0.155,
-
-            radius:
-                0.021,
-
-            speed:
-                1.15,
-
-            color:
-                "#d8a96a",
-
-            glow:
-                "#f4d39a"
+            id: "venus",
+            name: "Venus",
+            radius: 5,
+            orbitX: 145,
+            orbitY: 67,
+            angle: 1.8,
+            speed: 0.00037,
+            direction: -1,
+            rotation: -0.008,
+            colorA: "#ffe2a3",
+            colorB: "#c78642",
+            glow: "#ffd47b"
         },
-
         {
-            id:
-                "earth",
-
-            name:
-                "Erde",
-
-            orbit:
-                0.215,
-
-            radius:
-                0.024,
-
-            speed:
-                0.90,
-
-            color:
-                "#4d91d8",
-
-            glow:
-                "#7fc9ff",
-
-            earth:
-                true
+            id: "earth",
+            name: "Earth",
+            radius: 7,
+            orbitX: 195,
+            orbitY: 88,
+            angle: 3.2,
+            speed: 0.00027,
+            direction: 1,
+            rotation: 0.016,
+            colorA: "#55c7ff",
+            colorB: "#2566d4",
+            glow: "#49bfff",
+            moon: true
         },
-
         {
-            id:
-                "mars",
-
-            name:
-                "Mars",
-
-            orbit:
-                0.285,
-
-            radius:
-                0.018,
-
-            speed:
-                0.72,
-
-            color:
-                "#b85b43",
-
-            glow:
-                "#ed8b65"
+            id: "mars",
+            name: "Mars",
+            radius: 6,
+            orbitX: 240,
+            orbitY: 108,
+            angle: 5.4,
+            speed: 0.00021,
+            direction: -1,
+            rotation: 0.011,
+            colorA: "#ff8064",
+            colorB: "#9f301e",
+            glow: "#ff664d"
         },
-
         {
-            id:
-                "jupiter",
-
-            name:
-                "Jupiter",
-
-            orbit:
-                0.395,
-
-            radius:
-                0.055,
-
-            speed:
-                0.39,
-
-            color:
-                "#c49b79",
-
-            glow:
-                "#e5c4a3",
-
-            gas:
-                true
+            id: "jupiter",
+            name: "Jupiter",
+            radius: 15,
+            orbitX: 315,
+            orbitY: 145,
+            angle: 0.9,
+            speed: 0.00013,
+            direction: 1,
+            rotation: 0.023,
+            colorA: "#f2d1a1",
+            colorB: "#a16d4c",
+            glow: "#e3ad77"
         },
-
         {
-            id:
-                "saturn",
-
-            name:
-                "Saturn",
-
-            orbit:
-                0.515,
-
-            radius:
-                0.047,
-
-            speed:
-                0.30,
-
-            color:
-                "#d8c18b",
-
-            glow:
-                "#f1dfae",
-
-            rings:
-                true,
-
-            gas:
-                true
+            id: "saturn",
+            name: "Saturn",
+            radius: 12,
+            orbitX: 390,
+            orbitY: 177,
+            angle: 4.2,
+            speed: 0.000095,
+            direction: -1,
+            rotation: 0.019,
+            colorA: "#f3d99c",
+            colorB: "#b38c52",
+            glow: "#f4d38b",
+            rings: true
         },
-
         {
-            id:
-                "uranus",
-
-            name:
-                "Uranus",
-
-            orbit:
-                0.635,
-
-            radius:
-                0.034,
-
-            speed:
-                0.22,
-
-            color:
-                "#7ac8d4",
-
-            glow:
-                "#b2f2fa"
+            id: "uranus",
+            name: "Uranus",
+            radius: 9,
+            orbitX: 460,
+            orbitY: 210,
+            angle: 2.2,
+            speed: 0.000073,
+            direction: 1,
+            rotation: 0.009,
+            colorA: "#a9f4ff",
+            colorB: "#3f9fae",
+            glow: "#8cecff"
         },
-
         {
-            id:
-                "neptune",
-
-            name:
-                "Neptun",
-
-            orbit:
-                0.755,
-
-            radius:
-                0.032,
-
-            speed:
-                0.17,
-
-            color:
-                "#426cc4",
-
-            glow:
-                "#789cff"
+            id: "neptune",
+            name: "Neptune",
+            radius: 10,
+            orbitX: 530,
+            orbitY: 245,
+            angle: 5.8,
+            speed: 0.000058,
+            direction: -1,
+            rotation: 0.014,
+            colorA: "#639dff",
+            colorB: "#2448a5",
+            glow: "#5d8cff"
+        },
+        {
+            id: "pluto",
+            name: "Pluto",
+            radius: 4,
+            orbitX: 600,
+            orbitY: 280,
+            angle: 1.1,
+            speed: 0.000037,
+            direction: 1,
+            rotation: 0.006,
+            colorA: "#d5c1ad",
+            colorB: "#776052",
+            glow: "#c7a98c"
         }
-
     ];
 
+    const stars = [];
+    const STAR_COUNT = 220;
 
-    /* ========================================================
-       HELPERS
-    ======================================================== */
+    let root = null;
+    let scene = null;
+    let starLayer = null;
+    let galaxyLayer = null;
+    let orbitLayer = null;
+    let planetLayer = null;
+    let sun = null;
 
-    function clamp(
-        value,
-        min,
-        max
-    ) {
-
-        return Math.max(
-            min,
-            Math.min(
-                max,
-                value
-            )
-        );
+    function qs(selector, parent = document) {
+        return parent.querySelector(selector);
     }
 
+    function createElement(tag, className, parent) {
+        const el = document.createElement(tag);
 
-    function random(
-        min,
-        max
-    ) {
-
-        return (
-            Math.random() *
-            (
-                max -
-                min
-            )
-        ) +
-        min;
-    }
-
-
-    function distance(
-        x1,
-        y1,
-        x2,
-        y2
-    ) {
-
-        const dx =
-            x1 - x2;
-
-        const dy =
-            y1 - y2;
-
-        return Math.sqrt(
-            dx * dx +
-            dy * dy
-        );
-    }
-
-
-    function emit(
-        name,
-        data
-    ) {
-
-        const bus =
-            window.HalDoAppEvents;
-
-
-        if (
-            bus &&
-            typeof bus.emit ===
-            "function"
-        ) {
-
-            try {
-
-                bus.emit(
-                    name,
-                    data,
-                    {
-                        source:
-                            "cosmic-world"
-                    }
-                );
-
-            } catch (error) {
-
-                console.warn(
-                    "[HalDo Cosmic World]",
-                    error
-                );
-            }
+        if (className) {
+            el.className = className;
         }
 
-
-        const bridge =
-            window.HalDoV20;
-
-
-        if (
-            bridge &&
-            typeof bridge.emit ===
-            "function"
-        ) {
-
-            try {
-
-                bridge.emit(
-                    name,
-                    data
-                );
-
-            } catch (error) {
-
-                /*
-                 * Defensive.
-                 */
-            }
-        }
-    }
-
-
-    /* ========================================================
-       ROOT
-    ======================================================== */
-
-    function createRoot() {
-
-        if (
-            state.root &&
-            document.body.contains(
-                state.root
-            )
-        ) {
-
-            return state.root;
+        if (parent) {
+            parent.appendChild(el);
         }
 
-
-        const root =
-            document.createElement(
-                "section"
-            );
-
-
-        root.id =
-            "haldo-v20-cosmic-world";
-
-
-        root.className =
-            "haldo-v20-cosmic-world";
-
-
-        root.setAttribute(
-            "aria-label",
-            "HalDo Cosmic World"
-        );
-
-
-        root.innerHTML = [
-
-            '<div class="haldo-cosmic-background"></div>',
-
-            '<canvas class="haldo-cosmic-canvas"></canvas>',
-
-            '<div class="haldo-cosmic-vignette"></div>',
-
-            '<div class="haldo-cosmic-ai">',
-
-                '<div class="haldo-cosmic-ai-ring"></div>',
-
-                '<div class="haldo-cosmic-ai-glow"></div>',
-
-                '<img ',
-                    'class="haldo-cosmic-ai-logo" ',
-                    'src="assets/logo/logo.png" ',
-                    'alt="HalDo AI" ',
-                    'draggable="false"',
-                '>',
-
-                '<div class="haldo-cosmic-ai-name">',
-                    'HalDo AI',
-                '</div>',
-
-            '</div>',
-
-            '<div class="haldo-cosmic-info" aria-live="polite">',
-
-                '<strong class="haldo-cosmic-info-name">',
-                    'HalDo Cosmic World',
-                '</strong>',
-
-                '<span class="haldo-cosmic-info-text">',
-                    'Unser lebendiges Sonnensystem',
-                '</span>',
-
-            '</div>'
-
-        ].join("");
-
-
-        document.body.appendChild(
-            root
-        );
-
-
-        state.root =
-            root;
-
-
-        state.canvas =
-            root.querySelector(
-                ".haldo-cosmic-canvas"
-            );
-
-
-        state.context =
-            state.canvas.getContext(
-                "2d"
-            );
-
-
-        return root;
+        return el;
     }
-
-
-    /* ========================================================
-       STYLE
-    ======================================================== */
-
-    function installStyles() {
-
-        if (
-            document.getElementById(
-                "haldo-v20-cosmic-world-style"
-            )
-        ) {
-
-            return;
-        }
-
-
-        const style =
-            document.createElement(
-                "style"
-            );
-
-
-        style.id =
-            "haldo-v20-cosmic-world-style";
-
-
-        style.textContent = `
-
-            #haldo-v20-cosmic-world {
-
-                position:
-                    fixed;
-
-                inset:
-                    0;
-
-                z-index:
-                    0;
-
-                overflow:
-                    hidden;
-
-                background:
-                    #02030b;
-
-                isolation:
-                    isolate;
-
-                font-family:
-                    system-ui,
-                    -apple-system,
-                    BlinkMacSystemFont,
-                    "Segoe UI",
-                    sans-serif;
-
-                user-select:
-                    none;
-
-                touch-action:
-                    none;
-            }
-
-
-            #haldo-v20-cosmic-world
-            .haldo-cosmic-background {
-
-                position:
-                    absolute;
-
-                inset:
-                    0;
-
-                background:
-
-                    radial-gradient(
-                        circle at 50% 50%,
-                        rgba(255,170,55,.15),
-                        transparent 15%
-                    ),
-
-                    radial-gradient(
-                        circle at 22% 30%,
-                        rgba(80,120,255,.09),
-                        transparent 28%
-                    ),
-
-                    radial-gradient(
-                        circle at 78% 65%,
-                        rgba(160,80,255,.08),
-                        transparent 32%
-                    ),
-
-                    #02030b;
-            }
-
-
-            #haldo-v20-cosmic-world
-            .haldo-cosmic-canvas {
-
-                position:
-                    absolute;
-
-                inset:
-                    0;
-
-                width:
-                    100%;
-
-                height:
-                    100%;
-
-                display:
-                    block;
-            }
-
-
-            #haldo-v20-cosmic-world
-            .haldo-cosmic-vignette {
-
-                position:
-                    absolute;
-
-                inset:
-                    0;
-
-                pointer-events:
-                    none;
-
-                background:
-                    radial-gradient(
-                        circle,
-                        transparent 45%,
-                        rgba(0,0,0,.40) 100%
-                    );
-            }
-
-
-            #haldo-v20-cosmic-world
-            .haldo-cosmic-ai {
-
-                position:
-                    absolute;
-
-                left:
-                    50%;
-
-                top:
-                    50%;
-
-                width:
-                    180px;
-
-                height:
-                    180px;
-
-                transform:
-                    translate(-50%, -50%);
-
-                display:
-                    flex;
-
-                align-items:
-                    center;
-
-                justify-content:
-                    center;
-
-                pointer-events:
-                    none;
-
-                z-index:
-                    5;
-            }
-
-
-            #haldo-v20-cosmic-world
-            .haldo-cosmic-ai-ring {
-
-                position:
-                    absolute;
-
-                inset:
-                    0;
-
-                border-radius:
-                    50%;
-
-                border:
-                    1px solid
-                    rgba(255,220,130,.34);
-
-                box-shadow:
-                    0 0 30px
-                    rgba(255,190,70,.22),
-
-                    inset 0 0 30px
-                    rgba(255,210,110,.12);
-
-                animation:
-                    haldo-ai-ring
-                    8s
-                    linear
-                    infinite;
-            }
-
-
-            #haldo-v20-cosmic-world
-            .haldo-cosmic-ai-glow {
-
-                position:
-                    absolute;
-
-                width:
-                    135px;
-
-                height:
-                    135px;
-
-                border-radius:
-                    50%;
-
-                background:
-                    radial-gradient(
-                        circle,
-                        rgba(255,230,150,.35),
-                        rgba(255,170,50,.12) 42%,
-                        transparent 72%
-                    );
-
-                filter:
-                    blur(8px);
-
-                animation:
-                    haldo-ai-breathe
-                    3.8s
-                    ease-in-out
-                    infinite;
-            }
-
-
-            #haldo-v20-cosmic-world
-            .haldo-cosmic-ai-logo {
-
-                position:
-                    relative;
-
-                width:
-                    92px;
-
-                height:
-                    92px;
-
-                object-fit:
-                    contain;
-
-                filter:
-                    drop-shadow(
-                        0 0 18px
-                        rgba(255,235,160,.75)
-                    );
-
-                animation:
-                    haldo-ai-float
-                    4s
-                    ease-in-out
-                    infinite;
-            }
-
-
-            #haldo-v20-cosmic-world
-            .haldo-cosmic-ai-name {
-
-                position:
-                    absolute;
-
-                top:
-                    calc(100% + 12px);
-
-                padding:
-                    5px 12px;
-
-                border-radius:
-                    999px;
-
-                background:
-                    rgba(4,7,18,.60);
-
-                border:
-                    1px solid
-                    rgba(255,255,255,.12);
-
-                color:
-                    rgba(255,248,220,.92);
-
-                font-size:
-                    12px;
-
-                letter-spacing:
-                    .08em;
-
-                backdrop-filter:
-                    blur(10px);
-            }
-
-
-            #haldo-v20-cosmic-world
-            .haldo-cosmic-info {
-
-                position:
-                    absolute;
-
-                left:
-                    20px;
-
-                bottom:
-                    20px;
-
-                z-index:
-                    10;
-
-                display:
-                    flex;
-
-                flex-direction:
-                    column;
-
-                gap:
-                    4px;
-
-                max-width:
-                    300px;
-
-                padding:
-                    12px 16px;
-
-                border-radius:
-                    16px;
-
-                background:
-                    rgba(4,7,18,.58);
-
-                border:
-                    1px solid
-                    rgba(255,255,255,.10);
-
-                box-shadow:
-                    0 10px 40px
-                    rgba(0,0,0,.25);
-
-                backdrop-filter:
-                    blur(14px);
-
-                color:
-                    white;
-
-                pointer-events:
-                    none;
-            }
-
-
-            #haldo-v20-cosmic-world
-            .haldo-cosmic-info-name {
-
-                font-size:
-                    14px;
-            }
-
-
-            #haldo-v20-cosmic-world
-            .haldo-cosmic-info-text {
-
-                font-size:
-                    11px;
-
-                opacity:
-                    .68;
-            }
-
-
-            @keyframes haldo-ai-ring {
-
-                from {
-                    transform:
-                        rotate(0deg);
-                }
-
-                to {
-                    transform:
-                        rotate(360deg);
-                }
-            }
-
-
-            @keyframes haldo-ai-breathe {
-
-                0%, 100% {
-                    transform:
-                        scale(.92);
-                    opacity:
-                        .72;
-                }
-
-                50% {
-                    transform:
-                        scale(1.08);
-                    opacity:
-                        1;
-                }
-            }
-
-
-            @keyframes haldo-ai-float {
-
-                0%, 100% {
-                    transform:
-                        translateY(0);
-                }
-
-                50% {
-                    transform:
-                        translateY(-5px);
-                }
-            }
-
-
-            @media (
-                max-width: 700px
-            ) {
-
-                #haldo-v20-cosmic-world
-                .haldo-cosmic-ai {
-
-                    width:
-                        130px;
-
-                    height:
-                        130px;
-                }
-
-
-                #haldo-v20-cosmic-world
-                .haldo-cosmic-ai-logo {
-
-                    width:
-                        68px;
-
-                    height:
-                        68px;
-                }
-
-
-                #haldo-v20-cosmic-world
-                .haldo-cosmic-info {
-
-                    left:
-                        12px;
-
-                    bottom:
-                        12px;
-                }
-            }
-
-        `;
-
-
-        document.head.appendChild(
-            style
-        );
-    }
-
-
-    /* ========================================================
-       STARS
-    ======================================================== */
 
     function createStars() {
+        stars.length = 0;
 
-        state.stars =
-            [];
-
-
-        const count =
-            Math.min(
-                900,
-                Math.max(
-                    300,
-                    Math.floor(
-                        (
-                            window.innerWidth *
-                            window.innerHeight
-                        ) /
-                        1400
-                    )
-                )
-            );
-
-
-        for (
-            let i = 0;
-            i < count;
-            i++
-        ) {
-
-            state.stars.push({
-
-                x:
-                    Math.random(),
-
-                y:
-                    Math.random(),
-
-                radius:
-                    random(
-                        0.25,
-                        1.45
-                    ),
-
-                alpha:
-                    random(
-                        0.18,
-                        0.95
-                    ),
-
-                twinkle:
-                    random(
-                        0.5,
-                        2.8
-                    ),
-
-                phase:
-                    random(
-                        0,
-                        Math.PI * 2
-                    )
+        for (let i = 0; i < STAR_COUNT; i++) {
+            stars.push({
+                x: Math.random() * 100,
+                y: Math.random() * 100,
+                size: Math.random() * 2.7 + 0.3,
+                alpha: Math.random() * 0.8 + 0.2,
+                pulse: Math.random() * 0.005 + 0.001,
+                phase: Math.random() * Math.PI * 2,
+                drift: (Math.random() - 0.5) * 0.002
             });
         }
+
+        stars.forEach((star) => {
+            const el = createElement("div", "haldo-cosmic-star", starLayer);
+
+            el.style.left = `${star.x}%`;
+            el.style.top = `${star.y}%`;
+            el.style.width = `${star.size}px`;
+            el.style.height = `${star.size}px`;
+            el.style.opacity = star.alpha;
+        });
     }
 
+    function createGalaxies() {
+        const galaxies = [
+            {
+                left: "8%",
+                top: "15%",
+                width: "280px",
+                height: "170px",
+                rotation: "-22deg"
+            },
+            {
+                left: "72%",
+                top: "12%",
+                width: "340px",
+                height: "200px",
+                rotation: "18deg"
+            },
+            {
+                left: "65%",
+                top: "68%",
+                width: "300px",
+                height: "160px",
+                rotation: "-14deg"
+            },
+            {
+                left: "12%",
+                top: "70%",
+                width: "250px",
+                height: "140px",
+                rotation: "27deg"
+            }
+        ];
 
-    /* ========================================================
-       PLANET STATE
-    ======================================================== */
-
-    function createPlanets() {
-
-        state.planets =
-            PLANET_DEFINITIONS.map(
-                function (
-                    definition,
-                    index
-                ) {
-
-                    return {
-
-                        ...definition,
-
-                        angle:
-                            (
-                                index *
-                                1.87
-                            ) +
-                            random(
-                                0,
-                                .8
-                            ),
-
-                        rotation:
-                            random(
-                                0,
-                                Math.PI * 2
-                            ),
-
-                        moonAngle:
-                            random(
-                                0,
-                                Math.PI * 2
-                            )
-                    };
-
-                }
+        galaxies.forEach((data, index) => {
+            const galaxy = createElement(
+                "div",
+                `haldo-cosmic-galaxy galaxy-${index + 1}`,
+                galaxyLayer
             );
+
+            Object.assign(galaxy.style, {
+                left: data.left,
+                top: data.top,
+                width: data.width,
+                height: data.height,
+                transform: `rotate(${data.rotation})`
+            });
+        });
     }
 
+    function createOrbit(planet) {
+        const orbit = createElement(
+            "div",
+            "haldo-cosmic-orbit",
+            orbitLayer
+        );
 
-    /* ========================================================
-       RESIZE
-    ======================================================== */
+        orbit.dataset.planet = planet.id;
 
-    function resize() {
+        Object.assign(orbit.style, {
+            width: `${planet.orbitX * 2}px`,
+            height: `${planet.orbitY * 2}px`
+        });
+
+        return orbit;
+    }
+
+    function createPlanet(planet) {
+        const orbit = createOrbit(planet);
+
+        const body = createElement(
+            "button",
+            "haldo-cosmic-planet",
+            planetLayer
+        );
+
+        body.type = "button";
+        body.dataset.planet = planet.id;
+        body.setAttribute("aria-label", planet.name);
+
+        body.style.setProperty("--planet-a", planet.colorA);
+        body.style.setProperty("--planet-b", planet.colorB);
+        body.style.setProperty("--planet-glow", planet.glow);
+        body.style.width = `${planet.radius * 2}px`;
+        body.style.height = `${planet.radius * 2}px`;
+
+        if (planet.rings) {
+            const rings = createElement(
+                "span",
+                "haldo-planet-rings",
+                body
+            );
+
+            rings.setAttribute("aria-hidden", "true");
+        }
+
+        if (planet.moon) {
+            const moonOrbit = createElement(
+                "span",
+                "haldo-moon-orbit",
+                body
+            );
+
+            const moon = createElement(
+                "span",
+                "haldo-moon",
+                moonOrbit
+            );
+
+            moon.setAttribute("aria-hidden", "true");
+        }
+
+        body.addEventListener("click", () => {
+            emit("cosmic:planet:selected", {
+                id: planet.id,
+                name: planet.name
+            });
+
+            showPlanetInfo(planet);
+        });
+
+        planet._orbitElement = orbit;
+        planet._bodyElement = body;
+    }
+
+    function createSun() {
+        sun = createElement(
+            "button",
+            "haldo-cosmic-sun",
+            scene
+        );
+
+        sun.type = "button";
+        sun.id = "haldo-cosmic-sun";
+        sun.setAttribute(
+            "aria-label",
+            "HalDo AI OS öffnen"
+        );
+
+        const corona = createElement(
+            "span",
+            "haldo-sun-corona",
+            sun
+        );
+
+        const fire = createElement(
+            "span",
+            "haldo-sun-fire",
+            sun
+        );
+
+        const logo = createElement(
+            "img",
+            "haldo-sun-logo",
+            sun
+        );
+
+        logo.alt = "HalDo AI OS";
+        logo.src =
+            "assets/logo/logo.png";
+
+        logo.onerror = function () {
+            this.src = "logo.png";
+        };
+
+        const core = createElement(
+            "span",
+            "haldo-sun-core",
+            sun
+        );
+
+        core.appendChild(logo);
+
+        sun.addEventListener("click", handleSunClick);
+
+        sun.addEventListener("keydown", (event) => {
+            if (
+                event.key === "Enter" ||
+                event.key === " "
+            ) {
+                event.preventDefault();
+                handleSunClick();
+            }
+        });
+
+        void corona;
+        void fire;
+    }
+
+    function handleSunClick() {
+        state.sunClicks++;
+
+        emit("haldo:sun:activated", {
+            clicks: state.sunClicks,
+            source: "cosmic-sun"
+        });
+
+        const commands = [
+            "ai-chat",
+            "home",
+            "haldo-ai"
+        ];
 
         if (
-            !state.canvas ||
-            !state.context
+            window.HalDoAppRouter &&
+            typeof window.HalDoAppRouter.open === "function"
         ) {
-
+            window.HalDoAppRouter.open("ai-chat");
             return;
         }
 
-
-        const rect =
-            state.root.getBoundingClientRect();
-
-
-        state.width =
-            rect.width;
-
-
-        state.height =
-            rect.height;
-
-
-        state.dpr =
-            Math.min(
-                window.devicePixelRatio ||
-                1,
-                2
-            );
-
-
-        state.canvas.width =
-            Math.floor(
-                state.width *
-                state.dpr
-            );
-
-
-        state.canvas.height =
-            Math.floor(
-                state.height *
-                state.dpr
-            );
-
-
-        state.canvas.style.width =
-            state.width +
-            "px";
-
-
-        state.canvas.style.height =
-            state.height +
-            "px";
-
-
-        state.context.setTransform(
-            state.dpr,
-            0,
-            0,
-            state.dpr,
-            0,
-            0
-        );
-    }
-
-
-    /* ========================================================
-       ORBIT SCALE
-    ======================================================== */
-
-    function getOrbitScale() {
-
-        const shortest =
-            Math.min(
-                state.width,
-                state.height
-            );
-
-
-        return shortest * .48;
-    }
-
-
-    /* ========================================================
-       DRAW STARS
-    ======================================================== */
-
-    function drawStars() {
-
-        const ctx =
-            state.context;
-
-
-        for (
-            let i = 0;
-            i < state.stars.length;
-            i++
-        ) {
-
-            const star =
-                state.stars[i];
-
-
-            const pulse =
-                (
-                    Math.sin(
-                        state.time *
-                        star.twinkle +
-                        star.phase
-                    ) +
-                    1
-                ) *
-                .5;
-
-
-            const alpha =
-                star.alpha *
-                (
-                    .58 +
-                    pulse *
-                    .42
-                );
-
-
-            ctx.beginPath();
-
-
-            ctx.arc(
-                star.x *
-                    state.width,
-
-                star.y *
-                    state.height,
-
-                star.radius,
-
-                0,
-
-                Math.PI * 2
-            );
-
-
-            ctx.fillStyle =
-                "rgba(255,255,255," +
-                alpha +
-                ")";
-
-
-            ctx.fill();
-        }
-    }
-
-
-    /* ========================================================
-       DRAW ORBIT
-    ======================================================== */
-
-    function drawOrbit(
-        radius
-    ) {
-
-        const ctx =
-            state.context;
-
-
-        const cx =
-            state.width / 2;
-
-
-        const cy =
-            state.height / 2;
-
-
-        ctx.beginPath();
-
-
-        ctx.arc(
-            cx,
-            cy,
-            radius,
-            0,
-            Math.PI * 2
-        );
-
-
-        ctx.strokeStyle =
-            "rgba(255,255,255,.075)";
-
-
-        ctx.lineWidth =
-            1;
-
-
-        ctx.stroke();
-    }
-
-
-    /* ========================================================
-       DRAW SUN
-    ======================================================== */
-
-    function drawSun() {
-
-        const ctx =
-            state.context;
-
-
-        const cx =
-            state.width / 2;
-
-
-        const cy =
-            state.height / 2;
-
-
-        const base =
-            Math.min(
-                state.width,
-                state.height
-            );
-
-
-        const radius =
-            clamp(
-                base * .075,
-                38,
-                76
-            );
-
-
-        const pulse =
-            1 +
-            Math.sin(
-                state.time *
-                1.4
-            ) *
-            .035;
-
-
-        const r =
-            radius *
-            pulse;
-
-
-        const glow =
-            ctx.createRadialGradient(
-                cx,
-                cy,
-                r * .35,
-                cx,
-                cy,
-                r * 3.6
-            );
-
-
-        glow.addColorStop(
-            0,
-            "rgba(255,242,180,.50)"
-        );
-
-
-        glow.addColorStop(
-            .24,
-            "rgba(255,190,65,.25)"
-        );
-
-
-        glow.addColorStop(
-            1,
-            "rgba(255,150,20,0)"
-        );
-
-
-        ctx.beginPath();
-
-
-        ctx.arc(
-            cx,
-            cy,
-            r * 3.6,
-            0,
-            Math.PI * 2
-        );
-
-
-        ctx.fillStyle =
-            glow;
-
-
-        ctx.fill();
-
-
-        const gradient =
-            ctx.createRadialGradient(
-                cx - r * .3,
-                cy - r * .35,
-                r * .08,
-                cx,
-                cy,
-                r
-            );
-
-
-        gradient.addColorStop(
-            0,
-            "#fff9d1"
-        );
-
-
-        gradient.addColorStop(
-            .28,
-            "#ffd66d"
-        );
-
-
-        gradient.addColorStop(
-            .72,
-            "#ff9e28"
-        );
-
-
-        gradient.addColorStop(
-            1,
-            "#e86616"
-        );
-
-
-        ctx.beginPath();
-
-
-        ctx.arc(
-            cx,
-            cy,
-            r,
-            0,
-            Math.PI * 2
-        );
-
-
-        ctx.fillStyle =
-            gradient;
-
-
-        ctx.fill();
-
-
-        /*
-         * Solar surface.
-         */
-
-        for (
-            let i = 0;
-            i < 9;
-            i++
-        ) {
-
-            const angle =
-                state.time *
-                (.15 + i * .013) +
-                i * 2.2;
-
-
-            const x =
-                cx +
-                Math.cos(angle) *
-                r *
-                random(
-                    .15,
-                    .72
-                );
-
-
-            const y =
-                cy +
-                Math.sin(angle) *
-                r *
-                random(
-                    .15,
-                    .72
-                );
-
-
-            ctx.beginPath();
-
-
-            ctx.arc(
-                x,
-                y,
-                random(
-                    1,
-                    3
-                ),
-                0,
-                Math.PI * 2
-            );
-
-
-            ctx.fillStyle =
-                "rgba(255,245,180,.28)";
-
-
-            ctx.fill();
-        }
-    }
-
-
-    /* ========================================================
-       DRAW PLANET
-    ======================================================== */
-
-    function drawPlanet(
-        planet
-    ) {
-
-        const ctx =
-            state.context;
-
-
-        const cx =
-            state.width / 2;
-
-
-        const cy =
-            state.height / 2;
-
-
-        const orbitScale =
-            getOrbitScale();
-
-
-        const orbitRadius =
-            orbitScale *
-            planet.orbit;
-
-
-        const x =
-            cx +
-            Math.cos(
-                planet.angle
-            ) *
-            orbitRadius;
-
-
-        const y =
-            cy +
-            Math.sin(
-                planet.angle
-            ) *
-            orbitRadius;
-
-
-        const base =
-            Math.min(
-                state.width,
-                state.height
-            );
-
-
-        const radius =
-            Math.max(
-                3,
-                base *
-                planet.radius
-            );
-
-
-        planet.x =
-            x;
-
-
-        planet.y =
-            y;
-
-
-        planet.renderRadius =
-            radius;
-
-
-        /*
-         * Planet glow.
-         */
-
-        const glow =
-            ctx.createRadialGradient(
-                x,
-                y,
-                radius * .3,
-                x,
-                y,
-                radius * 3
-            );
-
-
-        glow.addColorStop(
-            0,
-            planet.glow
-        );
-
-
-        glow.addColorStop(
-            1,
-            "rgba(0,0,0,0)"
-        );
-
-
-        ctx.beginPath();
-
-
-        ctx.arc(
-            x,
-            y,
-            radius * 2.8,
-            0,
-            Math.PI * 2
-        );
-
-
-        ctx.fillStyle =
-            glow;
-
-
-        ctx.globalAlpha =
-            .16;
-
-
-        ctx.fill();
-
-
-        ctx.globalAlpha =
-            1;
-
-
-        /*
-         * Body.
-         */
-
-        const body =
-            ctx.createRadialGradient(
-                x - radius * .35,
-                y - radius * .4,
-                radius * .08,
-                x,
-                y,
-                radius
-            );
-
-
-        body.addColorStop(
-            0,
-            "#ffffff"
-        );
-
-
-        body.addColorStop(
-            .13,
-            planet.glow
-        );
-
-
-        body.addColorStop(
-            .55,
-            planet.color
-        );
-
-
-        body.addColorStop(
-            1,
-            "#111827"
-        );
-
-
-        ctx.beginPath();
-
-
-        ctx.arc(
-            x,
-            y,
-            radius,
-            0,
-            Math.PI * 2
-        );
-
-
-        ctx.fillStyle =
-            body;
-
-
-        ctx.fill();
-
-
-        /*
-         * Earth continents + atmosphere.
-         */
-
         if (
-            planet.earth
+            window.HalDoAppManager &&
+            typeof window.HalDoAppManager.openApp === "function"
         ) {
-
-            ctx.save();
-
-
-            ctx.beginPath();
-
-
-            ctx.arc(
-                x,
-                y,
-                radius,
-                0,
-                Math.PI * 2
-            );
-
-
-            ctx.clip();
-
-
-            for (
-                let i = 0;
-                i < 5;
-                i++
-            ) {
-
-                const px =
-                    x +
-                    Math.sin(
-                        i * 5.3
-                    ) *
-                    radius *
-                    .48;
-
-
-                const py =
-                    y +
-                    Math.cos(
-                        i * 3.7
-                    ) *
-                    radius *
-                    .42;
-
-
-                ctx.beginPath();
-
-
-                ctx.ellipse(
-                    px,
-                    py,
-                    radius *
-                        random(
-                            .16,
-                            .34
-                        ),
-                    radius *
-                        random(
-                            .08,
-                            .20
-                        ),
-                    i,
-                    0,
-                    Math.PI * 2
-                );
-
-
-                ctx.fillStyle =
-                    "rgba(70,165,82,.82)";
-
-
-                ctx.fill();
-            }
-
-
-            ctx.restore();
-
-
-            ctx.beginPath();
-
-
-            ctx.arc(
-                x,
-                y,
-                radius * 1.18,
-                0,
-                Math.PI * 2
-            );
-
-
-            ctx.strokeStyle =
-                "rgba(110,210,255,.42)";
-
-
-            ctx.lineWidth =
-                Math.max(
-                    .7,
-                    radius * .07
-                );
-
-
-            ctx.stroke();
-        }
-
-
-        /*
-         * Jupiter bands.
-         */
-
-        if (
-            planet.id ===
-            "jupiter"
-        ) {
-
-            ctx.save();
-
-
-            ctx.beginPath();
-
-
-            ctx.arc(
-                x,
-                y,
-                radius,
-                0,
-                Math.PI * 2
-            );
-
-
-            ctx.clip();
-
-
-            for (
-                let i = -3;
-                i <= 3;
-                i++
-            ) {
-
-                ctx.fillStyle =
-                    i % 2 === 0
-                        ? "rgba(112,73,48,.24)"
-                        : "rgba(255,230,190,.20)";
-
-
-                ctx.fillRect(
-                    x - radius,
-                    y + i * radius * .24,
-                    radius * 2,
-                    radius * .10
-                );
-            }
-
-
-            ctx.restore();
-        }
-
-
-        /*
-         * Saturn rings.
-         */
-
-        if (
-            planet.rings
-        ) {
-
-            ctx.save();
-
-
-            ctx.translate(
-                x,
-                y
-            );
-
-
-            ctx.rotate(
-                -.28
-            );
-
-
-            ctx.scale(
-                1,
-                .34
-            );
-
-
-            ctx.beginPath();
-
-
-            ctx.ellipse(
-                0,
-                0,
-                radius * 2.0,
-                radius * 2.0,
-                0,
-                0,
-                Math.PI * 2
-            );
-
-
-            ctx.strokeStyle =
-                "rgba(231,214,169,.72)";
-
-
-            ctx.lineWidth =
-                Math.max(
-                    2,
-                    radius * .15
-                );
-
-
-            ctx.stroke();
-
-
-            ctx.beginPath();
-
-
-            ctx.ellipse(
-                0,
-                0,
-                radius * 1.48,
-                radius * 1.48,
-                0,
-                0,
-                Math.PI * 2
-            );
-
-
-            ctx.strokeStyle =
-                "rgba(130,108,72,.55)";
-
-
-            ctx.lineWidth =
-                Math.max(
-                    1,
-                    radius * .07
-                );
-
-
-            ctx.stroke();
-
-
-            ctx.restore();
-        }
-
-
-        /*
-         * Moon around Earth.
-         */
-
-        if (
-            planet.earth
-        ) {
-
-            const moonOrbit =
-                radius * 2.1;
-
-
-            const moonX =
-                x +
-                Math.cos(
-                    planet.moonAngle
-                ) *
-                moonOrbit;
-
-
-            const moonY =
-                y +
-                Math.sin(
-                    planet.moonAngle
-                ) *
-                moonOrbit *
-                .72;
-
-
-            ctx.beginPath();
-
-
-            ctx.arc(
-                moonX,
-                moonY,
-                Math.max(
-                    2,
-                    radius * .28
-                ),
-                0,
-                Math.PI * 2
-            );
-
-
-            const moonGradient =
-                ctx.createRadialGradient(
-                    moonX - 1,
-                    moonY - 1,
-                    1,
-                    moonX,
-                    moonY,
-                    radius * .28
-                );
-
-
-            moonGradient.addColorStop(
-                0,
-                "#f5f5ef"
-            );
-
-
-            moonGradient.addColorStop(
-                1,
-                "#66666b"
-            );
-
-
-            ctx.fillStyle =
-                moonGradient;
-
-
-            ctx.fill();
-        }
-    }
-
-
-    /* ========================================================
-       DRAW
-    ======================================================== */
-
-    function draw() {
-
-        if (
-            !state.context
-        ) {
-
+            window.HalDoAppManager.openApp("ai-chat");
             return;
         }
 
-
-        const ctx =
-            state.context;
-
-
-        ctx.clearRect(
-            0,
-            0,
-            state.width,
-            state.height
-        );
-
-
-        drawStars();
-
-
-        const orbitScale =
-            getOrbitScale();
-
-
-        for (
-            let i = 0;
-            i < state.planets.length;
-            i++
-        ) {
-
-            drawOrbit(
-                orbitScale *
-                state.planets[i].orbit
-            );
-        }
-
-
-        drawSun();
-
-
-        /*
-         * Draw distant planets first,
-         * closer planets afterwards.
-         */
-
-        const sorted =
-            state.planets
-                .slice()
-                .sort(
-                    function (
-                        a,
-                        b
-                    ) {
-
-                        return (
-                            a.orbit -
-                            b.orbit
-                        );
-
-                    }
-                );
-
-
-        for (
-            let i = 0;
-            i < sorted.length;
-            i++
-        ) {
-
-            drawPlanet(
-                sorted[i]
-            );
-        }
-
-
-        /*
-         * Pointer highlight.
-         */
-
         if (
-            state.pointer.active
+            window.HalDoAppRuntime &&
+            typeof window.HalDoAppRuntime.openApp === "function"
         ) {
-
-            for (
-                let i = 0;
-                i < state.planets.length;
-                i++
-            ) {
-
-                const planet =
-                    state.planets[i];
-
-
-                if (
-                    distance(
-                        state.pointer.x,
-                        state.pointer.y,
-                        planet.x,
-                        planet.y
-                    ) <
-                    planet.renderRadius *
-                    2
-                ) {
-
-                    ctx.beginPath();
-
-
-                    ctx.arc(
-                        planet.x,
-                        planet.y,
-                        planet.renderRadius *
-                        1.65,
-                        0,
-                        Math.PI * 2
-                    );
-
-
-                    ctx.strokeStyle =
-                        "rgba(255,255,255,.65)";
-
-
-                    ctx.lineWidth =
-                        1;
-
-
-                    ctx.stroke();
-
-                    break;
-                }
-            }
-        }
-    }
-
-
-    /* ========================================================
-       UPDATE
-    ======================================================== */
-
-    function update(
-        delta
-    ) {
-
-        const seconds =
-            Math.min(
-                delta / 1000,
-                .05
-            );
-
-
-        state.time +=
-            seconds;
-
-
-        for (
-            let i = 0;
-            i < state.planets.length;
-            i++
-        ) {
-
-            const planet =
-                state.planets[i];
-
-
-            planet.angle +=
-                seconds *
-                planet.speed *
-                .08;
-
-
-            planet.moonAngle +=
-                seconds *
-                1.8;
-        }
-
-
-        state.aiPulse =
-            (
-                Math.sin(
-                    state.time *
-                    1.4
-                ) +
-                1
-            ) *
-            .5;
-    }
-
-
-    /* ========================================================
-       LOOP
-    ======================================================== */
-
-    function loop(
-        timestamp
-    ) {
-
-        if (
-            !state.running
-        ) {
-
+            window.HalDoAppRuntime.openApp("ai-chat");
             return;
         }
 
-
-        if (
-            !state.lastTime
-        ) {
-
-            state.lastTime =
-                timestamp;
-        }
-
-
-        const delta =
-            timestamp -
-            state.lastTime;
-
-
-        state.lastTime =
-            timestamp;
-
-
-        update(
-            delta
-        );
-
-
-        draw();
-
-
-        state.animationFrame =
-            window.requestAnimationFrame(
-                loop
+        const menu =
+            document.querySelector(
+                "#haldo-app-menu, #app-menu, .haldo-app-menu"
             );
-    }
 
-
-    /* ========================================================
-       POINTER
-    ======================================================== */
-
-    function updatePointer(
-        event
-    ) {
-
-        if (
-            !state.root
-        ) {
-
-            return;
+        if (menu) {
+            menu.classList.add("is-open");
         }
 
-
-        const rect =
-            state.root.getBoundingClientRect();
-
-
-        state.pointer.x =
-            event.clientX -
-            rect.left;
-
-
-        state.pointer.y =
-            event.clientY -
-            rect.top;
-
-
-        state.pointer.active =
-            true;
+        void commands;
     }
 
-
-    function pointerLeave() {
-
-        state.pointer.active =
-            false;
-    }
-
-
-    function pointerSelect() {
-
-        if (
-            !state.pointer.active
-        ) {
-
-            return;
-        }
-
-
-        for (
-            let i = 0;
-            i < state.planets.length;
-            i++
-        ) {
-
-            const planet =
-                state.planets[i];
-
-
+    function emit(eventName, detail = {}) {
+        try {
             if (
-                distance(
-                    state.pointer.x,
-                    state.pointer.y,
-                    planet.x,
-                    planet.y
-                ) <
-                planet.renderRadius *
-                2.2
+                window.HalDoKernel &&
+                window.HalDoKernel.events &&
+                typeof window.HalDoKernel.events.emit === "function"
             ) {
-
-                state.selectedPlanet =
-                    planet;
-
-
-                emit(
-                    "cosmic:planet-selected",
-                    {
-
-                        planet:
-                            planet.id,
-
-                        name:
-                            planet.name,
-
-                        position: {
-
-                            x:
-                                planet.x,
-
-                            y:
-                                planet.y
-                        }
-                    }
-                );
-
-
-                const nameElement =
-                    state.root.querySelector(
-                        ".haldo-cosmic-info-name"
-                    );
-
-
-                const textElement =
-                    state.root.querySelector(
-                        ".haldo-cosmic-info-text"
-                    );
-
-
-                if (
-                    nameElement
-                ) {
-
-                    nameElement.textContent =
-                        planet.name;
-                }
-
-
-                if (
-                    textElement
-                ) {
-
-                    textElement.textContent =
-                        "Planet im HalDo Sonnensystem";
-                }
-
-
-                return;
-            }
-        }
-    }
-
-
-    /* ========================================================
-       EVENTS
-    ======================================================== */
-
-    function bindEvents() {
-
-        if (
-            !state.root
-        ) {
-
-            return;
-        }
-
-
-        state.root.addEventListener(
-            "pointermove",
-            updatePointer
-        );
-
-
-        state.root.addEventListener(
-            "pointerleave",
-            pointerLeave
-        );
-
-
-        state.root.addEventListener(
-            "pointerdown",
-            pointerSelect
-        );
-
-
-        window.addEventListener(
-            "resize",
-            resize
-        );
-
-
-        /*
-         * AI Event.
-         */
-
-        const bus =
-            window.HalDoAppEvents;
-
-
-        if (
-            bus &&
-            typeof bus.on ===
-            "function"
-        ) {
-
-            bus.on(
-                "ai:message",
-                function () {
-
-                    state.aiPulse =
-                        1;
-
-                }
-            );
-
-
-            bus.on(
-                "ai:response",
-                function () {
-
-                    state.aiPulse =
-                        1;
-
-                }
-            );
-        }
-    }
-
-
-    /* ========================================================
-       START
-    ======================================================== */
-
-    CosmicWorld.start =
-        function () {
-
-            if (
-                state.running
-            ) {
-
-                return true;
-            }
-
-
-            state.running =
-                true;
-
-
-            state.lastTime =
-                0;
-
-
-            state.animationFrame =
-                window.requestAnimationFrame(
-                    loop
-                );
-
-
-            emit(
-                "cosmic:started",
-                {
-                    version:
-                        CosmicWorld.version
-                }
-            );
-
-
-            return true;
-        };
-
-
-    /* ========================================================
-       STOP
-    ======================================================== */
-
-    CosmicWorld.stop =
-        function () {
-
-            state.running =
-                false;
-
-
-            if (
-                state.animationFrame
-            ) {
-
-                window.cancelAnimationFrame(
-                    state.animationFrame
+                window.HalDoKernel.events.emit(
+                    eventName,
+                    detail
                 );
             }
-
-
-            state.animationFrame =
-                null;
-        };
-
-
-    /* ========================================================
-       SHOW / HIDE
-    ======================================================== */
-
-    CosmicWorld.show =
-        function () {
-
-            if (
-                state.root
-            ) {
-
-                state.root.style.display =
-                    "block";
-            }
-
-
-            CosmicWorld.start();
-        };
-
-
-    CosmicWorld.hide =
-        function () {
-
-            if (
-                state.root
-            ) {
-
-                state.root.style.display =
-                    "none";
-            }
-        };
-
-
-    /* ========================================================
-       SELECT PLANET
-    ======================================================== */
-
-    CosmicWorld.selectPlanet =
-        function (
-            planetId
-        ) {
-
-            const planet =
-                state.planets.find(
-                    function (
-                        item
-                    ) {
-
-                        return (
-                            item.id ===
-                            planetId
-                        );
-                    }
-                );
-
-
-            if (
-                !planet
-            ) {
-
-                return false;
-            }
-
-
-            state.selectedPlanet =
-                planet;
-
-
-            emit(
-                "cosmic:planet-selected",
-                {
-
-                    planet:
-                        planet.id,
-
-                    name:
-                        planet.name
-                }
+        } catch (error) {
+            console.warn(
+                "[HalDo Cosmic] Kernel event failed:",
+                error
             );
-
-
-            return true;
-        };
-
-
-    /* ========================================================
-       STATUS
-    ======================================================== */
-
-    CosmicWorld.getStatus =
-        function () {
-
-            return {
-
-                name:
-                    CosmicWorld.name,
-
-                version:
-                    CosmicWorld.version,
-
-                ready:
-                    CosmicWorld.ready,
-
-                running:
-                    state.running,
-
-                planets:
-                    state.planets.map(
-                        function (
-                            planet
-                        ) {
-
-                            return planet.id;
-
-                        }
-                    ),
-
-                stars:
-                    state.stars.length,
-
-                selectedPlanet:
-                    state.selectedPlanet
-                        ? state.selectedPlanet.id
-                        : null,
-
-                timestamp:
-                    Date.now()
-            };
-        };
-
-
-    /* ========================================================
-       INIT
-    ======================================================== */
-
-    CosmicWorld.init =
-        function () {
-
-            if (
-                CosmicWorld.ready
-            ) {
-
-                return CosmicWorld;
-            }
-
-
-            installStyles();
-
-
-            createRoot();
-
-
-            createStars();
-
-
-            createPlanets();
-
-
-            resize();
-
-
-            bindEvents();
-
-
-            CosmicWorld.ready =
-                true;
-
-
-            CosmicWorld.start();
-
-
-            /*
-             * Global APIs.
-             */
-
-            window.HalDoCosmicWorld =
-                CosmicWorld;
-
-
-            window.HalDoV20CosmicWorld =
-                CosmicWorld;
-
-
-            HalDoOS.cosmicWorld =
-                CosmicWorld;
-
-
-            V20.cosmicWorld =
-                CosmicWorld;
-
-
-            emit(
-                "cosmic:ready",
-                CosmicWorld.getStatus()
-            );
-
-
-            console.log(
-                "[HalDo AI OS 20]",
-                "Cosmic World bereit."
-            );
-
-
-            return CosmicWorld;
-        };
-
-
-    /* ========================================================
-       BOOT
-    ======================================================== */
-
-    function boot() {
+        }
 
         try {
-
-            CosmicWorld.init();
-
+            document.dispatchEvent(
+                new CustomEvent(
+                    eventName,
+                    { detail }
+                )
+            );
         } catch (error) {
-
-            console.error(
-                "[HalDo AI OS 20]",
-                "Cosmic World Fehler:",
+            console.warn(
+                "[HalDo Cosmic] DOM event failed:",
                 error
             );
         }
     }
 
+    function showPlanetInfo(planet) {
+        const existing =
+            document.querySelector(
+                ".haldo-cosmic-planet-info"
+            );
+
+        if (existing) {
+            existing.remove();
+        }
+
+        const panel = createElement(
+            "div",
+            "haldo-cosmic-planet-info",
+            root
+        );
+
+        const title = createElement(
+            "strong",
+            null,
+            panel
+        );
+
+        title.textContent = planet.name;
+
+        const description = createElement(
+            "span",
+            null,
+            panel
+        );
+
+        description.textContent =
+            `${planet.name} • lebendige Umlaufbahn`;
+
+        const close = createElement(
+            "button",
+            null,
+            panel
+        );
+
+        close.type = "button";
+        close.textContent = "×";
+
+        close.addEventListener(
+            "click",
+            () => panel.remove()
+        );
+
+        setTimeout(() => {
+            panel.classList.add("is-visible");
+        }, 20);
+    }
+
+    function updateStars(time) {
+        const elements =
+            starLayer
+                ? starLayer.children
+                : [];
+
+        stars.forEach((star, index) => {
+            const element = elements[index];
+
+            if (!element) {
+                return;
+            }
+
+            const pulse =
+                0.55 +
+                Math.sin(
+                    time * star.pulse +
+                    star.phase
+                ) *
+                0.45;
+
+            element.style.opacity =
+                Math.max(
+                    0.12,
+                    Math.min(
+                        1,
+                        star.alpha * pulse
+                    )
+                );
+        });
+    }
+
+    function updatePlanets(delta) {
+        planets.forEach((planet) => {
+            planet.angle +=
+                delta *
+                planet.speed *
+                planet.direction;
+
+            const x =
+                Math.cos(planet.angle) *
+                planet.orbitX;
+
+            const y =
+                Math.sin(planet.angle) *
+                planet.orbitY;
+
+            if (planet._bodyElement) {
+                planet._bodyElement.style.transform =
+                    `translate3d(${x}px, ${y}px, 0) rotate(${planet.angle * planet.rotation * 100}px)`;
+            }
+        });
+    }
+
+    function animationLoop(timestamp) {
+        if (!state.running) {
+            return;
+        }
+
+        if (!state.lastTime) {
+            state.lastTime = timestamp;
+        }
+
+        const delta =
+            timestamp -
+            state.lastTime;
+
+        state.lastTime = timestamp;
+        state.elapsed += delta;
+
+        if (!state.paused) {
+            updateStars(timestamp);
+            updatePlanets(delta);
+        }
+
+        state.animationFrame =
+            requestAnimationFrame(
+                animationLoop
+            );
+    }
+
+    function build() {
+        if (state.initialized) {
+            return;
+        }
+
+        root =
+            document.querySelector(
+                "#haldo-cosmic-world"
+            ) ||
+            document.querySelector(
+                ".cosmic-world"
+            ) ||
+            document.body;
+
+        if (!root) {
+            return;
+        }
+
+        root.classList.add(
+            "haldo-cosmic-world-root"
+        );
+
+        scene = createElement(
+            "div",
+            "haldo-cosmic-scene",
+            root
+        );
+
+        galaxyLayer = createElement(
+            "div",
+            "haldo-cosmic-galaxies",
+            scene
+        );
+
+        starLayer = createElement(
+            "div",
+            "haldo-cosmic-stars",
+            scene
+        );
+
+        orbitLayer = createElement(
+            "div",
+            "haldo-cosmic-orbits",
+            scene
+        );
+
+        planetLayer = createElement(
+            "div",
+            "haldo-cosmic-planets",
+            scene
+        );
+
+        createGalaxies();
+        createStars();
+        createSun();
+
+        planets.forEach(
+            createPlanet
+        );
+
+        state.initialized = true;
+    }
+
+    function start() {
+        build();
+
+        if (state.running) {
+            return;
+        }
+
+        state.running = true;
+        state.paused = false;
+        state.lastTime = 0;
+
+        state.animationFrame =
+            requestAnimationFrame(
+                animationLoop
+            );
+
+        emit(
+            "cosmic:started",
+            {
+                version: VERSION
+            }
+        );
+    }
+
+    function stop() {
+        state.running = false;
+
+        if (state.animationFrame) {
+            cancelAnimationFrame(
+                state.animationFrame
+            );
+        }
+
+        state.animationFrame = null;
+    }
+
+    function pause() {
+        state.paused = true;
+    }
+
+    function resume() {
+        state.paused = false;
+    }
+
+    const API = {
+        version: VERSION,
+        state,
+        planets,
+        start,
+        stop,
+        pause,
+        resume,
+        build
+    };
+
+    window.HalDoCosmicWorld = API;
+
+    function boot() {
+        start();
+    }
 
     if (
         document.readyState ===
         "loading"
     ) {
-
         document.addEventListener(
             "DOMContentLoaded",
             boot,
-            {
-                once:
-                    true
-            }
+            { once: true }
         );
-
     } else {
-
         boot();
     }
-
 
 })(window, document);
