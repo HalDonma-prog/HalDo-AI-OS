@@ -1,859 +1,2064 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
+
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#050711">
-<meta name="description" content="HalDo AI OS 20 — Professional Ultimate Foundation">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="HalDo AI OS">
 
-<title>HalDo AI OS 20</title>
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover"
+>
 
-<link rel="manifest" href="manifest.json">
+<meta
+    name="theme-color"
+    content="#050711"
+>
+
+<meta
+    name="description"
+    content="HalDo AI OS 20.1 — Cosmic AI Operating System"
+>
+
+<link
+    rel="manifest"
+    href="manifest.json"
+>
+
+<title>HalDo AI OS 20.1</title>
+
 
 <style>
-*{box-sizing:border-box}
-html,body{margin:0;width:100%;height:100%;overflow:hidden}
-body{
+
+/* ============================================================
+   HALDO AI OS 20.1
+   COSMIC FOUNDATION
+   ============================================================ */
+
+:root {
+
+    --bg:
+        #03050d;
+
+    --glass:
+        rgba(12, 16, 34, .72);
+
+    --glass-strong:
+        rgba(10, 13, 28, .92);
+
+    --line:
+        rgba(255,255,255,.10);
+
+    --text:
+        rgba(255,255,255,.94);
+
+    --muted:
+        rgba(255,255,255,.55);
+
+    --accent:
+        #9da9ff;
+
+    --accent-soft:
+        rgba(130,145,255,.22);
+
+    --shadow:
+        rgba(0,0,0,.45);
+
+}
+
+
+/* ============================================================
+   RESET
+   ============================================================ */
+
+*,
+*::before,
+*::after {
+
+    box-sizing:
+        border-box;
+
+}
+
+
+html,
+body {
+
+    width:
+        100%;
+
+    height:
+        100%;
+
+    margin:
+        0;
+
+    padding:
+        0;
+
+}
+
+
+body {
+
+    overflow:
+        hidden;
+
     background:
-    radial-gradient(circle at 50% 20%,rgba(90,110,255,.22),transparent 35%),
-    radial-gradient(circle at 20% 80%,rgba(255,80,180,.12),transparent 30%),
-    #050711;
-    color:#fff;
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-}
-button,input{font:inherit}
-button{cursor:pointer}
-#haldo-root{position:fixed;inset:0;overflow:hidden}
-#boot{
-    position:absolute;inset:0;z-index:99999;
-    display:flex;align-items:center;justify-content:center;
-    background:#050711;
-    transition:.5s;
-}
-#boot.hidden{opacity:0;pointer-events:none}
-.boot{text-align:center;width:min(90vw,520px)}
-.logo{
-    width:100px;height:100px;margin:auto auto 24px;
-    display:grid;place-items:center;border-radius:30px;
-    background:radial-gradient(circle,#fff,#8d9cff 35%,transparent 70%);
-    box-shadow:0 0 45px rgba(120,140,255,.5);
-    animation:breathe 3s infinite;
-}
-.logo span{font-size:48px;font-weight:900}
-@keyframes breathe{50%{transform:scale(1.06)}}
-.boot h1{margin:0;font-size:34px}
-.boot p{opacity:.5;margin:8px 0 30px}
-#boot-message{min-height:22px}
-.progress{
-    height:5px;margin-top:15px;border-radius:99px;
-    background:rgba(255,255,255,.08);overflow:hidden
-}
-#boot-bar{
-    height:100%;width:0;
-    background:linear-gradient(90deg,#7180ff,#fff,#7180ff);
-    transition:.25s
-}
-#boot-detail{font-size:10px;opacity:.35;margin-top:10px}
+        var(--bg);
 
-#desktop{position:absolute;inset:0;display:none}
-#desktop.active{display:block}
+    color:
+        var(--text);
 
-.wallpaper{
-    position:absolute;inset:0;
+    font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Helvetica,
+        Arial,
+        sans-serif;
+
+    -webkit-font-smoothing:
+        antialiased;
+
+}
+
+
+/* ============================================================
+   ROOT
+   ============================================================ */
+
+#haldo-root {
+
+    position:
+        fixed;
+
+    inset:
+        0;
+
+    overflow:
+        hidden;
+
+}
+
+
+/* ============================================================
+   COSMIC DESKTOP
+   ============================================================ */
+
+#desktop {
+
+    position:
+        absolute;
+
+    inset:
+        0;
+
+    display:
+        none;
+
+    overflow:
+        hidden;
+
+}
+
+
+#desktop.active {
+
+    display:
+        block;
+
+}
+
+
+/* ============================================================
+   COSMIC BACKGROUND
+   ============================================================ */
+
+.cosmic-space {
+
+    position:
+        absolute;
+
+    inset:
+        0;
+
+    overflow:
+        hidden;
+
     background:
-    radial-gradient(circle at 50% 45%,rgba(100,120,255,.2),transparent 25%),
-    radial-gradient(circle at 15% 20%,rgba(255,255,255,.08),transparent 18%),
-    radial-gradient(circle at 85% 70%,rgba(100,150,255,.08),transparent 22%);
+
+        radial-gradient(
+            circle at 50% 47%,
+            rgba(105,125,255,.18),
+            transparent 18%
+        ),
+
+        radial-gradient(
+            circle at 15% 25%,
+            rgba(130,150,255,.10),
+            transparent 20%
+        ),
+
+        radial-gradient(
+            circle at 82% 70%,
+            rgba(180,110,255,.08),
+            transparent 22%
+        ),
+
+        radial-gradient(
+            circle at 50% 100%,
+            rgba(50,80,180,.10),
+            transparent 35%
+        ),
+
+        #03050d;
+
 }
 
-#topbar{
-    position:absolute;top:0;left:0;right:0;height:54px;
-    display:flex;align-items:center;justify-content:space-between;
-    padding:0 18px;
-    background:rgba(5,7,17,.65);
-    backdrop-filter:blur(18px);
-    border-bottom:1px solid rgba(255,255,255,.08);
-    z-index:1000;
-}
-.brand{font-weight:800}
-.status{font-size:12px;opacity:.65}
 
-#dock{
-    position:absolute;left:50%;bottom:20px;
-    transform:translateX(-50%);
-    display:flex;gap:8px;padding:9px;
-    border-radius:22px;
-    background:rgba(10,12,25,.78);
-    backdrop-filter:blur(25px);
-    border:1px solid rgba(255,255,255,.1);
-    z-index:1000;
-}
-.dock-button{
-    width:48px;height:48px;border:0;border-radius:15px;
-    color:#fff;background:rgba(255,255,255,.07);
-    transition:.18s;
-}
-.dock-button:hover{transform:translateY(-4px);background:rgba(255,255,255,.15)}
+/* ============================================================
+   STARS
+   ============================================================ */
 
-#launcher{
-    position:absolute;
-    left:50%;top:70px;
-    transform:translateX(-50%);
-    width:min(94vw,1000px);
-    height:min(78vh,720px);
-    display:none;
-    z-index:2000;
-    padding:24px;
-    border-radius:28px;
-    background:rgba(10,12,25,.94);
-    backdrop-filter:blur(30px);
-    border:1px solid rgba(255,255,255,.1);
-    box-shadow:0 30px 100px rgba(0,0,0,.5);
-}
-#launcher.open{display:block}
-.launcher-head{display:flex;gap:12px;margin-bottom:20px}
-#app-search{
-    flex:1;padding:14px 18px;border:0;outline:0;
-    border-radius:15px;background:rgba(255,255,255,.08);color:#fff;
-}
-#close-launcher{
-    width:48px;border:0;border-radius:15px;
-    background:rgba(255,255,255,.08);color:#fff;
-}
-#app-grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
-    gap:12px;
-    overflow:auto;
-    height:calc(100% - 78px);
-}
-.app-card{
-    min-height:120px;
-    border:1px solid rgba(255,255,255,.07);
-    border-radius:20px;
-    background:rgba(255,255,255,.045);
-    color:#fff;
-    text-align:left;
-    padding:16px;
-    transition:.18s;
-}
-.app-card:hover{
-    transform:translateY(-3px);
-    background:rgba(255,255,255,.09);
-}
-.app-icon{font-size:30px;margin-bottom:10px}
-.app-name{font-weight:700}
-.app-category{font-size:10px;opacity:.45;margin-top:4px}
+.stars {
 
-#windows{position:absolute;inset:54px 0 88px;z-index:500}
-.window{
-    position:absolute;
-    left:50%;top:50%;
-    transform:translate(-50%,-50%);
-    width:min(90vw,900px);
-    height:min(75vh,650px);
-    background:rgba(12,14,29,.96);
-    border:1px solid rgba(255,255,255,.12);
-    border-radius:22px;
-    box-shadow:0 30px 100px rgba(0,0,0,.55);
-    overflow:hidden;
-    display:flex;
-    flex-direction:column;
+    position:
+        absolute;
+
+    inset:
+        0;
+
+    pointer-events:
+        none;
+
+    opacity:
+        .8;
+
+    background-image:
+
+        radial-gradient(
+            circle,
+            rgba(255,255,255,.8) 1px,
+            transparent 1.5px
+        ),
+
+        radial-gradient(
+            circle,
+            rgba(180,200,255,.55) 1px,
+            transparent 1.5px
+        ),
+
+        radial-gradient(
+            circle,
+            rgba(255,255,255,.4) 1px,
+            transparent 1.5px
+        );
+
+    background-size:
+        130px 130px,
+        190px 190px,
+        260px 260px;
+
+    background-position:
+        0 0,
+        45px 80px,
+        120px 30px;
+
+    animation:
+        stars-drift
+        80s
+        linear
+        infinite;
+
 }
-.window-header{
-    height:54px;flex:none;
-    display:flex;align-items:center;justify-content:space-between;
-    padding:0 14px 0 18px;
-    background:rgba(255,255,255,.045);
-    border-bottom:1px solid rgba(255,255,255,.07);
+
+
+@keyframes stars-drift {
+
+    from {
+        transform:
+            translate3d(0,0,0);
+    }
+
+    to {
+        transform:
+            translate3d(-100px,70px,0);
+    }
+
 }
-.window-title{font-weight:700}
-.window-close{
-    width:34px;height:34px;border:0;border-radius:10px;
-    background:rgba(255,255,255,.08);color:#fff;
+
+
+/* ============================================================
+   PLANETS
+   ============================================================ */
+
+.planet {
+
+    position:
+        absolute;
+
+    border-radius:
+        50%;
+
+    pointer-events:
+        none;
+
 }
-.window-body{flex:1;overflow:auto;padding:24px}
-.panel{
-    padding:18px;border-radius:18px;
-    background:rgba(255,255,255,.045);
-    border:1px solid rgba(255,255,255,.06);
-    margin-bottom:12px;
+
+
+.planet-one {
+
+    width:
+        95px;
+
+    height:
+        95px;
+
+    left:
+        7%;
+
+    top:
+        23%;
+
+    background:
+
+        radial-gradient(
+            circle at 35% 30%,
+            rgba(255,255,255,.5),
+            rgba(120,145,230,.38) 28%,
+            rgba(50,65,130,.55) 70%,
+            rgba(10,15,40,.9)
+        );
+
+    box-shadow:
+        0 0 35px rgba(100,130,255,.18);
+
 }
-.panel h3{margin:0 0 8px}
-.muted{opacity:.55;font-size:13px}
-.action{
-    padding:10px 14px;border:0;border-radius:12px;
-    background:rgba(120,140,255,.25);color:#fff;
-    margin:4px;
+
+
+.planet-two {
+
+    width:
+        54px;
+
+    height:
+        54px;
+
+    right:
+        11%;
+
+    top:
+        27%;
+
+    background:
+
+        radial-gradient(
+            circle at 35% 30%,
+            rgba(255,220,180,.55),
+            rgba(170,110,90,.45) 40%,
+            rgba(45,20,35,.9)
+        );
+
+    box-shadow:
+        0 0 28px rgba(200,130,120,.16);
+
 }
-#toast{
-    position:absolute;left:50%;bottom:90px;
-    transform:translateX(-50%);
-    padding:12px 18px;border-radius:14px;
-    background:rgba(15,17,30,.95);
-    border:1px solid rgba(255,255,255,.1);
-    opacity:0;pointer-events:none;transition:.25s;
-    z-index:5000;
+
+
+.planet-three {
+
+    width:
+        38px;
+
+    height:
+        38px;
+
+    right:
+        24%;
+
+    bottom:
+        18%;
+
+    background:
+
+        radial-gradient(
+            circle at 35% 30%,
+            rgba(210,230,255,.65),
+            rgba(90,130,190,.4) 50%,
+            rgba(20,30,70,.9)
+        );
+
 }
-#toast.show{opacity:1}
+
+
+/* ============================================================
+   ORBIT
+   ============================================================ */
+
+.orbit {
+
+    position:
+        absolute;
+
+    left:
+        50%;
+
+    top:
+        47%;
+
+    width:
+        470px;
+
+    height:
+        470px;
+
+    transform:
+        translate(-50%,-50%);
+
+    border:
+        1px solid rgba(160,175,255,.10);
+
+    border-radius:
+        50%;
+
+    pointer-events:
+        none;
+
+}
+
+
+.orbit::before {
+
+    content:
+        "";
+
+    position:
+        absolute;
+
+    inset:
+        70px;
+
+    border:
+        1px solid rgba(160,175,255,.07);
+
+    border-radius:
+        50%;
+
+}
+
+
+/* ============================================================
+   HALDO SUN / AI CENTER
+   ============================================================ */
+
+#haldo-sun {
+
+    position:
+        absolute;
+
+    left:
+        50%;
+
+    top:
+        47%;
+
+    width:
+        170px;
+
+    height:
+        170px;
+
+    transform:
+        translate(-50%,-50%);
+
+    border-radius:
+        50%;
+
+    display:
+        grid;
+
+    place-items:
+        center;
+
+    z-index:
+        20;
+
+    background:
+
+        radial-gradient(
+            circle,
+            rgba(255,255,255,.98) 0%,
+            rgba(255,240,190,.92) 16%,
+            rgba(255,205,100,.62) 34%,
+            rgba(130,145,255,.20) 62%,
+            transparent 76%
+        );
+
+    box-shadow:
+
+        0 0 35px
+        rgba(255,220,130,.45),
+
+        0 0 90px
+        rgba(125,145,255,.30),
+
+        0 0 150px
+        rgba(100,120,255,.15);
+
+    animation:
+        sun-breathe
+        5s
+        ease-in-out
+        infinite;
+
+}
+
+
+@keyframes sun-breathe {
+
+    0%,
+    100% {
+
+        transform:
+            translate(-50%,-50%)
+            scale(1);
+
+    }
+
+    50% {
+
+        transform:
+            translate(-50%,-50%)
+            scale(1.045);
+
+    }
+
+}
+
+
+#haldo-avatar {
+
+    width:
+        100px;
+
+    height:
+        100px;
+
+    border-radius:
+        50%;
+
+    display:
+        grid;
+
+    place-items:
+        center;
+
+    overflow:
+        hidden;
+
+    background:
+        rgba(255,255,255,.16);
+
+    border:
+        1px solid
+        rgba(255,255,255,.28);
+
+    box-shadow:
+        inset 0 0 25px
+        rgba(255,255,255,.18);
+
+}
+
+
+#haldo-avatar span {
+
+    font-size:
+        48px;
+
+    font-weight:
+        900;
+
+    letter-spacing:
+        -.08em;
+
+    text-shadow:
+        0 0 28px
+        rgba(255,255,255,.8);
+
+}
+
+
+/* ============================================================
+   TOP BAR
+   ============================================================ */
+
+#topbar {
+
+    position:
+        absolute;
+
+    left:
+        0;
+
+    right:
+        0;
+
+    top:
+        0;
+
+    height:
+        58px;
+
+    z-index:
+        1000;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    padding:
+        0 18px;
+
+    background:
+        rgba(3,5,13,.48);
+
+    backdrop-filter:
+        blur(20px);
+
+    border-bottom:
+        1px solid var(--line);
+
+}
+
+
+.brand {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        10px;
+
+    font-weight:
+        800;
+
+}
+
+
+.brand-mark {
+
+    width:
+        30px;
+
+    height:
+        30px;
+
+    display:
+        grid;
+
+    place-items:
+        center;
+
+    border-radius:
+        10px;
+
+    background:
+        rgba(255,255,255,.10);
+
+}
+
+
+.system-status {
+
+    font-size:
+        12px;
+
+    color:
+        var(--muted);
+
+}
+
+
+/* ============================================================
+   WINDOWS
+   ============================================================ */
+
+#windows {
+
+    position:
+        absolute;
+
+    inset:
+        58px 0 86px;
+
+    z-index:
+        500;
+
+    pointer-events:
+        none;
+
+}
+
+
+.window {
+
+    position:
+        absolute;
+
+    left:
+        50%;
+
+    top:
+        50%;
+
+    width:
+        min(88vw,900px);
+
+    height:
+        min(72vh,650px);
+
+    transform:
+        translate(-50%,-50%);
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    overflow:
+        hidden;
+
+    border:
+        1px solid
+        rgba(255,255,255,.12);
+
+    border-radius:
+        24px;
+
+    background:
+        var(--glass-strong);
+
+    backdrop-filter:
+        blur(30px);
+
+    box-shadow:
+        0 35px 100px
+        var(--shadow);
+
+    pointer-events:
+        auto;
+
+}
+
+
+.window-header {
+
+    flex:
+        0 0 54px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    padding:
+        0 14px 0 18px;
+
+    background:
+        rgba(255,255,255,.045);
+
+    border-bottom:
+        1px solid
+        rgba(255,255,255,.07);
+
+}
+
+
+.window-title {
+
+    font-weight:
+        750;
+
+}
+
+
+.window-controls {
+
+    display:
+        flex;
+
+    gap:
+        6px;
+
+}
+
+
+.window-control {
+
+    width:
+        32px;
+
+    height:
+        32px;
+
+    border:
+        0;
+
+    border-radius:
+        9px;
+
+    color:
+        #fff;
+
+    background:
+        rgba(255,255,255,.07);
+
+}
+
+
+.window-control:hover {
+
+    background:
+        rgba(255,255,255,.14);
+
+}
+
+
+.window-body {
+
+    flex:
+        1;
+
+    overflow:
+        auto;
+
+    padding:
+        22px;
+
+}
+
+
+/* ============================================================
+   APP CONTENT
+   ============================================================ */
+
+.app-hero {
+
+    padding:
+        22px;
+
+    border:
+        1px solid
+        rgba(255,255,255,.07);
+
+    border-radius:
+        20px;
+
+    background:
+        rgba(255,255,255,.04);
+
+    margin-bottom:
+        14px;
+
+}
+
+
+.app-hero-icon {
+
+    font-size:
+        38px;
+
+    margin-bottom:
+        10px;
+
+}
+
+
+.app-hero-title {
+
+    font-size:
+        24px;
+
+    font-weight:
+        800;
+
+}
+
+
+.app-hero-description {
+
+    margin-top:
+        6px;
+
+    color:
+        var(--muted);
+
+}
+
+
+.app-section {
+
+    padding:
+        18px;
+
+    border:
+        1px solid
+        rgba(255,255,255,.06);
+
+    border-radius:
+        18px;
+
+    background:
+        rgba(255,255,255,.035);
+
+    margin-bottom:
+        12px;
+
+}
+
+
+.app-section h3 {
+
+    margin:
+        0 0 8px;
+
+}
+
+
+.muted {
+
+    color:
+        var(--muted);
+
+    font-size:
+        13px;
+
+    line-height:
+        1.55;
+
+}
+
+
+.action {
+
+    border:
+        1px solid
+        rgba(255,255,255,.09);
+
+    border-radius:
+        12px;
+
+    padding:
+        10px 14px;
+
+    color:
+        #fff;
+
+    background:
+        var(--accent-soft);
+
+}
+
+
+.action:hover {
+
+    background:
+        rgba(130,145,255,.34);
+
+}
+
+
+/* ============================================================
+   LAUNCHER
+   ============================================================ */
+
+#launcher {
+
+    position:
+        absolute;
+
+    left:
+        50%;
+
+    top:
+        72px;
+
+    transform:
+        translateX(-50%);
+
+    width:
+        min(94vw,1050px);
+
+    height:
+        min(78vh,720px);
+
+    z-index:
+        3000;
+
+    display:
+        none;
+
+    padding:
+        22px;
+
+    border:
+        1px solid
+        var(--line);
+
+    border-radius:
+        28px;
+
+    background:
+        rgba(8,11,24,.94);
+
+    backdrop-filter:
+        blur(35px);
+
+    box-shadow:
+        0 40px 120px
+        rgba(0,0,0,.6);
+
+}
+
+
+#launcher.open {
+
+    display:
+        block;
+
+}
+
+
+.launcher-header {
+
+    display:
+        flex;
+
+    gap:
+        10px;
+
+    margin-bottom:
+        18px;
+
+}
+
+
+#app-search {
+
+    flex:
+        1;
+
+    height:
+        48px;
+
+    border:
+        1px solid
+        rgba(255,255,255,.08);
+
+    outline:
+        none;
+
+    border-radius:
+        14px;
+
+    padding:
+        0 16px;
+
+    color:
+        #fff;
+
+    background:
+        rgba(255,255,255,.06);
+
+}
+
+
+#launcher-close {
+
+    width:
+        48px;
+
+    border:
+        0;
+
+    border-radius:
+        14px;
+
+    color:
+        #fff;
+
+    background:
+        rgba(255,255,255,.07);
+
+}
+
+
+#app-grid {
+
+    height:
+        calc(100% - 66px);
+
+    overflow:
+        auto;
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(
+            auto-fill,
+            minmax(150px,1fr)
+        );
+
+    gap:
+        11px;
+
+}
+
+
+.app-card {
+
+    min-height:
+        125px;
+
+    border:
+        1px solid
+        rgba(255,255,255,.07);
+
+    border-radius:
+        19px;
+
+    padding:
+        16px;
+
+    color:
+        #fff;
+
+    text-align:
+        left;
+
+    background:
+        rgba(255,255,255,.035);
+
+    transition:
+        transform .18s,
+        background .18s;
+
+}
+
+
+.app-card:hover {
+
+    transform:
+        translateY(-3px);
+
+    background:
+        rgba(255,255,255,.08);
+
+}
+
+
+.app-icon {
+
+    font-size:
+        30px;
+
+    margin-bottom:
+        11px;
+
+}
+
+
+.app-name {
+
+    font-weight:
+        700;
+
+}
+
+
+.app-category {
+
+    margin-top:
+        5px;
+
+    font-size:
+        10px;
+
+    color:
+        var(--muted);
+
+}
+
+
+/* ============================================================
+   DOCK
+   ============================================================ */
+
+#dock {
+
+    position:
+        absolute;
+
+    left:
+        50%;
+
+    bottom:
+        18px;
+
+    transform:
+        translateX(-50%);
+
+    z-index:
+        4000;
+
+    display:
+        flex;
+
+    gap:
+        8px;
+
+    padding:
+        9px;
+
+    border:
+        1px solid
+        rgba(255,255,255,.11);
+
+    border-radius:
+        23px;
+
+    background:
+        rgba(8,11,24,.75);
+
+    backdrop-filter:
+        blur(25px);
+
+    box-shadow:
+        0 20px 60px
+        rgba(0,0,0,.4);
+
+}
+
+
+.dock-button {
+
+    width:
+        48px;
+
+    height:
+        48px;
+
+    border:
+        0;
+
+    border-radius:
+        15px;
+
+    color:
+        #fff;
+
+    background:
+        rgba(255,255,255,.06);
+
+}
+
+
+.dock-button:hover {
+
+    transform:
+        translateY(-4px);
+
+    background:
+        rgba(255,255,255,.13);
+
+}
+
+
+/* ============================================================
+   TOAST
+   ============================================================ */
+
+#toast {
+
+    position:
+        absolute;
+
+    left:
+        50%;
+
+    bottom:
+        90px;
+
+    transform:
+        translateX(-50%);
+
+    z-index:
+        5000;
+
+    max-width:
+        90vw;
+
+    padding:
+        11px 17px;
+
+    border:
+        1px solid
+        rgba(255,255,255,.1);
+
+    border-radius:
+        14px;
+
+    background:
+        rgba(10,13,26,.94);
+
+    opacity:
+        0;
+
+    pointer-events:
+        none;
+
+    transition:
+        opacity .2s;
+
+}
+
+
+#toast.visible {
+
+    opacity:
+        1;
+
+}
+
+
+/* ============================================================
+   BOOT
+   ============================================================ */
+
+#boot {
+
+    position:
+        absolute;
+
+    inset:
+        0;
+
+    z-index:
+        99999;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    background:
+        #03050d;
+
+    transition:
+        opacity .7s,
+        visibility .7s;
+
+}
+
+
+#boot.finished {
+
+    opacity:
+        0;
+
+    visibility:
+        hidden;
+
+    pointer-events:
+        none;
+
+}
+
+
+.boot-content {
+
+    width:
+        min(90vw,520px);
+
+    text-align:
+        center;
+
+}
+
+
+.boot-logo {
+
+    width:
+        105px;
+
+    height:
+        105px;
+
+    margin:
+        0 auto 24px;
+
+    display:
+        grid;
+
+    place-items:
+        center;
+
+    border-radius:
+        32px;
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(255,255,255,.95),
+            rgba(130,145,255,.48),
+            transparent 72%
+        );
+
+    box-shadow:
+        0 0 60px
+        rgba(130,145,255,.38);
+
+}
+
+
+.boot-logo span {
+
+    font-size:
+        48px;
+
+    font-weight:
+        900;
+
+}
+
+
+.boot-title {
+
+    margin:
+        0;
+
+    font-size:
+        34px;
+
+}
+
+
+.boot-subtitle {
+
+    margin:
+        8px 0 30px;
+
+    color:
+        var(--muted);
+
+}
+
+
+#boot-message {
+
+    min-height:
+        22px;
+
+}
+
+
+.boot-track {
+
+    height:
+        4px;
+
+    margin-top:
+        14px;
+
+    border-radius:
+        99px;
+
+    overflow:
+        hidden;
+
+    background:
+        rgba(255,255,255,.08);
+
+}
+
+
+#boot-progress {
+
+    width:
+        0%;
+
+    height:
+        100%;
+
+    background:
+        linear-gradient(
+            90deg,
+            #7585ff,
+            #ffffff,
+            #7585ff
+        );
+
+    transition:
+        width .25s;
+
+}
+
+
+#boot-detail {
+
+    margin-top:
+        9px;
+
+    font-size:
+        10px;
+
+    color:
+        var(--muted);
+
+}
+
+
+/* ============================================================
+   MOBILE
+   ============================================================ */
+
+@media (max-width:700px) {
+
+    .orbit {
+
+        width:
+            320px;
+
+        height:
+            320px;
+
+    }
+
+
+    #haldo-sun {
+
+        width:
+            135px;
+
+        height:
+            135px;
+
+    }
+
+
+    #haldo-avatar {
+
+        width:
+            82px;
+
+        height:
+            82px;
+
+    }
+
+
+    #windows {
+
+        inset:
+            58px 0 80px;
+
+    }
+
+
+    .window {
+
+        width:
+            94vw;
+
+        height:
+            78vh;
+
+    }
+
+
+    #launcher {
+
+        top:
+            66px;
+
+        height:
+            82vh;
+
+    }
+
+
+    .planet-one {
+
+        width:
+            60px;
+
+        height:
+            60px;
+
+    }
+
+}
+
 </style>
+
 </head>
+
 
 <body>
 
 <div id="haldo-root">
 
-    <!-- =================================================
-         BOOT
-         ================================================= -->
 
-    <section id="boot" data-haldo-boot>
-        <div class="boot">
+<!-- ==========================================================
+     COSMIC DESKTOP
+     ========================================================== -->
 
-            <div class="logo">
-                <span>H</span>
+<main id="desktop">
+
+
+    <div class="cosmic-space"></div>
+
+    <div class="stars"></div>
+
+    <div class="planet planet-one"></div>
+
+    <div class="planet planet-two"></div>
+
+    <div class="planet planet-three"></div>
+
+    <div class="orbit"></div>
+
+
+    <!-- ======================================================
+         TOP BAR
+         ====================================================== -->
+
+    <header id="topbar">
+
+        <div class="brand">
+
+            <div class="brand-mark">
+                H
             </div>
 
-            <h1>HalDo AI OS 20</h1>
-
-            <p>Professional Ultimate Foundation</p>
-
-            <div id="boot-message" data-boot-message>
-                HalDo AI OS wird vorbereitet …
-            </div>
-
-            <div class="progress">
-                <div id="boot-bar" data-boot-progress></div>
-            </div>
-
-            <div id="boot-detail" data-boot-detail>
-                Stage: foundation · 0%
-            </div>
+            <span>
+                HalDo AI OS 20
+            </span>
 
         </div>
+
+
+        <div
+            class="system-status"
+            id="system-status"
+        >
+            System wird gestartet …
+        </div>
+
+    </header>
+
+
+    <!-- ======================================================
+         HALDO AI SUN
+         ====================================================== -->
+
+    <section
+        id="haldo-sun"
+        aria-label="HalDo AI"
+    >
+
+        <div id="haldo-avatar">
+
+            <span>
+                H
+            </span>
+
+        </div>
+
     </section>
 
 
-    <!-- =================================================
-         DESKTOP
-         ================================================= -->
+    <!-- ======================================================
+         WINDOWS
+         ====================================================== -->
 
-    <main id="desktop">
-
-        <div class="wallpaper"></div>
-
-        <header id="topbar">
-
-            <div class="brand">
-                ☀ HalDo AI OS 20
-            </div>
-
-            <div class="status" id="system-status">
-                System bereit
-            </div>
-
-        </header>
+    <section
+        id="windows"
+        aria-live="polite"
+    ></section>
 
 
-        <section id="windows"></section>
+    <!-- ======================================================
+         LAUNCHER
+         ====================================================== -->
 
+    <section
+        id="launcher"
+    >
 
-        <!-- =================================================
-             LAUNCHER
-             ================================================= -->
+        <div class="launcher-header">
 
-        <section id="launcher">
-
-            <div class="launcher-head">
-
-                <input
-                    id="app-search"
-                    type="search"
-                    placeholder="Apps suchen …"
-                    autocomplete="off"
-                >
-
-                <button
-                    id="close-launcher"
-                    type="button"
-                >×</button>
-
-            </div>
-
-            <div id="app-grid"></div>
-
-        </section>
-
-
-        <!-- =================================================
-             DOCK
-             ================================================= -->
-
-        <nav id="dock">
+            <input
+                id="app-search"
+                type="search"
+                placeholder="HalDo Apps suchen …"
+                autocomplete="off"
+            >
 
             <button
-                class="dock-button"
-                data-open-launcher
-                title="Apps"
-            >☰</button>
+                id="launcher-close"
+                type="button"
+            >
+                ×
+            </button>
 
-            <button
-                class="dock-button"
-                data-launch="ai"
-                title="HalDo AI"
-            >AI</button>
-
-            <button
-                class="dock-button"
-                data-launch="files"
-                title="Dateien"
-            >📁</button>
-
-            <button
-                class="dock-button"
-                data-launch="settings"
-                title="Einstellungen"
-            >⚙</button>
-
-            <button
-                class="dock-button"
-                data-launch="browser"
-                title="Browser"
-            >🌐</button>
-
-        </nav>
-
-    </main>
+        </div>
 
 
-    <div id="toast"></div>
+        <div
+            id="app-grid"
+        ></div>
+
+    </section>
+
+
+    <!-- ======================================================
+         DOCK
+         ====================================================== -->
+
+    <nav id="dock">
+
+        <button
+            class="dock-button"
+            data-launcher
+            title="Apps"
+        >
+            ☰
+        </button>
+
+
+        <button
+            class="dock-button"
+            data-app="ai"
+            title="HalDo AI"
+        >
+            ☀
+        </button>
+
+
+        <button
+            class="dock-button"
+            data-app="files"
+            title="Dateien"
+        >
+            📁
+        </button>
+
+
+        <button
+            class="dock-button"
+            data-app="browser"
+            title="Browser"
+        >
+            🌐
+        </button>
+
+
+        <button
+            class="dock-button"
+            data-app="settings"
+            title="Einstellungen"
+        >
+            ⚙
+        </button>
+
+    </nav>
+
+
+</main>
+
+
+<!-- ==========================================================
+     BOOT
+     ========================================================== -->
+
+<section
+    id="boot"
+    data-haldo-boot
+>
+
+    <div class="boot-content">
+
+        <div class="boot-logo">
+            <span>H</span>
+        </div>
+
+
+        <h1 class="boot-title">
+            HalDo AI OS 20
+        </h1>
+
+
+        <p class="boot-subtitle">
+            Professional Ultimate Foundation
+        </p>
+
+
+        <div
+            id="boot-message"
+            data-boot-message
+        >
+            HalDo AI OS wird vorbereitet …
+        </div>
+
+
+        <div class="boot-track">
+
+            <div
+                id="boot-progress"
+                data-boot-progress
+            ></div>
+
+        </div>
+
+
+        <div
+            id="boot-detail"
+            data-boot-detail
+        >
+            Foundation · 0%
+        </div>
+
+    </div>
+
+</section>
+
+
+<div id="toast"></div>
+
 
 </div>
 
 
-<!-- =========================================================
+<!-- ==========================================================
      EXISTIERENDER KERNEL
-     ========================================================= -->
+     ========================================================== -->
 
 <script src="js/kernel.js"></script>
 
 
-<!-- =========================================================
-     NEUER BOOTSTRAP
-     ========================================================= -->
+<!-- ==========================================================
+     BOOTSTRAP
+     ========================================================== -->
 
 <script src="js/haldo-bootstrap.js"></script>
 
 
 <script>
+
+/* ============================================================
+   HALDO AI OS 20.1
+   APPLICATION RUNTIME
+   ============================================================ */
+
 "use strict";
 
-/*
- * ============================================================
- * HALDO AI OS 20
- * CENTRAL SYSTEM REGISTRY
- * ============================================================
- *
- * Diese Registry beschreibt die geplante A-Z-Systemlandschaft.
- *
- * Sie macht die Apps sichtbar und öffnungsfähig.
- *
- * Die einzelnen Apps können später durch ihre echten
- * App-Module ersetzt/erweitert werden.
- * ============================================================
- */
 
 window.HalDo =
     window.HalDo ||
     {};
 
-const OS = window.HalDo;
+
+const HalDo =
+    window.HalDo;
 
 
 /* ============================================================
-   SYSTEM INFORMATION
+   SYSTEM VERSION
    ============================================================ */
 
-OS.version = "20.0.0";
-OS.codename = "Professional Ultimate Foundation";
+HalDo.version =
+    "20.1.0";
+
+HalDo.codename =
+    "Cosmic Professional";
 
 
 /* ============================================================
    APP REGISTRY
    ============================================================ */
 
-OS.appRegistry =
-    OS.appRegistry ||
+HalDo.appRegistry =
+    HalDo.appRegistry ||
     {};
 
-OS.appRegistry.apps =
-    OS.appRegistry.apps ||
+
+HalDo.appRegistry.apps =
+    HalDo.appRegistry.apps ||
     new Map();
 
 
-const APP_DEFINITIONS = [
+/* ============================================================
+   COMPLETE PLANNED APP CATALOG
+   ============================================================ */
+
+const HALDO_APPS = [
 
     /* CORE */
 
-    {
-        id:"dashboard",
-        name:"Dashboard",
-        icon:"⌂",
-        category:"Core",
-        description:"Zentrale HalDo AI OS Oberfläche"
-    },
-
-    {
-        id:"launcher",
-        name:"App Launcher",
-        icon:"☰",
-        category:"Core",
-        description:"Alle installierten Apps"
-    },
-
-    {
-        id:"settings",
-        name:"Einstellungen",
-        icon:"⚙",
-        category:"System",
-        description:"Systemeinstellungen"
-    },
-
-    {
-        id:"files",
-        name:"Dateien",
-        icon:"📁",
-        category:"System",
-        description:"Dateien und Speicher"
-    },
-
-    {
-        id:"search",
-        name:"Suche",
-        icon:"🔎",
-        category:"Core",
-        description:"Universelle HalDo Suche"
-    },
-
+    ["dashboard","Dashboard","⌂","Core"],
+    ["launcher","App Launcher","☰","Core"],
+    ["search","Universal Search","⌕","Core"],
+    ["settings","Einstellungen","⚙","System"],
+    ["files","Dateien","📁","System"],
 
     /* AI */
 
-    {
-        id:"ai",
-        name:"HalDo AI",
-        icon:"☀",
-        category:"AI",
-        description:"Zentrale künstliche Intelligenz"
-    },
-
-    {
-        id:"chat",
-        name:"AI Chat",
-        icon:"💬",
-        category:"AI",
-        description:"Unterhaltung mit HalDo AI"
-    },
-
-    {
-        id:"voice",
-        name:"AI Voice",
-        icon:"🎙",
-        category:"AI",
-        description:"Spracheingabe und Sprachausgabe"
-    },
-
-    {
-        id:"ai-memory",
-        name:"AI Memory",
-        icon:"🧠",
-        category:"AI",
-        description:"Kontext und Erinnerungen"
-    },
-
-    {
-        id:"ai-tools",
-        name:"AI Tools",
-        icon:"🧰",
-        category:"AI",
-        description:"AI Werkzeuge"
-    },
-
+    ["ai","HalDo AI","☀","AI"],
+    ["chat","AI Chat","💬","AI"],
+    ["voice","AI Voice","🎙","AI"],
+    ["ai-memory","AI Memory","🧠","AI"],
+    ["ai-tools","AI Tools","🧰","AI"],
+    ["ai-avatar","AI Avatar","☀","AI"],
 
     /* PRODUCTIVITY */
 
-    {
-        id:"notes",
-        name:"Notizen",
-        icon:"📝",
-        category:"Produktivität",
-        description:"Notizen erstellen und speichern"
-    },
-
-    {
-        id:"calendar",
-        name:"Kalender",
-        icon:"📅",
-        category:"Produktivität",
-        description:"Termine und Kalender"
-    },
-
-    {
-        id:"tasks",
-        name:"Aufgaben",
-        icon:"✓",
-        category:"Produktivität",
-        description:"Aufgabenverwaltung"
-    },
-
-    {
-        id:"clock",
-        name:"Uhr",
-        icon:"🕒",
-        category:"Produktivität",
-        description:"Zeit und Timer"
-    },
-
-    {
-        id:"calculator",
-        name:"Rechner",
-        icon:"🧮",
-        category:"Produktivität",
-        description:"Berechnungen"
-    },
-
+    ["notes","Notizen","📝","Produktivität"],
+    ["calendar","Kalender","📅","Produktivität"],
+    ["tasks","Aufgaben","✓","Produktivität"],
+    ["clock","Uhr","◷","Produktivität"],
+    ["calculator","Rechner","∑","Produktivität"],
+    ["documents","Dokumente","▤","Produktivität"],
 
     /* INTERNET */
 
-    {
-        id:"browser",
-        name:"Browser",
-        icon:"🌐",
-        category:"Internet",
-        description:"Webzugriff"
-    },
-
-    {
-        id:"downloads",
-        name:"Downloads",
-        icon:"⬇",
-        category:"Internet",
-        description:"Downloads"
-    },
-
-    {
-        id:"bookmarks",
-        name:"Lesezeichen",
-        icon:"🔖",
-        category:"Internet",
-        description:"Gespeicherte Webseiten"
-    },
-
+    ["browser","Browser","🌐","Internet"],
+    ["downloads","Downloads","↓","Internet"],
+    ["bookmarks","Lesezeichen","🔖","Internet"],
 
     /* COMMUNICATION */
 
-    {
-        id:"messages",
-        name:"Nachrichten",
-        icon:"💬",
-        category:"Kommunikation",
-        description:"Nachrichten"
-    },
-
-    {
-        id:"contacts",
-        name:"Kontakte",
-        icon:"👤",
-        category:"Kommunikation",
-        description:"Kontakte"
-    },
-
-    {
-        id:"mail",
-        name:"Mail",
-        icon:"✉",
-        category:"Kommunikation",
-        description:"E-Mail"
-    },
-
+    ["mail","Mail","✉","Kommunikation"],
+    ["messages","Nachrichten","💬","Kommunikation"],
+    ["contacts","Kontakte","👤","Kommunikation"],
 
     /* MEDIA */
 
-    {
-        id:"photos",
-        name:"Fotos",
-        icon:"🖼",
-        category:"Medien",
-        description:"Fotos und Bilder"
-    },
+    ["photos","Fotos","▣","Medien"],
+    ["music","Musik","♫","Medien"],
+    ["video","Video","▶","Medien"],
+    ["gallery","Galerie","▦","Medien"],
 
-    {
-        id:"music",
-        name:"Musik",
-        icon:"♫",
-        category:"Medien",
-        description:"Musik"
-    },
+    /* COSMIC WORLD */
 
-    {
-        id:"video",
-        name:"Video",
-        icon:"▶",
-        category:"Medien",
-        description:"Videos"
-    },
-
-    {
-        id:"cosmic",
-        name:"Cosmic World",
-        icon:"✦",
-        category:"HalDo World",
-        description:"Die kosmische HalDo Welt"
-    },
-
+    ["cosmic-world","Cosmic World","✦","HalDo World"],
+    ["cosmic-welcome","Cosmic Welcome","✧","HalDo World"],
+    ["cosmic-space","Cosmic Space","✦","HalDo World"],
 
     /* DEVELOPMENT */
 
-    {
-        id:"terminal",
-        name:"Terminal",
-        icon:"⌘",
-        category:"Entwicklung",
-        description:"Systemterminal"
-    },
-
-    {
-        id:"code",
-        name:"Code Studio",
-        icon:"</>",
-        category:"Entwicklung",
-        description:"Codeentwicklung"
-    },
-
-    {
-        id:"developer",
-        name:"Developer Tools",
-        icon:"🛠",
-        category:"Entwicklung",
-        description:"Entwicklerwerkzeuge"
-    },
-
+    ["terminal","Terminal","⌘","Entwicklung"],
+    ["code","Code Studio","</>","Entwicklung"],
+    ["developer","Developer Tools","⚒","Entwicklung"],
 
     /* STORAGE */
 
-    {
-        id:"storage",
-        name:"Storage",
-        icon:"💾",
-        category:"System",
-        description:"Lokaler Datenspeicher"
-    },
-
-    {
-        id:"backup",
-        name:"Backup",
-        icon:"↥",
-        category:"System",
-        description:"System-Backup"
-    },
-
-    {
-        id:"restore",
-        name:"Restore",
-        icon:"↧",
-        category:"System",
-        description:"Wiederherstellung"
-    },
-
-    {
-        id:"migration",
-        name:"Migration",
-        icon:"⇄",
-        category:"System",
-        description:"Systemmigration"
-    },
-
-    {
-        id:"rollback",
-        name:"Rollback",
-        icon:"↶",
-        category:"System",
-        description:"System-Rollback"
-    },
-
+    ["storage","Storage","▣","System"],
+    ["backup","Backup","↥","System"],
+    ["restore","Restore","↧","System"],
+    ["migration","Migration","⇄","System"],
+    ["rollback","Rollback","↶","System"],
 
     /* UPDATE */
 
-    {
-        id:"software-update",
-        name:"Software Update",
-        icon:"⟳",
-        category:"System",
-        description:"HalDo Software Updates"
-    },
-
-    {
-        id:"update-manager",
-        name:"Update Manager",
-        icon:"⬆",
-        category:"System",
-        description:"Updateverwaltung"
-    },
-
-    {
-        id:"version-manager",
-        name:"Version Manager",
-        icon:"#",
-        category:"System",
-        description:"Versionen und Builds"
-    },
-
+    ["software-update","Software Update","⟳","System"],
+    ["update-manager","Update Manager","⬆","System"],
+    ["version-manager","Version Manager","#","System"],
 
     /* PWA */
 
-    {
-        id:"pwa",
-        name:"PWA",
-        icon:"▣",
-        category:"System",
-        description:"Progressive Web App"
-    },
-
-    {
-        id:"service-worker",
-        name:"Service Worker",
-        icon:"⚡",
-        category:"System",
-        description:"Offline- und Cache-System"
-    },
-
+    ["pwa","PWA Manager","▣","System"],
+    ["service-worker","Service Worker","⚡","System"],
 
     /* SECURITY */
 
-    {
-        id:"security",
-        name:"Sicherheit",
-        icon:"🔐",
-        category:"System",
-        description:"Sicherheitsfunktionen"
-    },
-
-    {
-        id:"permissions",
-        name:"Berechtigungen",
-        icon:"🛡",
-        category:"System",
-        description:"App-Berechtigungen"
-    },
-
+    ["security","Sicherheit","🔐","System"],
+    ["permissions","Berechtigungen","🛡","System"],
+    ["privacy","Datenschutz","◉","System"],
 
     /* LANGUAGE */
 
-    {
-        id:"language",
-        name:"Sprache",
-        icon:"文",
-        category:"Sprache",
-        description:"Systemsprache"
-    },
-
-    {
-        id:"ezidi-keyboard",
-        name:"Êzîdî Keyboard",
-        icon:"⌨",
-        category:"Sprache",
-        description:"Êzîdî Tastatur"
-    },
-
-    {
-        id:"translation",
-        name:"Übersetzer",
-        icon:"A文",
-        category:"Sprache",
-        description:"Übersetzungen"
-    },
-
+    ["language","Sprache","文","Sprache"],
+    ["translation","Übersetzer","A文","Sprache"],
+    ["ezidi-keyboard","Êzîdî Keyboard","⌨","Sprache"],
 
     /* PERSONALIZATION */
 
-    {
-        id:"themes",
-        name:"Themes",
-        icon:"◈",
-        category:"Personalisierung",
-        description:"Systemdesign"
-    },
+    ["themes","Themes","◈","Personalisierung"],
+    ["wallpaper","Hintergrund","◉","Personalisierung"],
+    ["sounds","Sounds","♫","Personalisierung"],
 
-    {
-        id:"wallpaper",
-        name:"Hintergrund",
-        icon:"◉",
-        category:"Personalisierung",
-        description:"Desktop-Hintergrund"
-    },
+    /* SYSTEM */
 
-    {
-        id:"sounds",
-        name:"Sounds",
-        icon:"♫",
-        category:"Personalisierung",
-        description:"Systemklänge"
-    },
-
-    {
-        id:"cosmic-welcome",
-        name:"Cosmic Welcome",
-        icon:"✧",
-        category:"HalDo World",
-        description:"HalDo Cosmic Welcome Sound"
-    },
-
-
-    /* SYSTEM TOOLS */
-
-    {
-        id:"system-monitor",
-        name:"System Monitor",
-        icon:"◫",
-        category:"System",
-        description:"Systemstatus"
-    },
-
-    {
-        id:"diagnostics",
-        name:"Diagnose",
-        icon:"⌁",
-        category:"System",
-        description:"Systemdiagnose"
-    },
-
-    {
-        id:"about",
-        name:"Über HalDo",
-        icon:"ⓘ",
-        category:"System",
-        description:"Informationen über HalDo AI OS"
-    }
+    ["system-monitor","System Monitor","◫","System"],
+    ["diagnostics","Diagnose","⌁","System"],
+    ["about","Über HalDo","ⓘ","System"]
 
 ];
 
 
 /* ============================================================
-   REGISTER
+   REGISTER ALL
    ============================================================ */
 
-APP_DEFINITIONS.forEach(
-    app => {
+HALDO_APPS.forEach(
+    definition => {
 
-        OS.appRegistry.apps.set(
-            app.id,
+        const [
+            id,
+            name,
+            icon,
+            category
+        ] = definition;
+
+
+        HalDo.appRegistry.apps.set(
+            id,
             {
-                ...app,
-                installed:true,
-                enabled:true,
-                status:"registered"
+
+                id,
+                name,
+                icon,
+                category,
+
+                installed:
+                    true,
+
+                enabled:
+                    true,
+
+                state:
+                    "registered"
+
             }
         );
 
@@ -865,16 +2070,8 @@ APP_DEFINITIONS.forEach(
    REGISTRY API
    ============================================================ */
 
-OS.appRegistry.get =
-    function(id){
-
-        return this.apps.get(id) || null;
-
-    };
-
-
-OS.appRegistry.list =
-    function(){
+HalDo.appRegistry.list =
+    function () {
 
         return Array.from(
             this.apps.values()
@@ -883,37 +2080,50 @@ OS.appRegistry.list =
     };
 
 
-OS.appRegistry.register =
-    function(app){
+HalDo.appRegistry.get =
+    function (id) {
 
-        if(
-            !app ||
-            !app.id
-        ){
-            return false;
-        }
-
-        this.apps.set(
-            app.id,
-            {
-                ...app,
-                installed:true,
-                enabled:true,
-                status:"registered"
-            }
-        );
-
-        renderApps();
-
-        return true;
+        return this.apps.get(id)
+            || null;
 
     };
 
 
-OS.appRegistry.unregister =
-    function(id){
+HalDo.appRegistry.register =
+    function (app) {
 
-        return this.apps.delete(id);
+        if (
+            !app ||
+            !app.id
+        ) {
+
+            return false;
+
+        }
+
+
+        this.apps.set(
+            app.id,
+            {
+
+                installed:
+                    true,
+
+                enabled:
+                    true,
+
+                state:
+                    "registered",
+
+                ...app
+
+            }
+        );
+
+
+        renderAppGrid();
+
+        return true;
 
     };
 
@@ -922,74 +2132,31 @@ OS.appRegistry.unregister =
    WINDOW MANAGER
    ============================================================ */
 
-OS.windowManager =
-    OS.windowManager ||
+HalDo.windowManager =
+    HalDo.windowManager ||
     {};
 
-OS.windowManager.windows =
-    OS.windowManager.windows ||
+
+HalDo.windowManager.windows =
     new Map();
 
 
-let zIndex = 100;
+let windowZ =
+    100;
 
 
-/* ============================================================
-   TOAST
-   ============================================================ */
-
-function toast(message){
-
-    const element =
-        document.getElementById(
-            "toast"
-        );
-
-    if(!element){
-        return;
-    }
-
-    element.textContent =
-        message;
-
-    element.classList.add(
-        "show"
-    );
-
-    clearTimeout(
-        element._timer
-    );
-
-    element._timer =
-        setTimeout(
-            () => {
-
-                element.classList.remove(
-                    "show"
-                );
-
-            },
-            2200
-        );
-
-}
-
-
-/* ============================================================
-   OPEN APP
-   ============================================================ */
-
-function openApp(id){
+function openApp(id) {
 
     const app =
-        OS.appRegistry.get(
+        HalDo.appRegistry.get(
             id
         );
 
-    if(!app){
 
-        toast(
-            "App nicht registriert: " +
+    if (!app) {
+
+        showToast(
+            "App nicht gefunden: " +
             id
         );
 
@@ -999,142 +2166,176 @@ function openApp(id){
 
 
     /*
-     * Falls ein echtes App-Modul vorhanden ist,
-     * zuerst dieses verwenden.
+     * Echte App-Module werden später bevorzugt.
      */
 
-    const module =
+    if (
         window.HalDoApps &&
-        window.HalDoApps[id];
-
-
-    if(
-        module &&
-        typeof module.open ===
+        window.HalDoApps[id] &&
+        typeof
+        window.HalDoApps[id].open ===
         "function"
-    ){
+    ) {
 
-        return module.open();
+        return window.HalDoApps[id].open();
 
     }
 
 
     /*
-     * Systemfenster für registrierte Apps.
-     *
-     * Dadurch kann jede registrierte App bereits
-     * geöffnet und verwaltet werden.
+     * Bereits geöffnet?
      */
 
     const existing =
-        OS.windowManager.windows.get(
+        HalDo.windowManager.windows.get(
             id
         );
 
 
-    if(existing){
+    if (existing) {
 
         existing.style.zIndex =
-            ++zIndex;
+            ++windowZ;
 
         return existing;
 
     }
 
 
-    const windowElement =
+    const win =
         document.createElement(
             "article"
         );
 
-    windowElement.className =
+
+    win.className =
         "window";
 
-    windowElement.dataset.appId =
+
+    win.dataset.app =
         id;
 
-    windowElement.style.zIndex =
-        ++zIndex;
+
+    win.style.zIndex =
+        ++windowZ;
 
 
-    windowElement.innerHTML = `
+    win.innerHTML = `
 
         <header class="window-header">
 
             <div class="window-title">
+
                 ${escapeHTML(app.icon)}
                 &nbsp;
                 ${escapeHTML(app.name)}
+
             </div>
 
-            <button
-                class="window-close"
-                type="button"
-                aria-label="Fenster schließen"
-            >×</button>
+
+            <div class="window-controls">
+
+                <button
+                    class="window-control"
+                    data-minimize
+                >
+                    −
+                </button>
+
+                <button
+                    class="window-control"
+                    data-close
+                >
+                    ×
+                </button>
+
+            </div>
 
         </header>
 
+
         <div class="window-body">
 
-            <div class="panel">
+            <section class="app-hero">
 
-                <h3>
-                    ${escapeHTML(app.name)}
-                </h3>
-
-                <div class="muted">
-                    ${escapeHTML(app.description)}
+                <div class="app-hero-icon">
+                    ${escapeHTML(app.icon)}
                 </div>
 
-            </div>
+                <div class="app-hero-title">
+                    ${escapeHTML(app.name)}
+                </div>
 
-            <div class="panel">
+                <div class="app-hero-description">
+                    ${escapeHTML(app.category)}
+                </div>
+
+            </section>
+
+
+            <section class="app-section">
 
                 <h3>
                     HalDo App Runtime
                 </h3>
 
                 <div class="muted">
+
                     App ID:
                     ${escapeHTML(app.id)}
+
                     <br>
-                    Kategorie:
-                    ${escapeHTML(app.category)}
+
+                    Registry:
+                    registriert
+
                     <br>
-                    Status:
-                    ${escapeHTML(app.status)}
+
+                    Installation:
+                    aktiv
+
+                    <br>
+
+                    Runtime:
+                    verbunden
+
                 </div>
 
-            </div>
+            </section>
 
-            <div class="panel">
+
+            <section class="app-section">
 
                 <h3>
-                    Systemverbindung
+                    App-Modul
                 </h3>
 
                 <div class="muted">
-                    Kernel: verbunden<br>
-                    Registry: registriert<br>
-                    App Manager: verfügbar<br>
-                    Window Manager: verfügbar
+
+                    Die äußere App-Shell ist
+                    aktiv. Der vollständige
+                    innere Funktionsumfang
+                    dieses Moduls wird in der
+                    jeweiligen App-Datei aufgebaut.
+
                 </div>
 
-            </div>
+            </section>
+
 
             <button
                 class="action"
-                data-system-action="refresh"
+                data-action="settings"
             >
-                Aktualisieren
+                App-Einstellungen
             </button>
 
+
             <button
                 class="action"
-                data-system-action="settings"
+                data-action="refresh"
             >
-                Einstellungen
+                Aktualisieren
             </button>
 
         </div>
@@ -1142,27 +2343,36 @@ function openApp(id){
 
 
     document
-        .getElementById(
-            "windows"
-        )
-        .appendChild(
-            windowElement
-        );
+        .getElementById("windows")
+        .appendChild(win);
 
 
-    const close =
-        windowElement.querySelector(
-            ".window-close"
-        );
+    HalDo.windowManager.windows.set(
+        id,
+        win
+    );
 
 
-    close.addEventListener(
+    win.addEventListener(
+        "mousedown",
+        () => {
+
+            win.style.zIndex =
+                ++windowZ;
+
+        }
+    );
+
+
+    win.querySelector(
+        "[data-close]"
+    ).addEventListener(
         "click",
         () => {
 
-            windowElement.remove();
+            win.remove();
 
-            OS.windowManager.windows.delete(
+            HalDo.windowManager.windows.delete(
                 id
             );
 
@@ -1170,56 +2380,198 @@ function openApp(id){
     );
 
 
-    windowElement.addEventListener(
-        "mousedown",
+    win.querySelector(
+        "[data-minimize]"
+    ).addEventListener(
+        "click",
         () => {
 
-            windowElement.style.zIndex =
-                ++zIndex;
+            win.style.display =
+                "none";
 
         }
     );
 
 
-    OS.windowManager.windows.set(
-        id,
-        windowElement
+    win.querySelector(
+        "[data-action='settings']"
+    ).addEventListener(
+        "click",
+        () => {
+
+            openApp(
+                "settings"
+            );
+
+        }
     );
 
 
-    toast(
+    win.querySelector(
+        "[data-action='refresh']"
+    ).addEventListener(
+        "click",
+        () => {
+
+            showToast(
+                app.name +
+                " wurde aktualisiert."
+            );
+
+        }
+    );
+
+
+    showToast(
         app.name +
         " geöffnet"
     );
 
 
-    return windowElement;
+    return win;
 
 }
 
 
-OS.appManager =
-    OS.appManager ||
+HalDo.appManager =
+    HalDo.appManager ||
     {};
 
 
-OS.appManager.open =
+HalDo.appManager.open =
     openApp;
 
 
-OS.appManager.launch =
+HalDo.appManager.launch =
     openApp;
 
 
-OS.appManager.startApp =
+HalDo.appManager.startApp =
     openApp;
 
 
 /* ============================================================
-   ESCAPE HTML
+   APP GRID
    ============================================================ */
 
-function escapeHTML(value){
+function renderAppGrid(
+    search = ""
+) {
+
+    const grid =
+        document.getElementById(
+            "app-grid"
+        );
+
+
+    if (!grid) {
+        return;
+    }
+
+
+    grid.innerHTML =
+        "";
+
+
+    const query =
+        search
+            .trim()
+            .toLowerCase();
+
+
+    HalDo.appRegistry
+        .list()
+        .filter(
+            app => {
+
+                if (!query) {
+                    return true;
+                }
+
+
+                return (
+
+                    app.name
+                        .toLowerCase()
+                        .includes(query)
+
+                    ||
+
+                    app.category
+                        .toLowerCase()
+                        .includes(query)
+
+                    ||
+
+                    app.id
+                        .toLowerCase()
+                        .includes(query)
+
+                );
+
+            }
+        )
+        .forEach(
+            app => {
+
+                const card =
+                    document.createElement(
+                        "button"
+                    );
+
+
+                card.className =
+                    "app-card";
+
+
+                card.type =
+                    "button";
+
+
+                card.innerHTML = `
+
+                    <div class="app-icon">
+                        ${escapeHTML(app.icon)}
+                    </div>
+
+                    <div class="app-name">
+                        ${escapeHTML(app.name)}
+                    </div>
+
+                    <div class="app-category">
+                        ${escapeHTML(app.category)}
+                    </div>
+
+                `;
+
+
+                card.addEventListener(
+                    "click",
+                    () => {
+
+                        openApp(
+                            app.id
+                        );
+
+                    }
+                );
+
+
+                grid.appendChild(
+                    card
+                );
+
+            }
+        );
+
+}
+
+
+/* ============================================================
+   ESCAPE
+   ============================================================ */
+
+function escapeHTML(value) {
 
     return String(
         value ?? ""
@@ -1249,111 +2601,43 @@ function escapeHTML(value){
 
 
 /* ============================================================
-   APP GRID
+   TOAST
    ============================================================ */
 
-const grid =
-    document.getElementById(
-        "app-grid"
+function showToast(
+    text
+) {
+
+    const toast =
+        document.getElementById(
+            "toast"
+        );
+
+
+    toast.textContent =
+        text;
+
+
+    toast.classList.add(
+        "visible"
     );
 
 
-function renderApps(
-    filter=""
-){
-
-    if(!grid){
-        return;
-    }
+    clearTimeout(
+        toast._timer
+    );
 
 
-    grid.innerHTML = "";
+    toast._timer =
+        setTimeout(
+            () => {
 
-
-    const normalized =
-        filter
-            .trim()
-            .toLowerCase();
-
-
-    OS.appRegistry
-        .list()
-        .filter(
-            app => {
-
-                if(!normalized){
-                    return true;
-                }
-
-                return (
-                    app.name
-                        .toLowerCase()
-                        .includes(
-                            normalized
-                        )
-                    ||
-                    app.category
-                        .toLowerCase()
-                        .includes(
-                            normalized
-                        )
-                    ||
-                    app.id
-                        .toLowerCase()
-                        .includes(
-                            normalized
-                        )
+                toast.classList.remove(
+                    "visible"
                 );
 
-            }
-        )
-        .forEach(
-            app => {
-
-                const card =
-                    document.createElement(
-                        "button"
-                    );
-
-                card.className =
-                    "app-card";
-
-                card.type =
-                    "button";
-
-                card.innerHTML = `
-
-                    <div class="app-icon">
-                        ${escapeHTML(app.icon)}
-                    </div>
-
-                    <div class="app-name">
-                        ${escapeHTML(app.name)}
-                    </div>
-
-                    <div class="app-category">
-                        ${escapeHTML(app.category)}
-                    </div>
-                `;
-
-
-                card.addEventListener(
-                    "click",
-                    () => {
-
-                        openApp(
-                            app.id
-                        );
-
-                    }
-                );
-
-
-                grid.appendChild(
-                    card
-                );
-
-            }
+            },
+            2000
         );
 
 }
@@ -1369,41 +2653,35 @@ const launcher =
     );
 
 
-function openLauncher(){
-
-    launcher.classList.add(
-        "open"
-    );
-
-}
-
-
-function closeLauncher(){
-
-    launcher.classList.remove(
-        "open"
-    );
-
-}
-
-
 document
     .querySelector(
-        "[data-open-launcher]"
+        "[data-launcher]"
     )
     .addEventListener(
         "click",
-        openLauncher
+        () => {
+
+            launcher.classList.add(
+                "open"
+            );
+
+        }
     );
 
 
 document
     .getElementById(
-        "close-launcher"
+        "launcher-close"
     )
     .addEventListener(
         "click",
-        closeLauncher
+        () => {
+
+            launcher.classList.remove(
+                "open"
+            );
+
+        }
     );
 
 
@@ -1415,7 +2693,7 @@ document
         "input",
         event => {
 
-            renderApps(
+            renderAppGrid(
                 event.target.value
             );
 
@@ -1423,9 +2701,13 @@ document
     );
 
 
+/* ============================================================
+   DOCK
+   ============================================================ */
+
 document
     .querySelectorAll(
-        "[data-launch]"
+        "[data-app]"
     )
     .forEach(
         button => {
@@ -1435,7 +2717,7 @@ document
                 () => {
 
                     openApp(
-                        button.dataset.launch
+                        button.dataset.app
                     );
 
                 }
@@ -1446,79 +2728,12 @@ document
 
 
 /* ============================================================
-   KEYBOARD
-   ============================================================ */
-
-document.addEventListener(
-    "keydown",
-    event => {
-
-        if(
-            event.key ===
-            "Escape"
-        ){
-
-            closeLauncher();
-
-        }
-
-
-        if(
-            event.key ===
-            "F2"
-        ){
-
-            event.preventDefault();
-
-            openLauncher();
-
-        }
-
-    }
-);
-
-
-/* ============================================================
-   DESKTOP START
-   ============================================================ */
-
-function showDesktop(){
-
-    document
-        .getElementById(
-            "desktop"
-        )
-        .classList.add(
-            "active"
-        );
-
-
-    document
-        .getElementById(
-            "boot"
-        )
-        .classList.add(
-            "hidden"
-        );
-
-
-    document
-        .getElementById(
-            "system-status"
-        )
-        .textContent =
-            "HalDo AI OS · Bereit";
-
-}
-
-
-/* ============================================================
    BOOT UI
    ============================================================ */
 
-function bootStage(
+function updateBoot(
     event
-){
+) {
 
     const data =
         event.detail ||
@@ -1526,14 +2741,20 @@ function bootStage(
 
 
     const progress =
-        Number(
-            data.progress
-        ) || 0;
+        Math.max(
+            0,
+            Math.min(
+                100,
+                Number(
+                    data.progress
+                ) || 0
+            )
+        );
 
 
     const bar =
         document.getElementById(
-            "boot-bar"
+            "boot-progress"
         );
 
 
@@ -1549,18 +2770,18 @@ function bootStage(
         );
 
 
-    if(bar){
+    if (bar) {
 
         bar.style.width =
-            `${progress}%`;
+            progress + "%";
 
     }
 
 
-    if(
+    if (
         message &&
         data.message
-    ){
+    ) {
 
         message.textContent =
             data.message;
@@ -1568,13 +2789,10 @@ function bootStage(
     }
 
 
-    if(detail){
+    if (detail) {
 
         detail.textContent =
-            `Stage: ${
-                data.stage ||
-                "system"
-            } · ${progress}%`;
+            `${data.stage || "system"} · ${progress}%`;
 
     }
 
@@ -1583,14 +2801,56 @@ function bootStage(
 
 window.addEventListener(
     "haldo:bootstrap:stage",
-    bootStage
+    updateBoot
 );
 
 
 window.addEventListener(
     "haldo:boot:stage",
-    bootStage
+    updateBoot
 );
+
+
+/* ============================================================
+   READY
+   ============================================================ */
+
+function showDesktop() {
+
+    document
+        .getElementById(
+            "desktop"
+        )
+        .classList.add(
+            "active"
+        );
+
+
+    document
+        .getElementById(
+            "boot"
+        )
+        .classList.add(
+            "finished"
+        );
+
+
+    document
+        .getElementById(
+            "system-status"
+        )
+        .textContent =
+            "HalDo AI OS · Bereit";
+
+
+    renderAppGrid();
+
+
+    /*
+     * HalDo AI bleibt im Zentrum.
+     */
+
+}
 
 
 window.addEventListener(
@@ -1606,93 +2866,48 @@ window.addEventListener(
 
 
 /* ============================================================
-   FALLBACK START
+   FALLBACK
    ============================================================ */
 
-async function startHalDo(){
-
-    try{
+window.setTimeout(
+    () => {
 
         /*
-         * Wenn der neue Bootstrap vorhanden ist,
-         * darf ausschließlich dieser starten.
+         * Falls der Bootstrap nicht existiert,
+         * bleibt das System nicht endlos unsichtbar.
          */
 
-        if(
-            window.HalDo &&
-            window.HalDo.bootstrap &&
+        if (
+            !HalDo.bootstrap ||
             typeof
-            window.HalDo.bootstrap.start ===
+            HalDo.bootstrap.start !==
             "function"
-        ){
-
-            await
-                window.HalDo.bootstrap.start();
-
-        }else{
-
-            /*
-             * Fallback für eine Umgebung,
-             * in der Bootstrap nicht geladen wurde.
-             */
+        ) {
 
             showDesktop();
 
         }
 
-    }catch(error){
-
-        console.error(
-            "[HalDo AI OS]",
-            error
-        );
-
-        showDesktop();
-
-    }
-
-}
+    },
+    3500
+);
 
 
 /* ============================================================
-   INITIAL RENDER
+   INITIAL REGISTRY
    ============================================================ */
 
-renderApps();
-
-
-/* ============================================================
-   START
-   ============================================================ */
-
-if(
-    document.readyState ===
-    "loading"
-){
-
-    document.addEventListener(
-        "DOMContentLoaded",
-        startHalDo,
-        {
-            once:true
-        }
-    );
-
-}else{
-
-    startHalDo();
-
-}
+renderAppGrid();
 
 
 /* ============================================================
    SERVICE WORKER
    ============================================================ */
 
-if(
+if (
     "serviceWorker" in
     navigator
-){
+) {
 
     window.addEventListener(
         "load",
@@ -1701,16 +2916,6 @@ if(
             navigator.serviceWorker
                 .register(
                     "service-worker.js"
-                )
-                .then(
-                    registration => {
-
-                        console.info(
-                            "[HalDo PWA] Service Worker:",
-                            registration.scope
-                        );
-
-                    }
                 )
                 .catch(
                     error => {
@@ -1729,23 +2934,9 @@ if(
 }
 
 
-/* ============================================================
-   SYSTEM READY EVENT
-   ============================================================ */
-
-window.dispatchEvent(
-    new CustomEvent(
-        "haldo:index:ready",
-        {
-            detail:{
-                version:
-                    OS.version,
-
-                apps:
-                    OS.appRegistry.list().length
-            }
-        }
-    )
+console.info(
+    "[HalDo AI OS 20.1] Apps registriert:",
+    HalDo.appRegistry.list().length
 );
 
 </script>
