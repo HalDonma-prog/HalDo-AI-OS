@@ -1,1681 +1,1491 @@
 /*
- * ============================================================
- * HALDO AI OS 20
- * HALDO BOOTSTRAP
- * ============================================================
+ * ================================================================
+ * HalDo AI OS 20
+ * js/haldo-bootstrap.js
  *
- * Datei:
- * /js/haldo-bootstrap.js
- *
- * Änderung:
- * KOMPLETT NEU
+ * ÄNDERUNG:
+ * KOMPLETT ERSETZEN
  *
  * Aufgabe:
- * - zentraler Startpunkt des Betriebssystems
- * - verbindet vorhandene HalDo-Systeme
- * - startet den vorhandenen Kernel
- * - wartet auf vorhandene Module
- * - initialisiert Runtime / Registry / Manager / Router
- * - verbindet Dashboard / Desktop
- * - erzeugt einen zuverlässigen READY-Zustand
- *
- * WICHTIG:
- * Dieser Bootstrap ersetzt NICHT js/kernel.js.
- * Vorhandene Module werden bevorzugt verwendet.
- * ============================================================
+ * - kontrollierter OS-Start
+ * - Verbindung der Core-Systeme
+ * - Verbindung zur Shell
+ * - Runtime-Erkennung
+ * - Registry-Erkennung
+ * - App-Manager-Erkennung
+ * - Router-Erkennung
+ * - Window-Manager-Erkennung
+ * - automatische Registrierung der HalDo-System-Apps
+ * - kein Fake-"App geöffnet"
+ * - kein endloses "wird vorbereitet"
+ * ================================================================
  */
 
-"use strict";
-
 (function (window, document) {
+  "use strict";
 
-    /* ========================================================
-       GLOBAL OBJECT
-       ======================================================== */
+  const VERSION = "20.0.0";
 
-    const HalDo =
-        window.HalDo ||
-        (window.HalDo = {});
+  const state = {
+    started: false,
+    ready: false,
+    starting: false,
+    failed: false,
+    startTime: null,
+    errors: [],
+    warnings: [],
+    systems: {},
+    appsRegistered: 0
+  };
 
+  const events = Object.create(null);
 
-    /* ========================================================
-       VERSION
-       ======================================================== */
+  function on(name, handler) {
+    if (typeof handler !== "function") return function () {};
 
-    HalDo.version =
-        HalDo.version ||
-        "20.0.0";
+    if (!events[name]) {
+      events[name] = new Set();
+    }
 
+    events[name].add(handler);
 
-    HalDo.build =
-        HalDo.build ||
-        "Professional Ultimate Foundation";
+    return function unsubscribe() {
+      events[name]?.delete(handler);
+    };
+  }
 
+  function emit(name, detail) {
+    const listeners = events[name];
 
-    /* ========================================================
-       BOOT STATE
-       ======================================================== */
+    if (listeners) {
+      listeners.forEach(function (handler) {
+        try {
+          handler(detail);
+        } catch (error) {
+          console.error(
+            "[HalDo Bootstrap] Event handler error:",
+            error
+          );
+        }
+      });
+    }
 
-    const state = {
+    try {
+      window.dispatchEvent(
+        new CustomEvent("haldo:" + name, {
+          detail: detail
+        })
+      );
+    } catch (_) {
+      /* CustomEvent fallback is intentionally silent. */
+    }
+  }
 
-        started: false,
+  function log(...args) {
+    console.info("[HalDo AI OS 20]", ...args);
+  }
 
-        finished: false,
+  function warn(...args) {
+    console.warn("[HalDo AI OS 20]", ...args);
+    state.warnings.push(args.map(String).join(" "));
+  }
 
-        failed: false,
-
-        stage: "foundation",
-
-        progress: 0,
-
-        startedAt: null,
-
-        finishedAt: null,
-
-        error: null,
-
-        history: []
-
+  function fail(message, error) {
+    const entry = {
+      message: String(message),
+      error: error || null,
+      time: Date.now()
     };
 
+    state.errors.push(entry);
 
-    HalDo.bootstrap =
-        HalDo.bootstrap ||
-        {};
+    console.error(
+      "[HalDo AI OS 20]",
+      message,
+      error || ""
+    );
 
+    emit("error", entry);
+  }
 
-    HalDo.bootstrap.state =
-        state;
-
-
-    HalDo.boot =
-        HalDo.boot ||
-        state;
-
-
-    /* ========================================================
-       EVENT SYSTEM
-       ======================================================== */
-
-    function emit(
-        event,
-        detail = {}
+  function setStatus(text) {
+    if (
+      window.HalDoShell &&
+      typeof window.HalDoShell.setStatus === "function"
     ) {
-
-        try {
-
-            if (
-                typeof HalDo.emit ===
-                "function"
-            ) {
-
-                HalDo.emit(
-                    event,
-                    detail
-                );
-
-            }
-
-        } catch (error) {
-
-            console.warn(
-                "[HalDo Bootstrap] Event failed:",
-                event,
-                error
-            );
-
-        }
-
-
-        try {
-
-            window.dispatchEvent(
-                new CustomEvent(
-                    `haldo:${event}`,
-                    {
-                        detail
-                    }
-                )
-            );
-
-        } catch (error) {
-
-            /*
-             * Ältere Browser / spezielle WebViews.
-             */
-
-        }
-
+      window.HalDoShell.setStatus(text);
     }
 
+    const element =
+      document.getElementById("haldo-system-status");
 
-    /* ========================================================
-       STAGE
-       ======================================================== */
+    if (element) {
+      element.textContent = text;
+    }
 
-    function setStage(
-        stage,
-        progress,
-        message
-    ) {
+    emit("status", {
+      text: text
+    });
+  }
 
-        state.stage =
-            stage;
+  /*
+   * ------------------------------------------------------------
+   * GLOBAL OS OBJECT
+   * ------------------------------------------------------------
+   */
 
-        state.progress =
-            Math.max(
-                0,
-                Math.min(
-                    100,
-                    Number(
-                        progress
-                    ) || 0
-                )
-            );
+  const HalDoBootstrap = {
+    version: VERSION,
 
-        state.history.push({
+    state,
 
-            stage,
+    on,
+    emit,
 
-            progress:
-                state.progress,
+    log,
+    warn,
+    fail,
 
-            message:
-                message ||
-                "",
+    setStatus,
 
-            timestamp:
-                Date.now()
+    getState() {
+      return {
+        ...state,
+        systems: {
+          ...state.systems
+        },
+        errors: state.errors.slice(),
+        warnings: state.warnings.slice()
+      };
+    },
 
-        });
+    isReady() {
+      return state.ready === true;
+    },
 
+    isStarted() {
+      return state.started === true;
+    }
+  };
 
-        emit(
-            "boot:stage",
-            {
+  window.HalDoBootstrap = HalDoBootstrap;
 
-                stage,
+  /*
+   * ------------------------------------------------------------
+   * HALDO OS ROOT
+   * ------------------------------------------------------------
+   */
 
-                progress:
-                    state.progress,
+  if (!window.HalDoOS) {
+    window.HalDoOS = {};
+  }
 
-                message:
-                    message ||
-                    ""
+  window.HalDoOS.bootstrap = HalDoBootstrap;
 
-            }
-        );
+  /*
+   * ------------------------------------------------------------
+   * SYSTEM LOOKUP
+   *
+   * Verschiedene ältere/neuere Implementierungen werden
+   * nicht blind überschrieben.
+   * ------------------------------------------------------------
+   */
 
+  function findKernel() {
+    return (
+      window.HalDoKernel ||
+      window.HalDoOS?.kernel ||
+      null
+    );
+  }
 
-        emit(
-            "bootstrap:stage",
-            {
+  function findRuntime() {
+    return (
+      window.HalDoRuntime ||
+      window.HalDoOS?.runtime ||
+      window.HalDoAppRuntime ||
+      null
+    );
+  }
 
-                stage,
+  function findRegistry() {
+    return (
+      window.HalDoAppRegistry ||
+      window.HalDoOS?.appRegistry ||
+      window.HalDoRegistry ||
+      null
+    );
+  }
 
-                progress:
-                    state.progress,
+  function findManager() {
+    return (
+      window.HalDoAppManager ||
+      window.HalDoOS?.appManager ||
+      null
+    );
+  }
 
-                message:
-                    message ||
-                    ""
+  function findRouter() {
+    return (
+      window.HalDoAppRouter ||
+      window.HalDoOS?.appRouter ||
+      window.HalDoRouter ||
+      null
+    );
+  }
 
-            }
-        );
+  function findWindowManager() {
+    return (
+      window.HalDoWindowManager ||
+      window.HalDoOS?.windowManager ||
+      null
+    );
+  }
 
+  /*
+   * ------------------------------------------------------------
+   * SYSTEM REGISTRATION
+   * ------------------------------------------------------------
+   */
 
+  function registerSystem(name, object) {
+    state.systems[name] = {
+      available: !!object,
+      object: object || null
+    };
+
+    if (object) {
+      log(name + " verbunden.");
+    } else {
+      warn(name + " ist momentan noch nicht verfügbar.");
+    }
+
+    emit("system:detected", {
+      name,
+      available: !!object
+    });
+
+    return object;
+  }
+
+  /*
+   * ------------------------------------------------------------
+   * APP DEFINITIONS
+   *
+   * Diese Liste ist die zentrale App-Grundlage.
+   * Die eigentlichen inneren App-Module kommen anschließend
+   * über Runtime/Registry.
+   * ------------------------------------------------------------
+   */
+
+  const SYSTEM_APPS = [
+    {
+      id: "haldo-ai",
+      name: "HalDo AI",
+      category: "AI",
+      icon: "✦",
+      description:
+        "Zentrale künstliche Intelligenz von HalDo AI OS.",
+      priority: 1,
+      system: true,
+      capabilities: [
+        "chat",
+        "conversation",
+        "ai",
+        "voice",
+        "context",
+        "assistant"
+      ]
+    },
+
+    {
+      id: "haldo-browser",
+      name: "HalDo Browser",
+      category: "Internet",
+      icon: "◉",
+      description:
+        "Webbrowser und Internet-Arbeitsbereich.",
+      priority: 2,
+      capabilities: [
+        "web",
+        "tabs",
+        "history",
+        "bookmarks",
+        "downloads"
+      ]
+    },
+
+    {
+      id: "haldo-app-store",
+      name: "HalDo App Store",
+      category: "System",
+      icon: "▣",
+      description:
+        "Apps suchen, installieren, aktualisieren und verwalten.",
+      priority: 3,
+      capabilities: [
+        "apps",
+        "install",
+        "update",
+        "remove"
+      ]
+    },
+
+    {
+      id: "haldo-files",
+      name: "HalDo Dateien",
+      category: "Produktivität",
+      icon: "▱",
+      description:
+        "Dateien und Ordner verwalten.",
+      priority: 4,
+      capabilities: [
+        "filesystem",
+        "folders",
+        "files",
+        "search"
+      ]
+    },
+
+    {
+      id: "haldo-settings",
+      name: "HalDo Einstellungen",
+      category: "System",
+      icon: "⚙",
+      description:
+        "System-, App-, Theme-, Sprach- und AI-Einstellungen.",
+      priority: 5,
+      system: true,
+      capabilities: [
+        "settings",
+        "themes",
+        "language",
+        "privacy",
+        "system"
+      ]
+    },
+
+    {
+      id: "haldo-gallery",
+      name: "HalDo Galerie",
+      category: "Medien",
+      icon: "▧",
+      description:
+        "Bilder und visuelle Inhalte verwalten.",
+      priority: 10
+    },
+
+    {
+      id: "haldo-music",
+      name: "HalDo Musik",
+      category: "Medien",
+      icon: "♫",
+      description:
+        "Musik und Audio.",
+      priority: 11
+    },
+
+    {
+      id: "haldo-videos",
+      name: "HalDo Videos",
+      category: "Medien",
+      icon: "▶",
+      description:
+        "Videoinhalte verwalten und wiedergeben.",
+      priority: 12
+    },
+
+    {
+      id: "haldo-calendar",
+      name: "HalDo Kalender",
+      category: "Produktivität",
+      icon: "▦",
+      description:
+        "Termine und Kalender.",
+      priority: 20
+    },
+
+    {
+      id: "haldo-notes",
+      name: "HalDo Notizen",
+      category: "Produktivität",
+      icon: "✎",
+      description:
+        "Notizen erstellen und speichern.",
+      priority: 21
+    },
+
+    {
+      id: "haldo-calculator",
+      name: "HalDo Rechner",
+      category: "Werkzeuge",
+      icon: "⌗",
+      description:
+        "Rechner und mathematische Werkzeuge.",
+      priority: 22
+    },
+
+    {
+      id: "haldo-driving-school",
+      name: "HalDo Fahrschule",
+      category: "Lernen",
+      icon: "🚗",
+      description:
+        "Lern- und Übungsumgebung für Fahrschulthemen.",
+      priority: 23
+    },
+
+    {
+      id: "haldo-translator",
+      name: "HalDo Übersetzer",
+      category: "Sprache",
+      icon: "文",
+      description:
+        "Mehrsprachige Übersetzung.",
+      priority: 24
+    },
+
+    {
+      id: "haldo-language",
+      name: "HalDo Sprache",
+      category: "Sprache",
+      icon: "A",
+      description:
+        "Sprach- und Eingabeeinstellungen.",
+      priority: 25
+    },
+
+    {
+      id: "haldo-chat",
+      name: "HalDo Chat",
+      category: "Kommunikation",
+      icon: "◌",
+      description:
+        "Kommunikation und Nachrichten.",
+      priority: 30
+    },
+
+    {
+      id: "haldo-contacts",
+      name: "HalDo Kontakte",
+      category: "Kommunikation",
+      icon: "♙",
+      description:
+        "Kontakte verwalten.",
+      priority: 31
+    },
+
+    {
+      id: "haldo-mail",
+      name: "HalDo Mail",
+      category: "Kommunikation",
+      icon: "✉",
+      description:
+        "E-Mail-Arbeitsbereich.",
+      priority: 32
+    },
+
+    {
+      id: "haldo-weather",
+      name: "HalDo Wetter",
+      category: "Information",
+      icon: "☁",
+      description:
+        "Wetterinformationen.",
+      priority: 40
+    },
+
+    {
+      id: "haldo-maps",
+      name: "HalDo Karten",
+      category: "Navigation",
+      icon: "⌖",
+      description:
+        "Karten und Navigation.",
+      priority: 41
+    },
+
+    {
+      id: "haldo-clock",
+      name: "HalDo Uhr",
+      category: "Werkzeuge",
+      icon: "◷",
+      description:
+        "Uhr, Timer und Zeitfunktionen.",
+      priority: 42
+    },
+
+    {
+      id: "haldo-tasks",
+      name: "HalDo Aufgaben",
+      category: "Produktivität",
+      icon: "✓",
+      description:
+        "Aufgaben und To-do-Listen.",
+      priority: 43
+    },
+
+    {
+      id: "haldo-documents",
+      name: "HalDo Dokumente",
+      category: "Produktivität",
+      icon: "▤",
+      description:
+        "Dokumente erstellen und verwalten.",
+      priority: 44
+    },
+
+    {
+      id: "haldo-downloads",
+      name: "HalDo Downloads",
+      category: "System",
+      icon: "↓",
+      description:
+        "Heruntergeladene Dateien.",
+      priority: 45
+    },
+
+    {
+      id: "haldo-system",
+      name: "HalDo System",
+      category: "System",
+      icon: "◈",
+      description:
+        "Systemstatus und Diagnose.",
+      priority: 50,
+      system: true
+    },
+
+    {
+      id: "haldo-update",
+      name: "HalDo Update",
+      category: "System",
+      icon: "↻",
+      description:
+        "System- und App-Updates.",
+      priority: 51,
+      system: true
+    },
+
+    {
+      id: "haldo-backup",
+      name: "HalDo Backup",
+      category: "System",
+      icon: "▰",
+      description:
+        "Sicherung und Wiederherstellung.",
+      priority: 52,
+      system: true
+    },
+
+    {
+      id: "haldo-migration",
+      name: "HalDo Migration",
+      category: "System",
+      icon: "⇄",
+      description:
+        "Datenmigration zwischen Versionen.",
+      priority: 53,
+      system: true
+    },
+
+    {
+      id: "haldo-rollback",
+      name: "HalDo Rollback",
+      category: "System",
+      icon: "↶",
+      description:
+        "Sichere Rückkehr zu einem vorherigen Systemstand.",
+      priority: 54,
+      system: true
+    },
+
+    {
+      id: "haldo-pwa",
+      name: "HalDo Installation",
+      category: "System",
+      icon: "＋",
+      description:
+        "PWA-Installation und Geräteintegration.",
+      priority: 55,
+      system: true
+    },
+
+    {
+      id: "haldo-themes",
+      name: "HalDo Themes",
+      category: "Personalisierung",
+      icon: "✧",
+      description:
+        "Darstellung und Themes.",
+      priority: 56
+    },
+
+    {
+      id: "haldo-cosmic-world",
+      name: "HalDo Cosmic World",
+      category: "HalDo",
+      icon: "✦",
+      description:
+        "Die lebendige kosmische Welt von HalDo.",
+      priority: 57
+    },
+
+    {
+      id: "haldo-voice",
+      name: "HalDo Voice",
+      category: "AI",
+      icon: "◉",
+      description:
+        "Spracheingabe und Sprachausgabe.",
+      priority: 58
+    }
+  ];
+
+  /*
+   * ------------------------------------------------------------
+   * REGISTRY ADAPTER
+   *
+   * Unterstützt verschiedene mögliche API-Namen.
+   * ------------------------------------------------------------
+   */
+
+  function registerAppWithRegistry(app) {
+    const registry = findRegistry();
+
+    if (!registry) {
+      return false;
+    }
+
+    const methods = [
+      "register",
+      "registerApp",
+      "add",
+      "addApp"
+    ];
+
+    for (const method of methods) {
+      if (typeof registry[method] !== "function") {
+        continue;
+      }
+
+      try {
+        registry[method](app);
+        return true;
+      } catch (error) {
         /*
-         * Bestehende Boot-Oberfläche direkt aktualisieren.
+         * Ein bereits registriertes App-Objekt darf den Start
+         * nicht zerstören.
          */
-
-        updateBootUI(
-            message
+        warn(
+          "Registry konnte " +
+          app.id +
+          " über " +
+          method +
+          " nicht registrieren.",
+          error
         );
-
+      }
     }
 
+    return false;
+  }
 
-    /* ========================================================
-       BOOT UI
-       ======================================================== */
+  /*
+   * ------------------------------------------------------------
+   * APP MANAGER ADAPTER
+   * ------------------------------------------------------------
+   */
 
-    function updateBootUI(
-        message
-    ) {
+  function registerAppWithManager(app) {
+    const manager = findManager();
 
-        const bar =
-            document.querySelector(
-                "[data-boot-progress]"
-            );
-
-        const text =
-            document.querySelector(
-                "[data-boot-message]"
-            );
-
-        const detail =
-            document.querySelector(
-                "[data-boot-detail]"
-            );
-
-
-        if (bar) {
-
-            bar.style.width =
-                `${state.progress}%`;
-
-        }
-
-
-        if (
-            text &&
-            message
-        ) {
-
-            text.textContent =
-                message;
-
-        }
-
-
-        if (detail) {
-
-            detail.textContent =
-                `Stage: ${state.stage} · ${state.progress}%`;
-
-        }
-
+    if (!manager) {
+      return false;
     }
 
-
-    /* ========================================================
-       SAFE WAIT
-       ======================================================== */
-
-    function wait(
-        milliseconds
-    ) {
-
-        return new Promise(
-            resolve => {
-
-                window.setTimeout(
-                    resolve,
-                    milliseconds
-                );
-
-            }
-        );
-
-    }
-
-
-    /* ========================================================
-       WAIT FOR CONDITION
-       ======================================================== */
-
-    async function waitFor(
-        condition,
-        timeout = 5000,
-        interval = 50
-    ) {
-
-        const started =
-            Date.now();
-
-
-        while (
-            Date.now() -
-            started <
-            timeout
-        ) {
-
-            try {
-
-                if (
-                    condition()
-                ) {
-
-                    return true;
-
-                }
-
-            } catch (error) {
-
-                /*
-                 * Die Bedingung darf während des
-                 * Modulaufbaus noch fehlschlagen.
-                 */
-
-            }
-
-
-            await wait(
-                interval
-            );
-
-        }
-
-
-        return false;
-
-    }
-
-
-    /* ========================================================
-       FIND OBJECT
-       ======================================================== */
-
-    function findObject(
-        names
-    ) {
-
-        for (
-            const name of names
-        ) {
-
-            const parts =
-                name.split(
-                    "."
-                );
-
-            let current =
-                window;
-
-
-            for (
-                const part of parts
-            ) {
-
-                if (
-                    current &&
-                    part in current
-                ) {
-
-                    current =
-                        current[part];
-
-                } else {
-
-                    current =
-                        null;
-
-                    break;
-
-                }
-
-            }
-
-
-            if (
-                current
-            ) {
-
-                return current;
-
-            }
-
-        }
-
-
-        return null;
-
-    }
-
-
-    /* ========================================================
-       CALL EXISTING METHOD
-       ======================================================== */
-
-    async function callMethod(
-        object,
-        methods,
-        ...args
-    ) {
-
-        if (
-            !object
-        ) {
-
-            return {
-
-                called:
-                    false,
-
-                result:
-                    null
-
-            };
-
-        }
-
-
-        for (
-            const method of methods
-        ) {
-
-            if (
-                typeof object[method] ===
-                "function"
-            ) {
-
-                const result =
-                    await object[method](
-                        ...args
-                    );
-
-
-                return {
-
-                    called:
-                        true,
-
-                    method,
-
-                    result
-
-                };
-
-            }
-
-        }
-
-
-        return {
-
-            called:
-                false,
-
-            result:
-                null
-
-        };
-
-    }
-
-
-    /* ========================================================
-       ERROR RECORDING
-       ======================================================== */
-
-    function recordError(
-        error,
-        stage
-    ) {
-
-        const normalized =
-            error instanceof Error
-                ? error
-                : new Error(
-                    String(
-                        error ||
-                        "Unknown error"
-                    )
-                );
-
-
-        state.error = {
-
-            message:
-                normalized.message,
-
-            stack:
-                normalized.stack ||
-                "",
-
-            stage:
-                stage ||
-                state.stage,
-
-            timestamp:
-                Date.now()
-
-        };
-
-
-        state.history.push({
-
-            stage:
-                "error",
-
-            progress:
-                state.progress,
-
-            message:
-                normalized.message,
-
-            timestamp:
-                Date.now()
-
-        });
-
-
-        console.error(
-            "[HalDo Bootstrap]",
-            normalized
-        );
-
-
-        emit(
-            "bootstrap:error",
-            {
-
-                error:
-                    normalized,
-
-                stage:
-                    stage ||
-                    state.stage
-
-            }
-        );
-
-    }
-
-
-    /* ========================================================
-       KERNEL
-       ======================================================== */
-
-    async function startKernel() {
-
-        setStage(
-            "kernel",
-            12,
-            "HalDo Kernel wird gestartet …"
-        );
-
-
-        const kernel =
-            HalDo.kernel ||
-            window.HalDoKernel;
-
-
-        if (
-            !kernel
-        ) {
-
-            /*
-             * Der Bootstrap darf nicht endlos hängen.
-             */
-
-            console.warn(
-                "[HalDo Bootstrap] Kein Kernel gefunden."
-            );
-
-            return false;
-
-        }
-
-
-        const result =
-            await callMethod(
-                kernel,
-                [
-                    "start",
-                    "initialize",
-                    "boot"
-                ]
-            );
-
-
-        if (
-            result.called
-        ) {
-
-            await wait(
-                0
-            );
-
-        }
-
-
-        await waitFor(
-            () =>
-                Boolean(
-                    HalDo.kernel ||
-                    window.HalDoKernel
-                ),
-            3000
-        );
-
-
+    const methods = [
+      "register",
+      "registerApp",
+      "add",
+      "addApp"
+    ];
+
+    for (const method of methods) {
+      if (typeof manager[method] !== "function") {
+        continue;
+      }
+
+      try {
+        manager[method](app);
         return true;
-
+      } catch (error) {
+        warn(
+          "App Manager konnte " +
+          app.id +
+          " über " +
+          method +
+          " nicht registrieren.",
+          error
+        );
+      }
     }
 
+    return false;
+  }
 
-    /* ========================================================
-       STORAGE
-       ======================================================== */
+  /*
+   * ------------------------------------------------------------
+   * RUNTIME APP REGISTRATION
+   * ------------------------------------------------------------
+   */
 
-    async function initializeStorage() {
+  function registerAppWithRuntime(app) {
+    const runtime = findRuntime();
 
-        setStage(
-            "storage",
-            25,
-            "HalDo Storage wird initialisiert …"
-        );
+    if (!runtime) {
+      return false;
+    }
 
+    const methods = [
+      "registerApp",
+      "register",
+      "defineApp",
+      "addApp"
+    ];
 
-        const storage =
-            HalDo.storage ||
-            window.HalDoStorage;
+    for (const method of methods) {
+      if (typeof runtime[method] !== "function") {
+        continue;
+      }
 
-
-        if (
-            !storage
-        ) {
-
-            console.warn(
-                "[HalDo Bootstrap] Storage noch nicht verfügbar."
-            );
-
-            return false;
-
-        }
-
-
-        const result =
-            await callMethod(
-                storage,
-                [
-                    "init",
-                    "initialize",
-                    "start"
-                ]
-            );
-
-
-        if (
-            result.called
-        ) {
-
-            await wait(
-                0
-            );
-
-        }
-
-
+      try {
+        runtime[method](app);
         return true;
-
+      } catch (error) {
+        warn(
+          "Runtime konnte " +
+          app.id +
+          " über " +
+          method +
+          " nicht registrieren.",
+          error
+        );
+      }
     }
 
+    return false;
+  }
 
-    /* ========================================================
-       REGISTRY
-       ======================================================== */
+  /*
+   * ------------------------------------------------------------
+   * APP MENU
+   *
+   * Die index.html bekommt hier die echte App-Liste.
+   * ------------------------------------------------------------
+   */
 
-    async function initializeRegistry() {
+  function renderAppMenu() {
+    const list =
+      document.getElementById("haldo-app-list");
 
-        setStage(
-            "registry",
-            38,
-            "App Registry wird verbunden …"
-        );
-
-
-        const registry =
-            HalDo.appRegistry ||
-            HalDo.registry ||
-            window.HalDoAppRegistry;
-
-
-        if (
-            !registry
-        ) {
-
-            console.warn(
-                "[HalDo Bootstrap] App Registry noch nicht verfügbar."
-            );
-
-            return false;
-
-        }
-
-
-        const result =
-            await callMethod(
-                registry,
-                [
-                    "init",
-                    "initialize",
-                    "start",
-                    "load"
-                ]
-            );
-
-
-        if (
-            result.called
-        ) {
-
-            await wait(
-                0
-            );
-
-        }
-
-
-        return true;
-
+    if (!list) {
+      warn("App-Menü-Liste nicht gefunden.");
+      return;
     }
 
+    list.innerHTML = "";
 
-    /* ========================================================
-       SYSTEM
-       ======================================================== */
-
-    async function initializeSystem() {
-
-        setStage(
-            "system",
-            50,
-            "HalDo System wird initialisiert …"
+    const apps = SYSTEM_APPS
+      .slice()
+      .sort(function (a, b) {
+        return (
+          (a.priority || 999) -
+          (b.priority || 999)
         );
-
-
-        const system =
-            HalDo.system ||
-            window.HalDoSystem;
-
-
-        if (
-            !system
-        ) {
-
-            console.warn(
-                "[HalDo Bootstrap] System-Modul noch nicht verfügbar."
-            );
-
-            return false;
-
-        }
-
-
-        const result =
-            await callMethod(
-                system,
-                [
-                    "init",
-                    "initialize",
-                    "start",
-                    "boot"
-                ]
-            );
-
-
-        if (
-            result.called
-        ) {
-
-            await wait(
-                0
-            );
-
-        }
-
-
-        return true;
-
-    }
-
-
-    /* ========================================================
-       APP MANAGER
-       ======================================================== */
-
-    async function initializeAppManager() {
-
-        setStage(
-            "app-manager",
-            60,
-            "App Manager wird verbunden …"
-        );
-
-
-        const manager =
-            HalDo.appManager ||
-            window.HalDoAppManager;
-
-
-        if (
-            !manager
-        ) {
-
-            console.warn(
-                "[HalDo Bootstrap] App Manager noch nicht verfügbar."
-            );
-
-            return false;
-
-        }
-
-
-        const result =
-            await callMethod(
-                manager,
-                [
-                    "init",
-                    "initialize",
-                    "start"
-                ]
-            );
-
-
-        if (
-            result.called
-        ) {
-
-            await wait(
-                0
-            );
-
-        }
-
-
-        return true;
-
-    }
-
-
-    /* ========================================================
-       ROUTER
-       ======================================================== */
-
-    async function initializeRouter() {
-
-        setStage(
-            "router",
-            68,
-            "App Router wird verbunden …"
-        );
-
-
-        const router =
-            HalDo.router ||
-            HalDo.appRouter ||
-            window.HalDoRouter;
-
-
-        if (
-            !router
-        ) {
-
-            console.warn(
-                "[HalDo Bootstrap] Router noch nicht verfügbar."
-            );
-
-            return false;
-
-        }
-
-
-        const result =
-            await callMethod(
-                router,
-                [
-                    "init",
-                    "initialize",
-                    "start"
-                ]
-            );
-
-
-        if (
-            result.called
-        ) {
-
-            await wait(
-                0
-            );
-
-        }
-
-
-        return true;
-
-    }
-
-
-    /* ========================================================
-       WINDOW MANAGER
-       ======================================================== */
-
-    async function initializeWindowManager() {
-
-        setStage(
-            "window-manager",
-            75,
-            "Window Manager wird verbunden …"
-        );
-
-
-        const manager =
-            HalDo.windowManager ||
-            window.HalDoWindowManager;
-
-
-        if (
-            !manager
-        ) {
-
-            console.warn(
-                "[HalDo Bootstrap] Window Manager noch nicht verfügbar."
-            );
-
-            return false;
-
-        }
-
-
-        const result =
-            await callMethod(
-                manager,
-                [
-                    "init",
-                    "initialize",
-                    "start"
-                ]
-            );
-
-
-        if (
-            result.called
-        ) {
-
-            await wait(
-                0
-            );
-
-        }
-
-
-        return true;
-
-    }
-
-
-    /* ========================================================
-       LAUNCHER
-       ======================================================== */
-
-    async function initializeLauncher() {
-
-        setStage(
-            "launcher",
-            80,
-            "Launcher wird vorbereitet …"
-        );
-
-
-        const launcher =
-            HalDo.launcher ||
-            window.HalDoLauncher;
-
-
-        if (
-            !launcher
-        ) {
-
-            console.warn(
-                "[HalDo Bootstrap] Launcher noch nicht verfügbar."
-            );
-
-            return false;
-
-        }
-
-
-        const result =
-            await callMethod(
-                launcher,
-                [
-                    "init",
-                    "initialize",
-                    "start"
-                ]
-            );
-
-
-        if (
-            result.called
-        ) {
-
-            await wait(
-                0
-            );
-
-        }
-
-
-        return true;
-
-    }
-
-
-    /* ========================================================
-       AI
-       ======================================================== */
-
-    async function initializeAI() {
-
-        setStage(
-            "ai",
-            85,
-            "HalDo AI wird verbunden …"
-        );
-
-
-        const ai =
-            HalDo.ai ||
-            HalDo.aiCore ||
-            window.HalDoAI;
-
-
-        if (
-            !ai
-        ) {
-
-            console.warn(
-                "[HalDo Bootstrap] AI-Modul noch nicht verfügbar."
-            );
-
-            return false;
-
-        }
-
-
-        const result =
-            await callMethod(
-                ai,
-                [
-                    "init",
-                    "initialize",
-                    "start"
-                ]
-            );
-
-
-        if (
-            result.called
-        ) {
-
-            await wait(
-                0
-            );
-
-        }
-
-
-        return true;
-
-    }
-
-
-    /* ========================================================
-       DASHBOARD / DESKTOP
-       ======================================================== */
-
-    async function openDashboard() {
-
-        setStage(
-            "desktop",
-            92,
-            "HalDo Desktop wird gestartet …"
-        );
-
-
-        /*
-         * Bereits vorhandenen Desktop bevorzugen.
-         */
-
-        const desktop =
-            findObject(
-                [
-                    "HalDo.desktop",
-                    "HalDo.desktopManager",
-                    "HalDo.windowManager"
-                ]
-            );
-
-
-        if (
-            desktop
-        ) {
-
-            const result =
-                await callMethod(
-                    desktop,
-                    [
-                        "showDesktop",
-                        "show",
-                        "openDesktop",
-                        "initializeDesktop"
-                    ]
-                );
-
-
-            if (
-                result.called
-            ) {
-
-                return true;
-
-            }
-
-        }
-
-
-        /*
-         * Dashboard über App Manager öffnen,
-         * falls es als App registriert wurde.
-         */
-
-        const manager =
-            HalDo.appManager;
-
-
-        if (
-            manager
-        ) {
-
-            const result =
-                await callMethod(
-                    manager,
-                    [
-                        "open",
-                        "launch",
-                        "startApp"
-                    ],
-                    "dashboard"
-                );
-
-
-            if (
-                result.called
-            ) {
-
-                return true;
-
-            }
-
-        }
-
-
-        /*
-         * Letzter Browser-Fallback:
-         * dashboard.html wird nur geöffnet,
-         * wenn kein bestehender Desktop verfügbar ist.
-         */
-
-        const currentPath =
-            window.location.pathname;
-
-
-        if (
-            !/dashboard\.html$/i.test(
-                currentPath
-            )
-        ) {
-
-            /*
-             * Kein automatischer Redirect,
-             * wenn die aktuelle Seite bereits
-             * eine funktionierende Desktop-Shell besitzt.
-             */
-
-            const host =
-                document.querySelector(
-                    "[data-haldo-desktop-host]"
-                );
-
-
-            if (
-                host
-            ) {
-
-                const iframe =
-                    document.createElement(
-                        "iframe"
-                    );
-
-                iframe.src =
-                    "dashboard.html";
-
-                iframe.title =
-                    "HalDo AI OS Dashboard";
-
-                iframe.style.position =
-                    "absolute";
-
-                iframe.style.inset =
-                    "0";
-
-                iframe.style.width =
-                    "100%";
-
-                iframe.style.height =
-                    "100%";
-
-                iframe.style.border =
-                    "0";
-
-                host.appendChild(
-                    iframe
-                );
-
-                return true;
-
-            }
-
-        }
-
-
-        return false;
-
-    }
-
-
-    /* ========================================================
-       READY
-       ======================================================== */
-
-    async function finishBoot() {
-
-        setStage(
-            "ready",
-            100,
-            "HalDo AI OS ist bereit."
-        );
-
-
-        state.finished =
-            true;
-
-        state.failed =
-            false;
-
-        state.finishedAt =
-            Date.now();
-
-
-        /*
-         * Bestehende Boot-Strukturen aktualisieren.
-         */
-
-        if (
-            HalDo.boot
-        ) {
-
-            HalDo.boot.stage =
-                "ready";
-
-            HalDo.boot.progress =
-                100;
-
-            HalDo.boot.finished =
-                true;
-
-        }
-
-
-        emit(
-            "system:ready",
-            {
-
-                version:
-                    HalDo.version,
-
-                build:
-                    HalDo.build,
-
-                timestamp:
-                    Date.now()
-
-            }
-        );
-
-
-        emit(
-            "boot:ready",
-            {
-
-                version:
-                    HalDo.version,
-
-                timestamp:
-                    Date.now()
-
-            }
-        );
-
-
-        emit(
-            "bootstrap:ready",
-            {
-
-                version:
-                    HalDo.version,
-
-                timestamp:
-                    Date.now()
-
-            }
-        );
-
-
-        /*
-         * Boot Screen ausblenden.
-         */
-
-        const bootScreen =
-            document.querySelector(
-                "[data-haldo-boot]"
-            );
-
-
-        if (
-            bootScreen
-        ) {
-
-            bootScreen.classList.add(
-                "is-finished"
-            );
-
-            window.setTimeout(
-                () => {
-
-                    bootScreen.remove();
-
-                },
-                700
-            );
-
-        }
-
-
-        document.documentElement
-            .classList.add(
-                "haldo-ready"
-            );
-
-
-        if (
-            document.body
-        ) {
-
-            document.body.classList.add(
-                "haldo-ready"
-            );
-
-        }
-
-
-        return true;
-
-    }
-
-
-    /* ========================================================
-       MAIN BOOT
-       ======================================================== */
-
-    async function start() {
-
-        /*
-         * Doppelte Starts verhindern.
-         */
-
-        if (
-            state.started
-        ) {
-
-            return state;
-
-        }
-
-
-        state.started =
-            true;
-
-        state.startedAt =
-            Date.now();
-
-
-        try {
-
-            setStage(
-                "foundation",
-                5,
-                "HalDo AI OS wird vorbereitet …"
-            );
-
-
-            /*
-             * Kleine Verzögerung,
-             * damit bereits geladene Skripte
-             * ihre globalen APIs registrieren können.
-             */
-
-            await wait(
-                25
-            );
-
-
-            await startKernel();
-
-
-            await wait(
-                10
-            );
-
-
-            await initializeStorage();
-
-
-            await initializeRegistry();
-
-
-            await initializeSystem();
-
-
-            await initializeAppManager();
-
-
-            await initializeRouter();
-
-
-            await initializeWindowManager();
-
-
-            await initializeLauncher();
-
-
-            await initializeAI();
-
-
-            await openDashboard();
-
-
-            await finishBoot();
-
-
-            return state;
-
-        } catch (error) {
-
-            recordError(
-                error,
-                state.stage
-            );
-
-
-            /*
-             * Auch bei einem Fehler wird nicht
-             * unendlich im Boot-Zustand gewartet.
-             */
-
-            state.failed =
-                true;
-
-
-            emit(
-                "boot:failed",
-                {
-
-                    error,
-
-                    stage:
-                        state.stage
-
-                }
-            );
-
-
-            const text =
-                document.querySelector(
-                    "[data-boot-message]"
-                );
-
-
-            if (
-                text
-            ) {
-
-                text.textContent =
-                    "HalDo AI OS konnte nicht vollständig gestartet werden.";
-
-            }
-
-
-            const detail =
-                document.querySelector(
-                    "[data-boot-detail]"
-                );
-
-
-            if (
-                detail
-            ) {
-
-                detail.textContent =
-                    `${state.stage}: ${
-                        error?.message ||
-                        "Unbekannter Fehler"
-                    }`;
-
-            }
-
-
-            return state;
-
-        }
-
-    }
-
-
-    /* ========================================================
-       PUBLIC API
-       ======================================================== */
-
-    HalDo.bootstrap.start =
-        start;
-
-
-    HalDo.bootstrap.getState =
+      });
+
+    apps.forEach(function (app) {
+      const button =
+        document.createElement("button");
+
+      button.type = "button";
+      button.className = "haldo-app-item";
+      button.dataset.appId = app.id;
+
+      button.innerHTML = `
+        <span class="haldo-app-item__icon">
+          ${escapeHTML(app.icon || "•")}
+        </span>
+
+        <span>
+          <span class="haldo-app-item__name">
+            ${escapeHTML(app.name)}
+          </span>
+
+          <span class="haldo-app-item__description">
+            ${escapeHTML(app.description || "")}
+          </span>
+        </span>
+      `;
+
+      button.addEventListener(
+        "click",
         function () {
-
-            return {
-                ...state,
-                history:
-                    [
-                        ...state.history
-                    ]
-            };
-
-        };
-
-
-    HalDo.bootstrap.restart =
-        async function () {
-
-            state.started =
-                false;
-
-            state.finished =
-                false;
-
-            state.failed =
-                false;
-
-            state.stage =
-                "foundation";
-
-            state.progress =
-                0;
-
-            state.error =
-                null;
-
-            return start();
-
-        };
-
-
-    window.HalDoBootstrap =
-        HalDo.bootstrap;
-
-
-    /* ========================================================
-       AUTO START
-       ======================================================== */
-
-    function autoStart() {
-
-        /*
-         * Wenn der Kernel selbst bereits startet,
-         * wartet der Bootstrap kurz darauf.
-         */
-
-        if (
-            document.readyState ===
-            "loading"
-        ) {
-
-            document.addEventListener(
-                "DOMContentLoaded",
-                () => {
-
-                    start();
-
-                },
-                {
-                    once:
-                        true
-                }
-            );
-
-        } else {
-
-            start();
-
+          openApp(app.id);
         }
+      );
 
+      list.appendChild(button);
+    });
+
+    state.appsRegistered = apps.length;
+
+    emit("apps:menu-rendered", {
+      count: apps.length
+    });
+  }
+
+  function escapeHTML(value) {
+    return String(value)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  /*
+   * ------------------------------------------------------------
+   * APP SEARCH
+   * ------------------------------------------------------------
+   */
+
+  function initializeAppSearch() {
+    const input =
+      document.getElementById("haldo-app-search");
+
+    const list =
+      document.getElementById("haldo-app-list");
+
+    if (!input || !list) {
+      return;
     }
 
+    input.addEventListener(
+      "input",
+      function () {
+        const query =
+          input.value
+            .trim()
+            .toLocaleLowerCase();
+
+        list
+          .querySelectorAll(".haldo-app-item")
+          .forEach(function (button) {
+            const app =
+              SYSTEM_APPS.find(function (item) {
+                return (
+                  item.id ===
+                  button.dataset.appId
+                );
+              });
+
+            if (!app) {
+              button.hidden = true;
+              return;
+            }
+
+            const haystack = [
+              app.id,
+              app.name,
+              app.category,
+              app.description
+            ]
+              .join(" ")
+              .toLocaleLowerCase();
+
+            button.hidden =
+              query.length > 0 &&
+              !haystack.includes(query);
+          });
+      }
+    );
+  }
+
+  /*
+   * ------------------------------------------------------------
+   * OPEN APP
+   *
+   * Hier wird bewusst KEINE Fake-Meldung erzeugt.
+   * ------------------------------------------------------------
+   */
+
+  function openApp(appId) {
+    const app =
+      SYSTEM_APPS.find(function (item) {
+        return item.id === appId;
+      });
+
+    if (!app) {
+      fail(
+        "Unbekannte App: " +
+        String(appId)
+      );
+      return false;
+    }
+
+    emit("app:open-request", {
+      id: app.id,
+      app: app
+    });
+
+    const manager = findManager();
+
+    if (
+      manager &&
+      typeof manager.open === "function"
+    ) {
+      try {
+        manager.open(app.id);
+        closeMenu();
+        return true;
+      } catch (error) {
+        fail(
+          "App Manager konnte " +
+          app.id +
+          " nicht öffnen.",
+          error
+        );
+      }
+    }
+
+    const runtime = findRuntime();
+
+    if (
+      runtime &&
+      typeof runtime.openApp === "function"
+    ) {
+      try {
+        runtime.openApp(app.id);
+        closeMenu();
+        return true;
+      } catch (error) {
+        fail(
+          "Runtime konnte " +
+          app.id +
+          " nicht öffnen.",
+          error
+        );
+      }
+    }
+
+    const router = findRouter();
+
+    if (
+      router &&
+      typeof router.navigate === "function"
+    ) {
+      try {
+        router.navigate(app.id);
+        closeMenu();
+        return true;
+      } catch (error) {
+        fail(
+          "Router konnte " +
+          app.id +
+          " nicht öffnen.",
+          error
+        );
+      }
+    }
 
     /*
-     * Global verfügbar machen,
-     * bevor der automatische Start beginnt.
+     * Falls die nachfolgenden Runtime-Dateien noch nicht
+     * ersetzt wurden, bleibt die App registriert.
+     * Es wird keine falsche "geöffnet"-Meldung angezeigt.
      */
+    warn(
+      "App " +
+      app.id +
+      " ist registriert, aber die Öffnungs-Runtime " +
+      "ist noch nicht vollständig verbunden."
+    );
 
-    window.HalDo =
-        HalDo;
+    setStatus(
+      app.name +
+      " wartet auf die App Runtime."
+    );
 
+    return false;
+  }
 
-    autoStart();
+  function closeMenu() {
+    if (
+      window.HalDoShell &&
+      typeof window.HalDoShell.closeAppMenu ===
+        "function"
+    ) {
+      window.HalDoShell.closeAppMenu();
+    }
+  }
 
+  /*
+   * ------------------------------------------------------------
+   * REGISTER ALL SYSTEM APPS
+   * ------------------------------------------------------------
+   */
+
+  function registerAllApps() {
+    let registered = 0;
+
+    SYSTEM_APPS.forEach(function (app) {
+      let success = false;
+
+      /*
+       * Runtime zuerst.
+       */
+      if (registerAppWithRuntime(app)) {
+        success = true;
+      }
+
+      /*
+       * Registry zusätzlich.
+       */
+      if (registerAppWithRegistry(app)) {
+        success = true;
+      }
+
+      /*
+       * Manager zusätzlich.
+       */
+      if (registerAppWithManager(app)) {
+        success = true;
+      }
+
+      if (success) {
+        registered++;
+      }
+    });
+
+    state.appsRegistered =
+      SYSTEM_APPS.length;
+
+    emit("apps:registered", {
+      total: SYSTEM_APPS.length,
+      connected: registered
+    });
+
+    return registered;
+  }
+
+  /*
+   * ------------------------------------------------------------
+   * SYSTEM DETECTION
+   * ------------------------------------------------------------
+   */
+
+  function detectSystems() {
+    registerSystem(
+      "kernel",
+      findKernel()
+    );
+
+    registerSystem(
+      "runtime",
+      findRuntime()
+    );
+
+    registerSystem(
+      "registry",
+      findRegistry()
+    );
+
+    registerSystem(
+      "appManager",
+      findManager()
+    );
+
+    registerSystem(
+      "router",
+      findRouter()
+    );
+
+    registerSystem(
+      "windowManager",
+      findWindowManager()
+    );
+
+    registerSystem(
+      "shell",
+      window.HalDoShell || null
+    );
+  }
+
+  /*
+   * ------------------------------------------------------------
+   * KERNEL CONNECTION
+   * ------------------------------------------------------------
+   */
+
+  function connectKernel() {
+    const kernel = findKernel();
+
+    if (!kernel) {
+      warn(
+        "Kein HalDoKernel gefunden. " +
+        "Der bestehende Kernel bleibt unangetastet."
+      );
+      return;
+    }
+
+    try {
+      if (
+        typeof kernel.on === "function"
+      ) {
+        kernel.on(
+          "app:open",
+          function (event) {
+            emit("kernel:app-open", event);
+          }
+        );
+      }
+
+      if (
+        typeof kernel.emit === "function"
+      ) {
+        kernel.emit(
+          "bootstrap:ready",
+          {
+            version: VERSION
+          }
+        );
+      }
+
+      log("Kernel verbunden.");
+    } catch (error) {
+      fail(
+        "Fehler bei der Kernel-Verbindung.",
+        error
+      );
+    }
+  }
+
+  /*
+   * ------------------------------------------------------------
+   * WINDOW MANAGER CONNECTION
+   * ------------------------------------------------------------
+   */
+
+  function connectWindowManager() {
+    const manager = findWindowManager();
+
+    if (!manager) {
+      warn(
+        "Window Manager noch nicht verfügbar."
+      );
+      return;
+    }
+
+    /*
+     * Shell Window Layer bekanntgeben.
+     */
+    const layer =
+      document.getElementById(
+        "haldo-window-layer"
+      );
+
+    if (
+      layer &&
+      typeof manager.setContainer ===
+        "function"
+    ) {
+      try {
+        manager.setContainer(layer);
+      } catch (error) {
+        warn(
+          "Window Manager Container konnte nicht gesetzt werden.",
+          error
+        );
+      }
+    }
+
+    emit("window-manager:connected", {
+      manager
+    });
+  }
+
+  /*
+   * ------------------------------------------------------------
+   * BOOTSTRAP SEQUENCE
+   * ------------------------------------------------------------
+   */
+
+  async function start() {
+    if (state.ready) {
+      return HalDoBootstrap;
+    }
+
+    if (state.starting) {
+      return HalDoBootstrap;
+    }
+
+    state.starting = true;
+    state.startTime = Date.now();
+
+    try {
+      setStatus(
+        "HalDo AI OS 20 wird initialisiert …"
+      );
+
+      emit("boot:start", {
+        version: VERSION
+      });
+
+      /*
+       * 1. Bestehende Systeme erkennen.
+       */
+      detectSystems();
+
+      /*
+       * 2. Kernel verbinden.
+       */
+      setStatus(
+        "Kernel wird verbunden …"
+      );
+
+      connectKernel();
+
+      /*
+       * 3. Window Manager verbinden.
+       */
+      setStatus(
+        "Fenstersystem wird verbunden …"
+      );
+
+      connectWindowManager();
+
+      /*
+       * 4. Apps registrieren.
+       */
+      setStatus(
+        "HalDo Apps werden registriert …"
+      );
+
+      registerAllApps();
+
+      /*
+       * 5. Menü erzeugen.
+       */
+      setStatus(
+        "HalDo App-Menü wird aufgebaut …"
+      );
+
+      renderAppMenu();
+      initializeAppSearch();
+
+      /*
+       * 6. Öffentliche Runtime-Brücken.
+       */
+      window.HalDoOS.apps =
+        SYSTEM_APPS.slice();
+
+      window.HalDoOS.openApp =
+        openApp;
+
+      window.HalDoOS.getApps =
+        function () {
+          return SYSTEM_APPS.slice();
+        };
+
+      /*
+       * 7. Zustand fertig.
+       */
+      state.started = true;
+      state.ready = true;
+      state.starting = false;
+      state.failed = false;
+
+      setStatus(
+        "HalDo AI OS 20 ist bereit."
+      );
+
+      emit("boot:ready", {
+        version: VERSION,
+        apps: SYSTEM_APPS.length,
+        duration:
+          Date.now() - state.startTime
+      });
+
+      /*
+       * Shell-Bootscreen entfernen.
+       */
+      if (
+        typeof window.HalDoShellReady ===
+        "function"
+      ) {
+        window.HalDoShellReady();
+      }
+
+      log(
+        "HalDo AI OS 20 erfolgreich initialisiert.",
+        SYSTEM_APPS.length + " Apps erkannt."
+      );
+
+      return HalDoBootstrap;
+
+    } catch (error) {
+      state.starting = false;
+      state.failed = true;
+
+      fail(
+        "HalDo AI OS 20 konnte nicht vollständig gestartet werden.",
+        error
+      );
+
+      setStatus(
+        "HalDo AI OS 20 läuft im Wiederherstellungsmodus."
+      );
+
+      /*
+       * Die Shell bleibt benutzbar.
+       * Wir zerstören nicht den gesamten Desktop.
+       */
+      try {
+        if (
+          typeof window.HalDoShellReady ===
+          "function"
+        ) {
+          window.HalDoShellReady();
+        }
+      } catch (_) {}
+
+      return HalDoBootstrap;
+    }
+  }
+
+  /*
+   * ------------------------------------------------------------
+   * PUBLIC API
+   * ------------------------------------------------------------
+   */
+
+  HalDoBootstrap.start = start;
+
+  HalDoBootstrap.openApp = openApp;
+
+  HalDoBootstrap.getApps = function () {
+    return SYSTEM_APPS.slice();
+  };
+
+  HalDoBootstrap.getApp = function (id) {
+    return (
+      SYSTEM_APPS.find(function (app) {
+        return app.id === id;
+      }) || null
+    );
+  };
+
+  /*
+   * ------------------------------------------------------------
+   * GLOBAL EVENT BRIDGES
+   * ------------------------------------------------------------
+   */
+
+  window.addEventListener(
+    "haldo:app-open",
+    function (event) {
+      const id =
+        event.detail?.id ||
+        event.detail?.appId;
+
+      if (id) {
+        openApp(id);
+      }
+    }
+  );
+
+  window.addEventListener(
+    "haldo:open-app",
+    function (event) {
+      const id =
+        event.detail?.id ||
+        event.detail?.appId;
+
+      if (id) {
+        openApp(id);
+      }
+    }
+  );
+
+  /*
+   * ------------------------------------------------------------
+   * ERROR PROTECTION
+   * ------------------------------------------------------------
+   */
+
+  window.addEventListener(
+    "error",
+    function (event) {
+      if (
+        event &&
+        event.error &&
+        event.error.__haldoHandled
+      ) {
+        return;
+      }
+
+      state.errors.push({
+        message:
+          event.message ||
+          "Unbekannter JavaScript-Fehler",
+        source: event.filename || null,
+        line: event.lineno || null,
+        column: event.colno || null,
+        time: Date.now()
+      });
+    }
+  );
+
+  window.addEventListener(
+    "unhandledrejection",
+    function (event) {
+      state.errors.push({
+        message:
+          "Unhandled Promise Rejection",
+        reason:
+          event.reason || null,
+        time: Date.now()
+      });
+    }
+  );
+
+  /*
+   * ------------------------------------------------------------
+   * START AFTER DOM READY
+   * ------------------------------------------------------------
+   */
+
+  function boot() {
+    /*
+     * Ein kleiner defer verhindert, dass die Shell
+     * während des initialen DOM-Aufbaus blockiert.
+     */
+    window.setTimeout(function () {
+      start();
+    }, 0);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener(
+      "DOMContentLoaded",
+      boot,
+      {
+        once: true
+      }
+    );
+  } else {
+    boot();
+  }
 
 })(window, document);
