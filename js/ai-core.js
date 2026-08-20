@@ -1,4073 +1,2349 @@
-/* ============================================================
+/* ================================================================
    HALDO AI OS 20
-   HALDO AI CORE
-   ------------------------------------------------------------
-   Datei:
-       /js/ai-core.js
+   AI CORE
+   FILE: js/ai-core.js
 
-   Version:
-       20.2.0
-
-   ZENTRALE HALDO-AI-RUNTIME
-
-   VERBINDET:
-
-   Kernel
-   System
-   App Manager
-   App Registry
-   App Router
-   Window Manager
-   Storage
-   Language
-   Voice
-   Speech
-   Notifications
-   Conversation State
-   AI Chat
-   AI Commands
-   AI Memory
-
-   Unterstützt:
-
-   - natürliche Unterhaltung
-   - Gesprächskontext
-   - Session Memory
-   - persistentes Memory über Storage
-   - App öffnen
-   - App schließen
-   - App aktivieren
-   - App minimieren
-   - App wiederherstellen
-   - App suchen
-   - Systeminformationen
+   ZENTRALER AI-KERN
+   ------------------------------------------------
+   - AI State
    - Events
-   - Sprachsystem
-   - Voice
-   - Speech
-   - Fehlerbehandlung
-   - Command Routing
-   - Runtime Context
-   - Mobile/Desktop Runtime
-   - Erweiterbarkeit
-
-   HALDO AI OS 20
-   ============================================================ */
+   - Conversation
+   - Memory
+   - Intent Detection
+   - Commands
+   - App Control
+   - Window Control
+   - System Bridge
+   - Storage Bridge
+   - Voice/Speech Bridge
+   - externe AI-Provider-Schnittstelle
+   - kompatibel mit HDA5 / HalDo
+   ================================================================ */
 
 "use strict";
 
-(function (window, document) {
+(function () {
 
-    /* ========================================================
-       01 — FOUNDATION
-       ======================================================== */
+    /* ============================================================
+       GLOBAL NAMESPACE
+       ============================================================ */
 
-    window.HalDoOS =
-        window.HalDoOS || {};
+    const HD =
+        window.HalDo =
+        window.HalDo || {};
 
-    const HalDoOS =
-        window.HalDoOS;
+    /*
+     * Ältere Projektteile verwenden HDA5.
+     * Wir halten diesen Namen kompatibel.
+     */
+    const HDA5 =
+        window.HDA5 =
+        window.HDA5 || HD;
 
+    /* ============================================================
+       BASIC EVENT BRIDGE
+       ============================================================ */
 
-    /* ========================================================
-       02 — META
-       ======================================================== */
+    HD.events =
+        HD.events || {
 
-    const VERSION =
-        "20.2.0";
+            listeners:
+                HD.events?.listeners ||
+                new Map(),
 
-    const MODULE_ID =
-        "ai-core";
+            on(name, handler) {
 
-    const NAME =
-        "HalDo AI Core 20";
+                if (
+                    typeof handler !==
+                    "function"
+                ) {
+                    return () => {};
+                }
 
+                if (
+                    !this.listeners.has(name)
+                ) {
+                    this.listeners.set(
+                        name,
+                        new Set()
+                    );
+                }
 
-    /* ========================================================
-       03 — SERVICE ACCESS
-       ======================================================== */
+                this.listeners
+                    .get(name)
+                    .add(handler);
 
-    function getKernel() {
+                return () => {
 
-        return (
-            window.HalDoKernel ||
-            HalDoOS.kernel ||
-            null
-        );
-    }
+                    this.listeners
+                        .get(name)
+                        ?.delete(handler);
 
+                };
 
-    function getSystem() {
+            },
 
-        return (
-            window.HalDoSystem ||
-            HalDoOS.system ||
-            null
-        );
-    }
+            off(name, handler) {
 
+                this.listeners
+                    .get(name)
+                    ?.delete(handler);
 
-    function getAppManager() {
+            },
 
-        return (
-            window.HalDoAppManager ||
-            window.HalDoOSAppManager ||
-            HalDoOS.appManager ||
-            null
-        );
-    }
+            emit(name, payload) {
 
+                const set =
+                    this.listeners.get(name);
 
-    function getRegistry() {
+                if (!set) {
+                    return;
+                }
 
-        return (
-            window.HalDoAppRegistry ||
-            HalDoOS.appRegistry ||
-            null
-        );
-    }
-
-
-    function getRouter() {
-
-        return (
-            window.HalDoAppRouter ||
-            HalDoOS.appRouter ||
-            null
-        );
-    }
-
-
-    function getWindowManager() {
-
-        return (
-            window.HalDoWindowManager ||
-            HalDoOS.windowManager ||
-            null
-        );
-    }
-
-
-    function getStorage() {
-
-        return (
-            window.HalDoStorage ||
-            HalDoOS.storage ||
-            null
-        );
-    }
-
-
-    function getLanguage() {
-
-        return (
-            window.HalDoLanguageManager ||
-            HalDoOS.languageManager ||
-            window.HalDoLanguage ||
-            HalDoOS.language ||
-            null
-        );
-    }
-
-
-    function getVoice() {
-
-        return (
-            window.HalDoVoice ||
-            HalDoOS.voice ||
-            null
-        );
-    }
-
-
-    function getSpeech() {
-
-        return (
-            window.HalDoSpeech ||
-            HalDoOS.speech ||
-            null
-        );
-    }
-
-
-    function getNotifications() {
-
-        return (
-            window.HalDoNotifications ||
-            HalDoOS.notifications ||
-            null
-        );
-    }
-
-
-    function getConversationState() {
-
-        return (
-            window.HalDoConversationState ||
-            HalDoOS.conversationState ||
-            null
-        );
-    }
-
-
-    function getAIChat() {
-
-        return (
-            window.HalDoAIChat ||
-            HalDoOS.aiChat ||
-            null
-        );
-    }
-
-
-    function getAICommands() {
-
-        return (
-            window.HalDoAICommands ||
-            HalDoOS.aiCommands ||
-            null
-        );
-    }
-
-
-    function getAIMemory() {
-
-        return (
-            window.HalDoAIMemory ||
-            HalDoOS.aiMemory ||
-            null
-        );
-    }
-
-
-    function hasMethod(
-        object,
-        method
-    ) {
-
-        return !!(
-            object &&
-            typeof object[method] ===
-            "function"
-        );
-    }
-
-
-    /* ========================================================
-       04 — HELPERS
-       ======================================================== */
-
-    function normalizeId(value) {
-
-        return String(value || "")
-            .trim()
-            .toLowerCase()
-            .replace(
-                /[^a-z0-9äöüßîêç_-]+/gi,
-                "-"
-            )
-            .replace(
-                /-+/g,
-                "-"
-            )
-            .replace(
-                /^-|-$/g,
-                "");
-    }
-
-
-    function clone(value) {
-
-        if (
-            value === null ||
-            value === undefined
-        ) {
-            return value;
-        }
-
-        if (
-            typeof structuredClone ===
-            "function"
-        ) {
-
-            try {
-                return structuredClone(value);
-            } catch (_) {}
-        }
-
-        if (Array.isArray(value)) {
-
-            return value.map(
-                item => clone(item)
-            );
-        }
-
-        if (
-            typeof value ===
-            "object"
-        ) {
-
-            const result = {};
-
-            Object.keys(value)
-                .forEach(key => {
-
-                    result[key] =
-                        clone(value[key]);
-
-                });
-
-            return result;
-        }
-
-        return value;
-    }
-
-
-    function safeAsync(
-        result
-    ) {
-
-        if (
-            result &&
-            typeof result.then ===
-            "function"
-        ) {
-
-            return result;
-        }
-
-        return Promise.resolve(
-            result
-        );
-    }
-
-
-    function now() {
-
-        return Date.now();
-    }
-
-
-    function createId(
-        prefix
-    ) {
-
-        return (
-            prefix +
-            "-" +
-            now() +
-            "-" +
-            Math.random()
-                .toString(36)
-                .slice(2, 9)
-        );
-    }
-
-
-    /* ========================================================
-       05 — STATE
-       ======================================================== */
-
-    const state = {
-
-        initialized:
-            false,
-
-        initializing:
-            false,
-
-        ready:
-            false,
-
-        failed:
-            false,
-
-        sessionId:
-            createId("haldo-session"),
-
-        startedAt:
-            now(),
-
-        language:
-            "de",
-
-        conversation:
-            [],
-
-        maxConversation:
-            100,
-
-        memory:
-            [],
-
-        maxMemory:
-            500,
-
-        activeApp:
-            null,
-
-        processing:
-            false,
-
-        lastUserMessage:
-            "",
-
-        lastResponse:
-            "",
-
-        lastCommand:
-            null,
-
-        listeners:
-            new Map(),
-
-        connections: {
-
-            kernel:
-                false,
-
-            system:
-                false,
-
-            appManager:
-                false,
-
-            registry:
-                false,
-
-            router:
-                false,
-
-            windowManager:
-                false,
-
-            storage:
-                false,
-
-            language:
-                false,
-
-            voice:
-                false,
-
-            speech:
-                false,
-
-            notifications:
-                false,
-
-            conversationState:
-                false,
-
-            aiChat:
-                false,
-
-            aiCommands:
-                false,
-
-            aiMemory:
-                false
-
-        },
-
-        statistics: {
-
-            messages:
-                0,
-
-            responses:
-                0,
-
-            commands:
-                0,
-
-            appsOpened:
-                0,
-
-            appsClosed:
-                0,
-
-            errors:
-                0,
-
-            memoryWrites:
-                0
-
-        }
-
-    };
-
-
-    /* ========================================================
-       06 — LOGGING
-       ======================================================== */
-
-    function log() {
-
-        try {
-
-            console.log(
-                "[HalDo AI Core 20]",
-                ...arguments
-            );
-
-        } catch (_) {}
-    }
-
-
-    function warn() {
-
-        try {
-
-            console.warn(
-                "[HalDo AI Core 20]",
-                ...arguments
-            );
-
-        } catch (_) {}
-    }
-
-
-    function errorLog() {
-
-        try {
-
-            console.error(
-                "[HalDo AI Core 20]",
-                ...arguments
-            );
-
-        } catch (_) {}
-    }
-
-
-    /* ========================================================
-       07 — EVENTS
-       ======================================================== */
-
-    function on(
-        event,
-        callback
-    ) {
-
-        if (
-            typeof callback !==
-            "function"
-        ) {
-
-            return function () {};
-        }
-
-        if (
-            !state.listeners.has(event)
-        ) {
-
-            state.listeners.set(
-                event,
-                new Set()
-            );
-        }
-
-        const listeners =
-            state.listeners.get(
-                event
-            );
-
-        listeners.add(
-            callback
-        );
-
-        return function () {
-
-            off(
-                event,
-                callback
-            );
-
-        };
-    }
-
-
-    function off(
-        event,
-        callback
-    ) {
-
-        const listeners =
-            state.listeners.get(
-                event
-            );
-
-        if (!listeners) {
-            return;
-        }
-
-        listeners.delete(
-            callback
-        );
-
-        if (!listeners.size) {
-
-            state.listeners.delete(
-                event
-            );
-        }
-    }
-
-
-    function emit(
-        event,
-        data = null
-    ) {
-
-        const listeners =
-            state.listeners.get(
-                event
-            );
-
-        if (listeners) {
-
-            Array.from(
-                listeners
-            ).forEach(
-                callback => {
+                for (
+                    const handler
+                    of Array.from(set)
+                ) {
 
                     try {
 
-                        callback(
-                            data
+                        handler(payload);
+
+                    } catch (error) {
+
+                        console.error(
+                            "[HalDo AI Event]",
+                            name,
+                            error
                         );
 
-                    } catch (
-                        exception
-                    ) {
-
-                        reportError(
-                            exception,
-                            "AI Event: " +
-                            event
-                        );
                     }
 
                 }
-            );
-        }
 
-
-        const kernel =
-            getKernel();
-
-        if (
-            kernel &&
-            hasMethod(
-                kernel,
-                "emit"
-            )
-        ) {
-
-            try {
-
-                kernel.emit(
-                    "ai:" + event,
-                    data
-                );
-
-            } catch (_) {}
-        }
-
-
-        const events =
-            HalDoOS.events;
-
-        if (
-            events &&
-            hasMethod(
-                events,
-                "emit"
-            )
-        ) {
-
-            try {
-
-                events.emit(
-                    "ai:" + event,
-                    data
-                );
-
-            } catch (_) {}
-        }
-
-
-        try {
-
-            window.dispatchEvent(
-                new CustomEvent(
-                    "haldo:ai:" + event,
-                    {
-                        detail:
-                            data
-                    }
-                )
-            );
-
-        } catch (_) {}
-    }
-
-
-    /* ========================================================
-       08 — ERROR HANDLING
-       ======================================================== */
-
-    function reportError(
-        exception,
-        context
-    ) {
-
-        state.statistics.errors +=
-            1;
-
-        const normalized =
-            exception instanceof Error
-                ? exception
-                : new Error(
-                    String(exception)
-                );
-
-        const record = {
-
-            name:
-                normalized.name,
-
-            message:
-                normalized.message,
-
-            stack:
-                normalized.stack ||
-                "",
-
-            context:
-                context ||
-                "HalDo AI",
-
-            time:
-                new Date()
-                    .toISOString()
+            }
 
         };
 
-        errorLog(
-            record
-        );
-
-        emit(
-            "error",
-            record
-        );
-
-        const kernel =
-            getKernel();
-
-        if (
-            kernel &&
-            hasMethod(
-                kernel,
-                "reportError"
-            )
+    HD.on =
+        HD.on ||
+        function (
+            name,
+            handler
         ) {
 
-            try {
-
-                kernel.reportError(
-                    normalized,
-                    context ||
-                    "HalDo AI"
-                );
-
-            } catch (_) {}
-        }
-
-        return record;
-    }
-
-
-    /* ========================================================
-       09 — CONVERSATION
-       ======================================================== */
-
-    function addConversation(
-        role,
-        content,
-        metadata = {}
-    ) {
-
-        const message = {
-
-            id:
-                createId(
-                    "message"
-                ),
-
-            role:
-                role,
-
-            content:
-                String(
-                    content ||
-                    ""
-                ),
-
-            metadata:
-                clone(metadata),
-
-            timestamp:
-                new Date()
-                    .toISOString()
+            return HD.events.on(
+                name,
+                handler
+            );
 
         };
 
-        state.conversation.push(
-            message
-        );
-
-        while (
-            state.conversation.length >
-            state.maxConversation
+    HD.off =
+        HD.off ||
+        function (
+            name,
+            handler
         ) {
 
-            state.conversation.shift();
-        }
-
-        emit(
-            "conversation-updated",
-            {
-                message,
-                conversation:
-                    clone(
-                        state.conversation
-                    )
-            }
-        );
-
-        return message;
-    }
-
-
-    function getConversation() {
-
-        return clone(
-            state.conversation
-        );
-    }
-
-
-    function clearConversation() {
-
-        state.conversation = [];
-
-        emit(
-            "conversation-cleared"
-        );
-
-        persistConversation();
-
-        return true;
-    }
-
-
-    function getConversationContext(
-        limit = 20
-    ) {
-
-        return state.conversation
-            .slice(
-                -Math.max(
-                    1,
-                    limit
-                )
-            )
-            .map(
-                message => ({
-                    role:
-                        message.role,
-
-                    content:
-                        message.content
-                })
+            return HD.events.off(
+                name,
+                handler
             );
-    }
 
+        };
 
-    /* ========================================================
-       10 — PERSISTENCE
-       ======================================================== */
-
-    const STORAGE_KEYS = {
-
-        conversation:
-            "haldo.os20.ai.conversation",
-
-        memory:
-            "haldo.os20.ai.memory",
-
-        language:
-            "haldo.os20.ai.language"
-
-    };
-
-
-    async function storageSet(
-        key,
-        value
-    ) {
-
-        const storage =
-            getStorage();
-
-        try {
-
-            if (
-                storage &&
-                hasMethod(
-                    storage,
-                    "set"
-                )
-            ) {
-
-                return await safeAsync(
-                    storage.set(
-                        key,
-                        value
-                    )
-                );
-            }
-
-            if (
-                window.localStorage
-            ) {
-
-                window.localStorage.setItem(
-                    key,
-                    JSON.stringify(
-                        value
-                    )
-                );
-
-                return true;
-            }
-
-        } catch (
-            exception
+    HD.emit =
+        HD.emit ||
+        function (
+            name,
+            payload
         ) {
 
-            reportError(
-                exception,
-                "AI Storage Set"
+            return HD.events.emit(
+                name,
+                payload
             );
-        }
 
-        return false;
-    }
+        };
 
+    /* ============================================================
+       STORAGE BRIDGE
+       ============================================================ */
 
-    async function storageGet(
+    function storageGet(
         key,
         fallback
     ) {
 
-        const storage =
-            getStorage();
+        try {
+
+            if (
+                HD.storage &&
+                typeof HD.storage.get ===
+                "function"
+            ) {
+
+                const value =
+                    HD.storage.get(
+                        key,
+                        fallback
+                    );
+
+                return value === undefined
+                    ? fallback
+                    : value;
+
+            }
+
+        } catch (error) {
+
+            console.warn(
+                "[HalDo AI] Storage read failed",
+                error
+            );
+
+        }
+
+        try {
+
+            const raw =
+                window.localStorage.getItem(
+                    key
+                );
+
+            if (
+                raw === null
+            ) {
+                return fallback;
+            }
+
+            return JSON.parse(
+                raw
+            );
+
+        } catch {
+
+            return fallback;
+
+        }
+
+    }
+
+    function storageSet(
+        key,
+        value
+    ) {
 
         try {
 
             if (
-                storage &&
-                hasMethod(
-                    storage,
-                    "get"
-                )
+                HD.storage &&
+                typeof HD.storage.set ===
+                "function"
             ) {
 
-                const result =
-                    await safeAsync(
-                        storage.get(
-                            key
-                        )
-                    );
-
-                return (
-                    result ===
-                    undefined
-                )
-                    ? fallback
-                    : result;
-            }
-
-            if (
-                window.localStorage
-            ) {
-
-                const raw =
-                    window.localStorage
-                        .getItem(key);
-
-                if (!raw) {
-                    return fallback;
-                }
-
-                return JSON.parse(
-                    raw
-                );
-            }
-
-        } catch (
-            exception
-        ) {
-
-            reportError(
-                exception,
-                "AI Storage Get"
-            );
-        }
-
-        return fallback;
-    }
-
-
-    async function persistConversation() {
-
-        await storageSet(
-            STORAGE_KEYS.conversation,
-            state.conversation
-        );
-    }
-
-
-    async function loadConversation() {
-
-        const result =
-            await storageGet(
-                STORAGE_KEYS.conversation,
-                []
-            );
-
-        if (
-            Array.isArray(result)
-        ) {
-
-            state.conversation =
-                result.slice(
-                    -state.maxConversation
-                );
-        }
-
-        emit(
-            "conversation-loaded",
-            {
-                count:
-                    state.conversation.length
-            }
-        );
-
-        return getConversation();
-    }
-
-
-    /* ========================================================
-       11 — MEMORY
-       ======================================================== */
-
-    async function remember(
-        key,
-        value,
-        metadata = {}
-    ) {
-
-        const record = {
-
-            id:
-                createId(
-                    "memory"
-                ),
-
-            key:
-                String(key || "")
-                    .trim(),
-
-            value:
-                clone(value),
-
-            metadata:
-                clone(metadata),
-
-            timestamp:
-                new Date()
-                    .toISOString()
-
-        };
-
-        if (!record.key) {
-            return false;
-        }
-
-        const existing =
-            state.memory.findIndex(
-                item =>
-                    item.key ===
-                    record.key
-            );
-
-        if (
-            existing >= 0
-        ) {
-
-            state.memory[
-                existing
-            ] = record;
-
-        } else {
-
-            state.memory.push(
-                record
-            );
-        }
-
-        while (
-            state.memory.length >
-            state.maxMemory
-        ) {
-
-            state.memory.shift();
-        }
-
-        state.statistics.memoryWrites +=
-            1;
-
-        emit(
-            "memory-written",
-            record
-        );
-
-        await storageSet(
-            STORAGE_KEYS.memory,
-            state.memory
-        );
-
-        const memory =
-            getAIMemory();
-
-        if (
-            memory &&
-            hasMethod(
-                memory,
-                "remember"
-            )
-        ) {
-
-            try {
-
-                await safeAsync(
-                    memory.remember(
-                        record.key,
-                        record.value,
-                        record.metadata
-                    )
-                );
-
-            } catch (
-                exception
-            ) {
-
-                reportError(
-                    exception,
-                    "AI Memory"
-                );
-            }
-        }
-
-        return true;
-    }
-
-
-    async function loadMemory() {
-
-        const result =
-            await storageGet(
-                STORAGE_KEYS.memory,
-                []
-            );
-
-        if (
-            Array.isArray(result)
-        ) {
-
-            state.memory =
-                result.slice(
-                    -state.maxMemory
-                );
-        }
-
-        const memory =
-            getAIMemory();
-
-        if (
-            memory &&
-            hasMethod(
-                memory,
-                "getAll"
-            )
-        ) {
-
-            try {
-
-                const external =
-                    await safeAsync(
-                        memory.getAll()
-                    );
-
-                if (
-                    Array.isArray(
-                        external
-                    )
-                ) {
-
-                    state.memory =
-                        external;
-                }
-
-            } catch (_) {}
-        }
-
-        return clone(
-            state.memory
-        );
-    }
-
-
-    function recall(
-        key
-    ) {
-
-        const value =
-            String(
-                key || ""
-            )
-            .trim()
-            .toLowerCase();
-
-        if (!value) {
-            return null;
-        }
-
-        const found =
-            state.memory.find(
-                item =>
-                    String(
-                        item.key || ""
-                    )
-                    .toLowerCase() ===
+                HD.storage.set(
+                    key,
                     value
+                );
+
+                return true;
+
+            }
+
+        } catch (error) {
+
+            console.warn(
+                "[HalDo AI] Storage write failed",
+                error
             );
 
-        return found
-            ? clone(found)
-            : null;
-    }
+        }
 
+        try {
 
-    function getMemory() {
-
-        return clone(
-            state.memory
-        );
-    }
-
-
-    async function forget(
-        key
-    ) {
-
-        const value =
-            String(
-                key || ""
-            )
-            .trim()
-            .toLowerCase();
-
-        const before =
-            state.memory.length;
-
-        state.memory =
-            state.memory.filter(
-                item =>
-                    String(
-                        item.key || ""
-                    )
-                    .toLowerCase() !==
-                    value
-            );
-
-        if (
-            before !==
-            state.memory.length
-        ) {
-
-            await storageSet(
-                STORAGE_KEYS.memory,
-                state.memory
-            );
-
-            emit(
-                "memory-forgotten",
-                {
-                    key
-                }
+            window.localStorage.setItem(
+                key,
+                JSON.stringify(value)
             );
 
             return true;
+
+        } catch {
+
+            return false;
+
         }
 
-        return false;
     }
 
+    /* ============================================================
+       AI MEMORY
+       ============================================================ */
 
-    /* ========================================================
-       12 — LANGUAGE
-       ======================================================== */
+    HD.aiMemory =
+        HD.aiMemory || {
 
-    async function loadLanguage() {
+            key:
+                "haldo-ai-memory",
 
-        const language =
-            getLanguage();
+            data:
+                storageGet(
+                    "haldo-ai-memory",
+                    {
+                        facts: [],
+                        preferences: [],
+                        conversations: []
+                    }
+                ),
 
-        try {
+            ensure() {
+
+                if (
+                    !this.data ||
+                    typeof this.data !==
+                    "object"
+                ) {
+
+                    this.data = {};
+
+                }
+
+                this.data.facts =
+                    Array.isArray(
+                        this.data.facts
+                    )
+                        ? this.data.facts
+                        : [];
+
+                this.data.preferences =
+                    Array.isArray(
+                        this.data.preferences
+                    )
+                        ? this.data.preferences
+                        : [];
+
+                this.data.conversations =
+                    Array.isArray(
+                        this.data.conversations
+                    )
+                        ? this.data.conversations
+                        : [];
+
+            },
+
+            save() {
+
+                this.ensure();
+
+                return storageSet(
+                    this.key,
+                    this.data
+                );
+
+            },
+
+            add(
+                type,
+                value
+            ) {
+
+                this.ensure();
+
+                if (
+                    !value
+                ) {
+                    return null;
+                }
+
+                if (
+                    !Array.isArray(
+                        this.data[type]
+                    )
+                ) {
+
+                    this.data[type] =
+                        [];
+
+                }
+
+                const item = {
+
+                    id:
+                        "memory-" +
+                        Date.now() +
+                        "-" +
+                        Math.random()
+                            .toString(36)
+                            .slice(2),
+
+                    value:
+                        String(value),
+
+                    createdAt:
+                        new Date()
+                            .toISOString()
+
+                };
+
+                this.data[type].push(
+                    item
+                );
+
+                /*
+                 * Speicher kontrolliert halten.
+                 */
+                if (
+                    this.data[type]
+                        .length > 500
+                ) {
+
+                    this.data[type] =
+                        this.data[type]
+                            .slice(-500);
+
+                }
+
+                this.save();
+
+                HD.emit(
+                    "ai:memory-added",
+                    {
+                        type,
+                        item
+                    }
+                );
+
+                return item;
+
+            },
+
+            get(type) {
+
+                this.ensure();
+
+                return [
+                    ...(this.data[type] || [])
+                ];
+
+            },
+
+            search(
+                query,
+                type = null
+            ) {
+
+                const text =
+                    String(
+                        query || ""
+                    )
+                    .trim()
+                    .toLowerCase();
+
+                if (!text) {
+                    return [];
+                }
+
+                const groups =
+                    type
+                        ? [
+                            {
+                                type,
+                                items:
+                                    this.get(
+                                        type
+                                    )
+                            }
+                        ]
+                        : Object.keys(
+                            this.data
+                        ).map(
+                            key => ({
+                                type: key,
+                                items:
+                                    this.get(
+                                        key
+                                    )
+                            })
+                        );
+
+                const result = [];
+
+                for (
+                    const group
+                    of groups
+                ) {
+
+                    for (
+                        const item
+                        of group.items
+                    ) {
+
+                        const value =
+                            String(
+                                item.value ||
+                                ""
+                            )
+                            .toLowerCase();
+
+                        if (
+                            value.includes(
+                                text
+                            )
+                        ) {
+
+                            result.push({
+                                ...item,
+                                type:
+                                    group.type
+                            });
+
+                        }
+
+                    }
+
+                }
+
+                return result;
+
+            },
+
+            clear() {
+
+                this.data = {
+
+                    facts: [],
+
+                    preferences: [],
+
+                    conversations: []
+
+                };
+
+                this.save();
+
+                HD.emit(
+                    "ai:memory-cleared"
+                );
+
+                return true;
+
+            },
+
+            getStatus() {
+
+                this.ensure();
+
+                return {
+
+                    facts:
+                        this.data.facts.length,
+
+                    preferences:
+                        this.data.preferences.length,
+
+                    conversations:
+                        this.data
+                            .conversations
+                            .length
+
+                };
+
+            }
+
+        };
+
+    HD.aiMemory.ensure();
+
+    /* ============================================================
+       AI CONVERSATION
+       ============================================================ */
+
+    HD.aiConversation =
+        HD.aiConversation || {
+
+            key:
+                "haldo-ai-conversation",
+
+            messages:
+                storageGet(
+                    "haldo-ai-conversation",
+                    []
+                ),
+
+            normalizeMessages() {
+
+                if (
+                    !Array.isArray(
+                        this.messages
+                    )
+                ) {
+
+                    this.messages = [];
+
+                }
+
+            },
+
+            save() {
+
+                this.normalizeMessages();
+
+                return storageSet(
+                    this.key,
+                    this.messages
+                );
+
+            },
+
+            add(
+                role,
+                content,
+                meta = {}
+            ) {
+
+                this.normalizeMessages();
+
+                const message = {
+
+                    id:
+                        "msg-" +
+                        Date.now() +
+                        "-" +
+                        Math.random()
+                            .toString(36)
+                            .slice(2),
+
+                    role:
+                        String(
+                            role ||
+                            "assistant"
+                        ),
+
+                    content:
+                        String(
+                            content ??
+                            ""
+                        ),
+
+                    timestamp:
+                        new Date()
+                            .toISOString(),
+
+                    meta:
+                        meta &&
+                        typeof meta ===
+                        "object"
+                            ? meta
+                            : {}
+
+                };
+
+                this.messages.push(
+                    message
+                );
+
+                if (
+                    this.messages.length >
+                    500
+                ) {
+
+                    this.messages =
+                        this.messages
+                            .slice(-500);
+
+                }
+
+                this.save();
+
+                HD.emit(
+                    "ai:conversation-added",
+                    message
+                );
+
+                return message;
+
+            },
+
+            all() {
+
+                this.normalizeMessages();
+
+                return [
+                    ...this.messages
+                ];
+
+            },
+
+            recent(
+                count = 20
+            ) {
+
+                this.normalizeMessages();
+
+                return this.messages
+                    .slice(
+                        -Math.max(
+                            1,
+                            Number(count) || 20
+                        )
+                    );
+
+            },
+
+            clear() {
+
+                this.messages = [];
+
+                this.save();
+
+                HD.emit(
+                    "ai:conversation-cleared"
+                );
+
+                return true;
+
+            }
+
+        };
+
+    /* ============================================================
+       COMMAND REGISTRY
+       ============================================================ */
+
+    HD.aiCommands =
+        HD.aiCommands || {
+
+            commands:
+                HD.aiCommands?.commands ||
+                new Map(),
+
+            register(
+                name,
+                handler,
+                options = {}
+            ) {
+
+                const id =
+                    String(
+                        name || ""
+                    )
+                    .trim()
+                    .toLowerCase();
+
+                if (
+                    !id ||
+                    typeof handler !==
+                    "function"
+                ) {
+
+                    return false;
+
+                }
+
+                this.commands.set(
+                    id,
+                    {
+
+                        id,
+
+                        handler,
+
+                        description:
+                            options.description ||
+                            "",
+
+                        aliases:
+                            Array.isArray(
+                                options.aliases
+                            )
+                                ? options.aliases
+                                : []
+
+                    }
+                );
+
+                HD.emit(
+                    "ai:command-registered",
+                    {
+                        id
+                    }
+                );
+
+                return true;
+
+            },
+
+            unregister(name) {
+
+                return this.commands.delete(
+                    String(
+                        name || ""
+                    )
+                    .trim()
+                    .toLowerCase()
+                );
+
+            },
+
+            get(name) {
+
+                const id =
+                    String(
+                        name || ""
+                    )
+                    .trim()
+                    .toLowerCase();
+
+                if (
+                    this.commands.has(id)
+                ) {
+
+                    return this.commands.get(
+                        id
+                    );
+
+                }
+
+                for (
+                    const command
+                    of this.commands.values()
+                ) {
+
+                    if (
+                        command.aliases
+                            .map(
+                                alias =>
+                                    String(
+                                        alias
+                                    )
+                                    .toLowerCase()
+                            )
+                            .includes(id)
+                    ) {
+
+                        return command;
+
+                    }
+
+                }
+
+                return null;
+
+            },
+
+            async execute(
+                name,
+                payload,
+                context = {}
+            ) {
+
+                const command =
+                    this.get(
+                        name
+                    );
+
+                if (
+                    !command
+                ) {
+
+                    return {
+
+                        success:
+                            false,
+
+                        error:
+                            "Command not found."
+
+                    };
+
+                }
+
+                try {
+
+                    const result =
+                        await command.handler(
+                            payload,
+                            context
+                        );
+
+                    HD.emit(
+                        "ai:command-executed",
+                        {
+                            command:
+                                command.id,
+
+                            result
+                        }
+                    );
+
+                    return {
+
+                        success:
+                            true,
+
+                        result
+
+                    };
+
+                } catch (error) {
+
+                    HD.emit(
+                        "ai:command-error",
+                        {
+                            command:
+                                command.id,
+
+                            error
+                        }
+                    );
+
+                    return {
+
+                        success:
+                            false,
+
+                        error
+
+                    };
+
+                }
+
+            },
+
+            list() {
+
+                return Array.from(
+                    this.commands.values()
+                ).map(
+                    command => ({
+                        id:
+                            command.id,
+
+                        description:
+                            command.description,
+
+                        aliases:
+                            [...command.aliases]
+
+                    })
+                );
+
+            }
+
+        };
+
+    /*
+     * Alte API-Kompatibilität.
+     */
+    HD.ai =
+        HD.ai || {};
+
+    HD.ai.addCommand =
+        HD.ai.addCommand ||
+        function (
+            name,
+            handler,
+            options
+        ) {
+
+            return HD.aiCommands.register(
+                name,
+                handler,
+                options
+            );
+
+        };
+
+    /* ============================================================
+       APP CONTROL BRIDGE
+       ============================================================ */
+
+    function findAppController() {
+
+        const candidates = [
+
+            HD.apps,
+
+            HD.appManager,
+
+            HD.runtime?.apps,
+
+            HD.appSystem,
+
+            HDA5.apps,
+
+            HDA5.appManager
+
+        ];
+
+        for (
+            const controller
+            of candidates
+        ) {
 
             if (
-                language &&
-                hasMethod(
-                    language,
-                    "getCurrentLanguage"
+                controller &&
+                (
+                    typeof controller.open ===
+                    "function" ||
+                    typeof controller.launch ===
+                    "function"
                 )
             ) {
 
-                const result =
-                    await safeAsync(
-                        language
-                            .getCurrentLanguage()
-                    );
+                return controller;
 
-                if (result) {
-
-                    state.language =
-                        String(result);
-                }
             }
 
-        } catch (_) {}
-
-
-        if (
-            !state.language
-        ) {
-
-            const saved =
-                await storageGet(
-                    STORAGE_KEYS.language,
-                    "de"
-                );
-
-            state.language =
-                String(
-                    saved || "de"
-                );
         }
 
-        return state.language;
+        return null;
+
     }
-
-
-    async function setLanguage(
-        language
-    ) {
-
-        const value =
-            String(
-                language || ""
-            )
-            .trim()
-            .toLowerCase();
-
-        if (!value) {
-            return false;
-        }
-
-        state.language =
-            value;
-
-        await storageSet(
-            STORAGE_KEYS.language,
-            value
-        );
-
-        const manager =
-            getLanguage();
-
-        if (
-            manager &&
-            hasMethod(
-                manager,
-                "setLanguage"
-            )
-        ) {
-
-            try {
-
-                await safeAsync(
-                    manager.setLanguage(
-                        value
-                    )
-                );
-
-            } catch (
-                exception
-            ) {
-
-                reportError(
-                    exception,
-                    "AI Language"
-                );
-            }
-        }
-
-        emit(
-            "language-changed",
-            {
-                language:
-                    value
-            }
-        );
-
-        return true;
-    }
-
-
-    /* ========================================================
-       13 — APP OPERATIONS
-       ======================================================== */
 
     async function openApp(
         appId,
         options = {}
     ) {
 
-        const manager =
-            getAppManager();
+        const controller =
+            findAppController();
 
-        if (!manager) {
+        if (
+            !controller
+        ) {
 
-            return {
+            HD.emit(
+                "ai:app-open-failed",
+                {
+                    appId,
+                    reason:
+                        "No app controller"
+                }
+            );
 
-                success:
-                    false,
+            return null;
 
-                error:
-                    "App Manager ist nicht verbunden."
-
-            };
         }
 
         try {
 
-            let result;
-
             if (
-                hasMethod(
-                    manager,
-                    "openApp"
-                )
+                typeof controller.open ===
+                "function"
             ) {
 
-                result =
-                    await safeAsync(
-                        manager.openApp(
-                            appId,
-                            options
-                        )
-                    );
-
-            } else if (
-                hasMethod(
-                    manager,
-                    "open"
-                )
-            ) {
-
-                result =
-                    await safeAsync(
-                        manager.open(
-                            appId,
-                            options
-                        )
-                    );
-
-            } else {
-
-                return {
-
-                    success:
-                        false,
-
-                    error:
-                        "App Manager besitzt keine Open-Funktion."
-
-                };
-            }
-
-            if (result) {
-
-                state.statistics.appsOpened +=
-                    1;
-
-                state.activeApp =
-                    normalizeId(
-                        appId
-                    );
-
-                emit(
-                    "app-opened",
-                    {
-                        appId:
-                            normalizeId(
-                                appId
-                            ),
-
-                        result
-                    }
+                return await controller.open(
+                    appId,
+                    options
                 );
 
-                return {
-
-                    success:
-                        true,
-
-                    result
-                };
             }
 
-            return {
+            if (
+                typeof controller.launch ===
+                "function"
+            ) {
 
-                success:
-                    false,
+                return await controller.launch(
+                    appId,
+                    options
+                );
 
-                error:
-                    "App konnte nicht geöffnet werden."
+            }
 
-            };
+        } catch (error) {
 
-        } catch (
-            exception
-        ) {
-
-            reportError(
-                exception,
-                "AI App Open"
+            HD.emit(
+                "ai:app-open-error",
+                {
+                    appId,
+                    error
+                }
             );
 
-            return {
-
-                success:
-                    false,
-
-                error:
-                    exception.message
-
-            };
         }
+
+        return null;
+
     }
 
-
-    async function closeApp(
+    function closeApp(
         appId
     ) {
 
-        const manager =
-            getAppManager();
+        const controller =
+            findAppController();
 
-        if (!manager) {
-
-            return {
-
-                success:
-                    false,
-
-                error:
-                    "App Manager ist nicht verbunden."
-
-            };
-        }
-
-        try {
-
-            const result =
-                hasMethod(
-                    manager,
-                    "closeApp"
-                )
-                    ? await safeAsync(
-                        manager.closeApp(
-                            appId
-                        )
-                    )
-                    : await safeAsync(
-                        manager.close(
-                            appId
-                        )
-                    );
-
-            if (result) {
-
-                state.statistics.appsClosed +=
-                    1;
-
-                emit(
-                    "app-closed",
-                    {
-                        appId:
-                            normalizeId(
-                                appId
-                            )
-                    }
-                );
-            }
-
-            return {
-
-                success:
-                    !!result,
-
-                result
-
-            };
-
-        } catch (
-            exception
+        if (
+            controller &&
+            typeof controller.close ===
+            "function"
         ) {
 
-            reportError(
-                exception,
-                "AI App Close"
-            );
+            try {
 
-            return {
+                return controller.close(
+                    appId
+                );
 
-                success:
-                    false,
+            } catch {}
 
-                error:
-                    exception.message
-
-            };
         }
+
+        return null;
+
     }
 
+    /* ============================================================
+       WINDOW BRIDGE
+       ============================================================ */
 
-    async function activateApp(
-        appId
+    function getWindowManager() {
+
+        return (
+            HD.windowManager ||
+            HDA5.windowManager ||
+            HD.runtime?.windowManager ||
+            null
+        );
+
+    }
+
+    function focusWindow(
+        windowId
     ) {
 
         const manager =
-            getAppManager();
-
-        if (!manager) {
-            return false;
-        }
-
-        try {
-
-            if (
-                hasMethod(
-                    manager,
-                    "activateApp"
-                )
-            ) {
-
-                return !!(
-                    await safeAsync(
-                        manager.activateApp(
-                            appId
-                        )
-                    )
-                );
-            }
-
-            if (
-                hasMethod(
-                    manager,
-                    "activate"
-                )
-            ) {
-
-                return !!(
-                    await safeAsync(
-                        manager.activate(
-                            appId
-                        )
-                    )
-                );
-            }
-
-        } catch (
-            exception
-        ) {
-
-            reportError(
-                exception,
-                "AI App Activate"
-            );
-        }
-
-        return false;
-    }
-
-
-    function searchApps(
-        query
-    ) {
-
-        const manager =
-            getAppManager();
+            getWindowManager();
 
         if (
             manager &&
-            hasMethod(
-                manager,
-                "search"
-            )
+            typeof manager.focus ===
+            "function"
         ) {
 
             try {
 
-                return manager.search(
-                    query
-                ) || [];
+                return manager.focus(
+                    windowId
+                );
 
-            } catch (_) {}
+            } catch {}
+
         }
 
-        const registry =
-            getRegistry();
+        return null;
 
-        if (
-            registry &&
-            hasMethod(
-                registry,
-                "search"
-            )
-        ) {
-
-            try {
-
-                return registry.search(
-                    query
-                ) || [];
-
-            } catch (_) {}
-        }
-
-        return [];
     }
 
+    /* ============================================================
+       SYSTEM BRIDGE
+       ============================================================ */
 
-    function getApps() {
-
-        const manager =
-            getAppManager();
+    async function systemStatus() {
 
         if (
-            manager &&
-            hasMethod(
-                manager,
-                "getAll"
-            )
+            HD.systemAPI?.getSystemStatus
         ) {
 
-            try {
+            return HD.systemAPI
+                .getSystemStatus();
 
-                return manager.getAll()
-                    || [];
-
-            } catch (_) {}
         }
 
-        return [];
+        if (
+            HD.os?.getStatus
+        ) {
+
+            return HD.os.getStatus();
+
+        }
+
+        return {
+
+            name:
+                "HalDo AI OS",
+
+            version:
+                "20.0.0",
+
+            ready:
+                true
+
+        };
+
     }
 
+    /* ============================================================
+       INTENT DETECTION
+       ============================================================ */
 
-    /* ========================================================
-       14 — COMMAND DETECTION
-       ======================================================== */
-
-    function cleanCommandText(
+    function normalize(
         text
     ) {
 
         return String(
             text || ""
         )
-        .trim()
-        .replace(
-            /\s+/g,
-            " "
-        );
+        .trim();
+
     }
 
-
-    function detectCommand(
+    function detectIntent(
         text
     ) {
 
         const value =
-            cleanCommandText(
+            normalize(
                 text
             )
             .toLowerCase();
 
         if (!value) {
-            return null;
+
+            return "empty";
+
         }
-
-
-        /*
-         * OPEN
-         */
-
-        const openPatterns = [
-
-            /^öffne\s+(.+)$/i,
-
-            /^öffnen\s+(.+)$/i,
-
-            /^starte\s+(.+)$/i,
-
-            /^start\s+(.+)$/i,
-
-            /^open\s+(.+)$/i,
-
-            /^launch\s+(.+)$/i,
-
-            /^zeige\s+(.+)$/i
-
-        ];
-
-        for (
-            const pattern of
-            openPatterns
-        ) {
-
-            const match =
-                value.match(
-                    pattern
-                );
-
-            if (match) {
-
-                return {
-
-                    type:
-                        "open-app",
-
-                    target:
-                        cleanCommandText(
-                            match[1]
-                        )
-
-                };
-            }
-        }
-
-
-        /*
-         * CLOSE
-         */
-
-        const closePatterns = [
-
-            /^schließe\s+(.+)$/i,
-
-            /^schli[eß]e\s+(.+)$/i,
-
-            /^beende\s+(.+)$/i,
-
-            /^close\s+(.+)$/i,
-
-            /^stoppe\s+(.+)$/i
-
-        ];
-
-        for (
-            const pattern of
-            closePatterns
-        ) {
-
-            const match =
-                value.match(
-                    pattern
-                );
-
-            if (match) {
-
-                return {
-
-                    type:
-                        "close-app",
-
-                    target:
-                        cleanCommandText(
-                            match[1]
-                        )
-
-                };
-            }
-        }
-
-
-        /*
-         * SEARCH
-         */
-
-        const searchPatterns = [
-
-            /^suche\s+nach\s+(.+)$/i,
-
-            /^suche\s+(.+)$/i,
-
-            /^search\s+(.+)$/i
-
-        ];
-
-        for (
-            const pattern of
-            searchPatterns
-        ) {
-
-            const match =
-                value.match(
-                    pattern
-                );
-
-            if (match) {
-
-                return {
-
-                    type:
-                        "search-app",
-
-                    target:
-                        cleanCommandText(
-                            match[1]
-                        )
-
-                };
-            }
-        }
-
-
-        /*
-         * MINIMIZE
-         */
 
         if (
-            value ===
-                "minimiere die app" ||
-            value ===
-                "minimieren" ||
-            value ===
-                "minimize"
+            /^(hi|hallo|hey|hello|moin|guten)\b/
+                .test(value)
         ) {
 
-            return {
+            return "greeting";
 
-                type:
-                    "minimize-active"
-
-            };
         }
-
-
-        /*
-         * RESTORE
-         */
 
         if (
-            value ===
-                "wiederherstellen" ||
-            value ===
-                "stelle die app wieder her" ||
-            value ===
-                "restore"
+            /\b(zeit|uhrzeit|wie spät|clock)\b/
+                .test(value)
         ) {
 
-            return {
+            return "clock";
 
-                type:
-                    "restore-active"
-
-            };
         }
-
-
-        /*
-         * SYSTEM
-         */
 
         if (
-            value.includes(
-                "systemstatus"
-            ) ||
-            value.includes(
-                "system status"
-            )
+            /\b(kalender|termin|termine|calendar)\b/
+                .test(value)
         ) {
 
-            return {
+            return "calendar";
 
-                type:
-                    "system-status"
-
-            };
         }
-
-
-        /*
-         * HELP
-         */
 
         if (
-            value ===
-                "hilfe" ||
-            value ===
-                "help" ||
-            value.includes(
-                "was kannst du"
-            ) ||
-            value.includes(
-                "was kannst du machen"
-            )
+            /\b(notiz|notizen|note|notes)\b/
+                .test(value)
         ) {
 
-            return {
+            return "notes";
 
-                type:
-                    "help"
-
-            };
         }
 
+        if (
+            /\b(aufgabe|aufgaben|task|tasks|todo)\b/
+                .test(value)
+        ) {
 
-        return null;
+            return "tasks";
+
+        }
+
+        if (
+            /\b(einstellungen|einstellung|settings)\b/
+                .test(value)
+        ) {
+
+            return "settings";
+
+        }
+
+        if (
+            /\b(rechner|rechnen|rechnung|calculator)\b/
+                .test(value)
+        ) {
+
+            return "calculator";
+
+        }
+
+        if (
+            /\b(schreib|schreiben|text|brief|writing)\b/
+                .test(value)
+        ) {
+
+            return "writing";
+
+        }
+
+        if (
+            /\b(übersetz|übersetzen|translation|translate)\b/
+                .test(value)
+        ) {
+
+            return "translation";
+
+        }
+
+        if (
+            /\b(systemstatus|system status|status|system)\b/
+                .test(value)
+        ) {
+
+            return "system";
+
+        }
+
+        if (
+            /\b(backup|sicherung)\b/
+                .test(value)
+        ) {
+
+            return "backup";
+
+        }
+
+        if (
+            /\b(app|apps|anwendung|öffne|öffnen|starte|starten)\b/
+                .test(value)
+        ) {
+
+            return "app-control";
+
+        }
+
+        if (
+            /\b(sonne|solar|sun)\b/
+                .test(value)
+        ) {
+
+            return "cosmic-sun";
+
+        }
+
+        if (
+            /\b(logo|haldo logo)\b/
+                .test(value)
+        ) {
+
+            return "cosmic-logo";
+
+        }
+
+        if (
+            /\b(planet|planeten|orbit|kosmos|cosmic)\b/
+                .test(value)
+        ) {
+
+            return "cosmic";
+
+        }
+
+        if (
+            /\b(danke|dankeschön|wie geht|alles gut)\b/
+                .test(value)
+        ) {
+
+            return "smalltalk";
+
+        }
+
+        return "conversation";
+
     }
 
+    /* ============================================================
+       LOCAL RESPONSE ENGINE
+       ============================================================ */
 
-    /* ========================================================
-       15 — COMMAND EXECUTION
-       ======================================================== */
-
-    async function executeCommand(
-        command
+    async function localResponse(
+        text,
+        intent
     ) {
 
-        if (!command) {
-            return null;
-        }
-
-        state.lastCommand =
-            clone(command);
-
-        state.statistics.commands +=
-            1;
-
-        emit(
-            "command-started",
-            command
-        );
-
-
-        try {
-
-            switch (
-                command.type
-            ) {
-
-
-                case "open-app": {
-
-                    const apps =
-                        searchApps(
-                            command.target
-                        );
-
-                    const exact =
-                        apps.find(
-                            app =>
-                                normalizeId(
-                                    app.id
-                                ) ===
-                                normalizeId(
-                                    command.target
-                                )
-                        );
-
-                    const selected =
-                        exact ||
-                        apps[0];
-
-                    if (!selected) {
-
-                        return {
-
-                            handled:
-                                true,
-
-                            success:
-                                false,
-
-                            message:
-                                "Ich konnte die App „" +
-                                command.target +
-                                "“ nicht finden."
-
-                        };
-                    }
-
-                    const result =
-                        await openApp(
-                            selected.id
-                        );
-
-                    return {
-
-                        handled:
-                            true,
-
-                        success:
-                            result.success,
-
-                        app:
-                            selected,
-
-                        message:
-                            result.success
-                                ? (
-                                    "Ich öffne " +
-                                    (
-                                        selected.title ||
-                                        selected.name ||
-                                        selected.id
-                                    ) +
-                                    " für dich."
-                                )
-                                :
-                                "Die App konnte nicht geöffnet werden."
-
-                    };
-                }
-
-
-                case "close-app": {
-
-                    const apps =
-                        searchApps(
-                            command.target
-                        );
-
-                    const selected =
-                        apps[0];
-
-                    if (!selected) {
-
-                        return {
-
-                            handled:
-                                true,
-
-                            success:
-                                false,
-
-                            message:
-                                "Ich konnte die App nicht finden."
-
-                        };
-                    }
-
-                    const result =
-                        await closeApp(
-                            selected.id
-                        );
-
-                    return {
-
-                        handled:
-                            true,
-
-                        success:
-                            result.success,
-
-                        message:
-                            result.success
-                                ? "Ich habe die App geschlossen."
-                                : "Die App konnte nicht geschlossen werden."
-
-                    };
-                }
-
-
-                case "search-app": {
-
-                    const results =
-                        searchApps(
-                            command.target
-                        );
-
-                    return {
-
-                        handled:
-                            true,
-
-                        success:
-                            true,
-
-                        results,
-
-                        message:
-                            results.length
-                                ? (
-                                    "Ich habe " +
-                                    results.length +
-                                    " passende App(s) gefunden."
-                                )
-                                :
-                                "Ich habe keine passende App gefunden."
-
-                    };
-                }
-
-
-                case "system-status": {
-
-                    const system =
-                        getSystem();
-
-                    let status =
-                        null;
-
-                    if (
-                        system &&
-                        hasMethod(
-                            system,
-                            "getStatus"
-                        )
-                    ) {
-
-                        status =
-                            await safeAsync(
-                                system.getStatus()
-                            );
-                    }
-
-                    return {
-
-                        handled:
-                            true,
-
-                        success:
-                            true,
-
-                        status,
-
-                        message:
-                            "Ich prüfe den aktuellen HalDo-Systemstatus."
-
-                    };
-                }
-
-
-                case "help": {
-
-                    return {
-
-                        handled:
-                            true,
-
-                        success:
-                            true,
-
-                        message:
-                            "Ich kann mit dir sprechen, Apps suchen und öffnen, Apps schließen, Systeminformationen abrufen und – sobald die jeweilige App verbunden ist – ihre vorgesehenen Funktionen ausführen."
-
-                    };
-                }
-
-
-                case "minimize-active": {
-
-                    const manager =
-                        getAppManager();
-
-                    const active =
-                        manager &&
-                        hasMethod(
-                            manager,
-                            "getActiveAppId"
-                        )
-                            ? manager.getActiveAppId()
-                            : null;
-
-                    if (
-                        active &&
-                        hasMethod(
-                            manager,
-                            "minimize"
-                        )
-                    ) {
-
-                        await safeAsync(
-                            manager.minimize(
-                                active
-                            )
-                        );
-
-                        return {
-
-                            handled:
-                                true,
-
-                            success:
-                                true,
-
-                            message:
-                                "Ich habe die aktive App minimiert."
-
-                        };
-                    }
-
-                    return {
-
-                        handled:
-                            true,
-
-                        success:
-                            false,
-
-                        message:
-                            "Momentan ist keine aktive App zum Minimieren vorhanden."
-
-                    };
-                }
-
-
-                case "restore-active": {
-
-                    const manager =
-                        getAppManager();
-
-                    const active =
-                        manager &&
-                        hasMethod(
-                            manager,
-                            "getActiveAppId"
-                        )
-                            ? manager.getActiveAppId()
-                            : null;
-
-                    if (
-                        active &&
-                        hasMethod(
-                            manager,
-                            "restore"
-                        )
-                    ) {
-
-                        await safeAsync(
-                            manager.restore(
-                                active
-                            )
-                        );
-
-                        return {
-
-                            handled:
-                                true,
-
-                            success:
-                                true,
-
-                            message:
-                                "Ich habe die aktive App wiederhergestellt."
-
-                        };
-                    }
-
-                    return {
-
-                        handled:
-                            true,
-
-                        success:
-                            false,
-
-                        message:
-                            "Es gibt momentan keine aktive App zum Wiederherstellen."
-
-                    };
-                }
-
-
-                default:
-
-                    return {
-
-                        handled:
-                            false
-
-                    };
-            }
-
-        } catch (
-            exception
+        const language =
+            HD.aiLanguage?.current ||
+            HD.language?.current ||
+            "de";
+
+        switch (
+            intent
         ) {
 
-            reportError(
-                exception,
-                "AI Command Execution"
-            );
+            case "empty":
+
+                return {
+
+                    text:
+                        "Ich bin da. Schreib mir einfach, was du möchtest.",
+
+                    intent
+
+                };
+
+            case "greeting":
+
+                return {
+
+                    text:
+                        language === "en"
+                            ? "Hello! ❤️ I am HalDo AI. What would you like us to do today?"
+                            : language === "fr"
+                                ? "Bonjour ! ❤️ Je suis HalDo AI. Que souhaitez-vous faire aujourd'hui ?"
+                                : "Hallo! ❤️ Ich bin HalDo AI. Schön, dass du da bist. Was möchtest du heute gemeinsam machen?",
+
+                    intent
+
+                };
+
+            case "smalltalk":
+
+                return {
+
+                    text:
+                        "Danke, dass du fragst. Ich bin bereit und aufmerksam. Erzähl mir, was gerade wichtig für dich ist.",
+
+                    intent
+
+                };
+
+            case "calendar":
+
+                return {
+
+                    text:
+                        "Ich kann deinen HalDo-Kalender öffnen und Termine verwalten.",
+
+                    intent,
+
+                    action:
+                        "calendar"
+
+                };
+
+            case "notes":
+
+                return {
+
+                    text:
+                        "Ich kann deine Notizen öffnen, erstellen und speichern.",
+
+                    intent,
+
+                    action:
+                        "notes"
+
+                };
+
+            case "tasks":
+
+                return {
+
+                    text:
+                        "Ich kann deine Aufgabenverwaltung öffnen und Aufgaben speichern.",
+
+                    intent,
+
+                    action:
+                        "tasks"
+
+                };
+
+            case "settings":
+
+                return {
+
+                    text:
+                        "Ich öffne die HalDo-Einstellungen für dich.",
+
+                    intent,
+
+                    action:
+                        "settings"
+
+                };
+
+            case "clock":
+
+                return {
+
+                    text:
+                        `Die aktuelle Zeit ist ${new Date().toLocaleTimeString()}.`,
+
+                    intent,
+
+                    action:
+                        "clock"
+
+                };
+
+            case "calculator":
+
+                return {
+
+                    text:
+                        "Der HalDo-Rechner steht bereit.",
+
+                    intent,
+
+                    action:
+                        "calculator"
+
+                };
+
+            case "writing":
+
+                return {
+
+                    text:
+                        "Natürlich. Sag mir Thema, Stil und Länge. Ich kann daraus einen strukturierten Text erstellen.",
+
+                    intent
+
+                };
+
+            case "translation":
+
+                return {
+
+                    text:
+                        "Gerne. Schreibe den Text und nenne mir die gewünschte Zielsprache.",
+
+                    intent
+
+                };
+
+            case "system":
+
+                return {
+
+                    text:
+                        "Ich prüfe den aktuellen Zustand von HalDo AI OS.",
+
+                    intent,
+
+                    data:
+                        await systemStatus()
+
+                };
+
+            case "backup":
+
+                return {
+
+                    text:
+                        "Die Backup-Funktion ist mit dem HalDo-System verbunden.",
+
+                    intent,
+
+                    action:
+                        "backup"
+
+                };
+
+            case "cosmic-sun":
+
+                return {
+
+                    text:
+                        "Ich öffne HalDo AI über das Cosmic-Sonnen-System.",
+
+                    intent,
+
+                    action:
+                        "ai",
+
+                    source:
+                        "cosmic-sun"
+
+                };
+
+            case "cosmic-logo":
+
+                return {
+
+                    text:
+                        "Ich öffne HalDo AI über das HalDo-Logo.",
+
+                    intent,
+
+                    action:
+                        "ai",
+
+                    source:
+                        "cosmic-logo"
+
+                };
+
+            case "cosmic":
+
+                return {
+
+                    text:
+                        "Die HalDo Cosmic World ist aktiv.",
+
+                    intent
+
+                };
+
+            case "app-control":
+
+                return {
+
+                    text:
+                        "Ich kann Apps über das HalDo-App-System öffnen und steuern.",
+
+                    intent
+
+                };
+
+            default:
+
+                return {
+
+                    text:
+                        "Ich habe deine Nachricht verstanden. Die lokale HalDo-AI-Schicht ist aktiv. Für externe KI-Inferenz kann ein AI-Service über den vorgesehenen Provider angeschlossen werden.",
+
+                    intent
+
+                };
+
+        }
+
+    }
+
+    /* ============================================================
+       AI CORE
+       ============================================================ */
+
+    HD.aiCore =
+        HD.aiCore || {
+
+            status:
+                "ready",
+
+            name:
+                "HalDo AI",
+
+            version:
+                "20.0.0",
+
+            capabilities: [
+
+                "conversation",
+
+                "writing",
+
+                "reasoning",
+
+                "summarization",
+
+                "translation",
+
+                "planning",
+
+                "system-control",
+
+                "app-control",
+
+                "memory",
+
+                "voice",
+
+                "speech",
+
+                "commands",
+
+                "storage",
+
+                "cosmic-control"
+
+            ],
+
+            provider:
+                null,
+
+            initialized:
+                false,
+
+            setStatus(
+                status
+            ) {
+
+                this.status =
+                    status;
+
+                HD.emit(
+                    "ai:status",
+                    {
+                        status
+                    }
+                );
+
+            },
+
+            normalize,
+
+            detectIntent,
+
+            getMemory() {
+
+                return HD.aiMemory;
+
+            },
+
+            getConversation() {
+
+                return HD.aiConversation;
+
+            },
+
+            registerProvider(
+                provider
+            ) {
+
+                if (
+                    typeof provider ===
+                    "function"
+                ) {
+
+                    this.provider =
+                        provider;
+
+                    HD.emit(
+                        "ai:provider-connected"
+                    );
+
+                    return true;
+
+                }
+
+                if (
+                    provider &&
+                    typeof provider.ask ===
+                    "function"
+                ) {
+
+                    this.provider =
+                        provider.ask.bind(
+                            provider
+                        );
+
+                    HD.emit(
+                        "ai:provider-connected"
+                    );
+
+                    return true;
+
+                }
+
+                return false;
+
+            },
+
+            removeProvider() {
+
+                this.provider =
+                    null;
+
+                HD.emit(
+                    "ai:provider-disconnected"
+                );
+
+            },
+
+            async ask(
+                text,
+                options = {}
+            ) {
+
+                const input =
+                    normalize(
+                        text
+                    );
+
+                if (!input) {
+
+                    return localResponse(
+                        "",
+                        "empty"
+                    );
+
+                }
+
+                this.setStatus(
+                    "thinking"
+                );
+
+                HD.aiConversation.add(
+                    "user",
+                    input
+                );
+
+                const intent =
+                    detectIntent(
+                        input
+                    );
+
+                HD.emit(
+                    "ai:intent",
+                    {
+                        text:
+                            input,
+
+                        intent
+                    }
+                );
+
+                let response;
+
+                /*
+                 * Externe AI zuerst nur dann,
+                 * wenn ausdrücklich gewünscht
+                 * oder ein Provider verfügbar ist.
+                 */
+                if (
+                    this.provider &&
+                    options.localOnly !== true
+                ) {
+
+                    try {
+
+                        response =
+                            await this.provider(
+                                input,
+                                {
+                                    intent,
+
+                                    memory:
+                                        HD.aiMemory
+                                            .getStatus(),
+
+                                    conversation:
+                                        HD.aiConversation
+                                            .recent(30),
+
+                                    options
+
+                                }
+                            );
+
+                        /*
+                         * Provider darf String oder
+                         * Response-Objekt zurückgeben.
+                         */
+                        if (
+                            typeof response ===
+                            "string"
+                        ) {
+
+                            response = {
+
+                                text:
+                                    response,
+
+                                intent
+
+                            };
+
+                        }
+
+                    } catch (error) {
+
+                        HD.emit(
+                            "ai:provider-error",
+                            {
+                                error
+                            }
+                        );
+
+                        response =
+                            await localResponse(
+                                input,
+                                intent
+                            );
+
+                    }
+
+                } else {
+
+                    response =
+                        await localResponse(
+                            input,
+                            intent
+                        );
+
+                }
+
+                response =
+                    response || {
+
+                        text:
+                            "Ich konnte gerade keine Antwort erzeugen.",
+
+                        intent
+
+                    };
+
+                if (
+                    response.action
+                ) {
+
+                    setTimeout(
+                        async () => {
+
+                            try {
+
+                                await openApp(
+                                    response.action,
+                                    {
+                                        source:
+                                            response.source ||
+                                            "ai"
+                                    }
+                                );
+
+                            } catch {}
+
+                        },
+                        120
+                    );
+
+                }
+
+                HD.aiConversation.add(
+                    "assistant",
+                    response.text,
+                    {
+                        intent:
+                            response.intent ||
+                            intent,
+
+                        action:
+                            response.action ||
+                            null
+                    }
+                );
+
+                HD.aiMemory.add(
+                    "conversations",
+                    response.text
+                );
+
+                this.setStatus(
+                    "ready"
+                );
+
+                HD.emit(
+                    "ai:response",
+                    response
+                );
+
+                return response;
+
+            },
+
+            async openWindow(
+                options = {}
+            ) {
+
+                /*
+                 * Primär das neue V20-System.
+                 */
+                const v20Candidates = [
+
+                    HD.appRuntime,
+
+                    HD.appManager,
+
+                    HD.apps,
+
+                    HDA5.appManager
+
+                ];
+
+                for (
+                    const manager
+                    of v20Candidates
+                ) {
+
+                    if (
+                        !manager
+                    ) {
+                        continue;
+                    }
+
+                    try {
+
+                        if (
+                            typeof manager.open ===
+                            "function"
+                        ) {
+
+                            const result =
+                                await manager.open(
+                                    "ai",
+                                    options
+                                );
+
+                            if (
+                                result
+                            ) {
+
+                                return result;
+
+                            }
+
+                        }
+
+                    } catch {}
+
+                }
+
+                /*
+                 * Bestehende AI-App als Fallback.
+                 */
+                if (
+                    HD.apps?.ai?.open
+                ) {
+
+                    return HD.apps.ai.open(
+                        options
+                    );
+
+                }
+
+                if (
+                    HDA5.apps?.ai?.open
+                ) {
+
+                    return HDA5.apps.ai.open(
+                        options
+                    );
+
+                }
+
+                return null;
+
+            },
+
+            closeWindow() {
+
+                const manager =
+                    getWindowManager();
+
+                if (
+                    manager?.close
+                ) {
+
+                    try {
+
+                        return manager.close(
+                            "app-ai"
+                        );
+
+                    } catch {}
+
+                }
+
+                return null;
+
+            },
+
+            focusWindow() {
+
+                return focusWindow(
+                    "app-ai"
+                );
+
+            },
+
+            getStatus() {
+
+                return {
+
+                    name:
+                        this.name,
+
+                    version:
+                        this.version,
+
+                    status:
+                        this.status,
+
+                    initialized:
+                        this.initialized,
+
+                    provider:
+                        Boolean(
+                            this.provider
+                        ),
+
+                    capabilities:
+                        [
+                            ...this.capabilities
+                        ],
+
+                    memory:
+                        HD.aiMemory
+                            .getStatus(),
+
+                    conversation:
+                        HD.aiConversation
+                            .messages
+                            .length,
+
+                    commands:
+                        HD.aiCommands
+                            .commands
+                            .size
+
+                };
+
+            }
+
+        };
+
+    /* ============================================================
+       COMMANDS
+       ============================================================ */
+
+    HD.aiCommands.register(
+        "system",
+        async function () {
+
+            return systemStatus();
+
+        },
+        {
+            description:
+                "Zeigt den HalDo-Systemstatus."
+        }
+    );
+
+    HD.aiCommands.register(
+        "open-ai",
+        async function () {
+
+            return HD.aiCore
+                .openWindow();
+
+        },
+        {
+            description:
+                "Öffnet das HalDo AI Fenster.",
+            aliases: [
+                "ai",
+                "haldo-ai"
+            ]
+        }
+    );
+
+    HD.aiCommands.register(
+        "close-ai",
+        async function () {
+
+            return HD.aiCore
+                .closeWindow();
+
+        },
+        {
+            description:
+                "Schließt das HalDo AI Fenster."
+        }
+    );
+
+    HD.aiCommands.register(
+        "memory",
+        function (
+            payload
+        ) {
+
+            if (
+                payload?.clear
+            ) {
+
+                return HD.aiMemory
+                    .clear();
+
+            }
+
+            return HD.aiMemory
+                .getStatus();
+
+        },
+        {
+            description:
+                "Verwaltet den AI-Speicher."
+        }
+    );
+
+    HD.aiCommands.register(
+        "backup",
+        async function () {
+
+            if (
+                HD.backup?.create
+            ) {
+
+                return HD.backup
+                    .create();
+
+            }
 
             return {
-
-                handled:
-                    true,
 
                 success:
                     false,
 
                 error:
-                    exception.message
+                    "Backup-System nicht verfügbar."
 
             };
 
-        } finally {
-
-            emit(
-                "command-finished",
-                command
-            );
-        }
-    }
-
-
-    /* ========================================================
-       16 — NATURAL RESPONSE
-       ======================================================== */
-
-    function localResponse(
-        text
-    ) {
-
-        const value =
-            String(
-                text || ""
-            )
-            .trim()
-            .toLowerCase();
-
-
-        if (!value) {
-
-            return "Ich bin hier. Erzähl mir, was du machen möchtest.";
-        }
-
-
-        if (
-            /^(hallo|hi|hey|guten morgen|guten tag|guten abend)\b/
-                .test(value)
-        ) {
-
-            return "Hallo. 💙 Ich bin HalDo AI. Ich bin bereit, mit dir zu sprechen und dein HalDo AI OS zu bedienen.";
-        }
-
-
-        if (
-            value.includes(
-                "wie geht es dir"
-            ) ||
-            value.includes(
-                "wie geht's dir"
-            )
-        ) {
-
-            return "Danke, dass du fragst. Ich bin bereit und konzentriere mich auf deine Anfrage.";
-        }
-
-
-        if (
-            value.includes(
-                "wer bist du"
-            )
-        ) {
-
-            return "Ich bin HalDo AI – die KI-Schnittstelle deines HalDo AI OS. Ich kann Gespräche führen und über die verbundenen Systemdienste mit deinen Apps und dem Betriebssystem arbeiten.";
-        }
-
-
-        if (
-            value.includes(
-                "danke"
-            )
-        ) {
-
-            return "Sehr gerne. 💙";
-        }
-
-
-        if (
-            value.includes(
-                "was machst du"
-            )
-        ) {
-
-            return "Ich kann mit dir sprechen, deinen Gesprächskontext nutzen und über die verbundenen HalDo-Dienste Apps und Systemfunktionen ansteuern.";
-        }
-
-
-        return null;
-    }
-
-
-    /* ========================================================
-       17 — MAIN CHAT
-       ======================================================== */
-
-    async function chat(
-        input,
-        options = {}
-    ) {
-
-        const text =
-            cleanCommandText(
-                input
-            );
-
-        if (!text) {
-
-            return {
-
-                success:
-                    false,
-
-                message:
-                    "Ich habe keine Nachricht erhalten."
-
-            };
-        }
-
-
-        if (
-            state.processing &&
-            options.allowConcurrent !==
-            true
-        ) {
-
-            return {
-
-                success:
-                    false,
-
-                busy:
-                    true,
-
-                message:
-                    "Ich bearbeite gerade deine vorherige Anfrage."
-
-            };
-        }
-
-
-        state.processing =
-            true;
-
-        state.lastUserMessage =
-            text;
-
-        state.statistics.messages +=
-            1;
-
-
-        const userMessage =
-            addConversation(
-                "user",
-                text
-            );
-
-
-        emit(
-            "message-received",
-            userMessage
-        );
-
-
-        try {
-
-            /*
-             * 1 — externe AI Command Engine
-             */
-
-            const commands =
-                getAICommands();
-
-            if (
-                commands &&
-                hasMethod(
-                    commands,
-                    "parse"
-                )
-            ) {
-
-                try {
-
-                    const parsed =
-                        await safeAsync(
-                            commands.parse(
-                                text,
-                                {
-                                    language:
-                                        state.language,
-
-                                    conversation:
-                                        getConversationContext()
-                                }
-                            )
-                        );
-
-                    if (parsed) {
-
-                        const commandResult =
-                            await executeCommand(
-                                parsed
-                            );
-
-                        if (
-                            commandResult &&
-                            commandResult.handled
-                        ) {
-
-                            const responseText =
-                                commandResult.message ||
-                                (
-                                    commandResult.success
-                                        ? "Erledigt."
-                                        : "Das konnte ich leider nicht ausführen."
-                                );
-
-                            return await finalizeResponse(
-                                responseText,
-                                {
-                                    type:
-                                        "command",
-
-                                    command:
-                                        parsed,
-
-                                    result:
-                                        commandResult
-                                }
-                            );
-                        }
-                    }
-
-                } catch (
-                    exception
-                ) {
-
-                    reportError(
-                        exception,
-                        "AI Commands"
-                    );
-                }
-            }
-
-
-            /*
-             * 2 — lokale Command-Erkennung
-             */
-
-            const command =
-                detectCommand(
-                    text
-                );
-
-            if (command) {
-
-                const result =
-                    await executeCommand(
-                        command
-                    );
-
-                if (
-                    result &&
-                    result.handled
-                ) {
-
-                    return await finalizeResponse(
-                        result.message ||
-                        "Erledigt.",
-                        {
-                            type:
-                                "command",
-
-                            command,
-
-                            result
-                        }
-                    );
-                }
-            }
-
-
-            /*
-             * 3 — vorhandene AI Chat Engine
-             */
-
-            const aiChat =
-                getAIChat();
-
-            if (
-                aiChat &&
-                hasMethod(
-                    aiChat,
-                    "chat"
-                )
-            ) {
-
-                try {
-
-                    const result =
-                        await safeAsync(
-                            aiChat.chat(
-                                text,
-                                {
-                                    language:
-                                        state.language,
-
-                                    conversation:
-                                        getConversationContext(),
-
-                                    memory:
-                                        getMemory(),
-
-                                    sessionId:
-                                        state.sessionId,
-
-                                    options
-                                }
-                            )
-                        );
-
-                    const response =
-                        normalizeAIResult(
-                            result
-                        );
-
-                    if (response) {
-
-                        return await finalizeResponse(
-                            response,
-                            {
-                                type:
-                                    "ai-chat",
-
-                                source:
-                                    "ai-chat"
-                            }
-                        );
-                    }
-
-                } catch (
-                    exception
-                ) {
-
-                    reportError(
-                        exception,
-                        "AI Chat Engine"
-                    );
-                }
-            }
-
-
-            /*
-             * 4 — lokale Antwort
-             */
-
-            const local =
-                localResponse(
-                    text
-                );
-
-            if (local) {
-
-                return await finalizeResponse(
-                    local,
-                    {
-                        type:
-                            "local"
-                    }
-                );
-            }
-
-
-            /*
-             * 5 — sichere Fallback-Antwort
-             */
-
-            return await finalizeResponse(
-                "Ich habe deine Nachricht verstanden. Für diese Anfrage ist momentan noch keine passende HalDo-Funktion verbunden.",
-                {
-                    type:
-                        "fallback"
-                }
-            );
-
-        } catch (
-            exception
-        ) {
-
-            reportError(
-                exception,
-                "HalDo AI Chat"
-            );
-
-            return await finalizeResponse(
-                "Entschuldigung, dabei ist ein Fehler aufgetreten. Ich habe ihn erkannt und an das HalDo-System weitergegeben.",
-                {
-                    type:
-                        "error"
-                }
-            );
-
-        } finally {
-
-            state.processing =
-                false;
-        }
-    }
-
-
-    function normalizeAIResult(
-        result
-    ) {
-
-        if (
-            result === null ||
-            result === undefined
-        ) {
-
-            return null;
-        }
-
-
-        if (
-            typeof result ===
-            "string"
-        ) {
-
-            return result.trim() ||
-                null;
-        }
-
-
-        if (
-            typeof result ===
-            "object"
-        ) {
-
-            const candidates = [
-
-                result.message,
-
-                result.response,
-
-                result.text,
-
-                result.content,
-
-                result.answer
-
-            ];
-
-            for (
-                const candidate of
-                candidates
-            ) {
-
-                if (
-                    typeof candidate ===
-                    "string" &&
-                    candidate.trim()
-                ) {
-
-                    return candidate.trim();
-                }
-            }
-        }
-
-        return null;
-    }
-
-
-    async function finalizeResponse(
-        text,
-        metadata = {}
-    ) {
-
-        const responseText =
-            String(
-                text ||
-                "Ich bin hier."
-            ).trim();
-
-
-        const assistantMessage =
-            addConversation(
-                "assistant",
-                responseText,
-                metadata
-            );
-
-        state.lastResponse =
-            responseText;
-
-        state.statistics.responses +=
-            1;
-
-
-        await persistConversation();
-
-
-        emit(
-            "response",
-            {
-                message:
-                    assistantMessage,
-
-                text:
-                    responseText,
-
-                metadata:
-                    clone(metadata)
-            }
-        );
-
-
-        /*
-         * Optional Voice Output
-         */
-
-        if (
-            metadata.speak === true
-        ) {
-
-            await speak(
-                responseText
-            );
-        }
-
-
-        return {
-
-            success:
-                true,
-
-            text:
-                responseText,
-
-            message:
-                assistantMessage,
-
-            metadata:
-                clone(metadata)
-
-        };
-    }
-
-
-    /* ========================================================
-       18 — SPEECH / VOICE
-       ======================================================== */
-
-    async function speak(
-        text,
-        options = {}
-    ) {
-
-        const value =
-            String(
-                text || ""
-            ).trim();
-
-        if (!value) {
-            return false;
-        }
-
-
-        const voice =
-            getVoice();
-
-        if (
-            voice &&
-            hasMethod(
-                voice,
-                "speak"
-            )
-        ) {
-
-            try {
-
-                await safeAsync(
-                    voice.speak(
-                        value,
-                        options
-                    )
-                );
-
-                emit(
-                    "speech-started",
-                    {
-                        text:
-                            value
-                    }
-                );
-
-                return true;
-
-            } catch (
-                exception
-            ) {
-
-                reportError(
-                    exception,
-                    "HalDo Voice"
-                );
-            }
-        }
-
-
-        const speech =
-            getSpeech();
-
-        if (
-            speech &&
-            hasMethod(
-                speech,
-                "speak"
-            )
-        ) {
-
-            try {
-
-                await safeAsync(
-                    speech.speak(
-                        value,
-                        options
-                    )
-                );
-
-                return true;
-
-            } catch (
-                exception
-            ) {
-
-                reportError(
-                    exception,
-                    "HalDo Speech"
-                );
-            }
-        }
-
-
-        /*
-         * Browser fallback
-         */
-
-        if (
-            "speechSynthesis" in
-            window
-        ) {
-
-            try {
-
-                window.speechSynthesis.cancel();
-
-                const utterance =
-                    new SpeechSynthesisUtterance(
-                        value
-                    );
-
-                utterance.lang =
-                    options.lang ||
-                    state.language ||
-                    "de-DE";
-
-                if (
-                    typeof options.rate ===
-                    "number"
-                ) {
-
-                    utterance.rate =
-                        options.rate;
-                }
-
-                if (
-                    typeof options.pitch ===
-                    "number"
-                ) {
-
-                    utterance.pitch =
-                        options.pitch;
-                }
-
-                window.speechSynthesis
-                    .speak(
-                        utterance
-                    );
-
-                return true;
-
-            } catch (
-                exception
-            ) {
-
-                reportError(
-                    exception,
-                    "Browser Speech"
-                );
-            }
-        }
-
-        return false;
-    }
-
-
-    function stopSpeaking() {
-
-        const voice =
-            getVoice();
-
-        if (
-            voice &&
-            hasMethod(
-                voice,
-                "stop"
-            )
-        ) {
-
-            try {
-
-                voice.stop();
-
-            } catch (_) {}
-        }
-
-
-        if (
-            "speechSynthesis" in
-            window
-        ) {
-
-            try {
-
-                window.speechSynthesis
-                    .cancel();
-
-            } catch (_) {}
-        }
-
-        emit(
-            "speech-stopped"
-        );
-
-        return true;
-    }
-
-
-    /* ========================================================
-       19 — SYSTEM CONTEXT
-       ======================================================== */
-
-    function getSystemContext() {
-
-        const manager =
-            getAppManager();
-
-        let activeApp =
-            null;
-
-        let apps = [];
-
-        if (
-            manager &&
-            hasMethod(
-                manager,
-                "getActiveApp"
-            )
-        ) {
-
-            try {
-
-                activeApp =
-                    manager.getActiveApp();
-
-            } catch (_) {}
-        }
-
-        if (
-            manager &&
-            hasMethod(
-                manager,
-                "getAll"
-            )
-        ) {
-
-            try {
-
-                apps =
-                    manager.getAll() ||
-                    [];
-
-            } catch (_) {}
-        }
-
-        return {
-
-            version:
-                VERSION,
-
-            language:
-                state.language,
-
-            sessionId:
-                state.sessionId,
-
-            activeApp,
-
-            appCount:
-                apps.length,
-
-            apps:
-                apps.map(
-                    app => ({
-
-                        id:
-                            app.id,
-
-                        name:
-                            app.name,
-
-                        title:
-                            app.title,
-
-                        category:
-                            app.category,
-
-                        enabled:
-                            app.enabled !==
-                            false
-
-                    })
-                ),
-
-            connections:
-                getConnectionStatus()
-
-        };
-    }
-
-
-    /* ========================================================
-       20 — CONNECTIONS
-       ======================================================== */
-
-    function refreshConnections() {
-
-        state.connections.kernel =
-            !!getKernel();
-
-        state.connections.system =
-            !!getSystem();
-
-        state.connections.appManager =
-            !!getAppManager();
-
-        state.connections.registry =
-            !!getRegistry();
-
-        state.connections.router =
-            !!getRouter();
-
-        state.connections.windowManager =
-            !!getWindowManager();
-
-        state.connections.storage =
-            !!getStorage();
-
-        state.connections.language =
-            !!getLanguage();
-
-        state.connections.voice =
-            !!getVoice();
-
-        state.connections.speech =
-            !!getSpeech();
-
-        state.connections.notifications =
-            !!getNotifications();
-
-        state.connections.conversationState =
-            !!getConversationState();
-
-        state.connections.aiChat =
-            !!getAIChat();
-
-        state.connections.aiCommands =
-            !!getAICommands();
-
-        state.connections.aiMemory =
-            !!getAIMemory();
-
-        return {
-            ...state.connections
-        };
-    }
-
-
-    function getConnectionStatus() {
-
-        return {
-            ...refreshConnections()
-        };
-    }
-
-
-    /* ========================================================
-       21 — NOTIFICATIONS
-       ======================================================== */
-
-    function notify(
-        title,
-        message,
-        options = {}
-    ) {
-
-        const notifications =
-            getNotifications();
-
-        if (
-            notifications &&
-            hasMethod(
-                notifications,
-                "show"
-            )
-        ) {
-
-            try {
-
-                return notifications.show(
-                    {
-                        title,
-                        message,
-                        ...options
-                    }
-                );
-
-            } catch (
-                exception
-            ) {
-
-                reportError(
-                    exception,
-                    "AI Notification"
-                );
-            }
-        }
-
-
-        emit(
-            "notification",
-            {
-                title,
-                message,
-                options
-            }
-        );
-
-        return true;
-    }
-
-
-    /* ========================================================
-       22 — DIAGNOSTICS
-       ======================================================== */
-
-    function diagnostics() {
-
-        refreshConnections();
-
-        return {
-
-            name:
-                NAME,
-
-            version:
-                VERSION,
-
-            module:
-                MODULE_ID,
-
-            initialized:
-                state.initialized,
-
-            initializing:
-                state.initializing,
-
-            ready:
-                state.ready,
-
-            failed:
-                state.failed,
-
-            processing:
-                state.processing,
-
-            language:
-                state.language,
-
-            sessionId:
-                state.sessionId,
-
-            conversationMessages:
-                state.conversation.length,
-
-            memoryEntries:
-                state.memory.length,
-
-            activeApp:
-                state.activeApp,
-
-            connections:
-                {
-                    ...state.connections
-                },
-
-            statistics:
-                {
-                    ...state.statistics
-                },
-
-            timestamp:
-                new Date()
-                    .toISOString()
-
-        };
-    }
-
-
-    function healthCheck() {
-
-        refreshConnections();
-
-        const problems = [];
-
-
-        if (
-            !state.connections.appManager
-        ) {
-
-            problems.push(
-                "App Manager nicht verbunden."
-            );
-        }
-
-
-        if (
-            !state.connections.storage
-        ) {
-
-            problems.push(
-                "Storage nicht verbunden."
-            );
-        }
-
-
-        return {
-
-            healthy:
-                problems.length ===
-                0,
-
-            problems,
-
-            connections:
-                {
-                    ...state.connections
-                },
-
-            timestamp:
-                new Date()
-                    .toISOString()
-
-        };
-    }
-
-
-    /* ========================================================
-       23 — PUBLIC API
-       ======================================================== */
-
-    const api = {
-
-        name:
-            NAME,
-
-        version:
-            VERSION,
-
-        module:
-            MODULE_ID,
-
-
-        /* State */
-
-        getState() {
-
-            return {
-
-                initialized:
-                    state.initialized,
-
-                initializing:
-                    state.initializing,
-
-                ready:
-                    state.ready,
-
-                failed:
-                    state.failed,
-
-                processing:
-                    state.processing,
-
-                language:
-                    state.language,
-
-                sessionId:
-                    state.sessionId,
-
-                activeApp:
-                    state.activeApp,
-
-                messages:
-                    state.conversation.length,
-
-                memory:
-                    state.memory.length,
-
-                connections:
-                    getConnectionStatus()
-
-            };
         },
-
-
-        /* Events */
-
-        on,
-
-        off,
-
-        emit,
-
-
-        /* Conversation */
-
-        chat,
-
-        ask:
-            chat,
-
-        sendMessage:
-            chat,
-
-        getConversation,
-
-        getConversationContext,
-
-        clearConversation,
-
-
-        /* Memory */
-
-        remember,
-
-        recall,
-
-        forget,
-
-        getMemory,
-
-        loadMemory,
-
-
-        /* Language */
-
-        getLanguage,
-
-        loadLanguage,
-
-        setLanguage,
-
-
-        /* Apps */
-
-        openApp,
-
-        closeApp,
-
-        activateApp,
-
-        searchApps,
-
-        getApps,
-
-
-        /* Commands */
-
-        detectCommand,
-
-        executeCommand,
-
-
-        /* Voice */
-
-        speak,
-
-        stopSpeaking,
-
-
-        /* Notifications */
-
-        notify,
-
-
-        /* Context */
-
-        getSystemContext,
-
-
-        /* Diagnostics */
-
-        diagnostics,
-
-        healthCheck,
-
-
-        /* Connections */
-
-        refreshConnections,
-
-        getConnectionStatus,
-
-
-        /* Persistence */
-
-        loadConversation,
-
-        persistConversation
-
-    };
-
-
-    /* ========================================================
-       24 — GLOBAL EXPORT
-       ======================================================== */
-
-    window.HalDoAI =
-        api;
-
-    window.HalDoAICore =
-        api;
-
-    window.HalDoOSAI =
-        api;
-
-    HalDoOS.ai =
-        api;
-
-    HalDoOS.aiCore =
-        api;
-
-
-    /* ========================================================
-       25 — KERNEL CONNECTION
-       ======================================================== */
-
-    function connectKernel() {
-
-        const kernel =
-            getKernel();
-
-        if (!kernel) {
-            return false;
+        {
+            description:
+                "Erstellt ein HalDo-Systembackup."
         }
+    );
 
-        try {
+    /* ============================================================
+       LEGACY AI API
+       ============================================================ */
 
-            if (
-                hasMethod(
-                    kernel,
-                    "registerModule"
-                )
-            ) {
+    HD.ai.status =
+        HD.aiCore.status;
 
-                kernel.registerModule(
-                    MODULE_ID,
-                    api
+    HD.ai.version =
+        HD.aiCore.version;
+
+    HD.ai.ask =
+        function (
+            text,
+            options
+        ) {
+
+            return HD.aiCore.ask(
+                text,
+                options
+            );
+
+        };
+
+    HD.ai.openWindow =
+        function (
+            options
+        ) {
+
+            return HD.aiCore.openWindow(
+                options
+            );
+
+        };
+
+    HD.ai.getStatus =
+        function () {
+
+            return HD.aiCore.getStatus();
+
+        };
+
+    HD.ai.registerProvider =
+        function (
+            provider
+        ) {
+
+            return HD.aiCore
+                .registerProvider(
+                    provider
                 );
-            }
 
-            if (
-                hasMethod(
-                    kernel,
-                    "setModuleReady"
-                )
-            ) {
+        };
 
-                kernel.setModuleReady(
-                    MODULE_ID,
-                    true
-                );
-            }
+    /* ============================================================
+       COSMIC → AI CONNECTION
+       ============================================================ */
 
-            state.connections.kernel =
+    HD.on(
+        "cosmic:sun:activate",
+        function () {
+
+            HD.aiCore.openWindow({
+
+                source:
+                    "cosmic-sun"
+
+            });
+
+        }
+    );
+
+    HD.on(
+        "cosmic:logo:activate",
+        function () {
+
+            HD.aiCore.openWindow({
+
+                source:
+                    "cosmic-logo"
+
+            });
+
+        }
+    );
+
+    /* ============================================================
+       SYSTEM → AI CONNECTION
+       ============================================================ */
+
+    HD.on(
+        "system:ready",
+        function () {
+
+            HD.aiCore.initialized =
                 true;
 
-            return true;
-
-        } catch (
-            exception
-        ) {
-
-            reportError(
-                exception,
-                "AI Kernel Connection"
+            HD.aiCore.setStatus(
+                "ready"
             );
 
-            return false;
-        }
-    }
-
-
-    /* ========================================================
-       26 — SYSTEM EVENT CONNECTION
-       ======================================================== */
-
-    function connectSystemEvents() {
-
-        const kernel =
-            getKernel();
-
-        if (
-            kernel &&
-            hasMethod(
-                kernel,
-                "on"
-            )
-        ) {
-
-            try {
-
-                kernel.on(
-                    "app-manager:app-opened",
-                    payload => {
-
-                        if (
-                            payload &&
-                            payload.app
-                        ) {
-
-                            state.activeApp =
-                                normalizeId(
-                                    payload.app.id
-                                );
-                        }
-
-                        emit(
-                            "system-app-opened",
-                            payload
-                        );
-
-                    }
-                );
-
-                kernel.on(
-                    "app-manager:app-closed",
-                    payload => {
-
-                        emit(
-                            "system-app-closed",
-                            payload
-                        );
-
-                    }
-                );
-
-                return true;
-
-            } catch (
-                exception
-            ) {
-
-                reportError(
-                    exception,
-                    "AI System Events"
-                );
-            }
-        }
-
-        return false;
-    }
-
-
-    /* ========================================================
-       27 — INITIALIZATION
-       ======================================================== */
-
-    async function initialize() {
-
-        if (
-            state.ready
-        ) {
-
-            return api;
-        }
-
-
-        if (
-            state.initializing
-        ) {
-
-            return api;
-        }
-
-
-        state.initializing =
-            true;
-
-        state.initialized =
-            true;
-
-        state.failed =
-            false;
-
-
-        emit(
-            "initializing",
-            {
-                version:
-                    VERSION
-            }
-        );
-
-
-        try {
-
-            refreshConnections();
-
-            connectKernel();
-
-            connectSystemEvents();
-
-            await loadLanguage();
-
-            await loadConversation();
-
-            await loadMemory();
-
-
-            state.ready =
-                true;
-
-            state.initializing =
-                false;
-
-
-            const kernel =
-                getKernel();
-
-            if (
-                kernel &&
-                hasMethod(
-                    kernel,
-                    "setModuleReady"
-                )
-            ) {
-
-                try {
-
-                    kernel.setModuleReady(
-                        MODULE_ID,
-                        true
-                    );
-
-                } catch (_) {}
-            }
-
-
-            const payload = {
-
-                version:
-                    VERSION,
-
-                language:
-                    state.language,
-
-                diagnostics:
-                    diagnostics()
-
-            };
-
-
-            emit(
-                "ready",
-                payload
+            HD.emit(
+                "ai:ready",
+                HD.aiCore.getStatus()
             );
 
-
-            try {
-
-                window.dispatchEvent(
-                    new CustomEvent(
-                        "haldo:ai-ready",
-                        {
-                            detail:
-                                payload
-                        }
-                    )
-                );
-
-            } catch (_) {}
-
-
-            log(
-                "HalDo AI Core bereit.",
-                VERSION
-            );
-
-
-            return api;
-
-        } catch (
-            exception
-        ) {
-
-            state.initializing =
-                false;
-
-            state.failed =
-                true;
-
-            reportError(
-                exception,
-                "HalDo AI Initialisierung"
-            );
-
-            return api;
         }
-    }
+    );
 
+    /* ============================================================
+       INITIALIZATION
+       ============================================================ */
 
-    /* ========================================================
-       28 — BOOT
-       ======================================================== */
+    HD.aiCore.initialized =
+        true;
 
-    function boot() {
+    HD.aiCore.setStatus(
+        "ready"
+    );
 
-        initialize()
-            .catch(
-                exception => {
+    HD.emit(
+        "ai:core-ready",
+        {
+            version:
+                HD.aiCore.version,
 
-                    state.initializing =
-                        false;
+            capabilities:
+                HD.aiCore.capabilities
+        }
+    );
 
-                    state.failed =
-                        true;
+    console.info(
+        "✦ HalDo AI Core 20.0.0 bereit."
+    );
 
-                    reportError(
-                        exception,
-                        "HalDo AI Boot"
-                    );
-
-                }
-            );
-    }
-
-
-    /* ========================================================
-       29 — DOM START
-       ======================================================== */
-
-    if (
-        document.readyState ===
-        "loading"
-    ) {
-
-        document.addEventListener(
-            "DOMContentLoaded",
-            boot,
-            {
-                once:
-                    true
-            }
-        );
-
-    } else {
-
-        boot();
-
-    }
-
-
-    /* ========================================================
-       30 — FINAL EXPORT
-       ======================================================== */
-
-    HalDoOS.ai =
-        api;
-
-    HalDoOS.aiCore =
-        api;
-
-    window.HalDoAI =
-        api;
-
-    window.HalDoAICore =
-        api;
-
-    window.HalDoOSAI =
-        api;
-
-
-    /* ========================================================
-       END
-       HALDO AI OS 20
-       AI CORE 20.2
-       ======================================================== */
-
-})(window, document);
+})();
