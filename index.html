@@ -3,1497 +3,2500 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#07101f">
+<meta name="theme-color" content="#030713">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>HalDo AI OS 22</title>
 <style>
-*{box-sizing:border-box}
-html,body{margin:0;width:100%;height:100%;overflow:hidden}
-body{
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
-    color:#fff;
-    background:#020611;
+:root{
+    --bg:#02050d;
+    --glass:rgba(8,16,35,.78);
+    --glass2:rgba(10,22,48,.92);
+    --line:rgba(255,255,255,.12);
+    --text:#f4f8ff;
+    --muted:rgba(240,247,255,.58);
+    --accent:#72b8ff;
+    --accent2:#b7ddff;
+    --good:#63ffb0;
+    --danger:#ff7184;
+    --shadow:0 30px 90px rgba(0,0,0,.58);
 }
-button,input,textarea,select{font:inherit}
-button{cursor:pointer}
+*{
+    box-sizing:border-box;
+}
+html,
+body{
+    width:100%;
+    height:100%;
+    margin:0;
+    overflow:hidden;
+    background:var(--bg);
+    color:var(--text);
+    font-family:
+        Inter,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+}
+button,
+input,
+textarea,
+select{
+    font:inherit;
+}
+button{
+    -webkit-tap-highlight-color:transparent;
+}
 #haldo-os{
     position:fixed;
     inset:0;
     overflow:hidden;
     background:
-        radial-gradient(circle at 50% 42%,rgba(48,104,210,.18),transparent 35%),
-        radial-gradient(circle at 20% 20%,rgba(80,120,255,.10),transparent 30%),
-        linear-gradient(145deg,#020611,#071426 55%,#02050d);
+        radial-gradient(circle at 50% 48%,rgba(45,100,180,.08),transparent 40%),
+        radial-gradient(circle at 20% 20%,rgba(100,160,255,.06),transparent 35%),
+        #02050d;
 }
-#haldo-galaxy{
+/* =========================================================
+   GALAXY
+   ========================================================= */
+#galaxy{
     position:absolute;
     inset:0;
-    pointer-events:none;
     overflow:hidden;
-    background:
-        radial-gradient(circle at 20% 25%,rgba(255,255,255,.9) 0 1px,transparent 2px),
-        radial-gradient(circle at 70% 18%,rgba(150,200,255,.8) 0 1px,transparent 2px),
-        radial-gradient(circle at 35% 72%,rgba(255,255,255,.7) 0 1px,transparent 2px),
-        radial-gradient(circle at 82% 65%,rgba(150,190,255,.7) 0 1px,transparent 2px);
-    opacity:.45;
-    animation:galaxyMove 18s linear infinite;
+    pointer-events:none;
 }
-@keyframes galaxyMove{
-    0%{transform:scale(1) rotate(0deg)}
-    50%{transform:scale(1.04) rotate(1deg)}
-    100%{transform:scale(1) rotate(0deg)}
-}
-#haldo-topbar{
+.stars,
+.stars::before,
+.stars::after{
     position:absolute;
-    top:0;
-    left:0;
-    right:0;
-    height:62px;
+    inset:-50%;
+    content:"";
+    background-image:
+        radial-gradient(circle,rgba(255,255,255,.9) 0 1px,transparent 1.5px),
+        radial-gradient(circle,rgba(150,205,255,.7) 0 1px,transparent 1.5px),
+        radial-gradient(circle,rgba(255,255,255,.5) 0 1px,transparent 1.5px);
+    background-size:180px 180px,270px 270px,390px 390px;
+    animation:starsMove 120s linear infinite;
+    opacity:.45;
+}
+.stars::before{
+    animation-duration:180s;
+    transform:scale(1.25);
+    opacity:.35;
+}
+.stars::after{
+    animation-duration:240s;
+    transform:scale(1.5);
+    opacity:.22;
+}
+@keyframes starsMove{
+    from{transform:rotate(0deg) translate3d(0,0,0)}
+    to{transform:rotate(360deg) translate3d(0,0,0)}
+}
+/* =========================================================
+   SOLAR SYSTEM
+   ========================================================= */
+#solar-system{
+    position:absolute;
+    left:50%;
+    top:50%;
+    width:min(92vw,760px);
+    height:min(92vw,760px);
+    transform:translate(-50%,-50%);
+    pointer-events:none;
+}
+.sun{
+    position:absolute;
+    left:50%;
+    top:50%;
+    width:clamp(90px,14vw,150px);
+    aspect-ratio:1;
+    transform:translate(-50%,-50%);
+    border-radius:50%;
+    background:
+        radial-gradient(circle at 35% 30%,
+            #fff,
+            #fff6a8 12%,
+            #ffd35a 28%,
+            #ff9e2d 52%,
+            #ff5b18 72%,
+            rgba(255,70,0,.15) 100%);
+    box-shadow:
+        0 0 35px #fff3a0,
+        0 0 75px #ffb82e,
+        0 0 140px rgba(255,160,20,.55),
+        0 0 240px rgba(255,100,20,.2);
+    animation:sunPulse 4s ease-in-out infinite;
+}
+.sun::before,
+.sun::after{
+    content:"";
+    position:absolute;
+    inset:-25%;
+    border-radius:50%;
+    background:conic-gradient(
+        transparent,
+        rgba(255,240,140,.2),
+        transparent 18%,
+        rgba(255,180,40,.25),
+        transparent 40%
+    );
+    animation:sunCorona 12s linear infinite;
+}
+.sun::after{
+    inset:-45%;
+    opacity:.35;
+    animation-duration:20s;
+}
+@keyframes sunPulse{
+    50%{
+        transform:translate(-50%,-50%) scale(1.06);
+        filter:brightness(1.18);
+    }
+}
+@keyframes sunCorona{
+    to{transform:rotate(360deg)}
+}
+.orbit{
+    position:absolute;
+    left:50%;
+    top:50%;
+    border:1px solid rgba(150,205,255,.12);
+    border-radius:50%;
+    transform:translate(-50%,-50%);
+    animation:orbitSpin linear infinite;
+}
+.orbit::after{
+    content:"";
+    position:absolute;
+    left:50%;
+    top:-5px;
+    width:10px;
+    height:10px;
+    border-radius:50%;
+    background:var(--planet);
+    box-shadow:
+        0 0 10px var(--planet),
+        0 0 22px var(--planet);
+}
+.orbit1{width:25%;height:25%;--planet:#d5d5d5;animation-duration:6s}
+.orbit2{width:35%;height:35%;--planet:#dba765;animation-duration:10s}
+.orbit3{width:47%;height:47%;--planet:#5e9cff;animation-duration:14s}
+.orbit4{width:59%;height:59%;--planet:#e66f55;animation-duration:19s}
+.orbit5{width:72%;height:72%;--planet:#e8c67a;animation-duration:27s}
+.orbit6{width:83%;height:83%;--planet:#d8c59b;animation-duration:35s}
+.orbit7{width:94%;height:94%;--planet:#77d7ff;animation-duration:44s}
+@keyframes orbitSpin{
+    from{transform:translate(-50%,-50%) rotate(0deg)}
+    to{transform:translate(-50%,-50%) rotate(360deg)}
+}
+/* =========================================================
+   TOP BAR
+   ========================================================= */
+#topbar{
+    position:absolute;
+    left:14px;
+    right:14px;
+    top:calc(10px + env(safe-area-inset-top));
+    height:54px;
     z-index:5000;
     display:flex;
     align-items:center;
     justify-content:space-between;
-    padding:8px 12px;
-    background:linear-gradient(180deg,rgba(2,7,18,.94),rgba(2,7,18,.55));
-    border-bottom:1px solid rgba(255,255,255,.08);
-    backdrop-filter:blur(18px);
+    pointer-events:none;
 }
-.haldo-menu-button{
-    width:46px;
-    height:46px;
-    border:1px solid rgba(255,255,255,.12);
-    border-radius:14px;
-    background:rgba(255,255,255,.06);
-    color:#fff;
-    display:grid;
-    place-items:center;
-    font-size:22px;
-    overflow:hidden;
+.top-button{
+    pointer-events:auto;
+    width:48px;
+    height:48px;
+    border:1px solid var(--line);
+    border-radius:15px;
+    background:rgba(7,15,31,.72);
+    color:white;
+    cursor:pointer;
+    backdrop-filter:blur(20px);
+    box-shadow:0 12px 35px rgba(0,0,0,.3);
+    transition:.18s ease;
 }
-.haldo-menu-button img{
-    width:32px;
-    height:32px;
+.top-button:hover{
+    transform:translateY(-1px);
+    background:rgba(25,48,82,.88);
+}
+#menu-logo{
+    width:28px;
+    height:28px;
     object-fit:contain;
+    border-radius:8px;
 }
-#haldo-status{
-    display:flex;
-    align-items:center;
-    gap:8px;
-    color:rgba(255,255,255,.72);
+#system-time{
+    pointer-events:auto;
+    padding:10px 14px;
+    border:1px solid var(--line);
+    border-radius:14px;
+    background:rgba(5,12,26,.62);
+    backdrop-filter:blur(18px);
+    color:var(--muted);
     font-size:12px;
 }
-.haldo-status-dot{
-    width:8px;
-    height:8px;
-    border-radius:50%;
-    background:#61ffb0;
-    box-shadow:0 0 12px #61ffb0;
-}
-#haldo-desktop{
+/* =========================================================
+   MENU
+   ========================================================= */
+#side-menu{
     position:absolute;
-    inset:62px 0 0;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-}
-#haldo-living-ai{
-    position:relative;
-    width:min(48vw,390px);
-    height:min(48vw,390px);
-    min-width:220px;
-    min-height:220px;
-    display:grid;
-    place-items:center;
-}
-#haldo-living-ai::before{
-    content:"";
-    position:absolute;
-    inset:10%;
-    border-radius:50%;
-    background:radial-gradient(circle,rgba(100,170,255,.20),transparent 68%);
-    filter:blur(20px);
-    animation:livingGlow 4s ease-in-out infinite;
-}
-@keyframes livingGlow{
-    0%,100%{transform:scale(.95);opacity:.65}
-    50%{transform:scale(1.08);opacity:1}
-}
-#haldo-living-logo{
-    position:relative;
-    z-index:2;
-    width:72%;
-    height:72%;
-    object-fit:contain;
-    animation:livingLogo 5s ease-in-out infinite;
-    filter:drop-shadow(0 0 20px rgba(120,190,255,.35));
-}
-@keyframes livingLogo{
-    0%,100%{transform:translateY(0) scale(1) rotate(-1deg)}
-    50%{transform:translateY(-7px) scale(1.025) rotate(1deg)}
-}
-#haldo-ai-panel{
-    position:absolute;
-    left:50%;
-    bottom:7%;
-    transform:translateX(-50%);
-    width:min(720px,90vw);
-    z-index:100;
-    padding:12px;
-    border:1px solid rgba(255,255,255,.10);
-    border-radius:20px;
-    background:rgba(3,10,24,.68);
-    backdrop-filter:blur(20px);
-}
-#haldo-ai-messages{
-    max-height:130px;
-    overflow:auto;
-    padding:4px 8px 10px;
-    font-size:14px;
-}
-.haldo-ai-message{
-    padding:7px 9px;
-    margin:3px 0;
-    border-radius:12px;
-}
-.haldo-ai-message.user{
-    background:rgba(90,150,255,.16);
-    text-align:right;
-}
-.haldo-ai-message.ai{
-    background:rgba(255,255,255,.06);
-}
-#haldo-ai-form{
-    display:flex;
-    gap:8px;
-}
-#haldo-ai-input{
-    flex:1;
-    min-width:0;
-    border:1px solid rgba(255,255,255,.12);
-    border-radius:14px;
-    outline:0;
-    padding:11px 13px;
-    background:rgba(0,0,0,.24);
-    color:#fff;
-}
-.haldo-ai-send{
-    border:0;
-    border-radius:14px;
-    padding:0 18px;
-    background:linear-gradient(135deg,#4b91ff,#7b6cff);
-    color:#fff;
-}
-#haldo-menu{
-    position:absolute;
-    top:62px;
     left:0;
+    top:0;
     bottom:0;
-    width:min(380px,88vw);
-    z-index:4500;
+    width:min(370px,92vw);
+    z-index:6000;
     transform:translateX(-105%);
-    transition:transform .22s ease;
-    background:rgba(3,10,23,.96);
-    border-right:1px solid rgba(255,255,255,.10);
-    box-shadow:30px 0 80px rgba(0,0,0,.38);
-    backdrop-filter:blur(24px);
+    transition:transform .25s cubic-bezier(.2,.8,.2,1);
+    background:rgba(3,8,19,.94);
+    border-right:1px solid var(--line);
+    backdrop-filter:blur(30px);
+    box-shadow:30px 0 80px rgba(0,0,0,.5);
     display:flex;
     flex-direction:column;
 }
-#haldo-menu.open{transform:translateX(0)}
-#haldo-menu-header{
-    padding:18px;
-    border-bottom:1px solid rgba(255,255,255,.08);
+#side-menu.open{
+    transform:translateX(0);
 }
-#haldo-menu-header strong{display:block;font-size:18px}
-#haldo-menu-header small{color:rgba(255,255,255,.45)}
-#haldo-app-list{
-    flex:1;
-    overflow:auto;
-    padding:10px;
-}
-.haldo-app-item{
-    width:100%;
-    min-height:48px;
+.menu-head{
     display:flex;
     align-items:center;
     gap:12px;
-    margin:4px 0;
-    padding:8px 12px;
+    padding:20px;
+    padding-top:calc(20px + env(safe-area-inset-top));
+    border-bottom:1px solid var(--line);
+}
+.menu-logo{
+    width:42px;
+    height:42px;
+    object-fit:contain;
+    border-radius:12px;
+}
+.menu-title strong{
+    display:block;
+    font-size:17px;
+}
+.menu-title span{
+    display:block;
+    color:var(--muted);
+    font-size:11px;
+    margin-top:3px;
+}
+#menu-close{
+    margin-left:auto;
+}
+#app-list{
+    flex:1;
+    overflow:auto;
+    padding:12px;
+}
+.app-entry{
+    width:100%;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    min-height:48px;
+    padding:9px 11px;
+    margin-bottom:4px;
     border:1px solid transparent;
     border-radius:13px;
-    background:rgba(255,255,255,.035);
-    color:#fff;
+    background:transparent;
+    color:white;
     text-align:left;
+    cursor:pointer;
 }
-.haldo-app-item:hover,
-.haldo-app-item:focus{
-    background:rgba(100,170,255,.12);
-    border-color:rgba(150,200,255,.18);
-    outline:0;
+.app-entry:hover{
+    background:rgba(255,255,255,.07);
+    border-color:var(--line);
 }
-.haldo-app-icon{
+.app-entry .icon{
     width:30px;
     text-align:center;
-    font-size:19px;
+    font-size:20px;
 }
-.haldo-app-label{
+.app-entry .info{
     min-width:0;
+}
+.app-entry strong{
+    display:block;
+    font-size:13px;
+    font-weight:650;
+}
+.app-entry small{
+    display:block;
+    margin-top:2px;
+    color:var(--muted);
+    white-space:nowrap;
     overflow:hidden;
     text-overflow:ellipsis;
-    white-space:nowrap;
 }
-#haldo-window-layer{
+/* =========================================================
+   LIVING AI
+   ========================================================= */
+#living-ai{
     position:absolute;
-    inset:62px 0 0;
+    left:50%;
+    top:50%;
+    transform:translate(-50%,-50%);
+    width:min(210px,42vw);
+    aspect-ratio:1;
+    z-index:100;
+    cursor:pointer;
+    border-radius:50%;
+    display:grid;
+    place-items:center;
+}
+#living-ai img{
+    width:70%;
+    height:70%;
+    object-fit:contain;
+    filter:
+        drop-shadow(0 0 18px rgba(130,205,255,.7))
+        drop-shadow(0 0 50px rgba(80,150,255,.35));
+    animation:livingLogo 5s ease-in-out infinite;
+}
+#living-ai::before{
+    content:"";
+    position:absolute;
+    inset:8%;
+    border-radius:50%;
+    border:1px solid rgba(180,225,255,.22);
+    box-shadow:
+        0 0 30px rgba(100,190,255,.18),
+        inset 0 0 30px rgba(100,190,255,.08);
+    animation:livingRing 8s linear infinite;
+}
+#living-ai::after{
+    content:"";
+    position:absolute;
+    inset:-10%;
+    border-radius:50%;
+    background:radial-gradient(circle,rgba(120,200,255,.14),transparent 65%);
+    animation:livingGlow 3s ease-in-out infinite;
+}
+@keyframes livingLogo{
+    0%,100%{transform:translateY(0) scale(1) rotate(-1deg)}
+    50%{transform:translateY(-7px) scale(1.035) rotate(1deg)}
+}
+@keyframes livingRing{
+    to{transform:rotate(360deg)}
+}
+@keyframes livingGlow{
+    50%{transform:scale(1.15);opacity:.65}
+}
+#ai-label{
+    position:absolute;
+    bottom:-34px;
+    left:50%;
+    transform:translateX(-50%);
+    white-space:nowrap;
+    color:rgba(255,255,255,.8);
+    font-size:11px;
+    letter-spacing:.08em;
+}
+/* =========================================================
+   WINDOWS
+   ========================================================= */
+#window-layer{
+    position:absolute;
+    inset:0;
     z-index:3000;
     pointer-events:none;
-    overflow:hidden;
 }
 .haldo-window{
     position:absolute;
     display:flex;
     flex-direction:column;
     pointer-events:auto;
-    min-width:300px;
+    min-width:330px;
     min-height:220px;
-    border:1px solid rgba(255,255,255,.13);
+    width:620px;
+    height:430px;
+    max-width:calc(100vw - 20px);
+    max-height:calc(100vh - 90px);
+    border:1px solid rgba(255,255,255,.14);
     border-radius:18px;
     overflow:hidden;
-    background:linear-gradient(145deg,rgba(11,24,48,.98),rgba(3,9,22,.99));
-    box-shadow:0 30px 80px rgba(0,0,0,.48);
-    backdrop-filter:blur(22px);
+    background:linear-gradient(145deg,rgba(11,24,48,.98),rgba(3,9,23,.98));
+    box-shadow:var(--shadow),0 0 60px rgba(80,150,255,.08);
+    backdrop-filter:blur(24px);
+    transition:
+        opacity .16s ease,
+        transform .16s ease,
+        box-shadow .16s ease;
 }
-.haldo-window.hidden{display:none}
+.haldo-window.active{
+    box-shadow:
+        0 35px 90px rgba(0,0,0,.58),
+        0 0 70px rgba(100,175,255,.14);
+}
 .haldo-window.maximized{
-    inset:0!important;
-    width:100%!important;
-    height:100%!important;
-    border-radius:0;
+    left:10px!important;
+    top:74px!important;
+    width:calc(100vw - 20px)!important;
+    height:calc(100vh - 94px)!important;
+    border-radius:14px;
 }
-.haldo-window-header{
-    height:48px;
-    min-height:48px;
+.haldo-window.minimized{
+    opacity:0;
+    transform:translateY(30px) scale(.94);
+    pointer-events:none;
+}
+.window-header{
+    height:50px;
+    min-height:50px;
     display:flex;
     align-items:center;
-    justify-content:space-between;
-    padding:0 7px 0 14px;
+    gap:10px;
+    padding:0 8px 0 14px;
     user-select:none;
-    background:rgba(255,255,255,.055);
+    cursor:grab;
     border-bottom:1px solid rgba(255,255,255,.08);
+    background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.02));
 }
-.haldo-window-title{
+.window-header:active{
+    cursor:grabbing;
+}
+.window-app-icon{
+    width:30px;
+    height:30px;
+    display:grid;
+    place-items:center;
+    border-radius:9px;
+    background:rgba(255,255,255,.08);
+}
+.window-name{
+    flex:1;
     min-width:0;
-    display:flex;
-    align-items:center;
-    gap:9px;
-}
-.haldo-window-title span:last-child{
+    white-space:nowrap;
     overflow:hidden;
     text-overflow:ellipsis;
-    white-space:nowrap;
+    font-weight:650;
 }
-.haldo-window-controls{display:flex;gap:4px}
-.haldo-window-controls button{
-    width:34px;
+.window-controls{
+    display:flex;
+    gap:3px;
+}
+.window-control{
+    width:35px;
     height:34px;
     border:0;
     border-radius:9px;
     background:transparent;
-    color:#fff;
+    color:white;
+    cursor:pointer;
 }
-.haldo-window-controls button:hover{background:rgba(255,255,255,.10)}
-.haldo-window-controls .close:hover{background:rgba(255,70,90,.30)}
-.haldo-window-body{
+.window-control:hover{
+    background:rgba(255,255,255,.1);
+}
+.window-control.close:hover{
+    background:rgba(255,70,90,.28);
+}
+.window-body{
+    min-height:0;
+    flex:1;
+    display:flex;
+    flex-direction:column;
+}
+.app-toolbar{
+    min-height:36px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:0 13px;
+    border-bottom:1px solid rgba(255,255,255,.06);
+    color:var(--muted);
+    font-size:11px;
+}
+.app-content{
     flex:1;
     min-height:0;
     overflow:auto;
+    padding:18px;
 }
-.haldo-app-page{
-    min-height:100%;
-    padding:20px;
+.resize-handle{
+    position:absolute;
+    right:2px;
+    bottom:2px;
+    width:22px;
+    height:22px;
+    cursor:nwse-resize;
 }
-.haldo-app-page h2{margin:0 0 8px}
-.haldo-app-page p{
-    color:rgba(255,255,255,.58);
-    line-height:1.55;
+.resize-handle::after{
+    content:"";
+    position:absolute;
+    right:3px;
+    bottom:3px;
+    width:10px;
+    height:10px;
+    border-right:2px solid rgba(255,255,255,.4);
+    border-bottom:2px solid rgba(255,255,255,.4);
 }
-.haldo-card{
-    padding:16px;
-    border:1px solid rgba(255,255,255,.09);
-    border-radius:16px;
-    background:rgba(255,255,255,.045);
-    margin:10px 0;
-}
-.haldo-actions{
+/* =========================================================
+   COMMON APP UI
+   ========================================================= */
+.app-shell{
     display:flex;
-    flex-wrap:wrap;
-    gap:8px;
+    flex-direction:column;
+    gap:14px;
+    min-height:100%;
 }
-.haldo-actions button{
+.app-card{
+    border:1px solid var(--line);
+    background:rgba(255,255,255,.035);
+    border-radius:15px;
+    padding:15px;
+}
+.app-card h2,
+.app-card h3,
+.app-card p{
+    margin-top:0;
+}
+.app-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+    gap:10px;
+}
+.action-button{
+    min-height:40px;
+    padding:8px 14px;
+    border:1px solid rgba(255,255,255,.11);
+    border-radius:11px;
+    background:rgba(255,255,255,.06);
+    color:white;
+    cursor:pointer;
+}
+.action-button:hover{
+    background:rgba(255,255,255,.12);
+}
+.action-button.primary{
+    background:linear-gradient(135deg,#377cc7,#65b7ff);
+    color:#03101e;
+    border:0;
+}
+.input,
+.textarea,
+.select{
+    width:100%;
+    padding:11px 12px;
     border:1px solid rgba(255,255,255,.12);
     border-radius:11px;
-    padding:9px 13px;
-    background:rgba(255,255,255,.06);
-    color:#fff;
+    background:rgba(0,0,0,.2);
+    color:white;
+    outline:none;
 }
-#haldo-boot{
+.textarea{
+    min-height:100px;
+    resize:vertical;
+}
+.chat{
+    display:flex;
+    flex-direction:column;
+    height:100%;
+    gap:10px;
+}
+.chat-messages{
+    flex:1;
+    overflow:auto;
+    display:flex;
+    flex-direction:column;
+    gap:9px;
+}
+.chat-message{
+    max-width:85%;
+    padding:11px 13px;
+    border-radius:14px;
+    line-height:1.5;
+    font-size:14px;
+}
+.chat-message.ai{
+    align-self:flex-start;
+    background:rgba(100,170,255,.1);
+    border:1px solid rgba(100,170,255,.15);
+}
+.chat-message.user{
+    align-self:flex-end;
+    background:rgba(255,255,255,.08);
+}
+.chat-input{
+    display:flex;
+    gap:8px;
+}
+.chat-input textarea{
+    flex:1;
+    min-height:48px;
+    max-height:130px;
+}
+.status{
+    color:var(--good);
+    font-size:11px;
+}
+/* =========================================================
+   BOOT
+   ========================================================= */
+#boot-screen{
     position:absolute;
     inset:0;
     z-index:10000;
     display:flex;
-    flex-direction:column;
     align-items:center;
     justify-content:center;
-    background:
-        radial-gradient(circle,rgba(60,120,255,.18),transparent 40%),
-        #020611;
-    transition:opacity .5s ease,visibility .5s ease;
+    flex-direction:column;
+    background:#01030a;
+    transition:opacity .8s ease,visibility .8s ease;
 }
-#haldo-boot.done{
+#boot-screen.hidden{
     opacity:0;
     visibility:hidden;
     pointer-events:none;
 }
-#haldo-boot-logo{
-    width:min(280px,55vw);
-    height:min(280px,55vw);
+#boot-logo{
+    width:min(180px,45vw);
+    height:min(180px,45vw);
     object-fit:contain;
-    animation:bootLogo 3.2s ease-in-out infinite;
-    filter:drop-shadow(0 0 35px rgba(100,180,255,.55));
+    filter:
+        drop-shadow(0 0 25px rgba(100,190,255,.7))
+        drop-shadow(0 0 70px rgba(80,130,255,.35));
+    animation:bootLogo 3s ease-in-out infinite;
 }
 @keyframes bootLogo{
-    0%{transform:scale(.88) rotate(-3deg);opacity:.75}
-    50%{transform:scale(1.04) rotate(3deg);opacity:1}
-    100%{transform:scale(.88) rotate(-3deg);opacity:.75}
-}
-#haldo-boot-text{
-    margin-top:18px;
-    color:rgba(255,255,255,.72);
-    font-size:14px;
-}
-#haldo-toast{
-    position:absolute;
-    left:50%;
-    bottom:20px;
-    transform:translate(-50%,20px);
-    opacity:0;
-    z-index:9000;
-    padding:10px 15px;
-    border:1px solid rgba(255,255,255,.12);
-    border-radius:13px;
-    background:rgba(3,10,24,.92);
-    transition:.2s;
-}
-#haldo-toast.show{
-    transform:translate(-50%,0);
-    opacity:1;
-}
-@media(max-width:700px){
-    #haldo-topbar{height:56px}
-    #haldo-desktop{inset:56px 0 0}
-    #haldo-window-layer{inset:56px 0 0}
-    #haldo-menu{top:56px;width:88vw}
-    #haldo-living-ai{
-        width:75vw;
-        height:75vw;
+    50%{
+        transform:scale(1.05) rotate(2deg);
+        filter:
+            drop-shadow(0 0 35px rgba(150,220,255,.9))
+            drop-shadow(0 0 90px rgba(80,150,255,.5));
     }
-    #haldo-ai-panel{
-        bottom:12px;
-        width:94vw;
+}
+#boot-title{
+    margin-top:20px;
+    font-size:22px;
+    font-weight:700;
+}
+#boot-status{
+    margin-top:8px;
+    color:var(--muted);
+    font-size:12px;
+}
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+@media(max-width:700px){
+    #solar-system{
+        width:125vw;
+        height:125vw;
+        opacity:.88;
+    }
+    #living-ai{
+        width:190px;
+        max-width:48vw;
     }
     .haldo-window{
-        min-width:0!important;
-        left:8px!important;
-        top:8px!important;
-        width:calc(100% - 16px)!important;
-        height:calc(100% - 16px)!important;
-        border-radius:15px;
+        min-width:0;
+        width:calc(100vw - 18px)!important;
+        height:calc(100vh - 110px)!important;
+        left:9px!important;
+        top:64px!important;
+        max-width:none;
+        max-height:none;
+        border-radius:16px;
+    }
+    .resize-handle{
+        display:none;
+    }
+    .app-content{
+        padding:13px;
+    }
+    .window-control{
+        width:38px;
+        height:36px;
+    }
+    #system-time{
+        display:none;
+    }
+}
+@media(prefers-reduced-motion:reduce){
+    *,
+    *::before,
+    *::after{
+        animation-duration:.001ms!important;
+        animation-iteration-count:1!important;
+        transition-duration:.001ms!important;
     }
 }
 </style>
 </head>
 <body>
 <div id="haldo-os">
-    <div id="haldo-galaxy"></div>
-<header id="haldo-topbar">
-    <button id="haldo-menu-button" class="haldo-menu-button" aria-label="HalDo Menü">
-        <img id="haldo-menu-logo" src="assets/logo/logo.png" alt="HalDo">
+<div id="galaxy">
+    <div class="stars"></div>
+</div>
+<div id="solar-system">
+    <div class="sun"></div>
+    <div class="orbit orbit1"></div>
+    <div class="orbit orbit2"></div>
+    <div class="orbit orbit3"></div>
+    <div class="orbit orbit4"></div>
+    <div class="orbit orbit5"></div>
+    <div class="orbit orbit6"></div>
+    <div class="orbit orbit7"></div>
+</div>
+<header id="topbar">
+    <button id="menu-button" class="top-button" aria-label="HalDo Menü">
+        <img id="menu-logo" src="assets/logo/logo.png" alt="HalDo">
     </button>
-    <div id="haldo-status">
-        <span class="haldo-status-dot"></span>
-        <span id="haldo-status-text">HalDo AI OS 22</span>
-    </div>
+    <div id="system-time"></div>
 </header>
-<aside id="haldo-menu" aria-hidden="true">
-    <div id="haldo-menu-header">
-        <strong>☀️ HalDo AI OS 22</strong>
-        <small>Alle Anwendungen</small>
+<aside id="side-menu">
+    <div class="menu-head">
+        <img
+            class="menu-logo"
+            src="assets/logo/logo.png"
+            alt="HalDo AI"
+        >
+        <div class="menu-title">
+            <strong>HalDo AI OS 22</strong>
+            <span>Alle Anwendungen & Systeme</span>
+        </div>
+        <button
+            id="menu-close"
+            class="top-button"
+            aria-label="Menü schließen"
+        >×</button>
     </div>
-    <div id="haldo-app-list"></div>
+    <div id="app-list"></div>
 </aside>
-<main id="haldo-desktop">
-    <section id="haldo-living-ai">
-        <img id="haldo-living-logo"
-             src="assets/logo/logo.png"
-             alt="Lebendiges HalDo AI Logo">
-    </section>
-    <section id="haldo-ai-panel">
-        <div id="haldo-ai-messages"></div>
-        <form id="haldo-ai-form">
-            <input id="haldo-ai-input"
-                   autocomplete="off"
-                   placeholder="Mit HalDo AI schreiben …">
-            <button class="haldo-ai-send" type="submit">Senden</button>
-        </form>
-    </section>
+<main
+    id="living-ai"
+    aria-label="HalDo AI öffnen"
+    role="button"
+    tabindex="0"
+>
+    <img
+        src="assets/logo/logo.png"
+        alt="Lebendiges HalDo AI Logo"
+    >
+    <div id="ai-label">HalDo AI</div>
 </main>
-<section id="haldo-window-layer"></section>
-<div id="haldo-toast"></div>
-<section id="haldo-boot">
-    <img id="haldo-boot-logo"
-         src="assets/logo/logo.png"
-         alt="HalDo AI">
-    <div id="haldo-boot-text">HalDo AI OS 22 wird gestartet …</div>
+<div id="window-layer"></div>
+<section id="boot-screen">
+    <img
+        id="boot-logo"
+        src="assets/logo/logo.png"
+        alt="HalDo"
+    >
+    <div id="boot-title">
+        HALDO AI OS 22
+    </div>
+    <div id="boot-status">
+        HalDo AI wird gestartet …
+    </div>
 </section>
 </div>
 <script>
 "use strict";
-(function(){
-const HD = window.HalDo = window.HalDo || {};
+/* =========================================================
+   HALDO GLOBAL FOUNDATION
+   ========================================================= */
+window.HalDo = window.HalDo || {};
+const HD = window.HalDo;
 HD.version = "22.0.0";
+HD.name = "HalDo AI OS";
 HD.initialized = HD.initialized || false;
-HD.events = HD.events || {};
+/* =========================================================
+   EVENTS
+   ========================================================= */
+HD.events = HD.events || (() => {
+    const listeners = new Map();
+    return {
+        on(name,callback){
+            if(typeof callback !== "function") return () => {};
+            if(!listeners.has(name)){
+                listeners.set(name,new Set());
+            }
+            listeners.get(name).add(callback);
+            return () => {
+                listeners.get(name)?.delete(callback);
+            };
+        },
+        off(name,callback){
+            listeners.get(name)?.delete(callback);
+        },
+        emit(name,data={}){
+            listeners.get(name)?.forEach(fn=>{
+                try{
+                    fn(data);
+                }catch(error){
+                    console.error("HalDo event error:",name,error);
+                }
+            });
+            window.dispatchEvent(
+                new CustomEvent("haldo:"+name,{detail:data})
+            );
+        }
+    };
+})();
+HD.emit = HD.emit || ((name,data)=>HD.events.emit(name,data));
+/* =========================================================
+   STORAGE / PERSISTENCE
+   ========================================================= */
+HD.storage = HD.storage || {
+    prefix:"haldo-os22:",
+    get(key,fallback=null){
+        try{
+            const value =
+                localStorage.getItem(
+                    this.prefix + key
+                );
+            return value === null
+                ? fallback
+                : JSON.parse(value);
+        }catch(error){
+            console.warn("HalDo Storage read:",error);
+            return fallback;
+        }
+    },
+    set(key,value){
+        try{
+            localStorage.setItem(
+                this.prefix + key,
+                JSON.stringify(value)
+            );
+            HD.emit("storage:saved",{key,value});
+            return true;
+        }catch(error){
+            console.error("HalDo Storage write:",error);
+            return false;
+        }
+    },
+    remove(key){
+        try{
+            localStorage.removeItem(
+                this.prefix + key
+            );
+            return true;
+        }catch(_){
+            return false;
+        }
+    }
+};
+HD.appState = HD.appState || {
+    get(appId){
+        return HD.storage.get(
+            "app:"+appId,
+            {}
+        );
+    },
+    save(appId,state){
+        return HD.storage.set(
+            "app:"+appId,
+            state || {}
+        );
+    }
+};
+/* =========================================================
+   CONFIGURATION
+   ========================================================= */
 HD.config = HD.config || {};
-HD.config.defaultWindowWidth =
-    HD.config.defaultWindowWidth || 720;
-HD.config.defaultWindowHeight =
-    HD.config.defaultWindowHeight || 480;
-HD.config.minimumWindowWidth =
-    HD.config.minimumWindowWidth || 300;
-HD.config.minimumWindowHeight =
-    HD.config.minimumWindowHeight || 220;
-/* =========================================================
-   EVENT BUS
-   ========================================================= */
-const listeners = new Map();
-HD.emit = function(name,data){
-    const list = listeners.get(name);
-    if(!list) return;
-    [...list].forEach(fn=>{
-        try{ fn(data); }
-        catch(error){ console.error("HalDo Event:",name,error); }
-    });
-};
-HD.on = function(name,fn){
-    if(typeof fn !== "function") return ()=>{};
-    if(!listeners.has(name)) listeners.set(name,new Set());
-    listeners.get(name).add(fn);
-    return ()=>listeners.get(name)?.delete(fn);
-};
-HD.events.on = HD.on;
-/* =========================================================
-   STORAGE
-   ========================================================= */
-HD.storage = HD.storage || {};
-HD.storage.get = function(key,fallback=null){
-    try{
-        const value = localStorage.getItem("haldo:"+key);
-        return value === null ? fallback : JSON.parse(value);
-    }catch(error){
-        console.warn("HalDo Storage get:",error);
-        return fallback;
+Object.assign(
+    HD.config,
+    {
+        defaultWindowWidth:
+            HD.config.defaultWindowWidth || 620,
+        defaultWindowHeight:
+            HD.config.defaultWindowHeight || 430,
+        minimumWindowWidth:
+            HD.config.minimumWindowWidth || 330,
+        minimumWindowHeight:
+            HD.config.minimumWindowHeight || 220,
+        welcomeSound:
+            HD.storage.get(
+                "setting:welcomeSound",
+                true
+            ),
+        language:
+            HD.storage.get(
+                "setting:language",
+                "de"
+            )
     }
-};
-HD.storage.set = function(key,value){
-    try{
-        localStorage.setItem("haldo:"+key,JSON.stringify(value));
-        return true;
-    }catch(error){
-        console.warn("HalDo Storage set:",error);
-        return false;
-    }
-};
-HD.storage.remove = function(key){
-    try{
-        localStorage.removeItem("haldo:"+key);
-        return true;
-    }catch(_){
-        return false;
-    }
-};
-HD.appState = HD.appState || {};
-HD.appState.get = function(appId){
-    return HD.storage.get("app-state:"+appId,{});
-};
-HD.appState.save = function(appId,state){
-    return HD.storage.set("app-state:"+appId,state || {});
-};
+);
 /* =========================================================
    RUNTIME
    ========================================================= */
-HD.runtime = HD.runtime || {};
-HD.runtime.components = HD.runtime.components || new Map();
-HD.runtime.register = function(name,value){
-    this.components.set(name,value);
-    HD.emit("runtime:registered",{name,value});
-    return value;
-};
-HD.runtime.get = function(name){
-    return this.components.get(name);
+HD.runtime = HD.runtime || {
+    initialized:false,
+    components:new Map(),
+    register(name,component){
+        if(!name || !component) return;
+        this.components.set(name,component);
+        HD.emit("runtime:registered",{name,component});
+    },
+    get(name){
+        return this.components.get(name);
+    },
+    has(name){
+        return this.components.has(name);
+    }
 };
 /* =========================================================
-   APP LIST — KOMPLETTER HALDO AI OS 22 STARTZUSTAND
+   ROUTER
    ========================================================= */
-HD.appDefinitions = [
-["haldo-ai","☀️","HalDo AI"],
-["chat","💬","Chat"],
-["voice","🎙️","Voice"],
-["mail","📧","HalDo Mail"],
-["browser","🌐","HalDo Browser"],
-["translator","🌍","Übersetzer"],
-["dictionary","📖","Wörterbuch"],
-["languages","🗣️","Sprachen"],
-["ezidi-keyboard","⌨️","Êzîdî-Tastatur"],
-["traffic","🚗","Verkehr"],
-["traffic-warnings","⚠️","Verkehrswarnungen"],
-["maps","🗺️","Karten"],
-["navigation","🧭","Navigation"],
-["driving-school","🚘","Fahrschule"],
-["driving-license","🚦","Führerschein / Verkehrslernen"],
-["health","🏥","Gesundheit"],
-["medications","💊","Medikamente / Erinnerungen"],
-["learning","🧠","Lernen"],
-["university","🎓","Universität"],
-["school","🏫","Schule"],
-["training","🧑‍🏫","Ausbildung"],
-["library","📚","Bibliothek"],
-["notes","📝","Notizen"],
-["calendar","📅","Kalender"],
-["reminders","⏰","Erinnerungen"],
-["weather","🌦️","Wetter"],
-["nature","🌱","Natur / Wiesen"],
-["environment","🌳","Umwelt"],
-["science","🔬","Wissenschaft"],
-["code","💻","Code / Entwicklung"],
-["files","📁","Dateien"],
-["documents","🗂️","Dokumente"],
-["communication","📧","Kommunikation"],
-["notifications","🔔","Benachrichtigungen"],
-["settings","⚙️","Einstellungen"],
-["security","🔐","Sicherheit"],
-["users","👤","Benutzer"],
-["storage","💾","Speicher"],
-["network","🌐","Netzwerk"],
-["updates","🔄","Updates"],
-["system-status","📊","Systemstatus"],
-["system-tools","🛠️","Systemtools"],
-["bluetooth","🔵","Bluetooth"],
-["vehicle","🚘","Fahrzeug / Android Auto"],
-["music-studio","🎵","HalDo Music Studio"],
-["audio-studio","🎙️","HalDo Audio Studio"],
-["video-studio","🎬","HalDo Video Studio"],
-["creative-studio","🖼️","HalDo Creative Studio"],
-["design-studio","🎨","HalDo Design Studio"]
+HD.router = HD.router || {
+    current:null,
+    routes:new Map(),
+    register(path,handler){
+        this.routes.set(path,handler);
+    },
+    navigate(path,data={}){
+        this.current = path;
+        const handler =
+            this.routes.get(path);
+        if(typeof handler === "function"){
+            return handler(data);
+        }
+        HD.emit(
+            "router:navigate",
+            {path,data}
+        );
+        return true;
+    }
+};
+/* =========================================================
+   COMPLETE APP MANIFEST
+   ========================================================= */
+const HALDO_APPS = [
+    ["haldo-ai","☀️","HalDo AI","Zentrale lebendige künstliche Intelligenz"],
+    ["chat","💬","Chat","Unterhaltung und Gespräche"],
+    ["voice","🎙️","Voice","Sprache und Sprachsteuerung"],
+    ["mail","📧","HalDo Mail","E-Mail, Briefe und Dokumente"],
+    ["browser","🌐","HalDo Browser","Web-Browser"],
+    ["translator","🌍","Übersetzer","Mehrsprachige Übersetzung"],
+    ["dictionary","📖","Wörterbuch","Wörter, Bedeutungen und Sprachwissen"],
+    ["languages","🗣️","Sprachen","Sprachsystem und Sprachverwaltung"],
+    ["ezidi-keyboard","⌨️","Êzîdî-Tastatur","Êzîdî-Zeichen und Tastaturlayouts"],
+    ["traffic","🚗","Verkehr","Verkehrsinformationen"],
+    ["traffic-warning","⚠️","Verkehrswarnungen","Warnungen und Verkehrslage"],
+    ["maps","🗺️","Karten","Karten und Orte"],
+    ["navigation","🧭","Navigation","Routenplanung und Navigation"],
+    ["driving-school","🚘","Fahrschule","Fahrschul-Lernen"],
+    ["driving-license","🚦","Führerschein / Verkehrslernen","Prüfungsvorbereitung"],
+    ["health","🏥","Gesundheit","Gesundheitsinformationen"],
+    ["medications","💊","Medikamente / Erinnerungen","Medikamenten- und Erinnerungsverwaltung"],
+    ["learning","🧠","Lernen","Lernsystem"],
+    ["university","🎓","Universität","Universitätsorganisation"],
+    ["school","🏫","Schule","Schulorganisation"],
+    ["training","🧑‍🏫","Ausbildung","Ausbildungsorganisation"],
+    ["library","📚","Bibliothek","Bücher und Wissenssammlung"],
+    ["notes","📝","Notizen","Notizen und persönliche Einträge"],
+    ["calendar","📅","Kalender","Termine und Kalender"],
+    ["reminders","⏰","Erinnerungen","Aufgaben und Erinnerungen"],
+    ["weather","🌦️","Wetter","Wetterinformationen"],
+    ["nature","🌱","Natur / Wiesen","Natur und Wiesen"],
+    ["environment","🌳","Umwelt","Umweltinformationen"],
+    ["science","🔬","Wissenschaft","Wissenschaft und Forschung"],
+    ["code","💻","Code / Entwicklung","Programmierung und Entwicklung"],
+    ["files","📁","Dateien","Dateiverwaltung"],
+    ["documents","🗂️","Dokumente","Dokumentverwaltung"],
+    ["communication","📧","Kommunikation","Kommunikation"],
+    ["notifications","🔔","Benachrichtigungen","Benachrichtigungen"],
+    ["settings","⚙️","Einstellungen","System- und App-Einstellungen"],
+    ["security","🔐","Sicherheit","Sicherheit und Datenschutz"],
+    ["user","👤","Benutzer","Benutzerkonto"],
+    ["storage","💾","Speicher","Speicherverwaltung"],
+    ["network","🌐","Netzwerk","Netzwerkverwaltung"],
+    ["updates","🔄","Updates","Systemupdates"],
+    ["system-status","📊","Systemstatus","Systemstatus"],
+    ["system-tools","🛠️","Systemtools","Systemwerkzeuge"],
+    ["bluetooth","🔵","Bluetooth","Bluetooth-Verbindungen"],
+    ["vehicle","🚘","Fahrzeug / Android Auto","Fahrzeugverbindungen"],
+    ["music-studio","🎵","HalDo Music Studio","Musik erstellen und bearbeiten"],
+    ["audio-studio","🎙️","HalDo Audio Studio","Audio aufnehmen und bearbeiten"],
+    ["video-studio","🎬","HalDo Video Studio","Videos erstellen und bearbeiten"],
+    ["creative-studio","🖼️","HalDo Creative Studio","Kreative Medien"],
+    ["design-studio","🎨","HalDo Design Studio","Design und Gestaltung"]
 ].map(item=>({
     id:item[0],
     icon:item[1],
     name:item[2],
-    description:"HalDo AI OS 22 Anwendung",
-    persistent:false
+    description:item[3]
 }));
-/* =========================================================
-   APP REGISTRY
-   ========================================================= */
-HD.appRegistry = HD.appRegistry || {};
-HD.appRegistry.items = new Map(
-    HD.appDefinitions.map(app=>[app.id,app])
-);
-HD.appRegistry.get = function(id){
-    return this.items.get(id) || null;
-};
-HD.appRegistry.all = function(){
-    return [...this.items.values()];
-};
-HD.appRegistry.register = function(app){
-    if(!app || !app.id) return false;
-    this.items.set(app.id,app);
-    return true;
-};
-/* =========================================================
-   WINDOW SYSTEM
-   ========================================================= */
-HD.windowManager = HD.windowManager || {};
-HD.windowManager.windows =
-    HD.windowManager.windows || new Map();
-HD.windowManager.zIndex = 3100;
-HD.windowManager.activeWindowId = null;
-const layer =
-    document.getElementById("haldo-window-layer");
-HD.windowManager.create = function(app){
-    if(!app) return null;
-    const existing =
-        this.windows.get(app.id);
-    if(existing){
-        this.restore(app.id);
-        return existing;
+HD.apps = HD.apps || {
+    manifests:new Map(
+        HALDO_APPS.map(app=>[app.id,app])
+    ),
+    get(id){
+        return this.manifests.get(id) || null;
+    },
+    all(){
+        return Array.from(
+            this.manifests.values()
+        );
     }
-    const definition =
-        HD.appRegistry.get(app.id);
-    if(!definition) return null;
-    const element =
-        document.createElement("section");
-    element.className = "haldo-window";
-    element.dataset.appId = app.id;
-    element.style.left =
-        `${70 + (this.windows.size % 5) * 25}px`;
-    element.style.top =
-        `${55 + (this.windows.size % 5) * 25}px`;
-    element.style.width =
-        `${HD.config.defaultWindowWidth}px`;
-    element.style.height =
-        `${HD.config.defaultWindowHeight}px`;
-    const header =
-        document.createElement("header");
-    header.className =
-        "haldo-window-header";
-    const title =
-        document.createElement("div");
-    title.className =
-        "haldo-window-title";
-    const icon =
-        document.createElement("span");
-    icon.textContent =
-        definition.icon;
-    const name =
-        document.createElement("span");
-    name.textContent =
-        definition.name;
-    title.append(icon,name);
-    const controls =
-        document.createElement("div");
-    controls.className =
-        "haldo-window-controls";
-    const minimize =
-        document.createElement("button");
-    minimize.textContent = "−";
-    const maximize =
-        document.createElement("button");
-    maximize.textContent = "□";
-    const close =
-        document.createElement("button");
-    close.textContent = "×";
-    close.className = "close";
-    controls.append(
-        minimize,
-        maximize,
-        close
-    );
-    header.append(
-        title,
-        controls
-    );
-    const body =
-        document.createElement("div");
-    body.className =
-        "haldo-window-body";
-    body.innerHTML =
-        this.renderApp(definition);
-    element.append(
-        header,
-        body
-    );
-    layer.appendChild(element);
-    const record = {
-        id:app.id,
-        app,
-        definition,
-        element,
-        header,
-        body,
-        minimized:false,
-        maximized:false,
-        x:70,
-        y:55,
-        width:HD.config.defaultWindowWidth,
-        height:HD.config.defaultWindowHeight
-    };
-    this.windows.set(app.id,record);
-    element.addEventListener(
-        "pointerdown",
-        ()=>this.focus(app.id)
-    );
-    minimize.addEventListener(
-        "click",
-        event=>{
-            event.preventDefault();
-            event.stopPropagation();
-            this.minimize(app.id);
-        }
-    );
-    maximize.addEventListener(
-        "click",
-        event=>{
-            event.preventDefault();
-            event.stopPropagation();
-            this.toggleMaximize(app.id);
-        }
-    );
-    close.addEventListener(
-        "click",
-        event=>{
-            event.preventDefault();
-            event.stopPropagation();
-            this.close(app.id);
-        }
-    );
-    header.addEventListener(
-        "dblclick",
-        event=>{
-            if(event.target.closest(".haldo-window-controls"))
-                return;
-            this.toggleMaximize(app.id);
-        }
-    );
-    this.makeDraggable(record);
-    this.focus(app.id);
-    return record;
 };
-HD.windowManager.renderApp =
-function(definition){
-    const safe =
-        String(definition.name)
-            .replace(/</g,"&lt;")
-            .replace(/>/g,"&gt;");
-    return `
-        <div class="haldo-app-page">
-            <div class="haldo-card">
-                <div style="font-size:38px">${definition.icon}</div>
-                <h2>${safe}</h2>
-                <p>
-                    Diese Anwendung ist mit dem zentralen
-                    HalDo AI OS 22 App-, Window-, Runtime-,
-                    Router- und Storage-System verbunden.
-                </p>
-            </div>
-            <div class="haldo-card">
-                <strong>APP STATUS</strong>
-                <p>● Online · System verbunden</p>
-            </div>
-            <div class="haldo-actions">
-                <button data-haldo-action="ai">☀️ HalDo AI</button>
-                <button data-haldo-action="save">💾 Speichern</button>
-                <button data-haldo-action="close">× Schließen</button>
-            </div>
-        </div>
-    `;
+/* =========================================================
+   APP REGISTRY COMPATIBILITY
+   ========================================================= */
+HD.appRegistry = HD.appRegistry || {
+    get(id){
+        return HD.apps.get(id);
+    },
+    all(){
+        return HD.apps.all();
+    }
 };
-HD.windowManager.focus =
-function(appId){
-    const record =
-        this.windows.get(appId);
-    if(!record) return;
-    this.zIndex++;
-    record.element.style.zIndex =
-        String(this.zIndex);
-    record.element.classList.remove("hidden");
-    record.minimized = false;
-    this.activeWindowId =
-        appId;
-    HD.emit(
-        "window:activated",
-        {window:record}
-    );
+/* =========================================================
+   AI CORE
+   ========================================================= */
+HD.ai = HD.ai || {
+    name:"HalDo AI",
+    history:
+        HD.storage.get(
+            "ai:history",
+            []
+        ),
+    greetings:[
+        "Hallo, ich bin HalDo AI. Schön, dass du da bist. ❤️",
+        "Willkommen bei HalDo AI. Ich bin bereit, mit dir zu sprechen.",
+        "Hallo! Was möchtest du heute gemeinsam machen?"
+    ],
+    respond(input){
+        const text =
+            String(input || "").trim();
+        if(!text){
+            return "Ich bin hier. Schreib mir einfach, was du möchtest.";
+        }
+        const lower =
+            text.toLowerCase();
+        let answer;
+        if(
+            lower.includes("hallo") ||
+            lower.includes("hi") ||
+            lower.includes("hey")
+        ){
+            answer =
+                "Hallo Bruder ❤️💙. Ich bin HalDo AI und höre dir zu. Was möchtest du machen?";
+        }
+        else if(
+            lower.includes("wer bist") ||
+            lower.includes("wer bist du")
+        ){
+            answer =
+                "Ich bin HalDo AI – die zentrale intelligente Oberfläche deines HalDo AI OS 22. Ich kann mit dir schreiben, sprechen, erklären, planen und dich durch deine Anwendungen führen.";
+        }
+        else if(
+            lower.includes("zeit")
+        ){
+            answer =
+                "Die aktuelle Systemzeit ist " +
+                new Date().toLocaleTimeString(
+                    "de-DE"
+                ) +
+                ".";
+        }
+        else if(
+            lower.includes("apps") ||
+            lower.includes("app liste")
+        ){
+            answer =
+                "Im HalDo AI OS 22 sind " +
+                HD.apps.all().length +
+                " Anwendungen registriert und über das Hauptmenü erreichbar.";
+        }
+        else if(
+            lower.includes("danke")
+        ){
+            answer =
+                "Sehr gerne. ❤️ Ich bin weiter bei dir.";
+        }
+        else{
+            answer =
+                "Ich habe dich verstanden. 💙 " +
+                "Erzähl mir mehr darüber, damit wir gemeinsam weiterarbeiten können.";
+        }
+        this.history.push({
+            role:"user",
+            content:text,
+            time:Date.now()
+        });
+        this.history.push({
+            role:"assistant",
+            content:answer,
+            time:Date.now()
+        });
+        HD.storage.set(
+            "ai:history",
+            this.history.slice(-200)
+        );
+        HD.emit(
+            "ai:response",
+            {
+                input:text,
+                answer
+            }
+        );
+        return answer;
+    }
 };
-HD.windowManager.open =
-function(app){
-    if(!app) return null;
-    let record =
-        this.windows.get(app.id);
-    if(!record){
+/* =========================================================
+   VOICE
+   ========================================================= */
+HD.voice = HD.voice || {
+    speaking:false,
+    speak(text){
+        if(
+            !("speechSynthesis" in window)
+        ){
+            return false;
+        }
+        window.speechSynthesis.cancel();
+        const utterance =
+            new SpeechSynthesisUtterance(
+                String(text)
+            );
+        utterance.lang =
+            HD.config.language === "de"
+                ? "de-DE"
+                : HD.config.language;
+        utterance.rate=.96;
+        utterance.pitch=1.02;
+        utterance.onstart=()=>{
+            this.speaking=true;
+            HD.emit("voice:start",{text});
+        };
+        utterance.onend=()=>{
+            this.speaking=false;
+            HD.emit("voice:end",{text});
+        };
+        window.speechSynthesis.speak(
+            utterance
+        );
+        return true;
+    },
+    stop(){
+        if("speechSynthesis" in window){
+            window.speechSynthesis.cancel();
+        }
+        this.speaking=false;
+    }
+};
+/* =========================================================
+   WELCOME SOUND
+   ========================================================= */
+HD.audio = HD.audio || {
+    playWelcome(){
+        if(!HD.config.welcomeSound){
+            return;
+        }
+        try{
+            const AudioContext =
+                window.AudioContext ||
+                window.webkitAudioContext;
+            if(!AudioContext) return;
+            const ctx =
+                new AudioContext();
+            const now =
+                ctx.currentTime;
+            const notes =
+                [220,277.18,329.63,440];
+            notes.forEach(
+                (frequency,index)=>{
+                    const oscillator =
+                        ctx.createOscillator();
+                    const gain =
+                        ctx.createGain();
+                    oscillator.type =
+                        "sine";
+                    oscillator.frequency
+                        .setValueAtTime(
+                            frequency,
+                            now + index*.12
+                        );
+                    gain.gain.setValueAtTime(
+                        0,
+                        now + index*.12
+                    );
+                    gain.gain.linearRampToValueAtTime(
+                        .035,
+                        now + index*.12 + .04
+                    );
+                    gain.gain.exponentialRampToValueAtTime(
+                        .0001,
+                        now + index*.12 + .75
+                    );
+                    oscillator.connect(gain);
+                    gain.connect(ctx.destination);
+                    oscillator.start(
+                        now + index*.12
+                    );
+                    oscillator.stop(
+                        now + index*.12 + .8
+                    );
+                }
+            );
+            setTimeout(
+                ()=>ctx.close().catch(()=>{}),
+                1500
+            );
+        }catch(error){
+            console.warn(
+                "HalDo Welcome Audio:",
+                error
+            );
+        }
+    }
+};
+/* =========================================================
+   WINDOW MANAGER
+   ========================================================= */
+HD.windowManager = HD.windowManager || {
+    windows:new Map(),
+    zIndex:100,
+    active:null,
+    open(appId){
+        const app =
+            HD.appManager.get(
+                appId
+            );
+        if(!app) return null;
+        let record =
+            this.windows.get(
+                appId
+            );
+        if(record){
+            record.element.classList.remove(
+                "minimized"
+            );
+            this.focus(appId);
+            return record;
+        }
         record =
             this.create(app);
-    }
-    if(!record) return null;
-    record.element.classList.remove("hidden");
-    record.minimized = false;
-    app.opened = true;
-    app.closed = false;
-    app.active = true;
-    this.focus(app.id);
-    HD.emit(
-        "window:opened",
-        {window:record,app}
-    );
-    return record;
-};
-HD.windowManager.close =
-function(appId){
-    const record =
-        this.windows.get(appId);
-    if(!record) return false;
-    record.element.remove();
-    this.windows.delete(appId);
-    if(this.activeWindowId === appId)
-        this.activeWindowId = null;
-    HD.emit(
-        "window:closed",
-        {appId}
-    );
-    return true;
-};
-HD.windowManager.minimize =
-function(appId){
-    const record =
-        this.windows.get(appId);
-    if(!record) return false;
-    record.minimized = true;
-    record.element.classList.add("hidden");
-    HD.emit(
-        "window:minimized",
-        {window:record}
-    );
-    return true;
-};
-HD.windowManager.restore =
-function(appId){
-    const record =
-        this.windows.get(appId);
-    if(!record) return false;
-    record.minimized = false;
-    record.element.classList.remove("hidden");
-    this.focus(appId);
-    HD.emit(
-        "window:restored",
-        {window:record}
-    );
-    return true;
-};
-HD.windowManager.toggleMaximize =
-function(appId){
-    const record =
-        this.windows.get(appId);
-    if(!record) return false;
-    record.maximized =
-        !record.maximized;
-    record.element.classList.toggle(
-        "maximized",
-        record.maximized
-    );
-    HD.emit(
-        "window:maximized",
-        {
-            window:record,
-            maximized:record.maximized
+        this.windows.set(
+            appId,
+            record
+        );
+        this.focus(appId);
+        return record;
+    },
+    create(app){
+        const manifest =
+            app.manifest;
+        const element =
+            document.createElement(
+                "section"
+            );
+        element.className =
+            "haldo-window active";
+        const saved =
+            HD.appState.get(
+                app.id
+            );
+        const windowState =
+            saved.window || {};
+        element.style.left =
+            (windowState.x ?? 70) + "px";
+        element.style.top =
+            (windowState.y ?? 75) + "px";
+        element.style.width =
+            (windowState.width ??
+                HD.config.defaultWindowWidth) + "px";
+        element.style.height =
+            (windowState.height ??
+                HD.config.defaultWindowHeight) + "px";
+        const header =
+            document.createElement(
+                "div"
+            );
+        header.className =
+            "window-header";
+        const icon =
+            document.createElement(
+                "div"
+            );
+        icon.className =
+            "window-app-icon";
+        icon.textContent =
+            manifest.icon;
+        const name =
+            document.createElement(
+                "div"
+            );
+        name.className =
+            "window-name";
+        name.textContent =
+            manifest.name;
+        const controls =
+            document.createElement(
+                "div"
+            );
+        controls.className =
+            "window-controls";
+        const minimize =
+            this.control("−");
+        const maximize =
+            this.control("□");
+        const close =
+            this.control("×");
+        close.classList.add("close");
+        controls.append(
+            minimize,
+            maximize,
+            close
+        );
+        header.append(
+            icon,
+            name,
+            controls
+        );
+        const body =
+            document.createElement(
+                "div"
+            );
+        body.className =
+            "window-body";
+        const toolbar =
+            document.createElement(
+                "div"
+            );
+        toolbar.className =
+            "app-toolbar";
+        toolbar.innerHTML =
+            '<span class="status">● ONLINE</span>' +
+            '<span>'+this.escape(
+                manifest.description
+            )+'</span>';
+        const content =
+            document.createElement(
+                "div"
+            );
+        content.className =
+            "app-content";
+        body.append(
+            toolbar,
+            content
+        );
+        const resize =
+            document.createElement(
+                "div"
+            );
+        resize.className =
+            "resize-handle";
+        element.append(
+            header,
+            body,
+            resize
+        );
+        document
+            .getElementById(
+                "window-layer"
+            )
+            .appendChild(element);
+        const record = {
+            id:app.id,
+            app,
+            element,
+            header,
+            content,
+            resize,
+            maximized:false,
+            minimized:false,
+            x:Number(
+                windowState.x ?? 70
+            ),
+            y:Number(
+                windowState.y ?? 75
+            ),
+            width:Number(
+                windowState.width ??
+                HD.config.defaultWindowWidth
+            ),
+            height:Number(
+                windowState.height ??
+                HD.config.defaultWindowHeight
+            )
+        };
+        if(windowState.maximized){
+            record.maximized=true;
         }
-    );
-    return true;
-};
-HD.windowManager.makeDraggable =
-function(record){
-    let dragging = false;
-    let offsetX = 0;
-    let offsetY = 0;
-    record.header.addEventListener(
-        "pointerdown",
-        event=>{
-            if(
-                event.target.closest(
-                    ".haldo-window-controls"
-                )
-            ) return;
-            if(record.maximized) return;
-            dragging = true;
-            offsetX =
-                event.clientX -
-                record.element.offsetLeft;
-            offsetY =
-                event.clientY -
-                record.element.offsetTop;
-            try{
+        this.renderApp(record);
+        /* ONE CLICK CLOSE */
+        close.addEventListener(
+            "click",
+            event=>{
+                event.preventDefault();
+                event.stopPropagation();
+                HD.appManager.close(
+                    app.id
+                );
+            }
+        );
+        minimize.addEventListener(
+            "click",
+            event=>{
+                event.preventDefault();
+                event.stopPropagation();
+                this.minimize(
+                    app.id
+                );
+            }
+        );
+        maximize.addEventListener(
+            "click",
+            event=>{
+                event.preventDefault();
+                event.stopPropagation();
+                this.toggleMaximize(
+                    app.id
+                );
+            }
+        );
+        header.addEventListener(
+            "dblclick",
+            ()=>this.toggleMaximize(
+                app.id
+            )
+        );
+        element.addEventListener(
+            "pointerdown",
+            ()=>this.focus(
+                app.id
+            )
+        );
+        this.enableDragging(record);
+        this.enableResize(record);
+        this.apply(record);
+        return record;
+    },
+    control(symbol){
+        const button =
+            document.createElement(
+                "button"
+            );
+        button.className =
+            "window-control";
+        button.type="button";
+        button.textContent=symbol;
+        return button;
+    },
+    focus(appId){
+        const record =
+            this.windows.get(
+                appId
+            );
+        if(!record) return;
+        this.zIndex++;
+        record.element.style.zIndex =
+            String(this.zIndex);
+        this.active =
+            appId;
+        this.windows.forEach(
+            item=>{
+                item.element.classList
+                    .toggle(
+                        "active",
+                        item.id === appId
+                    );
+            }
+        );
+        HD.emit(
+            "window:activated",
+            {window:record}
+        );
+    },
+    close(appId){
+        const record =
+            this.windows.get(
+                appId
+            );
+        if(!record) return;
+        this.save(record);
+        record.element.remove();
+        this.windows.delete(
+            appId
+        );
+        if(this.active===appId){
+            this.active=null;
+        }
+        HD.emit(
+            "window:closed",
+            {window:record}
+        );
+    },
+    minimize(appId){
+        const record =
+            this.windows.get(
+                appId
+            );
+        if(!record) return;
+        record.minimized=true;
+        record.element.classList.add(
+            "minimized"
+        );
+        HD.emit(
+            "window:minimized",
+            {window:record}
+        );
+    },
+    restore(appId){
+        const record =
+            this.windows.get(
+                appId
+            );
+        if(!record) return;
+        record.minimized=false;
+        record.element.classList.remove(
+            "minimized"
+        );
+        this.focus(appId);
+    },
+    toggleMaximize(appId){
+        const record =
+            this.windows.get(
+                appId
+            );
+        if(!record) return;
+        record.maximized =
+            !record.maximized;
+        record.element.classList.toggle(
+            "maximized",
+            record.maximized
+        );
+        this.save(record);
+    },
+    apply(record){
+        if(record.maximized) return;
+        record.element.style.left =
+            record.x+"px";
+        record.element.style.top =
+            record.y+"px";
+        record.element.style.width =
+            record.width+"px";
+        record.element.style.height =
+            record.height+"px";
+    },
+    save(record){
+        const state =
+            HD.appState.get(
+                record.id
+            );
+        state.window = {
+            x:record.x,
+            y:record.y,
+            width:record.width,
+            height:record.height,
+            maximized:record.maximized
+        };
+        state.wasOpen =
+            !record.minimized;
+        HD.appState.save(
+            record.id,
+            state
+        );
+    },
+    enableDragging(record){
+        let dragging=false;
+        let offsetX=0;
+        let offsetY=0;
+        record.header.addEventListener(
+            "pointerdown",
+            event=>{
+                if(
+                    event.target.closest(
+                        ".window-controls"
+                    )
+                ){
+                    return;
+                }
+                if(record.maximized){
+                    return;
+                }
+                dragging=true;
+                offsetX =
+                    event.clientX-record.x;
+                offsetY =
+                    event.clientY-record.y;
                 record.header.setPointerCapture(
                     event.pointerId
                 );
-            }catch(_){}
-        }
-    );
-    record.header.addEventListener(
-        "pointermove",
-        event=>{
-            if(!dragging || record.maximized)
-                return;
-            record.x =
-                Math.max(
-                    0,
-                    event.clientX - offsetX
-                );
-            record.y =
-                Math.max(
-                    0,
-                    event.clientY - offsetY
-                );
-            record.element.style.left =
-                record.x+"px";
-            record.element.style.top =
-                record.y+"px";
-        }
-    );
-    record.header.addEventListener(
-        "pointerup",
-        event=>{
-            dragging = false;
-            try{
-                record.header.releasePointerCapture(
+            }
+        );
+        record.header.addEventListener(
+            "pointermove",
+            event=>{
+                if(!dragging) return;
+                record.x =
+                    Math.max(
+                        5,
+                        event.clientX-offsetX
+                    );
+                record.y =
+                    Math.max(
+                        60,
+                        event.clientY-offsetY
+                    );
+                this.apply(record);
+            }
+        );
+        record.header.addEventListener(
+            "pointerup",
+            event=>{
+                dragging=false;
+                try{
+                    record.header.releasePointerCapture(
+                        event.pointerId
+                    );
+                }catch(_){}
+                this.save(record);
+            }
+        );
+    },
+    enableResize(record){
+        let resizing=false;
+        let startX=0;
+        let startY=0;
+        let startW=0;
+        let startH=0;
+        record.resize.addEventListener(
+            "pointerdown",
+            event=>{
+                if(record.maximized){
+                    return;
+                }
+                resizing=true;
+                startX=event.clientX;
+                startY=event.clientY;
+                startW=record.width;
+                startH=record.height;
+                record.resize.setPointerCapture(
                     event.pointerId
                 );
-            }catch(_){}
+                event.preventDefault();
+            }
+        );
+        record.resize.addEventListener(
+            "pointermove",
+            event=>{
+                if(!resizing) return;
+                record.width =
+                    Math.max(
+                        HD.config.minimumWindowWidth,
+                        startW+
+                        event.clientX-
+                        startX
+                    );
+                record.height =
+                    Math.max(
+                        HD.config.minimumWindowHeight,
+                        startH+
+                        event.clientY-
+                        startY
+                    );
+                this.apply(record);
+            }
+        );
+        record.resize.addEventListener(
+            "pointerup",
+            event=>{
+                resizing=false;
+                try{
+                    record.resize.releasePointerCapture(
+                        event.pointerId
+                    );
+                }catch(_){}
+                this.save(record);
+            }
+        );
+    },
+    escape(value){
+        return String(value??"")
+            .replace(/&/g,"&amp;")
+            .replace(/</g,"&lt;")
+            .replace(/>/g,"&gt;")
+            .replace(/"/g,"&quot;")
+            .replace(/'/g,"&#039;");
+    },
+    renderApp(record){
+        record.content.innerHTML="";
+        const id =
+            record.id;
+        if(
+            id==="haldo-ai" ||
+            id==="chat"
+        ){
+            this.renderAI(record);
+            return;
         }
+        if(id==="voice"){
+            this.renderVoice(record);
+            return;
+        }
+        if(id==="settings"){
+            this.renderSettings(record);
+            return;
+        }
+        this.renderGeneric(record);
+    },
+    renderAI(record){
+        const shell =
+            document.createElement("div");
+        shell.className="chat";
+        const messages =
+            document.createElement("div");
+        messages.className=
+            "chat-messages";
+        HD.ai.history
+            .slice(-50)
+            .forEach(
+                item=>{
+                    const bubble =
+                        document.createElement(
+                            "div"
+                        );
+                    bubble.className=
+                        "chat-message "+
+                        (
+                            item.role==="user"
+                                ?"user"
+                                :"ai"
+                        );
+                    bubble.textContent =
+                        item.content;
+                    messages.appendChild(
+                        bubble
+                    );
+                }
+            );
+        const inputRow =
+            document.createElement(
+                "div"
+            );
+        inputRow.className=
+            "chat-input";
+        const input =
+            document.createElement(
+                "textarea"
+            );
+        input.className=
+            "textarea";
+        input.placeholder=
+            "Schreibe HalDo AI etwas …";
+        const send =
+            document.createElement(
+                "button"
+            );
+        send.className=
+            "action-button primary";
+        send.textContent="Senden";
+        const speak =
+            document.createElement(
+                "button"
+            );
+        speak.className=
+            "action-button";
+        speak.textContent="🔊";
+        const submit=()=>{
+            const text =
+                input.value.trim();
+            if(!text) return;
+            const userBubble =
+                document.createElement("div");
+            userBubble.className=
+                "chat-message user";
+            userBubble.textContent=text;
+            messages.appendChild(
+                userBubble
+            );
+            input.value="";
+            const answer =
+                HD.ai.respond(text);
+            const aiBubble =
+                document.createElement("div");
+            aiBubble.className=
+                "chat-message ai";
+            aiBubble.textContent=
+                answer;
+            messages.appendChild(
+                aiBubble
+            );
+            messages.scrollTop =
+                messages.scrollHeight;
+        };
+        send.addEventListener(
+            "click",
+            submit
+        );
+        input.addEventListener(
+            "keydown",
+            event=>{
+                if(
+                    event.key==="Enter" &&
+                    !event.shiftKey
+                ){
+                    event.preventDefault();
+                    submit();
+                }
+            }
+        );
+        speak.addEventListener(
+            "click",
+            ()=>{
+                const last =
+                    HD.ai.history
+                        .filter(
+                            x=>x.role==="assistant"
+                        )
+                        .at(-1);
+                HD.voice.speak(
+                    last?.content ||
+                    "Hallo, ich bin HalDo AI."
+                );
+            }
+        );
+        inputRow.append(
+            input,
+            send,
+            speak
+        );
+        shell.append(
+            messages,
+            inputRow
+        );
+        record.content.appendChild(
+            shell
+        );
+        requestAnimationFrame(
+            ()=>messages.scrollTop=
+                messages.scrollHeight
+        );
+    },
+    renderVoice(record){
+        const shell =
+            document.createElement(
+                "div"
+            );
+        shell.className="app-shell";
+        shell.innerHTML=
+            `
+            <div class="app-card">
+                <h2>🎙️ HalDo Voice</h2>
+                <p>HalDo kann Antworten vorlesen und Sprachfunktionen des Geräts verwenden.</p>
+                <div class="app-grid">
+                    <button class="action-button primary" data-speak>HalDo sprechen</button>
+                    <button class="action-button" data-stop>Stopp</button>
+                </div>
+            </div>
+            `;
+        shell.querySelector(
+            "[data-speak]"
+        ).onclick=()=>HD.voice.speak(
+            "Hallo. Ich bin HalDo AI. Schön, dass du mit mir sprichst."
+        );
+        shell.querySelector(
+            "[data-stop]"
+        ).onclick=()=>HD.voice.stop();
+        record.content.appendChild(
+            shell
+        );
+    },
+    renderSettings(record){
+        const shell =
+            document.createElement(
+                "div"
+            );
+        shell.className=
+            "app-shell";
+        shell.innerHTML=
+            `
+            <div class="app-card">
+                <h2>⚙️ Einstellungen</h2>
+                <p>Persönliche HalDo AI OS Einstellungen.</p>
+            </div>
+            <div class="app-card">
+                <h3>Willkommens-Ton</h3>
+                <label>
+                    <input type="checkbox" data-welcome>
+                    HalDo AI Begrüßungston aktivieren
+                </label>
+            </div>
+            <div class="app-card">
+                <h3>Sprache</h3>
+                <select class="select" data-language>
+                    <option value="de-DE">Deutsch</option>
+                    <option value="en-US">English</option>
+                    <option value="ku">Kurdî</option>
+                    <option value="ar-SA">العربية</option>
+                    <option value="tr-TR">Türkçe</option>
+                    <option value="fr-FR">Français</option>
+                    <option value="es-ES">Español</option>
+                    <option value="it-IT">Italiano</option>
+                    <option value="ru-RU">Русский</option>
+                    <option value="el-GR">Ελληνικά</option>
+                </select>
+            </div>
+            `;
+        const welcome =
+            shell.querySelector(
+                "[data-welcome]"
+            );
+        welcome.checked =
+            !!HD.config.welcomeSound;
+        welcome.onchange=()=>{
+            HD.config.welcomeSound =
+                welcome.checked;
+            HD.storage.set(
+                "setting:welcomeSound",
+                welcome.checked
+            );
+        };
+        const language =
+            shell.querySelector(
+                "[data-language]"
+            );
+        language.value =
+            HD.config.language === "de"
+                ? "de-DE"
+                : HD.config.language;
+        language.onchange=()=>{
+            HD.config.language =
+                language.value;
+            HD.storage.set(
+                "setting:language",
+                language.value
+            );
+        };
+        record.content.appendChild(
+            shell
+        );
+    },
+    renderGeneric(record){
+        const manifest =
+            record.app.manifest;
+        const shell =
+            document.createElement(
+                "div"
+            );
+        shell.className=
+            "app-shell";
+        shell.innerHTML=
+            `
+            <div class="app-card">
+                <h2>${this.escape(manifest.icon)} ${this.escape(manifest.name)}</h2>
+                <p>${this.escape(manifest.description)}</p>
+                <span class="status">● APP ONLINE</span>
+            </div>
+            <div class="app-grid">
+                <button class="action-button primary" data-ai>HalDo AI Hilfe</button>
+                <button class="action-button" data-save>Speichern</button>
+                <button class="action-button" data-settings>Einstellungen</button>
+            </div>
+            <div class="app-card">
+                <h3>Arbeitsbereich</h3>
+                <textarea class="textarea" placeholder="Hier kann die Anwendung arbeiten …"></textarea>
+        </div>
+        `;
+    shell.querySelector(
+        "[data-ai]"
+    ).onclick=()=>{
+        this.close(record.id);
+        this.open("haldo-ai");
+    };
+    shell.querySelector(
+        "[data-save]"
+    ).onclick=()=>{
+        const state =
+            HD.appState.get(
+                record.id
+            );
+        state.savedAt =
+            Date.now();
+        HD.appState.save(
+            record.id,
+            state
+        );
+    };
+    shell.querySelector(
+        "[data-settings]"
+    ).onclick=()=>{
+        this.open("settings");
+    };
+    record.content.appendChild(
+        shell
     );
+}
+
 };
+
 HD.runtime.register(
-    "window-manager",
-    HD.windowManager
+“window-manager”,
+HD.windowManager
 );
+
 /* =========================================================
-   APP MANAGER
-   ========================================================= */
-HD.appManager = HD.appManager || {};
-HD.appManager.instances =
-    HD.appManager.instances || new Map();
-HD.appManager.get =
-function(id){
+APP MANAGER
+========================================================= */
+
+HD.appManager = HD.appManager || {
+
+instances:new Map(),
+get(id){
     return this.instances.get(id) || null;
-};
-HD.appManager.create =
-function(id){
-    const definition =
-        HD.appRegistry.get(id);
-    if(!definition) return null;
+},
+create(id){
+    const manifest =
+        HD.apps.get(id);
+    if(!manifest) return null;
     let instance =
         this.instances.get(id);
     if(instance) return instance;
-    instance = {
+    instance={
         id,
-        name:definition.name,
-        icon:definition.icon,
-        manifest:definition,
+        name:manifest.name,
+        manifest,
         state:HD.appState.get(id),
         opened:false,
-        active:false,
         closed:true,
-        setState(key,value){
-            this.state[key]=value;
-            HD.appState.save(this.id,this.state);
+        active:false,
+        minimized:false,
+        maximized:false,
+        open(){
+            this.opened=true;
+            this.closed=false;
+            this.active=true;
+            this.minimized=false;
             HD.emit(
-                "app:state-change",
-                {app:this,key,value}
+                "app:opened",
+                {app:this}
             );
+            return this;
         },
-        getState(key,fallback=null){
-            return Object.prototype.hasOwnProperty
-                .call(this.state,key)
-                ? this.state[key]
-                : fallback;
+        close(){
+            this.opened=false;
+            this.closed=true;
+            this.active=false;
+            this.minimized=false;
+            HD.windowManager.close(
+                this.id
+            );
+            HD.emit(
+                "app:closed",
+                {app:this}
+            );
+            return this;
+        },
+        minimize(){
+            this.minimized=true;
+            this.active=false;
+            HD.windowManager.minimize(
+                this.id
+            );
+            return this;
+        },
+        restore(){
+            this.minimized=false;
+            this.active=true;
+            HD.windowManager.restore(
+                this.id
+            );
+            return this;
+        },
+        maximize(){
+            this.maximized=true;
+            this.active=true;
+            HD.windowManager
+                .toggleMaximize(
+                    this.id
+                );
+            return this;
         }
     };
-    this.instances.set(id,instance);
+    this.instances.set(
+        id,
+        instance
+    );
     return instance;
-};
-HD.appManager.open =
-function(id){
+},
+open(id){
     const app =
         this.create(id);
     if(!app) return null;
-    app.opened = true;
-    app.closed = false;
-    app.active = true;
-    HD.windowManager.open(app);
-    HD.emit(
-        "app:open",
+    app.open();
+    HD.windowManager.open(id);
+    HD.router.navigate(
+        "/app/"+id,
         {app}
+    );
+    HD.emit(
+        "app:action",
+        {
+            appId:id,
+            action:"open",
+            app
+        }
     );
     return app;
-};
-HD.appManager.close =
-function(id){
+},
+close(id){
     const app =
-        this.instances.get(id);
+        this.get(id);
     if(!app) return false;
-    app.opened = false;
-    app.closed = true;
-    app.active = false;
-    HD.windowManager.close(id);
-    HD.emit(
-        "app:close",
-        {app}
-    );
+    app.close();
     return true;
-};
-HD.runtime.register(
-    "app-manager",
-    HD.appManager
-);
-/* =========================================================
-   ROUTER
-   ========================================================= */
-HD.router = HD.router || {};
-HD.router.current =
-    null;
-HD.router.open =
-function(appId){
-    if(!HD.appRegistry.get(appId))
-        return false;
-    this.current =
-        appId;
-    HD.appManager.open(appId);
-    HD.emit(
-        "route:change",
-        {appId}
-    );
+},
+minimize(id){
+    const app =
+        this.get(id);
+    if(!app) return false;
+    app.minimize();
     return true;
+},
+restore(id){
+    const app =
+        this.get(id);
+    if(!app) return false;
+    app.restore();
+    return true;
+},
+maximize(id){
+    const app =
+        this.get(id);
+    if(!app) return false;
+    app.maximize();
+    return true;
+}
+
 };
+
 HD.runtime.register(
-    "router",
-    HD.router
+“app-manager”,
+HD.appManager
 );
+
 /* =========================================================
-   MENU
-   ========================================================= */
-const menu =
-    document.getElementById("haldo-menu");
-const menuButton =
-    document.getElementById("haldo-menu-button");
+MENU
+========================================================= */
+
 const appList =
-    document.getElementById("haldo-app-list");
-HD.appRegistry.all()
-.forEach(app=>{
+document.getElementById(
+“app-list”
+);
+
+HALDO_APPS.forEach(
+manifest=>{
+
     const button =
-        document.createElement("button");
-    button.className =
-        "haldo-app-item";
-    button.type = "button";
-    button.innerHTML =
-        `<span class="haldo-app-icon">${app.icon}</span>
-         <span class="haldo-app-label">${app.name}</span>`;
-    button.addEventListener(
-        "click",
-        ()=>{
-            HD.router.open(app.id);
-            menu.classList.remove("open");
-            menu.setAttribute("aria-hidden","true");
-        }
-    );
-    appList.appendChild(button);
-});
-menuButton.addEventListener(
-    "click",
-    event=>{
-        event.preventDefault();
-        const open =
-            menu.classList.toggle("open");
-        menu.setAttribute(
-            "aria-hidden",
-            String(!open)
+        document.createElement(
+            "button"
         );
-    }
-);
-/* =========================================================
-   AI FOUNDATION
-   ========================================================= */
-HD.ai = HD.ai || {};
-HD.ai.respond =
-function(text){
-    const input =
-        String(text || "").trim();
-    if(!input)
-        return "Ich bin hier. Schreib mir einfach, was du möchtest.";
-    const lower =
-        input.toLowerCase();
-    if(
-        lower.includes("hallo") ||
-        lower.includes("hi") ||
-        lower.includes("hey")
-    ){
-        return "Hallo Bruder ❤️💙. Ich bin HalDo AI. Ich bin bereit, mit dir zu schreiben, Fragen zu beantworten und dich durch HalDo AI OS 22 zu begleiten.";
-    }
-    if(
-        lower.includes("wer bist") ||
-        lower.includes("was bist")
-    ){
-        return "Ich bin HalDo AI – die zentrale intelligente Assistenz von HalDo AI OS 22. Mein Ziel ist, mit den Systemdiensten, Apps, Sprache, Speicher und Benutzeroberfläche zusammenzuarbeiten.";
-    }
-    if(
-        lower.includes("öffne") ||
-        lower.includes("open")
-    ){
-        for(const app of HD.appRegistry.all()){
-            if(
-                lower.includes(
-                    app.name.toLowerCase()
-                )
-            ){
-                HD.router.open(app.id);
-                return `${app.name} wurde geöffnet.`;
-            }
-        }
-    }
-    if(
-        lower.includes("musik")
-    ){
-        HD.router.open("music-studio");
-        return "HalDo Music Studio wurde geöffnet. 🎵";
-    }
-    if(
-        lower.includes("video")
-    ){
-        HD.router.open("video-studio");
-        return "HalDo Video Studio wurde geöffnet. 🎬";
-    }
-    if(
-        lower.includes("mail")
-    ){
-        HD.router.open("mail");
-        return "HalDo Mail wurde geöffnet. 📧";
-    }
-    if(
-        lower.includes("wetter")
-    ){
-        HD.router.open("weather");
-        return "HalDo Wetter wurde geöffnet. 🌦️";
-    }
-    if(
-        lower.includes("verkehr")
-    ){
-        HD.router.open("traffic");
-        return "HalDo Verkehr wurde geöffnet. 🚗";
-    }
-    return "Ich habe deine Nachricht verstanden. Die vollständige HalDo-AI-Intelligenz kann jetzt über das vorhandene AI-Core-Modul erweitert werden, ohne dass dieses zentrale Startsystem erneut ersetzt werden muss.";
-};
-/* =========================================================
-   AI UI
-   ========================================================= */
-const aiForm =
-    document.getElementById("haldo-ai-form");
-const aiInput =
-    document.getElementById("haldo-ai-input");
-const aiMessages =
-    document.getElementById("haldo-ai-messages");
-function addAIMessage(type,text){
-    const item =
-        document.createElement("div");
-    item.className =
-        "haldo-ai-message "+type;
-    item.textContent =
-        text;
-    aiMessages.appendChild(item);
-    aiMessages.scrollTop =
-        aiMessages.scrollHeight;
-}
-aiForm.addEventListener(
-    "submit",
-    event=>{
-        event.preventDefault();
-        const text =
-            aiInput.value.trim();
-        if(!text) return;
-        addAIMessage(
-            "user",
-            text
+    button.className=
+        "app-entry";
+    button.type="button";
+    button.innerHTML=
+        `
+        <span class="icon">${manifest.icon}</span>
+        <span class="info">
+            <strong>${HD.windowManager.escape(manifest.name)}</strong>
+            <small>${HD.windowManager.escape(manifest.description)}</small>
+        </span>
+        `;
+    button.onclick=()=>{
+        HD.appManager.open(
+            manifest.id
         );
-        aiInput.value = "";
-        setTimeout(
-            ()=>{
-                addAIMessage(
-                    "ai",
-                    HD.ai.respond(text)
-                );
-            },
-            120
-        );
-    }
-);
-/* =========================================================
-   APP ACTIONS
-   ========================================================= */
-document.addEventListener(
-    "click",
-    event=>{
-        const action =
-            event.target.closest(
-                "[data-haldo-action]"
+        document
+            .getElementById(
+                "side-menu"
+            )
+            .classList.remove(
+                "open"
             );
-        if(!action) return;
-        const record =
-            event.target.closest(
-                ".haldo-window"
-            );
-        if(!record) return;
-        const appId =
-            record.dataset.appId;
-        switch(
-            action.dataset.haldoAction
-        ){
-            case "ai":
-                HD.router.open("haldo-ai");
-                break;
-            case "save":
-                HD.appState.save(
-                    appId,
-                    HD.appManager
-                        .get(appId)
-                        ?.state || {}
-                );
-                showToast("Gespeichert");
-                break;
-            case "close":
-                HD.appManager.close(appId);
-                break;
-        }
-    }
+    };
+    appList.appendChild(
+        button
+    );
+}
+
 );
+
 /* =========================================================
-   TOAST
-   ========================================================= */
-function showToast(text){
-    const toast =
-        document.getElementById(
-            "haldo-toast"
-        );
-    toast.textContent =
-        text;
-    toast.classList.add("show");
-    clearTimeout(
-        showToast.timer
-    );
-    showToast.timer =
-        setTimeout(
-            ()=>{
-                toast.classList.remove("show");
-            },
-            1800
-        );
+MENU EVENTS
+========================================================= */
+
+const sideMenu =
+document.getElementById(
+“side-menu”
+);
+
+document
+.getElementById(
+“menu-button”
+)
+.addEventListener(
+“click”,
+()=>{
+sideMenu.classList.add(
+“open”
+);
 }
+);
+
+document
+.getElementById(
+“menu-close”
+)
+.addEventListener(
+“click”,
+()=>{
+sideMenu.classList.remove(
+“open”
+);
+}
+);
+
 /* =========================================================
-   GALAXY START SOUND
-   ========================================================= */
-function startGalaxySound(){
-    try{
-        const AudioContext =
-            window.AudioContext ||
-            window.webkitAudioContext;
-        if(!AudioContext)
-            return;
-        const ctx =
-            new AudioContext();
-        const osc =
-            ctx.createOscillator();
-        const gain =
-            ctx.createGain();
-        osc.type =
-            "sine";
-        osc.frequency.setValueAtTime(
-            110,
-            ctx.currentTime
-        );
-        osc.frequency.exponentialRampToValueAtTime(
-            440,
-            ctx.currentTime + 1.8
-        );
-        gain.gain.setValueAtTime(
-            0.0001,
-            ctx.currentTime
-        );
-        gain.gain.exponentialRampToValueAtTime(
-            0.035,
-            ctx.currentTime + .15
-        );
-        gain.gain.exponentialRampToValueAtTime(
-            0.0001,
-            ctx.currentTime + 2.1
-        );
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start();
-        osc.stop(ctx.currentTime + 2.1);
-    }catch(error){
-        console.debug("Galaxy sound unavailable",error);
-    }
+LIVING AI CLICK
+========================================================= */
+
+const livingAI =
+document.getElementById(
+“living-ai”
+);
+
+livingAI.addEventListener(
+“click”,
+()=>{
+HD.appManager.open(
+“haldo-ai”
+);
 }
-/* =========================================================
-   EXTERNAL EXISTING MODULES
-   ========================================================= */
-const existingModules = [
-    "js/kernel.js",
-    "js/system.js",
-    "js/system-loader.js",
-    "js/config-manager.js",
-    "js/storage.js",
-    "js/storage-manager.js",
-    "js/module-manager.js",
-    "js/language-system.js",
-    "js/language-manager.js",
-    "js/ai-language.js",
-    "js/ezidi-keyboard.js",
-    "js/ai-memory.js",
-    "js/ai-core.js",
-    "js/ai-engine.js",
-    "js/ai-chat.js",
-    "js/ai-speech.js",
-    "js/ai-voice.js",
-    "js/voice.js",
-    "js/conversation-state.js",
-    "js/app-registry.js",
-    "js/app-manager.js",
-    "js/app-launcher.js",
-    "js/app-router.js",
-    "js/window-manager.js",
-    "js/desktop manager.js",
-    "js/launcher.js",
-    "js/shell-manager.js",
-    "js/system-status.js",
-    "js/haldo-light-system.js",
-    "js/logo-animation-manager.js",
-    "js/logo-intro-manager.js",
-    "js/boot.js",
-    "js/startup.js"
-];
-/*
- * Bereits vorhandene Dateien werden nach
- * diesem zentralen Bootstrap geladen.
- *
- * Fehler eines einzelnen Moduls dürfen
- * den gesamten Start nicht zerstören.
- */
-function loadExistingModules(){
-    const unique =
-        [...new Set(existingModules)];
-    return unique.reduce(
-        (promise,src)=>
-            promise.then(
-                ()=>new Promise(resolve=>{
-                    if(
-                        document.querySelector(
-                            `script[data-haldo-module="${CSS.escape(src)}"]`
-                        )
-                    ){
-                        resolve();
-                        return;
-                    }
-                    const script =
-                        document.createElement("script");
-                    script.src = src;
-                    script.async = false;
-                    script.dataset.haldoModule =
-                        src;
-                    script.onload =
-                        ()=>resolve();
-                    script.onerror =
-                        error=>{
-                            console.warn(
-                                "HalDo Modul nicht geladen:",
-                                src
-                            );
-                            resolve();
-                        };
-                    document.head.appendChild(script);
-                })
-            ),
-        Promise.resolve()
-    );
-}
-/* =========================================================
-   START
-   ========================================================= */
-async function boot(){
-    if(HD.initialized)
-        return;
-    HD.initialized = true;
-    const status =
-        document.getElementById(
-            "haldo-status-text"
-        );
-    const bootText =
-        document.getElementById(
-            "haldo-boot-text"
-        );
-    bootText.textContent =
-        "HalDo AI OS 22 wird gestartet …";
-    /*
-     * Kurze Logo-Intro, danach kontrollierter
-     * Modulstart.
-     */
-    await new Promise(
-        resolve=>setTimeout(
-            resolve,
-            850
-        )
-    );
-    startGalaxySound();
-    bootText.textContent =
-        "Systemmodule werden verbunden …";
-    await loadExistingModules();
-    bootText.textContent =
-        "App-System wird verbunden …";
-    await new Promise(
-        resolve=>setTimeout(
-            resolve,
-            250
-        )
-    );
-    status.textContent =
-        "HalDo AI OS 22 · ONLINE";
-    bootText.textContent =
-        "HalDo AI ist bereit.";
-    addAIMessage(
-        "ai",
-        "Hallo Bruder ❤️💙. HalDo AI OS 22 ist gestartet. Du kannst mir schreiben oder über das Menü eine Anwendung öffnen."
-    );
-    await new Promise(
-        resolve=>setTimeout(
-            resolve,
-            550
-        )
-    );
-    document
-        .getElementById("haldo-boot")
-        .classList.add("done");
-    HD.emit(
-        "os:ready",
-        {
-            version:HD.version,
-            apps:HD.appRegistry.all()
-        }
-    );
-    /*
-     * Zentrale HalDo-Komponenten erneut
-     * registrieren, falls die vorhandenen
-     * Module diese Schnittstellen anbieten.
-     */
-    try{
-        if(window.HalDoSystem)
-            HD.runtime.register(
-                "system",
-                window.HalDoSystem
-            );
-    }catch(_){}
-    /*
-     * HalDo AI als zentrale Start-App
-     * nicht automatisch als Fenster öffnen.
-     */
-}
+);
+
+livingAI.addEventListener(
+“keydown”,
+event=>{
 if(
-    document.readyState === "loading"
+event.key===“Enter” ||
+event.key===” “
 ){
-    document.addEventListener(
-        "DOMContentLoaded",
-        boot,
-        {once:true}
-    );
-}else{
-    boot();
+
+        event.preventDefault();
+        HD.appManager.open(
+            "haldo-ai"
+        );
+    }
 }
-})();
+
+);
+
+/* =========================================================
+SYSTEM TIME
+========================================================= */
+
+const timeElement =
+document.getElementById(
+“system-time”
+);
+
+function updateTime(){
+
+timeElement.textContent =
+    new Date().toLocaleString(
+        "de-DE",
+        {
+            dateStyle:"medium",
+            timeStyle:"short"
+        }
+    );
+
+}
+
+updateTime();
+
+setInterval(
+updateTime,
+1000
+);
+
+/* =========================================================
+BOOT
+========================================================= */
+
+async function bootHalDo(){
+
+const boot =
+    document.getElementById(
+        "boot-screen"
+    );
+const status =
+    document.getElementById(
+        "boot-status"
+    );
+const stages=[
+    "HalDo AI wird gestartet …",
+    "Runtime wird verbunden …",
+    "App-System wird verbunden …",
+    "Window-System wird verbunden …",
+    "Router wird verbunden …",
+    "Storage wird geladen …",
+    "Living HalDo AI wird aktiviert …",
+    "HalDo AI OS 22 ist bereit."
+];
+for(
+    const message of stages
+){
+    status.textContent =
+        message;
+    await new Promise(
+        resolve=>
+            setTimeout(
+                resolve,
+                180
+            )
+    );
+}
+HD.runtime.initialized=true;
+HD.initialized=true;
+HD.emit(
+    "system:ready",
+    {
+        version:HD.version
+    }
+);
+setTimeout(
+    ()=>{
+        boot.classList.add(
+            "hidden"
+        );
+        HD.audio.playWelcome();
+        if(
+            HD.config.welcomeSound
+        ){
+            setTimeout(
+                ()=>{
+                    HD.voice.speak(
+                        "Willkommen bei HalDo AI OS 22. Schön, dass du da bist."
+                    );
+                },
+                250
+            );
+        }
+    },
+    500
+);
+
+}
+
+window.addEventListener(
+“load”,
+bootHalDo
+);
+
+/* =========================================================
+RESPONSIVE WINDOW SAFETY
+========================================================= */
+
+window.addEventListener(
+“resize”,
+()=>{
+
+    HD.windowManager.windows
+        .forEach(
+            record=>{
+                if(
+                    record.maximized
+                ){
+                    return;
+                }
+                const maxX =
+                    Math.max(
+                        5,
+                        window.innerWidth -
+                        record.width -
+                        5
+                    );
+                const maxY =
+                    Math.max(
+                        60,
+                        window.innerHeight -
+                        record.height -
+                        5
+                    );
+                record.x =
+                    Math.min(
+                        record.x,
+                        maxX
+                    );
+                record.y =
+                    Math.min(
+                        record.y,
+                        maxY
+                    );
+                HD.windowManager.apply(
+                    record
+                );
+            }
+        );
+}
+
+);
+
+/* =========================================================
+COMPATIBILITY BRIDGES
+========================================================= */
+
+HD.windows =
+HD.windowManager;
+
+HD.appsManager =
+HD.appManager;
+
+HD.services =
+HD.services || {
+
+    register(name,service){
+        HD.runtime.register(
+            name,
+            service
+        );
+    },
+    get(name){
+        return HD.runtime.get(
+            name
+        );
+    }
+};
+
+/* =========================================================
+INITIAL ROUTES
+========================================================= */
+
+HD.router.register(
+“/”,
+()=>true
+);
+
+HALDO_APPS.forEach(
+app=>{
+
+    HD.router.register(
+        "/app/"+app.id,
+        data=>data
+    );
+}
+
+);
+
+HD.emit(
+“haldo:index-ready”,
+{
+version:HD.version,
+apps:HALDO_APPS.length
+}
+);
+
 </script>
 </body>
 </html>
