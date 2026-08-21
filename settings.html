@@ -1,1483 +1,1986 @@
 <!DOCTYPE html>
 <html lang="de">
-
 <head>
-<meta charset="UTF-8">
-
-<meta name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-
-<meta name="theme-color" content="#050914">
-
-<title>HalDo AI OS 18 — Einstellungen</title>
-
-<style>
-
-/* =========================================================
-   HALDO AI OS 18
-   SETTINGS
-========================================================= */
-
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    -webkit-tap-highlight-color: transparent;
-}
-
-html,
-body {
-    width: 100%;
-    min-height: 100%;
-}
-
-body {
-    min-height: 100vh;
-
-    color: #ffffff;
-
-    font-family:
-        -apple-system,
-        BlinkMacSystemFont,
-        "Segoe UI",
-        Roboto,
-        Arial,
-        sans-serif;
-
-    background:
-        radial-gradient(
-            circle at 50% -10%,
-            rgba(0,126,255,.20),
-            transparent 35%
-        ),
-        radial-gradient(
-            circle at 100% 85%,
-            rgba(125,55,255,.15),
-            transparent 30%
-        ),
-        #050914;
-}
-
-/* =========================================================
-   BACKGROUND
-========================================================= */
-
-.background {
-    position: fixed;
-    inset: 0;
-    overflow: hidden;
-    pointer-events: none;
-    z-index: 0;
-}
-
-.orb {
-    position: absolute;
-
-    width: 250px;
-    height: 250px;
-
-    border-radius: 50%;
-
-    filter: blur(90px);
-
-    opacity: .14;
-}
-
-.orb.one {
-    left: -110px;
-    top: -100px;
-
-    background: #087cff;
-}
-
-.orb.two {
-    right: -120px;
-    bottom: 5%;
-
-    background: #7b3cff;
-}
-
-/* =========================================================
-   APP
-========================================================= */
-
-.app {
-    position: relative;
-
-    z-index: 1;
-
-    width: min(950px, 100%);
-
-    min-height: 100vh;
-
-    margin: auto;
-
-    padding-bottom:
-        calc(25px + env(safe-area-inset-bottom));
-}
-
-/* =========================================================
-   HEADER
-========================================================= */
-
-.header {
-    position: sticky;
-
-    top: 0;
-
-    z-index: 20;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: space-between;
-
-    padding:
-        9px 12px;
-
-    background:
-        rgba(5,9,20,.91);
-
-    border-bottom:
-        1px solid
-        rgba(255,255,255,.08);
-
-    backdrop-filter:
-        blur(22px);
-
-    -webkit-backdrop-filter:
-        blur(22px);
-}
-
-.brand {
-    display: flex;
-
-    align-items: center;
-
-    gap: 9px;
-}
-
-.logo {
-    width: 44px;
-    height: 44px;
-
-    object-fit: contain;
-
-    animation:
-        logoRotate 10s linear infinite,
-        logoGlow 2.4s ease-in-out infinite;
-}
-
-@keyframes logoRotate {
-    from {
-        transform: rotate(0deg);
-    }
-
-    to {
-        transform: rotate(360deg);
-    }
-}
-
-@keyframes logoGlow {
-
-    0%,
-    100% {
-        filter:
-            drop-shadow(
-                0 0 5px
-                rgba(255,255,255,.5)
-            )
-            drop-shadow(
-                0 0 12px
-                rgba(0,126,255,.45)
-            );
-    }
-
-    50% {
-        filter:
-            drop-shadow(
-                0 0 10px
-                rgba(255,255,255,1)
-            )
-            drop-shadow(
-                0 0 25px
-                rgba(0,150,255,.9)
-            );
-    }
-}
-
-.brand-text strong {
-    display: block;
-
-    font-size: 14px;
-}
-
-.brand-text span {
-    display: block;
-
-    margin-top: 2px;
-
-    color: #718199;
-
-    font-size: 8px;
-
-    letter-spacing: .7px;
-}
-
-.home-button {
-    width: 38px;
-    height: 38px;
-
-    border-radius: 12px;
-
-    color: #a7bad0;
-
-    background:
-        rgba(255,255,255,.045);
-
-    border:
-        1px solid
-        rgba(255,255,255,.08);
-
-    cursor: pointer;
-
-    font-size: 17px;
-}
-
-/* =========================================================
-   TITLE
-========================================================= */
-
-.hero {
-    padding:
-        24px 14px 14px;
-}
-
-.hero h1 {
-    font-size: 24px;
-
-    letter-spacing: -.5px;
-}
-
-.hero p {
-    margin-top: 6px;
-
-    color: #718199;
-
-    font-size: 9px;
-
-    line-height: 1.6;
-}
-
-/* =========================================================
-   STATUS CARD
-========================================================= */
-
-.status-card {
-    display: flex;
-
-    align-items: center;
-
-    gap: 10px;
-
-    margin:
-        0 12px 12px;
-
-    padding: 12px;
-
-    border-radius: 16px;
-
-    background:
-        linear-gradient(
-            135deg,
-            rgba(0,126,255,.09),
-            rgba(125,55,255,.07)
-        );
-
-    border:
-        1px solid
-        rgba(255,255,255,.07);
-}
-
-.status-icon {
-    width: 34px;
-    height: 34px;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    border-radius: 11px;
-
-    background:
-        rgba(0,220,160,.08);
-
-    border:
-        1px solid
-        rgba(0,220,160,.13);
-
-    font-size: 15px;
-}
-
-.status-text strong {
-    display: block;
-
-    font-size: 9px;
-}
-
-.status-text span {
-    display: block;
-
-    margin-top: 3px;
-
-    color: #73839a;
-
-    font-size: 7px;
-}
-
-/* =========================================================
-   SECTION
-========================================================= */
-
-.section {
-    margin:
-        0 12px 12px;
-
-    padding: 13px;
-
-    border-radius: 18px;
-
-    background:
-        rgba(255,255,255,.035);
-
-    border:
-        1px solid
-        rgba(255,255,255,.065);
-}
-
-.section-title {
-    margin-bottom: 10px;
-
-    color: #8ca1bb;
-
-    font-size: 8px;
-
-    font-weight: 700;
-
-    letter-spacing: 1px;
-
-    text-transform: uppercase;
-}
-
-/* =========================================================
-   SETTING
-========================================================= */
-
-.setting {
-    display: flex;
-
-    align-items: center;
-
-    justify-content: space-between;
-
-    gap: 15px;
-
-    min-height: 54px;
-
-    padding:
-        9px 0;
-
-    border-bottom:
-        1px solid
-        rgba(255,255,255,.045);
-}
-
-.setting:last-child {
-    border-bottom: 0;
-}
-
-.setting-info {
-    min-width: 0;
-}
-
-.setting-info strong {
-    display: block;
-
-    font-size: 9px;
-
-    font-weight: 600;
-}
-
-.setting-info span {
-    display: block;
-
-    margin-top: 3px;
-
-    color: #697a91;
-
-    font-size: 7px;
-
-    line-height: 1.45;
-}
-
-/* =========================================================
-   TOGGLE
-========================================================= */
-
-.toggle {
-    position: relative;
-
-    flex-shrink: 0;
-
-    width: 44px;
-    height: 25px;
-
-    border-radius: 20px;
-
-    background:
-        rgba(255,255,255,.10);
-
-    border:
-        1px solid
-        rgba(255,255,255,.08);
-
-    cursor: pointer;
-
-    transition: .2s ease;
-}
-
-.toggle::after {
-    content: "";
-
-    position: absolute;
-
-    top: 3px;
-    left: 3px;
-
-    width: 17px;
-    height: 17px;
-
-    border-radius: 50%;
-
-    background: #8797ab;
-
-    transition: .2s ease;
-}
-
-.toggle.active {
-    background:
-        rgba(0,126,255,.27);
-
-    border-color:
-        rgba(0,126,255,.32);
-}
-
-.toggle.active::after {
-    left: 22px;
-
-    background: #8ed7ff;
-
-    box-shadow:
-        0 0 10px
-        rgba(0,150,255,.7);
-}
-
-/* =========================================================
-   SELECT
-========================================================= */
-
-.select {
-    min-width: 120px;
-
-    padding:
-        8px 9px;
-
-    border-radius: 10px;
-
-    outline: none;
-
-    color: #b8d2ec;
-
-    background:
-        rgba(255,255,255,.045);
-
-    border:
-        1px solid
-        rgba(255,255,255,.08);
-
-    font-size: 8px;
-}
-
-/* =========================================================
-   ACTION BUTTONS
-========================================================= */
-
-.actions {
-    display: grid;
-
-    grid-template-columns:
-        repeat(2, 1fr);
-
-    gap: 7px;
-}
-
-.action-button {
-    min-height: 42px;
-
-    padding: 9px;
-
-    border-radius: 12px;
-
-    color: #91b9dc;
-
-    background:
-        rgba(255,255,255,.04);
-
-    border:
-        1px solid
-        rgba(255,255,255,.07);
-
-    cursor: pointer;
-
-    font-size: 8px;
-
-    transition: .15s ease;
-}
-
-.action-button:active {
-    transform: scale(.97);
-}
-
-/* =========================================================
-   ABOUT
-========================================================= */
-
-.about {
-    text-align: center;
-
-    color: #56667d;
-
-    font-size: 7px;
-
-    line-height: 1.7;
-}
-
-.about strong {
-    color: #8198b3;
-
-    font-size: 9px;
-}
-
-/* =========================================================
-   TOAST
-========================================================= */
-
-.toast {
-    position: fixed;
-
-    z-index: 100;
-
-    left: 50%;
-
-    bottom:
-        calc(25px + env(safe-area-inset-bottom));
-
-    transform:
-        translate(-50%, 12px);
-
-    padding:
-        9px 13px;
-
-    border-radius: 12px;
-
-    color: #dcecff;
-
-    background:
-        rgba(16,26,44,.97);
-
-    border:
-        1px solid
-        rgba(255,255,255,.09);
-
-    font-size: 8px;
-
-    opacity: 0;
-
-    pointer-events: none;
-
-    transition: .2s ease;
-}
-
-.toast.show {
-    opacity: 1;
-
-    transform:
-        translate(-50%, 0);
-}
-
-/* =========================================================
-   MOBILE
-========================================================= */
-
-@media (max-width: 420px) {
-
-    .hero h1 {
-        font-size: 21px;
-    }
-
-    .actions {
-        grid-template-columns:
-            1fr 1fr;
-    }
-
-    .select {
-        min-width: 105px;
-    }
-
-}
-
-</style>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta
+        name="theme-color"
+        content="#050812"
+    >
+
+    <title>HalDo AI OS 20 — Einstellungen</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            width: 100%;
+            min-height: 100%;
+            font-family:
+                Inter,
+                system-ui,
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                sans-serif;
+            color: #fff;
+            background:
+                radial-gradient(
+                    circle at 50% -15%,
+                    #263b70 0,
+                    #0b1128 38%,
+                    #03050b 100%
+                );
+        }
+
+        body {
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        button,
+        input,
+        select {
+            font: inherit;
+        }
+
+        button {
+            color: inherit;
+        }
+
+        .page {
+            width: 100%;
+            min-height: 100vh;
+            padding: 24px;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+        }
+
+        .identity {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .logo {
+            width: 58px;
+            height: 58px;
+            object-fit: contain;
+            border-radius: 16px;
+        }
+
+        h1,
+        h2,
+        p {
+            margin-top: 0;
+        }
+
+        h1 {
+            margin-bottom: 4px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            margin: 0;
+            color: rgba(255,255,255,.55);
+            font-size: 13px;
+        }
+
+        .version {
+            padding: 9px 13px;
+            border:
+                1px solid
+                rgba(255,255,255,.1);
+            border-radius: 12px;
+            background: rgba(255,255,255,.05);
+            color: rgba(255,255,255,.7);
+            font-size: 12px;
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 230px minmax(0, 1fr);
+            gap: 18px;
+            align-items: start;
+        }
+
+        .sidebar,
+        .content {
+            min-width: 0;
+        }
+
+        .sidebar {
+            padding: 12px;
+            border:
+                1px solid
+                rgba(255,255,255,.09);
+            border-radius: 20px;
+            background:
+                rgba(255,255,255,.045);
+            backdrop-filter: blur(16px);
+        }
+
+        .nav-button {
+            display: block;
+            width: 100%;
+            margin-bottom: 7px;
+            padding: 12px 13px;
+            border: 0;
+            border-radius: 12px;
+            background: transparent;
+            color: rgba(255,255,255,.65);
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .nav-button:last-child {
+            margin-bottom: 0;
+        }
+
+        .nav-button:hover,
+        .nav-button.active {
+            background: rgba(255,255,255,.09);
+            color: #fff;
+        }
+
+        .panel {
+            display: none;
+            padding: 20px;
+            border:
+                1px solid
+                rgba(255,255,255,.09);
+            border-radius: 20px;
+            background:
+                linear-gradient(
+                    145deg,
+                    rgba(255,255,255,.09),
+                    rgba(255,255,255,.035)
+                );
+            backdrop-filter: blur(16px);
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        .panel-title {
+            margin-bottom: 6px;
+            font-size: 19px;
+        }
+
+        .panel-description {
+            margin-bottom: 20px;
+            color: rgba(255,255,255,.5);
+            font-size: 13px;
+        }
+
+        .setting {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            min-height: 60px;
+            padding: 12px 0;
+            border-bottom:
+                1px solid
+                rgba(255,255,255,.06);
+        }
+
+        .setting:last-child {
+            border-bottom: 0;
+        }
+
+        .setting-info {
+            min-width: 0;
+        }
+
+        .setting-name {
+            margin-bottom: 4px;
+            font-size: 14px;
+            font-weight: 650;
+        }
+
+        .setting-description {
+            margin: 0;
+            color: rgba(255,255,255,.45);
+            font-size: 12px;
+            line-height: 1.45;
+        }
+
+        .control {
+            flex: 0 0 auto;
+        }
+
+        .toggle {
+            position: relative;
+            width: 48px;
+            height: 27px;
+            border: 0;
+            border-radius: 20px;
+            background: rgba(255,255,255,.15);
+            cursor: pointer;
+        }
+
+        .toggle::after {
+            content: "";
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            width: 19px;
+            height: 19px;
+            border-radius: 50%;
+            background: #fff;
+            transition:
+                transform .18s ease;
+        }
+
+        .toggle.active {
+            background: rgba(82,180,255,.6);
+        }
+
+        .toggle.active::after {
+            transform: translateX(21px);
+        }
+
+        select,
+        input[type="text"] {
+            min-width: 170px;
+            padding: 9px 11px;
+            border:
+                1px solid
+                rgba(255,255,255,.1);
+            border-radius: 10px;
+            outline: none;
+            background: rgba(0,0,0,.2);
+            color: #fff;
+        }
+
+        select option {
+            background: #101626;
+            color: #fff;
+        }
+
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .button {
+            padding: 10px 14px;
+            border:
+                1px solid
+                rgba(255,255,255,.1);
+            border-radius: 11px;
+            background: rgba(255,255,255,.06);
+            cursor: pointer;
+        }
+
+        .button:hover {
+            background: rgba(255,255,255,.12);
+        }
+
+        .status {
+            margin-top: 14px;
+            min-height: 20px;
+            color: rgba(255,255,255,.55);
+            font-size: 12px;
+        }
+
+        .danger {
+            border-color:
+                rgba(255,100,100,.2);
+        }
+
+        .danger:hover {
+            background:
+                rgba(255,70,70,.12);
+        }
+
+        @media (max-width: 760px) {
+
+            .page {
+                padding: 15px;
+            }
+
+            .layout {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                display: flex;
+                gap: 7px;
+                overflow-x: auto;
+            }
+
+            .nav-button {
+                width: auto;
+                min-width: max-content;
+                margin: 0;
+            }
+
+            .setting {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .control {
+                width: 100%;
+            }
+
+            select,
+            input[type="text"] {
+                width: 100%;
+            }
+        }
+    </style>
 </head>
-
 
 <body>
 
+<div
+    id="haldo-settings-page"
+    class="page"
+>
 
-<div class="background">
-    <div class="orb one"></div>
-    <div class="orb two"></div>
+    <header class="header">
+
+        <div class="identity">
+
+            <img
+                class="logo"
+                src="assets/logo/logo.png"
+                alt="HalDo AI"
+                onerror="this.style.display='none'"
+            >
+
+            <div>
+
+                <h1>
+                    Einstellungen
+                </h1>
+
+                <p class="subtitle">
+                    HalDo AI OS 20 — zentrale Systemkonfiguration
+                </p>
+
+            </div>
+
+        </div>
+
+        <div class="version">
+            HalDo AI OS 20
+        </div>
+
+    </header>
+
+
+    <div class="layout">
+
+        <!-- ==================================================
+             SIDEBAR
+        ================================================== -->
+
+        <nav class="sidebar">
+
+            <button
+                class="nav-button active"
+                type="button"
+                data-panel="general"
+            >
+                Allgemein
+            </button>
+
+            <button
+                class="nav-button"
+                type="button"
+                data-panel="language"
+            >
+                Sprache
+            </button>
+
+            <button
+                class="nav-button"
+                type="button"
+                data-panel="display"
+            >
+                Anzeige
+            </button>
+
+            <button
+                class="nav-button"
+                type="button"
+                data-panel="ai"
+            >
+                HalDo AI
+            </button>
+
+            <button
+                class="nav-button"
+                type="button"
+                data-panel="privacy"
+            >
+                Datenschutz
+            </button>
+
+            <button
+                class="nav-button"
+                type="button"
+                data-panel="system"
+            >
+                System
+            </button>
+
+        </nav>
+
+
+        <!-- ==================================================
+             CONTENT
+        ================================================== -->
+
+        <main class="content">
+
+
+            <!-- GENERAL -->
+
+            <section
+                id="panel-general"
+                class="panel active"
+            >
+
+                <h2 class="panel-title">
+                    Allgemein
+                </h2>
+
+                <p class="panel-description">
+                    Grundlegende Einstellungen des HalDo-Systems.
+                </p>
+
+
+                <div class="setting">
+
+                    <div class="setting-info">
+
+                        <div class="setting-name">
+                            HalDo beim Start begrüßen
+                        </div>
+
+                        <p class="setting-description">
+                            Aktiviert die HalDo-Begrüßung während des Systemstarts.
+                        </p>
+
+                    </div>
+
+                    <div class="control">
+
+                        <button
+                            class="toggle active"
+                            type="button"
+                            data-setting="welcome"
+                            aria-label="Begrüßung"
+                        ></button>
+
+                    </div>
+
+                </div>
+
+
+                <div class="setting">
+
+                    <div class="setting-info">
+
+                        <div class="setting-name">
+                            Animationen
+                        </div>
+
+                        <p class="setting-description">
+                            Aktiviert visuelle HalDo-Systemanimationen.
+                        </p>
+
+                    </div>
+
+                    <div class="control">
+
+                        <button
+                            class="toggle active"
+                            type="button"
+                            data-setting="animations"
+                            aria-label="Animationen"
+                        ></button>
+
+                    </div>
+
+                </div>
+
+
+                <div class="setting">
+
+                    <div class="setting-info">
+
+                        <div class="setting-name">
+                            Diagnose beim Start
+                        </div>
+
+                        <p class="setting-description">
+                            Prüft zentrale Systeme während des Starts.
+                        </p>
+
+                    </div>
+
+                    <div class="control">
+
+                        <button
+                            class="toggle active"
+                            type="button"
+                            data-setting="diagnostics"
+                            aria-label="Diagnose"
+                        ></button>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- LANGUAGE -->
+
+            <section
+                id="panel-language"
+                class="panel"
+            >
+
+                <h2 class="panel-title">
+                    Sprache
+                </h2>
+
+                <p class="panel-description">
+                    Spracheinstellungen und Tastaturintegration.
+                </p>
+
+
+                <div class="setting">
+
+                    <div class="setting-info">
+
+                        <div class="setting-name">
+                            Systemsprache
+                        </div>
+
+                        <p class="setting-description">
+                            Bevorzugte Sprache der HalDo-Oberfläche.
+                        </p>
+
+                    </div>
+
+                    <div class="control">
+
+                        <select
+                            id="language-select"
+                            data-setting="language"
+                        >
+                            <option value="de">
+                                Deutsch
+                            </option>
+
+                            <option value="en">
+                                English
+                            </option>
+
+                            <option value="ku">
+                                Kurdî
+                            </option>
+
+                            <option value="ar">
+                                العربية
+                            </option>
+
+                            <option value="fr">
+                                Français
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+
+                <div class="setting">
+
+                    <div class="setting-info">
+
+                        <div class="setting-name">
+                            Êzîdî-Tastatur
+                        </div>
+
+                        <p class="setting-description">
+                            Unterstützung der integrierten Êzîdî-Tastatur.
+                        </p>
+
+                    </div>
+
+                    <div class="control">
+
+                        <button
+                            class="toggle active"
+                            type="button"
+                            data-setting="ezidiKeyboard"
+                            aria-label="Êzîdî Tastatur"
+                        ></button>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- DISPLAY -->
+
+            <section
+                id="panel-display"
+                class="panel"
+            >
+
+                <h2 class="panel-title">
+                    Anzeige
+                </h2>
+
+                <p class="panel-description">
+                    Einstellungen für Display und visuelle Darstellung.
+                </p>
+
+
+                <div class="setting">
+
+                    <div class="setting-info">
+
+                        <div class="setting-name">
+                            Helles Design
+                        </div>
+
+                        <p class="setting-description">
+                            Wechselt zwischen dunkler und heller Darstellung.
+                        </p>
+
+                    </div>
+
+                    <div class="control">
+
+                        <button
+                            class="toggle"
+                            type="button"
+                            data-setting="lightMode"
+                            aria-label="Helles Design"
+                        ></button>
+
+                    </div>
+
+                </div>
+
+
+                <div class="setting">
+
+                    <div class="setting-info">
+
+                        <div class="setting-name">
+                            Cosmic World
+                        </div>
+
+                        <p class="setting-description">
+                            Aktiviert die kosmische HalDo-Systemwelt.
+                        </p>
+
+                    </div>
+
+                    <div class="control">
+
+                        <button
+                            class="toggle active"
+                            type="button"
+                            data-setting="cosmic"
+                            aria-label="Cosmic World"
+                        ></button>
+
+                    </div>
+
+                </div>
+
+
+                <div class="setting">
+
+                    <div class="setting-info">
+
+                        <div class="setting-name">
+                            Logo-Effekte
+                        </div>
+
+                        <p class="setting-description">
+                            Aktiviert visuelle Effekte rund um das HalDo-Logo.
+                        </p>
+
+                    </div>
+
+                    <div class="control">
+
+                        <button
+                            class="toggle active"
+                            type="button"
+                            data-setting="logoEffects"
+                            aria-label="Logo Effekte"
+                        ></button>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- AI -->
+
+            <section
+                id="panel-ai"
+                class="panel"
+            >
+
+                <h2 class="panel-title">
+                    HalDo AI
+                </h2>
+
+                <p class="panel-description">
+                    Zentrale Einstellungen der HalDo-AI-Integration.
+                </p>
+
+
+                <div class="setting">
+
+                    <div class="setting-info">
+
+                        <div class="setting-name">
+                            AI-Assistent
+                        </div>
+
+                        <p class="setting-description">
+                            Aktiviert die zentrale HalDo-AI-Funktion.
+                        </p>
+
+                    </div>
+
+                    <div class="control">
+
+                        <button
+                            class="toggle active"
+                            type="button"
+                            data-setting="aiEnabled"
+                            aria-label="AI"
+                        ></button>
+
+                    </div>
+
+                </div>
+
+
+                <div class="setting">
+
+                    <div class="setting-info">
+
+                        <div class="setting-name">
+                            Sprachsteuerung
+                        </div>
+
+                        <p class="setting-description">
+                            Ermöglicht die Verbindung mit Sprachfunktionen.
+                        </p>
+
+                    </div>
+
+                    <div class="control">
+
+                        <button
+                            class="toggle"
+                            type="button"
+                            data-setting="voice"
+                            aria-label="Sprachsteuerung"
+                        ></button>
+
+                    </div>
+
+                </div>
+
+
+                <div class="setting">
+
+                    <div class="setting-info">
+
+                        <div class="setting-name">
+                            AI-Sprache
+                        </div>
+
+                        <p class="setting-description">
+                            Sprache für AI-Ausgaben.
+                        </p>
+
+                    </div>
+
+                    <div class="control">
+
+                        <select
+                            id="ai-language-select"
+                            data-setting="aiLanguage"
+                        >
+                            <option value="de">
+                                Deutsch
+                            </option>
+
+                            <option value="en">
+                                English
+                            </option>
+
+                            <option value="ku">
+                                Kurdî
+                            </option>
+                        </select>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- PRIVACY -->
+
+            <section
+                id="panel-privacy"
+                class="panel"
+            >
+
+                <h2 class="panel-title">
+                    Datenschutz
+                </h2>
+
+                <p class="panel-description">
+                    Kontrolle lokaler Daten und Berechtigungen.
+                </p>
+
+
+                <div class="setting">
+
+                    <div class="setting-info">
+
+                        <div class="setting-name">
+                            Lokale Speicherung
+                        </div>
+
+                        <p class="setting-description">
+                            Ermöglicht die lokale Speicherung von Einstellungen.
+                        </p>
+
+                    </div>
+
+                    <div class="control">
+
+                        <button
+                            class="toggle active"
+                            type="button"
+                            data-setting="localStorage"
+                            aria-label="Lokale Speicherung"
+                        ></button>
+
+                    </div>
+
+                </div>
+
+
+                <div class="setting">
+
+                    <div class="setting-info">
+
+                        <div class="setting-name">
+                            Diagnose-Daten
+                        </div>
+
+                        <p class="setting-description">
+                            Erlaubt lokale Systemdiagnosen für die Fehleranalyse.
+                        </p>
+
+                    </div>
+
+                    <div class="control">
+
+                        <button
+                            class="toggle active"
+                            type="button"
+                            data-setting="diagnosticData"
+                            aria-label="Diagnose Daten"
+                        ></button>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- SYSTEM -->
+
+            <section
+                id="panel-system"
+                class="panel"
+            >
+
+                <h2 class="panel-title">
+                    System
+                </h2>
+
+                <p class="panel-description">
+                    Informationen und zentrale Systemaktionen.
+                </p>
+
+
+                <div class="setting">
+
+                    <div class="setting-info">
+
+                        <div class="setting-name">
+                            HalDo-Version
+                        </div>
+
+                        <p class="setting-description">
+                            Aktueller Systemstand.
+                        </p>
+
+                    </div>
+
+                    <div class="control">
+
+                        <span>
+                            20.0.0
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="setting">
+
+                    <div class="setting-info">
+
+                        <div class="setting-name">
+                            V20 App Manifest
+                        </div>
+
+                        <p class="setting-description">
+                            Verbindung zum zentralen App-Manifest.
+                        </p>
+
+                    </div>
+
+                    <div class="control">
+
+                        <span
+                            id="manifest-status"
+                            class="neutral"
+                        >
+                            Prüfe...
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="setting">
+
+                    <div class="setting-info">
+
+                        <div class="setting-name">
+                            App Runtime
+                        </div>
+
+                        <p class="setting-description">
+                            Verbindung zur V20-App-Laufzeit.
+                        </p>
+
+                    </div>
+
+                    <div class="control">
+
+                        <span
+                            id="runtime-status"
+                            class="neutral"
+                        >
+                            Prüfe...
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="actions">
+
+                    <button
+                        id="system-button"
+                        class="button"
+                        type="button"
+                    >
+                        System
+                    </button>
+
+                    <button
+                        id="apps-button"
+                        class="button"
+                        type="button"
+                    >
+                        Apps
+                    </button>
+
+                    <button
+                        id="dashboard-button"
+                        class="button"
+                        type="button"
+                    >
+                        Dashboard
+                    </button>
+
+                    <button
+                        id="reset-button"
+                        class="button danger"
+                        type="button"
+                    >
+                        Einstellungen zurücksetzen
+                    </button>
+
+                </div>
+
+            </section>
+
+
+            <div
+                id="settings-status"
+                class="status"
+            ></div>
+
+        </main>
+
+    </div>
+
 </div>
 
 
-<main class="app">
-
-
-<!-- =====================================================
-     HEADER
-===================================================== -->
-
-<header class="header">
-
-    <div class="brand">
-
-        <img
-            class="logo"
-            src="assets/logo/logo.png"
-            alt="HalDo AI"
-        >
-
-        <div class="brand-text">
-
-            <strong>
-                HalDo AI
-            </strong>
-
-            <span>
-                OS 18 • SETTINGS
-            </span>
-
-        </div>
-
-    </div>
-
-
-    <button
-        class="home-button"
-        onclick="goHome()"
-        title="Startseite"
-    >
-        ⌂
-    </button>
-
-</header>
-
-
-<!-- =====================================================
-     HERO
-===================================================== -->
-
-<section class="hero">
-
-    <h1>
-        Einstellungen
-    </h1>
-
-    <p>
-        Passe dein HalDo AI OS 18 an.
-        Die Einstellungen werden lokal auf
-        diesem Gerät gespeichert.
-    </p>
-
-</section>
-
-
-<!-- =====================================================
-     STATUS
-===================================================== -->
-
-<section class="status-card">
-
-    <div class="status-icon">
-        ✓
-    </div>
-
-    <div class="status-text">
-
-        <strong>
-            HalDo AI System bereit
-        </strong>
-
-        <span>
-            Einstellungen • lokale Speicherung • OS 18
-        </span>
-
-    </div>
-
-</section>
-
-
-<!-- =====================================================
-     AI
-===================================================== -->
-
-<section class="section">
-
-    <div class="section-title">
-        AI & CHAT
-    </div>
-
-
-    <div class="setting">
-
-        <div class="setting-info">
-
-            <strong>
-                AI Chat aktivieren
-            </strong>
-
-            <span>
-                Aktiviert die HalDo-AI-Chatoberfläche.
-            </span>
-
-        </div>
-
-        <button
-            class="toggle active"
-            id="aiToggle"
-            onclick="toggleSetting('ai')"
-        ></button>
-
-    </div>
-
-
-    <div class="setting">
-
-        <div class="setting-info">
-
-            <strong>
-                Chat-Verlauf speichern
-            </strong>
-
-            <span>
-                Speichert den lokalen Chatverlauf auf
-                diesem Gerät.
-            </span>
-
-        </div>
-
-        <button
-            class="toggle active"
-            id="historyToggle"
-            onclick="toggleSetting('history')"
-        ></button>
-
-    </div>
-
-
-    <div class="setting">
-
-        <div class="setting-info">
-
-            <strong>
-                Antwort-Animation
-            </strong>
-
-            <span>
-                Zeigt die kurze HalDo-AI-Denkanimation.
-            </span>
-
-        </div>
-
-        <button
-            class="toggle active"
-            id="animationToggle"
-            onclick="toggleSetting('animation')"
-        ></button>
-
-    </div>
-
-</section>
-
-
-<!-- =====================================================
-     APPEARANCE
-===================================================== -->
-
-<section class="section">
-
-    <div class="section-title">
-        DARSTELLUNG
-    </div>
-
-
-    <div class="setting">
-
-        <div class="setting-info">
-
-            <strong>
-                HalDo Logo Animation
-            </strong>
-
-            <span>
-                Das HalDo-Logo bleibt lebendig,
-                leuchtend und drehend.
-            </span>
-
-        </div>
-
-        <button
-            class="toggle active"
-            id="logoToggle"
-            onclick="toggleSetting('logo')"
-        ></button>
-
-    </div>
-
-
-    <div class="setting">
-
-        <div class="setting-info">
-
-            <strong>
-                Sprache
-            </strong>
-
-            <span>
-                Grundsprache der HalDo-Oberfläche.
-            </span>
-
-        </div>
-
-
-        <select
-            class="select"
-            id="languageSelect"
-            onchange="saveSelect('language', this.value)"
-        >
-
-            <option value="de">
-                Deutsch
-            </option>
-
-            <option value="en">
-                English
-            </option>
-
-            <option value="ku">
-                Kurdî
-            </option>
-
-            <option value="ar">
-                العربية
-            </option>
-
-        </select>
-
-    </div>
-
-</section>
-
-
-<!-- =====================================================
-     KEYBOARD
-===================================================== -->
-
-<section class="section">
-
-    <div class="section-title">
-        TASTATUR
-    </div>
-
-
-    <div class="setting">
-
-        <div class="setting-info">
-
-            <strong>
-                Êzîdî Tastatur
-            </strong>
-
-            <span>
-                Eigene Zeichen für die HalDo-AI-Eingabe.
-            </span>
-
-        </div>
-
-        <button
-            class="toggle active"
-            id="ezidiToggle"
-            onclick="toggleSetting('ezidi')"
-        ></button>
-
-    </div>
-
-
-    <div class="setting">
-
-        <div class="setting-info">
-
-            <strong>
-                Tastatur automatisch öffnen
-            </strong>
-
-            <span>
-                Öffnet die Sondertastatur bei Bedarf
-                automatisch.
-            </span>
-
-        </div>
-
-        <button
-            class="toggle"
-            id="autoKeyboardToggle"
-            onclick="toggleSetting('autoKeyboard')"
-        ></button>
-
-    </div>
-
-</section>
-
-
-<!-- =====================================================
-     SYSTEM
-===================================================== -->
-
-<section class="section">
-
-    <div class="section-title">
-        SYSTEM
-    </div>
-
-
-    <div class="setting">
-
-        <div class="setting-info">
-
-            <strong>
-                System-Animationen
-            </strong>
-
-            <span>
-                Aktiviert die animierten Übergänge
-                innerhalb von HalDo AI OS 18.
-            </span>
-
-        </div>
-
-        <button
-            class="toggle active"
-            id="systemAnimationToggle"
-            onclick="toggleSetting('systemAnimation')"
-        ></button>
-
-    </div>
-
-
-    <div class="setting">
-
-        <div class="setting-info">
-
-            <strong>
-                Diagnosemodus
-            </strong>
-
-            <span>
-                Für die spätere Prüfung von Modulen
-                und Systemzuständen.
-            </span>
-
-        </div>
-
-        <button
-            class="toggle"
-            id="diagnosticToggle"
-            onclick="toggleSetting('diagnostic')"
-        ></button>
-
-    </div>
-
-</section>
-
-
-<!-- =====================================================
-     ACTIONS
-===================================================== -->
-
-<section class="section">
-
-    <div class="section-title">
-        VERWALTUNG
-    </div>
-
-
-    <div class="actions">
-
-
-        <button
-            class="action-button"
-            onclick="saveAll()"
-        >
-            ✓ Einstellungen speichern
-        </button>
-
-
-        <button
-            class="action-button"
-            onclick="resetSettings()"
-        >
-            ↻ Zurücksetzen
-        </button>
-
-
-        <button
-            class="action-button"
-            onclick="openChat()"
-        >
-            ◇ AI Chat öffnen
-        </button>
-
-
-        <button
-            class="action-button"
-            onclick="openDashboard()"
-        >
-            ▦ Dashboard öffnen
-        </button>
-
-
-    </div>
-
-</section>
-
-
-<!-- =====================================================
-     ABOUT
-===================================================== -->
-
-<section class="section about">
-
-    <strong>
-        HalDo AI OS 18
-    </strong>
-
-    <br>
-
-    Professional Ultimate Foundation
-
-    <br>
-
-    Diese Einstellungsseite ist als eigenständiges
-    Modul aufgebaut und kann später mit weiteren
-    Systemdiensten verbunden werden.
-
-</section>
-
-
-</main>
-
-
-<div
-    class="toast"
-    id="toast"
-></div>
-
-
 <script>
+(function (window, document) {
 
-/* =========================================================
-   HALDO SETTINGS CORE
-========================================================= */
-
-const SETTINGS_KEY =
-    "haldo_ai_os18_settings";
+    "use strict";
 
 
-const defaultSettings = {
-
-    ai: true,
-
-    history: true,
-
-    animation: true,
-
-    logo: true,
-
-    language: "de",
-
-    ezidi: true,
-
-    autoKeyboard: false,
-
-    systemAnimation: true,
-
-    diagnostic: false
-
-};
+    const STORAGE_KEY =
+        "haldo.v20.settings";
 
 
-let settings = {
-    ...defaultSettings
-};
+    const defaults = {
+
+        welcome: true,
+
+        animations: true,
+
+        diagnostics: true,
+
+        language: "de",
+
+        ezidiKeyboard: true,
+
+        lightMode: false,
+
+        cosmic: true,
+
+        logoEffects: true,
+
+        aiEnabled: true,
+
+        voice: false,
+
+        aiLanguage: "de",
+
+        localStorage: true,
+
+        diagnosticData: true
+
+    };
 
 
-/* =========================================================
-   START
-========================================================= */
-
-document.addEventListener(
-    "DOMContentLoaded",
-    function() {
-
+    let settings =
         loadSettings();
 
-        applySettings();
 
-    }
-);
+    /* ========================================================
+       STORAGE
+    ======================================================== */
+
+    function loadSettings() {
+
+        try {
+
+            const raw =
+                localStorage.getItem(
+                    STORAGE_KEY
+                );
 
 
-/* =========================================================
-   LOAD
-========================================================= */
+            if (!raw) {
+                return Object.assign(
+                    {},
+                    defaults
+                );
+            }
 
-function loadSettings() {
 
-    try {
+            const parsed =
+                JSON.parse(raw);
 
-        const stored =
-            localStorage.getItem(
-                SETTINGS_KEY
+
+            return Object.assign(
+                {},
+                defaults,
+                parsed
+            );
+
+        } catch (error) {
+
+            console.warn(
+                "[HalDo Settings] Load warning:",
+                error
             );
 
 
-        if (stored) {
+            return Object.assign(
+                {},
+                defaults
+            );
 
-            const parsed =
-                JSON.parse(
-                    stored
+        }
+
+    }
+
+
+    function saveSettings() {
+
+        try {
+
+            localStorage.setItem(
+                STORAGE_KEY,
+                JSON.stringify(settings)
+            );
+
+            return true;
+
+        } catch (error) {
+
+            console.warn(
+                "[HalDo Settings] Save warning:",
+                error
+            );
+
+            return false;
+
+        }
+
+    }
+
+
+    /* ========================================================
+       STATUS
+    ======================================================== */
+
+    function showStatus(message) {
+
+        const element =
+            document.getElementById(
+                "settings-status"
+            );
+
+
+        if (!element) {
+            return;
+        }
+
+
+        element.textContent =
+            message;
+
+
+        window.clearTimeout(
+            showStatus.timer
+        );
+
+
+        showStatus.timer =
+            window.setTimeout(
+                function () {
+
+                    element.textContent =
+                        "";
+
+                },
+                2500
+            );
+
+    }
+
+
+    /* ========================================================
+       APPLY SETTING
+    ======================================================== */
+
+    function applySetting(
+        key,
+        value
+    ) {
+
+        settings[key] =
+            value;
+
+
+        saveSettings();
+
+
+        /*
+         * Zentrale HalDo APIs informieren.
+         */
+
+        try {
+
+            const config =
+                window.HalDoConfigManager ||
+                (
+                    window.HalDoOS &&
+                    window.HalDoOS.configManager
                 );
 
 
             if (
-                parsed &&
-                typeof parsed === "object"
+                config &&
+                typeof config.set ===
+                "function"
             ) {
 
-                settings = {
-                    ...defaultSettings,
-                    ...parsed
-                };
+                config.set(
+                    key,
+                    value
+                );
 
             }
 
+        } catch (error) {
+
+            console.warn(
+                "[HalDo Settings] Config connection warning:",
+                error
+            );
+
         }
 
-    } catch (error) {
 
-        settings = {
-            ...defaultSettings
-        };
+        try {
+
+            const storage =
+                window.HalDoStorageManager ||
+                (
+                    window.HalDoOS &&
+                    window.HalDoOS.storageManager
+                );
+
+
+            if (
+                storage &&
+                typeof storage.set ===
+                "function"
+            ) {
+
+                storage.set(
+                    "settings." + key,
+                    value
+                );
+
+            }
+
+        } catch (error) {
+
+            console.warn(
+                "[HalDo Settings] Storage connection warning:",
+                error
+            );
+
+        }
+
+
+        /*
+         * Systemweiter Event.
+         */
+
+        try {
+
+            window.dispatchEvent(
+                new CustomEvent(
+                    "haldo:settings:changed",
+                    {
+                        detail: {
+                            key: key,
+                            value: value,
+                            settings: Object.assign(
+                                {},
+                                settings
+                            )
+                        }
+                    }
+                )
+            );
+
+        } catch (error) {
+
+            console.warn(
+                "[HalDo Settings] Event warning:",
+                error
+            );
+
+        }
+
+
+        showStatus(
+            "Einstellung gespeichert."
+        );
 
     }
 
-}
+
+    /* ========================================================
+       UI
+    ======================================================== */
+
+    function updateToggle(
+        button
+    ) {
+
+        const key =
+            button.dataset.setting;
 
 
-/* =========================================================
-   SAVE
-========================================================= */
+        if (!key) {
+            return;
+        }
 
-function saveAll() {
 
-    try {
+        const active =
+            Boolean(
+                settings[key]
+            );
 
-        localStorage.setItem(
-            SETTINGS_KEY,
-            JSON.stringify(
-                settings
+
+        button.classList.toggle(
+            "active",
+            active
+        );
+
+        button.setAttribute(
+            "aria-pressed",
+            String(active)
+        );
+
+    }
+
+
+    function updateSelect(
+        select
+    ) {
+
+        const key =
+            select.dataset.setting;
+
+
+        if (!key) {
+            return;
+        }
+
+
+        if (
+            typeof settings[key] !==
+            "undefined"
+        ) {
+
+            select.value =
+                settings[key];
+
+        }
+
+    }
+
+
+    function updateAllControls() {
+
+        document
+            .querySelectorAll(
+                ".toggle[data-setting]"
             )
-        );
+            .forEach(
+                updateToggle
+            );
 
 
-        showToast(
-            "HalDo AI Einstellungen gespeichert."
-        );
-
-    } catch (error) {
-
-        showToast(
-            "Speichern war nicht möglich."
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   TOGGLE
-========================================================= */
-
-function toggleSetting(
-    name
-) {
-
-    settings[name] =
-        !Boolean(
-            settings[name]
-        );
-
-
-    applySettings();
-
-    saveAll();
-
-}
-
-
-/* =========================================================
-   SELECT
-========================================================= */
-
-function saveSelect(
-    name,
-    value
-) {
-
-    settings[name] =
-        value;
-
-
-    saveAll();
-
-}
-
-
-/* =========================================================
-   APPLY
-========================================================= */
-
-function applySettings() {
-
-    setToggle(
-        "aiToggle",
-        settings.ai
-    );
-
-    setToggle(
-        "historyToggle",
-        settings.history
-    );
-
-    setToggle(
-        "animationToggle",
-        settings.animation
-    );
-
-    setToggle(
-        "logoToggle",
-        settings.logo
-    );
-
-    setToggle(
-        "ezidiToggle",
-        settings.ezidi
-    );
-
-    setToggle(
-        "autoKeyboardToggle",
-        settings.autoKeyboard
-    );
-
-    setToggle(
-        "systemAnimationToggle",
-        settings.systemAnimation
-    );
-
-    setToggle(
-        "diagnosticToggle",
-        settings.diagnostic
-    );
-
-
-    const language =
-        document.getElementById(
-            "languageSelect"
-        );
-
-
-    if (language) {
-
-        language.value =
-            settings.language;
-
-    }
-
-}
-
-
-/* =========================================================
-   SET TOGGLE
-========================================================= */
-
-function setToggle(
-    id,
-    active
-) {
-
-    const element =
-        document.getElementById(
-            id
-        );
-
-
-    if (!element) {
-
-        return;
+        document
+            .querySelectorAll(
+                "select[data-setting]"
+            )
+            .forEach(
+                updateSelect
+            );
 
     }
 
 
-    element.classList.toggle(
-        "active",
-        Boolean(active)
-    );
+    /* ========================================================
+       PANELS
+    ======================================================== */
 
-}
+    function connectPanels() {
+
+        document
+            .querySelectorAll(
+                ".nav-button[data-panel]"
+            )
+            .forEach(
+                function (button) {
+
+                    button.addEventListener(
+                        "click",
+                        function () {
+
+                            const panel =
+                                button.dataset.panel;
 
 
-/* =========================================================
-   RESET
-========================================================= */
+                            document
+                                .querySelectorAll(
+                                    ".nav-button"
+                                )
+                                .forEach(
+                                    function (item) {
 
-function resetSettings() {
+                                        item.classList.toggle(
+                                            "active",
+                                            item === button
+                                        );
 
-    const confirmed =
-        confirm(
-            "Alle HalDo-AI-Einstellungen auf Standard zurücksetzen?"
-        );
+                                    }
+                                );
 
 
-    if (!confirmed) {
+                            document
+                                .querySelectorAll(
+                                    ".panel"
+                                )
+                                .forEach(
+                                    function (item) {
 
-        return;
+                                        item.classList.toggle(
+                                            "active",
+                                            item.id ===
+                                            "panel-" +
+                                            panel
+                                        );
+
+                                    }
+                                );
+
+                        }
+                    );
+
+                }
+            );
 
     }
 
 
-    settings = {
-        ...defaultSettings
+    /* ========================================================
+       TOGGLES
+    ======================================================== */
+
+    function connectToggles() {
+
+        document
+            .querySelectorAll(
+                ".toggle[data-setting]"
+            )
+            .forEach(
+                function (button) {
+
+                    button.addEventListener(
+                        "click",
+                        function () {
+
+                            const key =
+                                button.dataset.setting;
+
+
+                            const next =
+                                !Boolean(
+                                    settings[key]
+                                );
+
+
+                            applySetting(
+                                key,
+                                next
+                            );
+
+
+                            updateToggle(
+                                button
+                            );
+
+                        }
+                    );
+
+                }
+            );
+
+    }
+
+
+    /* ========================================================
+       SELECTS
+    ======================================================== */
+
+    function connectSelects() {
+
+        document
+            .querySelectorAll(
+                "select[data-setting]"
+            )
+            .forEach(
+                function (select) {
+
+                    select.addEventListener(
+                        "change",
+                        function () {
+
+                            applySetting(
+                                select.dataset.setting,
+                                select.value
+                            );
+
+                        }
+                    );
+
+                }
+            );
+
+    }
+
+
+    /* ========================================================
+       SYSTEM CONNECTION
+    ======================================================== */
+
+    function updateSystemConnection() {
+
+        const manifest =
+            window.HalDoV20AppManifest ||
+            (
+                window.HalDoV20 &&
+                window.HalDoV20.appManifest
+            ) ||
+            (
+                window.HalDoOS &&
+                window.HalDoOS.appManifest
+            );
+
+
+        const runtime =
+            window.HalDoV20AppRuntime ||
+            (
+                window.HalDoV20 &&
+                window.HalDoV20.appRuntime
+            );
+
+
+        const manifestElement =
+            document.getElementById(
+                "manifest-status"
+            );
+
+
+        const runtimeElement =
+            document.getElementById(
+                "runtime-status"
+            );
+
+
+        if (manifestElement) {
+
+            manifestElement.textContent =
+                manifest
+                    ? "Verbunden"
+                    : "Nicht geladen";
+
+            manifestElement.style.color =
+                manifest
+                    ? "#9fffc2"
+                    : "#ffd27c";
+
+        }
+
+
+        if (runtimeElement) {
+
+            runtimeElement.textContent =
+                runtime
+                    ? "Verbunden"
+                    : "Nicht geladen";
+
+            runtimeElement.style.color =
+                runtime
+                    ? "#9fffc2"
+                    : "#ffd27c";
+
+        }
+
+    }
+
+
+    /* ========================================================
+       NAVIGATION
+    ======================================================== */
+
+    function navigate(path) {
+
+        try {
+
+            window.location.href =
+                path;
+
+        } catch (error) {
+
+            console.warn(
+                "[HalDo Settings] Navigation warning:",
+                error
+            );
+
+        }
+
+    }
+
+
+    function connectNavigation() {
+
+        const systemButton =
+            document.getElementById(
+                "system-button"
+            );
+
+
+        const appsButton =
+            document.getElementById(
+                "apps-button"
+            );
+
+
+        const dashboardButton =
+            document.getElementById(
+                "dashboard-button"
+            );
+
+
+        const resetButton =
+            document.getElementById(
+                "reset-button"
+            );
+
+
+        if (systemButton) {
+
+            systemButton.addEventListener(
+                "click",
+                function () {
+
+                    navigate(
+                        "system.html"
+                    );
+
+                }
+            );
+
+        }
+
+
+        if (appsButton) {
+
+            appsButton.addEventListener(
+                "click",
+                function () {
+
+                    navigate(
+                        "apps.html"
+                    );
+
+                }
+            );
+
+        }
+
+
+        if (dashboardButton) {
+
+            dashboardButton.addEventListener(
+                "click",
+                function () {
+
+                    navigate(
+                        "dashboard.html"
+                    );
+
+                }
+            );
+
+        }
+
+
+        if (resetButton) {
+
+            resetButton.addEventListener(
+                "click",
+                function () {
+
+                    const confirmed =
+                        window.confirm(
+                            "Alle HalDo-Einstellungen zurücksetzen?"
+                        );
+
+
+                    if (!confirmed) {
+                        return;
+                    }
+
+
+                    settings =
+                        Object.assign(
+                            {},
+                            defaults
+                        );
+
+
+                    saveSettings();
+
+                    updateAllControls();
+
+                    showStatus(
+                        "Einstellungen wurden zurückgesetzt."
+                    );
+
+
+                    try {
+
+                        window.dispatchEvent(
+                            new CustomEvent(
+                                "haldo:settings:reset",
+                                {
+                                    detail:
+                                        Object.assign(
+                                            {},
+                                            settings
+                                        )
+                                }
+                            )
+                        );
+
+                    } catch (error) {
+
+                        console.warn(
+                            "[HalDo Settings] Reset event warning:",
+                            error
+                        );
+
+                    }
+
+                }
+            );
+
+        }
+
+    }
+
+
+    /* ========================================================
+       GLOBAL API
+    ======================================================== */
+
+    window.HalDoSettingsPage = {
+
+        get: function (key) {
+
+            if (!key) {
+                return undefined;
+            }
+
+            return settings[key];
+
+        },
+
+
+        set: function (
+            key,
+            value
+        ) {
+
+            if (!key) {
+                return false;
+            }
+
+
+            applySetting(
+                key,
+                value
+            );
+
+
+            updateAllControls();
+
+            return true;
+
+        },
+
+
+        getAll: function () {
+
+            return Object.assign(
+                {},
+                settings
+            );
+
+        },
+
+
+        reset: function () {
+
+            settings =
+                Object.assign(
+                    {},
+                    defaults
+                );
+
+
+            saveSettings();
+
+            updateAllControls();
+
+            return true;
+
+        }
+
     };
 
 
-    saveAll();
+    /* ========================================================
+       EVENTS
+    ======================================================== */
 
-    applySettings();
+    function connectEvents() {
 
-
-    showToast(
-        "Standardeinstellungen wiederhergestellt."
-    );
-
-}
-
-
-/* =========================================================
-   NAVIGATION
-========================================================= */
-
-function goHome() {
-
-    window.location.href =
-        "index.html";
-
-}
-
-
-function openChat() {
-
-    window.location.href =
-        "chat.html";
-
-}
-
-
-function openDashboard() {
-
-    window.location.href =
-        "dashboard.html";
-
-}
-
-
-/* =========================================================
-   TOAST
-========================================================= */
-
-let toastTimer;
-
-
-function showToast(
-    message
-) {
-
-    const toast =
-        document.getElementById(
-            "toast"
+        window.addEventListener(
+            "haldo:v20:app-manifest-ready",
+            updateSystemConnection
         );
 
 
-    toast.textContent =
-        message;
-
-
-    toast.classList.add(
-        "show"
-    );
-
-
-    clearTimeout(
-        toastTimer
-    );
-
-
-    toastTimer =
-        setTimeout(
-            function() {
-
-                toast.classList.remove(
-                    "show"
-                );
-
-            },
-            2200
+        window.addEventListener(
+            "haldo:v20:app-runtime-ready",
+            updateSystemConnection
         );
 
-}
 
+        window.addEventListener(
+            "haldo:settings:changed",
+            function () {
+
+                settings =
+                    loadSettings();
+
+                updateAllControls();
+
+            }
+        );
+
+    }
+
+
+    /* ========================================================
+       INIT
+    ======================================================== */
+
+    function init() {
+
+        connectPanels();
+
+        connectToggles();
+
+        connectSelects();
+
+        connectNavigation();
+
+        connectEvents();
+
+        updateAllControls();
+
+        updateSystemConnection();
+
+        showStatus(
+            "HalDo Einstellungen bereit."
+        );
+
+    }
+
+
+    if (
+        document.readyState ===
+        "loading"
+    ) {
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            init,
+            {
+                once: true
+            }
+        );
+
+    } else {
+
+        init();
+
+    }
+
+
+})(window, document);
 </script>
 
 </body>
