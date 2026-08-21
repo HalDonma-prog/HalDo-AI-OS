@@ -1,0 +1,1282 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta
+        name="theme-color"
+        content="#050812"
+    >
+
+    <title>HalDo AI OS 20 — Apps</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            width: 100%;
+            min-height: 100%;
+            font-family:
+                Inter,
+                system-ui,
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                sans-serif;
+            background:
+                radial-gradient(
+                    circle at top,
+                    #18244a 0%,
+                    #080d1c 45%,
+                    #03050b 100%
+                );
+            color: #ffffff;
+        }
+
+        body {
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        button,
+        input {
+            font: inherit;
+        }
+
+        .apps-shell {
+            width: 100%;
+            min-height: 100vh;
+            padding: 24px;
+        }
+
+        .apps-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .brand-logo {
+            width: 54px;
+            height: 54px;
+            object-fit: contain;
+            border-radius: 16px;
+        }
+
+        .brand-title {
+            margin: 0;
+            font-size: 26px;
+            font-weight: 700;
+        }
+
+        .brand-subtitle {
+            margin: 4px 0 0;
+            opacity: 0.65;
+            font-size: 13px;
+        }
+
+        .toolbar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .search {
+            width: min(320px, 80vw);
+            padding: 12px 15px;
+            border: 1px solid rgba(255,255,255,.12);
+            border-radius: 12px;
+            outline: none;
+            background: rgba(255,255,255,.07);
+            color: #fff;
+        }
+
+        .search::placeholder {
+            color: rgba(255,255,255,.45);
+        }
+
+        .button {
+            border: 1px solid rgba(255,255,255,.12);
+            border-radius: 12px;
+            padding: 11px 15px;
+            background: rgba(255,255,255,.08);
+            color: #fff;
+            cursor: pointer;
+        }
+
+        .button:hover {
+            background: rgba(255,255,255,.14);
+        }
+
+        .status-bar {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 22px;
+        }
+
+        .status-card {
+            padding: 12px 16px;
+            border-radius: 14px;
+            background: rgba(255,255,255,.06);
+            border: 1px solid rgba(255,255,255,.08);
+            min-width: 120px;
+        }
+
+        .status-label {
+            display: block;
+            font-size: 11px;
+            opacity: .55;
+            margin-bottom: 4px;
+        }
+
+        .status-value {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .category-bar {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 12px;
+            margin-bottom: 18px;
+        }
+
+        .category-button {
+            flex: 0 0 auto;
+            border: 1px solid rgba(255,255,255,.1);
+            border-radius: 999px;
+            padding: 8px 14px;
+            background: rgba(255,255,255,.05);
+            color: rgba(255,255,255,.8);
+            cursor: pointer;
+        }
+
+        .category-button.active {
+            background: rgba(255,255,255,.16);
+            color: #fff;
+        }
+
+        .apps-grid {
+            display: grid;
+            grid-template-columns:
+                repeat(auto-fill, minmax(220px, 1fr));
+            gap: 16px;
+        }
+
+        .app-card {
+            position: relative;
+            min-height: 210px;
+            padding: 20px;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,.09);
+            background:
+                linear-gradient(
+                    145deg,
+                    rgba(255,255,255,.09),
+                    rgba(255,255,255,.035)
+                );
+            backdrop-filter: blur(14px);
+            transition:
+                transform .2s ease,
+                border-color .2s ease,
+                background .2s ease;
+        }
+
+        .app-card:hover {
+            transform: translateY(-3px);
+            border-color: rgba(255,255,255,.2);
+            background:
+                linear-gradient(
+                    145deg,
+                    rgba(255,255,255,.13),
+                    rgba(255,255,255,.05)
+                );
+        }
+
+        .app-icon {
+            width: 52px;
+            height: 52px;
+            object-fit: contain;
+            border-radius: 14px;
+            margin-bottom: 15px;
+        }
+
+        .app-name {
+            margin: 0;
+            font-size: 18px;
+        }
+
+        .app-description {
+            margin: 8px 0;
+            font-size: 13px;
+            line-height: 1.5;
+            color: rgba(255,255,255,.62);
+        }
+
+        .app-meta {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            margin-top: 15px;
+            font-size: 11px;
+            opacity: .55;
+        }
+
+        .app-open {
+            width: 100%;
+            margin-top: 15px;
+            padding: 10px;
+            border: 1px solid rgba(255,255,255,.1);
+            border-radius: 10px;
+            background: rgba(255,255,255,.07);
+            color: #fff;
+            cursor: pointer;
+        }
+
+        .app-open:hover {
+            background: rgba(255,255,255,.15);
+        }
+
+        .empty {
+            padding: 50px 20px;
+            text-align: center;
+            color: rgba(255,255,255,.55);
+        }
+
+        .error {
+            padding: 20px;
+            border-radius: 16px;
+            background: rgba(255,80,80,.08);
+            border: 1px solid rgba(255,80,80,.2);
+            color: #ffb5b5;
+        }
+
+        @media (max-width: 650px) {
+            .apps-shell {
+                padding: 15px;
+            }
+
+            .brand-title {
+                font-size: 21px;
+            }
+
+            .apps-grid {
+                grid-template-columns:
+                    repeat(auto-fill, minmax(165px, 1fr));
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div
+    id="haldo-apps"
+    class="apps-shell"
+>
+
+    <header class="apps-header">
+
+        <div class="brand">
+
+            <img
+                class="brand-logo"
+                src="assets/logo/logo.png"
+                alt="HalDo AI"
+                onerror="this.style.display='none'"
+            >
+
+            <div>
+                <h1 class="brand-title">
+                    HalDo AI OS
+                </h1>
+
+                <p class="brand-subtitle">
+                    V20 Application Center
+                </p>
+            </div>
+
+        </div>
+
+
+        <div class="toolbar">
+
+            <input
+                id="apps-search"
+                class="search"
+                type="search"
+                placeholder="Apps suchen..."
+                autocomplete="off"
+            >
+
+            <button
+                id="apps-refresh"
+                class="button"
+                type="button"
+            >
+                Aktualisieren
+            </button>
+
+        </div>
+
+    </header>
+
+
+    <section
+        id="apps-status"
+        class="status-bar"
+    ></section>
+
+
+    <nav
+        id="apps-categories"
+        class="category-bar"
+        aria-label="App-Kategorien"
+    ></nav>
+
+
+    <main>
+
+        <div
+            id="apps-grid"
+            class="apps-grid"
+        ></div>
+
+    </main>
+
+</div>
+
+
+<script>
+(function (window, document) {
+
+    "use strict";
+
+
+    const state = {
+
+        apps: [],
+
+        filtered: [],
+
+        category: "all",
+
+        query: "",
+
+        manifest: null
+
+    };
+
+
+    /* ========================================================
+       HELPERS
+    ======================================================== */
+
+    function getManifest() {
+
+        return (
+            window.HalDoV20AppManifest
+            ||
+            (
+                window.HalDoV20 &&
+                window.HalDoV20.appManifest
+            )
+            ||
+            (
+                window.HalDoOS &&
+                window.HalDoOS.appManifest
+            )
+            ||
+            null
+        );
+
+    }
+
+
+    function getRuntime() {
+
+        return (
+            window.HalDoV20AppRuntime
+            ||
+            (
+                window.HalDoV20 &&
+                window.HalDoV20.runtime
+            )
+            ||
+            (
+                window.HalDoOS &&
+                window.HalDoOS.runtime
+            )
+            ||
+            null
+        );
+
+    }
+
+
+    function getRegistry() {
+
+        return (
+            window.HalDoV20AppRegistry
+            ||
+            (
+                window.HalDoV20 &&
+                window.HalDoV20.appRegistry
+            )
+            ||
+            (
+                window.HalDoOS &&
+                window.HalDoOS.appRegistry
+            )
+            ||
+            null
+        );
+
+    }
+
+
+    function escapeHTML(value) {
+
+        return String(value || "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+
+    }
+
+
+    /* ========================================================
+       LOAD APPS
+    ======================================================== */
+
+    function loadApps() {
+
+        const manifest =
+            getManifest();
+
+
+        state.manifest =
+            manifest;
+
+
+        if (
+            manifest &&
+            typeof manifest.getAll ===
+            "function"
+        ) {
+
+            state.apps =
+                manifest.getAll();
+
+        } else {
+
+            state.apps = [];
+
+        }
+
+
+        applyFilter();
+
+        updateStatus();
+
+    }
+
+
+    /* ========================================================
+       FILTER
+    ======================================================== */
+
+    function applyFilter() {
+
+        const query =
+            state.query
+                .trim()
+                .toLowerCase();
+
+
+        state.filtered =
+            state.apps.filter(
+                function (app) {
+
+                    const categoryMatch =
+                        state.category === "all"
+                        ||
+                        String(
+                            app.category || ""
+                        ).toLowerCase()
+                        ===
+                        state.category;
+
+
+                    if (!categoryMatch) {
+                        return false;
+                    }
+
+
+                    if (!query) {
+                        return true;
+                    }
+
+
+                    return (
+
+                        String(app.id || "")
+                            .toLowerCase()
+                            .includes(query)
+
+                        ||
+
+                        String(app.name || "")
+                            .toLowerCase()
+                            .includes(query)
+
+                        ||
+
+                        String(app.title || "")
+                            .toLowerCase()
+                            .includes(query)
+
+                        ||
+
+                        String(app.description || "")
+                            .toLowerCase()
+                            .includes(query)
+
+                    );
+
+                }
+            );
+
+
+        renderApps();
+
+    }
+
+
+    /* ========================================================
+       RENDER CATEGORIES
+    ======================================================== */
+
+    function renderCategories() {
+
+        const container =
+            document.getElementById(
+                "apps-categories"
+            );
+
+
+        if (!container) {
+            return;
+        }
+
+
+        const categories =
+            new Set();
+
+
+        state.apps.forEach(
+            function (app) {
+
+                if (app.category) {
+
+                    categories.add(
+                        String(
+                            app.category
+                        ).toLowerCase()
+                    );
+
+                }
+
+            }
+        );
+
+
+        let html = "";
+
+
+        html +=
+            '<button class="category-button ' +
+            (
+                state.category === "all"
+                    ? "active"
+                    : ""
+            ) +
+            '" data-category="all">' +
+            'Alle' +
+            '</button>';
+
+
+        Array.from(categories)
+            .sort()
+            .forEach(
+                function (category) {
+
+                    html +=
+                        '<button ' +
+                        'class="category-button ' +
+                        (
+                            state.category === category
+                                ? "active"
+                                : ""
+                        ) +
+                        '" ' +
+                        'data-category="' +
+                        escapeHTML(category) +
+                        '">' +
+                        escapeHTML(category) +
+                        '</button>';
+
+                }
+            );
+
+
+        container.innerHTML =
+            html;
+
+
+        container
+            .querySelectorAll(
+                "[data-category]"
+            )
+            .forEach(
+                function (button) {
+
+                    button.addEventListener(
+                        "click",
+                        function () {
+
+                            state.category =
+                                button.dataset.category;
+
+                            renderCategories();
+
+                            applyFilter();
+
+                        }
+                    );
+
+                }
+            );
+
+    }
+
+
+    /* ========================================================
+       RENDER APPS
+    ======================================================== */
+
+    function renderApps() {
+
+        const container =
+            document.getElementById(
+                "apps-grid"
+            );
+
+
+        if (!container) {
+            return;
+        }
+
+
+        if (
+            !state.manifest
+        ) {
+
+            container.innerHTML =
+                '<div class="error">' +
+                'Das V20-App-Manifest ist noch nicht verfügbar.' +
+                '</div>';
+
+            return;
+
+        }
+
+
+        if (
+            state.filtered.length === 0
+        ) {
+
+            container.innerHTML =
+                '<div class="empty">' +
+                'Keine passenden Apps gefunden.' +
+                '</div>';
+
+            return;
+
+        }
+
+
+        container.innerHTML =
+            state.filtered
+                .map(
+                    function (app) {
+
+                        const id =
+                            escapeHTML(app.id);
+
+                        const title =
+                            escapeHTML(
+                                app.title ||
+                                app.name ||
+                                app.id
+                            );
+
+                        const description =
+                            escapeHTML(
+                                app.description ||
+                                ""
+                            );
+
+                        const category =
+                            escapeHTML(
+                                app.category ||
+                                "system"
+                            );
+
+                        const icon =
+                            escapeHTML(
+                                app.icon ||
+                                "assets/logo/logo.png"
+                            );
+
+
+                        return (
+
+                            '<article ' +
+                            'class="app-card" ' +
+                            'data-app-id="' +
+                            id +
+                            '">' +
+
+                                '<img ' +
+                                'class="app-icon" ' +
+                                'src="' +
+                                icon +
+                                '" ' +
+                                'alt="" ' +
+                                'onerror="' +
+                                "this.src='assets/logo/logo.png'" +
+                                '">' +
+
+                                '<h2 class="app-name">' +
+                                    title +
+                                '</h2>' +
+
+                                '<p class="app-description">' +
+                                    description +
+                                '</p>' +
+
+                                '<div class="app-meta">' +
+                                    '<span>' +
+                                        category +
+                                    '</span>' +
+
+                                    '<span>' +
+                                        escapeHTML(
+                                            app.version ||
+                                            "20.0.0"
+                                        ) +
+                                    '</span>' +
+
+                                '</div>' +
+
+                                '<button ' +
+                                'class="app-open" ' +
+                                'data-open-app="' +
+                                id +
+                                '">' +
+                                'Öffnen' +
+                                '</button>' +
+
+                            '</article>'
+
+                        );
+
+                    }
+                )
+                .join("");
+
+
+        container
+            .querySelectorAll(
+                "[data-open-app]"
+            )
+            .forEach(
+                function (button) {
+
+                    button.addEventListener(
+                        "click",
+                        function () {
+
+                            openApp(
+                                button.dataset.openApp
+                            );
+
+                        }
+                    );
+
+                }
+            );
+
+    }
+
+
+    /* ========================================================
+       OPEN APP
+    ======================================================== */
+
+    function openApp(id) {
+
+        if (!id) {
+            return;
+        }
+
+
+        const runtime =
+            getRuntime();
+
+
+        const registry =
+            getRegistry();
+
+
+        const manifest =
+            getManifest();
+
+
+        /*
+         * Primär:
+         * V20 Runtime
+         */
+
+        if (
+            runtime
+        ) {
+
+            const methods = [
+                "launch",
+                "open",
+                "start",
+                "launchApp",
+                "openApp"
+            ];
+
+
+            for (
+                let i = 0;
+                i < methods.length;
+                i++
+            ) {
+
+                const method =
+                    methods[i];
+
+
+                if (
+                    typeof runtime[method] ===
+                    "function"
+                ) {
+
+                    try {
+
+                        runtime[method](id);
+
+                        return;
+
+                    } catch (error) {
+
+                        console.warn(
+                            "[HalDo Apps] Runtime:",
+                            error
+                        );
+
+                    }
+
+                }
+
+            }
+
+        }
+
+
+        /*
+         * Sekundär:
+         * App Registry
+         */
+
+        if (
+            registry
+        ) {
+
+            const methods = [
+                "launch",
+                "open",
+                "start",
+                "launchApp",
+                "openApp"
+            ];
+
+
+            for (
+                let i = 0;
+                i < methods.length;
+                i++
+            ) {
+
+                const method =
+                    methods[i];
+
+
+                if (
+                    typeof registry[method] ===
+                    "function"
+                ) {
+
+                    try {
+
+                        registry[method](id);
+
+                        return;
+
+                    } catch (error) {
+
+                        console.warn(
+                            "[HalDo Apps] Registry:",
+                            error
+                        );
+
+                    }
+
+                }
+
+            }
+
+        }
+
+
+        /*
+         * Letzter Fallback:
+         * Manifest Entry
+         */
+
+        if (
+            manifest &&
+            typeof manifest.get ===
+            "function"
+        ) {
+
+            const app =
+                manifest.get(id);
+
+
+            if (
+                app &&
+                app.entry
+            ) {
+
+                window.location.href =
+                    app.entry;
+
+                return;
+
+            }
+
+        }
+
+
+        console.warn(
+            "[HalDo Apps] Keine Startmethode für App:",
+            id
+        );
+
+    }
+
+
+    /* ========================================================
+       STATUS
+    ======================================================== */
+
+    function updateStatus() {
+
+        const container =
+            document.getElementById(
+                "apps-status"
+            );
+
+
+        if (!container) {
+            return;
+        }
+
+
+        const manifest =
+            state.manifest;
+
+
+        const appCount =
+            state.apps.length;
+
+
+        const runtime =
+            getRuntime();
+
+
+        const registry =
+            getRegistry();
+
+
+        container.innerHTML =
+
+            '<div class="status-card">' +
+                '<span class="status-label">Apps</span>' +
+                '<span class="status-value">' +
+                    appCount +
+                '</span>' +
+            '</div>' +
+
+            '<div class="status-card">' +
+                '<span class="status-label">Manifest</span>' +
+                '<span class="status-value">' +
+                    (
+                        manifest
+                            ? "OK"
+                            : "—"
+                    ) +
+                '</span>' +
+            '</div>' +
+
+            '<div class="status-card">' +
+                '<span class="status-label">Runtime</span>' +
+                '<span class="status-value">' +
+                    (
+                        runtime
+                            ? "OK"
+                            : "—"
+                    ) +
+                '</span>' +
+            '</div>' +
+
+            '<div class="status-card">' +
+                '<span class="status-label">Registry</span>' +
+                '<span class="status-value">' +
+                    (
+                        registry
+                            ? "OK"
+                            : "—"
+                    ) +
+                '</span>' +
+            '</div>';
+
+    }
+
+
+    /* ========================================================
+       SEARCH
+    ======================================================== */
+
+    function setupSearch() {
+
+        const input =
+            document.getElementById(
+                "apps-search"
+            );
+
+
+        if (!input) {
+            return;
+        }
+
+
+        input.addEventListener(
+            "input",
+            function () {
+
+                state.query =
+                    input.value || "";
+
+                applyFilter();
+
+            }
+        );
+
+    }
+
+
+    /* ========================================================
+       REFRESH
+    ======================================================== */
+
+    function setupRefresh() {
+
+        const button =
+            document.getElementById(
+                "apps-refresh"
+            );
+
+
+        if (!button) {
+            return;
+        }
+
+
+        button.addEventListener(
+            "click",
+            function () {
+
+                loadApps();
+
+                renderCategories();
+
+            }
+        );
+
+    }
+
+
+    /* ========================================================
+       V20 EVENTS
+    ======================================================== */
+
+    function connectEvents() {
+
+        const events = [
+
+            "haldo:v20:app-manifest-ready",
+
+            "haldo:v20:app-runtime-ready",
+
+            "haldo:v20:app-registry-ready",
+
+            "haldo:v20:display-ready"
+
+        ];
+
+
+        events.forEach(
+            function (eventName) {
+
+                window.addEventListener(
+                    eventName,
+                    function () {
+
+                        loadApps();
+
+                        renderCategories();
+
+                    }
+                );
+
+            }
+        );
+
+    }
+
+
+    /* ========================================================
+       INITIALIZE
+    ======================================================== */
+
+    function init() {
+
+        setupSearch();
+
+        setupRefresh();
+
+        connectEvents();
+
+        loadApps();
+
+        renderCategories();
+
+    }
+
+
+    /* ========================================================
+       START
+    ======================================================== */
+
+    if (
+        document.readyState ===
+        "loading"
+    ) {
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            init,
+            {
+                once: true
+            }
+        );
+
+    } else {
+
+        init();
+
+    }
+
+
+    /* ========================================================
+       GLOBAL API
+    ======================================================== */
+
+    window.HalDoAppsPage = {
+
+        reload:
+            loadApps,
+
+        render:
+            renderApps,
+
+        open:
+            openApp,
+
+        getState:
+            function () {
+
+                return {
+                    apps:
+                        state.apps.slice(),
+
+                    filtered:
+                        state.filtered.slice(),
+
+                    category:
+                        state.category,
+
+                    query:
+                        state.query
+
+                };
+
+            }
+
+    };
+
+
+})(window, document);
+</script>
+
+</body>
+</html>
