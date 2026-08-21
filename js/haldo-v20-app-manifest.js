@@ -8,13 +8,15 @@
  *   js/haldo-v20-app-manifest.js
  *
  * Zweck:
- *   Zentrale Definition aller geplanten HalDo-Apps.
+ *   Zentrale Definition und Verwaltung aller V20-Apps.
  *
- * WICHTIG:
- *   Dieses Manifest registriert keine Fake-Funktionen.
- *   Es beschreibt die Architektur und Voraussetzungen einer
- *   App. Die tatsächliche Funktionalität kommt anschließend
- *   in den jeweiligen App-Modulen.
+ * Dieses Manifest:
+ *   - registriert App-Definitionen
+ *   - stellt eine zentrale App-API bereit
+ *   - verwaltet Kategorien
+ *   - verwaltet Abhängigkeiten und Verbindungen
+ *   - stellt Diagnose- und Validierungsfunktionen bereit
+ *   - verbindet sich mit HalDoOS / HalDoV20 / Kernel
  *
  * ============================================================
  */
@@ -22,6 +24,11 @@
 (function (window, document) {
 
     "use strict";
+
+
+    /* ========================================================
+       NAMESPACE
+       ======================================================== */
 
     const HalDoOS =
         window.HalDoOS =
@@ -31,145 +38,395 @@
         window.HalDoV20 =
         window.HalDoV20 || {};
 
-    const apps = new Map();
-    const categories = new Map();
+
+    /* ========================================================
+       INTERNAL REGISTRIES
+       ======================================================== */
+
+    const apps =
+        new Map();
+
+    const categories =
+        new Map();
+
+
+    /* ========================================================
+       MANIFEST
+       ======================================================== */
 
     const Manifest = {
 
-        name: "HalDo V20 Central App Manifest",
-        version: "20.0.0",
-        ready: false
+        name:
+            "HalDo V20 Central App Manifest",
+
+        version:
+            "20.0.0",
+
+        ready:
+            false,
+
+        loadedAt:
+            null
+
     };
 
 
     /* ========================================================
-       APP FACTORY
-    ======================================================== */
+       NORMALIZATION
+       ======================================================== */
 
-    function createApp(config) {
+    function normalizeId(id) {
 
-        return Object.assign({
+        return String(id || "")
+            .trim()
+            .toLowerCase();
 
-            id: "",
-            name: "",
-            title: "",
-            category: "system",
+    }
 
-            version: "20.0.0",
 
-            icon: "",
-            description: "",
+    function normalizeCategory(categoryName) {
 
-            status: "planned",
-
-            entry: "",
-            module: "",
-
-            services: [],
-            permissions: [],
-
-            dependencies: [],
-            connections: [],
-
-            languages: true,
-            searchable: true,
-
-            window: {
-                width: 900,
-                height: 650,
-                resizable: true,
-                maximizable: true,
-                minimizable: true
-            },
-
-            settings: {},
-
-            metadata: {}
-
-        }, config);
+        return String(
+            categoryName || "other"
+        ).trim();
 
     }
 
 
     /* ========================================================
-       REGISTER
-    ======================================================== */
+       APP FACTORY
+       ======================================================== */
+
+    function createApp(config) {
+
+        const source =
+            config || {};
+
+        const app =
+            Object.assign({
+
+                id:
+                    "",
+
+                name:
+                    "",
+
+                title:
+                    "",
+
+                category:
+                    "system",
+
+                version:
+                    "20.0.0",
+
+                icon:
+                    "",
+
+                description:
+                    "",
+
+                status:
+                    "planned",
+
+                entry:
+                    "",
+
+                module:
+                    "",
+
+                services:
+                    [],
+
+                permissions:
+                    [],
+
+                dependencies:
+                    [],
+
+                connections:
+                    [],
+
+                languages:
+                    true,
+
+                searchable:
+                    true,
+
+                window: {
+
+                    width:
+                        900,
+
+                    height:
+                        650,
+
+                    resizable:
+                        true,
+
+                    maximizable:
+                        true,
+
+                    minimizable:
+                        true
+
+                },
+
+                settings:
+                    {},
+
+                metadata:
+                    {}
+
+            }, source);
+
+
+        /*
+         * Never share mutable arrays/objects between apps.
+         */
+
+        app.services =
+            Array.isArray(source.services)
+                ? source.services.slice()
+                : [];
+
+        app.permissions =
+            Array.isArray(source.permissions)
+                ? source.permissions.slice()
+                : [];
+
+        app.dependencies =
+            Array.isArray(source.dependencies)
+                ? source.dependencies.slice()
+                : [];
+
+        app.connections =
+            Array.isArray(source.connections)
+                ? source.connections.slice()
+                : [];
+
+        app.settings =
+            Object.assign(
+                {},
+                source.settings || {}
+            );
+
+        app.metadata =
+            Object.assign(
+                {},
+                source.metadata || {}
+            );
+
+        app.window =
+            Object.assign(
+                {
+                    width:
+                        900,
+
+                    height:
+                        650,
+
+                    resizable:
+                        true,
+
+                    maximizable:
+                        true,
+
+                    minimizable:
+                        true
+                },
+                source.window || {}
+            );
+
+
+        return app;
+
+    }
+
+
+    /* ========================================================
+       CATEGORY REGISTRATION
+       ======================================================== */
+
+    function registerCategory(
+        categoryId
+    ) {
+
+        const id =
+            normalizeCategory(
+                categoryId
+            );
+
+        if (!id) {
+            return;
+        }
+
+        if (!categories.has(id)) {
+
+            categories.set(
+                id,
+                []
+            );
+
+        }
+
+    }
+
+
+    /* ========================================================
+       REGISTER APP
+       ======================================================== */
 
     function register(config) {
 
-        if (!config || !config.id) {
+        if (
+            !config ||
+            !config.id
+        ) {
+
             return false;
+
         }
 
+
         const id =
-            String(config.id)
-                .trim()
-                .toLowerCase();
+            normalizeId(
+                config.id
+            );
+
+
+        if (!id) {
+
+            return false;
+
+        }
+
+
+        /*
+         * Remove previous category reference
+         * when an application is re-registered.
+         */
+
+        const previous =
+            apps.get(id);
+
+        if (previous) {
+
+            const previousCategory =
+                normalizeCategory(
+                    previous.category
+                );
+
+            const previousIds =
+                categories.get(
+                    previousCategory
+                );
+
+            if (
+                Array.isArray(
+                    previousIds
+                )
+            {
+
+                const index =
+                    previousIds.indexOf(id);
+
+                if (index !== -1) {
+
+                    previousIds.splice(
+                        index,
+                        1
+                    );
+
+                }
+
+            }
+
+        }
+
 
         const app =
-            createApp(
-                Object.assign(
-                    {},
-                    config,
-                    {
-                        id: id
-                    }
-                )
+            createApp({
+
+                ...config,
+
+                id:
+                    id
+
+            });
+
+
+        const appCategory =
+            normalizeCategory(
+                app.category
             );
+
+
+        registerCategory(
+            appCategory
+        );
+
 
         apps.set(
             id,
             app
         );
 
-        const category =
-            app.category || "other";
 
-        if (!categories.has(category)) {
-            categories.set(
-                category,
-                []
+        const ids =
+            categories.get(
+                appCategory
             );
+
+
+        if (
+            !ids.includes(id)
+        ) {
+
+            ids.push(id);
+
         }
 
-        categories
-            .get(category)
-            .push(id);
 
         return true;
+
     }
 
 
     /* ========================================================
-       CATEGORY
-    ======================================================== */
+       CATEGORY API
+       ======================================================== */
 
     function category(
         id,
         title
     ) {
 
-        categories.set(
-            id,
-            categories.get(id) || []
+        const categoryId =
+            normalizeCategory(id);
+
+        registerCategory(
+            categoryId
         );
 
         return {
-            id: id,
-            title: title
+
+            id:
+                categoryId,
+
+            title:
+                title || categoryId
+
         };
+
     }
 
 
     /* ========================================================
        APP DEFINITIONS
-    ======================================================== */
+       ======================================================== */
 
     const definitions = [
-
-        /* ----------------------------------------------------
-           A
-        ---------------------------------------------------- */
 
         {
             id: "ai",
@@ -311,10 +568,6 @@
             ]
         },
 
-        /* ----------------------------------------------------
-           B
-        ---------------------------------------------------- */
-
         {
             id: "backup",
             name: "Backup",
@@ -366,10 +619,6 @@
                 "downloads"
             ]
         },
-
-        /* ----------------------------------------------------
-           C
-        ---------------------------------------------------- */
 
         {
             id: "calculator",
@@ -478,10 +727,6 @@
             ]
         },
 
-        /* ----------------------------------------------------
-           D
-        ---------------------------------------------------- */
-
         {
             id: "dashboard",
             name: "Dashboard",
@@ -537,10 +782,6 @@
             ]
         },
 
-        /* ----------------------------------------------------
-           E
-        ---------------------------------------------------- */
-
         {
             id: "education",
             name: "Education",
@@ -568,10 +809,6 @@
                 "ai"
             ]
         },
-
-        /* ----------------------------------------------------
-           F
-        ---------------------------------------------------- */
 
         {
             id: "files",
@@ -626,10 +863,6 @@
             ]
         },
 
-        /* ----------------------------------------------------
-           G
-        ---------------------------------------------------- */
-
         {
             id: "gallery",
             name: "Gallery",
@@ -655,10 +888,6 @@
                 "ai"
             ]
         },
-
-        /* ----------------------------------------------------
-           H
-        ---------------------------------------------------- */
 
         {
             id: "health",
@@ -711,10 +940,6 @@
             ]
         },
 
-        /* ----------------------------------------------------
-           I
-        ---------------------------------------------------- */
-
         {
             id: "internet",
             name: "Internet",
@@ -739,10 +964,6 @@
                 "translator"
             ]
         },
-
-        /* ----------------------------------------------------
-           J
-        ---------------------------------------------------- */
 
         {
             id: "journal",
@@ -770,10 +991,6 @@
             ]
         },
 
-        /* ----------------------------------------------------
-           K
-        ---------------------------------------------------- */
-
         {
             id: "keyboard",
             name: "Keyboard",
@@ -797,10 +1014,6 @@
                 "translator"
             ]
         },
-
-        /* ----------------------------------------------------
-           L
-        ---------------------------------------------------- */
 
         {
             id: "language",
@@ -855,10 +1068,6 @@
                 "notes"
             ]
         },
-
-        /* ----------------------------------------------------
-           M
-        ---------------------------------------------------- */
 
         {
             id: "maps",
@@ -915,10 +1124,6 @@
                 "cosmic"
             ]
         },
-
-        /* ----------------------------------------------------
-           N
-        ---------------------------------------------------- */
 
         {
             id: "navigation",
@@ -979,10 +1184,6 @@
             ]
         },
 
-        /* ----------------------------------------------------
-           O
-        ---------------------------------------------------- */
-
         {
             id: "office",
             name: "Office",
@@ -1008,9 +1209,6 @@
                 "ai"
             ]
         },
-              /* ----------------------------------------------------
-           P
-        ---------------------------------------------------- */
 
         {
             id: "photos",
@@ -1063,10 +1261,6 @@
             ]
         },
 
-        /* ----------------------------------------------------
-           Q
-        ---------------------------------------------------- */
-
         {
             id: "qr-scanner",
             name: "QR Scanner",
@@ -1090,10 +1284,6 @@
                 "contacts"
             ]
         },
-
-        /* ----------------------------------------------------
-           R
-        ---------------------------------------------------- */
 
         {
             id: "reminders",
@@ -1120,10 +1310,6 @@
                 "ai"
             ]
         },
-
-        /* ----------------------------------------------------
-           S
-        ---------------------------------------------------- */
 
         {
             id: "security",
@@ -1207,10 +1393,6 @@
             ]
         },
 
-        /* ----------------------------------------------------
-           T
-        ---------------------------------------------------- */
-
         {
             id: "traffic",
             name: "Traffic",
@@ -1268,10 +1450,6 @@
             ]
         },
 
-        /* ----------------------------------------------------
-           U
-        ---------------------------------------------------- */
-
         {
             id: "university",
             name: "University",
@@ -1302,10 +1480,6 @@
             ]
         },
 
-        /* ----------------------------------------------------
-           V
-        ---------------------------------------------------- */
-
         {
             id: "video",
             name: "Video",
@@ -1332,10 +1506,6 @@
                 "song-creator"
             ]
         },
-
-        /* ----------------------------------------------------
-           W
-        ---------------------------------------------------- */
 
         {
             id: "weather",
@@ -1365,10 +1535,6 @@
             ]
         },
 
-        /* ----------------------------------------------------
-           X
-        ---------------------------------------------------- */
-
         {
             id: "xchange",
             name: "Xchange",
@@ -1393,10 +1559,6 @@
                 "ai"
             ]
         },
-
-        /* ----------------------------------------------------
-           Y
-        ---------------------------------------------------- */
 
         {
             id: "youtube",
@@ -1424,10 +1586,6 @@
             ]
         },
 
-        /* ----------------------------------------------------
-           Z
-        ---------------------------------------------------- */
-
         {
             id: "zip-manager",
             name: "ZIP Manager",
@@ -1452,10 +1610,6 @@
                 "backup"
             ]
         },
-
-        /* ====================================================
-           FAHRSCHULE
-        ==================================================== */
 
         {
             id: "driving-school",
@@ -1488,10 +1642,6 @@
             ]
         },
 
-        /* ====================================================
-           ROAD SAFETY
-        ==================================================== */
-
         {
             id: "road-safety",
             name: "Road Safety",
@@ -1523,15 +1673,16 @@
                 "settings"
             ],
             metadata: {
-                legalAwareness: true,
-                countryRules: true,
-                userResponsibility: true
+                legalAwareness:
+                    true,
+
+                countryRules:
+                    true,
+
+                userResponsibility:
+                    true
             }
         },
-
-        /* ====================================================
-           COSMIC WORLD
-        ==================================================== */
 
         {
             id: "cosmic",
@@ -1559,15 +1710,16 @@
                 "dashboard"
             ],
             metadata: {
-                hiddenMechanics: true,
-                cosmicClock: true,
-                livingWorld: true
+                hiddenMechanics:
+                    true,
+
+                cosmicClock:
+                    true,
+
+                livingWorld:
+                    true
             }
         },
-
-        /* ====================================================
-           COSMIC WELCOME
-        ==================================================== */
 
         {
             id: "cosmic-welcome",
@@ -1591,497 +1743,564 @@
                 "settings"
             ],
             metadata: {
-                optional: true,
-                userControllable: true,
-                subtle: true
+                optional:
+                    true,
+
+                userControllable:
+                    true,
+
+                subtle:
+                    true
             }
         }
-          ];
+
+    ];
+
 
     /* ========================================================
-       REGISTER ALL APPLICATION DEFINITIONS
+       REGISTER ALL DEFINITIONS
        ======================================================== */
 
-    definitions.forEach(function (definition) {
-        register(definition);
-    });
+    definitions.forEach(
+        function (definition) {
+
+            register(
+                definition
+            );
+
+        }
+    );
 
 
     /* ========================================================
        MANIFEST API
        ======================================================== */
 
-    Manifest.register = register;
+    Manifest.register =
+        register;
 
 
-    Manifest.get = function (id) {
-
-        if (!id) {
-            return null;
-        }
-
-        return apps.get(
-            String(id)
-                .trim()
-                .toLowerCase()
-        ) || null;
-    };
+    Manifest.category =
+        category;
 
 
-    Manifest.has = function (id) {
+    Manifest.get =
+        function (id) {
 
-        if (!id) {
-            return false;
-        }
+            return apps.get(
+                normalizeId(id)
+            ) || null;
 
-        return apps.has(
-            String(id)
-                .trim()
-                .toLowerCase()
-        );
-    };
+        };
 
 
-    Manifest.getAll = function () {
+    Manifest.has =
+        function (id) {
 
-        return Array.from(
-            apps.values()
-        );
-    };
+            return apps.has(
+                normalizeId(id)
+            );
 
-
-    Manifest.getIds = function () {
-
-        return Array.from(
-            apps.keys()
-        );
-    };
+        };
 
 
-    Manifest.getCount = function () {
+    Manifest.getAll =
+        function () {
 
-        return apps.size;
-    };
+            return Array.from(
+                apps.values()
+            );
 
-
-    Manifest.getByCategory = function (name) {
-
-        if (!name) {
-            return [];
-        }
-
-        const ids =
-            categories.get(
-                String(name)
-                    .trim()
-            ) || [];
-
-        return ids
-            .map(function (id) {
-                return apps.get(id);
-            })
-            .filter(Boolean);
-    };
+        };
 
 
-    Manifest.getCategories = function () {
+    Manifest.getIds =
+        function () {
 
-        const result = {};
+            return Array.from(
+                apps.keys()
+            );
 
-        categories.forEach(
-            function (ids, name) {
-
-                result[name] =
-                    ids.slice();
-
-            }
-        );
-
-        return result;
-    };
+        };
 
 
-    Manifest.search = function (query) {
+    Manifest.getCount =
+        function () {
 
-        const q =
-            String(query || "")
-                .trim()
-                .toLowerCase();
+            return apps.size;
 
-        if (!q) {
-            return Manifest.getAll();
-        }
+        };
 
-        return Manifest
-            .getAll()
-            .filter(function (app) {
 
-                return (
+    Manifest.getByCategory =
+        function (name) {
 
-                    String(app.id || "")
-                        .toLowerCase()
-                        .includes(q)
-
-                    ||
-
-                    String(app.name || "")
-                        .toLowerCase()
-                        .includes(q)
-
-                    ||
-
-                    String(app.title || "")
-                        .toLowerCase()
-                        .includes(q)
-
-                    ||
-
-                    String(app.description || "")
-                        .toLowerCase()
-                        .includes(q)
-
+            const categoryId =
+                normalizeCategory(
+                    name
                 );
 
-            });
-    };
+            const ids =
+                categories.get(
+                    categoryId
+                ) || [];
+
+            return ids
+                .map(
+                    function (id) {
+
+                        return apps.get(id);
+
+                    }
+                )
+                .filter(Boolean);
+
+        };
 
 
-    Manifest.getDependencies = function (id) {
+    Manifest.getCategories =
+        function () {
 
-        const app =
-            Manifest.get(id);
+            const result = {};
 
-        if (!app) {
-            return [];
-        }
+            categories.forEach(
+                function (ids, name) {
 
-        return Array.isArray(
-            app.dependencies
-        )
-            ? app.dependencies.slice()
-            : [];
-    };
+                    result[name] =
+                        ids.slice();
 
+                }
+            );
 
-    Manifest.getConnections = function (id) {
+            return result;
 
-        const app =
-            Manifest.get(id);
-
-        if (!app) {
-            return [];
-        }
-
-        return Array.isArray(
-            app.connections
-        )
-            ? app.connections.slice()
-            : [];
-    };
+        };
 
 
-    Manifest.getServices = function (id) {
+    Manifest.search =
+        function (query) {
 
-        const app =
-            Manifest.get(id);
-
-        if (!app) {
-            return [];
-        }
-
-        return Array.isArray(
-            app.services
-        )
-            ? app.services.slice()
-            : [];
-    };
+            const q =
+                String(query || "")
+                    .trim()
+                    .toLowerCase();
 
 
-    Manifest.getPermissions = function (id) {
+            if (!q) {
 
-        const app =
-            Manifest.get(id);
+                return Manifest.getAll();
 
-        if (!app) {
-            return [];
-        }
-
-        return Array.isArray(
-            app.permissions
-        )
-            ? app.permissions.slice()
-            : [];
-    };
+            }
 
 
-    Manifest.getEntry = function (id) {
+            return Manifest
+                .getAll()
+                .filter(
+                    function (app) {
 
-        const app =
-            Manifest.get(id);
+                        return (
 
-        return app
-            ? app.entry || ""
-            : "";
-    };
+                            String(
+                                app.id || ""
+                            )
+                                .toLowerCase()
+                                .includes(q)
+
+                            ||
+
+                            String(
+                                app.name || ""
+                            )
+                                .toLowerCase()
+                                .includes(q)
+
+                            ||
+
+                            String(
+                                app.title || ""
+                            )
+                                .toLowerCase()
+                                .includes(q)
+
+                            ||
+
+                            String(
+                                app.description || ""
+                            )
+                                .toLowerCase()
+                                .includes(q)
+
+                        );
+
+                    }
+                );
+
+        };
 
 
-    Manifest.getModule = function (id) {
+    Manifest.getDependencies =
+        function (id) {
 
-        const app =
-            Manifest.get(id);
+            const app =
+                Manifest.get(id);
 
-        return app
-            ? app.module || ""
-            : "";
-    };
+            return app &&
+                Array.isArray(
+                    app.dependencies
+                )
+                ? app.dependencies.slice()
+                : [];
+
+        };
 
 
-    Manifest.getWindowConfig = function (id) {
+    Manifest.getConnections =
+        function (id) {
 
-        const app =
-            Manifest.get(id);
+            const app =
+                Manifest.get(id);
 
-        if (!app) {
-            return null;
-        }
+            return app &&
+                Array.isArray(
+                    app.connections
+                )
+                ? app.connections.slice()
+                : [];
 
-        return Object.assign(
-            {},
-            app.window || {}
-        );
-    };
+        };
+
+
+    Manifest.getServices =
+        function (id) {
+
+            const app =
+                Manifest.get(id);
+
+            return app &&
+                Array.isArray(
+                    app.services
+                )
+                ? app.services.slice()
+                : [];
+
+        };
+
+
+    Manifest.getPermissions =
+        function (id) {
+
+            const app =
+                Manifest.get(id);
+
+            return app &&
+                Array.isArray(
+                    app.permissions
+                )
+                ? app.permissions.slice()
+                : [];
+
+        };
+
+
+    Manifest.getEntry =
+        function (id) {
+
+            const app =
+                Manifest.get(id);
+
+            return app
+                ? app.entry || ""
+                : "";
+
+        };
+
+
+    Manifest.getModule =
+        function (id) {
+
+            const app =
+                Manifest.get(id);
+
+            return app
+                ? app.module || ""
+                : "";
+
+        };
+
+
+    Manifest.getWindowConfig =
+        function (id) {
+
+            const app =
+                Manifest.get(id);
+
+            if (!app) {
+                return null;
+            }
+
+            return Object.assign(
+                {},
+                app.window || {}
+            );
+
+        };
 
 
     /* ========================================================
        VALIDATION
        ======================================================== */
 
-    Manifest.validate = function () {
+    Manifest.validate =
+        function () {
 
-        const errors = [];
-        const warnings = [];
+            const errors =
+                [];
 
-        apps.forEach(
-            function (app) {
+            const warnings =
+                [];
 
-                if (!app.id) {
-                    errors.push(
-                        "App ohne ID"
-                    );
+
+            apps.forEach(
+                function (app) {
+
+                    if (!app.id) {
+
+                        errors.push(
+                            "App ohne ID"
+                        );
+
+                    }
+
+                    if (!app.name) {
+
+                        warnings.push(
+                            "App ohne Namen: " +
+                            app.id
+                        );
+
+                    }
+
+                    if (!app.title) {
+
+                        warnings.push(
+                            "App ohne Titel: " +
+                            app.id
+                        );
+
+                    }
+
+                    if (!app.entry) {
+
+                        warnings.push(
+                            "App ohne Entry: " +
+                            app.id
+                        );
+
+                    }
+
+                    if (!app.module) {
+
+                        warnings.push(
+                            "App ohne Module: " +
+                            app.id
+                        );
+
+                    }
+
+                    if (
+                        !Array.isArray(
+                            app.services
+                        )
+                    ) {
+
+                        errors.push(
+                            "Ungültige Services: " +
+                            app.id
+                        );
+
+                    }
+
+                    if (
+                        !Array.isArray(
+                            app.connections
+                        )
+                    ) {
+
+                        errors.push(
+                            "Ungültige Connections: " +
+                            app.id
+                        );
+
+                    }
+
+                    if (
+                        !Array.isArray(
+                            app.permissions
+                        )
+                    ) {
+
+                        errors.push(
+                            "Ungültige Permissions: " +
+                            app.id
+                        );
+
+                    }
+
                 }
-
-                if (!app.name) {
-                    warnings.push(
-                        "App ohne Namen: " +
-                        app.id
-                    );
-                }
-
-                if (!app.title) {
-                    warnings.push(
-                        "App ohne Titel: " +
-                        app.id
-                    );
-                }
-
-                if (!app.entry) {
-                    warnings.push(
-                        "App ohne Entry: " +
-                        app.id
-                    );
-                }
-
-                if (!app.module) {
-                    warnings.push(
-                        "App ohne Module: " +
-                        app.id
-                    );
-                }
-
-                if (
-                    !Array.isArray(
-                        app.services
-                    )
-                ) {
-                    errors.push(
-                        "Ungültige Services: " +
-                        app.id
-                    );
-                }
-
-                if (
-                    !Array.isArray(
-                        app.connections
-                    )
-                ) {
-                    errors.push(
-                        "Ungültige Connections: " +
-                        app.id
-                    );
-                }
-
-                if (
-                    !Array.isArray(
-                        app.permissions
-                    )
-                ) {
-                    errors.push(
-                        "Ungültige Permissions: " +
-                        app.id
-                    );
-                }
-
-            }
-        );
+            );
 
 
-        return {
+            return {
 
-            valid:
-                errors.length === 0,
+                valid:
+                    errors.length === 0,
 
-            errors:
-                errors,
+                errors:
+                    errors,
 
-            warnings:
-                warnings,
+                warnings:
+                    warnings,
 
-            appCount:
-                apps.size
+                appCount:
+                    apps.size
+
+            };
 
         };
-    };
 
 
     /* ========================================================
-       DEPENDENCY VALIDATION
+       CONNECTION VALIDATION
        ======================================================== */
 
-    Manifest.validateConnections = function () {
+    Manifest.validateConnections =
+        function () {
 
-        const errors = [];
-        const warnings = [];
+            const errors =
+                [];
 
-        apps.forEach(
-            function (app) {
+            const warnings =
+                [];
 
-                const connections =
-                    Array.isArray(
-                        app.connections
-                    )
-                        ? app.connections
-                        : [];
 
-                connections.forEach(
-                    function (targetId) {
+            apps.forEach(
+                function (app) {
 
-                        if (
-                            !apps.has(
-                                String(targetId)
-                                    .trim()
-                                    .toLowerCase()
-                            )
-                        ) {
+                    const connections =
+                        Array.isArray(
+                            app.connections
+                        )
+                            ? app.connections
+                            : [];
 
-                            warnings.push({
 
-                                app:
-                                    app.id,
+                    connections.forEach(
+                        function (targetId) {
 
-                                missing:
+                            const normalizedTarget =
+                                normalizeId(
                                     targetId
+                                );
 
-                            });
+
+                            if (
+                                !apps.has(
+                                    normalizedTarget
+                                )
+                            ) {
+
+                                warnings.push({
+
+                                    app:
+                                        app.id,
+
+                                    missing:
+                                        targetId
+
+                                });
+
+                            }
 
                         }
+                    );
 
-                    }
-                );
-
-            }
-        );
+                }
+            );
 
 
-        return {
+            return {
 
-            valid:
-                errors.length === 0,
+                valid:
+                    errors.length === 0,
 
-            errors:
-                errors,
+                errors:
+                    errors,
 
-            warnings:
-                warnings
+                warnings:
+                    warnings
+
+            };
 
         };
-    };
 
 
     /* ========================================================
        STATUS
        ======================================================== */
 
-    Manifest.getStatus = function () {
+    Manifest.getStatus =
+        function () {
 
-        return {
+            return {
 
-            name:
-                Manifest.name,
+                name:
+                    Manifest.name,
 
-            version:
-                Manifest.version,
+                version:
+                    Manifest.version,
 
-            ready:
-                Manifest.ready,
+                ready:
+                    Manifest.ready,
 
-            appCount:
-                apps.size,
+                appCount:
+                    apps.size,
 
-            categoryCount:
-                categories.size,
+                categoryCount:
+                    categories.size,
 
-            timestamp:
-                Date.now()
+                timestamp:
+                    Date.now()
+
+            };
 
         };
-    };
-      /* ========================================================
-       GLOBAL REGISTRATION
-       ======================================================== */
-
-    Manifest.ready = true;
-
-
-    /*
-     * Primary V20 manifest API
-     */
-    window.HalDoV20AppManifest = Manifest;
-
-
-    /*
-     * HalDoOS integration
-     */
-    if (
-        window.HalDoOS &&
-        typeof window.HalDoOS === "object"
-    ) {
-        window.HalDoOS.appManifest = Manifest;
-    }
-
-
-    /*
-     * HalDo V20 namespace integration
-     */
-    if (
-        window.HalDoV20 &&
-        typeof window.HalDoV20 === "object"
-    ) {
-        window.HalDoV20.appManifest = Manifest;
-    }
 
 
     /* ========================================================
-       OPTIONAL KERNEL INTEGRATION
+       GLOBAL REGISTRATION
+       ======================================================== */
+
+    Manifest.ready =
+        true;
+
+    Manifest.loadedAt =
+        Date.now();
+
+
+    window.HalDoV20AppManifest =
+        Manifest;
+
+
+    V20.appManifest =
+        Manifest;
+
+
+    HalDoOS.appManifest =
+        Manifest;
+
+
+    /* ========================================================
+       KERNEL INTEGRATION
        ======================================================== */
 
     try {
@@ -2089,19 +2308,40 @@
         const kernel =
             window.HalDoKernel ||
             (
-                window.HalDoOS &&
-                window.HalDoOS.kernel
+                HalDoOS &&
+                HalDoOS.kernel
             );
 
 
         if (
             kernel &&
-            typeof kernel.setModuleReady === "function"
+            typeof kernel.setModuleReady ===
+                "function"
         ) {
 
             kernel.setModuleReady(
                 "haldo-v20-app-manifest",
                 Manifest
+            );
+
+        }
+
+
+        if (
+            kernel &&
+            typeof kernel.emit ===
+                "function"
+        ) {
+
+            kernel.emit(
+                "v20:app-manifest:ready",
+                {
+                    manifest:
+                        Manifest,
+
+                    status:
+                        Manifest.getStatus()
+                }
             );
 
         }
@@ -2117,43 +2357,7 @@
 
 
     /* ========================================================
-       OPTIONAL EVENT INTEGRATION
-       ======================================================== */
-
-    try {
-
-        const kernel =
-            window.HalDoKernel ||
-            (
-                window.HalDoOS &&
-                window.HalDoOS.kernel
-            );
-
-
-        if (
-            kernel &&
-            typeof kernel.emit === "function"
-        ) {
-
-            kernel.emit(
-                "v20:app-manifest:ready",
-                Manifest.getStatus()
-            );
-
-        }
-
-    } catch (error) {
-
-        console.warn(
-            "[HalDo V20 Manifest] Event integration warning:",
-            error
-        );
-
-    }
-
-
-    /* ========================================================
-       DIAGNOSTIC OUTPUT
+       DIAGNOSTICS
        ======================================================== */
 
     try {
@@ -2201,154 +2405,6 @@
 
 
     /* ========================================================
-       FINAL EVENT
-       ======================================================== */
-
-    try {
-
-        window.dispatchEvent(
-            new CustomEvent(
-                "haldo:v20:app-manifest-ready",
-                {
-                    detail:
-                        Manifest
-                }
-            )
-        );
-
-    } catch (error) {
-
-        console.warn(
-            "[HalDo V20 Manifest] Custom event warning:",
-            error
-        );
-
-    }
-
-
-    /* ========================================================
-       FINAL LOG
-       ======================================================== */
-
-    console.info(
-        "[HalDo AI OS 20]",
-        "Central V20 App Manifest loaded.",
-        "Apps:",
-        Manifest.getCount(),
-        "Categories:",
-        Object.keys(
-            Manifest.getCategories()
-        ).length
-    );
-
-
-})(window, document);
-    /* ========================================================
-       FINAL MANIFEST STATE
-       ======================================================== */
-
-    Manifest.ready = true;
-
-    Manifest.loadedAt = Date.now();
-
-
-    /* ========================================================
-       GLOBAL V20 API
-       ======================================================== */
-
-    window.HalDoV20AppManifest = Manifest;
-
-
-    if (
-        window.HalDoV20 &&
-        typeof window.HalDoV20 === "object"
-    ) {
-        window.HalDoV20.appManifest = Manifest;
-    }
-
-
-    if (
-        window.HalDoOS &&
-        typeof window.HalDoOS === "object"
-    ) {
-        window.HalDoOS.appManifest = Manifest;
-    }
-
-
-    /* ========================================================
-       DIAGNOSTICS
-       ======================================================== */
-
-    let manifestValidation = null;
-    let connectionValidation = null;
-
-    try {
-
-        manifestValidation =
-            Manifest.validate();
-
-        connectionValidation =
-            Manifest.validateConnections();
-
-    } catch (error) {
-
-        console.warn(
-            "[HalDo V20 Manifest] Validation error:",
-            error
-        );
-
-    }
-
-
-    /* ========================================================
-       KERNEL CONNECTION
-       ======================================================== */
-
-    try {
-
-        const kernel =
-            window.HalDoKernel ||
-            (
-                window.HalDoOS &&
-                window.HalDoOS.kernel
-            );
-
-
-        if (
-            kernel &&
-            typeof kernel.emit === "function"
-        ) {
-
-            kernel.emit(
-                "v20:app-manifest:ready",
-                {
-                    manifest:
-                        Manifest,
-
-                    status:
-                        Manifest.getStatus(),
-
-                    validation:
-                        manifestValidation,
-
-                    connections:
-                        connectionValidation
-                }
-            );
-
-        }
-
-    } catch (error) {
-
-        console.warn(
-            "[HalDo V20 Manifest] Kernel event warning:",
-            error
-        );
-
-    }
-
-
-    /* ========================================================
        DOM EVENT
        ======================================================== */
 
@@ -2359,11 +2415,13 @@
                 "haldo:v20:app-manifest-ready",
                 {
                     detail: {
+
                         manifest:
                             Manifest,
 
                         status:
                             Manifest.getStatus()
+
                     }
                 }
             )
@@ -2380,12 +2438,12 @@
 
 
     /* ========================================================
-       FINAL STATUS
+       FINAL LOG
        ======================================================== */
 
     console.info(
         "[HalDo AI OS 20]",
-        "V20 App Manifest READY.",
+        "Central V20 App Manifest loaded.",
         "Apps:",
         Manifest.getCount(),
         "Categories:",
