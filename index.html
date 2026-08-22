@@ -26239,6 +26239,795 @@
     );
 
 </script>
+                                <!-- =========================================================
+     HALDO AI OS 22
+     PART 15 / 16
+     BLOCK 2 / 2
+     RUNTIME BRIDGE + APP INTERACTION + FINAL BINDINGS
+     ========================================================= -->
+
+<script>
+
+    "use strict";
+
+
+    const HD15B =
+        window.HalDo;
+
+
+    /* ========================================================
+       RUNTIME BRIDGE
+       ======================================================== */
+
+    HD15B.runtimeBridge =
+        HD15B.runtimeBridge ||
+        {};
+
+
+    HD15B.runtimeBridge.state =
+        HD15B.runtimeBridge.state ||
+        {
+
+            initialized:
+                false,
+
+            bound:
+                false,
+
+            startupComplete:
+                false
+
+        };
+
+
+    /* ========================================================
+       SAFE HELPER
+       ======================================================== */
+
+    HD15B.runtimeBridge.safe =
+        function(
+            callback,
+            source = "runtime"
+        ) {
+
+            try {
+
+                if (
+                    typeof callback ===
+                    "function"
+                ) {
+
+                    return callback();
+
+                }
+
+            }
+
+            catch(error) {
+
+                console.error(
+                    "[HalDo Runtime]",
+                    source,
+                    error
+                );
+
+
+                if (
+                    HD15B.errors &&
+                    typeof HD15B.errors.report ===
+                    "function"
+                ) {
+
+                    HD15B.errors.report(
+                        error,
+                        source
+                    );
+
+                }
+
+            }
+
+
+            return null;
+
+        };
+
+
+    /* ========================================================
+       APP LAUNCH BRIDGE
+       ======================================================== */
+
+    HD15B.runtimeBridge.openApp =
+        function(
+            appId,
+            options = {}
+        ) {
+
+            return this.safe(
+                () => {
+
+                    const id =
+                        String(
+                            appId ||
+                            ""
+                        ).trim();
+
+
+                    if (
+                        !id
+                    ) {
+
+                        return null;
+
+                    }
+
+
+                    if (
+                        HD15B.apps &&
+                        typeof HD15B.apps.open ===
+                        "function"
+                    ) {
+
+                        return HD15B.apps.open(
+                            id,
+                            options
+                        );
+
+                    }
+
+
+                    if (
+                        HD15B.launcher &&
+                        typeof HD15B.launcher.open ===
+                        "function"
+                    ) {
+
+                        return HD15B.launcher.open(
+                            id,
+                            options
+                        );
+
+                    }
+
+
+                    return null;
+
+                },
+                "runtime:open-app"
+            );
+
+        };
+
+
+    /* ========================================================
+       APP CLOSE BRIDGE
+       ======================================================== */
+
+    HD15B.runtimeBridge.closeApp =
+        function(
+            appId
+        ) {
+
+            return this.safe(
+                () => {
+
+                    const id =
+                        String(
+                            appId ||
+                            ""
+                        ).trim();
+
+
+                    if (
+                        !id
+                    ) {
+
+                        return false;
+
+                    }
+
+
+                    if (
+                        HD15B.apps &&
+                        typeof HD15B.apps.close ===
+                        "function"
+                    ) {
+
+                        return HD15B.apps.close(
+                            id
+                        );
+
+                    }
+
+
+                    if (
+                        HD15B.launcher &&
+                        typeof HD15B.launcher.close ===
+                        "function"
+                    ) {
+
+                        return HD15B.launcher.close(
+                            id
+                        );
+
+                    }
+
+
+                    return false;
+
+                },
+                "runtime:close-app"
+            );
+
+        };
+
+
+    /* ========================================================
+       APP TOGGLE BRIDGE
+       ======================================================== */
+
+    HD15B.runtimeBridge.toggleApp =
+        function(
+            appId,
+            options = {}
+        ) {
+
+            return this.safe(
+                () => {
+
+                    const id =
+                        String(
+                            appId ||
+                            ""
+                        ).trim();
+
+
+                    if (
+                        !id
+                    ) {
+
+                        return null;
+
+                    }
+
+
+                    if (
+                        HD15B.launcher &&
+                        typeof HD15B.launcher.toggle ===
+                        "function"
+                    ) {
+
+                        return HD15B.launcher.toggle(
+                            id,
+                            options
+                        );
+
+                    }
+
+
+                    if (
+                        HD15B.apps &&
+                        typeof HD15B.apps.isRunning ===
+                        "function"
+                    ) {
+
+                        if (
+                            HD15B.apps.isRunning(
+                                id
+                            )
+                        ) {
+
+                            HD15B.apps.close(
+                                id
+                            );
+
+                            return null;
+
+                        }
+
+
+                        return HD15B.apps.open(
+                            id,
+                            options
+                        );
+
+                    }
+
+
+                    return null;
+
+                },
+                "runtime:toggle-app"
+            );
+
+        };
+
+
+    /* ========================================================
+       MENU BUTTON BINDING
+       ======================================================== */
+
+    HD15B.runtimeBridge.bindMenuButtons =
+        function() {
+
+            const selectors = [
+
+                "[data-menu-open]",
+
+                "[data-open-menu]",
+
+                "[data-action='menu']", 
+
+                "#haldo-menu-button",
+
+                ".haldo-menu-button"
+
+            ];
+
+
+            selectors.forEach(
+                selector => {
+
+                    document
+                        .querySelectorAll(
+                            selector
+                        )
+                        .forEach(
+                            element => {
+
+                                if (
+                                    element.dataset
+                                        .haldoMenuBound ===
+                                    "true"
+                                ) {
+
+                                    return;
+
+                                }
+
+
+                                element.dataset
+                                    .haldoMenuBound =
+                                    "true";
+
+
+                                element.addEventListener(
+                                    "click",
+                                    event => {
+
+                                        event.preventDefault();
+
+
+                                        if (
+                                            HD15B.interaction &&
+                                            typeof HD15B.interaction
+                                                .openMenu ===
+                                            "function"
+                                        ) {
+
+                                            HD15B.interaction
+                                                .openMenu();
+
+                                        }
+
+                                    }
+                                );
+
+                            }
+                        );
+
+                }
+            );
+
+        };
+
+
+    /* ========================================================
+       AI BUTTON BINDING
+       ======================================================== */
+
+    HD15B.runtimeBridge.bindAIButtons =
+        function() {
+
+            const selectors = [
+
+                "[data-ai-open]",
+
+                "[data-open-ai]",
+
+                "[data-action='ai']",
+
+                "#haldo-ai-button",
+
+                ".haldo-ai-button"
+
+            ];
+
+
+            selectors.forEach(
+                selector => {
+
+                    document
+                        .querySelectorAll(
+                            selector
+                        )
+                        .forEach(
+                            element => {
+
+                                if (
+                                    element.dataset
+                                        .haldoAiBound ===
+                                    "true"
+                                ) {
+
+                                    return;
+
+                                }
+
+
+                                element.dataset
+                                    .haldoAiBound =
+                                    "true";
+
+
+                                element.addEventListener(
+                                    "click",
+                                    event => {
+
+                                        event.preventDefault();
+
+
+                                        if (
+                                            HD15B.interaction &&
+                                            typeof HD15B.interaction
+                                                .openAI ===
+                                            "function"
+                                        ) {
+
+                                            HD15B.interaction
+                                                .openAI();
+
+                                        }
+
+                                    }
+                                );
+
+                            }
+                        );
+
+                }
+            );
+
+        };
+
+
+    /* ========================================================
+       APP BUTTON BINDING
+       ======================================================== */
+
+    HD15B.runtimeBridge.bindAppButtons =
+        function() {
+
+            document
+                .querySelectorAll(
+                    "[data-app-id]"
+                )
+                .forEach(
+                    element => {
+
+                        if (
+                            element.dataset
+                                .haldoAppBound ===
+                            "true"
+                        ) {
+
+                            return;
+
+                        }
+
+
+                        const appId =
+                            element.dataset
+                                .appId;
+
+
+                        if (
+                            !appId
+                        ) {
+
+                            return;
+
+                        }
+
+
+                        element.dataset
+                            .haldoAppBound =
+                            "true";
+
+
+                        element.addEventListener(
+                            "click",
+                            event => {
+
+                                event.preventDefault();
+
+
+                                this.openApp(
+                                    appId
+                                );
+
+                            }
+                        );
+
+                    }
+                );
+
+        };
+
+
+    /* ========================================================
+       GLOBAL INTERACTION EVENTS
+       ======================================================== */
+
+    HD15B.runtimeBridge.bindEvents =
+        function() {
+
+            if (
+                this.state.bound
+            ) {
+
+                return;
+
+            }
+
+
+            this.state.bound =
+                true;
+
+
+            if (
+                typeof HD15B.on !==
+                "function"
+            ) {
+
+                return;
+
+            }
+
+
+            HD15B.on(
+                "apps:ready",
+                () => {
+
+                    this.bindAppButtons();
+
+                }
+            );
+
+
+            HD15B.on(
+                "menu:ready",
+                () => {
+
+                    this.bindMenuButtons();
+
+                }
+            );
+
+
+            HD15B.on(
+                "ai:ready",
+                () => {
+
+                    this.bindAIButtons();
+
+                }
+            );
+
+
+            HD15B.on(
+                "system:ready",
+                () => {
+
+                    this.state.startupComplete =
+                        true;
+
+                    this.bindMenuButtons();
+
+                    this.bindAIButtons();
+
+                    this.bindAppButtons();
+
+                }
+            );
+
+        };
+
+
+    /* ========================================================
+       RUNTIME STATUS
+       ======================================================== */
+
+    HD15B.runtimeBridge.getStatus =
+        function() {
+
+            return {
+
+                initialized:
+                    this.state.initialized,
+
+                bound:
+                    this.state.bound,
+
+                startupComplete:
+                    this.state.startupComplete,
+
+                online:
+                    navigator.onLine,
+
+                timestamp:
+                    Date.now()
+
+            };
+
+        };
+
+
+    /* ========================================================
+       GLOBAL PUBLIC API
+       ======================================================== */
+
+    window.HalDoRuntimeBridge =
+        HD15B.runtimeBridge;
+
+
+    window.HalDoOpenApp =
+        function(
+            appId,
+            options = {}
+        ) {
+
+            return HD15B.runtimeBridge
+                .openApp(
+                    appId,
+                    options
+                );
+
+        };
+
+
+    window.HalDoCloseApp =
+        function(
+            appId
+        ) {
+
+            return HD15B.runtimeBridge
+                .closeApp(
+                    appId
+                );
+
+        };
+
+
+    window.HalDoToggleApp =
+        function(
+            appId,
+            options = {}
+        ) {
+
+            return HD15B.runtimeBridge
+                .toggleApp(
+                    appId,
+                    options
+                );
+
+        };
+
+
+    /* ========================================================
+       INITIALIZE RUNTIME BRIDGE
+       ======================================================== */
+
+    HD15B.runtimeBridge
+        .bindEvents();
+
+
+    HD15B.runtimeBridge
+        .bindMenuButtons();
+
+
+    HD15B.runtimeBridge
+        .bindAIButtons();
+
+
+    HD15B.runtimeBridge
+        .bindAppButtons();
+
+
+    HD15B.runtimeBridge.state.initialized =
+        true;
+
+
+    HD15B.emit(
+        "runtime-bridge:ready",
+        HD15B.runtimeBridge.getStatus()
+    );
+
+
+    /* ========================================================
+       DOM READY REBIND
+       ======================================================== */
+
+    if (
+        document.readyState ===
+        "loading"
+    ) {
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            () => {
+
+                HD15B.runtimeBridge
+                    .bindMenuButtons();
+
+                HD15B.runtimeBridge
+                    .bindAIButtons();
+
+                HD15B.runtimeBridge
+                    .bindAppButtons();
+
+            },
+            {
+                once:
+                    true
+            }
+        );
+
+    }
+
+
+    /* ========================================================
+       LOAD REBIND
+       ======================================================== */
+
+    window.addEventListener(
+        "load",
+        () => {
+
+            HD15B.runtimeBridge
+                .bindMenuButtons();
+
+            HD15B.runtimeBridge
+                .bindAIButtons();
+
+            HD15B.runtimeBridge
+                .bindAppButtons();
+
+        }
+    );
+
+
+    /* ========================================================
+       PART 15 READY
+       ======================================================== */
+
+    HD15B.emit(
+        "part15:ready",
+        {
+
+            version:
+                "22.0.0",
+
+            part:
+                15,
+
+            status:
+                "ready"
+
+        }
+    );
+
+</script>
 <!-- ============================================================
      HALDO AI OS 22
      INDEX.HTML — PART 16 / 16
