@@ -22184,2118 +22184,7 @@
     );
 
 </script>
-<!-- =========================================================
-     HALDO AI OS 22
-     PART 14 / 16
-     MENU TRIGGER + HALDO AI CHAT WINDOW + GREETING BRIDGE
-     ========================================================= -->
 
-<script>
-
-    "use strict";
-
-    const HD14 =
-        window.HalDo;
-
-
-    /* ========================================================
-       AI WINDOW FOUNDATION
-       ======================================================== */
-
-    HD14.aiWindow =
-        HD14.aiWindow ||
-        {};
-
-
-    HD14.aiWindow.state =
-        HD14.aiWindow.state ||
-        {
-
-            initialized:
-                false,
-
-            open:
-                false,
-
-            root:
-                null,
-
-            messages:
-                []
-
-        };
-
-
-    /* ========================================================
-       AI WINDOW STYLES
-       ======================================================== */
-
-    HD14.aiWindow.injectStyles =
-        function() {
-
-            if (
-                document.getElementById(
-                    "haldo-ai-window-style"
-                )
-            ) {
-
-                return;
-
-            }
-
-
-            const style =
-                document.createElement(
-                    "style"
-                );
-
-
-            style.id =
-                "haldo-ai-window-style";
-
-
-            style.textContent = `
-
-                .haldo-ai-overlay {
-
-                    position:
-                        fixed;
-
-                    inset:
-                        0;
-
-                    z-index:
-                        99950;
-
-                    display:
-                        flex;
-
-                    align-items:
-                        center;
-
-                    justify-content:
-                        center;
-
-                    padding:
-                        14px;
-
-                    background:
-                        rgba(
-                            0,
-                            0,
-                            12,
-                            .16
-                        );
-
-                    backdrop-filter:
-                        blur(
-                            5px
-                        );
-
-                    -webkit-backdrop-filter:
-                        blur(
-                            5px
-                        );
-
-                    opacity:
-                        0;
-
-                    pointer-events:
-                        none;
-
-                    transition:
-                        opacity .24s ease;
-
-                }
-
-
-                .haldo-ai-overlay.open {
-
-                    opacity:
-                        1;
-
-                    pointer-events:
-                        auto;
-
-                }
-
-
-                .haldo-ai-window {
-
-                    position:
-                        relative;
-
-                    width:
-                        min(
-                            720px,
-                            calc(
-                                100vw - 28px
-                            )
-                        );
-
-                    height:
-                        min(
-                            620px,
-                            calc(
-                                100vh - 42px
-                            )
-                        );
-
-                    display:
-                        flex;
-
-                    flex-direction:
-                        column;
-
-                    overflow:
-                        hidden;
-
-                    border-radius:
-                        27px;
-
-                    background:
-                        linear-gradient(
-                            145deg,
-                            rgba(
-                                8,
-                                18,
-                                43,
-                                .95
-                            ),
-                            rgba(
-                                3,
-                                7,
-                                22,
-                                .98
-                            )
-                        );
-
-                    border:
-                        1px solid
-                        rgba(
-                            255,
-                            255,
-                            255,
-                            .11
-                        );
-
-                    box-shadow:
-                        0 35px 110px
-                        rgba(
-                            0,
-                            0,
-                            0,
-                            .60
-                        );
-
-                    transform:
-                        translateY(
-                            14px
-                        )
-                        scale(
-                            .985
-                        );
-
-                    transition:
-                        transform .24s ease;
-
-                }
-
-
-                .haldo-ai-overlay.open
-                .haldo-ai-window {
-
-                    transform:
-                        translateY(0)
-                        scale(1);
-
-                }
-
-
-                .haldo-ai-header {
-
-                    display:
-                        flex;
-
-                    align-items:
-                        center;
-
-                    gap:
-                        10px;
-
-                    padding:
-                        11px 13px;
-
-                    border-bottom:
-                        1px solid
-                        rgba(
-                            255,
-                            255,
-                            255,
-                            .075
-                        );
-
-                }
-
-
-                .haldo-ai-avatar {
-
-                    width:
-                        47px;
-
-                    height:
-                        47px;
-
-                    object-fit:
-                        contain;
-
-                    border-radius:
-                        50%;
-
-                    filter:
-                        drop-shadow(
-                            0 0 18px
-                            rgba(
-                                255,
-                                218,
-                                110,
-                                .52
-                            )
-                        );
-
-                    animation:
-                        haldoAiAvatarBreath
-                        4s ease-in-out
-                        infinite;
-
-                }
-
-
-                @keyframes
-                haldoAiAvatarBreath {
-
-                    0%,
-                    100% {
-
-                        transform:
-                            scale(1);
-
-                    }
-
-                    50% {
-
-                        transform:
-                            scale(
-                                1.025
-                            );
-
-                    }
-
-                }
-
-
-                .haldo-ai-header-info {
-
-                    flex:
-                        1;
-
-                }
-
-
-                .haldo-ai-title {
-
-                    font-size:
-                        15px;
-
-                    font-weight:
-                        850;
-
-                }
-
-
-                .haldo-ai-status {
-
-                    display:
-                        inline-flex;
-
-                    align-items:
-                        center;
-
-                    gap:
-                        5px;
-
-                    margin-top:
-                        3px;
-
-                    font-size:
-                        8px;
-
-                    color:
-                        rgba(
-                            255,
-                            255,
-                            255,
-                            .43
-                        );
-
-                }
-
-
-                .haldo-ai-status-dot {
-
-                    width:
-                        6px;
-
-                    height:
-                        6px;
-
-                    border-radius:
-                        50%;
-
-                    background:
-                        #64e39a;
-
-                    box-shadow:
-                        0 0 8px
-                        #64e39a;
-
-                }
-
-
-                .haldo-ai-close {
-
-                    width:
-                        34px;
-
-                    height:
-                        34px;
-
-                    border:
-                        0;
-
-                    border-radius:
-                        10px;
-
-                    background:
-                        rgba(
-                            255,
-                            255,
-                            255,
-                            .07
-                        );
-
-                    color:
-                        #ffffff;
-
-                    cursor:
-                        pointer;
-
-                }
-
-
-                .haldo-ai-messages {
-
-                    flex:
-                        1;
-
-                    overflow-y:
-                        auto;
-
-                    padding:
-                        14px;
-
-                    scroll-behavior:
-                        smooth;
-
-                }
-
-
-                .haldo-ai-message {
-
-                    display:
-                        flex;
-
-                    margin:
-                        0 0 10px;
-
-                }
-
-
-                .haldo-ai-message.user {
-
-                    justify-content:
-                        flex-end;
-
-                }
-
-
-                .haldo-ai-message.ai {
-
-                    justify-content:
-                        flex-start;
-
-                }
-
-
-                .haldo-ai-bubble {
-
-                    max-width:
-                        min(
-                            82%,
-                            560px
-                        );
-
-                    padding:
-                        9px 11px;
-
-                    border-radius:
-                        15px;
-
-                    font-size:
-                        11px;
-
-                    line-height:
-                        1.48;
-
-                    white-space:
-                        pre-wrap;
-
-                    word-break:
-                        break-word;
-
-                }
-
-
-                .haldo-ai-message.ai
-                .haldo-ai-bubble {
-
-                    background:
-                        rgba(
-                            255,
-                            255,
-                            255,
-                            .055
-                        );
-
-                    border:
-                        1px solid
-                        rgba(
-                            255,
-                            255,
-                            255,
-                            .06
-                        );
-
-                }
-
-
-                .haldo-ai-message.user
-                .haldo-ai-bubble {
-
-                    background:
-                        linear-gradient(
-                            135deg,
-                            rgba(
-                                79,
-                                140,
-                                255,
-                                .72
-                            ),
-                            rgba(
-                                122,
-                                85,
-                                220,
-                                .72
-                            )
-                        );
-
-                }
-
-
-                .haldo-ai-typing {
-
-                    display:
-                        inline-flex;
-
-                    align-items:
-                        center;
-
-                    gap:
-                        4px;
-
-                    padding:
-                        8px 10px;
-
-                }
-
-
-                .haldo-ai-typing span {
-
-                    width:
-                        5px;
-
-                    height:
-                        5px;
-
-                    border-radius:
-                        50%;
-
-                    background:
-                        rgba(
-                            255,
-                            255,
-                            255,
-                            .55
-                        );
-
-                    animation:
-                        haldoTyping
-                        1.2s infinite;
-
-                }
-
-
-                .haldo-ai-typing span:nth-child(2) {
-
-                    animation-delay:
-                        .16s;
-
-                }
-
-
-                .haldo-ai-typing span:nth-child(3) {
-
-                    animation-delay:
-                        .32s;
-
-                }
-
-
-                @keyframes haldoTyping {
-
-                    0%,
-                    60%,
-                    100% {
-
-                        transform:
-                            translateY(0);
-
-                        opacity:
-                            .35;
-
-                    }
-
-                    30% {
-
-                        transform:
-                            translateY(-3px);
-
-                        opacity:
-                            1;
-
-                    }
-
-                }
-
-
-                .haldo-ai-composer {
-
-                    display:
-                        flex;
-
-                    align-items:
-                        flex-end;
-
-                    gap:
-                        7px;
-
-                    padding:
-                        9px;
-
-                    border-top:
-                        1px solid
-                        rgba(
-                            255,
-                            255,
-                            255,
-                            .075
-                        );
-
-                    background:
-                        rgba(
-                            0,
-                            0,
-                            0,
-                            .12
-                        );
-
-                }
-
-
-                .haldo-ai-input {
-
-                    flex:
-                        1;
-
-                    min-height:
-                        42px;
-
-                    max-height:
-                        130px;
-
-                    resize:
-                        vertical;
-
-                    padding:
-                        10px 11px;
-
-                    border:
-                        1px solid
-                        rgba(
-                            255,
-                            255,
-                            255,
-                            .09
-                        );
-
-                    border-radius:
-                        13px;
-
-                    outline:
-                        none;
-
-                    background:
-                        rgba(
-                            255,
-                            255,
-                            255,
-                            .045
-                        );
-
-                    color:
-                        #ffffff;
-
-                    font:
-                        inherit;
-
-                    font-size:
-                        11px;
-
-                }
-
-
-                .haldo-ai-input::placeholder {
-
-                    color:
-                        rgba(
-                            255,
-                            255,
-                            255,
-                            .30
-                        );
-
-                }
-
-
-                .haldo-ai-send {
-
-                    width:
-                        43px;
-
-                    height:
-                        43px;
-
-                    flex:
-                        0 0 43px;
-
-                    border:
-                        0;
-
-                    border-radius:
-                        13px;
-
-                    background:
-                        linear-gradient(
-                            135deg,
-                            #4f8cff,
-                            #7959dc
-                        );
-
-                    color:
-                        #ffffff;
-
-                    cursor:
-                        pointer;
-
-                    font-size:
-                        17px;
-
-                }
-
-
-                .haldo-ai-send:disabled {
-
-                    opacity:
-                        .42;
-
-                    cursor:
-                        default;
-
-                }
-
-
-                @media (
-                    max-width: 600px
-                ) {
-
-                    .haldo-ai-overlay {
-
-                        align-items:
-                            flex-end;
-
-                        padding:
-                            8px;
-
-                    }
-
-
-                    .haldo-ai-window {
-
-                        width:
-                            100%;
-
-                        height:
-                            min(
-                                650px,
-                                calc(
-                                    100vh - 18px
-                                )
-                            );
-
-                        border-radius:
-                            21px;
-
-                    }
-
-
-                    .haldo-ai-bubble {
-
-                        max-width:
-                            90%;
-
-                    }
-
-                }
-
-            `;
-
-
-            document.head.appendChild(
-                style
-            );
-
-        };
-
-
-    /* ========================================================
-       MESSAGE RENDERING
-       ======================================================== */
-
-    HD14.aiWindow.addMessage =
-        function(
-            role,
-            text
-        ) {
-
-            if (
-                !this.state.root
-            ) {
-
-                return;
-
-            }
-
-
-            const messages =
-                this.state.root.querySelector(
-                    ".haldo-ai-messages"
-                );
-
-
-            if (
-                !messages
-            ) {
-
-                return;
-
-            }
-
-
-            const wrapper =
-                document.createElement(
-                    "div"
-                );
-
-
-            wrapper.className =
-                "haldo-ai-message " +
-                (
-                    role === "user"
-                        ? "user"
-                        : "ai"
-                );
-
-
-            const bubble =
-                document.createElement(
-                    "div"
-                );
-
-
-            bubble.className =
-                "haldo-ai-bubble";
-
-
-            bubble.textContent =
-                String(
-                    text ?? ""
-                );
-
-
-            wrapper.appendChild(
-                bubble
-            );
-
-
-            messages.appendChild(
-                wrapper
-            );
-
-
-            messages.scrollTop =
-                messages.scrollHeight;
-
-
-            this.state.messages.push(
-                {
-
-                    role,
-
-                    text:
-                        String(
-                            text ?? ""
-                        ),
-
-                    timestamp:
-                        Date.now()
-
-                }
-            );
-
-        };
-
-
-    /* ========================================================
-       TYPING INDICATOR
-       ======================================================== */
-
-    HD14.aiWindow.showTyping =
-        function() {
-
-            if (
-                !this.state.root
-            ) {
-
-                return;
-
-            }
-
-
-            if (
-                this.state.root.querySelector(
-                    "[data-ai-typing]"
-                )
-            ) {
-
-                return;
-
-            }
-
-
-            const messages =
-                this.state.root.querySelector(
-                    ".haldo-ai-messages"
-                );
-
-
-            const wrapper =
-                document.createElement(
-                    "div"
-                );
-
-
-            wrapper.className =
-                "haldo-ai-message ai";
-
-
-            wrapper.dataset.aiTyping =
-                "true";
-
-
-            wrapper.innerHTML = `
-
-                <div
-                    class="haldo-ai-bubble haldo-ai-typing"
-                >
-
-                    <span></span>
-                    <span></span>
-                    <span></span>
-
-                </div>
-
-            `;
-
-
-            messages.appendChild(
-                wrapper
-            );
-
-
-            messages.scrollTop =
-                messages.scrollHeight;
-
-        };
-
-
-    HD14.aiWindow.hideTyping =
-        function() {
-
-            if (
-                !this.state.root
-            ) {
-
-                return;
-
-            }
-
-
-            const typing =
-                this.state.root.querySelector(
-                    "[data-ai-typing]"
-                );
-
-
-            if (
-                typing
-            ) {
-
-                typing.remove();
-
-            }
-
-        };
-        /* ========================================================
-       CREATE AI WINDOW
-       ======================================================== */
-
-    HD14.aiWindow.create =
-        function() {
-
-            this.injectStyles();
-
-
-            const overlay =
-                document.createElement(
-                    "div"
-                );
-
-
-            overlay.className =
-                "haldo-ai-overlay";
-
-
-            overlay.innerHTML = `
-
-                <div
-                    class="haldo-ai-window"
-                    role="dialog"
-                    aria-modal="true"
-                    aria-label="HalDo AI"
-                >
-
-                    <header
-                        class="haldo-ai-header"
-                    >
-
-                        <img
-                            class="haldo-ai-avatar"
-                            src="logo.png"
-                            alt="HalDo AI"
-                        >
-
-
-                        <div
-                            class="haldo-ai-header-info"
-                        >
-
-                            <div
-                                class="haldo-ai-title"
-                            >
-                                HalDo AI
-                            </div>
-
-
-                            <div
-                                class="haldo-ai-status"
-                            >
-
-                                <span
-                                    class="haldo-ai-status-dot"
-                                ></span>
-
-                                <span
-                                    data-ai-status
-                                >
-                                    bereit
-                                </span>
-
-                            </div>
-
-                        </div>
-
-
-                        <button
-                            type="button"
-                            class="haldo-ai-close"
-                            aria-label="HalDo AI schließen"
-                        >
-                            ✕
-                        </button>
-
-                    </header>
-
-
-                    <main
-                        class="haldo-ai-messages"
-                    ></main>
-
-
-                    <form
-                        class="haldo-ai-composer"
-                        data-ai-form
-                    >
-
-                        <textarea
-                            class="haldo-ai-input"
-                            data-ai-input
-                            rows="1"
-                            placeholder="Schreibe HalDo AI ..."
-                            autocomplete="off"
-                        ></textarea>
-
-
-                        <button
-                            type="submit"
-                            class="haldo-ai-send"
-                            data-ai-send
-                            aria-label="Nachricht senden"
-                        >
-                            ➤
-                        </button>
-
-                    </form>
-
-                </div>
-
-            `;
-
-
-            document.body.appendChild(
-                overlay
-            );
-
-
-            this.state.root =
-                overlay;
-
-
-            const closeButton =
-                overlay.querySelector(
-                    ".haldo-ai-close"
-                );
-
-
-            const form =
-                overlay.querySelector(
-                    "[data-ai-form]"
-                );
-
-
-            const input =
-                overlay.querySelector(
-                    "[data-ai-input]"
-                );
-
-
-            const sendButton =
-                overlay.querySelector(
-                    "[data-ai-send]"
-                );
-
-
-            const status =
-                overlay.querySelector(
-                    "[data-ai-status]"
-                );
-
-
-            closeButton.addEventListener(
-                "click",
-                () => {
-
-                    this.close();
-
-                }
-            );
-
-
-            overlay.addEventListener(
-                "click",
-                event => {
-
-                    if (
-                        event.target ===
-                        overlay
-                    ) {
-
-                        this.close();
-
-                    }
-
-                }
-            );
-
-
-            form.addEventListener(
-                "submit",
-                event => {
-
-                    event.preventDefault();
-
-                    this.send();
-
-                }
-            );
-
-
-            input.addEventListener(
-                "keydown",
-                event => {
-
-                    if (
-                        event.key ===
-                        "Enter" &&
-                        !event.shiftKey
-                    ) {
-
-                        event.preventDefault();
-
-                        this.send();
-
-                    }
-
-                }
-            );
-
-
-            input.addEventListener(
-                "input",
-                () => {
-
-                    input.style.height =
-                        "auto";
-
-
-                    input.style.height =
-                        Math.min(
-                            input.scrollHeight,
-                            130
-                        ) +
-                        "px";
-
-                }
-            );
-
-
-            this.state.input =
-                input;
-
-
-            this.state.sendButton =
-                sendButton;
-
-
-            this.state.status =
-                status;
-
-
-            return overlay;
-
-        };
-
-
-    /* ========================================================
-       OPEN
-       ======================================================== */
-
-    HD14.aiWindow.open =
-        function() {
-
-            if (
-                !this.state.root
-            ) {
-
-                this.create();
-
-            }
-
-
-            if (
-                !this.state.root
-            ) {
-
-                return;
-
-            }
-
-
-            this.state.open =
-                true;
-
-
-            this.state.root.classList.add(
-                "open"
-            );
-
-
-            document.body.classList.add(
-                "haldo-ai-open"
-            );
-
-
-            if (
-                this.state.input
-            ) {
-
-                setTimeout(
-                    () => {
-
-                        this.state.input.focus();
-
-                    },
-                    180
-                );
-
-            }
-
-
-            HD14.emit(
-                "ai:window:open",
-                {
-
-                    source:
-                        "haldo-ai-window"
-
-                }
-            );
-
-        };
-
-
-    /* ========================================================
-       CLOSE
-       ======================================================== */
-
-    HD14.aiWindow.close =
-        function() {
-
-            if (
-                !this.state.root
-            ) {
-
-                return;
-
-            }
-
-
-            this.state.open =
-                false;
-
-
-            this.state.root.classList.remove(
-                "open"
-            );
-
-
-            document.body.classList.remove(
-                "haldo-ai-open"
-            );
-
-
-            HD14.emit(
-                "ai:window:close",
-                {
-
-                    source:
-                        "haldo-ai-window"
-
-                }
-            );
-
-        };
-
-
-    /* ========================================================
-       TOGGLE
-       ======================================================== */
-
-    HD14.aiWindow.toggle =
-        function() {
-
-            if (
-                this.state.open
-            ) {
-
-                this.close();
-
-            }
-
-            else {
-
-                this.open();
-
-            }
-
-        };
-
-
-    /* ========================================================
-       CLEAR CHAT
-       ======================================================== */
-
-    HD14.aiWindow.clear =
-        function() {
-
-            if (
-                !this.state.root
-            ) {
-
-                return;
-
-            }
-
-
-            const messages =
-                this.state.root.querySelector(
-                    ".haldo-ai-messages"
-                );
-
-
-            if (
-                messages
-            ) {
-
-                messages.innerHTML =
-                    "";
-
-            }
-
-
-            this.state.messages =
-                [];
-
-
-            this.addMessage(
-                "ai",
-                "Der Chat wurde geleert. 💙❤️🚀"
-            );
-
-
-            HD14.emit(
-                "ai:conversation:clear",
-                {
-
-                    source:
-                        "haldo-ai-window"
-
-                }
-            );
-
-        };
-
-
-    /* ========================================================
-       SET STATUS
-       ======================================================== */
-
-    HD14.aiWindow.setStatus =
-        function(
-            text
-        ) {
-
-            if (
-                this.state.status
-            ) {
-
-                this.state.status.textContent =
-                    String(
-                        text ?? ""
-                    );
-
-            }
-
-        };
-
-
-    /* ========================================================
-       AI RESPONSE CONNECTION
-       ======================================================== */
-
-    HD14.aiWindow.requestAI =
-        async function(
-            message
-        ) {
-
-            const aiCandidates = [
-
-                HD14.ai?.chat,
-
-                HD14.ai?.respond,
-
-                HD14.ai?.ask,
-
-                HD14.aiCore?.chat,
-
-                HD14.aiCore?.respond,
-
-                HD14.aiEngine?.generate,
-
-                HD14.aiEngine?.respond
-
-            ];
-
-
-            for (
-                const candidate of
-                aiCandidates
-            ) {
-
-                if (
-                    typeof candidate !==
-                    "function"
-                ) {
-
-                    continue;
-
-                }
-
-
-                try {
-
-                    const owner =
-                        HD14.ai ||
-                        HD14.aiCore ||
-                        HD14.aiEngine;
-
-
-                    const result =
-                        await candidate.call(
-                            owner,
-                            message
-                        );
-
-
-                    if (
-                        typeof result ===
-                        "string" &&
-                        result.trim()
-                    ) {
-
-                        return result;
-
-                    }
-
-
-                    if (
-                        result &&
-                        typeof result.text ===
-                        "string"
-                    ) {
-
-                        return result.text;
-
-                    }
-
-
-                    if (
-                        result &&
-                        typeof result.response ===
-                        "string"
-                    ) {
-
-                        return result.response;
-
-                    }
-
-                }
-
-                catch(error) {
-
-                    console.warn(
-                        "[HalDo AI Window] AI engine error:",
-                        error
-                    );
-
-                }
-
-            }
-
-
-            return this.localFallback(
-                message
-            );
-
-        };
-
-
-    /* ========================================================
-       LOCAL FALLBACK
-       ======================================================== */
-
-    HD14.aiWindow.localFallback =
-        function(
-            message
-        ) {
-
-            const text =
-                String(
-                    message ?? ""
-                )
-                    .trim()
-                    .toLowerCase();
-
-
-            if (
-                !text
-            ) {
-
-                return "Schreib mir etwas. Ich bin hier. 💙❤️";
-
-            }
-
-
-            if (
-                text.includes(
-                    "hallo"
-                ) ||
-                text.includes(
-                    "hey haldo"
-                ) ||
-                text.includes(
-                    "hi haldo"
-                )
-            ) {
-
-                return "Hallo Bruder 💙❤️🚀 Ich bin HalDo AI. Wie kann ich dir helfen?";
-
-            }
-
-
-            if (
-                text.includes(
-                    "wer bist du"
-                ) ||
-                text.includes(
-                    "was bist du"
-                )
-            ) {
-
-                return "Ich bin HalDo AI – die zentrale KI innerhalb des HalDo AI OS.";
-
-            }
-
-
-            if (
-                text.includes(
-                    "menü"
-                ) ||
-                text.includes(
-                    "menu"
-                )
-            ) {
-
-                return "Du kannst das zentrale ☰ Menü öffnen. Dort findest du deine Apps und Systemfunktionen.";
-
-            }
-
-
-            if (
-                text.includes(
-                    "einstellung"
-                )
-            ) {
-
-                return "Die Einstellungen findest du im zentralen HalDo-Menü.";
-
-            }
-
-
-            if (
-                text.includes(
-                    "danke"
-                )
-            ) {
-
-                return "Sehr gerne, Bruder. 💙❤️🚀";
-
-            }
-
-
-            return (
-                "Ich habe deine Nachricht erhalten. 💙❤️ " +
-                "Die Anfrage wird über die vorhandene HalDo-AI-Schicht verarbeitet."
-            );
-
-        };
-
-
-    /* ========================================================
-       SEND
-       ======================================================== */
-
-    HD14.aiWindow.send =
-        async function() {
-
-            if (
-                !this.state.input ||
-                !this.state.sendButton
-            ) {
-
-                return;
-
-            }
-
-
-            const message =
-                this.state.input.value.trim();
-
-
-            if (
-                !message
-            ) {
-
-                return;
-
-            }
-
-
-            this.state.input.value =
-                "";
-
-
-            this.state.input.style.height =
-                "auto";
-
-
-            this.state.sendButton.disabled =
-                true;
-
-
-            this.addMessage(
-                "user",
-                message
-            );
-
-
-            this.showTyping();
-
-
-            this.setStatus(
-                "denkt ..."
-            );
-
-
-            try {
-
-                const response =
-                    await this.requestAI(
-                        message
-                    );
-
-
-                this.hideTyping();
-
-
-                this.addMessage(
-                    "ai",
-                    response
-                );
-
-
-                this.setStatus(
-                    "bereit"
-                );
-
-
-                HD14.emit(
-                    "ai:response",
-                    {
-
-                        message,
-
-                        response
-
-                    }
-                );
-
-            }
-
-            catch(error) {
-
-                console.error(
-                    "[HalDo AI Window] Response error:",
-                    error
-                );
-
-
-                this.hideTyping();
-
-
-                this.addMessage(
-                    "ai",
-                    "Bei der Verarbeitung ist ein Fehler aufgetreten. 💙❤️"
-                );
-
-
-                this.setStatus(
-                    "Fehler"
-                );
-
-            }
-
-            finally {
-
-                this.state.sendButton.disabled =
-                    false;
-
-
-                if (
-                    this.state.input
-                ) {
-
-                    this.state.input.focus();
-
-                }
-
-            }
-
-        };
-
-
-    /* ========================================================
-       KEYBOARD ESCAPE
-       ======================================================== */
-
-    document.addEventListener(
-        "keydown",
-        event => {
-
-            if (
-                event.key !==
-                "Escape"
-            ) {
-
-                return;
-
-            }
-
-
-            if (
-                HD14.aiWindow.state.open
-            ) {
-
-                HD14.aiWindow.close();
-
-            }
-
-        }
-    );
-
-
-    /* ========================================================
-       MENU AI BRIDGE
-       ======================================================== */
-
-    HD14.openAI =
-        function() {
-
-            HD14.aiWindow.open();
-
-        };
-
-
-    HD14.toggleAI =
-        function() {
-
-            HD14.aiWindow.toggle();
-
-        };
-
-
-    /* ========================================================
-       GLOBAL AI EVENTS
-       ======================================================== */
-
-    HD14.on(
-        "ai:open",
-        () => {
-
-            HD14.aiWindow.open();
-
-        }
-    );
-
-
-    HD14.on(
-        "ai:close",
-        () => {
-
-            HD14.aiWindow.close();
-
-        }
-    );
-
-
-    HD14.on(
-        "ai:toggle",
-        () => {
-
-            HD14.aiWindow.toggle();
-
-        }
-    );
-
-
-    /* ========================================================
-       GREETING COMMAND BRIDGE
-       ======================================================== */
-
-    HD14.handleGreeting =
-        function(
-            text
-        ) {
-
-            const value =
-                String(
-                    text ?? ""
-                )
-                    .trim()
-                    .toLowerCase();
-
-
-            if (
-                !value
-            ) {
-
-                return false;
-
-            }
-
-
-            const greetings = [
-
-                "hallo haldo",
-
-                "hey haldo",
-
-                "hi haldo",
-
-                "hello haldo",
-
-                "hallo haldo ai",
-
-                "hey haldo ai",
-
-                "hi haldo ai"
-
-            ];
-
-
-            const matched =
-                greetings.some(
-                    greeting =>
-                        value.includes(
-                            greeting
-                        )
-                );
-
-
-            if (
-                !matched
-            ) {
-
-                return false;
-
-            }
-
-
-            HD14.aiWindow.open();
-
-
-            setTimeout(
-                () => {
-
-                    if (
-                        HD14.aiWindow.state
-                            .messages
-                            .length === 0
-                    ) {
-
-                        HD14.aiWindow.addMessage(
-                            "ai",
-                            "Hallo Bruder 💙❤️🚀 Schön, dass du da bist. Wie kann ich dir helfen?"
-                        );
-
-                    }
-
-                },
-                220
-            );
-
-
-            return true;
-
-        };
-
-
-    /* ========================================================
-       VOICE / SPEECH BRIDGE
-       ======================================================== */
-
-    HD14.handleVoiceText =
-        function(
-            text
-        ) {
-
-            if (
-                this.handleGreeting(
-                    text
-                )
-            ) {
-
-                return true;
-
-            }
-
-
-            if (
-                !this.aiWindow.state.open
-            ) {
-
-                return false;
-
-            }
-
-
-            if (
-                this.aiWindow.state.input
-            ) {
-
-                this.aiWindow.state.input.value =
-                    String(
-                        text ?? ""
-                    );
-
-            }
-
-
-            this.aiWindow.send();
-
-
-            return true;
-
-        };
-
-
-    /* ========================================================
-       INITIALIZE
-       ======================================================== */
-
-    HD14.aiWindow.init =
-        function() {
-
-            if (
-                this.state.initialized
-            ) {
-
-                return;
-
-            }
-
-
-            this.create();
-
-
-            this.state.initialized =
-                true;
-
-
-            HD14.emit(
-                "ai:window:ready",
-                {
-
-                    source:
-                        "part-14"
-
-                }
-            );
-
-        };
-
-
-    /* ========================================================
-       DOM READY
-       ======================================================== */
-
-    if (
-        document.readyState ===
-        "loading"
-    ) {
-
-        document.addEventListener(
-            "DOMContentLoaded",
-            () => {
-
-                HD14.aiWindow.init();
-
-            },
-            {
-                once:
-                    true
-            }
-        );
-
-    }
-
-    else {
-
-        HD14.aiWindow.init();
-
-    }
-
-
-</script>
 <!-- =========================================================
      HALDO AI OS 22
      PART 14 / 16
@@ -27277,10 +25166,10 @@
 
 
     </script>
-    <!-- =========================================================
+<!-- =========================================================
      HALDO AI OS 22
      PART 15 / 16
-     FINAL SYSTEM INTEGRATION + STARTUP BRIDGE
+     APP OPEN SOUND + WELCOME VOICE + KEYBOARD + RUNTIME BRIDGE
      ========================================================= -->
 
 <script>
@@ -27288,49 +25177,48 @@
     "use strict";
 
 
+    const HD15 =
+        window.HalDo;
+
+
     /* ========================================================
-       HALDO FINAL INTEGRATION
+       INTERACTION FOUNDATION
        ======================================================== */
 
-    const HD15 =
-        window.HalDo =
-        window.HalDo ||
+    HD15.interaction =
+        HD15.interaction ||
         {};
 
 
-    /* ========================================================
-       FINAL STATE
-       ======================================================== */
-
-    HD15.final =
-        HD15.final ||
+    HD15.interaction.state =
+        HD15.interaction.state ||
         {
 
             initialized:
                 false,
 
-            started:
+            keyboardBound:
                 false,
 
-            ready:
+            appSoundLock:
                 false,
 
-            bootTime:
-                Date.now(),
+            welcomePlayed:
+                false,
 
-            version:
-                "22.0.0"
+            runtimeBound:
+                false
 
         };
 
 
     /* ========================================================
-       SAFE EVENT EMITTER
+       SAFE EMIT
        ======================================================== */
 
-    HD15.safeEmit =
+    HD15.interaction.emit =
         function(
-            event,
+            eventName,
             detail
         ) {
 
@@ -27342,7 +25230,7 @@
                 ) {
 
                     HD15.emit(
-                        event,
+                        eventName,
                         detail
                     );
 
@@ -27353,7 +25241,7 @@
             catch(error) {
 
                 console.warn(
-                    "[HalDo Final] Event error:",
+                    "[HalDo Interaction]",
                     error
                 );
 
@@ -27363,259 +25251,16 @@
 
 
     /* ========================================================
-       SAFE STORAGE
+       APP OPEN SOUND
        ======================================================== */
 
-    HD15.storage =
-        HD15.storage ||
-        {};
-
-
-    HD15.storage.read =
+    HD15.interaction.playAppSound =
         function(
-            key,
-            fallback = null
-        ) {
-
-            try {
-
-                if (
-                    HD15.storageManager &&
-                    typeof HD15.storageManager.get ===
-                    "function"
-                ) {
-
-                    const value =
-                        HD15.storageManager.get(
-                            key
-                        );
-
-
-                    return value ??
-                        fallback;
-
-                }
-
-
-                const raw =
-                    localStorage.getItem(
-                        key
-                    );
-
-
-                if (
-                    raw ===
-                    null
-                ) {
-
-                    return fallback;
-
-                }
-
-
-                try {
-
-                    return JSON.parse(
-                        raw
-                    );
-
-                }
-
-                catch(error) {
-
-                    return raw;
-
-                }
-
-            }
-
-            catch(error) {
-
-                console.warn(
-                    "[HalDo Final] Storage read failed:",
-                    error
-                );
-
-
-                return fallback;
-
-            }
-
-        };
-
-
-    HD15.storage.write =
-        function(
-            key,
-            value
-        ) {
-
-            try {
-
-                if (
-                    HD15.storageManager &&
-                    typeof HD15.storageManager.set ===
-                    "function"
-                ) {
-
-                    HD15.storageManager.set(
-                        key,
-                        value
-                    );
-
-
-                    return true;
-
-                }
-
-
-                localStorage.setItem(
-                    key,
-                    JSON.stringify(
-                        value
-                    )
-                );
-
-
-                return true;
-
-            }
-
-            catch(error) {
-
-                console.warn(
-                    "[HalDo Final] Storage write failed:",
-                    error
-                );
-
-
-                return false;
-
-            }
-
-        };
-
-
-    /* ========================================================
-       WORLD SETTINGS PERSISTENCE
-       ======================================================== */
-
-    HD15.worldSettings =
-        HD15.worldSettings ||
-        {};
-
-
-    HD15.worldSettings.defaults =
-        {
-
-            sun:
-                true,
-
-            stars:
-                true,
-
-            planets:
-                true,
-
-            orbits:
-                true,
-
-            glow:
-                true,
-
-            cosmic:
-                true
-
-        };
-
-
-    HD15.worldSettings.state =
-        Object.assign(
-            {},
-            HD15.worldSettings.defaults,
-            HD15.storage.read(
-                "haldo.world.settings",
-                {}
-            )
-        );
-
-
-    HD15.worldSettings.get =
-        function(
-            key
-        ) {
-
-            return this.state[
-                key
-            ];
-
-        };
-
-
-    HD15.worldSettings.set =
-        function(
-            key,
-            value
+            app
         ) {
 
             if (
-                !Object.prototype.hasOwnProperty.call(
-                    this.defaults,
-                    key
-                )
-            ) {
-
-                return false;
-
-            }
-
-
-            this.state[
-                key
-            ] =
-                Boolean(
-                    value
-                );
-
-
-            HD15.storage.write(
-                "haldo.world.settings",
-                this.state
-            );
-
-
-            this.apply();
-
-
-            HD15.safeEmit(
-                "world:settings-change",
-                {
-
-                    key,
-
-                    value:
-                        this.state[key]
-
-                }
-            );
-
-
-            return true;
-
-        };
-
-
-    HD15.worldSettings.apply =
-        function() {
-
-            const world =
-                HD15.world ||
-                HD15.cosmicWorld ||
-                HD15.worldEngine;
-
-
-            if (
-                !world
+                this.state.appSoundLock
             ) {
 
                 return;
@@ -27623,852 +25268,444 @@
             }
 
 
-            const mapping = {
-
-                sun:
-                    [
-                        "sun",
-                        "showSun",
-                        "sunVisible"
-                    ],
-
-                stars:
-                    [
-                        "stars",
-                        "showStars",
-                        "starsVisible"
-                    ],
-
-                planets:
-                    [
-                        "planets",
-                        "showPlanets",
-                        "planetsVisible"
-                    ],
-
-                orbits:
-                    [
-                        "orbits",
-                        "showOrbits",
-                        "orbitsVisible"
-                    ],
-
-                glow:
-                    [
-                        "glow",
-                        "showGlow"
-                    ]
-
-            };
+            this.state.appSoundLock =
+                true;
 
 
-            Object.entries(
-                mapping
-            )
-            .forEach(
-                ([key, names]) => {
+            try {
 
-                    names.forEach(
-                        name => {
+                const sound =
+                    app?.sound ||
+                    app?.openSound ||
+                    HD15.config?.appOpenSound;
 
-                            if (
-                                Object.prototype.hasOwnProperty.call(
-                                    world,
-                                    name
-                                )
-                            ) {
-
-                                try {
-
-                                    world[
-                                        name
-                                    ] =
-                                        this.state[
-                                            key
-                                        ];
-
-                                }
-
-                                catch(error) {
-
-                                    /* keep world alive */
-
-                                }
-
-                            }
-
-                        }
-                    );
-
-                }
-            );
-
-
-            if (
-                typeof world.applySettings ===
-                "function"
-            ) {
-
-                try {
-
-                    world.applySettings(
-                        this.state
-                    );
-
-                }
-
-                catch(error) {
-
-                    console.warn(
-                        "[HalDo World] applySettings failed:",
-                        error
-                    );
-
-                }
-
-            }
-
-        };
-
-
-    /* ========================================================
-       CENTRAL APP ACCESS
-       ======================================================== */
-
-    HD15.apps =
-        HD15.apps ||
-        {};
-
-
-    HD15.apps.resolve =
-        function(
-            appId
-        ) {
-
-            const managers = [
-
-                HD15.appManager,
-
-                HD15.appRegistry,
-
-                HD15.appsManager,
-
-                HD15.registry
-
-            ];
-
-
-            for (
-                const manager of
-                managers
-            ) {
 
                 if (
-                    !manager
-                ) {
-
-                    continue;
-
-                }
-
-
-                const methods = [
-
-                    "get",
-
-                    "getApp",
-
-                    "find",
-
-                    "resolve"
-
-                ];
-
-
-                for (
-                    const method of
-                    methods
-                ) {
-
-                    if (
-                        typeof manager[
-                            method
-                        ] !==
-                        "function"
-                    ) {
-
-                        continue;
-
-                    }
-
-
-                    try {
-
-                        const result =
-                            manager[
-                                method
-                            ](
-                                appId
-                            );
-
-
-                        if (
-                            result
-                        ) {
-
-                            return result;
-
-                        }
-
-                    }
-
-                    catch(error) {
-
-                        console.warn(
-                            "[HalDo Apps] Resolve failed:",
-                            error
-                        );
-
-                    }
-
-                }
-
-            }
-
-
-            return null;
-
-        };
-
-
-    /* ========================================================
-       CENTRAL APP OPEN
-       ======================================================== */
-
-    HD15.apps.open =
-        async function(
-            appId,
-            options = {}
-        ) {
-
-            const normalized =
-                String(
-                    appId ?? ""
-                )
-                .trim();
-
-
-            if (
-                !normalized
-            ) {
-
-                return false;
-
-            }
-
-
-            /*
-             * Special native HalDo AI window.
-             */
-
-            if (
-                normalized ===
-                "ai"
-            ) {
-
-                if (
-                    window.HalDoAIWindow &&
-                    typeof window.HalDoAIWindow.open ===
+                    typeof sound ===
                     "function"
                 ) {
 
-                    window.HalDoAIWindow.open();
+                    sound();
 
-                    return true;
+                }
+
+                else if (
+                    typeof HD15.playSound ===
+                    "function"
+                ) {
+
+                    HD15.playSound(
+                        "app-open"
+                    );
 
                 }
 
             }
 
+            catch(error) {
 
-            /*
-             * Prefer the central App Manager.
-             */
-
-            const managers = [
-
-                HD15.appManager,
-
-                HD15.appsManager
-
-            ];
-
-
-            for (
-                const manager of
-                managers
-            ) {
-
-                if (
-                    !manager
-                ) {
-
-                    continue;
-
-                }
-
-
-                const methods = [
-
-                    "open",
-
-                    "launch",
-
-                    "start",
-
-                    "openApp"
-
-                ];
-
-
-                for (
-                    const method of
-                    methods
-                ) {
-
-                    if (
-                        typeof manager[
-                            method
-                        ] !==
-                        "function"
-                    ) {
-
-                        continue;
-
-                    }
-
-
-                    try {
-
-                        const result =
-                            await manager[
-                                method
-                            ](
-                                normalized,
-                                options
-                            );
-
-
-                        if (
-                            result !==
-                            false
-                        ) {
-
-                            HD15.safeEmit(
-                                "app:opened",
-                                {
-
-                                    appId:
-                                        normalized,
-
-                                    options
-
-                                }
-                            );
-
-
-                            return true;
-
-                        }
-
-                    }
-
-                    catch(error) {
-
-                        console.warn(
-                            "[HalDo Apps] Manager open failed:",
-                            error
-                        );
-
-                    }
-
-                }
+                console.warn(
+                    "[HalDo] App sound error:",
+                    error
+                );
 
             }
 
 
-            /*
-             * Router fallback.
-             */
+            setTimeout(
+                () => {
 
-            if (
-                HD15.appRouter
-            ) {
+                    this.state.appSoundLock =
+                        false;
 
-                const routerMethods = [
-
-                    "open",
-
-                    "navigate",
-
-                    "route",
-
-                    "go"
-
-                ];
-
-
-                for (
-                    const method of
-                    routerMethods
-                ) {
-
-                    if (
-                        typeof HD15.appRouter[
-                            method
-                        ] !==
-                        "function"
-                    ) {
-
-                        continue;
-
-                    }
-
-
-                    try {
-
-                        const result =
-                            await HD15.appRouter[
-                                method
-                            ](
-                                normalized,
-                                options
-                            );
-
-
-                        if (
-                            result !==
-                            false
-                        ) {
-
-                            return true;
-
-                        }
-
-                    }
-
-                    catch(error) {
-
-                        console.warn(
-                            "[HalDo Router] Open failed:",
-                            error
-                        );
-
-                    }
-
-                }
-
-            }
-
-
-            /*
-             * Launcher fallback.
-             */
-
-            if (
-                HD15.launcher
-            ) {
-
-                const methods = [
-
-                    "launch",
-
-                    "open",
-
-                    "start"
-
-                ];
-
-
-                for (
-                    const method of
-                    methods
-                ) {
-
-                    if (
-                        typeof HD15.launcher[
-                            method
-                        ] !==
-                        "function"
-                    ) {
-
-                        continue;
-
-                    }
-
-
-                    try {
-
-                        const result =
-                            await HD15.launcher[
-                                method
-                            ](
-                                normalized,
-                                options
-                            );
-
-
-                        if (
-                            result !==
-                            false
-                        ) {
-
-                            return true;
-
-                        }
-
-                    }
-
-                    catch(error) {
-
-                        console.warn(
-                            "[HalDo Launcher] Open failed:",
-                            error
-                        );
-
-                    }
-
-                }
-
-            }
-
-
-            HD15.safeEmit(
-                "app:open-failed",
-                {
-
-                    appId:
-                        normalized
-
-                }
+                },
+                180
             );
 
-
-            return false;
-
         };
 
 
     /* ========================================================
-       GLOBAL APP API
+       WELCOME VOICE
        ======================================================== */
 
-    window.HalDoApps =
-        {
-
-            open:
-                (
-                    appId,
-                    options
-                ) =>
-                    HD15.apps.open(
-                        appId,
-                        options
-                    ),
-
-            resolve:
-                appId =>
-                    HD15.apps.resolve(
-                        appId
-                    )
-
-        };
-
-
-    /* ========================================================
-       AI / VOICE BRIDGE
-       ======================================================== */
-
-    HD15.voiceBridge =
-        HD15.voiceBridge ||
-        {};
-
-
-    HD15.voiceBridge.start =
+    HD15.interaction.welcomeVoice =
         function() {
 
-            const candidates = [
-
-                HD15.aiVoice,
-
-                HD15.voice,
-
-                HD15.aiSpeech,
-
-                HD15.speech
-
-            ];
-
-
-            for (
-                const system of
-                candidates
+            if (
+                this.state.welcomePlayed
             ) {
 
-                if (
-                    !system
-                ) {
-
-                    continue;
-
-                }
-
-
-                const methods = [
-
-                    "start",
-
-                    "listen",
-
-                    "startListening",
-
-                    "recognize"
-
-                ];
-
-
-                for (
-                    const method of
-                    methods
-                ) {
-
-                    if (
-                        typeof system[
-                            method
-                        ] !==
-                        "function"
-                    ) {
-
-                        continue;
-
-                    }
-
-
-                    try {
-
-                        const result =
-                            system[
-                                method
-                            ]();
-
-
-                        HD15.safeEmit(
-                            "voice:start",
-                            {
-                                result
-                            }
-                        );
-
-
-                        return result;
-
-                    }
-
-                    catch(error) {
-
-                        console.warn(
-                            "[HalDo Voice] Start failed:",
-                            error
-                        );
-
-                    }
-
-                }
+                return;
 
             }
 
 
-            if (
-                "webkitSpeechRecognition" in
-                window ||
-                "SpeechRecognition" in
-                window
-            ) {
-
-                try {
-
-                    const Recognition =
-                        window.SpeechRecognition ||
-                        window.webkitSpeechRecognition;
+            this.state.welcomePlayed =
+                true;
 
 
-                    const recognition =
-                        new Recognition();
+            const message =
+                "Willkommen bei HalDo AI OS.";
 
 
-                    recognition.lang =
+            try {
+
+                if (
+                    HD15.voice &&
+                    typeof HD15.voice.speak ===
+                    "function"
+                ) {
+
+                    HD15.voice.speak(
+                        message
+                    );
+
+                    return;
+
+                }
+
+
+                if (
+                    HD15.aiVoice &&
+                    typeof HD15.aiVoice.speak ===
+                    "function"
+                ) {
+
+                    HD15.aiVoice.speak(
+                        message
+                    );
+
+                    return;
+
+                }
+
+
+                if (
+                    HD15.speech &&
+                    typeof HD15.speech.speak ===
+                    "function"
+                ) {
+
+                    HD15.speech.speak(
+                        message
+                    );
+
+                    return;
+
+                }
+
+
+                if (
+                    "speechSynthesis" in
+                    window
+                ) {
+
+                    const utterance =
+                        new SpeechSynthesisUtterance(
+                            message
+                        );
+
+
+                    utterance.lang =
                         "de-DE";
 
 
-                    recognition.interimResults =
-                        false;
+                    utterance.rate =
+                        0.95;
 
 
-                    recognition.continuous =
-                        false;
+                    utterance.pitch =
+                        1;
 
 
-                    recognition.onresult =
-                        event => {
-
-                            const text =
-                                event
-                                    .results?.[0]?.[0]?.transcript ??
-                                "";
-
-
-                            if (
-                                text &&
-                                window.HalDoAIWindow
-                            ) {
-
-                                window.HalDoAIWindow.send(
-                                    text
-                                );
-
-                            }
-
-                        };
-
-
-                    recognition.onerror =
-                        error => {
-
-                            HD15.safeEmit(
-                                "voice:error",
-                                {
-                                    error
-                                }
-                            );
-
-                        };
-
-
-                    recognition.start();
-
-
-                    return recognition;
-
-                }
-
-                catch(error) {
-
-                    console.warn(
-                        "[HalDo Voice] Browser recognition failed:",
-                        error
-                    );
+                    window.speechSynthesis
+                        .speak(
+                            utterance
+                        );
 
                 }
 
             }
 
+            catch(error) {
 
-            return null;
+                console.warn(
+                    "[HalDo] Welcome voice error:",
+                    error
+                );
 
-        };
-
-
-    window.HalDoVoice =
-        {
-
-            start:
-                () =>
-                    HD15.voiceBridge.start()
+            }
 
         };
 
 
     /* ========================================================
-       EZIDI KEYBOARD BRIDGE
+       KEYBOARD FOUNDATION
        ======================================================== */
 
-    HD15.ezidi =
-        HD15.ezidi ||
-        {};
-
-
-    HD15.ezidi.open =
+    HD15.interaction.bindKeyboard =
         function() {
 
-            const systems = [
-
-                HD15.ezidiKeyboard,
-
-                HD15.keyboard,
-
-                HD15.keyboardManager
-
-            ];
-
-
-            for (
-                const system of
-                systems
+            if (
+                this.state.keyboardBound
             ) {
 
+                return;
+
+            }
+
+
+            document.addEventListener(
+                "keydown",
+                event => {
+
+                    if (
+                        event.defaultPrevented
+                    ) {
+
+                        return;
+
+                    }
+
+
+                    const target =
+                        event.target;
+
+
+                    const tag =
+                        target?.tagName
+                            ?.toLowerCase();
+
+
+                    const typing =
+                        tag === "input" ||
+                        tag === "textarea" ||
+                        target?.isContentEditable;
+
+
+                    /* ----------------------------------------
+                       ESCAPE
+                       ---------------------------------------- */
+
+                    if (
+                        event.key ===
+                        "Escape"
+                    ) {
+
+                        this.handleEscape();
+
+                        return;
+
+                    }
+
+
+                    if (
+                        typing
+                    ) {
+
+                        return;
+
+                    }
+
+
+                    /* ----------------------------------------
+                       MAIN MENU
+                       ---------------------------------------- */
+
+                    if (
+                        event.key ===
+                        "m"
+                    ) {
+
+                        this.openMenu();
+
+                        return;
+
+                    }
+
+
+                    /* ----------------------------------------
+                       AI
+                       ---------------------------------------- */
+
+                    if (
+                        event.key ===
+                        "a"
+                    ) {
+
+                        this.openAI();
+
+                        return;
+
+                    }
+
+
+                    /* ----------------------------------------
+                       APPS
+                       ---------------------------------------- */
+
+                    if (
+                        event.key ===
+                        "Enter"
+                    ) {
+
+                        this.focusLauncher();
+
+                    }
+
+                }
+            );
+
+
+            this.state.keyboardBound =
+                true;
+
+        };
+
+
+    /* ========================================================
+       ESCAPE HANDLER
+       ======================================================== */
+
+    HD15.interaction.handleEscape =
+        function() {
+
+            try {
+
                 if (
-                    !system
+                    HD15.aiChat &&
+                    typeof HD15.aiChat.close ===
+                    "function" &&
+                    HD15.aiChat.state?.open
                 ) {
 
-                    continue;
+                    HD15.aiChat.close();
+
+                    return;
 
                 }
 
 
-                const methods = [
+                if (
+                    HD15.apps &&
+                    typeof HD15.apps.closeAll ===
+                    "function"
+                ) {
 
-                    "open",
+                    const running =
+                        HD15.apps.state
+                            ?.running;
 
-                    "show",
 
-                    "toggle",
+                    if (
+                        running &&
+                        running.size
+                    ) {
 
-                    "activate"
+                        const last =
+                            Array.from(
+                                running.values()
+                            ).pop();
+
+
+                        if (
+                            last?.close
+                        ) {
+
+                            last.close();
+
+                            return;
+
+                        }
+
+                    }
+
+                }
+
+
+                this.closeMenus();
+
+            }
+
+            catch(error) {
+
+                console.warn(
+                    "[HalDo] Escape handler error:",
+                    error
+                );
+
+            }
+
+        };
+
+
+    /* ========================================================
+       OPEN MENU
+       ======================================================== */
+
+    HD15.interaction.openMenu =
+        function() {
+
+            try {
+
+                if (
+                    HD15.menu &&
+                    typeof HD15.menu.open ===
+                    "function"
+                ) {
+
+                    HD15.menu.open();
+
+                    return;
+
+                }
+
+
+                if (
+                    HD15.navigation &&
+                    typeof HD15.navigation.openMenu ===
+                    "function"
+                ) {
+
+                    HD15.navigation.openMenu();
+
+                    return;
+
+                }
+
+
+                const selectors = [
+
+                    "[data-menu-open]",
+
+                    "[data-action='menu']",
+
+                    "#haldo-menu-button",
+
+                    ".haldo-menu-button"
 
                 ];
 
 
                 for (
-                    const method of
-                    methods
+                    const selector of
+                    selectors
                 ) {
 
+                    const element =
+                        document.querySelector(
+                            selector
+                        );
+
+
                     if (
-                        typeof system[
-                            method
-                        ] !==
-                        "function"
+                        element
                     ) {
 
-                        continue;
+                        element.click();
 
-                    }
-
-
-                    try {
-
-                        return system[
-                            method
-                        ]();
-
-                    }
-
-                    catch(error) {
-
-                        console.warn(
-                            "[HalDo Êzîdî Keyboard] Open failed:",
-                            error
-                        );
+                        return;
 
                     }
 
@@ -28476,399 +25713,530 @@
 
             }
 
+            catch(error) {
 
-            HD15.safeEmit(
-                "ezidi-keyboard:open"
-            );
+                console.warn(
+                    "[HalDo] Menu open error:",
+                    error
+                );
 
-
-            return false;
-
-        };
-
-
-    window.HalDoEzidiKeyboard =
-        {
-
-            open:
-                () =>
-                    HD15.ezidi.open()
+            }
 
         };
 
 
     /* ========================================================
-       LOGO PATH NORMALIZATION
+       OPEN AI
        ======================================================== */
 
-    HD15.logo =
-        HD15.logo ||
-        {};
+    HD15.interaction.openAI =
+        function() {
+
+            try {
+
+                if (
+                    HD15.aiChat &&
+                    typeof HD15.aiChat.open ===
+                    "function"
+                ) {
+
+                    HD15.aiChat.open();
+
+                    return;
+
+                }
 
 
-    HD15.logo.path =
-        "logo.png";
+                if (
+                    HD15.ai &&
+                    typeof HD15.ai.open ===
+                    "function"
+                ) {
+
+                    HD15.ai.open();
+
+                    return;
+
+                }
 
 
-    HD15.logo.resolve =
-        function(
-            value
-        ) {
+                const selectors = [
 
-            const source =
-                String(
-                    value ?? ""
+                    "[data-ai-open]",
+
+                    "[data-action='ai']",
+
+                    "#haldo-ai-button",
+
+                    ".haldo-ai-button"
+
+                ];
+
+
+                for (
+                    const selector of
+                    selectors
+                ) {
+
+                    const element =
+                        document.querySelector(
+                            selector
+                        );
+
+
+                    if (
+                        element
+                    ) {
+
+                        element.click();
+
+                        return;
+
+                    }
+
+                }
+
+            }
+
+            catch(error) {
+
+                console.warn(
+                    "[HalDo] AI open error:",
+                    error
                 );
 
-
-            if (
-                !source
-            ) {
-
-                return this.path;
-
             }
-
-
-            if (
-                source.includes(
-                    "assets/logo/logo.png"
-                )
-            ) {
-
-                return this.path;
-
-            }
-
-
-            return source;
 
         };
+
+
+    /* ========================================================
+       FOCUS LAUNCHER
+       ======================================================== */
+
+    HD15.interaction.focusLauncher =
+        function() {
+
+            try {
+
+                const selectors = [
+
+                    "[data-app-launcher]",
+
+                    "#haldo-app-launcher",
+
+                    ".haldo-app-launcher"
+
+                ];
+
+
+                for (
+                    const selector of
+                    selectors
+                ) {
+
+                    const element =
+                        document.querySelector(
+                            selector
+                        );
+
+
+                    if (
+                        element
+                    ) {
+
+                        element.focus();
+
+                        return;
+
+                    }
+
+                }
+
+            }
+
+            catch(error) {
+
+                console.warn(
+                    "[HalDo] Launcher focus error:",
+                    error
+                );
+
+            }
+
+        };
+
+
+    /* ========================================================
+       CLOSE MENUS
+       ======================================================== */
+
+    HD15.interaction.closeMenus =
+        function() {
+
+            try {
+
+                if (
+                    HD15.menu &&
+                    typeof HD15.menu.close ===
+                    "function"
+                ) {
+
+                    HD15.menu.close();
+
+                }
+
+
+                if (
+                    HD15.navigation &&
+                    typeof HD15.navigation.closeMenu ===
+                    "function"
+                ) {
+
+                    HD15.navigation.closeMenu();
+
+                }
+
+
+                document
+                    .querySelectorAll(
+                        ".open"
+                    )
+                    .forEach(
+                        element => {
+
+                            if (
+                                element
+                                    .getAttribute(
+                                        "data-close-on-escape"
+                                    ) ===
+                                    "true"
+                            ) {
+
+                                element.classList
+                                    .remove(
+                                        "open"
+                                    );
+
+                            }
+
+                        }
+                    );
+
+            }
+
+            catch(error) {
+
+                console.warn(
+                    "[HalDo] Menu close error:",
+                    error
+                );
+
+            }
+
+        };
+
+
+    /* ========================================================
+       AI EVENTS
+       ======================================================== */
+
+    HD15.interaction.bindAIEvents =
+        function() {
+
+            if (
+                this.state.runtimeBound
+            ) {
+
+                return;
+
+            }
+
+
+            this.state.runtimeBound =
+                true;
+
+
+            if (
+                typeof HD15.on !==
+                "function"
+            ) {
+
+                return;
+
+            }
+
+
+            HD15.on(
+                "ai:opened",
+                () => {
+
+                    this.emit(
+                        "interaction:ai-opened"
+                    );
+
+                }
+            );
+
+
+            HD15.on(
+                "ai:closed",
+                () => {
+
+                    this.emit(
+                        "interaction:ai-closed"
+                    );
+
+                }
+            );
+
+
+            HD15.on(
+                "ai:message",
+                detail => {
+
+                    this.emit(
+                        "interaction:ai-message",
+                        detail
+                    );
+
+                }
+            );
+
+        };
+
+
+    /* ========================================================
+       COMMAND CONNECTION
+       ======================================================== */
+
+    HD15.interaction.bindCommands =
+        function() {
+
+            if (
+                typeof HD15.on !==
+                "function"
+            ) {
+
+                return;
+
+            }
+
+
+            HD15.on(
+                "command:open-ai",
+                () => {
+
+                    this.openAI();
+
+                }
+            );
+
+
+            HD15.on(
+                "command:open-menu",
+                () => {
+
+                    this.openMenu();
+
+                }
+            );
+
+
+            HD15.on(
+                "command:close",
+                () => {
+
+                    this.handleEscape();
+
+                }
+            );
+
+        };
+
+
+    /* ========================================================
+       LOGO → MENU CONNECTION
+       ======================================================== */
+
+    HD15.interaction.bindLogoMenu =
+        function() {
+
+            const selectors = [
+
+                "[data-haldo-logo]",
+
+                "#haldo-logo",
+
+                ".haldo-logo"
+
+            ];
+
+
+            selectors.forEach(
+                selector => {
+
+                    document
+                        .querySelectorAll(
+                            selector
+                        )
+                        .forEach(
+                            element => {
+
+                                if (
+                                    element.dataset
+                                        .haldoInteractionBound ===
+                                    "true"
+                                ) {
+
+                                    return;
+
+                                }
+
+
+                                element.dataset
+                                    .haldoInteractionBound =
+                                    "true";
+
+
+                                element.addEventListener(
+                                    "dblclick",
+                                    () => {
+
+                                        this.openMenu();
+
+                                    }
+                                );
+
+                            }
+                        );
+
+                }
+            );
+
+        };
+
+
+    /* ========================================================
+       SYSTEM READY
+       ======================================================== */
+
+    HD15.interaction.bindSystemReady =
+        function() {
+
+            if (
+                typeof HD15.on !==
+                "function"
+            ) {
+
+                return;
+
+            }
+
+
+            HD15.on(
+                "system:ready",
+                () => {
+
+                    this.welcomeVoice();
+
+                }
+            );
+
+
+            HD15.on(
+                "runtime:ready",
+                () => {
+
+                    this.emit(
+                        "interaction:runtime-ready"
+                    );
+
+                }
+            );
+
+        };
+
+
+    /* ========================================================
+       APP EVENTS
+       ======================================================== */
+
+    HD15.on(
+        "app:opened",
+        instance => {
+
+            try {
+
+                this.playAppSound(
+                    instance?.app
+                );
+
+            }
+
+            catch(error) {
+
+                console.warn(
+                    "[HalDo] App-open interaction error:",
+                    error
+                );
+
+            }
+
+        }
+    );
+
+
+    HD15.on(
+        "app:closed",
+        instance => {
+
+            this.emit(
+                "interaction:app-closed",
+                instance
+            );
+
+        }
+    );
+
+
+    /* ========================================================
+       INITIALIZATION
+       ======================================================== */
+
+    HD15.interaction.bindKeyboard();
+
+    HD15.interaction.bindAIEvents();
+
+    HD15.interaction.bindCommands();
+
+    HD15.interaction.bindLogoMenu();
+
+    HD15.interaction.bindSystemReady();
+
+
+    HD15.interaction.state.initialized =
+        true;
+
+
+    HD15.emit(
+        "interaction:ready"
+    );
 
 
     /*
-     * Correct known image references without touching
-     * unrelated external resources.
+     * Rebind after the rest of the page has loaded,
+     * because existing UI elements may be created later.
      */
-
-    HD15.logo.fixDOM =
-        function() {
-
-            document
-                .querySelectorAll(
-                    'img[src="assets/logo/logo.png"]'
-                )
-                .forEach(
-                    image => {
-
-                        image.src =
-                            this.path;
-
-                    }
-                );
-
-        };
-
-
-    /* ========================================================
-       SYSTEM STATUS
-       ======================================================== */
-
-    HD15.status =
-        HD15.status ||
-        {};
-
-
-    HD15.status.snapshot =
-        function() {
-
-            return {
-
-                version:
-                    HD15.final.version,
-
-                ready:
-                    HD15.final.ready,
-
-                online:
-                    navigator.onLine,
-
-                ai:
-                    Boolean(
-                        HD15.ai ||
-                        HD15.aiCore ||
-                        HD15.aiEngine
-                    ),
-
-                voice:
-                    Boolean(
-                        HD15.voice ||
-                        HD15.aiVoice ||
-                        HD15.aiSpeech
-                    ),
-
-                world:
-                    Boolean(
-                        HD15.world ||
-                        HD15.cosmicWorld ||
-                        HD15.worldEngine
-                    ),
-
-                keyboard:
-                    Boolean(
-                        HD15.ezidiKeyboard ||
-                        HD15.keyboard
-                    ),
-
-                apps:
-                    Boolean(
-                        HD15.appManager ||
-                        HD15.appRegistry
-                    ),
-
-                router:
-                    Boolean(
-                        HD15.appRouter
-                    )
-
-            };
-
-        };
-
-
-    window.HalDoSystemStatus =
-        {
-
-            get:
-                () =>
-                    HD15.status.snapshot()
-
-        };
-
-
-    /* ========================================================
-       FINAL READY EVENT
-       ======================================================== */
-
-    HD15.final.readyUp =
-        function() {
-
-            if (
-                this.ready
-            ) {
-
-                return;
-
-            }
-
-
-            this.ready =
-                true;
-
-
-            this.started =
-                true;
-
-
-            HD15.logo.fixDOM();
-
-
-            HD15.worldSettings.apply();
-
-
-            HD15.safeEmit(
-                "haldo:ready",
-                this.status.snapshot()
-            );
-
-
-            HD15.safeEmit(
-                "system:ready",
-                this.status.snapshot()
-            );
-
-
-            document.documentElement
-                .setAttribute(
-                    "data-haldo-ready",
-                    "true"
-                );
-
-
-            console.info(
-                "[HalDo AI OS 22] FINAL SYSTEM READY",
-                this.status.snapshot()
-            );
-
-        };
-
-
-    /* ========================================================
-       STARTUP
-       ======================================================== */
-
-    HD15.start =
-        function() {
-
-            if (
-                this.started
-            ) {
-
-                return;
-
-            }
-
-
-            this.started =
-                true;
-
-
-            try {
-
-                HD15.logo.fixDOM();
-
-            }
-
-            catch(error) {
-
-                console.warn(
-                    "[HalDo Final] Logo normalization failed:",
-                    error
-                );
-
-            }
-
-
-            try {
-
-                HD15.worldSettings.apply();
-
-            }
-
-            catch(error) {
-
-                console.warn(
-                    "[HalDo Final] World settings failed:",
-                    error
-                );
-
-            }
-
-
-            this.readyUp();
-
-        };
-
-
-    /* ========================================================
-       DOM READY
-       ======================================================== */
-
-    if (
-        document.readyState ===
-        "loading"
-    ) {
-
-        document.addEventListener(
-            "DOMContentLoaded",
-            () => {
-
-                HD15.start();
-
-            },
-            {
-                once:
-                    true
-            }
-        );
-
-    }
-
-    else {
-
-        HD15.start();
-
-    }
-
-
-    /* ========================================================
-       WINDOW LOAD FINALIZATION
-       ======================================================== */
 
     window.addEventListener(
         "load",
         () => {
 
-            try {
-
-                HD15.logo.fixDOM();
-
-                HD15.worldSettings.apply();
-
-            }
-
-            catch(error) {
-
-                console.warn(
-                    "[HalDo Final] Load finalization failed:",
-                    error
-                );
-
-            }
-
-
-            HD15.safeEmit(
-                "haldo:load-complete"
-            );
-
-        },
-        {
-            once:
-                true
-        }
-    );
-
-
-    /* ========================================================
-       ONLINE / OFFLINE
-       ======================================================== */
-
-    window.addEventListener(
-        "online",
-        () => {
-
-            HD15.safeEmit(
-                "system:online"
-            );
+            HD15.interaction.bindLogoMenu();
 
         }
     );
-
-
-    window.addEventListener(
-        "offline",
-        () => {
-
-            HD15.safeEmit(
-                "system:offline"
-            );
-
-        }
-    );
-
-
-    /* ========================================================
-       FINAL INITIALIZATION MARKER
-       ======================================================== */
-
-    HD15.final.initialized =
-        true;
-
-
-    HD15.safeEmit(
-        "haldo:final-integration-ready"
-    );
-
 
 </script>
 <!-- ============================================================
