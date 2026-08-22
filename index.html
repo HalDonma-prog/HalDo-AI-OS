@@ -6317,7 +6317,1460 @@
 <!-- =========================================================
      ENDE TEIL 4 / 16
      ========================================================= -->
-        <!-- =========================================================
+    <!-- =========================================================
+     HALDO AI OS 22
+     INDEX.HTML — PART 5 / 16
+     WORLD FOUNDATION + UI ROOT + APP FOUNDATION
+     ========================================================= -->
+<script>
+
+    "use strict";
+
+    const HD5 =
+        window.HalDo;
+
+
+    /* ========================================================
+       WORLD FOUNDATION
+       ======================================================== */
+
+    HD5.world =
+        HD5.world ||
+        {};
+
+
+    HD5.world.settings =
+        HD5.world.settings ||
+        {
+
+            sky: {
+
+                stars:
+                    365
+
+            },
+
+            planets: {
+
+                speed:
+                    "normal"
+
+            },
+
+            interface: {
+
+                animations:
+                    true
+
+            }
+
+        };
+
+
+    /* ========================================================
+       WORLD SETTINGS API
+       ======================================================== */
+
+    HD5.getSetting =
+        HD5.getSetting ||
+        function(
+            path,
+            fallback = null
+        ) {
+
+            if (
+                typeof path !==
+                "string"
+            ) {
+
+                return fallback;
+
+            }
+
+
+            const parts =
+                path.split(".");
+
+
+            let current =
+                HD5.world.settings;
+
+
+            for (
+                const part
+                of parts
+            ) {
+
+                if (
+                    current ===
+                    null ||
+                    current ===
+                    undefined ||
+                    typeof current !==
+                    "object" ||
+                    !(part in current)
+                ) {
+
+                    return fallback;
+
+                }
+
+
+                current =
+                    current[part];
+
+            }
+
+
+            return current ===
+                undefined
+                    ? fallback
+                    : current;
+
+        };
+
+
+    HD5.setSetting =
+        HD5.setSetting ||
+        function(
+            path,
+            value
+        ) {
+
+            if (
+                typeof path !==
+                "string" ||
+                !path
+            ) {
+
+                return false;
+
+            }
+
+
+            const parts =
+                path.split(".");
+
+
+            let current =
+                HD5.world.settings;
+
+
+            for (
+                let index = 0;
+                index <
+                parts.length - 1;
+                index++
+            ) {
+
+                const part =
+                    parts[index];
+
+
+                if (
+                    !current[part] ||
+                    typeof current[part] !==
+                    "object"
+                ) {
+
+                    current[part] =
+                        {};
+
+                }
+
+
+                current =
+                    current[part];
+
+            }
+
+
+            current[
+                parts[
+                    parts.length - 1
+                ]
+            ] =
+                value;
+
+
+            HD5.emit(
+                "world:settingsChanged",
+                {
+
+                    path,
+
+                    value
+
+                }
+            );
+
+
+            return true;
+
+        };
+
+
+    /* ========================================================
+       DAY / YEAR CALCULATION
+       ======================================================== */
+
+    HD5.world.getDayOfYear =
+        HD5.world.getDayOfYear ||
+        function(
+            date = new Date()
+        ) {
+
+            const start =
+                new Date(
+                    date.getFullYear(),
+                    0,
+                    0
+                );
+
+
+            const difference =
+                date -
+                start;
+
+
+            return Math.max(
+                1,
+                Math.min(
+                    365,
+                    Math.floor(
+                        difference /
+                        86400000
+                    )
+                )
+            );
+
+        };
+
+
+    HD5.world.calendar =
+        HD5.world.calendar ||
+        {
+
+            year:
+                new Date()
+                    .getFullYear(),
+
+            day:
+                HD5.world.getDayOfYear(),
+
+            month:
+                new Date()
+                    .getMonth() + 1,
+
+            date:
+                new Date()
+                    .getDate()
+
+        };
+
+
+    HD5.world.updateCalendar =
+        function(
+            date = new Date()
+        ) {
+
+            this.calendar =
+                {
+
+                    year:
+                        date.getFullYear(),
+
+                    day:
+                        this.getDayOfYear(
+                            date
+                        ),
+
+                    month:
+                        date.getMonth() + 1,
+
+                    date:
+                        date.getDate()
+
+                };
+
+
+            HD5.emit(
+                "world:calendarChanged",
+                {
+                    ...this.calendar
+                }
+            );
+
+
+            return this.calendar;
+
+        };
+
+
+    HD5.world.applySettings =
+        function() {
+
+            const stars =
+                HD5.getSetting(
+                    "sky.stars",
+                    365
+                );
+
+
+            const speed =
+                HD5.getSetting(
+                    "planets.speed",
+                    "normal"
+                );
+
+
+            const animations =
+                HD5.getSetting(
+                    "interface.animations",
+                    true
+                );
+
+
+            document.documentElement
+                .style
+                .setProperty(
+                    "--haldo-star-count",
+                    String(stars)
+                );
+
+
+            document.documentElement
+                .dataset
+                .planetSpeed =
+                String(speed);
+
+
+            document.documentElement
+                .dataset
+                .animations =
+                animations
+                    ? "on"
+                    : "off";
+
+
+            HD5.emit(
+                "world:settingsApplied",
+                {
+
+                    stars,
+
+                    speed,
+
+                    animations
+
+                }
+            );
+
+        };
+
+
+    HD5.world.updateCalendar();
+
+
+    /* ========================================================
+       ROOT UI FOUNDATION
+       ======================================================== */
+
+    HD5.ui =
+        HD5.ui ||
+        {};
+
+
+    HD5.ui.root =
+        null;
+
+
+    HD5.ui.desktop =
+        null;
+
+
+    HD5.ui.cosmicLayer =
+        null;
+
+
+    HD5.ui.appLayer =
+        null;
+
+
+    HD5.ui.overlay =
+        null;
+
+
+    HD5.ui.initialized =
+        false;
+
+
+    /* ========================================================
+       ROOT UI STYLES
+       ======================================================== */
+
+    HD5.ui.injectStyles =
+        function() {
+
+            if (
+                document.getElementById(
+                    "haldo-ui-foundation-style"
+                )
+            ) {
+
+                return;
+
+            }
+
+
+            const style =
+                document.createElement(
+                    "style"
+                );
+
+
+            style.id =
+                "haldo-ui-foundation-style";
+
+
+            style.textContent = `
+
+                :root {
+
+                    --haldo-bg:
+                        #050b18;
+
+                    --haldo-surface:
+                        rgba(
+                            8,
+                            15,
+                            34,
+                            .92
+                        );
+
+                    --haldo-border:
+                        rgba(
+                            255,
+                            255,
+                            255,
+                            .10
+                        );
+
+                    --haldo-text:
+                        #ffffff;
+
+                    --haldo-muted:
+                        rgba(
+                            255,
+                            255,
+                            255,
+                            .62
+                        );
+
+                    --haldo-accent:
+                        #77b7ff;
+
+                    --haldo-shadow:
+                        0 20px 70px
+                        rgba(
+                            0,
+                            0,
+                            0,
+                            .48
+                        );
+
+                    --haldo-safe-top:
+                        env(
+                            safe-area-inset-top,
+                            0px
+                        );
+
+                    --haldo-safe-right:
+                        env(
+                            safe-area-inset-right,
+                            0px
+                        );
+
+                    --haldo-safe-bottom:
+                        env(
+                            safe-area-inset-bottom,
+                            0px
+                        );
+
+                    --haldo-safe-left:
+                        env(
+                            safe-area-inset-left,
+                            0px
+                        );
+
+                }
+
+
+                html,
+                body {
+
+                    width:
+                        100%;
+
+                    height:
+                        100%;
+
+                    margin:
+                        0;
+
+                    padding:
+                        0;
+
+                    overflow:
+                        hidden;
+
+                    background:
+                        var(
+                            --haldo-bg
+                        );
+
+                    color:
+                        var(
+                            --haldo-text
+                        );
+
+                    font-family:
+                        -apple-system,
+                        BlinkMacSystemFont,
+                        "SF Pro Display",
+                        "SF Pro Text",
+                        "Segoe UI",
+                        Roboto,
+                        Helvetica,
+                        Arial,
+                        sans-serif;
+
+                    -webkit-font-smoothing:
+                        antialiased;
+
+                    text-rendering:
+                        optimizeLegibility;
+
+                }
+
+
+                body {
+
+                    position:
+                        relative;
+
+                    min-height:
+                        100dvh;
+
+                    isolation:
+                        isolate;
+
+                }
+
+
+                #haldo-os-root {
+
+                    position:
+                        fixed;
+
+                    inset:
+                        0;
+
+                    width:
+                        100%;
+
+                    height:
+                        100%;
+
+                    overflow:
+                        hidden;
+
+                    background:
+                        radial-gradient(
+                            circle at 50% 40%,
+                            rgba(
+                                35,
+                                75,
+                                145,
+                                .20
+                            ),
+                            transparent 48%
+                        ),
+                        #050b18;
+
+                    z-index:
+                        1;
+
+                }
+
+
+                #haldo-cosmic-world {
+
+                    position:
+                        absolute;
+
+                    inset:
+                        0;
+
+                    overflow:
+                        hidden;
+
+                    pointer-events:
+                        none;
+
+                    z-index:
+                        1;
+
+                }
+
+
+                #haldo-cosmic-stars {
+
+                    position:
+                        absolute;
+
+                    inset:
+                        0;
+
+                    overflow:
+                        hidden;
+
+                    z-index:
+                        1;
+
+                }
+
+
+                #haldo-cosmic-planets {
+
+                    position:
+                        absolute;
+
+                    inset:
+                        0;
+
+                    overflow:
+                        hidden;
+
+                    z-index:
+                        2;
+
+                }
+
+
+                #haldo-cosmic-sun {
+
+                    position:
+                        absolute;
+
+                    left:
+                        50%;
+
+                    top:
+                        50%;
+
+                    width:
+                        86px;
+
+                    height:
+                        86px;
+
+                    transform:
+                        translate(
+                            -50%,
+                            -50%
+                        );
+
+                    border-radius:
+                        50%;
+
+                    background:
+                        radial-gradient(
+                            circle,
+                            #fffbd4 0%,
+                            #fff2a0 25%,
+                            #ffc85c 52%,
+                            #ff8a2b 72%,
+                            transparent 100%
+                        );
+
+                    box-shadow:
+                        0 0 30px
+                        rgba(
+                            255,
+                            202,
+                            92,
+                            .72
+                        ),
+                        0 0 80px
+                        rgba(
+                            255,
+                            145,
+                            50,
+                            .35
+                        );
+
+                    z-index:
+                        3;
+
+                }
+
+
+                #haldo-ui-layer {
+
+                    position:
+                        absolute;
+
+                    inset:
+                        0;
+
+                    overflow:
+                        hidden;
+
+                    z-index:
+                        100;
+
+                }
+
+
+                #haldo-desktop {
+
+                    position:
+                        absolute;
+
+                    inset:
+                        0;
+
+                    overflow:
+                        hidden;
+
+                    pointer-events:
+                        none;
+
+                }
+
+
+                #haldo-app-layer {
+
+                    position:
+                        absolute;
+
+                    inset:
+                        0;
+
+                    overflow:
+                        hidden;
+
+                    pointer-events:
+                        none;
+
+                }
+
+
+                #haldo-app-layer
+                > * {
+
+                    pointer-events:
+                        auto;
+
+                }
+
+
+                #haldo-overlay {
+
+                    position:
+                        absolute;
+
+                    inset:
+                        0;
+
+                    pointer-events:
+                        none;
+
+                    z-index:
+                        10000;
+
+                }
+
+
+                .haldo-ui-hidden {
+
+                    display:
+                        none !important;
+
+                }
+
+
+                @media (
+                    max-width: 700px
+                ) {
+
+                    #haldo-cosmic-sun {
+
+                        width:
+                            62px;
+
+                        height:
+                            62px;
+
+                    }
+
+                }
+
+
+                @media (
+                    prefers-reduced-motion: reduce
+                ) {
+
+                    *,
+                    *::before,
+                    *::after {
+
+                        animation-duration:
+                            .001ms !important;
+
+                        animation-iteration-count:
+                            1 !important;
+
+                        transition-duration:
+                            .001ms !important;
+
+                        scroll-behavior:
+                            auto !important;
+
+                    }
+
+                }
+
+            `;
+
+
+            document.head.appendChild(
+                style
+            );
+
+        };
+
+
+    /* ========================================================
+       ROOT UI CREATION
+       ======================================================== */
+
+    HD5.ui.create =
+        function() {
+
+            if (
+                this.initialized &&
+                this.root
+            ) {
+
+                return this.root;
+
+            }
+
+
+            this.injectStyles();
+
+
+            let root =
+                document.getElementById(
+                    "haldo-os-root"
+                );
+
+
+            if (
+                !root
+            ) {
+
+                root =
+                    document.createElement(
+                        "main"
+                    );
+
+                root.id =
+                    "haldo-os-root";
+
+                document.body
+                    .appendChild(
+                        root
+                    );
+
+            }
+
+
+            let cosmic =
+                document.getElementById(
+                    "haldo-cosmic-world"
+                );
+
+
+            if (
+                !cosmic
+            ) {
+
+                cosmic =
+                    document.createElement(
+                        "section"
+                    );
+
+                cosmic.id =
+                    "haldo-cosmic-world";
+
+                root.appendChild(
+                    cosmic
+                );
+
+            }
+
+
+            let stars =
+                document.getElementById(
+                    "haldo-cosmic-stars"
+                );
+
+
+            if (
+                !stars
+            ) {
+
+                stars =
+                    document.createElement(
+                        "div"
+                    );
+
+                stars.id =
+                    "haldo-cosmic-stars";
+
+                cosmic.appendChild(
+                    stars
+                );
+
+            }
+
+
+            let planets =
+                document.getElementById(
+                    "haldo-cosmic-planets"
+                );
+
+
+            if (
+                !planets
+            ) {
+
+                planets =
+                    document.createElement(
+                        "div"
+                    );
+
+                planets.id =
+                    "haldo-cosmic-planets";
+
+                cosmic.appendChild(
+                    planets
+                );
+
+            }
+
+
+            let sun =
+                document.getElementById(
+                    "haldo-cosmic-sun"
+                );
+
+
+            if (
+                !sun
+            ) {
+
+                sun =
+                    document.createElement(
+                        "div"
+                    );
+
+                sun.id =
+                    "haldo-cosmic-sun";
+
+                cosmic.appendChild(
+                    sun
+                );
+
+            }
+
+
+            let uiLayer =
+                document.getElementById(
+                    "haldo-ui-layer"
+                );
+
+
+            if (
+                !uiLayer
+            ) {
+
+                uiLayer =
+                    document.createElement(
+                        "section"
+                    );
+
+                uiLayer.id =
+                    "haldo-ui-layer";
+
+                root.appendChild(
+                    uiLayer
+                );
+
+            }
+
+
+            let desktop =
+                document.getElementById(
+                    "haldo-desktop"
+                );
+
+
+            if (
+                !desktop
+            ) {
+
+                desktop =
+                    document.createElement(
+                        "div"
+                    );
+
+                desktop.id =
+                    "haldo-desktop";
+
+                uiLayer.appendChild(
+                    desktop
+                );
+
+            }
+
+
+            let appLayer =
+                document.getElementById(
+                    "haldo-app-layer"
+                );
+
+
+            if (
+                !appLayer
+            ) {
+
+                appLayer =
+                    document.createElement(
+                        "div"
+                    );
+
+                appLayer.id =
+                    "haldo-app-layer";
+
+                uiLayer.appendChild(
+                    appLayer
+                );
+
+            }
+
+
+            let overlay =
+                document.getElementById(
+                    "haldo-overlay"
+                );
+
+
+            if (
+                !overlay
+            ) {
+
+                overlay =
+                    document.createElement(
+                        "div"
+                    );
+
+                overlay.id =
+                    "haldo-overlay";
+
+                uiLayer.appendChild(
+                    overlay
+                );
+
+            }
+
+
+            this.root =
+                root;
+
+            this.cosmicLayer =
+                cosmic;
+
+            this.desktop =
+                desktop;
+
+            this.appLayer =
+                appLayer;
+
+            this.overlay =
+                overlay;
+
+            this.initialized =
+                true;
+
+
+            HD5.state.boot =
+                "ui-ready";
+
+
+            HD5.emit(
+                "ui:created",
+                {
+
+                    root,
+
+                    cosmic,
+
+                    desktop,
+
+                    appLayer,
+
+                    overlay
+
+                }
+            );
+
+
+            return root;
+
+        };
+
+
+    /* ========================================================
+       APP FOUNDATION
+       ======================================================== */
+
+    HD5.apps =
+        HD5.apps ||
+        {};
+
+
+    HD5.apps.registry =
+        HD5.apps.registry ||
+        new Map();
+
+
+    HD5.apps.instances =
+        HD5.apps.instances ||
+        new Map();
+
+
+    HD5.apps.active =
+        null;
+
+
+    HD5.apps.register =
+        function(
+            definition
+        ) {
+
+            if (
+                !definition ||
+                !definition.id
+            ) {
+
+                return false;
+
+            }
+
+
+            const id =
+                String(
+                    definition.id
+                );
+
+
+            const existing =
+                this.registry.get(
+                    id
+                );
+
+
+            const app =
+                {
+
+                    ...existing,
+
+                    ...definition,
+
+                    id,
+
+                    title:
+                        definition.title ||
+                        definition.name ||
+                        id,
+
+                    version:
+                        definition.version ||
+                        "1.0.0",
+
+                    registeredAt:
+                        existing
+                            ?.registeredAt ||
+                        Date.now()
+
+                };
+
+
+            this.registry.set(
+                id,
+                app
+            );
+
+
+            HD5.emit(
+                "app:registered",
+                {
+                    app
+                }
+            );
+
+
+            return app;
+
+        };
+
+
+    HD5.apps.get =
+        function(
+            id
+        ) {
+
+            return this.registry.get(
+                String(id)
+            ) ||
+            null;
+
+        };
+
+
+    HD5.apps.has =
+        function(
+            id
+        ) {
+
+            return this.registry.has(
+                String(id)
+            );
+
+        };
+
+
+    HD5.apps.list =
+        function()
+        {
+
+            return Array.from(
+                this.registry.values()
+            );
+
+        };
+
+
+    HD5.apps.unregister =
+        function(
+            id
+        ) {
+
+            const key =
+                String(id);
+
+
+            const removed =
+                this.registry.delete(
+                    key
+                );
+
+
+            if (
+                removed
+            ) {
+
+                HD5.emit(
+                    "app:unregistered",
+                    {
+                        id: key
+                    }
+                );
+
+            }
+
+
+            return removed;
+
+        };
+
+
+    /* ========================================================
+       UI INITIALIZATION
+       ======================================================== */
+
+    HD5.ui.initialize =
+        function() {
+
+            if (
+                this.initialized
+            ) {
+
+                return true;
+
+            }
+
+
+            this.create();
+
+
+            HD5.world.applySettings();
+
+
+            HD5.state.initialized =
+                true;
+
+
+            HD5.emit(
+                "foundation:ready",
+                {
+
+                    version:
+                        HD5.version,
+
+                    timestamp:
+                        Date.now()
+
+                }
+            );
+
+
+            return true;
+
+        };
+
+
+    /* ========================================================
+       SAFE DOM READY
+       ======================================================== */
+
+    const HD5_startUI =
+        function() {
+
+            try {
+
+                HD5.ui.initialize();
+
+            }
+
+            catch (
+                error
+            ) {
+
+                HD5.errors.report(
+                    error,
+                    "UI.Foundation"
+                );
+
+            }
+
+        };
+
+
+    if (
+        document.readyState ===
+        "loading"
+    ) {
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            HD5_startUI,
+            {
+                once:
+                    true
+            }
+        );
+
+    }
+
+    else {
+
+        HD5_startUI();
+
+    }
+
+
+    /* ========================================================
+       RUNTIME REGISTRATION
+       ======================================================== */
+
+    HD5.runtime.register(
+        "world-foundation",
+        HD5.world,
+        {
+
+            priority:
+                55,
+
+            dependencies:
+                [
+                    "core"
+                ]
+
+        }
+    );
+
+
+    HD5.runtime.register(
+        "ui-foundation",
+        HD5.ui,
+        {
+
+            priority:
+                60,
+
+            dependencies:
+                [
+                    "world-foundation"
+                ]
+
+        }
+    );
+
+
+    /* ========================================================
+       PART 5 READY
+       ======================================================== */
+
+    HD5.emit(
+        "foundation:part5-ready",
+        {
+
+            version:
+                HD5.version,
+
+            status:
+                "online",
+
+            ui:
+                true,
+
+            world:
+                true,
+
+            appFoundation:
+                true
+
+        }
+    );
+
+</script>
+
+    <!-- =========================================================
      HALDO AI OS 22
      PART 6 / 16
      HALDO WINDOW SYSTEM + DESKTOP WINDOWS
