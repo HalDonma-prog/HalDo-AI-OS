@@ -44458,7 +44458,307 @@ console.log(
 
 <!-- ============================================================
      END FINAL UI REPAIR LAYER
+     ========================================================= === -->
+<!-- ============================================================
+     HALDO AI OS 22 — COSMIC HOME LOGO CLICK FIX
+     Verbindet die innere HalDo-Sonne direkt mit HalDo AI.
      ============================================================ -->
 
+<script>
+"use strict";
+
+(function () {
+
+    function connectHalDoHomeLogo() {
+
+        const HD =
+            window.HalDo ||
+            {};
+
+
+        const logo =
+            document.getElementById(
+                "haldo-home-logo"
+            );
+
+
+        if (!logo) {
+
+            console.warn(
+                "[HalDo] haldo-home-logo nicht gefunden."
+            );
+
+            return;
+
+        }
+
+
+        /*
+         * Falls dieser Fix bereits einmal verbunden wurde,
+         * keinen zweiten Listener erzeugen.
+         */
+
+        if (
+            logo.dataset.haldoAiConnected ===
+            "true"
+        ) {
+
+            return;
+
+        }
+
+
+        logo.dataset.haldoAiConnected =
+            "true";
+
+
+        /*
+         * Das bisherige aria-hidden verhindert keine
+         * Maus-/Touch-Events, ist für einen klickbaren
+         * Button aber semantisch falsch.
+         */
+
+        logo.removeAttribute(
+            "aria-hidden"
+        );
+
+
+        logo.setAttribute(
+            "role",
+            "button"
+        );
+
+
+        logo.setAttribute(
+            "tabindex",
+            "0"
+        );
+
+
+        logo.setAttribute(
+            "aria-label",
+            "HalDo AI öffnen"
+        );
+
+
+        function openHalDoAI(
+            event
+        ) {
+
+            if (event) {
+
+                event.preventDefault();
+
+                event.stopPropagation();
+
+            }
+
+
+            try {
+
+                /*
+                 * Immer zuerst den bereits vorhandenen
+                 * zentralen App-Manager benutzen.
+                 */
+
+                if (
+                    HD.appManager &&
+                    typeof HD.appManager.open ===
+                    "function"
+                ) {
+
+                    const instance =
+                        HD.appManager.open(
+                            "haldo-ai"
+                        );
+
+
+                    if (instance) {
+
+                        HD.emit?.(
+                            "haldo:home-logo-opened",
+                            {
+
+                                appId:
+                                    "haldo-ai",
+
+                                instance
+
+                            }
+                        );
+
+
+                        return true;
+
+                    }
+
+                }
+
+            }
+            catch (
+                error
+            ) {
+
+                console.error(
+                    "[HalDo] HalDo AI konnte nicht geöffnet werden:",
+                    error
+                );
+
+            }
+
+
+            /*
+             * Fallback: vorhandene zentrale
+             * Sicherheitsfunktion benutzen.
+             */
+
+            try {
+
+                if (
+                    typeof window
+                        .haldoOpenAppSafe ===
+                    "function"
+                ) {
+
+                    const instance =
+                        window.haldoOpenAppSafe(
+                            "haldo-ai"
+                        );
+
+
+                    if (instance) {
+
+                        return true;
+
+                    }
+
+                }
+
+            }
+            catch (
+                error
+            ) {
+
+                console.error(
+                    "[HalDo] Fallback für HalDo AI fehlgeschlagen:",
+                    error
+                );
+
+            }
+
+
+            return false;
+
+        }
+
+
+        logo.addEventListener(
+            "click",
+            openHalDoAI
+        );
+
+
+        logo.addEventListener(
+            "keydown",
+            function (
+                event
+            ) {
+
+                if (
+                    event.key ===
+                    "Enter" ||
+                    event.key ===
+                    " "
+                ) {
+
+                    openHalDoAI(
+                        event
+                    );
+
+                }
+
+            }
+        );
+
+
+        /*
+         * Kleine visuelle Rückmeldung beim Berühren.
+         * Die bestehende Sonnenanimation bleibt erhalten.
+         */
+
+        logo.style.cursor =
+            "pointer";
+
+
+        logo.style.touchAction =
+            "manipulation";
+
+
+        logo.addEventListener(
+            "pointerdown",
+            function () {
+
+                logo.classList.add(
+                    "haldo-home-logo-active"
+                );
+
+            }
+        );
+
+
+        logo.addEventListener(
+            "pointerup",
+            function () {
+
+                logo.classList.remove(
+                    "haldo-home-logo-active"
+                );
+
+            }
+        );
+
+
+        logo.addEventListener(
+            "pointercancel",
+            function () {
+
+                logo.classList.remove(
+                    "haldo-home-logo-active"
+                );
+
+            }
+        );
+
+
+        console.info(
+            "HalDo AI OS 22 — innere HalDo-Sonne verbunden."
+        );
+
+    }
+
+
+    if (
+        document.readyState ===
+        "loading"
+    ) {
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            connectHalDoHomeLogo,
+            {
+                once:
+                    true
+            }
+        );
+
+    }
+    else {
+
+        connectHalDoHomeLogo();
+
+    }
+
+})();
+</script>
 </body>
 </html>
