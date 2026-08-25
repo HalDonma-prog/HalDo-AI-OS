@@ -56830,5 +56830,2480 @@ haldo-planet-spin {
 
 
 })(window, document);
+/* ============================================================
+   DATEI:
+   /js/cosmic-display.js
+
+   ÄNDERUNG:
+   AN DEN CODE AUS PART 3 DIREKT ANHÄNGEN
+
+   HALDO AI OS — COSMIC DISPLAY
+   PART 4 / 4
+   ============================================================ */
+
+
+/* ============================================================
+   26 — COSMIC AI WINDOW + DISPLAY STYLES
+   ============================================================ */
+
+(function (window, document) {
+
+    "use strict";
+
+
+    function injectStyles() {
+
+        if (
+            document.getElementById(
+                "haldo-cosmic-display-final-style"
+            )
+        ) {
+
+            return;
+
+        }
+
+
+        const style =
+            document.createElement(
+                "style"
+            );
+
+
+        style.id =
+            "haldo-cosmic-display-final-style";
+
+
+        style.textContent = `
+
+            /* =================================================
+               COSMIC ROOT
+               ================================================= */
+
+            .haldo-cosmic-root {
+
+                position:
+                    relative;
+
+                width:
+                    100%;
+
+                min-height:
+                    100dvh;
+
+                min-height:
+                    100vh;
+
+                overflow:
+                    hidden;
+
+                isolation:
+                    isolate;
+
+                background:
+                    radial-gradient(
+                        circle at 50% 50%,
+                        rgba(
+                            18,
+                            27,
+                            70,
+                            .90
+                        ) 0%,
+                        rgba(
+                            5,
+                            8,
+                            25,
+                            .96
+                        ) 42%,
+                        rgba(
+                            1,
+                            3,
+                            13,
+                            1
+                        ) 100%
+                    );
+
+            }
+
+
+            /* =================================================
+               STAR FIELD
+               ================================================= */
+
+            .haldo-cosmic-root::before {
+
+                content:
+                    "";
+
+                position:
+                    absolute;
+
+                inset:
+                    0;
+
+                z-index:
+                    -3;
+
+                pointer-events:
+                    none;
+
+                background-image:
+                    radial-gradient(
+                        circle,
+                        rgba(
+                            255,
+                            255,
+                            255,
+                            .90
+                        ) 0 1px,
+                        transparent 1.6px
+                    );
+
+                background-size:
+                    83px 83px;
+
+                opacity:
+                    .32;
+
+                animation:
+                    haldoStarsDrift
+                    95s
+                    linear
+                    infinite;
+
+            }
+
+
+            .haldo-cosmic-root::after {
+
+                content:
+                    "";
+
+                position:
+                    absolute;
+
+                inset:
+                    0;
+
+                z-index:
+                    -2;
+
+                pointer-events:
+                    none;
+
+                background:
+
+                    radial-gradient(
+                        circle at 18% 24%,
+                        rgba(
+                            90,
+                            120,
+                            255,
+                            .15
+                        ),
+                        transparent 23%
+                    ),
+
+                    radial-gradient(
+                        circle at 78% 22%,
+                        rgba(
+                            180,
+                            90,
+                            255,
+                            .11
+                        ),
+                        transparent 22%
+                    ),
+
+                    radial-gradient(
+                        circle at 50% 80%,
+                        rgba(
+                            255,
+                            170,
+                            55,
+                            .08
+                        ),
+                        transparent 28%
+                    );
+
+            }
+
+
+            @keyframes haldoStarsDrift {
+
+                from {
+
+                    transform:
+                        translate3d(
+                            0,
+                            0,
+                            0
+                        );
+
+                }
+
+                to {
+
+                    transform:
+                        translate3d(
+                            -83px,
+                            83px,
+                            0
+                        );
+
+                }
+
+            }
+
+
+            /* =================================================
+               COSMIC CENTER
+               ================================================= */
+
+            .haldo-cosmic-center {
+
+                position:
+                    absolute;
+
+                left:
+                    50%;
+
+                top:
+                    50%;
+
+                width:
+                    min(
+                        86vw,
+                        820px
+                    );
+
+                height:
+                    min(
+                        86vw,
+                        820px
+                    );
+
+                transform:
+                    translate(
+                        -50%,
+                        -50%
+                    );
+
+                display:
+                    grid;
+
+                place-items:
+                    center;
+
+                pointer-events:
+                    none;
+
+            }
+
+
+            /* =================================================
+               SUN
+               ================================================= */
+
+            .haldo-sun,
+            .cosmic-sun,
+            [data-haldo-sun] {
+
+                position:
+                    absolute;
+
+                left:
+                    50%;
+
+                top:
+                    50%;
+
+                width:
+                    clamp(
+                        135px,
+                        22vw,
+                        245px
+                    );
+
+                height:
+                    clamp(
+                        135px,
+                        22vw,
+                        245px
+                    );
+
+                transform:
+                    translate(
+                        -50%,
+                        -50%
+                    );
+
+                border-radius:
+                    50%;
+
+                cursor:
+                    pointer;
+
+                pointer-events:
+                    auto;
+
+                z-index:
+                    30;
+
+                background:
+
+                    radial-gradient(
+                        circle at 37% 34%,
+                        rgba(
+                            255,
+                            255,
+                            255,
+                            1
+                        ) 0 4%,
+                        rgba(
+                            255,
+                            247,
+                            192,
+                            1
+                        ) 7%,
+                        rgba(
+                            255,
+                            214,
+                            79,
+                            1
+                        ) 25%,
+                        rgba(
+                            255,
+                            160,
+                            20,
+                            .98
+                        ) 55%,
+                        rgba(
+                            255,
+                            95,
+                            0,
+                            .90
+                        ) 75%,
+                        rgba(
+                            120,
+                            25,
+                            0,
+                            .20
+                        ) 100%
+                    );
+
+                box-shadow:
+
+                    0 0 18px
+                    rgba(
+                        255,
+                        244,
+                        160,
+                        .95
+                    ),
+
+                    0 0 45px
+                    rgba(
+                        255,
+                        195,
+                        60,
+                        .85
+                    ),
+
+                    0 0 90px
+                    rgba(
+                        255,
+                        135,
+                        20,
+                        .55
+                    ),
+
+                    0 0 180px
+                    rgba(
+                        255,
+                        95,
+                        0,
+                        .30
+                    );
+
+                transition:
+                    transform .35s ease,
+                    filter .35s ease;
+
+                animation:
+                    haldoSunBreathing
+                    5.5s
+                    ease-in-out
+                    infinite;
+
+            }
+
+
+            .haldo-sun:hover,
+            .cosmic-sun:hover,
+            [data-haldo-sun]:hover {
+
+                transform:
+                    translate(
+                        -50%,
+                        -50%
+                    )
+                    scale(
+                        1.045
+                    );
+
+                filter:
+                    brightness(
+                        1.12
+                    );
+
+            }
+
+
+            .haldo-sun::before,
+            .cosmic-sun::before,
+            [data-haldo-sun]::before {
+
+                content:
+                    "";
+
+                position:
+                    absolute;
+
+                inset:
+                    -38px;
+
+                border-radius:
+                    50%;
+
+                pointer-events:
+                    none;
+
+                background:
+                    repeating-conic-gradient(
+                        from 0deg,
+                        rgba(
+                            255,
+                            235,
+                            120,
+                            .60
+                        ) 0deg 1.1deg,
+                        transparent 1.1deg 3.1deg
+                    );
+
+                -webkit-mask:
+                    radial-gradient(
+                        circle,
+                        transparent 0 56%,
+                        #000 58% 100%
+                    );
+
+                mask:
+                    radial-gradient(
+                        circle,
+                        transparent 0 56%,
+                        #000 58% 100%
+                    );
+
+                animation:
+                    haldoSunRays
+                    28s
+                    linear
+                    infinite;
+
+            }
+
+
+            .haldo-sun::after,
+            .cosmic-sun::after,
+            [data-haldo-sun]::after {
+
+                content:
+                    "";
+
+                position:
+                    absolute;
+
+                inset:
+                    12%;
+
+                border-radius:
+                    50%;
+
+                background:
+
+                    radial-gradient(
+                        circle at 28% 28%,
+                        rgba(
+                            255,
+                            255,
+                            255,
+                            .58
+                        ) 0 2%,
+                        transparent 2.8%
+                    ),
+
+                    radial-gradient(
+                        circle at 70% 61%,
+                        rgba(
+                            255,
+                            255,
+                            255,
+                            .22
+                        ) 0 2%,
+                        transparent 3%
+                    ),
+
+                    radial-gradient(
+                        circle at 55% 32%,
+                        rgba(
+                            255,
+                            120,
+                            0,
+                            .55
+                        ) 0 6%,
+                        transparent 7%
+                    );
+
+                opacity:
+                    .65;
+
+                animation:
+                    haldoSunSurface
+                    8s
+                    ease-in-out
+                    infinite alternate;
+
+            }
+
+
+            @keyframes haldoSunBreathing {
+
+                0%,
+                100% {
+
+                    box-shadow:
+
+                        0 0 18px
+                        rgba(
+                            255,
+                            244,
+                            160,
+                            .95
+                        ),
+
+                        0 0 45px
+                        rgba(
+                            255,
+                            195,
+                            60,
+                            .80
+                        ),
+
+                        0 0 90px
+                        rgba(
+                            255,
+                            135,
+                            20,
+                            .50
+                        );
+
+                }
+
+                50% {
+
+                    box-shadow:
+
+                        0 0 26px
+                        rgba(
+                            255,
+                            255,
+                            200,
+                            1
+                        ),
+
+                        0 0 65px
+                        rgba(
+                            255,
+                            210,
+                            75,
+                            .95
+                        ),
+
+                        0 0 130px
+                        rgba(
+                            255,
+                            135,
+                            20,
+                            .68
+                        );
+
+                }
+
+            }
+
+
+            @keyframes haldoSunRays {
+
+                to {
+
+                    transform:
+                        rotate(
+                            360deg
+                        );
+
+                }
+
+            }
+
+
+            @keyframes haldoSunSurface {
+
+                from {
+
+                    transform:
+                        rotate(
+                            -4deg
+                        )
+                        scale(
+                            .97
+                        );
+
+                }
+
+                to {
+
+                    transform:
+                        rotate(
+                            4deg
+                        )
+                        scale(
+                            1.03
+                        );
+
+                }
+
+            }
+
+
+            /* =================================================
+               AI LOGO INSIDE SUN
+               ================================================= */
+
+            .haldo-sun img,
+            .cosmic-sun img,
+            [data-haldo-sun] img {
+
+                position:
+                    absolute;
+
+                left:
+                    50%;
+
+                top:
+                    50%;
+
+                width:
+                    48%;
+
+                height:
+                    48%;
+
+                object-fit:
+                    contain;
+
+                transform:
+                    translate(
+                        -50%,
+                        -50%
+                    );
+
+                border-radius:
+                    50%;
+
+                z-index:
+                    4;
+
+                pointer-events:
+                    none;
+
+                filter:
+                    drop-shadow(
+                        0 0 7px
+                        rgba(
+                            255,
+                            255,
+                            255,
+                            .95
+                        )
+                    )
+                    drop-shadow(
+                        0 0 18px
+                        rgba(
+                            255,
+                            215,
+                            95,
+                            .90
+                        )
+                    );
+
+                animation:
+                    haldoLogoBreath
+                    4.5s
+                    ease-in-out
+                    infinite;
+
+            }
+
+
+            @keyframes haldoLogoBreath {
+
+                0%,
+                100% {
+
+                    opacity:
+                        .88;
+
+                    transform:
+                        translate(
+                            -50%,
+                            -50%
+                        )
+                        scale(
+                            .98
+                        );
+
+                }
+
+                50% {
+
+                    opacity:
+                        1;
+
+                    transform:
+                        translate(
+                            -50%,
+                            -50%
+                        )
+                        scale(
+                            1.035
+                        );
+
+                }
+
+            }
+
+
+            /* =================================================
+               ORBITS
+               ================================================= */
+
+            .haldo-orbit {
+
+                position:
+                    absolute;
+
+                left:
+                    50%;
+
+                top:
+                    50%;
+
+                border:
+                    1px solid
+                    rgba(
+                        170,
+                        205,
+                        255,
+                        .16
+                    );
+
+                border-radius:
+                    50%;
+
+                transform:
+                    translate(
+                        -50%,
+                        -50%
+                    );
+
+                pointer-events:
+                    none;
+
+            }
+
+
+            .haldo-orbit-1 {
+
+                width:
+                    31%;
+
+                height:
+                    16%;
+
+                transform:
+                    translate(
+                        -50%,
+                        -50%
+                    )
+                    rotate(
+                        -18deg
+                    );
+
+            }
+
+
+            .haldo-orbit-2 {
+
+                width:
+                    43%;
+
+                height:
+                    23%;
+
+                transform:
+                    translate(
+                        -50%,
+                        -50%
+                    )
+                    rotate(
+                        29deg
+                    );
+
+            }
+
+
+            .haldo-orbit-3 {
+
+                width:
+                    56%;
+
+                height:
+                    31%;
+
+                transform:
+                    translate(
+                        -50%,
+                        -50%
+                    )
+                    rotate(
+                        -11deg
+                    );
+
+            }
+
+
+            .haldo-orbit-4 {
+
+                width:
+                    69%;
+
+                height:
+                    39%;
+
+                transform:
+                    translate(
+                        -50%,
+                        -50%
+                    )
+                    rotate(
+                        17deg
+                    );
+
+            }
+
+
+            .haldo-orbit-5 {
+
+                width:
+                    82%;
+
+                height:
+                    47%;
+
+                transform:
+                    translate(
+                        -50%,
+                        -50%
+                    )
+                    rotate(
+                        -25deg
+                    );
+
+            }
+
+
+            .haldo-orbit-6 {
+
+                width:
+                    94%;
+
+                height:
+                    55%;
+
+                transform:
+                    translate(
+                        -50%,
+                        -50%
+                    )
+                    rotate(
+                        8deg
+                    );
+
+            }
+
+
+            /* =================================================
+               PLANETS
+               ================================================= */
+
+            .haldo-planet {
+
+                position:
+                    absolute;
+
+                width:
+                    clamp(
+                        8px,
+                        1.8vw,
+                        22px
+                    );
+
+                height:
+                    clamp(
+                        8px,
+                        1.8vw,
+                        22px
+                    );
+
+                border-radius:
+                    50%;
+
+                box-shadow:
+                    0 0 12px
+                    rgba(
+                        130,
+                        180,
+                        255,
+                        .60
+                    );
+
+                pointer-events:
+                    none;
+
+            }
+
+
+            .haldo-planet-1 {
+
+                left:
+                    50%;
+
+                top:
+                    0;
+
+                transform:
+                    translate(
+                        -50%,
+                        -50%
+                    );
+
+                background:
+                    radial-gradient(
+                        circle at 30% 28%,
+                        #fff 0 4%,
+                        #c9c9c9 5% 24%,
+                        #777 25% 58%,
+                        #353535 59%
+                    );
+
+                animation:
+                    haldoPlanetOrbit1
+                    12s
+                    linear
+                    infinite;
+
+            }
+
+
+            .haldo-planet-2 {
+
+                right:
+                    1%;
+
+                top:
+                    30%;
+
+                background:
+                    radial-gradient(
+                        circle at 32% 28%,
+                        #ffe9bd,
+                        #cf8c43 38%,
+                        #6e3518 75%
+                    );
+
+                animation:
+                    haldoPlanetOrbit2
+                    19s
+                    linear
+                    infinite;
+
+            }
+
+
+            .haldo-planet-3 {
+
+                left:
+                    7%;
+
+                top:
+                    32%;
+
+                background:
+                    radial-gradient(
+                        circle at 34% 28%,
+                        #fff0d5,
+                        #e6b17a 30%,
+                        #a85528 70%
+                    );
+
+                animation:
+                    haldoPlanetOrbit3
+                    24s
+                    linear
+                    infinite reverse;
+
+            }
+
+
+            .haldo-planet-earth {
+
+                width:
+                    clamp(
+                        15px,
+                        2.8vw,
+                        32px
+                    );
+
+                height:
+                    clamp(
+                        15px,
+                        2.8vw,
+                        32px
+                    );
+
+                left:
+                    50%;
+
+                top:
+                    7%;
+
+                background:
+
+                    radial-gradient(
+                        circle at 33% 27%,
+                        #c9f5ff 0 4%,
+                        transparent 5%
+                    ),
+
+                    radial-gradient(
+                        ellipse at 63% 48%,
+                        #4fc36d 0 12%,
+                        transparent 13%
+                    ),
+
+                    radial-gradient(
+                        ellipse at 40% 68%,
+                        #3e8c50 0 11%,
+                        transparent 12%
+                    ),
+
+                    radial-gradient(
+                        circle,
+                        #48a9e8,
+                        #1266a5 72%,
+                        #082d55
+                    );
+
+                box-shadow:
+                    0 0 20px
+                    rgba(
+                        55,
+                        175,
+                        255,
+                        .85
+                    );
+
+                animation:
+                    haldoEarthOrbit
+                    31s
+                    linear
+                    infinite;
+
+            }
+
+
+            .haldo-moon {
+
+                width:
+                    clamp(
+                        5px,
+                        1vw,
+                        11px
+                    );
+
+                height:
+                    clamp(
+                        5px,
+                        1vw,
+                        11px
+                    );
+
+                left:
+                    50%;
+
+                top:
+                    50%;
+
+                background:
+                    radial-gradient(
+                        circle at 32% 30%,
+                        #fff,
+                        #bfc2ca 42%,
+                        #656873 100%
+                    );
+
+                box-shadow:
+                    0 0 8px
+                    rgba(
+                        255,
+                        255,
+                        255,
+                        .65
+                    );
+
+                animation:
+                    haldoMoonOrbit
+                    4.2s
+                    linear
+                    infinite;
+
+            }
+
+
+            @keyframes haldoPlanetOrbit1 {
+
+                to {
+
+                    transform:
+                        translate(
+                            190px,
+                            100px
+                        )
+                        rotate(
+                            360deg
+                        );
+
+                }
+
+            }
+
+
+            @keyframes haldoPlanetOrbit2 {
+
+                to {
+
+                    transform:
+                        translate(
+                            -120px,
+                            170px
+                        )
+                        rotate(
+                            -360deg
+                        );
+
+                }
+
+            }
+
+
+            @keyframes haldoPlanetOrbit3 {
+
+                to {
+
+                    transform:
+                        translate(
+                            160px,
+                            -140px
+                        )
+                        rotate(
+                            360deg
+                        );
+
+                }
+
+            }
+
+
+            @keyframes haldoEarthOrbit {
+
+                to {
+
+                    transform:
+                        translate(
+                            -220px,
+                            130px
+                        )
+                        rotate(
+                            360deg
+                        );
+
+                }
+
+            }
+
+
+            @keyframes haldoMoonOrbit {
+
+                from {
+
+                    transform:
+                        rotate(
+                            0deg
+                        )
+                        translateX(
+                            28px
+                        );
+
+                }
+
+                to {
+
+                    transform:
+                        rotate(
+                            360deg
+                        )
+                        translateX(
+                            28px
+                        );
+
+                }
+
+            }
+
+
+            /* =================================================
+               AI WINDOW
+               ================================================= */
+
+            .haldo-ai-window {
+
+                position:
+                    fixed;
+
+                inset:
+                    0;
+
+                z-index:
+                    99999;
+
+                display:
+                    none;
+
+                align-items:
+                    center;
+
+                justify-content:
+                    center;
+
+                padding:
+                    clamp(
+                        10px,
+                        3vw,
+                        30px
+                    );
+
+                background:
+                    rgba(
+                        0,
+                        0,
+                        0,
+                        .48
+                    );
+
+                backdrop-filter:
+                    blur(
+                        10px
+                    );
+
+                -webkit-backdrop-filter:
+                    blur(
+                        10px
+                    );
+
+            }
+
+
+            .haldo-ai-window.open {
+
+                display:
+                    flex;
+
+                animation:
+                    haldoWindowAppear
+                    .25s
+                    ease
+                    both;
+
+            }
+
+
+            @keyframes haldoWindowAppear {
+
+                from {
+
+                    opacity:
+                        0;
+
+                }
+
+                to {
+
+                    opacity:
+                        1;
+
+                }
+
+            }
+
+
+            .haldo-ai-window-shell {
+
+                width:
+                    min(
+                        920px,
+                        100%
+                    );
+
+                height:
+                    min(
+                        760px,
+                        94dvh
+                    );
+
+                display:
+                    flex;
+
+                flex-direction:
+                    column;
+
+                overflow:
+                    hidden;
+
+                border:
+                    1px solid
+                    rgba(
+                        255,
+                        255,
+                        255,
+                        .13
+                    );
+
+                border-radius:
+                    26px;
+
+                background:
+                    linear-gradient(
+                        145deg,
+                        rgba(
+                            15,
+                            23,
+                            55,
+                            .97
+                        ),
+                        rgba(
+                            3,
+                            7,
+                            23,
+                            .98
+                        )
+                    );
+
+                box-shadow:
+
+                    0 30px 100px
+                    rgba(
+                        0,
+                        0,
+                        0,
+                        .60
+                    ),
+
+                    0 0 80px
+                    rgba(
+                        100,
+                        145,
+                        255,
+                        .13
+                    );
+
+            }
+
+
+            .haldo-ai-window-header {
+
+                min-height:
+                    72px;
+
+                display:
+                    flex;
+
+                align-items:
+                    center;
+
+                justify-content:
+                    space-between;
+
+                padding:
+                    12px 16px;
+
+                border-bottom:
+                    1px solid
+                    rgba(
+                        255,
+                        255,
+                        255,
+                        .08
+                    );
+
+            }
+
+
+            .haldo-ai-window-brand {
+
+                display:
+                    flex;
+
+                align-items:
+                    center;
+
+                gap:
+                    11px;
+
+            }
+
+
+            .haldo-ai-avatar {
+
+                width:
+                    45px;
+
+                height:
+                    45px;
+
+                display:
+                    grid;
+
+                place-items:
+                    center;
+
+                border-radius:
+                    50%;
+
+                background:
+                    radial-gradient(
+                        circle,
+                        rgba(
+                            255,
+                            220,
+                            100,
+                            .35
+                        ),
+                        rgba(
+                            255,
+                            180,
+                            40,
+                            .05
+                        )
+                    );
+
+                box-shadow:
+                    0 0 25px
+                    rgba(
+                        255,
+                        210,
+                        90,
+                        .30
+                    );
+
+            }
+
+
+            .haldo-ai-avatar img {
+
+                width:
+                    35px;
+
+                height:
+                    35px;
+
+                object-fit:
+                    contain;
+
+                border-radius:
+                    50%;
+
+            }
+
+
+            .haldo-ai-window-brand strong {
+
+                display:
+                    block;
+
+                color:
+                    white;
+
+                font-size:
+                    16px;
+
+            }
+
+
+            .haldo-ai-window-brand small {
+
+                display:
+                    block;
+
+                margin-top:
+                    2px;
+
+                color:
+                    rgba(
+                        255,
+                        255,
+                        255,
+                        .46
+                    );
+
+                font-size:
+                    11px;
+
+            }
+
+
+            .haldo-ai-window-close {
+
+                width:
+                    40px;
+
+                height:
+                    40px;
+
+                border:
+                    0;
+
+                border-radius:
+                    12px;
+
+                background:
+                    rgba(
+                        255,
+                        255,
+                        255,
+                        .07
+                    );
+
+                color:
+                    rgba(
+                        255,
+                        255,
+                        255,
+                        .78
+                    );
+
+                font-size:
+                    25px;
+
+                cursor:
+                    pointer;
+
+            }
+
+
+            .haldo-ai-window-close:hover {
+
+                background:
+                    rgba(
+                        255,
+                        90,
+                        100,
+                        .20
+                    );
+
+                color:
+                    white;
+
+            }
+
+
+            .haldo-ai-window-body {
+
+                flex:
+                    1;
+
+                min-height:
+                    0;
+
+                overflow:
+                    hidden;
+
+            }
+
+
+            .haldo-ai-messages {
+
+                height:
+                    100%;
+
+                overflow:
+                    auto;
+
+                padding:
+                    20px;
+
+                scroll-behavior:
+                    smooth;
+
+            }
+
+
+            .haldo-ai-message {
+
+                display:
+                    flex;
+
+                gap:
+                    10px;
+
+                margin:
+                    0 0 17px;
+
+            }
+
+
+            .haldo-ai-message.user {
+
+                justify-content:
+                    flex-end;
+
+            }
+
+
+            .haldo-ai-message-content {
+
+                max-width:
+                    min(
+                        78%,
+                        680px
+                    );
+
+            }
+
+
+            .haldo-ai-message.user
+            .haldo-ai-message-content {
+
+                padding:
+                    11px 14px;
+
+                border-radius:
+                    17px 17px 4px 17px;
+
+                background:
+                    rgba(
+                        90,
+                        135,
+                        255,
+                        .18
+                    );
+
+                border:
+                    1px solid
+                    rgba(
+                        130,
+                        170,
+                        255,
+                        .18
+                    );
+
+            }
+
+
+            .haldo-ai-message.assistant
+            .haldo-ai-message-content {
+
+                padding:
+                    10px 13px;
+
+                border-radius:
+                    4px 17px 17px 17px;
+
+                background:
+                    rgba(
+                        255,
+                        255,
+                        255,
+                        .055
+                    );
+
+                border:
+                    1px solid
+                    rgba(
+                        255,
+                        255,
+                        255,
+                        .07
+                    );
+
+            }
+
+
+            .haldo-ai-message-avatar {
+
+                width:
+                    34px;
+
+                height:
+                    34px;
+
+                flex:
+                    0 0 34px;
+
+                display:
+                    grid;
+
+                place-items:
+                    center;
+
+                border-radius:
+                    50%;
+
+                background:
+                    rgba(
+                        255,
+                        215,
+                        90,
+                        .10
+                    );
+
+            }
+
+
+            .haldo-ai-message-avatar img {
+
+                width:
+                    27px;
+
+                height:
+                    27px;
+
+                object-fit:
+                    contain;
+
+                border-radius:
+                    50%;
+
+            }
+
+
+            .haldo-ai-message-name {
+
+                margin-bottom:
+                    4px;
+
+                color:
+                    rgba(
+                        255,
+                        255,
+                        255,
+                        .43
+                    );
+
+                font-size:
+                    10px;
+
+                font-weight:
+                    700;
+
+            }
+
+
+            .haldo-ai-message-text {
+
+                color:
+                    rgba(
+                        255,
+                        255,
+                        255,
+                        .90
+                    );
+
+                line-height:
+                    1.55;
+
+                white-space:
+                    pre-wrap;
+
+                word-break:
+                    break-word;
+
+                font-size:
+                    14px;
+
+            }
+
+
+            .haldo-ai-thinking-dot {
+
+                display:
+                    inline-block;
+
+                animation:
+                    haldoThinking
+                    1.1s
+                    infinite;
+
+            }
+
+
+            .haldo-ai-thinking-dot:nth-child(2) {
+
+                animation-delay:
+                    .15s;
+
+            }
+
+
+            .haldo-ai-thinking-dot:nth-child(3) {
+
+                animation-delay:
+                    .30s;
+
+            }
+
+
+            @keyframes haldoThinking {
+
+                0%,
+                80%,
+                100% {
+
+                    opacity:
+                        .20;
+
+                }
+
+                40% {
+
+                    opacity:
+                        1;
+
+                }
+
+            }
+
+
+            .haldo-ai-input-area {
+
+                display:
+                    flex;
+
+                align-items:
+                    flex-end;
+
+                gap:
+                    9px;
+
+                padding:
+                    12px;
+
+                border-top:
+                    1px solid
+                    rgba(
+                        255,
+                        255,
+                        255,
+                        .08
+                    );
+
+            }
+
+
+            .haldo-ai-input {
+
+                flex:
+                    1;
+
+                min-width:
+                    0;
+
+                max-height:
+                    160px;
+
+                resize:
+                    vertical;
+
+                padding:
+                    12px 14px;
+
+                border:
+                    1px solid
+                    rgba(
+                        255,
+                        255,
+                        255,
+                        .11
+                    );
+
+                border-radius:
+                    16px;
+
+                outline:
+                    none;
+
+                background:
+                    rgba(
+                        0,
+                        0,
+                        0,
+                        .22
+                    );
+
+                color:
+                    white;
+
+                font:
+                    inherit;
+
+                line-height:
+                    1.4;
+
+            }
+
+
+            .haldo-ai-input:focus {
+
+                border-color:
+                    rgba(
+                        130,
+                        170,
+                        255,
+                        .42
+                    );
+
+                box-shadow:
+                    0 0 20px
+                    rgba(
+                        90,
+                        135,
+                        255,
+                        .09
+                    );
+
+            }
+
+
+            .haldo-ai-send {
+
+                width:
+                    48px;
+
+                height:
+                    48px;
+
+                flex:
+                    0 0 48px;
+
+                border:
+                    0;
+
+                border-radius:
+                    15px;
+
+                background:
+                    linear-gradient(
+                        135deg,
+                        rgba(
+                            255,
+                            220,
+                            110,
+                            .95
+                        ),
+                        rgba(
+                            255,
+                            145,
+                            40,
+                            .95
+                        )
+                    );
+
+                color:
+                    #1b1300;
+
+                font-size:
+                    20px;
+
+                font-weight:
+                    800;
+
+                cursor:
+                    pointer;
+
+                box-shadow:
+                    0 0 25px
+                    rgba(
+                        255,
+                        190,
+                        60,
+                        .24
+                    );
+
+            }
+
+
+            .haldo-ai-send:hover {
+
+                filter:
+                    brightness(
+                        1.08
+                    );
+
+                transform:
+                    translateY(
+                        -1px
+                    );
+
+            }
+
+
+            /* =================================================
+               MOBILE
+               ================================================= */
+
+            @media(
+                max-width: 700px
+            ){
+
+                .haldo-cosmic-center {
+
+                    width:
+                        100vw;
+
+                    height:
+                        100vw;
+
+                }
+
+
+                .haldo-sun,
+                .cosmic-sun,
+                [data-haldo-sun] {
+
+                    width:
+                        145px;
+
+                    height:
+                        145px;
+
+                }
+
+
+                .haldo-ai-window {
+
+                    padding:
+                        0;
+
+                }
+
+
+                .haldo-ai-window-shell {
+
+                    width:
+                        100%;
+
+                    height:
+                        100%;
+
+                    min-height:
+                        100%;
+
+                    border-radius:
+                        0;
+
+                    border:
+                        0;
+
+                }
+
+
+                .haldo-ai-window-header {
+
+                    padding-top:
+                        max(
+                            12px,
+                            env(
+                                safe-area-inset-top
+                            )
+                        );
+
+                }
+
+
+                .haldo-ai-messages {
+
+                    padding:
+                        14px;
+
+                }
+
+
+                .haldo-ai-message-content {
+
+                    max-width:
+                        86%;
+
+                }
+
+
+                .haldo-ai-input-area {
+
+                    padding-bottom:
+                        max(
+                            10px,
+                            env(
+                                safe-area-inset-bottom
+                            )
+                        );
+
+                }
+
+            }
+
+
+            @media(
+                prefers-reduced-motion: reduce
+            ){
+
+                .haldo-cosmic-root *,
+                .haldo-cosmic-root::before,
+                .haldo-sun,
+                .cosmic-sun,
+                [data-haldo-sun] {
+
+                    animation-duration:
+                        .01ms !important;
+
+                    animation-iteration-count:
+                        1 !important;
+
+                    scroll-behavior:
+                        auto !important;
+
+                }
+
+            }
+
+        `;
+
+
+        document.head.appendChild(
+            style
+        );
+
+    }
+
+
+    /* ========================================================
+       27 — MAKE EXISTING SUN COMPATIBLE
+       ======================================================== */
+
+    function prepareSun() {
+
+        const sun =
+            document.querySelector(
+                "[data-haldo-sun]"
+            ) ||
+            document.querySelector(
+                ".haldo-sun"
+            ) ||
+            document.querySelector(
+                ".cosmic-sun"
+            );
+
+
+        if (
+            !sun
+        ) {
+
+            return;
+
+        }
+
+
+        /*
+         * Das vorhandene HalDo-Logo wird
+         * automatisch als innere Sonne
+         * verwendet, wenn noch kein Bild
+         * vorhanden ist.
+         */
+
+        if (
+            !sun.querySelector(
+                "img"
+            )
+        ) {
+
+            const image =
+                document.createElement(
+                    "img"
+                );
+
+
+            image.src =
+                "assets/logo/logo.png";
+
+
+            image.alt =
+                "HalDo AI";
+
+
+            sun.appendChild(
+                image
+            );
+
+        }
+
+
+        /*
+         * Für bereits vorhandene
+         * Sonnen-/Cosmic-Strukturen
+         * werden keine alten Elemente
+         * gelöscht.
+         */
+
+        sun.classList.add(
+            "haldo-sun"
+        );
+
+
+        sun.setAttribute(
+            "data-haldo-sun",
+            ""
+        );
+
+    }
+
+
+    /* ========================================================
+       28 — GLOBAL APP OPEN HELPER
+       ======================================================== */
+
+    function installGlobalAppHelper() {
+
+        window.HalDoOpenApp =
+            function (
+                appId,
+                options = {}
+            ) {
+
+                const api =
+                    window.HalDoCosmicDisplay;
+
+
+                if (
+                    api &&
+                    typeof api.openApp ===
+                    "function"
+                ) {
+
+                    return api.openApp(
+                        appId,
+                        options
+                    );
+
+                }
+
+
+                return null;
+
+            };
+
+    }
+
+
+    /* ========================================================
+       29 — AI OPEN HELPER
+       ======================================================== */
+
+    function installGlobalAIHelper() {
+
+        window.HalDoOpenAI =
+            function (
+                options = {}
+            ) {
+
+                const api =
+                    window.HalDoCosmicDisplay;
+
+
+                if (
+                    api &&
+                    typeof api.openAI ===
+                    "function"
+                ) {
+
+                    return api.openAI(
+                        options
+                    );
+
+                }
+
+
+                return null;
+
+            };
+
+    }
+
+
+    /* ========================================================
+       30 — FINAL INITIALIZATION
+       ======================================================== */
+
+    function initializeFinalCosmicLayer() {
+
+        injectStyles();
+
+        prepareSun();
+
+        installGlobalAppHelper();
+
+        installGlobalAIHelper();
+
+
+        /*
+         * Nachträgliche Initialisierung,
+         * falls index.html die Cosmic-Struktur
+         * erst nach diesem Script erzeugt.
+         */
+
+        window.setTimeout(
+            function () {
+
+                prepareSun();
+
+            },
+            150
+        );
+
+
+        window.setTimeout(
+            function () {
+
+                prepareSun();
+
+            },
+            800
+        );
+
+
+        /*
+         * App-System kann nach dem Boot
+         * seine Registry aktualisieren.
+         */
+
+        window.addEventListener(
+            "haldo:apps-ready",
+            function () {
+
+                if (
+                    window.HalDoCosmicDisplay &&
+                    typeof
+                    window.HalDoCosmicDisplay.refreshApps ===
+                    "function"
+                ) {
+
+                    window.HalDoCosmicDisplay.refreshApps();
+
+                }
+
+            }
+        );
+
+
+        emitReady();
+
+    }
+
+
+    function emitReady() {
+
+        try {
+
+            window.dispatchEvent(
+                new CustomEvent(
+                    "haldo:cosmic-display-ready",
+                    {
+                        detail:
+                            {
+                                version:
+                                    "20.2.0",
+                                features:
+                                    [
+                                        "cosmic-sun",
+                                        "haldo-logo",
+                                        "ai-window",
+                                        "app-menu",
+                                        "responsive-ui",
+                                        "app-routing"
+                                    ]
+                            }
+                    }
+                )
+            );
+
+        } catch (_) {}
+
+    }
+
+
+    if (
+        document.readyState ===
+        "loading"
+    ) {
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            initializeFinalCosmicLayer,
+            {
+                once:
+                    true
+            }
+        );
+
+    } else {
+
+        initializeFinalCosmicLayer();
+
+    }
+
+
+})(window, document);
+
+
+/* ============================================================
+   PART 4 ENDE
+   ============================================================ */
 </body>
 </html>
