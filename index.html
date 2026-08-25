@@ -49657,5 +49657,2387 @@ HD.emit(
 
 })();
 </script>
+<!-- =========================================================
+     HALDO AI OS 22
+     INDEX.HTML — PART 1 / 12
+     COSMIC WORLD + CENTRAL SUN + UNIVERSAL WINDOW BRIDGE
+     
+     EINSETZORT:
+     Direkt vor dem vorhandenen:
+     </body>
+
+     NICHT in einen bestehenden <script>-Block einfügen.
+     ========================================================= -->
+
+<script>
+"use strict";
+
+(function (window, document) {
+
+    if (window.HalDoCosmicUniversalBridge) {
+        return;
+    }
+
+    const HDX = {
+
+        version: "22.1.0",
+        id: "haldo-cosmic-universal-bridge",
+
+        state: {
+            ready: false,
+            windows: new Map(),
+            zIndex: 2147481000,
+            aiWindow: null
+        }
+
+    };
+
+    window.HalDoCosmicUniversalBridge = HDX;
+
+
+    /* ========================================================
+       01 — SAFE HELPERS
+       ======================================================== */
+
+    function byId(id) {
+        return document.getElementById(id);
+    }
+
+
+    function qs(selector, root = document) {
+        return root.querySelector(selector);
+    }
+
+
+    function hasMethod(object, method) {
+        return !!(
+            object &&
+            typeof object[method] === "function"
+        );
+    }
+
+
+    function emit(name, detail = {}) {
+
+        try {
+
+            window.dispatchEvent(
+                new CustomEvent(
+                    name,
+                    {
+                        detail
+                    }
+                )
+            );
+
+        } catch (_) {}
+
+    }
+
+
+    function getLogo() {
+
+        const candidates = [
+            "assets/logo/logo.png",
+            "logo.png",
+            "./assets/logo/logo.png"
+        ];
+
+        for (const source of candidates) {
+
+            try {
+
+                const image =
+                    new Image();
+
+                image.src =
+                    source;
+
+                return source;
+
+            } catch (_) {}
+
+        }
+
+        return "assets/logo/logo.png";
+    }
+
+
+    /* ========================================================
+       02 — EXISTING WINDOW SYSTEM
+       ======================================================== */
+
+    function getWindowManager() {
+
+        return (
+            window.HalDoWindowManager ||
+            window.HalDoOSWindowManager ||
+            window.HalDoOS?.windowManager ||
+            window.HalDo?.windowManager ||
+            null
+        );
+
+    }
+
+
+    function getAppManager() {
+
+        return (
+            window.HalDoAppManager ||
+            window.HalDoOSAppManager ||
+            window.HalDoOS?.appManager ||
+            null
+        );
+
+    }
+
+
+    function getRouter() {
+
+        return (
+            window.HalDoAppRouter ||
+            window.HalDoRouter ||
+            window.HalDoOS?.router ||
+            window.HalDo?.router ||
+            null
+        );
+
+    }
+
+
+    function getRegistry() {
+
+        return (
+            window.HalDoAppRegistry ||
+            window.HalDoOS?.appRegistry ||
+            window.HalDo?.appRegistry ||
+            null
+        );
+
+    }
+
+
+    /* ========================================================
+       03 — EXISTING HALDO AI WINDOW
+       ======================================================== */
+
+    function findExistingAIWindow() {
+
+        return (
+            byId("haldo-ai-window") ||
+            qs(
+                "[data-haldo-ai-window]"
+            ) ||
+            qs(
+                ".haldo-ai-window"
+            )
+        );
+
+    }
+
+
+    function showExistingAIWindow() {
+
+        const element =
+            findExistingAIWindow();
+
+        if (!element) {
+            return false;
+        }
+
+        try {
+
+            element.setAttribute(
+                "aria-hidden",
+                "false"
+            );
+
+        } catch (_) {}
+
+
+        element.classList.add(
+            "is-open",
+            "open",
+            "visible",
+            "active"
+        );
+
+
+        element.hidden =
+            false;
+
+
+        element.style.display =
+            "flex";
+
+
+        element.style.visibility =
+            "visible";
+
+
+        element.style.opacity =
+            "1";
+
+
+        element.style.pointerEvents =
+            "auto";
+
+
+        element.style.zIndex =
+            String(
+                ++HDX.state.zIndex
+            );
+
+
+        HDX.state.aiWindow =
+            element;
+
+
+        emit(
+            "haldo:ai-window-opened",
+            {
+                source:
+                    "cosmic-sun",
+
+                element
+            }
+        );
+
+
+        focusAIInput(
+            element
+        );
+
+
+        return true;
+
+    }
+
+
+    function focusAIInput(
+        root
+    ) {
+
+        const input =
+            root.querySelector(
+                "textarea, input[type='text'], [contenteditable='true']"
+            );
+
+        if (!input) {
+            return;
+        }
+
+        try {
+
+            setTimeout(
+                function () {
+
+                    input.focus();
+
+                },
+                80
+            );
+
+        } catch (_) {}
+
+    }
+
+
+    /* ========================================================
+       04 — UNIVERSAL AI WINDOW FALLBACK
+       ======================================================== */
+
+    function createUniversalAIWindow() {
+
+        const existing =
+            byId(
+                "haldo-universal-ai-window"
+            );
+
+        if (existing) {
+            return existing;
+        }
+
+
+        const windowElement =
+            document.createElement(
+                "section"
+            );
+
+
+        windowElement.id =
+            "haldo-universal-ai-window";
+
+
+        windowElement.className =
+            "haldo-universal-window haldo-universal-ai-window";
+
+
+        windowElement.setAttribute(
+            "role",
+            "dialog"
+        );
+
+
+        windowElement.setAttribute(
+            "aria-modal",
+            "true"
+        );
+
+
+        windowElement.setAttribute(
+            "aria-label",
+            "HalDo AI"
+        );
+
+
+        windowElement.innerHTML = `
+
+            <div class="haldo-universal-window-panel">
+
+                <header
+                    class="haldo-universal-window-header"
+                >
+
+                    <div
+                        class="haldo-universal-window-brand"
+                    >
+
+                        <img
+                            src="${getLogo()}"
+                            alt="HalDo AI"
+                        >
+
+                        <div>
+
+                            <strong>
+                                HalDo AI
+                            </strong>
+
+                            <small>
+                                Cosmic Intelligence
+                            </small>
+
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        class="haldo-universal-window-actions"
+                    >
+
+                        <button
+                            type="button"
+                            data-hdx-ai-minimize
+                            aria-label="Minimieren"
+                        >
+                            −
+                        </button>
+
+
+                        <button
+                            type="button"
+                            data-hdx-ai-close
+                            aria-label="Schließen"
+                        >
+                            ×
+                        </button>
+
+                    </div>
+
+                </header>
+
+
+                <main
+                    class="haldo-universal-ai-body"
+                >
+
+                    <div
+                        class="haldo-universal-ai-avatar"
+                    >
+
+                        <div
+                            class="haldo-universal-ai-avatar-glow"
+                        ></div>
+
+                        <img
+                            src="${getLogo()}"
+                            alt="HalDo AI"
+                        >
+
+                    </div>
+
+
+                    <div
+                        class="haldo-universal-ai-title"
+                    >
+                        HalDo AI
+                    </div>
+
+
+                    <div
+                        class="haldo-universal-ai-subtitle"
+                    >
+                        Wie kann ich dir helfen?
+                    </div>
+
+
+                    <div
+                        id="haldo-universal-ai-messages"
+                        class="haldo-universal-ai-messages"
+                        aria-live="polite"
+                    >
+
+                        <div
+                            class="haldo-ai-message haldo-ai-message-system"
+                        >
+                            Hallo. Ich bin HalDo AI.
+                            Du kannst mit mir schreiben,
+                            Fragen stellen und dich mit mir
+                            unterhalten.
+                        </div>
+
+                    </div>
+
+
+                    <form
+                        id="haldo-universal-ai-form"
+                        class="haldo-universal-ai-form"
+                    >
+
+                        <textarea
+                            id="haldo-universal-ai-input"
+                            placeholder="Schreibe etwas an HalDo AI …"
+                            rows="2"
+                            autocomplete="off"
+                            spellcheck="true"
+                        ></textarea>
+
+
+                        <button
+                            type="submit"
+                            aria-label="Nachricht senden"
+                        >
+                            Senden
+                        </button>
+
+                    </form>
+
+                </main>
+
+            </div>
+
+        `;
+
+
+        document.body.appendChild(
+            windowElement
+        );
+
+
+        bindUniversalAIWindow(
+            windowElement
+        );
+
+
+        return windowElement;
+
+    }
+
+
+    /* ========================================================
+       05 — UNIVERSAL AI WINDOW EVENTS
+       ======================================================== */
+
+    function bindUniversalAIWindow(
+        element
+    ) {
+
+        if (
+            element.dataset.hdxBound ===
+            "true"
+        ) {
+            return;
+        }
+
+
+        element.dataset.hdxBound =
+            "true";
+
+
+        const closeButton =
+            element.querySelector(
+                "[data-hdx-ai-close]"
+            );
+
+
+        const minimizeButton =
+            element.querySelector(
+                "[data-hdx-ai-minimize]"
+            );
+
+
+        if (closeButton) {
+
+            closeButton.addEventListener(
+                "click",
+                function () {
+
+                    closeUniversalWindow(
+                        element
+                    );
+
+                }
+            );
+
+        }
+
+
+        if (minimizeButton) {
+
+            minimizeButton.addEventListener(
+                "click",
+                function () {
+
+                    element.classList.toggle(
+                        "is-minimized"
+                    );
+
+                }
+            );
+
+        }
+
+
+        const form =
+            byId(
+                "haldo-universal-ai-form"
+            );
+
+
+        if (form) {
+
+            form.addEventListener(
+                "submit",
+                async function (event) {
+
+                    event.preventDefault();
+
+                    const input =
+                        byId(
+                            "haldo-universal-ai-input"
+                        );
+
+
+                    if (!input) {
+                        return;
+                    }
+
+
+                    const text =
+                        String(
+                            input.value ||
+                            ""
+                        ).trim();
+
+
+                    if (!text) {
+                        return;
+                    }
+
+
+                    appendAIMessage(
+                        text,
+                        "user"
+                    );
+
+
+                    input.value =
+                        "";
+
+
+                    await processAIMessage(
+                        text
+                    );
+
+                }
+            );
+
+        }
+
+    }
+
+
+    /* ========================================================
+       06 — AI MESSAGE SYSTEM
+       ======================================================== */
+
+    function appendAIMessage(
+        text,
+        type
+    ) {
+
+        const container =
+            byId(
+                "haldo-universal-ai-messages"
+            );
+
+
+        if (!container) {
+            return;
+        }
+
+
+        const message =
+            document.createElement(
+                "div"
+            );
+
+
+        message.className =
+            "haldo-ai-message " +
+            (
+                type === "user"
+                    ? "haldo-ai-message-user"
+                    : "haldo-ai-message-ai"
+            );
+
+
+        message.textContent =
+            text;
+
+
+        container.appendChild(
+            message
+        );
+
+
+        container.scrollTop =
+            container.scrollHeight;
+
+    }
+
+
+    /* ========================================================
+       07 — AI SERVICE BRIDGE
+       ======================================================== */
+
+    async function processAIMessage(
+        text
+    ) {
+
+        const ai =
+            window.HalDoAI ||
+            window.HalDoAIService ||
+            window.HalDoOS?.ai ||
+            window.HalDo?.ai ||
+            null;
+
+
+        if (
+            ai &&
+            hasMethod(
+                ai,
+                "chat"
+            )
+        ) {
+
+            try {
+
+                const result =
+                    await ai.chat(
+                        text
+                    );
+
+
+                const answer =
+                    typeof result ===
+                    "string"
+                        ? result
+                        : (
+                            result?.text ||
+                            result?.response ||
+                            result?.message ||
+                            "Ich habe deine Nachricht verarbeitet."
+                        );
+
+
+                appendAIMessage(
+                    answer,
+                    "ai"
+                );
+
+
+                return answer;
+
+            } catch (error) {
+
+                emit(
+                    "haldo:ai-error",
+                    {
+                        error
+                    }
+                );
+
+            }
+
+        }
+
+
+        if (
+            ai &&
+            hasMethod(
+                ai,
+                "ask"
+            )
+        ) {
+
+            try {
+
+                const result =
+                    await ai.ask(
+                        text
+                    );
+
+
+                const answer =
+                    typeof result ===
+                    "string"
+                        ? result
+                        : (
+                            result?.text ||
+                            result?.response ||
+                            result?.message ||
+                            "Ich habe deine Nachricht verarbeitet."
+                        );
+
+
+                appendAIMessage(
+                    answer,
+                    "ai"
+                );
+
+
+                return answer;
+
+            } catch (error) {
+
+                emit(
+                    "haldo:ai-error",
+                    {
+                        error
+                    }
+                );
+
+            }
+
+        }
+
+
+        appendAIMessage(
+            "Ich bin bereit. Mein vollständiges AI-Service-Modul wird für diese Unterhaltung verwendet, sobald es verbunden ist.",
+            "ai"
+        );
+
+
+        return null;
+
+    }
+
+
+    /* ========================================================
+       08 — CLOSE WINDOW
+       ======================================================== */
+
+    function closeUniversalWindow(
+        element
+    ) {
+
+        if (!element) {
+            return;
+        }
+
+
+        element.classList.remove(
+            "is-open",
+            "open",
+            "visible",
+            "active"
+        );
+
+
+        element.style.display =
+            "none";
+
+
+        element.style.pointerEvents =
+            "none";
+
+
+        try {
+
+            element.setAttribute(
+                "aria-hidden",
+                "true"
+            );
+
+        } catch (_) {}
+
+
+        emit(
+            "haldo:window-closed",
+            {
+                element
+            }
+        );
+
+    }
+
+
+    /* ========================================================
+       09 — OPEN HALDO AI
+       ======================================================== */
+
+    async function openHalDoAI(
+        options = {}
+    ) {
+
+        /*
+         * Bestehende professionelle
+         * HalDo-AI-Oberfläche zuerst benutzen.
+         */
+
+        if (
+            showExistingAIWindow()
+        ) {
+
+            return (
+                HDX.state.aiWindow
+            );
+
+        }
+
+
+        /*
+         * Fallback-Fenster benutzen,
+         * damit HalDo AI niemals ohne
+         * funktionierendes Fenster bleibt.
+         */
+
+        const element =
+            createUniversalAIWindow();
+
+
+        element.hidden =
+            false;
+
+
+        element.style.display =
+            "flex";
+
+
+        element.style.visibility =
+            "visible";
+
+
+        element.style.opacity =
+            "1";
+
+
+        element.style.pointerEvents =
+            "auto";
+
+
+        element.style.zIndex =
+            String(
+                ++HDX.state.zIndex
+            );
+
+
+        element.classList.add(
+            "is-open",
+            "open",
+            "visible",
+            "active"
+        );
+
+
+        try {
+
+            element.setAttribute(
+                "aria-hidden",
+                "false"
+            );
+
+        } catch (_) {}
+
+
+        HDX.state.aiWindow =
+            element;
+
+
+        emit(
+            "haldo:ai-open",
+            {
+                source:
+                    options.source ||
+                    "cosmic-sun",
+
+                options,
+
+                element
+            }
+        );
+
+
+        focusAIInput(
+            element
+        );
+
+
+        return element;
+
+    }
+
+
+    /* ========================================================
+       10 — SUN CONNECTION
+       ======================================================== */
+
+    function bindCosmicSun() {
+
+        const sun =
+            byId(
+                "haldo-cosmic-sun"
+            ) ||
+            qs(
+                ".haldo-cosmic-sun"
+            );
+
+
+        if (!sun) {
+            return false;
+        }
+
+
+        if (
+            sun.dataset.hdxUniversalBound ===
+            "true"
+        ) {
+            return true;
+        }
+
+
+        sun.dataset.hdxUniversalBound =
+            "true";
+
+
+        sun.style.cursor =
+            "pointer";
+
+
+        sun.setAttribute(
+            "role",
+            "button"
+        );
+
+
+        sun.setAttribute(
+            "tabindex",
+            "0"
+        );
+
+
+        sun.addEventListener(
+            "click",
+            function (event) {
+
+                event.preventDefault();
+                event.stopPropagation();
+
+                openHalDoAI({
+                    source:
+                        "cosmic-sun"
+                });
+
+            }
+        );
+
+
+        sun.addEventListener(
+            "keydown",
+            function (event) {
+
+                if (
+                    event.key ===
+                    "Enter" ||
+                    event.key ===
+                    " "
+                ) {
+
+                    event.preventDefault();
+
+                    openHalDoAI({
+                        source:
+                            "cosmic-sun-keyboard"
+                    });
+
+                }
+
+            }
+        );
+
+
+        return true;
+
+    }
+
+
+    /* ========================================================
+       11 — UNIVERSAL APP WINDOW
+       ======================================================== */
+
+    function openUniversalApp(
+        app,
+        options = {}
+    ) {
+
+        if (!app) {
+            return null;
+        }
+
+
+        const manager =
+            getAppManager();
+
+
+        /*
+         * Bestehenden App Manager
+         * bevorzugt verwenden.
+         */
+
+        if (
+            manager &&
+            hasMethod(
+                manager,
+                "open"
+            )
+        ) {
+
+            try {
+
+                return manager.open(
+                    app.id ||
+                    app.appId ||
+                    app,
+                    options
+                );
+
+            } catch (_) {}
+
+        }
+
+
+        if (
+            manager &&
+            hasMethod(
+                manager,
+                "openApp"
+            )
+        ) {
+
+            try {
+
+                return manager.openApp(
+                    app.id ||
+                    app.appId ||
+                    app,
+                    options
+                );
+
+            } catch (_) {}
+
+        }
+
+
+        /*
+         * Danach Window Manager.
+         */
+
+        const windowManager =
+            getWindowManager();
+
+
+        if (
+            windowManager &&
+            hasMethod(
+                windowManager,
+                "open"
+            )
+        ) {
+
+            try {
+
+                return windowManager.open({
+
+                    id:
+                        options.windowId ||
+                        (
+                            "haldo-window-" +
+                            (
+                                app.id ||
+                                app.appId ||
+                                "app"
+                            )
+                        ),
+
+                    appId:
+                        app.id ||
+                        app.appId,
+
+                    title:
+                        app.title ||
+                        app.name ||
+                        app.id ||
+                        "HalDo App",
+
+                    icon:
+                        app.icon ||
+                        "◈",
+
+                    singleton:
+                        app.singleton !==
+                        false,
+
+                    ...options
+
+                });
+
+            } catch (_) {}
+
+        }
+
+
+        return createFallbackAppWindow(
+            app,
+            options
+        );
+
+    }
+
+
+    /* ========================================================
+       12 — FALLBACK APP WINDOW
+       ======================================================== */
+
+    function createFallbackAppWindow(
+        app,
+        options = {}
+    ) {
+
+        const id =
+            options.windowId ||
+            (
+                "haldo-fallback-window-" +
+                (
+                    app.id ||
+                    app.appId ||
+                    Date.now()
+                )
+            );
+
+
+        const existing =
+            byId(id);
+
+
+        if (existing) {
+
+            existing.style.display =
+                "flex";
+
+            existing.style.zIndex =
+                String(
+                    ++HDX.state.zIndex
+                );
+
+            return existing;
+
+        }
+
+
+        const element =
+            document.createElement(
+                "section"
+            );
+
+
+        element.id =
+            id;
+
+
+        element.className =
+            "haldo-universal-window haldo-fallback-app-window";
+
+
+        element.setAttribute(
+            "role",
+            "dialog"
+        );
+
+
+        element.innerHTML = `
+
+            <div class="haldo-universal-window-panel">
+
+                <header
+                    class="haldo-universal-window-header"
+                >
+
+                    <div
+                        class="haldo-universal-window-brand"
+                    >
+
+                        <div
+                            class="haldo-universal-app-icon"
+                        >
+                            ${
+                                app.icon ||
+                                "◈"
+                            }
+                        </div>
+
+                        <div>
+
+                            <strong>
+                                ${
+                                    app.title ||
+                                    app.name ||
+                                    app.id ||
+                                    "HalDo App"
+                                }
+                            </strong>
+
+                            <small>
+                                HalDo AI OS
+                            </small>
+
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        class="haldo-universal-window-actions"
+                    >
+
+                        <button
+                            type="button"
+                            data-hdx-close
+                        >
+                            ×
+                        </button>
+
+                    </div>
+
+                </header>
+
+
+                <main
+                    class="haldo-fallback-app-content"
+                >
+
+                    <img
+                        src="${getLogo()}"
+                        alt="HalDo"
+                    >
+
+                    <h2>
+                        ${
+                            app.title ||
+                            app.name ||
+                            app.id ||
+                            "HalDo App"
+                        }
+                    </h2>
+
+                    <p>
+                        Die App ist mit dem
+                        universellen HalDo-Fenstersystem
+                        verbunden.
+                    </p>
+
+                </main>
+
+            </div>
+
+        `;
+
+
+        document.body.appendChild(
+            element
+        );
+
+
+        const close =
+            element.querySelector(
+                "[data-hdx-close]"
+            );
+
+
+        if (close) {
+
+            close.addEventListener(
+                "click",
+                function () {
+
+                    closeUniversalWindow(
+                        element
+                    );
+
+                }
+            );
+
+        }
+
+
+        element.style.display =
+            "flex";
+
+
+        element.style.zIndex =
+            String(
+                ++HDX.state.zIndex
+            );
+
+
+        element.classList.add(
+            "is-open",
+            "open",
+            "visible"
+        );
+
+
+        HDX.state.windows.set(
+            id,
+            element
+        );
+
+
+        emit(
+            "haldo:app-window-opened",
+            {
+                app,
+                options,
+                element
+            }
+        );
+
+
+        return element;
+
+    }
+
+
+    /* ========================================================
+       13 — PROFESSIONAL WINDOW STYLES
+       ======================================================== */
+
+    function installStyles() {
+
+        if (
+            byId(
+                "haldo-cosmic-universal-styles"
+            )
+        ) {
+            return;
+        }
+
+
+        const style =
+            document.createElement(
+                "style"
+            );
+
+
+        style.id =
+            "haldo-cosmic-universal-styles";
+
+
+        style.textContent = `
+
+            .haldo-universal-window {
+
+                position:
+                    fixed;
+
+                inset:
+                    0;
+
+                display:
+                    none;
+
+                align-items:
+                    center;
+
+                justify-content:
+                    center;
+
+                padding:
+                    18px;
+
+                z-index:
+                    2147481000;
+
+                background:
+                    rgba(
+                        1,
+                        4,
+                        15,
+                        .48
+                    );
+
+                backdrop-filter:
+                    blur(
+                        10px
+                    );
+
+                -webkit-backdrop-filter:
+                    blur(
+                        10px
+                    );
+
+                pointer-events:
+                    auto;
+
+            }
+
+
+            .haldo-universal-window.is-open,
+            .haldo-universal-window.open,
+            .haldo-universal-window.visible,
+            .haldo-universal-window.active {
+
+                display:
+                    flex;
+
+            }
+
+
+            .haldo-universal-window-panel {
+
+                width:
+                    min(
+                        960px,
+                        100%
+                    );
+
+                height:
+                    min(
+                        760px,
+                        92dvh
+                    );
+
+                display:
+                    flex;
+
+                flex-direction:
+                    column;
+
+                overflow:
+                    hidden;
+
+                border:
+                    1px solid
+                    rgba(
+                        255,
+                        255,
+                        255,
+                        .16
+                    );
+
+                border-radius:
+                    28px;
+
+                background:
+                    linear-gradient(
+                        145deg,
+                        rgba(
+                            16,
+                            24,
+                            52,
+                            .97
+                        ),
+                        rgba(
+                            3,
+                            7,
+                            21,
+                            .98
+                        )
+                    );
+
+                box-shadow:
+                    0 30px 100px
+                    rgba(
+                        0,
+                        0,
+                        0,
+                        .7
+                    ),
+                    0 0 80px
+                    rgba(
+                        255,
+                        190,
+                        70,
+                        .13
+                    );
+
+                color:
+                    white;
+
+                animation:
+                    haldoUniversalWindowIn
+                    .28s
+                    ease-out;
+
+            }
+
+
+            @keyframes
+            haldoUniversalWindowIn {
+
+                from {
+
+                    opacity:
+                        0;
+
+                    transform:
+                        translateY(
+                            20px
+                        )
+                        scale(
+                            .96
+                        );
+
+                }
+
+                to {
+
+                    opacity:
+                        1;
+
+                    transform:
+                        translateY(
+                            0
+                        )
+                        scale(
+                            1
+                        );
+
+                }
+
+            }
+
+
+            .haldo-universal-window-header {
+
+                min-height:
+                    68px;
+
+                display:
+                    flex;
+
+                align-items:
+                    center;
+
+                justify-content:
+                    space-between;
+
+                gap:
+                    15px;
+
+                padding:
+                    10px
+                    16px;
+
+                border-bottom:
+                    1px solid
+                    rgba(
+                        255,
+                        255,
+                        255,
+                        .09
+                    );
+
+                background:
+                    rgba(
+                        255,
+                        255,
+                        255,
+                        .035
+                    );
+
+            }
+
+
+            .haldo-universal-window-brand {
+
+                display:
+                    flex;
+
+                align-items:
+                    center;
+
+                gap:
+                    12px;
+
+                min-width:
+                    0;
+
+            }
+
+
+            .haldo-universal-window-brand img {
+
+                width:
+                    42px;
+
+                height:
+                    42px;
+
+                object-fit:
+                    contain;
+
+                border-radius:
+                    50%;
+
+                filter:
+                    drop-shadow(
+                        0 0 12px
+                        rgba(
+                            255,
+                            205,
+                            90,
+                            .75
+                        )
+                    );
+
+            }
+
+
+            .haldo-universal-window-brand strong {
+
+                display:
+                    block;
+
+                font-size:
+                    16px;
+
+                letter-spacing:
+                    .2px;
+
+            }
+
+
+            .haldo-universal-window-brand small {
+
+                display:
+                    block;
+
+                margin-top:
+                    3px;
+
+                color:
+                    rgba(
+                        255,
+                        255,
+                        255,
+                        .52
+                    );
+
+            }
+
+
+            .haldo-universal-window-actions {
+
+                display:
+                    flex;
+
+                gap:
+                    7px;
+
+            }
+
+
+            .haldo-universal-window-actions button {
+
+                width:
+                    38px;
+
+                height:
+                    38px;
+
+                border:
+                    1px solid
+                    rgba(
+                        255,
+                        255,
+                        255,
+                        .12
+                    );
+
+                border-radius:
+                    12px;
+
+                background:
+                    rgba(
+                        255,
+                        255,
+                        255,
+                        .06
+                    );
+
+                color:
+                    white;
+
+                font-size:
+                    19px;
+
+                cursor:
+                    pointer;
+
+            }
+
+
+            .haldo-universal-window-actions button:hover {
+
+                background:
+                    rgba(
+                        255,
+                        255,
+                        255,
+                        .13
+                    );
+
+            }
+
+
+            .haldo-universal-ai-body {
+
+                flex:
+                    1;
+
+                min-height:
+                    0;
+
+                display:
+                    flex;
+
+                flex-direction:
+                    column;
+
+                align-items:
+                    center;
+
+                padding:
+                    26px;
+
+            }
+
+
+            .haldo-universal-ai-avatar {
+
+                position:
+                    relative;
+
+                width:
+                    92px;
+
+                height:
+                    92px;
+
+                display:
+                    grid;
+
+                place-items:
+                    center;
+
+                margin:
+                    5px
+                    auto
+                    12px;
+
+            }
+
+
+            .haldo-universal-ai-avatar-glow {
+
+                position:
+                    absolute;
+
+                inset:
+                    -28px;
+
+                border-radius:
+                    50%;
+
+                background:
+                    radial-gradient(
+                        circle,
+                        rgba(
+                            255,
+                            203,
+                            84,
+                            .34
+                        ),
+                        transparent
+                        68%
+                    );
+
+                animation:
+                    haldoAvatarGlow
+                    3s
+                    ease-in-out
+                    infinite;
+
+            }
+
+
+            @keyframes
+            haldoAvatarGlow {
+
+                0%,
+                100% {
+
+                    transform:
+                        scale(
+                            .92
+                        );
+
+                    opacity:
+                        .65;
+
+                }
+
+                50% {
+
+                    transform:
+                        scale(
+                            1.12
+                        );
+
+                    opacity:
+                        1;
+
+                }
+
+            }
+
+
+            .haldo-universal-ai-avatar img {
+
+                position:
+                    relative;
+
+                width:
+                    76px;
+
+                height:
+                    76px;
+
+                object-fit:
+                    contain;
+
+                border-radius:
+                    50%;
+
+                filter:
+                    drop-shadow(
+                        0 0 20px
+                        rgba(
+                            255,
+                            215,
+                            100,
+                            .8
+                        )
+                    );
+
+            }
+
+
+            .haldo-universal-ai-title {
+
+                font-size:
+                    25px;
+
+                font-weight:
+                    700;
+
+            }
+
+
+            .haldo-universal-ai-subtitle {
+
+                margin-top:
+                    5px;
+
+                color:
+                    rgba(
+                        255,
+                        255,
+                        255,
+                        .58
+                    );
+
+            }
+
+
+            .haldo-universal-ai-messages {
+
+                width:
+                    min(
+                        820px,
+                        100%
+                    );
+
+                flex:
+                    1;
+
+                min-height:
+                    160px;
+
+                overflow:
+                    auto;
+
+                margin-top:
+                    20px;
+
+                padding:
+                    12px;
+
+            }
+
+
+            .haldo-ai-message {
+
+                width:
+                    fit-content;
+
+                max-width:
+                    min(
+                        78%,
+                        680px
+                    );
+
+                margin:
+                    8px
+                    0;
+
+                padding:
+                    11px
+                    14px;
+
+                border:
+                    1px solid
+                    rgba(
+                        255,
+                        255,
+                        255,
+                        .09
+                    );
+
+                border-radius:
+                    17px;
+
+                line-height:
+                    1.45;
+
+                white-space:
+                    pre-wrap;
+
+            }
+
+
+            .haldo-ai-message-user {
+
+                margin-left:
+                    auto;
+
+                background:
+                    rgba(
+                        90,
+                        130,
+                        255,
+                        .17
+                    );
+
+            }
+
+
+            .haldo-ai-message-ai,
+            .haldo-ai-message-system {
+
+                margin-right:
+                    auto;
+
+                background:
+                    rgba(
+                        255,
+                        255,
+                        255,
+                        .055
+                    );
+
+            }
+
+
+            .haldo-universal-ai-form {
+
+                width:
+                    min(
+                        820px,
+                        100%
+                    );
+
+                display:
+                    flex;
+
+                align-items:
+                    flex-end;
+
+                gap:
+                    9px;
+
+                padding:
+                    8px;
+
+                border:
+                    1px solid
+                    rgba(
+                        255,
+                        255,
+                        255,
+                        .12
+                    );
+
+                border-radius:
+                    19px;
+
+                background:
+                    rgba(
+                        255,
+                        255,
+                        255,
+                        .055
+                    );
+
+            }
+
+
+            .haldo-universal-ai-form textarea {
+
+                flex:
+                    1;
+
+                min-width:
+                    0;
+
+                resize:
+                    none;
+
+                border:
+                    0;
+
+                outline:
+                    0;
+
+                background:
+                    transparent;
+
+                color:
+                    white;
+
+                padding:
+                    10px;
+
+                font:
+                    inherit;
+
+            }
+
+
+            .haldo-universal-ai-form button {
+
+                min-width:
+                    92px;
+
+                padding:
+                    11px
+                    15px;
+
+                border:
+                    0;
+
+                border-radius:
+                    13px;
+
+                background:
+                    linear-gradient(
+                        135deg,
+                        #ffd76a,
+                        #ff9d38
+                    );
+
+                color:
+                    #17100a;
+
+                font-weight:
+                    700;
+
+                cursor:
+                    pointer;
+
+            }
+
+
+            .haldo-fallback-app-content {
+
+                flex:
+                    1;
+
+                display:
+                    flex;
+
+                flex-direction:
+                    column;
+
+                align-items:
+                    center;
+
+                justify-content:
+                    center;
+
+                text-align:
+                    center;
+
+                padding:
+                    30px;
+
+            }
+
+
+            .haldo-fallback-app-content img {
+
+                width:
+                    88px;
+
+                height:
+                    88px;
+
+                object-fit:
+                    contain;
+
+                border-radius:
+                    50%;
+
+                filter:
+                    drop-shadow(
+                        0 0 20px
+                        rgba(
+                            255,
+                            210,
+                            90,
+                            .7
+                        )
+                    );
+
+            }
+
+
+            .haldo-fallback-app-content h2 {
+
+                margin:
+                    18px
+                    0
+                    6px;
+
+            }
+
+
+            .haldo-fallback-app-content p {
+
+                color:
+                    rgba(
+                        255,
+                        255,
+                        255,
+                        .62
+                    );
+
+            }
+
+
+            .haldo-universal-window.is-minimized
+            .haldo-universal-window-panel {
+
+                height:
+                    auto;
+
+            }
+
+
+            .haldo-universal-window.is-minimized
+            .haldo-universal-window-panel
+            > :not(
+                .haldo-universal-window-header
+            ) {
+
+                display:
+                    none;
+
+            }
+
+
+            @media(
+                max-width: 700px
+            ){
+
+                .haldo-universal-window {
+
+                    padding:
+                        0;
+
+                }
+
+
+                .haldo-universal-window-panel {
+
+                    width:
+                        100%;
+
+                    height:
+                        100dvh;
+
+                    max-height:
+                        none;
+
+                    border-radius:
+                        0;
+
+                }
+
+
+                .haldo-universal-ai-body {
+
+                    padding:
+                        18px;
+
+                }
+
+
+                .haldo-ai-message {
+
+                    max-width:
+                        90%;
+
+                }
+
+            }
+
+        `;
+
+
+        document.head.appendChild(
+            style
+        );
+
+    }
+
+
+    /* ========================================================
+       14 — PUBLIC API
+       ======================================================== */
+
+    HDX.openAI =
+        openHalDoAI;
+
+
+    HDX.openApp =
+        openUniversalApp;
+
+
+    HDX.bindSun =
+        bindCosmicSun;
+
+
+    HDX.getAIWindow =
+        function () {
+
+            return (
+                HDX.state.aiWindow ||
+                findExistingAIWindow()
+            );
+
+        };
+
+
+    /* ========================================================
+       15 — BOOT
+       ======================================================== */
+
+    function boot() {
+
+        if (
+            HDX.state.ready
+        ) {
+            return;
+        }
+
+
+        installStyles();
+
+
+        bindCosmicSun();
+
+
+        HDX.state.ready =
+            true;
+
+
+        emit(
+            "haldo:cosmic-universal-ready",
+            {
+                version:
+                    HDX.version
+            }
+        );
+
+    }
+
+
+    if (
+        document.readyState ===
+        "loading"
+    ) {
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            boot,
+            {
+                once:
+                    true
+            }
+        );
+
+    } else {
+
+        boot();
+
+    }
+
+
+})(window, document);
+</script>
 </body>
 </html>
