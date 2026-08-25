@@ -45969,5 +45969,1068 @@ HD.emit(
 
 })();
 </script>
+    <!-- =========================================================
+     HALDO AI OS 29
+     MASTER FOUNDATION CONNECTOR
+     
+     Zweck:
+     - verbindet vorhandene Runtime-Systeme
+     - verwendet vorhandene APIs
+     - erzeugt keinen zweiten App Manager
+     - erzeugt keine zweite Registry
+     - lässt vorhandene Apps bestehen
+     - verbindet Kernel/System/Registry/Runtime/Manager/
+       Router/Window Manager/Launcher/AI/Voice/Language/
+       Storage/Keyboard
+     ========================================================= -->
+
+<script>
+"use strict";
+
+(function () {
+
+    const HD =
+        window.HalDo =
+        window.HalDo || {};
+
+    const OS =
+        window.HalDoOS =
+        window.HalDoOS || {};
+
+    const state =
+        HD.masterFoundation =
+        HD.masterFoundation || {
+
+            connected: false,
+            started: false,
+            services: {},
+            apps: {},
+            errors: [],
+            timestamp: 0
+
+        };
+
+
+    /* =========================================================
+       SAFE HELPERS
+       ========================================================= */
+
+    function findGlobal() {
+
+        const names =
+            Array.from(
+                arguments
+            );
+
+        for (
+            const name of names
+        ) {
+
+            try {
+
+                if (
+                    window[name]
+                ) {
+                    return window[name];
+                }
+
+            } catch (
+                ignored
+            ) {}
+
+        }
+
+        return null;
+
+    }
+
+
+    function callIfAvailable(
+        target,
+        methods,
+        args
+    ) {
+
+        if (
+            !target
+        ) {
+            return null;
+        }
+
+        const list =
+            Array.isArray(methods)
+                ? methods
+                : [methods];
+
+        for (
+            const method of list
+        ) {
+
+            if (
+                typeof target[method] ===
+                "function"
+            ) {
+
+                try {
+
+                    return target[method](
+                        ...(args || [])
+                    );
+
+                } catch (
+                    error
+                ) {
+
+                    state.errors.push(
+                        {
+
+                            method,
+                            message:
+                                error &&
+                                error.message
+                                    ? error.message
+                                    : String(
+                                        error
+                                    )
+
+                        }
+                    );
+
+                }
+
+            }
+
+        }
+
+        return null;
+
+    }
+
+
+    function expose(
+        key,
+        value
+    ) {
+
+        if (
+            !value
+        ) {
+            return;
+        }
+
+        state.services[key] =
+            value;
+
+        OS[key] =
+            OS[key] ||
+            value;
+
+        HD[key] =
+            HD[key] ||
+            value;
+
+    }
+
+
+    /* =========================================================
+       FOUNDATION DISCOVERY
+       ========================================================= */
+
+    function discoverFoundation() {
+
+        expose(
+            "kernel",
+            findGlobal(
+                "HalDoKernel"
+            )
+        );
+
+        expose(
+            "system",
+            findGlobal(
+                "HalDoSystem"
+            )
+        );
+
+        expose(
+            "runtime",
+            findGlobal(
+                "HalDoRuntime",
+                "HalDoAppRuntime"
+            )
+        );
+
+        expose(
+            "appRegistry",
+            findGlobal(
+                "HalDoAppRegistry",
+                "HalDoOSAppRegistry"
+            )
+        );
+
+        expose(
+            "appManager",
+            findGlobal(
+                "HalDoAppManager",
+                "HalDoOSAppManager"
+            )
+        );
+
+        expose(
+            "appRouter",
+            findGlobal(
+                "HalDoAppRouter",
+                "HalDoOSAppRouter"
+            )
+        );
+
+        expose(
+            "windowManager",
+            findGlobal(
+                "HalDoWindowManager"
+            )
+        );
+
+        expose(
+            "launcher",
+            findGlobal(
+                "HalDoLauncher"
+            )
+        );
+
+        expose(
+            "storage",
+            findGlobal(
+                "HalDoStorage"
+            )
+        );
+
+        expose(
+            "storageManager",
+            findGlobal(
+                "HalDoStorageManager"
+            )
+        );
+
+        expose(
+            "ai",
+            findGlobal(
+                "HalDoAICore",
+                "HalDoAI",
+                "HalDoAIEngine"
+            )
+        );
+
+        expose(
+            "voice",
+            findGlobal(
+                "HalDoVoice",
+                "HalDoSpeech",
+                "HalDoAISpeech"
+            )
+        );
+
+        expose(
+            "language",
+            findGlobal(
+                "HalDoLanguage",
+                "HalDoLanguageManager",
+                "HalDoLanguageSystem"
+            )
+        );
+
+        expose(
+            "ezidiKeyboard",
+            findGlobal(
+                "HalDoEzidiKeyboard"
+            )
+        );
+
+        expose(
+            "notifications",
+            findGlobal(
+                "HalDoNotifications",
+                "HalDoNotificationManager"
+            )
+        );
+
+        expose(
+            "keyboard",
+            findGlobal(
+                "HalDoKeyboard"
+            )
+        );
+
+        expose(
+            "platform",
+            findGlobal(
+                "HalDoPlatform",
+                "HalDoAppPlatform"
+            )
+        );
+
+    }
+
+
+    /* =========================================================
+       BIDIRECTIONAL SERVICE CONNECTION
+       ========================================================= */
+
+    function connectService(
+        target,
+        name,
+        service
+    ) {
+
+        if (
+            !target ||
+            !service
+        ) {
+            return;
+        }
+
+        callIfAvailable(
+            target,
+            [
+                "registerService",
+                "register",
+                "setService"
+            ],
+            [
+                name,
+                service
+            ]
+        );
+
+    }
+
+
+    function connectSetter(
+        target,
+        name,
+        service
+    ) {
+
+        if (
+            !target ||
+            !service
+        ) {
+            return;
+        }
+
+        const setter =
+            "set" +
+            name.charAt(0).toUpperCase() +
+            name.slice(1);
+
+        callIfAvailable(
+            target,
+            setter,
+            [
+                service
+            ]
+        );
+
+    }
+
+
+    function connectFoundation() {
+
+        const services =
+            state.services;
+
+        const targets =
+            [
+
+                services.kernel,
+                services.system,
+                services.runtime,
+                services.appRegistry,
+                services.appManager,
+                services.appRouter,
+                services.windowManager,
+                services.launcher,
+                services.storage,
+                services.storageManager,
+                services.ai,
+                services.voice,
+                services.language,
+                services.ezidiKeyboard,
+                services.notifications,
+                services.keyboard,
+                services.platform
+
+            ]
+                .filter(Boolean);
+
+
+        for (
+            const target of targets
+        ) {
+
+            for (
+                const [
+                    name,
+                    service
+                ]
+                of Object.entries(
+                    services
+                )
+            ) {
+
+                if (
+                    !service ||
+                    service ===
+                    target
+                ) {
+                    continue;
+                }
+
+                connectService(
+                    target,
+                    name,
+                    service
+                );
+
+            }
+
+        }
+
+
+        connectSetter(
+            services.appRegistry,
+            "appManager",
+            services.appManager
+        );
+
+        connectSetter(
+            services.appManager,
+            "registry",
+            services.appRegistry
+        );
+
+        connectSetter(
+            services.appManager,
+            "runtime",
+            services.runtime
+        );
+
+        connectSetter(
+            services.appManager,
+            "router",
+            services.appRouter
+        );
+
+        connectSetter(
+            services.appManager,
+            "windowManager",
+            services.windowManager
+        );
+
+        connectSetter(
+            services.appManager,
+            "launcher",
+            services.launcher
+        );
+
+        connectSetter(
+            services.appManager,
+            "kernel",
+            services.kernel
+        );
+
+        connectSetter(
+            services.appManager,
+            "system",
+            services.system
+        );
+
+        connectSetter(
+            services.appManager,
+            "storage",
+            services.storage
+        );
+
+        connectSetter(
+            services.appManager,
+            "ai",
+            services.ai
+        );
+
+        connectSetter(
+            services.appManager,
+            "language",
+            services.language
+        );
+
+        connectSetter(
+            services.appManager,
+            "voice",
+            services.voice
+        );
+
+        connectSetter(
+            services.appManager,
+            "keyboard",
+            services.keyboard
+        );
+
+
+        connectSetter(
+            services.runtime,
+            "registry",
+            services.appRegistry
+        );
+
+        connectSetter(
+            services.runtime,
+            "appManager",
+            services.appManager
+        );
+
+        connectSetter(
+            services.runtime,
+            "router",
+            services.appRouter
+        );
+
+        connectSetter(
+            services.runtime,
+            "windowManager",
+            services.windowManager
+        );
+
+        connectSetter(
+            services.appRouter,
+            "appManager",
+            services.appManager
+        );
+
+        connectSetter(
+            services.appRouter,
+            "windowManager",
+            services.windowManager
+        );
+
+        connectSetter(
+            services.windowManager,
+            "appManager",
+            services.appManager
+        );
+
+        connectSetter(
+            services.launcher,
+            "appManager",
+            services.appManager
+        );
+
+    }
+
+
+    /* =========================================================
+       APP DISCOVERY
+       ========================================================= */
+
+    function discoverApps() {
+
+        const registry =
+            state.services.appRegistry;
+
+        if (
+            !registry
+        ) {
+            return;
+        }
+
+        let apps =
+            callIfAvailable(
+                registry,
+                [
+                    "getAll",
+                    "getApps",
+                    "list",
+                    "all"
+                ],
+                []
+            );
+
+        if (
+            apps &&
+            typeof apps.then ===
+            "function"
+        ) {
+
+            apps.then(
+                registerDiscoveredApps
+            )
+            .catch(
+                error => {
+
+                    state.errors.push(
+                        {
+
+                            stage:
+                                "app-discovery",
+
+                            message:
+                                error.message
+
+                        }
+                    );
+
+                }
+            );
+
+            return;
+        }
+
+        registerDiscoveredApps(
+            apps
+        );
+
+    }
+
+
+    function registerDiscoveredApps(
+        apps
+    ) {
+
+        if (
+            !apps
+        ) {
+            return;
+        }
+
+        const list =
+            Array.isArray(
+                apps
+            )
+                ? apps
+                : Object.values(
+                    apps
+                );
+
+        for (
+            const app of list
+        ) {
+
+            if (
+                !app ||
+                !app.id
+            ) {
+                continue;
+            }
+
+            state.apps[
+                String(
+                    app.id
+                )
+            ] =
+                app;
+
+        }
+
+        HD.masterApps =
+            state.apps;
+
+        OS.masterApps =
+            state.apps;
+
+    }
+
+
+    /* =========================================================
+       SPECIAL APP ALIASES
+       ========================================================= */
+
+    function connectKnownApps() {
+
+        const aliases = {
+
+            "haldo-ai":
+                findGlobal(
+                    "HalDoAIWindow",
+                    "HalDoAIChatApp",
+                    "HalDoAIChat"
+                ),
+
+            "ai-chat":
+                findGlobal(
+                    "HalDoAIChatApp",
+                    "HalDoAIChat"
+                ),
+
+            "files":
+                findGlobal(
+                    "HalDoFileManager"
+                ),
+
+            "haldo-home":
+                findGlobal(
+                    "HalDoHomeApp"
+                ),
+
+            "settings":
+                findGlobal(
+                    "HalDoSettingsApp",
+                    "HalDoSettings"
+                ),
+
+            "ezidi-keyboard":
+                findGlobal(
+                    "HalDoEzidiKeyboard"
+                )
+
+        };
+
+
+        for (
+            const [
+                id,
+                api
+            ]
+            of Object.entries(
+                aliases
+            )
+        ) {
+
+            if (
+                api
+            ) {
+
+                state.apps[
+                    id
+                ] =
+                    state.apps[id] ||
+                    {
+
+                        id,
+                        api,
+                        connected:
+                            true
+
+                    };
+
+            }
+
+        }
+
+    }
+
+
+    /* =========================================================
+       OPEN APP — SINGLE ROUTE
+       ========================================================= */
+
+    async function openApp(
+        appId,
+        options = {}
+    ) {
+
+        const id =
+            String(
+                appId ||
+                ""
+            ).trim();
+
+        if (
+            !id
+        ) {
+            return false;
+        }
+
+        const manager =
+            state.services.appManager;
+
+        if (
+            manager
+        ) {
+
+            const result =
+                callIfAvailable(
+                    manager,
+                    [
+                        "openApp",
+                        "open",
+                        "launch",
+                        "activate"
+                    ],
+                    [
+                        id,
+                        options
+                    ]
+                );
+
+            if (
+                result !==
+                null
+            ) {
+
+                if (
+                    result &&
+                    typeof result.then ===
+                    "function"
+                ) {
+
+                    return !!(
+                        await result
+                    );
+
+                }
+
+                return !!result;
+
+            }
+
+        }
+
+
+        const app =
+            state.apps[id];
+
+        const api =
+            app &&
+            (
+                app.api ||
+                app
+            );
+
+        if (
+            api
+        ) {
+
+            const result =
+                callIfAvailable(
+                    api,
+                    [
+                        "open",
+                        "openApp",
+                        "launch",
+                        "start",
+                        "activate"
+                    ],
+                    [
+                        id,
+                        options
+                    ]
+                );
+
+            if (
+                result !==
+                null
+            ) {
+
+                if (
+                    result &&
+                    typeof result.then ===
+                    "function"
+                ) {
+
+                    return !!(
+                        await result
+                    );
+
+                }
+
+                return !!result;
+
+            }
+
+        }
+
+        return false;
+
+    }
+
+
+    /* =========================================================
+       PUBLIC MASTER API
+       ========================================================= */
+
+    HD.master =
+        HD.master || {};
+
+    Object.assign(
+        HD.master,
+        {
+
+            state,
+
+            discoverFoundation,
+
+            connectFoundation,
+
+            discoverApps,
+
+            connectKnownApps,
+
+            openApp,
+
+            getService:
+                name =>
+                    state.services[
+                        name
+                    ] ||
+                    null,
+
+            getApp:
+                id =>
+                    state.apps[
+                        String(
+                            id || ""
+                        )
+                    ] ||
+                    null,
+
+            getApps:
+                () =>
+                    Object.values(
+                        state.apps
+                    ),
+
+            isReady:
+                () =>
+                    state.connected ===
+                    true
+
+        }
+    );
+
+
+    OS.master =
+        HD.master;
+
+
+    /* =========================================================
+       START CONNECTION
+       ========================================================= */
+
+    function start() {
+
+        if (
+            state.started
+        ) {
+            return;
+        }
+
+        state.started =
+            true;
+
+        discoverFoundation();
+
+        connectFoundation();
+
+        connectKnownApps();
+
+        discoverApps();
+
+        state.connected =
+            true;
+
+        state.timestamp =
+            Date.now();
+
+
+        try {
+
+            if (
+                typeof HD.emit ===
+                "function"
+            ) {
+
+                HD.emit(
+                    "master:foundation-connected",
+                    {
+
+                        services:
+                            Object.keys(
+                                state.services
+                            ),
+
+                        apps:
+                            Object.keys(
+                                state.apps
+                            ),
+
+                        ready:
+                            true
+
+                    }
+                );
+
+                HD.emit(
+                    "system:ready",
+                    {
+
+                        source:
+                            "master-foundation",
+
+                        ready:
+                            true
+
+                    }
+                );
+
+            }
+
+        } catch (
+            ignored
+        ) {}
+
+
+        try {
+
+            window.dispatchEvent(
+                new CustomEvent(
+                    "haldo:foundation-connected",
+                    {
+
+                        detail: {
+
+                            services:
+                                Object.keys(
+                                    state.services
+                                ),
+
+                            apps:
+                                Object.keys(
+                                    state.apps
+                                )
+
+                        }
+
+                    }
+                )
+            );
+
+        } catch (
+            ignored
+        ) {}
+
+    }
+
+
+    if (
+        document.readyState ===
+        "loading"
+    ) {
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            start,
+            {
+                once:
+                    true
+            }
+        );
+
+    } else {
+
+        start();
+
+    }
+
+})();
+</script>
 </body>
 </html>
