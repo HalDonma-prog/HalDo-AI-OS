@@ -53846,6 +53846,1605 @@ haldo-planet-spin {
 
 /* ==========================================================
    PART 1 ENDE
-   ========================================================== */
+   ========================================================== */ 
+ /* ============================================================
+   DATEI:
+   /js/cosmic-display.js
+
+   ÄNDERUNG:
+   AN DEN CODE AUS PART 1 DIREKT ANHÄNGEN
+
+   HALDO AI OS — COSMIC DISPLAY
+   PART 2 / 4
+   ============================================================ */
+
+
+/* ============================================================
+   05 — MENU + APP NAVIGATION
+   ============================================================ */
+
+(function (window, document) {
+
+    "use strict";
+
+
+    const HD =
+        window.HalDoOS ||
+        {};
+
+
+    const state =
+        window.HalDoCosmicDisplayState ||
+        {
+
+            initialized:
+                false,
+
+            menuOpen:
+                false,
+
+            appWindow:
+                null,
+
+            activeApp:
+                null
+
+        };
+
+
+    window.HalDoCosmicDisplayState =
+        state;
+
+
+    function qs(
+        selector,
+        root = document
+    ) {
+
+        return root.querySelector(
+            selector
+        );
+
+    }
+
+
+    function emit(
+        name,
+        detail = {}
+    ) {
+
+        try {
+
+            window.dispatchEvent(
+                new CustomEvent(
+                    name,
+                    {
+                        detail
+                    }
+                )
+            );
+
+        } catch (_) {}
+
+    }
+
+
+    function getAppManager() {
+
+        return (
+
+            window.HalDoAppManager ||
+
+            window.HalDoOSAppManager ||
+
+            window.HalDoOS?.appManager ||
+
+            window.HalDo?.appManager ||
+
+            null
+
+        );
+
+    }
+
+
+    function getApps() {
+
+        const manager =
+            getAppManager();
+
+
+        if (
+            manager &&
+            typeof manager.getApps ===
+            "function"
+        ) {
+
+            try {
+
+                return (
+                    manager.getApps() ||
+                    []
+                );
+
+            } catch (_) {}
+
+        }
+
+
+        if (
+            manager &&
+            typeof manager.getAll ===
+            "function"
+        ) {
+
+            try {
+
+                return (
+                    manager.getAll() ||
+                    []
+                );
+
+            } catch (_) {}
+
+        }
+
+
+        if (
+            manager &&
+            manager.apps &&
+            typeof manager.apps ===
+            "object"
+        ) {
+
+            try {
+
+                return Object.values(
+                    manager.apps
+                );
+
+            } catch (_) {}
+
+        }
+
+
+        return [];
+
+    }
+
+
+    function openApp(
+        appId,
+        options = {}
+    ) {
+
+        const manager =
+            getAppManager();
+
+
+        if (
+            manager &&
+            typeof manager.open ===
+            "function"
+        ) {
+
+            try {
+
+                const result =
+                    manager.open(
+                        appId,
+                        options
+                    );
+
+                return result;
+
+            } catch (error) {
+
+                emit(
+                    "haldo:app-open-error",
+                    {
+                        appId,
+                        error
+                    }
+                );
+
+            }
+
+        }
+
+
+        if (
+            manager &&
+            typeof manager.openApp ===
+            "function"
+        ) {
+
+            try {
+
+                return manager.openApp(
+                    appId,
+                    options
+                );
+
+            } catch (error) {
+
+                emit(
+                    "haldo:app-open-error",
+                    {
+                        appId,
+                        error
+                    }
+                );
+
+            }
+
+        }
+
+
+        emit(
+            "haldo:app-open-request",
+            {
+                appId,
+                options
+            }
+        );
+
+
+        return null;
+
+    }
+
+
+    /* ========================================================
+       06 — CREATE MENU
+       ======================================================== */
+
+    function createMenu() {
+
+        let menu =
+            qs(
+                ".haldo-cosmic-menu"
+            );
+
+
+        if (menu) {
+
+            return menu;
+
+        }
+
+
+        const root =
+            qs(
+                ".haldo-cosmic-root"
+            ) ||
+            document.body;
+
+
+        menu =
+            document.createElement(
+                "aside"
+            );
+
+
+        menu.className =
+            "haldo-cosmic-menu";
+
+
+        menu.setAttribute(
+            "aria-label",
+            "HalDo Menü"
+        );
+
+
+        menu.innerHTML = `
+
+            <button
+                type="button"
+                class="haldo-cosmic-menu-button"
+                data-haldo-menu-toggle
+                aria-label="HalDo Menü öffnen"
+                aria-expanded="false"
+            >
+
+                <span>
+                    ☰
+                </span>
+
+            </button>
+
+
+            <div
+                class="haldo-cosmic-menu-content"
+                data-haldo-menu-content
+            >
+
+                <div
+                    class="haldo-cosmic-menu-heading"
+                >
+
+                    <img
+                        src="assets/logo/logo.png"
+                        alt="HalDo"
+                    >
+
+                    <div>
+
+                        <strong>
+                            HalDo AI OS
+                        </strong>
+
+                        <small>
+                            Cosmic World
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+                <div
+                    class="haldo-cosmic-menu-section"
+                >
+
+                    <div
+                        class="haldo-cosmic-menu-section-title"
+                    >
+                        SYSTEM
+                    </div>
+
+
+                    <button
+                        type="button"
+                        data-haldo-system-menu
+                        data-app-id="settings"
+                    >
+
+                        <span>⚙</span>
+
+                        <span>
+                            Einstellungen
+                        </span>
+
+                    </button>
+
+
+                    <button
+                        type="button"
+                        data-haldo-system-menu
+                        data-action="files"
+                    >
+
+                        <span>▣</span>
+
+                        <span>
+                            Dateien
+                        </span>
+
+                    </button>
+
+
+                    <button
+                        type="button"
+                        data-haldo-system-menu
+                        data-action="system"
+                    >
+
+                        <span>◈</span>
+
+                        <span>
+                            System
+                        </span>
+
+                    </button>
+
+
+                    <button
+                        type="button"
+                        data-haldo-system-menu
+                        data-action="updates"
+                    >
+
+                        <span>↻</span>
+
+                        <span>
+                            Updates
+                        </span>
+
+                    </button>
+
+                </div>
+
+
+                <div
+                    class="haldo-cosmic-menu-section"
+                >
+
+                    <div
+                        class="haldo-cosmic-menu-section-title"
+                    >
+                        APPS
+                    </div>
+
+
+                    <div
+                        class="haldo-cosmic-app-list"
+                        data-haldo-app-list
+                    ></div>
+
+                </div>
+
+            </div>
+
+        `;
+
+
+        root.appendChild(
+            menu
+        );
+
+
+        bindMenu(
+            menu
+        );
+
+
+        renderApps(
+            menu
+        );
+
+
+        return menu;
+
+    }
+
+
+    /* ========================================================
+       07 — MENU EVENTS
+       ======================================================== */
+
+    function bindMenu(
+        menu
+    ) {
+
+        if (
+            menu.dataset.bound ===
+            "true"
+        ) {
+
+            return;
+
+        }
+
+
+        menu.dataset.bound =
+            "true";
+
+
+        const toggle =
+            menu.querySelector(
+                "[data-haldo-menu-toggle]"
+            );
+
+
+        if (toggle) {
+
+            toggle.addEventListener(
+                "click",
+                function () {
+
+                    toggleMenu(
+                        menu
+                    );
+
+                }
+            );
+
+        }
+
+
+        menu.addEventListener(
+            "click",
+            function (event) {
+
+                const appButton =
+                    event.target.closest(
+                        "[data-app-id]"
+                    );
+
+
+                if (
+                    appButton
+                ) {
+
+                    const appId =
+                        appButton.getAttribute(
+                            "data-app-id"
+                        );
+
+
+                    if (appId) {
+
+                        openApp(
+                            appId,
+                            {
+                                source:
+                                    "cosmic-menu"
+                            }
+                        );
+
+                        closeMenu(
+                            menu
+                        );
+
+                        return;
+
+                    }
+
+                }
+
+
+                const actionButton =
+                    event.target.closest(
+                        "[data-action]"
+                    );
+
+
+                if (
+                    actionButton
+                ) {
+
+                    const action =
+                        actionButton.getAttribute(
+                            "data-action"
+                        );
+
+
+                    handleSystemAction(
+                        action
+                    );
+
+                    closeMenu(
+                        menu
+                    );
+
+                }
+
+            }
+        );
+
+    }
+
+
+    function toggleMenu(
+        menu
+    ) {
+
+        if (
+            !menu
+        ) {
+
+            return;
+
+        }
+
+
+        state.menuOpen =
+            !state.menuOpen;
+
+
+        menu.classList.toggle(
+            "open",
+            state.menuOpen
+        );
+
+
+        const button =
+            menu.querySelector(
+                "[data-haldo-menu-toggle]"
+            );
+
+
+        if (button) {
+
+            button.setAttribute(
+                "aria-expanded",
+                String(
+                    state.menuOpen
+                )
+            );
+
+        }
+
+
+        emit(
+            "haldo:cosmic-menu",
+            {
+                open:
+                    state.menuOpen
+            }
+        );
+
+    }
+
+
+    function closeMenu(
+        menu
+    ) {
+
+        if (
+            !menu
+        ) {
+
+            return;
+
+        }
+
+
+        state.menuOpen =
+            false;
+
+
+        menu.classList.remove(
+            "open"
+        );
+
+
+        const button =
+            menu.querySelector(
+                "[data-haldo-menu-toggle]"
+            );
+
+
+        if (button) {
+
+            button.setAttribute(
+                "aria-expanded",
+                "false"
+            );
+
+        }
+
+    }
+
+
+    /* ========================================================
+       08 — APP LIST
+       ======================================================== */
+
+    function renderApps(
+        menu
+    ) {
+
+        const container =
+            menu.querySelector(
+                "[data-haldo-app-list]"
+            );
+
+
+        if (
+            !container
+        ) {
+
+            return;
+
+        }
+
+
+        const apps =
+            getApps();
+
+
+        container.innerHTML =
+            "";
+
+
+        const unique =
+            new Map();
+
+
+        apps.forEach(
+            function (app) {
+
+                if (
+                    !app
+                ) {
+
+                    return;
+
+                }
+
+
+                const id =
+                    String(
+                        app.id ||
+                        app.appId ||
+                        app.name ||
+                        ""
+                    )
+                        .trim();
+
+
+                if (
+                    !id
+                ) {
+
+                    return;
+
+                }
+
+
+                if (
+                    unique.has(
+                        id
+                    )
+                ) {
+
+                    return;
+
+                }
+
+
+                unique.set(
+                    id,
+                    app
+                );
+
+            }
+        );
+
+
+        unique.forEach(
+            function (
+                app,
+                id
+            ) {
+
+                const button =
+                    document.createElement(
+                        "button"
+                    );
+
+
+                button.type =
+                    "button";
+
+
+                button.className =
+                    "haldo-cosmic-app-button";
+
+
+                button.setAttribute(
+                    "data-app-id",
+                    id
+                );
+
+
+                const icon =
+                    app.icon ||
+                    "◈";
+
+
+                const title =
+                    app.title ||
+                    app.name ||
+                    id;
+
+
+                button.innerHTML = `
+
+                    <span
+                        class="haldo-cosmic-app-icon"
+                    >
+                        ${icon}
+                    </span>
+
+                    <span
+                        class="haldo-cosmic-app-name"
+                    >
+                        ${escapeText(title)}
+                    </span>
+
+                `;
+
+
+                container.appendChild(
+                    button
+                );
+
+            }
+        );
+
+
+        /*
+         * Falls das bestehende Registry-System
+         * beim Booten noch keine Apps geliefert
+         * hat, zeigen wir die vorgesehenen
+         * Kern-Apps trotzdem an.
+         */
+
+        if (
+            unique.size ===
+            0
+        ) {
+
+            renderFallbackApps(
+                container
+            );
+
+        }
+
+    }
+
+
+    function renderFallbackApps(
+        container
+    ) {
+
+        const fallbackApps = [
+
+            {
+                id:
+                    "ai-chat",
+                name:
+                    "HalDo AI",
+                icon:
+                    "✦"
+            },
+
+            {
+                id:
+                    "file-manager",
+                name:
+                    "Dateien",
+                icon:
+                    "▣"
+            },
+
+            {
+                id:
+                    "settings",
+                name:
+                    "Einstellungen",
+                icon:
+                    "⚙"
+            },
+
+            {
+                id:
+                    "browser",
+                name:
+                    "Browser",
+                icon:
+                    "◎"
+            },
+
+            {
+                id:
+                    "gallery",
+                name:
+                    "Galerie",
+                icon:
+                    "▧"
+            },
+
+            {
+                id:
+                    "music",
+                name:
+                    "Musik",
+                icon:
+                    "♫"
+            },
+
+            {
+                id:
+                    "calendar",
+                name:
+                    "Kalender",
+                icon:
+                    "□"
+            },
+
+            {
+                id:
+                    "notes",
+                name:
+                    "Notizen",
+                icon:
+                    "✎"
+            }
+
+        ];
+
+
+        fallbackApps.forEach(
+            function (app) {
+
+                const button =
+                    document.createElement(
+                        "button"
+                    );
+
+
+                button.type =
+                    "button";
+
+
+                button.className =
+                    "haldo-cosmic-app-button";
+
+
+                button.dataset.appId =
+                    app.id;
+
+
+                button.innerHTML = `
+
+                    <span
+                        class="haldo-cosmic-app-icon"
+                    >
+                        ${app.icon}
+                    </span>
+
+                    <span
+                        class="haldo-cosmic-app-name"
+                    >
+                        ${app.name}
+                    </span>
+
+                `;
+
+
+                container.appendChild(
+                    button
+                );
+
+            }
+        );
+
+    }
+
+
+    function escapeText(
+        value
+    ) {
+
+        return String(
+            value ?? ""
+        )
+            .replace(
+                /&/g,
+                "&amp;"
+            )
+            .replace(
+                /</g,
+                "&lt;"
+            )
+            .replace(
+                />/g,
+                "&gt;"
+            )
+            .replace(
+                /"/g,
+                "&quot;"
+            )
+            .replace(
+                /'/g,
+                "&#039;"
+            );
+
+    }
+
+
+    /* ========================================================
+       09 — SYSTEM ACTIONS
+       ======================================================== */
+
+    function handleSystemAction(
+        action
+    ) {
+
+        switch (
+            String(
+                action ||
+                ""
+            )
+                .toLowerCase()
+        ) {
+
+            case "files":
+
+                openApp(
+                    "file-manager",
+                    {
+                        source:
+                            "system-menu"
+                    }
+                );
+
+                break;
+
+
+            case "updates":
+
+                openApp(
+                    "update-manager",
+                    {
+                        source:
+                            "system-menu"
+                    }
+                );
+
+                break;
+
+
+            case "system":
+
+                openApp(
+                    "system",
+                    {
+                        source:
+                            "system-menu"
+                    }
+                );
+
+                break;
+
+
+            default:
+
+                emit(
+                    "haldo:system-action",
+                    {
+                        action
+                    }
+                );
+
+        }
+
+    }
+
+
+    /* ========================================================
+       10 — ADD MENU STYLES
+       ======================================================== */
+
+    function injectMenuStyles() {
+
+        if (
+            document.getElementById(
+                "haldo-cosmic-menu-style"
+            )
+        ) {
+
+            return;
+
+        }
+
+
+        const style =
+            document.createElement(
+                "style"
+            );
+
+
+        style.id =
+            "haldo-cosmic-menu-style";
+
+
+        style.textContent = `
+
+            .haldo-cosmic-menu-button {
+
+                width:
+                    52px;
+
+                height:
+                    52px;
+
+                flex:
+                    0 0 52px;
+
+                border:
+                    1px solid
+                    rgba(
+                        255,
+                        255,
+                        255,
+                        .13
+                    );
+
+                border-radius:
+                    16px;
+
+                background:
+                    rgba(
+                        255,
+                        255,
+                        255,
+                        .065
+                    );
+
+                color:
+                    white;
+
+                font-size:
+                    23px;
+
+                cursor:
+                    pointer;
+
+                transition:
+                    .2s ease;
+
+            }
+
+
+            .haldo-cosmic-menu-button:hover,
+            .haldo-cosmic-menu-button:focus-visible {
+
+                background:
+                    rgba(
+                        255,
+                        215,
+                        105,
+                        .13
+                    );
+
+                box-shadow:
+                    0 0 20px
+                    rgba(
+                        255,
+                        205,
+                        90,
+                        .16
+                    );
+
+                outline:
+                    none;
+
+            }
+
+
+            .haldo-cosmic-menu-content {
+
+                display:
+                    none;
+
+                min-height:
+                    0;
+
+                overflow:
+                    auto;
+
+                padding:
+                    10px 5px 4px;
+
+            }
+
+
+            .haldo-cosmic-menu.open
+            .haldo-cosmic-menu-content {
+
+                display:
+                    block;
+
+            }
+
+
+            .haldo-cosmic-menu-heading {
+
+                display:
+                    flex;
+
+                align-items:
+                    center;
+
+                gap:
+                    10px;
+
+                padding:
+                    6px 8px
+                    13px;
+
+                margin-bottom:
+                    4px;
+
+                border-bottom:
+                    1px solid
+                    rgba(
+                        255,
+                        255,
+                        255,
+                        .08
+                    );
+
+            }
+
+
+            .haldo-cosmic-menu-heading img {
+
+                width:
+                    42px;
+
+                height:
+                    42px;
+
+                object-fit:
+                    contain;
+
+                border-radius:
+                    50%;
+
+                filter:
+                    drop-shadow(
+                        0 0 12px
+                        rgba(
+                            255,
+                            215,
+                            100,
+                            .65
+                        )
+                    );
+
+            }
+
+
+            .haldo-cosmic-menu-heading strong {
+
+                display:
+                    block;
+
+                font-size:
+                    14px;
+
+            }
+
+
+            .haldo-cosmic-menu-heading small {
+
+                display:
+                    block;
+
+                margin-top:
+                    2px;
+
+                color:
+                    rgba(
+                        255,
+                        255,
+                        255,
+                        .50
+                    );
+
+            }
+
+
+            .haldo-cosmic-menu-section {
+
+                padding:
+                    6px 0;
+
+            }
+
+
+            .haldo-cosmic-menu-section-title {
+
+                padding:
+                    6px 9px;
+
+                color:
+                    rgba(
+                        255,
+                        255,
+                        255,
+                        .38
+                    );
+
+                font-size:
+                    9px;
+
+                font-weight:
+                    700;
+
+                letter-spacing:
+                    1.5px;
+
+            }
+
+
+            .haldo-cosmic-menu-section button {
+
+                width:
+                    100%;
+
+                min-height:
+                    43px;
+
+                display:
+                    flex;
+
+                align-items:
+                    center;
+
+                gap:
+                    10px;
+
+                margin:
+                    3px 0;
+
+                padding:
+                    8px 10px;
+
+                border:
+                    1px solid
+                    transparent;
+
+                border-radius:
+                    13px;
+
+                background:
+                    transparent;
+
+                color:
+                    rgba(
+                        255,
+                        255,
+                        255,
+                        .84
+                    );
+
+                text-align:
+                    left;
+
+                cursor:
+                    pointer;
+
+                font:
+                    inherit;
+
+            }
+
+
+            .haldo-cosmic-menu-section button:hover,
+            .haldo-cosmic-menu-section button:focus-visible {
+
+                background:
+                    rgba(
+                        255,
+                        255,
+                        255,
+                        .075
+                    );
+
+                border-color:
+                    rgba(
+                        255,
+                        255,
+                        255,
+                        .08
+                    );
+
+                outline:
+                    none;
+
+            }
+
+
+            .haldo-cosmic-menu-section
+            button > span:first-child {
+
+                width:
+                    26px;
+
+                flex:
+                    0 0 26px;
+
+                text-align:
+                    center;
+
+                font-size:
+                    18px;
+
+            }
+
+
+            .haldo-cosmic-app-list {
+
+                display:
+                    flex;
+
+                flex-direction:
+                    column;
+
+                gap:
+                    2px;
+
+            }
+
+
+            .haldo-cosmic-app-button {
+
+                min-height:
+                    46px !important;
+
+            }
+
+
+            .haldo-cosmic-app-icon {
+
+                display:
+                    grid;
+
+                place-items:
+                    center;
+
+                width:
+                    28px !important;
+
+                flex:
+                    0 0 28px;
+
+                font-size:
+                    18px;
+
+            }
+
+
+            .haldo-cosmic-app-name {
+
+                overflow:
+                    hidden;
+
+                text-overflow:
+                    ellipsis;
+
+                white-space:
+                    nowrap;
+
+            }
+
+
+            @media(
+                max-width: 600px
+            ){
+
+                .haldo-cosmic-menu {
+
+                    left:
+                        8px;
+
+                    width:
+                        62px;
+
+                }
+
+
+                .haldo-cosmic-menu.open {
+
+                    width:
+                        min(
+                            290px,
+                            calc(
+                                100vw - 16px
+                            )
+                        );
+
+                }
+
+            }
+
+        `;
+
+
+        document.head.appendChild(
+            style
+        );
+
+    }
+
+
+    /* ========================================================
+       11 — REFRESH APP LIST
+       ======================================================== */
+
+    function refreshAppList() {
+
+        const menu =
+            qs(
+                ".haldo-cosmic-menu"
+            );
+
+
+        if (!menu) {
+
+            return;
+
+        }
+
+
+        renderApps(
+            menu
+        );
+
+    }
+
+
+    window.HalDoCosmicDisplay =
+        window.HalDoCosmicDisplay ||
+        {};
+
+
+    window.HalDoCosmicDisplay.openApp =
+        openApp;
+
+
+    window.HalDoCosmicDisplay.createMenu =
+        createMenu;
+
+
+    window.HalDoCosmicDisplay.refreshApps =
+        refreshAppList;
+
+
+    /* ========================================================
+       12 — INITIALIZE
+       ======================================================== */
+
+    function initializeMenu() {
+
+        if (
+            state.initialized
+        ) {
+
+            refreshAppList();
+
+            return;
+
+        }
+
+
+        injectMenuStyles();
+
+        createMenu();
+
+        state.initialized =
+            true;
+
+
+        emit(
+            "haldo:cosmic-menu-ready",
+            {
+                version:
+                    "20.2.0"
+            }
+        );
+
+    }
+
+
+    if (
+        document.readyState ===
+        "loading"
+    ) {
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            initializeMenu,
+            {
+                once:
+                    true
+            }
+        );
+
+    } else {
+
+        initializeMenu();
+
+    }
+
+
+})(window, document);
 </body>
 </html>
