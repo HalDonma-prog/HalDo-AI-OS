@@ -52039,5 +52039,1813 @@ HD.emit(
 
 })(window, document);
 </script>
+/* ============================================================
+   DATEI:
+   /js/cosmic-display.js
+
+   ÄNDERUNG:
+   KOMPLETT ERSETZEN
+
+   HALDO AI OS — COSMIC DISPLAY
+   PART 1 / 4
+
+   Diese Datei wird in PART 1–4 vollständig zusammengesetzt.
+   ============================================================ */
+
+"use strict";
+
+(function (window, document) {
+
+    /* ========================================================
+       01 — FOUNDATION
+       ======================================================== */
+
+    window.HalDoOS = window.HalDoOS || {};
+
+    const HalDoOS = window.HalDoOS;
+
+    const VERSION = "20.2.0";
+    const MODULE_ID = "cosmic-display";
+
+
+    /* ========================================================
+       02 — STATE
+       ======================================================== */
+
+    const state = {
+
+        initialized: false,
+        ready: false,
+
+        menuOpen: false,
+
+        activeAppId: null,
+
+        stars: [],
+        planets: [],
+
+        animationFrame: null,
+
+        reducedMotion:
+            window.matchMedia &&
+            window.matchMedia(
+                "(prefers-reduced-motion: reduce)"
+            ).matches,
+
+        elements: {
+
+            root: null,
+            universe: null,
+            stars: null,
+            sun: null,
+            planets: null,
+
+            menu: null,
+            menuButton: null,
+            menuContent: null,
+
+            appLayer: null,
+            appWindow: null,
+            appContent: null,
+            appTitle: null
+
+        }
+
+    };
+
+
+    /* ========================================================
+       03 — HELPERS
+       ======================================================== */
+
+    function qs(
+        selector,
+        root = document
+    ) {
+
+        return root.querySelector(
+            selector
+        );
+
+    }
+
+
+    function createElement(
+        tag,
+        className = "",
+        parent = null
+    ) {
+
+        const element =
+            document.createElement(
+                tag
+            );
+
+        if (className) {
+
+            element.className =
+                className;
+
+        }
+
+        if (parent) {
+
+            parent.appendChild(
+                element
+            );
+
+        }
+
+        return element;
+
+    }
+
+
+    function escapeHTML(
+        value
+    ) {
+
+        return String(
+            value ?? ""
+        )
+            .replace(
+                /&/g,
+                "&amp;"
+            )
+            .replace(
+                /</g,
+                "&lt;"
+            )
+            .replace(
+                />/g,
+                "&gt;"
+            )
+            .replace(
+                /"/g,
+                "&quot;"
+            )
+            .replace(
+                /'/g,
+                "&#039;"
+            );
+
+    }
+
+
+    function emit(
+        eventName,
+        detail = {}
+    ) {
+
+        try {
+
+            window.dispatchEvent(
+                new CustomEvent(
+                    eventName,
+                    {
+                        detail
+                    }
+                )
+            );
+
+        } catch (_) {}
+
+    }
+
+
+    function getLogoPath() {
+
+        const candidates = [
+
+            "assets/logo/logo.png",
+            "./assets/logo/logo.png",
+            "logo.png"
+
+        ];
+
+        for (
+            const source of candidates
+        ) {
+
+            return source;
+
+        }
+
+        return (
+            "assets/logo/logo.png"
+        );
+
+    }
+
+
+    function getAppManager() {
+
+        return (
+
+            window.HalDoAppManager ||
+
+            window.HalDoOSAppManager ||
+
+            HalDoOS.appManager ||
+
+            window.HalDo?.appManager ||
+
+            null
+
+        );
+
+    }
+
+
+    function getApps() {
+
+        const manager =
+            getAppManager();
+
+        if (
+            manager &&
+            typeof manager.getApps ===
+            "function"
+        ) {
+
+            try {
+
+                return (
+                    manager.getApps() ||
+                    []
+                );
+
+            } catch (_) {}
+
+        }
+
+
+        if (
+            manager &&
+            typeof manager.getAll ===
+            "function"
+        ) {
+
+            try {
+
+                return (
+                    manager.getAll() ||
+                    []
+                );
+
+            } catch (_) {}
+
+        }
+
+
+        if (
+            manager &&
+            typeof manager.apps ===
+            "object"
+        ) {
+
+            try {
+
+                return Object.values(
+                    manager.apps
+                );
+
+            } catch (_) {}
+
+        }
+
+
+        return [];
+
+    }
+
+
+    /* ========================================================
+       04 — STYLE
+       ======================================================== */
+
+    function injectStyles() {
+
+        if (
+            document.getElementById(
+                "haldo-cosmic-display-style"
+            )
+        ) {
+
+            return;
+
+        }
+
+
+        const style =
+            document.createElement(
+                "style"
+            );
+
+
+        style.id =
+            "haldo-cosmic-display-style";
+
+
+        style.textContent = `
+
+/* ==========================================================
+   HALDO COSMIC DISPLAY
+   ========================================================== */
+
+.haldo-cosmic-root {
+
+    position: fixed;
+
+    inset: 0;
+
+    width: 100vw;
+
+    height: 100dvh;
+
+    overflow: hidden;
+
+    background:
+
+        radial-gradient(
+            circle at 50% 45%,
+            rgba(
+                255,
+                255,
+                255,
+                .07
+            ),
+            transparent 28%
+        ),
+
+        radial-gradient(
+            circle at 50% 50%,
+            #172653 0%,
+            #070d22 38%,
+            #02040d 72%,
+            #000 100%
+        );
+
+    color:
+        #fff;
+
+    font-family:
+
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+
+    isolation:
+        isolate;
+
+    user-select:
+        none;
+
+    -webkit-user-select:
+        none;
+
+    -webkit-tap-highlight-color:
+        transparent;
+
+}
+
+
+/* ==========================================================
+   SPACE
+   ========================================================== */
+
+.haldo-cosmic-universe {
+
+    position:
+        absolute;
+
+    inset:
+        0;
+
+    overflow:
+        hidden;
+
+    pointer-events:
+        none;
+
+}
+
+
+/* ==========================================================
+   STARS
+   ========================================================== */
+
+.haldo-cosmic-stars {
+
+    position:
+        absolute;
+
+    inset:
+        0;
+
+    overflow:
+        hidden;
+
+    transform:
+        translateZ(0);
+
+}
+
+
+.haldo-cosmic-star {
+
+    position:
+        absolute;
+
+    border-radius:
+        50%;
+
+    background:
+        #fff;
+
+    box-shadow:
+
+        0 0 5px
+        rgba(
+            255,
+            255,
+            255,
+            .9
+        ),
+
+        0 0 12px
+        rgba(
+            170,
+            210,
+            255,
+            .65
+        );
+
+    opacity:
+        .7;
+
+    animation:
+
+        haldo-star-pulse
+        var(--star-duration)
+        ease-in-out
+        infinite
+        alternate;
+
+}
+
+
+@keyframes
+haldo-star-pulse {
+
+    from {
+
+        opacity:
+            .25;
+
+        transform:
+            scale(
+                .75
+            );
+
+    }
+
+    to {
+
+        opacity:
+            1;
+
+        transform:
+            scale(
+                1.35
+            );
+
+    }
+
+}
+
+
+/* ==========================================================
+   CENTRAL SUN
+   ========================================================== */
+
+.haldo-cosmic-sun {
+
+    position:
+        absolute;
+
+    left:
+        50%;
+
+    top:
+        50%;
+
+    width:
+        clamp(
+            118px,
+            19vw,
+            260px
+        );
+
+    aspect-ratio:
+        1;
+
+    transform:
+        translate(
+            -50%,
+            -50%
+        );
+
+    border-radius:
+        50%;
+
+    background:
+
+        radial-gradient(
+            circle at 42% 38%,
+            #ffffff 0%,
+            #fffbd0 10%,
+            #ffe86b 24%,
+            #ffc32f 48%,
+            #ff7b00 70%,
+            #ff3d00 84%,
+            rgba(
+                255,
+                65,
+                0,
+                .08
+            ) 100%
+        );
+
+    box-shadow:
+
+        0 0 22px
+        rgba(
+            255,
+            255,
+            220,
+            .98
+        ),
+
+        0 0 55px
+        rgba(
+            255,
+            222,
+            78,
+            .98
+        ),
+
+        0 0 105px
+        rgba(
+            255,
+            165,
+            30,
+            .82
+        ),
+
+        0 0 180px
+        rgba(
+            255,
+            94,
+            0,
+            .56
+        ),
+
+        0 0 300px
+        rgba(
+            255,
+            50,
+            0,
+            .30
+        );
+
+    animation:
+
+        haldo-sun-glow
+        3.4s
+        ease-in-out
+        infinite
+        alternate;
+
+    z-index:
+        8;
+
+    cursor:
+        pointer;
+
+    touch-action:
+        manipulation;
+
+}
+
+
+/*
+ * 365° Sonnenstrahlen.
+ *
+ * Der repeating-conic-gradient erzeugt
+ * einen vollständigen Strahlenkranz mit
+ * sehr feiner Unterteilung.
+ */
+
+.haldo-cosmic-sun::before {
+
+    content:
+        "";
+
+    position:
+        absolute;
+
+    inset:
+        -42%;
+
+    border-radius:
+        50%;
+
+    background:
+
+        repeating-conic-gradient(
+
+            from 0deg,
+
+            rgba(
+                255,
+                245,
+                160,
+                0
+            )
+            0deg,
+
+            rgba(
+                255,
+                240,
+                130,
+                .12
+            )
+            .72deg,
+
+            rgba(
+                255,
+                215,
+                70,
+                .50
+            )
+            .9863deg,
+
+            rgba(
+                255,
+                145,
+                0,
+                .08
+            )
+            1.42deg,
+
+            rgba(
+                255,
+                245,
+                160,
+                0
+            )
+            1.9726deg
+
+        );
+
+    mask-image:
+
+        radial-gradient(
+            circle,
+            transparent 0 36%,
+            #000 48%,
+            #000 56%,
+            transparent 70%
+        );
+
+    -webkit-mask-image:
+
+        radial-gradient(
+            circle,
+            transparent 0 36%,
+            #000 48%,
+            #000 56%,
+            transparent 70%
+        );
+
+    animation:
+
+        haldo-sun-rays
+        22s
+        linear
+        infinite;
+
+    pointer-events:
+        none;
+
+}
+
+
+/* ==========================================================
+   SUN CORONA
+   ========================================================== */
+
+.haldo-cosmic-sun::after {
+
+    content:
+        "";
+
+    position:
+        absolute;
+
+    inset:
+        -30%;
+
+    border-radius:
+        50%;
+
+    background:
+
+        radial-gradient(
+            circle,
+            transparent 43%,
+            rgba(
+                255,
+                239,
+                134,
+                .20
+            ) 52%,
+            rgba(
+                255,
+                156,
+                20,
+                .13
+            ) 63%,
+            transparent 76%
+        );
+
+    animation:
+
+        haldo-sun-corona
+        12s
+        linear
+        infinite;
+
+    pointer-events:
+        none;
+
+}
+
+
+/* ==========================================================
+   HALDO LOGO INSIDE THE SUN
+   ========================================================== */
+
+.haldo-cosmic-sun-logo {
+
+    position:
+        absolute;
+
+    left:
+        50%;
+
+    top:
+        50%;
+
+    width:
+        48%;
+
+    height:
+        48%;
+
+    transform:
+        translate(
+            -50%,
+            -50%
+        );
+
+    object-fit:
+        contain;
+
+    border-radius:
+        50%;
+
+    z-index:
+        4;
+
+    opacity:
+        .98;
+
+    filter:
+
+        drop-shadow(
+            0 0 7px
+            rgba(
+                255,
+                255,
+                255,
+                .95
+            )
+        )
+
+        drop-shadow(
+            0 0 18px
+            rgba(
+                255,
+                218,
+                100,
+                .98
+            )
+        )
+
+        drop-shadow(
+            0 0 34px
+            rgba(
+                255,
+                145,
+                20,
+                .85
+            )
+        );
+
+    animation:
+
+        haldo-sun-logo-pulse
+        3.2s
+        ease-in-out
+        infinite
+        alternate;
+
+    pointer-events:
+        none;
+
+}
+
+
+/* ==========================================================
+   SUN TOUCH / CLICK AREA
+   ========================================================== */
+
+.haldo-cosmic-sun-hotspot {
+
+    position:
+        absolute;
+
+    inset:
+        -48%;
+
+    z-index:
+        10;
+
+    border-radius:
+        50%;
+
+    cursor:
+        pointer;
+
+    background:
+        transparent;
+
+    border:
+        0;
+
+    padding:
+        0;
+
+    touch-action:
+        manipulation;
+
+}
+
+
+/* ==========================================================
+   SUN ANIMATIONS
+   ========================================================== */
+
+@keyframes
+haldo-sun-glow {
+
+    from {
+
+        transform:
+            translate(
+                -50%,
+                -50%
+            )
+            scale(
+                .965
+            );
+
+        filter:
+            brightness(
+                .96
+            )
+            saturate(
+                1.04
+            );
+
+    }
+
+    to {
+
+        transform:
+            translate(
+                -50%,
+                -50%
+            )
+            scale(
+                1.045
+            );
+
+        filter:
+            brightness(
+                1.20
+            )
+            saturate(
+                1.18
+            );
+
+    }
+
+}
+
+
+@keyframes
+haldo-sun-rays {
+
+    to {
+
+        transform:
+            rotate(
+                360deg
+            );
+
+    }
+
+}
+
+
+@keyframes
+haldo-sun-corona {
+
+    to {
+
+        transform:
+            rotate(
+                -360deg
+            )
+            scale(
+                1.04
+            );
+
+    }
+
+}
+
+
+@keyframes
+haldo-sun-logo-pulse {
+
+    from {
+
+        transform:
+            translate(
+                -50%,
+                -50%
+            )
+            scale(
+                .94
+            )
+            rotate(
+                -2deg
+            );
+
+    }
+
+    to {
+
+        transform:
+            translate(
+                -50%,
+                -50%
+            )
+            scale(
+                1.04
+            )
+            rotate(
+                2deg
+            );
+
+    }
+
+}
+
+
+/* ==========================================================
+   PLANET ORBITS
+   ========================================================== */
+
+.haldo-cosmic-orbit {
+
+    position:
+        absolute;
+
+    left:
+        50%;
+
+    top:
+        50%;
+
+    border:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            .075
+        );
+
+    border-radius:
+        50%;
+
+    transform:
+        translate(
+            -50%,
+            -50%
+        );
+
+    z-index:
+        4;
+
+    box-shadow:
+
+        inset 0 0 24px
+        rgba(
+            120,
+            170,
+            255,
+            .025
+        ),
+
+        0 0 18px
+        rgba(
+            80,
+            130,
+            255,
+            .018
+        );
+
+}
+
+
+/* ==========================================================
+   PLANET SYSTEM
+   ========================================================== */
+
+.haldo-cosmic-planet-system {
+
+    position:
+        absolute;
+
+    left:
+        50%;
+
+    top:
+        50%;
+
+    width:
+        100%;
+
+    height:
+        100%;
+
+    transform:
+        translate(
+            -50%,
+            -50%
+        );
+
+    animation:
+
+        var(--orbit-animation)
+        var(--orbit-speed)
+        linear
+        infinite;
+
+    transform-origin:
+        center center;
+
+}
+
+
+/* ==========================================================
+   PLANET
+   ========================================================== */
+
+.haldo-cosmic-planet {
+
+    position:
+        absolute;
+
+    left:
+        50%;
+
+    top:
+        0;
+
+    border-radius:
+        50%;
+
+    transform:
+        translate(
+            -50%,
+            -50%
+        );
+
+    box-shadow:
+
+        0 0 10px
+        rgba(
+            255,
+            255,
+            255,
+            .35
+        ),
+
+        0 0 22px
+        rgba(
+            110,
+            180,
+            255,
+            .18
+        );
+
+    animation:
+
+        haldo-planet-spin
+        var(
+            --planet-spin,
+            7s
+        )
+        linear
+        infinite;
+
+    overflow:
+        visible;
+
+}
+
+
+@keyframes
+haldo-planet-spin {
+
+    from {
+
+        filter:
+            brightness(
+                .96
+            )
+            saturate(
+                .96
+            );
+
+    }
+
+    50% {
+
+        filter:
+            brightness(
+                1.13
+            )
+            saturate(
+                1.10
+            );
+
+    }
+
+    to {
+
+        filter:
+            brightness(
+                .96
+            )
+            saturate(
+                .96
+            );
+
+    }
+
+}
+
+
+/* ==========================================================
+   12 PLANET DESIGNS
+   ========================================================== */
+
+.haldo-planet-a {
+
+    background:
+
+        radial-gradient(
+            circle at 30% 28%,
+            #ffffff 0%,
+            #a6e8ff 18%,
+            #3f8df2 53%,
+            #102b62 100%
+        );
+
+}
+
+
+.haldo-planet-b {
+
+    background:
+
+        radial-gradient(
+            circle at 30% 25%,
+            #fff8d7 0%,
+            #f5c86b 22%,
+            #b86d35 60%,
+            #542719 100%
+        );
+
+}
+
+
+.haldo-planet-c {
+
+    background:
+
+        radial-gradient(
+            circle at 35% 24%,
+            #e2fff7 0%,
+            #52d0aa 28%,
+            #14758a 65%,
+            #082d46 100%
+        );
+
+}
+
+
+.haldo-earth {
+
+    background:
+
+        radial-gradient(
+            circle at 32% 28%,
+            #c9ffff 0%,
+            #45d0ff 18%,
+            #1768d9 53%,
+            #08245f 100%
+        );
+
+    box-shadow:
+
+        0 0 18px
+        rgba(
+            80,
+            190,
+            255,
+            .92
+        ),
+
+        0 0 42px
+        rgba(
+            30,
+            120,
+            255,
+            .48
+        ),
+
+        0 0 65px
+        rgba(
+            50,
+            190,
+            255,
+            .15
+        );
+
+}
+
+
+.haldo-earth::before {
+
+    content:
+        "";
+
+    position:
+        absolute;
+
+    width:
+        38%;
+
+    height:
+        23%;
+
+    left:
+        18%;
+
+    top:
+        29%;
+
+    border-radius:
+        50%;
+
+    background:
+        rgba(
+            74,
+            220,
+            112,
+            .80
+        );
+
+    filter:
+        blur(
+            1.7px
+        );
+
+    transform:
+        rotate(
+            -20deg
+        );
+
+}
+
+
+.haldo-earth::after {
+
+    border-color:
+        rgba(
+            150,
+            235,
+            255,
+            .38
+        );
+
+    box-shadow:
+        0 0 14px
+        rgba(
+            110,
+            220,
+            255,
+            .35
+        );
+
+}
+
+
+.haldo-planet-d {
+
+    background:
+
+        radial-gradient(
+            circle at 35% 28%,
+            #ffffff 0%,
+            #e1b7ff 24%,
+            #824bd1 60%,
+            #281046 100%
+        );
+
+}
+
+
+.haldo-planet-e {
+
+    background:
+
+        radial-gradient(
+            circle at 32% 27%,
+            #e8f5ff 0%,
+            #a9c9d8 25%,
+            #607987 58%,
+            #27343e 100%
+        );
+
+}
+
+
+.haldo-planet-f {
+
+    background:
+
+        radial-gradient(
+            circle at 30% 25%,
+            #ffe3a8 0%,
+            #d78b37 28%,
+            #8a3e22 62%,
+            #35151b 100%
+        );
+
+}
+
+
+.haldo-planet-g {
+
+    background:
+
+        radial-gradient(
+            circle at 34% 25%,
+            #eaffff 0%,
+            #7bd6df 27%,
+            #3384a0 62%,
+            #153e59 100%
+        );
+
+}
+
+
+.haldo-planet-h {
+
+    background:
+
+        radial-gradient(
+            circle at 35% 28%,
+            #f8f1ff 0%,
+            #d58bf4 26%,
+            #713aa4 61%,
+            #2b1547 100%
+        );
+
+}
+
+
+.haldo-planet-i {
+
+    background:
+
+        radial-gradient(
+            circle at 28% 24%,
+            #fff9dc 0%,
+            #efc46b 28%,
+            #a46b31 61%,
+            #4b2a18 100%
+        );
+
+}
+
+
+.haldo-planet-j {
+
+    background:
+
+        radial-gradient(
+            circle at 32% 27%,
+            #e2fbff 0%,
+            #6eb8ff 30%,
+            #3152ae 63%,
+            #121d4d 100%
+        );
+
+}
+
+
+.haldo-planet-k {
+
+    background:
+
+        radial-gradient(
+            circle at 33% 28%,
+            #ffffff 0%,
+            #c6d5df 28%,
+            #768797 60%,
+            #303a47 100%
+        );
+
+}
+
+
+.haldo-planet-l {
+
+    background:
+
+        radial-gradient(
+            circle at 32% 25%,
+            #fff5ce 0%,
+            #ffbb59 25%,
+            #b95b31 58%,
+            #481b20 100%
+        );
+
+}
+
+
+/* ==========================================================
+   PLANET HALO
+   ========================================================== */
+
+.haldo-cosmic-planet::after {
+
+    content:
+        "";
+
+    position:
+        absolute;
+
+    inset:
+        -22%;
+
+    border-radius:
+        50%;
+
+    border:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            .16
+        );
+
+    opacity:
+        .45;
+
+}
+
+
+/* ==========================================================
+   RINGED PLANET
+   ========================================================== */
+
+.haldo-ringed::before {
+
+    content:
+        "";
+
+    position:
+        absolute;
+
+    left:
+        50%;
+
+    top:
+        50%;
+
+    width:
+        190%;
+
+    height:
+        58%;
+
+    transform:
+        translate(
+            -50%,
+            -50%
+        )
+        rotate(
+            -13deg
+        );
+
+    border-radius:
+        50%;
+
+    border:
+        2px solid
+        rgba(
+            225,
+            198,
+            145,
+            .52
+        );
+
+    box-shadow:
+
+        0 0 7px
+        rgba(
+            240,
+            215,
+            165,
+            .28
+        ),
+
+        inset 0 0 5px
+        rgba(
+            240,
+            215,
+            165,
+            .16
+        );
+
+}
+
+
+/* ==========================================================
+   MOON
+   ========================================================== */
+
+.haldo-moon {
+
+    background:
+
+        radial-gradient(
+            circle at 35% 30%,
+            #ffffff 0%,
+            #d9dce2 30%,
+            #8d929c 72%,
+            #383c46 100%
+        );
+
+    box-shadow:
+
+        0 0 15px
+        rgba(
+            230,
+            240,
+            255,
+            .62
+        ),
+
+        0 0 30px
+        rgba(
+            190,
+            210,
+            255,
+            .16
+        );
+
+}
+
+
+/* ==========================================================
+   DIFFERENT ORBIT TILTS
+   ========================================================== */
+
+.haldo-cosmic-planet-system[data-tilt="1"] {
+
+    transform:
+        translate(
+            -50%,
+            -50%
+        )
+        rotate(
+            9deg
+        );
+
+}
+
+
+.haldo-cosmic-planet-system[data-tilt="2"] {
+
+    transform:
+        translate(
+            -50%,
+            -50%
+        )
+        rotate(
+            -13deg
+        );
+
+}
+
+
+.haldo-cosmic-planet-system[data-tilt="3"] {
+
+    transform:
+        translate(
+            -50%,
+            -50%
+        )
+        rotate(
+            17deg
+        );
+
+}
+
+
+.haldo-cosmic-planet-system[data-tilt="4"] {
+
+    transform:
+        translate(
+            -50%,
+            -50%
+        )
+        rotate(
+            -21deg
+        );
+
+}
+
+
+/* ==========================================================
+   COMPACT MENU
+   ========================================================== */
+
+.haldo-cosmic-menu {
+
+    position:
+        absolute;
+
+    top:
+        50%;
+
+    left:
+        max(
+            10px,
+            env(
+                safe-area-inset-left
+            )
+        );
+
+    transform:
+        translateY(
+            -50%
+        );
+
+    width:
+        min(
+            74px,
+            17vw
+        );
+
+    max-height:
+        calc(
+            100dvh -
+            28px
+        );
+
+    padding:
+        8px;
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    align-items:
+        center;
+
+    gap:
+        7px;
+
+    border:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            .16
+        );
+
+    border-radius:
+        22px;
+
+    background:
+        rgba(
+            8,
+            15,
+            38,
+            .66
+        );
+
+    backdrop-filter:
+        blur(
+            22px
+        );
+
+    -webkit-backdrop-filter:
+        blur(
+            22px
+        );
+
+    box-shadow:
+        0 10px 50px
+        rgba(
+            0,
+            0,
+            0,
+            .45
+        );
+
+    z-index:
+        100;
+
+    transition:
+
+        width
+        .25s
+        ease,
+
+        background
+        .25s
+        ease;
+
+}
+
+
+.haldo-cosmic-menu.open {
+
+    width:
+        min(
+            280px,
+            76vw
+        );
+
+    align-items:
+        stretch;
+
+}
+
+
+/* ==========================================================
+   PART 1 ENDE
+   ========================================================== */
 </body>
 </html>
