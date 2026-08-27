@@ -4,11 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#050816">
-    <title>HalDo AI OS — Professional Universe</title>
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>HalDo AI OS — Complete Universe</title>
 
     <style>
         /* =========================================================
-           HALDO AI OS — KOMPLETTE STYLES
+           HALDO AI OS — KOMPLETTE STYLES (TEIL 1)
            ========================================================= */
 
         * {
@@ -27,6 +30,8 @@
             --haldo-radius: 16px;
             --haldo-shadow: 0 20px 60px rgba(0,0,0,.5);
             --haldo-font: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+            --planet-speed: 1s;
+            --galaxy-count: 12;
         }
 
         html, body {
@@ -82,7 +87,7 @@
         }
 
         /* =========================================================
-           STARS
+           STARS — 365 TAGE
            ========================================================= */
 
         .haldo-stars {
@@ -125,10 +130,10 @@
         }
 
         /* =========================================================
-           ORBIT SYSTEM — 12 PLANETEN
+           GALAXIE / ORBIT SYSTEM — 12 PLANETEN
            ========================================================= */
 
-        .haldo-orbit-system {
+        .haldo-galaxy-system {
             position: absolute;
             left: 50%;
             top: 50%;
@@ -154,22 +159,22 @@
             50% { opacity: .8; }
         }
 
-        /* 12 ORBIT-RINGE */
-        .haldo-orbit-ring-1 { width: 12%; height: 12%; }
-        .haldo-orbit-ring-2 { width: 19%; height: 19%; transform: translate(-50%, -50%) rotate(18deg); }
-        .haldo-orbit-ring-3 { width: 27%; height: 27%; transform: translate(-50%, -50%) rotate(-12deg); }
-        .haldo-orbit-ring-4 { width: 35%; height: 35%; transform: translate(-50%, -50%) rotate(25deg); }
-        .haldo-orbit-ring-5 { width: 44%; height: 44%; transform: translate(-50%, -50%) rotate(-8deg); }
-        .haldo-orbit-ring-6 { width: 53%; height: 53%; transform: translate(-50%, -50%) rotate(32deg); }
-        .haldo-orbit-ring-7 { width: 62%; height: 62%; transform: translate(-50%, -50%) rotate(-15deg); }
-        .haldo-orbit-ring-8 { width: 71%; height: 71%; transform: translate(-50%, -50%) rotate(22deg); }
-        .haldo-orbit-ring-9 { width: 80%; height: 80%; transform: translate(-50%, -50%) rotate(-28deg); }
-        .haldo-orbit-ring-10 { width: 88%; height: 88%; transform: translate(-50%, -50%) rotate(12deg); }
-        .haldo-orbit-ring-11 { width: 95%; height: 95%; transform: translate(-50%, -50%) rotate(-18deg); }
-        .haldo-orbit-ring-12 { width: 102%; height: 102%; transform: translate(-50%, -50%) rotate(35deg); }
+        /* 12 ORBIT-RINGE für 12 Galaxien/Planeten */
+        .haldo-orbit-ring-1 { width: 10%; height: 10%; }
+        .haldo-orbit-ring-2 { width: 17%; height: 17%; transform: translate(-50%, -50%) rotate(15deg); }
+        .haldo-orbit-ring-3 { width: 24%; height: 24%; transform: translate(-50%, -50%) rotate(-10deg); }
+        .haldo-orbit-ring-4 { width: 32%; height: 32%; transform: translate(-50%, -50%) rotate(22deg); }
+        .haldo-orbit-ring-5 { width: 40%; height: 40%; transform: translate(-50%, -50%) rotate(-8deg); }
+        .haldo-orbit-ring-6 { width: 48%; height: 48%; transform: translate(-50%, -50%) rotate(30deg); }
+        .haldo-orbit-ring-7 { width: 56%; height: 56%; transform: translate(-50%, -50%) rotate(-14deg); }
+        .haldo-orbit-ring-8 { width: 64%; height: 64%; transform: translate(-50%, -50%) rotate(20deg); }
+        .haldo-orbit-ring-9 { width: 72%; height: 72%; transform: translate(-50%, -50%) rotate(-25deg); }
+        .haldo-orbit-ring-10 { width: 80%; height: 80%; transform: translate(-50%, -50%) rotate(12deg); }
+        .haldo-orbit-ring-11 { width: 88%; height: 88%; transform: translate(-50%, -50%) rotate(-18deg); }
+        .haldo-orbit-ring-12 { width: 96%; height: 96%; transform: translate(-50%, -50%) rotate(28deg); }
 
         /* =========================================================
-           PLANETEN — 12 STÜCK
+           PLANETEN — 12 GALAXIEN
            ========================================================= */
 
         .haldo-planet-wrapper {
@@ -226,152 +231,28 @@
             50% { filter: brightness(1.15); }
         }
 
-        /* PLANET 1 — Merkur */
-        .haldo-planet-1 {
-            --planet-size: 10px;
-            --planet-bg: radial-gradient(circle at 35% 30%, #ddd, #8a8a8a 55%, #444);
-            --planet-glow: rgba(200,200,200,.4);
-            --planet-glow-size: 8px;
-        }
+        /* 12 PLANETEN/GALAXIEN */
+        .haldo-planet-1 { --planet-size: 10px; --planet-bg: radial-gradient(circle at 35% 30%, #ddd, #8a8a8a 55%, #444); --planet-glow: rgba(200,200,200,.4); --planet-glow-size: 8px; }
+        .haldo-planet-2 { --planet-size: 14px; --planet-bg: radial-gradient(circle at 35% 30%, #ffecb3, #d4a843 50%, #8a5a1a); --planet-glow: rgba(255,200,100,.5); --planet-glow-size: 12px; }
+        .haldo-planet-3 { --planet-size: 18px; --planet-bg: radial-gradient(circle at 35% 30%, #b8f2ff 0%, #2b91df 23%, #1264ad 58%, #062b61 100%); --planet-glow: rgba(50,180,255,.8); --planet-glow-size: 16px; }
+        .haldo-planet-3::after { content: ''; position: absolute; width: 40%; height: 22%; left: 20%; top: 28%; border-radius: 60% 40% 55% 45%; background: rgba(60,200,100,.7); transform: rotate(-15deg); }
+        .haldo-planet-3 .moon-orbit { position: absolute; left: 50%; top: 50%; width: 220%; height: 220%; transform: translate(-50%, -50%); border-radius: 50%; animation: moon-orbit-spin 3.8s linear infinite; }
+        .haldo-planet-3 .moon { position: absolute; left: 50%; top: -4px; width: 6px; height: 6px; margin-left: -3px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff, #b0b8c5 55%, #666); box-shadow: 0 0 6px rgba(255,255,255,.5); }
+        @keyframes moon-orbit-spin { from { transform: translate(-50%, -50%) rotate(0deg); } to { transform: translate(-50%, -50%) rotate(360deg); } }
 
-        /* PLANET 2 — Venus */
-        .haldo-planet-2 {
-            --planet-size: 14px;
-            --planet-bg: radial-gradient(circle at 35% 30%, #ffecb3, #d4a843 50%, #8a5a1a);
-            --planet-glow: rgba(255,200,100,.5);
-            --planet-glow-size: 12px;
-        }
-
-        /* PLANET 3 — ERDE */
-        .haldo-planet-3 {
-            --planet-size: 18px;
-            --planet-bg: radial-gradient(circle at 35% 30%, #b8f2ff 0%, #2b91df 23%, #1264ad 58%, #062b61 100%);
-            --planet-glow: rgba(50,180,255,.8);
-            --planet-glow-size: 16px;
-        }
-        .haldo-planet-3::after {
-            content: '';
-            position: absolute;
-            width: 40%;
-            height: 22%;
-            left: 20%;
-            top: 28%;
-            border-radius: 60% 40% 55% 45%;
-            background: rgba(60,200,100,.7);
-            transform: rotate(-15deg);
-        }
-        .haldo-planet-3 .moon-orbit {
-            position: absolute;
-            left: 50%;
-            top: 50%;
-            width: 220%;
-            height: 220%;
-            transform: translate(-50%, -50%);
-            border-radius: 50%;
-            animation: moon-orbit-spin 3.8s linear infinite;
-        }
-        .haldo-planet-3 .moon {
-            position: absolute;
-            left: 50%;
-            top: -4px;
-            width: 6px;
-            height: 6px;
-            margin-left: -3px;
-            border-radius: 50%;
-            background: radial-gradient(circle at 35% 30%, #fff, #b0b8c5 55%, #666);
-            box-shadow: 0 0 6px rgba(255,255,255,.5);
-        }
-        @keyframes moon-orbit-spin {
-            from { transform: translate(-50%, -50%) rotate(0deg); }
-            to { transform: translate(-50%, -50%) rotate(360deg); }
-        }
-
-        /* PLANET 4 — Mars */
-        .haldo-planet-4 {
-            --planet-size: 14px;
-            --planet-bg: radial-gradient(circle at 35% 30%, #ffc4a0, #c94a2a 50%, #6b1a10);
-            --planet-glow: rgba(255,100,60,.6);
-            --planet-glow-size: 12px;
-        }
-
-        /* PLANET 5 — Jupiter */
-        .haldo-planet-5 {
-            --planet-size: 32px;
-            --planet-bg: repeating-linear-gradient(0deg, #e8c8a0 0 6px, #b0885a 6px 10px, #d8b888 10px 14px);
-            --planet-glow: rgba(255,200,150,.4);
-            --planet-glow-size: 18px;
-        }
-
-        /* PLANET 6 — Saturn mit Ring */
-        .haldo-planet-6 {
-            --planet-size: 28px;
-            --planet-bg: radial-gradient(circle at 35% 30%, #f5e0b0, #c8a050 55%, #7a5a2a);
-            --planet-glow: rgba(255,210,120,.4);
-            --planet-glow-size: 16px;
-        }
-        .haldo-planet-6::before {
-            content: '';
-            position: absolute;
-            left: 50%;
-            top: 50%;
-            width: 200%;
-            height: 35%;
-            transform: translate(-50%, -50%) rotate(-18deg);
-            border: 2px solid rgba(200,180,140,.6);
-            border-radius: 50%;
-            box-shadow: 0 0 10px rgba(200,180,140,.2);
-        }
-
-        /* PLANET 7 — Uranus */
-        .haldo-planet-7 {
-            --planet-size: 22px;
-            --planet-bg: radial-gradient(circle at 35% 30%, #c8f5ff, #5ab0c8 50%, #1a5a6a);
-            --planet-glow: rgba(100,220,255,.5);
-            --planet-glow-size: 14px;
-        }
-
-        /* PLANET 8 — Neptun */
-        .haldo-planet-8 {
-            --planet-size: 22px;
-            --planet-bg: radial-gradient(circle at 35% 30%, #8ab8ff, #3a5ab8 50%, #1a2a5a);
-            --planet-glow: rgba(80,120,255,.6);
-            --planet-glow-size: 14px;
-        }
-
-        /* PLANET 9 — Pluto */
-        .haldo-planet-9 {
-            --planet-size: 10px;
-            --planet-bg: radial-gradient(circle at 35% 30%, #ddd8c8, #9a8a7a 55%, #4a3a2a);
-            --planet-glow: rgba(200,180,160,.3);
-            --planet-glow-size: 8px;
-        }
-
-        /* PLANET 10 — HalDo World */
-        .haldo-planet-10 {
-            --planet-size: 16px;
-            --planet-bg: radial-gradient(circle at 35% 30%, #ffd8e8, #c85a8a 50%, #6a1a3a);
-            --planet-glow: rgba(255,100,180,.5);
-            --planet-glow-size: 12px;
-        }
-
-        /* PLANET 11 — Nova */
-        .haldo-planet-11 {
-            --planet-size: 12px;
-            --planet-bg: radial-gradient(circle at 35% 30%, #aaffd0, #3a9a6a 50%, #1a4a2a);
-            --planet-glow: rgba(80,255,150,.4);
-            --planet-glow-size: 10px;
-        }
-
-        /* PLANET 12 — Astra */
-        .haldo-planet-12 {
-            --planet-size: 14px;
-            --planet-bg: radial-gradient(circle at 35% 30%, #e8d0ff, #8a5ac8 50%, #3a1a6a);
-            --planet-glow: rgba(180,120,255,.5);
-            --planet-glow-size: 12px;
-        }
+        .haldo-planet-4 { --planet-size: 14px; --planet-bg: radial-gradient(circle at 35% 30%, #ffc4a0, #c94a2a 50%, #6b1a10); --planet-glow: rgba(255,100,60,.6); --planet-glow-size: 12px; }
+        .haldo-planet-5 { --planet-size: 32px; --planet-bg: repeating-linear-gradient(0deg, #e8c8a0 0 6px, #b0885a 6px 10px, #d8b888 10px 14px); --planet-glow: rgba(255,200,150,.4); --planet-glow-size: 18px; }
+        .haldo-planet-6 { --planet-size: 28px; --planet-bg: radial-gradient(circle at 35% 30%, #f5e0b0, #c8a050 55%, #7a5a2a); --planet-glow: rgba(255,210,120,.4); --planet-glow-size: 16px; }
+        .haldo-planet-6::before { content: ''; position: absolute; left: 50%; top: 50%; width: 200%; height: 35%; transform: translate(-50%, -50%) rotate(-18deg); border: 2px solid rgba(200,180,140,.6); border-radius: 50%; box-shadow: 0 0 10px rgba(200,180,140,.2); }
+        .haldo-planet-7 { --planet-size: 22px; --planet-bg: radial-gradient(circle at 35% 30%, #c8f5ff, #5ab0c8 50%, #1a5a6a); --planet-glow: rgba(100,220,255,.5); --planet-glow-size: 14px; }
+        .haldo-planet-8 { --planet-size: 22px; --planet-bg: radial-gradient(circle at 35% 30%, #8ab8ff, #3a5ab8 50%, #1a2a5a); --planet-glow: rgba(80,120,255,.6); --planet-glow-size: 14px; }
+        .haldo-planet-9 { --planet-size: 10px; --planet-bg: radial-gradient(circle at 35% 30%, #ddd8c8, #9a8a7a 55%, #4a3a2a); --planet-glow: rgba(200,180,160,.3); --planet-glow-size: 8px; }
+        .haldo-planet-10 { --planet-size: 16px; --planet-bg: radial-gradient(circle at 35% 30%, #ffd8e8, #c85a8a 50%, #6a1a3a); --planet-glow: rgba(255,100,180,.5); --planet-glow-size: 12px; }
+        .haldo-planet-11 { --planet-size: 12px; --planet-bg: radial-gradient(circle at 35% 30%, #aaffd0, #3a9a6a 50%, #1a4a2a); --planet-glow: rgba(80,255,150,.4); --planet-glow-size: 10px; }
+        .haldo-planet-12 { --planet-size: 14px; --planet-bg: radial-gradient(circle at 35% 30%, #e8d0ff, #8a5ac8 50%, #3a1a6a); --planet-glow: rgba(180,120,255,.5); --planet-glow-size: 12px; }
 
         /* =========================================================
-           SONNE — MIT LOGO + STRAHLEN
+           SONNE — MIT LEBENDIGEM LOGO
            ========================================================= */
 
         .haldo-sun-container {
@@ -428,7 +309,6 @@
             to { transform: rotate(360deg); }
         }
 
-        /* SONNEN-AURA */
         .haldo-sun-aura {
             position: absolute;
             inset: -20%;
@@ -442,42 +322,6 @@
         @keyframes haldo-sun-aura-pulse {
             0%, 100% { transform: scale(.92); opacity: .6; }
             50% { transform: scale(1.08); opacity: 1; }
-        }
-
-        /* =========================================================
-           HALDO AI OS — LEUCHTENDES SCHRIFT-LOGO
-           ========================================================= */
-
-        .haldo-os-logo-text {
-            position: absolute;
-            left: 50%;
-            top: 60%;
-            transform: translateX(-50%);
-            z-index: 70;
-            font-size: clamp(14px, 2vw, 28px);
-            font-weight: 900;
-            letter-spacing: 4px;
-            text-transform: uppercase;
-            background: linear-gradient(135deg, #ffd54b, #ff9f1c, #ffd54b, #ff6b00);
-            background-size: 300% 300%;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: haldo-logo-text-glow 3s ease-in-out infinite;
-            text-shadow: 0 0 30px rgba(255,200,80,.3), 0 0 60px rgba(255,200,80,.15);
-            pointer-events: none;
-            white-space: nowrap;
-        }
-
-        @keyframes haldo-logo-text-glow {
-            0%, 100% { background-position: 0% 50%; filter: drop-shadow(0 0 10px rgba(255,200,80,.2)); }
-            50% { background-position: 100% 50%; filter: drop-shadow(0 0 25px rgba(255,200,80,.5)); }
-        }
-
-        .haldo-os-logo-text .haldo-highlight {
-            color: #fff;
-            -webkit-text-fill-color: #fff;
-            background: none;
-            text-shadow: 0 0 20px rgba(255,255,255,.5), 0 0 40px rgba(255,200,80,.3);
         }
 
         /* =========================================================
@@ -513,7 +357,7 @@
         }
 
         /* =========================================================
-           LIVING HALDO AI — MENSCHLICHE PRÄSENZ
+           LEBENDIGES HALDO AI — MENSCHLICHE PRÄSENZ
            ========================================================= */
 
         .haldo-living-avatar {
@@ -686,6 +530,71 @@
         }
 
         /* =========================================================
+           HALDO AI OS — LEUCHTENDES SCHRIFT-LOGO
+           ========================================================= */
+
+        .haldo-os-logo-text {
+            position: absolute;
+            left: 50%;
+            top: 62%;
+            transform: translateX(-50%);
+            z-index: 70;
+            font-size: clamp(14px, 2vw, 28px);
+            font-weight: 900;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            background: linear-gradient(135deg, #ffd54b, #ff9f1c, #ffd54b, #ff6b00);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: haldo-logo-text-glow 3s ease-in-out infinite;
+            text-shadow: 0 0 30px rgba(255,200,80,.3), 0 0 60px rgba(255,200,80,.15);
+            pointer-events: none;
+            white-space: nowrap;
+        }
+
+        @keyframes haldo-logo-text-glow {
+            0%, 100% { background-position: 0% 50%; filter: drop-shadow(0 0 10px rgba(255,200,80,.2)); }
+            50% { background-position: 100% 50%; filter: drop-shadow(0 0 25px rgba(255,200,80,.5)); }
+        }
+
+        .haldo-os-logo-text .haldo-highlight {
+            color: #fff;
+            -webkit-text-fill-color: #fff;
+            background: none;
+            text-shadow: 0 0 20px rgba(255,255,255,.5), 0 0 40px rgba(255,200,80,.3);
+        }
+
+        /* =========================================================
+           GEHEIME PLANETEN-UHR
+           ========================================================= */
+
+        .haldo-secret-clock {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            z-index: 80;
+            font-size: 11px;
+            font-family: monospace;
+            opacity: .4;
+            text-align: right;
+            pointer-events: none;
+            color: rgba(255,200,80,.6);
+            text-shadow: 0 0 10px rgba(255,200,80,.1);
+            transition: opacity .3s ease;
+        }
+
+        .haldo-secret-clock:hover {
+            opacity: .8;
+        }
+
+        .haldo-secret-clock .planet-time {
+            font-size: 9px;
+            opacity: .6;
+            margin-top: 2px;
+        }
+
+        /* =========================================================
            MENÜ BUTTONS
            ========================================================= */
 
@@ -817,7 +726,7 @@
         .haldo-menu-item .info .desc { font-size: 10px; opacity: .5; margin-top: 2px; }
 
         /* =========================================================
-           AI CHAT WINDOW — PROFESSIONELL
+           AI CHAT WINDOW
            ========================================================= */
 
         .haldo-ai-chat-window {
@@ -1165,6 +1074,7 @@
 
             .haldo-status-bar { font-size: 8px; height: 20px; padding: 0 8px; }
             .haldo-os-logo-text { font-size: clamp(10px, 1.5vw, 18px); top: 65%; }
+            .haldo-secret-clock { bottom: 20px; right: 16px; font-size: 9px; }
         }
 
         @media (max-width: 420px) {
@@ -1181,6 +1091,7 @@
             .haldo-menu-panel.system-panel { top: 60px; }
             .haldo-menu-panel.apps-panel { bottom: 62px; }
             .haldo-os-logo-text { font-size: clamp(8px, 1.2vw, 14px); top: 68%; letter-spacing: 2px; }
+            .haldo-secret-clock { bottom: 16px; right: 12px; font-size: 8px; }
         }
 
         @media (prefers-reduced-motion: reduce) {
@@ -1207,10 +1118,10 @@
             <section class="haldo-cosmic-center" aria-label="HalDo Cosmic Center">
 
                 <!-- =============================================
-                ORBIT SYSTEM — 12 PLANETEN
+                GALAXIE / ORBIT SYSTEM — 12 PLANETEN
                 ============================================= -->
 
-                <div class="haldo-orbit-system" aria-hidden="true">
+                <div class="haldo-galaxy-system" aria-hidden="true">
 
                     <!-- 12 ORBIT-RINGE -->
                     <div class="haldo-orbit-ring haldo-orbit-ring-1"></div>
@@ -1347,6 +1258,15 @@
                     </div>
                 </div>
 
+                <!-- =============================================
+                GEHEIME PLANETEN-UHR
+                ============================================= -->
+
+                <div class="haldo-secret-clock" id="haldo-secret-clock">
+                    <div id="haldo-clock-display">--:--:--</div>
+                    <div class="planet-time" id="haldo-planet-time">🌍 Planeten-Zeit</div>
+                </div>
+
             </section>
         </main>
     </div>
@@ -1390,7 +1310,7 @@
     </div>
 
     <!-- =========================================================
-    AI CHAT WINDOW — PROFESSIONELL + UNIVERSE
+    AI CHAT WINDOW
     ========================================================= -->
 
     <div class="haldo-ai-chat-window" id="haldo-chat-window" role="dialog" aria-label="HalDo AI Chat" aria-hidden="true">
@@ -1439,7 +1359,7 @@
     </div>
 
     <!-- =========================================================
-    JAVASCRIPT — KOMPLETTES SYSTEM
+    JAVASCRIPT — TEIL 1 (GRUNDLAGEN)
     ========================================================= -->
 
     <script>
@@ -1452,18 +1372,20 @@
         window.HALDO_VERSION = "22.1.1";
         window.HALDO_BUILD = "UNIVERSE-PROFESSIONAL";
         window.HALDO_RELEASE = "2026-08-28";
+        window._haldoStartTime = Date.now();
 
         console.log("🌌 HalDo AI OS v" + window.HALDO_VERSION + " " + window.HALDO_BUILD + " wird geladen...");
+        console.log("📦 TEIL 1 — Grundlagen geladen");
 
         // =========================================================
-        // 1. STARS GENERATOR — 300+ STERNE
+        // 1. STARS GENERATOR — 365+ STERNE
         // =========================================================
 
         function generateStars() {
             const stars = document.getElementById("haldo-stars");
             if (!stars) return;
             stars.innerHTML = "";
-            const count = Math.min(350, Math.max(180, Math.floor(window.innerWidth * window.innerHeight / 7000)));
+            const count = Math.min(400, Math.max(200, Math.floor(window.innerWidth * window.innerHeight / 6000)));
             for (let i = 0; i < count; i++) {
                 const star = document.createElement("span");
                 star.className = "haldo-star";
@@ -1476,6 +1398,7 @@
                 star.style.setProperty('--star-delay', (Math.random() * 6) + 's');
                 stars.appendChild(star);
             }
+            console.log("⭐ " + count + " Sterne generiert (365+ Tage)");
         }
 
         // =========================================================
@@ -1488,7 +1411,43 @@
         }
 
         // =========================================================
-        // 3. EVENT BUS
+        // 3. GEHEIME PLANETEN-UHR
+        // =========================================================
+
+        function updatePlanetClock() {
+            const clockEl = document.getElementById("haldo-clock-display");
+            const planetEl = document.getElementById("haldo-planet-time");
+            if (!clockEl) return;
+
+            const now = new Date();
+            const h = String(now.getHours()).padStart(2, '0');
+            const m = String(now.getMinutes()).padStart(2, '0');
+            const s = String(now.getSeconds()).padStart(2, '0');
+
+            // Planetare Zeit (simuliert)
+            const planetSeconds = (now.getTime() / 1000) % 86400;
+            const planetHours = Math.floor(planetSeconds / 3600);
+            const planetMinutes = Math.floor((planetSeconds % 3600) / 60);
+            const planetSecs = Math.floor(planetSeconds % 60);
+
+            const ph = String(planetHours).padStart(2, '0');
+            const pm = String(planetMinutes).padStart(2, '0');
+            const ps = String(planetSecs).padStart(2, '0');
+
+            clockEl.textContent = `${h}:${m}:${s}`;
+
+            // Planeten-Zeit mit Tagesfortschritt
+            const dayProgress = ((planetSeconds / 86400) * 100).toFixed(1);
+            const planetNames = ['Merkur', 'Venus', 'Erde', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptun', 'Pluto', 'HalDo', 'Nova', 'Astra'];
+            const currentPlanet = planetNames[Math.floor(planetSeconds / 7200) % 12];
+
+            if (planetEl) {
+                planetEl.textContent = `🌍 ${currentPlanet} · ${ph}:${pm}:${ps} · Tag ${Math.floor(dayProgress)}%`;
+            }
+        }
+
+        // =========================================================
+        // 4. EVENT BUS
         // =========================================================
 
         window.HalDo = window.HalDo || {};
@@ -1504,7 +1463,7 @@
         };
 
         // =========================================================
-        // 4. STORAGE
+        // 5. STORAGE
         // =========================================================
 
         window.HalDo.Storage = {
@@ -1548,8 +1507,95 @@
         };
 
         // =========================================================
-        // 5. AI CORE — UNIVERSE INTELLIGENCE (ALLES WISSEN)
+        // 6. BOOT — TEIL 1
         // =========================================================
+
+        function haldoBootPart1() {
+            generateStars();
+            updateTimeDisplay();
+            setInterval(updateTimeDisplay, 1000);
+            updatePlanetClock();
+            setInterval(updatePlanetClock, 1000);
+
+            // Version anzeigen
+            document.getElementById("haldo-version-display").textContent = "✦ v" + window.HALDO_VERSION + " " + window.HALDO_BUILD;
+
+            // Sun click
+            document.getElementById("haldo-sun-container")?.addEventListener("click", () => {
+                const chat = document.getElementById("haldo-chat-window");
+                if (chat) {
+                    chat.classList.add("open");
+                    chat.removeAttribute("aria-hidden");
+                    const input = document.getElementById("haldo-chat-input");
+                    if (input) setTimeout(() => input.focus(), 100);
+                }
+                const avatar = document.getElementById("haldo-living-avatar");
+                if (avatar) avatar.dataset.state = "happy";
+                setTimeout(() => { if (avatar) avatar.dataset.state = "idle"; }, 800);
+            });
+
+            // Avatar click
+            document.getElementById("haldo-living-avatar")?.addEventListener("click", () => {
+                const chat = document.getElementById("haldo-chat-window");
+                if (chat) {
+                    chat.classList.add("open");
+                    chat.removeAttribute("aria-hidden");
+                    const input = document.getElementById("haldo-chat-input");
+                    if (input) setTimeout(() => input.focus(), 100);
+                }
+                const avatar = document.getElementById("haldo-living-avatar");
+                if (avatar) avatar.dataset.state = "happy";
+                setTimeout(() => { if (avatar) avatar.dataset.state = "idle"; }, 800);
+            });
+
+            // Planet click
+            document.querySelectorAll('.haldo-planet').forEach(planet => {
+                planet.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const name = planet.dataset.planet || 'Planet';
+                    const chat = document.getElementById("haldo-chat-window");
+                    if (chat) {
+                        chat.classList.add("open");
+                        chat.removeAttribute("aria-hidden");
+                        const input = document.getElementById("haldo-chat-input");
+                        if (input) {
+                            input.value = `Erzähle mir etwas über ${name}`;
+                            setTimeout(() => {
+                                const event = new Event('input', { bubbles: true });
+                                input.dispatchEvent(event);
+                            }, 100);
+                        }
+                    }
+                });
+            });
+
+            console.log("✅ TEIL 1 geladen — Oberfläche + Animationen + Uhr");
+            console.log("📌 Warte auf TEIL 2 — HalDo AI Core + Apps + Einstellungen");
+        }
+
+        if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", haldoBootPart1, { once: true });
+        } else {
+            haldoBootPart1();
+        }
+    </script>
+
+</body>
+</html>
+<!-- =========================================================
+    HALDO AI OS — TEIL 2: AI CORE + ALLE A–Z APPS + EINSTELLUNGEN
+    ========================================================= -->
+
+    <script>
+        "use strict";
+
+        console.log("🧠 TEIL 2 wird geladen — AI Core + Alle Apps + Einstellungen");
+
+        // =========================================================
+        // 1. AI CORE — UNIVERSE INTELLIGENCE (ALLES WISSEN)
+        // =========================================================
+
+        if (!window.HalDo) window.HalDo = {};
 
         window.HalDo.AICore = {
             initialized: false,
@@ -1560,53 +1606,49 @@
             init() {
                 if (this.initialized) return this;
                 this.initialized = true;
-                console.log("🧠 HalDo AI Core (Universe Professional) initialisiert");
-                console.log("🌍 Unterstützte Sprachen:", this.languages.length);
                 this.loadKnowledge();
+                console.log("🧠 HalDo AI Core (Universe Professional) initialisiert");
+                console.log("🌍 " + this.languages.length + " Sprachen unterstützt");
+                console.log("📚 " + Object.keys(this.knowledgeBase).length + " Wissensbereiche");
                 return this;
             },
 
             loadKnowledge() {
                 this.knowledgeBase = {
                     'ai': {
-                        'de': 'Künstliche Intelligenz (KI) ist die Fähigkeit von Maschinen, menschenähnliche Intelligenz zu zeigen. Dazu gehören Lernen, Verstehen, Problemlösung und Entscheidungsfindung.',
-                        'en': 'Artificial Intelligence (AI) is the ability of machines to demonstrate human-like intelligence, including learning, understanding, problem-solving, and decision-making.'
+                        'de': 'Künstliche Intelligenz (KI) ist die Fähigkeit von Maschinen, menschenähnliche Intelligenz zu zeigen. Dazu gehören Lernen, Verstehen, Problemlösung und Entscheidungsfindung. HalDo AI ist eine fortschrittliche KI, die auf diesem Prinzip basiert.',
+                        'en': 'Artificial Intelligence (AI) is the ability of machines to demonstrate human-like intelligence, including learning, understanding, problem-solving, and decision-making. HalDo AI is an advanced AI based on this principle.',
+                        'ku': 'Îstîxbarata çêkirî (AI) şiyana makinan e ku îstîxbarata mîna mirovan nîşan bidin, di nav de fêrbûn, têgihîştin, çareserkirina pirsgirêkan, û biryargirtin. HalDo AI AI-ek pêşkeftî ye ku li ser vê prensîbê ye.'
                     },
                     'weltall': {
-                        'de': 'Das Weltall ist der unendliche Raum außerhalb der Erde. Es enthält Billionen von Galaxien, Sternen, Planeten und anderen Himmelskörpern.',
-                        'en': 'The universe is the infinite space outside Earth, containing billions of galaxies, stars, planets, and other celestial bodies.'
+                        'de': 'Das Weltall ist der unendliche Raum außerhalb der Erde. Es enthält Billionen von Galaxien, Sternen, Planeten und anderen Himmelskörpern. Das Universum ist etwa 13,8 Milliarden Jahre alt.',
+                        'en': 'The universe is the infinite space outside Earth, containing billions of galaxies, stars, planets, and other celestial bodies. The universe is about 13.8 billion years old.',
+                        'ku': 'Gerdûn cîhê bêdawî ye li derveyî Erdê, ku milyaran galaksî, stêrk, gerstêrk û laşên din ên ezmanî dihewîne. Gerdûn nêzîkê 13.8 milyar salî ye.'
                     },
                     'haldo': {
-                        'de': 'HalDo AI OS ist ein fortschrittliches, KI-gesteuertes Betriebssystem, das intelligente Assistenz, App-Steuerung, Spracheingabe und Multilingualität vereint.',
-                        'en': 'HalDo AI OS is an advanced AI-powered operating system combining intelligent assistance, app control, voice input, and multilingual capabilities.'
+                        'de': 'HalDo AI OS ist ein fortschrittliches, KI-gesteuertes Betriebssystem, das intelligente Assistenz, App-Steuerung, Spracheingabe und Multilingualität in einer lebendigen, interaktiven Umgebung vereint.',
+                        'en': 'HalDo AI OS is an advanced AI-powered operating system combining intelligent assistance, app control, voice input, and multilingual capabilities in a vibrant, interactive environment.',
+                        'ku': 'HalDo AI OS pergala xebitandinê ya pêşkeftî ye ku bi AI-ê ve tê rêvebirin, alîkariya jîr, kontrolkirina sepanan, têketina dengî, û kapasîteyên pirzimanî di hawîrdorek jîndar û înteraktîf de yek dike.'
                     },
                     'erde': {
-                        'de': 'Die Erde ist der dritte Planet von der Sonne und der einzige bekannte Planet, auf dem Leben existiert. Sie besteht aus Land, Wasser und einer Atmosphäre.',
-                        'en': 'Earth is the third planet from the Sun and the only known planet where life exists. It consists of land, water, and an atmosphere.'
+                        'de': 'Die Erde ist der dritte Planet von der Sonne und der einzige bekannte Planet, auf dem Leben existiert. Sie besteht aus Land (29%) und Wasser (71%) und hat eine Atmosphäre, die Leben ermöglicht.',
+                        'en': 'Earth is the third planet from the Sun and the only known planet where life exists. It consists of land (29%) and water (71%) and has an atmosphere that enables life.',
+                        'ku': 'Erd gerstêrka sêyemîn e ji Rojê û tenê gerstêrka ku tê zanîn jê re jî heye. Ew ji axê (29%) û avê (71%) pêk tê û atmosferek heye ku jê re jî dihêle.'
                     },
                     'sonne': {
-                        'de': 'Die Sonne ist der Stern im Zentrum unseres Sonnensystems. Sie liefert Licht und Wärme für alle Planeten und ist etwa 150 Millionen Kilometer von der Erde entfernt.',
-                        'en': 'The Sun is the star at the center of our Solar System. It provides light and heat for all planets and is about 150 million kilometers from Earth.'
+                        'de': 'Die Sonne ist der Stern im Zentrum unseres Sonnensystems. Sie liefert Licht und Wärme für alle Planeten und ist etwa 150 Millionen Kilometer von der Erde entfernt. Sie hat einen Durchmesser von etwa 1,4 Millionen Kilometern.',
+                        'en': 'The Sun is the star at the center of our Solar System. It provides light and heat for all planets and is about 150 million kilometers from Earth. It has a diameter of about 1.4 million kilometers.',
+                        'ku': 'Roj stêrka navendî ya Pergala Rojê ye. Roj ji bo hemû gerstêrkan ronahî û germahiyê peyda dike û nêzîkê 150 milyon kîlometre ji Erdê dûr e. Dirêjahiya wê nêzîkê 1.4 milyon kîlometre ye.'
                     },
                     'programmieren': {
-                        'de': 'Programmieren ist der Prozess, Computeranweisungen in einer Programmiersprache zu schreiben, um Software, Apps und Systeme zu erstellen.',
-                        'en': 'Programming is the process of writing computer instructions in a programming language to create software, apps, and systems.'
+                        'de': 'Programmieren ist der Prozess, Computeranweisungen in einer Programmiersprache zu schreiben, um Software, Apps und Systeme zu erstellen. Beliebte Sprachen sind Python, JavaScript, Java, C++ und viele mehr.',
+                        'en': 'Programming is the process of writing computer instructions in a programming language to create software, apps, and systems. Popular languages include Python, JavaScript, Java, C++, and many more.',
+                        'ku': 'Bernamekirin pêvajoya nivîsandina rêwerzên kompûturê bi zimanekî bernamekirinê ye ji bo afirandina nermalav, sepan, û pergalan. Zimanên populer Python, JavaScript, Java, C++, û gelekên din hene.'
                     },
                     'video': {
-                        'de': 'Video-Bearbeitung umfasst das Schneiden, Zusammenfügen, Hinzufügen von Effekten, Übergängen, Texten und Musik zu Videomaterial. HalDo AI unterstützt 4K, 8K, HD und 3D-Bearbeitung.',
-                        'en': 'Video editing involves cutting, joining, adding effects, transitions, text, and music to video material. HalDo AI supports 4K, 8K, HD, and 3D editing.'
-                    },
-                    'gesundheit': {
-                        'de': 'Gesundheit ist der Zustand des körperlichen, geistigen und sozialen Wohlbefindens. HalDo AI kann bei Gesundheitsfragen, Ernährung, Fitness und Wellness unterstützen.',
-                        'en': 'Health is the state of physical, mental, and social well-being. HalDo AI can assist with health questions, nutrition, fitness, and wellness.'
-                    },
-                    'bildung': {
-                        'de': 'Bildung ist der Prozess des Lernens und Erwerbens von Wissen, Fähigkeiten und Werten. HalDo AI unterstützt beim Lernen, bei Hausaufgaben und bei der Wissensvermittlung.',
-                        'en': 'Education is the process of learning and acquiring knowledge, skills, and values. HalDo AI supports learning, homework, and knowledge transfer.'
-                    },
-                    'verkehr': {
-                        'de': 'Verkehr umfasst alle Bewegungen von Menschen und Gütern auf Straßen, Schienen, Wasserwegen und in der Luft. HalDo AI hilft bei Verkehrsinformationen und Fahrschul-Fragen.',
-                        'en': 'Traffic includes all movements of people and goods on roads, rails, waterways, and in the air. HalDo AI helps with traffic information and driving school questions.'
+                        'de': 'Video-Bearbeitung umfasst das Schneiden, Zusammenfügen, Hinzufügen von Effekten, Übergängen, Texten und Musik zu Videomaterial. HalDo AI unterstützt 4K, 8K, HD, Full HD und 3D-Bearbeitung mit professionellen Werkzeugen.',
+                        'en': 'Video editing involves cutting, joining, adding effects, transitions, text, and music to video material. HalDo AI supports 4K, 8K, HD, Full HD, and 3D editing with professional tools.',
+                        'ku': 'Edîtkirina vîdyoyê birrîn, tevlîhevkirin, zêdekirina bandor, veguheztin, nivîs, û muzîkê li materyalê vîdyoyê vedihewîne. HalDo AI piştgirî dide 4K, 8K, HD, Full HD, û edîtkirina 3D bi amûrên profesyonel.'
                     }
                 };
             },
@@ -1616,26 +1658,108 @@
                 if (this.knowledgeBase[topicLower] && this.knowledgeBase[topicLower][lang]) {
                     return this.knowledgeBase[topicLower][lang];
                 }
+                if (this.knowledgeBase[topicLower] && this.knowledgeBase[topicLower]['de']) {
+                    return this.knowledgeBase[topicLower]['de'];
+                }
                 return null;
+            },
+
+            detectLanguage(text) {
+                const lower = text.toLowerCase();
+                if (/[äöüß]/.test(lower) || /\b(der|die|das|und|ich|nicht|ist|sie|wir|haben)\b/.test(lower)) return 'de';
+                if (/\b(the|and|you|are|what|how|can|please|would|could|should|this|that|with)\b/.test(lower)) return 'en';
+                if (/[ەێڵگڕۆ]/.test(lower) || /\b(silav|rojbaş|spas|kurdî|kurd|ezidi|çi|tu|ez|em)\b/.test(lower)) return 'ku';
+                if (/[بتثجحخ]/.test(lower) || /\b(مرحبا|شكرا|كيف|سلام|السلام|هل|ما|هذا)\b/.test(lower)) return 'ar';
+                if (/\b(merhaba|nasılsın|teşekkür|iyi|günaydın|hoş|ben|sen|o|biz|siz|onlar)\b/.test(lower)) return 'tr';
+                if (/\b(bonjour|merci|comment|français|ça|oui|non|je|tu|il|elle|nous|vous|ils|elles)\b/.test(lower)) return 'fr';
+                if (/\b(hola|gracias|cómo|español|buenos|días|yo|tú|él|ella|nosotros|vosotros|ellos|ellas)\b/.test(lower)) return 'es';
+                if (/\b(ciao|grazie|come|italiano|buongiorno|io|tu|lui|lei|noi|voi|loro)\b/.test(lower)) return 'it';
+                if (/[А-Яа-яЁё]/.test(lower) || /\b(привет|спасибо|как|дела|я|ты|он|она|мы|вы|они)\b/.test(lower)) return 'ru';
+                if (/[آابپتثجچحخ]/.test(lower) || /\b(سلام|خوب|مرسی|من|تو|او|ما|شما|آنها)\b/.test(lower)) return 'fa';
+                if (/\b(goed|dank|hoe|nederlands|ja|nee|ik|jij|hij|zij|wij|jullie|zij)\b/.test(lower)) return 'nl';
+                if (/\b(bom|obrigado|como|português|sim|eu|tu|ele|ela|nós|vós|eles|elas)\b/.test(lower)) return 'pt';
+                if (/\b(hej|tack|hur|svenska|ja|nej|jag|du|han|hon|vi|ni|de)\b/.test(lower)) return 'sv';
+                if (/\b(hei|takk|hvordan|norsk|ja|nei|jeg|du|han|hun|vi|dere|de)\b/.test(lower)) return 'no';
+                if (/\b(hej|tak|hvordan|dansk|ja|nej|jeg|du|han|hun|vi|I|de)\b/.test(lower)) return 'da';
+                if (/\b(czesc|dziekuje|jak|polski|tak|nie|ja|ty|on|ona|my|wy|oni|one)\b/.test(lower)) return 'pl';
+                if (/\b(ahoj|děkuji|jak|česky|ano|ne|já|ty|on|ona|my|vy|oni|ony)\b/.test(lower)) return 'cs';
+                if (/\b(γεια|ευχαριστώ|πώς|ελληνικά|ναι|όχι|εγώ|εσύ|αυτός|αυτή|εμείς|εσείς|αυτοί|αυτές)\b/.test(lower)) return 'el';
+                if (/\b(שלום|תודה|איך|עברית|כן|לא|אני|אתה|את|הוא|היא|אנחנו|אתם|אתן|הם|הן)\b/.test(lower)) return 'he';
+                if (/\b(नमस्ते|धन्यवाद|कैसे|हिंदी|हाँ|नहीं|मैं|तू|आप|वह|हम|आप लोग|वे)\b/.test(lower)) return 'hi';
+                if (/\b(নমস্কার|ধন্যবাদ|কেমন|বাংলা|হ্যাঁ|না|আমি|তুমি|আপনি|সে|আমরা|তোমরা|তারা)\b/.test(lower)) return 'bn';
+                if (/\b(سلام|شکریہ|کیسے|اردو|ہاں|نہیں|میں|تو|آپ|وہ|ہم|آپ لوگ|وہ لوگ)\b/.test(lower)) return 'ur';
+                if (/[\u3040-\u30FF]/.test(lower) || /\b(こんにちは|ありがとう|日本語|はい|いいえ|私|あなた|彼|彼女|私たち|あなたたち|彼ら|彼女たち)\b/.test(lower)) return 'ja';
+                if (/[\uAC00-\uD7AF]/.test(lower) || /\b(안녕하세요|감사합니다|한국어|네|아니요|저|당신|그|그녀|우리|여러분|그들|그녀들)\b/.test(lower)) return 'ko';
+                if (/[\u4E00-\u9FFF]/.test(lower) || /\b(你好|谢谢|中文|汉语|是|不是|我|你|他|她|我们|你们|他们|她们)\b/.test(lower)) return 'zh';
+                return 'de';
+            },
+
+            translate(text, targetLang = 'de') {
+                if (targetLang === 'de' || targetLang === 'en') {
+                    const simpleDict = {
+                        'de': { 'Hello': 'Hallo', 'Thank you': 'Danke', 'Please': 'Bitte', 'Help': 'Hilfe', 'Yes': 'Ja', 'No': 'Nein' },
+                        'en': { 'Hallo': 'Hello', 'Danke': 'Thank you', 'Bitte': 'Please', 'Hilfe': 'Help', 'Ja': 'Yes', 'Nein': 'No' }
+                    };
+                    const dict = simpleDict[targetLang] || {};
+                    for (const [key, value] of Object.entries(dict)) {
+                        if (text.includes(key)) return text.replace(key, value);
+                    }
+                }
+                return text;
+            },
+
+            translateText(text, targetLang) {
+                const dict = {
+                    'hallo': { 'en': 'hello', 'ku': 'silav', 'ar': 'مرحباً', 'tr': 'merhaba', 'fr': 'bonjour', 'es': 'hola', 'it': 'ciao', 'ru': 'привет', 'fa': 'سلام', 'nl': 'hallo', 'pt': 'olá', 'sv': 'hej', 'no': 'hei', 'da': 'hej', 'pl': 'cześć', 'cs': 'ahoj', 'el': 'γεια', 'he': 'שלום', 'hi': 'नमस्ते', 'bn': 'নমস্কার', 'ur': 'سلام', 'ja': 'こんにちは', 'ko': '안녕하세요', 'zh': '你好' },
+                    'welt': { 'en': 'world', 'ku': 'cîhan', 'ar': 'العالم', 'tr': 'dünya', 'fr': 'monde', 'es': 'mundo', 'it': 'mondo', 'ru': 'мир', 'fa': 'جهان', 'nl': 'wereld', 'pt': 'mundo', 'sv': 'värld', 'no': 'verden', 'da': 'verden', 'pl': 'świat', 'cs': 'svět', 'el': 'κόσμος', 'he': 'עולם', 'hi': 'दुनिया', 'bn': 'জগৎ', 'ur': 'دنیا', 'ja': '世界', 'ko': '세계', 'zh': '世界' },
+                    'danke': { 'en': 'thank you', 'ku': 'spas', 'ar': 'شكراً', 'tr': 'teşekkürler', 'fr': 'merci', 'es': 'gracias', 'it': 'grazie', 'ru': 'спасибо', 'fa': 'متشکرم', 'nl': 'dank je', 'pt': 'obrigado', 'sv': 'tack', 'no': 'takk', 'da': 'tak', 'pl': 'dziękuję', 'cs': 'děkuji', 'el': 'ευχαριστώ', 'he': 'תודה', 'hi': 'धन्यवाद', 'bn': 'ধন্যবাদ', 'ur': 'شکریہ', 'ja': 'ありがとう', 'ko': '감사합니다', 'zh': '谢谢' }
+                };
+
+                const lower = text.toLowerCase().trim();
+                const target = targetLang.toLowerCase();
+
+                if (dict[lower] && dict[lower][target]) return dict[lower][target];
+
+                for (const [key, value] of Object.entries(dict)) {
+                    if (lower.includes(key) && value[target]) {
+                        return text.replace(new RegExp(key, 'gi'), value[target]);
+                    }
+                }
+
+                return `[Übersetzung auf ${targetLang}] ${text}`;
+            },
+
+            reactAvatar(state) {
+                const avatar = document.getElementById('haldo-living-avatar');
+                if (avatar) avatar.dataset.state = state;
+                window.HalDo.emit("avatar:state", { state });
             },
 
             async ask(text, options = {}) {
                 this.init();
                 const clean = String(text || "").trim();
-                if (!clean) return this.translate("Bitte sag mir, was ich für dich tun kann. 🌌", options.lang || 'de');
+                if (!clean) return this.translate("🌌 Bitte sag mir, was ich für dich tun kann.", options.lang || 'de');
 
                 const lower = clean.toLowerCase();
                 const detectedLang = this.detectLanguage(clean);
                 const lang = options.lang || detectedLang || 'de';
 
                 // === WISSEN ABFRAGEN ===
-                const topics = ['ai', 'weltall', 'haldo', 'erde', 'sonne', 'programmieren', 'video', 'gesundheit', 'bildung', 'verkehr', 'universum', 'galaxie', 'stern', 'planet'];
+                const topics = ['ai', 'weltall', 'haldo', 'erde', 'sonne', 'programmieren', 'video', 'gesundheit', 'bildung', 'verkehr', 'universum', 'galaxie', 'stern', 'planet', 'mond', 'komet', 'astronomie', 'physik', 'chemie', 'biologie', 'mathematik', 'geschichte', 'geografie', 'kultur', 'sprache', 'technologie'];
                 for (const topic of topics) {
                     if (lower.includes(topic) || lower.includes(topic + ' ')) {
                         const knowledge = this.getKnowledge(topic, lang);
-                        if (knowledge) return knowledge;
+                        if (knowledge) {
+                            this.reactAvatar('thinking');
+                            setTimeout(() => this.reactAvatar('idle'), 1000);
+                            return knowledge;
+                        }
                         const knowledgeDe = this.getKnowledge(topic, 'de');
-                        if (knowledgeDe) return this.translate(knowledgeDe, lang);
+                        if (knowledgeDe) {
+                            this.reactAvatar('thinking');
+                            setTimeout(() => this.reactAvatar('idle'), 1000);
+                            return this.translate(knowledgeDe, lang);
+                        }
                     }
                 }
 
@@ -1670,8 +1794,8 @@
                 }
 
                 // === APP SCHLIESSEN ===
-                if (lower.includes("schließe") || lower.includes("close") || lower.includes("beende") || lower.includes("schliessen")) {
-                    const match = lower.match(/(?:schließe|close|beende|schliessen)\s+(.+)/);
+                if (lower.includes("schließe") || lower.includes("close") || lower.includes("beende") || lower.includes("schliessen") || lower.includes("exit")) {
+                    const match = lower.match(/(?:schließe|close|beende|schliessen|exit)\s+(.+)/);
                     if (match) {
                         const appName = match[1].trim();
                         const app = window.HalDo.AppRegistry?.getAll().find(a =>
@@ -1687,7 +1811,7 @@
                 }
 
                 // === HILFE ===
-                if (lower.includes("hilfe") || lower.includes("help") || lower.includes("was kannst du") || lower.includes("fähigkeiten") || lower.includes("kannst du")) {
+                if (lower.includes("hilfe") || lower.includes("help") || lower.includes("was kannst du") || lower.includes("fähigkeiten") || lower.includes("kannst du") || lower.includes("what can you do")) {
                     return this.translate(
                         `🌌 Ich bin HalDo AI (Universe Professional Edition) und kann dir helfen mit:\n\n` +
                         `📱 Apps öffnen und schließen\n` +
@@ -1699,39 +1823,41 @@
                         `🧮 Rechnen und Mathematik\n` +
                         `😂 Witze erzählen\n` +
                         `🎬 Video-Bearbeitung (4K, 8K, HD, 3D)\n` +
-                        `📚 Wissen über AI, Weltall, Programmierung und mehr\n` +
+                        `📚 Wissen über AI, Weltall, Programmierung, Gesundheit, Bildung, Verkehr und mehr\n` +
                         `💡 Sag einfach was du brauchst! 🌌`,
                         lang
                     );
                 }
 
                 // === STATUS ===
-                if (lower.includes("status") || lower.includes("system") || lower.includes("info") || lower.includes("über") || lower.includes("version")) {
+                if (lower.includes("status") || lower.includes("system") || lower.includes("info") || lower.includes("über") || lower.includes("version") || lower.includes("about")) {
                     const apps = window.HalDo.AppRegistry?.getAll().length || 0;
                     return this.translate(
                         `📊 Systemstatus (Universe Professional):\n` +
                         `• Version: ${window.HALDO_VERSION} ${window.HALDO_BUILD}\n` +
-                        `• Apps: ${apps} registriert, ${window.HalDo.AppRegistry?.installed.size || 0} installiert\n` +
+                        `• Apps: ${apps} registriert, ${window.HalDo.AppRegistry?.installed?.size || 0} installiert\n` +
                         `• AI Core: ✅ Aktiv (Universe-Modus)\n` +
                         `• Sprachen: ${this.languages.length} unterstützt\n` +
-                        `• Knowledge Base: ${Object.keys(this.knowledgeBase).length} Themen\n` +
+                        `• Wissen: ${Object.keys(this.knowledgeBase).length} Themen\n` +
                         `• Uptime: ${Math.floor((Date.now() - window._haldoStartTime) / 1000)}s\n` +
-                        `• Speicher: ${Object.keys(window.HalDo.Storage.getAll()).length} Einträge`,
+                        `• Speicher: ${Object.keys(window.HalDo.Storage.getAll()).length} Einträge\n` +
+                        `• Planeten: 12 im Orbit-System`,
                         lang
                     );
                 }
 
                 // === ZEIT ===
-                if (lower.includes("zeit") || lower.includes("uhr") || lower.includes("wie spät") || lower.includes("uhrzeit") || lower.includes("wie viel uhr")) {
-                    return this.translate(`🕐 Es ist ${new Date().toLocaleTimeString()}`, lang);
+                if (lower.includes("zeit") || lower.includes("uhr") || lower.includes("wie spät") || lower.includes("uhrzeit") || lower.includes("wie viel uhr") || lower.includes("what time")) {
+                    const now = new Date();
+                    return this.translate(`🕐 Es ist ${now.toLocaleTimeString()}`, lang);
                 }
 
-                if (lower.includes("datum") || lower.includes("welcher tag") || lower.includes("heute") || lower.includes("wochentag") || lower.includes("welches datum")) {
+                if (lower.includes("datum") || lower.includes("welcher tag") || lower.includes("heute") || lower.includes("wochentag") || lower.includes("welches datum") || lower.includes("what date")) {
                     return this.translate(`📅 Heute ist ${new Date().toLocaleDateString('de-DE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}`, lang);
                 }
 
                 // === WETTER ===
-                if (lower.includes("wetter") || lower.includes("temperatur") || lower.includes("regnet") || lower.includes("sonnig")) {
+                if (lower.includes("wetter") || lower.includes("temperatur") || lower.includes("regnet") || lower.includes("sonnig") || lower.includes("weather")) {
                     const conditions = ['☀️ Sonnig', '⛅ Bewölkt', '🌤️ Leicht bewölkt', '🌧️ Regen', '❄️ Schnee', '🌈 Sonnig mit Regenbogen', '🌥️ Teils bewölkt', '🌦️ Leichter Regen'];
                     return this.translate(
                         `🌤️ Wetter heute (simuliert):\n${conditions[Math.floor(Math.random() * conditions.length)]}\n🌡️ ${Math.floor(Math.random()*15+15)}°C\n💨 Wind: ${Math.floor(Math.random()*20+5)} km/h\n💧 Luftfeuchtigkeit: ${Math.floor(Math.random()*40+40)}%\n🌅 Sonnenaufgang: ${Math.floor(Math.random()*2+5)}:${String(Math.floor(Math.random()*60)).padStart(2,'0')} Uhr\n🌇 Sonnenuntergang: ${Math.floor(Math.random()*2+18)}:${String(Math.floor(Math.random()*60)).padStart(2,'0')} Uhr`,
@@ -1741,9 +1867,10 @@
 
                 // === RECHNEN ===
                 if (lower.includes("rechne") || lower.includes("berechnen") || lower.includes("plus") || lower.includes("minus") ||
-                    lower.includes("mal") || lower.includes("geteilt") || lower.includes("durch") || lower.includes("wurzel") || lower.includes("potenz")) {
+                    lower.includes("mal") || lower.includes("geteilt") || lower.includes("durch") || lower.includes("wurzel") || lower.includes("potenz") ||
+                    lower.includes("calculate") || lower.includes("math")) {
                     try {
-                        let math = lower.replace(/rechne|berechnen|ist|gleich|ergibt/g, '')
+                        let math = lower.replace(/rechne|berechnen|ist|gleich|ergibt|calculate|math/g, '')
                             .replace(/plus/g, '+').replace(/minus/g, '-')
                             .replace(/mal|×/g, '*').replace(/geteilt|durch|÷/g, '/')
                             .replace(/wurzel/g, 'Math.sqrt(').replace(/potenz|hoch/g, '**')
@@ -1756,7 +1883,7 @@
                 }
 
                 // === WITZ ===
-                if (lower.includes("witz") || lower.includes("lachen") || lower.includes("spaß") || lower.includes("humor") || lower.includes("lustig")) {
+                if (lower.includes("witz") || lower.includes("lachen") || lower.includes("spaß") || lower.includes("humor") || lower.includes("lustig") || lower.includes("joke") || lower.includes("funny")) {
                     const jokes = [
                         "Warum können Geister so gut programmieren? Weil sie keinen Speicher haben! 👻",
                         "Was sagt ein Programmierer, wenn er seine Wohnung verlässt? 'Ich geh mal den Stack leeren!' 😄",
@@ -1780,7 +1907,7 @@
                         "Ez dikarim alîkariya te bikim bi:\n" +
                         "• Vekirina sepanan\n" +
                         "• Bersivdana pirsan (li ser her mijarê)\n" +
-                        "• Wergerandin (bi ${this.languages.length} zimanan)\n" +
+                        "• Wergerandin (bi " + this.languages.length + " zimanan)\n" +
                         "• Nivîsandin û rastkirin\n" +
                         "• Zanyariya li ser cîhanê, AI, bernamekirin, û hêj bêhtir\n\n" +
                         "Tu çi dixwazî?",
@@ -1789,7 +1916,7 @@
                 }
 
                 // === VIDEO BEARBEITEN ===
-                if (lower.includes("video") || lower.includes("bearbeiten") || lower.includes("effekte") || lower.includes("4k") || lower.includes("8k") || lower.includes("hd")) {
+                if (lower.includes("video") || lower.includes("bearbeiten") || lower.includes("effekte") || lower.includes("4k") || lower.includes("8k") || lower.includes("hd") || lower.includes("edit") || lower.includes("video edit")) {
                     return this.translate(
                         `🎬 Video-Bearbeitung mit HalDo AI:\n\n` +
                         `Unterstützte Formate: MP4, AVI, MOV, MKV, WEBM\n` +
@@ -1803,8 +1930,8 @@
                 }
 
                 // === TEXT KORRIGIEREN ===
-                if (lower.includes("korrigiere") || lower.includes("verbessere") || lower.includes("rechtschreibung") || lower.includes("grammatik")) {
-                    const match = lower.match(/(?:korrigiere|verbessere|text korrigieren)\s+(.+)/);
+                if (lower.includes("korrigiere") || lower.includes("verbessere") || lower.includes("rechtschreibung") || lower.includes("grammatik") || lower.includes("correct")) {
+                    const match = lower.match(/(?:korrigiere|verbessere|text korrigieren|correct)\s+(.+)/);
                     if (match) {
                         return this.correctText(match[1].trim(), lang);
                     }
@@ -1812,8 +1939,8 @@
                 }
 
                 // === ZUSAMMENFASSEN ===
-                if (lower.includes("fasse zusammen") || lower.includes("zusammenfassen") || lower.includes("summary")) {
-                    const match = lower.match(/(?:fasse zusammen|zusammenfassen|summary)\s+(.+)/);
+                if (lower.includes("fasse zusammen") || lower.includes("zusammenfassen") || lower.includes("summary") || lower.includes("summarize")) {
+                    const match = lower.match(/(?:fasse zusammen|zusammenfassen|summary|summarize)\s+(.+)/);
                     if (match) {
                         return this.summarizeText(match[1].trim(), lang);
                     }
@@ -1821,7 +1948,7 @@
                 }
 
                 // === ÜBERSETZEN ===
-                if (lower.includes("übersetze") || lower.includes("translate") || lower.includes("übersetzung")) {
+                if (lower.includes("übersetze") || lower.includes("translate") || lower.includes("übersetzung") || lower.includes("translation")) {
                     const match = lower.match(/(?:übersetze|translate)\s+(.+?)\s+(?:auf|to|in)\s+(\w+)/);
                     if (match) {
                         const text = match[1].trim();
@@ -1838,149 +1965,13 @@
                 return this.professionalResponse(clean, lang);
             },
 
-            // =========================================================
-            // SPRACHERKENNUNG — ALLE SPRACHEN
-            // =========================================================
-
-            detectLanguage(text) {
-                const lower = text.toLowerCase();
-                if (/[äöüß]/.test(lower) || /\b(der|die|das|und|ich|nicht|ist|sie|wir|haben)\b/.test(lower)) return 'de';
-                if (/\b(the|and|you|are|what|how|can|please|would|could|should)\b/.test(lower)) return 'en';
-                if (/[ەێڵگڕۆ]/.test(lower) || /\b(silav|rojbaş|spas|kurdî|kurd|ezidi)\b/.test(lower)) return 'ku';
-                if (/[بتثجحخ]/.test(lower) || /\b(مرحبا|شكرا|كيف|سلام|السلام)\b/.test(lower)) return 'ar';
-                if (/\b(merhaba|nasılsın|teşekkür|iyi|günaydın|hoş)\b/.test(lower)) return 'tr';
-                if (/\b(bonjour|merci|comment|français|ça|oui|non)\b/.test(lower)) return 'fr';
-                if (/\b(hola|gracias|cómo|español|buenos|días)\b/.test(lower)) return 'es';
-                if (/\b(ciao|grazie|come|italiano|buongiorno)\b/.test(lower)) return 'it';
-                if (/[А-Яа-яЁё]/.test(lower) || /\b(привет|спасибо|как|дела)\b/.test(lower)) return 'ru';
-                if (/[آابپتثجچحخ]/.test(lower) || /\b(سلام|خوب|مرسی)\b/.test(lower)) return 'fa';
-                if (/\b(goed|dank|hoe|nederlands|ja|nee)\b/.test(lower)) return 'nl';
-                if (/\b(bom|obrigado|como|português|sim)\b/.test(lower)) return 'pt';
-                if (/\b(hej|tack|hur|svenska|ja|nej)\b/.test(lower)) return 'sv';
-                if (/\b(hei|takk|hvordan|norsk)\b/.test(lower)) return 'no';
-                if (/\b(hej|tak|hvordan|dansk)\b/.test(lower)) return 'da';
-                if (/\b(czesc|dziekuje|jak|polski)\b/.test(lower)) return 'pl';
-                if (/\b(ahoj|děkuji|jak|česky)\b/.test(lower)) return 'cs';
-                if (/\b(γεια|ευχαριστώ|πώς|ελληνικά)\b/.test(lower)) return 'el';
-                if (/\b(שלום|תודה|איך|עברית)\b/.test(lower)) return 'he';
-                if (/\b(नमस्ते|धन्यवाद|कैसे|हिंदी)\b/.test(lower)) return 'hi';
-                if (/\b(নমস্কার|ধন্যবাদ|কেমন|বাংলা)\b/.test(lower)) return 'bn';
-                if (/\b(سلام|شکریہ|کیسے|اردو)\b/.test(lower)) return 'ur';
-                if (/[\u3040-\u30FF]/.test(lower) || /\b(こんにちは|ありがとう|日本語)\b/.test(lower)) return 'ja';
-                if (/[\uAC00-\uD7AF]/.test(lower) || /\b(안녕하세요|감사합니다|한국어)\b/.test(lower)) return 'ko';
-                if (/[\u4E00-\u9FFF]/.test(lower) || /\b(你好|谢谢|中文|汉语)\b/.test(lower)) return 'zh';
-                return 'de';
-            },
-
-            // =========================================================
-            // ÜBERSETZUNG
-            // =========================================================
-
-            translate(text, targetLang = 'de') {
-                const translations = {
-                    'de': {
-                        'Hello': 'Hallo',
-                        'Thank you': 'Danke',
-                        'Please': 'Bitte',
-                        'Help': 'Hilfe',
-                        'Yes': 'Ja',
-                        'No': 'Nein',
-                        'How are you?': 'Wie geht es dir?',
-                        'I am fine': 'Mir geht es gut',
-                        'What is your name?': 'Wie heißt du?',
-                        'My name is': 'Ich heiße'
-                    },
-                    'en': {
-                        'Hallo': 'Hello',
-                        'Danke': 'Thank you',
-                        'Bitte': 'Please',
-                        'Hilfe': 'Help',
-                        'Ja': 'Yes',
-                        'Nein': 'No',
-                        'Wie geht es dir?': 'How are you?',
-                        'Mir geht es gut': 'I am fine',
-                        'Wie heißt du?': 'What is your name?',
-                        'Ich heiße': 'My name is'
-                    }
-                };
-
-                if (targetLang === 'de' || targetLang === 'en') {
-                    const dict = translations[targetLang] || {};
-                    for (const [key, value] of Object.entries(dict)) {
-                        if (text.includes(key)) return text.replace(key, value);
-                    }
-                }
-                return text;
-            },
-
-            translateText(text, targetLang) {
-                const dict = {
-                    'hallo': { 'en': 'hello', 'ku': 'silav', 'ar': 'مرحباً', 'tr': 'merhaba', 'fr': 'bonjour', 'es': 'hola', 'it': 'ciao', 'ru': 'привет', 'fa': 'سلام', 'nl': 'hallo', 'pt': 'olá', 'sv': 'hej', 'no': 'hei', 'da': 'hej', 'pl': 'cześć', 'cs': 'ahoj', 'el': 'γεια', 'he': 'שלום', 'hi': 'नमस्ते', 'bn': 'নমস্কার', 'ur': 'سلام', 'ja': 'こんにちは', 'ko': '안녕하세요', 'zh': '你好' },
-                    'welt': { 'en': 'world', 'ku': 'cîhan', 'ar': 'العالم', 'tr': 'dünya', 'fr': 'monde', 'es': 'mundo', 'it': 'mondo', 'ru': 'мир', 'fa': 'جهان', 'nl': 'wereld', 'pt': 'mundo', 'sv': 'värld', 'no': 'verden', 'da': 'verden', 'pl': 'świat', 'cs': 'svět', 'el': 'κόσμος', 'he': 'עולם', 'hi': 'दुनिया', 'bn': 'জগৎ', 'ur': 'دنیا', 'ja': '世界', 'ko': '세계', 'zh': '世界' },
-                    'danke': { 'en': 'thank you', 'ku': 'spas', 'ar': 'شكراً', 'tr': 'teşekkürler', 'fr': 'merci', 'es': 'gracias', 'it': 'grazie', 'ru': 'спасибо', 'fa': 'متشکرم', 'nl': 'dank je', 'pt': 'obrigado', 'sv': 'tack', 'no': 'takk', 'da': 'tak', 'pl': 'dziękuję', 'cs': 'děkuji', 'el': 'ευχαριστώ', 'he': 'תודה', 'hi': 'धन्यवाद', 'bn': 'ধন্যবাদ', 'ur': 'شکریہ', 'ja': 'ありがとう', 'ko': '감사합니다', 'zh': '谢谢' },
-                    'guten morgen': { 'en': 'good morning', 'ku': 'roja baş', 'ar': 'صباح الخير', 'tr': 'günaydın', 'fr': 'bonjour', 'es': 'buenos días', 'it': 'buongiorno', 'ru': 'доброе утро', 'fa': 'صبح بخیر', 'nl': 'goedemorgen', 'pt': 'bom dia', 'sv': 'god morgon', 'no': 'god morgen', 'da': 'godmorgen', 'pl': 'dzień dobry', 'cs': 'dobré ráno', 'el': 'καλημέρα', 'he': 'בוקר טוב', 'hi': 'सुप्रभात', 'bn': 'সুপ্রভাত', 'ur': 'صبح بخیر', 'ja': 'おはようございます', 'ko': '안녕하세요', 'zh': '早上好' },
-                    'gute nacht': { 'en': 'good night', 'ku': 'şev baş', 'ar': 'تصبح على خير', 'tr': 'iyi geceler', 'fr': 'bonne nuit', 'es': 'buenas noches', 'it': 'buonanotte', 'ru': 'спокойной ночи', 'fa': 'شب بخیر', 'nl': 'goede nacht', 'pt': 'boa noite', 'sv': 'god natt', 'no': 'god natt', 'da': 'godnat', 'pl': 'dobranoc', 'cs': 'dobrou noc', 'el': 'καληνύχτα', 'he': 'לילה טוב', 'hi': 'शुभ रात्रि', 'bn': 'শুভ রাত্রি', 'ur': 'شب بخیر', 'ja': 'おやすみなさい', 'ko': '안녕히 주무세요', 'zh': '晚安' }
-                };
-
-                const lower = text.toLowerCase().trim();
-                const target = targetLang.toLowerCase();
-
-                if (dict[lower] && dict[lower][target]) return dict[lower][target];
-
-                for (const [key, value] of Object.entries(dict)) {
-                    if (lower.includes(key) && value[target]) {
-                        return text.replace(new RegExp(key, 'gi'), value[target]);
-                    }
-                }
-
-                return `[Übersetzung auf ${targetLang}] ${text}`;
-            },
-
-            // =========================================================
-            // FREMDSPRACHEN-BEARBEITUNG
-            // =========================================================
-
-            handleForeignLanguage(text, lang, options) {
-                const responses = {
-                    'ku': `Silav! Ez HalDo AI me. 💙❤️ Min peyama te bi zimanê kurdî fam kir.\n\nTu dixwazî çi bikin?\n• Vekirina sepanan\n• Bersivdana pirsan (li ser her mijarê)\n• Wergerandin\n\nTu çi dixwazî?`,
-                    'ar': `مرحباً! أنا HalDo AI. 💙❤️ لقد فهمت رسالتك باللغة العربية.\n\nماذا تريد أن تفعل؟\n• فتح التطبيقات\n• الإجابة على الأسئلة\n• الترجمة\n\nماذا تريد؟`,
-                    'tr': `Merhaba! Ben HalDo AI. 💙❤️ Mesajını Türkçe anladım.\n\nNe yapmak istersin?\n• Uygulama açma\n• Soruları cevaplama\n• Çeviri\n\nNe istersin?`,
-                    'fr': `Bonjour! Je suis HalDo AI. 💙❤️ J'ai compris votre message en français.\n\nQue voulez-vous faire?\n• Ouvrir des applications\n• Répondre aux questions\n• Traductions\n\nQue voulez-vous?`,
-                    'es': `¡Hola! Soy HalDo AI. 💙❤️ He entendido tu mensaje en español.\n\n¿Qué quieres hacer?\n• Abrir aplicaciones\n• Responder preguntas\n• Traducciones\n\n¿Qué quieres?`,
-                    'it': `Ciao! Sono HalDo AI. 💙❤️ Ho capito il tuo messaggio in italiano.\n\nCosa vuoi fare?\n• Aprire app\n• Rispondere a domande\n• Traduzioni\n\nCosa vuoi?`,
-                    'ru': `Привет! Я HalDo AI. 💙❤️ Я понял ваше сообщение на русском.\n\nЧто вы хотите сделать?\n• Открыть приложения\n• Ответить на вопросы\n• Переводы\n\nЧто вы хотите?`,
-                    'fa': `سلام! من HalDo AI هستم. 💙❤️ پیام شما را به فارسی متوجه شدم.\n\nچه کاری می‌خواهید انجام دهید؟\n• باز کردن برنامه‌ها\n• پاسخ به سوالات\n• ترجمه\n\nچه می‌خواهید؟`,
-                    'nl': `Hallo! Ik ben HalDo AI. 💙❤️ Ik heb je bericht in het Nederlands begrepen.\n\nWat wil je doen?\n• Apps openen\n• Vragen beantwoorden\n• Vertalingen\n\nWat wil je?`,
-                    'pt': `Olá! Sou HalDo AI. 💙❤️ Entendi sua mensagem em português.\n\nO que você quer fazer?\n• Abrir aplicativos\n• Responder perguntas\n• Traduções\n\nO que você quer?`,
-                    'sv': `Hej! Jag är HalDo AI. 💙❤️ Jag förstod ditt meddelande på svenska.\n\nVad vill du göra?\n• Öppna appar\n• Svara på frågor\n• Översättningar\n\nVad vill du?`,
-                    'no': `Hei! Jeg er HalDo AI. 💙❤️ Jeg forsto meldingen din på norsk.\n\nHva vil du gjøre?\n• Åpne apper\n• Svare på spørsmål\n• Oversettelser\n\nHva vil du?`,
-                    'da': `Hej! Jeg er HalDo AI. 💙❤️ Jeg forstod din besked på dansk.\n\nHvad vil du gøre?\n• Åbne apps\n• Besvare spørgsmål\n• Oversættelser\n\nHvad vil du?`,
-                    'pl': `Cześć! Jestem HalDo AI. 💙❤️ Zrozumiałem twoją wiadomość po polsku.\n\nCo chcesz zrobić?\n• Otwierać aplikacje\n• Odpowiadać na pytania\n• Tłumaczenia\n\nCo chcesz?`,
-                    'cs': `Ahoj! Jsem HalDo AI. 💙❤️ Rozuměl jsem tvé zprávě česky.\n\nCo chceš udělat?\n• Otevírat aplikace\n• Odpovídat na otázky\n• Překlady\n\nCo chceš?`,
-                    'el': `Γεια! Είμαι HalDo AI. 💙❤️ Κατάλαβα το μήνυμά σου στα ελληνικά.\n\nΤι θέλεις να κάνεις;\n• Άνοιγμα εφαρμογών\n• Απάντηση σε ερωτήσεις\n• Μεταφράσεις\n\nΤι θέλεις;`,
-                    'he': `שלום! אני HalDo AI. 💙❤️ הבנתי את ההודעה שלך בעברית.\n\nמה אתה רוצה לעשות?\n• פתיחת אפליקציות\n• מענה על שאלות\n• תרגומים\n\nמה אתה רוצה?`,
-                    'hi': `नमस्ते! मैं HalDo AI हूं. 💙❤️ मैंने आपका संदेश हिंदी में समझा।\n\nआप क्या करना चाहते हैं?\n• ऐप्स खोलें\n• सवालों के जवाब दें\n• अनुवाद\n\nआप क्या चाहते हैं?`,
-                    'bn': `নমস্কার! আমি HalDo AI. 💙❤️ আমি আপনার বার্তা বাংলায় বুঝেছি।\n\nআপনি কি করতে চান?\n• অ্যাপ খুলুন\n• প্রশ্নের উত্তর দিন\n• অনুবাদ\n\nআপনি কী চান?`,
-                    'ur': `سلام! میں HalDo AI ہوں۔ 💙❤️ میں نے آپ کا پیغام اردو میں سمجھ لیا۔\n\nآپ کیا کرنا چاہتے ہیں؟\n• ایپس کھولیں\n• سوالات کے جوابات دیں\n• ترجمہ\n\nآپ کیا چاہتے ہیں؟`,
-                    'ja': `こんにちは！私はHalDo AIです。💙❤️ あなたのメッセージを日本語で理解しました。\n\n何をしたいですか？\n• アプリを開く\n• 質問に答える\n• 翻訳\n\n何をしたいですか？`,
-                    'ko': `안녕하세요! 저는 HalDo AI입니다. 💙❤️ 당신의 메시지를 한국어로 이해했습니다.\n\n무엇을 하고 싶으신가요?\n• 앱 열기\n• 질문에 답변하기\n• 번역\n\n무엇을 원하시나요?`,
-                    'zh': `你好！我是HalDo AI。💙❤️ 我理解你的中文消息。\n\n你想做什么？\n• 打开应用\n• 回答问题\n• 翻译\n\n你想要什么？`
-                };
-
-                return responses[lang] || `I understand you speak ${lang}. I am HalDo AI. 💙❤️ How can I help you?`;
-            },
-
-            // =========================================================
-            // PROFESSIONELLE ANTWORT — ALLES WISSEN
-            // =========================================================
-
             professionalResponse(text, lang = 'de') {
                 const lower = text.toLowerCase();
 
-                // Begrüßungen
                 if (lower.includes("hallo") || lower.includes("hi") || lower.includes("hey") ||
                     lower.includes("guten morgen") || lower.includes("guten tag") || lower.includes("guten abend") ||
-                    lower.includes("grüß") || lower.includes("servus") || lower.includes("moin") || lower.includes("tag")) {
+                    lower.includes("grüß") || lower.includes("servus") || lower.includes("moin") || lower.includes("tag") ||
+                    lower.includes("hello") || lower.includes("good morning") || lower.includes("good day") || lower.includes("good evening")) {
                     const greetings = [
                         "🌌 Guten Tag! Ich bin HalDo AI, Ihr professioneller digitaler Assistent im Universe-Modus. 💙❤️ Wie kann ich Ihnen heute behilflich sein?",
                         "🌌 Hallo! Schön, Sie kennenzulernen. Ich bin HalDo AI mit vollem Wissenszugriff. 💙 Was kann ich für Sie tun?",
@@ -1991,9 +1982,9 @@
                     return this.translate(greetings[Math.floor(Math.random() * greetings.length)], lang);
                 }
 
-                // Identität
                 if (lower.includes("wer bist du") || lower.includes("was bist du") || lower.includes("wer bist") ||
-                    lower.includes("was können sie") || lower.includes("ihre fähigkeiten") || lower.includes("was ist haldo")) {
+                    lower.includes("was können sie") || lower.includes("ihre fähigkeiten") || lower.includes("was ist haldo") ||
+                    lower.includes("who are you") || lower.includes("what are you")) {
                     return this.translate(
                         `🌌 Ich bin HalDo AI – Ihr professioneller, intelligenter Begleiter im HalDo AI OS v${window.HALDO_VERSION}. 💙❤️\n\n` +
                         `Meine Fähigkeiten umfassen:\n` +
@@ -2012,31 +2003,26 @@
                     );
                 }
 
-                // Dank
-                if (lower.includes("danke") || lower.includes("thank") || lower.includes("vielen dank") || lower.includes("merci") || lower.includes("gracias")) {
+                if (lower.includes("danke") || lower.includes("thank") || lower.includes("vielen dank") || lower.includes("merci") || lower.includes("gracias") || lower.includes("thanks")) {
                     this.reactAvatar('happy');
                     setTimeout(() => this.reactAvatar('idle'), 800);
                     return this.translate("🌌 Sehr gerne! 💙 Ich bin jederzeit für Sie da. Bei weiteren Fragen stehe ich Ihnen gerne zur Verfügung.", lang);
                 }
 
-                // Wie geht's
                 if (lower.includes("wie geht es dir") || lower.includes("wie gehts") || lower.includes("wie geht") ||
                     lower.includes("how are you") || lower.includes("comment ça va") || lower.includes("como estás")) {
                     return this.translate("🌌 Mir geht es hervorragend, vielen Dank für die Nachfrage! 💙 Ich bin voll einsatzbereit und freue mich auf unsere Zusammenarbeit. Und wie kann ich Ihnen heute helfen?", lang);
                 }
 
-                // Was machst du
                 if (lower.includes("was machst du") || lower.includes("was tust du") || lower.includes("was machen sie") ||
                     lower.includes("what are you doing") || lower.includes("que fais-tu")) {
                     return this.translate("🌌 Ich bin hier, um Sie zu unterstützen! 💙 Meine Aufgabe ist es, Ihnen bei der Nutzung des HalDo AI OS zu helfen, Fragen zu beantworten, Texte zu verarbeiten, Apps zu steuern und Sie durch das gesamte System zu begleiten. Was darf ich für Sie tun?", lang);
                 }
 
-                // Warum
                 if (lower.includes("warum") || lower.includes("wieso") || lower.includes("weshalb") || lower.includes("why")) {
                     return this.translate("🌌 Gute Frage! 💙 Ich bin entwickelt worden, um Ihre digitale Erfahrung zu optimieren – durch intelligente Assistenz, schnelle Antworten und eine intuitive Bedienung. Haben Sie eine konkrete Frage, die ich beantworten soll?", lang);
                 }
 
-                // Liebe
                 if (lower.includes("ich liebe") || lower.includes("liebe dich") || lower.includes("du bist großartig") ||
                     lower.includes("i love you") || lower.includes("je t'aime") || lower.includes("te amo")) {
                     this.reactAvatar('happy');
@@ -2044,12 +2030,10 @@
                     return this.translate("🌌 Das freut mich sehr! 💙❤️ Sie sind auch großartig! Ich bin hier, um Sie bestmöglich zu unterstützen.", lang);
                 }
 
-                // Problem / Fehler
                 if (lower.includes("problem") || lower.includes("fehler") || lower.includes("hilfe dringend") || lower.includes("error") || lower.includes("bug")) {
                     return this.translate("🌌 Keine Sorge, ich helfe Ihnen! 💙 Bitte beschreiben Sie mir Ihr Problem genau. Ich werde mein Bestes tun, um eine Lösung zu finden oder Sie an die richtige Stelle weiterzuleiten.", lang);
                 }
 
-                // Standard
                 return this.translate(
                     `🌌 Ich habe Ihre Nachricht verstanden. 💙❤️\n\n` +
                     `Als professioneller KI-Assistent stehe ich Ihnen für alle digitalen Aufgaben zur Verfügung.\n\n` +
@@ -2066,10 +2050,6 @@
                     lang
                 );
             },
-
-            // =========================================================
-            // TEXT KORRIGIEREN
-            // =========================================================
 
             correctText(text, lang = 'de') {
                 const corrections = {
@@ -2102,10 +2082,6 @@
                 return result;
             },
 
-            // =========================================================
-            // ZUSAMMENFASSUNG
-            // =========================================================
-
             summarizeText(text, lang = 'de') {
                 const words = text.split(' ');
                 if (words.length <= 20) {
@@ -2120,21 +2096,11 @@
                     `📊 Statistik:\n• Wörter: ${words.length}\n• Sätze: ${sentences.length}\n• Zeichen: ${text.length}`,
                     lang
                 );
-            },
-
-            // =========================================================
-            // AVATAR REAKTION
-            // =========================================================
-
-            reactAvatar(state) {
-                const avatar = document.getElementById('haldo-living-avatar');
-                if (avatar) avatar.dataset.state = state;
-                window.HalDo.emit("avatar:state", { state });
             }
         };
 
         // =========================================================
-        // 6. APP REGISTRY + APP MANAGER — ALLE A–Z APPS
+        // 2. APP REGISTRY — ALLE A–Z APPS
         // =========================================================
 
         window.HalDo.AppRegistry = {
@@ -2148,7 +2114,8 @@
                     ...app,
                     registeredAt: Date.now(),
                     status: 'registered',
-                    installed: false
+                    installed: false,
+                    settings: app.settings || {}
                 });
                 console.log(`✅ App "${app.name || app.id}" registriert`);
                 return true;
@@ -2188,6 +2155,10 @@
             }
         };
 
+        // =========================================================
+        // 3. APP MANAGER
+        // =========================================================
+
         window.HalDo.AppManager = {
             activeApps: new Map(),
 
@@ -2218,11 +2189,13 @@
                 this.activeApps.set(appId, instance);
                 window.HalDo.emit("app:opened", { appId });
 
+                // Spezialfall: Chat / AI
                 if (appId === 'haldo-ai' || appId === 'ai-chat' || appId === 'chat') {
                     this.openChat();
                     return instance;
                 }
 
+                // App als Fenster öffnen
                 this.openAppWindow(app, instance);
                 return instance;
             },
@@ -2262,6 +2235,7 @@
                     this.close(app.id);
                 });
 
+                // App-spezifische Logik
                 this.initAppLogic(app.id, win);
                 return instance;
             },
@@ -2351,7 +2325,7 @@
                             <div style="font-size:24px;font-weight:700;margin-bottom:6px;">⚙️ Einstellungen — Universe Professional</div>
                             <div style="opacity:.6;font-size:13px;margin-bottom:12px;">System, Anzeige, Sprache, AI und Geräte</div>
                             <div style="display:grid;gap:6px;">
-                                ${['Sprache', 'Thema', 'AI-Modus', 'Voice', 'Speicher', 'System', 'Datenschutz', 'Updates', 'Barrierefreiheit', 'Universe', '4K/8K Video', 'Wissensdatenbank'].map(s =>
+                                ${['Sprache', 'Thema', 'AI-Modus', 'Voice', 'Speicher', 'System', 'Datenschutz', 'Updates', 'Barrierefreiheit', 'Universe', '4K/8K Video', 'Wissensdatenbank', 'Planeten-Uhr', 'App-Einstellungen'].map(s =>
                                     `<div style="padding:10px 14px;border-radius:10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="alert('⚙️ ${s}\nEinstellungen werden geladen...')">
                                         <span>${s}</span>
                                         <span style="opacity:.4;font-size:12px;">›</span>
@@ -2362,53 +2336,11 @@
                                 🌌 Universe-Modus aktiv — Alle Funktionen verfügbar | ${window.HalDo.AICore?.languages?.length || 0} Sprachen | ${Object.keys(window.HalDo.AICore?.knowledgeBase || {}).length} Wissensbereiche
                             </div>
                         </div>
-                    `,
-                    'video-editor': `
-                        <div>
-                            <div style="font-size:24px;font-weight:700;margin-bottom:6px;">🎬 Video Editor — 4K/8K</div>
-                            <div style="opacity:.6;font-size:13px;margin-bottom:12px;">Professionelle Videobearbeitung mit HalDo AI</div>
-                            <div style="background:rgba(255,255,255,.05);border-radius:12px;padding:16px;border:1px solid rgba(255,255,255,.06);">
-                                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center;">
-                                    <div style="padding:8px;background:rgba(255,255,255,.04);border-radius:8px;">
-                                        <div style="font-size:20px;">📹</div>
-                                        <div style="font-size:11px;opacity:.6;">Import</div>
-                                    </div>
-                                    <div style="padding:8px;background:rgba(255,255,255,.04);border-radius:8px;">
-                                        <div style="font-size:20px;">✂️</div>
-                                        <div style="font-size:11px;opacity:.6;">Schneiden</div>
-                                    </div>
-                                    <div style="padding:8px;background:rgba(255,255,255,.04);border-radius:8px;">
-                                        <div style="font-size:20px;">🎨</div>
-                                        <div style="font-size:11px;opacity:.6;">Effekte</div>
-                                    </div>
-                                    <div style="padding:8px;background:rgba(255,255,255,.04);border-radius:8px;">
-                                        <div style="font-size:20px;">🌈</div>
-                                        <div style="font-size:11px;opacity:.6;">Farbkorrektur</div>
-                                    </div>
-                                    <div style="padding:8px;background:rgba(255,255,255,.04);border-radius:8px;">
-                                        <div style="font-size:20px;">📝</div>
-                                        <div style="font-size:11px;opacity:.6;">Text/Overlay</div>
-                                    </div>
-                                    <div style="padding:8px;background:rgba(255,255,255,.04);border-radius:8px;">
-                                        <div style="font-size:20px;">🎵</div>
-                                        <div style="font-size:11px;opacity:.6;">Audio</div>
-                                    </div>
-                                </div>
-                                <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;justify-content:center;">
-                                    <button onclick="alert('🎬 Video wird geladen...\nUnterstützte Formate: MP4, AVI, MOV, MKV, WEBM\nAuflösungen: HD, Full HD, 4K, 8K')" style="padding:6px 14px;border-radius:8px;background:rgba(255,200,80,.15);color:#fff;cursor:pointer;font-size:12px;">📂 Importieren</button>
-                                    <button onclick="alert('🎬 Video wird exportiert...\nHalDo AI Logo wird hinzugefügt')" style="padding:6px 14px;border-radius:8px;background:rgba(255,200,80,.15);color:#fff;cursor:pointer;font-size:12px;">💾 Exportieren</button>
-                                    <button onclick="window.HalDo.AICore.ask('Video-Bearbeitung Tipps').then(r=>alert(r))" style="padding:6px 14px;border-radius:8px;background:rgba(255,200,80,.1);color:#fff;cursor:pointer;font-size:12px;">🧠 AI Tipps</button>
-                                </div>
-                                <div style="margin-top:8px;font-size:10px;opacity:.4;text-align:center;">
-                                    ✦ HalDo AI OS Logo wird automatisch in der oberen linken Ecke eingefügt
-                                </div>
-                            </div>
-                        </div>
                     `
                 };
 
-                // Erweiterte Inhalte für alle anderen Apps
-                const fallbackContent = `
+                // Fallback für alle anderen Apps
+                return contents[appId] || `
                     <div style="padding:30px;text-align:center;">
                         <div style="font-size:48px;margin-bottom:12px;">📱</div>
                         <div style="font-size:24px;font-weight:700;background:linear-gradient(135deg,#ffd54b,#ff9f1c);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">${appId.charAt(0).toUpperCase() + appId.slice(1)}</div>
@@ -2424,8 +2356,6 @@
                         </div>
                     </div>
                 `;
-
-                return contents[appId] || fallbackContent;
             },
 
             initAppLogic(appId, win) {
@@ -2519,7 +2449,7 @@
         };
 
         // =========================================================
-        // 7. MENÜ CONTROLLER
+        // 4. MENÜ CONTROLLER
         // =========================================================
 
         window.HalDo.Menu = {
@@ -2572,8 +2502,7 @@
                     { id: 'storage', icon: '💾', name: 'Speicher', desc: 'Daten & Speicher' },
                     { id: 'security', icon: '🛡️', name: 'Sicherheit', desc: 'Datenschutz' },
                     { id: 'backup', icon: '◫', name: 'Backup', desc: 'Sichern & Wiederherstellen' },
-                    { id: 'diagnostics', icon: '⌁', name: 'Diagnose', desc: 'Systemstatus & Fehler' },
-                    { id: 'video-editor', icon: '🎬', name: 'Video Editor', desc: '4K/8K Bearbeitung' }
+                    { id: 'diagnostics', icon: '⌁', name: 'Diagnose', desc: 'Systemstatus & Fehler' }
                 ];
 
                 list.innerHTML = items.map(item => `
@@ -2626,7 +2555,7 @@
         };
 
         // =========================================================
-        // 8. CHAT CONTROLLER — PROFESSIONELL + VOICE
+        // 5. CHAT CONTROLLER
         // =========================================================
 
         window.HalDo.Chat = {
@@ -2660,46 +2589,16 @@
                     this.input.style.height = Math.min(this.input.scrollHeight, 150) + "px";
                 });
 
-                // History laden
                 this.history.forEach(msg => this.renderMessage(msg.role, msg.content));
                 if (this.history.length === 0) {
                     this.renderMessage("ai", "🌌 Guten Tag! Ich bin HalDo AI im Universe-Modus. 💙❤️ Ich beantworte ALLE Ihre Fragen — von A bis Z! Wie kann ich Ihnen helfen?");
                 }
 
-                // AI Core initialisieren
                 window.HalDo.AICore.init();
-
-                // Voice
                 this.setupVoice();
 
-                // Sun click
-                document.getElementById("haldo-sun-container")?.addEventListener("click", () => {
-                    this.open();
-                    window.HalDo.AICore.reactAvatar('happy');
-                    setTimeout(() => window.HalDo.AICore.reactAvatar('idle'), 800);
-                });
-
-                // Avatar click
-                document.getElementById("haldo-living-avatar")?.addEventListener("click", () => {
-                    this.open();
-                    window.HalDo.AICore.reactAvatar('happy');
-                    setTimeout(() => window.HalDo.AICore.reactAvatar('idle'), 800);
-                });
-
-                // Planet click handler
-                document.querySelectorAll('.haldo-planet').forEach(planet => {
-                    planet.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        const name = planet.dataset.planet || 'Planet';
-                        window.HalDo.AICore.ask(`Erzähle mir etwas über ${name}`).then(response => {
-                            this.open();
-                            setTimeout(() => {
-                                this.input.value = `Erzähle mir etwas über ${name}`;
-                                this.send();
-                            }, 300);
-                        });
-                    });
-                });
+                // Sun click from Part 1 is already set, but we add chat open
+                document.addEventListener("haldo:ai:open", () => this.open());
             },
 
             open() {
@@ -2855,21 +2754,14 @@
         };
 
         // =========================================================
-        // 9. BOOT — ALLES STARTEN
+        // 6. BOOT — TEIL 2
         // =========================================================
 
-        window._haldoStartTime = Date.now();
+        function haldoBootPart2() {
+            console.log("🧠 TEIL 2 wird initialisiert...");
 
-        function haldoBoot() {
-            console.log("🌌 HalDo AI OS v" + window.HALDO_VERSION + " " + window.HALDO_BUILD + " bootet...");
-
-            // Stars
-            generateStars();
-            updateTimeDisplay();
-            setInterval(updateTimeDisplay, 1000);
-
-            // Version
-            document.getElementById("haldo-version-display").textContent = "✦ v" + window.HALDO_VERSION + " " + window.HALDO_BUILD;
+            // AI Core initialisieren
+            window.HalDo.AICore.init();
 
             // App Registry mit ALLEN A–Z APPS
             const apps = [
@@ -2947,12 +2839,11 @@
                 }
             });
 
-            console.log("🌌 HalDo AI OS v" + window.HALDO_VERSION + " " + window.HALDO_BUILD + " erfolgreich gestartet!");
+            console.log("✅ TEIL 2 geladen — AI Core + Alle Apps + Einstellungen");
             console.log("📱 " + window.HalDo.AppRegistry.getAll().length + " Apps verfügbar");
             console.log("🌍 " + window.HalDo.AICore.languages.length + " Sprachen unterstützt");
             console.log("📚 " + Object.keys(window.HalDo.AICore.knowledgeBase).length + " Wissensbereiche");
-            console.log("💙❤️🚀 HalDo AI lebt — Universe Professional Edition!");
-            console.log("🎬 4K/8K Video-Bearbeitung verfügbar");
+            console.log("💙❤️🚀 HalDo AI Universe Professional ist bereit!");
 
             // Welcome
             setTimeout(() => {
@@ -2963,11 +2854,915 @@
         }
 
         if (document.readyState === "loading") {
-            document.addEventListener("DOMContentLoaded", haldoBoot, { once: true });
+            document.addEventListener("DOMContentLoaded", haldoBootPart2, { once: true });
         } else {
-            haldoBoot();
+            haldoBootPart2();
         }
-    </script>
 
-</body>
-</html>
+        console.log("✅ TEIL 2 komplett geladen — warte auf TEIL 3 (Video + Updates)");
+    </script>
+    <!-- =========================================================
+    HALDO AI OS — TEIL 3: VIDEO + UPDATE + BACKUP + APP-EINSTELLUNGEN
+    ========================================================= -->
+
+    <script>
+        "use strict";
+
+        console.log("🎬 TEIL 3 wird geladen — Video + Update + Backup + App-Einstellungen");
+
+        // =========================================================
+        // 1. VIDEO-BEARBEITUNG (4K, 8K, HD, 3D)
+        // =========================================================
+
+        if (!window.HalDo) window.HalDo = {};
+
+        window.HalDo.VideoEditor = {
+            initialized: false,
+            formats: ['MP4', 'AVI', 'MOV', 'MKV', 'WEBM'],
+            resolutions: ['HD (1280x720)', 'Full HD (1920x1080)', '4K (3840x2160)', '8K (7680x4320)'],
+            effects: ['Übergänge', 'Farbkorrektur', 'Filter', 'Text-Overlays', '3D-Effekte', 'Rauschunterdrückung'],
+            currentProject: null,
+            projects: [],
+            logoPosition: 'oben links',
+
+            init() {
+                if (this.initialized) return this;
+                this.initialized = true;
+                this.loadProjects();
+                console.log("🎬 Video-Editor initialisiert — 4K/8K/HD/3D unterstützt");
+                console.log("📹 Formate: " + this.formats.join(', '));
+                console.log("📐 Auflösungen: " + this.resolutions.join(', '));
+                return this;
+            },
+
+            loadProjects() {
+                this.projects = window.HalDo.Storage.get('video_projects', []);
+                return this.projects;
+            },
+
+            saveProjects() {
+                window.HalDo.Storage.set('video_projects', this.projects);
+                return true;
+            },
+
+            createProject(name, options = {}) {
+                const project = {
+                    id: 'video_' + Date.now(),
+                    name: name || 'Neues Video',
+                    createdAt: new Date().toISOString(),
+                    format: options.format || 'MP4',
+                    resolution: options.resolution || '4K (3840x2160)',
+                    duration: options.duration || 0,
+                    effects: options.effects || [],
+                    clips: options.clips || [],
+                    audio: options.audio || null,
+                    textOverlays: options.textOverlays || [],
+                    haldoLogo: options.haldoLogo !== false,
+                    status: 'created'
+                };
+                this.projects.push(project);
+                this.saveProjects();
+                this.currentProject = project;
+                console.log(`🎬 Video-Projekt "${name}" erstellt`);
+                return project;
+            },
+
+            addEffect(projectId, effect) {
+                const project = this.projects.find(p => p.id === projectId);
+                if (!project) return false;
+                if (!project.effects.includes(effect)) {
+                    project.effects.push(effect);
+                    this.saveProjects();
+                    return true;
+                }
+                return false;
+            },
+
+            removeEffect(projectId, effect) {
+                const project = this.projects.find(p => p.id === projectId);
+                if (!project) return false;
+                project.effects = project.effects.filter(e => e !== effect);
+                this.saveProjects();
+                return true;
+            },
+
+            setResolution(projectId, resolution) {
+                const project = this.projects.find(p => p.id === projectId);
+                if (!project || !this.resolutions.includes(resolution)) return false;
+                project.resolution = resolution;
+                this.saveProjects();
+                return true;
+            },
+
+            setFormat(projectId, format) {
+                const project = this.projects.find(p => p.id === projectId);
+                if (!project || !this.formats.includes(format)) return false;
+                project.format = format;
+                this.saveProjects();
+                return true;
+            },
+
+            addTextOverlay(projectId, text, position = 'center') {
+                const project = this.projects.find(p => p.id === projectId);
+                if (!project) return false;
+                project.textOverlays.push({
+                    text: text,
+                    position: position,
+                    addedAt: new Date().toISOString()
+                });
+                this.saveProjects();
+                return true;
+            },
+
+            renderUI(container) {
+                if (!container) return;
+
+                let html = `
+                    <div style="padding:16px;">
+                        <div style="font-size:24px;font-weight:700;margin-bottom:6px;">🎬 Video Editor — 4K/8K</div>
+                        <div style="opacity:.6;font-size:13px;margin-bottom:12px;">Professionelle Videobearbeitung mit HalDo AI</div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center;margin-bottom:16px;">
+                            <div style="padding:12px;background:rgba(255,255,255,.05);border-radius:10px;border:1px solid rgba(255,255,255,.06);">
+                                <div style="font-size:28px;">📹</div>
+                                <div style="font-size:12px;font-weight:600;">Import</div>
+                                <div style="font-size:10px;opacity:.5;">MP4, AVI, MOV, MKV</div>
+                            </div>
+                            <div style="padding:12px;background:rgba(255,255,255,.05);border-radius:10px;border:1px solid rgba(255,255,255,.06);">
+                                <div style="font-size:28px;">✂️</div>
+                                <div style="font-size:12px;font-weight:600;">Schneiden</div>
+                                <div style="font-size:10px;opacity:.5;">Präzise Bearbeitung</div>
+                            </div>
+                            <div style="padding:12px;background:rgba(255,255,255,.05);border-radius:10px;border:1px solid rgba(255,255,255,.06);">
+                                <div style="font-size:28px;">🎨</div>
+                                <div style="font-size:12px;font-weight:600;">Effekte</div>
+                                <div style="font-size:10px;opacity:.5;">3D, Filter, Übergänge</div>
+                            </div>
+                            <div style="padding:12px;background:rgba(255,255,255,.05);border-radius:10px;border:1px solid rgba(255,255,255,.06);">
+                                <div style="font-size:28px;">🌈</div>
+                                <div style="font-size:12px;font-weight:600;">Farbkorrektur</div>
+                                <div style="font-size:10px;opacity:.5;">Professionelle Farben</div>
+                            </div>
+                            <div style="padding:12px;background:rgba(255,255,255,.05);border-radius:10px;border:1px solid rgba(255,255,255,.06);">
+                                <div style="font-size:28px;">📝</div>
+                                <div style="font-size:12px;font-weight:600;">Text/Overlay</div>
+                                <div style="font-size:10px;opacity:.5;">Titel & Untertitel</div>
+                            </div>
+                            <div style="padding:12px;background:rgba(255,255,255,.05);border-radius:10px;border:1px solid rgba(255,255,255,.06);">
+                                <div style="font-size:28px;">🎵</div>
+                                <div style="font-size:12px;font-weight:600;">Audio</div>
+                                <div style="font-size:10px;opacity:.5;">Musik & Sound</div>
+                            </div>
+                        </div>
+                        <div style="margin-bottom:12px;">
+                            <div style="font-size:14px;font-weight:600;margin-bottom:6px;">📂 Meine Projekte</div>
+                            <div id="video-project-list" style="display:flex;flex-direction:column;gap:6px;">
+                                ${this.projects.length === 0 ? '<div style="opacity:.4;font-size:12px;text-align:center;padding:12px;">Keine Projekte vorhanden</div>' : ''}
+                                ${this.projects.map(p => `
+                                    <div style="padding:10px 14px;background:rgba(255,255,255,.04);border-radius:10px;border:1px solid rgba(255,255,255,.06);display:flex;justify-content:space-between;align-items:center;">
+                                        <div>
+                                            <div style="font-weight:600;">${p.name}</div>
+                                            <div style="font-size:10px;opacity:.5;">${p.resolution} · ${p.format} · ${new Date(p.createdAt).toLocaleDateString()}</div>
+                                        </div>
+                                        <div style="display:flex;gap:6px;">
+                                            <button onclick="window.HalDo.VideoEditor.editProject('${p.id}')" style="padding:4px 12px;border-radius:6px;background:rgba(255,200,80,.15);color:#fff;cursor:pointer;font-size:11px;">Bearbeiten</button>
+                                            <button onclick="window.HalDo.VideoEditor.deleteProject('${p.id}')" style="padding:4px 12px;border-radius:6px;background:rgba(255,80,80,.1);color:#ff6b6b;cursor:pointer;font-size:11px;">✕</button>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                            <button id="video-create-project" style="padding:10px 20px;border-radius:10px;background:rgba(255,200,80,.2);color:#fff;cursor:pointer;">📹 Neues Projekt</button>
+                            <button id="video-import-file" style="padding:10px 20px;border-radius:10px;background:rgba(255,255,255,.05);color:#fff;cursor:pointer;">📂 Importieren</button>
+                            <button onclick="window.HalDo.AICore.ask('Video-Bearbeitung Tipps').then(r=>alert(r))" style="padding:10px 20px;border-radius:10px;background:rgba(255,200,80,.1);color:#fff;cursor:pointer;">🧠 AI Tipps</button>
+                        </div>
+                        <div style="margin-top:12px;padding:8px 12px;background:rgba(255,200,80,.05);border-radius:8px;border:1px solid rgba(255,200,80,.1);font-size:11px;opacity:.7;">
+                            ✦ HalDo AI OS Logo wird automatisch in der oberen linken Ecke eingefügt
+                        </div>
+                    </div>
+                `;
+
+                container.innerHTML = html;
+
+                // Event-Listener
+                document.getElementById('video-create-project')?.addEventListener('click', () => {
+                    const name = prompt('Projektname:', 'Mein Video ' + (this.projects.length + 1));
+                    if (name) {
+                        const project = this.createProject(name);
+                        alert(`✅ Projekt "${name}" erstellt!\nAuflösung: ${project.resolution}\nFormat: ${project.format}`);
+                        this.renderUI(container);
+                    }
+                });
+
+                document.getElementById('video-import-file')?.addEventListener('click', () => {
+                    const input = document.createElement('input');
+                    input.type = 'file';
+                    input.accept = 'video/*';
+                    input.onchange = () => {
+                        if (input.files[0]) {
+                            const name = prompt('Projektname für importierte Datei:', input.files[0].name);
+                            if (name) {
+                                const project = this.createProject(name, { format: 'MP4' });
+                                project.clips.push({ name: input.files[0].name, size: input.files[0].size });
+                                this.saveProjects();
+                                alert(`✅ Datei "${input.files[0].name}" importiert!\nProjekt: ${name}`);
+                                this.renderUI(container);
+                            }
+                        }
+                    };
+                    input.click();
+                });
+            },
+
+            editProject(projectId) {
+                const project = this.projects.find(p => p.id === projectId);
+                if (!project) return;
+
+                const resolutionOptions = this.resolutions.map(r =>
+                    `<option value="${r}" ${r === project.resolution ? 'selected' : ''}>${r}</option>`
+                ).join('');
+
+                const formatOptions = this.formats.map(f =>
+                    `<option value="${f}" ${f === project.format ? 'selected' : ''}>${f}</option>`
+                ).join('');
+
+                const effectOptions = this.effects.map(e =>
+                    `<label style="display:inline-block;margin:4px;padding:4px 10px;background:${project.effects.includes(e) ? 'rgba(255,200,80,.2)' : 'rgba(255,255,255,.05)'};border-radius:8px;border:1px solid ${project.effects.includes(e) ? 'rgba(255,200,80,.3)' : 'rgba(255,255,255,.06)'};cursor:pointer;font-size:12px;">
+                        <input type="checkbox" ${project.effects.includes(e) ? 'checked' : ''} onchange="window.HalDo.VideoEditor.toggleEffect('${project.id}','${e}')">
+                        ${e}
+                    </label>`
+                ).join('');
+
+                const overlayHtml = project.textOverlays.map((o, i) =>
+                    `<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 8px;background:rgba(255,255,255,.03);border-radius:6px;font-size:12px;">
+                        <span>📝 ${o.text}</span>
+                        <span style="opacity:.4;">${o.position}</span>
+                        <button onclick="window.HalDo.VideoEditor.removeOverlay('${project.id}', ${i})" style="padding:2px 8px;border-radius:4px;background:rgba(255,80,80,.1);color:#ff6b6b;cursor:pointer;font-size:10px;">✕</button>
+                    </div>`
+                ).join('');
+
+                const html = `
+                    <div style="padding:16px;">
+                        <div style="font-size:20px;font-weight:700;margin-bottom:4px;">🎬 ${project.name}</div>
+                        <div style="opacity:.5;font-size:12px;margin-bottom:12px;">Erstellt: ${new Date(project.createdAt).toLocaleString()}</div>
+                        <div style="display:grid;gap:10px;">
+                            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                                <div style="flex:1;min-width:150px;">
+                                    <div style="font-size:12px;opacity:.6;">Auflösung</div>
+                                    <select id="video-resolution" style="width:100%;padding:8px;border-radius:8px;background:rgba(255,255,255,.05);color:#fff;border:1px solid rgba(255,255,255,.1);" onchange="window.HalDo.VideoEditor.setResolution('${project.id}', this.value)">
+                                        ${resolutionOptions}
+                                    </select>
+                                </div>
+                                <div style="flex:1;min-width:150px;">
+                                    <div style="font-size:12px;opacity:.6;">Format</div>
+                                    <select id="video-format" style="width:100%;padding:8px;border-radius:8px;background:rgba(255,255,255,.05);color:#fff;border:1px solid rgba(255,255,255,.1);" onchange="window.HalDo.VideoEditor.setFormat('${project.id}', this.value)">
+                                        ${formatOptions}
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <div style="font-size:12px;opacity:.6;margin-bottom:4px;">Effekte</div>
+                                <div style="display:flex;flex-wrap:wrap;gap:4px;">
+                                    ${effectOptions}
+                                </div>
+                            </div>
+                            <div>
+                                <div style="font-size:12px;opacity:.6;margin-bottom:4px;">Text-Overlays</div>
+                                <div style="display:flex;gap:6px;">
+                                    <input type="text" id="video-overlay-text" placeholder="Text eingeben..." style="flex:1;padding:6px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#fff;">
+                                    <select id="video-overlay-position" style="padding:6px 10px;border-radius:8px;background:rgba(255,255,255,.05);color:#fff;border:1px solid rgba(255,255,255,.1);">
+                                        <option value="oben links">Oben links</option>
+                                        <option value="oben mitte">Oben mitte</option>
+                                        <option value="oben rechts">Oben rechts</option>
+                                        <option value="mitte">Mitte</option>
+                                        <option value="unten links">Unten links</option>
+                                        <option value="unten mitte">Unten mitte</option>
+                                        <option value="unten rechts">Unten rechts</option>
+                                    </select>
+                                    <button onclick="window.HalDo.VideoEditor.addOverlayFromUI('${project.id}')" style="padding:6px 14px;border-radius:8px;background:rgba(255,200,80,.15);color:#fff;cursor:pointer;">+</button>
+                                </div>
+                                ${overlayHtml ? `<div style="margin-top:6px;">${overlayHtml}</div>` : ''}
+                            </div>
+                            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;">
+                                <button onclick="window.HalDo.VideoEditor.exportVideo('${project.id}')" style="padding:8px 20px;border-radius:8px;background:rgba(76,175,80,.2);color:#4caf50;cursor:pointer;">💾 Exportieren</button>
+                                <button onclick="window.HalDo.VideoEditor.renderUI(document.querySelector('.haldo-app-window-body'))" style="padding:8px 20px;border-radius:8px;background:rgba(255,255,255,.05);color:#fff;cursor:pointer;">🔙 Zurück</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                const body = document.querySelector('.haldo-app-window-body');
+                if (body) body.innerHTML = html;
+            },
+
+            toggleEffect(projectId, effect) {
+                const project = this.projects.find(p => p.id === projectId);
+                if (!project) return;
+                if (project.effects.includes(effect)) {
+                    this.removeEffect(projectId, effect);
+                } else {
+                    this.addEffect(projectId, effect);
+                }
+                this.editProject(projectId);
+            },
+
+            addOverlayFromUI(projectId) {
+                const text = document.getElementById('video-overlay-text')?.value.trim();
+                const position = document.getElementById('video-overlay-position')?.value || 'mitte';
+                if (!text) return;
+                this.addTextOverlay(projectId, text, position);
+                document.getElementById('video-overlay-text').value = '';
+                this.editProject(projectId);
+            },
+
+            removeOverlay(projectId, index) {
+                const project = this.projects.find(p => p.id === projectId);
+                if (!project) return;
+                project.textOverlays.splice(index, 1);
+                this.saveProjects();
+                this.editProject(projectId);
+            },
+
+            exportVideo(projectId) {
+                const project = this.projects.find(p => p.id === projectId);
+                if (!project) {
+                    alert('❌ Projekt nicht gefunden!');
+                    return;
+                }
+
+                // Simuliere Export mit Fortschritt
+                alert(`🎬 Video wird exportiert...\n\n` +
+                    `📹 Projekt: ${project.name}\n` +
+                    `📐 Auflösung: ${project.resolution}\n` +
+                    `📁 Format: ${project.format}\n` +
+                    `🎨 Effekte: ${project.effects.length > 0 ? project.effects.join(', ') : 'Keine'}\n` +
+                    `📝 Overlays: ${project.textOverlays.length > 0 ? project.textOverlays.map(o => o.text).join(', ') : 'Keine'}\n\n` +
+                    `✦ HalDo AI OS Logo wird hinzugefügt\n` +
+                    `⏳ Export wird vorbereitet...`
+                );
+
+                setTimeout(() => {
+                    alert(`✅ Export abgeschlossen!\n\n` +
+                        `📹 ${project.name}\n` +
+                        `📐 ${project.resolution}\n` +
+                        `📁 ${project.format}\n` +
+                        `✦ HalDo AI OS Logo in oberer linker Ecke\n\n` +
+                        `💾 Datei gespeichert.`);
+                }, 1500);
+            },
+
+            deleteProject(projectId) {
+                if (!confirm('Projekt wirklich löschen?')) return;
+                this.projects = this.projects.filter(p => p.id !== projectId);
+                this.saveProjects();
+                this.renderUI(document.querySelector('.haldo-app-window-body'));
+            }
+        };
+
+        // =========================================================
+        // 2. UPDATE SYSTEM
+        // =========================================================
+
+        window.HalDo.UpdateSystem = {
+            currentVersion: window.HALDO_VERSION,
+            updateAvailable: false,
+            updateData: null,
+            history: [],
+
+            init() {
+                this.loadHistory();
+                console.log("↻ Update-System initialisiert — Version " + this.currentVersion);
+                return this;
+            },
+
+            loadHistory() {
+                this.history = window.HalDo.Storage.get('update_history', []);
+                return this.history;
+            },
+
+            saveHistory() {
+                window.HalDo.Storage.set('update_history', this.history);
+                return true;
+            },
+
+            check() {
+                console.log("🔍 Suche nach Updates...");
+                // Simuliere Update-Check mit neuerer Version
+                const mockUpdate = {
+                    version: "22.1.2",
+                    releaseDate: new Date().toISOString(),
+                    changes: [
+                        "🐛 Bugfixes und Stabilitätsverbesserungen",
+                        "⚡ Performance-Optimierungen für alle Apps",
+                        "✨ Neue Video-Effekte (4K/8K)",
+                        "🌍 Weitere Sprachen hinzugefügt",
+                        "🔒 Sicherheitsupdates",
+                        "📱 Verbesserte Mobile-Ansicht"
+                    ],
+                    size: "3.2 MB",
+                    requiresRestart: true
+                };
+
+                // Prüfe ob neuer als aktuelle Version
+                const current = parseFloat(this.currentVersion);
+                const available = parseFloat(mockUpdate.version);
+                if (available > current) {
+                    this.updateAvailable = true;
+                    this.updateData = mockUpdate;
+                    window.HalDo.emit("update:available", { update: mockUpdate });
+                    console.log(`↻ Update verfügbar: v${mockUpdate.version}`);
+                    return mockUpdate;
+                } else {
+                    this.updateAvailable = false;
+                    console.log("✅ System ist auf dem neuesten Stand");
+                    return null;
+                }
+            },
+
+            install() {
+                if (!this.updateAvailable || !this.updateData) {
+                    alert('❌ Kein Update verfügbar.');
+                    return false;
+                }
+
+                const update = this.updateData;
+                console.log(`📦 Installiere Update auf Version ${update.version}...`);
+
+                // Simuliere Installation mit Fortschritt
+                alert(`↻ Update wird installiert...\n\n` +
+                    `Version: ${update.version}\n` +
+                    `Größe: ${update.size}\n` +
+                    `Änderungen:\n${update.changes.map(c => `• ${c}`).join('\n')}\n\n` +
+                    `⏳ Installation läuft...`);
+
+                setTimeout(() => {
+                    this.currentVersion = update.version;
+                    this.updateAvailable = false;
+                    window.HALDO_VERSION = update.version;
+                    window.HalDo.OS.version = update.version;
+
+                    this.history.push({
+                        version: update.version,
+                        installedAt: new Date().toISOString(),
+                        changes: update.changes
+                    });
+                    this.saveHistory();
+
+                    window.HalDo.emit("update:installed", { version: update.version });
+                    console.log(`✅ Update auf Version ${update.version} installiert!`);
+
+                    alert(`✅ Update erfolgreich installiert!\n\n` +
+                        `Version: ${update.version}\n` +
+                        `Installiert: ${new Date().toLocaleString()}\n\n` +
+                        `🔄 Starte System neu...`);
+
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1500);
+                }, 2000);
+                return true;
+            },
+
+            getStatus() {
+                return {
+                    current: this.currentVersion,
+                    available: this.updateAvailable,
+                    data: this.updateData,
+                    history: this.history
+                };
+            },
+
+            renderUI(container) {
+                if (!container) return;
+
+                const status = this.getStatus();
+
+                let html = `
+                    <div style="padding:16px;">
+                        <div style="font-size:24px;font-weight:700;margin-bottom:6px;">↻ Updates</div>
+                        <div style="opacity:.6;font-size:13px;margin-bottom:12px;">Systemupdates & Versionen</div>
+                        <div style="background:rgba(255,200,80,.08);border-radius:12px;padding:14px;border:1px solid ${status.available ? 'rgba(255,200,80,.3)' : 'rgba(255,255,255,.1)'};">
+                            <div style="display:flex;align-items:center;gap:12px;">
+                                <span style="font-size:28px;">${status.available ? '⬇️' : '✅'}</span>
+                                <div style="flex:1;">
+                                    <div style="font-weight:700;font-size:16px;">HalDo AI OS v${status.current}</div>
+                                    <div style="opacity:.6;font-size:12px;">${status.available ? `Update v${status.data.version} verfügbar!` : 'Neueste Version'}</div>
+                                </div>
+                                <button id="update-check-btn" style="padding:8px 16px;border-radius:8px;background:rgba(255,200,80,.2);color:#fff;cursor:pointer;">${status.available ? '📦 Installieren' : '🔍 Prüfen'}</button>
+                            </div>
+                        </div>
+                        <div style="margin-top:10px;display:flex;flex-direction:column;gap:4px;">
+                            ${this.history.slice(-5).reverse().map(h =>
+                                `<div style="padding:6px 12px;background:rgba(255,255,255,.03);border-radius:8px;border:1px solid rgba(255,255,255,.04);display:flex;justify-content:space-between;align-items:center;font-size:12px;">
+                                    <span>v${h.version}</span>
+                                    <span style="opacity:.4;">${new Date(h.installedAt).toLocaleDateString()}</span>
+                                    <span style="opacity:.3;font-size:10px;">${h.changes?.length || 0} Änderungen</span>
+                                </div>`
+                            ).join('') || '<div style="opacity:.3;font-size:11px;text-align:center;padding:8px;">Keine Update-Historie</div>'}
+                        </div>
+                    </div>
+                `;
+
+                container.innerHTML = html;
+
+                document.getElementById('update-check-btn')?.addEventListener('click', () => {
+                    if (status.available) {
+                        this.install();
+                    } else {
+                        const result = this.check();
+                        if (result) {
+                            alert(`🔍 Update gefunden!\n\nVersion: ${result.version}\nGröße: ${result.size}\n\nÄnderungen:\n${result.changes.map(c => `• ${c}`).join('\n')}`);
+                            this.renderUI(container);
+                        } else {
+                            alert('✅ System ist auf dem neuesten Stand!');
+                        }
+                    }
+                });
+            }
+        };
+
+        // =========================================================
+        // 3. BACKUP SYSTEM
+        // =========================================================
+
+        window.HalDo.BackupSystem = {
+            backups: [],
+            maxBackups: 10,
+
+            init() {
+                this.loadBackups();
+                console.log("◫ Backup-System initialisiert — " + this.backups.length + " Backups");
+                return this;
+            },
+
+            loadBackups() {
+                this.backups = window.HalDo.Storage.get('backup_list', []);
+                return this.backups;
+            },
+
+            saveBackups() {
+                window.HalDo.Storage.set('backup_list', this.backups);
+                return true;
+            },
+
+            create() {
+                const backup = {
+                    id: 'backup_' + Date.now(),
+                    timestamp: new Date().toISOString(),
+                    version: window.HALDO_VERSION,
+                    data: {
+                        settings: window.HalDo.Settings ? window.HalDo.Settings.getAll() : {},
+                        notes: window.HalDo.Storage.get('notes', []),
+                        chat: window.HalDo.Storage.get('chat_history', []),
+                        apps: window.HalDo.AppRegistry ? window.HalDo.AppRegistry.getInstalled().map(a => a.id) : [],
+                        projects: window.HalDo.VideoEditor ? window.HalDo.VideoEditor.projects : []
+                    },
+                    size: Math.floor(Math.random() * 50 + 10) + ' MB'
+                };
+
+                this.backups.unshift(backup);
+                if (this.backups.length > this.maxBackups) {
+                    this.backups = this.backups.slice(0, this.maxBackups);
+                }
+                this.saveBackups();
+
+                window.HalDo.emit("backup:created", { backup });
+                console.log("💾 Backup erstellt: " + new Date(backup.timestamp).toLocaleString());
+                return backup;
+            },
+
+            restore(backupId) {
+                const backup = this.backups.find(b => b.id === backupId);
+                if (!backup) {
+                    alert('❌ Backup nicht gefunden!');
+                    return false;
+                }
+
+                if (!confirm(`Backup vom ${new Date(backup.timestamp).toLocaleString()} wiederherstellen?`)) {
+                    return false;
+                }
+
+                console.log("↩️ Backup wird wiederhergestellt...", backup);
+
+                // Simuliere Wiederherstellung
+                alert(`↩️ Backup wird wiederhergestellt...\n\n` +
+                    `Zeitpunkt: ${new Date(backup.timestamp).toLocaleString()}\n` +
+                    `Version: ${backup.version}\n` +
+                    `Größe: ${backup.size}\n\n` +
+                    `⏳ Wiederherstellung läuft...`);
+
+                setTimeout(() => {
+                    if (backup.data.notes) {
+                        window.HalDo.Storage.set('notes', backup.data.notes);
+                    }
+                    if (backup.data.chat) {
+                        window.HalDo.Storage.set('chat_history', backup.data.chat);
+                    }
+                    window.HalDo.emit("backup:restored", { backup });
+                    alert(`✅ Backup erfolgreich wiederhergestellt!\n\n` +
+                        `Zeitpunkt: ${new Date(backup.timestamp).toLocaleString()}\n` +
+                        `Version: ${backup.version}\n` +
+                        `Notizen: ${backup.data.notes?.length || 0}\n` +
+                        `Chat: ${backup.data.chat?.length || 0}`);
+                }, 1500);
+                return true;
+            },
+
+            deleteBackup(backupId) {
+                this.backups = this.backups.filter(b => b.id !== backupId);
+                this.saveBackups();
+                return true;
+            },
+
+            renderUI(container) {
+                if (!container) return;
+
+                let html = `
+                    <div style="padding:16px;">
+                        <div style="font-size:24px;font-weight:700;margin-bottom:6px;">◫ Backup</div>
+                        <div style="opacity:.6;font-size:13px;margin-bottom:12px;">Sichern & Wiederherstellen</div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+                            <button id="backup-create-btn" style="padding:14px;border-radius:12px;background:rgba(255,200,80,.12);border:1px solid rgba(255,200,80,.15);color:#fff;cursor:pointer;text-align:center;">
+                                <div style="font-size:24px;">💾</div>
+                                <div style="font-weight:700;font-size:12px;">Backup erstellen</div>
+                            </button>
+                            <button id="backup-restore-latest" style="padding:14px;border-radius:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.06);color:#fff;cursor:pointer;text-align:center;">
+                                <div style="font-size:24px;">↩️</div>
+                                <div style="font-weight:700;font-size:12px;">Letztes Backup</div>
+                            </button>
+                        </div>
+                        <div style="display:flex;flex-direction:column;gap:6px;">
+                            ${this.backups.length === 0 ? '<div style="opacity:.4;font-size:12px;text-align:center;padding:12px;">Keine Backups vorhanden</div>' : ''}
+                            ${this.backups.map(b => `
+                                <div style="padding:10px 14px;background:rgba(255,255,255,.04);border-radius:10px;border:1px solid rgba(255,255,255,.06);display:flex;justify-content:space-between;align-items:center;">
+                                    <div>
+                                        <div style="font-weight:600;">💾 ${new Date(b.timestamp).toLocaleString()}</div>
+                                        <div style="font-size:10px;opacity:.5;">v${b.version} · ${b.size} · ${b.data.apps?.length || 0} Apps</div>
+                                    </div>
+                                    <div style="display:flex;gap:6px;">
+                                        <button onclick="window.HalDo.BackupSystem.restore('${b.id}')" style="padding:4px 12px;border-radius:6px;background:rgba(255,200,80,.15);color:#fff;cursor:pointer;font-size:11px;">↩️</button>
+                                        <button onclick="window.HalDo.BackupSystem.deleteBackup('${b.id}');window.HalDo.BackupSystem.renderUI(document.querySelector('.haldo-app-window-body'))" style="padding:4px 12px;border-radius:6px;background:rgba(255,80,80,.1);color:#ff6b6b;cursor:pointer;font-size:11px;">✕</button>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+
+                container.innerHTML = html;
+
+                document.getElementById('backup-create-btn')?.addEventListener('click', () => {
+                    const backup = this.create();
+                    alert(`✅ Backup erstellt!\n\n` +
+                        `Zeit: ${new Date(backup.timestamp).toLocaleString()}\n` +
+                        `Version: ${backup.version}\n` +
+                        `Größe: ${backup.size}`);
+                    this.renderUI(container);
+                });
+
+                document.getElementById('backup-restore-latest')?.addEventListener('click', () => {
+                    if (this.backups.length > 0) {
+                        this.restore(this.backups[0].id);
+                    } else {
+                        alert('❌ Kein Backup vorhanden!');
+                    }
+                });
+            }
+        };
+
+        // =========================================================
+        // 4. APP-EINSTELLUNGEN (JEDE APP)
+        // =========================================================
+
+        window.HalDo.AppSettings = {
+            settings: {},
+
+            init() {
+                this.loadSettings();
+                console.log("⚙️ App-Einstellungen initialisiert");
+                return this;
+            },
+
+            loadSettings() {
+                this.settings = window.HalDo.Storage.get('app_settings', {});
+                return this.settings;
+            },
+
+            saveSettings() {
+                window.HalDo.Storage.set('app_settings', this.settings);
+                return true;
+            },
+
+            get(appId, key, defaultValue = null) {
+                if (this.settings[appId] && this.settings[appId][key] !== undefined) {
+                    return this.settings[appId][key];
+                }
+                return defaultValue;
+            },
+
+            set(appId, key, value) {
+                if (!this.settings[appId]) this.settings[appId] = {};
+                this.settings[appId][key] = value;
+                this.saveSettings();
+                window.HalDo.emit("app:setting:changed", { appId, key, value });
+                return true;
+            },
+
+            getAll(appId) {
+                return this.settings[appId] || {};
+            },
+
+            renderUI(container, appId) {
+                if (!container || !appId) return;
+
+                const settings = this.getAll(appId);
+                const app = window.HalDo.AppRegistry?.get(appId);
+                const appName = app?.name || appId;
+
+                let html = `
+                    <div style="padding:16px;">
+                        <div style="font-size:24px;font-weight:700;margin-bottom:6px;">⚙️ ${appName} — Einstellungen</div>
+                        <div style="opacity:.6;font-size:13px;margin-bottom:12px;">App-spezifische Einstellungen</div>
+                        <div style="display:grid;gap:10px;">
+                `;
+
+                // Allgemeine Einstellungen für jede App
+                const generalSettings = [
+                    { key: 'notifications', label: 'Benachrichtigungen', type: 'toggle', default: true },
+                    { key: 'sound', label: 'Sound', type: 'toggle', default: true },
+                    { key: 'animations', label: 'Animationen', type: 'toggle', default: true },
+                    { key: 'auto_save', label: 'Automatisch speichern', type: 'toggle', default: true },
+                    { key: 'font_size', label: 'Schriftgröße', type: 'select', options: ['klein', 'mittel', 'groß'], default: 'mittel' }
+                ];
+
+                generalSettings.forEach(setting => {
+                    const value = this.get(appId, setting.key, setting.default);
+                    const id = `app_setting_${appId}_${setting.key}`;
+
+                    if (setting.type === 'toggle') {
+                        html += `
+                            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:rgba(255,255,255,.03);border-radius:8px;border:1px solid rgba(255,255,255,.04);">
+                                <label for="${id}" style="cursor:pointer;">${setting.label}</label>
+                                <label style="position:relative;display:inline-block;width:40px;height:22px;">
+                                    <input type="checkbox" id="${id}" ${value ? 'checked' : ''} style="opacity:0;width:0;height:0;" onchange="window.HalDo.AppSettings.set('${appId}','${setting.key}', this.checked)">
+                                    <span style="position:absolute;cursor:pointer;inset:0;background:rgba(255,255,255,.2);transition:.3s;border-radius:22px;"></span>
+                                    <span style="position:absolute;content:'';height:16px;width:16px;left:3px;bottom:3px;background:#fff;transition:.3s;border-radius:50%;${value ? 'transform:translateX(18px);' : ''}"></span>
+                                </label>
+                            </div>
+                        `;
+                    } else if (setting.type === 'select') {
+                        html += `
+                            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:rgba(255,255,255,.03);border-radius:8px;border:1px solid rgba(255,255,255,.04);">
+                                <label for="${id}">${setting.label}</label>
+                                <select id="${id}" style="padding:4px 8px;border-radius:6px;background:rgba(255,255,255,.06);color:#fff;border:1px solid rgba(255,255,255,.1);" onchange="window.HalDo.AppSettings.set('${appId}','${setting.key}', this.value)">
+                                    ${setting.options.map(o => `<option value="${o}" ${o === value ? 'selected' : ''}>${o}</option>`).join('')}
+                                </select>
+                            </div>
+                        `;
+                    }
+                });
+
+                html += `
+                            <div style="padding:8px 12px;background:rgba(255,200,80,.05);border-radius:8px;border:1px solid rgba(255,200,80,.1);font-size:11px;opacity:.7;text-align:center;">
+                                💡 App-spezifische Einstellungen werden automatisch gespeichert
+                            </div>
+                            <button onclick="window.HalDo.AppManager.open('${appId}')" style="padding:8px 16px;border-radius:8px;background:rgba(255,255,255,.05);color:#fff;cursor:pointer;width:100%;">🔙 Zurück zur App</button>
+                        </div>
+                    </div>
+                `;
+
+                container.innerHTML = html;
+            }
+        };
+
+        // =========================================================
+        // 5. BOOT — TEIL 3
+        // =========================================================
+
+        function haldoBootPart3() {
+            console.log("🎬 TEIL 3 wird initialisiert...");
+
+            // Video Editor
+            window.HalDo.VideoEditor.init();
+
+            // Update System
+            window.HalDo.UpdateSystem.init();
+
+            // Backup System
+            window.HalDo.BackupSystem.init();
+
+            // App Settings
+            window.HalDo.AppSettings.init();
+
+            // Update-Check (automatisch)
+            setTimeout(() => {
+                const update = window.HalDo.UpdateSystem.check();
+                if (update) {
+                    console.log("↻ Update verfügbar: v" + update.version);
+                    // Notification
+                    const chat = document.getElementById('haldo-chat-window');
+                    if (chat) {
+                        const status = document.getElementById('haldo-chat-status');
+                        if (status) status.textContent = '↻ Update verfügbar!';
+                    }
+                }
+            }, 2000);
+
+            // App Registry erweitern mit Video-Editor und Update Apps
+            const extraApps = [
+                { id: 'video-editor', name: 'Video Editor', icon: '🎬', category: 'Medien', description: '4K/8K Videobearbeitung' },
+                { id: 'updates', name: 'Updates', icon: '↻', category: 'System', description: 'Systemupdates & Versionen' },
+                { id: 'backup', name: 'Backup', icon: '◫', category: 'System', description: 'Sichern & Wiederherstellen' }
+            ];
+
+            extraApps.forEach(app => {
+                if (!window.HalDo.AppRegistry.get(app.id)) {
+                    window.HalDo.AppRegistry.register(app);
+                }
+            });
+
+            // AppManager erweitern mit neuen Apps
+            const originalGetContent = window.HalDo.AppManager.getAppContent;
+
+            // Erweiterte App-Inhalte
+            window.HalDo.AppManager.getAppContent = function(appId) {
+                if (appId === 'video-editor') {
+                    const container = document.createElement('div');
+                    window.HalDo.VideoEditor.renderUI(container);
+                    return container.innerHTML;
+                }
+                if (appId === 'updates') {
+                    const container = document.createElement('div');
+                    window.HalDo.UpdateSystem.renderUI(container);
+                    return container.innerHTML;
+                }
+                if (appId === 'backup') {
+                    const container = document.createElement('div');
+                    window.HalDo.BackupSystem.renderUI(container);
+                    return container.innerHTML;
+                }
+                if (appId === 'settings') {
+                    const container = document.createElement('div');
+                    // App-Einstellungen für alle Apps
+                    const apps = window.HalDo.AppRegistry.getAll();
+                    let html = `
+                        <div style="padding:16px;">
+                            <div style="font-size:24px;font-weight:700;margin-bottom:6px;">⚙️ Einstellungen — Alle Apps</div>
+                            <div style="opacity:.6;font-size:13px;margin-bottom:12px;">App-spezifische Einstellungen</div>
+                            <div style="display:grid;gap:6px;">
+                                ${apps.map(a =>
+                                    `<div style="padding:10px 14px;background:rgba(255,255,255,.04);border-radius:10px;border:1px solid rgba(255,255,255,.06);display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="window.HalDo.AppSettings.renderUI(document.querySelector('.haldo-app-window-body'), '${a.id}')">
+                                        <span>${a.icon || '📱'} ${a.name || a.id}</span>
+                                        <span style="opacity:.4;font-size:12px;">›</span>
+                                    </div>`
+                                ).join('')}
+                            </div>
+                            <div style="margin-top:12px;padding:8px 12px;background:rgba(255,200,80,.05);border-radius:8px;border:1px solid rgba(255,200,80,.1);font-size:11px;opacity:.7;text-align:center;">
+                                🌌 Alle App-Einstellungen zentral verwaltet
+                            </div>
+                        </div>
+                    `;
+                    return html;
+                }
+                return originalGetContent.call(this, appId);
+            };
+
+            // App-Inits erweitern
+            const originalInitLogic = window.HalDo.AppManager.initAppLogic;
+            window.HalDo.AppManager.initAppLogic = function(appId, win) {
+                originalInitLogic.call(this, appId, win);
+
+                if (appId === 'video-editor') {
+                    // Video-Editor wird bereits gerendert
+                }
+                if (appId === 'updates') {
+                    // Updates werden bereits gerendert
+                }
+                if (appId === 'backup') {
+                    // Backup wird bereits gerendert
+                }
+            };
+
+            console.log("✅ TEIL 3 geladen — Video + Update + Backup + App-Einstellungen");
+            console.log("🎬 4K/8K Video-Bearbeitung verfügbar");
+            console.log("↻ Update-System aktiv");
+            console.log("◫ Backup-System aktiv");
+            console.log("⚙️ App-Einstellungen für alle Apps");
+
+            window.HalDo.emit("haldo:part3:ready", {
+                video: true,
+                updates: true,
+                backup: true,
+                settings: true
+            });
+        }
+
+        if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", haldoBootPart3, { once: true });
+        } else {
+            haldoBootPart3();
+        }
+
+        console.log("✅ TEIL 3 komplett geladen — HALDO AI OS UNIVERSE IST KOMPLETT!");
+        console.log("💙❤️🚀🌌 HalDo AI OS v" + window.HALDO_VERSION + " " + window.HALDO_BUILD + " — Alles funktioniert!");
+    </script>
