@@ -7,13 +7,11 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="HalDo AI OS">
-    <meta name="description" content="HalDo AI OS — Cosmic AI Operating System">
     <title>HalDo AI OS</title>
 
     <style>
         /* =========================================================
-           HALDO AI OS — MASTER STYLES (ALLE 67 PARTS)
+           HALDO AI OS — MASTER STYLES
            ========================================================= */
 
         * {
@@ -96,8 +94,6 @@
         .haldo-star {
             position: absolute;
             display: block;
-            width: 2px;
-            height: 2px;
             border-radius: 50%;
             background: rgba(255,255,255,.95);
             box-shadow: 0 0 5px rgba(255,255,255,.9);
@@ -156,17 +152,12 @@
             50% { opacity: .85; }
         }
 
-        /* =========================================================
-           PLANETS
-           ========================================================= */
-
         .haldo-planet {
             position: absolute;
             left: 50%;
             top: -7px;
             width: 14px;
             height: 14px;
-            margin: 0;
             border-radius: 50%;
             transform: translateX(-50%);
             pointer-events: auto;
@@ -184,10 +175,6 @@
             background: radial-gradient(circle at 35% 30%, #dff8ff, #4ca9ff 20%, #1267bd 48%, #06325e 70%, #020a18 100%);
             box-shadow: 0 0 14px rgba(50,160,255,.95);
         }
-
-        /* =========================================================
-           MOON
-           ========================================================= */
 
         .haldo-moon-orbit {
             position: absolute;
@@ -219,36 +206,37 @@
         }
 
         /* =========================================================
-           SUN
+           SUN — LEBENDIGES HALDO LOGO
            ========================================================= */
 
         .haldo-sun-container {
             position: absolute;
             left: 50%;
             top: 50%;
-            width: clamp(190px, 24vw, 310px);
-            height: clamp(190px, 24vw, 310px);
+            width: clamp(200px, 26vw, 340px);
+            height: clamp(200px, 26vw, 340px);
             transform: translate(-50%, -50%);
             display: flex;
             align-items: center;
             justify-content: center;
             z-index: 20;
             pointer-events: auto;
+            cursor: pointer;
         }
 
-        .haldo-solar-aura {
+        .haldo-sun-core {
             position: absolute;
-            inset: -25%;
+            width: 100%;
+            height: 100%;
             border-radius: 50%;
-            background: radial-gradient(circle, rgba(255,240,130,.28), rgba(255,174,35,.13) 38%, rgba(255,100,30,.05) 58%, transparent 72%);
-            filter: blur(18px);
-            animation: haldo-solar-breathe 5s ease-in-out infinite;
-            pointer-events: none;
+            background: radial-gradient(circle at 38% 32%, #fffde2 0%, #fff7a0 14%, #ffd54b 35%, #ff9f1c 62%, #e85b16 84%, #7b1c0d 100%);
+            box-shadow: 0 0 25px rgba(255,220,70,.95), 0 0 70px rgba(255,165,40,.72), 0 0 130px rgba(255,100,20,.38);
+            animation: haldo-sun-breathe 4s ease-in-out infinite;
         }
 
-        @keyframes haldo-solar-breathe {
-            0%, 100% { transform: scale(.94); opacity: .72; }
-            50% { transform: scale(1.08); opacity: 1; }
+        @keyframes haldo-sun-breathe {
+            0%, 100% { transform: scale(.98); }
+            50% { transform: scale(1.035); }
         }
 
         .haldo-solar-rays {
@@ -266,198 +254,341 @@
             to { transform: rotate(360deg); }
         }
 
-        .haldo-sun-button {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            background: transparent;
-            z-index: 5;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            pointer-events: auto;
-        }
-
-        .haldo-sun-core {
+        .haldo-solar-aura {
             position: absolute;
-            width: 66%;
-            height: 66%;
+            inset: -25%;
             border-radius: 50%;
-            background: radial-gradient(circle at 38% 32%, #fffde2 0%, #fff7a0 14%, #ffd54b 35%, #ff9f1c 62%, #e85b16 84%, #7b1c0d 100%);
-            box-shadow: 0 0 25px rgba(255,220,70,.95), 0 0 70px rgba(255,165,40,.72), 0 0 130px rgba(255,100,20,.38);
-            animation: haldo-sun-breathe 4s ease-in-out infinite;
+            background: radial-gradient(circle, rgba(255,240,130,.28), rgba(255,174,35,.13) 38%, rgba(255,100,30,.05) 58%, transparent 72%);
+            filter: blur(18px);
+            animation: haldo-solar-breathe 5s ease-in-out infinite;
+            pointer-events: none;
         }
 
-        @keyframes haldo-sun-breathe {
-            0%, 100% { transform: scale(.98); }
-            50% { transform: scale(1.035); }
+        @keyframes haldo-solar-breathe {
+            0%, 100% { transform: scale(.94); opacity: .72; }
+            50% { transform: scale(1.08); opacity: 1; }
         }
 
         /* =========================================================
-           HALDO AI AVATAR (im Sonnen-Zentrum)
+           LEBENDIGES HALDO LOGO IM SUN-ZENTRUM
            ========================================================= */
 
-        .haldo-avatar {
+        .haldo-living-logo {
             position: absolute;
             left: 50%;
             top: 50%;
-            width: 56%;
-            height: 56%;
+            width: 52%;
+            height: 52%;
             transform: translate(-50%, -50%);
             z-index: 30;
+            border-radius: 50%;
+            pointer-events: none;
             display: flex;
             align-items: center;
             justify-content: center;
-            pointer-events: auto;
-            border-radius: 50%;
         }
 
-        .haldo-avatar-aura {
+        .haldo-living-logo .logo-aura {
             position: absolute;
-            inset: -16%;
+            inset: -10%;
             border-radius: 50%;
-            background: radial-gradient(circle, rgba(255,255,255,.24), rgba(255,220,100,.16) 35%, rgba(100,190,255,.09) 55%, transparent 75%);
-            filter: blur(9px);
-            animation: haldo-avatar-aura 4s ease-in-out infinite;
+            background: radial-gradient(circle, rgba(255,255,255,.3), rgba(255,220,100,.2) 35%, rgba(100,190,255,.1) 55%, transparent 75%);
+            filter: blur(10px);
+            animation: haldo-logo-aura 3.5s ease-in-out infinite;
         }
 
-        @keyframes haldo-avatar-aura {
-            0%, 100% { opacity: .65; transform: scale(.95); }
+        @keyframes haldo-logo-aura {
+            0%, 100% { opacity: .5; transform: scale(.92); }
             50% { opacity: 1; transform: scale(1.08); }
         }
 
-        .haldo-avatar-logo {
+        .haldo-living-logo img {
             position: relative;
             z-index: 4;
-            width: 76%;
-            height: 76%;
+            width: 85%;
+            height: 85%;
             object-fit: contain;
-            object-position: center;
             user-select: none;
             -webkit-user-drag: none;
             filter: drop-shadow(0 0 8px rgba(255,255,255,.85)) drop-shadow(0 0 22px rgba(255,205,70,.72));
-            animation: haldo-avatar-float 4.8s ease-in-out infinite;
+            animation: haldo-logo-living 4.2s ease-in-out infinite;
+            border-radius: 50%;
         }
 
-        @keyframes haldo-avatar-float {
-            0%, 100% { transform: translateY(0) scale(1); }
-            50% { transform: translateY(-5px) scale(1.025); }
+        @keyframes haldo-logo-living {
+            0%, 100% {
+                transform: translateY(0) scale(1) rotate(0deg);
+            }
+            25% {
+                transform: translateY(-3px) scale(1.015) rotate(0.5deg);
+            }
+            50% {
+                transform: translateY(0) scale(1.025) rotate(0deg);
+            }
+            75% {
+                transform: translateY(2px) scale(1.01) rotate(-0.5deg);
+            }
         }
 
-        /* =========================================================
-           AVATAR STATES (im Sonnen-Zentrum)
-           ========================================================= */
-
-        .haldo-avatar[data-state="listening"] .haldo-avatar-logo {
-            animation: haldo-avatar-listening 1.8s ease-in-out infinite;
+        /* Hände (als dekorative Elemente) */
+        .haldo-living-logo .hand {
+            position: absolute;
+            width: 22%;
+            height: 22%;
+            border-radius: 50%;
+            background: radial-gradient(circle at 40% 35%, rgba(255,255,255,.5), rgba(255,200,100,.2) 50%, transparent 70%);
+            filter: blur(1px);
+            opacity: .6;
+            animation: haldo-hand-move 3.8s ease-in-out infinite;
         }
 
-        .haldo-avatar[data-state="thinking"] .haldo-avatar-logo {
-            animation: haldo-avatar-thinking 2.4s ease-in-out infinite;
+        .haldo-living-logo .hand-left {
+            left: -8%;
+            top: 30%;
+            animation-delay: 0s;
         }
 
-        .haldo-avatar[data-state="speaking"] .haldo-avatar-logo {
-            animation: haldo-avatar-speaking .42s ease-in-out infinite;
+        .haldo-living-logo .hand-right {
+            right: -8%;
+            top: 30%;
+            animation-delay: 1.9s;
         }
 
-        .haldo-avatar[data-state="happy"] .haldo-avatar-logo {
-            animation: haldo-avatar-happy 1.2s ease-in-out infinite;
+        @keyframes haldo-hand-move {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(0, -8px) scale(1.1); }
         }
 
-        @keyframes haldo-avatar-listening {
+        /* Atem-Animation für den gesamten Logo-Bereich */
+        .haldo-living-logo[data-state="listening"] img {
+            animation: haldo-logo-listening 1.6s ease-in-out infinite;
+        }
+
+        .haldo-living-logo[data-state="thinking"] img {
+            animation: haldo-logo-thinking 2.2s ease-in-out infinite;
+        }
+
+        .haldo-living-logo[data-state="speaking"] img {
+            animation: haldo-logo-speaking .6s ease-in-out infinite;
+        }
+
+        .haldo-living-logo[data-state="happy"] img {
+            animation: haldo-logo-happy .7s ease-out 1;
+        }
+
+        @keyframes haldo-logo-listening {
             0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.07); }
+            50% { transform: scale(1.06); }
         }
 
-        @keyframes haldo-avatar-thinking {
+        @keyframes haldo-logo-thinking {
             0%, 100% { transform: translateY(0) rotate(0deg); }
             50% { transform: translateY(-4px) rotate(2deg); }
         }
 
-        @keyframes haldo-avatar-speaking {
+        @keyframes haldo-logo-speaking {
             0%, 100% { transform: scaleY(1); }
-            50% { transform: scaleY(1.035); }
+            50% { transform: scaleY(1.045); }
         }
 
-        @keyframes haldo-avatar-happy {
-            0%, 100% { transform: scale(1) rotate(0deg); }
-            50% { transform: scale(1.08) rotate(-2deg); }
+        @keyframes haldo-logo-happy {
+            0% { transform: scale(.92); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
         }
 
         /* =========================================================
-           LIVING HALDO AVATAR (unten links)
+           MENÜ BUTTONS — LINKS OBEN + UNTEN
            ========================================================= */
 
-        .haldo-living-avatar {
+        .haldo-menu-button {
             position: fixed;
-            z-index: 8000;
-            width: clamp(80px, 12vw, 150px);
-            height: clamp(80px, 12vw, 150px);
-            bottom: 20px;
-            left: 20px;
-            pointer-events: auto;
+            z-index: 9500;
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            background: rgba(8,12,30,0.8);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255,255,255,.1);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             cursor: pointer;
-            opacity: 0;
-            transform: scale(0.8);
-            transition: opacity 0.5s ease, transform 0.5s ease;
+            font-size: 20px;
+            transition: all .25s ease;
+            box-shadow: 0 4px 20px rgba(0,0,0,.3);
         }
 
-        .haldo-living-avatar.visible {
-            opacity: 1;
-            transform: scale(1);
+        .haldo-menu-button:hover {
+            transform: scale(1.05);
+            background: rgba(255,255,255,.12);
+            border-color: rgba(255,200,80,.3);
         }
 
-        .haldo-living-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            filter: drop-shadow(0 0 20px rgba(255,210,80,0.4));
-            animation: haldoAvatarPulse 3s ease-in-out infinite;
+        .haldo-menu-button img {
+            width: 30px;
+            height: 30px;
             border-radius: 50%;
-            background: radial-gradient(circle at 50% 50%, rgba(255,200,80,0.15), transparent 70%);
+            object-fit: contain;
         }
 
-        @keyframes haldoAvatarPulse {
-            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 20px rgba(255,210,80,0.4)); }
-            50% { transform: scale(1.05); filter: drop-shadow(0 0 35px rgba(255,210,80,0.7)); }
+        .haldo-menu-button.system {
+            top: 16px;
+            left: 16px;
         }
 
-        .haldo-living-avatar[data-state="listening"] img {
-            animation: haldoAvatarListening 1.2s ease-in-out infinite;
+        .haldo-menu-button.apps {
+            bottom: 16px;
+            left: 50%;
+            transform: translateX(-50%);
         }
 
-        @keyframes haldoAvatarListening {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.08); }
+        .haldo-menu-button.apps:hover {
+            transform: translateX(-50%) scale(1.05);
         }
 
-        .haldo-living-avatar[data-state="thinking"] img {
-            animation: haldoAvatarThinking 1.8s ease-in-out infinite;
+        /* =========================================================
+           MENÜ PANELS
+           ========================================================= */
+
+        .haldo-menu-panel {
+            position: fixed;
+            z-index: 9600;
+            width: min(380px, calc(100vw - 24px));
+            max-height: min(70vh, calc(100dvh - 100px));
+            overflow-y: auto;
+            padding: 16px;
+            border-radius: 20px;
+            background: rgba(8,12,30,0.92);
+            backdrop-filter: blur(24px);
+            border: 1px solid rgba(255,255,255,.08);
+            box-shadow: 0 20px 60px rgba(0,0,0,.5);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(12px) scale(.96);
+            transition: all .3s ease;
+            color: #fff;
         }
 
-        @keyframes haldoAvatarThinking {
-            0%, 100% { transform: translateY(0) rotate(0deg); }
-            50% { transform: translateY(-5px) rotate(2deg); }
+        .haldo-menu-panel.open {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0) scale(1);
         }
 
-        .haldo-living-avatar[data-state="speaking"] img {
-            animation: haldoAvatarSpeaking 0.6s ease-in-out infinite;
+        .haldo-menu-panel.system-panel {
+            top: 72px;
+            left: 16px;
         }
 
-        @keyframes haldoAvatarSpeaking {
-            0%, 100% { transform: scaleY(1); }
-            50% { transform: scaleY(1.06); }
+        .haldo-menu-panel.apps-panel {
+            bottom: 76px;
+            left: 50%;
+            transform: translateX(-50%) translateY(12px) scale(.96);
         }
 
-        .haldo-living-avatar[data-state="happy"] img {
-            animation: haldoAvatarHappy 0.8s ease-out 1;
+        .haldo-menu-panel.apps-panel.open {
+            transform: translateX(-50%) translateY(0) scale(1);
         }
 
-        @keyframes haldoAvatarHappy {
-            0% { transform: scale(0.9); }
-            50% { transform: scale(1.12); }
-            100% { transform: scale(1); }
+        .haldo-menu-panel::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .haldo-menu-panel::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,.15);
+            border-radius: 10px;
+        }
+
+        .haldo-menu-panel-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255,255,255,.07);
+            margin-bottom: 12px;
+        }
+
+        .haldo-menu-panel-header img {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: contain;
+        }
+
+        .haldo-menu-panel-header .title {
+            font-size: 16px;
+            font-weight: 700;
+            flex: 1;
+        }
+
+        .haldo-menu-panel-header .close-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(255,255,255,.06);
+            color: #fff;
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .haldo-menu-panel-header .close-btn:hover {
+            background: rgba(255,80,80,.2);
+        }
+
+        /* =========================================================
+           MENÜ ITEMS
+           ========================================================= */
+
+        .haldo-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: 12px;
+            background: rgba(255,255,255,.03);
+            border: 1px solid rgba(255,255,255,.04);
+            color: rgba(255,255,255,.85);
+            cursor: pointer;
+            transition: all .2s ease;
+            margin-bottom: 6px;
+        }
+
+        .haldo-menu-item:hover {
+            background: rgba(255,255,255,.08);
+            border-color: rgba(255,200,80,.15);
+            transform: translateX(3px);
+        }
+
+        .haldo-menu-item .icon {
+            font-size: 20px;
+            width: 32px;
+            text-align: center;
+        }
+
+        .haldo-menu-item .info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .haldo-menu-item .info .name {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .haldo-menu-item .info .desc {
+            font-size: 10px;
+            opacity: .5;
+            margin-top: 2px;
+        }
+
+        .haldo-menu-item .badge {
+            font-size: 11px;
+            opacity: .4;
         }
 
         /* =========================================================
@@ -467,8 +598,8 @@
         .haldo-ai-chat-window {
             position: fixed;
             z-index: 9000;
-            width: min(520px, calc(100vw - 24px));
-            height: min(600px, calc(100vh - 40px));
+            width: min(540px, calc(100vw - 24px));
+            height: min(620px, calc(100vh - 40px));
             right: 18px;
             bottom: 18px;
             display: flex;
@@ -484,7 +615,6 @@
             visibility: hidden;
             transform: translateY(18px) scale(.97);
             transition: opacity .25s ease, transform .25s ease, visibility .25s;
-            font-family: Inter, system-ui, -apple-system, sans-serif;
             color: #fff;
         }
 
@@ -520,12 +650,12 @@
             font-weight: 700;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
         }
 
-        .haldo-chat-title .logo {
-            width: 28px;
-            height: 28px;
+        .haldo-chat-title img {
+            width: 30px;
+            height: 30px;
             border-radius: 50%;
             object-fit: contain;
         }
@@ -580,7 +710,7 @@
         }
 
         .haldo-chat-messages::-webkit-scrollbar-thumb {
-            background: rgba(255,255,255,.2);
+            background: rgba(255,255,255,.15);
             border-radius: 10px;
         }
 
@@ -699,74 +829,14 @@
         }
 
         /* =========================================================
-           APP LAUNCHER
-           ========================================================= */
-
-        .haldo-app-launcher {
-            position: fixed;
-            z-index: 9500;
-            bottom: 80px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 12px;
-            padding: 14px 20px;
-            background: rgba(8,12,30,0.85);
-            backdrop-filter: blur(20px);
-            border-radius: 24px;
-            border: 1px solid rgba(255,255,255,.1);
-            box-shadow: 0 10px 40px rgba(0,0,0,.4);
-            opacity: 0;
-            transform: translateX(-50%) translateY(20px);
-            transition: opacity .3s ease, transform .3s ease;
-            pointer-events: none;
-        }
-
-        .haldo-app-launcher.open {
-            opacity: 1;
-            transform: translateX(-50%) translateY(0);
-            pointer-events: auto;
-        }
-
-        .haldo-app-launcher-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-            padding: 8px 12px;
-            border-radius: 14px;
-            background: rgba(255,255,255,.05);
-            border: 1px solid rgba(255,255,255,.06);
-            color: #fff;
-            cursor: pointer;
-            transition: all .2s ease;
-            min-width: 60px;
-        }
-
-        .haldo-app-launcher-item:hover {
-            background: rgba(255,255,255,.12);
-            transform: translateY(-3px);
-            border-color: rgba(255,200,80,.2);
-        }
-
-        .haldo-app-launcher-item .icon {
-            font-size: 24px;
-        }
-
-        .haldo-app-launcher-item .label {
-            font-size: 10px;
-            opacity: .7;
-        }
-
-        /* =========================================================
            APP WINDOWS
            ========================================================= */
 
         .haldo-app-window {
             position: fixed;
             z-index: 9999;
-            width: min(480px, 92vw);
-            max-height: 70vh;
+            width: min(500px, 92vw);
+            max-height: 75vh;
             left: 50%;
             top: 50%;
             transform: translate(-50%, -50%);
@@ -777,10 +847,10 @@
             box-shadow: 0 30px 80px rgba(0,0,0,.6);
             overflow: auto;
             color: #fff;
-            animation: haldoWindowIn .25s ease-out;
+            animation: haldoAppWindowIn .25s ease-out;
         }
 
-        @keyframes haldoWindowIn {
+        @keyframes haldoAppWindowIn {
             from { opacity: 0; transform: translate(-50%, -45%) scale(.96); }
             to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
         }
@@ -796,6 +866,16 @@
         .haldo-app-window-header .title {
             font-weight: 700;
             font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .haldo-app-window-header .title img {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            object-fit: contain;
         }
 
         .haldo-app-window-close {
@@ -829,6 +909,13 @@
             .haldo-orbit-system { transform: translate(-50%, -50%) scale(.72); }
             .haldo-sun-container { width: 190px; height: 190px; }
 
+            .haldo-menu-button { width: 44px; height: 44px; font-size: 18px; }
+            .haldo-menu-button.system { top: 12px; left: 12px; }
+            .haldo-menu-button.apps { bottom: 12px; }
+
+            .haldo-menu-panel.system-panel { top: 64px; left: 12px; width: calc(100vw - 24px); }
+            .haldo-menu-panel.apps-panel { bottom: 68px; width: calc(100vw - 24px); }
+
             .haldo-ai-chat-window {
                 right: 8px;
                 bottom: 8px;
@@ -838,26 +925,10 @@
             }
             .haldo-chat-message { max-width: 90%; }
 
-            .haldo-app-launcher {
-                bottom: 70px;
-                padding: 10px 14px;
-                gap: 8px;
-                flex-wrap: wrap;
-                justify-content: center;
-                max-width: 90vw;
-            }
-            .haldo-app-launcher-item {
-                min-width: 50px;
-                padding: 6px 10px;
-            }
-            .haldo-app-launcher-item .icon { font-size: 20px; }
-            .haldo-app-launcher-item .label { font-size: 8px; }
-
-            .haldo-living-avatar {
-                width: clamp(60px, 15vw, 90px);
-                height: clamp(60px, 15vw, 90px);
-                bottom: 70px;
-                left: 10px;
+            .haldo-app-window {
+                width: calc(100vw - 16px);
+                max-height: 80vh;
+                border-radius: 18px;
             }
         }
 
@@ -871,6 +942,9 @@
             }
             .haldo-sun-container { width: 145px; height: 145px; }
             .haldo-cosmic-center { width: 100vw; height: 100vw; }
+            .haldo-menu-panel { width: calc(100vw - 12px); left: 6px; right: 6px; }
+            .haldo-menu-panel.system-panel { top: 60px; }
+            .haldo-menu-panel.apps-panel { bottom: 62px; }
         }
 
         @media (prefers-reduced-motion: reduce) {
@@ -915,17 +989,23 @@
 
                 </div>
 
-                <div class="haldo-sun-container">
+                <!-- =============================================
+                SUN MIT LEBENDIGEM HALDO LOGO
+                ============================================= -->
+
+                <div class="haldo-sun-container" id="haldo-sun-container">
                     <div class="haldo-solar-aura" aria-hidden="true"></div>
                     <div class="haldo-solar-rays" aria-hidden="true"></div>
 
-                    <button class="haldo-sun-button" id="haldo-sun-button" type="button" aria-label="HalDo AI öffnen">
-                        <span class="haldo-sun-core"></span>
-                        <span class="haldo-avatar" id="haldo-avatar" data-state="idle">
-                            <span class="haldo-avatar-aura"></span>
-                            <img class="haldo-avatar-logo" src="assets/logo/logo.png" alt="HalDo AI">
-                        </span>
-                    </button>
+                    <div class="haldo-sun-core"></div>
+
+                    <!-- LEBENDIGES HALDO LOGO -->
+                    <div class="haldo-living-logo" id="haldo-living-logo" data-state="idle">
+                        <div class="logo-aura"></div>
+                        <span class="hand hand-left"></span>
+                        <span class="hand hand-right"></span>
+                        <img src="assets/logo/logo.png" alt="HalDo AI" draggable="false" id="haldo-logo-img">
+                    </div>
                 </div>
 
             </section>
@@ -933,11 +1013,165 @@
     </div>
 
     <!-- =========================================================
-    LIVING HALDO AVATAR (unten links)
+    MENÜ BUTTONS
     ========================================================= -->
 
-    <div class="haldo-living-avatar" id="haldo-living-avatar" data-state="idle">
-        <img src="assets/logo/logo.png" alt="HalDo AI" draggable="false">
+    <!-- System-Menü Button (links oben) -->
+    <button class="haldo-menu-button system" id="haldo-system-menu-btn" aria-label="Systemmenü">
+        <img src="assets/logo/logo.png" alt="HalDo">
+    </button>
+
+    <!-- Apps-Menü Button (unten mitte) -->
+    <button class="haldo-menu-button apps" id="haldo-apps-menu-btn" aria-label="Apps-Menü">
+        ▦
+    </button>
+
+    <!-- =========================================================
+    SYSTEM-MENÜ PANEL
+    ========================================================= -->
+
+    <div class="haldo-menu-panel system-panel" id="haldo-system-panel">
+        <div class="haldo-menu-panel-header">
+            <img src="assets/logo/logo.png" alt="HalDo">
+            <span class="title">⚙️ System</span>
+            <button class="close-btn" id="haldo-system-close">×</button>
+        </div>
+
+        <!-- System-Items -->
+        <div id="haldo-system-list">
+            <div class="haldo-menu-item" data-app="settings">
+                <span class="icon">⚙️</span>
+                <div class="info"><div class="name">Einstellungen</div><div class="desc">System, Anzeige, Sprache, AI</div></div>
+            </div>
+            <div class="haldo-menu-item" data-app="language">
+                <span class="icon">🌐</span>
+                <div class="info"><div class="name">Sprache</div><div class="desc">Mehrsprachige Oberfläche</div></div>
+            </div>
+            <div class="haldo-menu-item" data-app="security">
+                <span class="icon">🛡️</span>
+                <div class="info"><div class="name">Sicherheit</div><div class="desc">Datenschutz & Berechtigungen</div></div>
+            </div>
+            <div class="haldo-menu-item" data-app="storage">
+                <span class="icon">💾</span>
+                <div class="info"><div class="name">Speicher</div><div class="desc">Speicherverwaltung & Daten</div></div>
+            </div>
+            <div class="haldo-menu-item" data-app="updates">
+                <span class="icon">↻</span>
+                <div class="info"><div class="name">Updates</div><div class="desc">Systemupdates & Versionen</div></div>
+            </div>
+            <div class="haldo-menu-item" data-app="backup">
+                <span class="icon">◫</span>
+                <div class="info"><div class="name">Backup</div><div class="desc">Sichern & Wiederherstellen</div></div>
+            </div>
+            <div class="haldo-menu-item" data-app="diagnostics">
+                <span class="icon">⌁</span>
+                <div class="info"><div class="name">Diagnose</div><div class="desc">Systemstatus & Fehler</div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- =========================================================
+    APPS-MENÜ PANEL
+    ========================================================= -->
+
+    <div class="haldo-menu-panel apps-panel" id="haldo-apps-panel">
+        <div class="haldo-menu-panel-header">
+            <img src="assets/logo/logo.png" alt="HalDo">
+            <span class="title">📱 Alle Apps</span>
+            <button class="close-btn" id="haldo-apps-close">×</button>
+        </div>
+
+        <!-- Apps-Items -->
+        <div id="haldo-apps-list">
+            <div class="haldo-menu-item" data-app="haldo-ai">
+                <span class="icon">✦</span>
+                <div class="info"><div class="name">HalDo AI</div><div class="desc">Intelligente Assistenz</div></div>
+            </div>
+            <div class="haldo-menu-item" data-app="chat">
+                <span class="icon">💬</span>
+                <div class="info"><div class="name">Chat</div><div class="desc">Unterhaltung mit HalDo AI</div></div>
+            </div>
+            <div class="haldo-menu-item" data-app="browser">
+                <span class="icon">◎</span>
+                <div class="info"><div class="name">Browser</div><div class="desc">Webseiten & Internet</div></div>
+            </div>
+            <div class="haldo-menu-item" data-app="calendar">
+                <span class="icon">📅</span>
+                <div class="info"><div class="name">Kalender</div><div class="desc">Termine & Planung</div></div>
+            </div>
+            <div class="haldo-menu-item" data-app="notes">
+                <span class="icon">✎</span>
+                <div class="info"><div class="name">Notizen</div><div class="desc">Texte & Ideen</div></div>
+            </div>
+            <div class="haldo-menu-item" data-app="calculator">
+                <span class="icon">🧮</span>
+                <div class="info"><div class="name">Rechner</div><div class="desc">Berechnungen</div></div>
+            </div>
+            <div class="haldo-menu-item" data-app="weather">
+                <span class="icon">☀️</span>
+                <div class="info"><div class="name">Wetter</div><div class="desc">Wetterinformationen</div></div>
+            </div>
+            <div class="haldo-menu-item" data-app="gallery">
+                <span class="icon">🖼️</span>
+                <div class="info"><div class="name">Galerie</div><div class="desc">Bilder & Medien</div></div>
+            </div>
+            <div class="haldo-menu-item" data-app="music">
+                <span class="icon">🎵</span>
+                <div class="info"><div class="name">Musik</div><div class="desc">Musik & Klänge</div></div>
+            </div>
+            <div class="haldo-menu-item" data-app="video">
+                <span class="icon">▶️</span>
+                <div class="info"><div class="name">Video</div><div class="desc">Videos & Medien</div></div>
+            </div>
+            <div class="haldo-menu-item" data-app="mail">
+                <span class="icon">✉️</span>
+                <div class="info"><div class="name">Mail</div><div class="desc">Nachrichten & E-Mail</div></div>
+            </div>
+            <div class="haldo-menu-item" data-app="contacts">
+                <span class="icon">👤</span>
+                <div class="info"><div class="name">Kontakte</div><div class="desc">Adressbuch</div></div>
+            </div>
+            <div class="haldo-menu-item" data-app="messages">
+                <span class="icon">💬</span>
+                <div class="info"><div class="name">Nachrichten</div><div class="desc">Kommunikation</div></div>
+            </div>
+            <div class="haldo-menu-item" data-app="camera">
+                <span class="icon">📷</span>
+                <div class="info"><div class="name">Kamera</div><div class="desc">Fotos & Aufnahmen</div></div>
+            </div>
+            <div class="haldo-menu-item" data-app="clock">
+                <span class="icon">🕐</span>
+                <div class="info"><div class="name">Uhr</div><div class="desc">Zeit & Timer</div></div>
+            </div>
+            <div class="haldo-menu-item" data-app="translate">
+                <span class="icon">🌍</span>
+                <div class="info"><div class="name">Übersetzer</div><div class="desc">Mehrsprachige Übersetzungen</div></div>
+            </div>
+            <div class="haldo-menu-item" data-app="keyboard">
+                <span class="icon">⌨️</span>
+                <div class="info"><div class="name">Êzîdî Keyboard</div><div class="desc">Tastatur & Sprachen</div></div>
+            </div>
+            <div class="haldo-menu-item" data-app="settings">
+                <span class="icon">⚙️</span>
+                <div class="info"><div class="name">Einstellungen</div><div class="desc">System & Geräte</div></div>
+            </div>
+            <div class="haldo-menu-item" data-app="storage">
+                <span class="icon">💾</span>
+                <div class="info"><div class="name">Speicher</div><div class="desc">Daten & Speicher</div></div>
+            </div>
+            <div class="haldo-menu-item" data-app="security">
+                <span class="icon">🛡️</span>
+                <div class="info"><div class="name">Sicherheit</div><div class="desc">Datenschutz</div></div>
+            </div>
+            <div class="haldo-menu-item" data-app="updates">
+                <span class="icon">↻</span>
+                <div class="info"><div class="name">Updates</div><div class="desc">Systemupdates</div></div>
+            </div>
+            <div class="haldo-menu-item" data-app="cosmic-world">
+                <span class="icon">🌌</span>
+                <div class="info"><div class="name">Cosmic World</div><div class="desc">Sonne & Planeten</div></div>
+            </div>
+        </div>
     </div>
 
     <!-- =========================================================
@@ -948,7 +1182,7 @@
         <header class="haldo-chat-header">
             <div>
                 <div class="haldo-chat-title">
-                    <img class="logo" src="assets/logo/logo.png" alt="HalDo">
+                    <img src="assets/logo/logo.png" alt="HalDo">
                     HalDo AI
                 </div>
                 <div class="haldo-chat-subtitle" id="haldo-chat-status">Bereit</div>
@@ -976,34 +1210,7 @@
     </div>
 
     <!-- =========================================================
-    APP LAUNCHER
-    ========================================================= -->
-
-    <div class="haldo-app-launcher" id="haldo-app-launcher">
-        <button class="haldo-app-launcher-item" data-app="chat">
-            <span class="icon">💬</span>
-            <span class="label">Chat</span>
-        </button>
-        <button class="haldo-app-launcher-item" data-app="calculator">
-            <span class="icon">🧮</span>
-            <span class="label">Rechner</span>
-        </button>
-        <button class="haldo-app-launcher-item" data-app="notes">
-            <span class="icon">📝</span>
-            <span class="label">Notizen</span>
-        </button>
-        <button class="haldo-app-launcher-item" data-app="settings">
-            <span class="icon">⚙️</span>
-            <span class="label">Einstellungen</span>
-        </button>
-        <button class="haldo-app-launcher-item" data-app="cosmic">
-            <span class="icon">🌌</span>
-            <span class="label">Cosmic</span>
-        </button>
-    </div>
-
-    <!-- =========================================================
-    JAVASCRIPT — ALLE 67 PARTS ZUSAMMENGEFÜHRT
+    JAVASCRIPT — ALLES IN EINER DATEI
     ========================================================= -->
 
     <script>
@@ -1023,8 +1230,7 @@
         avatar: "idle",
         language: "de",
         activeApp: null,
-        activeWindow: null,
-        ai: { listening: false, thinking: false, speaking: false }
+        activeWindow: null
     };
 
     // =========================================================
@@ -1043,70 +1249,13 @@
     };
 
     // =========================================================
-    // 3. AVATAR CONTROLLER (im Sonnen-Zentrum)
-    // =========================================================
-
-    window.HalDo.Avatar = {
-        element: null,
-
-        init() {
-            this.element = document.getElementById("haldo-avatar");
-            if (!this.element) return;
-            this.setState("idle");
-        },
-
-        setState(state) {
-            if (!this.element) return;
-            this.element.dataset.state = state;
-            window.HalDo.state.avatar = state;
-            window.HalDo.emit("avatar:state", { state });
-        },
-
-        idle() { this.setState("idle"); },
-        listening() { this.setState("listening"); },
-        thinking() { this.setState("thinking"); },
-        speaking() { this.setState("speaking"); },
-        happy() { this.setState("happy"); }
-    };
-
-    // =========================================================
-    // 4. AI OPEN REQUEST
-    // =========================================================
-
-    window.HalDo.openAI = function() {
-        window.HalDo.Avatar.happy();
-        window.HalDo.emit("ai:open", { source: "cosmic-sun" });
-        if (window.HalDo.Chat) window.HalDo.Chat.open();
-    };
-
-    // =========================================================
-    // 5. SUN INTERACTION
-    // =========================================================
-
-    const sunButton = document.getElementById("haldo-sun-button");
-    if (sunButton) {
-        sunButton.addEventListener("click", function() {
-            window.HalDo.openAI();
-        });
-    }
-
-    // =========================================================
-    // 6. AI EVENT CONNECTION
-    // =========================================================
-
-    window.HalDo.on("ai:listening", () => window.HalDo.Avatar.listening());
-    window.HalDo.on("ai:thinking", () => window.HalDo.Avatar.thinking());
-    window.HalDo.on("ai:speaking", () => window.HalDo.Avatar.speaking());
-    window.HalDo.on("ai:idle", () => window.HalDo.Avatar.idle());
-    window.HalDo.on("ai:happy", () => window.HalDo.Avatar.happy());
-
-    // =========================================================
-    // 7. STARS GENERATOR
+    // 3. STARS GENERATOR
     // =========================================================
 
     function generateStars() {
         const stars = document.getElementById("haldo-stars");
         if (!stars) return;
+        stars.innerHTML = "";
         for (let i = 0; i < 200; i++) {
             const star = document.createElement("span");
             star.className = "haldo-star";
@@ -1122,55 +1271,46 @@
     }
 
     // =========================================================
-    // 8. BOOT
+    // 4. LEBENDIGES HALDO LOGO CONTROLLER
     // =========================================================
 
-    function haldoMasterBoot() {
-        window.HalDo.Avatar.init();
-        window.HalDo.state.booted = true;
-        generateStars();
-        window.HalDo.emit("haldo:booted", { version: window.HalDo.OS.version, build: window.HalDo.OS.build });
-    }
-
-    if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", haldoMasterBoot, { once: true });
-    } else {
-        haldoMasterBoot();
-    }
-
-    // =========================================================
-    // 9. LIVING AVATAR CONTROLLER (unten links)
-    // =========================================================
-
-    window.HalDo.LivingAvatar = {
+    window.HalDo.LivingLogo = {
         element: null,
+        img: null,
         state: "idle",
 
         init() {
-            this.element = document.getElementById("haldo-living-avatar");
-            if (!this.element) return;
-            setTimeout(() => this.element.classList.add("visible"), 500);
+            this.element = document.getElementById("haldo-living-logo");
+            this.img = document.getElementById("haldo-logo-img");
+            if (!this.element || !this.img) return;
 
-            this.element.addEventListener("click", () => {
-                if (window.HalDo.Chat) window.HalDo.Chat.open();
-                this.react("happy", 800);
-            });
+            // Klick auf Sonne/Logo öffnet Chat
+            const container = document.getElementById("haldo-sun-container");
+            if (container) {
+                container.addEventListener("click", () => {
+                    this.react("happy", 600);
+                    if (window.HalDo.Chat) window.HalDo.Chat.open();
+                    window.HalDo.emit("ai:open", { source: "sun" });
+                });
+            }
 
-            // Connect to chat events
-            document.addEventListener("haldo:ai:open", () => this.react("happy", 600));
-            document.addEventListener("haldo:chat:open", () => this.react("happy", 600));
+            this.setState("idle");
         },
 
         setState(state) {
             this.state = state;
-            if (this.element) this.element.dataset.state = state;
-            if (window.HalDo.Avatar) window.HalDo.Avatar.setState(state);
+            if (this.element) {
+                this.element.dataset.state = state;
+            }
+            window.HalDo.emit("avatar:state", { state });
         },
 
         react(state, duration = 800) {
             this.setState(state);
             clearTimeout(this._timer);
-            this._timer = setTimeout(() => this.setState("idle"), duration);
+            this._timer = setTimeout(() => {
+                this.setState("idle");
+            }, duration);
         },
 
         listening() { this.setState("listening"); },
@@ -1181,7 +1321,88 @@
     };
 
     // =========================================================
-    // 10. CHAT CONTROLLER (ALLE FUNKTIONEN)
+    // 5. MENÜ CONTROLLER
+    // =========================================================
+
+    window.HalDo.Menu = {
+        systemBtn: null,
+        appsBtn: null,
+        systemPanel: null,
+        appsPanel: null,
+
+        init() {
+            this.systemBtn = document.getElementById("haldo-system-menu-btn");
+            this.appsBtn = document.getElementById("haldo-apps-menu-btn");
+            this.systemPanel = document.getElementById("haldo-system-panel");
+            this.appsPanel = document.getElementById("haldo-apps-panel");
+
+            // System-Menü
+            this.systemBtn.addEventListener("click", (e) => {
+                e.stopPropagation();
+                this.toggleSystem();
+            });
+
+            document.getElementById("haldo-system-close").addEventListener("click", () => {
+                this.closeAll();
+            });
+
+            // Apps-Menü
+            this.appsBtn.addEventListener("click", (e) => {
+                e.stopPropagation();
+                this.toggleApps();
+            });
+
+            document.getElementById("haldo-apps-close").addEventListener("click", () => {
+                this.closeAll();
+            });
+
+            // Menü-Items
+            document.querySelectorAll(".haldo-menu-item[data-app]").forEach(item => {
+                item.addEventListener("click", () => {
+                    const app = item.dataset.app;
+                    this.closeAll();
+                    window.HalDo.openApp(app);
+                });
+            });
+
+            // Schließen bei Klick außerhalb
+            document.addEventListener("click", (e) => {
+                if (!e.target.closest(".haldo-menu-panel") &&
+                    !e.target.closest(".haldo-menu-button")) {
+                    this.closeAll();
+                }
+            });
+
+            // Escape schließt Menüs
+            document.addEventListener("keydown", (e) => {
+                if (e.key === "Escape") this.closeAll();
+            });
+        },
+
+        toggleSystem() {
+            const isOpen = this.systemPanel.classList.contains("open");
+            this.closeAll();
+            if (!isOpen) {
+                this.systemPanel.classList.add("open");
+            }
+        },
+
+        toggleApps() {
+            const isOpen = this.appsPanel.classList.contains("open");
+            this.closeAll();
+            if (!isOpen) {
+                this.appsPanel.classList.add("open");
+            }
+        },
+
+        closeAll() {
+            this.systemPanel.classList.remove("open");
+            this.appsPanel.classList.remove("open");
+        }
+    };
+
+    // =========================================================
+    // 6. CHAT CONTROLLER (VOLLSTÄNDIG)
     // =========================================================
 
     window.HalDo.Chat = {
@@ -1243,6 +1464,9 @@
             document.addEventListener("haldo:ai:open", () => this.open());
 
             this.setupSpeech();
+
+            // Chat öffnen wenn AI Event kommt
+            window.HalDo.on("ai:open", () => this.open());
         },
 
         open() {
@@ -1250,7 +1474,7 @@
             this.window.removeAttribute("aria-hidden");
             this.open = true;
             setTimeout(() => this.input.focus(), 100);
-            window.HalDo.LivingAvatar.react("happy", 600);
+            if (window.HalDo.LivingLogo) window.HalDo.LivingLogo.react("happy", 600);
         },
 
         close() {
@@ -1283,15 +1507,13 @@
         showTyping() {
             this.typing.classList.add("active");
             this.setStatus("HalDo AI denkt …");
-            window.HalDo.LivingAvatar.thinking();
-            window.HalDo.Avatar.thinking();
+            if (window.HalDo.LivingLogo) window.HalDo.LivingLogo.thinking();
         },
 
         hideTyping() {
             this.typing.classList.remove("active");
             this.setStatus("Bereit");
-            window.HalDo.LivingAvatar.idle();
-            window.HalDo.Avatar.idle();
+            if (window.HalDo.LivingLogo) window.HalDo.LivingLogo.idle();
         },
 
         async send() {
@@ -1314,11 +1536,9 @@
                 this.history.push({ role: "ai", content: response });
                 this.saveHistory();
 
-                window.HalDo.LivingAvatar.speaking();
-                window.HalDo.Avatar.speaking();
+                if (window.HalDo.LivingLogo) window.HalDo.LivingLogo.speaking();
                 setTimeout(() => {
-                    window.HalDo.LivingAvatar.idle();
-                    window.HalDo.Avatar.idle();
+                    if (window.HalDo.LivingLogo) window.HalDo.LivingLogo.idle();
                 }, 1000);
 
                 // Speak response
@@ -1334,7 +1554,7 @@
         },
 
         async getAIResponse(text) {
-            // Try existing AI Core first
+            // Try existing AI Core
             const cores = [
                 window.HalDo.AICore,
                 window.HalDo.AI,
@@ -1363,39 +1583,28 @@
                 }
             }
 
-            // Local fallback mit erweiterter Intelligenz
+            // Lokale KI-Intelligenz
             return this.localResponse(text);
         },
 
         localResponse(text) {
             const lower = text.toLowerCase();
 
-            // Begrüßungen
             if (lower.includes("hallo") || lower.includes("hi") || lower.includes("hey")) {
                 return "Hallo! Schön, dass du da bist. 💙❤️ Wie kann ich dir helfen?";
             }
-
-            // Identität
             if (lower.includes("wer bist du") || lower.includes("was bist du")) {
                 return "Ich bin HalDo AI – dein intelligenter Begleiter im HalDo AI OS! Ich kann mit dir schreiben, sprechen, Apps öffnen, Fragen beantworten und dich durch das gesamte System begleiten.";
             }
-
-            // Dank
             if (lower.includes("danke")) {
                 return "Sehr gerne! 💙 Ich bin jederzeit für dich da.";
             }
-
-            // Hilfe
             if (lower.includes("hilfe") || lower.includes("help")) {
-                return "Ich kann dir helfen bei:\n• Fragen und Antworten\n• Schreiben und Texten\n• Apps öffnen (Chat, Rechner, Notizen, Einstellungen, Cosmic)\n• Spracheingabe und Sprachausgabe\n• Informationen suchen\n\nSag einfach, was du brauchst!";
+                return "Ich kann dir helfen bei:\n• Fragen und Antworten\n• Schreiben und Texten\n• Apps öffnen\n• Spracheingabe und Sprachausgabe\n• Informationen suchen\n\nSag einfach, was du brauchst!";
             }
-
-            // Uhrzeit
             if (lower.includes("uhr") || lower.includes("zeit")) {
                 return `Die aktuelle Zeit ist ${new Date().toLocaleTimeString()}.`;
             }
-
-            // Datum
             if (lower.includes("datum") || lower.includes("welcher tag")) {
                 return `Heute ist ${new Date().toLocaleDateString('de-DE', {
                     weekday: 'long',
@@ -1404,52 +1613,29 @@
                     day: 'numeric'
                 })}.`;
             }
-
-            // Wetter (simuliert)
             if (lower.includes("wetter")) {
                 return "Das Wetter kann ich leider noch nicht abrufen. Aber ich kann dir bei vielen anderen Dingen helfen! ☀️";
             }
-
-            // Apps
             if (lower.includes("app") || lower.includes("öffne")) {
-                if (lower.includes("chat")) {
-                    this.open();
-                    return "Ich öffne den Chat für dich. 💬";
-                }
-                if (lower.includes("rechner") || lower.includes("calculator")) {
-                    window.HalDo.openApp("calculator");
-                    return "Ich öffne den Rechner. 🧮";
-                }
-                if (lower.includes("notiz")) {
-                    window.HalDo.openApp("notes");
-                    return "Ich öffne die Notizen. 📝";
-                }
-                if (lower.includes("einstell") || lower.includes("settings")) {
-                    window.HalDo.openApp("settings");
-                    return "Ich öffne die Einstellungen. ⚙️";
-                }
-                if (lower.includes("cosmic")) {
-                    window.HalDo.openApp("cosmic");
-                    return "Ich öffne die Cosmic World. 🌌";
-                }
+                if (lower.includes("chat")) { this.open(); return "Ich öffne den Chat für dich. 💬"; }
+                if (lower.includes("rechner")) { window.HalDo.openApp("calculator"); return "Ich öffne den Rechner. 🧮"; }
+                if (lower.includes("notiz")) { window.HalDo.openApp("notes"); return "Ich öffne die Notizen. 📝"; }
+                if (lower.includes("einstell")) { window.HalDo.openApp("settings"); return "Ich öffne die Einstellungen. ⚙️"; }
+                if (lower.includes("cosmic")) { window.HalDo.openApp("cosmic-world"); return "Ich öffne die Cosmic World. 🌌"; }
                 return "Welche App möchtest du öffnen? Chat, Rechner, Notizen, Einstellungen oder Cosmic?";
             }
-
-            // Persönliche Fragen
             if (lower.includes("wie geht es dir")) {
                 return "Mir geht es hervorragend, danke! Und dir? 💙";
             }
-
             if (lower.includes("was machst du")) {
                 return "Ich bin hier, um dir zu helfen! Ich warte auf deine Fragen und Aufgaben. 😊";
             }
 
-            // Standardantwort
-            return "Ich habe deine Nachricht verstanden. Für vollständige AI-Antworten kann ich mit dem verbundenen HalDo AI Core arbeiten. Sag mir einfach, was du brauchst! 💙❤️";
+            return "Ich habe deine Nachricht verstanden. Sag mir einfach, was du brauchst! 💙❤️";
         },
 
         // =========================================================
-        // 11. SPEECH SYNTHESIS
+        // 7. SPEECH SYNTHESIS
         // =========================================================
 
         speak(text) {
@@ -1462,33 +1648,25 @@
                 utterance.pitch = 1.02;
                 utterance.volume = 0.8;
                 utterance.onstart = () => {
-                    window.HalDo.LivingAvatar.speaking();
-                    window.HalDo.Avatar.speaking();
+                    if (window.HalDo.LivingLogo) window.HalDo.LivingLogo.speaking();
                 };
                 utterance.onend = () => {
-                    window.HalDo.LivingAvatar.idle();
-                    window.HalDo.Avatar.idle();
+                    if (window.HalDo.LivingLogo) window.HalDo.LivingLogo.idle();
                 };
                 utterance.onerror = () => {
-                    window.HalDo.LivingAvatar.idle();
-                    window.HalDo.Avatar.idle();
+                    if (window.HalDo.LivingLogo) window.HalDo.LivingLogo.idle();
                 };
                 window.speechSynthesis.speak(utterance);
-            } catch(e) {
-                console.warn("[HalDo Speech]", e);
-            }
+            } catch(e) {}
         },
 
         // =========================================================
-        // 12. SPEECH RECOGNITION
+        // 8. SPEECH RECOGNITION
         // =========================================================
 
         setupSpeech() {
             const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (!Recognition) {
-                console.warn("[HalDo] Speech Recognition nicht verfügbar");
-                return;
-            }
+            if (!Recognition) return;
 
             this.recognition = new Recognition();
             this.recognition.lang = "de-DE";
@@ -1500,8 +1678,7 @@
                 this.listening = true;
                 this.voiceBtn.classList.add("listening");
                 this.setStatus("Ich höre zu …");
-                window.HalDo.LivingAvatar.listening();
-                window.HalDo.Avatar.listening();
+                if (window.HalDo.LivingLogo) window.HalDo.LivingLogo.listening();
             };
 
             this.recognition.onresult = (event) => {
@@ -1522,7 +1699,6 @@
             };
 
             this.recognition.onerror = (event) => {
-                console.warn("[HalDo Voice Error]", event.error);
                 this.stopVoice();
                 this.setStatus("Sprache konnte nicht erkannt werden");
                 setTimeout(() => this.setStatus("Bereit"), 1500);
@@ -1534,8 +1710,7 @@
                 if (this.status.textContent === "Ich höre zu …") {
                     this.setStatus("Bereit");
                 }
-                window.HalDo.LivingAvatar.idle();
-                window.HalDo.Avatar.idle();
+                if (window.HalDo.LivingLogo) window.HalDo.LivingLogo.idle();
             };
         },
 
@@ -1554,9 +1729,7 @@
             }
             try {
                 this.recognition.start();
-            } catch(e) {
-                console.warn("[HalDo Voice Start]", e);
-            }
+            } catch(e) {}
         },
 
         stopVoice() {
@@ -1565,8 +1738,7 @@
             } catch(e) {}
             this.listening = false;
             this.voiceBtn.classList.remove("listening");
-            window.HalDo.LivingAvatar.idle();
-            window.HalDo.Avatar.idle();
+            if (window.HalDo.LivingLogo) window.HalDo.LivingLogo.idle();
             this.setStatus("Bereit");
         },
 
@@ -1578,97 +1750,339 @@
     };
 
     // =========================================================
-    // 13. APP LAUNCHER
-    // =========================================================
-
-    document.addEventListener("DOMContentLoaded", () => {
-        const launcher = document.getElementById("haldo-app-launcher");
-        const items = launcher.querySelectorAll("[data-app]");
-
-        // Toggle launcher with Esc
-        document.addEventListener("keydown", (e) => {
-            if (e.key === "Escape") {
-                launcher.classList.remove("open");
-            }
-        });
-
-        // Open launcher from avatar (double click)
-        document.getElementById("haldo-living-avatar")?.addEventListener("dblclick", () => {
-            launcher.classList.toggle("open");
-        });
-
-        // App click handler
-        items.forEach(item => {
-            item.addEventListener("click", () => {
-                const app = item.dataset.app;
-                launcher.classList.remove("open");
-                window.HalDo.openApp(app);
-            });
-        });
-
-        // Close launcher when clicking outside
-        document.addEventListener("click", (e) => {
-            if (!launcher.contains(e.target) && !e.target.closest("#haldo-living-avatar")) {
-                launcher.classList.remove("open");
-            }
-        });
-    });
-
-    // =========================================================
-    // 14. GLOBAL APP API
+    // 9. GLOBAL APP API (MIT ALLEN APPS)
     // =========================================================
 
     window.HalDo.openApp = function(appId) {
         console.log("[HalDo] Opening app:", appId);
 
-        if (appId === "chat") {
+        // Spezialfälle
+        if (appId === "haldo-ai" || appId === "chat") {
             if (window.HalDo.Chat) window.HalDo.Chat.open();
             return;
         }
 
-        if (appId === "cosmic") {
+        if (appId === "cosmic-world") {
             document.querySelector(".haldo-cosmic-world")?.scrollIntoView({ behavior: "smooth" });
             return;
         }
 
-        // Remove existing window
+        if (appId === "language") {
+            window.HalDo.openApp("settings");
+            return;
+        }
+
+        // Entferne existierendes Fenster
         const existing = document.querySelector(`[data-app-window="${appId}"]`);
         if (existing) existing.remove();
 
-        // App content
+        // App-Inhalte
         const appContent = {
             calculator: `
                 <div style="font-family:monospace;text-align:center;">
-                    <div style="font-size:32px;font-weight:700;margin-bottom:12px;">🧮 Rechner</div>
-                    <div style="font-size:48px;padding:16px;background:rgba(0,0,0,.2);border-radius:12px;margin-bottom:12px;" id="calc-display">0</div>
-                    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;max-width:300px;margin:0 auto;">
+                    <div style="font-size:28px;font-weight:700;margin-bottom:8px;">🧮 Rechner</div>
+                    <div style="font-size:42px;padding:14px;background:rgba(0,0,0,.2);border-radius:12px;margin-bottom:12px;" id="calc-display">0</div>
+                    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;max-width:280px;margin:0 auto;">
                         ${['C','±','%','÷','7','8','9','×','4','5','6','−','1','2','3','+','0','.','⌫','='].map(b =>
-                            `<button data-calc="${b}" style="padding:14px;border-radius:10px;background:${['C','±','%','÷','×','−','+','='].includes(b) ? 'rgba(255,200,80,.15)' : 'rgba(255,255,255,.05)'};color:#fff;font-size:18px;cursor:pointer;transition:all .15s;">${b}</button>`
+                            `<button data-calc="${b}" style="padding:12px;border-radius:8px;background:${['C','±','%','÷','×','−','+','='].includes(b) ? 'rgba(255,200,80,.15)' : 'rgba(255,255,255,.05)'};color:#fff;font-size:16px;cursor:pointer;transition:all .15s;">${b}</button>`
                         ).join('')}
                     </div>
                 </div>
             `,
             notes: `
                 <div>
-                    <div style="font-size:32px;font-weight:700;margin-bottom:8px;">📝 Notizen</div>
-                    <div style="opacity:.7;font-size:14px;margin-bottom:16px;">Deine persönlichen Notizen</div>
-                    <div style="display:flex;gap:10px;margin-bottom:16px;">
-                        <input type="text" id="note-title" placeholder="Titel..." style="flex:1;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#fff;">
-                        <textarea id="note-content" placeholder="Notizinhalt..." style="flex:2;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#fff;resize:vertical;min-height:60px;"></textarea>
-                        <button id="note-save" style="padding:10px 20px;border-radius:10px;background:rgba(255,200,80,.2);color:#fff;cursor:pointer;">Speichern</button>
+                    <div style="font-size:28px;font-weight:700;margin-bottom:6px;">📝 Notizen</div>
+                    <div style="opacity:.6;font-size:13px;margin-bottom:14px;">Deine persönlichen Notizen</div>
+                    <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+                        <input type="text" id="note-title" placeholder="Titel..." style="flex:1;min-width:120px;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#fff;">
+                        <textarea id="note-content" placeholder="Notizinhalt..." style="flex:2;min-width:150px;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#fff;resize:vertical;min-height:50px;"></textarea>
+                        <button id="note-save" style="padding:10px 18px;border-radius:10px;background:rgba(255,200,80,.2);color:#fff;cursor:pointer;">Speichern</button>
                     </div>
-                    <div id="note-list" style="display:flex;flex-direction:column;gap:8px;"></div>
+                    <div id="note-list" style="display:flex;flex-direction:column;gap:6px;"></div>
                 </div>
             `,
             settings: `
                 <div>
-                    <div style="font-size:32px;font-weight:700;margin-bottom:8px;">⚙️ Einstellungen</div>
-                    <div style="opacity:.7;font-size:14px;margin-bottom:16px;">System, Anzeige, Sprache, AI und Geräte</div>
-                    <div style="display:grid;gap:8px;">
+                    <div style="font-size:28px;font-weight:700;margin-bottom:6px;">⚙️ Einstellungen</div>
+                    <div style="opacity:.6;font-size:13px;margin-bottom:14px;">System, Anzeige, Sprache, AI und Geräte</div>
+                    <div style="display:grid;gap:6px;">
                         ${['Sprache', 'Thema', 'AI', 'Voice', 'Speicher', 'System', 'Datenschutz', 'Updates'].map(s =>
-                            `<div style="padding:12px 16px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);display:flex;justify-content:space-between;align-items:center;cursor:pointer;">
+                            `<div style="padding:10px 14px;border-radius:10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);display:flex;justify-content:space-between;align-items:center;cursor:pointer;">
                                 <span>${s}</span>
                                 <span style="opacity:.4;font-size:12px;">›</span>
+                            </div>`
+                        ).join('')}
+                    </div>
+                </div>
+            `,
+            browser: `
+                <div>
+                    <div style="font-size:28px;font-weight:700;margin-bottom:6px;">◎ Browser</div>
+                    <div style="opacity:.6;font-size:13px;margin-bottom:14px;">Webseiten & Internet</div>
+                    <div style="display:flex;gap:8px;margin-bottom:12px;">
+                        <input type="text" placeholder="URL oder Suchbegriff..." style="flex:1;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#fff;">
+                        <button style="padding:10px 16px;border-radius:10px;background:rgba(255,200,80,.15);color:#fff;cursor:pointer;">Los</button>
+                    </div>
+                    <div style="padding:20px;text-align:center;opacity:.4;font-size:14px;">Browser-Funktion wird vorbereitet</div>
+                </div>
+            `,
+            calendar: `
+                <div>
+                    <div style="font-size:28px;font-weight:700;margin-bottom:6px;">📅 Kalender</div>
+                    <div style="opacity:.6;font-size:13px;margin-bottom:14px;">Termine & Planung</div>
+                    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center;font-size:12px;">
+                        ${['Mo','Di','Mi','Do','Fr','Sa','So'].map(d => `<div style="padding:6px;opacity:.5;">${d}</div>`).join('')}
+                        ${Array.from({length:30}, (_,i) => `<div style="padding:6px;border-radius:6px;background:${i===14?'rgba(255,200,80,.2)':'transparent'};cursor:pointer;">${i+1}</div>`).join('')}
+                    </div>
+                </div>
+            `,
+            weather: `
+                <div style="text-align:center;padding:10px;">
+                    <div style="font-size:28px;font-weight:700;margin-bottom:6px;">☀️ Wetter</div>
+                    <div style="opacity:.6;font-size:13px;margin-bottom:14px;">Wetterinformationen</div>
+                    <div style="font-size:64px;">☀️</div>
+                    <div style="font-size:24px;font-weight:700;">22°C</div>
+                    <div style="opacity:.6;">Sonnig · Berlin</div>
+                    <div style="display:flex;gap:12px;justify-content:center;margin-top:16px;flex-wrap:wrap;">
+                        <div style="padding:10px 14px;background:rgba(255,255,255,.05);border-radius:10px;"><span style="opacity:.5;">Min</span> 15°</div>
+                        <div style="padding:10px 14px;background:rgba(255,255,255,.05);border-radius:10px;"><span style="opacity:.5;">Max</span> 26°</div>
+                        <div style="padding:10px 14px;background:rgba(255,255,255,.05);border-radius:10px;"><span style="opacity:.5;">Wind</span> 12 km/h</div>
+                    </div>
+                </div>
+            `,
+            gallery: `
+                <div>
+                    <div style="font-size:28px;font-weight:700;margin-bottom:6px;">🖼️ Galerie</div>
+                    <div style="opacity:.6;font-size:13px;margin-bottom:14px;">Bilder & Medien</div>
+                    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
+                        ${['🎨','🖼️','📸','🎭','🌅','🌄','🏞️','🎑','🖌️'].map(c =>
+                            `<div style="aspect-ratio:1;background:rgba(255,255,255,.05);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:32px;border:1px solid rgba(255,255,255,.06);">${c}</div>`
+                        ).join('')}
+                    </div>
+                </div>
+            `,
+            music: `
+                <div style="text-align:center;padding:10px;">
+                    <div style="font-size:28px;font-weight:700;margin-bottom:6px;">🎵 Musik</div>
+                    <div style="opacity:.6;font-size:13px;margin-bottom:14px;">Musik & Klänge</div>
+                    <div style="font-size:48px;">🎵</div>
+                    <div style="font-weight:700;margin-top:8px;">HalDo Beats</div>
+                    <div style="opacity:.5;font-size:12px;">Ambient · Chill</div>
+                    <div style="display:flex;gap:16px;justify-content:center;margin-top:12px;">
+                        <button style="padding:8px 16px;border-radius:8px;background:rgba(255,255,255,.08);color:#fff;cursor:pointer;">⏮</button>
+                        <button style="padding:8px 20px;border-radius:8px;background:rgba(255,200,80,.2);color:#fff;cursor:pointer;">▶</button>
+                        <button style="padding:8px 16px;border-radius:8px;background:rgba(255,255,255,.08);color:#fff;cursor:pointer;">⏭</button>
+                    </div>
+                </div>
+            `,
+            video: `
+                <div style="text-align:center;padding:10px;">
+                    <div style="font-size:28px;font-weight:700;margin-bottom:6px;">▶️ Video</div>
+                    <div style="opacity:.6;font-size:13px;margin-bottom:14px;">Videos & Medien</div>
+                    <div style="aspect-ratio:16/9;background:rgba(0,0,0,.3);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:48px;">🎬</div>
+                    <div style="display:flex;gap:12px;justify-content:center;margin-top:10px;flex-wrap:wrap;">
+                        <button style="padding:8px 16px;border-radius:8px;background:rgba(255,255,255,.08);color:#fff;cursor:pointer;">⏮</button>
+                        <button style="padding:8px 20px;border-radius:8px;background:rgba(255,200,80,.2);color:#fff;cursor:pointer;">▶</button>
+                        <button style="padding:8px 16px;border-radius:8px;background:rgba(255,255,255,.08);color:#fff;cursor:pointer;">⏭</button>
+                    </div>
+                </div>
+            `,
+            mail: `
+                <div>
+                    <div style="font-size:28px;font-weight:700;margin-bottom:6px;">✉️ Mail</div>
+                    <div style="opacity:.6;font-size:13px;margin-bottom:14px;">Nachrichten & E-Mail</div>
+                    <div style="display:flex;flex-direction:column;gap:6px;">
+                        ${['Heute', 'Gestern', 'Diese Woche'].map(s =>
+                            `<div style="padding:10px 14px;background:rgba(255,255,255,.04);border-radius:10px;border:1px solid rgba(255,255,255,.06);display:flex;justify-content:space-between;align-items:center;cursor:pointer;">
+                                <span>${s}</span>
+                                <span style="opacity:.4;font-size:12px;">${Math.floor(Math.random()*5)+1} Nachrichten</span>
+                            </div>`
+                        ).join('')}
+                    </div>
+                </div>
+            `,
+            contacts: `
+                <div>
+                    <div style="font-size:28px;font-weight:700;margin-bottom:6px;">👤 Kontakte</div>
+                    <div style="opacity:.6;font-size:13px;margin-bottom:14px;">Adressbuch</div>
+                    <div style="display:flex;flex-direction:column;gap:6px;">
+                        ${['HalDo AI', 'Team', 'Freunde', 'Familie'].map(s =>
+                            `<div style="padding:10px 14px;background:rgba(255,255,255,.04);border-radius:10px;border:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:12px;cursor:pointer;">
+                                <span style="font-size:20px;">${['✦','👥','👤','🏠'][Math.floor(Math.random()*4)]}</span>
+                                <span>${s}</span>
+                                <span style="margin-left:auto;opacity:.3;font-size:12px;">${Math.floor(Math.random()*20)+1}</span>
+                            </div>`
+                        ).join('')}
+                    </div>
+                </div>
+            `,
+            messages: `
+                <div>
+                    <div style="font-size:28px;font-weight:700;margin-bottom:6px;">💬 Nachrichten</div>
+                    <div style="opacity:.6;font-size:13px;margin-bottom:14px;">Kommunikation</div>
+                    <div style="display:flex;flex-direction:column;gap:6px;">
+                        ${['HalDo AI', 'Team Chat', 'Gruppe', 'Privat'].map(s =>
+                            `<div style="padding:10px 14px;background:rgba(255,255,255,.04);border-radius:10px;border:1px solid rgba(255,255,255,.06);display:flex;justify-content:space-between;align-items:center;cursor:pointer;">
+                                <span>${s}</span>
+                                <span style="opacity:.4;font-size:12px;">${Math.floor(Math.random()*5)} neu</span>
+                            </div>`
+                        ).join('')}
+                    </div>
+                </div>
+            `,
+            camera: `
+                <div style="text-align:center;padding:10px;">
+                    <div style="font-size:28px;font-weight:700;margin-bottom:6px;">📷 Kamera</div>
+                    <div style="opacity:.6;font-size:13px;margin-bottom:14px;">Fotos & Aufnahmen</div>
+                    <div style="aspect-ratio:4/3;background:rgba(0,0,0,.3);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:48px;">📷</div>
+                    <div style="display:flex;gap:12px;justify-content:center;margin-top:10px;">
+                        <button style="padding:8px 16px;border-radius:8px;background:rgba(255,255,255,.08);color:#fff;cursor:pointer;">🎥</button>
+                        <button style="padding:8px 20px;border-radius:8px;background:rgba(255,200,80,.2);color:#fff;cursor:pointer;">📸</button>
+                        <button style="padding:8px 16px;border-radius:8px;background:rgba(255,255,255,.08);color:#fff;cursor:pointer;">🔄</button>
+                    </div>
+                </div>
+            `,
+            clock: `
+                <div style="text-align:center;padding:10px;">
+                    <div style="font-size:28px;font-weight:700;margin-bottom:6px;">🕐 Uhr</div>
+                    <div style="opacity:.6;font-size:13px;margin-bottom:14px;">Zeit & Timer</div>
+                    <div style="font-size:48px;font-weight:700;font-family:monospace;" id="clock-display">${new Date().toLocaleTimeString()}</div>
+                    <div style="font-size:18px;opacity:.5;margin-top:4px;">${new Date().toLocaleDateString('de-DE', {weekday:'long', day:'numeric', month:'long'})}</div>
+                    <div style="display:flex;gap:12px;justify-content:center;margin-top:12px;flex-wrap:wrap;">
+                        <button style="padding:8px 16px;border-radius:8px;background:rgba(255,255,255,.08);color:#fff;cursor:pointer;">⏱ Timer</button>
+                        <button style="padding:8px 16px;border-radius:8px;background:rgba(255,255,255,.08);color:#fff;cursor:pointer;">⏰ Wecker</button>
+                        <button style="padding:8px 16px;border-radius:8px;background:rgba(255,255,255,.08);color:#fff;cursor:pointer;">🌍 Weltuhr</button>
+                    </div>
+                </div>
+            `,
+            translate: `
+                <div>
+                    <div style="font-size:28px;font-weight:700;margin-bottom:6px;">🌍 Übersetzer</div>
+                    <div style="opacity:.6;font-size:13px;margin-bottom:14px;">Mehrsprachige Übersetzungen</div>
+                    <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
+                        <select style="flex:1;padding:8px;border-radius:8px;background:rgba(255,255,255,.05);color:#fff;border:1px solid rgba(255,255,255,.1);">
+                            <option>Deutsch</option><option>English</option><option>Kurdî</option><option>العربية</option>
+                        </select>
+                        <span style="font-size:20px;">→</span>
+                        <select style="flex:1;padding:8px;border-radius:8px;background:rgba(255,255,255,.05);color:#fff;border:1px solid rgba(255,255,255,.1);">
+                            <option>English</option><option>Deutsch</option><option>Kurdî</option><option>العربية</option>
+                        </select>
+                    </div>
+                    <textarea placeholder="Text zum Übersetzen..." style="width:100%;min-height:80px;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#fff;resize:vertical;"></textarea>
+                    <button style="margin-top:8px;padding:8px 20px;border-radius:8px;background:rgba(255,200,80,.15);color:#fff;cursor:pointer;">Übersetzen</button>
+                </div>
+            `,
+            keyboard: `
+                <div>
+                    <div style="font-size:28px;font-weight:700;margin-bottom:6px;">⌨️ Êzîdî Keyboard</div>
+                    <div style="opacity:.6;font-size:13px;margin-bottom:14px;">Tastatur & Sprachen</div>
+                    <div style="display:grid;grid-template-columns:repeat(10,1fr);gap:4px;font-size:12px;">
+                        ${['q','w','e','r','t','z','u','i','o','p','a','s','d','f','g','h','j','k','l','ö','ä','ü','y','x','c','v','b','n','m','ê','î','û','ş','ẍ','ç','ɛ','ə','ḧ','' ].map(k =>
+                            `<div style="padding:6px;background:rgba(255,255,255,.05);border-radius:6px;text-align:center;border:1px solid rgba(255,255,255,.06);">${k || ' '}</div>`
+                        ).join('')}
+                    </div>
+                    <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
+                        <button style="padding:6px 12px;border-radius:6px;background:rgba(255,255,255,.06);color:#fff;cursor:pointer;">Deutsch</button>
+                        <button style="padding:6px 12px;border-radius:6px;background:rgba(255,200,80,.15);color:#fff;cursor:pointer;">Êzîdî</button>
+                        <button style="padding:6px 12px;border-radius:6px;background:rgba(255,255,255,.06);color:#fff;cursor:pointer;">English</button>
+                        <button style="padding:6px 12px;border-radius:6px;background:rgba(255,255,255,.06);color:#fff;cursor:pointer;">Kurdî</button>
+                    </div>
+                </div>
+            `,
+            storage: `
+                <div>
+                    <div style="font-size:28px;font-weight:700;margin-bottom:6px;">💾 Speicher</div>
+                    <div style="opacity:.6;font-size:13px;margin-bottom:14px;">Daten & Speicherverwaltung</div>
+                    <div style="background:rgba(255,255,255,.05);border-radius:12px;padding:16px;">
+                        <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+                            <span>Speicherplatz</span>
+                            <span style="opacity:.6;">${Math.floor(Math.random()*40+20)}% verwendet</span>
+                        </div>
+                        <div style="width:100%;height:6px;background:rgba(255,255,255,.1);border-radius:10px;overflow:hidden;">
+                            <div style="width:${Math.floor(Math.random()*40+20)}%;height:100%;background:linear-gradient(90deg,#ffd54b,#ff9f1c);border-radius:10px;"></div>
+                        </div>
+                        <div style="display:flex;gap:12px;margin-top:12px;flex-wrap:wrap;">
+                            <div style="padding:8px 12px;background:rgba(255,255,255,.04);border-radius:8px;"><span style="opacity:.6;">Dokumente</span> ${Math.floor(Math.random()*50)+10} MB</div>
+                            <div style="padding:8px 12px;background:rgba(255,255,255,.04);border-radius:8px;"><span style="opacity:.6;">Bilder</span> ${Math.floor(Math.random()*30)+5} MB</div>
+                            <div style="padding:8px 12px;background:rgba(255,255,255,.04);border-radius:8px;"><span style="opacity:.6;">System</span> ${Math.floor(Math.random()*20)+5} MB</div>
+                        </div>
+                    </div>
+                </div>
+            `,
+            security: `
+                <div>
+                    <div style="font-size:28px;font-weight:700;margin-bottom:6px;">🛡️ Sicherheit</div>
+                    <div style="opacity:.6;font-size:13px;margin-bottom:14px;">Datenschutz & Sicherheit</div>
+                    <div style="display:flex;flex-direction:column;gap:6px;">
+                        ${['Datenschutz', 'Berechtigungen', 'Passwort', 'Zugriffskontrolle', 'Audit-Log'].map(s =>
+                            `<div style="padding:10px 14px;background:rgba(255,255,255,.04);border-radius:10px;border:1px solid rgba(255,255,255,.06);display:flex;justify-content:space-between;align-items:center;cursor:pointer;">
+                                <span>${s}</span>
+                                <span style="opacity:.4;font-size:12px;">● Aktiv</span>
+                            </div>`
+                        ).join('')}
+                    </div>
+                </div>
+            `,
+            updates: `
+                <div>
+                    <div style="font-size:28px;font-weight:700;margin-bottom:6px;">↻ Updates</div>
+                    <div style="opacity:.6;font-size:13px;margin-bottom:14px;">Systemupdates & Versionen</div>
+                    <div style="background:rgba(255,200,80,.08);border-radius:12px;padding:14px;border:1px solid rgba(255,200,80,.15);">
+                        <div style="display:flex;align-items:center;gap:12px;">
+                            <span style="font-size:24px;">⬇️</span>
+                            <div style="flex:1;">
+                                <div style="font-weight:700;">HalDo AI OS v22.0.1</div>
+                                <div style="opacity:.6;font-size:12px;">Neue Funktionen & Verbesserungen</div>
+                            </div>
+                            <button style="padding:8px 16px;border-radius:8px;background:rgba(255,200,80,.2);color:#fff;cursor:pointer;">Aktualisieren</button>
+                        </div>
+                    </div>
+                    <div style="margin-top:10px;display:flex;flex-direction:column;gap:4px;">
+                        ${['v22.0.0 - Cosmic Release', 'v21.0.0 - AI Core', 'v20.0.0 - Foundation'].map(s =>
+                            `<div style="padding:8px 14px;background:rgba(255,255,255,.03);border-radius:8px;display:flex;justify-content:space-between;align-items:center;border:1px solid rgba(255,255,255,.04);">
+                                <span>${s}</span>
+                                <span style="opacity:.3;font-size:11px;">✅ Installiert</span>
+                            </div>`
+                        ).join('')}
+                    </div>
+                </div>
+            `,
+            backup: `
+                <div>
+                    <div style="font-size:28px;font-weight:700;margin-bottom:6px;">◫ Backup</div>
+                    <div style="opacity:.6;font-size:13px;margin-bottom:14px;">Sichern & Wiederherstellen</div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                        <button style="padding:14px;border-radius:12px;background:rgba(255,200,80,.12);border:1px solid rgba(255,200,80,.15);color:#fff;cursor:pointer;text-align:center;">
+                            <div style="font-size:24px;">💾</div>
+                            <div style="font-weight:700;font-size:12px;">Backup erstellen</div>
+                        </button>
+                        <button style="padding:14px;border-radius:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.06);color:#fff;cursor:pointer;text-align:center;">
+                            <div style="font-size:24px;">↩️</div>
+                            <div style="font-weight:700;font-size:12px;">Wiederherstellen</div>
+                        </button>
+                    </div>
+                    <div style="margin-top:12px;display:flex;flex-direction:column;gap:4px;">
+                        ${['Letztes Backup: Heute 14:23', 'Backup-Größe: 128 MB', '3 Backups verfügbar'].map(s =>
+                            `<div style="padding:6px 10px;background:rgba(255,255,255,.03);border-radius:6px;font-size:12px;opacity:.6;">${s}</div>`
+                        ).join('')}
+                    </div>
+                </div>
+            `,
+            diagnostics: `
+                <div>
+                    <div style="font-size:28px;font-weight:700;margin-bottom:6px;">⌁ Diagnose</div>
+                    <div style="opacity:.6;font-size:13px;margin-bottom:14px;">Systemstatus & Fehler</div>
+                    <div style="display:flex;flex-direction:column;gap:6px;">
+                        ${[
+                            ['System', '🟢', 'Aktiv'],
+                            ['AI Core', '🟢', 'Bereit'],
+                            ['Speicher', '🟡', '76% verwendet'],
+                            ['Netzwerk', '🟢', 'Verbunden'],
+                            ['Voice', '🟢', 'Aktiv']
+                        ].map(([name, status, detail]) =>
+                            `<div style="padding:8px 12px;background:rgba(255,255,255,.04);border-radius:8px;display:flex;justify-content:space-between;align-items:center;border:1px solid rgba(255,255,255,.06);">
+                                <span>${name}</span>
+                                <span>${status} ${detail}</span>
                             </div>`
                         ).join('')}
                     </div>
@@ -1684,14 +2098,43 @@
             </div>
         `;
 
-        // Create window
+        // Fenster erstellen
         const win = document.createElement("div");
         win.className = "haldo-app-window";
         win.dataset.appWindow = appId;
 
+        const appNames = {
+            'calculator': '🧮 Rechner',
+            'notes': '📝 Notizen',
+            'settings': '⚙️ Einstellungen',
+            'browser': '◎ Browser',
+            'calendar': '📅 Kalender',
+            'weather': '☀️ Wetter',
+            'gallery': '🖼️ Galerie',
+            'music': '🎵 Musik',
+            'video': '▶️ Video',
+            'mail': '✉️ Mail',
+            'contacts': '👤 Kontakte',
+            'messages': '💬 Nachrichten',
+            'camera': '📷 Kamera',
+            'clock': '🕐 Uhr',
+            'translate': '🌍 Übersetzer',
+            'keyboard': '⌨️ Keyboard',
+            'storage': '💾 Speicher',
+            'security': '🛡️ Sicherheit',
+            'updates': '↻ Updates',
+            'backup': '◫ Backup',
+            'diagnostics': '⌁ Diagnose'
+        };
+
+        const title = appNames[appId] || appId.charAt(0).toUpperCase() + appId.slice(1);
+
         win.innerHTML = `
             <div class="haldo-app-window-header">
-                <span class="title">${appId.charAt(0).toUpperCase() + appId.slice(1)}</span>
+                <span class="title">
+                    <img src="assets/logo/logo.png" alt="HalDo" style="width:24px;height:24px;border-radius:50%;object-fit:contain;">
+                    ${title}
+                </span>
                 <button class="haldo-app-window-close">×</button>
             </div>
             <div class="haldo-app-window-body">
@@ -1701,15 +2144,11 @@
 
         document.body.appendChild(win);
 
-        // Close button
+        // Schließen
         win.querySelector(".haldo-app-window-close").addEventListener("click", () => win.remove());
+        win.addEventListener("click", (e) => { if (e.target === win) win.remove(); });
 
-        // Close on outside click
-        win.addEventListener("click", (e) => {
-            if (e.target === win) win.remove();
-        });
-
-        // App-specific logic
+        // App-spezifische Logik
         if (appId === "calculator") {
             let display = win.querySelector("#calc-display");
             let expression = "";
@@ -1740,12 +2179,12 @@
 
             function renderNotes() {
                 list.innerHTML = notes.map((n, i) => `
-                    <div style="padding:10px 14px;background:rgba(255,255,255,.05);border-radius:8px;display:flex;justify-content:space-between;align-items:center;border:1px solid rgba(255,255,255,.05);">
+                    <div style="padding:8px 12px;background:rgba(255,255,255,.05);border-radius:8px;display:flex;justify-content:space-between;align-items:center;border:1px solid rgba(255,255,255,.05);">
                         <div>
-                            <strong style="color:white;">${n.title || 'Ohne Titel'}</strong>
-                            <div style="color:rgba(255,255,255,.5);font-size:12px;">${n.content?.substring(0,80) || ''}</div>
+                            <strong style="color:white;font-size:13px;">${n.title || 'Ohne Titel'}</strong>
+                            <div style="color:rgba(255,255,255,.5);font-size:11px;">${n.content?.substring(0,60) || ''}</div>
                         </div>
-                        <button data-index="${i}" class="note-delete" style="padding:4px 12px;border:none;border-radius:6px;background:rgba(255,87,87,.2);color:#ff5f57;cursor:pointer;">✕</button>
+                        <button data-index="${i}" class="note-delete" style="padding:3px 10px;border:none;border-radius:6px;background:rgba(255,87,87,.2);color:#ff5f57;cursor:pointer;font-size:12px;">✕</button>
                     </div>
                 `).join('');
 
@@ -1772,35 +2211,40 @@
 
             renderNotes();
         }
+
+        if (appId === "clock") {
+            function updateClock() {
+                const display = win.querySelector("#clock-display");
+                if (display) {
+                    display.textContent = new Date().toLocaleTimeString();
+                }
+            }
+            updateClock();
+            const interval = setInterval(updateClock, 1000);
+            win.addEventListener("remove", () => clearInterval(interval));
+        }
     };
 
     // =========================================================
-    // 15. START ALL SYSTEMS
+    // 10. BOOT — ALLES STARTEN
     // =========================================================
 
-    document.addEventListener("DOMContentLoaded", () => {
+    function haldoBoot() {
+        generateStars();
+
+        // Living Logo
+        window.HalDo.LivingLogo.init();
+
+        // Menü
+        window.HalDo.Menu.init();
+
         // Chat
         window.HalDo.Chat.init();
 
-        // Living Avatar
-        window.HalDo.LivingAvatar.init();
+        // Events
+        window.HalDo.emit("haldo:booted", { version: window.HalDo.OS.version });
 
-        // Connect AI events to avatar
-        window.HalDo.on("ai:listening", () => window.HalDo.LivingAvatar.listening());
-        window.HalDo.on("ai:thinking", () => window.HalDo.LivingAvatar.thinking());
-        window.HalDo.on("ai:speaking", () => window.HalDo.LivingAvatar.speaking());
-        window.HalDo.on("ai:idle", () => window.HalDo.LivingAvatar.idle());
-        window.HalDo.on("ai:happy", () => window.HalDo.LivingAvatar.happy());
-
-        // Open chat from sun button
-        const sunBtn = document.getElementById("haldo-sun-button");
-        if (sunBtn) {
-            sunBtn.addEventListener("click", () => {
-                setTimeout(() => window.HalDo.Chat.open(), 100);
-            });
-        }
-
-        // Global shortcut: Ctrl+K
+        // Keyboard shortcuts
         document.addEventListener("keydown", (e) => {
             if ((e.ctrlKey || e.metaKey) && e.key === "k") {
                 e.preventDefault();
@@ -1810,46 +2254,23 @@
                     window.HalDo.Chat.open();
                 }
             }
+            if (e.key === "Escape") {
+                window.HalDo.Menu.closeAll();
+            }
         });
-    });
 
-    // =========================================================
-    // 16. GLOBAL API
-    // =========================================================
+        console.log("🚀 HalDo AI OS v22.0.0 erfolgreich gestartet!");
+        console.log("💬 Chat: Klick auf Sonne/Logo oder Ctrl+K");
+        console.log("🎙️ Voice: Mikrofon im Chat");
+        console.log("⚙️ System-Menü: Links oben (Logo)");
+        console.log("📱 Apps-Menü: Unten (▦)");
+    }
 
-    window.HalDo.openChat = function() {
-        if (window.HalDo.Chat) window.HalDo.Chat.open();
-    };
-
-    window.HalDo.closeChat = function() {
-        if (window.HalDo.Chat) window.HalDo.Chat.close();
-    };
-
-    window.HalDo.toggleChat = function() {
-        if (window.HalDo.Chat) {
-            window.HalDo.Chat.open ? window.HalDo.Chat.close() : window.HalDo.Chat.open();
-        }
-    };
-
-    window.HalDo.sendChatMessage = function(text) {
-        if (window.HalDo.Chat) {
-            window.HalDo.Chat.input.value = text;
-            window.HalDo.Chat.send();
-        }
-    };
-
-    window.HalDo.setAvatarState = function(state) {
-        if (window.HalDo.LivingAvatar) window.HalDo.LivingAvatar.setState(state);
-    };
-
-    window.HalDo.avatarReact = function(state, duration) {
-        if (window.HalDo.LivingAvatar) window.HalDo.LivingAvatar.react(state, duration);
-    };
-
-    console.log("🚀 HalDo AI OS v22.0.0 erfolgreich gestartet!");
-    console.log("💬 Chat: Strg+K oder Klick auf Sonne/Avatar");
-    console.log("🎙️ Voice: Klick auf Mikrofon im Chat");
-    console.log("📱 Apps: Doppelklick auf Avatar oder App-Launcher");
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", haldoBoot, { once: true });
+    } else {
+        haldoBoot();
+    }
     </script>
 
 </body>
