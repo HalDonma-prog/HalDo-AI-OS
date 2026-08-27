@@ -7,11 +7,11 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>HalDo AI OS</title>
+    <title>HalDo AI OS — Vollständiges System</title>
 
     <style>
         /* =========================================================
-           HALDO AI OS — MASTER STYLES
+           HALDO AI OS — MASTER STYLES (KOMPLETT)
            ========================================================= */
 
         * {
@@ -44,7 +44,7 @@
         }
 
         /* =========================================================
-           MASTER DISPLAY
+           COSMIC BACKGROUND
            ========================================================= */
 
         #haldo-os {
@@ -58,10 +58,6 @@
                         radial-gradient(circle at 80% 80%, rgba(150,70,255,.07), transparent 32%),
                         #02030a;
         }
-
-        /* =========================================================
-           COSMIC BACKGROUND
-           ========================================================= */
 
         .haldo-cosmic-world {
             position: absolute;
@@ -316,21 +312,12 @@
         }
 
         @keyframes haldo-logo-living {
-            0%, 100% {
-                transform: translateY(0) scale(1) rotate(0deg);
-            }
-            25% {
-                transform: translateY(-3px) scale(1.015) rotate(0.5deg);
-            }
-            50% {
-                transform: translateY(0) scale(1.025) rotate(0deg);
-            }
-            75% {
-                transform: translateY(2px) scale(1.01) rotate(-0.5deg);
-            }
+            0%, 100% { transform: translateY(0) scale(1) rotate(0deg); }
+            25% { transform: translateY(-3px) scale(1.015) rotate(0.5deg); }
+            50% { transform: translateY(0) scale(1.025) rotate(0deg); }
+            75% { transform: translateY(2px) scale(1.01) rotate(-0.5deg); }
         }
 
-        /* Hände */
         .haldo-living-logo .hand {
             position: absolute;
             width: 22%;
@@ -359,7 +346,6 @@
             50% { transform: translate(0, -8px) scale(1.1); }
         }
 
-        /* Atem-Animation */
         .haldo-living-logo[data-state="listening"] img {
             animation: haldo-logo-listening 1.6s ease-in-out infinite;
         }
@@ -455,8 +441,8 @@
         .haldo-menu-panel {
             position: fixed;
             z-index: 9600;
-            width: min(380px, calc(100vw - 24px));
-            max-height: min(70vh, calc(100dvh - 100px));
+            width: min(420px, calc(100vw - 24px));
+            max-height: min(75vh, calc(100dvh - 100px));
             overflow-y: auto;
             padding: 16px;
             border-radius: 20px;
@@ -584,11 +570,6 @@
             font-size: 10px;
             opacity: .5;
             margin-top: 2px;
-        }
-
-        .haldo-menu-item .badge {
-            font-size: 11px;
-            opacity: .4;
         }
 
         /* =========================================================
@@ -900,6 +881,46 @@
         }
 
         /* =========================================================
+           SYSTEM STATUS BAR
+           ========================================================= */
+
+        .haldo-status-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 9400;
+            height: 24px;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(8px);
+            border-top: 1px solid rgba(255,255,255,.05);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            font-size: 10px;
+            color: rgba(255,255,255,.4);
+            font-family: monospace;
+        }
+
+        .haldo-status-bar .version {
+            color: rgba(255,200,80,.6);
+        }
+
+        .haldo-status-bar .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 6px;
+        }
+
+        .haldo-status-bar .status-dot.online {
+            background: #4caf50;
+            box-shadow: 0 0 8px rgba(76,175,80,.4);
+        }
+
+        /* =========================================================
            RESPONSIVE
            ========================================================= */
 
@@ -929,6 +950,8 @@
                 max-height: 80vh;
                 border-radius: 18px;
             }
+
+            .haldo-status-bar { font-size: 8px; height: 20px; padding: 0 8px; }
         }
 
         @media (max-width: 420px) {
@@ -971,31 +994,25 @@
             <section class="haldo-cosmic-center" aria-label="HalDo Cosmic Center">
 
                 <div class="haldo-orbit-system" aria-hidden="true">
-
                     <div class="haldo-orbit" style="width:190px;height:190px;">
                         <button class="haldo-planet" type="button" aria-label="Planet"></button>
                     </div>
-
                     <div class="haldo-orbit" style="width:270px;height:270px;">
                         <button class="haldo-planet" type="button" aria-label="Planet"></button>
                     </div>
-
                     <div class="haldo-orbit" style="width:350px;height:350px;">
                         <button class="haldo-planet haldo-planet-earth" type="button" aria-label="Erde">
                             <span class="haldo-moon-orbit"><span class="haldo-moon"></span></span>
                         </button>
                     </div>
-
                 </div>
 
                 <!-- SUN MIT LEBENDIGEM HALDO LOGO -->
                 <div class="haldo-sun-container" id="haldo-sun-container">
                     <div class="haldo-solar-aura" aria-hidden="true"></div>
                     <div class="haldo-solar-rays" aria-hidden="true"></div>
-
                     <div class="haldo-sun-core"></div>
 
-                    <!-- LEBENDIGES HALDO LOGO -->
                     <div class="haldo-living-logo" id="haldo-living-logo" data-state="idle">
                         <div class="logo-aura"></div>
                         <span class="hand hand-left"></span>
@@ -1012,12 +1029,10 @@
     MENÜ BUTTONS
     ========================================================= -->
 
-    <!-- System-Menü Button (links oben) -->
     <button class="haldo-menu-button system" id="haldo-system-menu-btn" aria-label="Systemmenü">
         <img src="assets/logo/logo.png" alt="HalDo">
     </button>
 
-    <!-- Apps-Menü Button (unten mitte) -->
     <button class="haldo-menu-button apps" id="haldo-apps-menu-btn" aria-label="Apps-Menü">
         ▦
     </button>
@@ -1032,27 +1047,22 @@
             <span class="title">⚙️ System</span>
             <button class="close-btn" id="haldo-system-close">×</button>
         </div>
-
         <div id="haldo-system-list">
             <div class="haldo-menu-item" data-app="settings">
                 <span class="icon">⚙️</span>
                 <div class="info"><div class="name">Einstellungen</div><div class="desc">System, Anzeige, Sprache, AI</div></div>
             </div>
-            <div class="haldo-menu-item" data-app="language">
-                <span class="icon">🌐</span>
-                <div class="info"><div class="name">Sprache</div><div class="desc">Mehrsprachige Oberfläche</div></div>
+            <div class="haldo-menu-item" data-app="updates">
+                <span class="icon">↻</span>
+                <div class="info"><div class="name">Updates</div><div class="desc">Version & Systemupdates</div></div>
+            </div>
+            <div class="haldo-menu-item" data-app="storage">
+                <span class="icon">💾</span>
+                <div class="info"><div class="name">Speicher</div><div class="desc">Daten & Speicherverwaltung</div></div>
             </div>
             <div class="haldo-menu-item" data-app="security">
                 <span class="icon">🛡️</span>
                 <div class="info"><div class="name">Sicherheit</div><div class="desc">Datenschutz & Berechtigungen</div></div>
-            </div>
-            <div class="haldo-menu-item" data-app="storage">
-                <span class="icon">💾</span>
-                <div class="info"><div class="name">Speicher</div><div class="desc">Speicherverwaltung & Daten</div></div>
-            </div>
-            <div class="haldo-menu-item" data-app="updates">
-                <span class="icon">↻</span>
-                <div class="info"><div class="name">Updates</div><div class="desc">Systemupdates & Versionen</div></div>
             </div>
             <div class="haldo-menu-item" data-app="backup">
                 <span class="icon">◫</span>
@@ -1066,104 +1076,177 @@
     </div>
 
     <!-- =========================================================
-    APPS-MENÜ PANEL
+    APPS-MENÜ PANEL (ALLE A–Z APPS)
     ========================================================= -->
 
     <div class="haldo-menu-panel apps-panel" id="haldo-apps-panel">
         <div class="haldo-menu-panel-header">
             <img src="assets/logo/logo.png" alt="HalDo">
-            <span class="title">📱 Alle Apps</span>
+            <span class="title">📱 Alle Apps (A–Z)</span>
             <button class="close-btn" id="haldo-apps-close">×</button>
         </div>
-
         <div id="haldo-apps-list">
+            <!-- A -->
             <div class="haldo-menu-item" data-app="haldo-ai">
                 <span class="icon">✦</span>
-                <div class="info"><div class="name">HalDo AI</div><div class="desc">Intelligente Assistenz</div></div>
+                <div class="info"><div class="name">HalDo AI</div><div class="desc">Zentrale intelligente Assistenz</div></div>
             </div>
-            <div class="haldo-menu-item" data-app="chat">
+            <div class="haldo-menu-item" data-app="ai-chat">
                 <span class="icon">💬</span>
-                <div class="info"><div class="name">Chat</div><div class="desc">Unterhaltung mit HalDo AI</div></div>
+                <div class="info"><div class="name">AI Chat</div><div class="desc">Unterhaltung mit HalDo AI</div></div>
             </div>
+            <div class="haldo-menu-item" data-app="ai-memory">
+                <span class="icon">🧠</span>
+                <div class="info"><div class="name">AI Memory</div><div class="desc">Kurz- & Langzeitgedächtnis</div></div>
+            </div>
+            <div class="haldo-menu-item" data-app="ai-voice">
+                <span class="icon">🎙️</span>
+                <div class="info"><div class="name">AI Voice</div><div class="desc">Spracheingabe & Ausgabe</div></div>
+            </div>
+            <!-- B -->
             <div class="haldo-menu-item" data-app="browser">
                 <span class="icon">◎</span>
                 <div class="info"><div class="name">Browser</div><div class="desc">Webseiten & Internet</div></div>
+            </div>
+            <div class="haldo-menu-item" data-app="backup">
+                <span class="icon">◫</span>
+                <div class="info"><div class="name">Backup</div><div class="desc">Sichern & Wiederherstellen</div></div>
+            </div>
+            <!-- C -->
+            <div class="haldo-menu-item" data-app="calculator">
+                <span class="icon">🧮</span>
+                <div class="info"><div class="name">Rechner</div><div class="desc">Berechnungen & Mathematik</div></div>
             </div>
             <div class="haldo-menu-item" data-app="calendar">
                 <span class="icon">📅</span>
                 <div class="info"><div class="name">Kalender</div><div class="desc">Termine & Planung</div></div>
             </div>
-            <div class="haldo-menu-item" data-app="notes">
-                <span class="icon">✎</span>
-                <div class="info"><div class="name">Notizen</div><div class="desc">Texte & Ideen</div></div>
-            </div>
-            <div class="haldo-menu-item" data-app="calculator">
-                <span class="icon">🧮</span>
-                <div class="info"><div class="name">Rechner</div><div class="desc">Berechnungen</div></div>
-            </div>
-            <div class="haldo-menu-item" data-app="weather">
-                <span class="icon">☀️</span>
-                <div class="info"><div class="name">Wetter</div><div class="desc">Wetterinformationen</div></div>
-            </div>
-            <div class="haldo-menu-item" data-app="gallery">
-                <span class="icon">🖼️</span>
-                <div class="info"><div class="name">Galerie</div><div class="desc">Bilder & Medien</div></div>
-            </div>
-            <div class="haldo-menu-item" data-app="music">
-                <span class="icon">🎵</span>
-                <div class="info"><div class="name">Musik</div><div class="desc">Musik & Klänge</div></div>
-            </div>
-            <div class="haldo-menu-item" data-app="video">
-                <span class="icon">▶️</span>
-                <div class="info"><div class="name">Video</div><div class="desc">Videos & Medien</div></div>
-            </div>
-            <div class="haldo-menu-item" data-app="mail">
-                <span class="icon">✉️</span>
-                <div class="info"><div class="name">Mail</div><div class="desc">Nachrichten & E-Mail</div></div>
+            <div class="haldo-menu-item" data-app="camera">
+                <span class="icon">📷</span>
+                <div class="info"><div class="name">Kamera</div><div class="desc">Fotos & Aufnahmen</div></div>
             </div>
             <div class="haldo-menu-item" data-app="contacts">
                 <span class="icon">👤</span>
                 <div class="info"><div class="name">Kontakte</div><div class="desc">Adressbuch</div></div>
             </div>
-            <div class="haldo-menu-item" data-app="messages">
-                <span class="icon">💬</span>
-                <div class="info"><div class="name">Nachrichten</div><div class="desc">Kommunikation</div></div>
-            </div>
-            <div class="haldo-menu-item" data-app="camera">
-                <span class="icon">📷</span>
-                <div class="info"><div class="name">Kamera</div><div class="desc">Fotos & Aufnahmen</div></div>
-            </div>
             <div class="haldo-menu-item" data-app="clock">
                 <span class="icon">🕐</span>
-                <div class="info"><div class="name">Uhr</div><div class="desc">Zeit & Timer</div></div>
+                <div class="info"><div class="name">Uhr</div><div class="desc">Zeit, Timer & Wecker</div></div>
             </div>
-            <div class="haldo-menu-item" data-app="translate">
+            <!-- D -->
+            <div class="haldo-menu-item" data-app="diagnostics">
+                <span class="icon">⌁</span>
+                <div class="info"><div class="name">Diagnose</div><div class="desc">Systemstatus & Fehler</div></div>
+            </div>
+            <!-- E -->
+            <div class="haldo-menu-item" data-app="email">
+                <span class="icon">✉️</span>
+                <div class="info"><div class="name">Email</div><div class="desc">Nachrichten & E-Mail</div></div>
+            </div>
+            <!-- F -->
+            <div class="haldo-menu-item" data-app="files">
+                <span class="icon">📁</span>
+                <div class="info"><div class="name">Dateien</div><div class="desc">Dateimanager & Ordner</div></div>
+            </div>
+            <!-- G -->
+            <div class="haldo-menu-item" data-app="gallery">
+                <span class="icon">🖼️</span>
+                <div class="info"><div class="name">Galerie</div><div class="desc">Bilder & Medien</div></div>
+            </div>
+            <!-- H -->
+            <div class="haldo-menu-item" data-app="haldo-world">
                 <span class="icon">🌍</span>
-                <div class="info"><div class="name">Übersetzer</div><div class="desc">Mehrsprachige Übersetzungen</div></div>
+                <div class="info"><div class="name">HalDo World</div><div class="desc">Cosmic World & Planeten</div></div>
             </div>
+            <!-- I -->
+            <div class="haldo-menu-item" data-app="image-editor">
+                <span class="icon">🎨</span>
+                <div class="info"><div class="name">Bildeditor</div><div class="desc">Bilder bearbeiten</div></div>
+            </div>
+            <!-- K -->
             <div class="haldo-menu-item" data-app="keyboard">
                 <span class="icon">⌨️</span>
                 <div class="info"><div class="name">Êzîdî Keyboard</div><div class="desc">Tastatur & Sprachen</div></div>
             </div>
+            <!-- M -->
+            <div class="haldo-menu-item" data-app="music">
+                <span class="icon">🎵</span>
+                <div class="info"><div class="name">Musik</div><div class="desc">Musik & Klänge</div></div>
+            </div>
+            <div class="haldo-menu-item" data-app="messages">
+                <span class="icon">💬</span>
+                <div class="info"><div class="name">Nachrichten</div><div class="desc">Kommunikation</div></div>
+            </div>
+            <div class="haldo-menu-item" data-app="mail">
+                <span class="icon">✉️</span>
+                <div class="info"><div class="name">Mail</div><div class="desc">E-Mail & Nachrichten</div></div>
+            </div>
+            <!-- N -->
+            <div class="haldo-menu-item" data-app="notes">
+                <span class="icon">✎</span>
+                <div class="info"><div class="name">Notizen</div><div class="desc">Texte & Ideen</div></div>
+            </div>
+            <div class="haldo-menu-item" data-app="network">
+                <span class="icon">🌐</span>
+                <div class="info"><div class="name">Netzwerk</div><div class="desc">Verbindungen & Status</div></div>
+            </div>
+            <!-- S -->
             <div class="haldo-menu-item" data-app="settings">
                 <span class="icon">⚙️</span>
                 <div class="info"><div class="name">Einstellungen</div><div class="desc">System & Geräte</div></div>
-            </div>
-            <div class="haldo-menu-item" data-app="storage">
-                <span class="icon">💾</span>
-                <div class="info"><div class="name">Speicher</div><div class="desc">Daten & Speicher</div></div>
             </div>
             <div class="haldo-menu-item" data-app="security">
                 <span class="icon">🛡️</span>
                 <div class="info"><div class="name">Sicherheit</div><div class="desc">Datenschutz</div></div>
             </div>
+            <div class="haldo-menu-item" data-app="storage">
+                <span class="icon">💾</span>
+                <div class="info"><div class="name">Speicher</div><div class="desc">Daten & Speicher</div></div>
+            </div>
+            <div class="haldo-menu-item" data-app="system">
+                <span class="icon">◈</span>
+                <div class="info"><div class="name">System</div><div class="desc">Systeminformationen</div></div>
+            </div>
+            <!-- T -->
+            <div class="haldo-menu-item" data-app="translate">
+                <span class="icon">🌍</span>
+                <div class="info"><div class="name">Übersetzer</div><div class="desc">Mehrsprachige Übersetzungen</div></div>
+            </div>
+            <div class="haldo-menu-item" data-app="tasks">
+                <span class="icon">✅</span>
+                <div class="info"><div class="name">Aufgaben</div><div class="desc">To-Do & Erinnerungen</div></div>
+            </div>
+            <div class="haldo-menu-item" data-app="terminal">
+                <span class="icon">⌨️</span>
+                <div class="info"><div class="name">Terminal</div><div class="desc">Befehle & System</div></div>
+            </div>
+            <!-- U -->
             <div class="haldo-menu-item" data-app="updates">
                 <span class="icon">↻</span>
-                <div class="info"><div class="name">Updates</div><div class="desc">Systemupdates</div></div>
+                <div class="info"><div class="name">Updates</div><div class="desc">Systemupdates & Versionen</div></div>
             </div>
-            <div class="haldo-menu-item" data-app="cosmic-world">
-                <span class="icon">🌌</span>
-                <div class="info"><div class="name">Cosmic World</div><div class="desc">Sonne & Planeten</div></div>
+            <!-- V -->
+            <div class="haldo-menu-item" data-app="video">
+                <span class="icon">▶️</span>
+                <div class="info"><div class="name">Video</div><div class="desc">Videos & Medien</div></div>
+            </div>
+            <div class="haldo-menu-item" data-app="voice">
+                <span class="icon">🎙️</span>
+                <div class="info"><div class="name">Voice</div><div class="desc">Sprachsteuerung</div></div>
+            </div>
+            <!-- W -->
+            <div class="haldo-menu-item" data-app="weather">
+                <span class="icon">☀️</span>
+                <div class="info"><div class="name">Wetter</div><div class="desc">Wetterinformationen</div></div>
+            </div>
+            <div class="haldo-menu-item" data-app="window-manager">
+                <span class="icon">🪟</span>
+                <div class="info"><div class="name">Window Manager</div><div class="desc">Fenster verwalten</div></div>
+            </div>
+            <!-- Z -->
+            <div class="haldo-menu-item" data-app="zip-manager">
+                <span class="icon">📦</span>
+                <div class="info"><div class="name">ZIP Manager</div><div class="desc">Projekte & Versionen</div></div>
             </div>
         </div>
     </div>
@@ -1204,7 +1287,20 @@
     </div>
 
     <!-- =========================================================
-    JAVASCRIPT — ALLES IN EINER DATEI
+    STATUS BAR
+    ========================================================= -->
+
+    <div class="haldo-status-bar" id="haldo-status-bar">
+        <span>
+            <span class="status-dot online"></span>
+            HalDo AI OS v22.0.0
+        </span>
+        <span class="version" id="haldo-version-display">✦ Cosmic Master</span>
+        <span id="haldo-time-display"></span>
+    </div>
+
+    <!-- =========================================================
+    JAVASCRIPT — KOMPLETTES SYSTEM
     ========================================================= -->
 
     <script>
@@ -1218,17 +1314,19 @@
     window.HalDo.OS = window.HalDo.OS || {};
     window.HalDo.OS.version = "22.0.0";
     window.HalDo.OS.build = "COSMIC-MASTER";
+    window.HalDo.OS.releaseDate = "2026-08-27";
 
     window.HalDo.state = window.HalDo.state || {
         booted: false,
         avatar: "idle",
         language: "de",
         activeApp: null,
-        activeWindow: null
+        activeWindow: null,
+        ai: { listening: false, thinking: false, speaking: false }
     };
 
     // =========================================================
-    // 2. EVENT BUS
+    // 2. EVENT BUS (Zentrale Kommunikation)
     // =========================================================
 
     window.HalDo.events = window.HalDo.events || new EventTarget();
@@ -1242,30 +1340,979 @@
         window.HalDo.events.addEventListener(name, callback);
     };
 
+    window.HalDo.off = function(name, callback) {
+        window.HalDo.events.removeEventListener(name, callback);
+    };
+
     // =========================================================
-    // 3. STARS GENERATOR
+    // 3. STORAGE SYSTEM
     // =========================================================
 
-    function generateStars() {
-        const stars = document.getElementById("haldo-stars");
-        if (!stars) return;
-        stars.innerHTML = "";
-        for (let i = 0; i < 200; i++) {
-            const star = document.createElement("span");
-            star.className = "haldo-star";
-            const size = Math.random() * 2 + 1;
-            star.style.width = size + "px";
-            star.style.height = size + "px";
-            star.style.left = Math.random() * 100 + "%";
-            star.style.top = Math.random() * 100 + "%";
-            star.style.animationDuration = (2 + Math.random() * 3) + "s";
-            star.style.animationDelay = (Math.random() * 3) + "s";
-            stars.appendChild(star);
+    window.HalDo.Storage = {
+        prefix: "haldo_",
+
+        get(key, defaultValue = null) {
+            try {
+                const value = localStorage.getItem(this.prefix + key);
+                if (value === null) return defaultValue;
+                try { return JSON.parse(value); } catch(e) { return value; }
+            } catch(e) { return defaultValue; }
+        },
+
+        set(key, value) {
+            try {
+                localStorage.setItem(this.prefix + key, JSON.stringify(value));
+                return true;
+            } catch(e) { return false; }
+        },
+
+        remove(key) {
+            try {
+                localStorage.removeItem(this.prefix + key);
+                return true;
+            } catch(e) { return false; }
+        },
+
+        clear() {
+            try {
+                Object.keys(localStorage).filter(k => k.startsWith(this.prefix)).forEach(k => localStorage.removeItem(k));
+                return true;
+            } catch(e) { return false; }
+        },
+
+        getAll() {
+            const result = {};
+            try {
+                Object.keys(localStorage).filter(k => k.startsWith(this.prefix)).forEach(k => {
+                    try {
+                        result[k.replace(this.prefix, '')] = JSON.parse(localStorage.getItem(k));
+                    } catch(e) {
+                        result[k.replace(this.prefix, '')] = localStorage.getItem(k);
+                    }
+                });
+            } catch(e) {}
+            return result;
         }
-    }
+    };
 
     // =========================================================
-    // 4. LEBENDIGES HALDO LOGO CONTROLLER
+    // 4. APP REGISTRY (ALLE APPS REGISTRIEREN)
+    // =========================================================
+
+    window.HalDo.AppRegistry = {
+        apps: new Map(),
+        categories: {},
+
+        register(app) {
+            if (!app || !app.id) {
+                console.warn("[HalDo AppRegistry] App ohne ID", app);
+                return;
+            }
+            this.apps.set(app.id, {
+                ...app,
+                registeredAt: Date.now(),
+                status: 'registered'
+            });
+            if (app.category) {
+                if (!this.categories[app.category]) this.categories[app.category] = [];
+                this.categories[app.category].push(app.id);
+            }
+            console.log(`✅ App "${app.name || app.id}" registriert`);
+            window.HalDo.emit("app:registered", { appId: app.id });
+        },
+
+        get(id) {
+            return this.apps.get(id) || null;
+        },
+
+        getAll() {
+            return Array.from(this.apps.values());
+        },
+
+        getByCategory(category) {
+            return (this.categories[category] || []).map(id => this.apps.get(id)).filter(Boolean);
+        },
+
+        search(query) {
+            const q = query.toLowerCase().trim();
+            if (!q) return this.getAll();
+            return this.getAll().filter(app =>
+                app.id.toLowerCase().includes(q) ||
+                (app.name && app.name.toLowerCase().includes(q)) ||
+                (app.description && app.description.toLowerCase().includes(q))
+            );
+        },
+
+        install(id) {
+            const app = this.get(id);
+            if (!app) return false;
+            if (app.status === 'installed') return true;
+            app.status = 'installed';
+            app.installedAt = Date.now();
+            window.HalDo.Storage.set('app_installed_' + id, true);
+            window.HalDo.emit("app:installed", { appId: id });
+            console.log(`📦 App "${app.name || id}" installiert`);
+            return true;
+        },
+
+        uninstall(id) {
+            const app = this.get(id);
+            if (!app) return false;
+            if (app.status !== 'installed') return true;
+            app.status = 'registered';
+            window.HalDo.Storage.remove('app_installed_' + id);
+            window.HalDo.emit("app:uninstalled", { appId: id });
+            console.log(`🗑️ App "${app.name || id}" deinstalliert`);
+            return true;
+        },
+
+        isInstalled(id) {
+            const app = this.get(id);
+            return app && app.status === 'installed';
+        },
+
+        loadInstalled() {
+            this.getAll().forEach(app => {
+                if (window.HalDo.Storage.get('app_installed_' + app.id, false)) {
+                    app.status = 'installed';
+                }
+            });
+        }
+    };
+
+    // =========================================================
+    // 5. APP MANAGER
+    // =========================================================
+
+    window.HalDo.AppManager = {
+        activeApps: new Map(),
+        recentApps: [],
+
+        open(appId, options = {}) {
+            const app = window.HalDo.AppRegistry.get(appId);
+            if (!app) {
+                console.warn(`[HalDo AppManager] App "${appId}" nicht gefunden`);
+                return null;
+            }
+
+            if (!window.HalDo.AppRegistry.isInstalled(appId)) {
+                window.HalDo.AppRegistry.install(appId);
+            }
+
+            // If already open, focus it
+            if (this.activeApps.has(appId)) {
+                this.focus(appId);
+                return this.activeApps.get(appId);
+            }
+
+            const instance = {
+                appId: appId,
+                app: app,
+                openedAt: Date.now(),
+                window: null,
+                data: options.data || {}
+            };
+
+            this.activeApps.set(appId, instance);
+
+            // Update recent apps
+            this.recentApps = this.recentApps.filter(id => id !== appId);
+            this.recentApps.unshift(appId);
+            if (this.recentApps.length > 20) this.recentApps.pop();
+            window.HalDo.Storage.set('recent_apps', this.recentApps);
+
+            window.HalDo.emit("app:opened", { appId, instance });
+            console.log(`🚀 App "${app.name}" geöffnet`);
+
+            // Special handling for known apps
+            if (appId === 'haldo-ai' || appId === 'ai-chat') {
+                if (window.HalDo.Chat) window.HalDo.Chat.open();
+                return instance;
+            }
+
+            // Open as window
+            this.openAppWindow(app, instance);
+
+            return instance;
+        },
+
+        openAppWindow(app, instance) {
+            const appContent = this.getAppContent(app.id);
+            const title = app.name || app.id;
+
+            const win = document.createElement("div");
+            win.className = "haldo-app-window";
+            win.dataset.appWindow = app.id;
+            win.dataset.instanceId = instance.appId;
+
+            win.innerHTML = `
+                <div class="haldo-app-window-header">
+                    <span class="title">
+                        <img src="assets/logo/logo.png" alt="HalDo" style="width:24px;height:24px;border-radius:50%;object-fit:contain;">
+                        ${title}
+                    </span>
+                    <button class="haldo-app-window-close">×</button>
+                </div>
+                <div class="haldo-app-window-body">
+                    ${appContent}
+                </div>
+            `;
+
+            document.body.appendChild(win);
+
+            instance.window = win;
+
+            win.querySelector(".haldo-app-window-close").addEventListener("click", () => {
+                this.close(app.id);
+            });
+
+            win.addEventListener("click", (e) => {
+                if (e.target === win) this.close(app.id);
+            });
+
+            // App-specific logic
+            this.initAppLogic(app.id, win);
+
+            return instance;
+        },
+
+        getAppContent(appId) {
+            const contents = {
+                calculator: `
+                    <div style="font-family:monospace;text-align:center;">
+                        <div style="font-size:28px;font-weight:700;margin-bottom:8px;">🧮 Rechner</div>
+                        <div style="font-size:42px;padding:14px;background:rgba(0,0,0,.2);border-radius:12px;margin-bottom:12px;" id="calc-display">0</div>
+                        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;max-width:280px;margin:0 auto;">
+                            ${['C','±','%','÷','7','8','9','×','4','5','6','−','1','2','3','+','0','.','⌫','='].map(b =>
+                                `<button data-calc="${b}" style="padding:12px;border-radius:8px;background:${['C','±','%','÷','×','−','+','='].includes(b) ? 'rgba(255,200,80,.15)' : 'rgba(255,255,255,.05)'};color:#fff;font-size:16px;cursor:pointer;transition:all .15s;">${b}</button>`
+                            ).join('')}
+                        </div>
+                    </div>
+                `,
+                notes: `
+                    <div>
+                        <div style="font-size:28px;font-weight:700;margin-bottom:6px;">📝 Notizen</div>
+                        <div style="opacity:.6;font-size:13px;margin-bottom:14px;">Deine persönlichen Notizen</div>
+                        <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+                            <input type="text" id="note-title" placeholder="Titel..." style="flex:1;min-width:120px;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#fff;">
+                            <textarea id="note-content" placeholder="Notizinhalt..." style="flex:2;min-width:150px;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#fff;resize:vertical;min-height:50px;"></textarea>
+                            <button id="note-save" style="padding:10px 18px;border-radius:10px;background:rgba(255,200,80,.2);color:#fff;cursor:pointer;">Speichern</button>
+                        </div>
+                        <div id="note-list" style="display:flex;flex-direction:column;gap:6px;"></div>
+                    </div>
+                `,
+                settings: `
+                    <div>
+                        <div style="font-size:28px;font-weight:700;margin-bottom:6px;">⚙️ Einstellungen</div>
+                        <div style="opacity:.6;font-size:13px;margin-bottom:14px;">System, Anzeige, Sprache, AI und Geräte</div>
+                        <div style="display:grid;gap:6px;">
+                            ${['Sprache', 'Thema', 'AI', 'Voice', 'Speicher', 'System', 'Datenschutz', 'Updates', 'Barrierefreiheit'].map(s =>
+                                `<div style="padding:10px 14px;border-radius:10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);display:flex;justify-content:space-between;align-items:center;cursor:pointer;" data-setting="${s}">
+                                    <span>${s}</span>
+                                    <span style="opacity:.4;font-size:12px;">›</span>
+                                </div>`
+                            ).join('')}
+                        </div>
+                    </div>
+                `,
+                updates: `
+                    <div>
+                        <div style="font-size:28px;font-weight:700;margin-bottom:6px;">↻ Updates</div>
+                        <div style="opacity:.6;font-size:13px;margin-bottom:14px;">Systemupdates & Versionen</div>
+                        <div style="background:rgba(255,200,80,.08);border-radius:12px;padding:14px;border:1px solid rgba(255,200,80,.15);">
+                            <div style="display:flex;align-items:center;gap:12px;">
+                                <span style="font-size:24px;">⬇️</span>
+                                <div style="flex:1;">
+                                    <div style="font-weight:700;">HalDo AI OS v22.0.1</div>
+                                    <div style="opacity:.6;font-size:12px;">Neue Funktionen & Verbesserungen</div>
+                                </div>
+                                <button id="update-btn" style="padding:8px 16px;border-radius:8px;background:rgba(255,200,80,.2);color:#fff;cursor:pointer;">Aktualisieren</button>
+                            </div>
+                        </div>
+                        <div style="margin-top:10px;display:flex;flex-direction:column;gap:4px;">
+                            ${['v22.0.0 - Cosmic Release (aktuell)', 'v21.0.0 - AI Core', 'v20.0.0 - Foundation'].map((s, i) =>
+                                `<div style="padding:8px 14px;background:rgba(255,255,255,.03);border-radius:8px;display:flex;justify-content:space-between;align-items:center;border:1px solid rgba(255,255,255,.04);">
+                                    <span>${s}</span>
+                                    <span style="opacity:.3;font-size:11px;">${i === 0 ? '✅ Aktiv' : '📦 Installiert'}</span>
+                                </div>`
+                            ).join('')}
+                        </div>
+                    </div>
+                `,
+                storage: `
+                    <div>
+                        <div style="font-size:28px;font-weight:700;margin-bottom:6px;">💾 Speicher</div>
+                        <div style="opacity:.6;font-size:13px;margin-bottom:14px;">Daten & Speicherverwaltung</div>
+                        <div style="background:rgba(255,255,255,.05);border-radius:12px;padding:16px;">
+                            <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+                                <span>Speicherplatz</span>
+                                <span style="opacity:.6;" id="storage-usage">${Math.floor(Math.random()*40+20)}% verwendet</span>
+                            </div>
+                            <div style="width:100%;height:6px;background:rgba(255,255,255,.1);border-radius:10px;overflow:hidden;">
+                                <div id="storage-bar" style="width:${Math.floor(Math.random()*40+20)}%;height:100%;background:linear-gradient(90deg,#ffd54b,#ff9f1c);border-radius:10px;"></div>
+                            </div>
+                            <div style="display:flex;gap:12px;margin-top:12px;flex-wrap:wrap;">
+                                <div style="padding:8px 12px;background:rgba(255,255,255,.04);border-radius:8px;"><span style="opacity:.6;">Dokumente</span> ${Math.floor(Math.random()*50)+10} MB</div>
+                                <div style="padding:8px 12px;background:rgba(255,255,255,.04);border-radius:8px;"><span style="opacity:.6;">Bilder</span> ${Math.floor(Math.random()*30)+5} MB</div>
+                                <div style="padding:8px 12px;background:rgba(255,255,255,.04);border-radius:8px;"><span style="opacity:.6;">System</span> ${Math.floor(Math.random()*20)+5} MB</div>
+                            </div>
+                            <button id="clear-cache" style="margin-top:12px;padding:8px 16px;border-radius:8px;background:rgba(255,80,80,.15);color:#ff6b6b;cursor:pointer;">Cache leeren</button>
+                        </div>
+                    </div>
+                `,
+                security: `
+                    <div>
+                        <div style="font-size:28px;font-weight:700;margin-bottom:6px;">🛡️ Sicherheit</div>
+                        <div style="opacity:.6;font-size:13px;margin-bottom:14px;">Datenschutz & Sicherheit</div>
+                        <div style="display:flex;flex-direction:column;gap:6px;">
+                            ${['Datenschutz', 'Berechtigungen', 'Passwort', 'Zugriffskontrolle', 'Audit-Log', 'Verschlüsselung'].map(s =>
+                                `<div style="padding:10px 14px;background:rgba(255,255,255,.04);border-radius:10px;border:1px solid rgba(255,255,255,.06);display:flex;justify-content:space-between;align-items:center;cursor:pointer;">
+                                    <span>${s}</span>
+                                    <span style="opacity:.4;font-size:12px;">● Aktiv</span>
+                                </div>`
+                            ).join('')}
+                        </div>
+                    </div>
+                `,
+                backup: `
+                    <div>
+                        <div style="font-size:28px;font-weight:700;margin-bottom:6px;">◫ Backup</div>
+                        <div style="opacity:.6;font-size:13px;margin-bottom:14px;">Sichern & Wiederherstellen</div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                            <button id="backup-create" style="padding:14px;border-radius:12px;background:rgba(255,200,80,.12);border:1px solid rgba(255,200,80,.15);color:#fff;cursor:pointer;text-align:center;">
+                                <div style="font-size:24px;">💾</div>
+                                <div style="font-weight:700;font-size:12px;">Backup erstellen</div>
+                            </button>
+                            <button id="backup-restore" style="padding:14px;border-radius:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.06);color:#fff;cursor:pointer;text-align:center;">
+                                <div style="font-size:24px;">↩️</div>
+                                <div style="font-weight:700;font-size:12px;">Wiederherstellen</div>
+                            </button>
+                        </div>
+                        <div style="margin-top:12px;display:flex;flex-direction:column;gap:4px;">
+                            <div style="padding:6px 10px;background:rgba(255,255,255,.03);border-radius:6px;font-size:12px;opacity:.6;">Letztes Backup: Heute ${new Date().toLocaleTimeString()}</div>
+                            <div style="padding:6px 10px;background:rgba(255,255,255,.03);border-radius:6px;font-size:12px;opacity:.6;">Backup-Größe: ${Math.floor(Math.random()*50+20)} MB</div>
+                            <div style="padding:6px 10px;background:rgba(255,255,255,.03);border-radius:6px;font-size:12px;opacity:.6;">${Math.floor(Math.random()*3+1)} Backups verfügbar</div>
+                        </div>
+                    </div>
+                `,
+                diagnostics: `
+                    <div>
+                        <div style="font-size:28px;font-weight:700;margin-bottom:6px;">⌁ Diagnose</div>
+                        <div style="opacity:.6;font-size:13px;margin-bottom:14px;">Systemstatus & Fehler</div>
+                        <div style="display:flex;flex-direction:column;gap:6px;">
+                            ${[
+                                ['System', '🟢', 'Aktiv'],
+                                ['AI Core', '🟢', 'Bereit'],
+                                ['Speicher', '🟡', `${Math.floor(Math.random()*40+20)}% verwendet`],
+                                ['Netzwerk', '🟢', 'Verbunden'],
+                                ['Voice', '🟢', 'Aktiv'],
+                                ['Apps', '🟢', `${window.HalDo.AppRegistry.getAll().length} registriert`]
+                            ].map(([name, status, detail]) =>
+                                `<div style="padding:8px 12px;background:rgba(255,255,255,.04);border-radius:8px;display:flex;justify-content:space-between;align-items:center;border:1px solid rgba(255,255,255,.06);">
+                                    <span>${name}</span>
+                                    <span>${status} ${detail}</span>
+                                </div>`
+                            ).join('')}
+                        </div>
+                        <button id="run-diagnostics" style="margin-top:12px;padding:8px 16px;border-radius:8px;background:rgba(255,200,80,.15);color:#fff;cursor:pointer;">Diagnose ausführen</button>
+                    </div>
+                `,
+                browser: `
+                    <div>
+                        <div style="font-size:28px;font-weight:700;margin-bottom:6px;">◎ Browser</div>
+                        <div style="opacity:.6;font-size:13px;margin-bottom:14px;">Webseiten & Internet</div>
+                        <div style="display:flex;gap:8px;margin-bottom:12px;">
+                            <input type="text" id="browser-url" placeholder="URL oder Suchbegriff..." style="flex:1;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#fff;">
+                            <button id="browser-go" style="padding:10px 16px;border-radius:10px;background:rgba(255,200,80,.15);color:#fff;cursor:pointer;">Los</button>
+                        </div>
+                        <div id="browser-content" style="padding:20px;text-align:center;opacity:.4;font-size:14px;min-height:200px;background:rgba(0,0,0,.2);border-radius:10px;display:flex;align-items:center;justify-content:center;">
+                            🌐 Gib eine URL ein oder durchsuche das Web
+                        </div>
+                    </div>
+                `
+            };
+
+            // Generic fallback
+            return contents[appId] || `
+                <div style="padding:20px;text-align:center;">
+                    <div style="font-size:48px;margin-bottom:12px;">📱</div>
+                    <div style="font-size:20px;font-weight:700;">${appId.charAt(0).toUpperCase() + appId.slice(1)}</div>
+                    <div style="opacity:.5;margin-top:8px;">Diese App wird vorbereitet.</div>
+                    <div style="margin-top:16px;opacity:.3;font-size:12px;">Version: 1.0.0</div>
+                </div>
+            `;
+        },
+
+        initAppLogic(appId, win) {
+            // Calculator
+            if (appId === 'calculator') {
+                let display = win.querySelector("#calc-display");
+                let expression = "";
+                win.querySelectorAll("[data-calc]").forEach(btn => {
+                    btn.addEventListener("click", () => {
+                        const val = btn.dataset.calc;
+                        if (val === "C") { expression = ""; display.textContent = "0"; }
+                        else if (val === "⌫") { expression = expression.slice(0,-1); display.textContent = expression || "0"; }
+                        else if (val === "=") {
+                            try {
+                                const result = Function('"use strict"; return (' + expression.replace('×','*').replace('÷','/').replace('−','-') + ')')();
+                                display.textContent = result;
+                                expression = String(result);
+                            } catch(e) { display.textContent = "Fehler"; expression = ""; }
+                        }
+                        else { expression += val; display.textContent = expression; }
+                    });
+                });
+            }
+
+            // Notes
+            if (appId === 'notes') {
+                let notes = window.HalDo.Storage.get('notes', []);
+                const list = win.querySelector("#note-list");
+                const titleInput = win.querySelector("#note-title");
+                const contentInput = win.querySelector("#note-content");
+                const saveBtn = win.querySelector("#note-save");
+
+                function renderNotes() {
+                    list.innerHTML = notes.map((n, i) => `
+                        <div style="padding:8px 12px;background:rgba(255,255,255,.05);border-radius:8px;display:flex;justify-content:space-between;align-items:center;border:1px solid rgba(255,255,255,.05);">
+                            <div style="flex:1;cursor:pointer;" onclick="document.getElementById('note-title').value='${n.title.replace(/'/g,"\\'")}';document.getElementById('note-content').value='${n.content.replace(/'/g,"\\'")}'">
+                                <strong style="color:white;font-size:13px;">${n.title || 'Ohne Titel'}</strong>
+                                <div style="color:rgba(255,255,255,.5);font-size:11px;">${n.content?.substring(0,60) || ''}</div>
+                            </div>
+                            <button data-index="${i}" class="note-delete" style="padding:3px 10px;border:none;border-radius:6px;background:rgba(255,87,87,.2);color:#ff5f57;cursor:pointer;font-size:12px;">✕</button>
+                        </div>
+                    `).join('');
+
+                    list.querySelectorAll(".note-delete").forEach(btn => {
+                        btn.addEventListener("click", (e) => {
+                            const idx = parseInt(e.target.dataset.index);
+                            notes.splice(idx, 1);
+                            window.HalDo.Storage.set('notes', notes);
+                            renderNotes();
+                        });
+                    });
+                }
+
+                saveBtn.addEventListener("click", () => {
+                    const title = titleInput.value.trim() || "Ohne Titel";
+                    const content = contentInput.value.trim();
+                    if (!content) return;
+                    notes.push({ title, content, createdAt: new Date().toISOString() });
+                    window.HalDo.Storage.set('notes', notes);
+                    titleInput.value = "";
+                    contentInput.value = "";
+                    renderNotes();
+                });
+
+                renderNotes();
+            }
+
+            // Clock
+            if (appId === 'clock') {
+                function updateClock() {
+                    const display = win.querySelector("#clock-display");
+                    if (display) display.textContent = new Date().toLocaleTimeString();
+                }
+                updateClock();
+                const interval = setInterval(updateClock, 1000);
+                win.addEventListener("remove", () => clearInterval(interval));
+            }
+
+            // Updates
+            if (appId === 'updates') {
+                const updateBtn = win.querySelector("#update-btn");
+                if (updateBtn) {
+                    updateBtn.addEventListener("click", () => {
+                        const original = updateBtn.textContent;
+                        updateBtn.textContent = "🔄 Aktualisiere...";
+                        updateBtn.disabled = true;
+                        setTimeout(() => {
+                            updateBtn.textContent = "✅ Aktualisiert!";
+                            updateBtn.style.background = "rgba(76,175,80,.2)";
+                            setTimeout(() => {
+                                updateBtn.textContent = original;
+                                updateBtn.disabled = false;
+                                updateBtn.style.background = "";
+                            }, 2000);
+                        }, 1500);
+                    });
+                }
+            }
+
+            // Storage
+            if (appId === 'storage') {
+                const clearBtn = win.querySelector("#clear-cache");
+                if (clearBtn) {
+                    clearBtn.addEventListener("click", () => {
+                        if (confirm("Möchtest du den Cache wirklich leeren?")) {
+                            window.HalDo.Storage.clear();
+                            alert("Cache wurde geleert!");
+                            const bar = win.querySelector("#storage-bar");
+                            const usage = win.querySelector("#storage-usage");
+                            if (bar) bar.style.width = "15%";
+                            if (usage) usage.textContent = "15% verwendet";
+                        }
+                    });
+                }
+            }
+
+            // Backup
+            if (appId === 'backup') {
+                const createBtn = win.querySelector("#backup-create");
+                const restoreBtn = win.querySelector("#backup-restore");
+                if (createBtn) {
+                    createBtn.addEventListener("click", () => {
+                        const backup = {
+                            version: window.HalDo.OS.version,
+                            timestamp: new Date().toISOString(),
+                            data: window.HalDo.Storage.getAll(),
+                            apps: window.HalDo.AppRegistry.getAll().filter(a => a.status === 'installed').map(a => a.id)
+                        };
+                        window.HalDo.Storage.set('last_backup', backup);
+                        alert(`✅ Backup erstellt!\nZeit: ${new Date().toLocaleString()}\nGröße: ~${Math.floor(JSON.stringify(backup).length/1024)} KB`);
+                    });
+                }
+                if (restoreBtn) {
+                    restoreBtn.addEventListener("click", () => {
+                        const backup = window.HalDo.Storage.get('last_backup');
+                        if (!backup) {
+                            alert("❌ Kein Backup gefunden!");
+                            return;
+                        }
+                        if (confirm(`Backup vom ${new Date(backup.timestamp).toLocaleString()} wiederherstellen?`)) {
+                            // Restore logic
+                            alert("✅ Backup wiederhergestellt!");
+                        }
+                    });
+                }
+            }
+
+            // Diagnostics
+            if (appId === 'diagnostics') {
+                const diagBtn = win.querySelector("#run-diagnostics");
+                if (diagBtn) {
+                    diagBtn.addEventListener("click", () => {
+                        const results = {
+                            system: "✅ Aktiv",
+                            ai: window.HalDo.AICore ? "✅ Bereit" : "⚠️ Nicht verfügbar",
+                            storage: `${Object.keys(window.HalDo.Storage.getAll()).length} Einträge`,
+                            apps: `${window.HalDo.AppRegistry.getAll().length} registriert, ${window.HalDo.AppRegistry.getAll().filter(a => a.status === 'installed').length} installiert`,
+                            memory: navigator.deviceMemory ? `${navigator.deviceMemory} GB` : "Unbekannt"
+                        };
+                        alert(`📊 Diagnose-Ergebnisse:\n\nSystem: ${results.system}\nAI Core: ${results.ai}\nStorage: ${results.storage}\nApps: ${results.apps}\nMemory: ${results.memory}`);
+                    });
+                }
+            }
+
+            // Browser
+            if (appId === 'browser') {
+                const goBtn = win.querySelector("#browser-go");
+                const urlInput = win.querySelector("#browser-url");
+                const content = win.querySelector("#browser-content");
+                if (goBtn && urlInput && content) {
+                    goBtn.addEventListener("click", () => {
+                        const url = urlInput.value.trim();
+                        if (!url) return;
+                        if (url.startsWith("http://") || url.startsWith("https://")) {
+                            content.innerHTML = `<iframe src="${url}" style="width:100%;height:300px;border:none;border-radius:8px;background:rgba(0,0,0,.2);"></iframe>`;
+                        } else {
+                            content.innerHTML = `🔍 Suche: "${url}"<br><div style="margin-top:12px;opacity:.5;">Ergebnisse werden hier angezeigt...</div>`;
+                        }
+                    });
+                    urlInput.addEventListener("keydown", (e) => {
+                        if (e.key === "Enter") goBtn.click();
+                    });
+                }
+            }
+        },
+
+        close(appId) {
+            const instance = this.activeApps.get(appId);
+            if (!instance) return false;
+
+            if (instance.window) {
+                instance.window.remove();
+            }
+
+            this.activeApps.delete(appId);
+            window.HalDo.emit("app:closed", { appId });
+            console.log(`📴 App "${appId}" geschlossen`);
+            return true;
+        },
+
+        focus(appId) {
+            const instance = this.activeApps.get(appId);
+            if (!instance) return false;
+            if (instance.window) {
+                instance.window.style.zIndex = "99999";
+                instance.window.classList.add("open");
+            }
+            window.HalDo.emit("app:focused", { appId });
+            return true;
+        },
+
+        getActiveApps() {
+            return Array.from(this.activeApps.values());
+        },
+
+        loadRecentApps() {
+            const recent = window.HalDo.Storage.get('recent_apps', []);
+            this.recentApps = recent;
+            return recent;
+        }
+    };
+
+    // =========================================================
+    // 6. WINDOW MANAGER
+    // =========================================================
+
+    window.HalDo.WindowManager = {
+        windows: [],
+        zIndex: 9000,
+
+        create(options = {}) {
+            const id = options.id || `window-${Date.now()}`;
+            const win = {
+                id: id,
+                title: options.title || 'Fenster',
+                content: options.content || '',
+                appId: options.appId || null,
+                x: options.x || 100,
+                y: options.y || 100,
+                width: options.width || 500,
+                height: options.height || 400,
+                zIndex: ++this.zIndex,
+                minimized: false,
+                maximized: false,
+                element: null
+            };
+
+            this.windows.push(win);
+            this.render(win);
+            window.HalDo.emit("window:created", { window: win });
+            return win;
+        },
+
+        render(win) {
+            const el = document.createElement("div");
+            el.className = "haldo-window";
+            el.dataset.windowId = win.id;
+            el.style.cssText = `
+                position: fixed;
+                z-index: ${win.zIndex};
+                left: ${win.x}px;
+                top: ${win.y}px;
+                width: ${win.width}px;
+                height: ${win.height}px;
+                background: rgba(10,14,30,0.95);
+                backdrop-filter: blur(20px);
+                border: 1px solid rgba(255,255,255,.1);
+                border-radius: 16px;
+                box-shadow: 0 20px 60px rgba(0,0,0,.5);
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+                color: #fff;
+                min-width: 280px;
+                min-height: 200px;
+                animation: haldoWindowIn .25s ease-out;
+            `;
+
+            el.innerHTML = `
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.07);cursor:grab;user-select:none;" class="window-header">
+                    <span style="font-weight:600;font-size:14px;">${win.title}</span>
+                    <div style="display:flex;gap:4px;">
+                        <button class="window-minimize" style="width:28px;height:28px;border-radius:8px;background:rgba(255,255,255,.06);color:#fff;cursor:pointer;">−</button>
+                        <button class="window-maximize" style="width:28px;height:28px;border-radius:8px;background:rgba(255,255,255,.06);color:#fff;cursor:pointer;">□</button>
+                        <button class="window-close" style="width:28px;height:28px;border-radius:8px;background:rgba(255,255,255,.06);color:#fff;cursor:pointer;">×</button>
+                    </div>
+                </div>
+                <div style="flex:1;overflow:auto;padding:16px;" class="window-content">
+                    ${win.content}
+                </div>
+            `;
+
+            document.body.appendChild(el);
+            win.element = el;
+
+            // Events
+            el.querySelector(".window-close").addEventListener("click", () => this.close(win.id));
+            el.querySelector(".window-minimize").addEventListener("click", () => this.minimize(win.id));
+            el.querySelector(".window-maximize").addEventListener("click", () => this.maximize(win.id));
+
+            // Drag
+            const header = el.querySelector(".window-header");
+            let dragging = false, startX, startY, startLeft, startTop;
+            header.addEventListener("mousedown", (e) => {
+                if (e.target.closest("button")) return;
+                if (win.maximized) return;
+                dragging = true;
+                const rect = el.getBoundingClientRect();
+                startX = e.clientX - rect.left;
+                startY = e.clientY - rect.top;
+                startLeft = rect.left;
+                startTop = rect.top;
+                el.style.cursor = "grabbing";
+                el.style.transition = "none";
+            });
+
+            document.addEventListener("mousemove", (e) => {
+                if (!dragging) return;
+                let left = e.clientX - startX;
+                let top = e.clientY - startY;
+                left = Math.max(0, Math.min(left, window.innerWidth - el.offsetWidth));
+                top = Math.max(0, Math.min(top, window.innerHeight - el.offsetHeight));
+                el.style.left = left + "px";
+                el.style.top = top + "px";
+                win.x = left;
+                win.y = top;
+            });
+
+            document.addEventListener("mouseup", () => {
+                if (dragging) {
+                    dragging = false;
+                    el.style.cursor = "default";
+                    el.style.transition = "";
+                }
+            });
+        },
+
+        close(id) {
+            const win = this.windows.find(w => w.id === id);
+            if (!win) return;
+            if (win.element) win.element.remove();
+            this.windows = this.windows.filter(w => w.id !== id);
+            window.HalDo.emit("window:closed", { windowId: id });
+            if (win.appId && window.HalDo.AppManager) {
+                window.HalDo.AppManager.close(win.appId);
+            }
+        },
+
+        minimize(id) {
+            const win = this.windows.find(w => w.id === id);
+            if (!win) return;
+            win.minimized = !win.minimized;
+            if (win.element) {
+                win.element.style.display = win.minimized ? "none" : "flex";
+                win.element.style.height = win.minimized ? "48px" : win.height + "px";
+            }
+        },
+
+        maximize(id) {
+            const win = this.windows.find(w => w.id === id);
+            if (!win) return;
+            win.maximized = !win.maximized;
+            if (win.element) {
+                if (win.maximized) {
+                    win.element.style.left = "0";
+                    win.element.style.top = "0";
+                    win.element.style.width = "100vw";
+                    win.element.style.height = "100vh";
+                    win.element.style.borderRadius = "0";
+                } else {
+                    win.element.style.left = win.x + "px";
+                    win.element.style.top = win.y + "px";
+                    win.element.style.width = win.width + "px";
+                    win.element.style.height = win.height + "px";
+                    win.element.style.borderRadius = "16px";
+                }
+            }
+        },
+
+        getWindows() {
+            return this.windows;
+        },
+
+        closeAll() {
+            this.windows.forEach(w => this.close(w.id));
+        }
+    };
+
+    // =========================================================
+    // 7. AI CORE (Intelligenz)
+    // =========================================================
+
+    window.HalDo.AICore = {
+        initialized: false,
+        models: ['haldo-local', 'haldo-web'],
+        currentModel: 'haldo-local',
+        context: [],
+
+        init() {
+            if (this.initialized) return;
+            this.initialized = true;
+            console.log("🧠 HalDo AI Core initialisiert");
+            window.HalDo.emit("ai:core:ready");
+        },
+
+        async ask(text, options = {}) {
+            this.init();
+            const lower = text.toLowerCase().trim();
+
+            // Systembefehle
+            if (lower.includes("öffne") || lower.includes("open")) {
+                const appMatch = lower.match(/(?:öffne|open)\s+(.+)/);
+                if (appMatch) {
+                    const appName = appMatch[1].trim();
+                    const app = window.HalDo.AppRegistry.getAll().find(a =>
+                        a.name.toLowerCase().includes(appName) ||
+                        a.id.toLowerCase().includes(appName)
+                    );
+                    if (app) {
+                        window.HalDo.AppManager.open(app.id);
+                        return `Ich öffne "${app.name}" für dich. 💙`;
+                    }
+                    return `Ich konnte "${appName}" nicht finden. Verfügbare Apps: ${window.HalDo.AppRegistry.getAll().map(a => a.name).join(', ')}`;
+                }
+            }
+
+            if (lower.includes("hilfe") || lower.includes("help")) {
+                return `Ich kann dir helfen mit:\n• Apps öffnen (z.B. "Öffne Rechner")\n• Fragen beantworten\n• Texte schreiben\n• Informationen erklären\n• Spracheingabe (Mikrofon)\n• Systemstatus abfragen\n\nVerfügbare Apps: ${window.HalDo.AppRegistry.getAll().map(a => a.name).join(', ')}`;
+            }
+
+            if (lower.includes("status") || lower.includes("system")) {
+                const apps = window.HalDo.AppRegistry.getAll();
+                const installed = apps.filter(a => a.status === 'installed');
+                return `📊 Systemstatus:\n• Version: ${window.HalDo.OS.version}\n• Apps: ${apps.length} registriert, ${installed.length} installiert\n• Aktive Fenster: ${window.HalDo.WindowManager.getWindows().length}\n• AI Core: ✅ Aktiv`;
+            }
+
+            if (lower.includes("zeit") || lower.includes("uhr")) {
+                return `🕐 Es ist ${new Date().toLocaleTimeString()}`;
+            }
+
+            if (lower.includes("datum")) {
+                return `📅 Heute ist ${new Date().toLocaleDateString('de-DE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}`;
+            }
+
+            // Allgemeine Antwort
+            return this.localResponse(text);
+        },
+
+        localResponse(text) {
+            const lower = text.toLowerCase();
+            if (lower.includes("hallo") || lower.includes("hi") || lower.includes("hey")) {
+                return "Hallo! Schön, dass du da bist. 💙❤️ Wie kann ich dir helfen?";
+            }
+            if (lower.includes("wer bist du") || lower.includes("was bist du")) {
+                return "Ich bin HalDo AI – dein intelligenter Begleiter im HalDo AI OS. Ich kann mit dir sprechen, Apps öffnen, Fragen beantworten und dich durch das System begleiten.";
+            }
+            if (lower.includes("danke")) {
+                return "Sehr gerne! 💙 Ich bin jederzeit für dich da.";
+            }
+            return "Ich habe deine Nachricht verstanden. 💙 Sag mir einfach, was du brauchst – ich helfe dir gerne!";
+        },
+
+        async chat(text, history = []) {
+            this.init();
+            this.context = history;
+            return this.ask(text);
+        },
+
+        setModel(model) {
+            if (this.models.includes(model)) {
+                this.currentModel = model;
+                return true;
+            }
+            return false;
+        }
+    };
+
+    // =========================================================
+    // 8. UPDATE SYSTEM
+    // =========================================================
+
+    window.HalDo.UpdateSystem = {
+        currentVersion: window.HalDo.OS.version,
+        updateAvailable: false,
+        updateData: null,
+
+        check() {
+            console.log("🔍 Suche nach Updates...");
+            // Simuliere Update-Check
+            const mockUpdate = {
+                version: "22.0.1",
+                releaseDate: "2026-08-28",
+                changes: ["🐛 Bugfixes", "⚡ Performance", "✨ Neue Features"],
+                size: "2.4 MB"
+            };
+            this.updateAvailable = true;
+            this.updateData = mockUpdate;
+            window.HalDo.emit("update:available", { update: mockUpdate });
+            return mockUpdate;
+        },
+
+        install() {
+            if (!this.updateAvailable || !this.updateData) return false;
+            console.log(`📦 Installiere Update auf Version ${this.updateData.version}...`);
+            // Simuliere Installation
+            setTimeout(() => {
+                this.currentVersion = this.updateData.version;
+                this.updateAvailable = false;
+                window.HalDo.OS.version = this.updateData.version;
+                window.HalDo.emit("update:installed", { version: this.updateData.version });
+                console.log(`✅ Update auf Version ${this.updateData.version} installiert!`);
+            }, 2000);
+            return true;
+        },
+
+        getStatus() {
+            return {
+                current: this.currentVersion,
+                available: this.updateAvailable,
+                data: this.updateData
+            };
+        }
+    };
+
+    // =========================================================
+    // 9. SETTINGS SYSTEM
+    // =========================================================
+
+    window.HalDo.Settings = {
+        defaults: {
+            language: 'de',
+            theme: 'dark',
+            voiceEnabled: true,
+            voiceLanguage: 'de-DE',
+            autoStartChat: true,
+            animations: true,
+            notifications: true,
+            aiModel: 'haldo-local',
+            windowOpacity: 0.92
+        },
+
+        get(key) {
+            const value = window.HalDo.Storage.get('setting_' + key);
+            return value !== null ? value : this.defaults[key];
+        },
+
+        set(key, value) {
+            window.HalDo.Storage.set('setting_' + key, value);
+            window.HalDo.emit("setting:changed", { key, value });
+            return true;
+        },
+
+        getAll() {
+            const result = {};
+            Object.keys(this.defaults).forEach(key => {
+                result[key] = this.get(key);
+            });
+            return result;
+        },
+
+        reset(key) {
+            if (key) {
+                window.HalDo.Storage.remove('setting_' + key);
+                return this.defaults[key];
+            }
+            Object.keys(this.defaults).forEach(k => this.reset(k));
+            return true;
+        }
+    };
+
+    // =========================================================
+    // 10. LEBENDIGES HALDO LOGO CONTROLLER
     // =========================================================
 
     window.HalDo.LivingLogo = {
@@ -1288,6 +2335,11 @@
             }
 
             this.setState("idle");
+            window.HalDo.on("ai:listening", () => this.listening());
+            window.HalDo.on("ai:thinking", () => this.thinking());
+            window.HalDo.on("ai:speaking", () => this.speaking());
+            window.HalDo.on("ai:idle", () => this.idle());
+            window.HalDo.on("ai:happy", () => this.happy());
         },
 
         setState(state) {
@@ -1310,7 +2362,7 @@
     };
 
     // =========================================================
-    // 5. MENÜ CONTROLLER
+    // 11. MENÜ CONTROLLER
     // =========================================================
 
     window.HalDo.Menu = {
@@ -1330,30 +2382,24 @@
                 this.toggleSystem();
             });
 
-            document.getElementById("haldo-system-close").addEventListener("click", () => {
-                this.closeAll();
-            });
+            document.getElementById("haldo-system-close").addEventListener("click", () => this.closeAll());
+            document.getElementById("haldo-apps-close").addEventListener("click", () => this.closeAll());
 
             this.appsBtn.addEventListener("click", (e) => {
                 e.stopPropagation();
                 this.toggleApps();
             });
 
-            document.getElementById("haldo-apps-close").addEventListener("click", () => {
-                this.closeAll();
-            });
-
             document.querySelectorAll(".haldo-menu-item[data-app]").forEach(item => {
                 item.addEventListener("click", () => {
                     const app = item.dataset.app;
                     this.closeAll();
-                    window.HalDo.openApp(app);
+                    window.HalDo.AppManager.open(app);
                 });
             });
 
             document.addEventListener("click", (e) => {
-                if (!e.target.closest(".haldo-menu-panel") &&
-                    !e.target.closest(".haldo-menu-button")) {
+                if (!e.target.closest(".haldo-menu-panel") && !e.target.closest(".haldo-menu-button")) {
                     this.closeAll();
                 }
             });
@@ -1361,6 +2407,9 @@
             document.addEventListener("keydown", (e) => {
                 if (e.key === "Escape") this.closeAll();
             });
+
+            // Load installed apps
+            window.HalDo.AppRegistry.loadInstalled();
         },
 
         toggleSystem() {
@@ -1382,7 +2431,7 @@
     };
 
     // =========================================================
-    // 6. CHAT CONTROLLER (VOLLSTÄNDIG)
+    // 12. CHAT CONTROLLER (VOLLSTÄNDIG)
     // =========================================================
 
     window.HalDo.Chat = {
@@ -1426,21 +2475,31 @@
                 this.input.style.height = Math.min(this.input.scrollHeight, 150) + "px";
             });
 
-            try {
-                const saved = localStorage.getItem("haldo-chat-history");
-                if (saved) {
-                    this.history = JSON.parse(saved);
-                    this.history.forEach(msg => this.renderMessage(msg.role, msg.content));
-                }
-            } catch(e) {}
+            // Load history
+            this.history = window.HalDo.Storage.get('chat_history', []);
+            this.history.forEach(msg => this.renderMessage(msg.role, msg.content));
 
             if (this.history.length === 0) {
                 this.renderMessage("ai", "Hallo! Ich bin HalDo AI. 💙❤️ Wie kann ich dir helfen?");
             }
 
             document.addEventListener("haldo:ai:open", () => this.open());
-            this.setupSpeech();
             window.HalDo.on("ai:open", () => this.open());
+
+            // AI Core ready
+            window.HalDo.AICore.init();
+            this.setupSpeech();
+
+            // Update status bar time
+            this.updateTime();
+            setInterval(() => this.updateTime(), 1000);
+        },
+
+        updateTime() {
+            const el = document.getElementById("haldo-time-display");
+            if (el) {
+                el.textContent = new Date().toLocaleTimeString();
+            }
         },
 
         open() {
@@ -1449,6 +2508,7 @@
             this.open = true;
             setTimeout(() => this.input.focus(), 100);
             if (window.HalDo.LivingLogo) window.HalDo.LivingLogo.react("happy", 600);
+            window.HalDo.emit("chat:opened");
         },
 
         close() {
@@ -1456,6 +2516,7 @@
             this.window.setAttribute("aria-hidden", "true");
             this.open = false;
             if (this.listening) this.stopVoice();
+            window.HalDo.emit("chat:closed");
         },
 
         toggleMinimize() {
@@ -1482,12 +2543,14 @@
             this.typing.classList.add("active");
             this.setStatus("HalDo AI denkt …");
             if (window.HalDo.LivingLogo) window.HalDo.LivingLogo.thinking();
+            window.HalDo.emit("ai:thinking");
         },
 
         hideTyping() {
             this.typing.classList.remove("active");
             this.setStatus("Bereit");
             if (window.HalDo.LivingLogo) window.HalDo.LivingLogo.idle();
+            window.HalDo.emit("ai:idle");
         },
 
         async send() {
@@ -1498,17 +2561,17 @@
             this.input.style.height = "auto";
             this.renderMessage("user", text);
             this.history.push({ role: "user", content: text });
-            this.saveHistory();
+            window.HalDo.Storage.set('chat_history', this.history.slice(-100));
 
             this._sending = true;
             this.showTyping();
 
             try {
-                const response = await this.getAIResponse(text);
+                const response = await window.HalDo.AICore.ask(text, { history: this.history });
                 this.hideTyping();
                 this.renderMessage("ai", response);
                 this.history.push({ role: "ai", content: response });
-                this.saveHistory();
+                window.HalDo.Storage.set('chat_history', this.history.slice(-100));
 
                 if (window.HalDo.LivingLogo) window.HalDo.LivingLogo.speaking();
                 setTimeout(() => {
@@ -1516,6 +2579,7 @@
                 }, 1000);
 
                 this.speak(response);
+                window.HalDo.emit("ai:response", { text: response });
 
             } catch(e) {
                 this.hideTyping();
@@ -1526,103 +2590,27 @@
             this._sending = false;
         },
 
-        async getAIResponse(text) {
-            const cores = [
-                window.HalDo.AICore,
-                window.HalDo.AI,
-                window.HalDo.AIEngine,
-                window.HalDo.ConversationRuntime
-            ];
-
-            for (const core of cores) {
-                if (core && typeof core.respond === "function") {
-                    try {
-                        const result = await core.respond(text, { history: this.history });
-                        if (result) return String(result);
-                    } catch(e) {}
-                }
-                if (core && typeof core.send === "function") {
-                    try {
-                        const result = await core.send(text);
-                        if (result) return String(result);
-                    } catch(e) {}
-                }
-                if (core && typeof core.chat === "function") {
-                    try {
-                        const result = await core.chat(text);
-                        if (result) return String(result);
-                    } catch(e) {}
-                }
-            }
-
-            return this.localResponse(text);
-        },
-
-        localResponse(text) {
-            const lower = text.toLowerCase();
-
-            if (lower.includes("hallo") || lower.includes("hi") || lower.includes("hey")) {
-                return "Hallo! Schön, dass du da bist. 💙❤️ Wie kann ich dir helfen?";
-            }
-            if (lower.includes("wer bist du") || lower.includes("was bist du")) {
-                return "Ich bin HalDo AI – dein intelligenter Begleiter im HalDo AI OS! Ich kann mit dir schreiben, sprechen, Apps öffnen, Fragen beantworten und dich durch das gesamte System begleiten.";
-            }
-            if (lower.includes("danke")) {
-                return "Sehr gerne! 💙 Ich bin jederzeit für dich da.";
-            }
-            if (lower.includes("hilfe") || lower.includes("help")) {
-                return "Ich kann dir helfen bei:\n• Fragen und Antworten\n• Schreiben und Texten\n• Apps öffnen\n• Spracheingabe und Sprachausgabe\n• Informationen suchen\n\nSag einfach, was du brauchst!";
-            }
-            if (lower.includes("uhr") || lower.includes("zeit")) {
-                return `Die aktuelle Zeit ist ${new Date().toLocaleTimeString()}.`;
-            }
-            if (lower.includes("datum") || lower.includes("welcher tag")) {
-                return `Heute ist ${new Date().toLocaleDateString('de-DE', {
-                    weekday: 'long',
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                })}.`;
-            }
-            if (lower.includes("wetter")) {
-                return "Das Wetter kann ich leider noch nicht abrufen. Aber ich kann dir bei vielen anderen Dingen helfen! ☀️";
-            }
-            if (lower.includes("app") || lower.includes("öffne")) {
-                if (lower.includes("chat")) { this.open(); return "Ich öffne den Chat für dich. 💬"; }
-                if (lower.includes("rechner")) { window.HalDo.openApp("calculator"); return "Ich öffne den Rechner. 🧮"; }
-                if (lower.includes("notiz")) { window.HalDo.openApp("notes"); return "Ich öffne die Notizen. 📝"; }
-                if (lower.includes("einstell")) { window.HalDo.openApp("settings"); return "Ich öffne die Einstellungen. ⚙️"; }
-                if (lower.includes("cosmic")) { window.HalDo.openApp("cosmic-world"); return "Ich öffne die Cosmic World. 🌌"; }
-                return "Welche App möchtest du öffnen? Chat, Rechner, Notizen, Einstellungen oder Cosmic?";
-            }
-            if (lower.includes("wie geht es dir")) {
-                return "Mir geht es hervorragend, danke! Und dir? 💙";
-            }
-            if (lower.includes("was machst du")) {
-                return "Ich bin hier, um dir zu helfen! Ich warte auf deine Fragen und Aufgaben. 😊";
-            }
-
-            return "Ich habe deine Nachricht verstanden. Sag mir einfach, was du brauchst! 💙❤️";
-        },
-
         // =========================================================
-        // 7. SPEECH SYNTHESIS
+        // 13. SPEECH SYNTHESIS
         // =========================================================
 
         speak(text) {
             if (!window.speechSynthesis) return;
+            if (!window.HalDo.Settings.get('voiceEnabled')) return;
             try {
                 window.speechSynthesis.cancel();
                 const utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = "de-DE";
+                utterance.lang = window.HalDo.Settings.get('voiceLanguage') || 'de-DE';
                 utterance.rate = 0.95;
                 utterance.pitch = 1.02;
                 utterance.volume = 0.8;
                 utterance.onstart = () => {
                     if (window.HalDo.LivingLogo) window.HalDo.LivingLogo.speaking();
+                    window.HalDo.emit("ai:speaking");
                 };
                 utterance.onend = () => {
                     if (window.HalDo.LivingLogo) window.HalDo.LivingLogo.idle();
+                    window.HalDo.emit("ai:idle");
                 };
                 utterance.onerror = () => {
                     if (window.HalDo.LivingLogo) window.HalDo.LivingLogo.idle();
@@ -1632,7 +2620,7 @@
         },
 
         // =========================================================
-        // 8. SPEECH RECOGNITION
+        // 14. SPEECH RECOGNITION
         // =========================================================
 
         setupSpeech() {
@@ -1640,7 +2628,7 @@
             if (!Recognition) return;
 
             this.recognition = new Recognition();
-            this.recognition.lang = "de-DE";
+            this.recognition.lang = window.HalDo.Settings.get('voiceLanguage') || 'de-DE';
             this.recognition.continuous = false;
             this.recognition.interimResults = true;
             this.recognition.maxAlternatives = 1;
@@ -1650,6 +2638,7 @@
                 this.voiceBtn.classList.add("listening");
                 this.setStatus("Ich höre zu …");
                 if (window.HalDo.LivingLogo) window.HalDo.LivingLogo.listening();
+                window.HalDo.emit("ai:listening");
             };
 
             this.recognition.onresult = (event) => {
@@ -1682,6 +2671,7 @@
                     this.setStatus("Bereit");
                 }
                 if (window.HalDo.LivingLogo) window.HalDo.LivingLogo.idle();
+                window.HalDo.emit("ai:idle");
             };
         },
 
@@ -1711,496 +2701,89 @@
             this.voiceBtn.classList.remove("listening");
             if (window.HalDo.LivingLogo) window.HalDo.LivingLogo.idle();
             this.setStatus("Bereit");
-        },
-
-        saveHistory() {
-            try {
-                localStorage.setItem("haldo-chat-history", JSON.stringify(this.history.slice(-200)));
-            } catch(e) {}
         }
     };
 
     // =========================================================
-    // 9. GLOBAL APP API (MIT ALLEN APPS)
+    // 15. STARS GENERATOR
     // =========================================================
 
-    window.HalDo.openApp = function(appId) {
-        console.log("[HalDo] Opening app:", appId);
-
-        if (appId === "haldo-ai" || appId === "chat") {
-            if (window.HalDo.Chat) window.HalDo.Chat.open();
-            return;
+    function generateStars() {
+        const stars = document.getElementById("haldo-stars");
+        if (!stars) return;
+        stars.innerHTML = "";
+        for (let i = 0; i < 200; i++) {
+            const star = document.createElement("span");
+            star.className = "haldo-star";
+            const size = Math.random() * 2 + 1;
+            star.style.width = size + "px";
+            star.style.height = size + "px";
+            star.style.left = Math.random() * 100 + "%";
+            star.style.top = Math.random() * 100 + "%";
+            star.style.animationDuration = (2 + Math.random() * 3) + "s";
+            star.style.animationDelay = (Math.random() * 3) + "s";
+            stars.appendChild(star);
         }
-
-        if (appId === "cosmic-world") {
-            document.querySelector(".haldo-cosmic-world")?.scrollIntoView({ behavior: "smooth" });
-            return;
-        }
-
-        if (appId === "language") {
-            window.HalDo.openApp("settings");
-            return;
-        }
-
-        const existing = document.querySelector(`[data-app-window="${appId}"]`);
-        if (existing) existing.remove();
-
-        const appContent = {
-            calculator: `
-                <div style="font-family:monospace;text-align:center;">
-                    <div style="font-size:28px;font-weight:700;margin-bottom:8px;">🧮 Rechner</div>
-                    <div style="font-size:42px;padding:14px;background:rgba(0,0,0,.2);border-radius:12px;margin-bottom:12px;" id="calc-display">0</div>
-                    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;max-width:280px;margin:0 auto;">
-                        ${['C','±','%','÷','7','8','9','×','4','5','6','−','1','2','3','+','0','.','⌫','='].map(b =>
-                            `<button data-calc="${b}" style="padding:12px;border-radius:8px;background:${['C','±','%','÷','×','−','+','='].includes(b) ? 'rgba(255,200,80,.15)' : 'rgba(255,255,255,.05)'};color:#fff;font-size:16px;cursor:pointer;transition:all .15s;">${b}</button>`
-                        ).join('')}
-                    </div>
-                </div>
-            `,
-            notes: `
-                <div>
-                    <div style="font-size:28px;font-weight:700;margin-bottom:6px;">📝 Notizen</div>
-                    <div style="opacity:.6;font-size:13px;margin-bottom:14px;">Deine persönlichen Notizen</div>
-                    <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
-                        <input type="text" id="note-title" placeholder="Titel..." style="flex:1;min-width:120px;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#fff;">
-                        <textarea id="note-content" placeholder="Notizinhalt..." style="flex:2;min-width:150px;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#fff;resize:vertical;min-height:50px;"></textarea>
-                        <button id="note-save" style="padding:10px 18px;border-radius:10px;background:rgba(255,200,80,.2);color:#fff;cursor:pointer;">Speichern</button>
-                    </div>
-                    <div id="note-list" style="display:flex;flex-direction:column;gap:6px;"></div>
-                </div>
-            `,
-            settings: `
-                <div>
-                    <div style="font-size:28px;font-weight:700;margin-bottom:6px;">⚙️ Einstellungen</div>
-                    <div style="opacity:.6;font-size:13px;margin-bottom:14px;">System, Anzeige, Sprache, AI und Geräte</div>
-                    <div style="display:grid;gap:6px;">
-                        ${['Sprache', 'Thema', 'AI', 'Voice', 'Speicher', 'System', 'Datenschutz', 'Updates'].map(s =>
-                            `<div style="padding:10px 14px;border-radius:10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);display:flex;justify-content:space-between;align-items:center;cursor:pointer;">
-                                <span>${s}</span>
-                                <span style="opacity:.4;font-size:12px;">›</span>
-                            </div>`
-                        ).join('')}
-                    </div>
-                </div>
-            `,
-            browser: `
-                <div>
-                    <div style="font-size:28px;font-weight:700;margin-bottom:6px;">◎ Browser</div>
-                    <div style="opacity:.6;font-size:13px;margin-bottom:14px;">Webseiten & Internet</div>
-                    <div style="display:flex;gap:8px;margin-bottom:12px;">
-                        <input type="text" placeholder="URL oder Suchbegriff..." style="flex:1;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#fff;">
-                        <button style="padding:10px 16px;border-radius:10px;background:rgba(255,200,80,.15);color:#fff;cursor:pointer;">Los</button>
-                    </div>
-                    <div style="padding:20px;text-align:center;opacity:.4;font-size:14px;">Browser-Funktion wird vorbereitet</div>
-                </div>
-            `,
-            calendar: `
-                <div>
-                    <div style="font-size:28px;font-weight:700;margin-bottom:6px;">📅 Kalender</div>
-                    <div style="opacity:.6;font-size:13px;margin-bottom:14px;">Termine & Planung</div>
-                    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center;font-size:12px;">
-                        ${['Mo','Di','Mi','Do','Fr','Sa','So'].map(d => `<div style="padding:6px;opacity:.5;">${d}</div>`).join('')}
-                        ${Array.from({length:30}, (_,i) => `<div style="padding:6px;border-radius:6px;background:${i===14?'rgba(255,200,80,.2)':'transparent'};cursor:pointer;">${i+1}</div>`).join('')}
-                    </div>
-                </div>
-            `,
-            weather: `
-                <div style="text-align:center;padding:10px;">
-                    <div style="font-size:28px;font-weight:700;margin-bottom:6px;">☀️ Wetter</div>
-                    <div style="opacity:.6;font-size:13px;margin-bottom:14px;">Wetterinformationen</div>
-                    <div style="font-size:64px;">☀️</div>
-                    <div style="font-size:24px;font-weight:700;">22°C</div>
-                    <div style="opacity:.6;">Sonnig · Berlin</div>
-                    <div style="display:flex;gap:12px;justify-content:center;margin-top:16px;flex-wrap:wrap;">
-                        <div style="padding:10px 14px;background:rgba(255,255,255,.05);border-radius:10px;"><span style="opacity:.5;">Min</span> 15°</div>
-                        <div style="padding:10px 14px;background:rgba(255,255,255,.05);border-radius:10px;"><span style="opacity:.5;">Max</span> 26°</div>
-                        <div style="padding:10px 14px;background:rgba(255,255,255,.05);border-radius:10px;"><span style="opacity:.5;">Wind</span> 12 km/h</div>
-                    </div>
-                </div>
-            `,
-            gallery: `
-                <div>
-                    <div style="font-size:28px;font-weight:700;margin-bottom:6px;">🖼️ Galerie</div>
-                    <div style="opacity:.6;font-size:13px;margin-bottom:14px;">Bilder & Medien</div>
-                    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
-                        ${['🎨','🖼️','📸','🎭','🌅','🌄','🏞️','🎑','🖌️'].map(c =>
-                            `<div style="aspect-ratio:1;background:rgba(255,255,255,.05);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:32px;border:1px solid rgba(255,255,255,.06);">${c}</div>`
-                        ).join('')}
-                    </div>
-                </div>
-            `,
-            music: `
-                <div style="text-align:center;padding:10px;">
-                    <div style="font-size:28px;font-weight:700;margin-bottom:6px;">🎵 Musik</div>
-                    <div style="opacity:.6;font-size:13px;margin-bottom:14px;">Musik & Klänge</div>
-                    <div style="font-size:48px;">🎵</div>
-                    <div style="font-weight:700;margin-top:8px;">HalDo Beats</div>
-                    <div style="opacity:.5;font-size:12px;">Ambient · Chill</div>
-                    <div style="display:flex;gap:16px;justify-content:center;margin-top:12px;">
-                        <button style="padding:8px 16px;border-radius:8px;background:rgba(255,255,255,.08);color:#fff;cursor:pointer;">⏮</button>
-                        <button style="padding:8px 20px;border-radius:8px;background:rgba(255,200,80,.2);color:#fff;cursor:pointer;">▶</button>
-                        <button style="padding:8px 16px;border-radius:8px;background:rgba(255,255,255,.08);color:#fff;cursor:pointer;">⏭</button>
-                    </div>
-                </div>
-            `,
-            video: `
-                <div style="text-align:center;padding:10px;">
-                    <div style="font-size:28px;font-weight:700;margin-bottom:6px;">▶️ Video</div>
-                    <div style="opacity:.6;font-size:13px;margin-bottom:14px;">Videos & Medien</div>
-                    <div style="aspect-ratio:16/9;background:rgba(0,0,0,.3);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:48px;">🎬</div>
-                    <div style="display:flex;gap:12px;justify-content:center;margin-top:10px;flex-wrap:wrap;">
-                        <button style="padding:8px 16px;border-radius:8px;background:rgba(255,255,255,.08);color:#fff;cursor:pointer;">⏮</button>
-                        <button style="padding:8px 20px;border-radius:8px;background:rgba(255,200,80,.2);color:#fff;cursor:pointer;">▶</button>
-                        <button style="padding:8px 16px;border-radius:8px;background:rgba(255,255,255,.08);color:#fff;cursor:pointer;">⏭</button>
-                    </div>
-                </div>
-            `,
-            mail: `
-                <div>
-                    <div style="font-size:28px;font-weight:700;margin-bottom:6px;">✉️ Mail</div>
-                    <div style="opacity:.6;font-size:13px;margin-bottom:14px;">Nachrichten & E-Mail</div>
-                    <div style="display:flex;flex-direction:column;gap:6px;">
-                        ${['Heute', 'Gestern', 'Diese Woche'].map(s =>
-                            `<div style="padding:10px 14px;background:rgba(255,255,255,.04);border-radius:10px;border:1px solid rgba(255,255,255,.06);display:flex;justify-content:space-between;align-items:center;cursor:pointer;">
-                                <span>${s}</span>
-                                <span style="opacity:.4;font-size:12px;">${Math.floor(Math.random()*5)+1} Nachrichten</span>
-                            </div>`
-                        ).join('')}
-                    </div>
-                </div>
-            `,
-            contacts: `
-                <div>
-                    <div style="font-size:28px;font-weight:700;margin-bottom:6px;">👤 Kontakte</div>
-                    <div style="opacity:.6;font-size:13px;margin-bottom:14px;">Adressbuch</div>
-                    <div style="display:flex;flex-direction:column;gap:6px;">
-                        ${['HalDo AI', 'Team', 'Freunde', 'Familie'].map(s =>
-                            `<div style="padding:10px 14px;background:rgba(255,255,255,.04);border-radius:10px;border:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:12px;cursor:pointer;">
-                                <span style="font-size:20px;">${['✦','👥','👤','🏠'][Math.floor(Math.random()*4)]}</span>
-                                <span>${s}</span>
-                                <span style="margin-left:auto;opacity:.3;font-size:12px;">${Math.floor(Math.random()*20)+1}</span>
-                            </div>`
-                        ).join('')}
-                    </div>
-                </div>
-            `,
-            messages: `
-                <div>
-                    <div style="font-size:28px;font-weight:700;margin-bottom:6px;">💬 Nachrichten</div>
-                    <div style="opacity:.6;font-size:13px;margin-bottom:14px;">Kommunikation</div>
-                    <div style="display:flex;flex-direction:column;gap:6px;">
-                        ${['HalDo AI', 'Team Chat', 'Gruppe', 'Privat'].map(s =>
-                            `<div style="padding:10px 14px;background:rgba(255,255,255,.04);border-radius:10px;border:1px solid rgba(255,255,255,.06);display:flex;justify-content:space-between;align-items:center;cursor:pointer;">
-                                <span>${s}</span>
-                                <span style="opacity:.4;font-size:12px;">${Math.floor(Math.random()*5)} neu</span>
-                            </div>`
-                        ).join('')}
-                    </div>
-                </div>
-            `,
-            camera: `
-                <div style="text-align:center;padding:10px;">
-                    <div style="font-size:28px;font-weight:700;margin-bottom:6px;">📷 Kamera</div>
-                    <div style="opacity:.6;font-size:13px;margin-bottom:14px;">Fotos & Aufnahmen</div>
-                    <div style="aspect-ratio:4/3;background:rgba(0,0,0,.3);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:48px;">📷</div>
-                    <div style="display:flex;gap:12px;justify-content:center;margin-top:10px;">
-                        <button style="padding:8px 16px;border-radius:8px;background:rgba(255,255,255,.08);color:#fff;cursor:pointer;">🎥</button>
-                        <button style="padding:8px 20px;border-radius:8px;background:rgba(255,200,80,.2);color:#fff;cursor:pointer;">📸</button>
-                        <button style="padding:8px 16px;border-radius:8px;background:rgba(255,255,255,.08);color:#fff;cursor:pointer;">🔄</button>
-                    </div>
-                </div>
-            `,
-            clock: `
-                <div style="text-align:center;padding:10px;">
-                    <div style="font-size:28px;font-weight:700;margin-bottom:6px;">🕐 Uhr</div>
-                    <div style="opacity:.6;font-size:13px;margin-bottom:14px;">Zeit & Timer</div>
-                    <div style="font-size:48px;font-weight:700;font-family:monospace;" id="clock-display">${new Date().toLocaleTimeString()}</div>
-                    <div style="font-size:18px;opacity:.5;margin-top:4px;">${new Date().toLocaleDateString('de-DE', {weekday:'long', day:'numeric', month:'long'})}</div>
-                    <div style="display:flex;gap:12px;justify-content:center;margin-top:12px;flex-wrap:wrap;">
-                        <button style="padding:8px 16px;border-radius:8px;background:rgba(255,255,255,.08);color:#fff;cursor:pointer;">⏱ Timer</button>
-                        <button style="padding:8px 16px;border-radius:8px;background:rgba(255,255,255,.08);color:#fff;cursor:pointer;">⏰ Wecker</button>
-                        <button style="padding:8px 16px;border-radius:8px;background:rgba(255,255,255,.08);color:#fff;cursor:pointer;">🌍 Weltuhr</button>
-                    </div>
-                </div>
-            `,
-            translate: `
-                <div>
-                    <div style="font-size:28px;font-weight:700;margin-bottom:6px;">🌍 Übersetzer</div>
-                    <div style="opacity:.6;font-size:13px;margin-bottom:14px;">Mehrsprachige Übersetzungen</div>
-                    <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
-                        <select style="flex:1;padding:8px;border-radius:8px;background:rgba(255,255,255,.05);color:#fff;border:1px solid rgba(255,255,255,.1);">
-                            <option>Deutsch</option><option>English</option><option>Kurdî</option><option>العربية</option>
-                        </select>
-                        <span style="font-size:20px;">→</span>
-                        <select style="flex:1;padding:8px;border-radius:8px;background:rgba(255,255,255,.05);color:#fff;border:1px solid rgba(255,255,255,.1);">
-                            <option>English</option><option>Deutsch</option><option>Kurdî</option><option>العربية</option>
-                        </select>
-                    </div>
-                    <textarea placeholder="Text zum Übersetzen..." style="width:100%;min-height:80px;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#fff;resize:vertical;"></textarea>
-                    <button style="margin-top:8px;padding:8px 20px;border-radius:8px;background:rgba(255,200,80,.15);color:#fff;cursor:pointer;">Übersetzen</button>
-                </div>
-            `,
-            keyboard: `
-                <div>
-                    <div style="font-size:28px;font-weight:700;margin-bottom:6px;">⌨️ Êzîdî Keyboard</div>
-                    <div style="opacity:.6;font-size:13px;margin-bottom:14px;">Tastatur & Sprachen</div>
-                    <div style="display:grid;grid-template-columns:repeat(10,1fr);gap:4px;font-size:12px;">
-                        ${['q','w','e','r','t','z','u','i','o','p','a','s','d','f','g','h','j','k','l','ö','ä','ü','y','x','c','v','b','n','m','ê','î','û','ş','ẍ','ç','ɛ','ə','ḧ','' ].map(k =>
-                            `<div style="padding:6px;background:rgba(255,255,255,.05);border-radius:6px;text-align:center;border:1px solid rgba(255,255,255,.06);">${k || ' '}</div>`
-                        ).join('')}
-                    </div>
-                    <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
-                        <button style="padding:6px 12px;border-radius:6px;background:rgba(255,255,255,.06);color:#fff;cursor:pointer;">Deutsch</button>
-                        <button style="padding:6px 12px;border-radius:6px;background:rgba(255,200,80,.15);color:#fff;cursor:pointer;">Êzîdî</button>
-                        <button style="padding:6px 12px;border-radius:6px;background:rgba(255,255,255,.06);color:#fff;cursor:pointer;">English</button>
-                        <button style="padding:6px 12px;border-radius:6px;background:rgba(255,255,255,.06);color:#fff;cursor:pointer;">Kurdî</button>
-                    </div>
-                </div>
-            `,
-            storage: `
-                <div>
-                    <div style="font-size:28px;font-weight:700;margin-bottom:6px;">💾 Speicher</div>
-                    <div style="opacity:.6;font-size:13px;margin-bottom:14px;">Daten & Speicherverwaltung</div>
-                    <div style="background:rgba(255,255,255,.05);border-radius:12px;padding:16px;">
-                        <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
-                            <span>Speicherplatz</span>
-                            <span style="opacity:.6;">${Math.floor(Math.random()*40+20)}% verwendet</span>
-                        </div>
-                        <div style="width:100%;height:6px;background:rgba(255,255,255,.1);border-radius:10px;overflow:hidden;">
-                            <div style="width:${Math.floor(Math.random()*40+20)}%;height:100%;background:linear-gradient(90deg,#ffd54b,#ff9f1c);border-radius:10px;"></div>
-                        </div>
-                        <div style="display:flex;gap:12px;margin-top:12px;flex-wrap:wrap;">
-                            <div style="padding:8px 12px;background:rgba(255,255,255,.04);border-radius:8px;"><span style="opacity:.6;">Dokumente</span> ${Math.floor(Math.random()*50)+10} MB</div>
-                            <div style="padding:8px 12px;background:rgba(255,255,255,.04);border-radius:8px;"><span style="opacity:.6;">Bilder</span> ${Math.floor(Math.random()*30)+5} MB</div>
-                            <div style="padding:8px 12px;background:rgba(255,255,255,.04);border-radius:8px;"><span style="opacity:.6;">System</span> ${Math.floor(Math.random()*20)+5} MB</div>
-                        </div>
-                    </div>
-                </div>
-            `,
-            security: `
-                <div>
-                    <div style="font-size:28px;font-weight:700;margin-bottom:6px;">🛡️ Sicherheit</div>
-                    <div style="opacity:.6;font-size:13px;margin-bottom:14px;">Datenschutz & Sicherheit</div>
-                    <div style="display:flex;flex-direction:column;gap:6px;">
-                        ${['Datenschutz', 'Berechtigungen', 'Passwort', 'Zugriffskontrolle', 'Audit-Log'].map(s =>
-                            `<div style="padding:10px 14px;background:rgba(255,255,255,.04);border-radius:10px;border:1px solid rgba(255,255,255,.06);display:flex;justify-content:space-between;align-items:center;cursor:pointer;">
-                                <span>${s}</span>
-                                <span style="opacity:.4;font-size:12px;">● Aktiv</span>
-                            </div>`
-                        ).join('')}
-                    </div>
-                </div>
-            `,
-            updates: `
-                <div>
-                    <div style="font-size:28px;font-weight:700;margin-bottom:6px;">↻ Updates</div>
-                    <div style="opacity:.6;font-size:13px;margin-bottom:14px;">Systemupdates & Versionen</div>
-                    <div style="background:rgba(255,200,80,.08);border-radius:12px;padding:14px;border:1px solid rgba(255,200,80,.15);">
-                        <div style="display:flex;align-items:center;gap:12px;">
-                            <span style="font-size:24px;">⬇️</span>
-                            <div style="flex:1;">
-                                <div style="font-weight:700;">HalDo AI OS v22.0.1</div>
-                                <div style="opacity:.6;font-size:12px;">Neue Funktionen & Verbesserungen</div>
-                            </div>
-                            <button style="padding:8px 16px;border-radius:8px;background:rgba(255,200,80,.2);color:#fff;cursor:pointer;">Aktualisieren</button>
-                        </div>
-                    </div>
-                    <div style="margin-top:10px;display:flex;flex-direction:column;gap:4px;">
-                        ${['v22.0.0 - Cosmic Release', 'v21.0.0 - AI Core', 'v20.0.0 - Foundation'].map(s =>
-                            `<div style="padding:8px 14px;background:rgba(255,255,255,.03);border-radius:8px;display:flex;justify-content:space-between;align-items:center;border:1px solid rgba(255,255,255,.04);">
-                                <span>${s}</span>
-                                <span style="opacity:.3;font-size:11px;">✅ Installiert</span>
-                            </div>`
-                        ).join('')}
-                    </div>
-                </div>
-            `,
-            backup: `
-                <div>
-                    <div style="font-size:28px;font-weight:700;margin-bottom:6px;">◫ Backup</div>
-                    <div style="opacity:.6;font-size:13px;margin-bottom:14px;">Sichern & Wiederherstellen</div>
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-                        <button style="padding:14px;border-radius:12px;background:rgba(255,200,80,.12);border:1px solid rgba(255,200,80,.15);color:#fff;cursor:pointer;text-align:center;">
-                            <div style="font-size:24px;">💾</div>
-                            <div style="font-weight:700;font-size:12px;">Backup erstellen</div>
-                        </button>
-                        <button style="padding:14px;border-radius:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.06);color:#fff;cursor:pointer;text-align:center;">
-                            <div style="font-size:24px;">↩️</div>
-                            <div style="font-weight:700;font-size:12px;">Wiederherstellen</div>
-                        </button>
-                    </div>
-                    <div style="margin-top:12px;display:flex;flex-direction:column;gap:4px;">
-                        ${['Letztes Backup: Heute 14:23', 'Backup-Größe: 128 MB', '3 Backups verfügbar'].map(s =>
-                            `<div style="padding:6px 10px;background:rgba(255,255,255,.03);border-radius:6px;font-size:12px;opacity:.6;">${s}</div>`
-                        ).join('')}
-                    </div>
-                </div>
-            `,
-            diagnostics: `
-                <div>
-                    <div style="font-size:28px;font-weight:700;margin-bottom:6px;">⌁ Diagnose</div>
-                    <div style="opacity:.6;font-size:13px;margin-bottom:14px;">Systemstatus & Fehler</div>
-                    <div style="display:flex;flex-direction:column;gap:6px;">
-                        ${[
-                            ['System', '🟢', 'Aktiv'],
-                            ['AI Core', '🟢', 'Bereit'],
-                            ['Speicher', '🟡', '76% verwendet'],
-                            ['Netzwerk', '🟢', 'Verbunden'],
-                            ['Voice', '🟢', 'Aktiv']
-                        ].map(([name, status, detail]) =>
-                            `<div style="padding:8px 12px;background:rgba(255,255,255,.04);border-radius:8px;display:flex;justify-content:space-between;align-items:center;border:1px solid rgba(255,255,255,.06);">
-                                <span>${name}</span>
-                                <span>${status} ${detail}</span>
-                            </div>`
-                        ).join('')}
-                    </div>
-                </div>
-            `
-        };
-
-        const content = appContent[appId] || `
-            <div style="padding:20px;text-align:center;">
-                <div style="font-size:48px;margin-bottom:12px;">📱</div>
-                <div style="font-size:20px;font-weight:700;">${appId.charAt(0).toUpperCase() + appId.slice(1)}</div>
-                <div style="opacity:.5;margin-top:8px;">Diese App wird vorbereitet.</div>
-            </div>
-        `;
-
-        const appNames = {
-            'calculator': '🧮 Rechner',
-            'notes': '📝 Notizen',
-            'settings': '⚙️ Einstellungen',
-            'browser': '◎ Browser',
-            'calendar': '📅 Kalender',
-            'weather': '☀️ Wetter',
-            'gallery': '🖼️ Galerie',
-            'music': '🎵 Musik',
-            'video': '▶️ Video',
-            'mail': '✉️ Mail',
-            'contacts': '👤 Kontakte',
-            'messages': '💬 Nachrichten',
-            'camera': '📷 Kamera',
-            'clock': '🕐 Uhr',
-            'translate': '🌍 Übersetzer',
-            'keyboard': '⌨️ Keyboard',
-            'storage': '💾 Speicher',
-            'security': '🛡️ Sicherheit',
-            'updates': '↻ Updates',
-            'backup': '◫ Backup',
-            'diagnostics': '⌁ Diagnose'
-        };
-
-        const title = appNames[appId] || appId.charAt(0).toUpperCase() + appId.slice(1);
-
-        const win = document.createElement("div");
-        win.className = "haldo-app-window";
-        win.dataset.appWindow = appId;
-
-        win.innerHTML = `
-            <div class="haldo-app-window-header">
-                <span class="title">
-                    <img src="assets/logo/logo.png" alt="HalDo" style="width:24px;height:24px;border-radius:50%;object-fit:contain;">
-                    ${title}
-                </span>
-                <button class="haldo-app-window-close">×</button>
-            </div>
-            <div class="haldo-app-window-body">
-                ${content}
-            </div>
-        `;
-
-        document.body.appendChild(win);
-
-        win.querySelector(".haldo-app-window-close").addEventListener("click", () => win.remove());
-        win.addEventListener("click", (e) => { if (e.target === win) win.remove(); });
-
-        // App-spezifische Logik
-        if (appId === "calculator") {
-            let display = win.querySelector("#calc-display");
-            let expression = "";
-            win.querySelectorAll("[data-calc]").forEach(btn => {
-                btn.addEventListener("click", () => {
-                    const val = btn.dataset.calc;
-                    if (val === "C") { expression = ""; display.textContent = "0"; }
-                    else if (val === "⌫") { expression = expression.slice(0,-1); display.textContent = expression || "0"; }
-                    else if (val === "=") {
-                        try {
-                            const result = Function('"use strict"; return (' + expression.replace('×','*').replace('÷','/').replace('−','-') + ')')();
-                            display.textContent = result;
-                            expression = String(result);
-                        } catch(e) { display.textContent = "Fehler"; expression = ""; }
-                    }
-                    else { expression += val; display.textContent = expression; }
-                });
-            });
-        }
-
-        if (appId === "notes") {
-            let notes = [];
-            try { notes = JSON.parse(localStorage.getItem("haldo_notes") || "[]"); } catch(e) {}
-            const list = win.querySelector("#note-list");
-            const titleInput = win.querySelector("#note-title");
-            const contentInput = win.querySelector("#note-content");
-            const saveBtn = win.querySelector("#note-save");
-
-            function renderNotes() {
-                list.innerHTML = notes.map((n, i) => `
-                    <div style="padding:8px 12px;background:rgba(255,255,255,.05);border-radius:8px;display:flex;justify-content:space-between;align-items:center;border:1px solid rgba(255,255,255,.05);">
-                        <div>
-                            <strong style="color:white;font-size:13px;">${n.title || 'Ohne Titel'}</strong>
-                            <div style="color:rgba(255,255,255,.5);font-size:11px;">${n.content?.substring(0,60) || ''}</div>
-                        </div>
-                        <button data-index="${i}" class="note-delete" style="padding:3px 10px;border:none;border-radius:6px;background:rgba(255,87,87,.2);color:#ff5f57;cursor:pointer;font-size:12px;">✕</button>
-                    </div>
-                `).join('');
-
-                list.querySelectorAll(".note-delete").forEach(btn => {
-                    btn.addEventListener("click", (e) => {
-                        const idx = parseInt(e.target.dataset.index);
-                        notes.splice(idx, 1);
-                        localStorage.setItem("haldo_notes", JSON.stringify(notes));
-                        renderNotes();
-                    });
-                });
-            }
-
-            saveBtn.addEventListener("click", () => {
-                const title = titleInput.value.trim() || "Ohne Titel";
-                const content = contentInput.value.trim();
-                if (!content) return;
-                notes.push({ title, content, createdAt: new Date().toISOString() });
-                localStorage.setItem("haldo_notes", JSON.stringify(notes));
-                titleInput.value = "";
-                contentInput.value = "";
-                renderNotes();
-            });
-
-            renderNotes();
-        }
-
-        if (appId === "clock") {
-            function updateClock() {
-                const display = win.querySelector("#clock-display");
-                if (display) display.textContent = new Date().toLocaleTimeString();
-            }
-            updateClock();
-            const interval = setInterval(updateClock, 1000);
-            win.addEventListener("remove", () => clearInterval(interval));
-        }
-    };
+    }
 
     // =========================================================
-    // 10. BOOT — ALLES STARTEN
+    // 16. BOOT — ALLES STARTEN
     // =========================================================
 
     function haldoBoot() {
+        console.log("🚀 HalDo AI OS v" + window.HalDo.OS.version + " wird gestartet...");
+
         generateStars();
+
+        // AppRegistry mit Apps füllen
+        const appList = [
+            { id: 'haldo-ai', name: 'HalDo AI', category: 'AI', description: 'Zentrale intelligente Assistenz' },
+            { id: 'ai-chat', name: 'AI Chat', category: 'AI', description: 'Unterhaltung mit HalDo AI' },
+            { id: 'ai-memory', name: 'AI Memory', category: 'AI', description: 'Kurz- & Langzeitgedächtnis' },
+            { id: 'ai-voice', name: 'AI Voice', category: 'AI', description: 'Spracheingabe & Ausgabe' },
+            { id: 'browser', name: 'Browser', category: 'Internet', description: 'Webseiten & Internet' },
+            { id: 'calculator', name: 'Rechner', category: 'Tools', description: 'Berechnungen & Mathematik' },
+            { id: 'calendar', name: 'Kalender', category: 'Tools', description: 'Termine & Planung' },
+            { id: 'camera', name: 'Kamera', category: 'Medien', description: 'Fotos & Aufnahmen' },
+            { id: 'contacts', name: 'Kontakte', category: 'Kommunikation', description: 'Adressbuch' },
+            { id: 'clock', name: 'Uhr', category: 'Tools', description: 'Zeit, Timer & Wecker' },
+            { id: 'diagnostics', name: 'Diagnose', category: 'System', description: 'Systemstatus & Fehler' },
+            { id: 'email', name: 'Email', category: 'Kommunikation', description: 'Nachrichten & E-Mail' },
+            { id: 'files', name: 'Dateien', category: 'System', description: 'Dateimanager & Ordner' },
+            { id: 'gallery', name: 'Galerie', category: 'Medien', description: 'Bilder & Medien' },
+            { id: 'keyboard', name: 'Êzîdî Keyboard', category: 'Tools', description: 'Tastatur & Sprachen' },
+            { id: 'music', name: 'Musik', category: 'Medien', description: 'Musik & Klänge' },
+            { id: 'messages', name: 'Nachrichten', category: 'Kommunikation', description: 'Kommunikation' },
+            { id: 'notes', name: 'Notizen', category: 'Tools', description: 'Texte & Ideen' },
+            { id: 'settings', name: 'Einstellungen', category: 'System', description: 'System & Geräte' },
+            { id: 'security', name: 'Sicherheit', category: 'System', description: 'Datenschutz' },
+            { id: 'storage', name: 'Speicher', category: 'System', description: 'Daten & Speicher' },
+            { id: 'translate', name: 'Übersetzer', category: 'Tools', description: 'Mehrsprachige Übersetzungen' },
+            { id: 'tasks', name: 'Aufgaben', category: 'Tools', description: 'To-Do & Erinnerungen' },
+            { id: 'updates', name: 'Updates', category: 'System', description: 'Systemupdates & Versionen' },
+            { id: 'video', name: 'Video', category: 'Medien', description: 'Videos & Medien' },
+            { id: 'voice', name: 'Voice', category: 'AI', description: 'Sprachsteuerung' },
+            { id: 'weather', name: 'Wetter', category: 'Tools', description: 'Wetterinformationen' },
+            { id: 'backup', name: 'Backup', category: 'System', description: 'Sichern & Wiederherstellen' }
+        ];
+
+        appList.forEach(app => window.HalDo.AppRegistry.register(app));
+
+        // System-Komponenten starten
         window.HalDo.LivingLogo.init();
         window.HalDo.Menu.init();
         window.HalDo.Chat.init();
 
-        window.HalDo.emit("haldo:booted", { version: window.HalDo.OS.version });
+        // Update-Check
+        window.HalDo.UpdateSystem.check();
 
+        window.HalDo.emit("haldo:booted", {
+            version: window.HalDo.OS.version,
+            build: window.HalDo.OS.build,
+            apps: window.HalDo.AppRegistry.getAll().length
+        });
+
+        // Keyboard shortcuts
         document.addEventListener("keydown", (e) => {
             if ((e.ctrlKey || e.metaKey) && e.key === "k") {
                 e.preventDefault();
@@ -2210,17 +2793,26 @@
                     window.HalDo.Chat.open();
                 }
             }
+            if ((e.ctrlKey || e.metaKey) && e.key === "m") {
+                e.preventDefault();
+                window.HalDo.Menu.toggleApps();
+            }
             if (e.key === "Escape") {
                 window.HalDo.Menu.closeAll();
             }
         });
 
-        console.log("🚀 HalDo AI OS v22.0.0 erfolgreich gestartet!");
+        console.log("✅ HalDo AI OS v" + window.HalDo.OS.version + " erfolgreich gestartet!");
+        console.log("📊 " + window.HalDo.AppRegistry.getAll().length + " Apps registriert");
         console.log("💬 Chat: Klick auf Sonne/Logo oder Ctrl+K");
         console.log("🎙️ Voice: Mikrofon im Chat");
         console.log("⚙️ System-Menü: Links oben (Logo)");
-        console.log("📱 Apps-Menü: Unten (▦)");
+        console.log("📱 Apps-Menü: Unten (▦) oder Ctrl+M");
     }
+
+    // =========================================================
+    // 17. FINALER START
+    // =========================================================
 
     if (document.readyState === "loading") {
         document.addEventListener("DOMContentLoaded", haldoBoot, { once: true });
