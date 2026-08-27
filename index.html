@@ -13,7 +13,7 @@
 
     <style>
         /* =========================================================
-           HALDO AI OS — MASTER STYLES
+           HALDO AI OS — MASTER STYLES (ALLE 67 PARTS)
            ========================================================= */
 
         * {
@@ -74,10 +74,6 @@
             isolation: isolate;
             background: radial-gradient(circle at center, rgba(15,30,75,.28), transparent 42%);
         }
-
-        /* =========================================================
-           DEEP SPACE
-           ========================================================= */
 
         .haldo-space {
             position: absolute;
@@ -160,17 +156,8 @@
             50% { opacity: .85; }
         }
 
-        .haldo-orbit::before {
-            content: "";
-            position: absolute;
-            inset: -2px;
-            border: 1px solid rgba(120,190,255,.08);
-            border-radius: 50%;
-            filter: blur(2px);
-        }
-
         /* =========================================================
-           PLANET
+           PLANETS
            ========================================================= */
 
         .haldo-planet {
@@ -308,7 +295,7 @@
         }
 
         /* =========================================================
-           HALDO AI AVATAR
+           HALDO AI AVATAR (im Sonnen-Zentrum)
            ========================================================= */
 
         .haldo-avatar {
@@ -359,7 +346,7 @@
         }
 
         /* =========================================================
-           AVATAR STATES
+           AVATAR STATES (im Sonnen-Zentrum)
            ========================================================= */
 
         .haldo-avatar[data-state="listening"] .haldo-avatar-logo {
@@ -399,210 +386,80 @@
         }
 
         /* =========================================================
-           RESPONSIVE
+           LIVING HALDO AVATAR (unten links)
            ========================================================= */
 
-        @media (max-width: 700px) {
-            .haldo-cosmic-center { width: 96vw; height: 96vw; }
-            .haldo-orbit-system { transform: translate(-50%, -50%) scale(.72); }
-            .haldo-sun-container { width: 190px; height: 190px; }
+        .haldo-living-avatar {
+            position: fixed;
+            z-index: 8000;
+            width: clamp(80px, 12vw, 150px);
+            height: clamp(80px, 12vw, 150px);
+            bottom: 20px;
+            left: 20px;
+            pointer-events: auto;
+            cursor: pointer;
+            opacity: 0;
+            transform: scale(0.8);
+            transition: opacity 0.5s ease, transform 0.5s ease;
         }
 
-        @media (max-width: 430px) {
-            .haldo-sun-container { width: 145px; height: 145px; }
-            .haldo-cosmic-center { width: 100vw; height: 100vw; }
+        .haldo-living-avatar.visible {
+            opacity: 1;
+            transform: scale(1);
         }
 
-        @media (prefers-reduced-motion: reduce) {
-            *, *::before, *::after {
-                animation-duration: .001ms !important;
-                animation-iteration-count: 1 !important;
-                scroll-behavior: auto !important;
-            }
+        .haldo-living-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            filter: drop-shadow(0 0 20px rgba(255,210,80,0.4));
+            animation: haldoAvatarPulse 3s ease-in-out infinite;
+            border-radius: 50%;
+            background: radial-gradient(circle at 50% 50%, rgba(255,200,80,0.15), transparent 70%);
         }
-    </style>
-</head>
 
-<body>
-
-    <div id="haldo-os" data-haldo-os="true">
-        <main class="haldo-cosmic-world" data-haldo-cosmic aria-label="HalDo AI OS Cosmic World">
-
-            <div class="haldo-space" aria-hidden="true"></div>
-            <div class="haldo-stars" id="haldo-stars" aria-hidden="true"></div>
-
-            <section class="haldo-cosmic-center" aria-label="HalDo Cosmic Center">
-
-                <div class="haldo-orbit-system" aria-hidden="true">
-
-                    <div class="haldo-orbit" style="width:190px;height:190px;">
-                        <button class="haldo-planet" type="button" aria-label="Planet"></button>
-                    </div>
-
-                    <div class="haldo-orbit" style="width:270px;height:270px;">
-                        <button class="haldo-planet" type="button" aria-label="Planet"></button>
-                    </div>
-
-                    <div class="haldo-orbit" style="width:350px;height:350px;">
-                        <button class="haldo-planet haldo-planet-earth" type="button" aria-label="Erde">
-                            <span class="haldo-moon-orbit"><span class="haldo-moon"></span></span>
-                        </button>
-                    </div>
-
-                </div>
-
-                <div class="haldo-sun-container">
-                    <div class="haldo-solar-aura" aria-hidden="true"></div>
-                    <div class="haldo-solar-rays" aria-hidden="true"></div>
-
-                    <button class="haldo-sun-button" id="haldo-sun-button" type="button" aria-label="HalDo AI öffnen">
-                        <span class="haldo-sun-core"></span>
-                        <span class="haldo-avatar" id="haldo-avatar" data-state="idle">
-                            <span class="haldo-avatar-aura"></span>
-                            <img class="haldo-avatar-logo" src="assets/logo/logo.png" alt="HalDo AI">
-                        </span>
-                    </button>
-                </div>
-
-            </section>
-        </main>
-    </div>
-
-    <!-- =========================================================
-    HALDO MASTER FOUNDATION
-    ========================================================= -->
-
-    <script>
-    "use strict";
-
-    window.HalDo = window.HalDo || {};
-    window.HalDo.OS = window.HalDo.OS || {};
-    window.HalDo.OS.version = "22.0.0";
-    window.HalDo.OS.build = "COSMIC-MASTER";
-
-    window.HalDo.state = window.HalDo.state || {
-        booted: false,
-        avatar: "idle",
-        language: "de",
-        activeApp: null,
-        activeWindow: null,
-        ai: { listening: false, thinking: false, speaking: false }
-    };
-
-    /* =========================================================
-       EVENT BUS
-       ========================================================= */
-
-    window.HalDo.events = window.HalDo.events || new EventTarget();
-
-    window.HalDo.emit = function(name, detail = {}) {
-        window.HalDo.events.dispatchEvent(new CustomEvent(name, { detail }));
-    };
-
-    window.HalDo.on = function(name, callback) {
-        if (typeof callback !== "function") return;
-        window.HalDo.events.addEventListener(name, callback);
-    };
-
-    /* =========================================================
-       AVATAR CONTROLLER
-       ========================================================= */
-
-    window.HalDo.Avatar = {
-        element: null,
-
-        init() {
-            this.element = document.getElementById("haldo-avatar");
-            if (!this.element) return;
-            this.setState("idle");
-        },
-
-        setState(state) {
-            if (!this.element) return;
-            this.element.dataset.state = state;
-            window.HalDo.state.avatar = state;
-            window.HalDo.emit("avatar:state", { state });
-        },
-
-        idle() { this.setState("idle"); },
-        listening() { this.setState("listening"); },
-        thinking() { this.setState("thinking"); },
-        speaking() { this.setState("speaking"); },
-        happy() { this.setState("happy"); }
-    };
-
-    /* =========================================================
-       AI OPEN REQUEST
-       ========================================================= */
-
-    window.HalDo.openAI = function() {
-        window.HalDo.Avatar.happy();
-        window.HalDo.emit("ai:open", { source: "cosmic-sun" });
-        if (window.HalDo.AppManager && typeof window.HalDo.AppManager.open === "function") {
-            window.HalDo.AppManager.open("ai-chat");
+        @keyframes haldoAvatarPulse {
+            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 20px rgba(255,210,80,0.4)); }
+            50% { transform: scale(1.05); filter: drop-shadow(0 0 35px rgba(255,210,80,0.7)); }
         }
-    };
 
-    /* =========================================================
-       SUN INTERACTION
-       ========================================================= */
-
-    const sunButton = document.getElementById("haldo-sun-button");
-    if (sunButton) {
-        sunButton.addEventListener("click", function() {
-            window.HalDo.openAI();
-        });
-    }
-
-    /* =========================================================
-       AI EVENT CONNECTION
-       ========================================================= */
-
-    window.HalDo.on("ai:listening", () => window.HalDo.Avatar.listening());
-    window.HalDo.on("ai:thinking", () => window.HalDo.Avatar.thinking());
-    window.HalDo.on("ai:speaking", () => window.HalDo.Avatar.speaking());
-    window.HalDo.on("ai:idle", () => window.HalDo.Avatar.idle());
-    window.HalDo.on("ai:happy", () => window.HalDo.Avatar.happy());
-
-    /* =========================================================
-       BOOT
-       ========================================================= */
-
-    function haldoMasterBoot() {
-        window.HalDo.Avatar.init();
-        window.HalDo.state.booted = true;
-        window.HalDo.emit("haldo:booted", { version: window.HalDo.OS.version, build: window.HalDo.OS.build });
-
-        // Generate stars
-        const stars = document.getElementById("haldo-stars");
-        if (stars) {
-            for (let i = 0; i < 200; i++) {
-                const star = document.createElement("span");
-                star.className = "haldo-star";
-                const size = Math.random() * 2 + 1;
-                star.style.width = size + "px";
-                star.style.height = size + "px";
-                star.style.left = Math.random() * 100 + "%";
-                star.style.top = Math.random() * 100 + "%";
-                star.style.animationDuration = (2 + Math.random() * 3) + "s";
-                star.style.animationDelay = (Math.random() * 3) + "s";
-                stars.appendChild(star);
-            }
+        .haldo-living-avatar[data-state="listening"] img {
+            animation: haldoAvatarListening 1.2s ease-in-out infinite;
         }
-    }
 
-    if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", haldoMasterBoot, { once: true });
-    } else {
-        haldoMasterBoot();
-    }
-    </script>
+        @keyframes haldoAvatarListening {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+        }
 
-    <!-- =========================================================
-    HALDO AI OS — COMPLETE CHAT + VOICE + AVATAR + APP BRIDGE
-    ========================================================= -->
+        .haldo-living-avatar[data-state="thinking"] img {
+            animation: haldoAvatarThinking 1.8s ease-in-out infinite;
+        }
 
-    <style>
+        @keyframes haldoAvatarThinking {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-5px) rotate(2deg); }
+        }
+
+        .haldo-living-avatar[data-state="speaking"] img {
+            animation: haldoAvatarSpeaking 0.6s ease-in-out infinite;
+        }
+
+        @keyframes haldoAvatarSpeaking {
+            0%, 100% { transform: scaleY(1); }
+            50% { transform: scaleY(1.06); }
+        }
+
+        .haldo-living-avatar[data-state="happy"] img {
+            animation: haldoAvatarHappy 0.8s ease-out 1;
+        }
+
+        @keyframes haldoAvatarHappy {
+            0% { transform: scale(0.9); }
+            50% { transform: scale(1.12); }
+            100% { transform: scale(1); }
+        }
+
         /* =========================================================
            AI CHAT WINDOW
            ========================================================= */
@@ -661,6 +518,16 @@
         .haldo-chat-title {
             font-size: 16px;
             font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .haldo-chat-title .logo {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            object-fit: contain;
         }
 
         .haldo-chat-subtitle {
@@ -706,6 +573,15 @@
             flex-direction: column;
             gap: 10px;
             scroll-behavior: smooth;
+        }
+
+        .haldo-chat-messages::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .haldo-chat-messages::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,.2);
+            border-radius: 10px;
         }
 
         .haldo-chat-message {
@@ -794,6 +670,10 @@
             border-color: rgba(255,255,255,.25);
         }
 
+        .haldo-chat-input::placeholder {
+            color: rgba(255,255,255,.3);
+        }
+
         .haldo-chat-send,
         .haldo-chat-voice {
             width: 44px;
@@ -805,6 +685,7 @@
             color: #fff;
             cursor: pointer;
             font-size: 18px;
+            transition: all .2s ease;
         }
 
         .haldo-chat-send:hover,
@@ -817,623 +698,6 @@
             box-shadow: 0 0 20px rgba(255,80,80,.15);
         }
 
-        @media (max-width: 700px) {
-            .haldo-ai-chat-window {
-                right: 8px;
-                bottom: 8px;
-                width: calc(100vw - 16px);
-                height: min(600px, calc(100vh - 16px));
-                border-radius: 18px;
-            }
-            .haldo-chat-message {
-                max-width: 90%;
-            }
-        }
-
-        @media (max-width: 420px) {
-            .haldo-ai-chat-window {
-                right: 0;
-                bottom: 0;
-                width: 100vw;
-                height: 100dvh;
-                border-radius: 0;
-            }
-        }
-    </style>
-
-    <!-- =========================================================
-    CHAT WINDOW HTML
-    ========================================================= -->
-
-    <div class="haldo-ai-chat-window" id="haldo-chat-window" role="dialog" aria-label="HalDo AI Chat" aria-hidden="true">
-        <header class="haldo-chat-header">
-            <div>
-                <div class="haldo-chat-title">✦ HalDo AI</div>
-                <div class="haldo-chat-subtitle" id="haldo-chat-status">Bereit</div>
-            </div>
-            <div class="haldo-chat-controls">
-                <button class="haldo-chat-control" id="haldo-chat-minimize" aria-label="Minimieren">−</button>
-                <button class="haldo-chat-control" id="haldo-chat-close" aria-label="Schließen">×</button>
-            </div>
-        </header>
-
-        <div class="haldo-chat-body">
-            <div class="haldo-chat-messages" id="haldo-chat-messages"></div>
-            <div class="haldo-chat-typing" id="haldo-chat-typing">
-                <span></span><span></span><span></span>
-            </div>
-        </div>
-
-        <footer class="haldo-chat-footer">
-            <div class="haldo-chat-input-row">
-                <textarea class="haldo-chat-input" id="haldo-chat-input" rows="1" placeholder="Schreibe HalDo AI …" aria-label="Nachricht"></textarea>
-                <button class="haldo-chat-voice" id="haldo-chat-voice" aria-label="Spracheingabe">🎙</button>
-                <button class="haldo-chat-send" id="haldo-chat-send" aria-label="Senden">➤</button>
-            </div>
-        </footer>
-    </div>
-
-    <!-- =========================================================
-    CHAT + VOICE + AI RUNTIME
-    ========================================================= -->
-
-    <script>
-    "use strict";
-
-    // =========================================================
-    // HALDO CHAT CONTROLLER
-    // =========================================================
-
-    window.HalDo = window.HalDo || {};
-
-    window.HalDo.Chat = {
-        window: null,
-        messages: null,
-        input: null,
-        sendBtn: null,
-        voiceBtn: null,
-        status: null,
-        typing: null,
-        open: false,
-        minimized: false,
-        history: [],
-        recognition: null,
-        listening: false,
-
-        init() {
-            this.window = document.getElementById("haldo-chat-window");
-            this.messages = document.getElementById("haldo-chat-messages");
-            this.input = document.getElementById("haldo-chat-input");
-            this.sendBtn = document.getElementById("haldo-chat-send");
-            this.voiceBtn = document.getElementById("haldo-chat-voice");
-            this.status = document.getElementById("haldo-chat-status");
-            this.typing = document.getElementById("haldo-chat-typing");
-
-            document.getElementById("haldo-chat-close").addEventListener("click", () => this.close());
-            document.getElementById("haldo-chat-minimize").addEventListener("click", () => this.toggleMinimize());
-            this.sendBtn.addEventListener("click", () => this.send());
-            this.voiceBtn.addEventListener("click", () => this.toggleVoice());
-
-            this.input.addEventListener("keydown", (e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                    e.preventDefault();
-                    this.send();
-                }
-            });
-
-            this.input.addEventListener("input", () => {
-                this.input.style.height = "auto";
-                this.input.style.height = Math.min(this.input.scrollHeight, 150) + "px";
-            });
-
-            // Load history
-            try {
-                const saved = localStorage.getItem("haldo-chat-history");
-                if (saved) {
-                    this.history = JSON.parse(saved);
-                    this.history.forEach(msg => this.renderMessage(msg.role, msg.content));
-                }
-            } catch(e) {}
-
-            // Welcome message
-            if (this.history.length === 0) {
-                this.renderMessage("ai", "Hallo! Ich bin HalDo AI. 💙❤️ Wie kann ich dir helfen?");
-            }
-
-            // Auto-open on sun click
-            document.addEventListener("haldo:ai:open", () => this.open());
-
-            this.setupSpeech();
-        },
-
-        open() {
-            this.window.classList.add("open");
-            this.window.removeAttribute("aria-hidden");
-            this.open = true;
-            setTimeout(() => this.input.focus(), 100);
-        },
-
-        close() {
-            this.window.classList.remove("open");
-            this.window.setAttribute("aria-hidden", "true");
-            this.open = false;
-            if (this.listening) this.stopVoice();
-        },
-
-        toggleMinimize() {
-            this.minimized = !this.minimized;
-            this.window.classList.toggle("minimized", this.minimized);
-            if (!this.minimized && this.open) {
-                setTimeout(() => this.input.focus(), 100);
-            }
-        },
-
-        renderMessage(role, content) {
-            const div = document.createElement("div");
-            div.className = `haldo-chat-message ${role === "user" ? "haldo-chat-message-user" : "haldo-chat-message-ai"}`;
-            div.textContent = content;
-            this.messages.appendChild(div);
-            this.messages.scrollTop = this.messages.scrollHeight;
-        },
-
-        setStatus(text) {
-            this.status.textContent = text;
-        },
-
-        showTyping() {
-            this.typing.classList.add("active");
-            this.setStatus("HalDo AI denkt …");
-            if (window.HalDo.Avatar) window.HalDo.Avatar.thinking();
-        },
-
-        hideTyping() {
-            this.typing.classList.remove("active");
-            this.setStatus("Bereit");
-            if (window.HalDo.Avatar) window.HalDo.Avatar.idle();
-        },
-
-        async send() {
-            const text = this.input.value.trim();
-            if (!text || this._sending) return;
-
-            this.input.value = "";
-            this.input.style.height = "auto";
-            this.renderMessage("user", text);
-            this.history.push({ role: "user", content: text });
-            this.saveHistory();
-
-            this._sending = true;
-            this.showTyping();
-
-            try {
-                const response = await this.getAIResponse(text);
-                this.hideTyping();
-                this.renderMessage("ai", response);
-                this.history.push({ role: "ai", content: response });
-                this.saveHistory();
-
-                if (window.HalDo.Avatar) window.HalDo.Avatar.speaking();
-                setTimeout(() => {
-                    if (window.HalDo.Avatar) window.HalDo.Avatar.idle();
-                }, 1000);
-
-                // Speak response
-                this.speak(response);
-
-            } catch(e) {
-                this.hideTyping();
-                this.renderMessage("ai", "Entschuldigung, ein Fehler ist aufgetreten.");
-                console.error("[HalDo Chat]", e);
-            }
-
-            this._sending = false;
-        },
-
-        async getAIResponse(text) {
-            // Try existing AI Core first
-            const cores = [
-                window.HalDo.AICore,
-                window.HalDo.AI,
-                window.HalDo.AIEngine,
-                window.HalDo.ConversationRuntime
-            ];
-
-            for (const core of cores) {
-                if (core && typeof core.respond === "function") {
-                    try {
-                        const result = await core.respond(text, { history: this.history });
-                        if (result) return String(result);
-                    } catch(e) {}
-                }
-                if (core && typeof core.send === "function") {
-                    try {
-                        const result = await core.send(text);
-                        if (result) return String(result);
-                    } catch(e) {}
-                }
-                if (core && typeof core.chat === "function") {
-                    try {
-                        const result = await core.chat(text);
-                        if (result) return String(result);
-                    } catch(e) {}
-                }
-            }
-
-            // Local fallback
-            return this.localResponse(text);
-        },
-
-        localResponse(text) {
-            const lower = text.toLowerCase();
-            if (lower.includes("hallo") || lower.includes("hi") || lower.includes("hey")) {
-                return "Hallo! Schön, dass du da bist. 💙❤️ Wie kann ich dir helfen?";
-            }
-            if (lower.includes("wer bist du") || lower.includes("was bist du")) {
-                return "Ich bin HalDo AI – dein intelligenter Begleiter im HalDo AI OS!";
-            }
-            if (lower.includes("danke")) {
-                return "Sehr gerne! 💙";
-            }
-            if (lower.includes("hilfe")) {
-                return "Ich kann mit dir schreiben, sprechen, Apps öffnen, Fragen beantworten und dich durch das System begleiten.";
-            }
-            if (lower.includes("uhr") || lower.includes("zeit")) {
-                return `Die aktuelle Zeit ist ${new Date().toLocaleTimeString()}.`;
-            }
-            if (lower.includes("datum")) {
-                return `Heute ist ${new Date().toLocaleDateString()}.`;
-            }
-            return "Ich habe deine Nachricht verstanden. Für vollständige AI-Antworten kann ich mit dem verbundenen HalDo AI Core arbeiten.";
-        },
-
-        // =========================================================
-        // SPEECH SYNTHESIS
-        // =========================================================
-
-        speak(text) {
-            if (!window.speechSynthesis) return;
-            try {
-                window.speechSynthesis.cancel();
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = "de-DE";
-                utterance.rate = 0.95;
-                utterance.pitch = 1.02;
-                utterance.volume = 0.8;
-                utterance.onstart = () => {
-                    if (window.HalDo.Avatar) window.HalDo.Avatar.speaking();
-                };
-                utterance.onend = () => {
-                    if (window.HalDo.Avatar) window.HalDo.Avatar.idle();
-                };
-                window.speechSynthesis.speak(utterance);
-            } catch(e) {}
-        },
-
-        // =========================================================
-        // SPEECH RECOGNITION
-        // =========================================================
-
-        setupSpeech() {
-            const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (!Recognition) return;
-
-            this.recognition = new Recognition();
-            this.recognition.lang = "de-DE";
-            this.recognition.continuous = false;
-            this.recognition.interimResults = true;
-
-            this.recognition.onstart = () => {
-                this.listening = true;
-                this.voiceBtn.classList.add("listening");
-                this.setStatus("Ich höre zu …");
-                if (window.HalDo.Avatar) window.HalDo.Avatar.listening();
-            };
-
-            this.recognition.onresult = (event) => {
-                let final = "";
-                let interim = "";
-                for (let i = event.resultIndex; i < event.results.length; i++) {
-                    const transcript = event.results[i][0].transcript;
-                    if (event.results[i].isFinal) final += transcript;
-                    else interim += transcript;
-                }
-                if (final) {
-                    this.input.value = final;
-                    this.stopVoice();
-                    this.send();
-                } else if (interim) {
-                    this.input.value = interim;
-                }
-            };
-
-            this.recognition.onerror = () => {
-                this.stopVoice();
-            };
-
-            this.recognition.onend = () => {
-                this.listening = false;
-                this.voiceBtn.classList.remove("listening");
-                if (window.HalDo.Avatar) window.HalDo.Avatar.idle();
-                this.setStatus("Bereit");
-            };
-        },
-
-        toggleVoice() {
-            if (this.listening) {
-                this.stopVoice();
-            } else {
-                this.startVoice();
-            }
-        },
-
-        startVoice() {
-            if (!this.recognition) {
-                this.setStatus("Spracheingabe nicht verfügbar");
-                return;
-            }
-            try {
-                this.recognition.start();
-            } catch(e) {}
-        },
-
-        stopVoice() {
-            try {
-                this.recognition.stop();
-            } catch(e) {}
-            this.listening = false;
-            this.voiceBtn.classList.remove("listening");
-            if (window.HalDo.Avatar) window.HalDo.Avatar.idle();
-            this.setStatus("Bereit");
-        },
-
-        saveHistory() {
-            try {
-                localStorage.setItem("haldo-chat-history", JSON.stringify(this.history.slice(-100)));
-            } catch(e) {}
-        }
-    };
-
-    // =========================================================
-    // START CHAT
-    // =========================================================
-
-    document.addEventListener("DOMContentLoaded", () => {
-        window.HalDo.Chat.init();
-
-        // Open chat from sun button
-        const sunBtn = document.getElementById("haldo-sun-button");
-        if (sunBtn) {
-            sunBtn.addEventListener("click", () => {
-                setTimeout(() => window.HalDo.Chat.open(), 100);
-            });
-        }
-
-        // Global shortcut: Ctrl+K
-        document.addEventListener("keydown", (e) => {
-            if ((e.ctrlKey || e.metaKey) && e.key === "k") {
-                e.preventDefault();
-                if (window.HalDo.Chat.open) {
-                    window.HalDo.Chat.open ? window.HalDo.Chat.close() : window.HalDo.Chat.open();
-                }
-            }
-        });
-    });
-
-    // =========================================================
-    // GLOBAL API
-    // =========================================================
-
-    window.HalDo.openChat = function() {
-        if (window.HalDo.Chat) window.HalDo.Chat.open();
-    };
-
-    window.HalDo.closeChat = function() {
-        if (window.HalDo.Chat) window.HalDo.Chat.close();
-    };
-
-    window.HalDo.sendChatMessage = function(text) {
-        if (window.HalDo.Chat) {
-            window.HalDo.Chat.input.value = text;
-            window.HalDo.Chat.send();
-        }
-    };
-
-    window.HalDo.toggleChat = function() {
-        if (window.HalDo.Chat) {
-            window.HalDo.Chat.open ? window.HalDo.Chat.close() : window.HalDo.Chat.open();
-        }
-    };
-    </script>
-
-    <!-- =========================================================
-    LIVING HALDO AVATAR ENGINE (FINAL)
-    ========================================================= -->
-
-    <style>
-        /* =========================================================
-           LIVING AVATAR
-           ========================================================= */
-
-        .haldo-living-avatar {
-            position: fixed;
-            z-index: 8000;
-            width: clamp(80px, 12vw, 150px);
-            height: clamp(80px, 12vw, 150px);
-            bottom: 20px;
-            left: 20px;
-            pointer-events: auto;
-            cursor: pointer;
-            opacity: 0;
-            transform: scale(0.8);
-            transition: opacity 0.5s ease, transform 0.5s ease;
-        }
-
-        .haldo-living-avatar.visible {
-            opacity: 1;
-            transform: scale(1);
-        }
-
-        .haldo-living-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            filter: drop-shadow(0 0 20px rgba(255,210,80,0.4));
-            animation: haldoAvatarPulse 3s ease-in-out infinite;
-            border-radius: 50%;
-            background: radial-gradient(circle at 50% 50%, rgba(255,200,80,0.15), transparent 70%);
-        }
-
-        @keyframes haldoAvatarPulse {
-            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 20px rgba(255,210,80,0.4)); }
-            50% { transform: scale(1.05); filter: drop-shadow(0 0 35px rgba(255,210,80,0.7)); }
-        }
-
-        .haldo-living-avatar[data-state="listening"] img {
-            animation: haldoAvatarListening 1.2s ease-in-out infinite;
-        }
-
-        @keyframes haldoAvatarListening {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.08); }
-        }
-
-        .haldo-living-avatar[data-state="thinking"] img {
-            animation: haldoAvatarThinking 1.8s ease-in-out infinite;
-        }
-
-        @keyframes haldoAvatarThinking {
-            0%, 100% { transform: translateY(0) rotate(0deg); }
-            50% { transform: translateY(-5px) rotate(2deg); }
-        }
-
-        .haldo-living-avatar[data-state="speaking"] img {
-            animation: haldoAvatarSpeaking 0.6s ease-in-out infinite;
-        }
-
-        @keyframes haldoAvatarSpeaking {
-            0%, 100% { transform: scaleY(1); }
-            50% { transform: scaleY(1.06); }
-        }
-
-        .haldo-living-avatar[data-state="happy"] img {
-            animation: haldoAvatarHappy 0.8s ease-out 1;
-        }
-
-        @keyframes haldoAvatarHappy {
-            0% { transform: scale(0.9); }
-            50% { transform: scale(1.12); }
-            100% { transform: scale(1); }
-        }
-
-        @media (max-width: 600px) {
-            .haldo-living-avatar {
-                width: clamp(60px, 15vw, 90px);
-                height: clamp(60px, 15vw, 90px);
-                bottom: 70px;
-                left: 10px;
-            }
-        }
-    </style>
-
-    <div class="haldo-living-avatar" id="haldo-living-avatar" data-state="idle">
-        <img src="assets/logo/logo.png" alt="HalDo AI" draggable="false">
-    </div>
-
-    <script>
-    "use strict";
-
-    // =========================================================
-    // LIVING AVATAR CONTROLLER
-    // =========================================================
-
-    window.HalDo.LivingAvatar = {
-        element: null,
-        state: "idle",
-
-        init() {
-            this.element = document.getElementById("haldo-living-avatar");
-            if (!this.element) return;
-
-            // Show after short delay
-            setTimeout(() => this.element.classList.add("visible"), 500);
-
-            this.element.addEventListener("click", () => {
-                if (window.HalDo.Chat) window.HalDo.Chat.open();
-                this.react("happy", 800);
-            });
-
-            // Connect to chat events
-            document.addEventListener("haldo:ai:open", () => {
-                this.react("happy", 600);
-            });
-
-            document.addEventListener("haldo:chat:open", () => {
-                this.react("happy", 600);
-            });
-        },
-
-        setState(state) {
-            this.state = state;
-            if (this.element) {
-                this.element.dataset.state = state;
-            }
-            if (window.HalDo.Avatar) {
-                window.HalDo.Avatar.setState(state);
-            }
-        },
-
-        react(state, duration = 800) {
-            this.setState(state);
-            clearTimeout(this._timer);
-            this._timer = setTimeout(() => {
-                this.setState("idle");
-            }, duration);
-        },
-
-        listening() { this.setState("listening"); },
-        thinking() { this.setState("thinking"); },
-        speaking() { this.setState("speaking"); },
-        happy() { this.react("happy", 800); },
-        idle() { this.setState("idle"); }
-    };
-
-    // =========================================================
-    // CONNECT AI EVENTS TO AVATAR
-    // =========================================================
-
-    document.addEventListener("DOMContentLoaded", () => {
-        window.HalDo.LivingAvatar.init();
-
-        // Connect to AI events
-        window.HalDo.on("ai:listening", () => window.HalDo.LivingAvatar.listening());
-        window.HalDo.on("ai:thinking", () => window.HalDo.LivingAvatar.thinking());
-        window.HalDo.on("ai:speaking", () => window.HalDo.LivingAvatar.speaking());
-        window.HalDo.on("ai:idle", () => window.HalDo.LivingAvatar.idle());
-        window.HalDo.on("ai:happy", () => window.HalDo.LivingAvatar.happy());
-
-        // Chat status
-        document.addEventListener("haldo:chat:open", () => window.HalDo.LivingAvatar.happy());
-        document.addEventListener("haldo:chat:close", () => window.HalDo.LivingAvatar.idle());
-    });
-
-    // =========================================================
-    // GLOBAL AVATAR API
-    // =========================================================
-
-    window.HalDo.setAvatarState = function(state) {
-        if (window.HalDo.LivingAvatar) window.HalDo.LivingAvatar.setState(state);
-    };
-
-    window.HalDo.avatarReact = function(state, duration) {
-        if (window.HalDo.LivingAvatar) window.HalDo.LivingAvatar.react(state, duration);
-    };
-    </script>
-
-    <!-- =========================================================
-    APP LAUNCHER + WINDOW SYSTEM (COMPLETE)
-    ========================================================= -->
-
-    <style>
         /* =========================================================
            APP LAUNCHER
            ========================================================= */
@@ -1494,7 +758,86 @@
             opacity: .7;
         }
 
-        @media (max-width: 600px) {
+        /* =========================================================
+           APP WINDOWS
+           ========================================================= */
+
+        .haldo-app-window {
+            position: fixed;
+            z-index: 9999;
+            width: min(480px, 92vw);
+            max-height: 70vh;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(10,14,30,0.95);
+            backdrop-filter: blur(24px);
+            border-radius: 24px;
+            border: 1px solid rgba(255,255,255,.1);
+            box-shadow: 0 30px 80px rgba(0,0,0,.6);
+            overflow: auto;
+            color: #fff;
+            animation: haldoWindowIn .25s ease-out;
+        }
+
+        @keyframes haldoWindowIn {
+            from { opacity: 0; transform: translate(-50%, -45%) scale(.96); }
+            to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
+
+        .haldo-app-window-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 18px;
+            border-bottom: 1px solid rgba(255,255,255,.07);
+        }
+
+        .haldo-app-window-header .title {
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .haldo-app-window-close {
+            background: rgba(255,255,255,.08);
+            border: none;
+            color: #fff;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            transition: all .2s ease;
+        }
+
+        .haldo-app-window-close:hover {
+            background: rgba(255,80,80,.3);
+        }
+
+        .haldo-app-window-body {
+            padding: 16px;
+            overflow-y: auto;
+            max-height: 60vh;
+        }
+
+        /* =========================================================
+           RESPONSIVE
+           ========================================================= */
+
+        @media (max-width: 700px) {
+            .haldo-cosmic-center { width: 96vw; height: 96vw; }
+            .haldo-orbit-system { transform: translate(-50%, -50%) scale(.72); }
+            .haldo-sun-container { width: 190px; height: 190px; }
+
+            .haldo-ai-chat-window {
+                right: 8px;
+                bottom: 8px;
+                width: calc(100vw - 16px);
+                height: min(600px, calc(100vh - 16px));
+                border-radius: 18px;
+            }
+            .haldo-chat-message { max-width: 90%; }
+
             .haldo-app-launcher {
                 bottom: 70px;
                 padding: 10px 14px;
@@ -1507,14 +850,134 @@
                 min-width: 50px;
                 padding: 6px 10px;
             }
-            .haldo-app-launcher-item .icon {
-                font-size: 20px;
+            .haldo-app-launcher-item .icon { font-size: 20px; }
+            .haldo-app-launcher-item .label { font-size: 8px; }
+
+            .haldo-living-avatar {
+                width: clamp(60px, 15vw, 90px);
+                height: clamp(60px, 15vw, 90px);
+                bottom: 70px;
+                left: 10px;
             }
-            .haldo-app-launcher-item .label {
-                font-size: 8px;
+        }
+
+        @media (max-width: 420px) {
+            .haldo-ai-chat-window {
+                right: 0;
+                bottom: 0;
+                width: 100vw;
+                height: 100dvh;
+                border-radius: 0;
+            }
+            .haldo-sun-container { width: 145px; height: 145px; }
+            .haldo-cosmic-center { width: 100vw; height: 100vw; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: .001ms !important;
+                animation-iteration-count: 1 !important;
+                scroll-behavior: auto !important;
             }
         }
     </style>
+</head>
+
+<body>
+
+    <!-- =========================================================
+    HALDO OS MASTER CONTAINER
+    ========================================================= -->
+
+    <div id="haldo-os" data-haldo-os="true">
+        <main class="haldo-cosmic-world" data-haldo-cosmic aria-label="HalDo AI OS Cosmic World">
+
+            <div class="haldo-space" aria-hidden="true"></div>
+            <div class="haldo-stars" id="haldo-stars" aria-hidden="true"></div>
+
+            <section class="haldo-cosmic-center" aria-label="HalDo Cosmic Center">
+
+                <div class="haldo-orbit-system" aria-hidden="true">
+
+                    <div class="haldo-orbit" style="width:190px;height:190px;">
+                        <button class="haldo-planet" type="button" aria-label="Planet"></button>
+                    </div>
+
+                    <div class="haldo-orbit" style="width:270px;height:270px;">
+                        <button class="haldo-planet" type="button" aria-label="Planet"></button>
+                    </div>
+
+                    <div class="haldo-orbit" style="width:350px;height:350px;">
+                        <button class="haldo-planet haldo-planet-earth" type="button" aria-label="Erde">
+                            <span class="haldo-moon-orbit"><span class="haldo-moon"></span></span>
+                        </button>
+                    </div>
+
+                </div>
+
+                <div class="haldo-sun-container">
+                    <div class="haldo-solar-aura" aria-hidden="true"></div>
+                    <div class="haldo-solar-rays" aria-hidden="true"></div>
+
+                    <button class="haldo-sun-button" id="haldo-sun-button" type="button" aria-label="HalDo AI öffnen">
+                        <span class="haldo-sun-core"></span>
+                        <span class="haldo-avatar" id="haldo-avatar" data-state="idle">
+                            <span class="haldo-avatar-aura"></span>
+                            <img class="haldo-avatar-logo" src="assets/logo/logo.png" alt="HalDo AI">
+                        </span>
+                    </button>
+                </div>
+
+            </section>
+        </main>
+    </div>
+
+    <!-- =========================================================
+    LIVING HALDO AVATAR (unten links)
+    ========================================================= -->
+
+    <div class="haldo-living-avatar" id="haldo-living-avatar" data-state="idle">
+        <img src="assets/logo/logo.png" alt="HalDo AI" draggable="false">
+    </div>
+
+    <!-- =========================================================
+    AI CHAT WINDOW
+    ========================================================= -->
+
+    <div class="haldo-ai-chat-window" id="haldo-chat-window" role="dialog" aria-label="HalDo AI Chat" aria-hidden="true">
+        <header class="haldo-chat-header">
+            <div>
+                <div class="haldo-chat-title">
+                    <img class="logo" src="assets/logo/logo.png" alt="HalDo">
+                    HalDo AI
+                </div>
+                <div class="haldo-chat-subtitle" id="haldo-chat-status">Bereit</div>
+            </div>
+            <div class="haldo-chat-controls">
+                <button class="haldo-chat-control" id="haldo-chat-minimize" aria-label="Minimieren">−</button>
+                <button class="haldo-chat-control" id="haldo-chat-close" aria-label="Schließen">×</button>
+            </div>
+        </header>
+
+        <div class="haldo-chat-body">
+            <div class="haldo-chat-messages" id="haldo-chat-messages"></div>
+            <div class="haldo-chat-typing" id="haldo-chat-typing">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+
+        <footer class="haldo-chat-footer">
+            <div class="haldo-chat-input-row">
+                <textarea class="haldo-chat-input" id="haldo-chat-input" rows="1" placeholder="Schreibe HalDo AI …" aria-label="Nachricht"></textarea>
+                <button class="haldo-chat-voice" id="haldo-chat-voice" aria-label="Spracheingabe">🎙</button>
+                <button class="haldo-chat-send" id="haldo-chat-send" aria-label="Senden">➤</button>
+            </div>
+        </footer>
+    </div>
+
+    <!-- =========================================================
+    APP LAUNCHER
+    ========================================================= -->
 
     <div class="haldo-app-launcher" id="haldo-app-launcher">
         <button class="haldo-app-launcher-item" data-app="chat">
@@ -1539,11 +1002,583 @@
         </button>
     </div>
 
+    <!-- =========================================================
+    JAVASCRIPT — ALLE 67 PARTS ZUSAMMENGEFÜHRT
+    ========================================================= -->
+
     <script>
     "use strict";
 
     // =========================================================
-    // APP LAUNCHER
+    // 1. HALDO MASTER FOUNDATION
+    // =========================================================
+
+    window.HalDo = window.HalDo || {};
+    window.HalDo.OS = window.HalDo.OS || {};
+    window.HalDo.OS.version = "22.0.0";
+    window.HalDo.OS.build = "COSMIC-MASTER";
+
+    window.HalDo.state = window.HalDo.state || {
+        booted: false,
+        avatar: "idle",
+        language: "de",
+        activeApp: null,
+        activeWindow: null,
+        ai: { listening: false, thinking: false, speaking: false }
+    };
+
+    // =========================================================
+    // 2. EVENT BUS
+    // =========================================================
+
+    window.HalDo.events = window.HalDo.events || new EventTarget();
+
+    window.HalDo.emit = function(name, detail = {}) {
+        window.HalDo.events.dispatchEvent(new CustomEvent(name, { detail }));
+    };
+
+    window.HalDo.on = function(name, callback) {
+        if (typeof callback !== "function") return;
+        window.HalDo.events.addEventListener(name, callback);
+    };
+
+    // =========================================================
+    // 3. AVATAR CONTROLLER (im Sonnen-Zentrum)
+    // =========================================================
+
+    window.HalDo.Avatar = {
+        element: null,
+
+        init() {
+            this.element = document.getElementById("haldo-avatar");
+            if (!this.element) return;
+            this.setState("idle");
+        },
+
+        setState(state) {
+            if (!this.element) return;
+            this.element.dataset.state = state;
+            window.HalDo.state.avatar = state;
+            window.HalDo.emit("avatar:state", { state });
+        },
+
+        idle() { this.setState("idle"); },
+        listening() { this.setState("listening"); },
+        thinking() { this.setState("thinking"); },
+        speaking() { this.setState("speaking"); },
+        happy() { this.setState("happy"); }
+    };
+
+    // =========================================================
+    // 4. AI OPEN REQUEST
+    // =========================================================
+
+    window.HalDo.openAI = function() {
+        window.HalDo.Avatar.happy();
+        window.HalDo.emit("ai:open", { source: "cosmic-sun" });
+        if (window.HalDo.Chat) window.HalDo.Chat.open();
+    };
+
+    // =========================================================
+    // 5. SUN INTERACTION
+    // =========================================================
+
+    const sunButton = document.getElementById("haldo-sun-button");
+    if (sunButton) {
+        sunButton.addEventListener("click", function() {
+            window.HalDo.openAI();
+        });
+    }
+
+    // =========================================================
+    // 6. AI EVENT CONNECTION
+    // =========================================================
+
+    window.HalDo.on("ai:listening", () => window.HalDo.Avatar.listening());
+    window.HalDo.on("ai:thinking", () => window.HalDo.Avatar.thinking());
+    window.HalDo.on("ai:speaking", () => window.HalDo.Avatar.speaking());
+    window.HalDo.on("ai:idle", () => window.HalDo.Avatar.idle());
+    window.HalDo.on("ai:happy", () => window.HalDo.Avatar.happy());
+
+    // =========================================================
+    // 7. STARS GENERATOR
+    // =========================================================
+
+    function generateStars() {
+        const stars = document.getElementById("haldo-stars");
+        if (!stars) return;
+        for (let i = 0; i < 200; i++) {
+            const star = document.createElement("span");
+            star.className = "haldo-star";
+            const size = Math.random() * 2 + 1;
+            star.style.width = size + "px";
+            star.style.height = size + "px";
+            star.style.left = Math.random() * 100 + "%";
+            star.style.top = Math.random() * 100 + "%";
+            star.style.animationDuration = (2 + Math.random() * 3) + "s";
+            star.style.animationDelay = (Math.random() * 3) + "s";
+            stars.appendChild(star);
+        }
+    }
+
+    // =========================================================
+    // 8. BOOT
+    // =========================================================
+
+    function haldoMasterBoot() {
+        window.HalDo.Avatar.init();
+        window.HalDo.state.booted = true;
+        generateStars();
+        window.HalDo.emit("haldo:booted", { version: window.HalDo.OS.version, build: window.HalDo.OS.build });
+    }
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", haldoMasterBoot, { once: true });
+    } else {
+        haldoMasterBoot();
+    }
+
+    // =========================================================
+    // 9. LIVING AVATAR CONTROLLER (unten links)
+    // =========================================================
+
+    window.HalDo.LivingAvatar = {
+        element: null,
+        state: "idle",
+
+        init() {
+            this.element = document.getElementById("haldo-living-avatar");
+            if (!this.element) return;
+            setTimeout(() => this.element.classList.add("visible"), 500);
+
+            this.element.addEventListener("click", () => {
+                if (window.HalDo.Chat) window.HalDo.Chat.open();
+                this.react("happy", 800);
+            });
+
+            // Connect to chat events
+            document.addEventListener("haldo:ai:open", () => this.react("happy", 600));
+            document.addEventListener("haldo:chat:open", () => this.react("happy", 600));
+        },
+
+        setState(state) {
+            this.state = state;
+            if (this.element) this.element.dataset.state = state;
+            if (window.HalDo.Avatar) window.HalDo.Avatar.setState(state);
+        },
+
+        react(state, duration = 800) {
+            this.setState(state);
+            clearTimeout(this._timer);
+            this._timer = setTimeout(() => this.setState("idle"), duration);
+        },
+
+        listening() { this.setState("listening"); },
+        thinking() { this.setState("thinking"); },
+        speaking() { this.setState("speaking"); },
+        happy() { this.react("happy", 800); },
+        idle() { this.setState("idle"); }
+    };
+
+    // =========================================================
+    // 10. CHAT CONTROLLER (ALLE FUNKTIONEN)
+    // =========================================================
+
+    window.HalDo.Chat = {
+        window: null,
+        messages: null,
+        input: null,
+        sendBtn: null,
+        voiceBtn: null,
+        status: null,
+        typing: null,
+        open: false,
+        minimized: false,
+        history: [],
+        recognition: null,
+        listening: false,
+        _sending: false,
+
+        init() {
+            this.window = document.getElementById("haldo-chat-window");
+            this.messages = document.getElementById("haldo-chat-messages");
+            this.input = document.getElementById("haldo-chat-input");
+            this.sendBtn = document.getElementById("haldo-chat-send");
+            this.voiceBtn = document.getElementById("haldo-chat-voice");
+            this.status = document.getElementById("haldo-chat-status");
+            this.typing = document.getElementById("haldo-chat-typing");
+
+            document.getElementById("haldo-chat-close").addEventListener("click", () => this.close());
+            document.getElementById("haldo-chat-minimize").addEventListener("click", () => this.toggleMinimize());
+            this.sendBtn.addEventListener("click", () => this.send());
+            this.voiceBtn.addEventListener("click", () => this.toggleVoice());
+
+            this.input.addEventListener("keydown", (e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    this.send();
+                }
+            });
+
+            this.input.addEventListener("input", () => {
+                this.input.style.height = "auto";
+                this.input.style.height = Math.min(this.input.scrollHeight, 150) + "px";
+            });
+
+            // Load history
+            try {
+                const saved = localStorage.getItem("haldo-chat-history");
+                if (saved) {
+                    this.history = JSON.parse(saved);
+                    this.history.forEach(msg => this.renderMessage(msg.role, msg.content));
+                }
+            } catch(e) {}
+
+            // Welcome message
+            if (this.history.length === 0) {
+                this.renderMessage("ai", "Hallo! Ich bin HalDo AI. 💙❤️ Wie kann ich dir helfen?");
+            }
+
+            // Auto-open on sun click
+            document.addEventListener("haldo:ai:open", () => this.open());
+
+            this.setupSpeech();
+        },
+
+        open() {
+            this.window.classList.add("open");
+            this.window.removeAttribute("aria-hidden");
+            this.open = true;
+            setTimeout(() => this.input.focus(), 100);
+            window.HalDo.LivingAvatar.react("happy", 600);
+        },
+
+        close() {
+            this.window.classList.remove("open");
+            this.window.setAttribute("aria-hidden", "true");
+            this.open = false;
+            if (this.listening) this.stopVoice();
+        },
+
+        toggleMinimize() {
+            this.minimized = !this.minimized;
+            this.window.classList.toggle("minimized", this.minimized);
+            if (!this.minimized && this.open) {
+                setTimeout(() => this.input.focus(), 100);
+            }
+        },
+
+        renderMessage(role, content) {
+            const div = document.createElement("div");
+            div.className = `haldo-chat-message ${role === "user" ? "haldo-chat-message-user" : "haldo-chat-message-ai"}`;
+            div.textContent = content;
+            this.messages.appendChild(div);
+            this.messages.scrollTop = this.messages.scrollHeight;
+        },
+
+        setStatus(text) {
+            this.status.textContent = text;
+        },
+
+        showTyping() {
+            this.typing.classList.add("active");
+            this.setStatus("HalDo AI denkt …");
+            window.HalDo.LivingAvatar.thinking();
+            window.HalDo.Avatar.thinking();
+        },
+
+        hideTyping() {
+            this.typing.classList.remove("active");
+            this.setStatus("Bereit");
+            window.HalDo.LivingAvatar.idle();
+            window.HalDo.Avatar.idle();
+        },
+
+        async send() {
+            const text = this.input.value.trim();
+            if (!text || this._sending) return;
+
+            this.input.value = "";
+            this.input.style.height = "auto";
+            this.renderMessage("user", text);
+            this.history.push({ role: "user", content: text });
+            this.saveHistory();
+
+            this._sending = true;
+            this.showTyping();
+
+            try {
+                const response = await this.getAIResponse(text);
+                this.hideTyping();
+                this.renderMessage("ai", response);
+                this.history.push({ role: "ai", content: response });
+                this.saveHistory();
+
+                window.HalDo.LivingAvatar.speaking();
+                window.HalDo.Avatar.speaking();
+                setTimeout(() => {
+                    window.HalDo.LivingAvatar.idle();
+                    window.HalDo.Avatar.idle();
+                }, 1000);
+
+                // Speak response
+                this.speak(response);
+
+            } catch(e) {
+                this.hideTyping();
+                this.renderMessage("ai", "Entschuldigung, ein Fehler ist aufgetreten.");
+                console.error("[HalDo Chat]", e);
+            }
+
+            this._sending = false;
+        },
+
+        async getAIResponse(text) {
+            // Try existing AI Core first
+            const cores = [
+                window.HalDo.AICore,
+                window.HalDo.AI,
+                window.HalDo.AIEngine,
+                window.HalDo.ConversationRuntime
+            ];
+
+            for (const core of cores) {
+                if (core && typeof core.respond === "function") {
+                    try {
+                        const result = await core.respond(text, { history: this.history });
+                        if (result) return String(result);
+                    } catch(e) {}
+                }
+                if (core && typeof core.send === "function") {
+                    try {
+                        const result = await core.send(text);
+                        if (result) return String(result);
+                    } catch(e) {}
+                }
+                if (core && typeof core.chat === "function") {
+                    try {
+                        const result = await core.chat(text);
+                        if (result) return String(result);
+                    } catch(e) {}
+                }
+            }
+
+            // Local fallback mit erweiterter Intelligenz
+            return this.localResponse(text);
+        },
+
+        localResponse(text) {
+            const lower = text.toLowerCase();
+
+            // Begrüßungen
+            if (lower.includes("hallo") || lower.includes("hi") || lower.includes("hey")) {
+                return "Hallo! Schön, dass du da bist. 💙❤️ Wie kann ich dir helfen?";
+            }
+
+            // Identität
+            if (lower.includes("wer bist du") || lower.includes("was bist du")) {
+                return "Ich bin HalDo AI – dein intelligenter Begleiter im HalDo AI OS! Ich kann mit dir schreiben, sprechen, Apps öffnen, Fragen beantworten und dich durch das gesamte System begleiten.";
+            }
+
+            // Dank
+            if (lower.includes("danke")) {
+                return "Sehr gerne! 💙 Ich bin jederzeit für dich da.";
+            }
+
+            // Hilfe
+            if (lower.includes("hilfe") || lower.includes("help")) {
+                return "Ich kann dir helfen bei:\n• Fragen und Antworten\n• Schreiben und Texten\n• Apps öffnen (Chat, Rechner, Notizen, Einstellungen, Cosmic)\n• Spracheingabe und Sprachausgabe\n• Informationen suchen\n\nSag einfach, was du brauchst!";
+            }
+
+            // Uhrzeit
+            if (lower.includes("uhr") || lower.includes("zeit")) {
+                return `Die aktuelle Zeit ist ${new Date().toLocaleTimeString()}.`;
+            }
+
+            // Datum
+            if (lower.includes("datum") || lower.includes("welcher tag")) {
+                return `Heute ist ${new Date().toLocaleDateString('de-DE', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                })}.`;
+            }
+
+            // Wetter (simuliert)
+            if (lower.includes("wetter")) {
+                return "Das Wetter kann ich leider noch nicht abrufen. Aber ich kann dir bei vielen anderen Dingen helfen! ☀️";
+            }
+
+            // Apps
+            if (lower.includes("app") || lower.includes("öffne")) {
+                if (lower.includes("chat")) {
+                    this.open();
+                    return "Ich öffne den Chat für dich. 💬";
+                }
+                if (lower.includes("rechner") || lower.includes("calculator")) {
+                    window.HalDo.openApp("calculator");
+                    return "Ich öffne den Rechner. 🧮";
+                }
+                if (lower.includes("notiz")) {
+                    window.HalDo.openApp("notes");
+                    return "Ich öffne die Notizen. 📝";
+                }
+                if (lower.includes("einstell") || lower.includes("settings")) {
+                    window.HalDo.openApp("settings");
+                    return "Ich öffne die Einstellungen. ⚙️";
+                }
+                if (lower.includes("cosmic")) {
+                    window.HalDo.openApp("cosmic");
+                    return "Ich öffne die Cosmic World. 🌌";
+                }
+                return "Welche App möchtest du öffnen? Chat, Rechner, Notizen, Einstellungen oder Cosmic?";
+            }
+
+            // Persönliche Fragen
+            if (lower.includes("wie geht es dir")) {
+                return "Mir geht es hervorragend, danke! Und dir? 💙";
+            }
+
+            if (lower.includes("was machst du")) {
+                return "Ich bin hier, um dir zu helfen! Ich warte auf deine Fragen und Aufgaben. 😊";
+            }
+
+            // Standardantwort
+            return "Ich habe deine Nachricht verstanden. Für vollständige AI-Antworten kann ich mit dem verbundenen HalDo AI Core arbeiten. Sag mir einfach, was du brauchst! 💙❤️";
+        },
+
+        // =========================================================
+        // 11. SPEECH SYNTHESIS
+        // =========================================================
+
+        speak(text) {
+            if (!window.speechSynthesis) return;
+            try {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = "de-DE";
+                utterance.rate = 0.95;
+                utterance.pitch = 1.02;
+                utterance.volume = 0.8;
+                utterance.onstart = () => {
+                    window.HalDo.LivingAvatar.speaking();
+                    window.HalDo.Avatar.speaking();
+                };
+                utterance.onend = () => {
+                    window.HalDo.LivingAvatar.idle();
+                    window.HalDo.Avatar.idle();
+                };
+                utterance.onerror = () => {
+                    window.HalDo.LivingAvatar.idle();
+                    window.HalDo.Avatar.idle();
+                };
+                window.speechSynthesis.speak(utterance);
+            } catch(e) {
+                console.warn("[HalDo Speech]", e);
+            }
+        },
+
+        // =========================================================
+        // 12. SPEECH RECOGNITION
+        // =========================================================
+
+        setupSpeech() {
+            const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!Recognition) {
+                console.warn("[HalDo] Speech Recognition nicht verfügbar");
+                return;
+            }
+
+            this.recognition = new Recognition();
+            this.recognition.lang = "de-DE";
+            this.recognition.continuous = false;
+            this.recognition.interimResults = true;
+            this.recognition.maxAlternatives = 1;
+
+            this.recognition.onstart = () => {
+                this.listening = true;
+                this.voiceBtn.classList.add("listening");
+                this.setStatus("Ich höre zu …");
+                window.HalDo.LivingAvatar.listening();
+                window.HalDo.Avatar.listening();
+            };
+
+            this.recognition.onresult = (event) => {
+                let final = "";
+                let interim = "";
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    const transcript = event.results[i][0].transcript;
+                    if (event.results[i].isFinal) final += transcript;
+                    else interim += transcript;
+                }
+                if (final) {
+                    this.input.value = final;
+                    this.stopVoice();
+                    setTimeout(() => this.send(), 100);
+                } else if (interim) {
+                    this.input.value = interim;
+                }
+            };
+
+            this.recognition.onerror = (event) => {
+                console.warn("[HalDo Voice Error]", event.error);
+                this.stopVoice();
+                this.setStatus("Sprache konnte nicht erkannt werden");
+                setTimeout(() => this.setStatus("Bereit"), 1500);
+            };
+
+            this.recognition.onend = () => {
+                this.listening = false;
+                this.voiceBtn.classList.remove("listening");
+                if (this.status.textContent === "Ich höre zu …") {
+                    this.setStatus("Bereit");
+                }
+                window.HalDo.LivingAvatar.idle();
+                window.HalDo.Avatar.idle();
+            };
+        },
+
+        toggleVoice() {
+            if (this.listening) {
+                this.stopVoice();
+            } else {
+                this.startVoice();
+            }
+        },
+
+        startVoice() {
+            if (!this.recognition) {
+                this.setStatus("Spracheingabe nicht verfügbar");
+                return;
+            }
+            try {
+                this.recognition.start();
+            } catch(e) {
+                console.warn("[HalDo Voice Start]", e);
+            }
+        },
+
+        stopVoice() {
+            try {
+                this.recognition.stop();
+            } catch(e) {}
+            this.listening = false;
+            this.voiceBtn.classList.remove("listening");
+            window.HalDo.LivingAvatar.idle();
+            window.HalDo.Avatar.idle();
+            this.setStatus("Bereit");
+        },
+
+        saveHistory() {
+            try {
+                localStorage.setItem("haldo-chat-history", JSON.stringify(this.history.slice(-200)));
+            } catch(e) {}
+        }
+    };
+
+    // =========================================================
+    // 13. APP LAUNCHER
     // =========================================================
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -1557,12 +1592,7 @@
             }
         });
 
-        // Open/close with app button or avatar click
-        document.addEventListener("haldo:app-menu:toggle", () => {
-            launcher.classList.toggle("open");
-        });
-
-        // Open launcher from avatar
+        // Open launcher from avatar (double click)
         document.getElementById("haldo-living-avatar")?.addEventListener("dblclick", () => {
             launcher.classList.toggle("open");
         });
@@ -1585,7 +1615,7 @@
     });
 
     // =========================================================
-    // GLOBAL APP API
+    // 14. GLOBAL APP API
     // =========================================================
 
     window.HalDo.openApp = function(appId) {
@@ -1597,43 +1627,46 @@
         }
 
         if (appId === "cosmic") {
-            // Scroll to cosmic world
             document.querySelector(".haldo-cosmic-world")?.scrollIntoView({ behavior: "smooth" });
             return;
         }
 
-        // Generic app window fallback
-        const appWindows = {
+        // Remove existing window
+        const existing = document.querySelector(`[data-app-window="${appId}"]`);
+        if (existing) existing.remove();
+
+        // App content
+        const appContent = {
             calculator: `
-                <div style="padding:20px;font-family:monospace;text-align:center;">
-                    <div style="font-size:32px;font-weight:700;margin-bottom:12px;">🧮</div>
-                    <div style="font-size:14px;opacity:.7;">Calculator App</div>
-                    <div style="margin-top:20px;font-size:48px;">0</div>
-                    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:16px;max-width:300px;margin-left:auto;margin-right:auto;">
-                        ${['7','8','9','÷','4','5','6','×','1','2','3','−','0','.','=','+'].map(b =>
-                            `<button style="padding:12px;border-radius:10px;background:rgba(255,255,255,.08);color:#fff;font-size:18px;cursor:pointer;">${b}</button>`
+                <div style="font-family:monospace;text-align:center;">
+                    <div style="font-size:32px;font-weight:700;margin-bottom:12px;">🧮 Rechner</div>
+                    <div style="font-size:48px;padding:16px;background:rgba(0,0,0,.2);border-radius:12px;margin-bottom:12px;" id="calc-display">0</div>
+                    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;max-width:300px;margin:0 auto;">
+                        ${['C','±','%','÷','7','8','9','×','4','5','6','−','1','2','3','+','0','.','⌫','='].map(b =>
+                            `<button data-calc="${b}" style="padding:14px;border-radius:10px;background:${['C','±','%','÷','×','−','+','='].includes(b) ? 'rgba(255,200,80,.15)' : 'rgba(255,255,255,.05)'};color:#fff;font-size:18px;cursor:pointer;transition:all .15s;">${b}</button>`
                         ).join('')}
                     </div>
                 </div>
             `,
             notes: `
-                <div style="padding:20px;">
-                    <div style="font-size:32px;font-weight:700;margin-bottom:12px;">📝 Notizen</div>
-                    <div style="opacity:.7;font-size:14px;">Deine Notizen erscheinen hier.</div>
-                    <div style="margin-top:16px;display:flex;gap:10px;">
-                        <input type="text" placeholder="Notiz Titel..." style="flex:1;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#fff;">
-                        <button style="padding:10px 20px;border-radius:10px;background:rgba(255,200,80,.2);color:#fff;cursor:pointer;">+</button>
+                <div>
+                    <div style="font-size:32px;font-weight:700;margin-bottom:8px;">📝 Notizen</div>
+                    <div style="opacity:.7;font-size:14px;margin-bottom:16px;">Deine persönlichen Notizen</div>
+                    <div style="display:flex;gap:10px;margin-bottom:16px;">
+                        <input type="text" id="note-title" placeholder="Titel..." style="flex:1;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#fff;">
+                        <textarea id="note-content" placeholder="Notizinhalt..." style="flex:2;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#fff;resize:vertical;min-height:60px;"></textarea>
+                        <button id="note-save" style="padding:10px 20px;border-radius:10px;background:rgba(255,200,80,.2);color:#fff;cursor:pointer;">Speichern</button>
                     </div>
-                    <div style="margin-top:16px;color:rgba(255,255,255,.3);text-align:center;font-size:14px;">Keine Notizen vorhanden</div>
+                    <div id="note-list" style="display:flex;flex-direction:column;gap:8px;"></div>
                 </div>
             `,
             settings: `
-                <div style="padding:20px;">
-                    <div style="font-size:32px;font-weight:700;margin-bottom:12px;">⚙️ Einstellungen</div>
-                    <div style="opacity:.7;font-size:14px;">System, Anzeige, Sprache, AI und Geräte</div>
-                    <div style="margin-top:16px;display:grid;gap:8px;">
-                        ${['Sprache', 'Thema', 'AI', 'Voice', 'Speicher', 'System'].map(s =>
-                            `<div style="padding:12px 16px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);display:flex;justify-content:space-between;align-items:center;">
+                <div>
+                    <div style="font-size:32px;font-weight:700;margin-bottom:8px;">⚙️ Einstellungen</div>
+                    <div style="opacity:.7;font-size:14px;margin-bottom:16px;">System, Anzeige, Sprache, AI und Geräte</div>
+                    <div style="display:grid;gap:8px;">
+                        ${['Sprache', 'Thema', 'AI', 'Voice', 'Speicher', 'System', 'Datenschutz', 'Updates'].map(s =>
+                            `<div style="padding:12px 16px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);display:flex;justify-content:space-between;align-items:center;cursor:pointer;">
                                 <span>${s}</span>
                                 <span style="opacity:.4;font-size:12px;">›</span>
                             </div>`
@@ -1643,69 +1676,180 @@
             `
         };
 
-        const content = appWindows[appId] || `
-            <div style="padding:40px;text-align:center;">
+        const content = appContent[appId] || `
+            <div style="padding:20px;text-align:center;">
                 <div style="font-size:48px;margin-bottom:12px;">📱</div>
-                <div style="font-size:20px;font-weight:700;">${appId}</div>
+                <div style="font-size:20px;font-weight:700;">${appId.charAt(0).toUpperCase() + appId.slice(1)}</div>
                 <div style="opacity:.5;margin-top:8px;">Diese App wird vorbereitet.</div>
             </div>
         `;
 
-        // Create floating window
-        const existing = document.querySelector(`[data-app-window="${appId}"]`);
-        if (existing) {
-            existing.style.display = "flex";
-            existing.style.opacity = "1";
-            return;
-        }
-
+        // Create window
         const win = document.createElement("div");
+        win.className = "haldo-app-window";
         win.dataset.appWindow = appId;
-        win.style.cssText = `
-            position: fixed;
-            z-index: 9999;
-            width: min(480px, 92vw);
-            max-height: 70vh;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(10,14,30,0.95);
-            backdrop-filter: blur(24px);
-            border-radius: 24px;
-            border: 1px solid rgba(255,255,255,.1);
-            box-shadow: 0 30px 80px rgba(0,0,0,.6);
-            overflow: auto;
-            color: #fff;
-            animation: haldoWindowIn .25s ease-out;
-        `;
 
         win.innerHTML = `
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid rgba(255,255,255,.07);">
-                <span style="font-weight:700;font-size:16px;">${appId.charAt(0).toUpperCase() + appId.slice(1)}</span>
-                <button style="background:rgba(255,255,255,.08);border:none;color:#fff;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:18px;" onclick="this.closest('[data-app-window]').remove()">×</button>
+            <div class="haldo-app-window-header">
+                <span class="title">${appId.charAt(0).toUpperCase() + appId.slice(1)}</span>
+                <button class="haldo-app-window-close">×</button>
             </div>
-            <div style="padding:16px;overflow-y:auto;max-height:60vh;">
+            <div class="haldo-app-window-body">
                 ${content}
             </div>
         `;
 
         document.body.appendChild(win);
 
-        // Close on click outside
+        // Close button
+        win.querySelector(".haldo-app-window-close").addEventListener("click", () => win.remove());
+
+        // Close on outside click
         win.addEventListener("click", (e) => {
             if (e.target === win) win.remove();
         });
+
+        // App-specific logic
+        if (appId === "calculator") {
+            let display = win.querySelector("#calc-display");
+            let expression = "";
+            win.querySelectorAll("[data-calc]").forEach(btn => {
+                btn.addEventListener("click", () => {
+                    const val = btn.dataset.calc;
+                    if (val === "C") { expression = ""; display.textContent = "0"; }
+                    else if (val === "⌫") { expression = expression.slice(0,-1); display.textContent = expression || "0"; }
+                    else if (val === "=") {
+                        try {
+                            const result = Function('"use strict"; return (' + expression.replace('×','*').replace('÷','/').replace('−','-') + ')')();
+                            display.textContent = result;
+                            expression = String(result);
+                        } catch(e) { display.textContent = "Fehler"; expression = ""; }
+                    }
+                    else { expression += val; display.textContent = expression; }
+                });
+            });
+        }
+
+        if (appId === "notes") {
+            let notes = [];
+            try { notes = JSON.parse(localStorage.getItem("haldo_notes") || "[]"); } catch(e) {}
+            const list = win.querySelector("#note-list");
+            const titleInput = win.querySelector("#note-title");
+            const contentInput = win.querySelector("#note-content");
+            const saveBtn = win.querySelector("#note-save");
+
+            function renderNotes() {
+                list.innerHTML = notes.map((n, i) => `
+                    <div style="padding:10px 14px;background:rgba(255,255,255,.05);border-radius:8px;display:flex;justify-content:space-between;align-items:center;border:1px solid rgba(255,255,255,.05);">
+                        <div>
+                            <strong style="color:white;">${n.title || 'Ohne Titel'}</strong>
+                            <div style="color:rgba(255,255,255,.5);font-size:12px;">${n.content?.substring(0,80) || ''}</div>
+                        </div>
+                        <button data-index="${i}" class="note-delete" style="padding:4px 12px;border:none;border-radius:6px;background:rgba(255,87,87,.2);color:#ff5f57;cursor:pointer;">✕</button>
+                    </div>
+                `).join('');
+
+                list.querySelectorAll(".note-delete").forEach(btn => {
+                    btn.addEventListener("click", (e) => {
+                        const idx = parseInt(e.target.dataset.index);
+                        notes.splice(idx, 1);
+                        localStorage.setItem("haldo_notes", JSON.stringify(notes));
+                        renderNotes();
+                    });
+                });
+            }
+
+            saveBtn.addEventListener("click", () => {
+                const title = titleInput.value.trim() || "Ohne Titel";
+                const content = contentInput.value.trim();
+                if (!content) return;
+                notes.push({ title, content, createdAt: new Date().toISOString() });
+                localStorage.setItem("haldo_notes", JSON.stringify(notes));
+                titleInput.value = "";
+                contentInput.value = "";
+                renderNotes();
+            });
+
+            renderNotes();
+        }
     };
 
-    // Add window animation
-    const style = document.createElement("style");
-    style.textContent = `
-        @keyframes haldoWindowIn {
-            from { opacity: 0; transform: translate(-50%, -45%) scale(.96); }
-            to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    // =========================================================
+    // 15. START ALL SYSTEMS
+    // =========================================================
+
+    document.addEventListener("DOMContentLoaded", () => {
+        // Chat
+        window.HalDo.Chat.init();
+
+        // Living Avatar
+        window.HalDo.LivingAvatar.init();
+
+        // Connect AI events to avatar
+        window.HalDo.on("ai:listening", () => window.HalDo.LivingAvatar.listening());
+        window.HalDo.on("ai:thinking", () => window.HalDo.LivingAvatar.thinking());
+        window.HalDo.on("ai:speaking", () => window.HalDo.LivingAvatar.speaking());
+        window.HalDo.on("ai:idle", () => window.HalDo.LivingAvatar.idle());
+        window.HalDo.on("ai:happy", () => window.HalDo.LivingAvatar.happy());
+
+        // Open chat from sun button
+        const sunBtn = document.getElementById("haldo-sun-button");
+        if (sunBtn) {
+            sunBtn.addEventListener("click", () => {
+                setTimeout(() => window.HalDo.Chat.open(), 100);
+            });
         }
-    `;
-    document.head.appendChild(style);
+
+        // Global shortcut: Ctrl+K
+        document.addEventListener("keydown", (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === "k") {
+                e.preventDefault();
+                if (window.HalDo.Chat.open) {
+                    window.HalDo.Chat.close();
+                } else {
+                    window.HalDo.Chat.open();
+                }
+            }
+        });
+    });
+
+    // =========================================================
+    // 16. GLOBAL API
+    // =========================================================
+
+    window.HalDo.openChat = function() {
+        if (window.HalDo.Chat) window.HalDo.Chat.open();
+    };
+
+    window.HalDo.closeChat = function() {
+        if (window.HalDo.Chat) window.HalDo.Chat.close();
+    };
+
+    window.HalDo.toggleChat = function() {
+        if (window.HalDo.Chat) {
+            window.HalDo.Chat.open ? window.HalDo.Chat.close() : window.HalDo.Chat.open();
+        }
+    };
+
+    window.HalDo.sendChatMessage = function(text) {
+        if (window.HalDo.Chat) {
+            window.HalDo.Chat.input.value = text;
+            window.HalDo.Chat.send();
+        }
+    };
+
+    window.HalDo.setAvatarState = function(state) {
+        if (window.HalDo.LivingAvatar) window.HalDo.LivingAvatar.setState(state);
+    };
+
+    window.HalDo.avatarReact = function(state, duration) {
+        if (window.HalDo.LivingAvatar) window.HalDo.LivingAvatar.react(state, duration);
+    };
+
+    console.log("🚀 HalDo AI OS v22.0.0 erfolgreich gestartet!");
+    console.log("💬 Chat: Strg+K oder Klick auf Sonne/Avatar");
+    console.log("🎙️ Voice: Klick auf Mikrofon im Chat");
+    console.log("📱 Apps: Doppelklick auf Avatar oder App-Launcher");
     </script>
 
 </body>
