@@ -15026,3 +15026,2779 @@ function isRegistered(
 /* ============================================================
    176 — END TEIL 13
    ============================================================ */
+ /* ============================================================
+   HALDO AI OS 20
+   APPLICATION MANAGER MASTER EXTENSION
+   TEIL 14 / 16
+   ============================================================ */
+
+
+/* ============================================================
+   48 — APP INSTANCE SNAPSHOT
+   ============================================================ */
+
+function getInstanceSnapshot(
+    appId
+) {
+
+    const id =
+        normalizeId(
+            appId
+        );
+
+    if (!id) {
+        return null;
+    }
+
+    const instance =
+        state.instances.get(
+            id
+        );
+
+    if (!instance) {
+        return null;
+    }
+
+    return clone(
+        instance
+    );
+}
+
+
+/* ============================================================
+   49 — ALL INSTANCE SNAPSHOTS
+   ============================================================ */
+
+function getInstanceSnapshots() {
+
+    return Array.from(
+        state.instances.entries()
+    ).map(
+        ([appId, instance]) => ({
+            appId,
+            instance:
+                clone(
+                    instance
+                )
+        })
+    );
+
+}
+
+
+/* ============================================================
+   50 — APP WINDOW STATE
+   ============================================================ */
+
+function getWindowState(
+    appId
+) {
+
+    const id =
+        normalizeId(
+            appId
+        );
+
+    if (!id) {
+        return null;
+    }
+
+    const appState =
+        createInitialState(
+            id
+        );
+
+    if (!appState) {
+        return null;
+    }
+
+    return {
+
+        appId:
+            id,
+
+        windowId:
+            appState.windowId,
+
+        open:
+            !!appState.open,
+
+        active:
+            !!appState.active,
+
+        visible:
+            !!appState.visible,
+
+        minimized:
+            !!appState.minimized,
+
+        maximized:
+            !!appState.maximized,
+
+        pip:
+            !!appState.pip
+
+    };
+
+}
+
+
+/* ============================================================
+   51 — SET APP ROUTE
+   ============================================================ */
+
+function setAppRoute(
+    appId,
+    route,
+    options = {}
+) {
+
+    const id =
+        normalizeId(
+            appId
+        );
+
+    if (!id) {
+        return null;
+    }
+
+    const normalizedRoute =
+        String(
+            route == null
+                ? ""
+                : route
+        ).trim();
+
+    const current =
+        createInitialState(
+            id
+        );
+
+    if (!current) {
+        return null;
+    }
+
+    updateAppState(
+        id,
+        {
+            route:
+                normalizedRoute ||
+                null
+        }
+    );
+
+    const router =
+        getRouter();
+
+    if (
+        options.navigate !== false &&
+        router
+    ) {
+
+        try {
+
+            if (
+                hasMethod(
+                    router,
+                    "navigate"
+                )
+            ) {
+
+                router.navigate(
+                    normalizedRoute,
+                    {
+                        appId:
+                            id
+                    }
+                );
+
+            } else if (
+                hasMethod(
+                    router,
+                    "go"
+                )
+            ) {
+
+                router.go(
+                    normalizedRoute
+                );
+
+            } else if (
+                hasMethod(
+                    router,
+                    "routeTo"
+                )
+            ) {
+
+                router.routeTo(
+                    id,
+                    normalizedRoute
+                );
+
+            }
+
+        } catch (exception) {
+
+            reportError(
+                exception,
+                "App Route Navigation"
+            );
+
+        }
+
+    }
+
+    emit(
+        "route-changed",
+        {
+
+            appId:
+                id,
+
+            route:
+                normalizedRoute ||
+                null
+
+        }
+    );
+
+    return getAppState(
+        id
+    );
+
+}
+
+
+/* ============================================================
+   52 — SET APP WINDOW
+   ============================================================ */
+
+function setAppWindow(
+    appId,
+    windowId,
+    options = {}
+) {
+
+    const id =
+        normalizeId(
+            appId
+        );
+
+    if (!id) {
+        return null;
+    }
+
+    const normalizedWindowId =
+        windowId == null
+            ? null
+            : String(
+                windowId
+            ).trim() || null;
+
+    const result =
+        updateAppState(
+            id,
+            {
+                windowId:
+                    normalizedWindowId
+            }
+        );
+
+    if (!result) {
+        return null;
+    }
+
+    if (
+        options.emit !== false
+    ) {
+
+        emit(
+            "window-changed",
+            {
+
+                appId:
+                    id,
+
+                windowId:
+                    normalizedWindowId
+
+            }
+        );
+
+    }
+
+    return clone(
+        result
+    );
+
+}
+
+
+/* ============================================================
+   53 — APP FOCUS
+   ============================================================ */
+
+async function focusApp(
+    appId,
+    options = {}
+) {
+
+    const id =
+        normalizeId(
+            appId
+        );
+
+    if (!id) {
+        return false;
+    }
+
+    const instance =
+        state.instances.get(
+            id
+        );
+
+    const manager =
+        getWindowManager();
+
+    try {
+
+        if (
+            manager
+        ) {
+
+            const windowId =
+                getAppState(
+                    id
+                ).windowId;
+
+            if (
+                windowId &&
+                hasMethod(
+                    manager,
+                    "focus"
+                )
+            ) {
+
+                await safeAsyncResult(
+                    manager.focus(
+                        windowId
+                    )
+                );
+
+            } else if (
+                windowId &&
+                hasMethod(
+                    manager,
+                    "focusWindow"
+                )
+            ) {
+
+                await safeAsyncResult(
+                    manager.focusWindow(
+                        windowId
+                    )
+                );
+
+            }
+
+        }
+
+        updateAppState(
+            id,
+            {
+                focused:
+                    true,
+
+                active:
+                    true,
+
+                visible:
+                    true
+            }
+        );
+
+        state.activeAppId =
+            id;
+
+        if (
+            instance
+        ) {
+
+            instance.state.focused =
+                true;
+
+            instance.state.active =
+                true;
+
+            instance.updatedAt =
+                Date.now();
+
+        }
+
+        state.statistics.activations +=
+            1;
+
+        emit(
+            "app-focused",
+            {
+                appId:
+                    id
+            }
+        );
+
+        dispatch(
+            "haldo:app:focused",
+            {
+                appId:
+                    id
+            }
+        );
+
+        return true;
+
+    } catch (exception) {
+
+        reportError(
+            exception,
+            "App Focus"
+        );
+
+        return false;
+
+    }
+
+}
+
+
+/* ============================================================
+   54 — APP BLUR
+   ============================================================ */
+
+async function blurApp(
+    appId,
+    options = {}
+) {
+
+    const id =
+        normalizeId(
+            appId
+        );
+
+    if (!id) {
+        return false;
+    }
+
+    const instance =
+        state.instances.get(
+            id
+        );
+
+    if (!instance) {
+        return false;
+    }
+
+    try {
+
+        updateAppState(
+            id,
+            {
+                focused:
+                    false,
+
+                active:
+                    false
+            }
+        );
+
+        instance.state.focused =
+            false;
+
+        instance.state.active =
+            false;
+
+        instance.updatedAt =
+            Date.now();
+
+        if (
+            state.activeAppId ===
+            id
+        ) {
+
+            state.activeAppId =
+                null;
+
+        }
+
+        emit(
+            "app-blurred",
+            {
+                appId:
+                    id
+            }
+        );
+
+        return true;
+
+    } catch (exception) {
+
+        reportError(
+            exception,
+            "App Blur"
+        );
+
+        return false;
+
+    }
+
+}
+
+
+/* ============================================================
+   55 — ACTIVATE ONLY
+   ============================================================ */
+
+async function activateOnly(
+    appId,
+    options = {}
+) {
+
+    const id =
+        normalizeId(
+            appId
+        );
+
+    if (!id) {
+        return false;
+    }
+
+    const current =
+        createInitialState(
+            id
+        );
+
+    if (!current) {
+        return false;
+    }
+
+    if (
+        state.activeAppId &&
+        state.activeAppId !== id
+    ) {
+
+        await blurApp(
+            state.activeAppId,
+            options
+        );
+
+    }
+
+    updateAppState(
+        id,
+        {
+
+            active:
+                true,
+
+            focused:
+                true,
+
+            visible:
+                true
+
+        }
+    );
+
+    state.activeAppId =
+        id;
+
+    state.statistics.activations +=
+        1;
+
+    emit(
+        "activated",
+        {
+            appId:
+                id
+        }
+    );
+
+    dispatch(
+        "haldo:app:activated",
+        {
+            appId:
+                id
+        }
+    );
+
+    return true;
+
+}
+
+
+/* ============================================================
+   56 — DEACTIVATE ONLY
+   ============================================================ */
+
+async function deactivateOnly(
+    appId,
+    options = {}
+) {
+
+    const id =
+        normalizeId(
+            appId
+        );
+
+    if (!id) {
+        return false;
+    }
+
+    const current =
+        createInitialState(
+            id
+        );
+
+    if (!current) {
+        return false;
+    }
+
+    updateAppState(
+        id,
+        {
+
+            active:
+                false,
+
+            focused:
+                false
+
+        }
+    );
+
+    if (
+        state.activeAppId ===
+        id
+    ) {
+
+        state.activeAppId =
+            null;
+
+    }
+
+    emit(
+        "deactivated",
+        {
+            appId:
+                id
+        }
+    );
+
+    dispatch(
+        "haldo:app:deactivated",
+        {
+            appId:
+                id
+        }
+    );
+
+    return true;
+
+}
+
+
+/* ============================================================
+   57 — APP VISIBILITY
+   ============================================================ */
+
+function setVisibility(
+    appId,
+    visible
+) {
+
+    const id =
+        normalizeId(
+            appId
+        );
+
+    if (!id) {
+        return false;
+    }
+
+    const result =
+        updateAppState(
+            id,
+            {
+                visible:
+                    !!visible
+            }
+        );
+
+    if (!result) {
+        return false;
+    }
+
+    emit(
+        "visibility-changed",
+        {
+
+            appId:
+                id,
+
+            visible:
+                !!visible
+
+        }
+    );
+
+    return true;
+
+}
+
+
+/* ============================================================
+   58 — APP MINIMIZE STATE
+   ============================================================ */
+
+function setMinimizedState(
+    appId,
+    minimized
+) {
+
+    const id =
+        normalizeId(
+            appId
+        );
+
+    if (!id) {
+        return false;
+    }
+
+    const result =
+        updateAppState(
+            id,
+            {
+
+                minimized:
+                    !!minimized,
+
+                visible:
+                    minimized
+                        ? false
+                        : true
+
+            }
+        );
+
+    return !!result;
+
+}
+
+
+/* ============================================================
+   59 — APP MAXIMIZE STATE
+   ============================================================ */
+
+function setMaximizedState(
+    appId,
+    maximized
+) {
+
+    const id =
+        normalizeId(
+            appId
+        );
+
+    if (!id) {
+        return false;
+    }
+
+    const result =
+        updateAppState(
+            id,
+            {
+                maximized:
+                    !!maximized
+            }
+        );
+
+    return !!result;
+
+}
+
+
+/* ============================================================
+   60 — APP PIP STATE
+   ============================================================ */
+
+function setPIPState(
+    appId,
+    pip
+) {
+
+    const id =
+        normalizeId(
+            appId
+        );
+
+    if (!id) {
+        return false;
+    }
+
+    const result =
+        updateAppState(
+            id,
+            {
+                pip:
+                    !!pip
+            }
+        );
+
+    return !!result;
+
+}
+
+
+/* ============================================================
+   61 — APP SUSPEND STATE
+   ============================================================ */
+
+function setSuspendedState(
+    appId,
+    suspended
+) {
+
+    const id =
+        normalizeId(
+            appId
+        );
+
+    if (!id) {
+        return false;
+    }
+
+    const result =
+        updateAppState(
+            id,
+            {
+                suspended:
+                    !!suspended,
+
+                lifecycle:
+                    suspended
+                        ? "suspended"
+                        : "running"
+            }
+        );
+
+    return !!result;
+
+}
+
+
+/* ============================================================
+   62 — APP LOADING STATE
+   ============================================================ */
+
+function setLoadingState(
+    appId,
+    loading
+) {
+
+    const id =
+        normalizeId(
+            appId
+        );
+
+    if (!id) {
+        return false;
+    }
+
+    const result =
+        updateAppState(
+            id,
+            {
+                loading:
+                    !!loading,
+
+                status:
+                    loading
+                        ? "loading"
+                        : "ready"
+            }
+        );
+
+    return !!result;
+
+}
+
+
+/* ============================================================
+   63 — APP READY STATE
+   ============================================================ */
+
+function setReadyState(
+    appId,
+    ready
+) {
+
+    const id =
+        normalizeId(
+            appId
+        );
+
+    if (!id) {
+        return false;
+    }
+
+    const result =
+        updateAppState(
+            id,
+            {
+                ready:
+                    !!ready,
+
+                loading:
+                    ready
+                        ? false
+                        : getAppState(
+                            id
+                        ).loading,
+
+                status:
+                    ready
+                        ? "ready"
+                        : getAppState(
+                            id
+                        ).status
+            }
+        );
+
+    return !!result;
+
+}
+
+
+/* ============================================================
+   64 — APP ERROR CLEAR
+   ============================================================ */
+
+function clearAppError(
+    appId
+) {
+
+    const id =
+        normalizeId(
+            appId
+        );
+
+    if (!id) {
+        return false;
+    }
+
+    const result =
+        updateAppState(
+            id,
+            {
+
+                error:
+                    null,
+
+                errorCount:
+                    0
+
+            }
+        );
+
+    if (!result) {
+        return false;
+    }
+
+    emit(
+        "error-cleared",
+        {
+            appId:
+                id
+        }
+    );
+
+    return true;
+
+}
+
+
+/* ============================================================
+   65 — END TEIL 14
+   ============================================================ */
+ /* ============================================================
+   HALDO AI OS 20
+   APPLICATION MANAGER MASTER EXTENSION
+   TEIL 15 / 16
+   ============================================================ */
+
+
+/* ============================================================
+   66 — APP STATE SNAPSHOT
+   ============================================================ */
+
+function getStateSnapshot(
+    appId
+) {
+
+    const id =
+        normalizeId(
+            appId
+        );
+
+    if (!id) {
+        return null;
+    }
+
+    const appState =
+        state.appStates &&
+        state.appStates.get
+            ? state.appStates.get(
+                id
+            )
+            : null;
+
+    if (!appState) {
+        return null;
+    }
+
+    return clone(
+        appState
+    );
+
+}
+
+
+/* ============================================================
+   67 — ALL APP STATE SNAPSHOTS
+   ============================================================ */
+
+function getAllStateSnapshots() {
+
+    const result = {};
+
+    if (
+        !state.appStates ||
+        !state.appStates.entries
+    ) {
+
+        return result;
+
+    }
+
+    for (
+        const [
+            appId,
+            appState
+        ]
+        of state.appStates.entries()
+    ) {
+
+        result[
+            appId
+        ] =
+            clone(
+                appState
+            );
+
+    }
+
+    return result;
+
+}
+
+
+/* ============================================================
+   68 — PERSIST APP STATE SAFELY
+   ============================================================ */
+
+async function persistStateSafely(
+    appId
+) {
+
+    const id =
+        normalizeId(
+            appId
+        );
+
+    if (!id) {
+        return false;
+    }
+
+    try {
+
+        if (
+            typeof persistAppState ===
+            "function"
+        ) {
+
+            await persistAppState(
+                id
+            );
+
+            return true;
+
+        }
+
+        const storage =
+            getStorage();
+
+        if (
+            storage &&
+            hasMethod(
+                storage,
+                "set"
+            )
+        ) {
+
+            const appState =
+                getAppState(
+                    id
+                );
+
+            await storage.set(
+                "haldo:app-state:" + id,
+                clone(
+                    appState
+                )
+            );
+
+            return true;
+
+        }
+
+    } catch (exception) {
+
+        reportError(
+            exception,
+            "Persist App State"
+        );
+
+    }
+
+    return false;
+
+}
+
+
+/* ============================================================
+   69 — RESTORE APP STATE
+   ============================================================ */
+
+async function restoreState(
+    appId
+) {
+
+    const id =
+        normalizeId(
+            appId
+        );
+
+    if (!id) {
+        return null;
+    }
+
+    try {
+
+        const storage =
+            getStorage();
+
+        let stored =
+            null;
+
+        if (
+            storage &&
+            hasMethod(
+                storage,
+                "get"
+            )
+        ) {
+
+            stored =
+                await storage.get(
+                    "haldo:app-state:" + id,
+                    null
+                );
+
+        }
+
+        if (
+            !stored
+        ) {
+
+            return getAppState(
+                id
+            );
+
+        }
+
+        return updateAppState(
+            id,
+            clone(
+                stored
+            )
+        );
+
+    } catch (exception) {
+
+        reportError(
+            exception,
+            "Restore App State"
+        );
+
+        return getAppState(
+            id
+        );
+
+    }
+
+}
+
+
+/* ============================================================
+   70 — APP STORAGE SET
+   ============================================================ */
+
+async function storageSet(
+    appId,
+    key,
+    value
+) {
+
+    const id =
+        normalizeId(
+            appId
+        );
+
+    const storageKey =
+        String(
+            key == null
+                ? ""
+                : key
+        ).trim();
+
+    if (
+        !id ||
+        !storageKey
+    ) {
+
+        return false;
+
+    }
+
+    try {
+
+        const storage =
+            getStorage();
+
+        if (
+            storage &&
+            hasMethod(
+                storage,
+                "set"
+            )
+        ) {
+
+            await storage.set(
+                "haldo:app:" +
+                id +
+                ":" +
+                storageKey,
+                clone(
+                    value
+                )
+            );
+
+            return true;
+
+        }
+
+        if (
+            typeof localStorage !==
+            "undefined"
+        ) {
+
+            localStorage.setItem(
+                "haldo:app:" +
+                id +
+                ":" +
+                storageKey,
+                JSON.stringify(
+                    value
+                )
+            );
+
+            return true;
+
+        }
+
+    } catch (exception) {
+
+        reportError(
+            exception,
+            "App Storage Set"
+        );
+
+    }
+
+    return false;
+
+}
+
+
+/* ============================================================
+   71 — APP STORAGE GET
+   ============================================================ */
+
+async function storageGet(
+    appId,
+    key,
+    fallback = null
+) {
+
+    const id =
+        normalizeId(
+            appId
+        );
+
+    const storageKey =
+        String(
+            key == null
+                ? ""
+                : key
+        ).trim();
+
+    if (
+        !id ||
+        !storageKey
+    ) {
+
+        return fallback;
+
+    }
+
+    try {
+
+        const storage =
+            getStorage();
+
+        if (
+            storage &&
+            hasMethod(
+                storage,
+                "get"
+            )
+        ) {
+
+            const result =
+                await storage.get(
+                    "haldo:app:" +
+                    id +
+                    ":" +
+                    storageKey,
+                    fallback
+                );
+
+            return result ===
+                undefined
+                ? fallback
+                : result;
+
+        }
+
+        if (
+            typeof localStorage !==
+            "undefined"
+        ) {
+
+            const raw =
+                localStorage.getItem(
+                    "haldo:app:" +
+                    id +
+                    ":" +
+                    storageKey
+                );
+
+            if (
+                raw ===
+                null
+            ) {
+
+                return fallback;
+
+            }
+
+            try {
+
+                return JSON.parse(
+                    raw
+                );
+
+            } catch (_) {
+
+                return raw;
+
+            }
+
+        }
+
+    } catch (exception) {
+
+        reportError(
+            exception,
+            "App Storage Get"
+        );
+
+    }
+
+    return fallback;
+
+}
+
+
+/* ============================================================
+   72 — APP STORAGE DELETE
+   ============================================================ */
+
+async function storageDelete(
+    appId,
+    key
+) {
+
+    const id =
+        normalizeId(
+            appId
+        );
+
+    const storageKey =
+        String(
+            key == null
+                ? ""
+                : key
+        ).trim();
+
+    if (
+        !id ||
+        !storageKey
+    ) {
+
+        return false;
+
+    }
+
+    try {
+
+        const storage =
+            getStorage();
+
+        if (
+            storage &&
+            hasMethod(
+                storage,
+                "delete"
+            )
+        ) {
+
+            await storage.delete(
+                "haldo:app:" +
+                id +
+                ":" +
+                storageKey
+            );
+
+            return true;
+
+        }
+
+        if (
+            storage &&
+            hasMethod(
+                storage,
+                "remove"
+            )
+        ) {
+
+            await storage.remove(
+                "haldo:app:" +
+                id +
+                ":" +
+                storageKey
+            );
+
+            return true;
+
+        }
+
+        if (
+            typeof localStorage !==
+            "undefined"
+        ) {
+
+            localStorage.removeItem(
+                "haldo:app:" +
+                id +
+                ":" +
+                storageKey
+            );
+
+            return true;
+
+        }
+
+    } catch (exception) {
+
+        reportError(
+            exception,
+            "App Storage Delete"
+        );
+
+    }
+
+    return false;
+
+}
+
+
+/* ============================================================
+   73 — APP STORAGE CLEAR
+   ============================================================ */
+
+async function storageClear(
+    appId
+) {
+
+    const id =
+        normalizeId(
+            appId
+        );
+
+    if (!id) {
+        return false;
+    }
+
+    try {
+
+        const storage =
+            getStorage();
+
+        if (
+            storage &&
+            hasMethod(
+                storage,
+                "clearNamespace"
+            )
+        ) {
+
+            await storage.clearNamespace(
+                "haldo:app:" +
+                id
+            );
+
+            return true;
+
+        }
+
+        if (
+            storage &&
+            hasMethod(
+                storage,
+                "clear"
+            )
+        ) {
+
+            /*
+             * Nur verwenden, wenn der Storage-Service
+             * ausdrücklich einen Namespace akzeptiert.
+             */
+            await storage.clear(
+                "haldo:app:" +
+                id
+            );
+
+            return true;
+
+        }
+
+        if (
+            typeof localStorage !==
+            "undefined"
+        ) {
+
+            const prefix =
+                "haldo:app:" +
+                id +
+                ":";
+
+            const keys = [];
+
+            for (
+                let index = 0;
+                index <
+                localStorage.length;
+                index += 1
+            ) {
+
+                const key =
+                    localStorage.key(
+                        index
+                    );
+
+                if (
+                    key &&
+                    key.startsWith(
+                        prefix
+                    )
+                ) {
+
+                    keys.push(
+                        key
+                    );
+
+                }
+
+            }
+
+            for (
+                const key
+                of keys
+            ) {
+
+                localStorage.removeItem(
+                    key
+                );
+
+            }
+
+            return true;
+
+        }
+
+    } catch (exception) {
+
+        reportError(
+            exception,
+            "App Storage Clear"
+        );
+
+    }
+
+    return false;
+
+}
+
+
+/* ============================================================
+   74 — APP SETTINGS SNAPSHOT
+   ============================================================ */
+
+function getSettingsSnapshot(
+    appId
+) {
+
+    const id =
+        normalizeId(
+            appId
+        );
+
+    if (!id) {
+        return null;
+    }
+
+    try {
+
+        return clone(
+            getSettings(
+                id
+            )
+        );
+
+    } catch (exception) {
+
+        reportError(
+            exception,
+            "Get App Settings Snapshot"
+        );
+
+        return null;
+
+    }
+
+}
+
+
+/* ============================================================
+   75 — UPDATE APP SETTINGS SAFELY
+   ============================================================ */
+
+async function updateSettings(
+    appId,
+    patch = {},
+    options = {}
+) {
+
+    const id =
+        normalizeId(
+            appId
+        );
+
+    if (!id) {
+        return null;
+    }
+
+    try {
+
+        const current =
+            getSettings(
+                id
+            ) || {};
+
+        const next =
+            {
+                ...clone(
+                    current
+                ),
+                ...clone(
+                    patch
+                )
+            };
+
+        const result =
+            await setSettings(
+                id,
+                next,
+                options
+            );
+
+        emit(
+            "settings-updated",
+            {
+
+                appId:
+                    id,
+
+                settings:
+                    clone(
+                        result
+                    )
+
+            }
+        );
+
+        return result;
+
+    } catch (exception) {
+
+        reportError(
+            exception,
+            "Update App Settings"
+        );
+
+        return null;
+
+    }
+
+}
+
+
+/* ============================================================
+   76 — APP HEALTH SNAPSHOT
+   ============================================================ */
+
+function getAppHealth(
+    appId
+) {
+
+    const id =
+        normalizeId(
+            appId
+        );
+
+    if (!id) {
+        return null;
+    }
+
+    const instance =
+        state.instances &&
+        state.instances.get
+            ? state.instances.get(
+                id
+            )
+            : null;
+
+    const appState =
+        getAppState(
+            id
+        );
+
+    const definition =
+        getApp(
+            id
+        );
+
+    const problems = [];
+
+
+    if (!definition) {
+
+        problems.push(
+            "App-Definition fehlt."
+        );
+
+    }
+
+
+    if (
+        !instance
+    ) {
+
+        problems.push(
+            "App-Instanz fehlt."
+        );
+
+    }
+
+
+    if (
+        appState &&
+        appState.error
+    ) {
+
+        problems.push(
+            appState.error.message ||
+            "App-Fehler vorhanden."
+        );
+
+    }
+
+
+    const dependencyResult =
+        checkDependencies(
+            id
+        );
+
+    if (
+        dependencyResult &&
+        dependencyResult.missing &&
+        dependencyResult.missing.length
+    ) {
+
+        problems.push(
+            "Fehlende Abhängigkeiten: " +
+            dependencyResult.missing.join(
+                ", "
+            )
+        );
+
+    }
+
+
+    return {
+
+        appId:
+            id,
+
+        healthy:
+            problems.length ===
+            0,
+
+        problems,
+
+        definition:
+            !!definition,
+
+        instance:
+            !!instance,
+
+        initialized:
+            !!(
+                appState &&
+                appState.initialized
+            ),
+
+        mounted:
+            !!(
+                appState &&
+                appState.mounted
+            ),
+
+        running:
+            !!(
+                appState &&
+                appState.running
+            ),
+
+        ready:
+            !!(
+                appState &&
+                appState.ready
+            ),
+
+        open:
+            !!(
+                appState &&
+                appState.open
+            ),
+
+        active:
+            !!(
+                appState &&
+                appState.active
+            ),
+
+        timestamp:
+            new Date().toISOString()
+
+    };
+
+}
+
+
+/* ============================================================
+   77 — ALL APP HEALTH
+   ============================================================ */
+
+function getAllAppHealth() {
+
+    const result = [];
+
+    for (
+        const definition
+        of getAll()
+    ) {
+
+        const id =
+            definition &&
+            (
+                definition.id ||
+                definition.appId ||
+                definition.name
+            );
+
+        if (!id) {
+            continue;
+        }
+
+        result.push(
+            getAppHealth(
+                id
+            )
+        );
+
+    }
+
+    return result;
+
+}
+
+
+/* ============================================================
+   78 — APP MANAGER EXTENDED API
+   ============================================================ */
+
+Object.assign(
+    api,
+    {
+
+        once,
+
+        dispatch,
+
+        emitForApp,
+
+        callAppHook,
+
+        getStatus,
+
+        getAllStatuses,
+
+        isRunning,
+
+        isOpen,
+
+        isActive,
+
+        isReady,
+
+        hasApp,
+
+        getAppContext,
+
+        createScopedStorage,
+
+        createScopedEvents,
+
+        getServices,
+
+        getAIService,
+
+        getVoiceService,
+
+        getSystemService,
+
+        getStorage,
+
+        getRouter,
+
+        getWindowManager,
+
+        getAppRoute,
+
+        getAppWindowId,
+
+        getAppInstanceId,
+
+        getAppDefinitionId,
+
+        command,
+
+        invoke,
+
+        send,
+
+        broadcast,
+
+        request,
+
+        hasCapability,
+
+        hasPermission,
+
+        hasFeature,
+
+        isEnabled,
+
+        isAvailable,
+
+        getDependencies,
+
+        startDependencies,
+
+        stopDependencies,
+
+        getDependencyGraph,
+
+        getDependencyChain,
+
+        hasDependencyCycle,
+
+        getRegistry,
+
+        registerValidated,
+
+        refreshDefinition,
+
+        createInstance,
+
+        ensureInstance,
+
+        resetInstance,
+
+        destroyInstance,
+
+        getInstances,
+
+        getInstanceCount,
+
+        getDefinitions,
+
+        getDefinitionCount,
+
+        isRegistered,
+
+        getInstanceSnapshot,
+
+        getInstanceSnapshots,
+
+        getWindowState,
+
+        setAppRoute,
+
+        setAppWindow,
+
+        focusApp,
+
+        blurApp,
+
+        activateOnly,
+
+        deactivateOnly,
+
+        setVisibility,
+
+        setMinimizedState,
+
+        setMaximizedState,
+
+        setPIPState,
+
+        setSuspendedState,
+
+        setLoadingState,
+
+        setReadyState,
+
+        clearAppError,
+
+        getStateSnapshot,
+
+        getAllStateSnapshots,
+
+        persistStateSafely,
+
+        restoreState,
+
+        storageSet,
+
+        storageGet,
+
+        storageDelete,
+
+        storageClear,
+
+        getSettingsSnapshot,
+
+        updateSettings,
+
+        getAppHealth,
+
+        getAllAppHealth
+
+    }
+);
+
+
+/* ============================================================
+   79 — FINAL PUBLIC GLOBALS
+   ============================================================ */
+
+if (
+    typeof window !==
+    "undefined"
+) {
+
+    window.HalDoAppManager =
+        api;
+
+    window.HalDoOSAppManager =
+        api;
+
+    if (
+        window.HalDoOS
+    ) {
+
+        window.HalDoOS.appManager =
+            api;
+
+    }
+
+}
+
+
+/* ============================================================
+   80 — EXTENSION READY EVENT
+   ============================================================ */
+
+emit(
+    "extended-api-ready",
+    {
+
+        version:
+            VERSION,
+
+        appCount:
+            getCount(),
+
+        timestamp:
+            new Date().toISOString()
+
+    }
+);
+
+if (
+    typeof window !==
+    "undefined" &&
+    typeof window.dispatchEvent ===
+    "function"
+) {
+
+    try {
+
+        const event =
+            typeof CustomEvent ===
+            "function"
+                ? new CustomEvent(
+                    "haldo:app-manager-extended-ready",
+                    {
+                        detail: {
+                            version:
+                                VERSION,
+
+                            appCount:
+                                getCount()
+                        }
+                    }
+                )
+                : null;
+
+        if (
+            event
+        ) {
+
+            window.dispatchEvent(
+                event
+            );
+
+        }
+
+    } catch (exception) {
+
+        reportError(
+            exception,
+            "App Manager Extended Ready Event"
+        );
+
+    }
+
+}
+
+
+/* ============================================================
+   81 — END TEIL 15
+   ============================================================ */
+ /* ============================================================
+   HALDO AI OS 20
+   APPLICATION MANAGER MASTER FINALIZATION
+   TEIL 16 / 16
+   ============================================================ */
+
+
+/* ============================================================
+   82 — FINAL API SAFETY LAYER
+   ============================================================ */
+
+(function finalizeAppManager() {
+
+    if (
+        typeof api !==
+        "object" ||
+        api === null
+    ) {
+
+        return;
+
+    }
+
+
+    /*
+     * Bereits vorhandene Funktionen werden nicht überschrieben.
+     * Fehlende Funktionen werden nur dann ergänzt, wenn sie
+     * innerhalb des aktuellen App-Manager-Kontexts verfügbar sind.
+     */
+
+    const optionalFunctions = {
+
+        command:
+            typeof command ===
+            "function"
+                ? command
+                : null,
+
+        invoke:
+            typeof invoke ===
+            "function"
+                ? invoke
+                : null,
+
+        send:
+            typeof send ===
+            "function"
+                ? send
+                : null,
+
+        broadcast:
+            typeof broadcast ===
+            "function"
+                ? broadcast
+                : null,
+
+        request:
+            typeof request ===
+            "function"
+                ? request
+                : null,
+
+        register:
+            typeof register ===
+            "function"
+                ? register
+                : null,
+
+        unregister:
+            typeof unregister ===
+            "function"
+                ? unregister
+                : null,
+
+        createInstance:
+            typeof createInstance ===
+            "function"
+                ? createInstance
+                : null,
+
+        ensureInstance:
+            typeof ensureInstance ===
+            "function"
+                ? ensureInstance
+                : null,
+
+        destroyInstance:
+            typeof destroyInstance ===
+            "function"
+                ? destroyInstance
+                : null,
+
+        resetInstance:
+            typeof resetInstance ===
+            "function"
+                ? resetInstance
+                : null,
+
+        getInstances:
+            typeof getInstances ===
+            "function"
+                ? getInstances
+                : null,
+
+        getDefinitions:
+            typeof getDefinitions ===
+            "function"
+                ? getDefinitions
+                : null,
+
+        getDependencies:
+            typeof getDependencies ===
+            "function"
+                ? getDependencies
+                : null,
+
+        checkDependencies:
+            typeof checkDependencies ===
+            "function"
+                ? checkDependencies
+                : null,
+
+        startDependencies:
+            typeof startDependencies ===
+            "function"
+                ? startDependencies
+                : null,
+
+        stopDependencies:
+            typeof stopDependencies ===
+            "function"
+                ? stopDependencies
+                : null,
+
+        getDependencyGraph:
+            typeof getDependencyGraph ===
+            "function"
+                ? getDependencyGraph
+                : null,
+
+        getDependencyChain:
+            typeof getDependencyChain ===
+            "function"
+                ? getDependencyChain
+                : null,
+
+        hasDependencyCycle:
+            typeof hasDependencyCycle ===
+            "function"
+                ? hasDependencyCycle
+                : null,
+
+        getAppHealth:
+            typeof getAppHealth ===
+            "function"
+                ? getAppHealth
+                : null,
+
+        getAllAppHealth:
+            typeof getAllAppHealth ===
+            "function"
+                ? getAllAppHealth
+                : null,
+
+        storageSet:
+            typeof storageSet ===
+            "function"
+                ? storageSet
+                : null,
+
+        storageGet:
+            typeof storageGet ===
+            "function"
+                ? storageGet
+                : null,
+
+        storageDelete:
+            typeof storageDelete ===
+            "function"
+                ? storageDelete
+                : null,
+
+        storageClear:
+            typeof storageClear ===
+            "function"
+                ? storageClear
+                : null
+
+    };
+
+
+    for (
+        const [
+            name,
+            handler
+        ]
+        of Object.entries(
+            optionalFunctions
+        )
+    ) {
+
+        if (
+            handler &&
+            typeof api[
+                name
+            ] !==
+            "function"
+        ) {
+
+            api[
+                name
+            ] =
+                handler;
+
+        }
+
+    }
+
+
+})();
+
+
+/* ============================================================
+   83 — FINAL STATE API
+   ============================================================ */
+
+if (
+    typeof api ===
+    "object" &&
+    api !== null
+) {
+
+    if (
+        typeof api.getState !==
+        "function"
+    ) {
+
+        api.getState =
+            function getState() {
+
+                return {
+
+                    initialized:
+                        !!state.initialized,
+
+                    ready:
+                        !!state.ready,
+
+                    activeAppId:
+                        state.activeAppId ||
+                        null,
+
+                    appCount:
+                        state.definitions &&
+                        state.definitions.size
+                            ? state.definitions.size
+                            : 0,
+
+                    instanceCount:
+                        state.instances &&
+                        state.instances.size
+                            ? state.instances.size
+                            : 0,
+
+                    timestamp:
+                        new Date().toISOString()
+
+                };
+
+            };
+
+    }
+
+
+    if (
+        typeof api.getSnapshot !==
+        "function"
+    ) {
+
+        api.getSnapshot =
+            function getSnapshot() {
+
+                return {
+
+                    state:
+                        clone(
+                            api.getState()
+                        ),
+
+                    definitions:
+                        typeof getDefinitions ===
+                        "function"
+                            ? getDefinitions()
+                            : [],
+
+                    instances:
+                        typeof getInstanceSnapshots ===
+                        "function"
+                            ? getInstanceSnapshots()
+                            : [],
+
+                    health:
+                        typeof getAllAppHealth ===
+                        "function"
+                            ? getAllAppHealth()
+                            : []
+
+                };
+
+            };
+
+    }
+
+}
+
+
+/* ============================================================
+   84 — FINAL EVENT
+   ============================================================ */
+
+if (
+    typeof emit ===
+    "function"
+) {
+
+    try {
+
+        emit(
+            "app-manager-finalized",
+            {
+
+                version:
+                    typeof VERSION !==
+                    "undefined"
+                        ? VERSION
+                        : "20",
+
+                timestamp:
+                    new Date().toISOString(),
+
+                appCount:
+                    typeof getCount ===
+                    "function"
+                        ? getCount()
+                        : 0,
+
+                instanceCount:
+                    state.instances &&
+                    typeof state.instances.size ===
+                    "number"
+                        ? state.instances.size
+                        : 0
+
+            }
+        );
+
+    } catch (
+        exception
+    ) {
+
+        /*
+         * Der Abschluss darf niemals den
+         * App Manager selbst zum Absturz bringen.
+         */
+
+        if (
+            typeof console !==
+            "undefined" &&
+            typeof console.error ===
+            "function"
+        ) {
+
+            console.error(
+                "[HalDo AI OS] App Manager final event failed:",
+                exception
+            );
+
+        }
+
+    }
+
+}
+
+
+/* ============================================================
+   85 — GLOBAL EXPORT
+   ============================================================ */
+
+if (
+    typeof globalThis !==
+    "undefined"
+) {
+
+    try {
+
+        globalThis.HalDoAppManager =
+            api;
+
+        globalThis.HalDoOSAppManager =
+            api;
+
+    } catch (
+        exception
+    ) {
+
+        if (
+            typeof console !==
+            "undefined" &&
+            typeof console.error ===
+            "function"
+        ) {
+
+            console.error(
+                "[HalDo AI OS] App Manager global export failed:",
+                exception
+            );
+
+        }
+
+    }
+
+}
+
+
+/* ============================================================
+   86 — BROWSER EXPORT
+   ============================================================ */
+
+if (
+    typeof window !==
+    "undefined"
+) {
+
+    try {
+
+        window.HalDoAppManager =
+            api;
+
+        window.HalDoOSAppManager =
+            api;
+
+        if (
+            window.HalDoOS &&
+            typeof window.HalDoOS ===
+            "object"
+        ) {
+
+            window.HalDoOS.appManager =
+                api;
+
+        }
+
+    } catch (
+        exception
+    ) {
+
+        if (
+            typeof console !==
+            "undefined" &&
+            typeof console.error ===
+            "function"
+        ) {
+
+            console.error(
+                "[HalDo AI OS] App Manager browser export failed:",
+                exception
+            );
+
+        }
+
+    }
+
+}
+
+
+/* ============================================================
+   87 — FINAL READY MARKER
+   ============================================================ */
+
+try {
+
+    if (
+        typeof globalThis !==
+        "undefined"
+    ) {
+
+        globalThis.__HALDO_APP_MANAGER_READY__ =
+            true;
+
+        globalThis.__HALDO_APP_MANAGER_VERSION__ =
+            typeof VERSION !==
+            "undefined"
+                ? VERSION
+                : "20";
+
+    }
+
+} catch (
+    exception
+) {
+
+    if (
+        typeof console !==
+        "undefined" &&
+        typeof console.error ===
+        "function"
+    ) {
+
+        console.error(
+            "[HalDo AI OS] App Manager ready marker failed:",
+            exception
+        );
+
+    }
+
+}
+
+
+/* ============================================================
+   88 — END TEIL 16 / 16
+   ============================================================ */
+
+/*
+ * HALDO AI OS
+ *
+ * Application Manager finalization complete.
+ *
+ * Next architectural target:
+ *
+ * /js/app-router.js
+ *
+ * The Router must be integrated only after the App Manager
+ * syntax/lifecycle consistency has been verified.
+ */
