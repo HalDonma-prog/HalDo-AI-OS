@@ -330,7 +330,7 @@
             }
         }
 
-        /* Hände (als dekorative Elemente) */
+        /* Hände */
         .haldo-living-logo .hand {
             position: absolute;
             width: 22%;
@@ -359,7 +359,7 @@
             50% { transform: translate(0, -8px) scale(1.1); }
         }
 
-        /* Atem-Animation für den gesamten Logo-Bereich */
+        /* Atem-Animation */
         .haldo-living-logo[data-state="listening"] img {
             animation: haldo-logo-listening 1.6s ease-in-out infinite;
         }
@@ -398,7 +398,7 @@
         }
 
         /* =========================================================
-           MENÜ BUTTONS — LINKS OBEN + UNTEN
+           MENÜ BUTTONS
            ========================================================= */
 
         .haldo-menu-button {
@@ -609,7 +609,6 @@
             border-radius: 24px;
             background: rgba(12,15,30,.92);
             backdrop-filter: blur(28px);
-            -webkit-backdrop-filter: blur(28px);
             box-shadow: 0 18px 70px rgba(0,0,0,.45);
             opacity: 0;
             visibility: hidden;
@@ -989,10 +988,7 @@
 
                 </div>
 
-                <!-- =============================================
-                SUN MIT LEBENDIGEM HALDO LOGO
-                ============================================= -->
-
+                <!-- SUN MIT LEBENDIGEM HALDO LOGO -->
                 <div class="haldo-sun-container" id="haldo-sun-container">
                     <div class="haldo-solar-aura" aria-hidden="true"></div>
                     <div class="haldo-solar-rays" aria-hidden="true"></div>
@@ -1037,7 +1033,6 @@
             <button class="close-btn" id="haldo-system-close">×</button>
         </div>
 
-        <!-- System-Items -->
         <div id="haldo-system-list">
             <div class="haldo-menu-item" data-app="settings">
                 <span class="icon">⚙️</span>
@@ -1081,7 +1076,6 @@
             <button class="close-btn" id="haldo-apps-close">×</button>
         </div>
 
-        <!-- Apps-Items -->
         <div id="haldo-apps-list">
             <div class="haldo-menu-item" data-app="haldo-ai">
                 <span class="icon">✦</span>
@@ -1284,7 +1278,6 @@
             this.img = document.getElementById("haldo-logo-img");
             if (!this.element || !this.img) return;
 
-            // Klick auf Sonne/Logo öffnet Chat
             const container = document.getElementById("haldo-sun-container");
             if (container) {
                 container.addEventListener("click", () => {
@@ -1299,18 +1292,14 @@
 
         setState(state) {
             this.state = state;
-            if (this.element) {
-                this.element.dataset.state = state;
-            }
+            if (this.element) this.element.dataset.state = state;
             window.HalDo.emit("avatar:state", { state });
         },
 
         react(state, duration = 800) {
             this.setState(state);
             clearTimeout(this._timer);
-            this._timer = setTimeout(() => {
-                this.setState("idle");
-            }, duration);
+            this._timer = setTimeout(() => this.setState("idle"), duration);
         },
 
         listening() { this.setState("listening"); },
@@ -1336,7 +1325,6 @@
             this.systemPanel = document.getElementById("haldo-system-panel");
             this.appsPanel = document.getElementById("haldo-apps-panel");
 
-            // System-Menü
             this.systemBtn.addEventListener("click", (e) => {
                 e.stopPropagation();
                 this.toggleSystem();
@@ -1346,7 +1334,6 @@
                 this.closeAll();
             });
 
-            // Apps-Menü
             this.appsBtn.addEventListener("click", (e) => {
                 e.stopPropagation();
                 this.toggleApps();
@@ -1356,7 +1343,6 @@
                 this.closeAll();
             });
 
-            // Menü-Items
             document.querySelectorAll(".haldo-menu-item[data-app]").forEach(item => {
                 item.addEventListener("click", () => {
                     const app = item.dataset.app;
@@ -1365,7 +1351,6 @@
                 });
             });
 
-            // Schließen bei Klick außerhalb
             document.addEventListener("click", (e) => {
                 if (!e.target.closest(".haldo-menu-panel") &&
                     !e.target.closest(".haldo-menu-button")) {
@@ -1373,7 +1358,6 @@
                 }
             });
 
-            // Escape schließt Menüs
             document.addEventListener("keydown", (e) => {
                 if (e.key === "Escape") this.closeAll();
             });
@@ -1382,17 +1366,13 @@
         toggleSystem() {
             const isOpen = this.systemPanel.classList.contains("open");
             this.closeAll();
-            if (!isOpen) {
-                this.systemPanel.classList.add("open");
-            }
+            if (!isOpen) this.systemPanel.classList.add("open");
         },
 
         toggleApps() {
             const isOpen = this.appsPanel.classList.contains("open");
             this.closeAll();
-            if (!isOpen) {
-                this.appsPanel.classList.add("open");
-            }
+            if (!isOpen) this.appsPanel.classList.add("open");
         },
 
         closeAll() {
@@ -1446,7 +1426,6 @@
                 this.input.style.height = Math.min(this.input.scrollHeight, 150) + "px";
             });
 
-            // Load history
             try {
                 const saved = localStorage.getItem("haldo-chat-history");
                 if (saved) {
@@ -1455,17 +1434,12 @@
                 }
             } catch(e) {}
 
-            // Welcome message
             if (this.history.length === 0) {
                 this.renderMessage("ai", "Hallo! Ich bin HalDo AI. 💙❤️ Wie kann ich dir helfen?");
             }
 
-            // Auto-open on sun click
             document.addEventListener("haldo:ai:open", () => this.open());
-
             this.setupSpeech();
-
-            // Chat öffnen wenn AI Event kommt
             window.HalDo.on("ai:open", () => this.open());
         },
 
@@ -1541,7 +1515,6 @@
                     if (window.HalDo.LivingLogo) window.HalDo.LivingLogo.idle();
                 }, 1000);
 
-                // Speak response
                 this.speak(response);
 
             } catch(e) {
@@ -1554,7 +1527,6 @@
         },
 
         async getAIResponse(text) {
-            // Try existing AI Core
             const cores = [
                 window.HalDo.AICore,
                 window.HalDo.AI,
@@ -1583,7 +1555,6 @@
                 }
             }
 
-            // Lokale KI-Intelligenz
             return this.localResponse(text);
         },
 
@@ -1756,7 +1727,6 @@
     window.HalDo.openApp = function(appId) {
         console.log("[HalDo] Opening app:", appId);
 
-        // Spezialfälle
         if (appId === "haldo-ai" || appId === "chat") {
             if (window.HalDo.Chat) window.HalDo.Chat.open();
             return;
@@ -1772,11 +1742,9 @@
             return;
         }
 
-        // Entferne existierendes Fenster
         const existing = document.querySelector(`[data-app-window="${appId}"]`);
         if (existing) existing.remove();
 
-        // App-Inhalte
         const appContent = {
             calculator: `
                 <div style="font-family:monospace;text-align:center;">
@@ -2098,11 +2066,6 @@
             </div>
         `;
 
-        // Fenster erstellen
-        const win = document.createElement("div");
-        win.className = "haldo-app-window";
-        win.dataset.appWindow = appId;
-
         const appNames = {
             'calculator': '🧮 Rechner',
             'notes': '📝 Notizen',
@@ -2129,6 +2092,10 @@
 
         const title = appNames[appId] || appId.charAt(0).toUpperCase() + appId.slice(1);
 
+        const win = document.createElement("div");
+        win.className = "haldo-app-window";
+        win.dataset.appWindow = appId;
+
         win.innerHTML = `
             <div class="haldo-app-window-header">
                 <span class="title">
@@ -2144,7 +2111,6 @@
 
         document.body.appendChild(win);
 
-        // Schließen
         win.querySelector(".haldo-app-window-close").addEventListener("click", () => win.remove());
         win.addEventListener("click", (e) => { if (e.target === win) win.remove(); });
 
@@ -2215,9 +2181,7 @@
         if (appId === "clock") {
             function updateClock() {
                 const display = win.querySelector("#clock-display");
-                if (display) {
-                    display.textContent = new Date().toLocaleTimeString();
-                }
+                if (display) display.textContent = new Date().toLocaleTimeString();
             }
             updateClock();
             const interval = setInterval(updateClock, 1000);
@@ -2231,20 +2195,12 @@
 
     function haldoBoot() {
         generateStars();
-
-        // Living Logo
         window.HalDo.LivingLogo.init();
-
-        // Menü
         window.HalDo.Menu.init();
-
-        // Chat
         window.HalDo.Chat.init();
 
-        // Events
         window.HalDo.emit("haldo:booted", { version: window.HalDo.OS.version });
 
-        // Keyboard shortcuts
         document.addEventListener("keydown", (e) => {
             if ((e.ctrlKey || e.metaKey) && e.key === "k") {
                 e.preventDefault();
