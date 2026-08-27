@@ -72,7 +72,6 @@
             HalDoOS.kernel ||
             null
         );
-
     }
 
 
@@ -83,7 +82,6 @@
             HalDoOS.system ||
             null
         );
-
     }
 
 
@@ -95,7 +93,6 @@
             HalDoOS.appRegistry ||
             null
         );
-
     }
 
 
@@ -106,7 +103,6 @@
             HalDoOS.appContract ||
             null
         );
-
     }
 
 
@@ -119,7 +115,6 @@
             HalDoOS.runtime ||
             null
         );
-
     }
 
 
@@ -130,7 +125,6 @@
             HalDoOS.appPlatform ||
             null
         );
-
     }
 
 
@@ -143,7 +137,6 @@
             HalDoOS.router ||
             null
         );
-
     }
 
 
@@ -154,7 +147,6 @@
             HalDoOS.windowManager ||
             null
         );
-
     }
 
 
@@ -165,7 +157,6 @@
             HalDoOS.launcher ||
             null
         );
-
     }
 
 
@@ -178,7 +169,6 @@
             HalDoOS.storage ||
             null
         );
-
     }
 
 
@@ -191,7 +181,6 @@
             HalDoOS.aiCore ||
             null
         );
-
     }
 
 
@@ -206,7 +195,6 @@
             HalDoOS.language ||
             null
         );
-
     }
 
 
@@ -219,7 +207,6 @@
             HalDoOS.speech ||
             null
         );
-
     }
 
 
@@ -230,7 +217,6 @@
             HalDoOS.notifications ||
             null
         );
-
     }
 
 
@@ -243,7 +229,6 @@
             HalDoOS.ezidiKeyboard ||
             null
         );
-
     }
 
 
@@ -255,7 +240,6 @@
             window.HalDoSystemDiagnostics ||
             null
         );
-
     }
 
 
@@ -268,7 +252,6 @@
             HalDoOS.config ||
             null
         );
-
     }
 
 
@@ -286,7 +269,6 @@
             typeof object[method] ===
             "function"
         );
-
     }
 
 
@@ -300,7 +282,6 @@
                 "object" &&
             !Array.isArray(value)
         );
-
     }
 
 
@@ -325,7 +306,6 @@
                 /^-|-$/g,
                 ""
             );
-
     }
 
 
@@ -341,7 +321,6 @@
         ) {
 
             return value;
-
         }
 
 
@@ -357,7 +336,6 @@
                 );
 
             } catch (_) {}
-
         }
 
 
@@ -368,7 +346,6 @@
             return value.map(
                 clone
             );
-
         }
 
 
@@ -400,19 +377,15 @@
 
                         result[key] =
                             clone(item);
-
                     }
-
                 }
             );
 
             return result;
-
         }
 
 
         return value;
-
     }
 
 
@@ -427,54 +400,92 @@
         ) {
 
             return result;
-
         }
 
         return Promise.resolve(
             result
         );
-
     }
 
 
     function dispatch(
-        name,
-        detail = {}
+        type,
+        detail
     ) {
 
         try {
 
             window.dispatchEvent(
                 new CustomEvent(
-                    name,
+                    type,
                     {
-                        detail
+                        detail:
+                            detail || {}
                     }
                 )
             );
 
         } catch (_) {}
-
     }
-
-
-    function now() {
+       function now() {
 
         return Date.now();
-
     }
 
 
     function createTimestamp() {
 
         return {
+
             createdAt:
                 now(),
 
             updatedAt:
                 now()
         };
+    }
 
+
+    function createStatistics() {
+
+        return {
+
+            registered:
+                0,
+
+            initialized:
+                0,
+
+            starts:
+                0,
+
+            opens:
+                0,
+
+            closes:
+                0,
+
+            stops:
+                0,
+
+            activations:
+                0,
+
+            deactivations:
+                0,
+
+            errors:
+                0,
+
+            settingsChanges:
+                0,
+
+            platformConnections:
+                0,
+
+            runtimeConnections:
+                0
+        };
     }
 
 
@@ -581,7 +592,6 @@
 
             diagnostics:
                 false
-
         },
 
         statistics: {
@@ -621,10 +631,19 @@
 
             runtimeConnections:
                 0
-
         }
-
     };
+
+
+    /* ========================================================
+       PUBLIC API HOLDER
+
+       The 31-master file contains the API methods throughout
+       the module. Keep one stable object so all integrations
+       share the same manager instance.
+       ======================================================== */
+
+    const api = {};
 
 
     /* ========================================================
@@ -643,10 +662,7 @@
             );
 
         } catch (_) {}
-
     }
-
-
     function warn(
         ...args
     ) {
@@ -659,7 +675,6 @@
             );
 
         } catch (_) {}
-
     }
 
 
@@ -675,7 +690,6 @@
             );
 
         } catch (_) {}
-
     }
 
 
@@ -705,9 +719,9 @@
                 source,
 
                 error
-
             }
         );
+
 
         const diagnostics =
             getDiagnostics();
@@ -727,15 +741,14 @@
                     {
                         source:
                             "app-manager",
+
                         subsystem:
                             source
                     }
                 );
 
             } catch (_) {}
-
         }
-
     }
 
 
@@ -754,7 +767,6 @@
         ) {
 
             return () => {};
-
         }
 
 
@@ -763,10 +775,10 @@
                 event || ""
             ).trim();
 
+
         if (!key) {
 
             return () => {};
-
         }
 
 
@@ -780,7 +792,6 @@
                 key,
                 new Set()
             );
-
         }
 
 
@@ -788,6 +799,7 @@
             state.listeners.get(
                 key
             );
+
 
         listeners.add(
             callback
@@ -799,9 +811,7 @@
             listeners.delete(
                 callback
             );
-
         };
-
     }
 
 
@@ -815,22 +825,22 @@
                 event || ""
             ).trim();
 
+
         const listeners =
             state.listeners.get(
                 key
             );
 
+
         if (!listeners) {
 
             return false;
-
         }
 
 
         return listeners.delete(
             callback
         );
-
     }
 
 
@@ -844,10 +854,12 @@
                 event || ""
             ).trim();
 
+
         const listeners =
             state.listeners.get(
                 key
             );
+
 
         if (
             listeners
@@ -873,12 +885,9 @@
                             "Event: " +
                             key
                         );
-
                     }
-
                 }
             );
-
         }
 
 
@@ -888,8 +897,8 @@
             detail
         );
 
-        return true;
 
+        return true;
     }
 
 
@@ -903,269 +912,321 @@
 
         if (!definition) {
 
-            throw new Error(
-                "Ungültige App-Definition."
-            );
-
+            return null;
         }
+               /* ========================================================
+           09 — APP NORMALIZATION
+           ======================================================== */
+
+        function normalizeApp(
+            definition
+        ) {
+
+            if (!definition) {
+
+                throw new Error(
+                    "Ungültige App-Definition."
+                );
+            }
 
 
-        const source =
-            definition.app ||
-            definition;
+            const source =
+                definition.app ||
+                definition;
 
 
-        const id =
-            normalizeId(
-                source.id ||
-                source.appId ||
-                source.key ||
-                source.slug
-            );
-
-
-        if (!id) {
-
-            throw new Error(
-                "App besitzt keine gültige ID."
-            );
-
-        }
-
-
-        const dependencies =
-            Array.isArray(
-                source.dependencies
-            )
-                ? [
-                    ...source.dependencies
-                ]
-                : [];
-
-
-        const permissions =
-            Array.isArray(
-                source.permissions
-            )
-                ? [
-                    ...source.permissions
-                ]
-                : [];
-
-
-        const capabilities =
-            Array.isArray(
-                source.capabilities
-            )
-                ? [
-                    ...source.capabilities
-                ]
-                : [];
-
-
-        const tags =
-            Array.isArray(
-                source.tags
-            )
-                ? [
-                    ...source.tags
-                ]
-                : [];
-
-
-        const categories =
-            Array.isArray(
-                source.categories
-            )
-                ? [
-                    ...source.categories
-                ]
-                : (
-                    source.category
-                        ? [
-                            source.category
-                        ]
-                        : []
+            const id =
+                normalizeId(
+                    source.id ||
+                    source.appId ||
+                    source.key ||
+                    source.slug
                 );
 
 
-        return {
+            if (!id) {
 
-            ...source,
+                throw new Error(
+                    "App besitzt keine gültige ID."
+                );
+            }
 
-            id,
 
-            appId:
-                id,
-
-            key:
-                source.key ||
-                id,
-
-            name:
-                source.name ||
-                source.title ||
-                id,
-
-            title:
-                source.title ||
-                source.name ||
-                id,
-
-            description:
-                source.description ||
-                "",
-
-            version:
-                source.version ||
-                "1.0.0",
-
-            enabled:
-                source.enabled !==
-                false,
-
-            visible:
-                source.visible !==
-                false,
-
-            singleton:
-                source.singleton !==
-                false,
-
-            dependencies,
-
-            permissions,
-
-            capabilities,
-
-            tags,
-
-            categories,
-
-            lifecycle:
-                source.lifecycle ||
-                "registered",
-
-            status:
-                source.status ||
-                "registered",
-
-            route:
-                source.route ||
-                null,
-
-            icon:
-                source.icon ||
-                null,
-
-            metadata:
-                isObject(
-                    source.metadata
+            const dependencies =
+                Array.isArray(
+                    source.dependencies
                 )
-                    ? clone(
+                    ? [
+                        ...source.dependencies
+                    ]
+                    : [];
+
+
+            const permissions =
+                Array.isArray(
+                    source.permissions
+                )
+                    ? [
+                        ...source.permissions
+                    ]
+                    : [];
+
+
+            const capabilities =
+                Array.isArray(
+                    source.capabilities
+                )
+                    ? [
+                        ...source.capabilities
+                    ]
+                    : [];
+
+
+            const tags =
+                Array.isArray(
+                    source.tags
+                )
+                    ? [
+                        ...source.tags
+                    ]
+                    : [];
+
+
+            const categories =
+                Array.isArray(
+                    source.categories
+                )
+                    ? [
+                        ...source.categories
+                    ]
+                    : (
+                        source.category
+                            ? [
+                                source.category
+                            ]
+                            : []
+                    );
+
+
+            return {
+
+                ...source,
+
+                id,
+
+                appId:
+                    id,
+
+                key:
+                    source.key ||
+                    id,
+
+                name:
+                    source.name ||
+                    source.title ||
+                    id,
+
+                title:
+                    source.title ||
+                    source.name ||
+                    id,
+
+                description:
+                    source.description ||
+                    "",
+
+                version:
+                    source.version ||
+                    "1.0.0",
+
+                enabled:
+                    source.enabled !==
+                    false,
+
+                visible:
+                    source.visible !==
+                    false,
+
+                singleton:
+                    source.singleton !==
+                    false,
+
+                dependencies,
+
+                permissions,
+
+                capabilities,
+
+                tags,
+
+                categories,
+
+                lifecycle:
+                    source.lifecycle ||
+                    "registered",
+
+                status:
+                    source.status ||
+                    "registered",
+
+                route:
+                    source.route ||
+                    null,
+
+                icon:
+                    source.icon ||
+                    null,
+
+                metadata:
+                    isObject(
                         source.metadata
                     )
-                    : {},
+                        ? clone(
+                            source.metadata
+                        )
+                        : {},
 
-            settings:
-                isObject(
-                    source.settings
-                )
-                    ? clone(
+                settings:
+                    isObject(
                         source.settings
                     )
-                    : {},
+                        ? clone(
+                            source.settings
+                        )
+                        : {},
 
-            ...createTimestamp()
-
-        };
-
-    }
-
-
-    /* ========================================================
-       09 — INITIAL APP STATE
-       ======================================================== */
-
-    function createInitialState(
-        appId
-    ) {
-
-        const id =
-            normalizeId(
-                appId
-            );
-
-        if (!id) {
-
-            return null;
-
+                ...createTimestamp()
+            };
         }
 
 
-        if (
-            !state.appState.has(
-                id
-            )
+        /* ========================================================
+           10 — INITIAL APP STATE
+           ======================================================== */
+
+        function createInitialState(
+            appId
         ) {
 
-            state.appState.set(
-                id,
+            const id =
+                normalizeId(
+                    appId
+                );
+
+
+            if (!id) {
+
+                return null;
+            }
+
+
+            if (
+                !state.appState.has(
+                    id
+                )
+            ) {
+
+                state.appState.set(
+                    id,
+                    {
+
+                        appId:
+                            id,
+
+                        lifecycle:
+                            "registered",
+
+                        status:
+                            "registered",
+
+                        loading:
+                            false,
+
+                        initialized:
+                            false,
+
+                        ready:
+                            false,
+
+                        started:
+                            false,
+
+                        open:
+                            false,
+
+                        active:
+                            false,
+
+                        visible:
+                            false,
+
+                        minimized:
+                            false,
+
+                        maximized:
+                            false,
+
+                        pip:
+                            false,
+
+                        windowId:
+                            null,
+
+                        route:
+                            null,
+
+                        error:
+                            null,
+
+                        errorCount:
+                            0,
+
+                        createdAt:
+                            now(),
+
+                        updatedAt:
+                            now()
+                    }
+                );
+            }
+
+
+            return state.appState.get(
+                id
+            );
+        }
+
+
+        function updateAppState(
+            appId,
+            changes = {}
+        ) {
+
+            const id =
+                normalizeId(
+                    appId
+                );
+
+
+            if (!id) {
+
+                return null;
+            }
+
+
+            const current =
+                createInitialState(
+                    id
+                );
+
+
+            Object.assign(
+                current,
+                changes,
                 {
 
                     appId:
                         id,
-
-                    lifecycle:
-                        "registered",
-
-                    status:
-                        "registered",
-
-                    loading:
-                        false,
-
-                    initialized:
-                        false,
-
-                    ready:
-                        false,
-
-                    started:
-                        false,
-
-                    open:
-                        false,
-
-                    active:
-                        false,
-
-                    visible:
-                        false,
-
-                    minimized:
-                        false,
-
-                    maximized:
-                        false,
-
-                    pip:
-                        false,
-
-                    windowId:
-                        null,
-
-                    route:
-                        null,
-
-                    error:
-                        null,
-
-                    errorCount:
-                        0,
-
-                    createdAt:
-                        now(),
 
                     updatedAt:
                         now()
@@ -1173,401 +1234,335 @@
                 }
             );
 
-        }
 
-
-        return state.appState.get(
-            id
-        );
-
-    }
-
-
-    function updateAppState(
-        appId,
-        changes = {}
-    ) {
-
-        const id =
-            normalizeId(
-                appId
-            );
-
-        if (!id) {
-
-            return null;
-
-        }
-
-
-        const current =
-            createInitialState(
-                id
+            state.appState.set(
+                id,
+                current
             );
 
 
-        Object.assign(
-            current,
-            changes,
-            {
-
-                appId:
-                    id,
-
-                updatedAt:
-                    now()
-
-            }
-        );
-
-
-        state.appState.set(
-            id,
-            current
-        );
-
-
-        emit(
-            "state-changed",
-            {
-
-                appId:
-                    id,
-
-                state:
-                    clone(
-                        current
-                    )
-
-            }
-        );
-
-
-        return clone(
-            current
-        );
-
-    }
-
-
-    function getAppState(
-        appId
-    ) {
-
-        const id =
-            normalizeId(
-                appId
-            );
-
-        if (!id) {
-
-            return null;
-
-        }
-
-
-        return clone(
-            createInitialState(
-                id
-            )
-        );
-
-    }
-
-
-    /* ========================================================
-       10 — SERVICE CONNECTION HELPERS
-       ======================================================== */
-
-    function connectKernel() {
-
-        const kernel =
-            getKernel();
-
-        if (!kernel) {
-
-            return false;
-
-        }
-
-
-        state.connections.kernel =
-            true;
-
-
-        if (
-            hasMethod(
-                kernel,
-                "on"
-            )
-        ) {
-
-            const readyHandler =
-                detail => {
-
-                    emit(
-                        "kernel-ready",
-                        detail
-                    );
-
-                };
-
-
-            const errorHandler =
-                detail => {
-
-                    emit(
-                        "kernel-error",
-                        detail
-                    );
-
-                };
-
-
-            try {
-
-                kernel.on(
-                    "ready",
-                    readyHandler
-                );
-
-                kernel.on(
-                    "error",
-                    errorHandler
-                );
-
-
-                state.kernelListeners.push(
-                    {
-
-                        event:
-                            "ready",
-
-                        callback:
-                            readyHandler
-
-                    }
-                );
-
-
-                state.kernelListeners.push(
-                    {
-
-                        event:
-                            "error",
-
-                        callback:
-                            errorHandler
-
-                    }
-                );
-
-            } catch (
-                exception
-            ) {
-
-                reportError(
-                    exception,
-                    "Kernel Connection"
-                );
-
-            }
-
-        }
-
-
-        return true;
-
-    }
-
-
-    function connectSystem() {
-
-        const system =
-            getSystem();
-
-        if (!system) {
-
-            return false;
-
-        }
-
-
-        state.connections.system =
-            true;
-
-
-        if (
-            hasMethod(
-                system,
-                "on"
-            )
-        ) {
-
-            const readyHandler =
-                detail => {
-
-                    emit(
-                        "system-ready",
-                        detail
-                    );
-
-                };
-
-
-            try {
-
-                system.on(
-                    "ready",
-                    readyHandler
-                );
-
-                state.systemListeners.push(
-                    {
-
-                        event:
-                            "ready",
-
-                        callback:
-                            readyHandler
-
-                    }
-                );
-
-            } catch (
-                exception
-            ) {
-
-                reportError(
-                    exception,
-                    "System Connection"
-                );
-
-            }
-
-        }
-
-
-        return true;
-
-    }
-
-
-    function connectRegistry() {
-
-        const registry =
-            getRegistry();
-
-        if (!registry) {
-
-            return false;
-
-        }
-
-
-        state.connections.registry =
-            true;
-
-
-        HalDoOS.appRegistry =
-            registry;
-
-
-        if (
-            hasMethod(
-                registry,
-                "on"
-            )
-        ) {
-
-            const events = [
-
-                "registered",
-                "unregistered",
-                "updated",
-                "enabled",
-                "disabled",
-                "error"
-
-            ];
-
-
-            events.forEach(
-                eventName => {
-
-                    const callback =
-                        detail => {
-
-                            emit(
-                                "registry-" +
-                                eventName,
-                                detail
-                            );
-
-                        };
-
-
-                    try {
-
-                        registry.on(
-                            eventName,
-                            callback
-                        );
-
-                        state.registryListeners.push(
-                            {
-
-                                event:
-                                    eventName,
-
-                                callback
-
-                            }
-                        );
-
-                    } catch (
-                        exception
-                    ) {
-
-                        reportError(
-                            exception,
-                            "Registry Connection"
-                        );
-
-                    }
-
+            emit(
+                "state-changed",
+                {
+
+                    appId:
+                        id,
+
+                    state:
+                        clone(
+                            current
+                        )
                 }
             );
 
+
+            return clone(
+                current
+            );
         }
 
 
-        return true;
+        function getAppState(
+            appId
+        ) {
 
-    }
+            const id =
+                normalizeId(
+                    appId
+                );
 
 
-    function connectContract() {
+            if (!id) {
+
+                return null;
+            }
+
+
+            return clone(
+                createInitialState(
+                    id
+                )
+            );
+        }
+
+
+        /* ========================================================
+           11 — SERVICE CONNECTION HELPERS
+           ======================================================== */
+
+        function connectKernel() {
+
+            const kernel =
+                getKernel();
+
+
+            if (!kernel) {
+
+                return false;
+            }
+
+
+            state.connections.kernel =
+                true;
+
+
+            if (
+                hasMethod(
+                    kernel,
+                    "on"
+                )
+            ) {
+
+                const readyHandler =
+                    detail => {
+
+                        emit(
+                            "kernel-ready",
+                            detail
+                        );
+                    };
+
+
+                const errorHandler =
+                    detail => {
+
+                        emit(
+                            "kernel-error",
+                            detail
+                        );
+                    };
+
+
+                try {
+
+                    kernel.on(
+                        "ready",
+                        readyHandler
+                    );
+
+
+                    kernel.on(
+                        "error",
+                        errorHandler
+                    );
+
+
+                    state.kernelListeners.push(
+                        {
+
+                            event:
+                                "ready",
+
+                            callback:
+                                readyHandler
+                        }
+                    );
+
+
+                    state.kernelListeners.push(
+                        {
+
+                            event:
+                                "error",
+
+                            callback:
+                                errorHandler
+                        }
+                    );
+
+                } catch (
+                    exception
+                ) {
+
+                    reportError(
+                        exception,
+                        "Kernel Connection"
+                    );
+                }
+            }
+
+
+            return true;
+        }
+
+
+        function connectSystem() {
+
+            const system =
+                getSystem();
+
+
+            if (!system) {
+
+                return false;
+            }
+
+
+            state.connections.system =
+                true;
+
+
+            if (
+                hasMethod(
+                    system,
+                    "on"
+                )
+            ) {
+
+                const readyHandler =
+                    detail => {
+
+                        emit(
+                            "system-ready",
+                            detail
+                        );
+                    };
+
+
+                try {
+
+                    system.on(
+                        "ready",
+                        readyHandler
+                    );
+
+
+                    state.systemListeners.push(
+                        {
+
+                            event:
+                                "ready",
+
+                            callback:
+                                readyHandler
+                        }
+                    );
+
+                } catch (
+                    exception
+                ) {
+
+                    reportError(
+                        exception,
+                        "System Connection"
+                    );
+                }
+            }
+
+
+            return true;
+        }
+
+
+        function connectRegistry() {
+
+            const registry =
+                getRegistry();
+
+
+            if (!registry) {
+
+                return false;
+            }
+
+
+            state.connections.registry =
+                true;
+
+
+            HalDoOS.appRegistry =
+                registry;
+
+
+            if (
+                hasMethod(
+                    registry,
+                    "on"
+                )
+            ) {
+
+                const events = [
+
+                    "registered",
+                    "unregistered",
+                    "updated",
+                    "enabled",
+                    "disabled",
+                    "error"
+
+                ];
+
+
+                events.forEach(
+                    eventName => {
+
+                        const callback =
+                            detail => {
+
+                                emit(
+                                    "registry-" +
+                                    eventName,
+                                    detail
+                                );
+                            };
+
+
+                        try {
+
+                            registry.on(
+                                eventName,
+                                callback
+                            );
+
+
+                            state.registryListeners.push(
+                                {
+
+                                    event:
+                                        eventName,
+
+                                    callback:
+                                        callback
+                                }
+                            );
+
+                        } catch (
+                            exception
+                        ) {
+
+                            reportError(
+                                exception,
+                                "Registry Connection"
+                            );
+                        }
+                    }
+                );
+            }
+
+
+            return true;
+        }
+           function connectContract() {
 
         const contract =
             getContract();
 
+
         if (!contract) {
 
             return false;
-
         }
 
 
         state.connections.contract =
             true;
 
+
         HalDoOS.appContract =
             contract;
 
 
         return true;
-
     }
 
 
@@ -1576,15 +1571,16 @@
         const runtime =
             getRuntime();
 
+
         if (!runtime) {
 
             return false;
-
         }
 
 
         state.connections.runtime =
             true;
+
 
         HalDoOS.appRuntime =
             runtime;
@@ -1626,7 +1622,6 @@
                                 eventName,
                                 detail
                             );
-
                         };
 
 
@@ -1637,14 +1632,15 @@
                             callback
                         );
 
+
                         state.runtimeListeners.push(
                             {
 
                                 event:
                                     eventName,
 
-                                callback
-
+                                callback:
+                                    callback
                             }
                         );
 
@@ -1656,17 +1652,13 @@
                             exception,
                             "Runtime Connection"
                         );
-
                     }
-
                 }
             );
-
         }
 
 
         return true;
-
     }
 
 
@@ -1686,32 +1678,42 @@
         state.connections.platform =
             !!getPlatform();
 
+
         state.connections.router =
             !!getRouter();
+
 
         state.connections.windowManager =
             !!getWindowManager();
 
+
         state.connections.launcher =
             !!getLauncher();
+
 
         state.connections.storage =
             !!getStorage();
 
+
         state.connections.ai =
             !!getAI();
+
 
         state.connections.language =
             !!getLanguage();
 
+
         state.connections.voice =
             !!getVoice();
+
 
         state.connections.notifications =
             !!getNotifications();
 
+
         state.connections.keyboard =
             !!getKeyboard();
+
 
         state.connections.diagnostics =
             !!getDiagnostics();
@@ -1720,18 +1722,19 @@
         HalDoOS.appManager =
             api;
 
+
         window.HalDoAppManager =
             api;
 
 
         return true;
-
     }
 
 
     /* ========================================================
        11 — REGISTRY ACCESS
        ======================================================== */
+
 
     function register(
         definition
@@ -1757,7 +1760,6 @@
             );
 
             return null;
-
         }
 
 
@@ -1795,9 +1797,7 @@
                         normalizeApp(
                             result
                         );
-
                 }
-
             }
 
         } catch (
@@ -1808,7 +1808,6 @@
                 exception,
                 "Registry Register"
             );
-
         }
 
 
@@ -1833,7 +1832,6 @@
 
                 app:
                     clone(app)
-
             }
         );
 
@@ -1844,7 +1842,6 @@
 
                 app:
                     clone(app)
-
             }
         );
 
@@ -1852,7 +1849,6 @@
         return clone(
             app
         );
-
     }
 
 
@@ -1863,7 +1859,6 @@
         return register(
             definition
         );
-
     }
 
 
@@ -1876,23 +1871,10 @@
                 appId
             );
 
+
         if (!id) {
 
             return false;
-
-        }
-
-
-        const app =
-            state.apps.get(
-                id
-            );
-
-
-        if (!app) {
-
-            return false;
-
         }
 
 
@@ -1913,7 +1895,6 @@
                 registry.unregister(
                     id
                 );
-
             }
 
         } catch (
@@ -1924,7 +1905,6 @@
                 exception,
                 "Registry Unregister"
             );
-
         }
 
 
@@ -1932,41 +1912,28 @@
             id
         );
 
-        state.instances.delete(
-            id
-        );
-
-        state.contexts.delete(
-            id
-        );
 
         state.appState.delete(
             id
         );
+
 
         state.settings.delete(
             id
         );
 
 
-        if (
-            state.activeAppId ===
+        state.contexts.delete(
             id
-        ) {
-
-            state.activeAppId =
-                null;
-
-        }
+        );
 
 
         emit(
             "unregistered",
             {
 
-                app:
-                    clone(app)
-
+                appId:
+                    id
             }
         );
 
@@ -1975,19 +1942,15 @@
             "haldo:app-unregistered",
             {
 
-                app:
-                    clone(app)
-
+                appId:
+                    id
             }
         );
 
 
         return true;
-
     }
-
-
-    function get(
+      function getRegisteredApp(
         appId
     ) {
 
@@ -1997,28 +1960,22 @@
             );
 
         if (!id) {
-
             return null;
-
         }
 
-
-        if (
-            state.apps.has(
-                id
-            )
-        ) {
-
-            return state.apps.get(
+        const local =
+            state.apps.get(
                 id
             );
 
+        if (local) {
+            return clone(
+                local
+            );
         }
-
 
         const registry =
             getRegistry();
-
 
         if (
             registry &&
@@ -2030,33 +1987,18 @@
 
             try {
 
-                const app =
+                const result =
                     registry.get(
                         id
                     );
 
+                if (result) {
 
-                if (app) {
-
-                    const normalized =
+                    return clone(
                         normalizeApp(
-                            app
-                        );
-
-
-                    state.apps.set(
-                        id,
-                        normalized
+                            result
+                        )
                     );
-
-
-                    createInitialState(
-                        id
-                    );
-
-
-                    return normalized;
-
                 }
 
             } catch (
@@ -2067,18 +2009,316 @@
                     exception,
                     "Registry Get"
                 );
-
             }
-
         }
 
-
         return null;
-
     }
 
 
-    function getAll() {
+    function getApp(
+        appId
+    ) {
+
+        return getRegisteredApp(
+            appId
+        );
+    }
+
+
+    function hasApp(
+        appId
+    ) {
+
+        return !!getRegisteredApp(
+            appId
+        );
+    }
+
+
+    function getApps() {
+
+        return Array.from(
+            state.apps.values()
+        ).map(
+            clone
+        );
+    }
+
+
+    function getRegisteredApps() {
+
+        return getApps();
+    }
+
+
+    function getAppCount() {
+
+        return state.apps.size;
+    }
+
+
+    /* ========================================================
+       12 — APP SETTINGS
+       ======================================================== */
+
+    function getSettings(
+        appId
+    ) {
+
+        const id =
+            normalizeId(
+                appId
+            );
+
+        if (!id) {
+            return {};
+        }
+
+        if (
+            !state.settings.has(
+                id
+            )
+        ) {
+
+            const app =
+                getRegisteredApp(
+                    id
+                );
+
+            state.settings.set(
+                id,
+                isObject(
+                    app &&
+                    app.settings
+                )
+                    ? clone(
+                        app.settings
+                    )
+                    : {}
+            );
+        }
+
+        return clone(
+            state.settings.get(
+                id
+            )
+        );
+    }
+
+
+    function setSettings(
+        appId,
+        settings = {}
+    ) {
+
+        const id =
+            normalizeId(
+                appId
+            );
+
+        if (!id) {
+            return false;
+        }
+
+        const current =
+            getSettings(
+                id
+            );
+
+        const next =
+            isObject(
+                settings
+            )
+                ? {
+                    ...current,
+                    ...clone(
+                        settings
+                    )
+                }
+                : current;
+
+        state.settings.set(
+            id,
+            next
+        );
+
+        state.statistics.settingsChanges +=
+            1;
+
+        emit(
+            "settings-changed",
+            {
+                appId:
+                    id,
+
+                settings:
+                    clone(
+                        next
+                    )
+            }
+        );
+
+        dispatch(
+            "haldo:app-settings-changed",
+            {
+                appId:
+                    id,
+
+                settings:
+                    clone(
+                        next
+                    )
+            }
+        );
+
+        return clone(
+            next
+        );
+    }
+
+
+    function setAppSetting(
+        appId,
+        key,
+        value
+    ) {
+
+        const settings =
+            getSettings(
+                appId
+            );
+
+        settings[
+            String(
+                key
+            )
+        ] =
+            value;
+
+        return setSettings(
+            appId,
+            settings
+        );
+    }
+
+
+    function getAppSetting(
+        appId,
+        key,
+        fallback = null
+    ) {
+
+        const settings =
+            getSettings(
+                appId
+            );
+
+        const name =
+            String(
+                key
+            );
+
+        return Object.prototype.hasOwnProperty.call(
+            settings,
+            name
+        )
+            ? settings[name]
+            : fallback;
+    }
+
+
+    /* ========================================================
+       13 — APP CONTEXT
+       ======================================================== */
+
+    function createContext(
+        appId,
+        context = {}
+    ) {
+
+        const id =
+            normalizeId(
+                appId
+            );
+
+        if (!id) {
+            return null;
+        }
+
+        const current =
+            state.contexts.get(
+                id
+            ) || {};
+
+        const next =
+            {
+                ...current,
+                ...(isObject(
+                    context
+                )
+                    ? clone(
+                        context
+                    )
+                    : {}),
+
+                appId:
+                    id,
+
+                updatedAt:
+                    now()
+            };
+
+        state.contexts.set(
+            id,
+            next
+        );
+
+        return clone(
+            next
+        );
+    }
+
+
+    function getContext(
+        appId
+    ) {
+
+        const id =
+            normalizeId(
+                appId
+            );
+
+        if (!id) {
+            return null;
+        }
+
+        return clone(
+            state.contexts.get(
+                id
+            ) || null
+        );
+    }
+
+
+    function clearContext(
+        appId
+    ) {
+
+        const id =
+            normalizeId(
+                appId
+            );
+
+        if (!id) {
+            return false;
+        }
+
+        return state.contexts.delete(
+            id
+        );
+    }
+           function getAll() {
 
         const result =
             [];
@@ -2141,6 +2381,7 @@
                                         normalized
                                     );
 
+
                                     result.push(
                                         clone(
                                             normalized
@@ -2164,14 +2405,12 @@
                     exception,
                     "Registry GetAll"
                 );
-
             }
 
         }
 
 
         return result;
-
     }
 
 
@@ -2186,7 +2425,6 @@
         return get(
             appId
         );
-
     }
 
 
@@ -2197,7 +2435,6 @@
         return !!get(
             appId
         );
-
     }
 
 
@@ -2246,7 +2483,6 @@
                     ) {
 
                         return false;
-
                     }
 
 
@@ -2258,7 +2494,6 @@
                     ) {
 
                         return false;
-
                     }
 
 
@@ -2286,9 +2521,7 @@
                         ) {
 
                             return false;
-
                         }
-
                     }
 
 
@@ -2316,16 +2549,13 @@
                         ) {
 
                             return false;
-
                         }
-
                     }
 
 
                     if (!text) {
 
                         return true;
-
                     }
 
 
@@ -2365,7 +2595,6 @@
 
                 }
             );
-
     }
 
 
@@ -2383,7 +2612,6 @@
                 appId
             )
         );
-
     }
 
 
@@ -2400,7 +2628,184 @@
         if (!id) {
 
             return {};
+        }
 
+
+        if (
+            state.settings.has(
+                id
+            )
+        ) {
+
+            return clone(
+                state.settings.get(
+                    id
+                )
+            );
+        }
+
+
+        const storage =
+            getStorage();
+
+
+        let settings = {};
+
+
+        if (
+            storage &&
+            hasMethod(
+                storage,
+                "get"
+            )
+        ) {
+
+            try {
+
+                const stored =
+                    storage.get(
+                        settingsKey(
+                            id
+                        )
+                    );
+
+
+                if (
+                    isObject(
+                        stored
+                    )
+                ) {
+
+                    settings =
+                        clone(
+                            stored
+                        );
+                }
+
+            } catch (
+                exception
+            ) {
+
+                reportError(
+                    exception,
+                    "Settings Get"
+                );
+            }
+        }
+
+
+        state.settings.set(
+            id,
+            settings
+        );
+
+
+        return clone(
+            settings
+        );
+    }
+
+
+    function setSettings(
+        appId,
+        settings = {}
+    ) {
+
+        const id =
+            normalizeId(
+                appId
+            );
+
+
+        if (!id) {
+
+            return false;
+        }
+
+
+        const normalized =
+            isObject(
+                settings
+            )
+                ? clone(
+                    settings
+                )
+                : {};
+
+
+        state.settings.set(
+            id,
+            normalized
+        );
+
+
+        const storage =
+            getStorage();
+
+
+        if (
+            storage &&
+            hasMethod(
+                storage,
+                "set"
+            )
+        ) {
+
+            try {
+
+                storage.set(
+                    settingsKey(
+                        id
+                    ),
+                    normalized
+                );
+
+            } catch (
+                exception
+            ) {
+
+                reportError(
+                    exception,
+                    "Settings Set"
+                );
+            }
+        }
+
+
+        state.statistics.settingsChanges +=
+            1;
+
+
+        emit(
+            "settings-changed",
+            {
+
+                appId:
+                    id,
+
+                settings:
+                    clone(
+                        normalized
+                    )
+            }
+        );
+
+
+        return true;
+    }
+           function getSettings(
+        appId
+    ) {
+
+        const id =
+            normalizeId(
+                appId
+            );
+
+
+        if (!id) {
+
+            return {};
         }
 
 
@@ -2414,7 +2819,6 @@
                 id,
                 {}
             );
-
         }
 
 
@@ -2441,7 +2845,6 @@
         if (!id) {
 
             return null;
-
         }
 
 
@@ -2460,7 +2863,6 @@
             )
                 ? changes
                 : {})
-
         };
 
 
@@ -2488,8 +2890,9 @@
                     id,
 
                 settings:
-                    clone(next)
-
+                    clone(
+                        next
+                    )
             }
         );
 
@@ -2497,7 +2900,6 @@
         return clone(
             next
         );
-
     }
 
 
@@ -2514,7 +2916,6 @@
         if (!id) {
 
             return false;
-
         }
 
 
@@ -2536,13 +2937,11 @@
 
                 appId:
                     id
-
             }
         );
 
 
         return true;
-
     }
 
 
@@ -2589,12 +2988,10 @@
                                 "App Settings Storage"
                             )
                     );
-
                 }
 
 
                 return true;
-
             }
 
 
@@ -2613,8 +3010,8 @@
 
 
                 return true;
-
             }
+
 
         } catch (
             exception
@@ -2624,12 +3021,10 @@
                 exception,
                 "App Settings speichern"
             );
-
         }
 
 
         return false;
-
     }
 
 
@@ -2646,7 +3041,6 @@
         if (!id) {
 
             return {};
-
         }
 
 
@@ -2698,10 +3092,8 @@
                             return clone(
                                 settings
                             );
-
                         }
                     );
-
                 }
 
 
@@ -2722,7 +3114,6 @@
                 return clone(
                     settings
                 );
-
             }
 
 
@@ -2743,67 +3134,10 @@
                     return getSettings(
                         id
                     );
-
                 }
-
-
-                const parsed =
-                    JSON.parse(
-                        raw
-                    );
-
-
-                const settings =
-                    isObject(
-                        parsed
-                    )
-                        ? parsed
-                        : {};
-
-
-                state.settings.set(
-                    id,
-                    settings
-                );
-
-
-                return clone(
-                    settings
-                );
-
-            }
-
-        } catch (
-            exception
-        ) {
-
-            reportError(
-                exception,
-                "App Settings laden"
-            );
-
-        }
-
-
-        return getSettings(
-            id
-        );
-
-    }
-
-
-    /* ========================================================
-       ENDE TEIL 1
+                   /* ========================================================
+       14 — APP CONTEXT
        ======================================================== */
- /* ============================================================
-   TEIL 2 / KOMPLETTE DATEI — js/app-manager.js
-   DIREKT NACH TEIL 1
-   ============================================================ */
-
-
-/* ========================================================
-   14 — APP CONTEXT
-   ======================================================== */
 
     function createAppContext(
         app
@@ -2905,7 +3239,6 @@
 
                     }
                 );
-
             },
 
             dispatch(
@@ -2926,7 +3259,6 @@
 
                     }
                 );
-
             },
 
             getState() {
@@ -2934,7 +3266,6 @@
                 return getAppState(
                     id
                 );
-
             },
 
             getSettings() {
@@ -2942,7 +3273,6 @@
                 return getSettings(
                     id
                 );
-
             },
 
             setSettings(
@@ -2953,7 +3283,6 @@
                     id,
                     changes
                 );
-
             },
 
             open(
@@ -2965,7 +3294,6 @@
                     target || id,
                     options
                 );
-
             },
 
             close(
@@ -2977,7 +3305,6 @@
                     target || id,
                     options
                 );
-
             },
 
             activate(
@@ -2987,7 +3314,6 @@
                 return activate(
                     target || id
                 );
-
             },
 
             minimize(
@@ -2997,7 +3323,6 @@
                 return minimize(
                     target || id
                 );
-
             },
 
             maximize(
@@ -3007,7 +3332,6 @@
                 return maximize(
                     target || id
                 );
-
             },
 
             restore(
@@ -3017,7 +3341,6 @@
                 return restore(
                     target || id
                 );
-
             },
 
             togglePIP(
@@ -3036,19 +3359,17 @@
                     targetId,
                     !current?.pip
                 );
-
             }
 
         };
 
         return context;
-
     }
 
 
-/* ========================================================
-   15 — DEPENDENCY CHECK
-   ======================================================== */
+    /* ========================================================
+       15 — DEPENDENCY CHECK
+       ======================================================== */
 
     function checkDependencies(
         app
@@ -3077,66 +3398,19 @@
                         );
 
                     if (
-                        !id
-                    ) {
-                        return;
-                    }
-
-                    if (
-                        !exists(id)
+                        id &&
+                        !hasApp(id)
                     ) {
 
                         missing.push(
                             id
                         );
-
-                    }
-
-                    return;
-                }
-
-
-                if (
-                    isObject(
-                        dependency
-                    )
-                ) {
-
-                    const id =
-                        normalizeId(
-                            dependency.id ||
-                            dependency.appId ||
-                            dependency.name
-                        );
-
-                    if (
-                        !id
-                    ) {
-                        return;
-                    }
-
-                    if (
-                        dependency.optional ===
-                        true
-                    ) {
-                        return;
-                    }
-
-                    if (
-                        !exists(id)
-                    ) {
-
-                        missing.push(
-                            id
-                        );
-
                     }
 
                 }
 
             }
         );
-
 
         return {
 
@@ -3147,164 +3421,10 @@
             missing
 
         };
-
     }
-
-
-/* ========================================================
-   16 — PERMISSION CHECK
-   ======================================================== */
-
-    function checkPermissions(
-        app,
-        options = {}
-    ) {
-
-        const permissions =
-            Array.isArray(
-                app?.permissions
-            )
-                ? app.permissions
-                : [];
-
-        if (
-            permissions.length ===
-            0
-        ) {
-
-            return {
-
-                valid:
-                    true,
-
-                missing: []
-
-            };
-
-        }
-
-
-        if (
-            options.ignorePermissions ===
-            true
-        ) {
-
-            return {
-
-                valid:
-                    true,
-
-                missing: []
-
-            };
-
-        }
-
-
-        const platform =
-            getPlatform();
-
-
-        if (
-            platform &&
-            hasMethod(
-                platform,
-                "checkPermissions"
-            )
-        ) {
-
-            try {
-
-                const result =
-                    platform.checkPermissions(
-                        app.id,
-                        permissions
-                    );
-
-                if (
-                    result &&
-                    typeof result.then ===
-                    "function"
-                ) {
-
-                    return {
-
-                        valid:
-                            true,
-
-                        missing: [],
-
-                        pending:
-                            result
-
-                    };
-
-                }
-
-                if (
-                    isObject(
-                        result
-                    )
-                ) {
-
-                    return {
-
-                        valid:
-                            result.valid !==
-                            false,
-
-                        missing:
-                            Array.isArray(
-                                result.missing
-                            )
-                                ? result.missing
-                                : []
-
-                    };
-
-                }
-
-                return {
-
-                    valid:
-                        result !== false,
-
-                    missing:
-                        result === false
-                            ? permissions
-                            : []
-
-                };
-
-            } catch (
-                exception
-            ) {
-
-                reportError(
-                    exception,
-                    "Permission Check"
-                );
-
-            }
-
-        }
-
-
-        return {
-
-            valid:
-                true,
-
-            missing: []
-
-        };
-
-    }
-
-
-/* ========================================================
-   17 — APP INITIALIZATION
-   ======================================================== */
+                   /* ========================================================
+       17 — APP INITIALIZATION
+       ======================================================== */
 
     async function initializeApp(
         app
@@ -3319,6 +3439,7 @@
             normalizeId(
                 app.id
             );
+
 
         if (!id) {
             return false;
@@ -3336,7 +3457,6 @@
         ) {
 
             return true;
-
         }
 
 
@@ -3350,21 +3470,18 @@
         ) {
 
             return true;
-
         }
 
 
         state.instances.set(
             id,
             {
-
                 ...(state.instances.get(
                     id
                 ) || {}),
 
                 initializing:
                     true
-
             }
         );
 
@@ -3396,6 +3513,7 @@
                     id
                 );
 
+
             const resolvedSettings =
                 (
                     loadedSettings &&
@@ -3418,7 +3536,6 @@
                     id,
                     context
                 );
-
             }
 
 
@@ -3449,7 +3566,6 @@
 
                     })
                 );
-
             }
 
 
@@ -3545,6 +3661,7 @@
 
             return true;
 
+
         } catch (
             exception
         ) {
@@ -3618,16 +3735,25 @@
             );
 
 
+            emit(
+                "app-initialization-error",
+                {
+
+                    app,
+
+                    error:
+                        exception
+
+                }
+            );
+
+
             return false;
-
         }
-
     }
-
-
-/* ========================================================
-   18 — START APP
-   ======================================================== */
+                   /* ========================================================
+       18 — START APP
+       ======================================================== */
 
     async function startApp(
         app,
@@ -3643,6 +3769,7 @@
             await initializeApp(
                 app
             );
+
 
         if (!initialized) {
             return false;
@@ -3667,7 +3794,6 @@
         ) {
 
             return true;
-
         }
 
 
@@ -3700,7 +3826,6 @@
 
                     })
                 );
-
             }
 
 
@@ -3776,6 +3901,7 @@
 
             return true;
 
+
         } catch (
             exception
         ) {
@@ -3805,15 +3931,13 @@
 
 
             return false;
-
         }
-
     }
 
 
-/* ========================================================
-   19 — STOP APP
-   ======================================================== */
+    /* ========================================================
+       19 — STOP APP
+       ======================================================== */
 
     async function stopApp(
         appId,
@@ -3824,6 +3948,7 @@
             get(
                 appId
             );
+
 
         if (!app) {
             return false;
@@ -3848,7 +3973,6 @@
         ) {
 
             return true;
-
         }
 
 
@@ -3876,7 +4000,6 @@
 
                     })
                 );
-
             }
 
 
@@ -3946,6 +4069,7 @@
 
             return true;
 
+
         } catch (
             exception
         ) {
@@ -3958,15 +4082,13 @@
 
 
             return false;
-
         }
-
     }
 
 
-/* ========================================================
-   20 — ROUTER
-   ======================================================== */
+    /* ========================================================
+       20 — ROUTER
+       ======================================================== */
 
     function routeToApp(
         app,
@@ -3976,13 +4098,13 @@
         const router =
             getRouter();
 
+
         if (
             !router ||
             !app
         ) {
 
             return false;
-
         }
 
 
@@ -4013,7 +4135,6 @@
 
 
                 return true;
-
             }
 
 
@@ -4031,8 +4152,8 @@
 
 
                 return true;
-
             }
+
 
         } catch (
             exception
@@ -4042,18 +4163,14 @@
                 exception,
                 "App Router"
             );
-
         }
 
 
         return false;
-
     }
-
-
-/* ========================================================
-   21 — WINDOW
-   ======================================================== */
+                  /* ========================================================
+       21 — WINDOW
+       ======================================================== */
 
     function createWindow(
         app,
@@ -4070,7 +4187,6 @@
         ) {
 
             return null;
-
         }
 
 
@@ -4126,7 +4242,6 @@
                 return manager.open(
                     config
                 );
-
             }
 
 
@@ -4140,8 +4255,8 @@
                 return manager.createWindow(
                     config
                 );
-
             }
+
 
         } catch (
             exception
@@ -4151,18 +4266,16 @@
                 exception,
                 "Window Manager"
             );
-
         }
 
 
         return null;
-
     }
 
 
-/* ========================================================
-   22 — PLATFORM OPEN
-   ======================================================== */
+    /* ========================================================
+       22 — PLATFORM OPEN
+       ======================================================== */
 
     async function platformOpen(
         appId,
@@ -4182,7 +4295,6 @@
         ) {
 
             return null;
-
         }
 
 
@@ -4195,6 +4307,7 @@
                 )
             );
 
+
         } catch (
             exception
         ) {
@@ -4204,16 +4317,15 @@
                 "Platform App Open"
             );
 
+
             return null;
-
         }
-
     }
 
 
-/* ========================================================
-   23 — OPEN APP
-   ======================================================== */
+    /* ========================================================
+       23 — OPEN APP
+       ======================================================== */
 
     async function open(
         appId,
@@ -4241,7 +4353,6 @@
             ) {
 
                 return platformResult;
-
             }
 
 
@@ -4255,7 +4366,6 @@
 
 
             return null;
-
         }
 
 
@@ -4271,7 +4381,6 @@
 
 
             return null;
-
         }
 
 
@@ -4297,7 +4406,6 @@
 
 
             return null;
-
         }
 
 
@@ -4341,8 +4449,8 @@
 
 
                     return null;
-
                 }
+
 
             } catch (
                 exception
@@ -4352,9 +4460,7 @@
                     exception,
                     "App Permissions"
                 );
-
             }
-
         }
 
 
@@ -4395,9 +4501,7 @@
 
 
                 return null;
-
             }
-
         }
 
 
@@ -4439,7 +4543,6 @@
                         : null
 
             };
-
         }
 
 
@@ -4454,439 +4557,11 @@
                     "opening",
 
                 status:
-                    "opening",
-
-                error:
-                    null
+                    "opening"
 
             }
         );
-
-
-        const started =
-            await startApp(
-                app,
-                options
-            );
-
-
-        if (!started) {
-
-            updateAppState(
-                app.id,
-                {
-
-                    loading:
-                        false
-
-                }
-            );
-
-
-            return null;
-
-        }
-
-
-        try {
-
-            if (
-                typeof app.open ===
-                "function"
-            ) {
-
-                await safeAsyncResult(
-                    app.open({
-
-                        app,
-
-                        manager:
-                            api,
-
-                        context:
-                            state.contexts.get(
-                                app.id
-                            ),
-
-                        options
-
-                    })
-                );
-
-            }
-
-
-            let platformResult =
-                null;
-
-
-            if (
-                getPlatform() &&
-                hasMethod(
-                    getPlatform(),
-                    "openApp"
-                )
-            ) {
-
-                platformResult =
-                    await platformOpen(
-                        app.id,
-                        options
-                    );
-
-            }
-
-
-            const windowResult =
-                createWindow(
-                    app,
-                    options
-                );
-
-
-            routeToApp(
-                app,
-                options
-            );
-
-
-            const windowId =
-                (
-                    windowResult &&
-                    (
-                        windowResult.id ||
-                        windowResult.windowId
-                    )
-                ) ||
-                (
-                    platformResult &&
-                    (
-                        platformResult.windowId ||
-                        platformResult.id
-                    )
-                ) ||
-                null;
-
-
-            updateAppState(
-                app.id,
-                {
-
-                    lifecycle:
-                        "open",
-
-                    status:
-                        "open",
-
-                    loading:
-                        false,
-
-                    initialized:
-                        true,
-
-                    started:
-                        true,
-
-                    ready:
-                        true,
-
-                    open:
-                        true,
-
-                    active:
-                        true,
-
-                    visible:
-                        true,
-
-                    minimized:
-                        false,
-
-                    maximized:
-                        options.maximized ===
-                        true,
-
-                    pip:
-                        options.pip ===
-                        true,
-
-                    windowId,
-
-                    route:
-                        app.route ||
-                        null
-
-                }
-            );
-
-
-            state.activeAppId =
-                normalizeId(
-                    app.id
-                );
-
-
-            deactivateOtherApps(
-                app.id
-            );
-
-
-            state.statistics.opens +=
-                1;
-
-            state.statistics.activations +=
-                1;
-
-
-            const payload = {
-
-                app,
-
-                window:
-                    windowResult,
-
-                platform:
-                    platformResult,
-
-                options,
-
-                state:
-                    getAppState(
-                        app.id
-                    )
-
-            };
-
-
-            emit(
-                "app-opened",
-                payload
-            );
-
-
-            emit(
-                "app-activated",
-                {
-
-                    app
-
-                }
-            );
-
-
-            dispatch(
-                "haldo:app-opened",
-                payload
-            );
-
-
-            return {
-
-                app,
-
-                window:
-                    windowResult,
-
-                platform:
-                    platformResult,
-
-                state:
-                    getAppState(
-                        app.id
-                    )
-
-            };
-
-        } catch (
-            exception
-        ) {
-
-            reportError(
-                exception,
-                "App Öffnen: " +
-                app.id
-            );
-
-
-            updateAppState(
-                app.id,
-                {
-
-                    loading:
-                        false,
-
-                    status:
-                        "error",
-
-                    lifecycle:
-                        "error",
-
-                    error:
-                        exception.message
-
-                }
-            );
-
-
-            return null;
-
-        }
-
-    }
-
-
-    function openApp(
-        appId,
-        options
-    ) {
-
-        return open(
-            appId,
-            options
-        );
-
-    }
-
-
-/* ========================================================
-   24 — ACTIVATE
-   ======================================================== */
-
-    async function activate(
-        appId
-    ) {
-
-        const app =
-            get(
-                appId
-            );
-
-
-        if (!app) {
-            return false;
-        }
-
-
-        const id =
-            normalizeId(
-                app.id
-            );
-
-
-        const appState =
-            createInitialState(
-                id
-            );
-
-
-        if (
-            !appState.open
-        ) {
-
-            return !!(
-                await open(
-                    id
-                )
-            );
-
-        }
-
-
-        try {
-
-            if (
-                typeof app.activate ===
-                "function"
-            ) {
-
-                await safeAsyncResult(
-                    app.activate({
-
-                        app,
-
-                        manager:
-                            api,
-
-                        context:
-                            state.contexts.get(
-                                id
-                            )
-
-                    })
-                );
-
-            }
-
-
-            const manager =
-                getWindowManager();
-
-
-            if (
-                manager &&
-                hasMethod(
-                    manager,
-                    "focusApp"
-                )
-            ) {
-
-                manager.focusApp(
-                    id
-                );
-
-            } else if (
-                manager &&
-                hasMethod(
-                    manager,
-                    "focus"
-                ) &&
-                appState.windowId
-            ) {
-
-                manager.focus(
-                    appState.windowId
-                );
-
-            }
-
-
-            deactivateOtherApps(
-                id
-            );
-
-
-            updateAppState(
-                id,
-                {
-
-                    active:
-                        true,
-
-                    visible:
-                        true,
-
-                    minimized:
-                        false,
-
-                    lifecycle:
-                        "active",
-
-                    status:
-                        "active"
-
-                }
-            );
-
-
-            state.activeAppId =
-                id;
-
-
-            state.statistics.activations +=
-                1;
-
-
-            emit(
+                   emit(
                 "app-activated",
                 {
 
@@ -4908,6 +4583,7 @@
 
             return true;
 
+
         } catch (
             exception
         ) {
@@ -4920,15 +4596,371 @@
 
 
             return false;
-
         }
-
     }
 
 
-/* ========================================================
-   25 — DEACTIVATE OTHER APPS
-   ======================================================== */
+    /* ========================================================
+       25 — DEACTIVATE
+       ======================================================== */
+
+    async function deactivate(
+        appId
+    ) {
+
+        const app =
+            get(
+                appId
+            );
+
+
+        if (!app) {
+
+            return false;
+        }
+
+
+        const id =
+            normalizeId(
+                app.id
+            );
+
+
+        try {
+
+            if (
+                typeof app.deactivate ===
+                "function"
+            ) {
+
+                await safeAsyncResult(
+                    app.deactivate({
+
+                        app,
+
+                        manager:
+                            api,
+
+                        context:
+                            state.contexts.get(
+                                id
+                            )
+
+                    })
+                );
+            }
+
+
+            updateAppState(
+                id,
+                {
+
+                    active:
+                        false,
+
+                    status:
+                        "open",
+
+                    lifecycle:
+                        "open"
+
+                }
+            );
+
+
+            state.statistics.deactivations +=
+                1;
+
+
+            emit(
+                "app-deactivated",
+                {
+
+                    app
+
+                }
+            );
+
+
+            dispatch(
+                "haldo:app-deactivated",
+                {
+
+                    app
+
+                }
+            );
+
+
+            return true;
+
+
+        } catch (
+            exception
+        ) {
+
+            reportError(
+                exception,
+                "App Deaktivierung: " +
+                id
+            );
+
+
+            return false;
+        }
+    }
+
+
+    function deactivateOtherApps(
+        activeAppId
+    ) {
+
+        const activeId =
+            normalizeId(
+                activeAppId
+            );
+
+
+        state.apps.forEach(
+            app => {
+
+                const id =
+                    normalizeId(
+                        app.id
+                    );
+
+
+                if (
+                    id &&
+                    id !== activeId
+                ) {
+
+                    const appState =
+                        createInitialState(
+                            id
+                        );
+
+
+                    if (
+                        appState.active
+                    ) {
+
+                        deactivate(
+                            id
+                        );
+
+                    }
+
+                }
+
+            }
+        );
+    }
+
+
+    /* ========================================================
+       26 — CLOSE
+       ======================================================== */
+
+    async function close(
+        appId,
+        options = {}
+    ) {
+
+        const app =
+            get(
+                appId
+            );
+
+
+        if (!app) {
+
+            return false;
+        }
+
+
+        const id =
+            normalizeId(
+                app.id
+            );
+
+
+        const current =
+            createInitialState(
+                id
+            );
+
+
+        if (
+            !current.open
+        ) {
+
+            return true;
+        }
+
+
+        try {
+
+            if (
+                typeof app.close ===
+                "function"
+            ) {
+
+                await safeAsyncResult(
+                    app.close({
+
+                        app,
+
+                        manager:
+                            api,
+
+                        context:
+                            state.contexts.get(
+                                id
+                            ),
+
+                        options
+
+                    })
+                );
+            }
+
+
+            const manager =
+                getWindowManager();
+
+
+            if (
+                manager &&
+                current.windowId
+            ) {
+
+                if (
+                    hasMethod(
+                        manager,
+                        "close"
+                    )
+                ) {
+
+                    await safeAsyncResult(
+                        manager.close(
+                            current.windowId
+                        )
+                    );
+
+                }
+
+            }
+
+
+            updateAppState(
+                id,
+                {
+
+                    lifecycle:
+                        "closed",
+
+                    status:
+                        "closed",
+
+                    loading:
+                        false,
+
+                    open:
+                        false,
+
+                    active:
+                        false,
+
+                    visible:
+                        false,
+
+                    minimized:
+                        false,
+
+                    maximized:
+                        false,
+
+                    pip:
+                        false,
+
+                    windowId:
+                        null
+
+                }
+            );
+
+
+            if (
+                state.activeAppId ===
+                id
+            ) {
+
+                state.activeAppId =
+                    null;
+            }
+
+
+            state.statistics.closes +=
+                1;
+
+
+            emit(
+                "app-closed",
+                {
+
+                    app,
+
+                    options
+
+                }
+            );
+
+
+            dispatch(
+                "haldo:app-closed",
+                {
+
+                    app,
+
+                    options
+
+                }
+            );
+
+
+            return true;
+
+
+        } catch (
+            exception
+        ) {
+
+            reportError(
+                exception,
+                "App Schließen: " +
+                id
+            );
+
+
+            return false;
+        }
+    }
+
+
+    function closeApp(
+        appId,
+        options
+    ) {
+
+        return close(
+            appId,
+            options
+        );
+    }
+          /* ========================================================
+       25 — DEACTIVATE OTHER APPS
+       ======================================================== */
 
     function deactivateOtherApps(
         activeAppId
@@ -4952,7 +4984,6 @@
                 ) {
 
                     return;
-
                 }
 
 
@@ -4962,7 +4993,6 @@
                 ) {
 
                     return;
-
                 }
 
 
@@ -5021,7 +5051,6 @@
                                         id
                                     )
                             );
-
                         }
 
                     } catch (
@@ -5033,9 +5062,7 @@
                             "App Deactivate: " +
                             id
                         );
-
                     }
-
                 }
 
             }
@@ -5044,22 +5071,12 @@
 
         state.statistics.deactivations +=
             1;
-
     }
 
 
-/* ========================================================
-   ENDE TEIL 2
-   ======================================================== */
- /* ============================================================
-   TEIL 3 / KOMPLETTE DATEI — js/app-manager.js
-   DIREKT NACH TEIL 2
-   ============================================================ */
-
-
-/* ========================================================
-   26 — MINIMIZE
-   ======================================================== */
+    /* ========================================================
+       26 — MINIMIZE
+       ======================================================== */
 
     async function minimize(
         appId
@@ -5070,32 +5087,38 @@
                 appId
             );
 
+
         if (!app) {
+
             return false;
         }
+
 
         const id =
             normalizeId(
                 app.id
             );
 
+
         const appState =
             createInitialState(
                 id
             );
+
 
         if (
             !appState.open
         ) {
 
             return false;
-
         }
+
 
         try {
 
             const manager =
                 getWindowManager();
+
 
             if (
                 manager &&
@@ -5128,10 +5151,9 @@
                             true
                         )
                     );
-
                 }
-
             }
+
 
             if (
                 typeof app.minimize ===
@@ -5153,8 +5175,8 @@
 
                     })
                 );
-
             }
+
 
             updateAppState(
                 id,
@@ -5178,6 +5200,7 @@
                 }
             );
 
+
             if (
                 state.activeAppId ===
                 id
@@ -5185,11 +5208,12 @@
 
                 state.activeAppId =
                     null;
-
             }
+
 
             state.statistics.minimizations +=
                 1;
+
 
             emit(
                 "app-minimized",
@@ -5200,6 +5224,7 @@
                 }
             );
 
+
             dispatch(
                 "haldo:app-minimized",
                 {
@@ -5209,7 +5234,9 @@
                 }
             );
 
+
             return true;
+
 
         } catch (
             exception
@@ -5221,16 +5248,15 @@
                 id
             );
 
+
             return false;
-
         }
-
     }
 
 
-/* ========================================================
-   27 — MAXIMIZE
-   ======================================================== */
+    /* ========================================================
+       27 — MAXIMIZE
+       ======================================================== */
 
     async function maximize(
         appId
@@ -5241,32 +5267,38 @@
                 appId
             );
 
+
         if (!app) {
+
             return false;
         }
+
 
         const id =
             normalizeId(
                 app.id
             );
 
+
         const appState =
             createInitialState(
                 id
             );
+
 
         if (
             !appState.open
         ) {
 
             return false;
-
         }
+
 
         try {
 
             const manager =
                 getWindowManager();
+
 
             if (
                 manager &&
@@ -5299,10 +5331,9 @@
                             true
                         )
                     );
-
                 }
-
             }
+
 
             if (
                 typeof app.maximize ===
@@ -5324,8 +5355,8 @@
 
                     })
                 );
-
             }
+
 
             updateAppState(
                 id,
@@ -5352,15 +5383,14 @@
                 }
             );
 
+
             state.activeAppId =
                 id;
 
-            deactivateOtherApps(
-                id
-            );
 
             state.statistics.maximizations +=
                 1;
+
 
             emit(
                 "app-maximized",
@@ -5371,6 +5401,7 @@
                 }
             );
 
+
             dispatch(
                 "haldo:app-maximized",
                 {
@@ -5380,7 +5411,9 @@
                 }
             );
 
+
             return true;
+
 
         } catch (
             exception
@@ -5392,16 +5425,13 @@
                 id
             );
 
+
             return false;
-
         }
-
     }
-
-
-/* ========================================================
-   28 — RESTORE
-   ======================================================== */
+           /* ========================================================
+       28 — RESTORE
+       ======================================================== */
 
     async function restore(
         appId
@@ -5416,28 +5446,32 @@
             return false;
         }
 
+
         const id =
             normalizeId(
                 app.id
             );
+
 
         const appState =
             createInitialState(
                 id
             );
 
+
         if (
             !appState.open
         ) {
 
             return false;
-
         }
+
 
         try {
 
             const manager =
                 getWindowManager();
+
 
             if (
                 manager &&
@@ -5470,8 +5504,8 @@
                             false
                         )
                     );
-
                 }
+
 
                 if (
                     hasMethod(
@@ -5486,10 +5520,9 @@
                             false
                         )
                     );
-
                 }
-
             }
+
 
             if (
                 typeof app.restore ===
@@ -5511,8 +5544,8 @@
 
                     })
                 );
-
             }
+
 
             updateAppState(
                 id,
@@ -5539,12 +5572,15 @@
                 }
             );
 
+
             state.activeAppId =
                 id;
+
 
             deactivateOtherApps(
                 id
             );
+
 
             emit(
                 "app-restored",
@@ -5555,6 +5591,7 @@
                 }
             );
 
+
             dispatch(
                 "haldo:app-restored",
                 {
@@ -5564,7 +5601,9 @@
                 }
             );
 
+
             return true;
+
 
         } catch (
             exception
@@ -5576,16 +5615,15 @@
                 id
             );
 
+
             return false;
-
         }
-
     }
 
 
-/* ========================================================
-   29 — PIP
-   ======================================================== */
+    /* ========================================================
+       29 — PIP
+       ======================================================== */
 
     async function setPIP(
         appId,
@@ -5597,32 +5635,38 @@
                 appId
             );
 
+
         if (!app) {
+
             return false;
         }
+
 
         const id =
             normalizeId(
                 app.id
             );
 
+
         const appState =
             createInitialState(
                 id
             );
+
 
         if (
             !appState.open
         ) {
 
             return false;
-
         }
+
 
         try {
 
             const manager =
                 getWindowManager();
+
 
             if (
                 manager &&
@@ -5656,10 +5700,9 @@
                             appState.windowId
                         )
                     );
-
                 }
-
             }
+
 
             if (
                 typeof app.setPIP ===
@@ -5684,8 +5727,8 @@
 
                     })
                 );
-
             }
+
 
             updateAppState(
                 id,
@@ -5694,11 +5737,30 @@
                     pip:
                         enabled === true,
 
+                    active:
+                        enabled === true ||
+                        appState.active,
+
                     visible:
-                        true
+                        true,
+
+                    lifecycle:
+                        enabled === true
+                            ? "pip"
+                            : "active",
+
+                    status:
+                        enabled === true
+                            ? "pip"
+                            : "active"
 
                 }
             );
+
+
+            state.statistics.pipChanges +=
+                1;
+
 
             emit(
                 "app-pip-changed",
@@ -5712,6 +5774,7 @@
                 }
             );
 
+
             dispatch(
                 "haldo:app-pip-changed",
                 {
@@ -5724,7 +5787,9 @@
                 }
             );
 
+
             return true;
+
 
         } catch (
             exception
@@ -5736,16 +5801,13 @@
                 id
             );
 
+
             return false;
-
         }
-
     }
-
-
-/* ========================================================
-   30 — CLOSE APP
-   ======================================================== */
+           /* ========================================================
+       30 — CLOSE APP
+       ======================================================== */
 
     async function close(
         appId,
@@ -5757,27 +5819,32 @@
                 appId
             );
 
+
         if (!app) {
+
             return false;
         }
+
 
         const id =
             normalizeId(
                 app.id
             );
 
+
         const appState =
             createInitialState(
                 id
             );
+
 
         if (
             !appState.open
         ) {
 
             return true;
-
         }
+
 
         updateAppState(
             id,
@@ -5794,6 +5861,7 @@
 
             }
         );
+
 
         try {
 
@@ -5819,11 +5887,12 @@
 
                     })
                 );
-
             }
+
 
             const manager =
                 getWindowManager();
+
 
             if (
                 manager &&
@@ -5855,15 +5924,15 @@
                             appState.windowId
                         )
                     );
-
                 }
-
             }
+
 
             await stopApp(
                 id,
                 options
             );
+
 
             updateAppState(
                 id,
@@ -5902,6 +5971,7 @@
                 }
             );
 
+
             if (
                 state.activeAppId ===
                 id
@@ -5909,14 +5979,16 @@
 
                 state.activeAppId =
                     null;
-
             }
+
 
             state.statistics.closes +=
                 1;
 
+
             state.statistics.activations +=
                 0;
+
 
             emit(
                 "app-closed",
@@ -5929,6 +6001,7 @@
                 }
             );
 
+
             dispatch(
                 "haldo:app-closed",
                 {
@@ -5940,7 +6013,9 @@
                 }
             );
 
+
             return true;
+
 
         } catch (
             exception
@@ -5951,6 +6026,7 @@
                 "App Schließen: " +
                 id
             );
+
 
             updateAppState(
                 id,
@@ -5971,10 +6047,9 @@
                 }
             );
 
+
             return false;
-
         }
-
     }
 
 
@@ -5987,13 +6062,12 @@
             appId,
             options
         );
-
     }
 
 
-/* ========================================================
-   31 — RESTART APP
-   ======================================================== */
+    /* ========================================================
+       31 — RESTART APP
+       ======================================================== */
 
     async function restart(
         appId,
@@ -6005,9 +6079,12 @@
                 appId
             );
 
+
         if (!app) {
+
             return false;
         }
+
 
         try {
 
@@ -6023,12 +6100,14 @@
                 }
             );
 
+
             return !!(
                 await open(
                     app.id,
                     options
                 )
             );
+
 
         } catch (
             exception
@@ -6040,16 +6119,15 @@
                 app.id
             );
 
+
             return false;
-
         }
-
     }
 
 
-/* ========================================================
-   32 — REFRESH APP
-   ======================================================== */
+    /* ========================================================
+       32 — REFRESH APP
+       ======================================================== */
 
     async function refresh(
         appId,
@@ -6061,14 +6139,18 @@
                 appId
             );
 
+
         if (!app) {
+
             return false;
         }
+
 
         const id =
             normalizeId(
                 app.id
             );
+
 
         try {
 
@@ -6100,25 +6182,15 @@
                     })
                 );
 
+
             } else {
 
-                const current =
-                    getAppState(
-                        id
-                    );
-
-                if (
-                    current.open
-                ) {
-
-                    await restart(
-                        id,
-                        options
-                    );
-
-                }
-
+                await restart(
+                    id,
+                    options
+                );
             }
+
 
             emit(
                 "app-refreshed",
@@ -6131,6 +6203,7 @@
                 }
             );
 
+
             dispatch(
                 "haldo:app-refreshed",
                 {
@@ -6142,7 +6215,9 @@
                 }
             );
 
+
             return true;
+
 
         } catch (
             exception
@@ -6154,16 +6229,13 @@
                 id
             );
 
+
             return false;
-
         }
-
     }
-
-
-/* ========================================================
-   33 — APP UPDATE
-   ======================================================== */
+           /* ========================================================
+       33 — APP UPDATE
+       ======================================================== */
 
     async function update(
         appId,
@@ -6176,19 +6248,24 @@
                 appId
             );
 
+
         if (!app) {
+
             return false;
         }
+
 
         const id =
             normalizeId(
                 app.id
             );
 
+
         const previous =
             {
                 ...app
             };
+
 
         try {
 
@@ -6216,13 +6293,14 @@
 
                     })
                 );
-
             }
+
 
             Object.assign(
                 app,
                 changes
             );
+
 
             emit(
                 "app-updated",
@@ -6239,6 +6317,7 @@
                 }
             );
 
+
             dispatch(
                 "haldo:app-updated",
                 {
@@ -6254,7 +6333,9 @@
                 }
             );
 
+
             return app;
+
 
         } catch (
             exception
@@ -6266,16 +6347,15 @@
                 id
             );
 
+
             return false;
-
         }
-
     }
 
 
-/* ========================================================
-   34 — APP DESTROY
-   ======================================================== */
+    /* ========================================================
+       34 — APP DESTROY
+       ======================================================== */
 
     async function destroy(
         appId,
@@ -6287,14 +6367,18 @@
                 appId
             );
 
+
         if (!app) {
+
             return false;
         }
+
 
         const id =
             normalizeId(
                 app.id
             );
+
 
         try {
 
@@ -6308,8 +6392,8 @@
                     id,
                     options
                 );
-
             }
+
 
             if (
                 typeof app.destroy ===
@@ -6333,24 +6417,28 @@
 
                     })
                 );
-
             }
+
 
             state.contexts.delete(
                 id
             );
 
+
             state.instances.delete(
                 id
             );
+
 
             state.appState.delete(
                 id
             );
 
+
             state.settings.delete(
                 id
             );
+
 
             emit(
                 "app-destroyed",
@@ -6363,6 +6451,7 @@
                 }
             );
 
+
             dispatch(
                 "haldo:app-destroyed",
                 {
@@ -6374,7 +6463,9 @@
                 }
             );
 
+
             return true;
+
 
         } catch (
             exception
@@ -6386,25 +6477,15 @@
                 id
             );
 
+
             return false;
-
         }
-
     }
 
 
-/* ========================================================
-   ENDE TEIL 3
-   ======================================================== */
- /* ============================================================
-   TEIL 4 / KOMPLETTE DATEI — js/app-manager.js
-   DIREKT NACH TEIL 3
-   ============================================================ */
-
-
-/* ========================================================
-   35 — GET APP STATE
-   ======================================================== */
+    /* ========================================================
+       35 — GET APP STATE
+       ======================================================== */
 
     function getState(
         appId
@@ -6415,20 +6496,22 @@
                 appId
             );
 
+
         if (!id) {
+
             return null;
         }
+
 
         return getAppState(
             id
         );
-
     }
 
 
-/* ========================================================
-   36 — GET APP CONTEXT
-   ======================================================== */
+    /* ========================================================
+       36 — GET APP CONTEXT
+       ======================================================== */
 
     function getContext(
         appId
@@ -6439,9 +6522,12 @@
                 appId
             );
 
+
         if (!id) {
+
             return null;
         }
+
 
         return (
             state.contexts.get(
@@ -6449,13 +6535,12 @@
             ) ||
             null
         );
-
     }
 
 
-/* ========================================================
-   37 — GET APP SETTINGS
-   ======================================================== */
+    /* ========================================================
+       37 — GET APP SETTINGS
+       ======================================================== */
 
     function getAppSettings(
         appId
@@ -6466,20 +6551,22 @@
                 appId
             );
 
+
         if (!id) {
+
             return {};
         }
+
 
         return getSettings(
             id
         );
-
     }
 
 
-/* ========================================================
-   38 — SET APP SETTINGS
-   ======================================================== */
+    /* ========================================================
+       38 — SET APP SETTINGS
+       ======================================================== */
 
     function setAppSettings(
         appId,
@@ -6491,21 +6578,21 @@
                 appId
             );
 
+
         if (!id) {
+
             return false;
         }
+
 
         return setSettings(
             id,
             changes
         );
-
     }
-
-
-/* ========================================================
-   39 — APP CAPABILITIES
-   ======================================================== */
+           /* ========================================================
+       39 — APP CAPABILITIES
+       ======================================================== */
 
     function getCapabilities(
         appId
@@ -6516,12 +6603,16 @@
                 appId
             );
 
+
         if (!app) {
+
             return [];
         }
 
+
         const capabilities =
             app.capabilities;
+
 
         if (
             Array.isArray(
@@ -6532,8 +6623,8 @@
             return [
                 ...capabilities
             ];
-
         }
+
 
         if (
             isObject(
@@ -6548,17 +6639,16 @@
                     capabilities[key] !==
                     false
             );
-
         }
 
-        return [];
 
+        return [];
     }
 
 
-/* ========================================================
-   40 — HAS CAPABILITY
-   ======================================================== */
+    /* ========================================================
+       40 — HAS CAPABILITY
+       ======================================================== */
 
     function hasCapability(
         appId,
@@ -6573,9 +6663,12 @@
                 .trim()
                 .toLowerCase();
 
+
         if (!normalized) {
+
             return false;
         }
+
 
         return getCapabilities(
             appId
@@ -6591,13 +6684,12 @@
             .includes(
                 normalized
             );
-
     }
 
 
-/* ========================================================
-   41 — GET APP SERVICE
-   ======================================================== */
+    /* ========================================================
+       41 — GET APP SERVICE
+       ======================================================== */
 
     function getAppService(
         appId,
@@ -6609,14 +6701,15 @@
                 appId
             );
 
+
         if (
             !context ||
             !context.services
         ) {
 
             return null;
-
         }
+
 
         const key =
             String(
@@ -6625,21 +6718,23 @@
             )
                 .trim();
 
+
         if (!key) {
+
             return null;
         }
+
 
         return (
             context.services[key] ||
             null
         );
-
     }
 
 
-/* ========================================================
-   42 — CALL APP METHOD
-   ======================================================== */
+    /* ========================================================
+       42 — CALL APP METHOD
+       ======================================================== */
 
     async function call(
         appId,
@@ -6652,14 +6747,15 @@
                 appId
             );
 
+
         if (!app) {
 
             throw new Error(
                 "App nicht gefunden: " +
                 appId
             );
-
         }
+
 
         const methodName =
             String(
@@ -6668,13 +6764,14 @@
             )
                 .trim();
 
+
         if (!methodName) {
 
             throw new Error(
                 "App-Methode fehlt."
             );
-
         }
+
 
         if (
             typeof app[
@@ -6687,8 +6784,8 @@
                 "App-Methode nicht gefunden: " +
                 methodName
             );
-
         }
+
 
         return safeAsyncResult(
             app[
@@ -6697,13 +6794,12 @@
                 ...args
             )
         );
-
     }
 
 
-/* ========================================================
-   43 — EXECUTE APP COMMAND
-   ======================================================== */
+    /* ========================================================
+       43 — EXECUTE APP COMMAND
+       ======================================================== */
 
     async function execute(
         appId,
@@ -6716,9 +6812,12 @@
                 appId
             );
 
+
         if (!app) {
+
             return null;
         }
+
 
         try {
 
@@ -6746,7 +6845,6 @@
 
                     })
                 );
-
             }
 
 
@@ -6761,11 +6859,11 @@
                         payload
                     )
                 );
-
             }
 
 
             return null;
+
 
         } catch (
             exception
@@ -6777,16 +6875,15 @@
                 appId
             );
 
+
             return null;
-
         }
-
     }
 
 
-/* ========================================================
-   44 — APP HEALTH
-   ======================================================== */
+    /* ========================================================
+       44 — APP HEALTH
+       ======================================================== */
 
     function health(
         appId
@@ -6796,6 +6893,7 @@
             get(
                 appId
             );
+
 
         if (!app) {
 
@@ -6816,13 +6914,14 @@
                     "not-found"
 
             };
-
         }
+
 
         const appState =
             getAppState(
                 app.id
             );
+
 
         const instance =
             state.instances.get(
@@ -6832,11 +6931,13 @@
             ) ||
             {};
 
+
         const errors =
             Number(
                 appState?.errorCount ||
                 0
             );
+
 
         return {
 
@@ -6878,13 +6979,12 @@
             errors
 
         };
-
     }
 
 
-/* ========================================================
-   45 — APP DIAGNOSTICS
-   ======================================================== */
+    /* ========================================================
+       45 — APP DIAGNOSTICS
+       ======================================================== */
 
     function diagnostics(
         appId
@@ -6895,10 +6995,12 @@
                 appId
             );
 
+
         const app =
             get(
                 id
             );
+
 
         const appState =
             id
@@ -6907,12 +7009,14 @@
                 )
                 : null;
 
+
         const context =
             id
                 ? getContext(
                     id
                 )
                 : null;
+
 
         const instance =
             id
@@ -6923,6 +7027,7 @@
                     null
                 )
                 : null;
+
 
         return {
 
@@ -6937,48 +7042,32 @@
 
             app:
                 app
-                    ? {
-                        id:
-                            app.id,
-
-                        name:
-                            app.name,
-
-                        title:
-                            app.title,
-
-                        version:
-                            app.version,
-
-                        enabled:
-                            app.enabled !==
-                            false
-                    }
+                    ? clone(app)
                     : null,
 
             state:
-                appState,
-
-            instance,
-
-            context:
-                context
-                    ? {
-                        appId:
-                            context.appId,
-
-                        services:
-                            Object.keys(
-                                context.services ||
-                                {}
-                            ).filter(
-                                key =>
-                                    !!context.services[
-                                        key
-                                    ]
-                            )
-                    }
+                appState
+                    ? clone(
+                        appState
+                    )
                     : null,
+
+            instance:
+                instance
+                    ? clone(
+                        instance
+                    )
+                    : null,
+
+            hasContext:
+                !!context,
+
+            capabilities:
+                id
+                    ? getCapabilities(
+                        id
+                    )
+                    : [],
 
             health:
                 id
@@ -6988,17 +7077,15 @@
                     : null
 
         };
-
     }
-
-
-/* ========================================================
-   46 — LIST OPEN APPS
-   ======================================================== */
+           /* ========================================================
+       46 — LIST OPEN APPS
+       ======================================================== */
 
     function getOpenApps() {
 
         const result = [];
+
 
         state.appState.forEach(
             (
@@ -7016,6 +7103,7 @@
                             id
                         );
 
+
                     if (app) {
 
                         result.push(
@@ -7028,26 +7116,24 @@
 
                             }
                         );
-
                     }
-
                 }
-
             }
         );
 
-        return result;
 
+        return result;
     }
 
 
-/* ========================================================
-   47 — LIST ACTIVE APPS
-   ======================================================== */
+    /* ========================================================
+       47 — LIST ACTIVE APPS
+       ======================================================== */
 
     function getActiveApps() {
 
         const result = [];
+
 
         state.appState.forEach(
             (
@@ -7065,6 +7151,7 @@
                             id
                         );
 
+
                     if (app) {
 
                         result.push(
@@ -7077,26 +7164,24 @@
 
                             }
                         );
-
                     }
-
                 }
-
             }
         );
 
-        return result;
 
+        return result;
     }
 
 
-/* ========================================================
-   48 — LIST RUNNING APPS
-   ======================================================== */
+    /* ========================================================
+       48 — LIST RUNNING APPS
+       ======================================================== */
 
     function getRunningApps() {
 
         const result = [];
+
 
         state.instances.forEach(
             (
@@ -7114,6 +7199,7 @@
                             id
                         );
 
+
                     if (app) {
 
                         result.push(
@@ -7130,27 +7216,25 @@
 
                             }
                         );
-
                     }
-
                 }
-
             }
         );
 
-        return result;
 
+        return result;
     }
 
 
-/* ========================================================
-   49 — ACTIVATE NEXT APP
-   ======================================================== */
+    /* ========================================================
+       49 — ACTIVATE NEXT APP
+       ======================================================== */
 
     async function activateNext() {
 
         const openApps =
             getOpenApps();
+
 
         if (
             openApps.length ===
@@ -7158,11 +7242,12 @@
         ) {
 
             return null;
-
         }
+
 
         const currentId =
             state.activeAppId;
+
 
         let index =
             openApps.findIndex(
@@ -7172,6 +7257,7 @@
                     ) ===
                     currentId
             );
+
 
         index =
             index < 0
@@ -7181,32 +7267,37 @@
                 ) %
                 openApps.length;
 
+
         const target =
             openApps[
                 index
             ];
 
+
         if (!target) {
+
             return null;
         }
+
 
         await activate(
             target.app.id
         );
 
-        return target.app;
 
+        return target.app;
     }
 
 
-/* ========================================================
-   50 — ACTIVATE PREVIOUS APP
-   ======================================================== */
+    /* ========================================================
+       50 — ACTIVATE PREVIOUS APP
+       ======================================================== */
 
     async function activatePrevious() {
 
         const openApps =
             getOpenApps();
+
 
         if (
             openApps.length ===
@@ -7214,11 +7305,12 @@
         ) {
 
             return null;
-
         }
+
 
         const currentId =
             state.activeAppId;
+
 
         let index =
             openApps.findIndex(
@@ -7228,6 +7320,7 @@
                     ) ===
                     currentId
             );
+
 
         index =
             index < 0
@@ -7238,27 +7331,31 @@
                 ) %
                 openApps.length;
 
+
         const target =
             openApps[
                 index
             ];
 
+
         if (!target) {
+
             return null;
         }
+
 
         await activate(
             target.app.id
         );
 
-        return target.app;
 
+        return target.app;
     }
 
 
-/* ========================================================
-   51 — CLOSE ALL
-   ======================================================== */
+    /* ========================================================
+       51 — CLOSE ALL
+       ======================================================== */
 
     async function closeAll(
         options = {}
@@ -7267,7 +7364,9 @@
         const openApps =
             getOpenApps();
 
+
         const results = [];
+
 
         for (
             const item of openApps
@@ -7281,6 +7380,7 @@
                         options
                     );
 
+
                 results.push(
                     {
 
@@ -7293,6 +7393,7 @@
                     }
                 );
 
+
             } catch (
                 exception
             ) {
@@ -7301,6 +7402,7 @@
                     exception,
                     "Close All"
                 );
+
 
                 results.push(
                     {
@@ -7316,19 +7418,17 @@
 
                     }
                 );
-
             }
-
         }
 
-        return results;
 
+        return results;
     }
 
 
-/* ========================================================
-   52 — STOP ALL
-   ======================================================== */
+    /* ========================================================
+       52 — STOP ALL
+       ======================================================== */
 
     async function stopAll(
         options = {}
@@ -7337,7 +7437,9 @@
         const runningApps =
             getRunningApps();
 
+
         const results = [];
+
 
         for (
             const item of runningApps
@@ -7351,6 +7453,7 @@
                         options
                     );
 
+
                 results.push(
                     {
 
@@ -7363,6 +7466,7 @@
                     }
                 );
 
+
             } catch (
                 exception
             ) {
@@ -7371,6 +7475,7 @@
                     exception,
                     "Stop All"
                 );
+
 
                 results.push(
                     {
@@ -7386,19 +7491,15 @@
 
                     }
                 );
-
             }
-
         }
 
+
         return results;
-
     }
-
-
-/* ========================================================
-   53 — REFRESH ALL
-   ======================================================== */
+           /* ========================================================
+       53 — REFRESH ALL
+       ======================================================== */
 
     async function refreshAll(
         options = {}
@@ -7407,7 +7508,9 @@
         const apps =
             list();
 
+
         const results = [];
+
 
         for (
             const app of apps
@@ -7421,6 +7524,7 @@
                         options
                     );
 
+
                 results.push(
                     {
 
@@ -7432,6 +7536,7 @@
                     }
                 );
 
+
             } catch (
                 exception
             ) {
@@ -7440,6 +7545,7 @@
                     exception,
                     "Refresh All"
                 );
+
 
                 results.push(
                     {
@@ -7454,19 +7560,17 @@
 
                     }
                 );
-
             }
-
         }
 
-        return results;
 
+        return results;
     }
 
 
-/* ========================================================
-   54 — GET STATISTICS
-   ======================================================== */
+    /* ========================================================
+       54 — GET STATISTICS
+       ======================================================== */
 
     function getStatistics() {
 
@@ -7502,13 +7606,12 @@
                 now()
 
         };
-
     }
 
 
-/* ========================================================
-   55 — RESET APP STATE
-   ======================================================== */
+    /* ========================================================
+       55 — RESET APP STATE
+       ======================================================== */
 
     function resetAppState(
         appId
@@ -7519,89 +7622,96 @@
                 appId
             );
 
+
         if (!id) {
+
             return false;
         }
+
 
         const current =
             createInitialState(
                 id
             );
 
-        const preserved =
-            {
 
-                id,
+        const preserved = {
 
-                registered:
-                    current.registered,
+            id,
 
-                initialized:
-                    false,
+            registered:
+                current.registered,
 
-                ready:
-                    false,
+            initialized:
+                false,
 
-                started:
-                    false,
+            ready:
+                false,
 
-                open:
-                    false,
+            started:
+                false,
 
-                active:
-                    false,
+            open:
+                false,
 
-                visible:
-                    false,
+            active:
+                false,
 
-                minimized:
-                    false,
+            visible:
+                false,
 
-                maximized:
-                    false,
+            minimized:
+                false,
 
-                pip:
-                    false,
+            maximized:
+                false,
 
-                loading:
-                    false,
+            pip:
+                false,
 
-                lifecycle:
-                    "idle",
+            loading:
+                false,
 
-                status:
-                    "idle",
+            lifecycle:
+                "idle",
 
-                error:
-                    null,
+            status:
+                "idle",
 
-                errorCount:
-                    current.errorCount ||
-                    0,
+            error:
+                null,
 
-                windowId:
-                    null,
+            errorCount:
+                current.errorCount ||
+                0,
 
-                route:
-                    null,
+            windowId:
+                null,
 
-                updatedAt:
-                    now()
+            route:
+                null,
 
-            };
+            updatedAt:
+                now()
+
+        };
+
 
         state.appState.set(
             id,
             preserved
         );
 
+
         state.instances.delete(
             id
         );
 
+
         state.contexts.delete(
             id
         );
+
 
         if (
             state.activeAppId ===
@@ -7610,8 +7720,8 @@
 
             state.activeAppId =
                 null;
-
         }
+
 
         emit(
             "app-state-reset",
@@ -7626,6 +7736,7 @@
             }
         );
 
+
         dispatch(
             "haldo:app-state-reset",
             {
@@ -7639,57 +7750,54 @@
             }
         );
 
-        return true;
 
+        return true;
     }
 
 
-/* ========================================================
-   ENDE TEIL 4
-   ======================================================== */
-/* ============================================================
-   TEIL 5 / KOMPLETTE DATEI — js/app-manager.js
-   DIREKT NACH TEIL 4
-   ============================================================ */
-
-
-/* ========================================================
-   56 — GET ACTIVE APP
-   ======================================================== */
+    /* ========================================================
+       56 — GET ACTIVE APP
+       ======================================================== */
 
     function getActiveApp() {
 
-        if (!state.activeAppId) {
+        if (
+            !state.activeAppId
+        ) {
+
             return null;
         }
+
 
         return get(
             state.activeAppId
         ) || null;
-
     }
 
 
-/* ========================================================
-   57 — GET ACTIVE APP STATE
-   ======================================================== */
+    /* ========================================================
+       57 — GET ACTIVE APP STATE
+       ======================================================== */
 
     function getActiveAppState() {
 
-        if (!state.activeAppId) {
+        if (
+            !state.activeAppId
+        ) {
+
             return null;
         }
+
 
         return getAppState(
             state.activeAppId
         );
-
     }
 
 
-/* ========================================================
-   58 — FIND APPS
-   ======================================================== */
+    /* ========================================================
+       58 — FIND APPS
+       ======================================================== */
 
     function find(
         query,
@@ -7699,6 +7807,7 @@
         const apps =
             list();
 
+
         const value =
             String(
                 query ||
@@ -7707,9 +7816,12 @@
                 .trim()
                 .toLowerCase();
 
+
         if (!value) {
+
             return apps;
         }
+
 
         const fields =
             Array.isArray(
@@ -7717,13 +7829,21 @@
             )
                 ? options.fields
                 : [
+
                     "id",
+
                     "name",
+
                     "title",
+
                     "description",
+
                     "category",
+
                     "keywords"
+
                 ];
+
 
         return apps.filter(
             app => {
@@ -7733,6 +7853,7 @@
 
                         const fieldValue =
                             app?.[field];
+
 
                         if (
                             Array.isArray(
@@ -7751,8 +7872,8 @@
                                                 value
                                             )
                                 );
-
                         }
+
 
                         return String(
                             fieldValue ??
@@ -7762,19 +7883,14 @@
                             .includes(
                                 value
                             );
-
                     }
                 );
-
             }
         );
-
     }
-
-
-/* ========================================================
-   59 — FIND ONE APP
-   ======================================================== */
+           /* ========================================================
+       59 — FIND ONE APP
+       ======================================================== */
 
     function findOne(
         query
@@ -7785,17 +7901,17 @@
                 query
             );
 
+
         return (
             results[0] ||
             null
         );
-
     }
 
 
-/* ========================================================
-   60 — APP VERSION
-   ======================================================== */
+    /* ========================================================
+       60 — APP VERSION
+       ======================================================== */
 
     function getVersion(
         appId
@@ -7806,22 +7922,24 @@
                 appId
             );
 
+
         if (!app) {
+
             return null;
         }
+
 
         return (
             app.version ||
             app.appVersion ||
             "1.0.0"
         );
-
     }
 
 
-/* ========================================================
-   61 — APP METADATA
-   ======================================================== */
+    /* ========================================================
+       61 — APP METADATA
+       ======================================================== */
 
     function getMetadata(
         appId
@@ -7832,9 +7950,12 @@
                 appId
             );
 
+
         if (!app) {
+
             return null;
         }
+
 
         return {
 
@@ -7908,13 +8029,12 @@
                 )
 
         };
-
     }
 
 
-/* ========================================================
-   62 — APP SNAPSHOT
-   ======================================================== */
+    /* ========================================================
+       62 — APP SNAPSHOT
+       ======================================================== */
 
     function snapshot(
         appId
@@ -7925,14 +8045,18 @@
                 appId
             );
 
+
         if (!metadata) {
+
             return null;
         }
+
 
         const context =
             getContext(
                 appId
             );
+
 
         const instance =
             state.instances.get(
@@ -7941,6 +8065,7 @@
                 )
             ) ||
             null;
+
 
         return {
 
@@ -7954,6 +8079,7 @@
             context:
                 context
                     ? {
+
                         appId:
                             context.appId,
 
@@ -7962,17 +8088,17 @@
                                 context.services ||
                                 {}
                             )
+
                     }
                     : null
 
         };
-
     }
 
 
-/* ========================================================
-   63 — BROADCAST APP EVENT
-   ======================================================== */
+    /* ========================================================
+       63 — BROADCAST APP EVENT
+       ======================================================== */
 
     function broadcast(
         event,
@@ -7986,6 +8112,7 @@
                     appId
                 )
                 : null;
+
 
         const payload = {
 
@@ -8006,10 +8133,12 @@
 
         };
 
+
         emit(
             event,
             payload
         );
+
 
         dispatch(
             "haldo:" +
@@ -8017,14 +8146,14 @@
             payload
         );
 
-        return payload;
 
+        return payload;
     }
 
 
-/* ========================================================
-   64 — SEND MESSAGE TO APP
-   ======================================================== */
+    /* ========================================================
+       64 — SEND MESSAGE TO APP
+       ======================================================== */
 
     async function sendMessage(
         appId,
@@ -8037,9 +8166,12 @@
                 appId
             );
 
+
         if (!app) {
+
             return false;
         }
+
 
         try {
 
@@ -8067,7 +8199,6 @@
 
                     })
                 );
-
             }
 
 
@@ -8082,11 +8213,11 @@
                         payload
                     )
                 );
-
             }
 
 
             return false;
+
 
         } catch (
             exception
@@ -8098,16 +8229,15 @@
                 appId
             );
 
+
             return false;
-
         }
-
     }
 
 
-/* ========================================================
-   65 — BROADCAST TO OPEN APPS
-   ======================================================== */
+    /* ========================================================
+       65 — BROADCAST TO OPEN APPS
+       ======================================================== */
 
     async function broadcastToOpenApps(
         message,
@@ -8117,7 +8247,9 @@
         const openApps =
             getOpenApps();
 
+
         const results = [];
+
 
         for (
             const item of openApps
@@ -8132,6 +8264,7 @@
                         payload
                     );
 
+
                 results.push(
                     {
 
@@ -8143,6 +8276,7 @@
                     }
                 );
 
+
             } catch (
                 exception
             ) {
@@ -8151,6 +8285,7 @@
                     exception,
                     "Broadcast Open Apps"
                 );
+
 
                 results.push(
                     {
@@ -8166,21 +8301,17 @@
 
                     }
                 );
-
             }
-
         }
 
+
         return results;
-
     }
+           /* ========================================================
+       66 — BROADCAST ALL APPS
+       ======================================================== */
 
-
-/* ========================================================
-   66 — BROADCAST TO ALL APPS
-   ======================================================== */
-
-    async function broadcastToAllApps(
+    async function broadcastAll(
         message,
         payload = {}
     ) {
@@ -8188,7 +8319,9 @@
         const apps =
             list();
 
+
         const results = [];
+
 
         for (
             const app of apps
@@ -8203,6 +8336,7 @@
                         payload
                     );
 
+
                 results.push(
                     {
 
@@ -8213,6 +8347,7 @@
                     }
                 );
 
+
             } catch (
                 exception
             ) {
@@ -8221,6 +8356,7 @@
                     exception,
                     "Broadcast All Apps"
                 );
+
 
                 results.push(
                     {
@@ -8235,19 +8371,17 @@
 
                     }
                 );
-
             }
-
         }
 
-        return results;
 
+        return results;
     }
 
 
-/* ========================================================
-   67 — APP LIFECYCLE HOOK
-   ======================================================== */
+    /* ========================================================
+       67 — APP LIFECYCLE HOOK
+       ======================================================== */
 
     async function lifecycle(
         appId,
@@ -8260,9 +8394,12 @@
                 appId
             );
 
+
         if (!app) {
+
             return false;
         }
+
 
         const hookName =
             String(
@@ -8271,14 +8408,18 @@
             )
                 .trim();
 
+
         if (!hookName) {
+
             return false;
         }
+
 
         const fn =
             app[
                 hookName
             ];
+
 
         if (
             typeof fn !==
@@ -8286,8 +8427,8 @@
         ) {
 
             return false;
-
         }
+
 
         try {
 
@@ -8317,6 +8458,7 @@
                 )
             );
 
+
         } catch (
             exception
         ) {
@@ -8329,16 +8471,15 @@
                 hookName
             );
 
+
             return false;
-
         }
-
     }
 
 
-/* ========================================================
-   68 — APP VISIBILITY
-   ======================================================== */
+    /* ========================================================
+       68 — APP VISIBILITY
+       ======================================================== */
 
     async function setVisible(
         appId,
@@ -8350,27 +8491,34 @@
                 appId
             );
 
+
         if (!app) {
+
             return false;
         }
+
 
         const id =
             normalizeId(
                 app.id
             );
 
+
         const value =
             visible === true;
+
 
         try {
 
             const manager =
                 getWindowManager();
 
+
             const appState =
                 getAppState(
                     id
                 );
+
 
             if (
                 manager &&
@@ -8418,9 +8566,7 @@
                             appState.windowId
                         )
                     );
-
                 }
-
             }
 
 
@@ -8447,7 +8593,6 @@
 
                     })
                 );
-
             }
 
 
@@ -8477,6 +8622,7 @@
 
             return true;
 
+
         } catch (
             exception
         ) {
@@ -8487,16 +8633,15 @@
                 id
             );
 
+
             return false;
-
         }
-
     }
 
 
-/* ========================================================
-   69 — FOCUS APP
-   ======================================================== */
+    /* ========================================================
+       69 — FOCUS APP
+       ======================================================== */
 
     async function focus(
         appId
@@ -8507,14 +8652,18 @@
                 appId
             );
 
+
         if (!app) {
+
             return false;
         }
+
 
         const id =
             normalizeId(
                 app.id
             );
+
 
         try {
 
@@ -8523,8 +8672,10 @@
                     id
                 );
 
+
             const manager =
                 getWindowManager();
+
 
             if (
                 manager &&
@@ -8569,9 +8720,7 @@
                             id
                         )
                     );
-
                 }
-
             }
 
 
@@ -8579,7 +8728,9 @@
                 id
             );
 
+
             return true;
+
 
         } catch (
             exception
@@ -8591,16 +8742,15 @@
                 id
             );
 
+
             return false;
-
         }
-
     }
 
 
-/* ========================================================
-   70 — APP WINDOW
-   ======================================================== */
+    /* ========================================================
+       70 — APP WINDOW
+       ======================================================== */
 
     function getWindow(
         appId
@@ -8611,21 +8761,25 @@
                 appId
             );
 
+
         if (
             !appState ||
             !appState.windowId
         ) {
 
             return null;
-
         }
+
 
         const manager =
             getWindowManager();
 
+
         if (!manager) {
+
             return null;
         }
+
 
         try {
 
@@ -8639,21 +8793,22 @@
                 return manager.getWindow(
                     appState.windowId
                 );
-
             }
+
 
             if (
-                hasMethod(
-                    manager,
-                    "get"
-                )
+                manager.windows instanceof
+                Map
             ) {
 
-                return manager.get(
+                return manager.windows.get(
                     appState.windowId
-                );
-
+                ) || null;
             }
+
+
+            return null;
+
 
         } catch (
             exception
@@ -8664,26 +8819,13 @@
                 "Get App Window"
             );
 
+
+            return null;
         }
-
-        return {
-
-            id:
-                appState.windowId,
-
-            appId:
-                normalizeId(
-                    appId
-                )
-
-        };
-
     }
-
-
-/* ========================================================
-   71 — UPDATE WINDOW
-   ======================================================== */
+           /* ========================================================
+       71 — UPDATE WINDOW
+       ======================================================== */
 
     async function updateWindow(
         appId,
@@ -8695,29 +8837,36 @@
                 appId
             );
 
+
         if (!app) {
+
             return false;
         }
+
 
         const appState =
             getAppState(
                 app.id
             );
 
+
         if (
             !appState.windowId
         ) {
 
             return false;
-
         }
+
 
         const manager =
             getWindowManager();
 
+
         if (!manager) {
+
             return false;
         }
+
 
         try {
 
@@ -8752,8 +8901,8 @@
             } else {
 
                 return false;
-
             }
+
 
             emit(
                 "app-window-updated",
@@ -8769,7 +8918,24 @@
                 }
             );
 
+
+            dispatch(
+                "haldo:app-window-updated",
+                {
+
+                    app,
+
+                    windowId:
+                        appState.windowId,
+
+                    changes
+
+                }
+            );
+
+
             return true;
+
 
         } catch (
             exception
@@ -8780,16 +8946,15 @@
                 "Update App Window"
             );
 
+
             return false;
-
         }
-
     }
 
 
-/* ========================================================
-   72 — WINDOW STATE SYNC
-   ======================================================== */
+    /* ========================================================
+       72 — WINDOW STATE SYNC
+       ======================================================== */
 
     function syncWindowState(
         appId,
@@ -8801,9 +8966,18 @@
                 appId
             );
 
+
         if (!id) {
+
             return false;
         }
+
+
+        const current =
+            getAppState(
+                id
+            );
+
 
         updateAppState(
             id,
@@ -8832,30 +9006,53 @@
                 windowId:
                     windowState.id ||
                     windowState.windowId ||
-                    getAppState(
-                        id
-                    ).windowId
+                    current.windowId
 
             }
         );
 
-        return true;
 
+        emit(
+            "app-window-state-synced",
+            {
+
+                appId:
+                    id,
+
+                windowState:
+
+                    {
+                        ...windowState
+                    }
+
+            }
+        );
+
+
+        dispatch(
+            "haldo:app-window-state-synced",
+            {
+
+                appId:
+                    id,
+
+                windowState:
+
+                    {
+                        ...windowState
+                    }
+
+            }
+        );
+
+
+        return true;
     }
 
 
-/* ========================================================
-   ENDE TEIL 5
-   ======================================================== */
-  /* ============================================================
-   TEIL 6 / KOMPLETTE DATEI — js/app-manager.js
-   DIREKT NACH TEIL 5
-   ============================================================ */
-
-
-/* ========================================================
-   73 — APP DATA
-   ======================================================== */
+    /* ========================================================
+       73 — APP DATA
+       ======================================================== */
 
     function getAppData(
         appId
@@ -8866,32 +9063,38 @@
                 appId
             );
 
+
         if (!app) {
+
             return null;
         }
+
 
         const id =
             normalizeId(
                 app.id
             );
 
+
         const data =
             state.data &&
             state.data.get
-                ? state.data.get(id)
+                ? state.data.get(
+                    id
+                )
                 : null;
+
 
         return (
             data ||
             {}
         );
-
     }
 
 
-/* ========================================================
-   74 — SET APP DATA
-   ======================================================== */
+    /* ========================================================
+       74 — SET APP DATA
+       ======================================================== */
 
     function setAppData(
         appId,
@@ -8903,9 +9106,12 @@
                 appId
             );
 
+
         if (!id) {
+
             return false;
         }
+
 
         if (
             !state.data ||
@@ -8915,12 +9121,15 @@
 
             state.data =
                 new Map();
-
         }
 
+
         const previous =
-            state.data.get(id) ||
+            state.data.get(
+                id
+            ) ||
             {};
+
 
         const next =
             {
@@ -8928,7 +9137,9 @@
                 ...previous,
 
                 ...(
-                    isObject(data)
+                    isObject(
+                        data
+                    )
                         ? data
                         : {}
                 ),
@@ -8938,10 +9149,12 @@
 
             };
 
+
         state.data.set(
             id,
             next
         );
+
 
         emit(
             "app-data-changed",
@@ -8958,14 +9171,30 @@
             }
         );
 
-        return next;
 
+        dispatch(
+            "haldo:app-data-changed",
+            {
+
+                appId:
+                    id,
+
+                data:
+                    next,
+
+                previous
+
+            }
+        );
+
+
+        return next;
     }
 
 
-/* ========================================================
-   75 — DELETE APP DATA
-   ======================================================== */
+    /* ========================================================
+       75 — CLEAR APP DATA
+       ======================================================== */
 
     function clearAppData(
         appId
@@ -8976,9 +9205,12 @@
                 appId
             );
 
+
         if (!id) {
+
             return false;
         }
+
 
         if (
             !state.data ||
@@ -8987,13 +9219,14 @@
         ) {
 
             return true;
-
         }
+
 
         const result =
             state.data.delete(
                 id
             );
+
 
         emit(
             "app-data-cleared",
@@ -9005,14 +9238,23 @@
             }
         );
 
+
+        dispatch(
+            "haldo:app-data-cleared",
+            {
+
+                appId:
+                    id
+
+            }
+        );
+
+
         return result;
-
     }
-
-
-/* ========================================================
-   76 — APP PERMISSIONS
-   ======================================================== */
+           /* ========================================================
+       76 — APP PERMISSIONS
+       ======================================================== */
 
     function getPermissions(
         appId
@@ -9036,7 +9278,6 @@
             return [
                 ...app.permissions
             ];
-
         }
 
         if (
@@ -9052,17 +9293,15 @@
                     app.permissions[key] !==
                     false
             );
-
         }
 
         return [];
-
     }
 
 
-/* ========================================================
-   77 — CHECK PERMISSION
-   ======================================================== */
+    /* ========================================================
+       77 — CHECK PERMISSION
+       ======================================================== */
 
     function hasPermission(
         appId,
@@ -9093,13 +9332,12 @@
                         .toLowerCase() ===
                     value
             );
-
     }
 
 
-/* ========================================================
-   78 — GRANT PERMISSION
-   ======================================================== */
+    /* ========================================================
+       78 — GRANT PERMISSION
+       ======================================================== */
 
     function grantPermission(
         appId,
@@ -9134,7 +9372,6 @@
 
             app.permissions =
                 [];
-
         }
 
         if (
@@ -9146,7 +9383,6 @@
             app.permissions.push(
                 value
             );
-
         }
 
         emit(
@@ -9162,13 +9398,12 @@
         );
 
         return true;
-
     }
 
 
-/* ========================================================
-   79 — REVOKE PERMISSION
-   ======================================================== */
+    /* ========================================================
+       79 — REVOKE PERMISSION
+       ======================================================== */
 
     function revokePermission(
         appId,
@@ -9203,7 +9438,6 @@
         ) {
 
             return false;
-
         }
 
         const before =
@@ -9237,17 +9471,15 @@
 
                 }
             );
-
         }
 
         return changed;
-
     }
 
 
-/* ========================================================
-   80 — APP DEPENDENCIES
-   ======================================================== */
+    /* ========================================================
+       80 — APP DEPENDENCIES
+       ======================================================== */
 
     function getDependencies(
         appId
@@ -9271,7 +9503,6 @@
             return [
                 ...app.dependencies
             ];
-
         }
 
         if (
@@ -9283,17 +9514,15 @@
             return Object.keys(
                 app.dependencies
             );
-
         }
 
         return [];
-
     }
 
 
-/* ========================================================
-   81 — DEPENDENCY STATUS
-   ======================================================== */
+    /* ========================================================
+       81 — DEPENDENCY STATUS
+       ======================================================== */
 
     function getDependencyStatus(
         appId
@@ -9322,7 +9551,6 @@
                     []
 
             };
-
         }
 
         const dependencies =
@@ -9371,9 +9599,7 @@
                 missing.push(
                     dependencyId
                 );
-
             }
-
         }
 
         return {
@@ -9389,13 +9615,12 @@
             dependencies
 
         };
-
     }
 
 
-/* ========================================================
-   82 — ENSURE DEPENDENCIES
-   ======================================================== */
+    /* ========================================================
+       82 — ENSURE DEPENDENCIES
+       ======================================================== */
 
     async function ensureDependencies(
         appId,
@@ -9422,7 +9647,6 @@
         ) {
 
             return true;
-
         }
 
         for (
@@ -9460,7 +9684,6 @@
                 );
 
                 return false;
-
             }
 
             const dependencyState =
@@ -9474,7 +9697,6 @@
             ) {
 
                 continue;
-
             }
 
             if (
@@ -9497,19 +9719,14 @@
                 if (!started) {
                     return false;
                 }
-
             }
-
         }
 
         return true;
-
     }
-
-
-/* ========================================================
-   83 — APP READY
-   ======================================================== */
+           /* ========================================================
+       83 — APP READY
+       ======================================================== */
 
     function isReady(
         appId
@@ -9520,26 +9737,29 @@
                 appId
             );
 
+
         if (!id) {
+
             return false;
         }
+
 
         const appState =
             getAppState(
                 id
             );
 
+
         return (
             appState.ready ===
             true
         );
-
     }
 
 
-/* ========================================================
-   84 — WAIT UNTIL READY
-   ======================================================== */
+    /* ========================================================
+       84 — WAIT UNTIL READY
+       ======================================================== */
 
     async function waitUntilReady(
         appId,
@@ -9552,14 +9772,17 @@
                 10000
             );
 
+
         const interval =
             Number(
                 options.interval ||
                 50
             );
 
+
         const startedAt =
             now();
+
 
         while (
             now() -
@@ -9574,8 +9797,8 @@
             ) {
 
                 return true;
-
             }
+
 
             await new Promise(
                 resolve =>
@@ -9584,19 +9807,18 @@
                         interval
                     )
             );
-
         }
+
 
         return isReady(
             appId
         );
-
     }
 
 
-/* ========================================================
-   85 — APP ENABLE
-   ======================================================== */
+    /* ========================================================
+       85 — APP ENABLE
+       ======================================================== */
 
     function enable(
         appId
@@ -9607,12 +9829,16 @@
                 appId
             );
 
+
         if (!app) {
+
             return false;
         }
 
+
         app.enabled =
             true;
+
 
         updateAppState(
             app.id,
@@ -9624,6 +9850,7 @@
             }
         );
 
+
         emit(
             "app-enabled",
             {
@@ -9633,14 +9860,24 @@
             }
         );
 
-        return true;
 
+        dispatch(
+            "haldo:app-enabled",
+            {
+
+                app
+
+            }
+        );
+
+
+        return true;
     }
 
 
-/* ========================================================
-   86 — APP DISABLE
-   ======================================================== */
+    /* ========================================================
+       86 — APP DISABLE
+       ======================================================== */
 
     async function disable(
         appId,
@@ -9652,9 +9889,12 @@
                 appId
             );
 
+
         if (!app) {
+
             return false;
         }
+
 
         try {
 
@@ -9668,11 +9908,12 @@
                     app.id,
                     options
                 );
-
             }
+
 
             app.enabled =
                 false;
+
 
             updateAppState(
                 app.id,
@@ -9696,6 +9937,7 @@
                 }
             );
 
+
             emit(
                 "app-disabled",
                 {
@@ -9705,7 +9947,19 @@
                 }
             );
 
+
+            dispatch(
+                "haldo:app-disabled",
+                {
+
+                    app
+
+                }
+            );
+
+
             return true;
+
 
         } catch (
             exception
@@ -9716,16 +9970,15 @@
                 "App Disable"
             );
 
+
             return false;
-
         }
-
     }
 
 
-/* ========================================================
-   87 — APP INSTALL HOOK
-   ======================================================== */
+    /* ========================================================
+       87 — APP INSTALL HOOK
+       ======================================================== */
 
     async function install(
         app,
@@ -9733,8 +9986,10 @@
     ) {
 
         if (!app) {
+
             return false;
         }
+
 
         try {
 
@@ -9755,17 +10010,20 @@
 
                     })
                 );
-
             }
+
 
             const registered =
                 register(
                     app
                 );
 
+
             if (!registered) {
+
                 return false;
             }
+
 
             emit(
                 "app-installed",
@@ -9778,6 +10036,7 @@
                 }
             );
 
+
             dispatch(
                 "haldo:app-installed",
                 {
@@ -9789,7 +10048,9 @@
                 }
             );
 
+
             return true;
+
 
         } catch (
             exception
@@ -9800,16 +10061,15 @@
                 "App Installation"
             );
 
+
             return false;
-
         }
-
     }
 
 
-/* ========================================================
-   88 — APP UNINSTALL
-   ======================================================== */
+    /* ========================================================
+       88 — APP UNINSTALL
+       ======================================================== */
 
     async function uninstall(
         appId,
@@ -9821,14 +10081,18 @@
                 appId
             );
 
+
         if (!app) {
+
             return false;
         }
+
 
         const id =
             normalizeId(
                 app.id
             );
+
 
         try {
 
@@ -9836,6 +10100,7 @@
                 id,
                 options
             );
+
 
             if (
                 typeof app.uninstall ===
@@ -9854,13 +10119,14 @@
 
                     })
                 );
-
             }
+
 
             const removed =
                 unregister(
                     id
                 );
+
 
             emit(
                 "app-uninstalled",
@@ -9868,10 +10134,13 @@
 
                     app,
 
-                    options
+                    options,
+
+                    removed
 
                 }
             );
+
 
             dispatch(
                 "haldo:app-uninstalled",
@@ -9879,15 +10148,16 @@
 
                     app,
 
-                    options
+                    options,
+
+                    removed
 
                 }
             );
 
-            return (
-                removed !==
-                false
-            );
+
+            return removed;
+
 
         } catch (
             exception
@@ -9895,19 +10165,16 @@
 
             reportError(
                 exception,
-                "App Deinstallation"
+                "App Uninstall"
             );
 
+
             return false;
-
         }
-
     }
-
-
-/* ========================================================
-   89 — APP EXPORT
-   ======================================================== */
+           /* ========================================================
+       89 — APP EXPORT
+       ======================================================== */
 
     function exportApp(
         appId
@@ -9919,6 +10186,7 @@
             );
 
         if (!app) {
+
             return null;
         }
 
@@ -9935,13 +10203,12 @@
                 now()
 
         };
-
     }
 
 
-/* ========================================================
-   90 — APP IMPORT
-   ======================================================== */
+    /* ========================================================
+       90 — APP IMPORT
+       ======================================================== */
 
     function importApp(
         definition,
@@ -9956,14 +10223,11 @@
         ) {
 
             return false;
-
         }
 
         const app =
             {
-
                 ...definition
-
             };
 
         if (
@@ -9973,10 +10237,10 @@
 
             app.id =
                 app.appId;
-
         }
 
         if (!app.id) {
+
             return false;
         }
 
@@ -9990,28 +10254,17 @@
                     "-" +
                     Date.now()
                 );
-
         }
 
         return register(
             app
         );
-
     }
 
 
-/* ========================================================
-   ENDE TEIL 6
-   ======================================================== */
-   /* ============================================================
-   TEIL 7 / KOMPLETTE DATEI — js/app-manager.js
-   DIREKT NACH TEIL 6
-   ============================================================ */
-
-
-/* ========================================================
-   91 — APP RELOAD
-   ======================================================== */
+    /* ========================================================
+       91 — APP RELOAD
+       ======================================================== */
 
     async function reload(
         appId,
@@ -10024,6 +10277,7 @@
             );
 
         if (!app) {
+
             return false;
         }
 
@@ -10046,25 +10300,29 @@
                     id,
                     {
                         ...options,
+
                         reload:
                             true
                     }
                 );
-
             }
+
 
             await destroy(
                 id,
                 {
                     ...options,
+
                     reload:
                         true
                 }
             );
 
+
             resetAppState(
                 id
             );
+
 
             const initialized =
                 await initializeApp(
@@ -10072,8 +10330,10 @@
                 );
 
             if (!initialized) {
+
                 return false;
             }
+
 
             if (
                 options.start !==
@@ -10085,16 +10345,18 @@
                         app,
                         {
                             ...options,
+
                             reload:
                                 true
                         }
                     );
 
                 if (!started) {
+
                     return false;
                 }
-
             }
+
 
             if (
                 wasOpen &&
@@ -10107,14 +10369,15 @@
                         id,
                         {
                             ...options,
+
                             reload:
                                 true
                         }
                     );
 
                 return !!opened;
-
             }
+
 
             emit(
                 "app-reloaded",
@@ -10132,7 +10395,9 @@
                 }
             );
 
+
             return true;
+
 
         } catch (
             exception
@@ -10144,165 +10409,13 @@
                 id
             );
 
+
             return false;
-
         }
-
     }
-
-
-/* ========================================================
-   92 — APP REFRESH
-   ======================================================== */
-
-    async function refresh(
-        appId,
-        options = {}
-    ) {
-
-        const app =
-            get(
-                appId
-            );
-
-        if (!app) {
-            return false;
-        }
-
-        const id =
-            normalizeId(
-                app.id
-            );
-
-        try {
-
-            if (
-                typeof app.refresh ===
-                "function"
-            ) {
-
-                await safeAsyncResult(
-                    app.refresh({
-
-                        app,
-
-                        manager:
-                            api,
-
-                        context:
-                            getContext(
-                                id
-                            ),
-
-                        state:
-                            getAppState(
-                                id
-                            ),
-
-                        options
-
-                    })
-                );
-
-            } else if (
-                typeof app.update ===
-                "function"
-            ) {
-
-                await safeAsyncResult(
-                    app.update({
-
-                        app,
-
-                        manager:
-                            api,
-
-                        context:
-                            getContext(
-                                id
-                            ),
-
-                        state:
-                            getAppState(
-                                id
-                            ),
-
-                        options
-
-                    })
-                );
-
-            }
-
-            const window =
-                getWindow(
-                    id
-                );
-
-            if (
-                window &&
-                options.window !==
-                false
-            ) {
-
-                await updateWindow(
-                    id,
-                    options.window || {}
-                );
-
-            }
-
-            updateAppState(
-                id,
-                {
-
-                    updatedAt:
-                        now(),
-
-                    lastRefresh:
-                        now()
-
-                }
-            );
-
-            emit(
-                "app-refreshed",
-                {
-
-                    app,
-
-                    options,
-
-                    state:
-                        getAppState(
-                            id
-                        )
-
-                }
-            );
-
-            return true;
-
-        } catch (
-            exception
-        ) {
-
-            reportError(
-                exception,
-                "App Refresh: " +
-                id
-            );
-
-            return false;
-
-        }
-
-    }
-
-
-/* ========================================================
-   93 — APP UPDATE
-   ======================================================== */
+           /* ========================================================
+       93 — APP UPDATE
+       ======================================================== */
 
     async function updateApp(
         appId,
@@ -10316,6 +10429,7 @@
             );
 
         if (!app) {
+
             return false;
         }
 
@@ -10334,12 +10448,10 @@
             if (
                 typeof changes !==
                 "object" ||
-                changes ===
-                null
+                changes === null
             ) {
 
                 return false;
-
             }
 
             Object.assign(
@@ -10376,7 +10488,6 @@
 
                     })
                 );
-
             }
 
             updateAppState(
@@ -10447,15 +10558,13 @@
             );
 
             return false;
-
         }
-
     }
 
 
-/* ========================================================
-   94 — APP REPLACE
-   ======================================================== */
+    /* ========================================================
+       94 — APP REPLACE
+       ======================================================== */
 
     async function replace(
         appId,
@@ -10474,7 +10583,6 @@
                 definition,
                 options
             );
-
         }
 
         const id =
@@ -10496,19 +10604,22 @@
                     id,
                     {
                         ...options,
+
                         replace:
                             true
+
                     }
                 );
-
             }
 
             await destroy(
                 id,
                 {
                     ...options,
+
                     replace:
                         true
+
                 }
             );
 
@@ -10523,17 +10634,18 @@
             ) {
 
                 return false;
-
             }
 
             const nextApp =
                 {
 
-                    ...(isObject(
-                        definition
-                    )
-                        ? definition
-                        : {}),
+                    ...(
+                        isObject(
+                            definition
+                        )
+                            ? definition
+                            : {}
+                    ),
 
                     id
 
@@ -10545,6 +10657,7 @@
                 );
 
             if (!registered) {
+
                 return false;
             }
 
@@ -10559,9 +10672,9 @@
                     );
 
                 if (!initialized) {
+
                     return false;
                 }
-
             }
 
             if (
@@ -10576,9 +10689,9 @@
                     );
 
                 if (!started) {
+
                     return false;
                 }
-
             }
 
             if (
@@ -10594,7 +10707,6 @@
                     );
 
                 return !!opened;
-
             }
 
             emit(
@@ -10625,17 +10737,15 @@
             );
 
             return false;
-
         }
-
     }
 
 
-/* ========================================================
-   95 — APP CLONE
-   ======================================================== */
+    /* ========================================================
+       95 — APP CLONE
+       ======================================================== */
 
-    function clone(
+    function cloneApp(
         appId,
         options = {}
     ) {
@@ -10646,6 +10756,7 @@
             );
 
         if (!app) {
+
             return null;
         }
 
@@ -10665,7 +10776,7 @@
             );
 
         const copy =
-            cloneValue(
+            clone(
                 app
             );
 
@@ -10678,7 +10789,6 @@
 
             copy.name =
                 options.name;
-
         }
 
         if (
@@ -10687,7 +10797,6 @@
 
             copy.title =
                 options.title;
-
         }
 
         copy.enabled =
@@ -10698,13 +10807,12 @@
                     false;
 
         return copy;
-
     }
 
 
-/* ========================================================
-   96 — REGISTER CLONED APP
-   ======================================================== */
+    /* ========================================================
+       96 — REGISTER CLONED APP
+       ======================================================== */
 
     function cloneAndRegister(
         appId,
@@ -10712,12 +10820,13 @@
     ) {
 
         const copy =
-            clone(
+            cloneApp(
                 appId,
                 options
             );
 
         if (!copy) {
+
             return null;
         }
 
@@ -10727,6 +10836,7 @@
             );
 
         if (!registered) {
+
             return null;
         }
 
@@ -10748,13 +10858,12 @@
         );
 
         return copy;
-
     }
 
 
-/* ========================================================
-   97 — APP CONFIGURATION
-   ======================================================== */
+    /* ========================================================
+       97 — APP CONFIGURATION
+       ======================================================== */
 
     function configure(
         appId,
@@ -10767,6 +10876,7 @@
             );
 
         if (!app) {
+
             return false;
         }
 
@@ -10782,7 +10892,6 @@
         ) {
 
             return false;
-
         }
 
         if (
@@ -10793,7 +10902,6 @@
 
             app.configuration =
                 {};
-
         }
 
         const previous =
@@ -10806,41 +10914,45 @@
             configuration
         );
 
-        updateAppState(
-            id,
-            {
-
-                configuration:
-                    app.configuration,
-
-                updatedAt:
-                    now()
-
-            }
-        );
-
         emit(
             "app-configured",
             {
 
                 app,
 
-                previous,
+                appId:
+                    id,
 
                 configuration:
-                    app.configuration
+                    app.configuration,
+
+                previous
+
+            }
+        );
+
+        dispatch(
+            "haldo:app-configured",
+            {
+
+                app,
+
+                appId:
+                    id,
+
+                configuration:
+                    app.configuration,
+
+                previous
 
             }
         );
 
         return true;
-
     }
-
-
-/* ========================================================
-   98 — GET CONFIGURATION
-   ======================================================== */
+           /* ========================================================
+       98 — GET CONFIGURATION
+       ======================================================== */
 
     function getConfiguration(
         appId
@@ -10852,6 +10964,7 @@
             );
 
         if (!app) {
+
             return {};
         }
 
@@ -10864,13 +10977,12 @@
                 : {})
 
         };
-
     }
 
 
-/* ========================================================
-   99 — SET FEATURE
-   ======================================================== */
+    /* ========================================================
+       99 — SET FEATURE
+       ======================================================== */
 
     function setFeature(
         appId,
@@ -10884,6 +10996,7 @@
             );
 
         if (!app) {
+
             return false;
         }
 
@@ -10895,6 +11008,7 @@
                 .trim();
 
         if (!name) {
+
             return false;
         }
 
@@ -10906,7 +11020,6 @@
 
             app.features =
                 {};
-
         }
 
         app.features[name] =
@@ -10929,13 +11042,12 @@
         );
 
         return true;
-
     }
 
 
-/* ========================================================
-   100 — HAS FEATURE
-   ======================================================== */
+    /* ========================================================
+       100 — HAS FEATURE
+       ======================================================== */
 
     function hasFeature(
         appId,
@@ -10948,6 +11060,7 @@
             );
 
         if (!app) {
+
             return false;
         }
 
@@ -10959,6 +11072,7 @@
                 .trim();
 
         if (!name) {
+
             return false;
         }
 
@@ -10967,13 +11081,12 @@
             app.features[name] ===
             true
         );
-
     }
 
 
-/* ========================================================
-   101 — GET FEATURES
-   ======================================================== */
+    /* ========================================================
+       101 — GET FEATURES
+       ======================================================== */
 
     function getFeatures(
         appId
@@ -10985,8 +11098,8 @@
             );
 
         if (!app) {
-            return {};
 
+            return {};
         }
 
         return {
@@ -10998,13 +11111,12 @@
                 : {})
 
         };
-
     }
 
 
-/* ========================================================
-   102 — APP CATEGORY
-   ======================================================== */
+    /* ========================================================
+       102 — APP CATEGORY
+       ======================================================== */
 
     function getCategory(
         appId
@@ -11016,6 +11128,7 @@
             );
 
         if (!app) {
+
             return null;
         }
 
@@ -11024,13 +11137,12 @@
             app.type ||
             "application"
         );
-
     }
 
 
-/* ========================================================
-   103 — APPS BY CATEGORY
-   ======================================================== */
+    /* ========================================================
+       103 — APPS BY CATEGORY
+       ======================================================== */
 
     function getByCategory(
         category
@@ -11045,6 +11157,7 @@
                 .toLowerCase();
 
         if (!value) {
+
             return [];
         }
 
@@ -11059,13 +11172,12 @@
                     .toLowerCase() ===
                 value
         );
-
     }
 
 
-/* ========================================================
-   104 — APPS BY CAPABILITY
-   ======================================================== */
+    /* ========================================================
+       104 — APPS BY CAPABILITY
+       ======================================================== */
 
     function getByCapability(
         capability
@@ -11080,6 +11192,7 @@
                 .toLowerCase();
 
         if (!value) {
+
             return [];
         }
 
@@ -11098,13 +11211,12 @@
                             value
                     )
         );
-
     }
 
 
-/* ========================================================
-   105 — APPS BY PERMISSION
-   ======================================================== */
+    /* ========================================================
+       105 — APPS BY PERMISSION
+       ======================================================== */
 
     function getByPermission(
         permission
@@ -11119,6 +11231,7 @@
                 .toLowerCase();
 
         if (!value) {
+
             return [];
         }
 
@@ -11137,22 +11250,10 @@
                             value
                     )
         );
-
     }
-
-
-/* ========================================================
-   ENDE TEIL 7
-   ======================================================== */
- /* ============================================================
-   TEIL 8 / KOMPLETTE DATEI — js/app-manager.js
-   DIREKT NACH TEIL 7
-   ============================================================ */
-
-
-/* ========================================================
-   106 — APP SEARCH
-   ======================================================== */
+           /* ========================================================
+       106 — APP SEARCH
+       ======================================================== */
 
     function search(
         query,
@@ -11180,7 +11281,6 @@
                     )
                 )
                 : apps;
-
         }
 
         const results =
@@ -11226,6 +11326,7 @@
                             )
                                 .toLowerCase();
 
+
                         if (
                             id === value
                         ) {
@@ -11241,8 +11342,8 @@
 
                             score +=
                                 500;
-
                         }
+
 
                         if (
                             name === value
@@ -11259,8 +11360,8 @@
 
                             score +=
                                 450;
-
                         }
+
 
                         if (
                             title === value
@@ -11277,8 +11378,8 @@
 
                             score +=
                                 400;
-
                         }
+
 
                         if (
                             description.includes(
@@ -11288,8 +11389,8 @@
 
                             score +=
                                 100;
-
                         }
+
 
                         if (
                             category.includes(
@@ -11299,8 +11400,8 @@
 
                             score +=
                                 150;
-
                         }
+
 
                         const keywords =
                             Array.isArray(
@@ -11308,6 +11409,7 @@
                             )
                                 ? app.keywords
                                 : [];
+
 
                         for (
                             const keyword of
@@ -11326,10 +11428,9 @@
 
                                 score +=
                                     200;
-
                             }
-
                         }
+
 
                         return {
 
@@ -11338,7 +11439,6 @@
                             score
 
                         };
-
                     }
                 )
                 .filter(
@@ -11355,11 +11455,13 @@
                         a.score
                 );
 
+
         const limit =
             Number(
                 options.limit ||
                 0
             );
+
 
         return limit > 0
             ? results
@@ -11375,13 +11477,12 @@
                 item =>
                     item.app
             );
-
     }
 
 
-/* ========================================================
-   107 — APP SORT
-   ======================================================== */
+    /* ========================================================
+       107 — APP SORT
+       ======================================================== */
 
     function sortApps(
         apps,
@@ -11398,6 +11499,7 @@
                 ]
                 : list();
 
+
         const factor =
             String(
                 direction
@@ -11406,6 +11508,7 @@
             "desc"
                 ? -1
                 : 1;
+
 
         return source.sort(
             (
@@ -11420,12 +11523,14 @@
                     )
                         .toLowerCase();
 
+
                 const right =
                     String(
                         b?.[field] ??
                         ""
                     )
                         .toLowerCase();
+
 
                 if (
                     left <
@@ -11434,8 +11539,8 @@
 
                     return -1 *
                         factor;
-
                 }
+
 
                 if (
                     left >
@@ -11444,20 +11549,18 @@
 
                     return 1 *
                         factor;
-
                 }
 
-                return 0;
 
+                return 0;
             }
         );
-
     }
 
 
-/* ========================================================
-   108 — APP GROUPS
-   ======================================================== */
+    /* ========================================================
+       108 — APP GROUPS
+       ======================================================== */
 
     function groupBy(
         field
@@ -11465,6 +11568,7 @@
 
         const groups =
             {};
+
 
         for (
             const app of list()
@@ -11478,29 +11582,29 @@
                     .trim() ||
                 "other";
 
+
             if (
                 !groups[key]
             ) {
 
                 groups[key] =
                     [];
-
             }
+
 
             groups[key].push(
                 app
             );
-
         }
 
-        return groups;
 
+        return groups;
     }
 
 
-/* ========================================================
-   109 — APP REGISTRY SYNC
-   ======================================================== */
+    /* ========================================================
+       109 — APP REGISTRY SYNC
+       ======================================================== */
 
     function syncRegistry(
         options = {}
@@ -11509,9 +11613,12 @@
         const registry =
             getRegistry();
 
+
         if (!registry) {
+
             return false;
         }
+
 
         try {
 
@@ -11520,17 +11627,19 @@
                     registry
                 );
 
+
             if (
                 registryApps.length ===
                 0
             ) {
 
                 return true;
-
             }
+
 
             let imported =
                 0;
+
 
             for (
                 const app of
@@ -11541,15 +11650,18 @@
                     continue;
                 }
 
+
                 const id =
                     normalizeId(
                         app.id ||
                         app.appId
                     );
 
+
                 if (!id) {
                     continue;
                 }
+
 
                 if (
                     state.apps.has(
@@ -11567,25 +11679,27 @@
                                 id
                             );
 
+
                         Object.assign(
                             existing,
                             app
                         );
-
                     }
 
-                    continue;
 
+                    continue;
                 }
+
 
                 register(
                     app
                 );
 
+
                 imported +=
                     1;
-
             }
+
 
             emit(
                 "app-registry-synced",
@@ -11599,7 +11713,9 @@
                 }
             );
 
+
             return true;
+
 
         } catch (
             exception
@@ -11610,30 +11726,33 @@
                 "App Registry Sync"
             );
 
+
             return false;
-
         }
-
     }
 
 
-/* ========================================================
-   110 — APP REGISTRY PUBLISH
-   ======================================================== */
+    /* ========================================================
+       110 — APP REGISTRY PUBLISH
+       ======================================================== */
 
     function publishRegistry() {
 
         const registry =
             getRegistry();
 
+
         if (!registry) {
+
             return false;
         }
+
 
         try {
 
             const apps =
                 list();
+
 
             if (
                 hasMethod(
@@ -11643,69 +11762,49 @@
             ) {
 
                 for (
-                    const app of
-                    apps
+                    const app of apps
                 ) {
 
-                    try {
-
-                        registry.register(
-                            app
-                        );
-
-                    } catch (
-                        exception
-                    ) {
-
-                        reportError(
-                            exception,
-                            "Registry Publish: " +
-                            app.id
-                        );
-
-                    }
-
+                    registry.register(
+                        app
+                    );
                 }
 
-                return true;
-
-            }
-
-            if (
+            } else if (
                 hasMethod(
                     registry,
-                    "registerApp"
+                    "add"
                 )
             ) {
 
                 for (
-                    const app of
-                    apps
+                    const app of apps
                 ) {
 
-                    try {
-
-                        registry.registerApp(
-                            app
-                        );
-
-                    } catch (
-                        exception
-                    ) {
-
-                        reportError(
-                            exception,
-                            "Registry Publish: " +
-                            app.id
-                        );
-
-                    }
-
+                    registry.add(
+                        app
+                    );
                 }
 
-                return true;
+            } else {
 
+                return false;
             }
+
+
+            emit(
+                "app-registry-published",
+                {
+
+                    count:
+                        apps.length
+
+                }
+            );
+
+
+            return true;
+
 
         } catch (
             exception
@@ -11716,16 +11815,13 @@
                 "App Registry Publish"
             );
 
+
+            return false;
         }
-
-        return false;
-
     }
-
-
-/* ========================================================
-   111 — APP MANAGER HEALTH
-   ======================================================== */
+           /* ========================================================
+       111 — APP MANAGER HEALTH
+       ======================================================== */
 
     function managerHealth() {
 
@@ -11791,13 +11887,12 @@
                 now()
 
         };
-
     }
 
 
-/* ========================================================
-   112 — APP MANAGER DIAGNOSTICS
-   ======================================================== */
+    /* ========================================================
+       112 — APP MANAGER DIAGNOSTICS
+       ======================================================== */
 
     function managerDiagnostics() {
 
@@ -11877,13 +11972,12 @@
                 !!getKeyboard()
 
         };
-
     }
 
 
-/* ========================================================
-   113 — APP MANAGER RESET
-   ======================================================== */
+    /* ========================================================
+       113 — APP MANAGER RESET
+       ======================================================== */
 
     async function reset(
         options = {}
@@ -11899,14 +11993,19 @@
                 await closeAll(
                     options
                 );
-
             }
 
+
             state.apps.clear();
+
             state.appState.clear();
+
             state.contexts.clear();
+
             state.instances.clear();
+
             state.settings.clear();
+
 
             if (
                 state.data &&
@@ -11915,14 +12014,16 @@
             ) {
 
                 state.data.clear();
-
             }
+
 
             state.activeAppId =
                 null;
 
+
             state.statistics =
                 createStatistics();
+
 
             emit(
                 "manager-reset",
@@ -11936,6 +12037,7 @@
                 }
             );
 
+
             dispatch(
                 "haldo:app-manager-reset",
                 {
@@ -11948,7 +12050,9 @@
                 }
             );
 
+
             return true;
+
 
         } catch (
             exception
@@ -11959,16 +12063,15 @@
                 "App Manager Reset"
             );
 
+
             return false;
-
         }
-
     }
 
 
-/* ========================================================
-   114 — APP MANAGER STARTUP
-   ======================================================== */
+    /* ========================================================
+       114 — APP MANAGER STARTUP
+       ======================================================== */
 
     async function initialize(
         options = {}
@@ -11979,8 +12082,8 @@
         ) {
 
             return true;
-
         }
+
 
         try {
 
@@ -11988,16 +12091,21 @@
                 options
             );
 
+
             publishRegistry();
+
 
             state.initialized =
                 true;
 
+
             state.started =
                 false;
 
+
             state.initializedAt =
                 now();
+
 
             emit(
                 "manager-initialized",
@@ -12011,7 +12119,9 @@
                 }
             );
 
+
             return true;
+
 
         } catch (
             exception
@@ -12022,16 +12132,15 @@
                 "App Manager Initialize"
             );
 
+
             return false;
-
         }
-
     }
 
 
-/* ========================================================
-   115 — APP MANAGER START
-   ======================================================== */
+    /* ========================================================
+       115 — APP MANAGER START
+       ======================================================== */
 
     async function start(
         options = {}
@@ -12042,17 +12151,20 @@
                 options
             );
 
+
         if (!ready) {
+
             return false;
         }
+
 
         if (
             state.started
         ) {
 
             return true;
-
         }
+
 
         try {
 
@@ -12064,34 +12176,40 @@
                 const apps =
                     list();
 
+
                 for (
                     const app of
                     apps
                 ) {
 
-                    if (
-                        app.enabled ===
-                        false
+                    try {
+
+                        await startApp(
+                            app,
+                            options
+                        );
+
+                    } catch (
+                        exception
                     ) {
 
-                        continue;
-
+                        reportError(
+                            exception,
+                            "Start Registered App: " +
+                            app.id
+                        );
                     }
-
-                    await startApp(
-                        app,
-                        options
-                    );
-
                 }
-
             }
+
 
             state.started =
                 true;
 
+
             state.startedAt =
                 now();
+
 
             emit(
                 "manager-started",
@@ -12105,16 +12223,22 @@
                 }
             );
 
+
             dispatch(
                 "haldo:app-manager-started",
                 {
 
-                    options
+                    options,
+
+                    statistics:
+                        getStatistics()
 
                 }
             );
 
+
             return true;
+
 
         } catch (
             exception
@@ -12125,16 +12249,13 @@
                 "App Manager Start"
             );
 
+
             return false;
-
         }
-
     }
-
-
-/* ========================================================
-   116 — APP MANAGER STOP
-   ======================================================== */
+           /* ========================================================
+       116 — APP MANAGER STOP
+       ======================================================== */
 
     async function stop(
         options = {}
@@ -12146,8 +12267,10 @@
                 options
             );
 
+
             state.started =
                 false;
+
 
             emit(
                 "manager-stopped",
@@ -12161,6 +12284,7 @@
                 }
             );
 
+
             dispatch(
                 "haldo:app-manager-stopped",
                 {
@@ -12170,7 +12294,9 @@
                 }
             );
 
+
             return true;
+
 
         } catch (
             exception
@@ -12181,25 +12307,15 @@
                 "App Manager Stop"
             );
 
+
             return false;
-
         }
-
     }
 
 
-/* ========================================================
-   ENDE TEIL 8
-   ======================================================== */
- /* ============================================================
-   TEIL 9 / KOMPLETTE DATEI — js/app-manager.js
-   DIREKT NACH TEIL 8
-   ============================================================ */
-
-
-/* ========================================================
-   117 — APP MANAGER READY
-   ======================================================== */
+    /* ========================================================
+       117 — APP MANAGER READY
+       ======================================================== */
 
     function isInitialized() {
 
@@ -12207,7 +12323,6 @@
             state.initialized ===
             true
         );
-
     }
 
 
@@ -12217,7 +12332,6 @@
             state.started ===
             true
         );
-
     }
 
 
@@ -12227,13 +12341,12 @@
             isInitialized() &&
             isStarted()
         );
-
     }
 
 
-/* ========================================================
-   118 — APP MANAGER STATE
-   ======================================================== */
+    /* ========================================================
+       118 — APP MANAGER STATE
+       ======================================================== */
 
     function getManagerState() {
 
@@ -12272,13 +12385,12 @@
                 now()
 
         };
-
     }
 
 
-/* ========================================================
-   119 — APP EVENT SUBSCRIPTION
-   ======================================================== */
+    /* ========================================================
+       119 — APP EVENT SUBSCRIPTION
+       ======================================================== */
 
     function subscribe(
         event,
@@ -12291,8 +12403,8 @@
         ) {
 
             return () => {};
-
         }
+
 
         const eventName =
             String(
@@ -12301,9 +12413,12 @@
             )
                 .trim();
 
+
         if (!eventName) {
+
             return () => {};
         }
+
 
         if (
             !state.listeners.has(
@@ -12315,23 +12430,26 @@
                 eventName,
                 new Set()
             );
-
         }
+
 
         const listeners =
             state.listeners.get(
                 eventName
             );
 
+
         listeners.add(
             callback
         );
+
 
         return () => {
 
             listeners.delete(
                 callback
             );
+
 
             if (
                 listeners.size ===
@@ -12341,17 +12459,14 @@
                 state.listeners.delete(
                     eventName
                 );
-
             }
-
         };
-
     }
 
 
-/* ========================================================
-   120 — APP EVENT EMITTER
-   ======================================================== */
+    /* ========================================================
+       120 — APP EVENT EMITTER
+       ======================================================== */
 
     function emitLocal(
         event,
@@ -12365,14 +12480,18 @@
             )
                 .trim();
 
+
         if (!eventName) {
+
             return false;
         }
+
 
         const listeners =
             state.listeners.get(
                 eventName
             );
+
 
         if (
             listeners &&
@@ -12392,6 +12511,7 @@
                         payload
                     );
 
+
                 } catch (
                     exception
                 ) {
@@ -12401,17 +12521,16 @@
                         "App Local Event: " +
                         eventName
                     );
-
                 }
-
             }
-
         }
+
 
         const wildcard =
             state.listeners.get(
                 "*"
             );
+
 
         if (
             wildcard &&
@@ -12432,6 +12551,7 @@
                         payload
                     );
 
+
                 } catch (
                     exception
                 ) {
@@ -12440,21 +12560,18 @@
                         exception,
                         "App Wildcard Event"
                     );
-
                 }
-
             }
-
         }
 
-        return true;
 
+        return true;
     }
 
 
-/* ========================================================
-   121 — APP COMMAND
-   ======================================================== */
+    /* ========================================================
+       121 — APP COMMAND
+       ======================================================== */
 
     async function command(
         appId,
@@ -12467,9 +12584,12 @@
                 appId
             );
 
+
         if (!app) {
+
             return null;
         }
+
 
         const name =
             String(
@@ -12478,48 +12598,14 @@
             )
                 .trim();
 
+
         if (!name) {
+
             return null;
         }
 
+
         try {
-
-            if (
-                app.commands &&
-                typeof app.commands[name] ===
-                "function"
-            ) {
-
-                return await safeAsyncResult(
-                    app.commands[name].call(
-                        app,
-                        {
-
-                            app,
-
-                            command:
-                                name,
-
-                            payload,
-
-                            manager:
-                                api,
-
-                            context:
-                                getContext(
-                                    app.id
-                                ),
-
-                            state:
-                                getAppState(
-                                    app.id
-                                )
-
-                        }
-                    )
-                );
-
-            }
 
             if (
                 typeof app.command ===
@@ -12542,17 +12628,29 @@
                         context:
                             getContext(
                                 app.id
-                            ),
-
-                        state:
-                            getAppState(
-                                app.id
                             )
 
                     })
                 );
-
             }
+
+
+            if (
+                app.commands &&
+                typeof app.commands[name] ===
+                "function"
+            ) {
+
+                return await safeAsyncResult(
+                    app.commands[name](
+                        payload
+                    )
+                );
+            }
+
+
+            return null;
+
 
         } catch (
             exception
@@ -12566,16 +12664,13 @@
                 name
             );
 
+
+            return null;
         }
-
-        return null;
-
     }
-
-
-/* ========================================================
-   122 — APP API CALL
-   ======================================================== */
+           /* ========================================================
+       122 — APP API CALL
+       ======================================================== */
 
     async function call(
         appId,
@@ -12588,9 +12683,12 @@
                 appId
             );
 
+
         if (!app) {
+
             return null;
         }
+
 
         const name =
             String(
@@ -12599,9 +12697,12 @@
             )
                 .trim();
 
+
         if (!name) {
+
             return null;
         }
+
 
         try {
 
@@ -12617,14 +12718,15 @@
                             : null
                     );
 
+
             if (
                 typeof target !==
                 "function"
             ) {
 
                 return null;
-
             }
+
 
             return await safeAsyncResult(
                 target.apply(
@@ -12632,6 +12734,7 @@
                     args
                 )
             );
+
 
         } catch (
             exception
@@ -12645,16 +12748,15 @@
                 name
             );
 
+
             return null;
-
         }
-
     }
 
 
-/* ========================================================
-   123 — APP SERVICE ACCESS
-   ======================================================== */
+    /* ========================================================
+       123 — APP SERVICE ACCESS
+       ======================================================== */
 
     function getService(
         appId,
@@ -12666,9 +12768,12 @@
                 appId
             );
 
+
         if (!context) {
+
             return null;
         }
+
 
         const name =
             String(
@@ -12677,9 +12782,12 @@
             )
                 .trim();
 
+
         if (!name) {
+
             return null;
         }
+
 
         if (
             context.services &&
@@ -12689,8 +12797,8 @@
             return context.services[
                 name
             ];
-
         }
+
 
         if (
             context[name]
@@ -12699,17 +12807,16 @@
             return context[
                 name
             ];
-
         }
 
-        return null;
 
+        return null;
     }
 
 
-/* ========================================================
-   124 — APP SERVICES
-   ======================================================== */
+    /* ========================================================
+       124 — APP SERVICES
+       ======================================================== */
 
     function getServices(
         appId
@@ -12720,11 +12827,12 @@
                 appId
             );
 
+
         if (!context) {
 
             return {};
-
         }
+
 
         return {
 
@@ -12732,13 +12840,12 @@
                 {})
 
         };
-
     }
 
 
-/* ========================================================
-   125 — APP CONTEXT UPDATE
-   ======================================================== */
+    /* ========================================================
+       125 — APP CONTEXT UPDATE
+       ======================================================== */
 
     function updateContext(
         appId,
@@ -12750,14 +12857,18 @@
                 appId
             );
 
+
         if (!id) {
+
             return false;
         }
+
 
         let context =
             getContext(
                 id
             );
+
 
         if (!context) {
 
@@ -12766,25 +12877,31 @@
                     id
                 );
 
+
             if (!app) {
+
                 return false;
             }
+
 
             context =
                 createAppContext(
                     app
                 );
 
+
             if (!context) {
+
                 return false;
             }
+
 
             state.contexts.set(
                 id,
                 context
             );
-
         }
+
 
         if (
             isObject(
@@ -12796,11 +12913,12 @@
                 context,
                 changes
             );
-
         }
+
 
         context.updatedAt =
             now();
+
 
         emit(
             "app-context-updated",
@@ -12814,14 +12932,14 @@
             }
         );
 
-        return context;
 
+        return context;
     }
 
 
-/* ========================================================
-   126 — APP CONTEXT SERVICE
-   ======================================================== */
+    /* ========================================================
+       126 — APP CONTEXT SERVICE
+       ======================================================== */
 
     function setContextService(
         appId,
@@ -12834,6 +12952,7 @@
                 appId
             );
 
+
         const name =
             String(
                 serviceName ||
@@ -12841,19 +12960,21 @@
             )
                 .trim();
 
+
         if (
             !id ||
             !name
         ) {
 
             return false;
-
         }
+
 
         let context =
             getContext(
                 id
             );
+
 
         if (!context) {
 
@@ -12862,21 +12983,31 @@
                     id
                 );
 
+
             if (!app) {
+
                 return false;
             }
+
 
             context =
                 createAppContext(
                     app
                 );
 
+
+            if (!context) {
+
+                return false;
+            }
+
+
             state.contexts.set(
                 id,
                 context
             );
-
         }
+
 
         if (
             !context.services
@@ -12884,16 +13015,18 @@
 
             context.services =
                 {};
-
         }
+
 
         context.services[
             name
         ] =
             service;
 
+
         context.updatedAt =
             now();
+
 
         emit(
             "app-context-service-changed",
@@ -12905,19 +13038,19 @@
                 serviceName:
                     name,
 
-                service
+                service,
+
+                context
 
             }
         );
 
+
         return true;
-
     }
-
-
-/* ========================================================
-   127 — APP EVENT FROM APP
-   ======================================================== */
+           /* ========================================================
+       127 — APP EVENT FROM APP
+       ======================================================== */
 
     function appEmit(
         appId,
@@ -12971,13 +13104,12 @@
         );
 
         return true;
-
     }
 
 
-/* ========================================================
-   128 — APP LISTENER
-   ======================================================== */
+    /* ========================================================
+       128 — APP LISTENER
+       ======================================================== */
 
     function onApp(
         appId,
@@ -12993,7 +13125,6 @@
         if (!id) {
 
             return () => {};
-
         }
 
         const eventName =
@@ -13009,13 +13140,12 @@
             eventName,
             callback
         );
-
     }
 
 
-/* ========================================================
-   129 — APP STATE WATCHER
-   ======================================================== */
+    /* ========================================================
+       129 — APP STATE WATCHER
+       ======================================================== */
 
     function watch(
         appId,
@@ -13028,7 +13158,6 @@
         ) {
 
             return () => {};
-
         }
 
         const id =
@@ -13037,6 +13166,7 @@
             );
 
         if (!id) {
+
             return () => {};
         }
 
@@ -13052,7 +13182,6 @@
                 ) {
 
                     return;
-
                 }
 
                 callback(
@@ -13061,20 +13190,18 @@
                     ),
                     payload
                 );
-
             };
 
         return subscribe(
             "app-state-changed",
             handler
         );
-
     }
 
 
-/* ========================================================
-   130 — APP STATE EVENT
-   ======================================================== */
+    /* ========================================================
+       130 — APP STATE EVENT
+       ======================================================== */
 
     function notifyStateChange(
         appId,
@@ -13088,6 +13215,7 @@
             );
 
         if (!id) {
+
             return false;
         }
 
@@ -13111,24 +13239,12 @@
         );
 
         return true;
-
     }
 
 
-/* ========================================================
-   ENDE TEIL 9
-   ======================================================== */
- /* ============================================================
-   HALDO AI OS
-   js/app-manager.js
-   TEIL 10 / 16
-   DIREKT NACH TEIL 9 EINFÜGEN
-   ============================================================ */
-
-
-/* ========================================================
-   131 — APP METADATA
-   ======================================================== */
+    /* ========================================================
+       131 — APP METADATA
+       ======================================================== */
 
     function getMetadata(
         appId
@@ -13140,6 +13256,7 @@
             );
 
         if (!app) {
+
             return null;
         }
 
@@ -13269,13 +13386,12 @@
                 null
 
         };
-
     }
 
 
-/* ========================================================
-   132 — APP CAPABILITIES
-   ======================================================== */
+    /* ========================================================
+       132 — APP CAPABILITIES
+       ======================================================== */
 
     function getCapabilities(
         appId
@@ -13287,6 +13403,7 @@
             );
 
         if (!app) {
+
             return [];
         }
 
@@ -13304,7 +13421,6 @@
             return [
                 ...capabilities
             ];
-
         }
 
         if (
@@ -13320,17 +13436,13 @@
                     capabilities[key] !==
                     false
             );
-
         }
 
         return [];
-
     }
-
-
-/* ========================================================
-   133 — APP WINDOW
-   ======================================================== */
+           /* ========================================================
+       133 — APP WINDOW
+       ======================================================== */
 
     function getWindow(
         appId
@@ -13356,7 +13468,6 @@
         ) {
 
             return null;
-
         }
 
         const manager =
@@ -13378,7 +13489,6 @@
                 return manager.get(
                     appState.windowId
                 );
-
             }
 
             if (
@@ -13391,7 +13501,6 @@
                 return manager.getWindow(
                     appState.windowId
                 );
-
             }
 
             if (
@@ -13403,7 +13512,6 @@
                 return manager.windows.get(
                     appState.windowId
                 );
-
             }
 
         } catch (
@@ -13415,17 +13523,15 @@
                 "Get App Window: " +
                 id
             );
-
         }
 
         return null;
-
     }
 
 
-/* ========================================================
-   134 — UPDATE WINDOW
-   ======================================================== */
+    /* ========================================================
+       134 — UPDATE WINDOW
+       ======================================================== */
 
     async function updateWindow(
         appId,
@@ -13480,7 +13586,6 @@
                     window,
                     changes
                 );
-
             }
 
             emit(
@@ -13509,15 +13614,13 @@
             );
 
             return false;
-
         }
-
     }
 
 
-/* ========================================================
-   135 — MINIMIZE APP
-   ======================================================== */
+    /* ========================================================
+       135 — MINIMIZE APP
+       ======================================================== */
 
     async function minimize(
         appId
@@ -13581,7 +13684,6 @@
 
                     }
                 );
-
             }
 
             updateAppState(
@@ -13622,15 +13724,13 @@
             );
 
             return false;
-
         }
-
     }
 
 
-/* ========================================================
-   136 — MAXIMIZE APP
-   ======================================================== */
+    /* ========================================================
+       136 — MAXIMIZE APP
+       ======================================================== */
 
     async function maximize(
         appId
@@ -13697,7 +13797,6 @@
 
                     }
                 );
-
             }
 
             updateAppState(
@@ -13746,15 +13845,11 @@
             );
 
             return false;
-
         }
-
     }
-
-
-/* ========================================================
-   137 — RESTORE APP
-   ======================================================== */
+           /* ========================================================
+       137 — RESTORE APP
+       ======================================================== */
 
     async function restore(
         appId
@@ -13821,7 +13916,6 @@
 
                     }
                 );
-
             }
 
             updateAppState(
@@ -13870,15 +13964,13 @@
             );
 
             return false;
-
         }
-
     }
 
 
-/* ========================================================
-   138 — APP FOCUS
-   ======================================================== */
+    /* ========================================================
+       138 — APP FOCUS
+       ======================================================== */
 
     async function focus(
         appId
@@ -13940,7 +14032,6 @@
                         windowId
                     )
                 );
-
             }
 
             state.activeAppId =
@@ -13992,15 +14083,13 @@
             );
 
             return false;
-
         }
-
     }
 
 
-/* ========================================================
-   139 — APP SHOW
-   ======================================================== */
+    /* ========================================================
+       139 — APP SHOW
+       ======================================================== */
 
     async function show(
         appId
@@ -14046,9 +14135,7 @@
                             windowId
                         )
                     );
-
                 }
-
             }
 
             updateAppState(
@@ -14086,15 +14173,13 @@
             );
 
             return false;
-
         }
-
     }
 
 
-/* ========================================================
-   140 — APP HIDE
-   ======================================================== */
+    /* ========================================================
+       140 — APP HIDE
+       ======================================================== */
 
     async function hide(
         appId
@@ -14140,9 +14225,7 @@
                             windowId
                         )
                     );
-
                 }
-
             }
 
             updateAppState(
@@ -14167,7 +14250,6 @@
 
                 state.activeAppId =
                     null;
-
             }
 
             emit(
@@ -14192,26 +14274,11 @@
             );
 
             return false;
-
         }
-
     }
-
-
-/* ========================================================
-   ENDE TEIL 10
-   ======================================================== */
- /* ============================================================
-   HALDO AI OS
-   js/app-manager.js
-   TEIL 11 / 16
-   DIREKT NACH TEIL 10 EINFÜGEN
-   ============================================================ */
-
-
-/* ========================================================
-   141 — APP WINDOW POSITION
-   ======================================================== */
+           /* ========================================================
+       141 — APP WINDOW POSITION
+       ======================================================== */
 
     async function setPosition(
         appId,
@@ -14241,7 +14308,6 @@
         ) {
 
             return false;
-
         }
 
         try {
@@ -14284,7 +14350,6 @@
                     window,
                     position
                 );
-
             }
 
             emit(
@@ -14311,15 +14376,13 @@
             );
 
             return false;
-
         }
-
     }
 
 
-/* ========================================================
-   142 — APP WINDOW SIZE
-   ======================================================== */
+    /* ========================================================
+       142 — APP WINDOW SIZE
+       ======================================================== */
 
     async function setSize(
         appId,
@@ -14349,7 +14412,6 @@
         ) {
 
             return false;
-
         }
 
         try {
@@ -14392,7 +14454,6 @@
                     window,
                     size
                 );
-
             }
 
             emit(
@@ -14419,15 +14480,13 @@
             );
 
             return false;
-
         }
-
     }
 
 
-/* ========================================================
-   143 — APP WINDOW FULLSCREEN
-   ======================================================== */
+    /* ========================================================
+       143 — APP WINDOW FULLSCREEN
+       ======================================================== */
 
     async function fullscreen(
         appId,
@@ -14502,9 +14561,7 @@
 
                         }
                     );
-
                 }
-
             }
 
             updateAppState(
@@ -14544,15 +14601,13 @@
             );
 
             return false;
-
         }
-
     }
 
 
-/* ========================================================
-   144 — APP PICTURE IN PICTURE
-   ======================================================== */
+    /* ========================================================
+       144 — APP PICTURE IN PICTURE
+       ======================================================== */
 
     async function setPip(
         appId,
@@ -14627,9 +14682,7 @@
 
                         }
                     );
-
                 }
-
             }
 
             updateAppState(
@@ -14664,20 +14717,16 @@
 
             reportError(
                 exception,
-                "App PIP: " +
+                "App PiP: " +
                 app.id
             );
 
             return false;
-
         }
-
     }
-
-
-/* ========================================================
-   145 — APP WINDOW TITLE
-   ======================================================== */
+           /* ========================================================
+       145 — APP WINDOW TITLE
+       ======================================================== */
 
     async function setTitle(
         appId,
@@ -14724,10 +14773,8 @@
                 await updateWindow(
                     app.id,
                     {
-
                         title:
                             value
-
                     }
                 );
 
@@ -14744,9 +14791,7 @@
                             value
                         )
                     );
-
                 }
-
             }
 
             emit(
@@ -14774,15 +14819,13 @@
             );
 
             return false;
-
         }
-
     }
 
 
-/* ========================================================
-   146 — APP WINDOW ICON
-   ======================================================== */
+    /* ========================================================
+       146 — APP WINDOW ICON
+       ======================================================== */
 
     async function setIcon(
         appId,
@@ -14839,15 +14882,13 @@
             );
 
             return false;
-
         }
-
     }
 
 
-/* ========================================================
-   147 — APP THEME
-   ======================================================== */
+    /* ========================================================
+       147 — APP THEME
+       ======================================================== */
 
     async function setTheme(
         appId,
@@ -14888,7 +14929,6 @@
         ) {
 
             return false;
-
         }
 
         try {
@@ -14901,7 +14941,6 @@
 
                 app.theme =
                     {};
-
             }
 
             if (
@@ -14919,7 +14958,6 @@
 
                 app.theme.name =
                     value;
-
             }
 
             const context =
@@ -14933,7 +14971,6 @@
 
                 context.theme =
                     app.theme;
-
             }
 
             const window =
@@ -14954,7 +14991,6 @@
 
                     }
                 );
-
             }
 
             emit(
@@ -14994,15 +15030,11 @@
             );
 
             return false;
-
         }
-
     }
-
-
-/* ========================================================
-   148 — APP LANGUAGE
-   ======================================================== */
+           /* ========================================================
+       148 — APP LANGUAGE
+       ======================================================== */
 
     async function setLanguage(
         appId,
@@ -15050,7 +15082,6 @@
 
                 context.language =
                     value;
-
             }
 
             const languageService =
@@ -15073,9 +15104,7 @@
                             value
                         )
                     );
-
                 }
-
             }
 
             if (
@@ -15098,7 +15127,6 @@
 
                     })
                 );
-
             }
 
             emit(
@@ -15126,15 +15154,13 @@
             );
 
             return false;
-
         }
-
     }
 
 
-/* ========================================================
-   149 — APP VOICE
-   ======================================================== */
+    /* ========================================================
+       149 — APP VOICE
+       ======================================================== */
 
     async function setVoice(
         appId,
@@ -15172,7 +15198,6 @@
 
                 context.voice =
                     app.voice;
-
             }
 
             const voiceService =
@@ -15195,9 +15220,7 @@
                             voice
                         )
                     );
-
                 }
-
             }
 
             if (
@@ -15219,7 +15242,6 @@
 
                     })
                 );
-
             }
 
             emit(
@@ -15246,15 +15268,13 @@
             );
 
             return false;
-
         }
-
     }
 
 
-/* ========================================================
-   150 — APP AI ACCESS
-   ======================================================== */
+    /* ========================================================
+       150 — APP AI ACCESS
+       ======================================================== */
 
     function getAIService(
         appId
@@ -15306,7 +15326,6 @@
 
                             }
                         );
-
                     }
 
                     if (
@@ -15327,11 +15346,9 @@
 
                             }
                         );
-
                     }
 
                     return null;
-
                 },
 
             speak:
@@ -15355,32 +15372,16 @@
                             text,
                             options
                         );
-
                     }
 
                     return null;
-
                 }
 
         };
-
     }
-
-
-/* ========================================================
-   ENDE TEIL 11
-   ======================================================== */
- /* ============================================================
-   HALDO AI OS
-   js/app-manager.js
-   TEIL 12 / 16
-   DIREKT NACH TEIL 11 EINFÜGEN
-   ============================================================ */
-
-
-/* ========================================================
-   151 — APP LANGUAGE SERVICE
-   ======================================================== */
+           /* ========================================================
+       151 — APP LANGUAGE SERVICE
+       ======================================================== */
 
     function getLanguageService(
         appId
@@ -15408,27 +15409,13 @@
 
             app,
 
-            getCurrent:
+            get:
                 () => {
-
-                    if (
-                        hasMethod(
-                            language,
-                            "getAppLanguage"
-                        )
-                    ) {
-
-                        return language.getAppLanguage(
-                            app.id
-                        );
-
-                    }
 
                     return (
                         app.language ||
                         null
                     );
-
                 },
 
             set:
@@ -15438,7 +15425,6 @@
                         app.id,
                         value
                     );
-
                 },
 
             translate:
@@ -15465,21 +15451,18 @@
 
                             }
                         );
-
                     }
 
                     return text;
-
                 }
 
         };
-
     }
 
 
-/* ========================================================
-   152 — APP VOICE SERVICE
-   ======================================================== */
+    /* ========================================================
+       152 — APP VOICE SERVICE
+       ======================================================== */
 
     function getVoiceService(
         appId
@@ -15524,11 +15507,9 @@
                             text,
                             options
                         );
-
                     }
 
                     return null;
-
                 },
 
             stop:
@@ -15542,11 +15523,9 @@
                     ) {
 
                         return voice.stop();
-
                     }
 
                     return false;
-
                 },
 
             pause:
@@ -15560,11 +15539,9 @@
                     ) {
 
                         return voice.pause();
-
                     }
 
                     return false;
-
                 },
 
             resume:
@@ -15578,21 +15555,18 @@
                     ) {
 
                         return voice.resume();
-
                     }
 
                     return false;
-
                 }
 
         };
-
     }
 
 
-/* ========================================================
-   153 — APP NOTIFICATION SERVICE
-   ======================================================== */
+    /* ========================================================
+       153 — APP NOTIFICATION SERVICE
+       ======================================================== */
 
     function getNotificationService(
         appId
@@ -15650,7 +15624,6 @@
                         return notifications.notify(
                             payload
                         );
-
                     }
 
                     if (
@@ -15663,11 +15636,9 @@
                         return notifications.show(
                             payload
                         );
-
                     }
 
                     return null;
-
                 },
 
             success:
@@ -15683,11 +15654,9 @@
                         return notifications.success(
                             message
                         );
-
                     }
 
                     return null;
-
                 },
 
             error:
@@ -15703,11 +15672,9 @@
                         return notifications.error(
                             message
                         );
-
                     }
 
                     return null;
-
                 },
 
             warning:
@@ -15723,21 +15690,18 @@
                         return notifications.warning(
                             message
                         );
-
                     }
 
                     return null;
-
                 }
 
         };
-
     }
 
 
-/* ========================================================
-   154 — APP KEYBOARD SERVICE
-   ======================================================== */
+    /* ========================================================
+       154 — APP KEYBOARD SERVICE
+       ======================================================== */
 
     function getKeyboardService(
         appId
@@ -15785,11 +15749,9 @@
 
                             }
                         );
-
                     }
 
                     return false;
-
                 },
 
             close:
@@ -15812,11 +15774,9 @@
 
                             }
                         );
-
                     }
 
                     return false;
-
                 },
 
             toggle:
@@ -15839,41 +15799,16 @@
 
                             }
                         );
-
                     }
 
                     return false;
-
-                },
-
-            setLayout:
-                layout => {
-
-                    if (
-                        hasMethod(
-                            keyboard,
-                            "setLayout"
-                        )
-                    ) {
-
-                        return keyboard.setLayout(
-                            layout
-                        );
-
-                    }
-
-                    return false;
-
                 }
 
         };
-
     }
-
-
-/* ========================================================
-   155 — APP STORAGE SERVICE
-   ======================================================== */
+           /* ========================================================
+       155 — APP STORAGE SERVICE
+       ======================================================== */
 
     function getStorageService(
         appId
@@ -15930,7 +15865,6 @@
                             prefix +
                             value
                         );
-
                     }
 
                     if (
@@ -15944,11 +15878,9 @@
                             prefix +
                             value
                         );
-
                     }
 
                     return null;
-
                 },
 
             set:
@@ -15975,7 +15907,6 @@
                             name,
                             value
                         );
-
                     }
 
                     if (
@@ -15990,11 +15921,9 @@
                             name,
                             value
                         );
-
                     }
 
                     return false;
-
                 },
 
             remove:
@@ -16017,7 +15946,6 @@
                             prefix +
                             name
                         );
-
                     }
 
                     if (
@@ -16031,21 +15959,18 @@
                             prefix +
                             name
                         );
-
                     }
 
                     return false;
-
                 }
 
         };
-
     }
 
 
-/* ========================================================
-   156 — APP KERNEL SERVICE
-   ======================================================== */
+    /* ========================================================
+       156 — APP KERNEL SERVICE
+       ======================================================== */
 
     function getKernelService(
         appId
@@ -16065,7 +15990,6 @@
         ) {
 
             return null;
-
         }
 
         return {
@@ -16085,11 +16009,9 @@
                     ) {
 
                         return kernel.getState();
-
                     }
 
                     return null;
-
                 },
 
             getStatus:
@@ -16103,11 +16025,9 @@
                     ) {
 
                         return kernel.getStatus();
-
                     }
 
                     return null;
-
                 },
 
             emit:
@@ -16127,21 +16047,18 @@
                             event,
                             payload
                         );
-
                     }
 
                     return false;
-
                 }
 
         };
-
     }
 
 
-/* ========================================================
-   157 — APP SYSTEM SERVICE
-   ======================================================== */
+    /* ========================================================
+       157 — APP SYSTEM SERVICE
+       ======================================================== */
 
     function getSystemService(
         appId
@@ -16161,7 +16078,6 @@
         ) {
 
             return null;
-
         }
 
         return {
@@ -16181,7 +16097,6 @@
                     ) {
 
                         return system.getInfo();
-
                     }
 
                     if (
@@ -16189,11 +16104,9 @@
                     ) {
 
                         return system.info;
-
                     }
 
                     return null;
-
                 },
 
             getStatus:
@@ -16207,11 +16120,9 @@
                     ) {
 
                         return system.getStatus();
-
                     }
 
                     return null;
-
                 },
 
             diagnose:
@@ -16227,21 +16138,18 @@
                         return system.diagnose(
                             options
                         );
-
                     }
 
                     return null;
-
                 }
 
         };
-
     }
 
 
-/* ========================================================
-   158 — APP ROUTER SERVICE
-   ======================================================== */
+    /* ========================================================
+       158 — APP ROUTER SERVICE
+       ======================================================== */
 
     function getRouterService(
         appId
@@ -16261,7 +16169,6 @@
         ) {
 
             return null;
-
         }
 
         return {
@@ -16271,7 +16178,7 @@
             app,
 
             navigate:
-                (
+                async (
                     route,
                     options = {}
                 ) => {
@@ -16285,50 +16192,89 @@
 
                         return router.navigate(
                             route,
-                            {
-
-                                ...options,
-
-                                appId:
-                                    app.id
-
-                            }
+                            options
                         );
+                    }
 
+                    if (
+                        hasMethod(
+                            router,
+                            "go"
+                        )
+                    ) {
+
+                        return router.go(
+                            route,
+                            options
+                        );
                     }
 
                     return false;
-
                 },
 
-            open:
-                options => {
+            back:
+                () => {
 
-                    return open(
-                        app.id,
-                        options
-                    );
+                    if (
+                        hasMethod(
+                            router,
+                            "back"
+                        )
+                    ) {
 
+                        return router.back();
+                    }
+
+                    return false;
                 },
 
-            close:
-                options => {
+            forward:
+                () => {
 
-                    return close(
-                        app.id,
-                        options
-                    );
+                    if (
+                        hasMethod(
+                            router,
+                            "forward"
+                        )
+                    ) {
 
+                        return router.forward();
+                    }
+
+                    return false;
+                },
+
+            current:
+                () => {
+
+                    if (
+                        hasMethod(
+                            router,
+                            "getCurrent"
+                        )
+                    ) {
+
+                        return router.getCurrent();
+                    }
+
+                    if (
+                        hasMethod(
+                            router,
+                            "current"
+                        )
+                    ) {
+
+                        return router.current();
+                    }
+
+                    return null;
                 }
 
         };
-
     }
-
-
-/* ========================================================
-   159 — APP WINDOW SERVICE
-   ======================================================== */
+           /* ========================================================
+       159 — APP WINDOW SERVICE
+       ======================================================== */
 
     function getWindowService(
         appId
@@ -16432,13 +16378,12 @@
                     )
 
         };
-
     }
 
 
-/* ========================================================
-   160 — COMPLETE APP SERVICES
-   ======================================================== */
+    /* ========================================================
+       160 — COMPLETE APP SERVICES
+       ======================================================== */
 
     function createAppServices(
         appId
@@ -16521,24 +16466,12 @@
                 getLauncher()
 
         };
-
     }
 
 
-/* ========================================================
-   ENDE TEIL 12
-   ======================================================== */
- /* ============================================================
-   HALDO AI OS
-   js/app-manager.js
-   TEIL 13 / 16
-   DIREKT NACH TEIL 12 EINFÜGEN
-   ============================================================ */
-
-
-/* ========================================================
-   161 — APP RUNTIME CONTEXT
-   ======================================================== */
+    /* ========================================================
+       161 — APP RUNTIME CONTEXT
+       ======================================================== */
 
     function getRuntimeContext(
         appId
@@ -16576,9 +16509,7 @@
                     id,
                     context
                 );
-
             }
-
         }
 
         if (!context) {
@@ -16623,11 +16554,2431 @@
             now();
 
         return context;
-
     }
 
 
-/* ========================================================
+    /* ========================================================
+       162 — APP RUNTIME CONTRACT
+       ======================================================== */
+
+    function getRuntimeContract(
+        appId
+    ) {
+
+        const app =
+            get(
+                appId
+            );
+
+        if (!app) {
+            return null;
+        }
+
+        const contract =
+            getContract();
+
+        const context =
+            getRuntimeContext(
+                app.id
+            );
+
+        const base = {
+
+            id:
+                app.id,
+
+            appId:
+                app.id,
+
+            version:
+                app.version ||
+                "1.0.0",
+
+            name:
+                app.name ||
+                app.title ||
+                app.id,
+
+            title:
+                app.title ||
+                app.name ||
+                app.id,
+
+            route:
+                app.route ||
+                null,
+
+            icon:
+                app.icon ||
+                null,
+
+            enabled:
+                app.enabled !==
+                false,
+
+            context,
+
+            services:
+                context &&
+                context.services
+                    ? context.services
+                    : {},
+
+            state:
+                getAppState(
+                    app.id
+                ),
+
+            metadata:
+                getMetadata(
+                    app.id
+                )
+
+        };
+
+        if (
+            contract &&
+            typeof contract ===
+            "object"
+        ) {
+
+            return {
+
+                ...contract,
+
+                ...base
+
+            };
+        }
+
+        return base;
+    }
+           /* ========================================================
+       163 — APP RUNTIME INITIALIZATION
+       ======================================================== */
+
+    async function initializeRuntime(
+        appId
+    ) {
+
+        const app =
+            get(
+                appId
+            );
+
+        if (!app) {
+            return false;
+        }
+
+        const id =
+            normalizeId(
+                app.id
+            );
+
+        try {
+
+            const context =
+                getRuntimeContext(
+                    id
+                );
+
+            if (!context) {
+                return false;
+            }
+
+            if (
+                app.runtime &&
+                typeof app.runtime.init ===
+                "function"
+            ) {
+
+                await safeAsyncResult(
+                    app.runtime.init(
+                        context
+                    )
+                );
+            }
+
+            if (
+                typeof app.init ===
+                "function"
+            ) {
+
+                await safeAsyncResult(
+                    app.init(
+                        context
+                    )
+                );
+            }
+
+            updateAppState(
+                id,
+                {
+
+                    initialized:
+                        true,
+
+                    runtimeInitialized:
+                        true
+
+                }
+            );
+
+            emit(
+                "app-runtime-initialized",
+                {
+
+                    app,
+
+                    context
+
+                }
+            );
+
+            return true;
+
+        } catch (
+            exception
+        ) {
+
+            reportError(
+                exception,
+                "App Runtime Initialization: " +
+                id
+            );
+
+            updateAppState(
+                id,
+                {
+
+                    runtimeInitialized:
+                        false,
+
+                    error:
+                        String(
+                            exception &&
+                            exception.message ||
+                            exception
+                        )
+
+                }
+            );
+
+            return false;
+        }
+    }
+
+
+    /* ========================================================
+       164 — APP RUNTIME START
+       ======================================================== */
+
+    async function startRuntime(
+        appId
+    ) {
+
+        const app =
+            get(
+                appId
+            );
+
+        if (!app) {
+            return false;
+        }
+
+        const id =
+            normalizeId(
+                app.id
+            );
+
+        try {
+
+            const context =
+                getRuntimeContext(
+                    id
+                );
+
+            if (!context) {
+                return false;
+            }
+
+            if (
+                app.runtime &&
+                typeof app.runtime.start ===
+                "function"
+            ) {
+
+                await safeAsyncResult(
+                    app.runtime.start(
+                        context
+                    )
+                );
+            }
+
+            if (
+                typeof app.start ===
+                "function"
+            ) {
+
+                await safeAsyncResult(
+                    app.start(
+                        context
+                    )
+                );
+            }
+
+            updateAppState(
+                id,
+                {
+
+                    started:
+                        true,
+
+                    ready:
+                        true,
+
+                    error:
+                        null
+
+                }
+            );
+
+            emit(
+                "app-runtime-started",
+                {
+
+                    app,
+
+                    context
+
+                }
+            );
+
+            emit(
+                "app-ready",
+                {
+
+                    app,
+
+                    context
+
+                }
+            );
+
+            return true;
+
+        } catch (
+            exception
+        ) {
+
+            reportError(
+                exception,
+                "App Runtime Start: " +
+                id
+            );
+
+            updateAppState(
+                id,
+                {
+
+                    started:
+                        false,
+
+                    ready:
+                        false,
+
+                    error:
+                        String(
+                            exception &&
+                            exception.message ||
+                            exception
+                        )
+
+                }
+            );
+
+            return false;
+        }
+    }
+
+
+    /* ========================================================
+       165 — APP RUNTIME STOP
+       ======================================================== */
+
+    async function stopRuntime(
+        appId
+    ) {
+
+        const app =
+            get(
+                appId
+            );
+
+        if (!app) {
+            return false;
+        }
+
+        const id =
+            normalizeId(
+                app.id
+            );
+
+        try {
+
+            const context =
+                getRuntimeContext(
+                    id
+                );
+
+            if (
+                app.runtime &&
+                typeof app.runtime.stop ===
+                "function"
+            ) {
+
+                await safeAsyncResult(
+                    app.runtime.stop(
+                        context
+                    )
+                );
+            }
+
+            if (
+                typeof app.stop ===
+                "function"
+            ) {
+
+                await safeAsyncResult(
+                    app.stop(
+                        context
+                    )
+                );
+            }
+
+            updateAppState(
+                id,
+                {
+
+                    started:
+                        false,
+
+                    ready:
+                        false,
+
+                    active:
+                        false
+
+                }
+            );
+
+            if (
+                state.activeAppId ===
+                id
+            ) {
+
+                state.activeAppId =
+                    null;
+            }
+
+            emit(
+                "app-runtime-stopped",
+                {
+
+                    app,
+
+                    context
+
+                }
+            );
+
+            return true;
+
+        } catch (
+            exception
+        ) {
+
+            reportError(
+                exception,
+                "App Runtime Stop: " +
+                id
+            );
+
+            return false;
+        }
+    }
+
+
+    /* ========================================================
+       166 — APP RUNTIME DESTROY
+       ======================================================== */
+
+    async function destroyRuntime(
+        appId
+    ) {
+
+        const app =
+            get(
+                appId
+            );
+
+        if (!app) {
+            return false;
+        }
+
+        const id =
+            normalizeId(
+                app.id
+            );
+
+        try {
+
+            const context =
+                getContext(
+                    id
+                );
+
+            if (
+                app.runtime &&
+                typeof app.runtime.destroy ===
+                "function"
+            ) {
+
+                await safeAsyncResult(
+                    app.runtime.destroy(
+                        context
+                    )
+                );
+            }
+
+            if (
+                typeof app.destroy ===
+                "function"
+            ) {
+
+                await safeAsyncResult(
+                    app.destroy(
+                        context
+                    )
+                );
+            }
+
+            updateAppState(
+                id,
+                {
+
+                    initialized:
+                        false,
+
+                    runtimeInitialized:
+                        false,
+
+                    started:
+                        false,
+
+                    ready:
+                        false,
+
+                    active:
+                        false
+
+                }
+            );
+
+            state.contexts.delete(
+                id
+            );
+
+            if (
+                state.activeAppId ===
+                id
+            ) {
+
+                state.activeAppId =
+                    null;
+            }
+
+            emit(
+                "app-runtime-destroyed",
+                {
+
+                    appId:
+                        id,
+
+                    app
+
+                }
+            );
+
+            return true;
+
+        } catch (
+            exception
+        ) {
+
+            reportError(
+                exception,
+                "App Runtime Destroy: " +
+                id
+            );
+
+            return false;
+        }
+    }
+
+
+    /* ========================================================
+       167 — APP RUNTIME LIFECYCLE
+       ======================================================== */
+
+    async function startLifecycle(
+        appId
+    ) {
+
+        const initialized =
+            await initializeRuntime(
+                appId
+            );
+
+        if (!initialized) {
+            return false;
+        }
+
+        return startRuntime(
+            appId
+        );
+    }
+
+
+    async function stopLifecycle(
+        appId
+    ) {
+
+        return stopRuntime(
+            appId
+        );
+    }
+           /* ========================================================
+       168 — APP RUNTIME RESTART
+       ======================================================== */
+
+    async function restartRuntime(
+        appId
+    ) {
+
+        const app =
+            get(
+                appId
+            );
+
+        if (!app) {
+            return false;
+        }
+
+        const id =
+            normalizeId(
+                app.id
+            );
+
+        try {
+
+            await stopRuntime(
+                id
+            );
+
+            await destroyRuntime(
+                id
+            );
+
+            return await startLifecycle(
+                id
+            );
+
+        } catch (
+            exception
+        ) {
+
+            reportError(
+                exception,
+                "App Runtime Restart: " +
+                id
+            );
+
+            return false;
+        }
+    }
+
+
+    /* ========================================================
+       169 — APP RUNTIME STATUS
+       ======================================================== */
+
+    function getRuntimeStatus(
+        appId
+    ) {
+
+        const app =
+            get(
+                appId
+            );
+
+        if (!app) {
+            return null;
+        }
+
+        const id =
+            normalizeId(
+                app.id
+            );
+
+        const state =
+            getAppState(
+                id
+            );
+
+        const context =
+            getContext(
+                id
+            );
+
+        return {
+
+            appId:
+                id,
+
+            initialized:
+                state.initialized ===
+                true,
+
+            runtimeInitialized:
+                state.runtimeInitialized ===
+                true,
+
+            started:
+                state.started ===
+                true,
+
+            ready:
+                state.ready ===
+                true,
+
+            active:
+                state.active ===
+                true,
+
+            open:
+                state.open ===
+                true,
+
+            visible:
+                state.visible ===
+                true,
+
+            minimized:
+                state.minimized ===
+                true,
+
+            maximized:
+                state.maximized ===
+                true,
+
+            fullscreen:
+                state.fullscreen ===
+                true,
+
+            pip:
+                state.pip ===
+                true,
+
+            windowId:
+                state.windowId ||
+                null,
+
+            hasContext:
+                !!context,
+
+            hasServices:
+                !!(
+                    context &&
+                    context.services
+                ),
+
+            error:
+                state.error ||
+                null,
+
+            updatedAt:
+                state.updatedAt ||
+                null
+
+        };
+    }
+
+
+    /* ========================================================
+       170 — APP READY CHECK
+       ======================================================== */
+
+    function isReady(
+        appId
+    ) {
+
+        const status =
+            getRuntimeStatus(
+                appId
+            );
+
+        if (!status) {
+            return false;
+        }
+
+        return (
+            status.ready === true &&
+            status.runtimeInitialized ===
+                true
+        );
+    }
+
+
+    /* ========================================================
+       171 — APP ACTIVE CHECK
+       ======================================================== */
+
+    function isActive(
+        appId
+    ) {
+
+        const status =
+            getRuntimeStatus(
+                appId
+            );
+
+        return !!(
+            status &&
+            status.active ===
+            true
+        );
+    }
+
+
+    /* ========================================================
+       172 — APP OPEN CHECK
+       ======================================================== */
+
+    function isOpen(
+        appId
+    ) {
+
+        const status =
+            getRuntimeStatus(
+                appId
+            );
+
+        return !!(
+            status &&
+            status.open ===
+            true
+        );
+    }
+
+
+    /* ========================================================
+       173 — APP VISIBILITY CHECK
+       ======================================================== */
+
+    function isVisible(
+        appId
+    ) {
+
+        const status =
+            getRuntimeStatus(
+                appId
+            );
+
+        return !!(
+            status &&
+            status.visible ===
+            true
+        );
+    }
+
+
+    /* ========================================================
+       174 — APP WINDOW CHECK
+       ======================================================== */
+
+    function hasWindow(
+        appId
+    ) {
+
+        const status =
+            getRuntimeStatus(
+                appId
+            );
+
+        return !!(
+            status &&
+            status.windowId
+        );
+    }
+
+
+    /* ========================================================
+       175 — APP ERROR RESET
+       ======================================================== */
+
+    function clearError(
+        appId
+    ) {
+
+        const app =
+            get(
+                appId
+            );
+
+        if (!app) {
+            return false;
+        }
+
+        const id =
+            normalizeId(
+                app.id
+            );
+
+        updateAppState(
+            id,
+            {
+
+                error:
+                    null
+
+            }
+        );
+
+        emit(
+            "app-error-cleared",
+            {
+
+                appId:
+                    id
+
+            }
+        );
+
+        return true;
+    }
+
+
+    /* ========================================================
+       176 — APP HEALTH CHECK
+       ======================================================== */
+
+    async function healthCheck(
+        appId
+    ) {
+
+        const app =
+            get(
+                appId
+            );
+
+        if (!app) {
+            return null;
+        }
+
+        const id =
+            normalizeId(
+                app.id
+            );
+
+        const status =
+            getRuntimeStatus(
+                id
+            );
+
+        const checks = {
+
+            registered:
+                !!app,
+
+            context:
+                !!(
+                    status &&
+                    status.hasContext
+                ),
+
+            services:
+                !!(
+                    status &&
+                    status.hasServices
+                ),
+
+            runtime:
+                !!(
+                    status &&
+                    status.runtimeInitialized
+                ),
+
+            ready:
+                !!(
+                    status &&
+                    status.ready
+                ),
+
+            window:
+                !!(
+                    status &&
+                    status.windowId
+                )
+
+        };
+
+        const healthy =
+            Object.keys(
+                checks
+            ).every(
+                key =>
+                    checks[key] === true
+            );
+
+        const result = {
+
+            appId:
+                id,
+
+            healthy,
+
+            checks,
+
+            status,
+
+            timestamp:
+                now()
+
+        };
+
+        emit(
+            "app-health-check",
+            result
+        );
+
+        return result;
+    }
+           /* ========================================================
+       177 — APP WINDOW STATE
+       ======================================================== */
+
+    function getWindowState(
+        appId
+    ) {
+
+        const app =
+            get(
+                appId
+            );
+
+        if (!app) {
+            return null;
+        }
+
+        const id =
+            normalizeId(
+                app.id
+            );
+
+        const window =
+            getWindow(
+                id
+            );
+
+        const state =
+            getAppState(
+                id
+            );
+
+        if (!window) {
+
+            return {
+
+                appId:
+                    id,
+
+                exists:
+                    false,
+
+                windowId:
+                    state.windowId ||
+                    null,
+
+                open:
+                    state.open ===
+                    true,
+
+                visible:
+                    state.visible ===
+                    true,
+
+                minimized:
+                    state.minimized ===
+                    true,
+
+                maximized:
+                    state.maximized ===
+                    true,
+
+                fullscreen:
+                    state.fullscreen ===
+                    true,
+
+                pip:
+                    state.pip ===
+                    true
+
+            };
+        }
+
+        return {
+
+            appId:
+                id,
+
+            exists:
+                true,
+
+            windowId:
+                window.id ||
+                window.windowId ||
+                state.windowId ||
+                null,
+
+            open:
+                state.open === true,
+
+            visible:
+                state.visible === true,
+
+            minimized:
+                state.minimized === true,
+
+            maximized:
+                state.maximized === true,
+
+            fullscreen:
+                state.fullscreen === true,
+
+            pip:
+                state.pip === true,
+
+            focused:
+                window.focused === true ||
+                window.active === true,
+
+            x:
+                window.x ??
+                window.left ??
+                null,
+
+            y:
+                window.y ??
+                window.top ??
+                null,
+
+            width:
+                window.width ??
+                null,
+
+            height:
+                window.height ??
+                null
+
+        };
+    }
+
+
+    /* ========================================================
+       178 — APP WINDOW POSITION GET
+       ======================================================== */
+
+    function getPosition(
+        appId
+    ) {
+
+        const state =
+            getWindowState(
+                appId
+            );
+
+        if (!state) {
+            return null;
+        }
+
+        return {
+
+            x:
+                state.x,
+
+            y:
+                state.y
+
+        };
+    }
+
+
+    /* ========================================================
+       179 — APP WINDOW SIZE GET
+       ======================================================== */
+
+    function getSize(
+        appId
+    ) {
+
+        const state =
+            getWindowState(
+                appId
+            );
+
+        if (!state) {
+            return null;
+        }
+
+        return {
+
+            width:
+                state.width,
+
+            height:
+                state.height
+
+        };
+    }
+
+
+    /* ========================================================
+       180 — APP WINDOW MOVE
+       ======================================================== */
+
+    async function move(
+        appId,
+        x,
+        y
+    ) {
+
+        const position = {
+
+            x:
+                Number.isFinite(
+                    Number(x)
+                )
+                    ? Number(x)
+                    : 0,
+
+            y:
+                Number.isFinite(
+                    Number(y)
+                )
+                    ? Number(y)
+                    : 0
+
+        };
+
+        return setPosition(
+            appId,
+            position
+        );
+    }
+
+
+    /* ========================================================
+       181 — APP WINDOW RESIZE
+       ======================================================== */
+
+    async function resize(
+        appId,
+        width,
+        height
+    ) {
+
+        const size = {
+
+            width:
+                Math.max(
+                    1,
+                    Number(width) || 1
+                ),
+
+            height:
+                Math.max(
+                    1,
+                    Number(height) || 1
+                )
+
+        };
+
+        return setSize(
+            appId,
+            size
+        );
+    }
+
+
+    /* ========================================================
+       182 — APP WINDOW TOGGLE MAXIMIZE
+       ======================================================== */
+
+    async function toggleMaximize(
+        appId
+    ) {
+
+        const state =
+            getWindowState(
+                appId
+            );
+
+        if (!state) {
+            return false;
+        }
+
+        if (
+            state.maximized ===
+            true
+        ) {
+
+            return restore(
+                appId
+            );
+        }
+
+        return maximize(
+            appId
+        );
+    }
+
+
+    /* ========================================================
+       183 — APP WINDOW TOGGLE PIP
+       ======================================================== */
+
+    async function togglePip(
+        appId
+    ) {
+
+        const state =
+            getWindowState(
+                appId
+            );
+
+        if (!state) {
+            return false;
+        }
+
+        return setPip(
+            appId,
+            state.pip !== true
+        );
+    }
+
+
+    /* ========================================================
+       184 — APP WINDOW TOGGLE FULLSCREEN
+       ======================================================== */
+
+    async function toggleFullscreen(
+        appId
+    ) {
+
+        const state =
+            getWindowState(
+                appId
+            );
+
+        if (!state) {
+            return false;
+        }
+
+        return fullscreen(
+            appId,
+            state.fullscreen !== true
+        );
+    }
+
+
+    /* ========================================================
+       185 — APP WINDOW ACTIVATE
+       ======================================================== */
+
+    async function activate(
+        appId
+    ) {
+
+        const result =
+            await focus(
+                appId
+            );
+
+        if (!result) {
+            return false;
+        }
+
+        await show(
+            appId
+        );
+
+        return true;
+    }
+          /* ========================================================
+       177 — APP WINDOW STATE
+       ======================================================== */
+
+    function getWindowState(
+        appId
+    ) {
+
+        const app =
+            get(
+                appId
+            );
+
+        if (!app) {
+            return null;
+        }
+
+        const id =
+            normalizeId(
+                app.id
+            );
+
+        const window =
+            getWindow(
+                id
+            );
+
+        const state =
+            getAppState(
+                id
+            );
+
+        if (!window) {
+
+            return {
+
+                appId:
+                    id,
+
+                exists:
+                    false,
+
+                windowId:
+                    state.windowId ||
+                    null,
+
+                open:
+                    state.open ===
+                    true,
+
+                visible:
+                    state.visible ===
+                    true,
+
+                minimized:
+                    state.minimized ===
+                    true,
+
+                maximized:
+                    state.maximized ===
+                    true,
+
+                fullscreen:
+                    state.fullscreen ===
+                    true,
+
+                pip:
+                    state.pip ===
+                    true
+
+            };
+        }
+
+        return {
+
+            appId:
+                id,
+
+            exists:
+                true,
+
+            windowId:
+                window.id ||
+                window.windowId ||
+                state.windowId ||
+                null,
+
+            open:
+                state.open === true,
+
+            visible:
+                state.visible === true,
+
+            minimized:
+                state.minimized === true,
+
+            maximized:
+                state.maximized === true,
+
+            fullscreen:
+                state.fullscreen === true,
+
+            pip:
+                state.pip === true,
+
+            focused:
+                window.focused === true ||
+                window.active === true,
+
+            x:
+                window.x ??
+                window.left ??
+                null,
+
+            y:
+                window.y ??
+                window.top ??
+                null,
+
+            width:
+                window.width ??
+                null,
+
+            height:
+                window.height ??
+                null
+
+        };
+    }
+
+
+    /* ========================================================
+       178 — APP WINDOW POSITION GET
+       ======================================================== */
+
+    function getPosition(
+        appId
+    ) {
+
+        const state =
+            getWindowState(
+                appId
+            );
+
+        if (!state) {
+            return null;
+        }
+
+        return {
+
+            x:
+                state.x,
+
+            y:
+                state.y
+
+        };
+    }
+
+
+    /* ========================================================
+       179 — APP WINDOW SIZE GET
+       ======================================================== */
+
+    function getSize(
+        appId
+    ) {
+
+        const state =
+            getWindowState(
+                appId
+            );
+
+        if (!state) {
+            return null;
+        }
+
+        return {
+
+            width:
+                state.width,
+
+            height:
+                state.height
+
+        };
+    }
+
+
+    /* ========================================================
+       180 — APP WINDOW MOVE
+       ======================================================== */
+
+    async function move(
+        appId,
+        x,
+        y
+    ) {
+
+        const position = {
+
+            x:
+                Number.isFinite(
+                    Number(x)
+                )
+                    ? Number(x)
+                    : 0,
+
+            y:
+                Number.isFinite(
+                    Number(y)
+                )
+                    ? Number(y)
+                    : 0
+
+        };
+
+        return setPosition(
+            appId,
+            position
+        );
+    }
+
+
+    /* ========================================================
+       181 — APP WINDOW RESIZE
+       ======================================================== */
+
+    async function resize(
+        appId,
+        width,
+        height
+    ) {
+
+        const size = {
+
+            width:
+                Math.max(
+                    1,
+                    Number(width) || 1
+                ),
+
+            height:
+                Math.max(
+                    1,
+                    Number(height) || 1
+                )
+
+        };
+
+        return setSize(
+            appId,
+            size
+        );
+    }
+
+
+    /* ========================================================
+       182 — APP WINDOW TOGGLE MAXIMIZE
+       ======================================================== */
+
+    async function toggleMaximize(
+        appId
+    ) {
+
+        const state =
+            getWindowState(
+                appId
+            );
+
+        if (!state) {
+            return false;
+        }
+
+        if (
+            state.maximized ===
+            true
+        ) {
+
+            return restore(
+                appId
+            );
+        }
+
+        return maximize(
+            appId
+        );
+    }
+
+
+    /* ========================================================
+       183 — APP WINDOW TOGGLE PIP
+       ======================================================== */
+
+    async function togglePip(
+        appId
+    ) {
+
+        const state =
+            getWindowState(
+                appId
+            );
+
+        if (!state) {
+            return false;
+        }
+
+        return setPip(
+            appId,
+            state.pip !== true
+        );
+    }
+
+
+    /* ========================================================
+       184 — APP WINDOW TOGGLE FULLSCREEN
+       ======================================================== */
+
+    async function toggleFullscreen(
+        appId
+    ) {
+
+        const state =
+            getWindowState(
+                appId
+            );
+
+        if (!state) {
+            return false;
+        }
+
+        return fullscreen(
+            appId,
+            state.fullscreen !== true
+        );
+    }
+
+
+    /* ========================================================
+       185 — APP WINDOW ACTIVATE
+       ======================================================== */
+
+    async function activate(
+        appId
+    ) {
+
+        const result =
+            await focus(
+                appId
+            );
+
+        if (!result) {
+            return false;
+        }
+
+        await show(
+            appId
+        );
+
+        return true;
+    }
+           /* ========================================================
+       186 — APP WINDOW BOUNDS
+       ======================================================== */
+
+    async function setBounds(
+        appId,
+        bounds = {}
+    ) {
+
+        const app =
+            get(
+                appId
+            );
+
+        if (!app) {
+            return false;
+        }
+
+        const next =
+            {};
+
+        if (
+            Number.isFinite(
+                Number(
+                    bounds.x
+                )
+            )
+        ) {
+
+            next.x =
+                Number(
+                    bounds.x
+                );
+        }
+
+        if (
+            Number.isFinite(
+                Number(
+                    bounds.y
+                )
+            )
+        ) {
+
+            next.y =
+                Number(
+                    bounds.y
+                );
+        }
+
+        if (
+            Number.isFinite(
+                Number(
+                    bounds.width
+                )
+            )
+        ) {
+
+            next.width =
+                Math.max(
+                    1,
+                    Number(
+                        bounds.width
+                    )
+                );
+        }
+
+        if (
+            Number.isFinite(
+                Number(
+                    bounds.height
+                )
+            )
+        ) {
+
+            next.height =
+                Math.max(
+                    1,
+                    Number(
+                        bounds.height
+                    )
+                );
+        }
+
+        if (
+            Object.keys(
+                next
+            ).length === 0
+        ) {
+
+            return false;
+        }
+
+        try {
+
+            const position = {};
+
+            if (
+                Object.prototype.hasOwnProperty.call(
+                    next,
+                    "x"
+                )
+            ) {
+
+                position.x =
+                    next.x;
+            }
+
+            if (
+                Object.prototype.hasOwnProperty.call(
+                    next,
+                    "y"
+                )
+            ) {
+
+                position.y =
+                    next.y;
+            }
+
+            const size = {};
+
+            if (
+                Object.prototype.hasOwnProperty.call(
+                    next,
+                    "width"
+                )
+            ) {
+
+                size.width =
+                    next.width;
+            }
+
+            if (
+                Object.prototype.hasOwnProperty.call(
+                    next,
+                    "height"
+                )
+            ) {
+
+                size.height =
+                    next.height;
+            }
+
+            if (
+                Object.keys(
+                    position
+                ).length > 0
+            ) {
+
+                await setPosition(
+                    app.id,
+                    position
+                );
+            }
+
+            if (
+                Object.keys(
+                    size
+                ).length > 0
+            ) {
+
+                await setSize(
+                    app.id,
+                    size
+                );
+            }
+
+            emit(
+                "app-window-bounds-changed",
+                {
+
+                    app,
+
+                    bounds:
+                        next
+
+                }
+            );
+
+            return true;
+
+        } catch (
+            exception
+        ) {
+
+            reportError(
+                exception,
+                "App Window Bounds: " +
+                app.id
+            );
+
+            return false;
+        }
+    }
+
+
+    /* ========================================================
+       187 — APP WINDOW SNAP
+       ======================================================== */
+
+    async function snap(
+        appId,
+        target = "center"
+    ) {
+
+        const app =
+            get(
+                appId
+            );
+
+        if (!app) {
+            return false;
+        }
+
+        const window =
+            getWindow(
+                app.id
+            );
+
+        const manager =
+            getWindowManager();
+
+        if (!window) {
+            return false;
+        }
+
+        try {
+
+            const windowId =
+                window.id ||
+                window.windowId;
+
+            if (
+                manager &&
+                hasMethod(
+                    manager,
+                    "snap"
+                )
+            ) {
+
+                await safeAsyncResult(
+                    manager.snap(
+                        windowId,
+                        target
+                    )
+                );
+
+            } else {
+
+                const viewport =
+                    getViewport();
+
+                if (
+                    !viewport
+                ) {
+
+                    return false;
+                }
+
+                const width =
+                    Number(
+                        window.width
+                    ) ||
+                    480;
+
+                const height =
+                    Number(
+                        window.height
+                    ) ||
+                    360;
+
+                const viewportWidth =
+                    Number(
+                        viewport.width
+                    ) ||
+                    0;
+
+                const viewportHeight =
+                    Number(
+                        viewport.height
+                    ) ||
+                    0;
+
+                let x =
+                    Math.max(
+                        0,
+                        (
+                            viewportWidth -
+                            width
+                        ) / 2
+                    );
+
+                let y =
+                    Math.max(
+                        0,
+                        (
+                            viewportHeight -
+                            height
+                        ) / 2
+                    );
+
+                const normalizedTarget =
+                    String(
+                        target ||
+                        "center"
+                    )
+                        .toLowerCase();
+
+                if (
+                    normalizedTarget ===
+                    "left"
+                ) {
+
+                    x = 0;
+
+                } else if (
+                    normalizedTarget ===
+                    "right"
+                ) {
+
+                    x =
+                        Math.max(
+                            0,
+                            viewportWidth -
+                            width
+                        );
+
+                } else if (
+                    normalizedTarget ===
+                    "top"
+                ) {
+
+                    y = 0;
+
+                } else if (
+                    normalizedTarget ===
+                    "bottom"
+                ) {
+
+                    y =
+                        Math.max(
+                            0,
+                            viewportHeight -
+                            height
+                        );
+                }
+
+                await setPosition(
+                    app.id,
+                    {
+                        x,
+                        y
+                    }
+                );
+            }
+
+            emit(
+                "app-window-snapped",
+                {
+
+                    app,
+
+                    target
+
+                }
+            );
+
+            return true;
+
+        } catch (
+            exception
+        ) {
+
+            reportError(
+                exception,
+                "App Window Snap: " +
+                app.id
+            );
+
+            return false;
+        }
+    }
+
+
+    /* ========================================================
+       188 — APP WINDOW CENTER
+       ======================================================== */
+
+    async function center(
+        appId
+    ) {
+
+        return snap(
+            appId,
+            "center"
+        );
+    }
+
+
+    /* ========================================================
+       189 — APP WINDOW FIT VIEWPORT
+       ======================================================== */
+
+    async function fitViewport(
+        appId,
+        margin = 16
+    ) {
+
+        const app =
+            get(
+                appId
+            );
+
+        if (!app) {
+            return false;
+        }
+
+        const viewport =
+            getViewport();
+
+        if (!viewport) {
+            return false;
+        }
+
+        const width =
+            Math.max(
+                1,
+                Number(
+                    viewport.width
+                ) -
+                (
+                    Number(
+                        margin
+                    ) || 0
+                ) * 2
+            );
+
+        const height =
+            Math.max(
+                1,
+                Number(
+                    viewport.height
+                ) -
+                (
+                    Number(
+                        margin
+                    ) || 0
+                ) * 2
+            );
+
+        try {
+
+            await setBounds(
+                app.id,
+                {
+
+                    x:
+                        Number(
+                            margin
+                        ) || 0,
+
+                    y:
+                        Number(
+                            margin
+                        ) || 0,
+
+                    width,
+
+                    height
+
+                }
+            );
+
+            emit(
+                "app-window-fit-viewport",
+                {
+
+                    app,
+
+                    width,
+
+                    height,
+
+                    margin
+
+                }
+            );
+
+            return true;
+
+        } catch (
+            exception
+        ) {
+
+            reportError(
+                exception,
+                "App Window Fit Viewport: " +
+                app.id
+            );
+
+            return false;
+        }
+    }
+
+
+    /* ========================================================
+       190 — APP WINDOW RESPONSIVE MODE
+       ======================================================== */
+
+    function getResponsiveMode() {
+
+        const viewport =
+            getViewport();
+
+        if (!viewport) {
+
+            return "desktop";
+        }
+
+        const width =
+            Number(
+                viewport.width
+            ) || 0;
+
+        if (
+            width <= 480
+        ) {
+
+            return "mobile";
+
+        }
+
+        if (
+            width <= 768
+        ) {
+
+            return "tablet";
+
+        }
+
+        if (
+            width <= 1200
+        ) {
+
+            return "laptop";
+        }
+
+        return "desktop";
+    }
+
+
+    /* ========================================================
+       191 — APP WINDOW RESPONSIVE ADJUST
+       ======================================================== */
+
+    async function applyResponsiveWindow(
+        appId
+    ) {
+
+        const app =
+            get(
+                appId
+            );
+
+        if (!app) {
+            return false;
+        }
+
+        const viewport =
+            getViewport();
+
+        if (!viewport) {
+            return false;
+        }
+
+        const mode =
+            getResponsiveMode();
+
+        const width =
+            Number(
+                viewport.width
+            ) || 0;
+
+        const height =
+            Number(
+                viewport.height
+            ) || 0;
+
+        let bounds;
+
+        if (
+            mode ===
+            "mobile"
+        ) {
+
+            bounds = {
+
+                x: 0,
+
+                y: 0,
+
+                width,
+
+                height
+
+            };
+
+        } else if (
+            mode ===
+            "tablet"
+        ) {
+
+            bounds = {
+
+                x: 8,
+
+                y: 8,
+
+                width:
+                    Math.max(
+                        1,
+                        width - 16
+                    ),
+
+                height:
+                    Math.max(
+                        1,
+                        height - 16
+                    )
+
+            };
+
+        } else {
+
+            bounds = {
+
+                x:
+                    undefined,
+
+                y:
+                    undefined,
+
+                width:
+                    Math.min(
+                        width - 32,
+                        1200
+                    ),
+
+                height:
+                    Math.min(
+                        height - 32,
+                        900
+                    )
+
+            };
+        }
+
+        if (
+            bounds.x ===
+            undefined
+        ) {
+
+            delete bounds.x;
+        }
+
+        if (
+            bounds.y ===
+            undefined
+        ) {
+
+            delete bounds.y;
+        }
+
+        await setBounds(
+            app.id,
+            bounds
+        );
+
+        emit(
+            "app-window-responsive-adjusted",
+            {
+
+                app,
+
+                mode,
+
+                bounds
+
+            }
+        );
+
+        return true;
+    }
+       /* ========================================================
    162 — APP RUNTIME CONTRACT
    ======================================================== */
 
@@ -16754,11 +19105,9 @@
                 ...base
 
             };
-
         }
 
         return base;
-
     }
 
 
@@ -16821,7 +19170,6 @@
                 now()
 
         };
-
     }
 
 
@@ -16869,17 +19217,13 @@
                 ) {
 
                     return false;
-
                 }
-
             }
 
             emit(
                 "app-before-open",
                 {
-
                     ...context
-
                 }
             );
 
@@ -16896,9 +19240,7 @@
             );
 
             return false;
-
         }
-
     }
 
 
@@ -16938,15 +19280,12 @@
                         context
                     )
                 );
-
             }
 
             emit(
                 "app-after-open",
                 {
-
                     ...context
-
                 }
             );
 
@@ -16963,9 +19302,7 @@
             );
 
             return false;
-
         }
-
     }
 
 
@@ -17013,17 +19350,13 @@
                 ) {
 
                     return false;
-
                 }
-
             }
 
             emit(
                 "app-before-close",
                 {
-
                     ...context
-
                 }
             );
 
@@ -17040,304 +19373,9 @@
             );
 
             return false;
-
         }
-
     }
-
-
-/* ========================================================
-   167 — APP AFTER CLOSE
-   ======================================================== */
-
-    async function afterClose(
-        appId,
-        options = {}
-    ) {
-
-        const app =
-            get(
-                appId
-            );
-
-        if (!app) {
-            return false;
-        }
-
-        const context =
-            createLifecycleContext(
-                app.id,
-                options
-            );
-
-        try {
-
-            if (
-                typeof app.afterClose ===
-                "function"
-            ) {
-
-                await safeAsyncResult(
-                    app.afterClose(
-                        context
-                    )
-                );
-
-            }
-
-            emit(
-                "app-after-close",
-                {
-
-                    ...context
-
-                }
-            );
-
-            return true;
-
-        } catch (
-            exception
-        ) {
-
-            reportError(
-                exception,
-                "App After Close: " +
-                app.id
-            );
-
-            return false;
-
-        }
-
-    }
-
-
-/* ========================================================
-   168 — APP BEFORE START
-   ======================================================== */
-
-    async function beforeStart(
-        appId,
-        options = {}
-    ) {
-
-        const app =
-            get(
-                appId
-            );
-
-        if (!app) {
-            return false;
-        }
-
-        const context =
-            createLifecycleContext(
-                app.id,
-                options
-            );
-
-        try {
-
-            if (
-                typeof app.beforeStart ===
-                "function"
-            ) {
-
-                const result =
-                    await safeAsyncResult(
-                        app.beforeStart(
-                            context
-                        )
-                    );
-
-                if (
-                    result ===
-                    false
-                ) {
-
-                    return false;
-
-                }
-
-            }
-
-            emit(
-                "app-before-start",
-                {
-
-                    ...context
-
-                }
-            );
-
-            return true;
-
-        } catch (
-            exception
-        ) {
-
-            reportError(
-                exception,
-                "App Before Start: " +
-                app.id
-            );
-
-            return false;
-
-        }
-
-    }
-
-
-/* ========================================================
-   169 — APP AFTER START
-   ======================================================== */
-
-    async function afterStart(
-        appId,
-        options = {}
-    ) {
-
-        const app =
-            get(
-                appId
-            );
-
-        if (!app) {
-            return false;
-        }
-
-        const context =
-            createLifecycleContext(
-                app.id,
-                options
-            );
-
-        try {
-
-            if (
-                typeof app.afterStart ===
-                "function"
-            ) {
-
-                await safeAsyncResult(
-                    app.afterStart(
-                        context
-                    )
-                );
-
-            }
-
-            emit(
-                "app-after-start",
-                {
-
-                    ...context
-
-                }
-            );
-
-            return true;
-
-        } catch (
-            exception
-        ) {
-
-            reportError(
-                exception,
-                "App After Start: " +
-                app.id
-            );
-
-            return false;
-
-        }
-
-    }
-
-
-/* ========================================================
-   170 — APP BEFORE STOP
-   ======================================================== */
-
-    async function beforeStop(
-        appId,
-        options = {}
-    ) {
-
-        const app =
-            get(
-                appId
-            );
-
-        if (!app) {
-            return false;
-        }
-
-        const context =
-            createLifecycleContext(
-                app.id,
-                options
-            );
-
-        try {
-
-            if (
-                typeof app.beforeStop ===
-                "function"
-            ) {
-
-                const result =
-                    await safeAsyncResult(
-                        app.beforeStop(
-                            context
-                        )
-                    );
-
-                if (
-                    result ===
-                    false
-                ) {
-
-                    return false;
-
-                }
-
-            }
-
-            emit(
-                "app-before-stop",
-                {
-
-                    ...context
-
-                }
-            );
-
-            return true;
-
-        } catch (
-            exception
-        ) {
-
-            reportError(
-                exception,
-                "App Before Stop: " +
-                app.id
-            );
-
-            return false;
-
-        }
-
-    }
-
-
-/* ========================================================
-   ENDE TEIL 13
-   ======================================================== */
- /* ============================================================
+       /* ============================================================
    HALDO AI OS
    js/app-manager.js
    TEIL 14 / 16
@@ -17406,7 +19444,6 @@
             );
 
             return false;
-
         }
 
     }
@@ -17456,7 +19493,6 @@
                 ) {
 
                     return false;
-
                 }
 
             }
@@ -17483,7 +19519,6 @@
             );
 
             return false;
-
         }
 
     }
@@ -17550,7 +19585,6 @@
             );
 
             return false;
-
         }
 
     }
@@ -17612,7 +19646,6 @@
                 ) {
 
                     return false;
-
                 }
 
             }
@@ -17646,7 +19679,6 @@
             );
 
             return false;
-
         }
 
     }
@@ -17696,7 +19728,6 @@
         );
 
         return true;
-
     }
 
 
@@ -17748,7 +19779,6 @@
             );
 
             return true;
-
         }
 
         const allowed =
@@ -17832,7 +19862,6 @@
 
                 state.activeAppId =
                     null;
-
             }
 
             emit(
@@ -17885,7 +19914,6 @@
             );
 
             return false;
-
         }
 
     }
@@ -17962,7 +19990,6 @@
         );
 
         return results;
-
     }
 
 
@@ -17997,7 +20024,6 @@
         ) {
 
             return false;
-
         }
 
         try {
@@ -18081,7 +20107,6 @@
             );
 
             return false;
-
         }
 
     }
@@ -18129,11 +20154,9 @@
                     id,
                     options
                 );
-
             }
 
             return true;
-
         }
 
         const allowed =
@@ -18190,7 +20213,6 @@
 
                     }
                 );
-
             }
 
             if (
@@ -18202,7 +20224,6 @@
                     id,
                     options
                 );
-
             }
 
             state.statistics.closes +=
@@ -18215,7 +20236,6 @@
 
                 state.activeAppId =
                     null;
-
             }
 
             updateAppState(
@@ -18319,7 +20339,6 @@
             );
 
             return false;
-
         }
 
     }
@@ -18399,14 +20418,13 @@
         );
 
         return results;
-
     }
 
 
 /* ========================================================
    ENDE TEIL 14
    ======================================================== */
- /* ============================================================
+       /* ============================================================
    HALDO AI OS
    js/app-manager.js
    TEIL 15 / 16
@@ -18545,7 +20563,6 @@
             );
 
             return false;
-
         }
 
     }
@@ -18595,7 +20612,6 @@
                 ) {
 
                     return false;
-
                 }
 
             } else {
@@ -18643,7 +20659,6 @@
             );
 
             return false;
-
         }
 
     }
@@ -18693,7 +20708,6 @@
                 ) {
 
                     return false;
-
                 }
 
             } else {
@@ -18728,6 +20742,25 @@
                             )
                         );
 
+                    } else {
+
+                        const element =
+                            window.element ||
+                            window.el ||
+                            null;
+
+                        if (
+                            element
+                        ) {
+
+                            element.dispatchEvent(
+                                new Event(
+                                    "haldo:app-refresh"
+                                )
+                            );
+
+                        }
+
                     }
 
                 }
@@ -18758,203 +20791,61 @@
             );
 
             return false;
-
         }
 
     }
 
 
 /* ========================================================
-   184 — APP TOGGLE
+   184 — REFRESH ALL APPS
    ======================================================== */
 
-    async function toggle(
-        appId,
+    async function refreshAll(
         options = {}
     ) {
-
-        const app =
-            get(
-                appId
-            );
-
-        if (!app) {
-            return false;
-        }
-
-        if (
-            isOpen(
-                app.id
-            )
-        ) {
-
-            return close(
-                app.id,
-                options
-            );
-
-        }
-
-        return open(
-            app.id,
-            options
-        );
-
-    }
-
-
-/* ========================================================
-   185 — APP ACTIVATE
-   ======================================================== */
-
-    async function activateApp(
-        appId,
-        options = {}
-    ) {
-
-        const app =
-            get(
-                appId
-            );
-
-        if (!app) {
-            return false;
-        }
-
-        const current =
-            createInitialState(
-                app.id
-            );
-
-        if (
-            !current.open
-        ) {
-
-            const result =
-                await open(
-                    app.id,
-                    options
-                );
-
-            return !!result;
-
-        }
-
-        return focus(
-            app.id
-        );
-
-    }
-
-
-/* ========================================================
-   186 — DEACTIVATE APP
-   ======================================================== */
-
-    async function deactivate(
-        appId,
-        options = {}
-    ) {
-
-        const app =
-            get(
-                appId
-            );
-
-        if (!app) {
-            return false;
-        }
-
-        const id =
-            normalizeId(
-                app.id
-            );
-
-        const current =
-            createInitialState(
-                id
-            );
-
-        updateAppState(
-            id,
-            {
-
-                active:
-                    false
-
-            }
-        );
-
-        if (
-            state.activeAppId ===
-            id
-        ) {
-
-            state.activeAppId =
-                null;
-
-        }
-
-        emit(
-            "app-deactivated",
-            {
-
-                app,
-
-                options
-
-            }
-        );
-
-        return true;
-
-    }
-
-
-/* ========================================================
-   187 — ACTIVATE ONLY ONE APP
-   ======================================================== */
-
-    async function activateOnly(
-        appId,
-        options = {}
-    ) {
-
-        const app =
-            get(
-                appId
-            );
-
-        if (!app) {
-            return false;
-        }
-
-        const id =
-            normalizeId(
-                app.id
-            );
 
         const apps =
             getOpenApps();
 
+        const results =
+            [];
+
         for (
-            const other of
-            apps
+            const app of apps
         ) {
 
-            if (
-                normalizeId(
-                    other.id
-                ) !==
-                id
-            ) {
+            try {
 
-                updateAppState(
-                    other.id,
+                results.push(
                     {
 
-                        active:
-                            false
+                        id:
+                            app.id,
+
+                        result:
+                            await refresh(
+                                app.id,
+                                options
+                            )
+
+                    }
+                );
+
+            } catch (
+                exception
+            ) {
+
+                results.push(
+                    {
+
+                        id:
+                            app.id,
+
+                        result:
+                            false,
+
+                        error:
+                            exception.message
 
                     }
                 );
@@ -18963,742 +20854,100 @@
 
         }
 
-        const result =
-            await activateApp(
-                id,
-                options
-            );
-
-        if (!result) {
-            return false;
-        }
-
-        state.activeAppId =
-            id;
-
-        updateAppState(
-            id,
-            {
-
-                active:
-                    true,
-
-                visible:
-                    true,
-
-                minimized:
-                    false
-
-            }
-        );
-
         emit(
-            "app-activated-only",
+            "apps-refreshed",
             {
 
-                app,
+                results,
 
-                options
+                count:
+                    results.length
 
             }
         );
 
-        return true;
-
+        return results;
     }
 
 
 /* ========================================================
-   188 — APP VISIBILITY
+   185 — RESTART ALL APPS
    ======================================================== */
 
-    function isVisible(
-        appId
-    ) {
-
-        const app =
-            get(
-                appId
-            );
-
-        if (!app) {
-            return false;
-        }
-
-        const appState =
-            getAppState(
-                app.id
-            );
-
-        return (
-            appState.visible ===
-            true
-        );
-
-    }
-
-
-/* ========================================================
-   189 — APP OPEN STATE
-   ======================================================== */
-
-    function isOpen(
-        appId
-    ) {
-
-        const app =
-            get(
-                appId
-            );
-
-        if (!app) {
-            return false;
-        }
-
-        const appState =
-            getAppState(
-                app.id
-            );
-
-        return (
-            appState.open ===
-            true
-        );
-
-    }
-
-
-/* ========================================================
-   190 — APP RUNNING STATE
-   ======================================================== */
-
-    function isRunning(
-        appId
-    ) {
-
-        const app =
-            get(
-                appId
-            );
-
-        if (!app) {
-            return false;
-        }
-
-        const id =
-            normalizeId(
-                app.id
-            );
-
-        const instance =
-            state.instances.get(
-                id
-            );
-
-        if (
-            instance &&
-            instance.started ===
-            true
-        ) {
-
-            return true;
-
-        }
-
-        const appState =
-            getAppState(
-                id
-            );
-
-        return (
-            appState.started ===
-            true ||
-            appState.running ===
-            true
-        );
-
-    }
-
-
-/* ========================================================
-   191 — APP READY STATE
-   ======================================================== */
-
-    function isReady(
-        appId
-    ) {
-
-        const app =
-            get(
-                appId
-            );
-
-        if (!app) {
-            return false;
-        }
-
-        const appState =
-            getAppState(
-                app.id
-            );
-
-        return (
-            appState.ready ===
-            true
-        );
-
-    }
-
-
-/* ========================================================
-   192 — APP INITIALIZED STATE
-   ======================================================== */
-
-    function isAppInitialized(
-        appId
-    ) {
-
-        const app =
-            get(
-                appId
-            );
-
-        if (!app) {
-            return false;
-        }
-
-        const id =
-            normalizeId(
-                app.id
-            );
-
-        const instance =
-            state.instances.get(
-                id
-            );
-
-        if (
-            instance &&
-            instance.initialized ===
-            true
-        ) {
-
-            return true;
-
-        }
-
-        const appState =
-            getAppState(
-                id
-            );
-
-        return (
-            appState.initialized ===
-            true
-        );
-
-    }
-
-
-/* ========================================================
-   193 — APP ENABLE
-   ======================================================== */
-
-    async function enable(
-        appId
-    ) {
-
-        const app =
-            get(
-                appId
-            );
-
-        if (!app) {
-            return false;
-        }
-
-        try {
-
-            app.enabled =
-                true;
-
-            updateAppState(
-                app.id,
-                {
-
-                    enabled:
-                        true
-
-                }
-            );
-
-            emit(
-                "app-enabled",
-                {
-
-                    app
-
-                }
-            );
-
-            return true;
-
-        } catch (
-            exception
-        ) {
-
-            reportError(
-                exception,
-                "App Enable: " +
-                app.id
-            );
-
-            return false;
-
-        }
-
-    }
-
-
-/* ========================================================
-   194 — APP DISABLE
-   ======================================================== */
-
-    async function disable(
-        appId,
+    async function restartAll(
         options = {}
     ) {
 
-        const app =
-            get(
-                appId
-            );
+        const apps =
+            getOpenApps();
 
-        if (!app) {
-            return false;
-        }
+        const results =
+            [];
 
-        try {
-
-            if (
-                options.close !==
-                false &&
-                isOpen(
-                    app.id
-                )
-            ) {
-
-                await close(
-                    app.id,
-                    options
-                );
-
-            }
-
-            app.enabled =
-                false;
-
-            updateAppState(
-                app.id,
-                {
-
-                    enabled:
-                        false,
-
-                    active:
-                        false
-
-                }
-            );
-
-            if (
-                state.activeAppId ===
-                normalizeId(
-                    app.id
-                )
-            ) {
-
-                state.activeAppId =
-                    null;
-
-            }
-
-            emit(
-                "app-disabled",
-                {
-
-                    app,
-
-                    options
-
-                }
-            );
-
-            return true;
-
-        } catch (
-            exception
-        ) {
-
-            reportError(
-                exception,
-                "App Disable: " +
-                app.id
-            );
-
-            return false;
-
-        }
-
-    }
-
-
-/* ========================================================
-   195 — APP RESET STATE
-   ======================================================== */
-
-    function resetAppState(
-        appId
-    ) {
-
-        const app =
-            get(
-                appId
-            );
-
-        if (!app) {
-            return false;
-        }
-
-        const id =
-            normalizeId(
-                app.id
-            );
-
-        const previous =
-            getAppState(
-                id
-            );
-
-        const fresh =
-            createInitialState(
-                id,
-                true
-            );
-
-        state.appStates.set(
-            id,
-            {
-
-                ...fresh,
-
-                appId:
-                    id,
-
-                enabled:
-                    app.enabled !==
-                    false,
-
-                status:
-                    "registered",
-
-                lifecycle:
-                    "registered",
-
-                initialized:
-                    false,
-
-                started:
-                    false,
-
-                running:
-                    false,
-
-                ready:
-                    false,
-
-                open:
-                    false,
-
-                active:
-                    false,
-
-                visible:
-                    false,
-
-                minimized:
-                    false,
-
-                maximized:
-                    false,
-
-                pip:
-                    false,
-
-                windowId:
-                    null,
-
-                loading:
-                    false,
-
-                error:
-                    null,
-
-                updatedAt:
-                    now()
-
-            }
-        );
-
-        state.instances.delete(
-            id
-        );
-
-        state.contexts.delete(
-            id
-        );
-
-        if (
-            state.activeAppId ===
-            id
-        ) {
-
-            state.activeAppId =
-                null;
-
-        }
-
-        const current =
-            getAppState(
-                id
-            );
-
-        notifyStateChange(
-            id,
-            previous,
-            current
-        );
-
-        emit(
-            "app-state-reset",
-            {
-
-                app,
-
-                previous,
-
-                current
-
-            }
-        );
-
-        return true;
-
-    }
-
-
-/* ========================================================
-   196 — APP ERROR RESET
-   ======================================================== */
-
-    function clearError(
-        appId
-    ) {
-
-        const app =
-            get(
-                appId
-            );
-
-        if (!app) {
-            return false;
-        }
-
-        const id =
-            normalizeId(
-                app.id
-            );
-
-        updateAppState(
-            id,
-            {
-
-                error:
-                    null,
-
-                status:
-                    isOpen(id)
-                        ? "open"
-                        : (
-                            isRunning(id)
-                                ? "running"
-                                : "ready"
-                        )
-
-            }
-        );
-
-        emit(
-            "app-error-cleared",
-            {
-
-                app
-
-            }
-        );
-
-        return true;
-
-    }
-
-
-/* ========================================================
-   197 — APP DIAGNOSTICS
-   ======================================================== */
-
-    async function diagnoseApp(
-        appId,
-        options = {}
-    ) {
-
-        const app =
-            get(
-                appId
-            );
-
-        if (!app) {
-            return null;
-        }
-
-        const id =
-            normalizeId(
-                app.id
-            );
-
-        const appState =
-            getAppState(
-                id
-            );
-
-        const dependencyStatus =
-            checkDependencies(
-                app
-            );
-
-        const permissionStatus =
-            checkPermissions(
-                app,
-                options
-            );
-
-        const context =
-            getRuntimeContext(
-                id
-            );
-
-        const result = {
-
-            id,
-
-            app,
-
-            metadata:
-                getMetadata(
-                    id
-                ),
-
-            state:
-                appState,
-
-            context,
-
-            initialized:
-                isAppInitialized(
-                    id
-                ),
-
-            running:
-                isRunning(
-                    id
-                ),
-
-            open:
-                isOpen(
-                    id
-                ),
-
-            visible:
-                isVisible(
-                    id
-                ),
-
-            ready:
-                isReady(
-                    id
-                ),
-
-            dependencies:
-                dependencyStatus,
-
-            permissions:
-                permissionStatus,
-
-            window:
-                getWindow(
-                    id
-                ),
-
-            timestamp:
-                now()
-
-        };
-
-        const system =
-            getSystem();
-
-        if (
-            system &&
-            hasMethod(
-                system,
-                "diagnoseApp"
-            )
+        for (
+            const app of apps
         ) {
 
             try {
 
-                result.system =
-                    await safeAsyncResult(
-                        system.diagnoseApp(
-                            id,
-                            options
-                        )
-                    );
+                results.push(
+                    {
+
+                        id:
+                            app.id,
+
+                        result:
+                            await restart(
+                                app.id,
+                                options
+                            )
+
+                    }
+                );
 
             } catch (
                 exception
             ) {
 
-                result.systemError =
-                    exception.message;
+                results.push(
+                    {
+
+                        id:
+                            app.id,
+
+                        result:
+                            false,
+
+                        error:
+                            exception.message
+
+                    }
+                );
 
             }
 
         }
 
         emit(
-            "app-diagnosed",
-            result
+            "apps-restarted",
+            {
+
+                results,
+
+                count:
+                    results.length
+
+            }
         );
 
-        return result;
-
+        return results;
     }
 
 
 /* ========================================================
    ENDE TEIL 15
    ======================================================== */
- /* ============================================================
+       /* ============================================================
    HALDO AI OS
    js/app-manager.js
    TEIL 16 / 16
@@ -19825,7 +21074,6 @@
                 )
 
         };
-
     }
 
 
@@ -19914,7 +21162,6 @@
         }
 
         return result;
-
     }
 
 
@@ -19976,7 +21223,6 @@
                 now()
 
         };
-
     }
 
 
@@ -20010,7 +21256,6 @@
         }
 
         return result;
-
     }
 
 
@@ -20023,7 +21268,7 @@
         const appStates =
             {};
 
-        state.appStates.forEach(
+        state.appState.forEach(
             (
                 value,
                 key
@@ -20032,7 +21277,7 @@
                 appStates[
                     key
                 ] =
-                    cloneData(
+                    clone(
                         value
                     );
 
@@ -20050,7 +21295,7 @@
             appStates,
 
             statistics:
-                cloneData(
+                clone(
                     state.statistics
                 ),
 
@@ -20058,7 +21303,6 @@
                 now()
 
         };
-
     }
 
 
@@ -20078,7 +21322,6 @@
         ) {
 
             return false;
-
         }
 
         try {
@@ -20112,7 +21355,7 @@
                                 id,
                                 {
 
-                                    ...cloneData(
+                                    ...clone(
                                         value
                                     ),
 
@@ -20169,9 +21412,7 @@
             );
 
             return false;
-
         }
-
     }
 
 
@@ -20190,14 +21431,12 @@
         ) {
 
             return () => {};
-
         }
 
         return on(
             eventName,
             listener
         );
-
     }
 
 
@@ -20216,7 +21455,6 @@
         ) {
 
             return () => {};
-
         }
 
         let active =
@@ -20252,7 +21490,6 @@
             );
 
         return unsubscribe;
-
     }
 
 
@@ -20271,14 +21508,12 @@
         ) {
 
             return false;
-
         }
 
         return off(
             eventName,
             listener
         );
-
     }
 
 
@@ -20336,7 +21571,7 @@
                 state.activeAppId,
 
             statistics:
-                cloneData(
+                clone(
                     state.statistics
                 ),
 
@@ -20344,7 +21579,6 @@
                 now()
 
         };
-
     }
 
 
@@ -20422,7 +21656,6 @@
         );
 
         return result;
-
     }
 
 
@@ -20455,7 +21688,7 @@
 
             }
 
-            state.appStates.clear();
+            state.appState.clear();
             state.contexts.clear();
             state.instances.clear();
 
@@ -20505,13 +21738,217 @@
             );
 
             return false;
-
         }
 
     }
 
 
 /* ========================================================
+   PUBLIC API — COMPLETE DECLARED FUNCTION SURFACE
+   ======================================================== */
+
+    Object.assign(
+        api,
+        {
+
+            getKernel,
+            getSystem,
+            getRegistry,
+            getContract,
+            getRuntime,
+            getPlatform,
+            getRouter,
+            getWindowManager,
+            getLauncher,
+            getStorage,
+            getAI,
+            getLanguage,
+            getVoice,
+            getNotifications,
+            getKeyboard,
+            getDiagnostics,
+            getConfig,
+            hasMethod,
+            isObject,
+            normalizeId,
+            clone,
+            safeAsyncResult,
+            dispatch,
+            now,
+            createTimestamp,
+            createStatistics,
+            log,
+            warn,
+            errorLog,
+            reportError,
+            on,
+            off,
+            emit,
+            normalizeApp,
+            createInitialState,
+            updateAppState,
+            getAppState,
+            connectKernel,
+            connectSystem,
+            connectRegistry,
+            connectContract,
+            connectRuntime,
+            connectServices,
+            register,
+            registerApp,
+            unregister,
+            get,
+            registryApps,
+            getAll,
+            find,
+            exists,
+            search,
+            settingsKey,
+            getSettings,
+            setSettings,
+            resetSettings,
+            saveAppSettings,
+            loadAppSettings,
+            createAppContext,
+            checkDependencies,
+            checkPermissions,
+            initializeApp,
+            startApp,
+            stopApp,
+            routeToApp,
+            createWindow,
+            platformOpen,
+            open,
+            openApp,
+            activate,
+            deactivateOtherApps,
+            minimize,
+            maximize,
+            restore,
+            setPIP,
+            close,
+            closeApp,
+            restart,
+            refresh,
+            update,
+            destroy,
+            getState,
+            getContext,
+            getAppSettings,
+            setAppSettings,
+            getCapabilities,
+            hasCapability,
+            getAppService,
+            call,
+            execute,
+            health,
+            diagnostics,
+            getOpenApps,
+            getActiveApps,
+            getRunningApps,
+            activateNext,
+            activatePrevious,
+            closeAll,
+            stopAll,
+            refreshAll,
+            getStatistics,
+            resetAppState,
+            getActiveApp,
+            getActiveAppState,
+            findOne,
+            getVersion,
+            getMetadata,
+            snapshot,
+            broadcast,
+            sendMessage,
+            broadcastToOpenApps,
+            broadcastToAllApps,
+            lifecycle,
+            setVisible,
+            focus,
+            getWindow,
+            updateWindow,
+            syncWindowState,
+            getAppData,
+            setAppData,
+            clearAppData,
+            getPermissions,
+            hasPermission,
+            grantPermission,
+            revokePermission,
+            getDependencies,
+            getDependencyStatus,
+            ensureDependencies,
+            isReady,
+            waitUntilReady,
+            enable,
+            disable,
+            install,
+            uninstall,
+            exportApp,
+            importApp,
+            reload,
+            updateApp,
+            replace,
+            cloneApp,
+            cloneAndRegister,
+            configure,
+            getConfiguration,
+            setFeature,
+            hasFeature,
+            getFeatures,
+            getCategory,
+            getByCategory,
+            getByCapability,
+            getByPermission,
+            sortApps,
+            groupBy,
+            syncRegistry,
+            publishRegistry,
+            managerHealth,
+            managerDiagnostics,
+            reset,
+            initialize,
+            start,
+            stop,
+            isInitialized,
+            isStarted,
+            isOperational,
+            getManagerState,
+            subscribe,
+            emitLocal,
+            command,
+            getService,
+            getServices,
+            updateContext,
+            setContextService,
+            appEmit,
+            onApp,
+            watch,
+            notifyStateChange,
+            show,
+            hide,
+            setPosition,
+            setSize,
+            fullscreen,
+            setPip,
+            setTitle,
+            setIcon,
+            setTheme,
+            setLanguage,
+            setVoice,
+            getAIService,
+            getLanguageService,
+            getVoiceService,
+            getNotificationService,
+            getKeyboardService,
+            getStorageService,
+            getKernelService,
+            getSystemService,
+            getRouterService
+        }
+    );
+       /* ========================================================
    210 — PUBLIC API EXTENSION
    ======================================================== */
 
@@ -20520,101 +21957,69 @@
         {
 
             getRuntimeContext,
-
             getRuntimeContract,
-
             createLifecycleContext,
 
             beforeOpen,
-
             afterOpen,
-
             beforeClose,
-
             afterClose,
 
             beforeStart,
-
             afterStart,
-
             beforeStop,
-
             afterStop,
 
             beforeInitialize,
-
             afterInitialize,
 
             runLifecycleHook,
-
             startWithLifecycle,
 
             stopApp,
-
             stopAll,
 
             closeWindow,
-
             close,
-
             closeAll,
 
             restart,
-
             reload,
-
             refresh,
 
             toggle,
-
             activateApp,
-
             deactivate,
-
             activateOnly,
 
             isVisible,
-
             isOpen,
-
             isRunning,
-
             isReady,
-
             isAppInitialized,
 
             enable,
-
             disable,
 
             resetAppState,
-
             clearError,
 
             diagnoseApp,
-
             getAppInfo,
 
             list,
-
             snapshot,
-
             snapshotAll,
 
             exportState,
-
             importState,
 
             onApp,
-
             onceApp,
-
             offApp,
 
             health,
-
             diagnose,
-
             reset
 
         }
@@ -21304,12 +22709,9 @@
 
 
 /* ========================================================
-   228 — FINAL EXPORT
+   228 — FINAL EXPORT PREPARATION
+   The module body remains open until the IIFE closes below.
    ======================================================== */
-
-    return api;
-
-}
 
 
 /* ============================================================
@@ -21317,61 +22719,50 @@
    APP MANAGER MODULE END
    ============================================================ */
 
-try {
+    try {
 
-    if (
-        typeof window !==
-        "undefined"
-    ) {
-
-        const manager =
-            createHalDoAppManager();
+        connectServices();
 
         window.HalDoAppManager =
-            manager;
+            api;
 
-        if (
-            !window.HalDo
-        ) {
+        window.HalDoOSAppManager =
+            api;
 
-            window.HalDo =
-                {};
-
-        }
+        window.HalDo =
+            window.HalDo || {};
 
         window.HalDo.appManager =
-            manager;
+            api;
 
-        if (
-            !window.HalDoOS
-        ) {
-
-            window.HalDoOS =
-                {};
-
-        }
+        window.HalDoOS =
+            window.HalDoOS || {};
 
         window.HalDoOS.appManager =
-            manager;
+            api;
+
+    } catch (
+        exception
+    ) {
+
+        try {
+
+            console.error(
+                "[HalDo App Manager] Initialisierung fehlgeschlagen:",
+                exception
+            );
+
+        } catch (
+            ignored
+        ) {}
 
     }
 
-} catch (
-    exception
-) {
 
-    try {
-
-        console.error(
-            "[HalDo App Manager] Initialisierung fehlgeschlagen:",
-            exception
-        );
-
-    } catch (
-        ignored
-    ) {}
-
-}
+})(
+    window,
+    document
+);
 
 
 /* ============================================================
