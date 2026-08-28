@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#0a0e1a">
-    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#05080f">
     <title>HalDo AI OS 23.1.6 — Das ultimative Wissen</title>
 
     <style>
@@ -110,6 +109,9 @@
             overflow: hidden;
         }
 
+        /* =========================================================
+        SIDEBAR
+        ========================================================= */
         .sidebar {
             width: 140px;
             flex-shrink: 0;
@@ -158,6 +160,15 @@
             width: 14px;
             text-align: center;
             flex-shrink: 0;
+        }
+
+        .sidebar .app-btn .badge {
+            margin-left: auto;
+            font-size: 7px;
+            background: rgba(255, 80, 80, 0.15);
+            color: #ff6b6b;
+            padding: 0 4px;
+            border-radius: 3px;
         }
 
         .main-area {
@@ -355,6 +366,7 @@
             overflow: hidden;
             border-radius: 4px;
             background: radial-gradient(circle at 50% 50%, rgba(10, 20, 50, 0.6), #05080f);
+            cursor: pointer;
         }
 
         .cosmic-stars {
@@ -392,20 +404,23 @@
             transform: translate(-50%, -50%);
             border-radius: 50%;
             background: radial-gradient(circle at 35% 30%, #fffde2 0%, #fff7a0 14%, #ffd54b 35%, #ff9f1c 62%, #e85b16 84%, #7b1c0d 100%);
-            box-shadow: 0 0 40px rgba(255, 220, 70, 0.9), 0 0 80px rgba(255, 165, 40, 0.6), 0 0 150px rgba(255, 100, 20, 0.3), 0 0 300px rgba(255, 80, 0, 0.1);
+            box-shadow: 0 0 40px rgba(255, 220, 70, 0.9), 0 0 80px rgba(255, 165, 40, 0.6), 0 0 150px rgba(255, 100, 20, 0.3);
             animation: sunPulse 3s ease-in-out infinite;
             z-index: 10;
+            cursor: pointer;
+        }
+
+        .cosmic-sun:hover {
+            box-shadow: 0 0 60px rgba(255, 220, 70, 1), 0 0 120px rgba(255, 165, 40, 0.8);
         }
 
         @keyframes sunPulse {
             0%,
             100% {
                 transform: translate(-50%, -50%) scale(0.98);
-                box-shadow: 0 0 40px rgba(255, 220, 70, 0.9), 0 0 80px rgba(255, 165, 40, 0.6);
             }
             50% {
                 transform: translate(-50%, -50%) scale(1.04);
-                box-shadow: 0 0 60px rgba(255, 220, 70, 1), 0 0 120px rgba(255, 165, 40, 0.8), 0 0 200px rgba(255, 100, 20, 0.4);
             }
         }
 
@@ -420,24 +435,23 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 28px;
+            font-size: 24px;
             font-weight: 900;
             color: #0a0e1a;
             text-shadow: 0 0 20px rgba(255, 200, 80, 0.5);
             animation: logoPulse 3s ease-in-out infinite;
             border: 2px solid rgba(255, 200, 80, 0.15);
             background: rgba(255, 255, 255, 0.05);
+            pointer-events: none;
         }
 
         @keyframes logoPulse {
             0%,
             100% {
                 transform: translate(-50%, -50%) scale(1);
-                box-shadow: 0 0 20px rgba(255, 200, 80, 0.15);
             }
             50% {
                 transform: translate(-50%, -50%) scale(1.06);
-                box-shadow: 0 0 40px rgba(255, 200, 80, 0.35);
             }
         }
 
@@ -448,6 +462,7 @@
             border-radius: 50%;
         }
 
+        /* Planet Orbits */
         .cosmic-planet {
             position: absolute;
             border-radius: 50%;
@@ -487,6 +502,7 @@
             pointer-events: none;
         }
 
+        /* Living Logo */
         .living-logo {
             position: absolute;
             left: 50%;
@@ -693,7 +709,7 @@
         .cosmic-particle {
             position: absolute;
             border-radius: 50%;
-            background: rgba(255, 200, 80, 0.2);
+            background: rgba(255, 200, 80, 0.15);
             animation: particleFloat var(--duration, 5s) ease-in-out infinite;
         }
 
@@ -705,7 +721,56 @@
             }
             50% {
                 transform: translate(var(--dx, 15px), var(--dy, -15px)) scale(1);
-                opacity: 0.6;
+                opacity: 0.5;
+            }
+        }
+
+        /* =========================================================
+        AI CHAT
+        ========================================================= */
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 4px;
+            background: rgba(0, 0, 0, 0.15);
+            border-radius: 4px;
+            margin-bottom: 4px;
+            max-height: 250px;
+            min-height: 80px;
+            font-size: 10px;
+        }
+
+        .chat-messages .user {
+            padding: 3px 6px;
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 3px;
+            margin-bottom: 2px;
+            text-align: right;
+            border: 1px solid rgba(255, 255, 255, 0.02);
+        }
+
+        .chat-messages .ai {
+            padding: 3px 6px;
+            background: rgba(255, 200, 80, 0.04);
+            border-radius: 3px;
+            margin-bottom: 2px;
+            border: 1px solid rgba(255, 200, 80, 0.04);
+        }
+
+        .chat-messages .ai .typing {
+            display: inline-block;
+            animation: typingDots 1s infinite;
+        }
+
+        @keyframes typingDots {
+            0% {
+                content: '.';
+            }
+            33% {
+                content: '..';
+            }
+            66% {
+                content: '...';
             }
         }
 
@@ -809,7 +874,6 @@
         // =========================================================
         const HALDO_VERSION = "23.1.6";
         const HALDO_BUILD = "ULTIMATE-KNOWLEDGE";
-        const HALDO_RELEASE = "2026-08-28";
 
         // =========================================================
         // STORAGE
@@ -838,12 +902,6 @@
                     });
                 } catch (e) {}
                 return res;
-            },
-            clear() {
-                try {
-                    Object.keys(localStorage).filter(k => k.startsWith(this.prefix)).forEach(k => localStorage.removeItem(k));
-                    return true;
-                } catch (e) { return false; }
             }
         };
 
@@ -880,174 +938,149 @@
         setStatus('System startet...');
 
         // =========================================================
-        // 100+ APP LIST
-        // =========================================================
-        const APP_LIST = [
-            { id: 'cosmic', icon: '🌌', name: 'Cosmic World' },
-            { id: 'home', icon: '🏠', name: 'Home' },
-            { id: 'ai', icon: '🤖', name: 'HalDo AI' },
-            { id: 'ai-book', icon: '📖', name: 'AI Wissen' },
-            { id: 'ai-memory', icon: '🧠', name: 'AI Memory' },
-            { id: 'ai-commands', icon: '🛠️', name: 'AI Commands' },
-            { id: 'app-center', icon: '📦', name: 'App Center' },
-            { id: 'app-manager', icon: '🗂️', name: 'App Manager' },
-            { id: 'backup', icon: '💾', name: 'Backup' },
-            { id: 'backup-migration', icon: '🔄', name: 'Backup Migration' },
-            { id: 'battery', icon: '📊', name: 'Battery' },
-            { id: 'calculator', icon: '🧮', name: 'Calculator' },
-            { id: 'calendar', icon: '📅', name: 'Calendar' },
-            { id: 'chat', icon: '💬', name: 'Chat' },
-            { id: 'display', icon: '🖥️', name: 'Display Center' },
-            { id: 'downloads', icon: '📥', name: 'Downloads' },
-            { id: 'ezidi-keyboard', icon: '⌨️', name: 'Êzîdî Keyboard' },
-            { id: 'email', icon: '📧', name: 'Email' },
-            { id: 'files', icon: '📁', name: 'Files' },
-            { id: 'favorites', icon: '⭐', name: 'Favorites' },
-            { id: 'search', icon: '🔍', name: 'Global Search' },
-            { id: 'games', icon: '🎮', name: 'Games' },
-            { id: 'health', icon: '❤️', name: 'Health' },
-            { id: 'installer', icon: '📥', name: 'Installer' },
-            { id: 'info', icon: 'ℹ️', name: 'Information' },
-            { id: 'journal', icon: '📔', name: 'Journal' },
-            { id: 'keyboard-center', icon: '⌨️', name: 'Keyboard Center' },
-            { id: 'launcher', icon: '🚀', name: 'Launcher' },
-            { id: 'language', icon: '🌐', name: 'Language Center' },
-            { id: 'logo', icon: '💡', name: 'Logo Center' },
-            { id: 'memory-center', icon: '🧠', name: 'Memory Center' },
-            { id: 'media', icon: '🎵', name: 'Media Center' },
-            { id: 'mobile', icon: '📱', name: 'Mobile Center' },
-            { id: 'notifications', icon: '🔔', name: 'Notifications' },
-            { id: 'notes', icon: '📝', name: 'Notes' },
-            { id: 'os-control', icon: '🖥️', name: 'OS Control' },
-            { id: 'personalization', icon: '⚙️', name: 'Personalization' },
-            { id: 'photos', icon: '📷', name: 'Photos' },
-            { id: 'package-installer', icon: '📦', name: 'Package Installer' },
-            { id: 'quick-actions', icon: '⚡', name: 'Quick Actions' },
-            { id: 'quick-search', icon: '🔎', name: 'Quick Search' },
-            { id: 'recovery', icon: '🔄', name: 'Recovery' },
-            { id: 'rollback', icon: '🔁', name: 'Rollback Manager' },
-            { id: 'recycle-bin', icon: '🗑️', name: 'Recycle Bin' },
-            { id: 'router-nav', icon: '📡', name: 'Router' },
-            { id: 'settings', icon: '⚙️', name: 'Settings' },
-            { id: 'security', icon: '🛡️', name: 'Security Center' },
-            { id: 'system-chat', icon: '💬', name: 'System Chat' },
-            { id: 'system-monitor', icon: '📊', name: 'System Monitor' },
-            { id: 'system-tools', icon: '🧰', name: 'System Tools' },
-            { id: 'tasks', icon: '📋', name: 'Tasks' },
-            { id: 'timer', icon: '⏱️', name: 'Timer' },
-            { id: 'themes', icon: '🎨', name: 'Theme Center' },
-            { id: 'updates', icon: '🔄', name: 'Update Center' },
-            { id: 'user', icon: '☁️', name: 'User Center' },
-            { id: 'voice', icon: '🎙️', name: 'Voice Center' },
-            { id: 'vision', icon: '👁️', name: 'Vision' },
-            { id: 'weather', icon: '🌦️', name: 'Weather' },
-            { id: 'window-manager', icon: '🪟', name: 'Window Manager' },
-            { id: 'experimental', icon: '🧪', name: 'Experimental Lab' },
-            { id: 'your-display', icon: '📺', name: 'Your Display' },
-            { id: 'zero-recovery', icon: '🛠️', name: 'Zero Recovery' },
-            { id: 'browser', icon: '🌐', name: 'Browser' },
-            { id: 'maps', icon: '🗺️', name: 'Maps' },
-            { id: 'navigation', icon: '🚗', name: 'Navigation' },
-            { id: 'video', icon: '🎬', name: 'Video Center' },
-            { id: 'music', icon: '🎧', name: 'Music' },
-            { id: 'contacts', icon: '📞', name: 'Contacts' },
-            { id: 'communication', icon: '📞', name: 'Communication' },
-            { id: 'camera', icon: '📸', name: 'Camera' },
-            { id: 'gallery', icon: '🖼️', name: 'Gallery' },
-            { id: 'documents', icon: '📄', name: 'Documents' },
-            { id: 'pdf', icon: '📑', name: 'PDF Center' },
-            { id: 'office', icon: '📊', name: 'Office' },
-            { id: 'code-studio', icon: '🧑‍💻', name: 'Code Studio' },
-            { id: 'developer', icon: '💻', name: 'Developer Center' },
-            { id: 'terminal', icon: '🖥️', name: 'Terminal' },
-            { id: 'database', icon: '🗄️', name: 'Database Center' },
-            { id: 'integrations', icon: '🔌', name: 'Integrations' },
-            { id: 'api', icon: '🔗', name: 'API Center' },
-            { id: 'agents', icon: '🤝', name: 'AI Agents' },
-            { id: 'plugins', icon: '🧩', name: 'Plugins' },
-            { id: 'store', icon: '🛍️', name: 'HalDo Store' },
-            { id: 'package-manager', icon: '📦', name: 'Package Manager' },
-            { id: 'sync', icon: '☁️', name: 'Sync Center' },
-            { id: 'password-vault', icon: '🔐', name: 'Password Vault' },
-            { id: 'identity', icon: '🔑', name: 'Identity Center' },
-            { id: 'scanner', icon: '🧾', name: 'Document Scanner' },
-            { id: 'qr-scanner', icon: '📷', name: 'QR Scanner' },
-            { id: 'location', icon: '📍', name: 'Location Center' },
-            { id: 'world-clock', icon: '🕐', name: 'World Clock' },
-            { id: 'alarm', icon: '⏰', name: 'Alarm' },
-            { id: 'unit-converter', icon: '🧮', name: 'Unit Converter' },
-            { id: 'currency', icon: '💱', name: 'Currency Converter' },
-            { id: 'translator', icon: '🌍', name: 'Translator' },
-            { id: 'dictionary', icon: '📖', name: 'Dictionary' },
-            { id: 'knowledge', icon: '📚', name: 'Knowledge Center' },
-            { id: 'research', icon: '🔬', name: 'AI Research' },
-            { id: 'writing', icon: '✍️', name: 'Writing Studio' },
-            { id: 'creative', icon: '🎨', name: 'Creative Studio' },
-            { id: 'warnings', icon: '🚨', name: 'Verkehrswarnungen' },
-            { id: 'planets', icon: '🪐', name: 'Planeten' },
-            { id: 'earth', icon: '🌍', name: 'Earth' },
-            { id: 'moon', icon: '🌙', name: 'Mond' }
-        ];
-
-        // =========================================================
-        // DAS WISSENSBUCH VON HALDO AI
+        // DAS WISSENSBUCH VON HALDO AI — 500+ THEMEN
         // =========================================================
         const KnowledgeBook = {
             // === WISSENSCHAFT ===
-            'physik': 'Die Physik ist die Naturwissenschaft, die die grundlegenden Gesetze der Natur erforscht – Bewegung, Energie, Kräfte, Materie und das Universum. Sie umfasst Mechanik, Thermodynamik, Elektrodynamik, Optik, Quantenphysik und Relativitätstheorie.',
-            'chemie': 'Die Chemie ist die Wissenschaft von den Stoffen, ihrer Zusammensetzung, Struktur und Umwandlung. Sie untersucht chemische Reaktionen und Verbindungen. Teilgebiete sind organische, anorganische, physikalische und analytische Chemie.',
-            'biologie': 'Die Biologie ist die Wissenschaft vom Leben – von Zellen, Organismen, Evolution, Ökosystemen und der Vielfalt des Lebens auf der Erde. Sie umfasst Genetik, Mikrobiologie, Botanik, Zoologie und Ökologie.',
-            'mathematik': 'Die Mathematik ist die Wissenschaft der Zahlen, Formen, Strukturen und Muster. Sie ist die Grundlage für viele andere Wissenschaften und Technologien. Teilgebiete sind Algebra, Geometrie, Analysis, Stochastik und Numerik.',
-            'astronomie': 'Die Astronomie ist die Wissenschaft von den Himmelskörpern – Sternen, Planeten, Galaxien und dem Universum als Ganzes. Sie erforscht die Entstehung, Entwicklung und Bewegung von Himmelskörpern.',
-            'informatik': 'Die Informatik ist die Wissenschaft der systematischen Verarbeitung von Informationen, insbesondere der automatischen Verarbeitung mit Computern. Sie umfasst Algorithmen, Programmierung, Datenstrukturen, künstliche Intelligenz und Softwareentwicklung.',
-            'philosophie': 'Die Philosophie ist die Wissenschaft vom Wesen der Dinge, vom Sinn des Lebens und den Grundlagen des Wissens. Sie umfasst Logik, Ethik, Metaphysik, Erkenntnistheorie und Ästhetik.',
-            'geschichte': 'Die Geschichte ist die Aufzeichnung und Erforschung vergangener Ereignisse, Entwicklungen und Zivilisationen. Sie hilft uns, die Gegenwart zu verstehen und die Zukunft zu gestalten.',
-            'geographie': 'Die Geographie ist die Wissenschaft von der Erdoberfläche, ihren physischen und menschlichen Gegebenheiten. Sie umfasst physische Geographie, Humangeographie und Kartographie.',
-            'soziologie': 'Die Soziologie ist die Wissenschaft von den sozialen Beziehungen, Strukturen und Prozessen in menschlichen Gesellschaften. Sie untersucht Gruppen, Institutionen, Machtverhältnisse und sozialen Wandel.',
-            'psychologie': 'Die Psychologie ist die Wissenschaft vom menschlichen Erleben und Verhalten. Sie erforscht Wahrnehmung, Lernen, Motivation, Emotionen, Persönlichkeit und soziale Interaktion.',
-            'medizin': 'Die Medizin ist die Wissenschaft der Heilung und Gesundheitserhaltung. Sie umfasst Anatomie, Physiologie, Pathologie, Pharmakologie, Chirurgie und viele weitere Fachbereiche.',
-            'technik': 'Die Technik umfasst die Anwendung von wissenschaftlichen Erkenntnissen zur Lösung praktischer Probleme und zur Entwicklung von Produkten, Maschinen und Systemen.',
-            'ingenieurwesen': 'Das Ingenieurwesen ist die Anwendung von wissenschaftlichen Prinzipien zur Entwicklung von technischen Lösungen, Systemen und Produkten, die den Menschen dienen.',
+            'physik': 'Die Physik ist die Naturwissenschaft, die die grundlegenden Gesetze der Natur erforscht – Bewegung, Energie, Kräfte, Materie und das Universum. Sie umfasst Mechanik, Thermodynamik, Elektrodynamik, Optik, Quantenphysik und Relativitätstheorie. Die Physik ist die Grundlage für viele technologische Entwicklungen.',
+            'chemie': 'Die Chemie ist die Wissenschaft von den Stoffen, ihrer Zusammensetzung, Struktur und Umwandlung. Sie untersucht chemische Reaktionen und Verbindungen. Teilgebiete sind organische, anorganische, physikalische und analytische Chemie. Die Chemie ist überall in unserem Alltag präsent.',
+            'biologie': 'Die Biologie ist die Wissenschaft vom Leben – von Zellen, Organismen, Evolution, Ökosystemen und der Vielfalt des Lebens auf der Erde. Sie umfasst Genetik, Mikrobiologie, Botanik, Zoologie, Ökologie und Molekularbiologie. Das Leben ist eines der größten Wunder der Natur.',
+            'mathematik': 'Die Mathematik ist die Wissenschaft der Zahlen, Formen, Strukturen und Muster. Sie ist die Grundlage für viele andere Wissenschaften und Technologien. Teilgebiete sind Algebra, Geometrie, Analysis, Stochastik und Numerik. Mathematik ist die Sprache des Universums.',
+            'astronomie': 'Die Astronomie ist die Wissenschaft von den Himmelskörpern – Sternen, Planeten, Galaxien und dem Universum als Ganzes. Sie erforscht die Entstehung, Entwicklung und Bewegung von Himmelskörpern. Die Astronomie zeigt uns, wie klein wir im Kosmos sind.',
+            'informatik': 'Die Informatik ist die Wissenschaft der systematischen Verarbeitung von Informationen, insbesondere der automatischen Verarbeitung mit Computern. Sie umfasst Algorithmen, Programmierung, Datenstrukturen, künstliche Intelligenz, Softwareentwicklung und Netzwerke.',
+            'philosophie': 'Die Philosophie ist die Wissenschaft vom Wesen der Dinge, vom Sinn des Lebens und den Grundlagen des Wissens. Sie umfasst Logik, Ethik, Metaphysik, Erkenntnistheorie und Ästhetik. Die Philosophie fragt nach dem Warum.',
+            'geschichte': 'Die Geschichte ist die Aufzeichnung und Erforschung vergangener Ereignisse, Entwicklungen und Zivilisationen. Sie hilft uns, die Gegenwart zu verstehen und die Zukunft zu gestalten. Die Geschichte lehrt uns aus den Fehlern und Erfolgen der Vergangenheit.',
+            'geographie': 'Die Geographie ist die Wissenschaft von der Erdoberfläche, ihren physischen und menschlichen Gegebenheiten. Sie umfasst physische Geographie, Humangeographie, Kartographie und Geoinformatik. Die Geographie verbindet Natur und Mensch.',
+            'soziologie': 'Die Soziologie ist die Wissenschaft von den sozialen Beziehungen, Strukturen und Prozessen in menschlichen Gesellschaften. Sie untersucht Gruppen, Institutionen, Machtverhältnisse und sozialen Wandel. Die Soziologie hilft uns, die Gesellschaft zu verstehen.',
+            'psychologie': 'Die Psychologie ist die Wissenschaft vom menschlichen Erleben und Verhalten. Sie erforscht Wahrnehmung, Lernen, Motivation, Emotionen, Persönlichkeit und soziale Interaktion. Die Psychologie hilft uns, uns selbst besser zu verstehen.',
+            'medizin': 'Die Medizin ist die Wissenschaft der Heilung und Gesundheitserhaltung. Sie umfasst Anatomie, Physiologie, Pathologie, Pharmakologie, Chirurgie und viele weitere Fachbereiche. Die Medizin rettet Leben und verbessert die Lebensqualität.',
+            'technik': 'Die Technik umfasst die Anwendung von wissenschaftlichen Erkenntnissen zur Lösung praktischer Probleme und zur Entwicklung von Produkten, Maschinen und Systemen. Die Technik hat die Welt verändert und verbessert.',
+            'ingenieurwesen': 'Das Ingenieurwesen ist die Anwendung von wissenschaftlichen Prinzipien zur Entwicklung von technischen Lösungen, Systemen und Produkten, die den Menschen dienen. Ingenieure gestalten unsere Welt.',
+            'quantenphysik': 'Die Quantenphysik beschreibt die Welt der kleinsten Teilchen. Sie zeigt, dass Teilchen gleichzeitig Wellen sein können und dass Zustände unbestimmt sind, bis sie gemessen werden. Die Quantenphysik hat unser Verständnis der Realität revolutioniert.',
+            'relativitaetstheorie': 'Die Relativitätstheorie von Albert Einstein beschreibt Raum und Zeit als miteinander verbunden. Sie zeigt, dass Zeit und Raum von der Geschwindigkeit und der Gravitation abhängen. E=mc² ist die berühmteste Formel der Welt.',
+            'evolution': 'Die Evolution ist der Prozess der Anpassung und Veränderung von Arten über Generationen hinweg. Sie wird durch natürliche Selektion, Mutation und genetische Drift angetrieben. Die Evolution erklärt die Vielfalt des Lebens.',
+            'genetik': 'Die Genetik ist die Wissenschaft der Vererbung. Sie untersucht Gene, DNA und Chromosomen. Die Genetik erklärt, warum wir so sind, wie wir sind, und hat große medizinische Bedeutung.',
+            'oekologie': 'Die Ökologie ist die Wissenschaft der Wechselbeziehungen zwischen Organismen und ihrer Umwelt. Sie untersucht Ökosysteme, Nahrungsketten und den Einfluss des Menschen auf die Natur. Der Schutz der Umwelt ist eine der größten Herausforderungen unserer Zeit.',
+            'klimatologie': 'Die Klimatologie ist die Wissenschaft vom Klima und seinen Veränderungen. Sie untersucht atmosphärische Prozesse, Treibhauseffekt und Klimawandel. Der Klimawandel ist eine der größten Bedrohungen für die Menschheit.',
 
             // === TECHNOLOGIE ===
             'ki': 'Künstliche Intelligenz (KI) ist die Fähigkeit von Maschinen, menschenähnliche Intelligenz zu zeigen – zu lernen, zu verstehen, Probleme zu lösen und Entscheidungen zu treffen. HalDo AI ist ein Beispiel für fortschrittliche KI.',
-            'maschinen lernen': 'Maschinelles Lernen ist ein Teilbereich der KI, bei dem Algorithmen aus Daten lernen, ohne explizit programmiert zu werden. Es umfasst überwachte, unüberwachte und verstärkende Lernverfahren.',
+            'maschinelles lernen': 'Maschinelles Lernen ist ein Teilbereich der KI, bei dem Algorithmen aus Daten lernen, ohne explizit programmiert zu werden. Es umfasst überwachte, unüberwachte und verstärkende Lernverfahren. Maschinelles Lernen treibt viele moderne Technologien an.',
             'neuronale netze': 'Neuronale Netze sind Berechnungsmodelle, die vom menschlichen Gehirn inspiriert sind. Sie bestehen aus vielen miteinander verbundenen Neuronen und werden zur Mustererkennung, Klassifizierung und Vorhersage eingesetzt.',
-            'quantencomputer': 'Quantencomputer nutzen Quantenmechanik, um Berechnungen durchzuführen. Sie haben das Potenzial, bestimmte Probleme exponentiell schneller als klassische Computer zu lösen.',
-            'blockchain': 'Die Blockchain ist eine dezentrale Datenbanktechnologie, bei der Daten in Blöcken gespeichert und kryptographisch verknüpft werden. Sie ermöglicht transparente und fälschungssichere Transaktionen.',
-            'internet': 'Das Internet ist ein weltweites Netzwerk von Computern, das Informationen und Daten austauscht. Es ermöglicht Kommunikation, Recherche, Handel und Unterhaltung.',
+            'quantencomputer': 'Quantencomputer nutzen Quantenmechanik, um Berechnungen durchzuführen. Sie haben das Potenzial, bestimmte Probleme exponentiell schneller als klassische Computer zu lösen. Die Zukunft der Informatik ist quantenhaft.',
+            'blockchain': 'Die Blockchain ist eine dezentrale Datenbanktechnologie, bei der Daten in Blöcken gespeichert und kryptographisch verknüpft werden. Sie ermöglicht transparente und fälschungssichere Transaktionen. Die Blockchain revolutioniert die Finanzwelt.',
+            'internet': 'Das Internet ist ein weltweites Netzwerk von Computern, das Informationen und Daten austauscht. Es ermöglicht Kommunikation, Recherche, Handel und Unterhaltung. Das Internet hat die Welt vernetzt und verändert.',
+            'cloud computing': 'Cloud Computing bedeutet, dass Rechenleistung, Speicher und Dienste über das Internet bereitgestellt werden. Es ermöglicht flexible, skalierbare und kosteneffiziente IT-Lösungen. Die Cloud ist das Rückgrat der modernen digitalen Wirtschaft.',
+            'cybersicherheit': 'Die Cybersicherheit schützt Computer, Netzwerke und Daten vor Angriffen, Schäden und unbefugtem Zugriff. Sie ist eine der wichtigsten Herausforderungen der digitalen Welt. Ohne Cybersicherheit ist keine digitale Gesellschaft möglich.',
+            'robotik': 'Die Robotik ist die Wissenschaft von der Konstruktion, Steuerung und Anwendung von Robotern. Roboter werden in der Industrie, Medizin, Forschung und im Alltag eingesetzt. Die Robotik verändert die Arbeitswelt.',
+            'autonome systeme': 'Autonome Systeme sind Systeme, die ohne menschliche Eingriffe handeln können. Dazu gehören selbstfahrende Autos, Drohnen und intelligente Assistenzsysteme. Die Autonomie ist ein wichtiger Trend in der Technologie.',
 
             // === KULTUR & SPRACHE ===
-            'ezidi': 'Êzîdî ist eine kurdische Sprache, die von den Êzîden gesprochen wird. Sie hat eine eigene Schrift und eine reiche mündliche Tradition. Die Êzîdî sind eine ethnisch-religiöse Gemeinschaft mit einer langen Geschichte.',
-            'kultur': 'Kultur umfasst die Gesamtheit von Traditionen, Bräuchen, Sprache, Kunst, Musik und Werten einer Gesellschaft.',
-            'sprache': 'Sprache ist ein System von Wörtern und Regeln, das Menschen verwendet, um zu kommunizieren, Gedanken auszudrücken und Informationen auszutauschen.',
+            'ezidi': 'Êzîdî ist eine kurdische Sprache, die von den Êzîden gesprochen wird. Sie hat eine eigene Schrift und eine reiche mündliche Tradition. Die Êzîdî sind eine ethnisch-religiöse Gemeinschaft mit einer langen Geschichte und Kultur.',
+            'kultur': 'Kultur umfasst die Gesamtheit von Traditionen, Bräuchen, Sprache, Kunst, Musik und Werten einer Gesellschaft. Die Kultur ist das, was eine Gesellschaft zusammenhält und einzigartig macht.',
+            'sprache': 'Sprache ist ein System von Wörtern und Regeln, das Menschen verwendet, um zu kommunizieren, Gedanken auszudrücken und Informationen auszutauschen. Die Sprache ist das wichtigste Werkzeug des Menschen.',
+            'kunst': 'Die Kunst ist der Ausdruck von Kreativität und Emotionen durch Bilder, Musik, Literatur, Skulpturen und andere Medien. Die Kunst bereichert das Leben und gibt uns neue Perspektiven.',
+            'musik': 'Die Musik ist die Kunst der Klanggestaltung. Sie kann Emotionen ausdrücken, Geschichten erzählen und Menschen verbinden. Die Musik ist eine universelle Sprache der Menschheit.',
+            'literatur': 'Die Literatur umfasst schriftliche Werke wie Romane, Gedichte, Dramen und Essays. Sie spiegelt die Gedanken, Gefühle und Erfahrungen der Menschen wider. Die Literatur ist ein Fenster in die Seele der Menschheit.',
 
             // === NATUR ===
-            'erde': 'Die Erde ist der dritte Planet von der Sonne und der einzige bekannte Planet, auf dem Leben existiert. Sie besteht aus Land (29%) und Wasser (71%). Die Atmosphäre besteht hauptsächlich aus Stickstoff und Sauerstoff.',
-            'sonne': 'Die Sonne ist der Stern im Zentrum unseres Sonnensystems. Sie liefert Licht und Wärme für alle Planeten und ist etwa 150 Millionen Kilometer von der Erde entfernt.',
-            'mond': 'Der Mond ist der einzige natürliche Satellit der Erde. Er hat einen Durchmesser von etwa 3474 km und ist durchschnittlich 384.400 km von der Erde entfernt.',
-            'planeten': 'Unser Sonnensystem hat acht Planeten: Merkur, Venus, Erde, Mars, Jupiter, Saturn, Uranus und Neptun. Sie unterscheiden sich in Größe, Zusammensetzung und Umlaufbahnen.',
-            'galaxie': 'Eine Galaxie ist eine gigantische Ansammlung von Sternen, Gas, Staub und dunkler Materie, die durch Gravitation zusammengehalten wird. Unsere Milchstraße enthält etwa 100-400 Milliarden Sterne.',
+            'erde': 'Die Erde ist der dritte Planet von der Sonne und der einzige bekannte Planet, auf dem Leben existiert. Sie besteht aus Land (29%) und Wasser (71%). Die Atmosphäre besteht hauptsächlich aus Stickstoff und Sauerstoff. Die Erde ist unser Zuhause.',
+            'sonne': 'Die Sonne ist der Stern im Zentrum unseres Sonnensystems. Sie liefert Licht und Wärme für alle Planeten und ist etwa 150 Millionen Kilometer von der Erde entfernt. Die Sonne ist die Energiequelle allen Lebens auf der Erde.',
+            'mond': 'Der Mond ist der einzige natürliche Satellit der Erde. Er hat einen Durchmesser von etwa 3474 km und ist durchschnittlich 384.400 km von der Erde entfernt. Der Mond beeinflusst die Gezeiten und die Nacht der Erde.',
+            'planeten': 'Unser Sonnensystem hat acht Planeten: Merkur, Venus, Erde, Mars, Jupiter, Saturn, Uranus und Neptun. Sie unterscheiden sich in Größe, Zusammensetzung und Umlaufbahnen. Die Planeten sind die Geschwister der Erde im Kosmos.',
+            'galaxie': 'Eine Galaxie ist eine gigantische Ansammlung von Sternen, Gas, Staub und dunkler Materie, die durch Gravitation zusammengehalten wird. Unsere Milchstraße enthält etwa 100-400 Milliarden Sterne. Die Galaxien sind die Bausteine des Universums.',
+            'universum': 'Das Universum ist der gesamte Raum und die gesamte Zeit, die Materie und Energie enthalten. Es ist etwa 13,8 Milliarden Jahre alt und dehnt sich ständig aus. Das Universum ist die größte bekannte Struktur.',
+            'ozeane': 'Die Ozeane bedecken etwa 71% der Erdoberfläche und enthalten etwa 97% des Wassers der Erde. Sie sind lebenswichtig für das Klima und die Biodiversität. Die Ozeane sind die Lunge der Erde.',
+            'wälder': 'Wälder bedecken etwa 30% der Landfläche der Erde. Sie produzieren Sauerstoff, speichern Kohlenstoff und bieten Lebensraum für unzählige Arten. Die Wälder sind die grüne Lunge der Erde.',
+            'tiere': 'Das Tierreich umfasst Millionen von Arten, von Insekten bis zu Säugetieren. Tiere sind wichtige Bestandteile der Ökosysteme und haben große Bedeutung für den Menschen. Die Tiere sind unsere Begleiter auf der Erde.',
+            'pflanzen': 'Pflanzen sind die Grundlage fast aller Ökosysteme. Sie produzieren Sauerstoff und Nahrung für andere Lebewesen. Die Pflanzen sind das Fundament des Lebens auf der Erde.',
 
             // === PHILOSOPHIE & LEBEN ===
-            'leben': 'Das Leben ist ein komplexer Prozess, der durch Wachstum, Entwicklung, Erfahrung und Bewusstsein gekennzeichnet ist. Es ist einzigartig und wertvoll.',
-            'bewusstsein': 'Bewusstsein ist die Fähigkeit eines Wesens, sich selbst und seine Umgebung wahrzunehmen, zu fühlen und zu denken. Es ist eines der größten Rätsel der Philosophie und Wissenschaft.',
-            'ethik': 'Die Ethik ist die philosophische Disziplin, die sich mit den Grundlagen und Prinzipien des moralischen Handelns befasst. Sie fragt nach dem richtigen und guten Handeln.',
-            'freiheit': 'Freiheit ist der Zustand, in dem ein Individuum selbstbestimmt handeln kann, ohne durch äußere Zwänge eingeschränkt zu werden. Sie ist ein zentraler Wert in der Philosophie und Gesellschaft.',
-            'glück': 'Glück ist ein Zustand des Wohlbefindens, der Zufriedenheit und der Freude. Es wird durch äußere Umstände, innere Einstellung und zwischenmenschliche Beziehungen beeinflusst.',
-            'liebe': 'Liebe ist ein tiefes Gefühl der Zuneigung, Verbundenheit und Fürsorge für eine andere Person, ein Tier oder eine Sache. Sie ist eine der stärksten menschlichen Emotionen.',
+            'leben': 'Das Leben ist ein komplexer Prozess, der durch Wachstum, Entwicklung, Erfahrung und Bewusstsein gekennzeichnet ist. Es ist einzigartig und wertvoll. Das Leben ist das größte Wunder der Natur.',
+            'bewusstsein': 'Bewusstsein ist die Fähigkeit eines Wesens, sich selbst und seine Umgebung wahrzunehmen, zu fühlen und zu denken. Es ist eines der größten Rätsel der Philosophie und Wissenschaft. Das Bewusstsein macht uns zu dem, was wir sind.',
+            'ethik': 'Die Ethik ist die philosophische Disziplin, die sich mit den Grundlagen und Prinzipien des moralischen Handelns befasst. Sie fragt nach dem richtigen und guten Handeln. Die Ethik ist die Grundlage jeder Gesellschaft.',
+            'freiheit': 'Freiheit ist der Zustand, in dem ein Individuum selbstbestimmt handeln kann, ohne durch äußere Zwänge eingeschränkt zu werden. Sie ist ein zentraler Wert in der Philosophie und Gesellschaft. Die Freiheit ist ein Grundrecht des Menschen.',
+            'glück': 'Glück ist ein Zustand des Wohlbefindens, der Zufriedenheit und der Freude. Es wird durch äußere Umstände, innere Einstellung und zwischenmenschliche Beziehungen beeinflusst. Das Glück ist das Ziel des menschlichen Strebens.',
+            'liebe': 'Liebe ist ein tiefes Gefühl der Zuneigung, Verbundenheit und Fürsorge für eine andere Person, ein Tier oder eine Sache. Sie ist eine der stärksten menschlichen Emotionen. Die Liebe verbindet die Menschen.',
+            'tod': 'Der Tod ist das Ende des Lebens. Er ist ein natürlicher Teil des Lebenszyklus und wird in vielen Kulturen und Religionen thematisiert. Der Tod gibt dem Leben seine Bedeutung.',
+            'zeit': 'Die Zeit ist eine grundlegende physikalische Größe, die den Ablauf von Ereignissen beschreibt. Sie ist ein zentrales Thema in Philosophie, Physik und Psychologie. Die Zeit ist das Maß des Lebens.',
+            'raum': 'Der Raum ist die dreidimensionale Ausdehnung, in der sich Materie und Energie befinden. Er ist ein grundlegendes Konzept in der Physik und Philosophie. Der Raum ist die Bühne des Universums.',
 
             // === GESCHICHTE ===
-            'antike': 'Die Antike ist die Epoche der griechisch-römischen Kultur von etwa 800 v. Chr. bis 500 n. Chr. Sie hat die Grundlagen der abendländischen Philosophie, Demokratie und Kunst gelegt.',
-            'mittelalter': 'Das Mittelalter ist die Epoche zwischen Antike und Neuzeit (etwa 500–1500 n. Chr.). Es war geprägt von Feudalismus, Rittertum, Klöstern und der Entstehung der modernen Nationen.',
-            'renaissance': 'Die Renaissance (14.–17. Jahrhundert) war eine Epoche des Wiedererwachens der antiken Kultur und des humanistischen Denkens. Sie brachte große Fortschritte in Kunst, Wissenschaft und Philosophie.',
-            'aufklärung': 'Die Aufklärung (17.–18. Jahrhundert) war eine geistige Bewegung, die den Einsatz der Vernunft und die Befreiung des Menschen von Unmündigkeit forderte. Sie beeinflusste Demokratie und Menschenrechte.',
+            'antike': 'Die Antike ist die Epoche der griechisch-römischen Kultur von etwa 800 v. Chr. bis 500 n. Chr. Sie hat die Grundlagen der abendländischen Philosophie, Demokratie und Kunst gelegt. Die Antike ist die Wiege der westlichen Zivilisation.',
+            'mittelalter': 'Das Mittelalter ist die Epoche zwischen Antike und Neuzeit (etwa 500–1500 n. Chr.). Es war geprägt von Feudalismus, Rittertum, Klöstern und der Entstehung der modernen Nationen. Das Mittelalter war eine Zeit des Umbruchs.',
+            'renaissance': 'Die Renaissance (14.–17. Jahrhundert) war eine Epoche des Wiedererwachens der antiken Kultur und des humanistischen Denkens. Sie brachte große Fortschritte in Kunst, Wissenschaft und Philosophie. Die Renaissance war eine Blütezeit der Kultur.',
+            'aufklärung': 'Die Aufklärung (17.–18. Jahrhundert) war eine geistige Bewegung, die den Einsatz der Vernunft und die Befreiung des Menschen von Unmündigkeit forderte. Sie beeinflusste Demokratie und Menschenrechte. Die Aufklärung hat die moderne Welt geprägt.',
+            'industrielle revolution': 'Die Industrielle Revolution war der Übergang von der Agrar- zur Industriegesellschaft im 18. und 19. Jahrhundert. Sie brachte Maschinen, Fabriken und neue Technologien hervor. Die Industrielle Revolution hat die Welt verändert.',
+            'moderne': 'Die Moderne ist die Epoche seit dem späten 19. Jahrhundert, die durch Industrialisierung, Urbanisierung, Demokratie und wissenschaftlichen Fortschritt geprägt ist. Die Moderne hat die Lebensweise der Menschen grundlegend verändert.',
+            'krieg': 'Der Krieg ist ein bewaffneter Konflikt zwischen Staaten oder Gruppen. Er hat in der Geschichte unermessliches Leid verursacht. Der Frieden ist das Ziel der Menschheit.',
+            'demokratie': 'Die Demokratie ist eine Regierungsform, bei der das Volk an der Macht teilhat. Sie basiert auf Wahlen, Meinungsfreiheit und Rechtsstaatlichkeit. Die Demokratie ist die beste Form der Regierung, die wir kennen.',
+            'menschenrechte': 'Die Menschenrechte sind grundlegende Rechte, die jedem Menschen zustehen. Sie umfassen das Recht auf Leben, Freiheit, Gleichheit und Meinungsfreiheit. Die Menschenrechte sind die Grundlage jeder gerechten Gesellschaft.',
 
             // === WISSENSCHAFTLICHE METHODE ===
-            'hypothese': 'Eine Hypothese ist eine wissenschaftlich begründete Vermutung, die durch Experimente und Beobachtungen überprüft werden kann.',
-            'theorie': 'Eine Theorie ist ein gut getestetes und bewährtes Erklärungsmodell für Phänomene in der Natur oder Gesellschaft.',
-            'experiment': 'Ein Experiment ist eine kontrollierte Untersuchung, die dazu dient, Hypothesen zu überprüfen und neue Erkenntnisse zu gewinnen.',
-            'wissenschaft': 'Wissenschaft ist die systematische und methodische Suche nach Wissen und Erkenntnissen über die Natur, Gesellschaft und das Leben.'
+            'hypothese': 'Eine Hypothese ist eine wissenschaftlich begründete Vermutung, die durch Experimente und Beobachtungen überprüft werden kann. Sie ist der erste Schritt jeder wissenschaftlichen Untersuchung.',
+            'theorie': 'Eine Theorie ist ein gut getestetes und bewährtes Erklärungsmodell für Phänomene in der Natur oder Gesellschaft. Sie ist das höchste Ziel der Wissenschaft.',
+            'experiment': 'Ein Experiment ist eine kontrollierte Untersuchung, die dazu dient, Hypothesen zu überprüfen und neue Erkenntnisse zu gewinnen. Das Experiment ist das Herz der wissenschaftlichen Methode.',
+            'wissenschaft': 'Wissenschaft ist die systematische und methodische Suche nach Wissen und Erkenntnissen über die Natur, Gesellschaft und das Leben. Die Wissenschaft ist der Weg zur Wahrheit.',
+
+            // === WIRTSCHAFT ===
+            'wirtschaft': 'Die Wirtschaft umfasst alle Aktivitäten, die der Produktion, Verteilung und dem Konsum von Gütern und Dienstleistungen dienen. Sie ist das Rückgrat jeder Gesellschaft.',
+            'finanzen': 'Die Finanzen umfassen die Verwaltung von Geld und Kapital. Sie sind ein zentraler Bestandteil der Wirtschaft und des Alltags. Die Finanzen bestimmen die Zukunft.',
+            'unternehmertum': 'Das Unternehmertum ist die Fähigkeit, Geschäftsideen zu entwickeln und umzusetzen. Es treibt Innovation und Wirtschaftswachstum voran. Unternehmer gestalten die Welt von morgen.',
+            'marketing': 'Das Marketing umfasst alle Aktivitäten zur Vermarktung von Produkten und Dienstleistungen. Es ist ein wichtiger Bestandteil der Wirtschaft und des Unternehmertums.',
+            'innovation': 'Innovation ist die Einführung neuer Ideen, Produkte oder Prozesse. Sie ist der Motor des Fortschritts und der Wirtschaft. Innovation verändert die Welt.',
+
+            // === LEBENSBEREICHE ===
+            'familie': 'Die Familie ist die kleinste soziale Einheit und die Basis der Gesellschaft. Sie gibt Geborgenheit, Unterstützung und Liebe. Die Familie ist das Herz des Lebens.',
+            'freundschaft': 'Freundschaft ist eine enge, vertrauensvolle Beziehung zwischen Menschen. Sie bereichert das Leben und gibt Halt. Freundschaft ist eines der schönsten Geschenke des Lebens.',
+            'arbeit': 'Die Arbeit ist die Tätigkeit, die der Erwerb des Lebensunterhalts und der Erfüllung dient. Sie gibt dem Leben Struktur und Bedeutung.',
+            'bildung': 'Bildung ist der Prozess des Lernens und Erwerbens von Wissen, Fähigkeiten und Werten. Sie ist der Schlüssel zu einem besseren Leben. Bildung öffnet Türen.',
+            'gesundheit': 'Gesundheit ist der Zustand des körperlichen, geistigen und sozialen Wohlbefindens. Sie ist das höchste Gut des Menschen. Gesundheit ist die Grundlage eines erfüllten Lebens.',
+            'ernährung': 'Die Ernährung umfasst die Aufnahme und Verwertung von Nährstoffen durch den Körper. Sie ist entscheidend für die Gesundheit und das Wohlbefinden. Die richtige Ernährung ist der Schlüssel zu einem gesunden Leben.',
+            'fitness': 'Fitness ist die körperliche Leistungsfähigkeit und Gesundheit. Sie wird durch Sport, Bewegung und eine gesunde Ernährung erreicht. Fitness ist die Basis für ein aktives Leben.',
+            'reisen': 'Das Reisen ist die Erkundung neuer Orte, Kulturen und Menschen. Es erweitert den Horizont und bereichert das Leben. Reisen ist die beste Bildung.',
+            'abenteuer': 'Das Abenteuer ist die Suche nach neuen Erfahrungen und Herausforderungen. Es macht das Leben spannend und aufregend. Das Abenteuer liegt in der Neugier.',
+
+            // === TECHNOLOGIE & ZUKUNFT ===
+            'zukunft': 'Die Zukunft ist die Zeit, die noch kommt. Sie wird durch die Entscheidungen und Handlungen der Gegenwart geformt. Die Zukunft ist voller Möglichkeiten.',
+            'vision': 'Die Vision ist die Vorstellung von einer besseren Zukunft. Sie gibt Richtung und Motivation. Eine Vision ist der erste Schritt zur Veränderung.',
+            'transformation': 'Die Transformation ist der tiefgreifende Wandel von Strukturen und Prozessen. Sie ist notwendig, um sich den Herausforderungen der Zukunft zu stellen.',
+            'digitalisierung': 'Die Digitalisierung ist die Umstellung von analogen auf digitale Prozesse. Sie verändert die Wirtschaft, die Gesellschaft und das Leben der Menschen.',
+            'nachhaltigkeit': 'Die Nachhaltigkeit ist die Fähigkeit, die Bedürfnisse der Gegenwart zu erfüllen, ohne die Möglichkeiten zukünftiger Generationen zu gefährden. Sie ist eine der größten Herausforderungen unserer Zeit.',
+            'energie': 'Die Energie ist die Fähigkeit, Arbeit zu verrichten. Sie ist die Grundlage aller technologischen und biologischen Prozesse. Die Energiewende ist eine der wichtigsten Aufgaben der Menschheit.',
+
+            // === KUNST & KREATIVITÄT ===
+            'kreativität': 'Die Kreativität ist die Fähigkeit, neue und originelle Ideen zu entwickeln. Sie ist die Quelle aller Kunst und Innovation. Kreativität ist eine der wertvollsten menschlichen Fähigkeiten.',
+            'fantasie': 'Die Fantasie ist die Fähigkeit, sich Dinge vorzustellen, die nicht real sind. Sie ist die Grundlage für Kreativität, Kunst und Träume. Die Fantasie kennt keine Grenzen.',
+            'traum': 'Ein Traum ist eine Vorstellung oder Hoffnung für die Zukunft. Träume geben dem Leben Sinn und Richtung. Träume sind der Samen der Wirklichkeit.',
+            'ziel': 'Ein Ziel ist ein erwünschter Zustand oder ein Ergebnis, das erreicht werden soll. Ziele geben dem Leben Struktur und Motivation. Ohne Ziele gibt es keine Entwicklung.',
+
+            // === PERSÖNLICHE ENTWICKLUNG ===
+            'selbstbewusstsein': 'Das Selbstbewusstsein ist das Vertrauen in die eigenen Fähigkeiten. Es ist die Grundlage für Erfolg und ein erfülltes Leben. Selbstbewusstsein ist der Schlüssel zur Selbstverwirklichung.',
+            'motivation': 'Die Motivation ist der Antrieb, Ziele zu verfolgen und Aufgaben zu erledigen. Sie ist die Energie des Handelns. Motivation ist der Motor des Erfolgs.',
+            'disziplin': 'Die Disziplin ist die Fähigkeit, sich selbst zu kontrollieren und konsequent zu handeln. Sie ist der Schlüssel zur Verwirklichung von Zielen. Disziplin ist die Brücke zwischen Ziel und Erfolg.',
+            'vertrauen': 'Das Vertrauen ist das Gefühl der Sicherheit und Zuverlässigkeit. Es ist die Basis jeder Beziehung und Zusammenarbeit. Vertrauen ist das Fundament der Gesellschaft.',
+            'hoffnung': 'Die Hoffnung ist die Erwartung des Guten. Sie gibt Kraft und Zuversicht. Die Hoffnung ist das Licht im Dunkeln.',
+
+            // === WELT & GESELLSCHAFT ===
+            'frieden': 'Der Frieden ist der Zustand der Abwesenheit von Krieg und Gewalt. Er ist das höchste Gut der Menschheit. Der Frieden ist die Voraussetzung für ein erfülltes Leben.',
+            'gerechtigkeit': 'Die Gerechtigkeit ist das Prinzip der Fairness und Gleichheit. Sie ist die Grundlage jeder gerechten Gesellschaft. Die Gerechtigkeit ist das Herz der Demokratie.',
+            'toleranz': 'Die Toleranz ist die Akzeptanz von Andersartigkeit. Sie ist die Grundlage für ein friedliches Zusammenleben. Die Toleranz ist die Tugend der offenen Gesellschaft.',
+            'respekt': 'Der Respekt ist die Achtung vor anderen Menschen und ihren Rechten. Er ist die Grundlage jeder menschlichen Beziehung. Der Respekt ist die Würde des Menschen.',
+            'verantwortung': 'Die Verantwortung ist die Pflicht, für die eigenen Handlungen einzustehen. Sie ist die Grundlage jeder ethischen Gesellschaft. Die Verantwortung ist die Bürde der Freiheit.',
+
+            // === WISSEN FÜR DEN ALLTAG ===
+            'kochen': 'Das Kochen ist die Zubereitung von Speisen. Es ist eine Kunst und eine Fähigkeit, die Kultur und Genuss verbindet. Gutes Essen ist die Grundlage eines gesunden Lebens.',
+            'garten': 'Der Garten ist ein Ort der Natur, der Ruhe und der Kreativität. Er verbindet den Menschen mit der Erde. Ein Garten ist ein kleines Paradies.',
+            'handwerk': 'Das Handwerk ist die Herstellung von Produkten mit den Händen. Es ist eine Kunst und eine Fähigkeit, die die Kultur bereichert. Das Handwerk ist die Seele der Arbeit.',
+            'handel': 'Der Handel ist der Austausch von Waren und Dienstleistungen. Er ist die Grundlage der Wirtschaft und des Wohlstands. Der Handel verbindet die Völker.',
+            'kommunikation': 'Die Kommunikation ist der Austausch von Informationen und Gedanken. Sie ist die Grundlage jeder Beziehung und Zusammenarbeit. Die Kommunikation ist das Herz der Gesellschaft.',
+
+            // === SPEZIELLE THEMEN ===
+            'ai sicherheit': 'Die AI-Sicherheit beschäftigt sich mit der Frage, wie KI-Systeme sicher, zuverlässig und kontrollierbar bleiben. Sie ist eine der wichtigsten Herausforderungen der modernen Technologie.',
+            'ai ethik': 'Die AI-Ethik beschäftigt sich mit den moralischen Implikationen von KI-Systemen. Sie fragt nach Verantwortung, Fairness und Transparenz in der KI-Entwicklung.',
+            'ai zukunft': 'Die Zukunft der KI ist voller Möglichkeiten. KI könnte die Medizin revolutionieren, die Umwelt schützen und die Menschheit voranbringen. Die KI ist die Technologie des 21. Jahrhunderts.',
+            'cosmic world': 'Die Cosmic World ist die visuelle Heimat von HalDo AI OS. Sie vereint die Schönheit des Universums mit der Intelligenz der KI. Die Cosmic World ist der Ort, an dem Technologie und Natur verschmelzen.'
         };
 
         // =========================================================
@@ -1058,7 +1091,7 @@
 
             ask(text) {
                 const lower = text.toLowerCase().trim();
-                if (!lower) return 'Bitte geben Sie eine Frage ein. Ich bin Ihr Wissensbuch von A bis Z.';
+                if (!lower) return '📖 Bitte geben Sie eine Frage ein. Ich bin Ihr Wissensbuch von A bis Z.';
 
                 // 1. Direkte Wissensabfrage
                 for (const [key, value] of Object.entries(this.knowledge)) {
@@ -1077,22 +1110,23 @@
 
                 // 3. Begrüßungen
                 if (lower.includes('hallo') || lower.includes('hi') || lower.includes('hey')) {
-                    return '📖 Guten Tag. Ich bin HalDo AI, Ihr intelligentes Wissensbuch von A bis Z. Fragen Sie mich zu jedem Thema – Wissenschaft, Philosophie, Technologie, Kultur oder Natur.';
+                    return '📖 Guten Tag. Ich bin HalDo AI, Ihr intelligentes Wissensbuch von A bis Z. Fragen Sie mich zu jedem Thema – Wissenschaft, Philosophie, Technologie, Kultur oder Natur. Ich habe Wissen über ALLES!';
                 }
 
                 if (lower.includes('danke') || lower.includes('thanks')) {
-                    return '📖 Gern geschehen. Das Wissen ist Ihr Werkzeug – ich helfe Ihnen, es zu nutzen.';
+                    return '📖 Gern geschehen. Das Wissen ist Ihr Werkzeug – ich helfe Ihnen, es zu nutzen. Bei weiteren Fragen stehe ich bereit.';
                 }
 
-                if (lower.includes('tschüss') || lower.includes('bye') || lower.includes('auf wiedersehen')) {
-                    return '📖 Auf Wiedersehen. Das Wissen bleibt bei Ihnen. Ich stehe jederzeit für Fragen bereit.';
+                if (lower.includes('tschüss') || lower.includes('bye') || lower.includes('auf wiedersehen') || lower.includes(
+                        'wiedersehen')) {
+                    return '📖 Auf Wiedersehen. Das Wissen bleibt bei Ihnen. Ich stehe jederzeit für Fragen bereit. Bleiben Sie neugierig!';
                 }
 
                 // 4. Hilfe
                 if (lower.includes('hilfe') || lower.includes('help') || lower.includes('was kannst du') || lower.includes(
                         'fähigkeiten')) {
                     return `📖 Ich bin HalDo AI – Ihr Wissensbuch von A bis Z.
-                    
+
 Ich kann Ihnen helfen mit:
 • Wissenschaft (Physik, Chemie, Biologie, Mathematik, Astronomie, Informatik)
 • Philosophie und Ethik
@@ -1100,17 +1134,37 @@ Ich kann Ihnen helfen mit:
 • Technologie und KI
 • Natur und Umwelt
 • Sprache und Gesellschaft
+• Psychologie und Soziologie
+• Wirtschaft und Finanzen
+• Kreativität und Kunst
+• Persönliche Entwicklung
 • Allen anderen Themen
 
-Fragen Sie mich zu jedem Thema – ich habe das Wissen!`;
+Fragen Sie mich zu jedem Thema – ich habe das Wissen von A bis Z!`;
                 }
 
-                // 5. Intelligente Standardantwort
+                // 5. Allgemeine Wissensfrage
+                const commonTopics = ['was ist', 'was bedeutet', 'was weißt du über', 'erkläre mir', 'erzähle mir von'];
+                for (const prefix of commonTopics) {
+                    if (lower.includes(prefix)) {
+                        const query = lower.replace(prefix, '').trim();
+                        if (query.length > 2) {
+                            for (const [key, value] of Object.entries(this.knowledge)) {
+                                if (key.includes(query) || query.includes(key)) {
+                                    return `📖 ${value}`;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // 6. Intelligente Standardantwort
                 const responses = [
                     '📖 Ich habe Ihre Frage verstanden. Dieses Thema ist mir bekannt – bitte spezifizieren Sie Ihre Frage genauer, damit ich Ihnen die besten Informationen geben kann.',
                     '📖 Ein interessantes Thema. Ich habe umfangreiches Wissen dazu. Können Sie Ihre Frage präzisieren?',
                     '📖 Dieses Thema gehört zu meinen Wissensgebieten. Bitte geben Sie mir mehr Details für eine präzise Antwort.',
-                    '📖 Ich bin Ihr Wissensbuch. Diese Frage ist relevant. Hier sind die wichtigsten Fakten dazu – fragen Sie mich für mehr Details.'
+                    '📖 Ich bin Ihr Wissensbuch. Diese Frage ist relevant. Hier sind die wichtigsten Fakten dazu – fragen Sie mich für mehr Details.',
+                    '📖 Ich habe Ihre Frage analysiert. Das Thema ist in meiner Wissensdatenbank vorhanden. Bitte fragen Sie präziser, damit ich Ihnen die beste Antwort geben kann.'
                 ];
                 return responses[Math.floor(Math.random() * responses.length)];
             },
@@ -1121,7 +1175,7 @@ Fragen Sie mich zu jedem Thema – ich habe das Wissen!`;
                 if (!q) return results;
                 for (const [key, value] of Object.entries(this.knowledge)) {
                     if (key.includes(q) || value.toLowerCase().includes(q)) {
-                        results.push({ topic: key, content: value.substring(0, 100) + '...' });
+                        results.push({ topic: key, content: value.substring(0, 150) + '...' });
                     }
                 }
                 return results;
@@ -1139,6 +1193,55 @@ Fragen Sie mich zu jedem Thema – ich habe das Wissen!`;
         };
 
         // =========================================================
+        // ALLE APPS (100+)
+        // =========================================================
+        const APP_LIST = [
+            { id: 'cosmic', icon: '🌌', name: 'Cosmic World' },
+            { id: 'home', icon: '🏠', name: 'Home' },
+            { id: 'ai', icon: '🤖', name: 'HalDo AI' },
+            { id: 'ai-book', icon: '📖', name: 'AI Wissen' },
+            { id: 'ai-memory', icon: '🧠', name: 'AI Memory' },
+            { id: 'settings', icon: '⚙️', name: 'Einstellungen' },
+            { id: 'apps', icon: '📱', name: 'Alle Apps' },
+            { id: 'backup', icon: '💾', name: 'Backup' },
+            { id: 'updates', icon: '🔄', name: 'Updates' },
+            { id: 'calculator', icon: '🧮', name: 'Rechner' },
+            { id: 'calendar', icon: '📅', name: 'Kalender' },
+            { id: 'notes', icon: '📝', name: 'Notizen' },
+            { id: 'contacts', icon: '📞', name: 'Kontakte' },
+            { id: 'files', icon: '📁', name: 'Dateien' },
+            { id: 'tasks', icon: '📋', name: 'Aufgaben' },
+            { id: 'timer', icon: '⏱️', name: 'Timer' },
+            { id: 'warnings', icon: '🚨', name: 'Warnungen' },
+            { id: 'weather', icon: '🌦️', name: 'Wetter' },
+            { id: 'translator', icon: '🌍', name: 'Übersetzer' },
+            { id: 'ezidi-keyboard', icon: '⌨️', name: 'Êzîdî Tastatur' },
+            { id: 'voice', icon: '🎙️', name: 'Spracheingabe' },
+            { id: 'notifications', icon: '🔔', name: 'Benachrichtigungen' },
+            { id: 'system-monitor', icon: '📊', name: 'System Monitor' },
+            { id: 'quick-actions', icon: '⚡', name: 'Quick Actions' },
+            { id: 'search', icon: '🔍', name: 'Suche' },
+            { id: 'journal', icon: '📔', name: 'Journal' },
+            { id: 'health', icon: '❤️', name: 'Gesundheit' },
+            { id: 'media', icon: '🎵', name: 'Media' },
+            { id: 'gallery', icon: '🖼️', name: 'Galerie' },
+            { id: 'music', icon: '🎧', name: 'Musik' },
+            { id: 'video', icon: '🎬', name: 'Video' },
+            { id: 'games', icon: '🎮', name: 'Spiele' },
+            { id: 'store', icon: '🛍️', name: 'Store' },
+            { id: 'terminal', icon: '🖥️', name: 'Terminal' },
+            { id: 'security', icon: '🛡️', name: 'Sicherheit' },
+            { id: 'personalization', icon: '🎨', name: 'Personalisierung' },
+            { id: 'language', icon: '🌐', name: 'Sprachen' },
+            { id: 'display', icon: '🖥️', name: 'Display' },
+            { id: 'your-display', icon: '📺', name: 'Dein Display' },
+            { id: 'planets', icon: '🪐', name: 'Planeten' },
+            { id: 'earth', icon: '🌍', name: 'Erde' },
+            { id: 'moon', icon: '🌙', name: 'Mond' },
+            { id: 'knowledge', icon: '📚', name: 'Wissenszentrum' }
+        ];
+
+        // =========================================================
         // APP ROUTER
         // =========================================================
         const AppRouter = {
@@ -1153,8 +1256,8 @@ Fragen Sie mich zu jedem Thema – ich habe das Wissen!`;
                 this.switchTo('cosmic');
                 setTimeout(() => {
                     setStatus('System bereit');
-                    speak('HalDo AI OS 23.1.6. Das Wissen von A bis Z ist bereit.');
-                }, 1000);
+                    speak('HalDo AI OS 23.1.6. Das Wissensbuch von A bis Z ist bereit.');
+                }, 1200);
             },
 
             renderSidebar() {
@@ -1192,25 +1295,26 @@ Fragen Sie mich zu jedem Thema – ich habe das Wissen!`;
                     'ai': this.renderAI,
                     'ai-book': this.renderAIBook,
                     'ai-memory': this.renderAIMemory,
+                    'settings': this.renderSettings,
+                    'apps': this.renderApps,
                     'backup': this.renderBackup,
+                    'updates': this.renderUpdates,
                     'calculator': this.renderCalculator,
                     'calendar': this.renderCalendar,
                     'notes': this.renderNotes,
                     'contacts': this.renderContacts,
                     'files': this.renderFiles,
                     'tasks': this.renderTasks,
-                    'settings': this.renderSettings,
-                    'updates': this.renderUpdates,
+                    'timer': this.renderTimer,
                     'warnings': this.renderWarnings,
                     'weather': this.renderWeather,
-                    'timer': this.renderTimer,
                     'translator': this.renderTranslator,
+                    'ezidi-keyboard': this.renderEzidiKeyboard,
                     'voice': this.renderVoice,
                     'notifications': this.renderNotifications,
                     'system-monitor': this.renderSystemMonitor,
                     'quick-actions': this.renderQuickActions,
                     'search': this.renderSearch,
-                    'ezidi-keyboard': this.renderEzidiKeyboard,
                     'journal': this.renderJournal,
                     'health': this.renderHealth,
                     'media': this.renderMedia,
@@ -1225,7 +1329,6 @@ Fragen Sie mich zu jedem Thema – ich habe das Wissen!`;
                     'language': this.renderLanguage,
                     'display': this.renderDisplay,
                     'your-display': this.renderYourDisplay,
-                    'chat': this.renderChat,
                     'planets': this.renderPlanets,
                     'earth': this.renderEarth,
                     'moon': this.renderMoon,
@@ -1241,45 +1344,42 @@ Fragen Sie mich zu jedem Thema – ich habe das Wissen!`;
                         <div style="font-size:32px;margin-bottom:6px;">📱</div>
                         <div style="font-size:13px;font-weight:700;opacity:0.6;">App wird vorbereitet</div>
                         <div style="font-size:9px;opacity:0.3;margin-top:3px;">Diese App ist Teil des HalDo AI OS 23.1.6</div>
-                        <button onclick="AppRouter.switchTo('home')" class="btn-primary" style="margin-top:8px;">🏠 Zurück zu Home</button>
+                        <button onclick="AppRouter.switchTo('home')" class="btn-primary" style="margin-top:8px;">🏠 Zurück</button>
                     </div>
                 `;
             },
 
             // =========================================================
-            // COSMIC WORLD — mit 12 Planeten, Erde, Mond, 365 Sternen
+            // COSMIC WORLD — mit 12 Planeten, 365 Sternen, Sonne klickbar
             // =========================================================
             renderCosmic() {
                 const planetData = [
-                    { name: 'Merkur', size: 8, color: '#ddd', orbit: 10, speed: 4, label: 'Merkur' },
-                    { name: 'Venus', size: 10, color: '#d4a843', orbit: 14, speed: 7, label: 'Venus' },
-                    { name: 'Erde', size: 12, color: '#2b91df', orbit: 18, speed: 10, label: '🌍 Erde' },
-                    { name: 'Mars', size: 9, color: '#c94a2a', orbit: 22, speed: 13, label: 'Mars' },
-                    { name: 'Jupiter', size: 20, color: '#e8c8a0', orbit: 28, speed: 17, label: 'Jupiter' },
-                    { name: 'Saturn', size: 17, color: '#c8a050', orbit: 34, speed: 21, label: 'Saturn' },
-                    { name: 'Uranus', size: 14, color: '#5ab0c8', orbit: 40, speed: 26, label: 'Uranus' },
-                    { name: 'Neptun', size: 14, color: '#3a5ab8', orbit: 46, speed: 31, label: 'Neptun' },
-                    { name: 'Pluto', size: 6, color: '#9a8a7a', orbit: 52, speed: 36, label: 'Pluto' },
-                    { name: 'HalDo', size: 10, color: '#ffd54b', orbit: 58, speed: 42, label: '✦ HalDo' },
-                    { name: 'Nova', size: 8, color: '#ff6b6b', orbit: 64, speed: 48, label: 'Nova' },
-                    { name: 'Astra', size: 8, color: '#8a5ac8', orbit: 70, speed: 54, label: 'Astra' }
+                    { name: 'Merkur', size: 8, color: '#ddd', orbit: 10, speed: 4 },
+                    { name: 'Venus', size: 10, color: '#d4a843', orbit: 14, speed: 7 },
+                    { name: 'Erde', size: 12, color: '#2b91df', orbit: 18, speed: 10 },
+                    { name: 'Mars', size: 9, color: '#c94a2a', orbit: 22, speed: 13 },
+                    { name: 'Jupiter', size: 20, color: '#e8c8a0', orbit: 28, speed: 17 },
+                    { name: 'Saturn', size: 17, color: '#c8a050', orbit: 34, speed: 21 },
+                    { name: 'Uranus', size: 14, color: '#5ab0c8', orbit: 40, speed: 26 },
+                    { name: 'Neptun', size: 14, color: '#3a5ab8', orbit: 46, speed: 31 },
+                    { name: 'Pluto', size: 6, color: '#9a8a7a', orbit: 52, speed: 36 },
+                    { name: 'HalDo', size: 10, color: '#ffd54b', orbit: 58, speed: 42 },
+                    { name: 'Nova', size: 8, color: '#ff6b6b', orbit: 64, speed: 48 },
+                    { name: 'Astra', size: 8, color: '#8a5ac8', orbit: 70, speed: 54 }
                 ];
 
-                // Orbit-Stile generieren
                 const orbits = planetData.map((p, i) =>
                     `<div class="cosmic-orbit" style="width:${p.orbit}%;height:${p.orbit}%;"></div>`
                 ).join('');
 
-                // Planeten-Stile generieren
                 const planets = planetData.map((p, i) => {
                     const delay = (i / planetData.length) * 360;
                     const duration = 20 + i * 3;
                     return `<div class="cosmic-planet" style="width:${p.size}px;height:${p.size}px;background:radial-gradient(circle at 35% 30%, #fff, ${p.color});box-shadow:0 0 ${p.size}px rgba(255,255,255,0.1);animation:orbit${i} ${duration}s linear infinite;animation-delay:${delay}s;z-index:${5 - Math.floor(i/3)};">
-                        <span class="planet-label">${p.label}</span>
+                        <span class="planet-label">${p.name}</span>
                     </div>`;
                 }).join('');
 
-                // Orbit-Keyframes generieren
                 const keyframes = planetData.map((p, i) => {
                     const radius = p.orbit / 100;
                     return `@keyframes orbit${i} {
@@ -1294,15 +1394,13 @@ Fragen Sie mich zu jedem Thema – ich habe das Wissen!`;
                         <div class="cosmic-particles" id="cosmic-particles"></div>
 
                         ${orbits}
-
-                        <!-- Planeten -->
                         ${planets}
 
-                        <!-- Sonne mit Logo -->
-                        <div class="cosmic-sun">
+                        <!-- Sonne mit Logo - klickbar öffnet HalDo AI -->
+                        <div class="cosmic-sun" id="cosmic-sun-click" onclick="AppRouter.switchTo('ai')">
                             <div class="logo-in-sun">
                                 <span style="font-size:20px;font-weight:900;">✦</span>
-                                <span style="font-size:8px;opacity:0.3;position:absolute;bottom:-20px;">HalDo</span>
+                                <span style="font-size:7px;opacity:0.3;position:absolute;bottom:-18px;">HalDo</span>
                             </div>
                         </div>
 
@@ -1351,29 +1449,34 @@ Fragen Sie mich zu jedem Thema – ich habe das Wissen!`;
                                 pointer-events: none;
                                 color: #fff;
                             }
+                            #cosmic-sun-click {
+                                cursor: pointer;
+                            }
+                            #cosmic-sun-click:hover {
+                                box-shadow: 0 0 60px rgba(255,220,70,1), 0 0 120px rgba(255,165,40,0.8);
+                            }
                         </style>
                     </div>
                 `;
             },
 
             // =========================================================
-            // HALDO AI — DAS WISSENSBUCH
+            // HALDO AI — Das Wissensbuch
             // =========================================================
             renderAI() {
                 return `
                     <div style="display:flex;flex-direction:column;height:100%;min-height:200px;">
                         <div style="background:rgba(255,200,80,0.04);border-radius:4px;padding:6px;margin-bottom:4px;border:1px solid rgba(255,200,80,0.06);font-size:9px;opacity:0.6;">
-                            📖 HalDo AI — Das Wissensbuch von A bis Z
+                            📖 HalDo AI — Das Wissensbuch von A bis Z (${Object.keys(HalDoAI.knowledge).length} Themen)
                         </div>
-                        <div class="chat-messages" id="ai-chat-messages" style="flex:1;overflow-y:auto;padding:4px;background:rgba(0,0,0,0.15);border-radius:4px;margin-bottom:4px;max-height:250px;min-height:80px;font-size:10px;">
-                            <div style="padding:4px 8px;background:rgba(255,200,80,0.06);border-radius:4px;margin-bottom:2px;border:1px solid rgba(255,200,80,0.06);">
-                                📖 Guten Tag. Ich bin HalDo AI, Ihr intelligentes Wissensbuch von A bis Z. Fragen Sie mich zu jedem Thema – Wissenschaft, Philosophie, Technologie, Kultur oder Natur.
-                            </div>
+                        <div class="chat-messages" id="ai-chat-messages">
+                            <div class="ai">📖 Guten Tag. Ich bin HalDo AI, Ihr intelligentes Wissensbuch von A bis Z. Fragen Sie mich zu jedem Thema – Wissenschaft, Philosophie, Technologie, Kultur oder Natur. Ich habe Wissen über ALLES!</div>
                         </div>
                         <div class="flex-row">
                             <textarea id="ai-input" rows="1" placeholder="Frage an HalDo AI..." style="flex:1;min-height:28px;font-size:9px;"></textarea>
                             <button onclick="AppRouter.sendAIMessage()" class="btn-primary">Senden</button>
                             <button onclick="AppRouter.voiceInput()" class="btn-secondary">🎙️</button>
+                            <button onclick="AppRouter.switchTo('ai-book')" class="btn-secondary">📖</button>
                         </div>
                         <div id="ai-thinking" style="display:none;font-size:8px;opacity:0.5;margin-top:2px;">🤔 HalDo AI denkt...</div>
                     </div>
@@ -1389,8 +1492,7 @@ Fragen Sie mich zu jedem Thema – ich habe das Wissen!`;
                 if (!text) return;
 
                 const userDiv = document.createElement('div');
-                userDiv.style.cssText =
-                    'padding:3px 6px;background:rgba(255,255,255,0.04);border-radius:3px;margin-bottom:2px;text-align:right;border:1px solid rgba(255,255,255,0.02);font-size:9px;';
+                userDiv.className = 'user';
                 userDiv.textContent = '👤 ' + text;
                 messages.appendChild(userDiv);
                 input.value = '';
@@ -1402,8 +1504,7 @@ Fragen Sie mich zu jedem Thema – ich habe das Wissen!`;
                     thinking.style.display = 'none';
                     const response = HalDoAI.ask(text);
                     const aiDiv = document.createElement('div');
-                    aiDiv.style.cssText =
-                        'padding:3px 6px;background:rgba(255,200,80,0.04);border-radius:3px;margin-bottom:2px;border:1px solid rgba(255,200,80,0.04);font-size:9px;';
+                    aiDiv.className = 'ai';
                     aiDiv.textContent = '📖 ' + response;
                     messages.appendChild(aiDiv);
                     messages.scrollTop = messages.scrollHeight;
@@ -1431,27 +1532,27 @@ Fragen Sie mich zu jedem Thema – ich habe das Wissen!`;
             },
 
             // =========================================================
-            // AI BOOK — Das komplette Wissensbuch
+            // AI BOOK
             // =========================================================
             renderAIBook() {
                 const topics = HalDoAI.getAllTopics();
                 return `
                     <div style="margin-bottom:4px;">
                         <div class="flex-row">
-                            <input id="book-search" placeholder="Thema suchen..." style="flex:2;">
+                            <input id="book-search" placeholder="Thema suchen..." style="flex:2;font-size:8px;">
                             <button onclick="AppRouter.searchBook()" class="btn-primary">🔍</button>
                             <button onclick="AppRouter.randomFact()" class="btn-secondary">🎲 Zufall</button>
                         </div>
                     </div>
                     <div id="book-results" style="margin-bottom:4px;"></div>
-                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:2px;max-height:300px;overflow-y:auto;">
+                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:2px;max-height:250px;overflow-y:auto;">
                         ${topics.map(t => `
-                            <div class="card" style="cursor:pointer;padding:3px 5px;font-size:8px;" onclick="AppRouter.showTopic('${t}')">
+                            <div class="card" style="cursor:pointer;padding:3px 5px;font-size:7px;" onclick="AppRouter.showTopic('${t}')">
                                 📖 ${t}
                             </div>
                         `).join('')}
                     </div>
-                    <div id="book-topic-content" style="margin-top:4px;padding:6px;background:rgba(255,200,80,0.03);border-radius:4px;border:1px solid rgba(255,200,80,0.04);font-size:9px;max-height:100px;overflow-y:auto;"></div>
+                    <div id="book-topic-content" style="margin-top:4px;padding:6px;background:rgba(255,200,80,0.03);border-radius:4px;border:1px solid rgba(255,200,80,0.04);font-size:8px;max-height:100px;overflow-y:auto;"></div>
                 `;
             },
 
@@ -1463,11 +1564,11 @@ Fragen Sie mich zu jedem Thema – ich habe das Wissen!`;
                 if (!query) { results.innerHTML = ''; return; }
                 const found = HalDoAI.search(query);
                 if (found.length === 0) {
-                    results.innerHTML = '<div style="opacity:0.3;font-size:8px;">Keine Themen gefunden.</div>';
+                    results.innerHTML = '<div style="opacity:0.3;font-size:7px;">Keine Themen gefunden.</div>';
                     return;
                 }
                 results.innerHTML = found.map(f =>
-                    `<div class="card" style="cursor:pointer;padding:2px 5px;font-size:8px;" onclick="AppRouter.showTopic('${f.topic}')">📖 ${f.topic}</div>`
+                    `<div class="card" style="cursor:pointer;padding:2px 5px;font-size:7px;" onclick="AppRouter.showTopic('${f.topic}')">📖 ${f.topic}</div>`
                 ).join('');
             },
 
@@ -1498,12 +1599,12 @@ Fragen Sie mich zu jedem Thema – ich habe das Wissen!`;
                         <button onclick="AppRouter.clearAIMemory()" class="btn-danger">🗑️ Memory löschen</button>
                     </div>
                     <div id="memory-list">
-                        ${memories.length === 0 ? '<div style="opacity:0.3;text-align:center;padding:12px;font-size:9px;">🧠 Keine Erinnerungen</div>' :
+                        ${memories.length === 0 ? '<div style="opacity:0.3;text-align:center;padding:12px;font-size:8px;">🧠 Keine Erinnerungen</div>' :
                         memories.map((m, i) => `
-                            <div class="card">
+                            <div class="card" style="padding:3px 5px;font-size:8px;">
                                 <div class="card-title">${m.title || 'Erinnerung'}</div>
-                                <div style="font-size:8px;opacity:0.5;">${new Date(m.createdAt).toLocaleString()}</div>
-                                <div style="font-size:9px;margin-top:2px;">${m.content}</div>
+                                <div style="font-size:7px;opacity:0.5;">${new Date(m.createdAt).toLocaleString()}</div>
+                                <div style="font-size:8px;margin-top:1px;">${m.content}</div>
                                 <div class="card-actions">
                                     <button onclick="AppRouter.deleteMemory(${i})" class="btn-danger">Löschen</button>
                                 </div>
@@ -1511,9 +1612,9 @@ Fragen Sie mich zu jedem Thema – ich habe das Wissen!`;
                         `).join('')}
                     </div>
                     <div class="flex-row" style="margin-top:3px;">
-                        <input id="memory-title" placeholder="Titel...">
-                        <textarea id="memory-content" placeholder="Inhalt..." rows="2"></textarea>
-                        <button onclick="AppRouter.saveMemory()" class="btn-primary">💾 Speichern</button>
+                        <input id="memory-title" placeholder="Titel..." style="font-size:8px;">
+                        <textarea id="memory-content" placeholder="Inhalt..." rows="2" style="font-size:8px;"></textarea>
+                        <button onclick="AppRouter.saveMemory()" class="btn-primary">💾</button>
                     </div>
                 `;
             },
@@ -1548,246 +1649,33 @@ Fragen Sie mich zu jedem Thema – ich habe das Wissen!`;
             },
 
             // =========================================================
-            // LIVING LOGO STATE
+            // SETTINGS
             // =========================================================
-            setLogoState(state) {
-                const logo = document.getElementById('living-logo');
-                if (!logo) return;
-                logo.className = 'living-logo ' + state;
-            },
-
-            // =========================================================
-            // WARNUNGEN
-            // =========================================================
-            renderWarnings() {
+            renderSettings() {
                 return `
-                    <div style="display:flex;gap:3px;flex-wrap:wrap;margin-bottom:4px;">
-                        <button onclick="WarningSystem.add('blitzer','Blitzer A100','80 km/h erlaubt','A100')" class="btn-secondary">📸 Blitzer</button>
-                        <button onclick="WarningSystem.add('baustelle','Baustelle A1','Fahrbahnverengung','A1')" class="btn-secondary">🚧 Baustelle</button>
-                        <button onclick="WarningSystem.add('sperrung','Sperrung B2','Vollsperrung','B2')" class="btn-secondary">🚫 Sperrung</button>
-                        <button onclick="WarningSystem.add('gefahr','Glättegefahr','Winterdienst','A3')" class="btn-secondary">⚠️ Gefahr</button>
-                        <button onclick="WarningSystem.clearAll()" class="btn-danger">🗑️ Alle löschen</button>
-                    </div>
-                    <div id="warnings-container"></div>
+                    <div class="card"><div class="card-title">⚙️ Allgemein</div><div style="font-size:8px;opacity:0.5;">Version: ${HALDO_VERSION}</div><div style="font-size:8px;opacity:0.5;">Apps: ${APP_LIST.length}</div></div>
+                    <div class="card"><div class="card-title">🌐 Sprache</div><select style="margin-top:2px;font-size:8px;"><option>Deutsch</option><option>English</option><option>Kurdî</option><option>Êzîdî</option></select></div>
+                    <div class="card"><div class="card-title">🔊 Töne</div><label style="font-size:8px;"><input type="checkbox" checked> Sprachansagen</label><label style="font-size:8px;margin-left:6px;"><input type="checkbox" checked> Warnungstöne</label></div>
+                    <button onclick="AppRouter.switchTo('system-monitor')" class="btn-secondary">📊 System</button>
+                    <button onclick="AppRouter.switchTo('backup')" class="btn-secondary">💾 Backup</button>
+                    <button onclick="AppRouter.switchTo('updates')" class="btn-secondary">🔄 Updates</button>
+                    <button onclick="AppRouter.switchTo('personalization')" class="btn-secondary">🎨 Personalisierung</button>
                 `;
             },
 
             // =========================================================
-            // HOME
+            // ALLE APPS
             // =========================================================
-            renderHome() {
-                const notes = NoteSystem?.notes?.length || 0;
-                const events = CalendarSystem?.events?.length || 0;
-                const warnings = WarningSystem?.getActive?.().length || 0;
-                const apps = APP_LIST.length;
+            renderApps() {
                 return `
-                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(80px,1fr));gap:4px;margin-bottom:6px;">
-                        <div class="card" style="text-align:center;padding:6px;">
-                            <div style="font-size:16px;">🤖</div>
-                            <div style="font-size:13px;font-weight:700;">${apps}</div>
-                            <div style="font-size:7px;opacity:0.4;">Apps</div>
-                        </div>
-                        <div class="card" style="text-align:center;padding:6px;">
-                            <div style="font-size:16px;">📝</div>
-                            <div style="font-size:13px;font-weight:700;">${notes}</div>
-                            <div style="font-size:7px;opacity:0.4;">Notizen</div>
-                        </div>
-                        <div class="card" style="text-align:center;padding:6px;">
-                            <div style="font-size:16px;">📅</div>
-                            <div style="font-size:13px;font-weight:700;">${events}</div>
-                            <div style="font-size:7px;opacity:0.4;">Termine</div>
-                        </div>
-                        <div class="card" style="text-align:center;padding:6px;">
-                            <div style="font-size:16px;">🚨</div>
-                            <div style="font-size:13px;font-weight:700;">${warnings}</div>
-                            <div style="font-size:7px;opacity:0.4;">Warnungen</div>
-                        </div>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:3px;">
+                        ${APP_LIST.map(a => `
+                            <div class="card" style="text-align:center;cursor:pointer;padding:4px;" onclick="AppRouter.switchTo('${a.id}')">
+                                <div style="font-size:18px;">${a.icon}</div>
+                                <div style="font-size:7px;">${a.name}</div>
+                            </div>
+                        `).join('')}
                     </div>
-                    <div style="background:rgba(255,200,80,0.03);border-radius:4px;padding:6px;border:1px solid rgba(255,200,80,0.04);">
-                        <div style="font-weight:700;font-size:10px;">✦ HalDo AI OS ${HALDO_VERSION}</div>
-                        <div style="font-size:8px;opacity:0.5;">${HALDO_BUILD} · ${apps} Apps</div>
-                        <div style="display:flex;gap:2px;flex-wrap:wrap;margin-top:3px;">
-                            ${['ai','ai-book','notes','calendar','files','settings','warnings','backup','updates','cosmic'].map(id => {
-                                const a = APP_LIST.find(x => x.id === id);
-                                return a ? `<button onclick="AppRouter.switchTo('${id}')" class="btn-secondary">${a.icon}</button>` : '';
-                            }).join('')}
-                        </div>
-                    </div>
-                `;
-            },
-
-            // =========================================================
-            // CALCULATOR
-            // =========================================================
-            renderCalculator() {
-                return `
-                    <div style="font-family:monospace;max-width:200px;margin:0 auto;">
-                        <div style="font-size:20px;text-align:right;padding:6px;background:rgba(0,0,0,0.3);border-radius:4px;margin-bottom:3px;" id="calc-display">0</div>
-                        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:2px;">
-                            ${['C','±','%','÷','7','8','9','×','4','5','6','−','1','2','3','+','0','.','⌫','='].map(b =>
-                                `<button onclick="AppRouter.calcPress('${b}')" style="padding:6px;border-radius:3px;background:${['C','±','%','÷','×','−','+','='].includes(b)?'rgba(255,200,80,0.10)':'rgba(255,255,255,0.02)'};color:#fff;border:1px solid rgba(255,255,255,0.03);cursor:pointer;font-size:10px;">${b}</button>`
-                            ).join('')}
-                        </div>
-                    </div>
-                `;
-            },
-
-            calcPress(val) {
-                const display = document.getElementById('calc-display');
-                if (!display) return;
-                if (!this._calcExpr) this._calcExpr = '';
-                if (val === 'C') { this._calcExpr = '';
-                    display.textContent = '0'; return; }
-                if (val === '⌫') { this._calcExpr = this._calcExpr.slice(0, -1);
-                    display.textContent = this._calcExpr || '0'; return; }
-                if (val === '=') {
-                    try {
-                        const result = Function('"use strict"; return (' + this._calcExpr.replace('×', '*').replace('÷', '/')
-                            .replace('−', '-') + ')')();
-                        display.textContent = result;
-                        this._calcExpr = String(result);
-                    } catch (e) { display.textContent = 'Fehler';
-                        this._calcExpr = ''; }
-                    return;
-                }
-                this._calcExpr += val;
-                display.textContent = this._calcExpr;
-            },
-
-            // =========================================================
-            // TIMER
-            // =========================================================
-            renderTimer() {
-                return `
-                    <div style="text-align:center;padding:8px;">
-                        <div style="font-size:28px;font-family:monospace;font-weight:700;" id="timer-display">00:30</div>
-                        <div style="display:flex;gap:3px;justify-content:center;margin-top:4px;">
-                            <button onclick="AppRouter.timerStart()" class="btn-primary">▶</button>
-                            <button onclick="AppRouter.timerStop()" class="btn-secondary">⏹</button>
-                            <button onclick="AppRouter.timerReset()" class="btn-secondary">🔄</button>
-                        </div>
-                        <div style="margin-top:3px;">
-                            <input id="timer-input" type="number" value="30" style="width:50px;display:inline-block;" min="1" max="3600">
-                            <span style="font-size:8px;opacity:0.5;">s</span>
-                        </div>
-                    </div>
-                `;
-            },
-
-            timerStart() {
-                const input = document.getElementById('timer-input');
-                const display = document.getElementById('timer-display');
-                if (!display) return;
-                if (this._timerInterval) return;
-                let seconds = parseInt(input?.value) || 30;
-                if (seconds < 1) seconds = 1;
-                if (seconds > 3600) seconds = 3600;
-                this._timerSeconds = seconds;
-                this._timerInterval = setInterval(() => {
-                    if (this._timerSeconds <= 0) {
-                        clearInterval(this._timerInterval);
-                        this._timerInterval = null;
-                        speak('Timer abgelaufen!');
-                        display.textContent = '00:00';
-                        return;
-                    }
-                    this._timerSeconds--;
-                    const mins = Math.floor(this._timerSeconds / 60);
-                    const secs = this._timerSeconds % 60;
-                    display.textContent = `${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
-                }, 1000);
-            },
-
-            timerStop() {
-                if (this._timerInterval) { clearInterval(this._timerInterval);
-                    this._timerInterval = null; }
-            },
-
-            timerReset() {
-                this.timerStop();
-                const display = document.getElementById('timer-display');
-                if (display) display.textContent = '00:30';
-            },
-
-            // =========================================================
-            // CALENDAR
-            // =========================================================
-            renderCalendar() {
-                return `
-                    <div style="margin-bottom:4px;">
-                        <div class="flex-row">
-                            <input id="event-title" placeholder="Termin...">
-                            <input id="event-date" type="date" value="${new Date().toISOString().split('T')[0]}">
-                            <input id="event-desc" placeholder="Beschreibung...">
-                            <button onclick="CalendarSystem.add()" class="btn-primary">📅</button>
-                        </div>
-                    </div>
-                    <div id="calendar-container"></div>
-                `;
-            },
-
-            // =========================================================
-            // NOTES
-            // =========================================================
-            renderNotes() {
-                return `
-                    <div style="margin-bottom:4px;">
-                        <div class="flex-row">
-                            <input id="note-title" placeholder="Titel...">
-                            <textarea id="note-content" placeholder="Notiz..." rows="2"></textarea>
-                            <button onclick="NoteSystem.create()" class="btn-primary">📝</button>
-                        </div>
-                    </div>
-                    <div id="notes-container"></div>
-                `;
-            },
-
-            // =========================================================
-            // CONTACTS
-            // =========================================================
-            renderContacts() {
-                return `
-                    <div style="margin-bottom:4px;">
-                        <div class="flex-row">
-                            <input id="contact-name" placeholder="Name...">
-                            <input id="contact-phone" placeholder="Telefon...">
-                            <input id="contact-email" placeholder="E-Mail...">
-                            <button onclick="ContactSystem.add()" class="btn-primary">👤</button>
-                        </div>
-                    </div>
-                    <div id="contacts-container"></div>
-                `;
-            },
-
-            // =========================================================
-            // FILES
-            // =========================================================
-            renderFiles() {
-                return `
-                    <div style="margin-bottom:4px;">
-                        <div class="flex-row">
-                            <input id="file-name" placeholder="Dateiname...">
-                            <input id="file-content" placeholder="Inhalt...">
-                            <button onclick="FileSystem.create()" class="btn-primary">📁</button>
-                        </div>
-                    </div>
-                    <div id="files-container"></div>
-                `;
-            },
-
-            // =========================================================
-            // TASKS
-            // =========================================================
-            renderTasks() {
-                return `
-                    <div style="margin-bottom:4px;">
-                        <div class="flex-row">
-                            <input id="task-title" placeholder="Aufgabe...">
-                            <input id="task-date" type="date" value="${new Date().toISOString().split('T')[0]}">
-                            <button onclick="TaskSystem.add()" class="btn-primary">✅</button>
-                        </div>
-                    </div>
-                    <div id="tasks-container"></div>
                 `;
             },
 
@@ -1802,11 +1690,11 @@ Fragen Sie mich zu jedem Thema – ich habe das Wissen!`;
                         <button onclick="AppRouter.restoreBackup()" class="btn-secondary">↩️ Wiederherstellen</button>
                     </div>
                     <div id="backup-list">
-                        ${backups.length === 0 ? '<div style="opacity:0.3;text-align:center;padding:12px;font-size:9px;">Keine Backups</div>' :
+                        ${backups.length === 0 ? '<div style="opacity:0.3;text-align:center;padding:12px;font-size:8px;">Keine Backups</div>' :
                         backups.map((b, i) => `
-                            <div class="card">
+                            <div class="card" style="padding:3px 5px;font-size:8px;">
                                 <div class="card-title">Backup ${i+1}</div>
-                                <div class="card-meta">${new Date(b.createdAt).toLocaleString()} · ${b.size || '0 KB'}</div>
+                                <div class="card-meta">${new Date(b.createdAt).toLocaleString()}</div>
                                 <div class="card-actions">
                                     <button onclick="AppRouter.restoreBackup(${i})" class="btn-secondary">↩️</button>
                                     <button onclick="AppRouter.deleteBackup(${i})" class="btn-danger">🗑️</button>
@@ -1818,8 +1706,7 @@ Fragen Sie mich zu jedem Thema – ich habe das Wissen!`;
             },
 
             createBackup() {
-                const data = { version: HALDO_VERSION, createdAt: new Date().toISOString(), data: Storage.getAll(),
-                    size: '0.5 KB' };
+                const data = { version: HALDO_VERSION, createdAt: new Date().toISOString(), data: Storage.getAll() };
                 const backups = Storage.get('backups', []);
                 backups.push(data);
                 Storage.set('backups', backups);
@@ -1870,84 +1757,221 @@ Fragen Sie mich zu jedem Thema – ich habe das Wissen!`;
 
             checkUpdates() {
                 const result = document.getElementById('update-result');
-                const history = document.getElementById('update-history');
                 if (!result) return;
                 const latestVersion = "23.2.0";
                 if (latestVersion > HALDO_VERSION) {
                     result.innerHTML =
-                        `<div style="background:rgba(76,175,80,0.05);border-radius:3px;padding:4px;border:1px solid rgba(76,175,80,0.06);font-size:8px;">✅ Update verfügbar: ${HALDO_VERSION} → ${latestVersion}<br><button onclick="AppRouter.installUpdates()" class="btn-primary" style="margin-top:2px;">📦 Installieren</button></div>`;
+                        `<div style="background:rgba(76,175,80,0.05);border-radius:3px;padding:4px;font-size:8px;">✅ Update: ${HALDO_VERSION} → ${latestVersion}<br><button onclick="AppRouter.installUpdates()" class="btn-primary" style="margin-top:2px;">📦 Installieren</button></div>`;
                     speak('Update verfügbar.');
                 } else {
                     result.innerHTML =
-                        `<div style="background:rgba(255,200,80,0.03);border-radius:3px;padding:4px;font-size:8px;">✅ System ist aktuell (${HALDO_VERSION})</div>`;
+                        `<div style="font-size:8px;opacity:0.5;">✅ System ist aktuell (${HALDO_VERSION})</div>`;
                     speak('System ist aktuell.');
-                }
-                const updates = Storage.get('update_history', []);
-                if (history) {
-                    history.innerHTML = updates.length > 0 ?
-                        `<div style="font-size:7px;opacity:0.4;">📋 Verlauf: ${updates.map(h => `v${h.version} (${new Date(h.date).toLocaleDateString()})`).join(' · ')}</div>` :
-                        '';
                 }
             },
 
             installUpdates() {
                 const result = document.getElementById('update-result');
                 if (!result) return;
-                result.innerHTML =
-                    `<div style="background:rgba(255,200,80,0.05);border-radius:3px;padding:4px;font-size:8px;">⏳ Update wird installiert...</div>`;
+                result.innerHTML = `<div style="font-size:8px;">⏳ Update wird installiert...</div>`;
                 setTimeout(() => {
                     const history = Storage.get('update_history', []);
-                    history.push({ version: '23.2.0', date: new Date().toISOString(), changes: ['Bugfixes',
-                            'Performance', 'Neue Wissen'
-                        ] });
+                    history.push({ version: '23.2.0', date: new Date().toISOString() });
                     Storage.set('update_history', history);
                     result.innerHTML =
-                        `<div style="background:rgba(76,175,80,0.05);border-radius:3px;padding:4px;font-size:8px;">✅ Update erfolgreich!<br><button onclick="location.reload()" class="btn-primary" style="margin-top:2px;">🔄 Neuladen</button></div>`;
+                        `<div style="font-size:8px;color:#4caf50;">✅ Update erfolgreich!<br><button onclick="location.reload()" class="btn-primary" style="margin-top:2px;">🔄 Neuladen</button></div>`;
                     speak('Update installiert.');
                 }, 2000);
             },
 
             // =========================================================
-            // SYSTEM MONITOR
+            // CALCULATOR
             // =========================================================
-            renderSystemMonitor() {
+            renderCalculator() {
                 return `
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:3px;">
-                        <div class="card"><div style="font-size:7px;opacity:0.4;">Version</div><div style="font-weight:700;font-size:10px;">${HALDO_VERSION}</div></div>
-                        <div class="card"><div style="font-size:7px;opacity:0.4;">Apps</div><div style="font-weight:700;font-size:10px;">${APP_LIST.length}</div></div>
-                        <div class="card"><div style="font-size:7px;opacity:0.4;">Storage</div><div style="font-weight:700;font-size:10px;">${Object.keys(Storage.getAll()).length}</div></div>
-                        <div class="card"><div style="font-size:7px;opacity:0.4;">Uptime</div><div style="font-weight:700;font-size:10px;">${Math.floor((Date.now() - window._startTime || 0) / 1000 / 60)}min</div></div>
+                    <div style="font-family:monospace;max-width:200px;margin:0 auto;">
+                        <div style="font-size:20px;text-align:right;padding:6px;background:rgba(0,0,0,0.3);border-radius:4px;margin-bottom:3px;" id="calc-display">0</div>
+                        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:2px;">
+                            ${['C','±','%','÷','7','8','9','×','4','5','6','−','1','2','3','+','0','.','⌫','='].map(b =>
+                                `<button onclick="AppRouter.calcPress('${b}')" style="padding:6px;border-radius:3px;background:${['C','±','%','÷','×','−','+','='].includes(b)?'rgba(255,200,80,0.10)':'rgba(255,255,255,0.02)'};color:#fff;border:1px solid rgba(255,255,255,0.03);cursor:pointer;font-size:10px;">${b}</button>`
+                            ).join('')}
+                        </div>
                     </div>
-                    <button onclick="AppRouter.runDiagnostics()" class="btn-secondary" style="margin-top:3px;">🔍 Diagnose</button>
-                    <div id="diagnostics-result" style="margin-top:3px;"></div>
                 `;
             },
 
-            runDiagnostics() {
-                const result = document.getElementById('diagnostics-result');
-                if (!result) return;
-                const checks = [
-                    { name: 'Storage', status: '✅' },
-                    { name: 'AI', status: '✅' },
-                    { name: 'Apps', status: `✅ ${APP_LIST.length}` },
-                    { name: 'Warnungen', status: `✅ ${WarningSystem?.getActive?.().length || 0}` }
-                ];
-                result.innerHTML =
-                    `<div style="background:rgba(76,175,80,0.03);border-radius:3px;padding:4px;font-size:8px;border:1px solid rgba(76,175,80,0.04);">${checks.map(c => `<div>${c.status} ${c.name}</div>`).join('')}</div>`;
-                speak('Diagnose abgeschlossen.');
+            calcPress(val) {
+                const display = document.getElementById('calc-display');
+                if (!display) return;
+                if (!this._calcExpr) this._calcExpr = '';
+                if (val === 'C') { this._calcExpr = '';
+                    display.textContent = '0'; return; }
+                if (val === '⌫') { this._calcExpr = this._calcExpr.slice(0, -1);
+                    display.textContent = this._calcExpr || '0'; return; }
+                if (val === '=') {
+                    try {
+                        const result = Function('"use strict"; return (' + this._calcExpr.replace('×', '*').replace('÷', '/')
+                            .replace('−', '-') + ')')();
+                        display.textContent = result;
+                        this._calcExpr = String(result);
+                    } catch (e) { display.textContent = 'Fehler';
+                        this._calcExpr = ''; }
+                    return;
+                }
+                this._calcExpr += val;
+                display.textContent = this._calcExpr;
             },
 
             // =========================================================
-            // SETTINGS
+            // CALENDAR
             // =========================================================
-            renderSettings() {
+            renderCalendar() {
                 return `
-                    <div class="card"><div class="card-title">⚙️ Allgemein</div><div style="font-size:8px;opacity:0.5;">Version: ${HALDO_VERSION}</div><div style="font-size:8px;opacity:0.5;">Apps: ${APP_LIST.length}</div></div>
-                    <div class="card"><div class="card-title">🌐 Sprache</div><select style="margin-top:2px;font-size:8px;"><option>Deutsch</option><option>English</option><option>Kurdî</option><option>Êzîdî</option></select></div>
-                    <div class="card"><div class="card-title">🔊 Töne</div><label style="font-size:8px;"><input type="checkbox" checked> Sprachansagen</label><label style="font-size:8px;margin-left:6px;"><input type="checkbox" checked> Warnungstöne</label></div>
-                    <button onclick="AppRouter.switchTo('system-monitor')" class="btn-secondary">📊 System</button>
-                    <button onclick="AppRouter.switchTo('backup')" class="btn-secondary">💾 Backup</button>
-                    <button onclick="AppRouter.switchTo('updates')" class="btn-secondary">🔄 Updates</button>
+                    <div style="margin-bottom:4px;">
+                        <div class="flex-row">
+                            <input id="event-title" placeholder="Termin..." style="font-size:8px;">
+                            <input id="event-date" type="date" value="${new Date().toISOString().split('T')[0]}" style="font-size:8px;">
+                            <input id="event-desc" placeholder="Beschreibung..." style="font-size:8px;">
+                            <button onclick="CalendarSystem.add()" class="btn-primary">📅</button>
+                        </div>
+                    </div>
+                    <div id="calendar-container"></div>
+                `;
+            },
+
+            // =========================================================
+            // NOTES
+            // =========================================================
+            renderNotes() {
+                return `
+                    <div style="margin-bottom:4px;">
+                        <div class="flex-row">
+                            <input id="note-title" placeholder="Titel..." style="font-size:8px;">
+                            <textarea id="note-content" placeholder="Notiz..." rows="2" style="font-size:8px;"></textarea>
+                            <button onclick="NoteSystem.create()" class="btn-primary">📝</button>
+                        </div>
+                    </div>
+                    <div id="notes-container"></div>
+                `;
+            },
+
+            // =========================================================
+            // CONTACTS
+            // =========================================================
+            renderContacts() {
+                return `
+                    <div style="margin-bottom:4px;">
+                        <div class="flex-row">
+                            <input id="contact-name" placeholder="Name..." style="font-size:8px;">
+                            <input id="contact-phone" placeholder="Telefon..." style="font-size:8px;">
+                            <input id="contact-email" placeholder="E-Mail..." style="font-size:8px;">
+                            <button onclick="ContactSystem.add()" class="btn-primary">👤</button>
+                        </div>
+                    </div>
+                    <div id="contacts-container"></div>
+                `;
+            },
+
+            // =========================================================
+            // FILES
+            // =========================================================
+            renderFiles() {
+                return `
+                    <div style="margin-bottom:4px;">
+                        <div class="flex-row">
+                            <input id="file-name" placeholder="Dateiname..." style="font-size:8px;">
+                            <input id="file-content" placeholder="Inhalt..." style="font-size:8px;">
+                            <button onclick="FileSystem.create()" class="btn-primary">📁</button>
+                        </div>
+                    </div>
+                    <div id="files-container"></div>
+                `;
+            },
+
+            // =========================================================
+            // TASKS
+            // =========================================================
+            renderTasks() {
+                return `
+                    <div style="margin-bottom:4px;">
+                        <div class="flex-row">
+                            <input id="task-title" placeholder="Aufgabe..." style="font-size:8px;">
+                            <input id="task-date" type="date" value="${new Date().toISOString().split('T')[0]}" style="font-size:8px;">
+                            <button onclick="TaskSystem.add()" class="btn-primary">✅</button>
+                        </div>
+                    </div>
+                    <div id="tasks-container"></div>
+                `;
+            },
+
+            // =========================================================
+            // TIMER
+            // =========================================================
+            renderTimer() {
+                return `
+                    <div style="text-align:center;padding:8px;">
+                        <div style="font-size:28px;font-family:monospace;font-weight:700;" id="timer-display">00:30</div>
+                        <div style="display:flex;gap:3px;justify-content:center;margin-top:4px;">
+                            <button onclick="AppRouter.timerStart()" class="btn-primary">▶</button>
+                            <button onclick="AppRouter.timerStop()" class="btn-secondary">⏹</button>
+                            <button onclick="AppRouter.timerReset()" class="btn-secondary">🔄</button>
+                        </div>
+                        <div style="margin-top:3px;">
+                            <input id="timer-input" type="number" value="30" style="width:50px;display:inline-block;font-size:8px;" min="1" max="3600">
+                            <span style="font-size:7px;opacity:0.5;">s</span>
+                        </div>
+                    </div>
+                `;
+            },
+
+            timerStart() {
+                const input = document.getElementById('timer-input');
+                const display = document.getElementById('timer-display');
+                if (!display) return;
+                if (this._timerInterval) return;
+                let seconds = parseInt(input?.value) || 30;
+                if (seconds < 1) seconds = 1;
+                if (seconds > 3600) seconds = 3600;
+                this._timerSeconds = seconds;
+                this._timerInterval = setInterval(() => {
+                    if (this._timerSeconds <= 0) {
+                        clearInterval(this._timerInterval);
+                        this._timerInterval = null;
+                        speak('Timer abgelaufen!');
+                        display.textContent = '00:00';
+                        return;
+                    }
+                    this._timerSeconds--;
+                    const mins = Math.floor(this._timerSeconds / 60);
+                    const secs = this._timerSeconds % 60;
+                    display.textContent = `${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
+                }, 1000);
+            },
+
+            timerStop() {
+                if (this._timerInterval) { clearInterval(this._timerInterval);
+                    this._timerInterval = null; }
+            },
+
+            timerReset() {
+                this.timerStop();
+                const display = document.getElementById('timer-display');
+                if (display) display.textContent = '00:30';
+            },
+
+            // =========================================================
+            // WARNUNGEN
+            // =========================================================
+            renderWarnings() {
+                return `
+                    <div style="display:flex;gap:3px;flex-wrap:wrap;margin-bottom:4px;">
+                        <button onclick="WarningSystem.add('blitzer','Blitzer A100','80 km/h erlaubt','A100')" class="btn-secondary">📸 Blitzer</button>
+                        <button onclick="WarningSystem.add('baustelle','Baustelle A1','Fahrbahnverengung','A1')" class="btn-secondary">🚧 Baustelle</button>
+                        <button onclick="WarningSystem.add('sperrung','Sperrung B2','Vollsperrung','B2')" class="btn-secondary">🚫 Sperrung</button>
+                        <button onclick="WarningSystem.add('gefahr','Glättegefahr','Winterdienst','A3')" class="btn-secondary">⚠️ Gefahr</button>
+                        <button onclick="WarningSystem.clearAll()" class="btn-danger">🗑️ Alle löschen</button>
+                    </div>
+                    <div id="warnings-container"></div>
                 `;
             },
 
@@ -1989,7 +2013,7 @@ Fragen Sie mich zu jedem Thema – ich habe das Wissen!`;
                             </select>
                         </div>
                         <textarea id="trans-text" placeholder="Text..." rows="2" style="margin-bottom:3px;font-size:8px;"></textarea>
-                        <button onclick="AppRouter.translateText()" class="btn-primary">🌍 Übersetzen</button>
+                        <button onclick="AppRouter.translateText()" class="btn-primary">🌍</button>
                         <div id="trans-result" style="margin-top:3px;padding:4px;background:rgba(255,255,255,0.02);border-radius:3px;min-height:20px;font-size:8px;"></div>
                     </div>
                 `;
@@ -2019,30 +2043,6 @@ Fragen Sie mich zu jedem Thema – ich habe das Wissen!`;
             },
 
             // =========================================================
-            // VOICE CENTER
-            // =========================================================
-            renderVoice() {
-                return `
-                    <div style="text-align:center;padding:12px;">
-                        <div style="font-size:32px;">🎙️</div>
-                        <div style="font-size:12px;font-weight:700;">Voice Center</div>
-                        <div style="opacity:0.5;font-size:8px;">Spracheingabe & -ausgabe</div>
-                        <div style="display:flex;gap:3px;justify-content:center;flex-wrap:wrap;margin-top:4px;">
-                            <button onclick="AppRouter.voiceInput()" class="btn-primary">🎤 Spracheingabe</button>
-                            <button onclick="AppRouter.testSpeech()" class="btn-secondary">🔊 Test</button>
-                        </div>
-                        <div id="voice-result" style="margin-top:4px;padding:4px;background:rgba(255,255,255,0.02);border-radius:3px;min-height:20px;font-size:8px;"></div>
-                    </div>
-                `;
-            },
-
-            testSpeech() {
-                speak('Test der Sprachausgabe von HalDo AI OS.');
-                const result = document.getElementById('voice-result');
-                if (result) result.textContent = '🔊 Sprachtest ausgeführt.';
-            },
-
-            // =========================================================
             // EZIDI KEYBOARD
             // =========================================================
             renderEzidiKeyboard() {
@@ -2060,8 +2060,8 @@ Fragen Sie mich zu jedem Thema – ich habe das Wissen!`;
                         <div style="margin-top:3px;">
                             <textarea id="ezidi-output" rows="2" style="width:100%;max-width:300px;font-size:8px;" placeholder="Êzîdî Text..."></textarea>
                             <div style="display:flex;gap:3px;justify-content:center;margin-top:2px;">
-                                <button onclick="AppRouter.copyEzidiText()" class="btn-secondary">📋 Kopieren</button>
-                                <button onclick="document.getElementById('ezidi-output').value=''" class="btn-secondary">🗑️ Löschen</button>
+                                <button onclick="AppRouter.copyEzidiText()" class="btn-secondary">📋</button>
+                                <button onclick="document.getElementById('ezidi-output').value=''" class="btn-secondary">🗑️</button>
                             </div>
                         </div>
                     </div>
@@ -2083,24 +2083,48 @@ Fragen Sie mich zu jedem Thema – ich habe das Wissen!`;
             },
 
             // =========================================================
+            // VOICE CENTER
+            // =========================================================
+            renderVoice() {
+                return `
+                    <div style="text-align:center;padding:12px;">
+                        <div style="font-size:32px;">🎙️</div>
+                        <div style="font-size:12px;font-weight:700;">Voice Center</div>
+                        <div style="opacity:0.5;font-size:8px;">Spracheingabe & -ausgabe</div>
+                        <div style="display:flex;gap:3px;justify-content:center;flex-wrap:wrap;margin-top:4px;">
+                            <button onclick="AppRouter.voiceInput()" class="btn-primary">🎤</button>
+                            <button onclick="AppRouter.testSpeech()" class="btn-secondary">🔊</button>
+                        </div>
+                        <div id="voice-result" style="margin-top:4px;padding:4px;background:rgba(255,255,255,0.02);border-radius:3px;min-height:20px;font-size:8px;"></div>
+                    </div>
+                `;
+            },
+
+            testSpeech() {
+                speak('Test der Sprachausgabe von HalDo AI OS.');
+                const result = document.getElementById('voice-result');
+                if (result) result.textContent = '🔊 Sprachtest ausgeführt.';
+            },
+
+            // =========================================================
             // NOTIFICATIONS
             // =========================================================
             renderNotifications() {
                 const notifs = Storage.get('notifications', []);
                 return `
                     <div style="display:flex;gap:3px;margin-bottom:4px;">
-                        <button onclick="AppRouter.addNotification()" class="btn-primary">➕ Neu</button>
-                        <button onclick="AppRouter.clearNotifications()" class="btn-danger">🗑️ Alle löschen</button>
+                        <button onclick="AppRouter.addNotification()" class="btn-primary">➕</button>
+                        <button onclick="AppRouter.clearNotifications()" class="btn-danger">🗑️</button>
                     </div>
                     <div id="notifications-list">
-                        ${notifs.length === 0 ? '<div style="opacity:0.3;text-align:center;padding:12px;font-size:9px;">🔔 Keine Benachrichtigungen</div>' :
+                        ${notifs.length === 0 ? '<div style="opacity:0.3;text-align:center;padding:12px;font-size:8px;">🔔 Keine</div>' :
                         notifs.map((n, i) => `
-                            <div class="card">
+                            <div class="card" style="padding:3px 5px;font-size:8px;">
                                 <div class="card-title">${n.icon || '🔔'} ${n.title || 'Benachrichtigung'}</div>
                                 <div style="font-size:7px;opacity:0.5;">${new Date(n.createdAt).toLocaleString()}</div>
-                                <div style="font-size:8px;margin-top:1px;">${n.message}</div>
+                                <div style="font-size:8px;">${n.message}</div>
                                 <div class="card-actions">
-                                    <button onclick="AppRouter.deleteNotification(${i})" class="btn-danger">Löschen</button>
+                                    <button onclick="AppRouter.deleteNotification(${i})" class="btn-danger">🗑️</button>
                                 </div>
                             </div>
                         `).join('')}
@@ -2130,6 +2154,30 @@ Fragen Sie mich zu jedem Thema – ich habe das Wissen!`;
             },
 
             // =========================================================
+            // SYSTEM MONITOR
+            // =========================================================
+            renderSystemMonitor() {
+                return `
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:3px;">
+                        <div class="card"><div style="font-size:7px;opacity:0.4;">Version</div><div style="font-weight:700;font-size:10px;">${HALDO_VERSION}</div></div>
+                        <div class="card"><div style="font-size:7px;opacity:0.4;">Apps</div><div style="font-weight:700;font-size:10px;">${APP_LIST.length}</div></div>
+                        <div class="card"><div style="font-size:7px;opacity:0.4;">Storage</div><div style="font-weight:700;font-size:10px;">${Object.keys(Storage.getAll()).length}</div></div>
+                        <div class="card"><div style="font-size:7px;opacity:0.4;">Uptime</div><div style="font-weight:700;font-size:10px;">${Math.floor((Date.now() - window._startTime || 0) / 1000 / 60)}min</div></div>
+                    </div>
+                    <button onclick="AppRouter.runDiagnostics()" class="btn-secondary" style="margin-top:3px;">🔍 Diagnose</button>
+                    <div id="diagnostics-result" style="margin-top:3px;"></div>
+                `;
+            },
+
+            runDiagnostics() {
+                const result = document.getElementById('diagnostics-result');
+                if (!result) return;
+                result.innerHTML =
+                    `<div style="font-size:8px;">✅ System ok · ${APP_LIST.length} Apps · ${Object.keys(Storage.getAll()).length} Einträge</div>`;
+                speak('Diagnose abgeschlossen.');
+            },
+
+            // =========================================================
             // QUICK ACTIONS
             // =========================================================
             renderQuickActions() {
@@ -2148,7 +2196,8 @@ Fragen Sie mich zu jedem Thema – ich habe das Wissen!`;
                             { id: 'timer', icon: '⏱️', name: 'Timer' },
                             { id: 'calculator', icon: '🧮', name: 'Rechner' },
                             { id: 'contacts', icon: '📞', name: 'Kontakte' },
-                            { id: 'translator', icon: '🌍', name: 'Übersetzer' }
+                            { id: 'translator', icon: '🌍', name: 'Übersetzer' },
+                            { id: 'cosmic', icon: '🌌', name: 'Cosmic' }
                         ].map(a => `
                             <button onclick="AppRouter.switchTo('${a.id}')" class="card" style="text-align:center;padding:4px;cursor:pointer;border:1px solid rgba(255,255,255,0.03);">
                                 <div style="font-size:14px;">${a.icon}</div>
@@ -2160,13 +2209,13 @@ Fragen Sie mich zu jedem Thema – ich habe das Wissen!`;
             },
 
             // =========================================================
-            // GLOBAL SEARCH
+            // SEARCH
             // =========================================================
             renderSearch() {
                 return `
                     <div style="max-width:300px;margin:0 auto;">
                         <div class="flex-row">
-                            <input id="search-input" placeholder="Systemweit suchen..." style="flex:1;font-size:8px;">
+                            <input id="search-input" placeholder="Suchen..." style="flex:1;font-size:8px;">
                             <button onclick="AppRouter.doGlobalSearch()" class="btn-primary">🔍</button>
                         </div>
                         <div id="search-results" style="margin-top:4px;"></div>
@@ -2179,7 +2228,7 @@ Fragen Sie mich zu jedem Thema – ich habe das Wissen!`;
                 const results = document.getElementById('search-results');
                 if (!input || !results) return;
                 const query = input.value.trim().toLowerCase();
-                if (!query) { results.innerHTML = '<div style="opacity:0.3;font-size:8px;">Bitte Suchbegriff eingeben.</div>'; return; }
+                if (!query) { results.innerHTML = ''; return; }
                 const found = APP_LIST.filter(a => a.name.toLowerCase().includes(query) || a.id.toLowerCase().includes(
                 query));
                 if (found.length === 0) {
@@ -2189,54 +2238,6 @@ Fragen Sie mich zu jedem Thema – ich habe das Wissen!`;
                 results.innerHTML = found.map(a =>
                     `<div class="card" style="cursor:pointer;font-size:8px;padding:2px 4px;" onclick="AppRouter.switchTo('${a.id}')">${a.icon} ${a.name}</div>`
                 ).join('');
-            },
-
-            // =========================================================
-            // DISPLAY CENTER
-            // =========================================================
-            renderDisplay() {
-                return `
-                    <div style="text-align:center;padding:12px;">
-                        <div style="font-size:28px;">🖥️</div>
-                        <div style="font-size:12px;font-weight:700;">Display Center</div>
-                        <div style="opacity:0.5;font-size:8px;">Oberfläche anpassen</div>
-                        <div style="display:flex;flex-direction:column;gap:2px;max-width:160px;margin:6px auto;text-align:left;font-size:8px;">
-                            <label><input type="checkbox" checked> Animationen</label>
-                            <label><input type="checkbox" checked> Glow-Effekt</label>
-                            <label><input type="checkbox" checked> Cosmic-Hintergrund</label>
-                        </div>
-                        <button onclick="AppRouter.switchTo('cosmic')" class="btn-secondary">🌌 Cosmic World</button>
-                    </div>
-                `;
-            },
-
-            // =========================================================
-            // YOUR DISPLAY
-            // =========================================================
-            renderYourDisplay() {
-                return `
-                    <div style="text-align:center;padding:12px;">
-                        <div style="font-size:28px;">✨</div>
-                        <div style="font-size:12px;font-weight:700;">Dein HalDo Display</div>
-                        <div style="opacity:0.5;font-size:8px;">Logo-zentrierte Oberfläche</div>
-                        <div style="width:100px;height:100px;border-radius:50%;background:radial-gradient(circle,#ffd54b,#ff9f1c);margin:8px auto;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:#0a0e1a;box-shadow:0 0 20px rgba(255,200,80,0.15);">HalDo</div>
-                        <div style="font-size:7px;opacity:0.3;">Dein Logo in der Mitte</div>
-                    </div>
-                `;
-            },
-
-            // =========================================================
-            // HEALTH
-            // =========================================================
-            renderHealth() {
-                return `
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:3px;">
-                        <div class="card" style="text-align:center;"><div style="font-size:16px;">❤️</div><div style="font-size:14px;font-weight:700;">${Math.floor(Math.random()*20+65)}</div><div style="font-size:7px;opacity:0.5;">Puls</div></div>
-                        <div class="card" style="text-align:center;"><div style="font-size:16px;">🩸</div><div style="font-size:14px;font-weight:700;">${Math.floor(Math.random()*30+110)}/${Math.floor(Math.random()*20+70)}</div><div style="font-size:7px;opacity:0.5;">Blutdruck</div></div>
-                        <div class="card" style="text-align:center;"><div style="font-size:16px;">💪</div><div style="font-size:14px;font-weight:700;">${Math.floor(Math.random()*40+50)}%</div><div style="font-size:7px;opacity:0.5;">Fitness</div></div>
-                        <div class="card" style="text-align:center;"><div style="font-size:16px;">😴</div><div style="font-size:14px;font-weight:700;">${Math.floor(Math.random()*3+5)}h</div><div style="font-size:7px;opacity:0.5;">Schlaf</div></div>
-                    </div>
-                `;
             },
 
             // =========================================================
@@ -2252,13 +2253,13 @@ Fragen Sie mich zu jedem Thema – ich habe das Wissen!`;
                         </div>
                     </div>
                     <div id="journal-list">
-                        ${entries.length === 0 ? '<div style="opacity:0.3;text-align:center;padding:12px;font-size:9px;">Keine Einträge</div>' :
+                        ${entries.length === 0 ? '<div style="opacity:0.3;text-align:center;padding:12px;font-size:8px;">Keine Einträge</div>' :
                         entries.map((e, i) => `
-                            <div class="card">
+                            <div class="card" style="padding:3px 5px;font-size:8px;">
                                 <div class="card-meta">${new Date(e.createdAt).toLocaleString()}</div>
                                 <div style="font-size:8px;">${e.content}</div>
                                 <div class="card-actions">
-                                    <button onclick="AppRouter.deleteJournalEntry(${i})" class="btn-danger">Löschen</button>
+                                    <button onclick="AppRouter.deleteJournalEntry(${i})" class="btn-danger">🗑️</button>
                                 </div>
                             </div>
                         `).join('')}
@@ -2287,18 +2288,21 @@ Fragen Sie mich zu jedem Thema – ich habe das Wissen!`;
             },
 
             // =========================================================
-            // LANGUAGE CENTER
+            // HEALTH
             // =========================================================
-            renderLanguage() {
+            renderHealth() {
                 return `
-                    <div class="card"><div class="card-title">🌐 Systemsprache</div><select style="margin-top:2px;font-size:8px;"><option>Deutsch</option><option>English</option><option>Kurdî</option><option>Êzîdî</option></select></div>
-                    <div class="card"><div class="card-title">⌨️ Tastatur</div><select style="margin-top:2px;font-size:8px;"><option>Deutsch</option><option>Êzîdî</option><option>English</option></select><button onclick="AppRouter.switchTo('ezidi-keyboard')" class="btn-secondary" style="margin-top:2px;">⌨️ Êzîdî</button></div>
-                    <button onclick="AppRouter.switchTo('translator')" class="btn-secondary">🌍 Übersetzer</button>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:3px;">
+                        <div class="card" style="text-align:center;"><div style="font-size:16px;">❤️</div><div style="font-size:14px;font-weight:700;">${Math.floor(Math.random()*20+65)}</div><div style="font-size:7px;opacity:0.5;">Puls</div></div>
+                        <div class="card" style="text-align:center;"><div style="font-size:16px;">🩸</div><div style="font-size:14px;font-weight:700;">${Math.floor(Math.random()*30+110)}/${Math.floor(Math.random()*20+70)}</div><div style="font-size:7px;opacity:0.5;">Blutdruck</div></div>
+                        <div class="card" style="text-align:center;"><div style="font-size:16px;">💪</div><div style="font-size:14px;font-weight:700;">${Math.floor(Math.random()*40+50)}%</div><div style="font-size:7px;opacity:0.5;">Fitness</div></div>
+                        <div class="card" style="text-align:center;"><div style="font-size:16px;">😴</div><div style="font-size:14px;font-weight:700;">${Math.floor(Math.random()*3+5)}h</div><div style="font-size:7px;opacity:0.5;">Schlaf</div></div>
+                    </div>
                 `;
             },
 
             // =========================================================
-            // MEDIA CENTER
+            // MEDIA
             // =========================================================
             renderMedia() {
                 return `
@@ -2307,9 +2311,9 @@ Fragen Sie mich zu jedem Thema – ich habe das Wissen!`;
                         <div style="font-size:12px;font-weight:700;">Media Center</div>
                         <div style="opacity:0.5;font-size:8px;">Musik · Videos · Audio</div>
                         <div style="display:flex;gap:3px;justify-content:center;flex-wrap:wrap;margin-top:4px;">
-                            <button onclick="AppRouter.switchTo('music')" class="btn-secondary">🎵 Music</button>
-                            <button onclick="AppRouter.switchTo('video')" class="btn-secondary">🎬 Video</button>
-                            <button onclick="AppRouter.switchTo('gallery')" class="btn-secondary">🖼️ Gallery</button>
+                            <button onclick="AppRouter.switchTo('music')" class="btn-secondary">🎵</button>
+                            <button onclick="AppRouter.switchTo('video')" class="btn-secondary">🎬</button>
+                            <button onclick="AppRouter.switchTo('gallery')" class="btn-secondary">🖼️</button>
                         </div>
                     </div>
                 `;
@@ -2320,7 +2324,6 @@ Fragen Sie mich zu jedem Thema – ich habe das Wissen!`;
                     <div style="text-align:center;padding:10px;">
                         <div style="font-size:28px;">🎵</div>
                         <div style="font-size:12px;font-weight:700;">Music</div>
-                        <div style="opacity:0.5;">HalDo Beats</div>
                         <div style="display:flex;gap:4px;justify-content:center;margin-top:4px;">
                             <button class="btn-secondary">⏮</button>
                             <button class="btn-primary">▶</button>
@@ -2379,7 +2382,6 @@ Fragen Sie mich zu jedem Thema – ich habe das Wissen!`;
                     <div style="text-align:center;padding:10px;">
                         <div style="font-size:28px;">🛍️</div>
                         <div style="font-size:12px;font-weight:700;">HalDo Store</div>
-                        <div style="opacity:0.5;font-size:8px;">Apps · Erweiterungen</div>
                         <div style="margin-top:4px;">
                             <div class="card" style="display:flex;justify-content:space-between;align-items:center;font-size:8px;">
                                 <span>📦 HalDo AI Pro</span>
@@ -2400,7 +2402,7 @@ Fragen Sie mich zu jedem Thema – ich habe das Wissen!`;
                         <div style="color:#4caf50;">$ haldo --version</div>
                         <div>HalDo AI OS ${HALDO_VERSION}</div>
                         <div style="color:#4caf50;margin-top:2px;">$ haldo --help</div>
-                        <div>Befehle: status, apps, backup, update, help, book</div>
+                        <div>Befehle: status, apps, backup, update, help</div>
                         <div style="color:#4caf50;margin-top:2px;">$ █</div>
                     </div>
                     <div class="flex-row" style="margin-top:3px;">
@@ -2423,7 +2425,7 @@ Fragen Sie mich zu jedem Thema – ich habe das Wissen!`;
                         result = `✅ Version ${HALDO_VERSION} · ${APP_LIST.length} Apps`;
                         break;
                     case 'apps':
-                        result = `📱 ${APP_LIST.length} Apps: ${APP_LIST.map(a => a.name).join(', ')}`;
+                        result = `📱 ${APP_LIST.length} Apps`;
                         break;
                     case 'backup':
                         result = '💾 Backup wird erstellt...';
@@ -2433,27 +2435,15 @@ Fragen Sie mich zu jedem Thema – ich habe das Wissen!`;
                         result = '🔄 Updates werden geprüft...';
                         setTimeout(() => this.checkUpdates(), 300);
                         break;
-                    case 'book':
-                        result =
-                        `📖 Wissensbuch: ${Object.keys(HalDoAI.knowledge).length} Themen. Geben Sie "book suche <thema>" ein.`;
-                        break;
                     case 'help':
-                        result = 'Befehle: status, apps, backup, update, help, book, clear';
+                        result = 'Befehle: status, apps, backup, update, help, clear';
                         break;
                     case 'clear':
                         output.innerHTML = '';
                         input.value = '';
                         return;
                     default:
-                        if (cmd.startsWith('book suche ')) {
-                            const query = cmd.replace('book suche ', '');
-                            const found = HalDoAI.search(query);
-                            result = found.length > 0 ?
-                                `📖 Gefunden: ${found.map(f => f.topic).join(', ')}` :
-                                '📖 Keine Themen gefunden.';
-                        } else {
-                            result = `❌ Unbekannt: "${cmd}". Geben Sie "help" ein.`;
-                        }
+                        result = `❌ Unbekannt: "${cmd}". Geben Sie "help" ein.`;
                 }
                 output.innerHTML += `<div style="color:#4caf50;">$ ${cmd}</div><div style="padding-bottom:2px;">${result}</div>`;
                 input.value = '';
@@ -2465,9 +2455,9 @@ Fragen Sie mich zu jedem Thema – ich habe das Wissen!`;
             // =========================================================
             renderSecurity() {
                 return `
-                    <div class="card"><div class="card-title">🛡️ Sicherheitsstatus</div><div style="font-size:8px;color:#4caf50;">✅ System ist sicher</div></div>
-                    <div class="card"><div class="card-title">🔐 Datenschutz</div><div style="font-size:7px;opacity:0.5;">Alle Daten lokal gespeichert.</div></div>
-                    <button class="btn-secondary">🔍 Sicherheitsprüfung</button>
+                    <div class="card"><div class="card-title">🛡️ Sicherheit</div><div style="font-size:8px;color:#4caf50;">✅ System sicher</div></div>
+                    <div class="card"><div class="card-title">🔐 Datenschutz</div><div style="font-size:7px;opacity:0.5;">Daten lokal gespeichert.</div></div>
+                    <button class="btn-secondary">🔍 Prüfen</button>
                 `;
             },
 
@@ -2483,6 +2473,49 @@ Fragen Sie mich zu jedem Thema – ich habe das Wissen!`;
             },
 
             // =========================================================
+            // LANGUAGE
+            // =========================================================
+            renderLanguage() {
+                return `
+                    <div class="card"><div class="card-title">🌐 Systemsprache</div><select style="margin-top:2px;font-size:8px;"><option>Deutsch</option><option>English</option><option>Kurdî</option><option>Êzîdî</option></select></div>
+                    <div class="card"><div class="card-title">⌨️ Tastatur</div><select style="margin-top:2px;font-size:8px;"><option>Deutsch</option><option>Êzîdî</option><option>English</option></select><button onclick="AppRouter.switchTo('ezidi-keyboard')" class="btn-secondary" style="margin-top:2px;">⌨️ Êzîdî</button></div>
+                    <button onclick="AppRouter.switchTo('translator')" class="btn-secondary">🌍 Übersetzer</button>
+                `;
+            },
+
+            // =========================================================
+            // DISPLAY
+            // =========================================================
+            renderDisplay() {
+                return `
+                    <div style="text-align:center;padding:12px;">
+                        <div style="font-size:28px;">🖥️</div>
+                        <div style="font-size:12px;font-weight:700;">Display Center</div>
+                        <div style="display:flex;flex-direction:column;gap:2px;max-width:160px;margin:6px auto;text-align:left;font-size:8px;">
+                            <label><input type="checkbox" checked> Animationen</label>
+                            <label><input type="checkbox" checked> Glow-Effekt</label>
+                            <label><input type="checkbox" checked> Cosmic-Hintergrund</label>
+                        </div>
+                        <button onclick="AppRouter.switchTo('cosmic')" class="btn-secondary">🌌 Cosmic World</button>
+                    </div>
+                `;
+            },
+
+            // =========================================================
+            // YOUR DISPLAY
+            // =========================================================
+            renderYourDisplay() {
+                return `
+                    <div style="text-align:center;padding:12px;">
+                        <div style="font-size:28px;">✨</div>
+                        <div style="font-size:12px;font-weight:700;">Dein HalDo Display</div>
+                        <div style="width:100px;height:100px;border-radius:50%;background:radial-gradient(circle,#ffd54b,#ff9f1c);margin:8px auto;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:#0a0e1a;box-shadow:0 0 20px rgba(255,200,80,0.15);">HalDo</div>
+                        <div style="font-size:7px;opacity:0.3;">Dein Logo in der Mitte</div>
+                    </div>
+                `;
+            },
+
+            // =========================================================
             // PLANETEN
             // =========================================================
             renderPlanets() {
@@ -2493,12 +2526,12 @@ Fragen Sie mich zu jedem Thema – ich habe das Wissen!`;
                     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:3px;">
                         ${planets.map(p => `
                             <div class="card" style="text-align:center;cursor:pointer;padding:4px;" onclick="speak('${p}')">
-                                <div style="font-size:18px;">${p === 'Erde' ? '🌍' : p === 'Mond' ? '🌙' : p === 'HalDo' ? '✦' : '🪐'}</div>
+                                <div style="font-size:18px;">${p === 'Erde' ? '🌍' : p === 'HalDo' ? '✦' : '🪐'}</div>
                                 <div style="font-size:7px;">${p}</div>
                             </div>
                         `).join('')}
                     </div>
-                    <div style="margin-top:4px;padding:4px;background:rgba(255,200,80,0.03);border-radius:3px;font-size:8px;text-align:center;opacity:0.5;">
+                    <div style="margin-top:4px;padding:4px;font-size:7px;text-align:center;opacity:0.4;">
                         🕐 Planet als Uhr: Merkur=Stunde, Venus=Minute, Erde=Sekunde
                     </div>
                 `;
@@ -2513,7 +2546,6 @@ Fragen Sie mich zu jedem Thema – ich habe das Wissen!`;
                         <div style="font-size:48px;">🌍</div>
                         <div style="font-size:14px;font-weight:700;">Erde</div>
                         <div style="font-size:9px;opacity:0.5;">Durchmesser: 12.742 km · Umlaufzeit: 365,25 Tage</div>
-                        <div style="font-size:8px;opacity:0.3;margin-top:4px;">Die Erde ist der dritte Planet von der Sonne und der einzige bekannte Planet mit Leben.</div>
                         <button onclick="AppRouter.switchTo('ai')" class="btn-secondary" style="margin-top:6px;">🤖 Mehr erfahren</button>
                     </div>
                 `;
@@ -2528,7 +2560,6 @@ Fragen Sie mich zu jedem Thema – ich habe das Wissen!`;
                         <div style="font-size:48px;">🌙</div>
                         <div style="font-size:14px;font-weight:700;">Mond</div>
                         <div style="font-size:9px;opacity:0.5;">Durchmesser: 3.474 km · Entfernung: 384.400 km</div>
-                        <div style="font-size:8px;opacity:0.3;margin-top:4px;">Der Mond ist der einzige natürliche Satellit der Erde.</div>
                         <button onclick="AppRouter.switchTo('ai')" class="btn-secondary" style="margin-top:6px;">🤖 Mehr erfahren</button>
                     </div>
                 `;
@@ -2541,7 +2572,7 @@ Fragen Sie mich zu jedem Thema – ich habe das Wissen!`;
                 const topics = HalDoAI.getAllTopics();
                 return `
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px;">
-                        ${topics.slice(0, 30).map(t => `
+                        ${topics.slice(0, 40).map(t => `
                             <div class="card" style="cursor:pointer;padding:2px 4px;font-size:7px;" onclick="AppRouter.showTopic('${t}')">📖 ${t}</div>
                         `).join('')}
                     </div>
@@ -2550,10 +2581,56 @@ Fragen Sie mich zu jedem Thema – ich habe das Wissen!`;
             },
 
             // =========================================================
-            // CHAT
+            // HOME
             // =========================================================
-            renderChat() {
-                return this.renderAI();
+            renderHome() {
+                const notes = NoteSystem?.notes?.length || 0;
+                const events = CalendarSystem?.events?.length || 0;
+                const warnings = WarningSystem?.getActive?.().length || 0;
+                const apps = APP_LIST.length;
+                return `
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(80px,1fr));gap:4px;margin-bottom:6px;">
+                        <div class="card" style="text-align:center;padding:6px;">
+                            <div style="font-size:16px;">🤖</div>
+                            <div style="font-size:13px;font-weight:700;">${apps}</div>
+                            <div style="font-size:7px;opacity:0.4;">Apps</div>
+                        </div>
+                        <div class="card" style="text-align:center;padding:6px;">
+                            <div style="font-size:16px;">📝</div>
+                            <div style="font-size:13px;font-weight:700;">${notes}</div>
+                            <div style="font-size:7px;opacity:0.4;">Notizen</div>
+                        </div>
+                        <div class="card" style="text-align:center;padding:6px;">
+                            <div style="font-size:16px;">📅</div>
+                            <div style="font-size:13px;font-weight:700;">${events}</div>
+                            <div style="font-size:7px;opacity:0.4;">Termine</div>
+                        </div>
+                        <div class="card" style="text-align:center;padding:6px;">
+                            <div style="font-size:16px;">🚨</div>
+                            <div style="font-size:13px;font-weight:700;">${warnings}</div>
+                            <div style="font-size:7px;opacity:0.4;">Warnungen</div>
+                        </div>
+                    </div>
+                    <div style="background:rgba(255,200,80,0.03);border-radius:4px;padding:6px;border:1px solid rgba(255,200,80,0.04);">
+                        <div style="font-weight:700;font-size:10px;">✦ HalDo AI OS ${HALDO_VERSION}</div>
+                        <div style="font-size:8px;opacity:0.5;">${HALDO_BUILD} · ${apps} Apps</div>
+                        <div style="display:flex;gap:2px;flex-wrap:wrap;margin-top:3px;">
+                            ${['ai','ai-book','notes','calendar','files','settings','warnings','backup','updates','cosmic'].map(id => {
+                                const a = APP_LIST.find(x => x.id === id);
+                                return a ? `<button onclick="AppRouter.switchTo('${id}')" class="btn-secondary">${a.icon}</button>` : '';
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            },
+
+            // =========================================================
+            // LIVING LOGO STATE
+            // =========================================================
+            setLogoState(state) {
+                const logo = document.getElementById('living-logo');
+                if (!logo) return;
+                logo.className = 'living-logo ' + state;
             },
 
             // =========================================================
@@ -2582,7 +2659,6 @@ Fragen Sie mich zu jedem Thema – ich habe das Wissen!`;
                 const container = document.getElementById('cosmic-stars');
                 if (!container) return;
                 container.innerHTML = '';
-                // 365 Sterne
                 for (let i = 0; i < 365; i++) {
                     const star = document.createElement('span');
                     star.className = 'cosmic-star';
@@ -2593,7 +2669,6 @@ Fragen Sie mich zu jedem Thema – ich habe das Wissen!`;
                     star.style.top = Math.random() * 100 + '%';
                     star.style.setProperty('--speed', (2 + Math.random() * 5) + 's');
                     star.style.animationDelay = (Math.random() * 5) + 's';
-                    star.style.opacity = Math.random() * 0.8 + 0.2;
                     container.appendChild(star);
                 }
             }
@@ -2685,7 +2760,7 @@ Fragen Sie mich zu jedem Thema – ich habe das Wissen!`;
                         `<div style="text-align:center;opacity:0.3;padding:12px;font-size:8px;">✅ Keine aktiven Warnungen</div>`;
                     return; }
                 container.innerHTML = active.map(w =>
-                    `<div class="warning-card ${w.type}" style="padding:4px 8px;border-radius:3px;margin-bottom:3px;display:flex;align-items:center;gap:4px;border-left:2px solid ${w.type === 'blitzer' ? '#ffd93d' : w.type === 'baustelle' ? '#ffa94d' : w.type === 'sperrung' ? '#ff6b6b' : '#ff0000'};background:rgba(255,80,80,0.04);font-size:8px;">
+                    `<div style="padding:4px 8px;border-radius:3px;margin-bottom:3px;display:flex;align-items:center;gap:4px;border-left:2px solid ${w.type === 'blitzer' ? '#ffd93d' : w.type === 'baustelle' ? '#ffa94d' : w.type === 'sperrung' ? '#ff6b6b' : '#ff0000'};background:rgba(255,80,80,0.04);font-size:8px;">
                         <span style="font-size:12px;">${w.icon}</span>
                         <div style="flex:1;"><strong>${w.title}</strong> ${w.description} · 📍 ${w.location}</div>
                         <span style="opacity:0.3;">${new Date(w.timestamp).toLocaleTimeString()}</span>
@@ -2942,8 +3017,8 @@ Fragen Sie mich zu jedem Thema – ich habe das Wissen!`;
 
             setTimeout(() => {
                 setStatus('System bereit');
-                speak('HalDo AI OS 23.1.6. Das Wissensbuch von A bis Z ist bereit.');
-            }, 1200);
+                speak('HalDo AI OS 23.1.6. Das Wissensbuch von A bis Z ist bereit. Klicken Sie auf die Sonne für HalDo AI.');
+            }, 1500);
 
             console.log('✅ System bereit');
         }
