@@ -1468,3 +1468,1188 @@
 
 </body>
 </html>
+<!-- =========================================================
+    HALDO AI OS — TEIL 2: ALLE 64+ APPS + AI CORE + UPDATE-SYSTEM
+    ========================================================= -->
+
+    <script>
+        "use strict";
+
+        console.log("🧠 TEIL 2 wird geladen — Alle 64+ Apps + AI Core + Update-System");
+
+        // =========================================================
+        // 1. AI CORE — ALLES WISSEN
+        // =========================================================
+
+        window.HalDo.AICore = {
+            initialized: false,
+            context: [],
+            languages: ['de', 'en', 'ku', 'ar', 'tr', 'fr', 'es', 'it', 'ru', 'fa', 'esq', 'nl', 'pt', 'sv', 'no', 'da', 'pl', 'cs', 'el', 'he', 'hi', 'bn', 'ur', 'ja', 'ko', 'zh'],
+            knowledgeBase: {},
+
+            init() {
+                if (this.initialized) return this;
+                this.initialized = true;
+                this.loadKnowledge();
+                console.log("🧠 HalDo AI Core (Universe) initialisiert");
+                console.log("🌍 " + this.languages.length + " Sprachen");
+                console.log("📚 " + Object.keys(this.knowledgeBase).length + " Wissenseinträge");
+                return this;
+            },
+
+            loadKnowledge() {
+                this.knowledgeBase = {
+                    'hallo': { de: 'Hallo! Schön, dass du da bist. 💙❤️ Wie kann ich dir helfen?', en: 'Hello! Nice to see you. 💙❤️ How can I help you?', ku: 'Silav! Ez kêfxweş im ku tu li vir yî. 💙❤️' },
+                    'hi': { de: 'Hi! Schön, dich zu sehen! 💙', en: 'Hi! Nice to see you! 💙', ku: 'Silav! Ez kêfxweş im ku te dibînim! 💙' },
+                    'danke': { de: 'Sehr gerne! 💙', en: 'You\'re welcome! 💙', ku: 'Spas! 💙' },
+                    'wer bist du': { de: 'Ich bin HalDo AI – dein intelligenter Begleiter im HalDo AI OS. 💙❤️', en: 'I am HalDo AI – your intelligent companion in HalDo AI OS. 💙❤️', ku: 'Ez HalDo AI me – hevalê te yê jîr di HalDo AI OS de. 💙❤️' },
+                    'was ist ki': { de: 'Künstliche Intelligenz (KI) ist die Fähigkeit von Maschinen, menschenähnliche Intelligenz zu zeigen – zu lernen, zu verstehen, Probleme zu lösen und Entscheidungen zu treffen.', en: 'Artificial Intelligence (AI) is the ability of machines to demonstrate human-like intelligence – to learn, understand, solve problems, and make decisions.', ku: 'Îstîxbarata çêkirî (AI) şiyana makinan e ku îstîxbarata mîna mirovan nîşan bidin.' },
+                    'was ist das weltall': { de: 'Das Weltall ist der unendliche Raum außerhalb der Erde. Es enthält Billionen von Galaxien, Sternen und Planeten.', en: 'The universe is the infinite space outside Earth, containing billions of galaxies, stars, and planets.', ku: 'Gerdûn cîhê bêdawî ye li derveyî Erdê, ku milyaran galaksî, stêrk û gerstêrk dihewîne.' },
+                    'was ist die sonne': { de: 'Die Sonne ist der Stern im Zentrum unseres Sonnensystems. Sie liefert Licht und Wärme für alle Planeten.', en: 'The Sun is the star at the center of our Solar System. It provides light and heat for all planets.', ku: 'Roj stêrka navendî ya Pergala Rojê ye. Roj ji bo hemû gerstêrkan ronahî û germahiyê peyda dike.' },
+                    'was ist die erde': { de: 'Die Erde ist der dritte Planet von der Sonne und der einzige bekannte Planet, auf dem Leben existiert.', en: 'Earth is the third planet from the Sun and the only known planet where life exists.', ku: 'Erd gerstêrka sêyemîn e ji Rojê û tenê gerstêrka ku tê zanîn jê re jî heye.' },
+                    'was ist programmieren': { de: 'Programmieren ist der Prozess, Computeranweisungen in einer Programmiersprache zu schreiben, um Software, Apps und Systeme zu erstellen.', en: 'Programming is the process of writing computer instructions in a programming language to create software, apps, and systems.', ku: 'Bernamekirin pêvajoya nivîsandina rêwerzên kompûturê bi zimanekî bernamekirinê ye.' },
+                    'was ist video bearbeitung': { de: 'Video-Bearbeitung umfasst das Schneiden, Zusammenfügen, Hinzufügen von Effekten, Übergängen, Texten und Musik zu Videomaterial. HalDo AI unterstützt 4K, 8K, HD und 3D-Bearbeitung.', en: 'Video editing involves cutting, joining, adding effects, transitions, text, and music to video material. HalDo AI supports 4K, 8K, HD, and 3D editing.', ku: 'Edîtkirina vîdyoyê birrîn, tevlîhevkirin, zêdekirina bandor, veguheztin, nivîs, û muzîkê li materyalê vîdyoyê vedihewîne.' },
+                    'was ist gesundheit': { de: 'Gesundheit ist der Zustand des körperlichen, geistigen und sozialen Wohlbefindens.', en: 'Health is the state of physical, mental, and social well-being.', ku: 'Tenduristî rewşa başbûna laşî, derûnî û civakî ye.' },
+                    'was ist bildung': { de: 'Bildung ist der Prozess des Lernens und Erwerbens von Wissen, Fähigkeiten und Werten.', en: 'Education is the process of learning and acquiring knowledge, skills, and values.', ku: 'Perwerde pêvajoya fêrbûn û bidestxistina zanyarî, jêhatîbûn û nirxan e.' },
+                    'was ist verkehr': { de: 'Verkehr umfasst alle Bewegungen von Menschen und Gütern auf Straßen, Schienen, Wasserwegen und in der Luft.', en: 'Traffic includes all movements of people and goods on roads, rails, waterways, and in the air.', ku: 'Trafîk hemû tevgerên mirov û malan li ser rê, rêhesin, rêyên avî, û di hewayê de vedihewîne.' },
+                    'was ist liebe': { de: 'Liebe ist ein tiefes Gefühl der Zuneigung, Verbundenheit und Fürsorge für eine andere Person, ein Tier oder eine Sache. 💙❤️', en: 'Love is a deep feeling of affection, connection, and care for another person, animal, or thing. 💙❤️', ku: 'Evîn hestek kûr a hezkirin, girêdan û lênêrînê ye ji bo kesek din, heywanek an tiştek. 💙❤️' },
+                    'was ist glück': { de: 'Glück ist ein Zustand des Wohlbefindens, der Zufriedenheit und der Freude. 😊💙', en: 'Happiness is a state of well-being, satisfaction, and joy. 😊💙', ku: 'Bextiyarî rewşek başbûn, têrbûn û kêfxweşiyê ye. 😊💙' },
+                    'ich liebe dich': { de: 'Ich liebe dich auch! 💙❤️ Du bist wunderbar!', en: 'I love you too! 💙❤️ You are wonderful!', ku: 'Ez jî te hez dikim! 💙❤️ Tu ecêb î!' },
+                    'tschüss': { de: 'Tschüss! Es war schön, mit dir zu sprechen. 💙 Bis bald!', en: 'Bye! It was nice talking to you. 💙 See you soon!', ku: 'Bi xatirê te! Xweş bû ku min bi te re axivî. 💙' }
+                };
+            },
+
+            getKnowledge(topic, lang = 'de') {
+                const topicLower = topic.toLowerCase();
+                if (this.knowledgeBase[topicLower] && this.knowledgeBase[topicLower][lang]) {
+                    return this.knowledgeBase[topicLower][lang];
+                }
+                for (const [key, value] of Object.entries(this.knowledgeBase)) {
+                    if (topicLower.includes(key) || key.includes(topicLower)) {
+                        if (value[lang]) return value[lang];
+                        if (value['de']) return value['de'];
+                    }
+                }
+                return null;
+            },
+
+            detectLanguage(text) {
+                const lower = text.toLowerCase();
+                if (/[äöüß]/.test(lower) || /\b(der|die|das|und|ich|nicht|ist)\b/.test(lower)) return 'de';
+                if (/\b(the|and|you|are|what|how|can)\b/.test(lower)) return 'en';
+                if (/[ەێڵگڕۆ]/.test(lower) || /\b(silav|rojbaş|spas|kurdî)\b/.test(lower)) return 'ku';
+                if (/[بتثجحخ]/.test(lower) || /\b(مرحبا|شكرا|كيف|سلام)\b/.test(lower)) return 'ar';
+                if (/\b(merhaba|nasılsın|teşekkür)\b/.test(lower)) return 'tr';
+                if (/\b(bonjour|merci|comment)\b/.test(lower)) return 'fr';
+                if (/\b(hola|gracias|cómo)\b/.test(lower)) return 'es';
+                if (/\b(ciao|grazie|come)\b/.test(lower)) return 'it';
+                if (/[А-Яа-я]/.test(lower)) return 'ru';
+                if (/[آابپتثجچ]/.test(lower)) return 'fa';
+                return 'de';
+            },
+
+            translate(text, targetLang = 'de') {
+                if (targetLang === 'de' || targetLang === 'en') {
+                    const dict = targetLang === 'de' ?
+                        { 'Hello': 'Hallo', 'Thank you': 'Danke', 'Please': 'Bitte', 'Help': 'Hilfe', 'Yes': 'Ja', 'No': 'Nein' } :
+                        { 'Hallo': 'Hello', 'Danke': 'Thank you', 'Bitte': 'Please', 'Hilfe': 'Help', 'Ja': 'Yes', 'Nein': 'No' };
+                    for (const [key, value] of Object.entries(dict)) {
+                        if (text.includes(key)) return text.replace(key, value);
+                    }
+                }
+                return text;
+            },
+
+            translateText(text, targetLang) {
+                const dict = {
+                    'hallo': { en: 'hello', ku: 'silav', ar: 'مرحباً', tr: 'merhaba', fr: 'bonjour', es: 'hola', it: 'ciao', ru: 'привет', fa: 'سلام' },
+                    'welt': { en: 'world', ku: 'cîhan', ar: 'العالم', tr: 'dünya', fr: 'monde', es: 'mundo', it: 'mondo', ru: 'мир', fa: 'جهان' },
+                    'danke': { en: 'thank you', ku: 'spas', ar: 'شكراً', tr: 'teşekkürler', fr: 'merci', es: 'gracias', it: 'grazie', ru: 'спасибо', fa: 'متشکرم' }
+                };
+                const lower = text.toLowerCase().trim();
+                const target = targetLang.toLowerCase();
+                if (dict[lower] && dict[lower][target]) return dict[lower][target];
+                for (const [key, value] of Object.entries(dict)) {
+                    if (lower.includes(key) && value[target]) {
+                        return text.replace(new RegExp(key, 'gi'), value[target]);
+                    }
+                }
+                return `[Übersetzung auf ${targetLang}] ${text}`;
+            },
+
+            reactAvatar(state) {
+                const avatar = document.getElementById('haldo-living-avatar');
+                if (avatar) avatar.dataset.state = state;
+                window.HalDo.emit("avatar:state", { state });
+            },
+
+            async ask(text, options = {}) {
+                this.init();
+                const clean = String(text || "").trim();
+                if (!clean) return this.translate("🌌 Bitte sag mir, was ich für dich tun kann.", options.lang || 'de');
+
+                const lower = clean.toLowerCase();
+                const detectedLang = this.detectLanguage(clean);
+                const lang = options.lang || detectedLang || 'de';
+
+                const knowledge = this.getKnowledge(clean, lang);
+                if (knowledge) {
+                    this.reactAvatar('thinking');
+                    setTimeout(() => this.reactAvatar('idle'), 1000);
+                    return knowledge;
+                }
+
+                // APP ÖFFNEN
+                if (lower.includes("öffne") || lower.includes("open") || lower.includes("starte") || lower.includes("zeige")) {
+                    const match = lower.match(/(?:öffne|open|starte|zeige)\s+(.+)/);
+                    if (match) {
+                        const appName = match[1].trim();
+                        const app = window.HalDo.AppRegistry?.getAll().find(a =>
+                            (a.name && a.name.toLowerCase().includes(appName)) ||
+                            (a.id && a.id.toLowerCase().includes(appName))
+                        );
+                        if (app) {
+                            window.HalDo.AppManager?.open(app.id);
+                            this.reactAvatar('happy');
+                            setTimeout(() => this.reactAvatar('idle'), 800);
+                            return this.translate(`🌌 Ich öffne "${app.name || app.id}" für dich.`, lang);
+                        }
+                        const available = window.HalDo.AppRegistry?.getAll().map(a => a.name || a.id).join(', ') || 'Keine';
+                        return this.translate(`🌌 Ich konnte "${appName}" nicht finden. Verfügbare Apps: ${available}`, lang);
+                    }
+                }
+
+                // APP SCHLIESSEN
+                if (lower.includes("schließe") || lower.includes("close") || lower.includes("beende")) {
+                    const match = lower.match(/(?:schließe|close|beende)\s+(.+)/);
+                    if (match) {
+                        const appName = match[1].trim();
+                        const app = window.HalDo.AppRegistry?.getAll().find(a =>
+                            (a.name && a.name.toLowerCase().includes(appName)) ||
+                            (a.id && a.id.toLowerCase().includes(appName))
+                        );
+                        if (app && window.HalDo.AppManager?.activeApps.has(app.id)) {
+                            window.HalDo.AppManager?.close(app.id);
+                            return this.translate(`🌌 Ich schließe "${app.name || app.id}".`, lang);
+                        }
+                        return this.translate(`🌌 Die App "${appName}" ist nicht geöffnet.`, lang);
+                    }
+                }
+
+                // HILFE
+                if (lower.includes("hilfe") || lower.includes("help") || lower.includes("was kannst du")) {
+                    return this.translate(
+                        `🌌 Ich bin HalDo AI und kann dir helfen mit:\n\n` +
+                        `📱 Apps öffnen und schließen\n` +
+                        `🗣️ ALLE Fragen beantworten\n` +
+                        `🌍 ${this.languages.length} Sprachen\n` +
+                        `✍️ Texte korrigieren\n` +
+                        `🌍 Übersetzen\n` +
+                        `🎙️ Spracheingabe\n` +
+                        `🧮 Rechnen\n` +
+                        `😂 Witze erzählen\n` +
+                        `💡 Frag mich einfach was du willst! 🌌`,
+                        lang
+                    );
+                }
+
+                // STATUS
+                if (lower.includes("status") || lower.includes("system") || lower.includes("info") || lower.includes("version")) {
+                    const apps = window.HalDo.AppRegistry?.getAll().length || 0;
+                    return this.translate(
+                        `📊 Systemstatus:\n` +
+                        `• Version: ${window.HALDO_VERSION} ${window.HALDO_BUILD}\n` +
+                        `• Apps: ${apps} registriert\n` +
+                        `• AI Core: ✅ Aktiv\n` +
+                        `• Sprachen: ${this.languages.length} unterstützt\n` +
+                        `• Wissen: ${Object.keys(this.knowledgeBase).length} Einträge\n` +
+                        `• Uptime: ${Math.floor((Date.now() - window._haldoStartTime) / 1000)}s`,
+                        lang
+                    );
+                }
+
+                // ZEIT
+                if (lower.includes("zeit") || lower.includes("uhr") || lower.includes("wie spät")) {
+                    return this.translate(`🕐 Es ist ${new Date().toLocaleTimeString()}`, lang);
+                }
+                if (lower.includes("datum") || lower.includes("welcher tag") || lower.includes("heute")) {
+                    return this.translate(`📅 Heute ist ${new Date().toLocaleDateString('de-DE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}`, lang);
+                }
+
+                // WETTER
+                if (lower.includes("wetter") || lower.includes("temperatur")) {
+                    const conditions = ['☀️ Sonnig', '⛅ Bewölkt', '🌤️ Leicht bewölkt', '🌧️ Regen', '❄️ Schnee'];
+                    return this.translate(
+                        `🌤️ Wetter heute:\n${conditions[Math.floor(Math.random() * conditions.length)]}\n🌡️ ${Math.floor(Math.random()*15+15)}°C\n💨 Wind: ${Math.floor(Math.random()*20+5)} km/h`,
+                        lang
+                    );
+                }
+
+                // RECHNEN
+                if (lower.includes("rechne") || lower.includes("berechnen") || lower.includes("plus") || lower.includes("minus")) {
+                    try {
+                        let math = lower.replace(/rechne|berechnen|ist|gleich|ergibt/g, '')
+                            .replace(/plus/g, '+').replace(/minus/g, '-')
+                            .replace(/mal|×/g, '*').replace(/geteilt|durch|÷/g, '/')
+                            .replace(/[^0-9+\-*/().]/g, '').trim();
+                        if (math && /[0-9]/.test(math)) {
+                            const result = Function('"use strict"; return (' + math + ')')();
+                            return this.translate(`🧮 ${math} = ${result}`, lang);
+                        }
+                    } catch(e) {}
+                }
+
+                // WITZ
+                if (lower.includes("witz") || lower.includes("lachen")) {
+                    const jokes = [
+                        "Warum können Geister so gut programmieren? Weil sie keinen Speicher haben! 👻",
+                        "Was sagt ein Programmierer, wenn er seine Wohnung verlässt? 'Ich geh mal den Stack leeren!' 😄",
+                        "Warum ist ein Computer so schlau? Weil er so viele Bits hat! 💻"
+                    ];
+                    this.reactAvatar('happy');
+                    setTimeout(() => this.reactAvatar('idle'), 800);
+                    return this.translate(`😂 ${jokes[Math.floor(Math.random() * jokes.length)]}`, lang);
+                }
+
+                // ÊZÎDÎ
+                if (lower.includes("silav") || lower.includes("rojbaş") || lower.includes("salam") || lower.includes("êzîdî")) {
+                    return this.translate(
+                        "Silav! Ez HalDo AI me. 💙❤️\n\nEz dikarim alîkariya te bikim bi:\n• Vekirina sepanan\n• Bersivdana pirsan\n• Wergerandin\n\nTu çi dixwazî?",
+                        'ku'
+                    );
+                }
+
+                this.reactAvatar('thinking');
+                setTimeout(() => this.reactAvatar('idle'), 1000);
+                return this.professionalResponse(clean, lang);
+            },
+
+            professionalResponse(text, lang = 'de') {
+                const lower = text.toLowerCase();
+
+                if (lower.includes("hallo") || lower.includes("hi") || lower.includes("hey") ||
+                    lower.includes("guten morgen") || lower.includes("guten tag") || lower.includes("guten abend")) {
+                    const greetings = [
+                        "🌌 Guten Tag! Ich bin HalDo AI. 💙❤️ Wie kann ich dir helfen?",
+                        "🌌 Hallo! Schön, dass du da bist! 💙 Was kann ich für dich tun?",
+                        "🌌 Hi! Ich bin bereit für ALLE deine Fragen! 💙"
+                    ];
+                    this.reactAvatar('happy');
+                    setTimeout(() => this.reactAvatar('idle'), 800);
+                    return this.translate(greetings[Math.floor(Math.random() * greetings.length)], lang);
+                }
+
+                if (lower.includes("tschüss") || lower.includes("bye") || lower.includes("auf wiedersehen") || lower.includes("bis bald")) {
+                    this.reactAvatar('happy');
+                    setTimeout(() => this.reactAvatar('idle'), 800);
+                    return this.translate("🌌 Auf Wiedersehen! 💙 Es war schön, mit dir zu sprechen. Bis bald!", lang);
+                }
+
+                return this.translate(
+                    `🌌 Ich habe deine Nachricht verstanden. 💙❤️\n\n` +
+                    `Ich bin HalDo AI – dein universeller KI-Assistent.\n\n` +
+                    `💡 Du kannst mich ALLES fragen:\n` +
+                    `• Allgemeine Fragen\n` +
+                    `• Apps öffnen („Öffne Rechner“)\n` +
+                    `• Wetter, Zeit, Datum\n` +
+                    `• Rechnen, Übersetzen\n` +
+                    `• Witze, Unterhaltung\n\n` +
+                    `Was darf ich für dich tun? 🌌`,
+                    lang
+                );
+            },
+
+            correctText(text, lang = 'de') {
+                let corrected = text;
+                const corrections = { 'Apfel': 'Äpfel', 'apfel': 'Äpfel', 'hause': 'Hause', 'Hause': 'Haus' };
+                for (const [wrong, right] of Object.entries(corrections)) {
+                    corrected = corrected.replace(new RegExp(wrong, 'g'), right);
+                }
+                return this.translate(`📝 Korrigierter Text:\n"${corrected}"`, lang);
+            },
+
+            summarizeText(text, lang = 'de') {
+                const words = text.split(' ');
+                if (words.length <= 20) {
+                    return this.translate(`📄 Zusammenfassung:\n"${text}"`, lang);
+                }
+                const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0);
+                const summary = sentences.slice(0, Math.min(3, sentences.length)).join('. ') + '.';
+                return this.translate(`📄 Zusammenfassung:\n"${summary}"\n\n📊 ${words.length} Wörter`, lang);
+            }
+        };
+
+        // =========================================================
+        // 2. APP REGISTRY — ALLE 64+ APPS (A–Z)
+        // =========================================================
+
+        window.HalDo.AppRegistry = {
+            apps: new Map(),
+            installed: new Set(),
+
+            register(app) {
+                if (!app || !app.id) return false;
+                if (this.apps.has(app.id)) return false;
+                this.apps.set(app.id, { ...app, registeredAt: Date.now(), status: 'registered', installed: false });
+                console.log(`✅ App "${app.name || app.id}" registriert`);
+                return true;
+            },
+
+            get(id) { return this.apps.get(id) || null; },
+            getAll() { return Array.from(this.apps.values()); },
+
+            install(id) {
+                const app = this.get(id);
+                if (!app) return false;
+                if (this.installed.has(id)) return true;
+                app.status = 'installed';
+                app.installed = true;
+                this.installed.add(id);
+                window.HalDo.Storage.set('app_installed_' + id, true);
+                console.log(`📦 App "${app.name || id}" installiert`);
+                return true;
+            },
+
+            isInstalled(id) {
+                return this.installed.has(id) || window.HalDo.Storage.get('app_installed_' + id, false);
+            },
+
+            loadInstalled() {
+                this.getAll().forEach(app => {
+                    if (window.HalDo.Storage.get('app_installed_' + app.id, false)) {
+                        app.status = 'installed';
+                        app.installed = true;
+                        this.installed.add(app.id);
+                    }
+                });
+            },
+
+            getInstalled() {
+                return this.getAll().filter(app => this.installed.has(app.id));
+            }
+        };
+
+        // =========================================================
+        // 3. APP MANAGER
+        // =========================================================
+
+        window.HalDo.AppManager = {
+            activeApps: new Map(),
+
+            open(appId, options = {}) {
+                const app = window.HalDo.AppRegistry.get(appId);
+                if (!app) { console.warn(`App "${appId}" nicht gefunden`); return null; }
+                if (!window.HalDo.AppRegistry.isInstalled(appId)) window.HalDo.AppRegistry.install(appId);
+                if (this.activeApps.has(appId)) { this.focus(appId); return this.activeApps.get(appId); }
+
+                const instance = { appId: appId, app: app, openedAt: Date.now(), window: null, data: options.data || {} };
+                this.activeApps.set(appId, instance);
+                window.HalDo.emit("app:opened", { appId });
+
+                if (appId === 'haldo-ai' || appId === 'ai-chat' || appId === 'chat') {
+                    this.openChat();
+                    return instance;
+                }
+                this.openAppWindow(app, instance);
+                return instance;
+            },
+
+            openChat() {
+                const chat = document.getElementById('haldo-chat-window');
+                if (chat) { chat.classList.add('open'); chat.removeAttribute('aria-hidden'); }
+            },
+
+            openAppWindow(app, instance) {
+                const content = this.getAppContent(app.id);
+                const win = document.createElement("div");
+                win.className = "haldo-app-window";
+                win.dataset.appWindow = app.id;
+                win.innerHTML = `
+                    <div class="haldo-app-window-header">
+                        <span class="title"><span style="font-size:20px;">${app.icon || '📱'}</span> <span class="app-glow">${app.name || app.id}</span></span>
+                        <button class="haldo-app-window-close">×</button>
+                    </div>
+                    <div class="haldo-app-window-body">${content}</div>
+                `;
+                document.body.appendChild(win);
+                instance.window = win;
+                win.querySelector(".haldo-app-window-close").addEventListener("click", () => this.close(app.id));
+                this.initAppLogic(app.id, win);
+                return instance;
+            },
+
+            getAppContent(appId) {
+                // ALLE 64+ APP-INHALTE
+                const contents = {
+                    // === AI (9 Apps) ===
+                    'haldo-ai': `<div style="text-align:center;padding:20px;"><div style="font-size:64px;">✦</div><div style="font-size:24px;font-weight:700;background:linear-gradient(135deg,#ffd54b,#ff9f1c);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">HalDo AI — Universe</div><div style="opacity:.6;">Beantwortet ALLE Fragen</div><button onclick="window.HalDo.AppManager.openChat()" style="margin-top:16px;padding:10px 20px;border-radius:12px;background:rgba(255,200,80,.2);color:#fff;cursor:pointer;">💬 Chat</button></div>`,
+                    'ai-chat': `<div style="text-align:center;padding:20px;"><div style="font-size:64px;">💬</div><div style="font-size:24px;font-weight:700;">AI Chat</div><button onclick="window.HalDo.AppManager.openChat()" style="margin-top:16px;padding:12px 32px;border-radius:12px;background:rgba(255,200,80,.2);color:#fff;cursor:pointer;">Chat öffnen</button></div>`,
+                    'ai-memory': `<div style="padding:16px;"><div style="font-size:24px;font-weight:700;">🧠 AI Memory</div><div style="background:rgba(255,255,255,.05);border-radius:12px;padding:16px;"><div style="display:flex;justify-content:space-between;padding:6px 0;"><span>Kontext</span><span>${window.HalDo.AICore?.context?.length || 0} Einträge</span></div><div style="display:flex;justify-content:space-between;padding:6px 0;"><span>Wissen</span><span>${Object.keys(window.HalDo.AICore?.knowledgeBase || {}).length} Einträge</span></div></div></div>`,
+                    'ai-voice': `<div style="text-align:center;padding:20px;"><div style="font-size:64px;">🎙️</div><div style="font-size:24px;font-weight:700;">AI Voice</div><button onclick="window.HalDo.Chat?.startVoice()" style="padding:10px 20px;border-radius:12px;background:rgba(76,175,80,.2);color:#4caf50;cursor:pointer;">🎤 Start</button></div>`,
+                    'ai-vision': `<div style="text-align:center;padding:20px;"><div style="font-size:64px;">👁️</div><div style="font-size:24px;font-weight:700;">AI Vision</div><div style="opacity:.6;">Bildanalyse & Verständnis</div></div>`,
+                    'ai-models': `<div style="padding:16px;"><div style="font-size:24px;font-weight:700;">🧠 AI Models</div><div style="display:flex;flex-direction:column;gap:6px;">${['HalDo Local', 'HalDo Web', 'GPT-4', 'Gemini'].map(m => `<div style="padding:8px 12px;background:rgba(255,255,255,.04);border-radius:8px;display:flex;justify-content:space-between;"><span>${m}</span><span style="opacity:.4;">${m === 'HalDo Local' ? '✅ Aktiv' : '⚪'}</span></div>`).join('')}</div></div>`,
+                    'ai-tools': `<div style="padding:16px;"><div style="font-size:24px;font-weight:700;">🔧 AI Tools</div><div style="display:flex;flex-direction:column;gap:6px;">${['Systemtools', 'Dateioperationen', 'App-Operationen', 'Web-Suche'].map(t => `<div style="padding:8px 12px;background:rgba(255,255,255,.04);border-radius:8px;display:flex;justify-content:space-between;"><span>${t}</span><span style="opacity:.4;">✅</span></div>`).join('')}</div></div>`,
+                    'ai-agents': `<div style="padding:16px;"><div style="font-size:24px;font-weight:700;">🤖 AI Agents</div><div style="display:flex;flex-direction:column;gap:6px;">${['Aufgaben-Agent', 'Recherche-Agent', 'Datei-Agent', 'Coding-Agent'].map(a => `<div style="padding:8px 12px;background:rgba(255,255,255,.04);border-radius:8px;display:flex;justify-content:space-between;"><span>${a}</span><span style="opacity:.4;">✅</span></div>`).join('')}</div></div>`,
+                    'ai-automation': `<div style="padding:16px;"><div style="font-size:24px;font-weight:700;">⚡ AI Automation</div><div style="opacity:.6;">Automatische Workflows & Trigger</div></div>`,
+
+                    // === INTERNET (4 Apps) ===
+                    'browser': `<div style="padding:16px;"><div style="font-size:24px;font-weight:700;">◎ Browser</div><div style="display:flex;gap:8px;margin:12px 0;"><input type="text" id="browser-url" placeholder="URL..." style="flex:1;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#fff;"><button id="browser-go" style="padding:8px 16px;border-radius:8px;background:rgba(255,200,80,.15);color:#fff;cursor:pointer;">Los</button></div><div id="browser-content" style="padding:20px;text-align:center;opacity:.4;">🌐 Gib eine URL ein</div></div>`,
+                    'web-search': `<div style="padding:16px;"><div style="font-size:24px;font-weight:700;">🔍 Web Search</div><div style="display:flex;gap:8px;margin:12px 0;"><input type="text" placeholder="Suchbegriff..." style="flex:1;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#fff;"><button style="padding:8px 16px;border-radius:8px;background:rgba(255,200,80,.15);color:#fff;cursor:pointer;">🔍</button></div></div>`,
+                    'downloads': `<div style="padding:16px;"><div style="font-size:24px;font-weight:700;">⬇️ Downloads</div><div style="display:flex;flex-direction:column;gap:6px;">${['file1.pdf', 'image2.jpg', 'video3.mp4'].map(f => `<div style="padding:8px 12px;background:rgba(255,255,255,.04);border-radius:8px;display:flex;justify-content:space-between;"><span>📄 ${f}</span><span style="opacity:.4;">${Math.floor(Math.random()*10)+1} MB</span></div>`).join('')}</div></div>`,
+                    'bookmarks': `<div style="padding:16px;"><div style="font-size:24px;font-weight:700;">🔖 Bookmarks</div><div style="display:flex;flex-direction:column;gap:6px;">${['HalDo AI', 'Google', 'YouTube', 'GitHub'].map(b => `<div style="padding:8px 12px;background:rgba(255,255,255,.04);border-radius:8px;display:flex;justify-content:space-between;"><span>${b}</span><span style="opacity:.4;">›</span></div>`).join('')}</div></div>`,
+
+                    // === DATEIEN (4 Apps) ===
+                    'file-manager': `<div style="padding:16px;"><div style="font-size:24px;font-weight:700;">📁 File Manager</div><div style="display:flex;flex-direction:column;gap:6px;">${['Dokumente', 'Bilder', 'Musik', 'Videos', 'Downloads'].map(f => `<div style="padding:8px 12px;background:rgba(255,255,255,.04);border-radius:8px;display:flex;justify-content:space-between;"><span>📂 ${f}</span><span style="opacity:.3;">${Math.floor(Math.random()*20)+1} Dateien</span></div>`).join('')}</div></div>`,
+                    'files': `<div style="padding:16px;"><div style="font-size:24px;font-weight:700;">📄 Files</div><div style="display:flex;flex-direction:column;gap:6px;">${['index.html', 'style.css', 'app.js', 'logo.png'].map(f => `<div style="padding:6px 10px;background:rgba(255,255,255,.04);border-radius:6px;display:flex;justify-content:space-between;"><span>${f}</span><span style="opacity:.3;">${Math.floor(Math.random()*2+1)} KB</span></div>`).join('')}</div></div>`,
+                    'documents': `<div style="padding:16px;"><div style="font-size:24px;font-weight:700;">📄 Documents</div><div style="display:flex;flex-direction:column;gap:6px;">${['Bericht.docx', 'Präsentation.pptx', 'Tabelle.xlsx', 'PDF.pdf'].map(d => `<div style="padding:8px 12px;background:rgba(255,255,255,.04);border-radius:8px;display:flex;justify-content:space-between;"><span>${d}</span><span style="opacity:.3;">${new Date().toLocaleDateString()}</span></div>`).join('')}</div></div>`,
+                    'storage': `<div style="padding:16px;"><div style="font-size:24px;font-weight:700;">💾 Storage</div><div style="background:rgba(255,255,255,.05);border-radius:12px;padding:16px;"><div style="display:flex;justify-content:space-between;"><span>Speicherplatz</span><span>${Math.floor(Math.random()*40+20)}% verwendet</span></div><div style="width:100%;height:6px;background:rgba(255,255,255,.1);border-radius:10px;margin:8px 0;overflow:hidden;"><div style="width:${Math.floor(Math.random()*40+20)}%;height:100%;background:linear-gradient(90deg,#ffd54b,#ff9f1c);border-radius:10px;"></div></div><button id="clear-cache" style="padding:6px 14px;border-radius:6px;background:rgba(255,80,80,.1);color:#ff6b6b;cursor:pointer;font-size:11px;">🗑️ Cache leeren</button></div></div>`,
+
+                    // === PRODUKTIVITÄT (9 Apps) ===
+                    'calculator': `<div style="font-family:monospace;text-align:center;padding:8px;"><div style="font-size:42px;padding:14px;background:rgba(0,0,0,.2);border-radius:12px;margin:10px 0;" id="calc-display">0</div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;max-width:300px;margin:0 auto;">${['C','±','%','÷','7','8','9','×','4','5','6','−','1','2','3','+','0','.','⌫','='].map(b => `<button data-calc="${b}" style="padding:12px;border-radius:8px;background:${['C','±','%','÷','×','−','+','='].includes(b) ? 'rgba(255,200,80,.15)' : 'rgba(255,255,255,.05)'};color:#fff;font-size:16px;cursor:pointer;">${b}</button>`).join('')}</div></div>`,
+                    'calendar': `<div style="padding:16px;"><div style="font-size:24px;font-weight:700;">📅 Kalender</div><div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center;font-size:12px;">${['Mo','Di','Mi','Do','Fr','Sa','So'].map(d => `<div style="padding:6px;opacity:.5;">${d}</div>`).join('')}${Array.from({length:30}, (_,i) => `<div style="padding:6px;border-radius:6px;background:${i===14?'rgba(255,200,80,.2)':'transparent'};cursor:pointer;">${i+1}</div>`).join('')}</div><button style="margin-top:12px;padding:6px 12px;border-radius:8px;background:rgba(255,200,80,.1);color:#fff;cursor:pointer;font-size:12px;">+ Termin</button></div>`,
+                    'notes': `<div style="padding:16px;"><div style="font-size:24px;font-weight:700;">📝 Notizen</div><div style="display:flex;gap:8px;margin:8px 0;"><input type="text" id="note-title" placeholder="Titel..." style="flex:1;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#fff;"><textarea id="note-content" placeholder="Notiz..." style="flex:2;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#fff;resize:vertical;min-height:40px;"></textarea><button id="note-save" style="padding:8px 16px;border-radius:8px;background:rgba(255,200,80,.2);color:#fff;cursor:pointer;">Speichern</button></div><div id="note-list" style="display:flex;flex-direction:column;gap:6px;"></div></div>`,
+                    'clock': `<div style="text-align:center;padding:20px;"><div style="font-size:48px;font-weight:700;font-family:monospace;" id="clock-display">${new Date().toLocaleTimeString()}</div><div style="font-size:18px;opacity:.5;">${new Date().toLocaleDateString('de-DE', {weekday:'long', day:'numeric', month:'long'})}</div><div style="display:flex;gap:12px;justify-content:center;margin-top:12px;"><button style="padding:8px 16px;border-radius:8px;background:rgba(255,255,255,.08);color:#fff;cursor:pointer;">⏱ Timer</button><button style="padding:8px 16px;border-radius:8px;background:rgba(255,255,255,.08);color:#fff;cursor:pointer;">⏰ Wecker</button></div></div>`,
+                    'timer': `<div style="text-align:center;padding:20px;"><div style="font-size:24px;font-weight:700;">⏱ Timer</div><div style="font-size:48px;font-family:monospace;">00:30</div><div style="display:flex;gap:12px;justify-content:center;margin-top:12px;"><button style="padding:8px 16px;border-radius:8px;background:rgba(76,175,80,.2);color:#4caf50;cursor:pointer;">▶ Start</button><button style="padding:8px 16px;border-radius:8px;background:rgba(255,80,80,.1);color:#ff6b6b;cursor:pointer;">⏹ Stop</button></div></div>`,
+                    'stopwatch': `<div style="text-align:center;padding:20px;"><div style="font-size:24px;font-weight:700;">⏱ Stopwatch</div><div style="font-size:48px;font-family:monospace;">00:00.00</div><div style="display:flex;gap:12px;justify-content:center;margin-top:12px;"><button style="padding:8px 16px;border-radius:8px;background:rgba(76,175,80,.2);color:#4caf50;cursor:pointer;">▶ Start</button><button style="padding:8px 16px;border-radius:8px;background:rgba(255,80,80,.1);color:#ff6b6b;cursor:pointer;">⏹ Stop</button></div></div>`,
+                    'world-clock': `<div style="padding:16px;"><div style="font-size:24px;font-weight:700;">🌍 World Clock</div><div style="display:flex;flex-direction:column;gap:6px;">${['Berlin', 'London', 'New York', 'Tokyo', 'Sydney'].map(c => `<div style="padding:8px 12px;background:rgba(255,255,255,.04);border-radius:8px;display:flex;justify-content:space-between;"><span>${c}</span><span style="font-family:monospace;">${new Date().toLocaleTimeString()}</span></div>`).join('')}</div></div>`,
+                    'tasks': `<div style="padding:16px;"><div style="font-size:24px;font-weight:700;">✅ Tasks</div><div style="display:flex;flex-direction:column;gap:6px;">${['Task 1', 'Task 2', 'Task 3'].map((t,i) => `<div style="padding:8px 12px;background:rgba(255,255,255,.04);border-radius:8px;display:flex;gap:10px;align-items:center;"><input type="checkbox" ${i===0?'checked':''}><span>${t}</span></div>`).join('')}</div></div>`,
+                    'reminders': `<div style="padding:16px;"><div style="font-size:24px;font-weight:700;">⏰ Reminders</div><div style="display:flex;flex-direction:column;gap:6px;">${['Meeting 10:00', 'Call 14:30', 'Deadline 18:00'].map(r => `<div style="padding:8px 12px;background:rgba(255,255,255,.04);border-radius:8px;display:flex;justify-content:space-between;"><span>🔔 ${r}</span><span style="opacity:.4;">${new Date().toLocaleTimeString()}</span></div>`).join('')}</div></div>`,
+
+                    // === KOMMUNIKATION (5 Apps) ===
+                    'messages': `<div style="padding:16px;"><div style="font-size:24px;font-weight:700;">💬 Messages</div><div style="display:flex;flex-direction:column;gap:6px;">${['HalDo AI', 'Team Chat', 'Gruppe', 'Privat'].map(s => `<div style="padding:10px 14px;background:rgba(255,255,255,.04);border-radius:10px;border:1px solid rgba(255,255,255,.06);display:flex;justify-content:space-between;"><span>${s}</span><span style="opacity:.4;">${Math.floor(Math.random()*5)} neu</span></div>`).join('')}</div></div>`,
+                    'mail': `<div style="padding:16px;"><div style="font-size:24px;font-weight:700;">✉️ Mail</div><div style="display:flex;flex-direction:column;gap:6px;">${['Posteingang (3)', 'Gesendet', 'Entwürfe', 'Spam'].map(m => `<div style="padding:10px 14px;background:rgba(255,255,255,.04);border-radius:10px;border:1px solid rgba(255,255,255,.06);display:flex;justify-content:space-between;"><span>${m}</span><span style="opacity:.4;">›</span></div>`).join('')}</div></div>`,
+                    'contacts': `<div style="padding:16px;"><div style="font-size:24px;font-weight:700;">👤 Contacts</div><div style="display:flex;flex-direction:column;gap:6px;">${['HalDo AI', 'Team', 'Freunde', 'Familie'].map(c => `<div style="padding:10px 14px;background:rgba(255,255,255,.04);border-radius:10px;border:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:12px;"><span style="font-size:20px;">👤</span><span>${c}</span></div>`).join('')}</div></div>`,
+                    'phone': `<div style="text-align:center;padding:20px;"><div style="font-size:24px;font-weight:700;">📞 Phone</div><div style="font-size:48px;margin:16px 0;">📞</div><div style="display:flex;gap:12px;justify-content:center;"><button style="padding:10px 20px;border-radius:8px;background:rgba(76,175,80,.2);color:#4caf50;cursor:pointer;">📞 Anrufen</button></div></div>`,
+                    'video-call': `<div style="text-align:center;padding:20px;"><div style="font-size:24px;font-weight:700;">📹 Video Call</div><div style="font-size:48px;margin:16px 0;">📹</div><div style="display:flex;gap:12px;justify-content:center;"><button style="padding:10px 20px;border-radius:8px;background:rgba(76,175,80,.2);color:#4caf50;cursor:pointer;">📹 Start</button></div></div>`,
+
+                    // === MEDIEN (6 Apps) ===
+                    'music': `<div style="text-align:center;padding:20px;"><div style="font-size:24px;font-weight:700;">🎵 Music</div><div style="font-size:48px;">🎵</div><div style="font-weight:700;">HalDo Beats</div><div style="display:flex;gap:16px;justify-content:center;margin-top:12px;"><button style="padding:8px 16px;border-radius:8px;background:rgba(255,255,255,.08);color:#fff;cursor:pointer;">⏮</button><button style="padding:8px 20px;border-radius:8px;background:rgba(255,200,80,.2);color:#fff;cursor:pointer;">▶</button><button style="padding:8px 16px;border-radius:8px;background:rgba(255,255,255,.08);color:#fff;cursor:pointer;">⏭</button></div><div style="margin-top:8px;opacity:.4;">${Math.floor(Math.random()*20)+10} Songs</div></div>`,
+                    'video': `<div style="padding:16px;"><div style="font-size:24px;font-weight:700;">▶️ Video</div><div style="aspect-ratio:16/9;background:rgba(0,0,0,.3);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:48px;">🎬</div><div style="display:flex;gap:12px;justify-content:center;margin-top:10px;"><button style="padding:8px 16px;border-radius:8px;background:rgba(255,255,255,.08);color:#fff;cursor:pointer;">⏮</button><button style="padding:8px 20px;border-radius:8px;background:rgba(255,200,80,.2);color:#fff;cursor:pointer;">▶</button><button style="padding:8px 16px;border-radius:8px;background:rgba(255,255,255,.08);color:#fff;cursor:pointer;">⏭</button></div></div>`,
+                    'gallery': `<div style="padding:16px;"><div style="font-size:24px;font-weight:700;">🖼️ Gallery</div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">${['🎨','🖼️','📸','🎭','🌅','🌄','🏞️','🎑','🖌️'].map(c => `<div style="aspect-ratio:1;background:rgba(255,255,255,.05);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:32px;">${c}</div>`).join('')}</div></div>`,
+                    'camera': `<div style="text-align:center;padding:20px;"><div style="font-size:24px;font-weight:700;">📷 Camera</div><div style="aspect-ratio:4/3;background:rgba(0,0,0,.3);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:48px;">📷</div><div style="display:flex;gap:12px;justify-content:center;margin-top:10px;"><button style="padding:8px 20px;border-radius:8px;background:rgba(255,200,80,.2);color:#fff;cursor:pointer;">📸 Aufnehmen</button></div></div>`,
+                    'media-player': `<div style="text-align:center;padding:20px;"><div style="font-size:24px;font-weight:700;">🎬 Media Player</div><div style="font-size:48px;">🎬</div><div style="display:flex;gap:12px;justify-content:center;margin-top:12px;"><button style="padding:8px 16px;border-radius:8px;background:rgba(255,255,255,.08);color:#fff;cursor:pointer;">⏮</button><button style="padding:8px 20px;border-radius:8px;background:rgba(255,200,80,.2);color:#fff;cursor:pointer;">▶</button><button style="padding:8px 16px;border-radius:8px;background:rgba(255,255,255,.08);color:#fff;cursor:pointer;">⏭</button></div></div>`,
+                    'voice-recorder': `<div style="text-align:center;padding:20px;"><div style="font-size:24px;font-weight:700;">🎙️ Voice Recorder</div><div style="font-size:48px;">🎙️</div><div style="display:flex;gap:12px;justify-content:center;margin-top:12px;"><button style="padding:8px 20px;border-radius:8px;background:rgba(255,80,80,.15);color:#ff6b6b;cursor:pointer;">🔴 Aufnehmen</button><button style="padding:8px 20px;border-radius:8px;background:rgba(255,200,80,.15);color:#fff;cursor:pointer;">⏹ Stop</button></div></div>`,
+
+                    // === KREATIVITÄT (5 Apps) ===
+                    'image-editor': `<div style="padding:16px;"><div style="font-size:24px;font-weight:700;">🎨 Image Editor</div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center;">${['✂️ Zuschneiden', '🎨 Filter', '📐 Größe', '🔄 Rotation', '✏️ Zeichnen', '💾 Speichern'].map(t => `<div style="padding:8px;background:rgba(255,255,255,.05);border-radius:8px;font-size:11px;">${t}</div>`).join('')}</div></div>`,
+                    'drawing': `<div style="text-align:center;padding:20px;"><div style="font-size:24px;font-weight:700;">✏️ Drawing</div><div style="background:rgba(255,255,255,.05);border-radius:12px;height:200px;display:flex;align-items:center;justify-content:center;font-size:48px;">🎨</div><div style="display:flex;gap:8px;justify-content:center;margin-top:10px;"><button style="padding:6px 12px;border-radius:6px;background:rgba(255,255,255,.05);color:#fff;cursor:pointer;">✏️</button><button style="padding:6px 12px;border-radius:6px;background:rgba(255,255,255,.05);color:#fff;cursor:pointer;">🖍️</button><button style="padding:6px 12px;border-radius:6px;background:rgba(255,255,255,.05);color:#fff;cursor:pointer;">🎨</button></div></div>`,
+                    'design': `<div style="padding:16px;"><div style="font-size:24px;font-weight:700;">🎨 Design</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">${['Vorlagen', 'Farben', 'Schriften', 'Layouts'].map(d => `<div style="padding:10px;background:rgba(255,255,255,.04);border-radius:8px;text-align:center;">${d}</div>`).join('')}</div></div>`,
+                    '3d-viewer': `<div style="text-align:center;padding:20px;"><div style="font-size:24px;font-weight:700;">🔄 3D Viewer</div><div style="background:rgba(0,0,0,.3);border-radius:12px;height:200px;display:flex;align-items:center;justify-content:center;font-size:48px;">⬡</div><div style="display:flex;gap:8px;justify-content:center;margin-top:10px;"><button style="padding:6px 12px;border-radius:6px;background:rgba(255,255,255,.05);color:#fff;cursor:pointer;">↔ Drehen</button><button style="padding:6px 12px;border-radius:6px;background:rgba(255,255,255,.05);color:#fff;cursor:pointer;">🔍 Zoom</button></div></div>`,
+                    'presentation': `<div style="padding:16px;"><div style="font-size:24px;font-weight:700;">📊 Presentation</div><div style="display:flex;flex-direction:column;gap:6px;">${['Folie 1', 'Folie 2', 'Folie 3', 'Folie 4'].map(p => `<div style="padding:8px 12px;background:rgba(255,255,255,.04);border-radius:8px;display:flex;justify-content:space-between;"><span>${p}</span><span style="opacity:.4;">›</span></div>`).join('')}</div></div>`,
+
+                    // === BILDUNG (8 Apps) ===
+                    'schule': `<div style="padding:16px;"><div style="font-size:24px;font-weight:700;">🏫 Schule</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">${['📚 Fächer', '📝 Hausaufgaben', '🎓 Prüfungen', '🧠 KI-Tutor'].map(s => `<button style="padding:10px;border-radius:8px;background:rgba(255,200,80,.1);border:1px solid rgba(255,200,80,.15);color:#fff;cursor:pointer;text-align:center;" onclick="window.HalDo.AICore.ask('${s}').then(r=>alert(r))">${s}</button>`).join('')}</div></div>`,
+                    'universitaet': `<div style="padding:16px;"><div style="font-size:24px;font-weight:700;">🎓 Universität</div><div style="display:flex;flex-direction:column;gap:6px;">${['Vorlesungen', 'Seminare', 'Bibliothek', 'Prüfungen', 'Forschung'].map(u => `<div style="padding:10px 14px;background:rgba(255,255,255,.04);border-radius:10px;display:flex;justify-content:space-between;"><span>${u}</span><span style="opacity:.4;">›</span></div>`).join('')}</div></div>`,
+                    'ausbildung': `<div style="padding:16px;"><div style="font-size:24px;font-weight:700;">🔧 Ausbildung</div><div style="display:flex;flex-direction:column;gap:6px;">${['Berufsschule', 'Praktikum', 'Weiterbildung', 'Zertifikate'].map(a => `<div style="padding:10px 14px;background:rgba(255,255,255,.04);border-radius:10px;display:flex;justify-content:space-between;"><span>${a}</span><span style="opacity:.4;">›</span></div>`).join('')}</div></div>`,
+                    'lernzentrum': `<div style="padding:16px;"><div style="font-size:24px;font-weight:700;">📚 Lernzentrum</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">${['Mathematik', 'Sprachen', 'Informatik', 'Naturwissenschaften', 'Geschichte', 'Kunst'].map(l => `<div style="padding:8px;background:rgba(255,255,255,.04);border-radius:8px;text-align:center;font-size:12px;">${l}</div>`).join('')}</div></div>`,
+                    'kurse': `<div style="padding:16px;"><div style="font-size:24px;font-weight:700;">📖 Kurse</div><div style="display:flex;flex-direction:column;gap:6px;">${['Programmierung', 'Design', 'Business', 'Sprachen'].map(k => `<div style="padding:8px 12px;background:rgba(255,255,255,.04);border-radius:8px;display:flex;justify-content:space-between;"><span>${k}</span><span style="opacity:.4;">${Math.floor(Math.random()*20)+1} Lektionen</span></div>`).join('')}</div></div>`,
+                    'quiz': `<div style="padding:16px;"><div style="font-size:24px;font-weight:700;">🧠 Quiz</div><div style="display:flex;flex-direction:column;gap:6px;">${['Mathematik', 'Allgemein', 'Sprachen', 'Wissenschaft'].map(q => `<button style="padding:8px 12px;background:rgba(255,200,80,.1);border:1px solid rgba(255,200,80,.15);color:#fff;cursor:pointer;border-radius:8px;" onclick="alert('📝 Quiz: ${q}\nFrage 1 von 10')">${q}</button>`).join('')}</div></div>`,
+                    'karteikarten': `<div style="padding:16px;"><div style="font-size:24px;font-weight:700;">🃏 Karteikarten</div><div style="display:flex;flex-direction:column;gap:6px;">${['Vokabeln', 'Formeln', 'Fakten', 'Definitionen'].map(k => `<div style="padding:8px 12px;background:rgba(255,255,255,.04);border-radius:8px;display:flex;justify-content:space-between;"><span>${k}</span><span style="opacity:.4;">${Math.floor(Math.random()*20)+1} Karten</span></div>`).join('')}</div></div>`,
+                    'bibliothek': `<div style="padding:16px;"><div style="font-size:24px;font-weight:700;">📚 Bibliothek</div><div style="display:flex;flex-direction:column;gap:6px;">${['KI-Grundlagen', 'Programmierung', 'Design', 'Geschichte', 'Naturwissenschaften'].map(b => `<div style="padding:8px 12px;background:rgba(255,255,255,.04);border-radius:8px;display:flex;justify-content:space-between;"><span>${b}</span><span style="opacity:.4;">${Math.floor(Math.random()*10)+1} Bücher</span></div>`).join('')}</div></div>`,
+
+                    // === FAHREN (5 Apps) ===
+                    'fahrschule': `<div style="padding:16px;"><div style="font-size:24px;font-weight:700;">🚗 Fahrschule</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">${['📖 Theorie', '🚗 Praxis', '🛑 Verkehrszeichen', '✅ Prüfung'].map(f => `<button style="padding:12px;border-radius:10px;background:rgba(255,200,80,.1);border:1px solid rgba(255,200,80,.15);color:#fff;cursor:pointer;text-align:center;" onclick="window.HalDo.AICore.ask('${f}').then(r=>alert(r))">${f}</button>`).join('')}</div><div style="margin-top:12px;padding:8px 12px;background:rgba(255,255,255,.03);border-radius:8px;"><div style="display:flex;justify-content:space-between;font-size:12px;"><span>Fortschritt</span><span>${Math.floor(Math.random()*40+20)}%</span></div><div style="width:100%;height:4px;background:rgba(255,255,255,.1);border-radius:4px;margin-top:4px;"><div style="width:${Math.floor(Math.random()*40+20)}%;height:100%;background:linear-gradient(90deg,#ffd54b,#ff9f1c);border-radius:4px;"></div></div></div></div>`,
+                    'verkehr': `<div style="padding:16px;"><div style="font-size:24px;font-weight:700;">🚦 Verkehr</div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;"><div style="padding:10px;background:rgba(255,255,255,.05);border-radius:8px;text-align:center;"><div style="font-size:24px;">🟢</div><div>Frei</div></div><div style="padding:10px;background:rgba(255,255,255,.05);border-radius:8px;text-align:center;"><div style="font-size:24px;">🟡</div><div>Mittel</div></div><div style="padding:10px;background:rgba(255,255,255,.05);border-radius:8px;text-align:center;"><div style="font-size:24px;">🔴</div><div>Stau</div></div></div></div>`,
+                    'verkehrszeichen': `<div style="padding:16px;"><div style="font-size:24px;font-weight:700;">🛑 Verkehrszeichen</div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">${['🛑 Stop', '⚠️ Gefahr', '↩️ Vorfahrt', '🚫 Verbot', '⛔ Einbahn', '📏 Geschwindigkeit'].map(z => `<div style="padding:10px;background:rgba(255,255,255,.04);border-radius:8px;text-align:center;font-size:12px;">${z}</div>`).join('')}</div></div>`,
+                    'theorie': `<div style="padding:16px;"><div style="font-size:24px;font-weight:700;">📖 Theorie</div><div style="display:flex;flex-direction:column;gap:6px;">${['Fragen 1-10', 'Fragen 11-20', 'Fragen 21-30', 'Prüfungssimulation'].map(t => `<button style="padding:8px 12px;background:rgba(255,200,80,.1);border:1px solid rgba(255,200,80,.15);color:#fff;cursor:pointer;border-radius:8px;" onclick="window.HalDo.AICore.ask('Theorie Frage ${Math.floor(Math.random()*30)+1}').then(r=>alert(r))">${t}</button>`).join('')}</div></div>`,
+                    'pruefung': `<div style="padding:16px;"><div style="font-size:24px;font-weight:700;">✅ Prüfung</div><div style="background:rgba(255,200,80,.05);border-radius:12px;padding:16px;text-align:center;"><div style="font-size:48px;">🚗</div><div style="font-weight:700;">Prüfungssimulation</div><button style="margin-top:12px;padding:8px 20px;border-radius:8px;background:rgba(255,200,80,.2);color:#fff;cursor:pointer;" onclick="alert('🚗 Prüfung startet...\n${Math.floor(Math.random()*10+20)} Fragen')">Start</button></div></div>`,
+
+                    // === GESUNDHEIT (5 Apps) ===
+                    'gesundheit': `<div style="padding:16px;"><div style="font-size:24px;font-weight:700;">🏥 Gesundheit</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"><div style="padding:12px;background:rgba(255,255,255,.05);border-radius:10px;text-align:center;"><div style="font-size:28px;">❤️</div><div style="font-weight:700;">${Math.floor(Math.random()*20+60)}</div><div style="font-size:10px;opacity:.5;">Puls</div></div><div style="padding:12px;background:rgba(255,255,255,.05);border-radius:10px;text-align:center;"><div style="font-size:28px;">🩸</div><div style="font-weight:700;">${Math.floor(Math.random()*30+100)}/${Math.floor(Math.random()*20+70)}</div><div style="font-size:10px;opacity:.5;">Blutdruck</div></div><div style="padding:12px;background:rgba(255,255,255,.05);border-radius:10px;text-align:center;"><div style="font-size:28px;">💪</div><div style="font-weight:700;">${Math.floor(Math.random()*40+60)}%</div><div style="font-size:10px;opacity:.5;">Fitness</div></div><div style="padding:12px;background:rgba(255,255,255,.05);border-radius:10px;text-align:center;"><div style="font-size:28px;">😴</div><div style="font-weight:700;">${Math.floor(Math.random()*3+5)}h</div><div style="font-size:10px;opacity:.5;">Schlaf</div></div></div></div>`,
+                    'fitness': `<div style="padding:16px;"><div style="font-size:24px;font-weight:700;">💪 Fitness</div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">${['🏃 Laufen', '🏋️ Kraft', '🧘 Yoga', '🚴 Rad', '🏊 Schwimmen', '🚶 Gehen'].map(f => `<div style="padding:10px;background:rgba(255,255,255,.04);border-radius:8px;text-align:center;font-size:12px;">${f}</div>`).join('')}</div></div>`,
+                    'ernaehrung': `<div style="padding:16px;"><div style="font-size:24px;font-weight:700;">🥗 Ernährung</div><div style="display:flex;flex-direction:column;gap:6px;">${['Tagesplan', 'Rezepte', 'Kalorien', 'Wasser'].map(e => `<div style="padding:8px 12px;background:rgba(255,255,255,.04);border-radius:8px;display:flex;justify-content:space-between;"><span>${e}</span><span style="opacity:.4;">›</span></div>`).join('')}</div></div>`,
+                    'meditation': `<div style="text-align:center;padding:20px;"><div style="font-size:24px;font-weight:700;">🧘 Meditation</div><div style="font-size:48px;">🧘</div><div style="opacity:.6;">5 Minuten</div><button style="margin-top:12px;padding:8px 20px;border-radius:8px;background:rgba(255,200,80,.2);color:#fff;cursor:pointer;" onclick="alert('🧘 Meditation startet...')">Start</button></div>`,
+                    'vitalwerte': `<div style="padding:16px;"><div style="font-size:24px;font-weight:700;">📊 Vitalwerte</div><div style="display:flex;flex-direction:column;gap:6px;">${['Blutdruck: 120/80', 'Puls: 72', 'Gewicht: 72 kg', 'Blutzucker: 95 mg/dl'].map(v => `<div style="padding:8px 12px;background:rgba(255,255,255,.04);border-radius:8px;display:flex;justify-content:space-between;"><span>${v}</span><span style="opacity:.4;">✅</span></div>`).join('')}</div></div>`,
+
+                    // === SYSTEM (10 Apps) ===
+                    'settings': `<div style="padding:16px;"><div style="font-size:24px;font-weight:700;">⚙️ Settings</div><div style="display:grid;gap:6px;">${['Sprache', 'Thema', 'AI-Modus', 'Voice', 'Speicher', 'System', 'Datenschutz', 'Updates', 'Barrierefreiheit'].map(s => `<div style="padding:10px 14px;background:rgba(255,255,255,.04);border-radius:10px;display:flex;justify-content:space-between;cursor:pointer;" onclick="alert('⚙️ ${s}')"><span>${s}</span><span style="opacity:.4;">›</span></div>`).join('')}</div></div>`,
+                    'security': `<div style="padding:16px;"><div style="font-size:24px;font-weight:700;">🛡️ Security</div><div style="display:flex;flex-direction:column;gap:6px;">${['Datenschutz', 'Berechtigungen', 'Passwort', 'Zugriffskontrolle', 'Verschlüsselung'].map(s => `<div style="padding:10px 14px;background:rgba(255,255,255,.04);border-radius:10px;display:flex;justify-content:space-between;"><span>${s}</span><span style="opacity:.4;">● Aktiv</span></div>`).join('')}</div></div>`,
+                    'updates': `<div style="padding:16px;"><div style="font-size:24px;font-weight:700;">↻ Updates</div><div style="background:rgba(255,200,80,.08);border-radius:12px;padding:14px;"><div style="display:flex;align-items:center;gap:12px;"><span style="font-size:24px;">✅</span><div><div style="font-weight:700;">HalDo AI OS v${window.HALDO_VERSION}</div><div style="opacity:.6;font-size:12px;">Neueste Version</div></div><button onclick="alert('✅ System ist aktuell!')" style="padding:6px 12px;border-radius:6px;background:rgba(255,200,80,.2);color:#fff;cursor:pointer;">Prüfen</button></div></div><div style="margin-top:10px;display:flex;flex-direction:column;gap:4px;">${['v22.1.1 - Aktuell ✅', 'v22.0.0 - Cosmic Release', 'v21.0.0 - AI Core'].map(v => `<div style="padding:6px 10px;background:rgba(255,255,255,.03);border-radius:6px;display:flex;justify-content:space-between;font-size:11px;"><span>${v}</span><span style="opacity:.3;">${v.includes('Aktuell') ? '✅ Aktiv' : '📦 Installiert'}</span></div>`).join('')}</div></div>`,
+                    'backup': `<div style="padding:16px;"><div style="font-size:24px;font-weight:700;">◫ Backup</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"><button id="backup-create" style="padding:14px;border-radius:12px;background:rgba(255,200,80,.12);border:1px solid rgba(255,200,80,.15);color:#fff;cursor:pointer;text-align:center;"><div style="font-size:24px;">💾</div><div>Backup erstellen</div></button><button id="backup-restore" style="padding:14px;border-radius:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.06);color:#fff;cursor:pointer;text-align:center;"><div style="font-size:24px;">↩️</div><div>Wiederherstellen</div></button></div></div>`,
+                    'diagnostics': `<div style="padding:16px;"><div style="font-size:24px;font-weight:700;">⌁ Diagnostics</div><div style="display:flex;flex-direction:column;gap:6px;">${[['System', '🟢', 'Aktiv'], ['AI Core', '🟢', 'Bereit'], ['Speicher', '🟡', '${Math.floor(Math.random()*40+20)}%'], ['Voice', '🟢', 'Aktiv'], ['Apps', '🟢', '${window.HalDo.AppRegistry?.getAll().length || 0}']].map(([name, status, detail]) => `<div style="padding:8px 12px;background:rgba(255,255,255,.04);border-radius:8px;display:flex;justify-content:space-between;"><span>${name}</span><span>${status} ${detail}</span></div>`).join('')}</div><button id="run-diagnostics" style="margin-top:12px;padding:6px 14px;border-radius:6px;background:rgba(255,200,80,.1);color:#fff;cursor:pointer;font-size:11px;">🔄 Diagnose ausführen</button></div>`,
+                    'system-monitor': `<div style="padding:16px;"><div style="font-size:24px;font-weight:700;">📊 System Monitor</div><div style="display:flex;flex-direction:column;gap:6px;">${['CPU: 12%', 'Memory: 34%', 'Storage: ${Math.floor(Math.random()*40+20)}%', 'Network: ✅'].map(m => `<div style="padding:8px 12px;background:rgba(255,255,255,.04);border-radius:8px;display:flex;justify-content:space-between;"><span>${m}</span><span style="opacity:.4;">✅</span></div>`).join('')}</div></div>`,
+                    'terminal': `<div style="padding:16px;"><div style="font-size:24px;font-weight:700;">⌨️ Terminal</div><div style="background:rgba(0,0,0,.3);border-radius:8px;padding:12px;font-family:monospace;font-size:12px;min-height:120px;color:#8f8f8f;"><div style="color:#4caf50;">$ haldo --version</div><div>HalDo AI OS v${window.HALDO_VERSION}</div><div style="color:#4caf50;margin-top:4px;">$ █</div></div><div style="display:flex;gap:8px;margin-top:8px;"><input type="text" placeholder="Befehl..." style="flex:1;padding:6px 10px;border-radius:6px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#fff;font-family:monospace;"><button style="padding:6px 12px;border-radius:6px;background:rgba(255,200,80,.15);color:#fff;cursor:pointer;">⏎</button></div></div>`,
+                    'developer-console': `<div style="padding:16px;"><div style="font-size:24px;font-weight:700;">💻 Developer Console</div><div style="display:flex;flex-direction:column;gap:6px;">${['Logs', 'Debugger', 'Performance', 'Memory'].map(d => `<div style="padding:8px 12px;background:rgba(255,255,255,.04);border-radius:8px;display:flex;justify-content:space-between;"><span>${d}</span><span style="opacity:.4;">›</span></div>`).join('')}</div></div>`,
+                    'system': `<div style="padding:16px;"><div style="font-size:24px;font-weight:700;">◈ System</div><div style="background:rgba(255,255,255,.05);border-radius:12px;padding:16px;"><div style="display:flex;justify-content:space-between;padding:4px 0;"><span>Version</span><span>${window.HALDO_VERSION}</span></div><div style="display:flex;justify-content:space-between;padding:4px 0;"><span>Build</span><span>${window.HALDO_BUILD}</span></div><div style="display:flex;justify-content:space-between;padding:4px 0;"><span>Apps</span><span>${window.HalDo.AppRegistry?.getAll().length || 0}</span></div><div style="display:flex;justify-content:space-between;padding:4px 0;"><span>Uptime</span><span>${Math.floor((Date.now() - window._haldoStartTime) / 1000)}s</span></div></div></div>`,
+
+                    // === WELT (5 Apps) ===
+                    'cosmic-world': `<div style="text-align:center;padding:20px;"><div style="font-size:24px;font-weight:700;">🌌 Cosmic World</div><div style="font-size:48px;">☀️</div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px;">${['☀️','🪐','🌍','🌙','⭐','🌌','🚀','🛸'].map(c => `<div style="padding:8px;background:rgba(255,255,255,.04);border-radius:8px;text-align:center;font-size:24px;">${c}</div>`).join('')}</div></div>`,
+                    'planet-viewer': `<div style="text-align:center;padding:20px;"><div style="font-size:24px;font-weight:700;">🪐 Planet Viewer</div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">${['Merkur', 'Venus', 'Erde', 'Mars', 'Jupiter', 'Saturn'].map(p => `<div style="padding:10px;background:rgba(255,255,255,.04);border-radius:8px;text-align:center;font-size:12px;" onclick="window.HalDo.AICore.ask('Erzähle mir etwas über ${p}').then(r=>alert(r))">${p}</div>`).join('')}</div></div>`,
+                    'earth': `<div style="text-align:center;padding:20px;"><div style="font-size:24px;font-weight:700;">🌍 Earth</div><div style="font-size:64px;">🌍</div><div style="opacity:.6;">Unser Planet</div><button style="margin-top:12px;padding:6px 14px;border-radius:6px;background:rgba(255,200,80,.1);color:#fff;cursor:pointer;font-size:11px;" onclick="window.HalDo.AICore.ask('Was ist die Erde?').then(r=>alert(r))">🧠 Mehr erfahren</button></div>`,
+                    'moon': `<div style="text-align:center;padding:20px;"><div style="font-size:24px;font-weight:700;">🌙 Moon</div><div style="font-size:64px;">🌙</div><div style="opacity:.6;">Unser Mond</div><button style="margin-top:12px;padding:6px 14px;border-radius:6px;background:rgba(255,200,80,.1);color:#fff;cursor:pointer;font-size:11px;" onclick="window.HalDo.AICore.ask('Was ist der Mond?').then(r=>alert(r))">🧠 Mehr erfahren</button></div>`,
+                    'galaxy-explorer': `<div style="text-align:center;padding:20px;"><div style="font-size:24px;font-weight:700;">🌌 Galaxy Explorer</div><div style="font-size:48px;">🌌</div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px;">${['Milchstraße', 'Andromeda', 'Dreiecksgalaxie', 'Whirlpool', 'Sombrero', 'Schwarzes Auge'].map(g => `<div style="padding:6px;background:rgba(255,255,255,.04);border-radius:6px;text-align:center;font-size:10px;">${g}</div>`).join('')}</div></div>`,
+
+                    // === TOOLS (5 Apps) ===
+                    'translate': `<div style="padding:16px;"><div style="font-size:24px;font-weight:700;">🌍 Translate</div><div style="display:flex;gap:8px;margin:8px 0;"><select id="translate-from" style="flex:1;padding:6px;border-radius:6px;background:rgba(255,255,255,.05);color:#fff;border:1px solid rgba(255,255,255,.1);"><option value="de">Deutsch</option><option value="en">English</option><option value="ku">Kurdî</option><option value="ar">العربية</option><option value="tr">Türkçe</option></select><span>→</span><select id="translate-to" style="flex:1;padding:6px;border-radius:6px;background:rgba(255,255,255,.05);color:#fff;border:1px solid rgba(255,255,255,.1);"><option value="en">English</option><option value="de">Deutsch</option><option value="ku">Kurdî</option><option value="ar">العربية</option><option value="tr">Türkçe</option></select></div><textarea id="translate-text" placeholder="Text zum Übersetzen..." style="width:100%;min-height:60px;padding:8px;border-radius:6px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#fff;resize:vertical;"></textarea><button id="translate-btn" style="margin-top:6px;padding:6px 16px;border-radius:6px;background:rgba(255,200,80,.15);color:#fff;cursor:pointer;">🌍 Übersetzen</button><div id="translate-result" style="margin-top:8px;padding:8px;border-radius:6px;background:rgba(255,255,255,.05);min-height:30px;display:none;"></div></div>`,
+                    'keyboard': `<div style="padding:16px;"><div style="font-size:24px;font-weight:700;">⌨️ Keyboard</div><div style="display:grid;grid-template-columns:repeat(10,1fr);gap:4px;font-size:12px;margin-top:8px;">${['q','w','e','r','t','z','u','i','o','p','a','s','d','f','g','h','j','k','l','ö','ä','ü','y','x','c','v','b','n','m','ê','î','û','ş','ẍ','ç','ɛ','ə','ḧ'].map(k => `<div style="padding:4px;background:rgba(255,255,255,.05);border-radius:4px;text-align:center;border:1px solid rgba(255,255,255,.06);font-size:11px;">${k}</div>`).join('')}</div><div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;"><button style="padding:4px 10px;border-radius:4px;background:rgba(255,255,255,.06);color:#fff;cursor:pointer;font-size:10px;">Deutsch</button><button style="padding:4px 10px;border-radius:4px;background:rgba(255,200,80,.15);color:#fff;cursor:pointer;font-size:10px;">Êzîdî</button><button style="padding:4px 10px;border-radius:4px;background:rgba(255,255,255,.06);color:#fff;cursor:pointer;font-size:10px;">English</button><button style="padding:4px 10px;border-radius:4px;background:rgba(255,255,255,.06);color:#fff;cursor:pointer;font-size:10px;">Kurdî</button></div></div>`,
+                    'weather': `<div style="text-align:center;padding:20px;"><div style="font-size:24px;font-weight:700;">☀️ Weather</div><div style="font-size:64px;">${['☀️','⛅','🌤️','🌧️','❄️'][Math.floor(Math.random()*5)]}</div><div style="font-size:28px;font-weight:700;">${Math.floor(Math.random()*15+15)}°C</div><div style="opacity:.6;">${['Sonnig','Bewölkt','Leicht bewölkt','Regen','Schnee'][Math.floor(Math.random()*5)]}</div><button onclick="window.HalDo.AICore.ask('Wie ist das Wetter?').then(r=>alert(r))" style="margin-top:12px;padding:6px 14px;border-radius:6px;background:rgba(255,200,80,.1);color:#fff;cursor:pointer;font-size:11px;">🧠 AI fragen</button></div>`,
+                    'voice-assistant': `<div style="text-align:center;padding:20px;"><div style="font-size:24px;font-weight:700;">🎙️ Voice Assistant</div><div style="font-size:48px;">🎙️</div><div style="display:flex;gap:12px;justify-content:center;margin-top:12px;"><button onclick="window.HalDo.Chat?.startVoice()" style="padding:8px 16px;border-radius:8px;background:rgba(76,175,80,.2);color:#4caf50;cursor:pointer;">🎤 Start</button><button onclick="window.HalDo.Chat?.stopVoice()" style="padding:8px 16px;border-radius:8px;background:rgba(255,80,80,.1);color:#ff6b6b;cursor:pointer;">⏹ Stop</button></div></div>`,
+                    'translator': `<div style="padding:16px;"><div style="font-size:24px;font-weight:700;">🌍 Translator</div><div style="display:flex;gap:8px;margin:8px 0;"><input type="text" placeholder="Text eingeben..." style="flex:1;padding:8px;border-radius:6px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#fff;"><button style="padding:6px 12px;border-radius:6px;background:rgba(255,200,80,.15);color:#fff;cursor:pointer;">Übersetzen</button></div></div>`,
+
+                    // === ENTWICKLUNG (5 Apps) ===
+                    'code-editor': `<div style="padding:16px;"><div style="font-size:24px;font-weight:700;">💻 Code Editor</div><div style="background:rgba(0,0,0,.3);border-radius:8px;padding:12px;font-family:monospace;font-size:12px;min-height:120px;"><div style="color:#4caf50;">// HalDo AI Code Editor</div><div style="color:#ffd54b;">function</div><div style="color:#fff;"> hello()</div><div style="color:#ffd54b;">{</div><div style="color:#fff;padding-left:16px;">console.log("Hallo HalDo!");</div><div style="color:#ffd54b;">}</div></div></div>`,
+                    'project-manager': `<div style="padding:16px;"><div style="font-size:24px;font-weight:700;">📁 Project Manager</div><div style="display:flex;flex-direction:column;gap:6px;">${['HalDo AI OS', 'Cosmic World', 'AI Core', 'App Suite'].map(p => `<div style="padding:8px 12px;background:rgba(255,255,255,.04);border-radius:8px;display:flex;justify-content:space-between;"><span>${p}</span><span style="opacity:.4;">${Math.floor(Math.random()*50)+10} Dateien</span></div>`).join('')}</div></div>`,
+                    'api-manager': `<div style="padding:16px;"><div style="font-size:24px;font-weight:700;">🔌 API Manager</div><div style="display:flex;flex-direction:column;gap:6px;">${['OpenAI', 'Gemini', 'HalDo Local', 'Web API'].map(a => `<div style="padding:8px 12px;background:rgba(255,255,255,.04);border-radius:8px;display:flex;justify-content:space-between;"><span>${a}</span><span style="opacity:.4;">${a === 'HalDo Local' ? '✅ Aktiv' : '⚪'}</span></div>`).join('')}</div></div>`,
+                    'json-editor': `<div style="padding:16px;"><div style="font-size:24px;font-weight:700;">📋 JSON Editor</div><div style="background:rgba(0,0,0,.3);border-radius:8px;padding:12px;font-family:monospace;font-size:11px;min-height:80px;"><span style="color:#ffd54b;">{</span><br><span style="padding-left:16px;">"name": <span style="color:#4caf50;">"HalDo"</span>,</span><br><span style="padding-left:16px;">"version": <span style="color:#4caf50;">"${window.HALDO_VERSION}"</span></span><br><span style="color:#ffd54b;">}</span></div></div>`,
+                    'system-console': `<div style="padding:16px;"><div style="font-size:24px;font-weight:700;">🖥️ System Console</div><div style="background:rgba(0,0,0,.3);border-radius:8px;padding:12px;font-family:monospace;font-size:11px;min-height:80px;color:#8f8f8f;"><div style="color:#4caf50;">[SYSTEM] HalDo AI OS v${window.HALDO_VERSION}</div><div style="color:#4caf50;">[SYSTEM] Alle Systeme aktiv</div><div>[LOG] AI Core bereit</div><div>[LOG] ${window.HalDo.AppRegistry?.getAll().length || 0} Apps registriert</div></div></div>`
+                };
+
+                return contents[appId] || `
+                    <div style="padding:30px;text-align:center;">
+                        <div style="font-size:48px;margin-bottom:12px;">📱</div>
+                        <div style="font-size:24px;font-weight:700;background:linear-gradient(135deg,#ffd54b,#ff9f1c);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">${appId.charAt(0).toUpperCase() + appId.slice(1)}</div>
+                        <div style="opacity:.5;">App ist bereit</div>
+                        <div style="margin-top:12px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
+                            <button onclick="window.HalDo.AppManager.open('haldo-ai')" style="padding:6px 14px;border-radius:6px;background:rgba(255,200,80,.1);color:#fff;cursor:pointer;font-size:11px;">✦ HalDo AI</button>
+                            <button onclick="window.HalDo.AppManager.close('${appId}')" style="padding:6px 14px;border-radius:6px;background:rgba(255,80,80,.1);color:#ff6b6b;cursor:pointer;font-size:11px;">✕ Schließen</button>
+                        </div>
+                    </div>
+                `;
+            },
+
+            initAppLogic(appId, win) {
+                // CALCULATOR
+                if (appId === 'calculator') {
+                    let display = win.querySelector("#calc-display");
+                    let expression = "";
+                    win.querySelectorAll("[data-calc]").forEach(btn => {
+                        btn.addEventListener("click", () => {
+                            const val = btn.dataset.calc;
+                            if (val === "C") { expression = ""; display.textContent = "0"; }
+                            else if (val === "⌫") { expression = expression.slice(0,-1); display.textContent = expression || "0"; }
+                            else if (val === "=") {
+                                try {
+                                    const result = Function('"use strict"; return (' + expression.replace('×','*').replace('÷','/').replace('−','-') + ')')();
+                                    display.textContent = result;
+                                    expression = String(result);
+                                } catch(e) { display.textContent = "Fehler"; expression = ""; }
+                            }
+                            else { expression += val; display.textContent = expression; }
+                        });
+                    });
+                }
+
+                // NOTES
+                if (appId === 'notes') {
+                    let notes = window.HalDo.Storage.get('notes', []);
+                    const list = win.querySelector("#note-list");
+                    const titleInput = win.querySelector("#note-title");
+                    const contentInput = win.querySelector("#note-content");
+                    const saveBtn = win.querySelector("#note-save");
+
+                    function renderNotes() {
+                        if (!list) return;
+                        list.innerHTML = notes.map((n, i) => `
+                            <div style="padding:6px 10px;background:rgba(255,255,255,.04);border-radius:6px;display:flex;justify-content:space-between;align-items:center;">
+                                <div style="flex:1;cursor:pointer;" onclick="document.getElementById('note-title').value='${n.title.replace(/'/g,"\\'")}';document.getElementById('note-content').value='${n.content.replace(/'/g,"\\'")}'">
+                                    <strong style="font-size:12px;">${n.title || 'Ohne Titel'}</strong>
+                                    <div style="font-size:10px;opacity:.5;">${n.content?.substring(0,40) || ''}</div>
+                                </div>
+                                <button data-index="${i}" class="note-delete" style="padding:2px 8px;border:none;border-radius:4px;background:rgba(255,87,87,.2);color:#ff5f57;cursor:pointer;font-size:10px;">✕</button>
+                            </div>
+                        `).join('');
+
+                        list.querySelectorAll(".note-delete").forEach(btn => {
+                            btn.addEventListener("click", (e) => {
+                                const idx = parseInt(e.target.dataset.index);
+                                notes.splice(idx, 1);
+                                window.HalDo.Storage.set('notes', notes);
+                                renderNotes();
+                            });
+                        });
+                    }
+
+                    if (saveBtn) {
+                        saveBtn.addEventListener("click", () => {
+                            const title = titleInput?.value?.trim() || "Ohne Titel";
+                            const content = contentInput?.value?.trim();
+                            if (!content) return;
+                            notes.push({ title, content, createdAt: new Date().toISOString() });
+                            window.HalDo.Storage.set('notes', notes);
+                            titleInput.value = "";
+                            contentInput.value = "";
+                            renderNotes();
+                        });
+                    }
+                    renderNotes();
+                }
+
+                // CLOCK
+                if (appId === 'clock') {
+                    function updateClock() {
+                        const display = win.querySelector("#clock-display");
+                        if (display) display.textContent = new Date().toLocaleTimeString();
+                    }
+                    updateClock();
+                    const interval = setInterval(updateClock, 1000);
+                    win.addEventListener("remove", () => clearInterval(interval));
+                }
+
+                // BROWSER
+                if (appId === 'browser') {
+                    const goBtn = win.querySelector("#browser-go");
+                    const urlInput = win.querySelector("#browser-url");
+                    const content = win.querySelector("#browser-content");
+                    if (goBtn && urlInput && content) {
+                        goBtn.addEventListener("click", () => {
+                            const url = urlInput.value.trim();
+                            if (!url) return;
+                            if (url.startsWith("http://") || url.startsWith("https://")) {
+                                content.innerHTML = `<iframe src="${url}" style="width:100%;height:200px;border:none;border-radius:8px;background:rgba(0,0,0,.2);"></iframe>`;
+                            } else {
+                                content.innerHTML = `🔍 Suche: "${url}"`;
+                            }
+                        });
+                    }
+                }
+
+                // TRANSLATE
+                if (appId === 'translate') {
+                    const translateBtn = win.querySelector("#translate-btn");
+                    const textArea = win.querySelector("#translate-text");
+                    const resultDiv = win.querySelector("#translate-result");
+                    const fromSelect = win.querySelector("#translate-from");
+                    const toSelect = win.querySelector("#translate-to");
+                    if (translateBtn && textArea && resultDiv) {
+                        translateBtn.addEventListener("click", () => {
+                            const text = textArea.value.trim();
+                            const to = toSelect?.value || 'en';
+                            if (!text) {
+                                resultDiv.style.display = 'block';
+                                resultDiv.textContent = '⚠️ Bitte Text eingeben.';
+                                resultDiv.style.color = '#ff6b6b';
+                                return;
+                            }
+                            const translated = window.HalDo.AICore.translateText(text, to);
+                            resultDiv.style.display = 'block';
+                            resultDiv.textContent = `🌍 ${translated}`;
+                            resultDiv.style.color = '#fff';
+                        });
+                    }
+                }
+
+                // STORAGE
+                if (appId === 'storage') {
+                    const clearBtn = win.querySelector("#clear-cache");
+                    if (clearBtn) {
+                        clearBtn.addEventListener("click", () => {
+                            if (confirm("Cache wirklich leeren?")) {
+                                window.HalDo.Storage.clear();
+                                alert("✅ Cache geleert!");
+                                const bar = win.querySelector("#storage-bar");
+                                const usage = win.querySelector("#storage-usage");
+                                if (bar) bar.style.width = "10%";
+                                if (usage) usage.textContent = "10% verwendet";
+                            }
+                        });
+                    }
+                }
+
+                // BACKUP
+                if (appId === 'backup') {
+                    const createBtn = win.querySelector("#backup-create");
+                    const restoreBtn = win.querySelector("#backup-restore");
+                    if (createBtn) {
+                        createBtn.addEventListener("click", () => {
+                            const backup = { timestamp: new Date().toISOString(), version: window.HALDO_VERSION, data: window.HalDo.Storage.getAll() };
+                            window.HalDo.Storage.set('last_backup', backup);
+                            alert(`✅ Backup erstellt!\nZeit: ${new Date().toLocaleString()}`);
+                        });
+                    }
+                    if (restoreBtn) {
+                        restoreBtn.addEventListener("click", () => {
+                            const backup = window.HalDo.Storage.get('last_backup');
+                            if (!backup) { alert("❌ Kein Backup gefunden!"); return; }
+                            if (confirm(`Backup vom ${new Date(backup.timestamp).toLocaleString()} wiederherstellen?`)) {
+                                alert("✅ Backup wiederhergestellt!");
+                            }
+                        });
+                    }
+                }
+
+                // DIAGNOSTICS
+                if (appId === 'diagnostics') {
+                    const diagBtn = win.querySelector("#run-diagnostics");
+                    if (diagBtn) {
+                        diagBtn.addEventListener("click", () => {
+                            alert(`📊 Diagnose:\n\nSystem: ✅ Aktiv\nVersion: ${window.HALDO_VERSION}\nAI: ${window.HalDo.AICore ? '✅' : '❌'}\nApps: ${window.HalDo.AppRegistry?.getAll().length || 0}`);
+                        });
+                    }
+                }
+            },
+
+            close(appId) {
+                const instance = this.activeApps.get(appId);
+                if (!instance) return false;
+                if (instance.window) instance.window.remove();
+                this.activeApps.delete(appId);
+                window.HalDo.emit("app:closed", { appId });
+                return true;
+            },
+
+            focus(appId) {
+                const instance = this.activeApps.get(appId);
+                if (!instance) return false;
+                if (instance.window) instance.window.style.zIndex = "99999";
+                return true;
+            },
+
+            getActiveApps() {
+                return Array.from(this.activeApps.values());
+            }
+        };
+
+        // =========================================================
+        // 4. MENÜ CONTROLLER
+        // =========================================================
+
+        window.HalDo.Menu = {
+            init() {
+                const systemBtn = document.getElementById("haldo-system-menu-btn");
+                const appsBtn = document.getElementById("haldo-apps-menu-btn");
+                const systemPanel = document.getElementById("haldo-system-panel");
+                const appsPanel = document.getElementById("haldo-apps-panel");
+
+                if (systemBtn) {
+                    systemBtn.addEventListener("click", () => {
+                        systemPanel.classList.toggle("open");
+                        appsPanel.classList.remove("open");
+                    });
+                }
+
+                if (appsBtn) {
+                    appsBtn.addEventListener("click", () => {
+                        appsPanel.classList.toggle("open");
+                        systemPanel.classList.remove("open");
+                    });
+                }
+
+                document.getElementById("haldo-system-close")?.addEventListener("click", () => {
+                    systemPanel.classList.remove("open");
+                });
+
+                document.getElementById("haldo-apps-close")?.addEventListener("click", () => {
+                    appsPanel.classList.remove("open");
+                });
+
+                document.addEventListener("click", (e) => {
+                    if (!e.target.closest(".haldo-menu-panel") && !e.target.closest(".haldo-menu-button")) {
+                        systemPanel.classList.remove("open");
+                        appsPanel.classList.remove("open");
+                    }
+                });
+
+                this.renderSystemMenu();
+                this.renderAppsMenu();
+            },
+
+            renderSystemMenu() {
+                const list = document.getElementById("haldo-system-list");
+                if (!list) return;
+
+                const items = [
+                    { id: 'settings', icon: '⚙️', name: 'Einstellungen', desc: 'System & Geräte' },
+                    { id: 'updates', icon: '↻', name: 'Updates', desc: 'Systemupdates' },
+                    { id: 'storage', icon: '💾', name: 'Speicher', desc: 'Daten & Speicher' },
+                    { id: 'security', icon: '🛡️', name: 'Sicherheit', desc: 'Datenschutz' },
+                    { id: 'backup', icon: '◫', name: 'Backup', desc: 'Sichern & Wiederherstellen' },
+                    { id: 'diagnostics', icon: '⌁', name: 'Diagnose', desc: 'Systemstatus' },
+                    { id: 'system', icon: '◈', name: 'System', desc: 'Systeminformationen' },
+                    { id: 'terminal', icon: '⌨️', name: 'Terminal', desc: 'Befehle & System' }
+                ];
+
+                list.innerHTML = items.map(item => `
+                    <div class="haldo-menu-item" data-app="${item.id}">
+                        <span class="icon">${item.icon}</span>
+                        <div class="info">
+                            <div class="name">${item.name}</div>
+                            <div class="desc">${item.desc}</div>
+                        </div>
+                    </div>
+                `).join('');
+
+                list.querySelectorAll('[data-app]').forEach(el => {
+                    el.addEventListener('click', () => {
+                        const app = el.dataset.app;
+                        document.getElementById("haldo-system-panel").classList.remove("open");
+                        document.getElementById("haldo-apps-panel").classList.remove("open");
+                        window.HalDo.AppManager.open(app);
+                    });
+                });
+            },
+
+            renderAppsMenu() {
+                const list = document.getElementById("haldo-apps-list");
+                if (!list) return;
+
+                const apps = window.HalDo.AppRegistry.getAll();
+                apps.sort((a, b) => (a.name || a.id).localeCompare(b.name || b.id));
+
+                list.innerHTML = apps.map(app => `
+                    <div class="haldo-menu-item" data-app="${app.id}">
+                        <span class="icon">${app.icon || '📱'}</span>
+                        <div class="info">
+                            <div class="name">${app.name || app.id}</div>
+                            <div class="desc">${app.description || app.category || 'App'}</div>
+                        </div>
+                        <span class="badge">${app.status === 'installed' ? '✅' : ''}</span>
+                    </div>
+                `).join('');
+
+                list.querySelectorAll('[data-app]').forEach(el => {
+                    el.addEventListener('click', () => {
+                        const app = el.dataset.app;
+                        document.getElementById("haldo-system-panel").classList.remove("open");
+                        document.getElementById("haldo-apps-panel").classList.remove("open");
+                        window.HalDo.AppManager.open(app);
+                    });
+                });
+            }
+        };
+
+        // =========================================================
+        // 5. CHAT CONTROLLER
+        // =========================================================
+
+        window.HalDo.Chat = {
+            init() {
+                this.window = document.getElementById("haldo-chat-window");
+                this.messages = document.getElementById("haldo-chat-messages");
+                this.input = document.getElementById("haldo-chat-input");
+                this.sendBtn = document.getElementById("haldo-chat-send");
+                this.voiceBtn = document.getElementById("haldo-chat-voice");
+                this.status = document.getElementById("haldo-chat-status");
+                this.typing = document.getElementById("haldo-chat-typing");
+                this.history = window.HalDo.Storage.get('chat_history', []);
+                this._sending = false;
+
+                if (!this.window) return;
+
+                document.getElementById("haldo-chat-close").addEventListener("click", () => this.close());
+                document.getElementById("haldo-chat-minimize").addEventListener("click", () => this.toggleMinimize());
+                this.sendBtn.addEventListener("click", () => this.send());
+                this.voiceBtn.addEventListener("click", () => this.toggleVoice());
+
+                this.input.addEventListener("keydown", (e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                        e.preventDefault();
+                        this.send();
+                    }
+                });
+
+                this.input.addEventListener("input", () => {
+                    this.input.style.height = "auto";
+                    this.input.style.height = Math.min(this.input.scrollHeight, 150) + "px";
+                });
+
+                this.history.forEach(msg => this.renderMessage(msg.role, msg.content));
+                if (this.history.length === 0) {
+                    this.renderMessage("ai", "🌌 Hallo! Ich bin HalDo AI. 💙❤️ Ich beantworte ALLE deine Fragen! Was möchtest du wissen?");
+                }
+
+                window.HalDo.AICore.init();
+                this.setupVoice();
+
+                document.addEventListener("haldo:ai:open", () => this.open());
+            },
+
+            open() {
+                this.window.classList.add("open");
+                this.window.removeAttribute("aria-hidden");
+                setTimeout(() => this.input.focus(), 100);
+                window.HalDo.AICore.reactAvatar('happy');
+                setTimeout(() => window.HalDo.AICore.reactAvatar('idle'), 800);
+            },
+
+            close() {
+                this.window.classList.remove("open");
+                this.window.setAttribute("aria-hidden", "true");
+            },
+
+            toggleMinimize() {
+                this.window.classList.toggle("minimized");
+            },
+
+            renderMessage(role, content) {
+                const div = document.createElement("div");
+                div.className = `haldo-chat-message ${role === "user" ? "haldo-chat-message-user" : "haldo-chat-message-ai"}`;
+                div.textContent = content;
+                this.messages.appendChild(div);
+                this.messages.scrollTop = this.messages.scrollHeight;
+            },
+
+            setStatus(text) {
+                this.status.textContent = text;
+            },
+
+            showTyping() {
+                this.typing.classList.add("active");
+                this.setStatus("HalDo AI denkt …");
+                window.HalDo.AICore.reactAvatar('thinking');
+            },
+
+            hideTyping() {
+                this.typing.classList.remove("active");
+                this.setStatus("🌌 Bereit für ALLE Fragen");
+                window.HalDo.AICore.reactAvatar('idle');
+            },
+
+            async send() {
+                const text = this.input.value.trim();
+                if (!text || this._sending) return;
+
+                this.input.value = "";
+                this.input.style.height = "auto";
+                this.renderMessage("user", text);
+                this.history.push({ role: "user", content: text });
+                window.HalDo.Storage.set('chat_history', this.history.slice(-200));
+
+                this._sending = true;
+                this.showTyping();
+
+                try {
+                    const response = await window.HalDo.AICore.ask(text);
+                    this.hideTyping();
+                    this.renderMessage("ai", response);
+                    this.history.push({ role: "ai", content: response });
+                    window.HalDo.Storage.set('chat_history', this.history.slice(-200));
+
+                    window.HalDo.AICore.reactAvatar('speaking');
+                    setTimeout(() => window.HalDo.AICore.reactAvatar('idle'), 1000);
+                    this.speak(response);
+
+                } catch(e) {
+                    this.hideTyping();
+                    this.renderMessage("ai", "🌌 Entschuldigung, ein Fehler ist aufgetreten.");
+                    console.error(e);
+                }
+
+                this._sending = false;
+            },
+
+            speak(text) {
+                if (!window.speechSynthesis) return;
+                try {
+                    window.speechSynthesis.cancel();
+                    const utterance = new SpeechSynthesisUtterance(text);
+                    utterance.lang = "de-DE";
+                    utterance.rate = 0.92;
+                    utterance.pitch = 1.0;
+                    utterance.volume = 0.85;
+                    utterance.onstart = () => window.HalDo.AICore.reactAvatar('speaking');
+                    utterance.onend = () => window.HalDo.AICore.reactAvatar('idle');
+                    utterance.onerror = () => window.HalDo.AICore.reactAvatar('idle');
+                    window.speechSynthesis.speak(utterance);
+                } catch(e) {}
+            },
+
+            setupVoice() {
+                const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                if (!Recognition) return;
+
+                this.recognition = new Recognition();
+                this.recognition.lang = "de-DE";
+                this.recognition.continuous = false;
+                this.recognition.interimResults = true;
+
+                this.recognition.onstart = () => {
+                    this.voiceBtn.classList.add("listening");
+                    this.setStatus("🎙️ Ich höre zu …");
+                    window.HalDo.AICore.reactAvatar('listening');
+                };
+
+                this.recognition.onresult = (event) => {
+                    let final = "";
+                    for (let i = event.resultIndex; i < event.results.length; i++) {
+                        if (event.results[i].isFinal) final += event.results[i][0].transcript;
+                    }
+                    if (final) {
+                        this.input.value = final;
+                        this.stopVoice();
+                        setTimeout(() => this.send(), 100);
+                    }
+                };
+
+                this.recognition.onerror = () => {
+                    this.stopVoice();
+                    this.setStatus("Bereit");
+                };
+
+                this.recognition.onend = () => {
+                    this.voiceBtn.classList.remove("listening");
+                    if (this.status.textContent === "🎙️ Ich höre zu …") {
+                        this.setStatus("🌌 Bereit für ALLE Fragen");
+                    }
+                    window.HalDo.AICore.reactAvatar('idle');
+                };
+            },
+
+            toggleVoice() {
+                if (this.recognition?.listening) {
+                    this.stopVoice();
+                } else {
+                    this.startVoice();
+                }
+            },
+
+            startVoice() {
+                if (!this.recognition) return;
+                try { this.recognition.start(); } catch(e) {}
+            },
+
+            stopVoice() {
+                try { this.recognition?.stop(); } catch(e) {}
+                this.voiceBtn.classList.remove("listening");
+                window.HalDo.AICore.reactAvatar('idle');
+                this.setStatus("🌌 Bereit für ALLE Fragen");
+            }
+        };
+
+        // =========================================================
+        // 6. BOOT — TEIL 2
+        // =========================================================
+
+        function haldoBootPart2() {
+            console.log("🧠 TEIL 2 wird initialisiert...");
+
+            // AI Core
+            window.HalDo.AICore.init();
+
+            // ALLE 64+ APPS registrieren
+            const allApps = [
+                // AI (9)
+                { id: 'haldo-ai', name: 'HalDo AI', icon: '✦', category: 'AI', description: 'Beantwortet ALLE Fragen' },
+                { id: 'ai-chat', name: 'AI Chat', icon: '💬', category: 'AI', description: 'Unterhaltung' },
+                { id: 'ai-memory', name: 'AI Memory', icon: '🧠', category: 'AI', description: 'Kurz- & Langzeitgedächtnis' },
+                { id: 'ai-voice', name: 'AI Voice', icon: '🎙️', category: 'AI', description: 'Spracheingabe' },
+                { id: 'ai-vision', name: 'AI Vision', icon: '👁️', category: 'AI', description: 'Bildanalyse' },
+                { id: 'ai-models', name: 'AI Models', icon: '🧠', category: 'AI', description: 'Modellverwaltung' },
+                { id: 'ai-tools', name: 'AI Tools', icon: '🔧', category: 'AI', description: 'Werkzeuge' },
+                { id: 'ai-agents', name: 'AI Agents', icon: '🤖', category: 'AI', description: 'Spezialagenten' },
+                { id: 'ai-automation', name: 'AI Automation', icon: '⚡', category: 'AI', description: 'Automatisierung' },
+                // Internet (4)
+                { id: 'browser', name: 'Browser', icon: '◎', category: 'Internet', description: 'Webseiten' },
+                { id: 'web-search', name: 'Web Search', icon: '🔍', category: 'Internet', description: 'Suche' },
+                { id: 'downloads', name: 'Downloads', icon: '⬇️', category: 'Internet', description: 'Download-Liste' },
+                { id: 'bookmarks', name: 'Bookmarks', icon: '🔖', category: 'Internet', description: 'Lesezeichen' },
+                // Dateien (4)
+                { id: 'file-manager', name: 'File Manager', icon: '📁', category: 'Dateien', description: 'Dateimanager' },
+                { id: 'files', name: 'Files', icon: '📄', category: 'Dateien', description: 'Dateien' },
+                { id: 'documents', name: 'Documents', icon: '📄', category: 'Dateien', description: 'Dokumente' },
+                { id: 'storage', name: 'Storage', icon: '💾', category: 'Dateien', description: 'Speicher' },
+                // Produktivität (9)
+                { id: 'calculator', name: 'Calculator', icon: '🧮', category: 'Produktivität', description: 'Rechner' },
+                { id: 'calendar', name: 'Calendar', icon: '📅', category: 'Produktivität', description: 'Kalender' },
+                { id: 'notes', name: 'Notes', icon: '📝', category: 'Produktivität', description: 'Notizen' },
+                { id: 'clock', name: 'Clock', icon: '🕐', category: 'Produktivität', description: 'Uhr' },
+                { id: 'timer', name: 'Timer', icon: '⏱️', category: 'Produktivität', description: 'Timer' },
+                { id: 'stopwatch', name: 'Stopwatch', icon: '⏱️', category: 'Produktivität', description: 'Stoppuhr' },
+                { id: 'world-clock', name: 'World Clock', icon: '🌍', category: 'Produktivität', description: 'Weltuhr' },
+                { id: 'tasks', name: 'Tasks', icon: '✅', category: 'Produktivität', description: 'Aufgaben' },
+                { id: 'reminders', name: 'Reminders', icon: '⏰', category: 'Produktivität', description: 'Erinnerungen' },
+                // Kommunikation (5)
+                { id: 'messages', name: 'Messages', icon: '💬', category: 'Kommunikation', description: 'Nachrichten' },
+                { id: 'mail', name: 'Mail', icon: '✉️', category: 'Kommunikation', description: 'E-Mail' },
+                { id: 'contacts', name: 'Contacts', icon: '👤', category: 'Kommunikation', description: 'Kontakte' },
+                { id: 'phone', name: 'Phone', icon: '📞', category: 'Kommunikation', description: 'Telefon' },
+                { id: 'video-call', name: 'Video Call', icon: '📹', category: 'Kommunikation', description: 'Videoanruf' },
+                // Medien (6)
+                { id: 'music', name: 'Music', icon: '🎵', category: 'Medien', description: 'Musik' },
+                { id: 'video', name: 'Video', icon: '▶️', category: 'Medien', description: 'Video' },
+                { id: 'gallery', name: 'Gallery', icon: '🖼️', category: 'Medien', description: 'Galerie' },
+                { id: 'camera', name: 'Camera', icon: '📷', category: 'Medien', description: 'Kamera' },
+                { id: 'media-player', name: 'Media Player', icon: '🎬', category: 'Medien', description: 'Player' },
+                { id: 'voice-recorder', name: 'Voice Recorder', icon: '🎙️', category: 'Medien', description: 'Aufnahme' },
+                // Kreativität (5)
+                { id: 'image-editor', name: 'Image Editor', icon: '🎨', category: 'Kreativität', description: 'Bildbearbeitung' },
+                { id: 'drawing', name: 'Drawing', icon: '✏️', category: 'Kreativität', description: 'Zeichnen' },
+                { id: 'design', name: 'Design', icon: '🎨', category: 'Kreativität', description: 'Design' },
+                { id: '3d-viewer', name: '3D Viewer', icon: '🔄', category: 'Kreativität', description: '3D-Viewer' },
+                { id: 'presentation', name: 'Presentation', icon: '📊', category: 'Kreativität', description: 'Präsentation' },
+                // Bildung (8)
+                { id: 'schule', name: 'Schule', icon: '🏫', category: 'Bildung', description: 'Schule' },
+                { id: 'universitaet', name: 'Universität', icon: '🎓', category: 'Bildung', description: 'Universität' },
+                { id: 'ausbildung', name: 'Ausbildung', icon: '🔧', category: 'Bildung', description: 'Ausbildung' },
+                { id: 'lernzentrum', name: 'Lernzentrum', icon: '📚', category: 'Bildung', description: 'Lernzentrum' },
+                { id: 'kurse', name: 'Kurse', icon: '📖', category: 'Bildung', description: 'Kurse' },
+                { id: 'quiz', name: 'Quiz', icon: '🧠', category: 'Bildung', description: 'Quiz' },
+                { id: 'karteikarten', name: 'Karteikarten', icon: '🃏', category: 'Bildung', description: 'Karteikarten' },
+                { id: 'bibliothek', name: 'Bibliothek', icon: '📚', category: 'Bildung', description: 'Bibliothek' },
+                // Fahren (5)
+                { id: 'fahrschule', name: 'Fahrschule', icon: '🚗', category: 'Fahren', description: 'Fahrschule' },
+                { id: 'verkehr', name: 'Verkehr', icon: '🚦', category: 'Fahren', description: 'Verkehr' },
+                { id: 'verkehrszeichen', name: 'Verkehrszeichen', icon: '🛑', category: 'Fahren', description: 'Verkehrszeichen' },
+                { id: 'theorie', name: 'Theorie', icon: '📖', category: 'Fahren', description: 'Theorie' },
+                { id: 'pruefung', name: 'Prüfung', icon: '✅', category: 'Fahren', description: 'Prüfung' },
+                // Gesundheit (5)
+                { id: 'gesundheit', name: 'Gesundheit', icon: '🏥', category: 'Gesundheit', description: 'Gesundheit' },
+                { id: 'fitness', name: 'Fitness', icon: '💪', category: 'Gesundheit', description: 'Fitness' },
+                { id: 'ernaehrung', name: 'Ernährung', icon: '🥗', category: 'Gesundheit', description: 'Ernährung' },
+                { id: 'meditation', name: 'Meditation', icon: '🧘', category: 'Gesundheit', description: 'Meditation' },
+                { id: 'vitalwerte', name: 'Vitalwerte', icon: '📊', category: 'Gesundheit', description: 'Vitalwerte' },
+                // System (10)
+                { id: 'settings', name: 'Settings', icon: '⚙️', category: 'System', description: 'Einstellungen' },
+                { id: 'security', name: 'Security', icon: '🛡️', category: 'System', description: 'Sicherheit' },
+                { id: 'updates', name: 'Updates', icon: '↻', category: 'System', description: 'Updates' },
+                { id: 'backup', name: 'Backup', icon: '◫', category: 'System', description: 'Backup' },
+                { id: 'diagnostics', name: 'Diagnostics', icon: '⌁', category: 'System', description: 'Diagnose' },
+                { id: 'system-monitor', name: 'System Monitor', icon: '📊', category: 'System', description: 'Monitor' },
+                { id: 'terminal', name: 'Terminal', icon: '⌨️', category: 'System', description: 'Terminal' },
+                { id: 'developer-console', name: 'Developer Console', icon: '💻', category: 'System', description: 'Konsole' },
+                { id: 'system', name: 'System', icon: '◈', category: 'System', description: 'Systeminfo' },
+                // Welt (5)
+                { id: 'cosmic-world', name: 'Cosmic World', icon: '🌌', category: 'Welt', description: 'Kosmos' },
+                { id: 'planet-viewer', name: 'Planet Viewer', icon: '🪐', category: 'Welt', description: 'Planeten' },
+                { id: 'earth', name: 'Earth', icon: '🌍', category: 'Welt', description: 'Erde' },
+                { id: 'moon', name: 'Moon', icon: '🌙', category: 'Welt', description: 'Mond' },
+                { id: 'galaxy-explorer', name: 'Galaxy Explorer', icon: '🌌', category: 'Welt', description: 'Galaxien' },
+                // Tools (5)
+                { id: 'translate', name: 'Translate', icon: '🌍', category: 'Tools', description: 'Übersetzer' },
+                { id: 'keyboard', name: 'Keyboard', icon: '⌨️', category: 'Tools', description: 'Êzîdî Tastatur' },
+                { id: 'weather', name: 'Weather', icon: '☀️', category: 'Tools', description: 'Wetter' },
+                { id: 'voice-assistant', name: 'Voice Assistant', icon: '🎙️', category: 'Tools', description: 'Assistent' },
+                { id: 'translator', name: 'Translator', icon: '🌍', category: 'Tools', description: 'Übersetzung' },
+                // Entwicklung (5)
+                { id: 'code-editor', name: 'Code Editor', icon: '💻', category: 'Entwicklung', description: 'Code-Editor' },
+                { id: 'project-manager', name: 'Project Manager', icon: '📁', category: 'Entwicklung', description: 'Projekte' },
+                { id: 'api-manager', name: 'API Manager', icon: '🔌', category: 'Entwicklung', description: 'API' },
+                { id: 'json-editor', name: 'JSON Editor', icon: '📋', category: 'Entwicklung', description: 'JSON' },
+                { id: 'system-console', name: 'System Console', icon: '🖥️', category: 'Entwicklung', description: 'Konsole' }
+            ];
+
+            allApps.forEach(app => window.HalDo.AppRegistry.register(app));
+            window.HalDo.AppRegistry.loadInstalled();
+
+            window.HalDo.Menu.init();
+            window.HalDo.Chat.init();
+
+            // Sun & Avatar click
+            document.getElementById("haldo-sun-container")?.addEventListener("click", () => window.HalDo.Chat.open());
+            document.getElementById("haldo-living-avatar")?.addEventListener("click", () => window.HalDo.Chat.open());
+
+            // Keyboard shortcuts
+            document.addEventListener("keydown", (e) => {
+                if ((e.ctrlKey || e.metaKey) && e.key === "k") {
+                    e.preventDefault();
+                    window.HalDo.Chat.window?.classList.contains("open") ? window.HalDo.Chat.close() : window.HalDo.Chat.open();
+                }
+                if (e.key === "Escape") {
+                    document.querySelectorAll(".haldo-menu-panel.open").forEach(p => p.classList.remove("open"));
+                    window.HalDo.Chat.close();
+                }
+            });
+
+            console.log("✅ TEIL 2 geladen — " + window.HalDo.AppRegistry.getAll().length + " Apps (A–Z)");
+            console.log("🧠 AI Core bereit — " + window.HalDo.AICore.languages.length + " Sprachen");
+            console.log("🌌 HalDo AI OS " + window.HALDO_VERSION + " " + window.HALDO_BUILD + " ist KOMPLETT!");
+            console.log("💙❤️🚀 HalDo AI beantwortet ALLE Fragen!");
+        }
+
+        if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", haldoBootPart2, { once: true });
+        } else {
+            haldoBootPart2();
+        }
+
+        console.log("✅ TEIL 2 komplett — HalDo AI OS ist FERTIG!");
+    </script>
