@@ -8,6 +8,9 @@
     <title>HalDo AI OS 23.1.6 — Masterplan</title>
 
     <style>
+        /* =========================================================
+        KOMPLETTE STYLES
+        ========================================================= */
         * {
             margin: 0;
             padding: 0;
@@ -712,6 +715,9 @@
             }
         }
 
+        /* =========================================================
+        CHAT MESSAGES
+        ========================================================= */
         .chat-messages {
             flex: 1;
             overflow-y: auto;
@@ -932,14 +938,12 @@
                 const lower = text.toLowerCase().trim();
                 if (!lower) return 'Was möchtest du wissen?';
 
-                // Direkte Wissensabfrage
                 for (const [key, value] of Object.entries(this.knowledge)) {
                     if (lower.includes(key) || lower.includes(key.replace(/_/g, ' '))) {
                         return value;
                     }
                 }
 
-                // Begrüßungen
                 if (lower.includes('hallo') || lower.includes('hi') || lower.includes('hey') || lower.includes('guten tag') ||
                     lower.includes('guten morgen')) {
                     return 'Hallo! Schön, dass du da bist. Was kann ich für dich tun?';
@@ -958,7 +962,6 @@
                     return 'Ich bin HalDo AI. Ich kann dir helfen mit Physik, Chemie, Biologie, Mathematik, Astronomie, Informatik, Philosophie, Geschichte, Technik und vielen anderen Themen. Frag mich einfach!';
                 }
 
-                // Thema erkennen
                 const topics = Object.keys(this.knowledge);
                 for (const topic of topics) {
                     if (lower.includes(topic.replace(/_/g, ' '))) {
@@ -966,7 +969,6 @@
                     }
                 }
 
-                // Intelligente Standardantworten (kurz, menschlich)
                 const responses = [
                     'Interessante Frage. Erzähl mir mehr, dann kann ich dir besser helfen.',
                     'Darüber kann ich dir was sagen. Magst du etwas genauer werden?',
@@ -1140,7 +1142,7 @@
             },
 
             // =========================================================
-            // COSMIC WORLD — MIT EINER SONNE, 12 PLANETEN, 365 STERNEN
+            // COSMIC WORLD — EINE SONNE, 12 PLANETEN, 365 STERNE
             // =========================================================
             renderCosmic() {
                 const planetData = [
@@ -1306,7 +1308,7 @@
             },
 
             // =========================================================
-            // HALDO AI — WIE EIN MENSCH (kurz, direkt)
+            // HALDO AI — WIE EIN MENSCH
             // =========================================================
             renderAI() {
                 return `
