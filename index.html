@@ -4,14 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#05080f">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>HalDo AI OS 23.1.6 — 100+ Apps Professional</title>
+    <title>HalDo AI OS 23.1.6 — Professionelle Edition</title>
 
     <style>
-        /* =========================================================
-        KOMPLETTE STYLES
-        ========================================================= */
         * {
             margin: 0;
             padding: 0;
@@ -115,11 +110,8 @@
             overflow: hidden;
         }
 
-        /* =========================================================
-        SIDEBAR
-        ========================================================= */
         .sidebar {
-            width: 150px;
+            width: 140px;
             flex-shrink: 0;
             background: var(--surface);
             border-radius: var(--radius);
@@ -432,29 +424,14 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 32px;
+            font-size: 28px;
             font-weight: 900;
             color: #0a0e1a;
-            text-shadow: 0 0 30px rgba(255, 200, 80, 0.6);
+            text-shadow: 0 0 30px rgba(255, 200, 80, 0.5);
             animation: logoPulse 3s ease-in-out infinite;
             border: 2px solid rgba(255, 200, 80, 0.15);
             background: rgba(255, 255, 255, 0.05);
             pointer-events: none;
-            overflow: hidden;
-        }
-
-        .cosmic-sun .logo-in-sun img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            border-radius: 50%;
-        }
-
-        .cosmic-sun .logo-in-sun .logo-text {
-            font-size: 18px;
-            font-weight: 800;
-            color: #0a0e1a;
-            text-shadow: 0 0 20px rgba(255, 200, 80, 0.5);
         }
 
         @keyframes logoPulse {
@@ -467,7 +444,12 @@
             }
         }
 
-        /* Planet Orbits */
+        .cosmic-sun .logo-in-sun .logo-text {
+            font-size: 22px;
+            font-weight: 800;
+            color: #0a0e1a;
+        }
+
         .cosmic-planet {
             position: absolute;
             border-radius: 50%;
@@ -507,7 +489,6 @@
             pointer-events: none;
         }
 
-        /* Living Logo */
         .living-logo {
             position: absolute;
             left: 50%;
@@ -763,90 +744,9 @@
             border: 1px solid rgba(255, 200, 80, 0.04);
             color: #e8edf5;
             font-size: 9px;
-            line-height: 1.4;
+            line-height: 1.5;
         }
 
-        /* =========================================================
-        WINDOW SYSTEM
-        ========================================================= */
-        .window-overlay {
-            position: fixed;
-            inset: 0;
-            z-index: 99999;
-            pointer-events: none;
-        }
-
-        .window-overlay.active {
-            pointer-events: all;
-        }
-
-        .window-frame {
-            position: absolute;
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            backdrop-filter: blur(24px);
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            min-width: 300px;
-            min-height: 200px;
-            resize: both;
-            transition: opacity 0.2s, transform 0.2s;
-            pointer-events: all;
-        }
-
-        .window-frame .window-titlebar {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 4px 10px;
-            background: rgba(255, 255, 255, 0.03);
-            border-bottom: 1px solid var(--border);
-            flex-shrink: 0;
-            cursor: grab;
-            user-select: none;
-            min-height: 26px;
-        }
-
-        .window-frame .window-titlebar .title {
-            font-size: 10px;
-            font-weight: 600;
-            opacity: 0.7;
-        }
-
-        .window-frame .window-titlebar .controls {
-            display: flex;
-            gap: 4px;
-        }
-
-        .window-frame .window-titlebar .controls button {
-            background: none;
-            border: none;
-            color: rgba(255, 255, 255, 0.3);
-            cursor: pointer;
-            font-size: 12px;
-            padding: 0 4px;
-            transition: color 0.2s;
-        }
-
-        .window-frame .window-titlebar .controls button:hover {
-            color: #fff;
-        }
-
-        .window-frame .window-titlebar .controls .close:hover {
-            color: #ff6b6b;
-        }
-
-        .window-frame .window-content {
-            flex: 1;
-            overflow-y: auto;
-            padding: 8px;
-            font-size: 9px;
-        }
-
-        /* Responsive */
         @media (max-width: 700px) {
             .sidebar {
                 width: 38px;
@@ -881,10 +781,6 @@
                 font-size: 5px;
                 bottom: -12px;
             }
-            .window-frame {
-                min-width: 200px;
-                min-height: 150px;
-            }
         }
 
         @media (max-width: 480px) {
@@ -916,10 +812,6 @@
                 width: 44px;
                 height: 44px;
             }
-            .window-frame {
-                min-width: 160px;
-                min-height: 120px;
-            }
         }
     </style>
 </head>
@@ -946,9 +838,6 @@
         </div>
     </div>
 
-    <!-- Window Overlay -->
-    <div class="window-overlay" id="window-overlay"></div>
-
     <script>
         "use strict";
 
@@ -956,7 +845,7 @@
         // VERSION
         // =========================================================
         const HALDO_VERSION = "23.1.6";
-        const HALDO_BUILD = "100-APPS-PROFESSIONAL";
+        const HALDO_BUILD = "PROFESSIONAL";
 
         // =========================================================
         // STORAGE
@@ -1021,239 +910,29 @@
         setStatus('System startet...');
 
         // =========================================================
-        // WINDOW MANAGER
-        // =========================================================
-        const WindowManager = {
-            windows: [],
-            overlay: document.getElementById('window-overlay'),
-            zIndex: 100000,
-
-            create(appId, title, content, icon = '📱') {
-                const frame = document.createElement('div');
-                frame.className = 'window-frame';
-                frame.dataset.app = appId;
-                frame.style.left = (100 + Math.random() * 200) + 'px';
-                frame.style.top = (80 + Math.random() * 150) + 'px';
-                frame.style.width = '400px';
-                frame.style.height = '350px';
-                frame.style.zIndex = this.zIndex++;
-
-                frame.innerHTML = `
-                    <div class="window-titlebar">
-                        <span class="title">${icon} ${title}</span>
-                        <div class="controls">
-                            <button class="minimize" title="Minimieren">−</button>
-                            <button class="close" title="Schließen">✕</button>
-                        </div>
-                    </div>
-                    <div class="window-content">${content}</div>
-                `;
-
-                // Titlebar Drag
-                const titlebar = frame.querySelector('.window-titlebar');
-                let isDragging = false;
-                let startX, startY, startLeft, startTop;
-
-                titlebar.addEventListener('mousedown', (e) => {
-                    if (e.target.closest('.controls')) return;
-                    isDragging = true;
-                    startX = e.clientX;
-                    startY = e.clientY;
-                    startLeft = parseInt(frame.style.left);
-                    startTop = parseInt(frame.style.top);
-                    frame.style.zIndex = this.zIndex++;
-                    document.addEventListener('mousemove', onDrag);
-                    document.addEventListener('mouseup', onDragEnd);
-                });
-
-                const onDrag = (e) => {
-                    if (!isDragging) return;
-                    frame.style.left = (startLeft + e.clientX - startX) + 'px';
-                    frame.style.top = (startTop + e.clientY - startY) + 'px';
-                };
-
-                const onDragEnd = () => {
-                    isDragging = false;
-                    document.removeEventListener('mousemove', onDrag);
-                    document.removeEventListener('mouseup', onDragEnd);
-                };
-
-                // Close
-                frame.querySelector('.close').addEventListener('click', () => {
-                    this.close(appId);
-                });
-
-                // Minimize
-                frame.querySelector('.minimize').addEventListener('click', () => {
-                    frame.style.display = frame.style.display === 'none' ? 'flex' : 'none';
-                });
-
-                // Click to bring to front
-                frame.addEventListener('mousedown', () => {
-                    frame.style.zIndex = this.zIndex++;
-                });
-
-                this.overlay.classList.add('active');
-                this.overlay.appendChild(frame);
-                this.windows.push({ id: appId, frame });
-
-                return frame;
-            },
-
-            close(appId) {
-                const win = this.windows.find(w => w.id === appId);
-                if (win) {
-                    win.frame.remove();
-                    this.windows = this.windows.filter(w => w.id !== appId);
-                    if (this.windows.length === 0) {
-                        this.overlay.classList.remove('active');
-                    }
-                }
-            },
-
-            closeAll() {
-                this.windows.forEach(w => w.frame.remove());
-                this.windows = [];
-                this.overlay.classList.remove('active');
-            },
-
-            getWindow(appId) {
-                const win = this.windows.find(w => w.id === appId);
-                return win ? win.frame : null;
-            },
-
-            hasWindow(appId) {
-                return this.windows.some(w => w.id === appId);
-            }
-        };
-
-        // =========================================================
-        // HALDO AI — ULTIMATIVE WISSENSDATENBANK (200+ THEMEN)
+        // HALDO AI — WIE EIN MENSCH (kurz, direkt, intelligent)
         // =========================================================
         const HalDoAI = {
             knowledge: {
-                // === PHYSIK ===
-                'physik': 'Die Physik ist die grundlegende Naturwissenschaft, die die Struktur und Dynamik des Universums erforscht. Sie beschreibt die fundamentalen Gesetze der Natur, von den kleinsten Teilchen (Quantenphysik) bis zu den größten Strukturen (Kosmologie). Die Physik ist die Grundlage für alle anderen Naturwissenschaften und für die moderne Technologie. Zu ihren Hauptgebieten gehören Mechanik, Thermodynamik, Elektrodynamik, Optik, Akustik, Atomphysik, Kernphysik, Teilchenphysik, Quantenphysik, Relativitätstheorie und Kosmologie. Die Physik hat unser Verständnis der Welt revolutioniert und ist die Grundlage für viele technologische Errungenschaften.',
-                'mechanik': 'Die Mechanik ist das älteste und grundlegendste Teilgebiet der Physik. Sie beschreibt die Bewegung von Körpern unter Einwirkung von Kräften. Die Newtonschen Gesetze (Trägheitsgesetz, Aktionsprinzip, Reaktionsprinzip) sind die Grundlage der klassischen Mechanik. Die Mechanik umfasst die Kinematik (Beschreibung von Bewegungen), die Dynamik (Ursachen von Bewegungen) und die Statik (Gleichgewicht von Kräften). Sie ist die Grundlage für den Maschinenbau, die Fahrzeugtechnik, die Luft- und Raumfahrt und viele andere Ingenieurwissenschaften.',
-                'thermodynamik': 'Die Thermodynamik beschreibt die Gesetze der Wärme und Temperatur. Sie umfasst die drei Hauptsätze: den ersten Hauptsatz (Energieerhaltung), den zweiten Hauptsatz (Entropie) und den dritten Hauptsatz (absoluter Nullpunkt). Die Thermodynamik ist die Grundlage für Verbrennungsmotoren, Kühlschränke, Wärmepumpen, Kraftwerke und viele andere technische Anwendungen. Sie ist auch wichtig für die Chemie, die Biologie und die Klimatologie.',
-                'elektrodynamik': 'Die Elektrodynamik beschreibt die Wechselwirkungen zwischen elektrischen und magnetischen Feldern. Sie ist die Grundlage für die Elektrotechnik, die Funktechnik, die Optik und die moderne Kommunikationstechnologie. Die Maxwellschen Gleichungen sind die mathematische Grundlage der Elektrodynamik. Sie beschreiben, wie elektrische und magnetische Felder entstehen, sich ausbreiten und miteinander wechselwirken.',
-                'quantenphysik': 'Die Quantenphysik ist das fundamentalste Teilgebiet der Physik. Sie beschreibt die Welt der Atome, Elektronen, Photonen und anderen Elementarteilchen. Sie zeigt, dass Energie nicht kontinuierlich, sondern in diskreten Quanten auftritt. Sie zeigt auch, dass Teilchen gleichzeitig Welleneigenschaften haben können (Welle-Teilchen-Dualismus). Die Quantenphysik hat unser Verständnis der Realität radikal verändert und ist die Grundlage für die moderne Halbleitertechnologie, die Laser, die Kernspaltung und viele andere Technologien.',
-                'relativitaetstheorie': 'Die Relativitätstheorie von Albert Einstein ist eine der revolutionärsten Theorien der Physik. Sie zeigt, dass Raum und Zeit nicht absolut sind, sondern von der Bewegung und der Gravitation abhängen. Die spezielle Relativitätstheorie (1905) beschreibt die Zusammenhänge zwischen Raum und Zeit bei konstanter Geschwindigkeit. Die allgemeine Relativitätstheorie (1915) beschreibt die Gravitation als Krümmung von Raum und Zeit. Die Relativitätstheorie ist die Grundlage für die moderne Kosmologie, die GPS-Technologie und viele andere Anwendungen.',
-                'nuklearphysik': 'Die Kernphysik beschreibt den Aufbau und das Verhalten von Atomkernen. Sie untersucht radioaktiven Zerfall, Kernreaktionen, Kernspaltung und Kernfusion. Die Kernphysik ist die Grundlage für die Kernenergie, die Kernwaffen, die Strahlentherapie in der Medizin und die Radiokarbon-Datierung in der Archäologie.',
-                'teilchenphysik': 'Die Teilchenphysik erforscht die elementaren Bausteine der Materie und die fundamentalen Kräfte. Sie beschreibt Quarks, Leptonen, Bosonen und die vier Grundkräfte (Gravitation, Elektromagnetismus, starke und schwache Kernkraft). Das Standardmodell der Teilchenphysik ist die erfolgreichste Theorie der Teilchenphysik. Der Large Hadron Collider (LHC) am CERN ist das größte Experiment der Teilchenphysik.',
-
-                // === CHEMIE ===
-                'chemie': 'Die Chemie ist die Wissenschaft von den Stoffen und ihren Umwandlungen. Sie beschreibt die Struktur, die Eigenschaften und die Reaktionen von Atomen, Molekülen und Verbindungen. Die Chemie ist eine zentrale Wissenschaft, die Verbindungen zur Physik, Biologie, Medizin, Materialwissenschaft und Umweltwissenschaft hat. Sie umfasst die organische Chemie (Kohlenstoffverbindungen), die anorganische Chemie (alle anderen Elemente), die Biochemie (chemische Prozesse im Leben) und die physikalische Chemie (physikalische Grundlagen chemischer Prozesse).',
-                'organische chemie': 'Die organische Chemie beschreibt Kohlenstoffverbindungen. Kohlenstoff ist das zentrale Element des Lebens und der organischen Chemie. Die organische Chemie umfasst Alkane, Alkene, Alkine, Alkohole, Carbonsäuren, Ester, Amine, Aminosäuren, Zucker, Fette, Proteine und Nukleinsäuren. Sie ist die Grundlage für die Pharmazie, die Kunststoffindustrie, die Farbstoffchemie, die Lebensmittelchemie und die Biochemie.',
-                'anorganische chemie': 'Die anorganische Chemie beschreibt alle chemischen Verbindungen außer Kohlenstoffverbindungen. Sie umfasst Salze, Metalle, Minerale, Keramiken, Halbleiter und Komplexverbindungen. Sie ist wichtig für die Materialwissenschaften, die Katalyse, die Elektrochemie, die Batterietechnologie und die Umweltchemie.',
-                'biochemie': 'Die Biochemie beschreibt die chemischen Prozesse in lebenden Organismen. Sie umfasst den Stoffwechsel, die Enzymatik, die Proteinfaltung, die DNA-Replikation, die Transkription, die Translation, den Energiestoffwechsel (ATP) und die Signaltransduktion. Die Biochemie ist die Grundlage für die Molekularbiologie, die Genetik, die Pharmazie und die Medizin.',
-                'analytische chemie': 'Die analytische Chemie beschreibt Methoden zur Untersuchung von Stoffen. Sie umfasst die Chromatographie (Trennung von Gemischen), die Spektroskopie (Untersuchung von Lichtwechselwirkungen), die Massenspektrometrie (Bestimmung von Molekülmassen) und die Elektrochemie. Sie ist wichtig für die Qualitätssicherung, die Umweltanalytik, die klinische Chemie und die Forensik.',
-
-                // === BIOLOGIE ===
-                'biologie': 'Die Biologie ist die Wissenschaft vom Leben. Sie beschreibt die Struktur, die Funktion, das Wachstum, die Evolution, die Verbreitung und die Vielfalt des Lebens auf der Erde. Die Biologie umfasst die Molekularbiologie, die Zellbiologie, die Genetik, die Evolution, die Ökologie, die Physiologie, die Anatomie, die Botanik, die Zoologie, die Mikrobiologie und die Immunologie. Das Leben ist eines der größten Wunder der Natur und die Biologie erforscht seine Geheimnisse.',
-                'zellbiologie': 'Die Zellbiologie beschreibt die Struktur und Funktion von Zellen – den grundlegenden Einheiten des Lebens. Sie umfasst die Zellmembran, den Zellkern, die Mitochondrien, das endoplasmatische Retikulum, den Golgi-Apparat, die Lysosomen, die Ribosomen und das Zytoskelett. Die Zellbiologie ist die Grundlage für die Biomedizin, die Krebsforschung, die Stammzellforschung und die Entwicklungsbiologie.',
-                'genetik': 'Die Genetik beschreibt die Vererbung von Merkmalen und die molekularen Grundlagen der Vererbung. Sie umfasst die DNA, die Gene, die Chromosomen, die Mutationen, die Rekombination, die Vererbungsmuster (Mendelsche Regeln) und die Genregulation. Die Genetik ist die Grundlage für die Evolution, die Landwirtschaft, die Medizin, die Forensik und die Gentechnik.',
-                'evolution': 'Die Evolution beschreibt die Entwicklung des Lebens auf der Erde über Milliarden von Jahren. Sie beruht auf der natürlichen Selektion, der Mutation, der genetischen Drift und der Artbildung. Charles Darwin begründete die Evolutionstheorie mit seinem Buch "Über die Entstehung der Arten" (1859). Die Evolution erklärt die Vielfalt des Lebens und die Anpassung von Organismen an ihre Umwelt.',
-                'oekologie': 'Die Ökologie beschreibt die Wechselbeziehungen zwischen Organismen und ihrer Umwelt. Sie umfasst die Populationsökologie, die Gemeinschaftsökologie, die Ökosystemökologie und die Landschaftsökologie. Die Ökologie ist wichtig für den Naturschutz, die Umweltplanung, die Landwirtschaft und die nachhaltige Entwicklung.',
-
-                // === MATHEMATIK ===
-                'mathematik': 'Die Mathematik ist die Wissenschaft der Strukturen, Muster und logischen Zusammenhänge. Sie ist die Sprache der Naturwissenschaften und die Grundlage für die moderne Technologie. Die Mathematik umfasst die Arithmetik, die Algebra, die Geometrie, die Analysis, die Wahrscheinlichkeitstheorie, die Statistik, die Numerik, die Logik und die Topologie. Die Mathematik ist eine der ältesten Wissenschaften und hat eine lange Geschichte, die bis zu den alten Griechen und Babyloniern zurückreicht.',
-                'algebra': 'Die Algebra ist ein zentrales Teilgebiet der Mathematik. Sie beschreibt mathematische Strukturen wie Zahlenkörper, Gruppen, Ringe, Körper und Vektorräume. Sie ist die Grundlage für die lineare Algebra, die abstrakte Algebra und die algebraische Geometrie. Die Algebra ist wichtig für die Physik, die Informatik, die Kryptographie und die Ingenieurwissenschaften.',
-                'geometrie': 'Die Geometrie beschreibt Formen, Räume und Figuren. Sie umfasst die euklidische Geometrie (Punkte, Linien, Flächen, Körper), die nichteuklidische Geometrie (hyperbolische und elliptische Geometrie), die Topologie (Eigenschaften von Räumen) und die Differentialgeometrie (gekrümmte Räume). Die Geometrie ist wichtig für die Architektur, die Kunst, die Physik, die Kartographie und die Robotik.',
-                'analysis': 'Die Analysis beschreibt Grenzwerte, Ableitungen, Integrale und Differentialgleichungen. Sie ist die Grundlage für die Physik, die Ingenieurwissenschaften, die Wirtschaftswissenschaften und die Biologie. Die Analysis wurde von Newton und Leibniz unabhängig voneinander entwickelt.',
-                'statistik': 'Die Statistik beschreibt die Sammlung, Analyse und Interpretation von Daten. Sie umfasst die deskriptive Statistik (Darstellung von Daten), die Inferenzstatistik (Schlussfolgerungen aus Daten) und die Wahrscheinlichkeitstheorie (Zufallsprozesse). Die Statistik ist wichtig für die Wissenschaft, die Wirtschaft, die Medizin, die Politik und die Marktforschung.',
-
-                // === ASTRONOMIE ===
-                'astronomie': 'Die Astronomie ist die Wissenschaft vom Universum. Sie beschreibt die Struktur, die Entwicklung und die Dynamik von Himmelskörpern, Sternen, Galaxien und des gesamten Kosmos. Die Astronomie ist eine der ältesten Wissenschaften und hat die Grundlagen für die Navigation, die Zeitmessung und das Verständnis des Universums gelegt. Sie umfasst die Planetenforschung, die Sternforschung, die Galaxienforschung, die Kosmologie und die Astrobiologie.',
-                'sonne': 'Die Sonne ist der Zentralstern unseres Sonnensystems. Sie ist ein gelber Zwergstern der Spektralklasse G2V, der etwa 4,6 Milliarden Jahre alt ist. Sie besteht hauptsächlich aus Wasserstoff (74%) und Helium (24%). Die Sonne fusioniert Wasserstoff zu Helium und erzeugt dabei die Energie, die das Leben auf der Erde ermöglicht. Die Sonne hat einen Durchmesser von etwa 1,39 Millionen Kilometern und ist etwa 150 Millionen Kilometer von der Erde entfernt.',
-                'planeten': 'Unser Sonnensystem hat acht Planeten: Merkur, Venus, Erde, Mars, Jupiter, Saturn, Uranus und Neptun. Sie unterscheiden sich in Größe, Zusammensetzung, Atmosphäre, Umlaufbahnen und innerer Struktur. Die Planeten sind in zwei Gruppen unterteilt: die erdähnlichen (terrestrischen) Planeten (Merkur, Venus, Erde, Mars) und die gasförmigen (jovianischen) Planeten (Jupiter, Saturn, Uranus, Neptun).',
-                'erde': 'Die Erde ist der dritte Planet von der Sonne. Sie ist der einzige bekannte Planet, auf dem Leben existiert. Die Erde hat einen festen inneren Kern, einen flüssigen äußeren Kern, einen festen Mantel und eine feste Kruste. Sie hat eine Atmosphäre, die hauptsächlich aus Stickstoff (78%) und Sauerstoff (21%) besteht, und Ozeane, die etwa 71% der Oberfläche bedecken. Die Erde ist etwa 4,54 Milliarden Jahre alt.',
-                'mond': 'Der Mond ist der einzige natürliche Satellit der Erde. Er hat einen Durchmesser von etwa 3.474 Kilometern und ist durchschnittlich 384.400 Kilometer von der Erde entfernt. Der Mond entstand wahrscheinlich durch eine Kollision der Erde mit einem marsgroßen Körper vor etwa 4,5 Milliarden Jahren. Der Mond beeinflusst die Gezeiten auf der Erde und ist ein wichtiges Objekt für die Erforschung des Sonnensystems.',
-                'galaxie': 'Eine Galaxie ist eine gigantische Ansammlung von Sternen, Gas, Staub und dunkler Materie, die durch Gravitation zusammengehalten wird. Unsere Heimatgalaxie, die Milchstraße, enthält etwa 100-400 Milliarden Sterne und hat einen Durchmesser von etwa 100.000 Lichtjahren. Galaxien gibt es in verschiedenen Formen: spiralig, elliptisch und irregulär.',
-                'schwarzes loch': 'Ein Schwarzes Loch ist ein astronomisches Objekt mit einer so starken Gravitation, dass nichts, nicht einmal Licht, entkommen kann. Schwarze Löcher entstehen beim Gravitationskollaps massereicher Sterne am Ende ihres Lebens. Sie sind eines der faszinierendsten Objekte im Universum und ein zentrales Thema der modernen Astrophysik.',
-                'urknall': 'Der Urknall war der Beginn des Universums vor etwa 13,8 Milliarden Jahren. Nach dem Urknall dehnte sich das Universum aus und kühlte ab, was zur Entstehung von Atomen, Sternen, Galaxien und Planeten führte. Der Urknall ist die am besten bestätigte Theorie über den Ursprung des Universums.',
-
-                // === TECHNOLOGIE ===
-                'informatik': 'Die Informatik ist die Wissenschaft der systematischen Verarbeitung von Informationen. Sie umfasst Algorithmen, Datenstrukturen, Programmierung, Softwareentwicklung, Datenbanken, Netzwerke, künstliche Intelligenz, Cybersicherheit, Mensch-Computer-Interaktion und theoretische Informatik. Die Informatik hat die moderne Welt revolutioniert und ist die Grundlage für die digitale Gesellschaft.',
-                'ki': 'Künstliche Intelligenz (KI) ist die Fähigkeit von Maschinen, menschenähnliche Intelligenz zu zeigen. Sie umfasst maschinelles Lernen, neuronale Netze, Deep Learning, natürliche Sprachverarbeitung, Computer Vision, Robotik, Expertensysteme und Schwarmintelligenz. Die KI ist eine der wichtigsten Technologien des 21. Jahrhunderts und hat das Potenzial, fast alle Bereiche der Gesellschaft zu verändern.',
-                'maschinelles lernen': 'Maschinelles Lernen ist ein Teilbereich der KI, bei dem Algorithmen aus Daten lernen, ohne explizit programmiert zu werden. Es umfasst überwachtes Lernen (mit gelabelten Daten), unüberwachtes Lernen (ohne gelabelte Daten) und verstärkendes Lernen (durch Belohnung und Bestrafung). Maschinelles Lernen wird für Bilderkennung, Sprachverarbeitung, Empfehlungssysteme, autonomes Fahren und viele andere Anwendungen eingesetzt.',
-                'neuronale netze': 'Neuronale Netze sind Berechnungsmodelle, die vom menschlichen Gehirn inspiriert sind. Sie bestehen aus vielen miteinander verbundenen Neuronen, die in Schichten angeordnet sind. Neuronale Netze werden zur Mustererkennung, Klassifizierung, Regression und generativen Modellierung eingesetzt. Deep Learning verwendet neuronale Netze mit vielen versteckten Schichten.',
-                'blockchain': 'Die Blockchain ist eine dezentrale Datenbanktechnologie, bei der Daten in Blöcken gespeichert und kryptographisch verknüpft werden. Sie ermöglicht transparente, fälschungssichere und manipulationsresiliente Transaktionen. Die Blockchain ist die Grundlage für Kryptowährungen wie Bitcoin und Ethereum und hat auch Anwendungen in der Lieferkette, im Gesundheitswesen und in der digitalen Identität.',
-                'cybersicherheit': 'Die Cybersicherheit schützt IT-Systeme, Netzwerke und Daten vor Angriffen, Schäden und unbefugtem Zugriff. Sie umfasst Verschlüsselung, Firewalls, Intrusion Detection, Authentifizierung, Zugriffskontrolle, Sicherheitsrichtlinien und Sicherheitsbewusstsein. Die Cybersicherheit ist eine der größten Herausforderungen der digitalen Gesellschaft.',
-                'cloud computing': 'Cloud Computing bietet IT-Ressourcen (Rechenleistung, Speicher, Dienste) über das Internet. Es umfasst Infrastructure-as-a-Service (IaaS), Platform-as-a-Service (PaaS), Software-as-a-Service (SaaS) und Serverless Computing. Cloud Computing bietet Skalierbarkeit, Flexibilität, Kosteneffizienz und Zugänglichkeit.',
-
-                // === PHILOSOPHIE ===
-                'philosophie': 'Die Philosophie ist die Wissenschaft der grundlegenden Fragen des Lebens, des Wissens, der Realität und der Moral. Sie ist die Mutter aller Wissenschaften und hat die Grundlagen der Logik, der Ethik, der Metaphysik, der Erkenntnistheorie und der Ästhetik gelegt. Die Philosophie fragt nach dem Wesen der Dinge, dem Sinn des Lebens und den Prinzipien des richtigen Handelns. Sie ist eine der ältesten und wichtigsten Disziplinen der Menschheit.',
-                'ethik': 'Die Ethik ist die philosophische Disziplin, die sich mit den Grundlagen und Prinzipien des moralischen Handelns befasst. Sie fragt nach dem richtigen und guten Handeln. Die Ethik umfasst die Tugendethik (Aristoteles), die Deontologie (Kant), den Utilitarismus (Bentham, Mill) und die angewandte Ethik (Medizinethik, Wirtschaftsethik, Umweltethik, Technikethik).',
-                'logik': 'Die Logik ist die Lehre des richtigen Schließens. Sie umfasst die Aussagenlogik, die Prädikatenlogik, die formale Logik, die Beweistheorie und die nicht-klassische Logik. Die Logik ist die Grundlage für die Mathematik, die Informatik, die Philosophie und die Rechtsprechung.',
-                'metaphysik': 'Die Metaphysik ist die philosophische Disziplin der grundlegenden Strukturen der Realität. Sie untersucht das Sein, die Zeit, den Raum, die Kausalität, die Substanz, die Existenz und das Verhältnis von Geist und Materie. Die Metaphysik ist eine der ältesten und grundlegendsten Disziplinen der Philosophie.',
-                'erkenntnistheorie': 'Die Erkenntnistheorie ist die Lehre vom Wissen. Sie untersucht die Quellen, die Grenzen und die Gültigkeit des Wissens. Sie umfasst den Empirismus (Wissen durch Erfahrung), den Rationalismus (Wissen durch Vernunft) und den Kritischen Rationalismus (Popper).',
-                'aesthetik': 'Die Ästhetik ist die philosophische Disziplin der Kunst und Schönheit. Sie untersucht die Wahrnehmung, den Geschmack, das Kunstwerk, die Kreativität und die ästhetische Erfahrung. Die Ästhetik ist wichtig für die Kunsttheorie, die Literaturwissenschaft, die Musiktheorie und die Architekturtheorie.',
-
-                // === GESCHICHTE ===
-                'geschichte': 'Die Geschichte ist die Wissenschaft der Vergangenheit. Sie untersucht die Entwicklung der menschlichen Zivilisation, Kulturen, Staaten, Kriege, Entdeckungen, Revolutionen und gesellschaftlichen Veränderungen. Die Geschichte ist die Grundlage für das Verständnis der Gegenwart und die Gestaltung der Zukunft. Sie umfasst die Antike, das Mittelalter, die Neuzeit, die Zeitgeschichte und die Globalgeschichte.',
-                'antike': 'Die Antike ist die Epoche der griechisch-römischen Kultur (etwa 800 v. Chr. bis 500 n. Chr.). Sie hat die Grundlagen der abendländischen Philosophie (Platon, Aristoteles, Sokrates), der Demokratie (Athen), der Kunst (griechische Bildhauerei, römische Architektur), der Literatur (Homer, Vergil) und des Rechts (römisches Recht) gelegt. Die Antike ist die Wiege der westlichen Zivilisation.',
-                'mittelalter': 'Das Mittelalter ist die Epoche zwischen Antike und Neuzeit (etwa 500 bis 1500 n. Chr.). Es war geprägt von Feudalismus, Rittertum, Klöstern, der katholischen Kirche, Kreuzzügen, der Entstehung der modernen Nationen, der Gotik und der Scholastik. Das Mittelalter war eine Zeit des Wandels und der Innovation.',
-                'renaissance': 'Die Renaissance (14. bis 17. Jahrhundert) war eine Epoche des Wiedererwachens der antiken Kultur und des humanistischen Denkens. Sie brachte große Fortschritte in der Kunst (Leonardo da Vinci, Michelangelo, Raphael), der Wissenschaft (Galilei, Kopernikus) und der Philosophie (Machiavelli, Erasmus). Die Renaissance war eine Blütezeit der europäischen Kultur.',
-                'aufklaerung': 'Die Aufklärung (17. und 18. Jahrhundert) war eine geistige Bewegung, die den Einsatz der Vernunft und die Befreiung des Menschen von Unmündigkeit forderte. Sie beeinflusste die Demokratie (Locke, Rousseau), die Menschenrechte (Voltaire), die wissenschaftliche Methode (Bacon, Newton) und die kritische Philosophie (Kant). Die Aufklärung ist die Grundlage der modernen liberalen Demokratie.',
-                'industrielle revolution': 'Die Industrielle Revolution war der Übergang von der Agrar- zur Industriegesellschaft im 18. und 19. Jahrhundert. Sie brachte Maschinen, Fabriken, Eisenbahnen, Dampfschiffe, die Massenproduktion und die Urbanisierung hervor. Die Industrielle Revolution hat die Welt grundlegend verändert und ist die Grundlage der modernen Wirtschaft.',
-                'weltkriege': 'Die Weltkriege des 20. Jahrhunderts waren die zerstörerischsten Konflikte der Menschheitsgeschichte. Der Erste Weltkrieg (1914-1918) und der Zweite Weltkrieg (1939-1945) führten zu enormen Verlusten an Menschenleben, politischen Umwälzungen, technologischen Fortschritten und der Gründung der Vereinten Nationen. Sie sind Mahnmale für die Schrecken des Krieges und die Bedeutung des Friedens.',
-
-                // === TECHNIK ===
-                'technik': 'Die Technik umfasst die Anwendung von wissenschaftlichen Erkenntnissen für praktische Zwecke. Sie ist die Grundlage für die moderne Zivilisation und umfasst den Maschinenbau, die Elektrotechnik, die Bauingenieurwissenschaften, die Verfahrenstechnik, die Informationstechnik, die Umwelttechnik, die Biotechnik und die Medizintechnik. Die Technik verbessert die Lebensqualität und löst praktische Probleme.',
-                'robotik': 'Die Robotik ist die Wissenschaft der Konstruktion, Programmierung und Anwendung von Robotern. Sie umfasst die Mechanik, die Elektronik, die Sensorik, die Steuerungstechnik, die künstliche Intelligenz und die Mensch-Roboter-Interaktion. Roboter werden in der Industrie (Fertigungsroboter), der Medizin (Operationsroboter), der Forschung (Explorationsroboter), dem Militär (Drohnen) und im Alltag (Service-Roboter) eingesetzt.',
-                'elektrotechnik': 'Die Elektrotechnik ist die Ingenieurwissenschaft, die sich mit elektrischen Systemen, Schaltkreisen, Motoren, Generatoren, Transformatoren, Leistungselektronik, Regelungstechnik und Kommunikationstechnik befasst. Sie ist die Grundlage der modernen Energieversorgung, der Elektromobilität, der Kommunikationstechnologie und der Automatisierungstechnik.',
-                'maschinenbau': 'Der Maschinenbau ist die Ingenieurwissenschaft, die sich mit der Konstruktion, der Fertigung und dem Betrieb von Maschinen und Anlagen befasst. Er umfasst die Mechanik, die Thermodynamik, die Strömungslehre, die Werkstoffkunde, die Fertigungstechnik und die Konstruktionslehre. Der Maschinenbau ist eine der ältesten und wichtigsten Ingenieurdisziplinen.',
-                'bauwesen': 'Das Bauwesen umfasst die Planung, die Konstruktion und die Errichtung von Gebäuden, Brücken, Straßen, Tunneln, Dämmen und anderen Bauwerken. Es umfasst die Architektur, die Bauingenieurwissenschaften, die Baustoffkunde, die Statik, die Geotechnik und die Bauphysik. Das Bauwesen ist die Grundlage der modernen Infrastruktur.',
-
-                // === WIRTSCHAFT ===
-                'wirtschaft': 'Die Wirtschaft umfasst die Produktion, die Verteilung und den Konsum von Gütern und Dienstleistungen. Sie ist das Rückgrat jeder Gesellschaft und umfasst die Makroökonomie (Gesamtwirtschaft), die Mikroökonomie (individuelle Entscheidungen), die Betriebswirtschaftslehre (Unternehmen), die Finanzwirtschaft, die Außenwirtschaft und die Wirtschaftspolitik. Die Wirtschaft ist die Grundlage für den Wohlstand und die Entwicklung einer Gesellschaft.',
-                'finanzen': 'Die Finanzen umfassen die Verwaltung von Geld, Kapital, Investitionen, Krediten, Risiken und Finanzinstrumenten. Sie umfasst die Unternehmensfinanzierung, die private Finanzplanung, das Investmentbanking, das Asset Management, die Versicherungswirtschaft und die Finanzregulierung. Die Finanzen sind ein zentraler Bestandteil der modernen Wirtschaft.',
-                'marketing': 'Das Marketing umfasst die Vermarktung von Produkten und Dienstleistungen. Es umfasst die Marktforschung, die Produktentwicklung, die Preisgestaltung, die Werbung, den Vertrieb, das Branding, das Kundenbeziehungsmanagement und die digitale Kommunikation. Das Marketing ist wichtig für den Erfolg von Unternehmen und die Befriedigung von Kundenbedürfnissen.',
-                'management': 'Das Management ist die Leitung und Organisation von Unternehmen und Institutionen. Es umfasst die Planung, die Steuerung, die Führung, die Koordination und die Kontrolle von Prozessen und Mitarbeitern. Das Management ist die Grundlage für die Effizienz und den Erfolg von Organisationen.',
-                'unternehmertum': 'Das Unternehmertum ist die Fähigkeit, Geschäftsideen zu entwickeln und in erfolgreiche Unternehmen umzusetzen. Es umfasst die Identifikation von Chancen, die Risikobereitschaft, die Innovation, die Kreativität, die Führungsfähigkeiten und die unternehmerische Verantwortung. Unternehmer sind die Motoren der Wirtschaft und des Fortschritts.',
-
-                // === KULTUR ===
-                'kultur': 'Die Kultur umfasst die Gesamtheit von Traditionen, Bräuchen, Sprache, Kunst, Musik, Literatur, Philosophie, Religion, Werten und Normen einer Gesellschaft. Sie ist die Identität eines Volkes und die Grundlage für den Zusammenhalt und die Entwicklung einer Gesellschaft. Die Kultur ist das Erbe der Menschheit.',
-                'kunst': 'Die Kunst ist der Ausdruck von Kreativität, Emotionen, Ideen und Visionen durch visuelle, akustische, performative und literarische Medien. Sie umfasst die Malerei, die Bildhauerei, die Architektur, die Musik, die Literatur, den Tanz, das Theater, den Film und die Fotografie. Die Kunst ist ein wesentlicher Bestandteil der menschlichen Kultur und bereichert das Leben.',
-                'musik': 'Die Musik ist die Kunst der Klanggestaltung. Sie umfasst die Komposition, die Interpretation, den Gesang, die Instrumente, die Musiktheorie, die Musikgeschichte und die Musikproduktion. Die Musik ist eine universelle Sprache der Menschheit und hat eine tiefe emotionale und kulturelle Bedeutung.',
-                'literatur': 'Die Literatur umfasst schriftliche Werke wie Romane, Gedichte, Dramen, Essays, Märchen, Sagen, Biografien und philosophische Schriften. Sie ist ein Spiegel der menschlichen Erfahrung, der Phantasie, der Emotionen und der Gedanken. Die Literatur ist ein wesentlicher Bestandteil der Kultur und der Bildung.',
-                'sprache': 'Die Sprache ist ein System von Zeichen, Symbolen und Regeln, das Menschen zur Kommunikation, zum Ausdruck von Gedanken und zur Weitergabe von Informationen verwenden. Die Sprache ist das wichtigste Werkzeug des Menschen und die Grundlage für die Kultur, die Bildung und die Gesellschaft.',
-
-                // === PSYCHOLOGIE ===
-                'psychologie': 'Die Psychologie ist die Wissenschaft vom menschlichen Erleben und Verhalten. Sie umfasst die Wahrnehmung, das Lernen, das Gedächtnis, die Emotionen, die Motivation, die Persönlichkeit, die Entwicklungspsychologie, die Sozialpsychologie, die klinische Psychologie, die Arbeitspsychologie, die Gesundheitspsychologie und die Neuropsychologie. Die Psychologie ist die Wissenschaft des menschlichen Geistes und Verhaltens.',
-                'wahrnehmung': 'Die Wahrnehmung ist der Prozess der Verarbeitung von Sinneseindrücken. Sie umfasst das Sehen, Hören, Riechen, Schmecken, Tasten und die Integration dieser Sinne im Gehirn. Die Wahrnehmung ist die Grundlage für das Verständnis der Umwelt und ist ein zentrales Thema der kognitiven Psychologie.',
-                'lernen': 'Lernen ist der Prozess des Erwerbs von Wissen, Fähigkeiten, Einstellungen und Verhaltensweisen. Es umfasst das assoziative Lernen (klassische und operante Konditionierung), das kognitive Lernen (Einsicht, Problemlösen), das Beobachtungslernen (Bandura) und das implizite Lernen. Lernen ist die Grundlage für die Entwicklung und die Anpassung des Menschen.',
-                'gedaechtnis': 'Das Gedächtnis ist die Fähigkeit, Informationen zu speichern, zu behalten und abzurufen. Es umfasst das sensorische Gedächtnis, das Kurzzeitgedächtnis, das Arbeitsgedächtnis, das Langzeitgedächtnis (episodisch, semantisch, prozedural) und die Gedächtnisbildung (Konsolidierung). Das Gedächtnis ist die Grundlage für Identität, Lernen und Wissen.',
-                'emotionen': 'Emotionen sind komplexe psychologische Zustände, die durch Gefühle, Gedanken, körperliche Reaktionen und Verhalten gekennzeichnet sind. Sie umfassen Freude, Trauer, Angst, Wut, Überraschung, Ekel, Liebe, Stolz, Scham, Schuld und Neugier. Emotionen haben eine wichtige Funktion für die Motivation, die Kommunikation, die Entscheidungsfindung und das soziale Verhalten.',
-                'persoenlichkeit': 'Die Persönlichkeit umfasst die individuellen Merkmale, Denkweisen, Gefühle und Verhaltensmuster eines Menschen. Sie wird durch Gene, Umwelt, Erziehung, Erfahrungen und soziale Interaktionen geprägt. Die Persönlichkeit ist ein zentrales Thema der Psychologie und wird durch verschiedene Theorien beschrieben (Traittheorien, psychodynamische Theorien, humanistische Theorien).',
-
-                // === SOZIOLOGIE ===
-                'soziologie': 'Die Soziologie ist die Wissenschaft der Gesellschaft. Sie untersucht soziale Strukturen, Institutionen, Gruppen, Schichten, Klassen, Machtverhältnisse, sozialen Wandel, soziale Ungleichheit, soziale Probleme, Kultur, Sozialisation und soziale Kontrolle. Die Soziologie ist die Wissenschaft der menschlichen Gesellschaft und ihrer Dynamik.',
-                'familie': 'Die Familie ist die kleinste soziale Einheit und die Basis der Gesellschaft. Sie umfasst Eltern, Kinder, Großeltern und andere Verwandte. Die Familie hat wichtige Funktionen: die Reproduktion, die Sozialisation, die emotionale Unterstützung, die wirtschaftliche Versorgung und die Weitergabe von Werten. Die Familie ist der Ort der Geborgenheit und der ersten sozialen Erfahrungen.',
-                'bildung': 'Bildung ist der Prozess des Erwerbs von Wissen, Fähigkeiten, Werten und kulturellen Fertigkeiten. Sie umfasst die formale Bildung (Schule, Universität), die non-formale Bildung (Weiterbildung) und die informelle Bildung (Lebenserfahrung). Bildung ist der Schlüssel zu persönlicher Entwicklung, beruflichem Erfolg und gesellschaftlicher Teilhabe.',
-                'arbeit': 'Die Arbeit ist die Tätigkeit zur Produktion von Gütern und Dienstleistungen. Sie ist wichtig für den Lebensunterhalt, die Identität, die soziale Anerkennung, die Sinnstiftung und die gesellschaftliche Teilhabe. Die Arbeit ist ein zentraler Bestandteil des Lebens und der Gesellschaft.',
-                'soziale ungleichheit': 'Soziale Ungleichheit beschreibt die ungleiche Verteilung von Ressourcen, Chancen, Macht und Prestige in einer Gesellschaft. Sie umfasst die Einkommensungleichheit, die Vermögensungleichheit, die Bildungsungleichheit, die Gesundheitsungleichheit, die Geschlechterungleichheit und die ethnische Ungleichheit. Soziale Ungleichheit ist eine der größten Herausforderungen der modernen Gesellschaft.',
-
-                // === MEDIZIN ===
-                'medizin': 'Die Medizin ist die Wissenschaft der Heilung, der Gesundheitserhaltung und der Krankheitsprävention. Sie umfasst die Anatomie, die Physiologie, die Pathologie, die Pharmakologie, die Chirurgie, die Innere Medizin, die Pädiatrie, die Gynäkologie, die Psychiatrie, die Radiologie, die Anästhesie, die Notfallmedizin, die Präventivmedizin und die öffentliche Gesundheit. Die Medizin ist die Wissenschaft des Lebens und der Gesundheit.',
-                'anatomie': 'Die Anatomie ist die Lehre vom Aufbau des menschlichen Körpers. Sie umfasst die Knochen, die Muskeln, die Organe, die Blutgefäße, die Nerven, die Haut, die Sinnesorgane und die inneren Strukturen. Die Anatomie ist die Grundlage für die Chirurgie, die Radiologie, die Pathologie und die Physiotherapie.',
-                'physiologie': 'Die Physiologie ist die Lehre von den Funktionen des menschlichen Körpers. Sie umfasst das Herz-Kreislauf-System, die Atmung, die Verdauung, den Stoffwechsel, die Hormone, das Immunsystem, das Nervensystem, die Nierenfunktion, die Hautfunktion und die Reproduktion. Die Physiologie ist die Grundlage für die Innere Medizin, die Kardiologie, die Pneumologie, die Endokrinologie und die Neurologie.',
-                'gesundheit': 'Gesundheit ist der Zustand des körperlichen, geistigen und sozialen Wohlbefindens. Sie ist die Grundlage für ein erfülltes Leben und wird durch Ernährung, Bewegung, Schlaf, Stressbewältigung, soziale Kontakte und medizinische Versorgung beeinflusst. Gesundheit ist das höchste Gut des Menschen.',
-                'pharmazie': 'Die Pharmazie ist die Wissenschaft der Arzneimittel. Sie umfasst die Entwicklung, die Herstellung, die Prüfung, die Zulassung, die Lagerung, die Abgabe und die Anwendung von Medikamenten. Die Pharmazie ist die Grundlage für die medikamentöse Therapie und die Gesundheitsversorgung.',
-
-                // === LEBEN ===
-                'leben': 'Das Leben ist ein komplexer Prozess der Organisation, des Wachstums, der Reproduktion, des Stoffwechsels, der Reaktion auf Umweltreize, der Evolution und der Anpassung. Es ist eines der größten Wunder der Natur und das zentrale Thema der Biologie. Das Leben ist einzigartig und wertvoll.',
-                'bewusstsein': 'Das Bewusstsein ist die Fähigkeit, sich selbst und die Umwelt wahrzunehmen, zu fühlen, zu denken und zu handeln. Es ist eines der größten Rätsel der Philosophie, der Psychologie und der Neurowissenschaften. Das Bewusstsein ist das, was uns zu Menschen macht.',
-                'liebe': 'Die Liebe ist ein tiefes Gefühl der Zuneigung, der Verbundenheit, der Fürsorge und des Verlangens nach Nähe. Sie ist eine der stärksten menschlichen Emotionen und prägt das Leben, die Beziehungen, die Kultur, die Kunst und die Philosophie. Die Liebe ist die Grundlage für Glück und menschliche Verbindung.',
-                'glueck': 'Das Glück ist ein Zustand des Wohlbefindens, der Freude, der Zufriedenheit und der Erfüllung. Es wird durch äußere Umstände, innere Einstellung, zwischenmenschliche Beziehungen, Sinnfindung und persönliche Entwicklung beeinflusst. Das Glück ist das Ziel des menschlichen Strebens.',
-                'freiheit': 'Die Freiheit ist die Möglichkeit, selbstbestimmt zu handeln, ohne durch äußere Zwänge eingeschränkt zu werden. Sie ist ein Grundwert der Philosophie, der Ethik, der Politik und der Gesellschaft. Die Freiheit ist das Fundament der Demokratie und der Menschenrechte.',
-                'tod': 'Der Tod ist das Ende des Lebens. Er ist ein natürlicher Teil des Lebenszyklus und wird in vielen Kulturen, Religionen und Philosophien thematisiert. Der Tod gibt dem Leben seine Bedeutung und ist eine Quelle der Reflexion und der Wertschätzung des Lebens.'
+                'physik': 'Die Physik ist die Naturwissenschaft, die die grundlegenden Gesetze der Natur erforscht – Bewegung, Energie, Kräfte, Materie und das Universum. Sie ist die Grundlage für alle anderen Naturwissenschaften.',
+                'chemie': 'Die Chemie ist die Wissenschaft von den Stoffen und ihren Umwandlungen. Sie untersucht chemische Reaktionen, Verbindungen und die Struktur der Materie.',
+                'biologie': 'Die Biologie ist die Wissenschaft vom Leben – von Zellen, Organismen, Evolution, Ökosystemen und der Vielfalt des Lebens auf der Erde.',
+                'mathematik': 'Die Mathematik ist die Wissenschaft der Zahlen, Formen, Strukturen und Muster. Sie ist die Grundlage für viele andere Wissenschaften und Technologien.',
+                'astronomie': 'Die Astronomie ist die Wissenschaft von den Himmelskörpern – Sternen, Planeten, Galaxien und dem Universum als Ganzes.',
+                'informatik': 'Die Informatik ist die Wissenschaft der systematischen Verarbeitung von Informationen. Sie umfasst Algorithmen, Programmierung, KI und Softwareentwicklung.',
+                'philosophie': 'Die Philosophie ist die Wissenschaft vom Wesen der Dinge, vom Sinn des Lebens und den Grundlagen des Wissens.',
+                'geschichte': 'Die Geschichte ist die Aufzeichnung und Erforschung vergangener Ereignisse, Entwicklungen und Zivilisationen.',
+                'technik': 'Die Technik umfasst die Anwendung von wissenschaftlichen Erkenntnissen zur Lösung praktischer Probleme.',
+                'ki': 'Künstliche Intelligenz ist die Fähigkeit von Maschinen, menschenähnliche Intelligenz zu zeigen – zu lernen, zu verstehen und Entscheidungen zu treffen.',
+                'sonne': 'Die Sonne ist der Stern im Zentrum unseres Sonnensystems. Sie liefert Licht und Wärme für alle Planeten.',
+                'erde': 'Die Erde ist der dritte Planet von der Sonne und der einzige bekannte Planet, auf dem Leben existiert.',
+                'mond': 'Der Mond ist der einzige natürliche Satellit der Erde. Er beeinflusst die Gezeiten.',
+                'planeten': 'Unser Sonnensystem hat acht Planeten: Merkur, Venus, Erde, Mars, Jupiter, Saturn, Uranus und Neptun.'
             },
 
             ask(text) {
                 const lower = text.toLowerCase().trim();
-                if (!lower) return 'Bitte geben Sie eine Frage ein. Ich bin HalDo AI und habe Wissen über alle Themen der Wissenschaft, Philosophie, Technologie, Geschichte, Kunst, Kultur und des Lebens.';
+                if (!lower) return 'Was möchtest du wissen?';
 
                 // Direkte Wissensabfrage
                 for (const [key, value] of Object.entries(this.knowledge)) {
@@ -1262,7 +941,26 @@
                     }
                 }
 
-                // Themen erkennen
+                // Begrüßungen
+                if (lower.includes('hallo') || lower.includes('hi') || lower.includes('hey') || lower.includes('guten tag') ||
+                    lower.includes('guten morgen')) {
+                    return 'Hallo! Schön, dass du da bist. Was kann ich für dich tun?';
+                }
+
+                if (lower.includes('danke') || lower.includes('thanks')) {
+                    return 'Gern geschehen. Immer wieder gerne.';
+                }
+
+                if (lower.includes('tschüss') || lower.includes('bye') || lower.includes('auf wiedersehen') || lower.includes(
+                        'bis bald')) {
+                    return 'Bis bald! Komm gut nach Hause.';
+                }
+
+                if (lower.includes('hilfe') || lower.includes('help') || lower.includes('was kannst du')) {
+                    return 'Ich bin HalDo AI. Ich kann dir helfen mit Physik, Chemie, Biologie, Mathematik, Astronomie, Informatik, Philosophie, Geschichte, Technik und vielen anderen Themen. Frag mich einfach!';
+                }
+
+                // Thema erkennen
                 const topics = Object.keys(this.knowledge);
                 for (const topic of topics) {
                     if (lower.includes(topic.replace(/_/g, ' '))) {
@@ -1270,79 +968,15 @@
                     }
                 }
 
-                // Begrüßungen
-                if (lower.includes('hallo') || lower.includes('hi') || lower.includes('hey') || lower.includes('guten tag') ||
-                    lower.includes('guten morgen') || lower.includes('guten abend')) {
-                    return 'Guten Tag! Ich bin HalDo AI, Ihr professioneller KI-Assistent und Wissenspartner. Ich habe ein umfassendes Wissen über alle Gebiete der Wissenschaft, Philosophie, Technologie, Geschichte, Kunst, Kultur und des Lebens. Stellen Sie mir eine Frage – ich bin bereit, mein Wissen mit Ihnen zu teilen. Ich kann Ihnen in allen Themenbereichen fundierte, detaillierte und verständliche Antworten geben.';
-                }
-
-                if (lower.includes('danke') || lower.includes('thanks') || lower.includes('vielen dank')) {
-                    return 'Gern geschehen! Es freut mich, dass ich Ihnen helfen konnte. Ich bin jederzeit bereit für weitere Fragen, Diskussionen und Analysen. Ich habe ein umfassendes Wissen und teile es gerne mit Ihnen. Bleiben Sie neugierig!';
-                }
-
-                if (lower.includes('tschüss') || lower.includes('bye') || lower.includes('auf wiedersehen') || lower.includes(
-                        'wiedersehen') || lower.includes('bis bald')) {
-                    return 'Auf Wiedersehen! Ich stehe Ihnen jederzeit für weitere Fragen, Diskussionen und Analysen zur Verfügung. Denken Sie daran: Wissen ist Macht, und ich bin hier, um Ihnen zu helfen, dieses Wissen zu erlangen. Bleiben Sie neugierig und kommen Sie bald wieder!';
-                }
-
-                // Hilfe
-                if (lower.includes('hilfe') || lower.includes('help') || lower.includes('was kannst du') || lower.includes(
-                        'fähigkeiten') || lower.includes('was weißt du') || lower.includes('was weisst du')) {
-                    return `Ich bin HalDo AI, ein professioneller KI-Assistent und Wissenspartner mit umfassendem Wissen über:
-
-• Physik, Chemie, Biologie, Mathematik, Astronomie
-• Philosophie, Ethik, Logik, Erkenntnistheorie
-• Geschichte, Antike, Mittelalter, Renaissance, Aufklärung
-• Technologie, Informatik, KI, Robotik, Netzwerke
-• Psychologie, Soziologie, Pädagogik
-• Wirtschaft, Finanzen, Management, Unternehmertum
-• Kunst, Musik, Literatur, Sprache, Kultur
-• Medizin, Gesundheit, Anatomie, Pharmazie
-• Natur, Ökologie, Klima, Umwelt
-• Leben, Bewusstsein, Liebe, Glück, Freiheit, Tod
-
-Ich kann Ihnen fundierte, detaillierte und verständliche Antworten auf alle Ihre Fragen geben. Stellen Sie mir einfach eine Frage – ich bin bereit!`;
-                }
-
-                // Allgemeine Wissensfrage
-                const prefixes = ['was ist', 'was bedeutet', 'was weißt du über', 'erkläre', 'erzähle von', 'wie funktioniert',
-                    'was sind', 'was macht', 'wer ist', 'welche'
-                ];
-                for (const prefix of prefixes) {
-                    if (lower.includes(prefix)) {
-                        const query = lower.replace(prefix, '').trim();
-                        if (query.length > 2) {
-                            for (const [key, value] of Object.entries(this.knowledge)) {
-                                const cleanKey = key.replace(/_/g, ' ');
-                                if (cleanKey.includes(query) || query.includes(cleanKey)) {
-                                    return value;
-                                }
-                            }
-                        }
-                    }
-                }
-
-                // Intelligente Standardantworten
+                // Intelligente Standardantworten (kurz, menschlich)
                 const responses = [
-                    'Ich habe Ihre Frage verstanden. Dies ist ein interessantes Thema, das in meinem Wissensbereich liegt. Bitte spezifizieren Sie Ihre Frage etwas genauer, damit ich Ihnen die besten Informationen geben kann. Ich kann Ihnen fundierte, detaillierte und verständliche Antworten liefern.',
-                    'Ein faszinierendes Thema! Ich habe umfangreiches Wissen dazu. Können Sie Ihre Frage präzisieren, damit ich Ihnen eine vollständige und hilfreiche Antwort geben kann? Ich bin hier, um mein Wissen mit Ihnen zu teilen.',
-                    'Ich kenne mich mit diesem Thema aus. Bitte geben Sie mir etwas mehr Details, damit ich Ihnen eine präzise Antwort liefern kann. Ich habe Wissen über alle Bereiche der Wissenschaft, Philosophie, Technologie, Geschichte, Kunst und Kultur.',
-                    'Das ist ein wichtiges Thema in meinem Wissensgebiet. Bitte fragen Sie konkreter, damit ich Ihnen die besten Informationen geben kann. Ich bin bereit, mein umfangreiches Wissen mit Ihnen zu teilen.'
+                    'Interessante Frage. Erzähl mir mehr, dann kann ich dir besser helfen.',
+                    'Darüber kann ich dir was sagen. Magst du etwas genauer werden?',
+                    'Verstehe. Worauf genau willst du hinaus?',
+                    'Gute Frage. Lass mich überlegen... Was genau interessiert dich daran?',
+                    'Darüber habe ich Wissen. Was möchtest du genau wissen?'
                 ];
                 return responses[Math.floor(Math.random() * responses.length)];
-            },
-
-            search(query) {
-                const results = [];
-                const q = query.toLowerCase().trim();
-                if (!q) return results;
-                for (const [key, value] of Object.entries(this.knowledge)) {
-                    const cleanKey = key.replace(/_/g, ' ');
-                    if (cleanKey.includes(q) || value.toLowerCase().includes(q)) {
-                        results.push({ topic: cleanKey, content: value.substring(0, 200) + '...' });
-                    }
-                }
-                return results;
             },
 
             getAllTopics() {
@@ -1352,13 +986,12 @@ Ich kann Ihnen fundierte, detaillierte und verständliche Antworten auf alle Ihr
             getRandomFact() {
                 const keys = Object.keys(this.knowledge);
                 const key = keys[Math.floor(Math.random() * keys.length)];
-                const cleanKey = key.replace(/_/g, ' ');
-                return `${cleanKey}: ${this.knowledge[key]}`;
+                return `${key.replace(/_/g, ' ')}: ${this.knowledge[key]}`;
             }
         };
 
         // =========================================================
-        // ALLE 100+ APPS (VOLLSTÄNDIGE LISTE)
+        // ALLE APPS
         // =========================================================
         const APP_LIST = [
             { id: 'cosmic', icon: '🌌', name: 'Cosmic World' },
@@ -1402,39 +1035,7 @@ Ich kann Ihnen fundierte, detaillierte und verständliche Antworten auf alle Ihr
             { id: 'your-display', icon: '📺', name: 'Dein Display' },
             { id: 'planets', icon: '🪐', name: 'Planeten' },
             { id: 'earth', icon: '🌍', name: 'Erde' },
-            { id: 'moon', icon: '🌙', name: 'Mond' },
-            { id: 'knowledge', icon: '📚', name: 'Wissenszentrum' },
-            { id: 'philosophie', icon: '🧠', name: 'Philosophie' },
-            { id: 'geschichte', icon: '📜', name: 'Geschichte' },
-            { id: 'technik', icon: '🔧', name: 'Technik' },
-            { id: 'physik', icon: '⚛️', name: 'Physik' },
-            { id: 'chemie', icon: '🧪', name: 'Chemie' },
-            { id: 'biologie', icon: '🧬', name: 'Biologie' },
-            { id: 'mathematik', icon: '📐', name: 'Mathematik' },
-            { id: 'astronomie', icon: '🔭', name: 'Astronomie' },
-            { id: 'informatik', icon: '💻', name: 'Informatik' },
-            { id: 'psychologie', icon: '🧠', name: 'Psychologie' },
-            { id: 'soziologie', icon: '👥', name: 'Soziologie' },
-            { id: 'wirtschaft', icon: '📈', name: 'Wirtschaft' },
-            { id: 'medizin', icon: '🏥', name: 'Medizin' },
-            { id: 'kunst', icon: '🎨', name: 'Kunst' },
-            { id: 'musik', icon: '🎵', name: 'Musik' },
-            { id: 'literatur', icon: '📖', name: 'Literatur' },
-            { id: 'sprache', icon: '🗣️', name: 'Sprache' },
-            { id: 'geschichte-welt', icon: '🌍', name: 'Weltgeschichte' },
-            { id: 'technik-geschichte', icon: '⚙️', name: 'Technikgeschichte' },
-            { id: 'philosophie-geschichte', icon: '📜', name: 'Philosophiegeschichte' },
-            { id: 'religion', icon: '✝️', name: 'Religion' },
-            { id: 'politik', icon: '🏛️', name: 'Politik' },
-            { id: 'recht', icon: '⚖️', name: 'Recht' },
-            { id: 'umwelt', icon: '🌿', name: 'Umwelt' },
-            { id: 'klima', icon: '🌡️', name: 'Klima' },
-            { id: 'energie', icon: '⚡', name: 'Energie' },
-            { id: 'mobilität', icon: '🚗', name: 'Mobilität' },
-            { id: 'kommunikation', icon: '📡', name: 'Kommunikation' },
-            { id: 'digitalisierung', icon: '💻', name: 'Digitalisierung' },
-            { id: 'zukunft', icon: '🔮', name: 'Zukunft' },
-            { id: 'innovation', icon: '💡', name: 'Innovation' }
+            { id: 'moon', icon: '🌙', name: 'Mond' }
         ];
 
         // =========================================================
@@ -1451,9 +1052,9 @@ Ich kann Ihnen fundierte, detaillierte und verständliche Antworten auf alle Ihr
                 this.renderSidebar();
                 this.switchTo('cosmic');
                 setTimeout(() => {
-                    setStatus('System bereit');
-                    speak('HalDo AI OS 23.1.6. Ich bin bereit für alle Ihre Fragen.');
-                }, 1500);
+                    setStatus('Bereit');
+                    speak('HalDo AI OS 23.1.6. Ich bin bereit.');
+                }, 1200);
             },
 
             renderSidebar() {
@@ -1485,11 +1086,6 @@ Ich kann Ihnen fundierte, detaillierte und verständliche Antworten auf alle Ihr
             },
 
             renderApp(appId) {
-                // Einfache Apps direkt rendern, komplexe über eigene Renderer
-                const app = APP_LIST.find(a => a.id === appId);
-                if (!app) return this.renderDefault();
-
-                // Spezielle Renderer für wichtige Apps
                 if (appId === 'cosmic') return this.renderCosmic();
                 if (appId === 'home') return this.renderHome();
                 if (appId === 'ai') return this.renderAI();
@@ -1532,19 +1128,6 @@ Ich kann Ihnen fundierte, detaillierte und verständliche Antworten auf alle Ihr
                 if (appId === 'planets') return this.renderPlanets();
                 if (appId === 'earth') return this.renderEarth();
                 if (appId === 'moon') return this.renderMoon();
-                if (appId === 'knowledge') return this.renderAIWissen();
-
-                // Wissens-Apps
-                const knowledgeApps = ['philosophie', 'geschichte', 'technik', 'physik', 'chemie', 'biologie', 'mathematik',
-                    'astronomie', 'informatik', 'psychologie', 'soziologie', 'wirtschaft', 'medizin', 'kunst', 'musik',
-                    'literatur', 'sprache', 'geschichte-welt', 'technik-geschichte', 'philosophie-geschichte', 'religion',
-                    'politik', 'recht', 'umwelt', 'klima', 'energie', 'mobilität', 'kommunikation', 'digitalisierung',
-                    'zukunft', 'innovation'
-                ];
-                if (knowledgeApps.includes(appId)) {
-                    return this.renderKnowledgeApp(appId);
-                }
-
                 return this.renderDefault();
             },
 
@@ -1553,14 +1136,13 @@ Ich kann Ihnen fundierte, detaillierte und verständliche Antworten auf alle Ihr
                     <div style="text-align:center;padding:20px;">
                         <div style="font-size:32px;margin-bottom:6px;">📱</div>
                         <div style="font-size:13px;font-weight:700;opacity:0.6;">App wird vorbereitet</div>
-                        <div style="font-size:9px;opacity:0.3;margin-top:3px;">Diese App ist Teil des HalDo AI OS 23.1.6</div>
                         <button onclick="AppRouter.switchTo('home')" class="btn-primary" style="margin-top:8px;">🏠 Zurück</button>
                     </div>
                 `;
             },
 
             // =========================================================
-            // COSMIC WORLD — mit 12 Planeten, 365 Sternen, Logo
+            // COSMIC WORLD — MIT EINER SONNE, 12 PLANETEN, 365 STERNEN
             // =========================================================
             renderCosmic() {
                 const planetData = [
@@ -1628,7 +1210,7 @@ Ich kann Ihnen fundierte, detaillierte und verständliche Antworten auf alle Ihr
                             </div>
                         </div>
 
-                        <!-- Planetenuhr Info -->
+                        <!-- Planetenuhr -->
                         <div style="position:absolute;bottom:10px;left:50%;transform:translateX(-50%);z-index:25;background:rgba(0,0,0,0.5);padding:4px 12px;border-radius:4px;font-size:7px;color:rgba(255,255,255,0.4);text-align:center;pointer-events:none;">
                             🕐 Merkur=Stunde · Venus=Minute · Erde=Sekunde
                             <span id="planet-clock" style="display:block;font-size:8px;color:rgba(255,200,80,0.6);margin-top:2px;"></span>
@@ -1716,7 +1298,7 @@ Ich kann Ihnen fundierte, detaillierte und verständliche Antworten auf alle Ihr
                         <div style="font-weight:700;font-size:10px;">✦ HalDo AI OS ${HALDO_VERSION}</div>
                         <div style="font-size:8px;opacity:0.5;">${HALDO_BUILD} · ${apps} Apps</div>
                         <div style="display:flex;gap:2px;flex-wrap:wrap;margin-top:3px;">
-                            ${['ai','ai-wissen','notes','calendar','files','settings','warnings','backup','updates','cosmic'].map(id => {
+                            ${['ai','notes','calendar','files','settings','warnings','backup','updates','cosmic'].map(id => {
                                 const a = APP_LIST.find(x => x.id === id);
                                 return a ? `<button onclick="AppRouter.switchTo('${id}')" class="btn-secondary">${a.icon}</button>` : '';
                             }).join('')}
@@ -1726,24 +1308,23 @@ Ich kann Ihnen fundierte, detaillierte und verständliche Antworten auf alle Ihr
             },
 
             // =========================================================
-            // HALDO AI — Professioneller Chat
+            // HALDO AI — WIE EIN MENSCH (kurz, direkt)
             // =========================================================
             renderAI() {
                 return `
                     <div style="display:flex;flex-direction:column;height:100%;min-height:200px;">
                         <div style="background:rgba(255,200,80,0.04);border-radius:4px;padding:6px;margin-bottom:4px;border:1px solid rgba(255,200,80,0.06);font-size:9px;opacity:0.6;">
-                            🤖 HalDo AI — Professioneller Assistent (${Object.keys(HalDoAI.knowledge).length} Wissensgebiete)
+                            🤖 HalDo AI — Frag mich einfach
                         </div>
                         <div class="chat-messages" id="ai-chat-messages">
-                            <div class="ai">Guten Tag! Ich bin HalDo AI, Ihr professioneller KI-Assistent und Wissenspartner. Ich habe ein umfassendes Wissen über alle Gebiete der Wissenschaft, Philosophie, Technologie, Geschichte, Kunst, Kultur und des Lebens. Stellen Sie mir eine Frage – ich bin bereit, mein Wissen mit Ihnen zu teilen.</div>
+                            <div class="ai">Hallo! Schön, dass du da bist. Was kann ich für dich tun?</div>
                         </div>
                         <div class="flex-row">
                             <textarea id="ai-input" rows="1" placeholder="Frage an HalDo AI..." style="flex:1;min-height:28px;font-size:9px;"></textarea>
                             <button onclick="AppRouter.sendAIMessage()" class="btn-primary">Senden</button>
                             <button onclick="AppRouter.voiceInput()" class="btn-secondary">🎙️</button>
-                            <button onclick="AppRouter.switchTo('ai-wissen')" class="btn-secondary">📚</button>
                         </div>
-                        <div id="ai-thinking" style="display:none;font-size:8px;opacity:0.5;margin-top:2px;">🤔 HalDo AI denkt...</div>
+                        <div id="ai-thinking" style="display:none;font-size:8px;opacity:0.5;margin-top:2px;">🤔 denkt...</div>
                     </div>
                 `;
             },
@@ -1774,9 +1355,9 @@ Ich kann Ihnen fundierte, detaillierte und verständliche Antworten auf alle Ihr
                     messages.appendChild(aiDiv);
                     messages.scrollTop = messages.scrollHeight;
                     this.setLogoState('speaking');
-                    speak(response.substring(0, 120) + '...');
-                    setTimeout(() => this.setLogoState('idle'), 1000);
-                }, 400);
+                    speak(response);
+                    setTimeout(() => this.setLogoState('idle'), 800);
+                }, 300);
             },
 
             voiceInput() {
@@ -1811,7 +1392,7 @@ Ich kann Ihnen fundierte, detaillierte und verständliche Antworten auf alle Ihr
                     </div>
                     <div id="wissen-results" style="margin-bottom:4px;"></div>
                     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:2px;max-height:250px;overflow-y:auto;">
-                        ${topics.slice(0, 80).map(t => `
+                        ${topics.map(t => `
                             <div class="card" style="cursor:pointer;padding:3px 5px;font-size:7px;" onclick="AppRouter.showWissen('${t}')">
                                 📚 ${t}
                             </div>
@@ -1850,7 +1431,7 @@ Ich kann Ihnen fundierte, detaillierte und verständliche Antworten auf alle Ihr
                 const text = HalDoAI.knowledge[topic.replace(/ /g, '_')] || HalDoAI.knowledge[topic];
                 if (text) {
                     content.innerHTML = `<strong>📚 ${topic}</strong><br>${text}`;
-                    speak(text.substring(0, 120) + '...');
+                    speak(text);
                 }
             },
 
@@ -1914,58 +1495,6 @@ Ich kann Ihnen fundierte, detaillierte und verständliche Antworten auf alle Ihr
             },
 
             // =========================================================
-            // KNOWLEDGE APP (generisch für Wissensgebiete)
-            // =========================================================
-            renderKnowledgeApp(appId) {
-                const names = {
-                    'philosophie': 'Philosophie',
-                    'geschichte': 'Geschichte',
-                    'technik': 'Technik',
-                    'physik': 'Physik',
-                    'chemie': 'Chemie',
-                    'biologie': 'Biologie',
-                    'mathematik': 'Mathematik',
-                    'astronomie': 'Astronomie',
-                    'informatik': 'Informatik',
-                    'psychologie': 'Psychologie',
-                    'soziologie': 'Soziologie',
-                    'wirtschaft': 'Wirtschaft',
-                    'medizin': 'Medizin',
-                    'kunst': 'Kunst',
-                    'musik': 'Musik',
-                    'literatur': 'Literatur',
-                    'sprache': 'Sprache',
-                    'geschichte-welt': 'Weltgeschichte',
-                    'technik-geschichte': 'Technikgeschichte',
-                    'philosophie-geschichte': 'Philosophiegeschichte',
-                    'religion': 'Religion',
-                    'politik': 'Politik',
-                    'recht': 'Recht',
-                    'umwelt': 'Umwelt',
-                    'klima': 'Klima',
-                    'energie': 'Energie',
-                    'mobilität': 'Mobilität',
-                    'kommunikation': 'Kommunikation',
-                    'digitalisierung': 'Digitalisierung',
-                    'zukunft': 'Zukunft',
-                    'innovation': 'Innovation'
-                };
-                const name = names[appId] || appId;
-                const key = appId.replace(/-/g, '_');
-                const content = HalDoAI.knowledge[key] || HalDoAI.knowledge[appId] ||
-                    `📚 ${name}: Dieses Wissensgebiet ist in meiner Datenbank vorhanden. Fragen Sie mich zu diesem Thema für detaillierte Informationen.`;
-
-                return `
-                    <div style="padding:10px;">
-                        <div style="font-size:18px;font-weight:700;margin-bottom:6px;">📚 ${name}</div>
-                        <div style="font-size:9px;line-height:1.6;opacity:0.9;">${content}</div>
-                        <button onclick="AppRouter.switchTo('ai')" class="btn-primary" style="margin-top:8px;">🤖 Mit HalDo AI sprechen</button>
-                        <button onclick="AppRouter.switchTo('ai-wissen')" class="btn-secondary" style="margin-top:8px;margin-left:4px;">📚 Alle Themen</button>
-                    </div>
-                `;
-            },
-
-            // =========================================================
             // SETTINGS
             // =========================================================
             renderSettings() {
@@ -1976,7 +1505,6 @@ Ich kann Ihnen fundierte, detaillierte und verständliche Antworten auf alle Ihr
                     <button onclick="AppRouter.switchTo('system-monitor')" class="btn-secondary">📊 System</button>
                     <button onclick="AppRouter.switchTo('backup')" class="btn-secondary">💾 Backup</button>
                     <button onclick="AppRouter.switchTo('updates')" class="btn-secondary">🔄 Updates</button>
-                    <button onclick="AppRouter.switchTo('personalization')" class="btn-secondary">🎨 Personalisierung</button>
                 `;
             },
 
@@ -2068,7 +1596,6 @@ Ich kann Ihnen fundierte, detaillierte und verständliche Antworten auf alle Ihr
                         </div>
                         <div id="update-result" style="margin-top:4px;"></div>
                     </div>
-                    <div id="update-history" style="margin-top:4px;"></div>
                 `;
             },
 
@@ -2140,7 +1667,7 @@ Ich kann Ihnen fundierte, detaillierte und verständliche Antworten auf alle Ihr
             },
 
             // =========================================================
-            // CALENDAR — MIT SPEICHERUNG
+            // CALENDAR
             // =========================================================
             renderCalendar() {
                 return `
@@ -2157,7 +1684,7 @@ Ich kann Ihnen fundierte, detaillierte und verständliche Antworten auf alle Ihr
             },
 
             // =========================================================
-            // NOTES — MIT SPEICHERUNG
+            // NOTES
             // =========================================================
             renderNotes() {
                 return `
@@ -2173,7 +1700,7 @@ Ich kann Ihnen fundierte, detaillierte und verständliche Antworten auf alle Ihr
             },
 
             // =========================================================
-            // CONTACTS — MIT SPEICHERUNG
+            // CONTACTS
             // =========================================================
             renderContacts() {
                 return `
@@ -2190,7 +1717,7 @@ Ich kann Ihnen fundierte, detaillierte und verständliche Antworten auf alle Ihr
             },
 
             // =========================================================
-            // FILES — MIT SPEICHERUNG
+            // FILES
             // =========================================================
             renderFiles() {
                 return `
@@ -2206,7 +1733,7 @@ Ich kann Ihnen fundierte, detaillierte und verständliche Antworten auf alle Ihr
             },
 
             // =========================================================
-            // TASKS — MIT SPEICHERUNG
+            // TASKS
             // =========================================================
             renderTasks() {
                 return `
@@ -2277,7 +1804,7 @@ Ich kann Ihnen fundierte, detaillierte und verständliche Antworten auf alle Ihr
             },
 
             // =========================================================
-            // WARNUNGEN — MIT TÖNEN
+            // WARNUNGEN
             // =========================================================
             renderWarnings() {
                 return `
@@ -2502,7 +2029,6 @@ Ich kann Ihnen fundierte, detaillierte und verständliche Antworten auf alle Ihr
                     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(55px,1fr));gap:3px;">
                         ${[
                             { id: 'ai', icon: '🤖', name: 'AI' },
-                            { id: 'ai-wissen', icon: '📚', name: 'Wissen' },
                             { id: 'notes', icon: '📝', name: 'Notizen' },
                             { id: 'calendar', icon: '📅', name: 'Kalender' },
                             { id: 'files', icon: '📁', name: 'Dateien' },
@@ -2908,10 +2434,6 @@ Ich kann Ihnen fundierte, detaillierte und verständliche Antworten auf alle Ihr
                     this.initCosmicStars();
                     this.initPlanetClock();
                 }
-                if (appId === 'ai-wissen') {
-                    const content = document.getElementById('wissen-content');
-                    if (content) content.textContent = '📚 Wählen Sie ein Thema aus der Liste.';
-                }
             },
 
             initCosmicStars() {
@@ -2940,7 +2462,6 @@ Ich kann Ihnen fundierte, detaillierte und verständliche Antworten auf alle Ihr
                     const h = now.getHours();
                     const m = now.getMinutes();
                     const s = now.getSeconds();
-                    // Merkur = Stunde, Venus = Minute, Erde = Sekunde
                     el.textContent =
                         `🪐 Merkur: ${h}h · Venus: ${m}m · Erde: ${s}s`;
                 }, 1000);
@@ -3276,7 +2797,6 @@ Ich kann Ihnen fundierte, detaillierte und verständliche Antworten auf alle Ihr
         function boot() {
             console.log(`🌌 HalDo AI OS ${HALDO_VERSION} ${HALDO_BUILD}`);
             console.log(`📱 ${APP_LIST.length} Apps`);
-            console.log(`📚 Wissensgebiete: ${Object.keys(HalDoAI.knowledge).length}`);
 
             AppRouter.init();
 
@@ -3289,9 +2809,9 @@ Ich kann Ihnen fundierte, detaillierte und verständliche Antworten auf alle Ihr
             }, 5000);
 
             setTimeout(() => {
-                setStatus('System bereit');
-                speak('HalDo AI OS 23.1.6. Ich bin bereit für alle Ihre Fragen. Klicken Sie auf die Sonne für den Chat.');
-            }, 1500);
+                setStatus('Bereit');
+                speak('HalDo AI OS 23.1.6. Ich bin bereit.');
+            }, 1200);
 
             console.log('✅ System bereit');
         }
