@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HalDo AI OS</title>
+    <style>
+        /* Grundlayout */
+        body {
+            margin: 0;
+            padding: 0;
+            background: radial-gradient(circle at center, #1a2a4a 0%, #050a15 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #fff;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Der Hauptbildschirm */
+        #os-screen {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            background: linear-gradient(135deg, #0e1a2b 0%, #1f3b5c 100%);
+            box-shadow: inset 0 0 100px rgba(0, 255, 255, 0.2);
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        /* Interface-Rahmen */
+        .screen-frame {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 50, 100, 0.1);
+            pointer-events: none;
+            border: 2px solid rgba(0, 200, 255, 0.4);
+            border-radius: 20px;
+        }
+
+        /* Das zentrale Logo (Lebendig) */
+        #haldo-logo {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(0,150,255,0.4) 0%, rgba(0,0,0,0) 70%);
+            border-radius: 50%;
+            border: 2px solid #00e5ff;
+            box-shadow: 0 0 50px #00e5ff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 80px;
+            font-weight: bold;
+            color: #ffffff;
+            text-shadow: 0 0 20px #00e5ff;
+            z-index: 10;
+            animation: pulse 3s infinite ease-in-out;
+            cursor: pointer;
+        }
+
+        @keyframes pulse {
+            0% { transform: translate(-50%, -50%) scale(1); box-shadow: 0 0 30px #00e5ff; }
+            50% { transform: translate(-50%, -50%) scale(1.05); box-shadow: 0 0 60px #00e5ff; }
+            100% { transform: translate(-50%, -50%) scale(1); box-shadow: 0 0 30px #00e5ff; }
+        }
+
+        /* Die schwebenden App-Icons */
+        .app-icon {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            backdrop-filter: blur(5px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            color: #00e5ff;
+            cursor: pointer;
+            transition: all 0.3s;
+            z-index: 20;
+        }
+
+        .app-icon:hover {
+            background: rgba(0, 229, 255, 0.3);
+            transform: scale(1.2);
+            box-shadow: 0 0 15px #00e5ff;
+        }
+
+        /* Die Seiten-Panels (Datenanzeigen) */
+        .panel {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 250px;
+            height: 80%;
+            background: rgba(0, 20, 50, 0.7);
+            border: 1px solid rgba(0, 200, 255, 0.5);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: inset 0 0 20px rgba(0, 200, 255, 0.2);
+            overflow-y: auto;
+            font-size: 14px;
+            color: #aaffff;
+        }
+
+        .left-panel { left: 20px; }
+        .right-panel { right: 20px; }
+
+        /* KI Chat Fenster */
+        #ai-chat-window {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 600px;
+            height: 150px;
+            background: rgba(0, 20, 50, 0.9);
+            border: 2px solid #00e5ff;
+            border-radius: 15px;
+            padding: 10px;
+            z-index: 30;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #ai-chat-log {
+            flex-grow: 1;
+            overflow-y: auto;
+            font-size: 14px;
+            border-bottom: 1px solid #555;
+            margin-bottom: 5px;
+        }
+
+        #ai-input {
+            background: transparent;
+            border: 1px solid #00e5ff;
+            color: white;
+            padding: 5px;
+            border-radius: 5px;
+            outline: none;
+        }
+
+        button {
+            background: #00e5ff;
+            border: none;
+            color: black;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        /* App-Inhalte (Popup) */
+        #app-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 800px;
+            height: 500px;
+            background: #0a1526;
+            border: 2px solid #00e5ff;
+            border-radius: 10px;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8);
+            z-index: 100;
+            display: none;
+            padding: 20px;
+        }
+
+        #app-title {
+            color: #00e5ff;
+            font-size: 24px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 10px;
+        }
+
+        #close-app {
+            float: right;
+            background: red;
+            color: white;
+        }
+
+        /* Datenlisten */
+        .data-list-item {
+            background: #112240;
+            margin-bottom: 5px;
+            padding: 5px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="os-screen">
+        <!-- Rahmen -->
+        <div class="screen-frame"></div>
+
+        <!-- Linkes Panel (Daten & System) -->
+        <div class="panel left-panel">
+            <h2>System Info</h2>
+            <p>CPU: <b>HalDo Quantum X</b></p>
+            <p>RAM: <b>32 TB</b></p>
+            <p>GPU: <b>Neural Net 9000</b></p>
+            <hr style="border-color: #00e5ff;">
+            <h3>Dateien:</h3>
+            <div class="data-list-item">📁 System-Core</div>
+            <div class="data-list-item">📁 AI-Datenbank</div>
+            <div class="data-list-item">📁 Benutzer-Profil</div>
+            <div class="data-list-item">📁 Updates</div>
+        </div>
+
+        <!-- Rechtes Panel (Statistiken) -->
+        <div class="panel right-panel">
+            <h2>System Statistik</h2>
+            <p>Latenz: 0.01ms</p>
+            <p>Netzwerk: 10 Gbit/s</p>
+            <div style="border: 1px solid #00e5ff; padding: 10px;">
+                <b>AI Verbindung:</b><br>
+                Verbunden ✅<br>
+                Modus: <i>Vollständiger Zugriff</i>
+            </div>
+        </div>
+
+        <!-- Das lebendige Logo -->
+        <div id="haldo-logo" onclick="openApp('KI_Kern')">
+            AI
+        </div>
+
+        <!-- Schwebende App-Icons (Rund um das Logo) -->
+        <div class="app-icon" style="top: 20%; left: 30%;" onclick="openApp('Notizen')">📝</div>
+        <div class="app-icon" style="top: 20%; left: 65%;" onclick="openApp('Musik')">🎵</div>
+        <div class="app-icon" style="top: 70%; left: 30%;" onclick="openApp('Dateien')">📂</div>
+        <div class="app-icon" style="top: 70%; left: 65%;" onclick="openApp('System')">⚙️</div>
+        <div class="app-icon" style="top: 15%; left: 50%;" onclick="openApp('Browser')">🌐</div>
+        <div class="app-icon" style="top: 80%; left: 50%;" onclick="openApp('KI')">🤖</div>
+
+        <!-- KI Chat Interface -->
+        <div id="ai-chat-window">
+            <div id="ai-chat-log">HalDo AI: Willkommen zurück, Bruder! Ich bin online. Wie kann ich dir helfen?</div>
+            <div style="display: flex;">
+                <input type="text" id="ai-input" placeholder="Sprich mit HalDo AI..." onkeydown="if(event.key==='Enter') sendMessage()">
+                <button onclick="sendMessage()">Senden</button>
+            </div>
+        </div>
+
+        <!-- Das App-Fenster -->
+        <div id="app-container">
+            <h2 id="app-title">App Name</h2>
+            <button id="close-app" onclick="closeApp()">Schließen</button>
+            <div id="app-content" style="height: 400px; overflow-y: auto;">
+                <!-- Hier kommt der Inhalt der App rein -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Funktion: App öffnen (Simulation von vollständigen Apps)
+        function openApp(appName) {
+            const container = document.getElementById('app-container');
+            const title = document.getElementById('app-title');
+            const content = document.getElementById('app-content');
+            
+            title.innerText = appName;
+            content.innerHTML = ""; // Leeren
+
+            // Hier sind die "vollen Daten" für verschiedene Apps
+            if (appName === 'Notizen') {
+                content.innerHTML = `
+                    <h3>Meine Notizen (Echtzeit-Speicher)</h3>
+                    <textarea id="note-area" style="width: 100%; height: 300px; background: #112; color: white; border: 1px solid #00e5ff; padding: 10px;">Hallo Bruder, dies ist eine echte Notiz!</textarea>
+                    <button onclick="alert('Notiz gespeichert!')">Speichern</button>
+                `;
+            } else if (appName === 'Musik') {
+                content.innerHTML = `
+                    <h3>Musik Player</h3>
+                    <p>Spiele: <b>HalDo Theme Song</b></p>
+                    <div style="background: #333; height: 10px; width: 100%; border-radius: 5px;">
+                        <div style="background: #00e5ff; height: 10px; width: 50%; border-radius: 5px;"></div>
+                    </div>
+                    <button style="margin-top: 20px;">▶️ Play</button>
+                    <button>⏸️ Pause</button>
+                `;
+            } else if (appName === 'KI' || appName === 'KI_Kern') {
+                content.innerHTML = `
+                    <h3>HalDo AI Kern</h3>
+                    <p>Status: <b style="color:lime">AKTIV</b></p>
+                    <p>Ich bin eine simulierte AI, die alle deine Dateien miteinander verbindet. Frage mich etwas in der Chatbox unten!</p>
+                `;
+            } else if (appName === 'Dateien') {
+                content.innerHTML = `
+                    <h3>Dateisystem</h3>
+                    <div class="data-list-item">📄 System_Config.txt (Vollständig)</div>
+                    <div class="data-list-item">📄 User_Data.db (Vollständig)</div>
+                    <div class="data-list-item">📄 AI_Code.v2 (Vollständig)</div>
+                    <div class="data-list-item">📄 Update_Pack_2026.zip (Vollständig)</div>
+                `;
+            } else {
+                content.innerHTML = `<p>App "${appName}" läuft im vollständigen Modus. Daten werden geladen...</p>`;
+            }
+
+            container.style.display = 'block';
+        }
+
+        function closeApp() {
+            document.getElementById('app-container').style.display = 'none';
+        }
+
+        // KI Chat Simulation
+        function sendMessage() {
+            const input = document.getElementById('ai-input');
+            const log = document.getElementById('ai-chat-log');
+            const msg = input.value;
+            
+            if(msg.trim() === "") return;
+
+            log.innerHTML += `<br><b>Du:</b> ${msg}`;
+
+            // Einfache KI-Logik (Simuliert das Verbinden von Daten)
+            let response = "";
+            if (msg.toLowerCase().includes("hallo")) {
+                response = "Hallo Bruder! Alle Systeme laufen auf vollen Touren. Wie kann ich das OS für dich optimieren?";
+            } else if (msg.toLowerCase().includes("datei")) {
+                response = "Ich habe Zugriff auf alle 10.000 Dateien. Ich kann sie sofort laden.";
+            } else if (msg.toLowerCase().includes("update")) {
+                response = "Update wird geprüft... Alle Komponenten (A-Z) sind auf dem neuesten Stand.";
+            } else {
+                response = "Verstanden. Ich verbinde alle Datenbanken und führe den Befehl aus. Dein System ist jetzt vollständig integriert.";
+            }
+
+            setTimeout(() => {
+                log.innerHTML += `<br><b style="color: #00e5ff;">HalDo AI:</b> ${response}`;
+                log.scrollTop = log.scrollHeight;
+            }, 500);
+
+            input.value = "";
+        }
+    </script>
+</body>
+</html>
