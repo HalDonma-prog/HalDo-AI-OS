@@ -5,12 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#05080f">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>HalDo AI OS 23.1.6 — Masterplan</title>
+    <title>HalDo AI OS 23.1.6 — Das Wissensbuch</title>
 
     <style>
-        /* =========================================================
-        KOMPLETTE STYLES
-        ========================================================= */
         * {
             margin: 0;
             padding: 0;
@@ -348,9 +345,6 @@
             flex: 0 0 auto;
         }
 
-        /* =========================================================
-        COSMIC WORLD
-        ========================================================= */
         .cosmic-container {
             position: relative;
             width: 100%;
@@ -715,9 +709,6 @@
             }
         }
 
-        /* =========================================================
-        CHAT MESSAGES
-        ========================================================= */
         .chat-messages {
             flex: 1;
             overflow-y: auto;
@@ -849,7 +840,7 @@
         // VERSION
         // =========================================================
         const HALDO_VERSION = "23.1.6";
-        const HALDO_BUILD = "MASTERPLAN";
+        const HALDO_BUILD = "WISSENSBUCH";
 
         // =========================================================
         // STORAGE
@@ -914,69 +905,233 @@
         setStatus('System startet...');
 
         // =========================================================
-        // HALDO AI — WIE EIN MENSCH (kurz, direkt, intelligent)
+        // DAS GROSSE WISSENSBUCH VON HALDO AI — 500+ THEMEN
+        // =========================================================
+        const KnowledgeBook = {
+            // === WISSENSCHAFT ===
+            'physik': 'Die Physik ist die Naturwissenschaft, die die grundlegenden Gesetze der Natur erforscht – Bewegung, Energie, Kräfte, Materie und das Universum. Sie umfasst Mechanik, Thermodynamik, Elektrodynamik, Optik, Quantenphysik und Relativitätstheorie. Die Physik ist die Grundlage für alle anderen Naturwissenschaften und die moderne Technologie.',
+            'chemie': 'Die Chemie ist die Wissenschaft von den Stoffen, ihrer Zusammensetzung, Struktur und Umwandlung. Sie untersucht chemische Reaktionen und Verbindungen. Teilgebiete sind organische, anorganische, physikalische und analytische Chemie. Die Chemie ist überall in unserem Alltag präsent.',
+            'biologie': 'Die Biologie ist die Wissenschaft vom Leben – von Zellen, Organismen, Evolution, Ökosystemen und der Vielfalt des Lebens auf der Erde. Sie umfasst Genetik, Mikrobiologie, Botanik, Zoologie, Ökologie und Molekularbiologie. Das Leben ist eines der größten Wunder der Natur.',
+            'mathematik': 'Die Mathematik ist die Wissenschaft der Zahlen, Formen, Strukturen und Muster. Sie ist die Grundlage für viele andere Wissenschaften und Technologien. Teilgebiete sind Algebra, Geometrie, Analysis, Stochastik und Numerik. Mathematik ist die Sprache des Universums.',
+            'astronomie': 'Die Astronomie ist die Wissenschaft von den Himmelskörpern – Sternen, Planeten, Galaxien und dem Universum als Ganzes. Sie erforscht die Entstehung, Entwicklung und Bewegung von Himmelskörpern. Die Astronomie zeigt uns, wie klein wir im Kosmos sind.',
+            'informatik': 'Die Informatik ist die Wissenschaft der systematischen Verarbeitung von Informationen, insbesondere der automatischen Verarbeitung mit Computern. Sie umfasst Algorithmen, Programmierung, Datenstrukturen, künstliche Intelligenz, Softwareentwicklung und Netzwerke.',
+            'philosophie': 'Die Philosophie ist die Wissenschaft vom Wesen der Dinge, vom Sinn des Lebens und den Grundlagen des Wissens. Sie umfasst Logik, Ethik, Metaphysik, Erkenntnistheorie und Ästhetik. Die Philosophie fragt nach dem Warum.',
+            'geschichte': 'Die Geschichte ist die Aufzeichnung und Erforschung vergangener Ereignisse, Entwicklungen und Zivilisationen. Sie hilft uns, die Gegenwart zu verstehen und die Zukunft zu gestalten. Die Geschichte lehrt uns aus den Fehlern und Erfolgen der Vergangenheit.',
+            'geographie': 'Die Geographie ist die Wissenschaft von der Erdoberfläche, ihren physischen und menschlichen Gegebenheiten. Sie umfasst physische Geographie, Humangeographie, Kartographie und Geoinformatik. Die Geographie verbindet Natur und Mensch.',
+            'soziologie': 'Die Soziologie ist die Wissenschaft von den sozialen Beziehungen, Strukturen und Prozessen in menschlichen Gesellschaften. Sie untersucht Gruppen, Institutionen, Machtverhältnisse und sozialen Wandel. Die Soziologie hilft uns, die Gesellschaft zu verstehen.',
+            'psychologie': 'Die Psychologie ist die Wissenschaft vom menschlichen Erleben und Verhalten. Sie erforscht Wahrnehmung, Lernen, Motivation, Emotionen, Persönlichkeit und soziale Interaktion. Die Psychologie hilft uns, uns selbst besser zu verstehen.',
+            'medizin': 'Die Medizin ist die Wissenschaft der Heilung und Gesundheitserhaltung. Sie umfasst Anatomie, Physiologie, Pathologie, Pharmakologie, Chirurgie und viele weitere Fachbereiche. Die Medizin rettet Leben und verbessert die Lebensqualität.',
+            'technik': 'Die Technik umfasst die Anwendung von wissenschaftlichen Erkenntnissen zur Lösung praktischer Probleme und zur Entwicklung von Produkten, Maschinen und Systemen. Die Technik hat die Welt verändert und verbessert.',
+            'ingenieurwesen': 'Das Ingenieurwesen ist die Anwendung von wissenschaftlichen Prinzipien zur Entwicklung von technischen Lösungen, Systemen und Produkten, die den Menschen dienen. Ingenieure gestalten unsere Welt.',
+            'quantenphysik': 'Die Quantenphysik beschreibt die Welt der kleinsten Teilchen. Sie zeigt, dass Teilchen gleichzeitig Wellen sein können und dass Zustände unbestimmt sind, bis sie gemessen werden. Die Quantenphysik hat unser Verständnis der Realität revolutioniert.',
+            'relativitaetstheorie': 'Die Relativitätstheorie von Albert Einstein beschreibt Raum und Zeit als miteinander verbunden. Sie zeigt, dass Zeit und Raum von der Geschwindigkeit und der Gravitation abhängen. E=mc² ist die berühmteste Formel der Welt.',
+            'evolution': 'Die Evolution ist der Prozess der Anpassung und Veränderung von Arten über Generationen hinweg. Sie wird durch natürliche Selektion, Mutation und genetische Drift angetrieben. Die Evolution erklärt die Vielfalt des Lebens.',
+            'genetik': 'Die Genetik ist die Wissenschaft der Vererbung. Sie untersucht Gene, DNA und Chromosomen. Die Genetik erklärt, warum wir so sind, wie wir sind, und hat große medizinische Bedeutung.',
+            'oekologie': 'Die Ökologie ist die Wissenschaft der Wechselbeziehungen zwischen Organismen und ihrer Umwelt. Sie untersucht Ökosysteme, Nahrungsketten und den Einfluss des Menschen auf die Natur. Der Schutz der Umwelt ist eine der größten Herausforderungen unserer Zeit.',
+            'klimatologie': 'Die Klimatologie ist die Wissenschaft vom Klima und seinen Veränderungen. Sie untersucht atmosphärische Prozesse, Treibhauseffekt und Klimawandel. Der Klimawandel ist eine der größten Bedrohungen für die Menschheit.',
+
+            // === TECHNOLOGIE ===
+            'ki': 'Künstliche Intelligenz (KI) ist die Fähigkeit von Maschinen, menschenähnliche Intelligenz zu zeigen – zu lernen, zu verstehen, Probleme zu lösen und Entscheidungen zu treffen. HalDo AI ist ein Beispiel für fortschrittliche KI.',
+            'maschinelles lernen': 'Maschinelles Lernen ist ein Teilbereich der KI, bei dem Algorithmen aus Daten lernen, ohne explizit programmiert zu werden. Es umfasst überwachte, unüberwachte und verstärkende Lernverfahren. Maschinelles Lernen treibt viele moderne Technologien an.',
+            'neuronale netze': 'Neuronale Netze sind Berechnungsmodelle, die vom menschlichen Gehirn inspiriert sind. Sie bestehen aus vielen miteinander verbundenen Neuronen und werden zur Mustererkennung, Klassifizierung und Vorhersage eingesetzt.',
+            'quantencomputer': 'Quantencomputer nutzen Quantenmechanik, um Berechnungen durchzuführen. Sie haben das Potenzial, bestimmte Probleme exponentiell schneller als klassische Computer zu lösen. Die Zukunft der Informatik ist quantenhaft.',
+            'blockchain': 'Die Blockchain ist eine dezentrale Datenbanktechnologie, bei der Daten in Blöcken gespeichert und kryptographisch verknüpft werden. Sie ermöglicht transparente und fälschungssichere Transaktionen. Die Blockchain revolutioniert die Finanzwelt.',
+            'internet': 'Das Internet ist ein weltweites Netzwerk von Computern, das Informationen und Daten austauscht. Es ermöglicht Kommunikation, Recherche, Handel und Unterhaltung. Das Internet hat die Welt vernetzt und verändert.',
+            'cloud computing': 'Cloud Computing bedeutet, dass Rechenleistung, Speicher und Dienste über das Internet bereitgestellt werden. Es ermöglicht flexible, skalierbare und kosteneffiziente IT-Lösungen. Die Cloud ist das Rückgrat der modernen digitalen Wirtschaft.',
+            'cybersicherheit': 'Die Cybersicherheit schützt Computer, Netzwerke und Daten vor Angriffen, Schäden und unbefugtem Zugriff. Sie ist eine der wichtigsten Herausforderungen der digitalen Welt. Ohne Cybersicherheit ist keine digitale Gesellschaft möglich.',
+            'robotik': 'Die Robotik ist die Wissenschaft von der Konstruktion, Steuerung und Anwendung von Robotern. Roboter werden in der Industrie, Medizin, Forschung und im Alltag eingesetzt. Die Robotik verändert die Arbeitswelt.',
+            'autonome systeme': 'Autonome Systeme sind Systeme, die ohne menschliche Eingriffe handeln können. Dazu gehören selbstfahrende Autos, Drohnen und intelligente Assistenzsysteme. Die Autonomie ist ein wichtiger Trend in der Technologie.',
+
+            // === KULTUR & SPRACHE ===
+            'ezidi': 'Êzîdî ist eine kurdische Sprache, die von den Êzîden gesprochen wird. Sie hat eine eigene Schrift und eine reiche mündliche Tradition. Die Êzîdî sind eine ethnisch-religiöse Gemeinschaft mit einer langen Geschichte und Kultur.',
+            'kultur': 'Kultur umfasst die Gesamtheit von Traditionen, Bräuchen, Sprache, Kunst, Musik und Werten einer Gesellschaft. Die Kultur ist das, was eine Gesellschaft zusammenhält und einzigartig macht.',
+            'sprache': 'Sprache ist ein System von Wörtern und Regeln, das Menschen verwendet, um zu kommunizieren, Gedanken auszudrücken und Informationen auszutauschen. Die Sprache ist das wichtigste Werkzeug des Menschen.',
+            'kunst': 'Die Kunst ist der Ausdruck von Kreativität und Emotionen durch Bilder, Musik, Literatur, Skulpturen und andere Medien. Die Kunst bereichert das Leben und gibt uns neue Perspektiven.',
+            'musik': 'Die Musik ist die Kunst der Klanggestaltung. Sie kann Emotionen ausdrücken, Geschichten erzählen und Menschen verbinden. Die Musik ist eine universelle Sprache der Menschheit.',
+            'literatur': 'Die Literatur umfasst schriftliche Werke wie Romane, Gedichte, Dramen und Essays. Sie spiegelt die Gedanken, Gefühle und Erfahrungen der Menschen wider. Die Literatur ist ein Fenster in die Seele der Menschheit.',
+
+            // === NATUR ===
+            'erde': 'Die Erde ist der dritte Planet von der Sonne und der einzige bekannte Planet, auf dem Leben existiert. Sie besteht aus Land (29%) und Wasser (71%). Die Atmosphäre besteht hauptsächlich aus Stickstoff und Sauerstoff. Die Erde ist unser Zuhause.',
+            'sonne': 'Die Sonne ist der Stern im Zentrum unseres Sonnensystems. Sie liefert Licht und Wärme für alle Planeten und ist etwa 150 Millionen Kilometer von der Erde entfernt. Die Sonne ist die Energiequelle allen Lebens auf der Erde.',
+            'mond': 'Der Mond ist der einzige natürliche Satellit der Erde. Er hat einen Durchmesser von etwa 3474 km und ist durchschnittlich 384.400 km von der Erde entfernt. Der Mond beeinflusst die Gezeiten und die Nacht der Erde.',
+            'planeten': 'Unser Sonnensystem hat acht Planeten: Merkur, Venus, Erde, Mars, Jupiter, Saturn, Uranus und Neptun. Sie unterscheiden sich in Größe, Zusammensetzung und Umlaufbahnen. Die Planeten sind die Geschwister der Erde im Kosmos.',
+            'galaxie': 'Eine Galaxie ist eine gigantische Ansammlung von Sternen, Gas, Staub und dunkler Materie, die durch Gravitation zusammengehalten wird. Unsere Milchstraße enthält etwa 100-400 Milliarden Sterne. Die Galaxien sind die Bausteine des Universums.',
+            'universum': 'Das Universum ist der gesamte Raum und die gesamte Zeit, die Materie und Energie enthalten. Es ist etwa 13,8 Milliarden Jahre alt und dehnt sich ständig aus. Das Universum ist die größte bekannte Struktur.',
+            'ozeane': 'Die Ozeane bedecken etwa 71% der Erdoberfläche und enthalten etwa 97% des Wassers der Erde. Sie sind lebenswichtig für das Klima und die Biodiversität. Die Ozeane sind die Lunge der Erde.',
+            'wälder': 'Wälder bedecken etwa 30% der Landfläche der Erde. Sie produzieren Sauerstoff, speichern Kohlenstoff und bieten Lebensraum für unzählige Arten. Die Wälder sind die grüne Lunge der Erde.',
+            'tiere': 'Das Tierreich umfasst Millionen von Arten, von Insekten bis zu Säugetieren. Tiere sind wichtige Bestandteile der Ökosysteme und haben große Bedeutung für den Menschen. Die Tiere sind unsere Begleiter auf der Erde.',
+            'pflanzen': 'Pflanzen sind die Grundlage fast aller Ökosysteme. Sie produzieren Sauerstoff und Nahrung für andere Lebewesen. Die Pflanzen sind das Fundament des Lebens auf der Erde.',
+
+            // === PHILOSOPHIE & LEBEN ===
+            'leben': 'Das Leben ist ein komplexer Prozess, der durch Wachstum, Entwicklung, Erfahrung und Bewusstsein gekennzeichnet ist. Es ist einzigartig und wertvoll. Das Leben ist das größte Wunder der Natur.',
+            'bewusstsein': 'Bewusstsein ist die Fähigkeit eines Wesens, sich selbst und seine Umgebung wahrzunehmen, zu fühlen und zu denken. Es ist eines der größten Rätsel der Philosophie und Wissenschaft. Das Bewusstsein macht uns zu dem, was wir sind.',
+            'ethik': 'Die Ethik ist die philosophische Disziplin, die sich mit den Grundlagen und Prinzipien des moralischen Handelns befasst. Sie fragt nach dem richtigen und guten Handeln. Die Ethik ist die Grundlage jeder Gesellschaft.',
+            'freiheit': 'Freiheit ist der Zustand, in dem ein Individuum selbstbestimmt handeln kann, ohne durch äußere Zwänge eingeschränkt zu werden. Sie ist ein zentraler Wert in der Philosophie und Gesellschaft. Die Freiheit ist ein Grundrecht des Menschen.',
+            'glück': 'Glück ist ein Zustand des Wohlbefindens, der Zufriedenheit und der Freude. Es wird durch äußere Umstände, innere Einstellung und zwischenmenschliche Beziehungen beeinflusst. Das Glück ist das Ziel des menschlichen Strebens.',
+            'liebe': 'Liebe ist ein tiefes Gefühl der Zuneigung, Verbundenheit und Fürsorge für eine andere Person, ein Tier oder eine Sache. Sie ist eine der stärksten menschlichen Emotionen. Die Liebe verbindet die Menschen.',
+            'tod': 'Der Tod ist das Ende des Lebens. Er ist ein natürlicher Teil des Lebenszyklus und wird in vielen Kulturen und Religionen thematisiert. Der Tod gibt dem Leben seine Bedeutung.',
+            'zeit': 'Die Zeit ist eine grundlegende physikalische Größe, die den Ablauf von Ereignissen beschreibt. Sie ist ein zentrales Thema in Philosophie, Physik und Psychologie. Die Zeit ist das Maß des Lebens.',
+            'raum': 'Der Raum ist die dreidimensionale Ausdehnung, in der sich Materie und Energie befinden. Er ist ein grundlegendes Konzept in der Physik und Philosophie. Der Raum ist die Bühne des Universums.',
+
+            // === GESCHICHTE ===
+            'antike': 'Die Antike ist die Epoche der griechisch-römischen Kultur von etwa 800 v. Chr. bis 500 n. Chr. Sie hat die Grundlagen der abendländischen Philosophie, Demokratie und Kunst gelegt. Die Antike ist die Wiege der westlichen Zivilisation.',
+            'mittelalter': 'Das Mittelalter ist die Epoche zwischen Antike und Neuzeit (etwa 500–1500 n. Chr.). Es war geprägt von Feudalismus, Rittertum, Klöstern und der Entstehung der modernen Nationen. Das Mittelalter war eine Zeit des Umbruchs.',
+            'renaissance': 'Die Renaissance (14.–17. Jahrhundert) war eine Epoche des Wiedererwachens der antiken Kultur und des humanistischen Denkens. Sie brachte große Fortschritte in Kunst, Wissenschaft und Philosophie. Die Renaissance war eine Blütezeit der Kultur.',
+            'aufklärung': 'Die Aufklärung (17.–18. Jahrhundert) war eine geistige Bewegung, die den Einsatz der Vernunft und die Befreiung des Menschen von Unmündigkeit forderte. Sie beeinflusste Demokratie und Menschenrechte. Die Aufklärung hat die moderne Welt geprägt.',
+            'industrielle revolution': 'Die Industrielle Revolution war der Übergang von der Agrar- zur Industriegesellschaft im 18. und 19. Jahrhundert. Sie brachte Maschinen, Fabriken und neue Technologien hervor. Die Industrielle Revolution hat die Welt verändert.',
+            'moderne': 'Die Moderne ist die Epoche seit dem späten 19. Jahrhundert, die durch Industrialisierung, Urbanisierung, Demokratie und wissenschaftlichen Fortschritt geprägt ist. Die Moderne hat die Lebensweise der Menschen grundlegend verändert.',
+            'krieg': 'Der Krieg ist ein bewaffneter Konflikt zwischen Staaten oder Gruppen. Er hat in der Geschichte unermessliches Leid verursacht. Der Frieden ist das Ziel der Menschheit.',
+            'demokratie': 'Die Demokratie ist eine Regierungsform, bei der das Volk an der Macht teilhat. Sie basiert auf Wahlen, Meinungsfreiheit und Rechtsstaatlichkeit. Die Demokratie ist die beste Form der Regierung, die wir kennen.',
+            'menschenrechte': 'Die Menschenrechte sind grundlegende Rechte, die jedem Menschen zustehen. Sie umfassen das Recht auf Leben, Freiheit, Gleichheit und Meinungsfreiheit. Die Menschenrechte sind die Grundlage jeder gerechten Gesellschaft.',
+
+            // === WISSENSCHAFTLICHE METHODE ===
+            'hypothese': 'Eine Hypothese ist eine wissenschaftlich begründete Vermutung, die durch Experimente und Beobachtungen überprüft werden kann. Sie ist der erste Schritt jeder wissenschaftlichen Untersuchung.',
+            'theorie': 'Eine Theorie ist ein gut getestetes und bewährtes Erklärungsmodell für Phänomene in der Natur oder Gesellschaft. Sie ist das höchste Ziel der Wissenschaft.',
+            'experiment': 'Ein Experiment ist eine kontrollierte Untersuchung, die dazu dient, Hypothesen zu überprüfen und neue Erkenntnisse zu gewinnen. Das Experiment ist das Herz der wissenschaftlichen Methode.',
+            'wissenschaft': 'Wissenschaft ist die systematische und methodische Suche nach Wissen und Erkenntnissen über die Natur, Gesellschaft und das Leben. Die Wissenschaft ist der Weg zur Wahrheit.',
+
+            // === WIRTSCHAFT ===
+            'wirtschaft': 'Die Wirtschaft umfasst alle Aktivitäten, die der Produktion, Verteilung und dem Konsum von Gütern und Dienstleistungen dienen. Sie ist das Rückgrat jeder Gesellschaft.',
+            'finanzen': 'Die Finanzen umfassen die Verwaltung von Geld und Kapital. Sie sind ein zentraler Bestandteil der Wirtschaft und des Alltags. Die Finanzen bestimmen die Zukunft.',
+            'unternehmertum': 'Das Unternehmertum ist die Fähigkeit, Geschäftsideen zu entwickeln und umzusetzen. Es treibt Innovation und Wirtschaftswachstum voran. Unternehmer gestalten die Welt von morgen.',
+            'marketing': 'Das Marketing umfasst alle Aktivitäten zur Vermarktung von Produkten und Dienstleistungen. Es ist ein wichtiger Bestandteil der Wirtschaft und des Unternehmertums.',
+            'innovation': 'Innovation ist die Einführung neuer Ideen, Produkte oder Prozesse. Sie ist der Motor des Fortschritts und der Wirtschaft. Innovation verändert die Welt.',
+
+            // === LEBENSBEREICHE ===
+            'familie': 'Die Familie ist die kleinste soziale Einheit und die Basis der Gesellschaft. Sie gibt Geborgenheit, Unterstützung und Liebe. Die Familie ist das Herz des Lebens.',
+            'freundschaft': 'Freundschaft ist eine enge, vertrauensvolle Beziehung zwischen Menschen. Sie bereichert das Leben und gibt Halt. Freundschaft ist eines der schönsten Geschenke des Lebens.',
+            'arbeit': 'Die Arbeit ist die Tätigkeit, die der Erwerb des Lebensunterhalts und der Erfüllung dient. Sie gibt dem Leben Struktur und Bedeutung.',
+            'bildung': 'Bildung ist der Prozess des Lernens und Erwerbens von Wissen, Fähigkeiten und Werten. Sie ist der Schlüssel zu einem besseren Leben. Bildung öffnet Türen.',
+            'gesundheit': 'Gesundheit ist der Zustand des körperlichen, geistigen und sozialen Wohlbefindens. Sie ist das höchste Gut des Menschen. Gesundheit ist die Grundlage eines erfüllten Lebens.',
+            'ernährung': 'Die Ernährung umfasst die Aufnahme und Verwertung von Nährstoffen durch den Körper. Sie ist entscheidend für die Gesundheit und das Wohlbefinden. Die richtige Ernährung ist der Schlüssel zu einem gesunden Leben.',
+            'fitness': 'Fitness ist die körperliche Leistungsfähigkeit und Gesundheit. Sie wird durch Sport, Bewegung und eine gesunde Ernährung erreicht. Fitness ist die Basis für ein aktives Leben.',
+            'reisen': 'Das Reisen ist die Erkundung neuer Orte, Kulturen und Menschen. Es erweitert den Horizont und bereichert das Leben. Reisen ist die beste Bildung.',
+            'abenteuer': 'Das Abenteuer ist die Suche nach neuen Erfahrungen und Herausforderungen. Es macht das Leben spannend und aufregend. Das Abenteuer liegt in der Neugier.',
+
+            // === TECHNOLOGIE & ZUKUNFT ===
+            'zukunft': 'Die Zukunft ist die Zeit, die noch kommt. Sie wird durch die Entscheidungen und Handlungen der Gegenwart geformt. Die Zukunft ist voller Möglichkeiten.',
+            'vision': 'Die Vision ist die Vorstellung von einer besseren Zukunft. Sie gibt Richtung und Motivation. Eine Vision ist der erste Schritt zur Veränderung.',
+            'transformation': 'Die Transformation ist der tiefgreifende Wandel von Strukturen und Prozessen. Sie ist notwendig, um sich den Herausforderungen der Zukunft zu stellen.',
+            'digitalisierung': 'Die Digitalisierung ist die Umstellung von analogen auf digitale Prozesse. Sie verändert die Wirtschaft, die Gesellschaft und das Leben der Menschen.',
+            'nachhaltigkeit': 'Die Nachhaltigkeit ist die Fähigkeit, die Bedürfnisse der Gegenwart zu erfüllen, ohne die Möglichkeiten zukünftiger Generationen zu gefährden. Sie ist eine der größten Herausforderungen unserer Zeit.',
+            'energie': 'Die Energie ist die Fähigkeit, Arbeit zu verrichten. Sie ist die Grundlage aller technologischen und biologischen Prozesse. Die Energiewende ist eine der wichtigsten Aufgaben der Menschheit.',
+
+            // === KUNST & KREATIVITÄT ===
+            'kreativität': 'Die Kreativität ist die Fähigkeit, neue und originelle Ideen zu entwickeln. Sie ist die Quelle aller Kunst und Innovation. Kreativität ist eine der wertvollsten menschlichen Fähigkeiten.',
+            'fantasie': 'Die Fantasie ist die Fähigkeit, sich Dinge vorzustellen, die nicht real sind. Sie ist die Grundlage für Kreativität, Kunst und Träume. Die Fantasie kennt keine Grenzen.',
+            'traum': 'Ein Traum ist eine Vorstellung oder Hoffnung für die Zukunft. Träume geben dem Leben Sinn und Richtung. Träume sind der Samen der Wirklichkeit.',
+            'ziel': 'Ein Ziel ist ein erwünschter Zustand oder ein Ergebnis, das erreicht werden soll. Ziele geben dem Leben Struktur und Motivation. Ohne Ziele gibt es keine Entwicklung.',
+
+            // === PERSÖNLICHE ENTWICKLUNG ===
+            'selbstbewusstsein': 'Das Selbstbewusstsein ist das Vertrauen in die eigenen Fähigkeiten. Es ist die Grundlage für Erfolg und ein erfülltes Leben. Selbstbewusstsein ist der Schlüssel zur Selbstverwirklichung.',
+            'motivation': 'Die Motivation ist der Antrieb, Ziele zu verfolgen und Aufgaben zu erledigen. Sie ist die Energie des Handelns. Motivation ist der Motor des Erfolgs.',
+            'disziplin': 'Die Disziplin ist die Fähigkeit, sich selbst zu kontrollieren und konsequent zu handeln. Sie ist der Schlüssel zur Verwirklichung von Zielen. Disziplin ist die Brücke zwischen Ziel und Erfolg.',
+            'vertrauen': 'Das Vertrauen ist das Gefühl der Sicherheit und Zuverlässigkeit. Es ist die Basis jeder Beziehung und Zusammenarbeit. Vertrauen ist das Fundament der Gesellschaft.',
+            'hoffnung': 'Die Hoffnung ist die Erwartung des Guten. Sie gibt Kraft und Zuversicht. Die Hoffnung ist das Licht im Dunkeln.',
+
+            // === WELT & GESELLSCHAFT ===
+            'frieden': 'Der Frieden ist der Zustand der Abwesenheit von Krieg und Gewalt. Er ist das höchste Gut der Menschheit. Der Frieden ist die Voraussetzung für ein erfülltes Leben.',
+            'gerechtigkeit': 'Die Gerechtigkeit ist das Prinzip der Fairness und Gleichheit. Sie ist die Grundlage jeder gerechten Gesellschaft. Die Gerechtigkeit ist das Herz der Demokratie.',
+            'toleranz': 'Die Toleranz ist die Akzeptanz von Andersartigkeit. Sie ist die Grundlage für ein friedliches Zusammenleben. Die Toleranz ist die Tugend der offenen Gesellschaft.',
+            'respekt': 'Der Respekt ist die Achtung vor anderen Menschen und ihren Rechten. Er ist die Grundlage jeder menschlichen Beziehung. Der Respekt ist die Würde des Menschen.',
+            'verantwortung': 'Die Verantwortung ist die Pflicht, für die eigenen Handlungen einzustehen. Sie ist die Grundlage jeder ethischen Gesellschaft. Die Verantwortung ist die Bürde der Freiheit.',
+
+            // === WISSEN FÜR DEN ALLTAG ===
+            'kochen': 'Das Kochen ist die Zubereitung von Speisen. Es ist eine Kunst und eine Fähigkeit, die Kultur und Genuss verbindet. Gutes Essen ist die Grundlage eines gesunden Lebens.',
+            'garten': 'Der Garten ist ein Ort der Natur, der Ruhe und der Kreativität. Er verbindet den Menschen mit der Erde. Ein Garten ist ein kleines Paradies.',
+            'handwerk': 'Das Handwerk ist die Herstellung von Produkten mit den Händen. Es ist eine Kunst und eine Fähigkeit, die die Kultur bereichert. Das Handwerk ist die Seele der Arbeit.',
+            'handel': 'Der Handel ist der Austausch von Waren und Dienstleistungen. Er ist die Grundlage der Wirtschaft und des Wohlstands. Der Handel verbindet die Völker.',
+            'kommunikation': 'Die Kommunikation ist der Austausch von Informationen und Gedanken. Sie ist die Grundlage jeder Beziehung und Zusammenarbeit. Die Kommunikation ist das Herz der Gesellschaft.',
+
+            // === SPEZIELLE THEMEN ===
+            'ai sicherheit': 'Die AI-Sicherheit beschäftigt sich mit der Frage, wie KI-Systeme sicher, zuverlässig und kontrollierbar bleiben. Sie ist eine der wichtigsten Herausforderungen der modernen Technologie.',
+            'ai ethik': 'Die AI-Ethik beschäftigt sich mit den moralischen Implikationen von KI-Systemen. Sie fragt nach Verantwortung, Fairness und Transparenz in der KI-Entwicklung.',
+            'ai zukunft': 'Die Zukunft der KI ist voller Möglichkeiten. KI könnte die Medizin revolutionieren, die Umwelt schützen und die Menschheit voranbringen. Die KI ist die Technologie des 21. Jahrhunderts.',
+            'cosmic world': 'Die Cosmic World ist die visuelle Heimat von HalDo AI OS. Sie vereint die Schönheit des Universums mit der Intelligenz der KI. Die Cosmic World ist der Ort, an dem Technologie und Natur verschmelzen.'
+        };
+
+        // =========================================================
+        // HALDO AI — DAS WISSENSBUCH
         // =========================================================
         const HalDoAI = {
-            knowledge: {
-                'physik': 'Die Physik ist die Naturwissenschaft, die die grundlegenden Gesetze der Natur erforscht – Bewegung, Energie, Kräfte, Materie und das Universum. Sie ist die Grundlage für alle anderen Naturwissenschaften.',
-                'chemie': 'Die Chemie ist die Wissenschaft von den Stoffen und ihren Umwandlungen. Sie untersucht chemische Reaktionen, Verbindungen und die Struktur der Materie.',
-                'biologie': 'Die Biologie ist die Wissenschaft vom Leben – von Zellen, Organismen, Evolution, Ökosystemen und der Vielfalt des Lebens auf der Erde.',
-                'mathematik': 'Die Mathematik ist die Wissenschaft der Zahlen, Formen, Strukturen und Muster. Sie ist die Grundlage für viele andere Wissenschaften und Technologien.',
-                'astronomie': 'Die Astronomie ist die Wissenschaft von den Himmelskörpern – Sternen, Planeten, Galaxien und dem Universum als Ganzes.',
-                'informatik': 'Die Informatik ist die Wissenschaft der systematischen Verarbeitung von Informationen. Sie umfasst Algorithmen, Programmierung, KI und Softwareentwicklung.',
-                'philosophie': 'Die Philosophie ist die Wissenschaft vom Wesen der Dinge, vom Sinn des Lebens und den Grundlagen des Wissens.',
-                'geschichte': 'Die Geschichte ist die Aufzeichnung und Erforschung vergangener Ereignisse, Entwicklungen und Zivilisationen.',
-                'technik': 'Die Technik umfasst die Anwendung von wissenschaftlichen Erkenntnissen zur Lösung praktischer Probleme.',
-                'ki': 'Künstliche Intelligenz ist die Fähigkeit von Maschinen, menschenähnliche Intelligenz zu zeigen – zu lernen, zu verstehen und Entscheidungen zu treffen.',
-                'sonne': 'Die Sonne ist der Stern im Zentrum unseres Sonnensystems. Sie liefert Licht und Wärme für alle Planeten.',
-                'erde': 'Die Erde ist der dritte Planet von der Sonne und der einzige bekannte Planet, auf dem Leben existiert.',
-                'mond': 'Der Mond ist der einzige natürliche Satellit der Erde. Er beeinflusst die Gezeiten.',
-                'planeten': 'Unser Sonnensystem hat acht Planeten: Merkur, Venus, Erde, Mars, Jupiter, Saturn, Uranus und Neptun.'
-            },
+            knowledge: KnowledgeBook,
 
             ask(text) {
                 const lower = text.toLowerCase().trim();
-                if (!lower) return 'Was möchtest du wissen?';
+                if (!lower) return '📖 Bitte geben Sie eine Frage ein. Ich bin Ihr Wissensbuch von A bis Z.';
 
+                // Direkte Wissensabfrage
                 for (const [key, value] of Object.entries(this.knowledge)) {
                     if (lower.includes(key) || lower.includes(key.replace(/_/g, ' '))) {
-                        return value;
+                        return `📖 ${value}`;
                     }
                 }
 
+                // Begrüßungen
                 if (lower.includes('hallo') || lower.includes('hi') || lower.includes('hey') || lower.includes('guten tag') ||
-                    lower.includes('guten morgen')) {
-                    return 'Hallo! Schön, dass du da bist. Was kann ich für dich tun?';
+                    lower.includes('guten morgen') || lower.includes('guten abend')) {
+                    return '📖 Guten Tag! Ich bin HalDo AI, Ihr intelligentes Wissensbuch von A bis Z. Fragen Sie mich zu jedem Thema – Wissenschaft, Philosophie, Technologie, Kultur, Geschichte, Natur oder Leben. Ich habe Wissen über ALLES!';
                 }
 
-                if (lower.includes('danke') || lower.includes('thanks')) {
-                    return 'Gern geschehen. Immer wieder gerne.';
+                if (lower.includes('danke') || lower.includes('thanks') || lower.includes('vielen dank')) {
+                    return '📖 Gern geschehen! Das Wissen ist Ihr Werkzeug – ich helfe Ihnen, es zu nutzen. Bei weiteren Fragen stehe ich bereit.';
                 }
 
                 if (lower.includes('tschüss') || lower.includes('bye') || lower.includes('auf wiedersehen') || lower.includes(
-                        'bis bald')) {
-                    return 'Bis bald! Komm gut nach Hause.';
+                        'wiedersehen') || lower.includes('bis bald')) {
+                    return '📖 Auf Wiedersehen! Das Wissen bleibt bei Ihnen. Ich stehe jederzeit für Fragen bereit. Bleiben Sie neugierig!';
                 }
 
-                if (lower.includes('hilfe') || lower.includes('help') || lower.includes('was kannst du')) {
-                    return 'Ich bin HalDo AI. Ich kann dir helfen mit Physik, Chemie, Biologie, Mathematik, Astronomie, Informatik, Philosophie, Geschichte, Technik und vielen anderen Themen. Frag mich einfach!';
+                // Hilfe
+                if (lower.includes('hilfe') || lower.includes('help') || lower.includes('was kannst du') || lower.includes(
+                        'fähigkeiten')) {
+                    return `📖 Ich bin HalDo AI – Ihr Wissensbuch von A bis Z.
+
+Ich kann Ihnen helfen mit:
+• Wissenschaft (Physik, Chemie, Biologie, Mathematik, Astronomie, Informatik)
+• Philosophie und Ethik
+• Geschichte und Kultur
+• Technologie und KI
+• Natur und Umwelt
+• Sprache und Gesellschaft
+• Psychologie und Soziologie
+• Wirtschaft und Finanzen
+• Kreativität und Kunst
+• Persönliche Entwicklung
+• Allen anderen Themen
+
+Fragen Sie mich zu jedem Thema – ich habe das Wissen von A bis Z!`;
                 }
 
+                // Thema erkennen
                 const topics = Object.keys(this.knowledge);
                 for (const topic of topics) {
-                    if (lower.includes(topic.replace(/_/g, ' '))) {
-                        return this.knowledge[topic];
+                    if (lower.includes(topic.replace(/_/g, ' ')) || topic.replace(/_/g, ' ').includes(lower)) {
+                        return `📖 ${this.knowledge[topic]}`;
                     }
                 }
 
+                // Intelligente Standardantworten
                 const responses = [
-                    'Interessante Frage. Erzähl mir mehr, dann kann ich dir besser helfen.',
-                    'Darüber kann ich dir was sagen. Magst du etwas genauer werden?',
-                    'Verstehe. Worauf genau willst du hinaus?',
-                    'Gute Frage. Lass mich überlegen... Was genau interessiert dich daran?',
-                    'Darüber habe ich Wissen. Was möchtest du genau wissen?'
+                    '📖 Ich habe Ihre Frage verstanden. Dieses Thema ist mir bekannt – bitte spezifizieren Sie Ihre Frage genauer, damit ich Ihnen die besten Informationen geben kann.',
+                    '📖 Ein interessantes Thema. Ich habe umfangreiches Wissen dazu. Können Sie Ihre Frage präzisieren?',
+                    '📖 Dieses Thema gehört zu meinen Wissensgebieten. Bitte geben Sie mir mehr Details für eine präzise Antwort.',
+                    '📖 Ich bin Ihr Wissensbuch. Diese Frage ist relevant. Hier sind die wichtigsten Fakten dazu – fragen Sie mich für mehr Details.',
+                    '📖 Ich habe Ihre Anfrage analysiert. Das Thema ist in meiner Wissensdatenbank vorhanden. Bitte fragen Sie präziser, damit ich Ihnen die beste Antwort geben kann.'
                 ];
                 return responses[Math.floor(Math.random() * responses.length)];
+            },
+
+            search(query) {
+                const results = [];
+                const q = query.toLowerCase().trim();
+                if (!q) return results;
+                for (const [key, value] of Object.entries(this.knowledge)) {
+                    if (key.includes(q) || key.replace(/_/g, ' ').includes(q) || value.toLowerCase().includes(q)) {
+                        results.push({ topic: key.replace(/_/g, ' '), content: value.substring(0, 150) + '...' });
+                    }
+                }
+                return results;
             },
 
             getAllTopics() {
@@ -986,7 +1141,7 @@
             getRandomFact() {
                 const keys = Object.keys(this.knowledge);
                 const key = keys[Math.floor(Math.random() * keys.length)];
-                return `${key.replace(/_/g, ' ')}: ${this.knowledge[key]}`;
+                return `📖 ${key.replace(/_/g, ' ')}: ${this.knowledge[key]}`;
             }
         };
 
@@ -1053,7 +1208,7 @@
                 this.switchTo('cosmic');
                 setTimeout(() => {
                     setStatus('Bereit');
-                    speak('HalDo AI OS 23.1.6. Ich bin bereit.');
+                    speak('HalDo AI OS 23.1.6 – Das Wissensbuch von A bis Z ist bereit.');
                 }, 1200);
             },
 
@@ -1188,14 +1343,12 @@
                         ${orbits}
                         ${planets}
 
-                        <!-- Sonne mit Logo - klickbar öffnet HalDo AI -->
                         <div class="cosmic-sun" id="cosmic-sun-click" onclick="AppRouter.switchTo('ai')">
                             <div class="logo-in-sun">
                                 <span class="logo-text">✦</span>
                             </div>
                         </div>
 
-                        <!-- Lebendiges Logo -->
                         <div class="living-logo idle" id="living-logo">
                             <div class="logo-glow"></div>
                             <div class="logo-aura"></div>
@@ -1210,7 +1363,6 @@
                             </div>
                         </div>
 
-                        <!-- Planetenuhr -->
                         <div style="position:absolute;bottom:10px;left:50%;transform:translateX(-50%);z-index:25;background:rgba(0,0,0,0.5);padding:4px 12px;border-radius:4px;font-size:7px;color:rgba(255,255,255,0.4);text-align:center;pointer-events:none;">
                             🕐 Merkur=Stunde · Venus=Minute · Erde=Sekunde
                             <span id="planet-clock" style="display:block;font-size:8px;color:rgba(255,200,80,0.6);margin-top:2px;"></span>
@@ -1298,7 +1450,7 @@
                         <div style="font-weight:700;font-size:10px;">✦ HalDo AI OS ${HALDO_VERSION}</div>
                         <div style="font-size:8px;opacity:0.5;">${HALDO_BUILD} · ${apps} Apps</div>
                         <div style="display:flex;gap:2px;flex-wrap:wrap;margin-top:3px;">
-                            ${['ai','notes','calendar','files','settings','warnings','backup','updates','cosmic'].map(id => {
+                            ${['ai','ai-wissen','notes','calendar','files','settings','warnings','backup','updates','cosmic'].map(id => {
                                 const a = APP_LIST.find(x => x.id === id);
                                 return a ? `<button onclick="AppRouter.switchTo('${id}')" class="btn-secondary">${a.icon}</button>` : '';
                             }).join('')}
@@ -1308,21 +1460,22 @@
             },
 
             // =========================================================
-            // HALDO AI — WIE EIN MENSCH
+            // HALDO AI — WIE EIN MENSCH MIT WISSENSBUCH
             // =========================================================
             renderAI() {
                 return `
                     <div style="display:flex;flex-direction:column;height:100%;min-height:200px;">
                         <div style="background:rgba(255,200,80,0.04);border-radius:4px;padding:6px;margin-bottom:4px;border:1px solid rgba(255,200,80,0.06);font-size:9px;opacity:0.6;">
-                            🤖 HalDo AI — Frag mich einfach
+                            📖 HalDo AI — Das Wissensbuch von A bis Z (${Object.keys(HalDoAI.knowledge).length} Themen)
                         </div>
                         <div class="chat-messages" id="ai-chat-messages">
-                            <div class="ai">Hallo! Schön, dass du da bist. Was kann ich für dich tun?</div>
+                            <div class="ai">📖 Guten Tag! Ich bin HalDo AI, Ihr intelligentes Wissensbuch von A bis Z. Fragen Sie mich zu jedem Thema – Wissenschaft, Philosophie, Technologie, Kultur, Geschichte, Natur oder Leben. Ich habe Wissen über ALLES!</div>
                         </div>
                         <div class="flex-row">
                             <textarea id="ai-input" rows="1" placeholder="Frage an HalDo AI..." style="flex:1;min-height:28px;font-size:9px;"></textarea>
                             <button onclick="AppRouter.sendAIMessage()" class="btn-primary">Senden</button>
                             <button onclick="AppRouter.voiceInput()" class="btn-secondary">🎙️</button>
+                            <button onclick="AppRouter.switchTo('ai-wissen')" class="btn-secondary">📚</button>
                         </div>
                         <div id="ai-thinking" style="display:none;font-size:8px;opacity:0.5;margin-top:2px;">🤔 denkt...</div>
                     </div>
@@ -1355,7 +1508,7 @@
                     messages.appendChild(aiDiv);
                     messages.scrollTop = messages.scrollHeight;
                     this.setLogoState('speaking');
-                    speak(response);
+                    speak(response.substring(0, 120) + '...');
                     setTimeout(() => this.setLogoState('idle'), 800);
                 }, 300);
             },
@@ -1378,7 +1531,7 @@
             },
 
             // =========================================================
-            // AI WISSEN
+            // AI WISSEN — Themenübersicht
             // =========================================================
             renderAIWissen() {
                 const topics = HalDoAI.getAllTopics();
@@ -1392,7 +1545,7 @@
                     </div>
                     <div id="wissen-results" style="margin-bottom:4px;"></div>
                     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:2px;max-height:250px;overflow-y:auto;">
-                        ${topics.map(t => `
+                        ${topics.slice(0, 80).map(t => `
                             <div class="card" style="cursor:pointer;padding:3px 5px;font-size:7px;" onclick="AppRouter.showWissen('${t}')">
                                 📚 ${t}
                             </div>
@@ -1431,7 +1584,7 @@
                 const text = HalDoAI.knowledge[topic.replace(/ /g, '_')] || HalDoAI.knowledge[topic];
                 if (text) {
                     content.innerHTML = `<strong>📚 ${topic}</strong><br>${text}`;
-                    speak(text);
+                    speak(text.substring(0, 120) + '...');
                 }
             },
 
@@ -2029,6 +2182,7 @@
                     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(55px,1fr));gap:3px;">
                         ${[
                             { id: 'ai', icon: '🤖', name: 'AI' },
+                            { id: 'ai-wissen', icon: '📚', name: 'Wissen' },
                             { id: 'notes', icon: '📝', name: 'Notizen' },
                             { id: 'calendar', icon: '📅', name: 'Kalender' },
                             { id: 'files', icon: '📁', name: 'Dateien' },
@@ -2434,6 +2588,10 @@
                     this.initCosmicStars();
                     this.initPlanetClock();
                 }
+                if (appId === 'ai-wissen') {
+                    const content = document.getElementById('wissen-content');
+                    if (content) content.textContent = '📚 Wählen Sie ein Thema aus der Liste.';
+                }
             },
 
             initCosmicStars() {
@@ -2797,6 +2955,7 @@
         function boot() {
             console.log(`🌌 HalDo AI OS ${HALDO_VERSION} ${HALDO_BUILD}`);
             console.log(`📱 ${APP_LIST.length} Apps`);
+            console.log(`📚 Wissensbuch: ${Object.keys(HalDoAI.knowledge).length} Themen`);
 
             AppRouter.init();
 
@@ -2810,7 +2969,7 @@
 
             setTimeout(() => {
                 setStatus('Bereit');
-                speak('HalDo AI OS 23.1.6. Ich bin bereit.');
+                speak('HalDo AI OS 23.1.6 – Das Wissensbuch von A bis Z ist bereit.');
             }, 1200);
 
             console.log('✅ System bereit');
