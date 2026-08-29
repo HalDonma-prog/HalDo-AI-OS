@@ -6,7 +6,6 @@
     <title>HalDo AI OS — Cosmic Intelligent OS</title>
     <meta name="theme-color" content="#0a0a1a" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <style>
         /* ===== GLOBAL ===== */
         * {
@@ -34,7 +33,6 @@
             color: var(--text);
             font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
             touch-action: manipulation;
-            -webkit-tap-highlight-color: transparent;
         }
         #root {
             width: 100vw;
@@ -102,7 +100,7 @@
             }
         }
 
-        /* ===== COSMIC CANVAS ===== */
+        /* ===== COSMIC CANVAS (3D-Weltraum) ===== */
         #cosmic {
             position: absolute;
             inset: 0;
@@ -194,7 +192,6 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            transition: box-shadow 0.3s;
             min-width: 200px;
             min-height: 150px;
             max-width: 98vw;
@@ -264,48 +261,6 @@
             font-size: clamp(0.8rem, 1.6vw, 0.9rem);
             line-height: 1.5;
             -webkit-overflow-scrolling: touch;
-        }
-        .window-body input,
-        .window-body textarea,
-        .window-body select {
-            width: 100%;
-            padding: 10px 12px;
-            background: rgba(255, 255, 255, 0.06);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 10px;
-            color: #fff;
-            font-size: clamp(0.8rem, 1.6vw, 0.9rem);
-            margin-bottom: 10px;
-            -webkit-appearance: none;
-            appearance: none;
-        }
-        .window-body button {
-            padding: 10px 18px;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            border: none;
-            border-radius: 10px;
-            color: #fff;
-            font-weight: 600;
-            font-size: clamp(0.8rem, 1.6vw, 0.9rem);
-            cursor: pointer;
-            transition: 0.2s;
-            touch-action: manipulation;
-            min-height: 44px;
-        }
-        .window-body button:active {
-            transform: scale(0.96);
-            opacity: 0.8;
-        }
-        .window-body .ai-quick {
-            padding: 8px 12px;
-            background: rgba(255, 255, 255, 0.06);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            border-radius: 20px;
-            font-size: clamp(0.7rem, 1.4vw, 0.8rem);
-            min-height: 36px;
-        }
-        .window-body .ai-quick:active {
-            background: rgba(255, 255, 255, 0.15);
         }
 
         /* ===== DOCK ===== */
@@ -398,7 +353,6 @@
             border-radius: 4px;
         }
 
-        /* ===== RESPONSIVE ===== */
         @media (max-width: 480px) {
             .window {
                 border-radius: 12px;
@@ -448,10 +402,6 @@
             .window-body {
                 padding: 8px;
             }
-            .window-body button {
-                min-height: 32px;
-                padding: 6px 12px;
-            }
         }
     </style>
 </head>
@@ -495,14 +445,16 @@
                 <button class="dock-item" data-app="terminal">⌨️</button>
                 <button class="dock-item" data-app="calendar">📅</button>
                 <button class="dock-item" data-app="music">🎵</button>
+                <button class="dock-item" data-app="appworld">📱</button>
             </div>
         </div>
     </div>
 
     <script>
         // ================================================================
-        //  HALDO AI OS — VEREINFACHTE GARANTIERT FUNKTIONIERENDE VERSION
-        //  Kein Login-Zwang, Bootet direkt ins System
+        //  HALDO AI OS — ERWEITERTE VERSION
+        //  Mit: 84 Apps (als Platzhalter), Cosmic World (Galaxien, Planeten, Sonne)
+        //  Living AI, Window-Manager, Storage, Theme-System
         // ================================================================
 
         (function() {
@@ -534,9 +486,13 @@
             const appContainer = $('app-container');
             const dock = $('dock');
 
-            // ===== COSMIC WORLD =====
+            // ================================================================
+            //  COSMIC WORLD — MIT GALAXIEN, PLANETEN, SONNE, STERNEN
+            // ================================================================
             let stars = [];
-            let particles = [];
+            let galaxies = [];
+            let planets = [];
+            let sun = null;
             let cosmicRunning = false;
             let cosmicCtx = null;
             let cosmicW = 0,
@@ -553,30 +509,89 @@
                 window.addEventListener('resize', resize);
                 resize();
 
+                // === STERNE (1500 für realistische Tiefe) ===
                 stars = [];
-                for (let i = 0; i < 150; i++) {
+                for (let i = 0; i < 1500; i++) {
                     stars.push({
                         x: Math.random() * cosmicW,
                         y: Math.random() * cosmicH,
-                        r: Math.random() * 2 + 0.5,
-                        speed: Math.random() * 0.3 + 0.1,
+                        r: Math.random() * 2.5 + 0.3,
+                        speed: Math.random() * 0.05 + 0.02,
                         brightness: Math.random() * 0.8 + 0.2,
-                        phase: Math.random() * Math.PI * 2
+                        phase: Math.random() * Math.PI * 2,
+                        color: `hsl(${Math.random() * 60 + 200}, 80%, ${60 + Math.random() * 40}%)`
                     });
                 }
 
-                particles = [];
-                for (let i = 0; i < 35; i++) {
-                    particles.push({
-                        x: Math.random() * cosmicW,
-                        y: Math.random() * cosmicH,
-                        vx: (Math.random() - 0.5) * 0.2,
-                        vy: (Math.random() - 0.5) * 0.2,
-                        r: Math.random() * 35 + 15,
-                        alpha: Math.random() * 0.025 + 0.008,
-                        hue: Math.random() * 60 + 220
+                // === GALAXIEN (Spiralnebel) ===
+                galaxies = [];
+                for (let g = 0; g < 5; g++) {
+                    const gx = Math.random() * cosmicW;
+                    const gy = Math.random() * cosmicH;
+                    const gSize = 80 + Math.random() * 120;
+                    const angle = Math.random() * Math.PI * 2;
+                    const points = [];
+                    for (let i = 0; i < 300; i++) {
+                        const t = Math.random() * Math.PI * 4;
+                        const r = Math.random() * gSize * 0.6;
+                        const x = gx + Math.cos(t + angle) * r * (1 + t * 0.1);
+                        const y = gy + Math.sin(t + angle) * r * (1 + t * 0.1);
+                        points.push({
+                            x,
+                            y,
+                            r: Math.random() * 2 + 0.5,
+                            brightness: Math.random() * 0.5 + 0.2,
+                            hue: 220 + Math.random() * 60
+                        });
+                    }
+                    galaxies.push({
+                        x: gx,
+                        y: gy,
+                        size: gSize,
+                        angle: angle,
+                        points: points,
+                        rotationSpeed: (Math.random() - 0.5) * 0.001
                     });
                 }
+
+                // === PLANETEN ===
+                planets = [];
+                const planetData = [
+                    { name: 'Mercur', radius: 8, color: '#aaaaaa', orbit: 80, speed: 0.02 },
+                    { name: 'Venus', radius: 12, color: '#ffaa44', orbit: 120, speed: 0.015 },
+                    { name: 'Erde', radius: 14, color: '#4488ff', orbit: 170, speed: 0.01 },
+                    { name: 'Mars', radius: 10, color: '#ff6644', orbit: 220, speed: 0.008 },
+                    { name: 'Jupiter', radius: 25, color: '#ddaa77', orbit: 280, speed: 0.005 },
+                    { name: 'Saturn', radius: 20, color: '#ddcc88', orbit: 350, speed: 0.004 },
+                    { name: 'Uranus', radius: 16, color: '#88ddff', orbit: 420, speed: 0.003 },
+                    { name: 'Neptun', radius: 15, color: '#4466ff', orbit: 490, speed: 0.002 }
+                ];
+                const centerX = cosmicW / 2;
+                const centerY = cosmicH / 2;
+                planetData.forEach((p, i) => {
+                    planets.push({
+                        name: p.name,
+                        radius: p.radius,
+                        color: p.color,
+                        orbit: p.orbit,
+                        speed: p.speed + (Math.random() - 0.5) * 0.002,
+                        angle: Math.random() * Math.PI * 2,
+                        centerX: centerX + (Math.random() - 0.5) * 100,
+                        centerY: centerY + (Math.random() - 0.5) * 100,
+                        glow: p.radius * 2
+                    });
+                });
+
+                // === SONNE (Zentrales Leuchtobjekt) ===
+                sun = {
+                    x: centerX,
+                    y: centerY,
+                    radius: 40,
+                    glow: 120,
+                    color: '#ffdd44',
+                    pulseSpeed: 0.005,
+                    pulsePhase: 0
+                };
 
                 cosmicRunning = true;
                 animateCosmic();
@@ -588,41 +603,139 @@
                 const w = cosmicW,
                     h = cosmicH;
 
-                ctx.clearRect(0, 0, w, h);
+                // Hintergrund (tiefes Schwarz mit leichter Farbtönung)
+                const bgGrad = ctx.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, w * 0.8);
+                bgGrad.addColorStop(0, '#0a0a2a');
+                bgGrad.addColorStop(0.5, '#050515');
+                bgGrad.addColorStop(1, '#000005');
+                ctx.fillStyle = bgGrad;
+                ctx.fillRect(0, 0, w, h);
 
-                particles.forEach(p => {
-                    p.x += p.vx;
-                    p.y += p.vy;
-                    if (p.x < 0) p.x = w;
-                    if (p.x > w) p.x = 0;
-                    if (p.y < 0) p.y = h;
-                    if (p.y > h) p.y = 0;
-                    const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r);
-                    grad.addColorStop(0, `hsla(${p.hue}, 80%, 60%, ${p.alpha})`);
-                    grad.addColorStop(1, `hsla(${p.hue}, 80%, 40%, 0)`);
-                    ctx.fillStyle = grad;
-                    ctx.beginPath();
-                    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-                    ctx.fill();
+                // === GALAXIEN zeichnen ===
+                galaxies.forEach(g => {
+                    g.angle += g.rotationSpeed;
+                    g.points.forEach(p => {
+                        const rotX = p.x - g.x;
+                        const rotY = p.y - g.y;
+                        const cosA = Math.cos(g.angle);
+                        const sinA = Math.sin(g.angle);
+                        const rx = g.x + rotX * cosA - rotY * sinA;
+                        const ry = g.y + rotX * sinA + rotY * cosA;
+                        ctx.fillStyle = `hsla(${p.hue}, 70%, 60%, ${p.brightness * 0.3})`;
+                        ctx.beginPath();
+                        ctx.arc(rx, ry, p.r, 0, Math.PI * 2);
+                        ctx.fill();
+                    });
                 });
 
-                const time = Date.now() / 2000;
+                // === SONNE (mit Puls und Glow) ===
+                if (sun) {
+                    sun.pulsePhase += sun.pulseSpeed;
+                    const pulse = 1 + 0.05 * Math.sin(sun.pulsePhase);
+                    const radius = sun.radius * pulse;
+
+                    // Äußerer Glow
+                    for (let i = 5; i > 0; i--) {
+                        const grad = ctx.createRadialGradient(sun.x, sun.y, 0, sun.x, sun.y, sun.glow * i * 0.3);
+                        grad.addColorStop(0, `rgba(255, 220, 68, ${0.1 / i})`);
+                        grad.addColorStop(1, 'rgba(255, 220, 68, 0)');
+                        ctx.fillStyle = grad;
+                        ctx.beginPath();
+                        ctx.arc(sun.x, sun.y, sun.glow * i * 0.3, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+
+                    // Sonne selbst
+                    const sunGrad = ctx.createRadialGradient(sun.x - radius * 0.3, sun.y - radius * 0.3, 0, sun.x, sun.y,
+                        radius);
+                    sunGrad.addColorStop(0, '#ffeeaa');
+                    sunGrad.addColorStop(0.4, '#ffdd44');
+                    sunGrad.addColorStop(0.8, '#ff8800');
+                    sunGrad.addColorStop(1, '#ff4400');
+                    ctx.fillStyle = sunGrad;
+                    ctx.beginPath();
+                    ctx.arc(sun.x, sun.y, radius, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // Sonnenflecken (dynamisch)
+                    for (let i = 0; i < 6; i++) {
+                        const spotAngle = i * 1.2 + sun.pulsePhase * 0.5;
+                        const spotR = radius * (0.3 + 0.2 * Math.sin(sun.pulsePhase * 0.7 + i));
+                        const spotX = sun.x + Math.cos(spotAngle) * radius * 0.5;
+                        const spotY = sun.y + Math.sin(spotAngle) * radius * 0.5;
+                        ctx.fillStyle = `rgba(180, 120, 20, ${0.2 + 0.1 * Math.sin(sun.pulsePhase + i)})`;
+                        ctx.beginPath();
+                        ctx.arc(spotX, spotY, spotR * 0.3, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+
+                    // Sonnenstrahlen (leuchtende Linien)
+                    for (let i = 0; i < 16; i++) {
+                        const angle = i * (Math.PI / 8) + sun.pulsePhase * 0.2;
+                        const len = radius * (1.2 + 0.3 * Math.sin(sun.pulsePhase * 0.5 + i * 0.5));
+                        ctx.strokeStyle = `rgba(255, 220, 68, ${0.05 + 0.03 * Math.sin(sun.pulsePhase + i)})`;
+                        ctx.lineWidth = 2;
+                        ctx.beginPath();
+                        ctx.moveTo(sun.x + Math.cos(angle) * radius * 0.8, sun.y + Math.sin(angle) * radius * 0.8);
+                        ctx.lineTo(sun.x + Math.cos(angle) * len, sun.y + Math.sin(angle) * len);
+                        ctx.stroke();
+                    }
+                }
+
+                // === PLANETEN ===
+                planets.forEach(p => {
+                    p.angle += p.speed;
+                    const px = p.centerX + Math.cos(p.angle) * p.orbit;
+                    const py = p.centerY + Math.sin(p.angle) * p.orbit;
+
+                    // Orbit-Linie
+                    ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+                    ctx.lineWidth = 1;
+                    ctx.setLineDash([4, 8]);
+                    ctx.beginPath();
+                    ctx.arc(p.centerX, p.centerY, p.orbit, 0, Math.PI * 2);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+
+                    // Planet-Glow
+                    const glow = ctx.createRadialGradient(px, py, 0, px, py, p.glow);
+                    glow.addColorStop(0, p.color + '40');
+                    glow.addColorStop(1, 'rgba(0,0,0,0)');
+                    ctx.fillStyle = glow;
+                    ctx.beginPath();
+                    ctx.arc(px, py, p.glow, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // Planet
+                    ctx.fillStyle = p.color;
+                    ctx.shadowColor = p.color;
+                    ctx.shadowBlur = 15;
+                    ctx.beginPath();
+                    ctx.arc(px, py, p.radius, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+
+                    // Name
+                    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+                    ctx.font = '8px sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(p.name, px, py + p.radius + 12);
+                });
+
+                // === STERNE (mit Twinkling) ===
+                const time = Date.now() / 3000;
                 stars.forEach(s => {
                     s.y += s.speed;
-                    if (s.y > h) { s.y = 0;
-                        s.x = Math.random() * w; }
-                    const bright = s.brightness * (0.7 + 0.3 * Math.sin(time + s.phase));
-                    ctx.fillStyle = `rgba(255,255,255,${bright})`;
+                    if (s.y > cosmicH) { s.y = 0;
+                        s.x = Math.random() * cosmicW; }
+                    const bright = s.brightness * (0.6 + 0.4 * Math.sin(time * 2 + s.phase));
+                    ctx.fillStyle = s.color;
+                    ctx.globalAlpha = bright;
                     ctx.beginPath();
                     ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
                     ctx.fill();
                 });
-
-                const grad = ctx.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, w / 2);
-                grad.addColorStop(0, 'rgba(0,212,255,0.015)');
-                grad.addColorStop(1, 'rgba(0,0,0,0)');
-                ctx.fillStyle = grad;
-                ctx.fillRect(0, 0, w, h);
+                ctx.globalAlpha = 1;
 
                 requestAnimationFrame(animateCosmic);
             }
@@ -632,8 +745,9 @@
                 const statuses = [
                     '⟡ Kernel lädt ...',
                     '⟡ System initialisiert ...',
-                    '⟡ Cosmic World startet ...',
-                    '⟡ Living AI wird geweckt ...',
+                    '⟡ Cosmic World wird generiert ...',
+                    '⟡ Galaxien & Planetensysteme werden geladen ...',
+                    '⟡ Living HalDo AI wird aktiviert ...',
                     '⟡ HalDo AI OS ist READY 🚀'
                 ];
 
@@ -650,15 +764,15 @@
                         setTimeout(() => launchApp('ai'), 400);
                         setTimeout(() => launchApp('cosmic'), 700);
                     }
-                }, 500);
+                }, 600);
             }
 
             // ===== WINDOW MANAGEMENT =====
             function getSafeWindowPosition() {
                 const vw = window.innerWidth;
                 const vh = window.innerHeight;
-                const w = Math.min(500, vw - 40);
-                const h = Math.min(400, vh - 160);
+                const w = Math.min(560, vw - 40);
+                const h = Math.min(420, vh - 160);
                 const x = Math.max(10, (vw - w) / 2);
                 const y = Math.max(40, (vh - h) / 2 - 20);
                 return { x, y, w, h };
@@ -684,8 +798,8 @@
                     appId: id,
                     title: app.title || id,
                     icon: app.icon || '📦',
-                    x: pos.x + Math.random() * 20,
-                    y: pos.y + Math.random() * 20,
+                    x: pos.x + Math.random() * 30,
+                    y: pos.y + Math.random() * 30,
                     width: pos.w,
                     height: pos.h,
                     zIndex: state.windowZIndex++,
@@ -891,8 +1005,8 @@
                 const win = state.windows.find(w => w.id === winId);
                 if (!win || !win.element) return;
                 if (win.width === window.innerWidth - 20) {
-                    win.width = win._prevWidth || 500;
-                    win.height = win._prevHeight || 400;
+                    win.width = win._prevWidth || 560;
+                    win.height = win._prevHeight || 420;
                     win.x = win._prevX || 20;
                     win.y = win._prevY || 40;
                 } else {
@@ -952,53 +1066,218 @@
                 notify(`🎨 Theme: ${next}`);
             }
 
-            // ===== APP REGISTRATION =====
+            // ================================================================
+            //  APP REGISTRATION & GENERATOR FÜR ALLE 84 APPS
+            // ================================================================
+
             function registerApp(id, config) {
                 state.apps[id] = { ...config, id, instance: null };
             }
 
-            // ===== APP DEFINITIONS =====
-            function defineApps() {
-                // 1. AI Assistant
-                registerApp('ai', {
-                    title: 'HalDo AI',
-                    icon: '🤖',
-                    render: (body) => {
-                        body.innerHTML = `
-                            <div style="display:flex;flex-direction:column;height:100%;gap:8px;">
-                                <div style="flex:1;overflow-y:auto;background:rgba(0,0,0,0.2);border-radius:10px;padding:10px;min-height:60px;max-height:300px;" id="ai-chat">
-                                    <div style="color:#8899bb;text-align:center;">💬 HalDo AI — bereit</div>
+            // === GENERIERT ALLE 84 APPS (von A bis Z) ===
+            function generateAllApps() {
+                // Vollständige App-Liste (84 Apps)
+                const appList = [
+                    // A
+                    { id: 'ai', title: 'HalDo AI', icon: '🤖' },
+                    { id: 'appcenter', title: 'App Center', icon: '📦' },
+                    { id: 'appmanager', title: 'App Manager', icon: '📋' },
+                    { id: 'audiorecorder', title: 'Audio Recorder', icon: '🎙️' },
+                    // B
+                    { id: 'backup', title: 'Backup & Restore', icon: '💾' },
+                    { id: 'browser', title: 'Browser', icon: '🌐' },
+                    // C
+                    { id: 'calculator', title: 'Calculator', icon: '🧮' },
+                    { id: 'calendar', title: 'Calendar', icon: '📅' },
+                    { id: 'camera', title: 'Camera', icon: '📷' },
+                    { id: 'contacts', title: 'Contacts', icon: '👤' },
+                    { id: 'cosmic', title: 'Cosmic World', icon: '🌌' },
+                    // D
+                    { id: 'documents', title: 'Documents', icon: '📄' },
+                    { id: 'downloads', title: 'Downloads', icon: '⬇️' },
+                    // E
+                    { id: 'ezidikeyboard', title: 'Êzîdî Keyboard', icon: '⌨️' },
+                    { id: 'email', title: 'Email / Mail', icon: '✉️' },
+                    // F
+                    { id: 'files', title: 'File Manager', icon: '📁' },
+                    { id: 'filetransfer', title: 'File Transfer', icon: '🔄' },
+                    // G
+                    { id: 'gallery', title: 'Gallery', icon: '🖼️' },
+                    { id: 'games', title: 'Games Center', icon: '🎮' },
+                    // H
+                    { id: 'haldoai', title: 'HalDo AI', icon: '🤖' },
+                    { id: 'help', title: 'Help Center', icon: '❓' },
+                    // I
+                    { id: 'imageeditor', title: 'Image Editor', icon: '🎨' },
+                    { id: 'internet', title: 'Internet Center', icon: '📶' },
+                    // J
+                    { id: 'journal', title: 'Journal / Diary', icon: '📖' },
+                    // K
+                    { id: 'keyboard', title: 'Keyboard Center', icon: '⌨️' },
+                    // L
+                    { id: 'language', title: 'Language Center', icon: '🌍' },
+                    { id: 'logs', title: 'System Logs', icon: '📋' },
+                    // M
+                    { id: 'maps', title: 'Maps', icon: '🗺️' },
+                    { id: 'mediacenter', title: 'Media Center', icon: '🎬' },
+                    { id: 'messages', title: 'Messages', icon: '💬' },
+                    { id: 'music', title: 'Music', icon: '🎵' },
+                    // N
+                    { id: 'notes', title: 'Notes', icon: '📝' },
+                    { id: 'notifications', title: 'Notification Center', icon: '🔔' },
+                    // O
+                    { id: 'office', title: 'Office Center', icon: '📊' },
+                    { id: 'about', title: 'OS Information', icon: 'ℹ️' },
+                    // P
+                    { id: 'pdfviewer', title: 'PDF Viewer', icon: '📕' },
+                    { id: 'photos', title: 'Photos', icon: '🖼️' },
+                    { id: 'privacy', title: 'Privacy Center', icon: '🔒' },
+                    { id: 'processmanager', title: 'Process Manager', icon: '⚡' },
+                    // Q
+                    { id: 'quicksettings', title: 'Quick Settings', icon: '⚙️' },
+                    { id: 'qrscanner', title: 'QR Scanner', icon: '📱' },
+                    // R
+                    { id: 'recovery', title: 'Recovery Center', icon: '🔄' },
+                    { id: 'reminders', title: 'Reminders', icon: '⏰' },
+                    // S
+                    { id: 'settings', title: 'Settings', icon: '⚙️' },
+                    { id: 'security', title: 'Security Center', icon: '🛡️' },
+                    { id: 'systemmonitor', title: 'System Monitor', icon: '📊' },
+                    { id: 'storagemanager', title: 'Storage Manager', icon: '💽' },
+                    { id: 'screenshot', title: 'Screenshot', icon: '📸' },
+                    { id: 'search', title: 'Search', icon: '🔍' },
+                    // T
+                    { id: 'taskmanager', title: 'Task Manager', icon: '✅' },
+                    { id: 'terminal', title: 'Terminal', icon: '⌨️' },
+                    { id: 'theme', title: 'Theme Center', icon: '🎨' },
+                    { id: 'clock', title: 'Time / Clock', icon: '🕐' },
+                    // U
+                    { id: 'update', title: 'Update Center', icon: '🔄' },
+                    { id: 'usercenter', title: 'User Center', icon: '👤' },
+                    // V
+                    { id: 'video', title: 'Video Player', icon: '🎬' },
+                    { id: 'voice', title: 'Voice Center', icon: '🎤' },
+                    { id: 'voicerecorder', title: 'Voice Recorder', icon: '🎙️' },
+                    // W
+                    { id: 'weather', title: 'Weather', icon: '🌤️' },
+                    { id: 'websearch', title: 'Web Search', icon: '🔎' },
+                    { id: 'windows', title: 'Window Center', icon: '🪟' },
+                    // X
+                    { id: 'extensions', title: 'Extensions Center', icon: '🧩' },
+                    // Y
+                    { id: 'personal', title: 'Your HalDo / Personal', icon: '💙' },
+                    // Z
+                    { id: 'zip', title: 'ZIP / Archive Manager', icon: '📦' },
+                    // Spezial-Apps
+                    { id: 'livingai', title: 'Living HalDo AI', icon: '🧠' },
+                    { id: 'cosmicdesktop', title: 'Cosmic Desktop', icon: '🌌' },
+                    { id: 'controlcenter', title: 'Control Center', icon: '🎛️' },
+                    { id: 'aicommand', title: 'AI Command Center', icon: '🤖' },
+                    { id: 'aimemory', title: 'AI Memory Center', icon: '🧠' },
+                    { id: 'aitools', title: 'AI Tools Center', icon: '🛠️' },
+                    { id: 'aiautomation', title: 'AI Automation', icon: '⚡' },
+                    { id: 'apppermissions', title: 'App Permissions', icon: '🔐' },
+                    { id: 'developer', title: 'Developer Center', icon: '💻' },
+                    { id: 'diagnostics', title: 'Diagnostics Center', icon: '🔬' },
+                    { id: 'systemrecovery', title: 'System Recovery', icon: '🔄' },
+                    { id: 'backupcenter', title: 'Backup Center', icon: '💾' },
+                    { id: 'migration', title: 'Migration Center', icon: '📤' },
+                    { id: 'rollback', title: 'Rollback Center', icon: '⏪' },
+                    { id: 'servicemanager', title: 'Service Manager', icon: '⚙️' },
+                    { id: 'modulemanager', title: 'Module Manager', icon: '🧩' },
+                    { id: 'eventcenter', title: 'Event Center', icon: '📡' },
+                    { id: 'sysinfo', title: 'System Information', icon: 'ℹ️' },
+                    { id: 'installation', title: 'Installation Center', icon: '📥' },
+                    { id: 'pwa', title: 'PWA / OS Installation', icon: '📲' },
+                    { id: 'appworld', title: 'App World', icon: '📱' }
+                ];
+
+                // Jede App registrieren mit Standard-Renderer
+                appList.forEach(app => {
+                    registerApp(app.id, {
+                        title: app.title,
+                        icon: app.icon,
+                        render: (body) => {
+                            body.innerHTML = `
+                                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:12px;text-align:center;padding:20px;">
+                                    <div style="font-size:3rem;">${app.icon}</div>
+                                    <h3 style="font-size:clamp(1rem,2vw,1.2rem);">${app.title}</h3>
+                                    <p style="color:#8899bb;font-size:0.85rem;">Diese App wird Schritt für Schritt mit allen Funktionen ausgebaut.</p>
+                                    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
+                                        <button onclick="HalDo.notify('${app.title} wird geladen ...')" style="padding:8px 16px;background:var(--primary);border:none;border-radius:8px;color:#fff;font-weight:600;">▶️ Öffnen</button>
+                                        <button onclick="HalDo.notify('📊 ${app.title} — Speicher: 12 MB')" style="padding:8px 16px;background:rgba(255,255,255,0.06);border:none;border-radius:8px;color:#fff;">ℹ️ Info</button>
+                                    </div>
+                                    <div style="font-size:0.7rem;color:#8899bb;margin-top:10px;border-top:1px solid rgba(255,255,255,0.04);padding-top:8px;width:100%;">
+                                        ${app.id} · HalDo AI OS v20.0.0
+                                    </div>
                                 </div>
-                                <div style="display:flex;gap:6px;flex-wrap:wrap;">
-                                    <input type="text" id="ai-input" placeholder="Frage ..." style="flex:1;min-width:100px;" />
-                                    <button id="ai-send">Senden</button>
-                                    <button id="ai-voice" style="background:#4444ff;">🎤</button>
+                            `;
+                        }
+                    });
+                });
+            }
+
+            // ================================================================
+            //  SPEZIAL-APPS (MIT VOLLER FUNKTIONALITÄT)
+            // ================================================================
+
+            // 1. AI Assistant (voll funktionsfähig)
+            registerApp('ai', {
+                title: 'HalDo AI',
+                icon: '🤖',
+                render: (body) => {
+                    body.innerHTML = `
+                        <div style="display:flex;flex-direction:column;height:100%;gap:8px;">
+                            <div style="display:flex;align-items:center;gap:10px;padding:6px 10px;background:rgba(0,212,255,0.06);border-radius:10px;">
+                                <div style="font-size:1.5rem;">🧠</div>
+                                <div>
+                                    <div style="font-weight:600;font-size:0.85rem;">Living HalDo AI</div>
+                                    <div style="font-size:0.7rem;color:#8899bb;">👀 Zuhören · 💬 Sprechen · 🧠 Denken</div>
                                 </div>
-                                <div style="display:flex;gap:4px;flex-wrap:wrap;">
-                                    <button class="ai-quick" data-cmd="Öffne Einstellungen">⚙️</button>
-                                    <button class="ai-quick" data-cmd="Zeige meine Dateien">📁</button>
-                                    <button class="ai-quick" data-cmd="Wechsle zu Cosmic">🌌</button>
-                                    <button class="ai-quick" data-cmd="Hilfe">❓</button>
+                                <div style="margin-left:auto;display:flex;gap:4px;">
+                                    <span id="ai-status" style="font-size:0.7rem;color:#44ff88;">● bereit</span>
                                 </div>
                             </div>
-                        `;
-                        const chat = body.querySelector('#ai-chat');
-                        const input = body.querySelector('#ai-input');
-                        const sendBtn = body.querySelector('#ai-send');
+                            <div style="flex:1;overflow-y:auto;background:rgba(0,0,0,0.2);border-radius:10px;padding:10px;min-height:60px;max-height:300px;" id="ai-chat">
+                                <div style="color:#8899bb;text-align:center;">💬 Hallo! Ich bin HalDo. Wie kann ich dir helfen?</div>
+                            </div>
+                            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                                <input type="text" id="ai-input" placeholder="Frage an HalDo ..." style="flex:1;min-width:100px;" />
+                                <button id="ai-send">Senden</button>
+                                <button id="ai-voice" style="background:#4444ff;">🎤</button>
+                            </div>
+                            <div style="display:flex;gap:4px;flex-wrap:wrap;">
+                                <button class="ai-quick" data-cmd="Öffne Einstellungen">⚙️</button>
+                                <button class="ai-quick" data-cmd="Zeige meine Dateien">📁</button>
+                                <button class="ai-quick" data-cmd="Wechsle zu Cosmic">🌌</button>
+                                <button class="ai-quick" data-cmd="Hilfe">❓</button>
+                                <button class="ai-quick" data-cmd="Erzähl mir über Êzîdî">🟡</button>
+                            </div>
+                        </div>
+                    `;
+                    const chat = body.querySelector('#ai-chat');
+                    const input = body.querySelector('#ai-input');
+                    const sendBtn = body.querySelector('#ai-send');
+                    const statusEl = body.querySelector('#ai-status');
 
-                        function addMessage(role, text) {
-                            const div = document.createElement('div');
-                            div.style.cssText =
-                                `padding:6px 10px;margin:3px 0;border-radius:8px;max-width:90%;${role === 'user' ? 'background:rgba(0,212,255,0.12);align-self:flex-end;' : 'background:rgba(123,47,252,0.12);'}`;
-                            div.textContent = (role === 'user' ? '👤 ' : '🤖 ') + text;
-                            chat.appendChild(div);
-                            chat.scrollTop = chat.scrollHeight;
-                        }
+                    function addMessage(role, text) {
+                        const div = document.createElement('div');
+                        div.style.cssText =
+                            `padding:6px 10px;margin:3px 0;border-radius:8px;max-width:90%;${role === 'user' ? 'background:rgba(0,212,255,0.12);align-self:flex-end;' : 'background:rgba(123,47,252,0.12);'}`;
+                        div.textContent = (role === 'user' ? '👤 ' : '🤖 ') + text;
+                        chat.appendChild(div);
+                        chat.scrollTop = chat.scrollHeight;
+                    }
 
-                        function processCommand(cmd) {
-                            addMessage('user', cmd);
-                            const lower = cmd.toLowerCase();
-                            let response = '';
+                    function processCommand(cmd) {
+                        addMessage('user', cmd);
+                        statusEl.textContent = '● denkt ...';
+                        statusEl.style.color = '#ffcc00';
+
+                        const lower = cmd.toLowerCase();
+                        let response = '';
+
+                        setTimeout(() => {
                             if (lower.includes('einstellung') || lower.includes('settings')) {
                                 response = '⚙️ Öffne Einstellungen ...';
                                 setTimeout(() => launchApp('settings'), 300);
@@ -1008,369 +1287,425 @@
                             } else if (lower.includes('cosmic')) {
                                 response = '🌌 Aktiviere Cosmic World ...';
                                 setTimeout(() => launchApp('cosmic'), 300);
-                            } else if (lower.includes('hilfe')) {
-                                response = '❓ Befehle: "Öffne Einstellungen", "Zeige meine Dateien", "Wechsle zu Cosmic", "Hallo", "Wetter"';
-                            } else if (lower.includes('hallo')) {
-                                response = '👋 Hallo! Ich bin HalDo. Wie kann ich helfen?';
+                            } else if (lower.includes('ezidi') || lower.includes('êzîdî')) {
+                                response =
+                                    '🟡 Êzîdî ist eine der ältesten monotheistischen Religionen. Die Êzîdî-Gemeinschaft hat eine reiche Kultur, Musik und Poesie. Die Sprache ist Kurmanji (Kurdisch). Möchtest du mehr wissen?';
+                            } else if (lower.includes('hilfe') || lower.includes('help')) {
+                                response =
+                                    '❓ Ich kann: Apps öffnen, Fragen beantworten, über Êzîdî und Kurden erzählen, Texte übersetzen, Wetter zeigen, und vieles mehr. Probier es aus!';
+                            } else if (lower.includes('hallo') || lower.includes('hi')) {
+                                response = '👋 Hallo! Schön dich zu sehen. Wie geht es dir heute?';
                             } else if (lower.includes('wetter')) {
-                                response = '🌤️ 22°C, sonnig (Demo)';
+                                response = '🌤️ Aktuell: 22°C, sonnig. (Demo-Daten)';
                             } else if (lower.includes('danke')) {
-                                response = '❤️ Gern geschehen!';
+                                response = '❤️ Gern geschehen! Immer für dich da.';
+                            } else if (lower.includes('galaxie') || lower.includes('planet')) {
+                                response =
+                                    '🌌 Unser Sonnensystem hat 8 Planeten: Merkur, Venus, Erde, Mars, Jupiter, Saturn, Uranus und Neptun. Die Milchstraße enthält etwa 100 Milliarden Sterne. Möchtest du mehr über Astronomie wissen?';
                             } else {
                                 response =
-                                    `💡 Verstanden: "${cmd}". Versuche: "Öffne Einstellungen", "Zeige meine Dateien" oder "Hilfe".`;
+                                    `💡 Ich habe verstanden: "${cmd}". Ich kann dir helfen bei: Wissenschaft, Geschichte, Kultur, Übersetzungen, Programmierung, Schreiben, Organisation. Was möchtest du wissen?`;
                             }
-                            setTimeout(() => addMessage('assistant', response), 300);
+
+                            addMessage('assistant', response);
+                            statusEl.textContent = '● bereit';
+                            statusEl.style.color = '#44ff88';
                             state.aiMemory.push({ role: 'user', content: cmd });
                             state.aiMemory.push({ role: 'assistant', content: response });
+                        }, 400);
+                    }
+
+                    sendBtn.addEventListener('click', () => {
+                        const val = input.value.trim();
+                        if (!val) return;
+                        processCommand(val);
+                        input.value = '';
+                    });
+                    input.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendBtn.click(); });
+
+                    body.querySelectorAll('.ai-quick').forEach(btn => {
+                        btn.addEventListener('click', () => processCommand(btn.dataset.cmd));
+                    });
+
+                    body.querySelector('#ai-voice').addEventListener('click', () => {
+                        if ('webkitSpeechRecognition' in window) {
+                            const rec = new webkitSpeechRecognition();
+                            rec.lang = 'de-DE';
+                            rec.onresult = (e) => {
+                                const text = e.results[0][0].transcript;
+                                input.value = text;
+                                sendBtn.click();
+                            };
+                            rec.start();
+                            notify('🎤 Höre zu ...');
+                            statusEl.textContent = '● hört zu ...';
+                            statusEl.style.color = '#44aaff';
+                        } else {
+                            notify('❌ Speech Recognition nicht unterstützt', 'error');
                         }
+                    });
+                }
+            });
 
-                        sendBtn.addEventListener('click', () => {
-                            const val = input.value.trim();
-                            if (!val) return;
-                            processCommand(val);
-                            input.value = '';
-                        });
-                        input.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendBtn.click(); });
-
-                        body.querySelectorAll('.ai-quick').forEach(btn => {
-                            btn.addEventListener('click', () => processCommand(btn.dataset.cmd));
-                        });
-
-                        body.querySelector('#ai-voice').addEventListener('click', () => {
-                            if ('webkitSpeechRecognition' in window) {
-                                const rec = new webkitSpeechRecognition();
-                                rec.lang = 'de-DE';
-                                rec.onresult = (e) => {
-                                    const text = e.results[0][0].transcript;
-                                    input.value = text;
-                                    sendBtn.click();
-                                };
-                                rec.start();
-                                notify('🎤 Höre zu ...');
-                            } else {
-                                notify('❌ Speech nicht unterstützt', 'error');
-                            }
-                        });
-                    }
-                });
-
-                // 2. File Manager
-                registerApp('files', {
-                    title: 'Datei-Manager',
-                    icon: '📁',
-                    render: (body) => {
-                        const files = [
-                            { name: 'Dokumente', type: 'folder', size: '-' },
-                            { name: 'Bilder', type: 'folder', size: '-' },
-                            { name: 'Musik', type: 'folder', size: '-' },
-                            { name: 'Projekt_HalDo.pdf', type: 'pdf', size: '2.4 MB' },
-                            { name: 'Systembericht.txt', type: 'txt', size: '128 KB' },
-                        ];
-                        body.innerHTML = `
-                            <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;">
-                                <input type="text" placeholder="🔍 Suche ..." style="flex:1;min-width:80px;" id="file-search" />
-                                <button id="file-new" style="padding:8px 12px;">➕</button>
-                            </div>
-                            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:6px;" id="file-grid">
-                                ${files.map(f => `
-                                    <div style="background:rgba(255,255,255,0.04);padding:10px;border-radius:10px;text-align:center;">
-                                        <div style="font-size:1.8rem;">${f.type === 'folder' ? '📁' : '📄'}</div>
-                                        <div style="font-size:0.7rem;font-weight:500;margin-top:2px;word-break:break-all;">${f.name}</div>
-                                        <div style="font-size:0.6rem;color:#8899bb;">${f.size}</div>
-                                    </div>
-                                `).join('')}
-                            </div>
-                            <div style="margin-top:8px;font-size:0.7rem;color:#8899bb;border-top:1px solid rgba(255,255,255,0.04);padding-top:8px;">
-                                📊 5 Elemente · 12.4 GB frei
-                            </div>
-                        `;
-                        body.querySelector('#file-search').addEventListener('input', (e) => {
-                            const q = e.target.value.toLowerCase();
-                            body.querySelectorAll('#file-grid > div').forEach(el => {
-                                const name = el.querySelector('div:nth-child(2)')?.textContent?.toLowerCase() || '';
-                                el.style.display = name.includes(q) ? '' : 'none';
-                            });
-                        });
-                        body.querySelector('#file-new').addEventListener('click', () => {
-                            const name = prompt('📁 Neuer Ordnername:');
-                            if (name) notify(`📁 Ordner "${name}" erstellt`);
-                        });
-                    }
-                });
-
-                // 3. Settings
-                registerApp('settings', {
-                    title: 'Einstellungen',
-                    icon: '⚙️',
-                    render: (body) => {
-                        body.innerHTML = `
-                            <h3 style="margin-bottom:10px;font-size:clamp(0.9rem,2vw,1.1rem);">⚙️ Einstellungen</h3>
-                            <div style="display:flex;flex-direction:column;gap:10px;">
-                                <div><label style="display:block;font-size:0.8rem;color:#8899bb;">Theme</label>
-                                    <select id="settings-theme" style="width:100%;">
-                                        <option value="cosmic" ${state.settings.theme === 'cosmic' ? 'selected' : ''}>🌌 Cosmic</option>
-                                        <option value="dark" ${state.settings.theme === 'dark' ? 'selected' : ''}>🌙 Dark</option>
-                                        <option value="light" ${state.settings.theme === 'light' ? 'selected' : ''}>☀️ Light</option>
-                                    </select>
+            // 2. File Manager
+            registerApp('files', {
+                title: 'Datei-Manager',
+                icon: '📁',
+                render: (body) => {
+                    const files = [
+                        { name: 'Dokumente', type: 'folder', size: '-' },
+                        { name: 'Bilder', type: 'folder', size: '-' },
+                        { name: 'Musik', type: 'folder', size: '-' },
+                        { name: 'Projekt_HalDo.pdf', type: 'pdf', size: '2.4 MB' },
+                        { name: 'Systembericht.txt', type: 'txt', size: '128 KB' },
+                        { name: 'Cosmic_Wallpaper.jpg', type: 'jpg', size: '4.1 MB' },
+                        { name: 'Ezidi_Kultur.docx', type: 'docx', size: '856 KB' },
+                    ];
+                    body.innerHTML = `
+                        <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;">
+                            <input type="text" placeholder="🔍 Suche ..." style="flex:1;min-width:80px;" id="file-search" />
+                            <button id="file-new" style="padding:8px 12px;">➕</button>
+                            <button id="file-upload" style="padding:8px 12px;">📤</button>
+                        </div>
+                        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:6px;" id="file-grid">
+                            ${files.map(f => `
+                                <div style="background:rgba(255,255,255,0.04);padding:10px;border-radius:10px;text-align:center;cursor:pointer;" onclick="HalDo.notify('📄 ${f.name} geöffnet')">
+                                    <div style="font-size:1.8rem;">${f.type === 'folder' ? '📁' : '📄'}</div>
+                                    <div style="font-size:0.7rem;font-weight:500;margin-top:2px;word-break:break-all;">${f.name}</div>
+                                    <div style="font-size:0.6rem;color:#8899bb;">${f.size}</div>
                                 </div>
-                                <div><label style="display:block;font-size:0.8rem;color:#8899bb;">Sprache</label>
-                                    <select id="settings-language" style="width:100%;">
-                                        <option value="de" ${state.settings.language === 'de' ? 'selected' : ''}>🇩🇪 Deutsch</option>
-                                        <option value="en" ${state.settings.language === 'en' ? 'selected' : ''}>🇬🇧 English</option>
-                                        <option value="ezidi" ${state.settings.language === 'ezidi' ? 'selected' : ''}>𒀭 Êzîdî</option>
-                                    </select>
-                                </div>
-                                <div><label style="display:flex;align-items:center;gap:8px;font-size:0.85rem;">
-                                    <input type="checkbox" id="settings-voice" ${state.settings.voiceEnabled ? 'checked' : ''} /> Sprachsteuerung
-                                </label></div>
-                                <button id="settings-save" style="margin-top:6px;">💾 Speichern</button>
-                                <div style="font-size:0.7rem;color:#8899bb;border-top:1px solid rgba(255,255,255,0.04);padding-top:8px;">
-                                    HalDo AI OS v20.0.0
-                                </div>
-                            </div>
-                        `;
-                        body.querySelector('#settings-save').addEventListener('click', () => {
-                            state.settings.theme = body.querySelector('#settings-theme').value;
-                            state.settings.language = body.querySelector('#settings-language').value;
-                            state.settings.voiceEnabled = body.querySelector('#settings-voice').checked;
-                            applyTheme(state.settings.theme);
-                            notify('✅ Einstellungen gespeichert!');
+                            `).join('')}
+                        </div>
+                        <div style="margin-top:8px;font-size:0.7rem;color:#8899bb;border-top:1px solid rgba(255,255,255,0.04);padding-top:8px;display:flex;justify-content:space-between;">
+                            <span>📊 7 Elemente</span>
+                            <span>💾 12.4 GB frei von 32 GB</span>
+                        </div>
+                    `;
+                    body.querySelector('#file-search').addEventListener('input', (e) => {
+                        const q = e.target.value.toLowerCase();
+                        body.querySelectorAll('#file-grid > div').forEach(el => {
+                            const name = el.querySelector('div:nth-child(2)')?.textContent?.toLowerCase() || '';
+                            el.style.display = name.includes(q) ? '' : 'none';
                         });
-                    }
-                });
+                    });
+                    body.querySelector('#file-new').addEventListener('click', () => {
+                        const name = prompt('📁 Neuer Ordnername:');
+                        if (name) notify(`📁 Ordner "${name}" erstellt`);
+                    });
+                    body.querySelector('#file-upload').addEventListener('click', () => {
+                        notify('📤 Upload-Dialog geöffnet (Demo)');
+                    });
+                }
+            });
 
-                // 4. Cosmic World
-                registerApp('cosmic', {
-                    title: 'Cosmic World',
-                    icon: '🌌',
-                    render: (body) => {
-                        body.innerHTML = `
-                            <div style="text-align:center;padding:10px;">
-                                <div style="font-size:2.5rem;">🌌</div>
-                                <h3 style="margin:6px 0;font-size:clamp(0.9rem,2vw,1.1rem);">Cosmic World</h3>
-                                <p style="color:#8899bb;font-size:0.8rem;">Sterne & Nebel tanzen</p>
-                                <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:12px;">
-                                    <button id="cosmic-stars">⭐ Sterne</button>
-                                    <button id="cosmic-nebula">🌫️ Nebel</button>
-                                    <button id="cosmic-rainbow">🌈 Regenbogen</button>
-                                    <button id="cosmic-reset">🔄 Reset</button>
-                                </div>
-                                <div style="margin-top:10px;font-size:0.7rem;color:#8899bb;">
-                                    🌠 ${stars.length} Sterne · ${particles.length} Partikel
-                                </div>
+            // 3. Settings
+            registerApp('settings', {
+                title: 'Einstellungen',
+                icon: '⚙️',
+                render: (body) => {
+                    body.innerHTML = `
+                        <h3 style="margin-bottom:10px;font-size:clamp(0.9rem,2vw,1.1rem);">⚙️ System-Einstellungen</h3>
+                        <div style="display:flex;flex-direction:column;gap:10px;">
+                            <div><label style="display:block;font-size:0.8rem;color:#8899bb;">Theme</label>
+                                <select id="settings-theme" style="width:100%;">
+                                    <option value="cosmic" ${state.settings.theme === 'cosmic' ? 'selected' : ''}>🌌 Cosmic</option>
+                                    <option value="dark" ${state.settings.theme === 'dark' ? 'selected' : ''}>🌙 Dark</option>
+                                    <option value="light" ${state.settings.theme === 'light' ? 'selected' : ''}>☀️ Light</option>
+                                </select>
                             </div>
-                        `;
-                        body.querySelector('#cosmic-stars').addEventListener('click', () => {
-                            stars.forEach(s => s.brightness = 1.0);
-                            notify('⭐ Sterne heller');
-                        });
-                        body.querySelector('#cosmic-nebula').addEventListener('click', () => {
-                            particles.forEach(p => p.alpha = 0.06);
-                            notify('🌫️ Nebel intensiv');
-                        });
-                        body.querySelector('#cosmic-rainbow').addEventListener('click', () => {
-                            particles.forEach((p, i) => p.hue = (i * 10) % 360);
-                            notify('🌈 Regenbogen');
-                        });
-                        body.querySelector('#cosmic-reset').addEventListener('click', () => {
-                            location.reload();
-                        });
-                    }
-                });
+                            <div><label style="display:block;font-size:0.8rem;color:#8899bb;">Sprache</label>
+                                <select id="settings-language" style="width:100%;">
+                                    <option value="de" ${state.settings.language === 'de' ? 'selected' : ''}>🇩🇪 Deutsch</option>
+                                    <option value="en" ${state.settings.language === 'en' ? 'selected' : ''}>🇬🇧 English</option>
+                                    <option value="ezidi" ${state.settings.language === 'ezidi' ? 'selected' : ''}>𒀭 Êzîdî</option>
+                                    <option value="ku" ${state.settings.language === 'ku' ? 'selected' : ''}>🇰🇲 Kurmancî</option>
+                                </select>
+                            </div>
+                            <div><label style="display:flex;align-items:center;gap:8px;font-size:0.85rem;">
+                                <input type="checkbox" id="settings-voice" ${state.settings.voiceEnabled ? 'checked' : ''} /> Sprachsteuerung
+                            </label></div>
+                            <button id="settings-save" style="margin-top:6px;">💾 Speichern</button>
+                            <div style="font-size:0.7rem;color:#8899bb;border-top:1px solid rgba(255,255,255,0.04);padding-top:8px;">
+                                HalDo AI OS v20.0.0 · ${Object.keys(state.apps).length} Apps installiert
+                            </div>
+                        </div>
+                    `;
+                    body.querySelector('#settings-save').addEventListener('click', () => {
+                        state.settings.theme = body.querySelector('#settings-theme').value;
+                        state.settings.language = body.querySelector('#settings-language').value;
+                        state.settings.voiceEnabled = body.querySelector('#settings-voice').checked;
+                        applyTheme(state.settings.theme);
+                        notify('✅ Einstellungen gespeichert!');
+                    });
+                }
+            });
 
-                // 5. Notes
-                registerApp('notes', {
-                    title: 'Notizen',
-                    icon: '📝',
-                    render: (body) => {
-                        let notes = JSON.parse(localStorage.getItem('haldo_notes') || '[]');
-                        body.innerHTML = `
-                            <div style="display:flex;gap:6px;margin-bottom:10px;">
-                                <input type="text" id="note-input" placeholder="📝 Notiz ..." style="flex:1;" />
-                                <button id="note-add">➕</button>
+            // 4. Cosmic World (mit erweiterten Steuerungen)
+            registerApp('cosmic', {
+                title: 'Cosmic World',
+                icon: '🌌',
+                render: (body) => {
+                    body.innerHTML = `
+                        <div style="text-align:center;padding:10px;">
+                            <div style="font-size:2.5rem;">🌌</div>
+                            <h3 style="margin:6px 0;font-size:clamp(0.9rem,2vw,1.1rem);">Cosmic World</h3>
+                            <p style="color:#8899bb;font-size:0.8rem;">Galaxien · Planeten · Sonne · Sterne</p>
+                            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:12px;">
+                                <button id="cosmic-stars">⭐ Sterne</button>
+                                <button id="cosmic-galaxies">🌀 Galaxien</button>
+                                <button id="cosmic-planets">🪐 Planeten</button>
+                                <button id="cosmic-sun">☀️ Sonne</button>
+                                <button id="cosmic-rainbow">🌈 Regenbogen</button>
+                                <button id="cosmic-reset">🔄 Reset</button>
                             </div>
-                            <div id="note-list" style="display:flex;flex-direction:column;gap:4px;max-height:200px;overflow-y:auto;">
-                                ${notes.map((n, i) => `
-                                    <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.04);padding:6px 10px;border-radius:8px;font-size:0.85rem;">
-                                        <span style="word-break:break-word;flex:1;">${n}</span>
-                                        <button class="note-del" data-idx="${i}" style="background:none;border:none;color:#ff6666;cursor:pointer;padding:4px 8px;">✕</button>
-                                    </div>
-                                `).join('')}
+                            <div style="margin-top:10px;font-size:0.7rem;color:#8899bb;">
+                                🌠 ${stars.length} Sterne · ${galaxies.length} Galaxien · ${planets.length} Planeten
                             </div>
-                        `;
-                        const input = body.querySelector('#note-input');
+                            <div style="margin-top:8px;font-size:0.65rem;color:#8899bb;border-top:1px solid rgba(255,255,255,0.04);padding-top:8px;">
+                                ⚡ Dynamisches 3D-Weltraum-Erlebnis
+                            </div>
+                        </div>
+                    `;
+                    body.querySelector('#cosmic-stars').addEventListener('click', () => {
+                        stars.forEach(s => s.brightness = 1.0);
+                        notify('⭐ Sterne leuchten heller');
+                    });
+                    body.querySelector('#cosmic-galaxies').addEventListener('click', () => {
+                        galaxies.forEach(g => g.points.forEach(p => p.brightness = 0.8));
+                        notify('🌀 Galaxien intensiviert');
+                    });
+                    body.querySelector('#cosmic-planets').addEventListener('click', () => {
+                        planets.forEach(p => p.glow = p.radius * 4);
+                        notify('🪐 Planeten leuchten stärker');
+                    });
+                    body.querySelector('#cosmic-sun').addEventListener('click', () => {
+                        if (sun) sun.radius = 60;
+                        notify('☀️ Sonne vergrößert');
+                    });
+                    body.querySelector('#cosmic-rainbow').addEventListener('click', () => {
+                        planets.forEach((p, i) => p.color = `hsl(${i * 45}, 90%, 60%)`);
+                        notify('🌈 Regenbogen-Planeten');
+                    });
+                    body.querySelector('#cosmic-reset').addEventListener('click', () => {
+                        location.reload();
+                    });
+                }
+            });
 
-                        function renderNotes() {
-                            const list = body.querySelector('#note-list');
-                            list.innerHTML = notes.map((n, i) => `
+            // 5. Notes (mit Storage)
+            registerApp('notes', {
+                title: 'Notizen',
+                icon: '📝',
+                render: (body) => {
+                    let notes = JSON.parse(localStorage.getItem('haldo_notes') || '[]');
+                    body.innerHTML = `
+                        <div style="display:flex;gap:6px;margin-bottom:10px;">
+                            <input type="text" id="note-input" placeholder="📝 Notiz ..." style="flex:1;" />
+                            <button id="note-add">➕</button>
+                        </div>
+                        <div id="note-list" style="display:flex;flex-direction:column;gap:4px;max-height:200px;overflow-y:auto;">
+                            ${notes.map((n, i) => `
                                 <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.04);padding:6px 10px;border-radius:8px;font-size:0.85rem;">
                                     <span style="word-break:break-word;flex:1;">${n}</span>
                                     <button class="note-del" data-idx="${i}" style="background:none;border:none;color:#ff6666;cursor:pointer;padding:4px 8px;">✕</button>
                                 </div>
-                            `).join('');
-                            list.querySelectorAll('.note-del').forEach(btn => {
-                                btn.addEventListener('click', () => {
-                                    const idx = parseInt(btn.dataset.idx);
-                                    notes.splice(idx, 1);
-                                    localStorage.setItem('haldo_notes', JSON.stringify(notes));
-                                    renderNotes();
-                                    notify('🗑️ Gelöscht');
-                                });
+                            `).join('')}
+                        </div>
+                    `;
+                    const input = body.querySelector('#note-input');
+
+                    function renderNotes() {
+                        const list = body.querySelector('#note-list');
+                        list.innerHTML = notes.map((n, i) => `
+                            <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.04);padding:6px 10px;border-radius:8px;font-size:0.85rem;">
+                                <span style="word-break:break-word;flex:1;">${n}</span>
+                                <button class="note-del" data-idx="${i}" style="background:none;border:none;color:#ff6666;cursor:pointer;padding:4px 8px;">✕</button>
+                            </div>
+                        `).join('');
+                        list.querySelectorAll('.note-del').forEach(btn => {
+                            btn.addEventListener('click', () => {
+                                const idx = parseInt(btn.dataset.idx);
+                                notes.splice(idx, 1);
+                                localStorage.setItem('haldo_notes', JSON.stringify(notes));
+                                renderNotes();
+                                notify('🗑️ Gelöscht');
                             });
-                        }
-
-                        body.querySelector('#note-add').addEventListener('click', () => {
-                            const val = input.value.trim();
-                            if (!val) return;
-                            notes.push(val);
-                            localStorage.setItem('haldo_notes', JSON.stringify(notes));
-                            input.value = '';
-                            renderNotes();
                         });
-                        input.addEventListener('keydown', (e) => { if (e.key === 'Enter') body.querySelector('#note-add')
-                                .click(); });
                     }
-                });
 
-                // 6. Terminal
-                registerApp('terminal', {
-                    title: 'Terminal',
-                    icon: '⌨️',
-                    render: (body) => {
-                        body.innerHTML = `
-                            <div style="background:#050510;border-radius:8px;padding:10px;font-family:'Courier New',monospace;font-size:0.75rem;min-height:80px;max-height:200px;overflow-y:auto;" id="terminal-output">
-                                <div style="color:#44ff88;">$ HalDo AI OS v20.0.0</div>
-                                <div style="color:#8899bb;">$ ${navigator.platform}</div>
-                                <div style="color:#44ff88;">$ ready ></div>
-                            </div>
-                            <div style="display:flex;gap:6px;margin-top:6px;">
-                                <input type="text" id="terminal-input" placeholder="$ Befehl ..." style="flex:1;font-family:'Courier New',monospace;font-size:0.75rem;" />
-                                <button id="terminal-exec" style="padding:6px 12px;">⏎</button>
-                            </div>
-                        `;
-                        const output = body.querySelector('#terminal-output');
-                        const input = body.querySelector('#terminal-input');
+                    body.querySelector('#note-add').addEventListener('click', () => {
+                        const val = input.value.trim();
+                        if (!val) return;
+                        notes.push(val);
+                        localStorage.setItem('haldo_notes', JSON.stringify(notes));
+                        input.value = '';
+                        renderNotes();
+                    });
+                    input.addEventListener('keydown', (e) => { if (e.key === 'Enter') body.querySelector('#note-add')
+                            .click(); });
+                }
+            });
 
-                        function exec(cmd) {
-                            const line = document.createElement('div');
-                            line.style.color = '#44ff88';
-                            line.textContent = `$ ${cmd}`;
-                            output.appendChild(line);
-                            let response = '';
-                            if (cmd === 'help') response = 'help, version, apps, theme, clear, echo, date, whoami';
-                            else if (cmd === 'version') response = 'HalDo AI OS 20.0.0 | Kernel 5.2.1';
-                            else if (cmd === 'apps') response = 'Apps: ' + Object.keys(state.apps).join(', ');
-                            else if (cmd === 'theme') response = `Theme: ${state.settings.theme}`;
-                            else if (cmd === 'clear') { output.innerHTML = ''; return; }
-                            else if (cmd.startsWith('echo ')) response = cmd.substring(5);
-                            else if (cmd === 'date') response = new Date().toLocaleString();
-                            else if (cmd === 'whoami') response = 'haldo@cosmic';
-                            else if (cmd === '') return;
-                            else response = `❌ Unbekannt: "${cmd}". Tipp: help`;
-                            const respLine = document.createElement('div');
-                            respLine.style.color = '#8899bb';
-                            respLine.textContent = response;
-                            output.appendChild(respLine);
-                            output.scrollTop = output.scrollHeight;
-                        }
+            // 6. Terminal
+            registerApp('terminal', {
+                title: 'Terminal',
+                icon: '⌨️',
+                render: (body) => {
+                    body.innerHTML = `
+                        <div style="background:#050510;border-radius:8px;padding:10px;font-family:'Courier New',monospace;font-size:0.75rem;min-height:80px;max-height:200px;overflow-y:auto;" id="terminal-output">
+                            <div style="color:#44ff88;">$ HalDo AI OS v20.0.0</div>
+                            <div style="color:#8899bb;">$ 🌌 Cosmic World aktiv</div>
+                            <div style="color:#8899bb;">$ ${navigator.platform}</div>
+                            <div style="color:#44ff88;">$ ready ></div>
+                        </div>
+                        <div style="display:flex;gap:6px;margin-top:6px;">
+                            <input type="text" id="terminal-input" placeholder="$ Befehl ..." style="flex:1;font-family:'Courier New',monospace;font-size:0.75rem;" />
+                            <button id="terminal-exec" style="padding:6px 12px;">⏎</button>
+                        </div>
+                    `;
+                    const output = body.querySelector('#terminal-output');
+                    const input = body.querySelector('#terminal-input');
 
-                        body.querySelector('#terminal-exec').addEventListener('click', () => {
-                            const val = input.value.trim();
-                            if (val) exec(val);
-                            input.value = '';
-                        });
-                        input.addEventListener('keydown', (e) => { if (e.key === 'Enter') body.querySelector('#terminal-exec')
-                                .click(); });
+                    function exec(cmd) {
+                        const line = document.createElement('div');
+                        line.style.color = '#44ff88';
+                        line.textContent = `$ ${cmd}`;
+                        output.appendChild(line);
+                        let response = '';
+                        if (cmd === 'help') response =
+                            'help, version, apps, theme, clear, echo, date, whoami, sysinfo, ezidi, kurdish, galaxy, planets, sun';
+                        else if (cmd === 'version') response = 'HalDo AI OS 20.0.0 | Kernel 5.2.1 | Cosmic Engine 3.0';
+                        else if (cmd === 'apps') response = '📱 Apps: ' + Object.keys(state.apps).length + ' installiert';
+                        else if (cmd === 'theme') response = `🎨 Theme: ${state.settings.theme}`;
+                        else if (cmd === 'clear') { output.innerHTML = ''; return; }
+                        else if (cmd.startsWith('echo ')) response = cmd.substring(5);
+                        else if (cmd === 'date') response = new Date().toLocaleString();
+                        else if (cmd === 'whoami') response = 'haldo@cosmic';
+                        else if (cmd === 'sysinfo') response =
+                            `OS: HalDo AI OS 20.0.0\nPlatform: ${navigator.platform}\nRAM: ${navigator.deviceMemory || '?'} GB\nTheme: ${state.settings.theme}\nStars: ${stars.length}\nGalaxies: ${galaxies.length}\nPlanets: ${planets.length}`;
+                        else if (cmd === 'ezidi') response =
+                            '🟡 Êzîdî: Eine der ältesten monotheistischen Religionen. Sprache: Kurmanji (Kurdisch). Kultur: reich an Traditionen, Musik und Poesie.';
+                        else if (cmd === 'kurdish') response =
+                            '🇰🇲 Kurdisch (Kurmanji) wird von Êzîdî und Kurden gesprochen. Die Sprache hat mehrere Dialekte und eine reiche literarische Tradition.';
+                        else if (cmd === 'galaxy' || cmd === 'galaxies') response =
+                            `🌀 ${galaxies.length} Galaxien im sichtbaren Universum. Jede enthält Milliarden von Sternen.`;
+                        else if (cmd === 'planets') response =
+                            `🪐 ${planets.length} Planeten: ${planets.map(p => p.name).join(', ')}. Unser Sonnensystem ist nur eines von vielen.`;
+                        else if (cmd === 'sun') response =
+                            `☀️ Die Sonne ist ein gelber Zwergstern. Ihr Durchmesser beträgt etwa 1,4 Millionen km. Die Oberflächentemperatur beträgt ca. 5.500°C.`;
+                        else if (cmd === '') return;
+                        else response = `❌ Unbekannt: "${cmd}". Tipp: help`;
+                        const respLine = document.createElement('div');
+                        respLine.style.color = '#8899bb';
+                        respLine.textContent = response;
+                        output.appendChild(respLine);
+                        output.scrollTop = output.scrollHeight;
                     }
-                });
 
-                // 7. Calendar
-                registerApp('calendar', {
-                    title: 'Kalender',
-                    icon: '📅',
-                    render: (body) => {
-                        const now = new Date();
-                        const today = now.getDate();
-                        const month = now.toLocaleString('de', { month: 'long' });
-                        const year = now.getFullYear();
-                        const days = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
-                        body.innerHTML = `
-                            <div style="text-align:center;">
-                                <div style="font-size:1.2rem;font-weight:600;">${month} ${year}</div>
-                                <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:8px;font-size:0.7rem;color:#8899bb;">
-                                    ${days.map(d => `<div style="text-align:center;">${d}</div>`).join('')}
-                                </div>
-                                <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:4px;">
-                                    ${Array.from({length: 30}, (_, i) => i + 1).map(d => `
-                                        <div style="text-align:center;padding:6px 0;border-radius:8px;${d === today ? 'background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff;' : ''}font-size:0.85rem;">
-                                            ${d}
-                                        </div>
-                                    `).join('')}
-                                </div>
-                                <div style="margin-top:8px;font-size:0.75rem;color:#8899bb;">📌 Heute: ${today}.${now.getMonth()+1}.${year}</div>
+                    body.querySelector('#terminal-exec').addEventListener('click', () => {
+                        const val = input.value.trim();
+                        if (val) exec(val);
+                        input.value = '';
+                    });
+                    input.addEventListener('keydown', (e) => { if (e.key === 'Enter') body.querySelector('#terminal-exec')
+                            .click(); });
+                }
+            });
+
+            // 7. Calendar
+            registerApp('calendar', {
+                title: 'Kalender',
+                icon: '📅',
+                render: (body) => {
+                    const now = new Date();
+                    const today = now.getDate();
+                    const month = now.toLocaleString('de', { month: 'long' });
+                    const year = now.getFullYear();
+                    const days = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
+                    body.innerHTML = `
+                        <div style="text-align:center;">
+                            <div style="font-size:1.2rem;font-weight:600;">${month} ${year}</div>
+                            <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:8px;font-size:0.7rem;color:#8899bb;">
+                                ${days.map(d => `<div style="text-align:center;">${d}</div>`).join('')}
                             </div>
-                        `;
-                    }
-                });
-
-                // 8. Music
-                registerApp('music', {
-                    title: 'Musik',
-                    icon: '🎵',
-                    render: (body) => {
-                        const songs = [
-                            '🌌 Cosmic Dreams',
-                            '🚀 Space Odyssey',
-                            '💫 Starlight',
-                            '🌙 Lunar Echo',
-                            '☀️ Solar Flare'
-                        ];
-                        body.innerHTML = `
-                            <div style="display:flex;flex-direction:column;gap:6px;">
-                                <div style="display:flex;gap:10px;justify-content:center;font-size:1.8rem;padding:8px 0;">
-                                    <span style="cursor:pointer;">⏮</span>
-                                    <span style="cursor:pointer;">▶️</span>
-                                    <span style="cursor:pointer;">⏭</span>
-                                    <span style="cursor:pointer;">🔊</span>
-                                </div>
-                                <div style="text-align:center;font-size:0.8rem;color:#8899bb;">🎵 Jetzt spielt: ${songs[0]}</div>
-                                <div style="margin-top:6px;">
-                                    ${songs.map(s => `
-                                        <div style="padding:6px 10px;background:rgba(255,255,255,0.03);border-radius:8px;margin:3px 0;font-size:0.8rem;display:flex;justify-content:space-between;">
-                                            <span>${s}</span>
-                                            <span style="color:#8899bb;">▶</span>
-                                        </div>
-                                    `).join('')}
-                                </div>
-                            </div>
-                        `;
-                    }
-                });
-
-                // App World
-                registerApp('appworld', {
-                    title: 'App World',
-                    icon: '📱',
-                    render: (body) => {
-                        const apps = Object.entries(state.apps).filter(([id]) => id !== 'appworld');
-                        body.innerHTML = `
-                            <h3 style="margin-bottom:10px;">📱 HalDo App World</h3>
-                            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;">
-                                ${apps.map(([id, app]) => `
-                                    <div style="background:rgba(255,255,255,0.04);padding:12px;border-radius:10px;text-align:center;cursor:pointer;" onclick="HalDo.launchApp('${id}')">
-                                        <div style="font-size:1.8rem;">${app.icon}</div>
-                                        <div style="font-size:0.7rem;margin-top:4px;">${app.title}</div>
+                            <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:4px;">
+                                ${Array.from({length: 30}, (_, i) => i + 1).map(d => `
+                                    <div style="text-align:center;padding:6px 0;border-radius:8px;${d === today ? 'background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff;' : ''}font-size:0.85rem;cursor:pointer;" onclick="HalDo.notify('📅 ${d}.${now.getMonth()+1}.${year}')">
+                                        ${d}
                                     </div>
                                 `).join('')}
                             </div>
-                            <div style="margin-top:12px;font-size:0.7rem;color:#8899bb;border-top:1px solid rgba(255,255,255,0.04);padding-top:8px;">
-                                ${apps.length} Apps installiert · HalDo AI OS v20.0.0
+                            <div style="margin-top:8px;font-size:0.75rem;color:#8899bb;">📌 Heute: ${today}.${now.getMonth()+1}.${year}</div>
+                            <div style="margin-top:4px;font-size:0.7rem;color:#8899bb;border-top:1px solid rgba(255,255,255,0.04);padding-top:8px;">
+                                🟡 Êzîdî: Çarşema Sor (Mittwoch der Roten) · 12. April
                             </div>
-                        `;
-                    }
-                });
-            }
+                        </div>
+                    `;
+                }
+            });
+
+            // 8. Music
+            registerApp('music', {
+                title: 'Musik',
+                icon: '🎵',
+                render: (body) => {
+                    const songs = [
+                        '🌌 Cosmic Dreams - HalDo',
+                        '🚀 Space Odyssey - HalDo',
+                        '💫 Starlight - HalDo',
+                        '🌙 Lunar Echo - HalDo',
+                        '☀️ Solar Flare - HalDo',
+                        '🟡 Ezidi Melody - Traditional',
+                        '🇰🇲 Kurdish Dance - HalDo'
+                    ];
+                    body.innerHTML = `
+                        <div style="display:flex;flex-direction:column;gap:6px;">
+                            <div style="display:flex;gap:10px;justify-content:center;font-size:1.8rem;padding:8px 0;">
+                                <span style="cursor:pointer;" onclick="HalDo.notify('⏮ Zurück')">⏮</span>
+                                <span style="cursor:pointer;" onclick="HalDo.notify('▶️ Abspielen')">▶️</span>
+                                <span style="cursor:pointer;" onclick="HalDo.notify('⏭ Weiter')">⏭</span>
+                                <span style="cursor:pointer;" onclick="HalDo.notify('🔊 Lautstärke')">🔊</span>
+                            </div>
+                            <div style="text-align:center;font-size:0.8rem;color:#8899bb;">🎵 Jetzt spielt: ${songs[0]}</div>
+                            <div style="margin-top:6px;">
+                                ${songs.map(s => `
+                                    <div style="padding:6px 10px;background:rgba(255,255,255,0.03);border-radius:8px;margin:3px 0;font-size:0.8rem;display:flex;justify-content:space-between;cursor:pointer;" onclick="HalDo.notify('▶️ ${s}')">
+                                        <span>${s}</span>
+                                        <span style="color:#8899bb;">▶</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+
+            // 9. App World
+            registerApp('appworld', {
+                title: 'App World',
+                icon: '📱',
+                render: (body) => {
+                    const apps = Object.entries(state.apps).filter(([id]) => id !== 'appworld');
+                    body.innerHTML = `
+                        <h3 style="margin-bottom:10px;font-size:clamp(0.9rem,2vw,1.1rem);">📱 HalDo App World</h3>
+                        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;max-height:300px;overflow-y:auto;">
+                            ${apps.map(([id, app]) => `
+                                <div style="background:rgba(255,255,255,0.04);padding:12px;border-radius:10px;text-align:center;cursor:pointer;transition:0.2s;" 
+                                     onclick="HalDo.launchApp('${id}')"
+                                     onmouseover="this.style.background='rgba(255,255,255,0.08)'" 
+                                     onmouseout="this.style.background='rgba(255,255,255,0.04)'">
+                                    <div style="font-size:1.8rem;">${app.icon}</div>
+                                    <div style="font-size:0.7rem;margin-top:4px;">${app.title}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div style="margin-top:10px;font-size:0.7rem;color:#8899bb;border-top:1px solid rgba(255,255,255,0.04);padding-top:8px;display:flex;justify-content:space-between;">
+                            <span>📱 ${apps.length} Apps installiert</span>
+                            <span>HalDo AI OS v20.0.0</span>
+                        </div>
+                    `;
+                }
+            });
 
             // ===== CLOCK =====
             function updateClock() {
@@ -1380,20 +1715,22 @@
                 }
             }
 
-            // ===== ABOUT =====
-            function showAbout() {
-                notify('⟡ HalDo AI OS v20.0.0 — Cosmic Intelligent OS\n💙 Für alle Geräte optimiert');
+            // ===== MENUS =====
+            function showSystemMenu() {
+                notify(
+                    '⚙️ System-Menü: Dateien · Einstellungen · Apps · Suche · AI · Sprache · Tastatur · Êzîdî · Theme · Benutzer · Datenschutz · Sicherheit · Speicher · Benachrichtigungen · Updates · Backup · Wiederherstellung · Systeminfo'
+                    );
+                launchApp('settings');
             }
 
-            // ===== SHOW APP WORLD =====
             function showAppWorld() {
                 launchApp('appworld');
             }
 
-            // ===== SHOW SYSTEM MENU =====
-            function showSystemMenu() {
-                notify('⚙️ System-Menü: Dateien · Einstellungen · Apps · AI · Sprache · Theme · Speicher · Updates');
-                launchApp('settings');
+            function showAbout() {
+                notify(
+                    '⟡ HalDo AI OS v20.0.0 — Cosmic Intelligent OS\n💙 Für alle Geräte optimiert\n🌌 Mit Galaxien, Planeten, Sonne & Sternen\n🟡 Êzîdî · Kurdisch · Deutsch · Englisch\n📱 ${Object.keys(state.apps).length} Apps installiert'
+                    );
             }
 
             // ===== INIT =====
@@ -1402,8 +1739,11 @@
                 const savedTheme = localStorage.getItem('haldo_theme') || 'cosmic';
                 applyTheme(savedTheme);
 
-                // Apps definieren
-                defineApps();
+                // Alle 84 Apps generieren
+                generateAllApps();
+
+                // Spezial-Apps überschreiben (mit voller Funktionalität)
+                // (Die speziellen Renderer werden weiter oben definiert)
 
                 // Cosmic starten
                 initCosmic();
@@ -1442,6 +1782,7 @@
 
                 console.log('⟡ HalDo AI OS v20.0.0');
                 console.log('🌌 Cosmic Intelligent OS');
+                console.log('📱 ' + Object.keys(state.apps).length + ' Apps installiert');
                 console.log('💡 HalDo.launchApp("ai")');
             }
 
