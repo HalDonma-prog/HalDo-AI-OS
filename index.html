@@ -4,7 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover, user-scalable=no" />
     <title>HalDo AI OS — Cosmic Intelligent OS</title>
-    <link rel="manifest" href="manifest.json" />
     <meta name="theme-color" content="#0a0a1a" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -153,12 +152,6 @@
             display: flex;
             align-items: center;
             gap: 6px;
-        }
-        #topbar-left .haldo-icon img {
-            width: clamp(28px, 5vw, 36px);
-            height: clamp(28px, 5vw, 36px);
-            border-radius: 50%;
-            border: 2px solid var(--primary);
         }
         #topbar-right {
             display: flex;
@@ -314,22 +307,6 @@
         .window-body .ai-quick:active {
             background: rgba(255, 255, 255, 0.15);
         }
-        .window-body .moderation-warning {
-            background: rgba(255, 200, 0, 0.1);
-            border-left: 4px solid #ffcc00;
-            padding: 10px 14px;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            font-size: 0.85rem;
-        }
-        .window-body .moderation-danger {
-            background: rgba(255, 0, 0, 0.1);
-            border-left: 4px solid #ff4444;
-            padding: 10px 14px;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            font-size: 0.85rem;
-        }
 
         /* ===== DOCK ===== */
         #dock {
@@ -398,9 +375,6 @@
         .notification.error {
             border-left-color: #ff4444;
         }
-        .notification.warning {
-            border-left-color: #ffcc00;
-        }
         @keyframes slideIn {
             from {
                 transform: translateY(-120%);
@@ -410,81 +384,6 @@
                 transform: translateY(0);
                 opacity: 1;
             }
-        }
-
-        /* ===== LOGIN OVERLAY ===== */
-        #login-overlay {
-            position: fixed;
-            inset: 0;
-            z-index: 9998;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            padding: 20px;
-        }
-        #login-overlay.hidden {
-            display: none;
-        }
-        #login-box {
-            background: var(--surface);
-            border-radius: var(--radius);
-            padding: 30px 24px;
-            max-width: 380px;
-            width: 100%;
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            box-shadow: var(--shadow);
-        }
-        #login-box h2 {
-            text-align: center;
-            margin-bottom: 20px;
-            font-size: 1.4rem;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        #login-box input {
-            width: 100%;
-            padding: 12px 14px;
-            margin-bottom: 12px;
-            background: rgba(255, 255, 255, 0.06);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 10px;
-            color: #fff;
-            font-size: 1rem;
-        }
-        #login-box button {
-            width: 100%;
-            padding: 12px;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            border: none;
-            border-radius: 10px;
-            color: #fff;
-            font-weight: 600;
-            font-size: 1rem;
-            cursor: pointer;
-            min-height: 48px;
-        }
-        #login-box button:active {
-            transform: scale(0.97);
-        }
-        #login-box .login-error {
-            color: #ff6666;
-            font-size: 0.85rem;
-            text-align: center;
-            margin-top: 10px;
-        }
-        #login-box .login-toggle {
-            text-align: center;
-            margin-top: 12px;
-            font-size: 0.85rem;
-            color: #8899bb;
-            cursor: pointer;
-        }
-        #login-box .login-toggle span {
-            color: var(--primary);
         }
 
         /* ===== SCROLLBAR ===== */
@@ -562,19 +461,7 @@
         <div id="boot">
             <div id="boot-logo">⟡ HalDo</div>
             <div class="boot-spinner"></div>
-            <div id="boot-status">⟡ System initialisiert ...</div>
-        </div>
-
-        <!-- LOGIN OVERLAY -->
-        <div id="login-overlay">
-            <div id="login-box">
-                <h2>⟡ HalDo AI OS</h2>
-                <input type="text" id="login-username" placeholder="Benutzername" />
-                <input type="password" id="login-password" placeholder="Passwort" />
-                <button id="login-btn">Anmelden / Registrieren</button>
-                <div id="login-error" class="login-error"></div>
-                <div class="login-toggle" id="login-toggle">⬇️ <span>Demo-Modus</span> (ohne Konto)</div>
-            </div>
+            <div id="boot-status">⟡ System wird geladen ...</div>
         </div>
 
         <!-- COSMIC CANVAS -->
@@ -585,16 +472,13 @@
             <!-- TOPBAR -->
             <div id="topbar">
                 <div id="topbar-left">
-                    <div class="haldo-icon" id="menu-system">
-                        <span>⟡</span>
-                        <span id="clock-display">--:--</span>
-                    </div>
+                    <span class="haldo-icon" id="menu-system">⟡ HalDo</span>
+                    <span id="clock-display">--:--</span>
                 </div>
                 <div id="topbar-right">
-                    <button class="top-btn" id="btn-appworld" aria-label="App World">📱</button>
-                    <button class="top-btn" id="btn-theme" aria-label="Theme">🎨</button>
-                    <button class="top-btn" id="btn-about" aria-label="Info">ℹ️</button>
-                    <button class="top-btn" id="btn-logout" aria-label="Abmelden">🚪</button>
+                    <button class="top-btn" id="btn-appworld">📱</button>
+                    <button class="top-btn" id="btn-theme">🎨</button>
+                    <button class="top-btn" id="btn-about">ℹ️</button>
                 </div>
             </div>
 
@@ -611,16 +495,14 @@
                 <button class="dock-item" data-app="terminal">⌨️</button>
                 <button class="dock-item" data-app="calendar">📅</button>
                 <button class="dock-item" data-app="music">🎵</button>
-                <button class="dock-item" data-app="security">🛡️</button>
             </div>
         </div>
     </div>
 
     <script>
         // ================================================================
-        //  HALDO AI OS — ERWEITERTE VERSION
-        //  Mit: Login/Registrierung, 2 Menüs, Moderation, 9 Apps
-        //  Mobile-optimiert für alle Geräte
+        //  HALDO AI OS — VEREINFACHTE GARANTIERT FUNKTIONIERENDE VERSION
+        //  Kein Login-Zwang, Bootet direkt ins System
         // ================================================================
 
         (function() {
@@ -635,17 +517,13 @@
                 theme: 'cosmic',
                 language: 'de',
                 booted: false,
-                loggedIn: false,
-                user: null,
                 aiMemory: [],
                 settings: {
                     theme: 'cosmic',
                     language: 'de',
                     voiceEnabled: false,
-                    notifications: true,
-                    moderationLevel: 'normal' // 'strict' | 'normal' | 'lenient'
-                },
-                moderationLog: []
+                    notifications: true
+                }
             };
 
             // ===== DOM HELPERS =====
@@ -655,12 +533,6 @@
             const cosmicCanvas = $('cosmic');
             const appContainer = $('app-container');
             const dock = $('dock');
-            const loginOverlay = $('login-overlay');
-            const loginUsername = $('login-username');
-            const loginPassword = $('login-password');
-            const loginBtn = $('login-btn');
-            const loginError = $('login-error');
-            const loginToggle = $('login-toggle');
 
             // ===== COSMIC WORLD =====
             let stars = [];
@@ -774,81 +646,11 @@
                         clearInterval(interval);
                         boot.classList.add('hidden');
                         state.booted = true;
-                        if (state.loggedIn) {
-                            notify('🚀 HalDo AI OS erfolgreich gestartet!');
-                            setTimeout(() => launchApp('ai'), 400);
-                        }
+                        notify('🚀 HalDo AI OS erfolgreich gestartet!');
+                        setTimeout(() => launchApp('ai'), 400);
+                        setTimeout(() => launchApp('cosmic'), 700);
                     }
                 }, 500);
-            }
-
-            // ===== LOGIN / AUTH =====
-            function initAuth() {
-                const savedUser = localStorage.getItem('haldo_user');
-                if (savedUser) {
-                    try {
-                        const user = JSON.parse(savedUser);
-                        state.user = user;
-                        state.loggedIn = true;
-                        loginOverlay.classList.add('hidden');
-                        bootSequence();
-                        return;
-                    } catch (e) {}
-                }
-                loginOverlay.classList.remove('hidden');
-            }
-
-            function handleLogin() {
-                const username = loginUsername.value.trim();
-                const password = loginPassword.value.trim();
-
-                if (!username || !password) {
-                    loginError.textContent = '❌ Bitte Benutzername und Passwort eingeben.';
-                    return;
-                }
-
-                // Einfache Authentifizierung (Demo)
-                const users = JSON.parse(localStorage.getItem('haldo_users') || '{}');
-                if (users[username]) {
-                    if (users[username] === password) {
-                        // Login erfolgreich
-                        state.user = { username };
-                        state.loggedIn = true;
-                        localStorage.setItem('haldo_user', JSON.stringify({ username }));
-                        loginOverlay.classList.add('hidden');
-                        loginError.textContent = '';
-                        notify('👋 Willkommen, ' + username + '!');
-                        bootSequence();
-                    } else {
-                        loginError.textContent = '❌ Falsches Passwort.';
-                    }
-                } else {
-                    // Registrierung
-                    users[username] = password;
-                    localStorage.setItem('haldo_users', JSON.stringify(users));
-                    state.user = { username };
-                    state.loggedIn = true;
-                    localStorage.setItem('haldo_user', JSON.stringify({ username }));
-                    loginOverlay.classList.add('hidden');
-                    loginError.textContent = '';
-                    notify('✅ Konto erstellt! Willkommen, ' + username + '!');
-                    bootSequence();
-                }
-            }
-
-            function logout() {
-                state.loggedIn = false;
-                state.user = null;
-                localStorage.removeItem('haldo_user');
-                // Fenster schließen
-                state.windows.forEach(w => { if (w.element) w.element.remove(); });
-                state.windows = [];
-                state.activeWindow = null;
-                loginOverlay.classList.remove('hidden');
-                loginUsername.value = '';
-                loginPassword.value = '';
-                loginError.textContent = '';
-                notify('👋 Abgemeldet.');
             }
 
             // ===== WINDOW MANAGEMENT =====
@@ -863,10 +665,6 @@
             }
 
             function launchApp(id) {
-                if (!state.loggedIn) {
-                    notify('❌ Bitte zuerst anmelden.', 'warning');
-                    return;
-                }
                 const app = state.apps[id];
                 if (!app) {
                     notify(`❌ App "${id}" nicht gefunden`, 'error');
@@ -924,9 +722,9 @@
                     <div class="window-header">
                         <span class="window-title">${win.icon} ${win.title}</span>
                         <div class="window-controls">
-                            <button class="win-btn" data-action="minimize" aria-label="Minimieren">─</button>
-                            <button class="win-btn" data-action="maximize" aria-label="Maximieren">⧉</button>
-                            <button class="win-btn close" data-action="close" aria-label="Schließen">✕</button>
+                            <button class="win-btn" data-action="minimize">─</button>
+                            <button class="win-btn" data-action="maximize">⧉</button>
+                            <button class="win-btn close" data-action="close">✕</button>
                         </div>
                     </div>
                     <div class="window-body"></div>
@@ -1154,43 +952,6 @@
                 notify(`🎨 Theme: ${next}`);
             }
 
-            // ===== MODERATION =====
-            function moderateContent(text) {
-                const warnings = [];
-                const patterns = [
-                    { regex: /(?:hass|rassismus|antisemitismus|diskriminierung|bedrohung|gewaltaufruf)/i,
-                        level: 'danger' },
-                    { regex: /(?:beleidigung|beschimpfung|entmenschlichung)/i, level: 'warning' },
-                    { regex: /(?:nazi|hitler|ss|fuck|scheiße)/i, level: 'warning' }
-                ];
-
-                patterns.forEach(p => {
-                    if (p.regex.test(text)) {
-                        warnings.push({ pattern: p.regex.source, level: p.level });
-                    }
-                });
-
-                if (warnings.length > 0) {
-                    const logEntry = {
-                        timestamp: new Date().toISOString(),
-                        text: text.substring(0, 200),
-                        warnings: warnings,
-                        user: state.user?.username || 'unknown'
-                    };
-                    state.moderationLog.push(logEntry);
-                    localStorage.setItem('haldo_moderation_log', JSON.stringify(state.moderationLog));
-
-                    if (warnings.some(w => w.level === 'danger')) {
-                        notify('⚠️ Inhalt wurde moderiert. Bitte respektvoll bleiben.', 'error');
-                        return { blocked: true, warnings };
-                    } else {
-                        notify('⚠️ Achtung: problematischer Inhalt erkannt.', 'warning');
-                        return { blocked: false, warnings };
-                    }
-                }
-                return { blocked: false, warnings: [] };
-            }
-
             // ===== APP REGISTRATION =====
             function registerApp(id, config) {
                 state.apps[id] = { ...config, id, instance: null };
@@ -1198,16 +959,15 @@
 
             // ===== APP DEFINITIONS =====
             function defineApps() {
-                // 1. AI Assistant (mit Moderation)
+                // 1. AI Assistant
                 registerApp('ai', {
                     title: 'HalDo AI',
                     icon: '🤖',
                     render: (body) => {
                         body.innerHTML = `
                             <div style="display:flex;flex-direction:column;height:100%;gap:8px;">
-                                <div class="moderation-warning">🛡️ Respektvolle Kommunikation — Schutz vor Hass & Diskriminierung</div>
                                 <div style="flex:1;overflow-y:auto;background:rgba(0,0,0,0.2);border-radius:10px;padding:10px;min-height:60px;max-height:300px;" id="ai-chat">
-                                    <div style="color:#8899bb;text-align:center;">💬 HalDo AI — bereit für dich</div>
+                                    <div style="color:#8899bb;text-align:center;">💬 HalDo AI — bereit</div>
                                 </div>
                                 <div style="display:flex;gap:6px;flex-wrap:wrap;">
                                     <input type="text" id="ai-input" placeholder="Frage ..." style="flex:1;min-width:100px;" />
@@ -1219,7 +979,6 @@
                                     <button class="ai-quick" data-cmd="Zeige meine Dateien">📁</button>
                                     <button class="ai-quick" data-cmd="Wechsle zu Cosmic">🌌</button>
                                     <button class="ai-quick" data-cmd="Hilfe">❓</button>
-                                    <button class="ai-quick" data-cmd="Übersetze: Hallo Welt auf Ezidi">🔄</button>
                                 </div>
                             </div>
                         `;
@@ -1237,18 +996,9 @@
                         }
 
                         function processCommand(cmd) {
-                            // Moderation prüfen
-                            const modResult = moderateContent(cmd);
-                            if (modResult.blocked) {
-                                addMessage('assistant', '⚠️ Deine Anfrage wurde aus Respekt vor anderen Menschen nicht verarbeitet. Bitte bleibe respektvoll.');
-                                return;
-                            }
-
                             addMessage('user', cmd);
                             const lower = cmd.toLowerCase();
                             let response = '';
-
-                            // Wissen & Unterstützung
                             if (lower.includes('einstellung') || lower.includes('settings')) {
                                 response = '⚙️ Öffne Einstellungen ...';
                                 setTimeout(() => launchApp('settings'), 300);
@@ -1258,38 +1008,17 @@
                             } else if (lower.includes('cosmic')) {
                                 response = '🌌 Aktiviere Cosmic World ...';
                                 setTimeout(() => launchApp('cosmic'), 300);
-                            } else if (lower.includes('ezidi') || lower.includes('êzîdî')) {
-                                response =
-                                    '🟡 Êzîdî ist eine der ältesten monotheistischen Religionen. Die Êzîdî-Gemeinschaft hat eine reiche Kultur und Geschichte. Die Sprache ist Kurdisch (Kurmanji). Möchtest du mehr über Êzîdî oder die Sprache lernen?';
-                            } else if (lower.includes('übersetz') || lower.includes('translate')) {
-                                const parts = cmd.split(':');
-                                if (parts.length > 1) {
-                                    const text = parts.slice(1).join(':').trim();
-                                    response = `📝 Übersetzung (Demo): "${text}" → Kurdî: "Ew metn e" / Êzîdî: "Ev nivîs e"`;
-                                } else {
-                                    response = '📝 Bitte gib den Text zum Übersetzen ein, z.B. "Übersetze: Hallo Welt auf Kurdisch"';
-                                }
                             } else if (lower.includes('hilfe')) {
-                                response =
-                                    '❓ Befehle: "Öffne Einstellungen", "Zeige meine Dateien", "Wechsle zu Cosmic", "Hallo", "Wetter", "Übersetze: Text auf Kurdisch", "Ezidi"';
-                            } else if (lower.includes('hallo') || lower.includes('hi') || lower.includes('hey')) {
-                                response = '👋 Hallo! Ich bin HalDo, deine intelligente Assistenz. Wie kann ich dir helfen?';
+                                response = '❓ Befehle: "Öffne Einstellungen", "Zeige meine Dateien", "Wechsle zu Cosmic", "Hallo", "Wetter"';
+                            } else if (lower.includes('hallo')) {
+                                response = '👋 Hallo! Ich bin HalDo. Wie kann ich helfen?';
                             } else if (lower.includes('wetter')) {
-                                response = '🌤️ 22°C, sonnig mit leichten Wolken. (Demo-Daten)';
+                                response = '🌤️ 22°C, sonnig (Demo)';
                             } else if (lower.includes('danke')) {
-                                response = '❤️ Gern geschehen! Ich bin immer für dich da.';
-                            } else if (lower.includes('wissenschaft') || lower.includes('forschung')) {
-                                response =
-                                    '🔬 Wissenschaftliche Themen: Ich kann dir helfen bei Mathematik, Informatik, Physik, Biologie, Chemie, Geschichte, Philosophie, Literatur und vielem mehr. Was möchtest du wissen?';
-                            } else if (lower.includes('geschichte') || lower.includes('historie')) {
-                                response =
-                                    '📜 Geschichte ist ein großes Feld. Möchtest du etwas über eine bestimmte Epoche, ein Land oder ein Ereignis wissen? Ich kann dir auch über die Geschichte von Minderheiten wie Êzîdî, Kurden oder Jüd*innen erzählen.';
-                            } else if (lower.includes('recht') || lower.includes('gesetz')) {
-                                response =
-                                    '⚖️ Ich kann allgemeine rechtliche Informationen geben, aber keine verbindliche Rechtsberatung. Bei spezifischen rechtlichen Fragen wende dich bitte an einen Rechtsanwalt.';
+                                response = '❤️ Gern geschehen!';
                             } else {
                                 response =
-                                    `💡 Verstanden: "${cmd}". Ich kann dir helfen bei: Wissenschaft, Geschichte, Kultur, Übersetzungen, Programmierung, Schreiben, Organisation. Was möchtest du wissen?`;
+                                    `💡 Verstanden: "${cmd}". Versuche: "Öffne Einstellungen", "Zeige meine Dateien" oder "Hilfe".`;
                             }
                             setTimeout(() => addMessage('assistant', response), 300);
                             state.aiMemory.push({ role: 'user', content: cmd });
@@ -1337,17 +1066,15 @@
                             { name: 'Musik', type: 'folder', size: '-' },
                             { name: 'Projekt_HalDo.pdf', type: 'pdf', size: '2.4 MB' },
                             { name: 'Systembericht.txt', type: 'txt', size: '128 KB' },
-                            { name: 'Kultur_Êzîdî.docx', type: 'docx', size: '856 KB' },
                         ];
                         body.innerHTML = `
                             <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;">
                                 <input type="text" placeholder="🔍 Suche ..." style="flex:1;min-width:80px;" id="file-search" />
                                 <button id="file-new" style="padding:8px 12px;">➕</button>
-                                <button id="file-upload" style="padding:8px 12px;">📤</button>
                             </div>
                             <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:6px;" id="file-grid">
                                 ${files.map(f => `
-                                    <div style="background:rgba(255,255,255,0.04);padding:10px;border-radius:10px;text-align:center;cursor:pointer;" onclick="HalDo.notify('📄 ${f.name} geöffnet')">
+                                    <div style="background:rgba(255,255,255,0.04);padding:10px;border-radius:10px;text-align:center;">
                                         <div style="font-size:1.8rem;">${f.type === 'folder' ? '📁' : '📄'}</div>
                                         <div style="font-size:0.7rem;font-weight:500;margin-top:2px;word-break:break-all;">${f.name}</div>
                                         <div style="font-size:0.6rem;color:#8899bb;">${f.size}</div>
@@ -1355,7 +1082,7 @@
                                 `).join('')}
                             </div>
                             <div style="margin-top:8px;font-size:0.7rem;color:#8899bb;border-top:1px solid rgba(255,255,255,0.04);padding-top:8px;">
-                                📊 6 Elemente · 12.4 GB frei
+                                📊 5 Elemente · 12.4 GB frei
                             </div>
                         `;
                         body.querySelector('#file-search').addEventListener('input', (e) => {
@@ -1367,17 +1094,7 @@
                         });
                         body.querySelector('#file-new').addEventListener('click', () => {
                             const name = prompt('📁 Neuer Ordnername:');
-                            if (name) {
-                                const mod = moderateContent(name);
-                                if (mod.blocked) {
-                                    notify('⚠️ Name nicht erlaubt.', 'error');
-                                    return;
-                                }
-                                notify(`📁 Ordner "${name}" erstellt`);
-                            }
-                        });
-                        body.querySelector('#file-upload').addEventListener('click', () => {
-                            notify('📤 Upload-Dialog geöffnet (Demo)');
+                            if (name) notify(`📁 Ordner "${name}" erstellt`);
                         });
                     }
                 });
@@ -1402,22 +1119,14 @@
                                         <option value="de" ${state.settings.language === 'de' ? 'selected' : ''}>🇩🇪 Deutsch</option>
                                         <option value="en" ${state.settings.language === 'en' ? 'selected' : ''}>🇬🇧 English</option>
                                         <option value="ezidi" ${state.settings.language === 'ezidi' ? 'selected' : ''}>𒀭 Êzîdî</option>
-                                        <option value="ku" ${state.settings.language === 'ku' ? 'selected' : ''}>🇰🇲 Kurmancî</option>
                                     </select>
                                 </div>
                                 <div><label style="display:flex;align-items:center;gap:8px;font-size:0.85rem;">
                                     <input type="checkbox" id="settings-voice" ${state.settings.voiceEnabled ? 'checked' : ''} /> Sprachsteuerung
                                 </label></div>
-                                <div><label style="display:block;font-size:0.8rem;color:#8899bb;">Moderation</label>
-                                    <select id="settings-moderation" style="width:100%;">
-                                        <option value="strict" ${state.settings.moderationLevel === 'strict' ? 'selected' : ''}>🛡️ Streng</option>
-                                        <option value="normal" ${state.settings.moderationLevel === 'normal' ? 'selected' : ''}>⚖️ Normal</option>
-                                        <option value="lenient" ${state.settings.moderationLevel === 'lenient' ? 'selected' : ''}>🌿 Locker</option>
-                                    </select>
-                                </div>
                                 <button id="settings-save" style="margin-top:6px;">💾 Speichern</button>
                                 <div style="font-size:0.7rem;color:#8899bb;border-top:1px solid rgba(255,255,255,0.04);padding-top:8px;">
-                                    HalDo AI OS v20.0.0 · Benutzer: ${state.user?.username || 'Gast'}
+                                    HalDo AI OS v20.0.0
                                 </div>
                             </div>
                         `;
@@ -1425,7 +1134,6 @@
                             state.settings.theme = body.querySelector('#settings-theme').value;
                             state.settings.language = body.querySelector('#settings-language').value;
                             state.settings.voiceEnabled = body.querySelector('#settings-voice').checked;
-                            state.settings.moderationLevel = body.querySelector('#settings-moderation').value;
                             applyTheme(state.settings.theme);
                             notify('✅ Einstellungen gespeichert!');
                         });
@@ -1515,11 +1223,6 @@
                         body.querySelector('#note-add').addEventListener('click', () => {
                             const val = input.value.trim();
                             if (!val) return;
-                            const mod = moderateContent(val);
-                            if (mod.blocked) {
-                                notify('⚠️ Notiz enthält problematischen Inhalt.', 'error');
-                                return;
-                            }
                             notes.push(val);
                             localStorage.setItem('haldo_notes', JSON.stringify(notes));
                             input.value = '';
@@ -1539,7 +1242,6 @@
                             <div style="background:#050510;border-radius:8px;padding:10px;font-family:'Courier New',monospace;font-size:0.75rem;min-height:80px;max-height:200px;overflow-y:auto;" id="terminal-output">
                                 <div style="color:#44ff88;">$ HalDo AI OS v20.0.0</div>
                                 <div style="color:#8899bb;">$ ${navigator.platform}</div>
-                                <div style="color:#8899bb;">$ Benutzer: ${state.user?.username || 'Gast'}</div>
                                 <div style="color:#44ff88;">$ ready ></div>
                             </div>
                             <div style="display:flex;gap:6px;margin-top:6px;">
@@ -1555,34 +1257,15 @@
                             line.style.color = '#44ff88';
                             line.textContent = `$ ${cmd}`;
                             output.appendChild(line);
-
-                            const mod = moderateContent(cmd);
-                            if (mod.blocked) {
-                                const respLine = document.createElement('div');
-                                respLine.style.color = '#ff6666';
-                                respLine.textContent = '⚠️ Befehl aus Moderationsgründen abgelehnt.';
-                                output.appendChild(respLine);
-                                output.scrollTop = output.scrollHeight;
-                                return;
-                            }
-
                             let response = '';
-                            if (cmd === 'help') response =
-                                'help, version, apps, theme, clear, echo, date, whoami, user, sysinfo, ezidi, kurdish';
+                            if (cmd === 'help') response = 'help, version, apps, theme, clear, echo, date, whoami';
                             else if (cmd === 'version') response = 'HalDo AI OS 20.0.0 | Kernel 5.2.1';
                             else if (cmd === 'apps') response = 'Apps: ' + Object.keys(state.apps).join(', ');
                             else if (cmd === 'theme') response = `Theme: ${state.settings.theme}`;
                             else if (cmd === 'clear') { output.innerHTML = ''; return; }
                             else if (cmd.startsWith('echo ')) response = cmd.substring(5);
                             else if (cmd === 'date') response = new Date().toLocaleString();
-                            else if (cmd === 'whoami') response = `Benutzer: ${state.user?.username || 'Gast'}`;
-                            else if (cmd === 'user') response = `👤 ${state.user?.username || 'Nicht angemeldet'}`;
-                            else if (cmd === 'sysinfo') response =
-                                `OS: HalDo AI OS 20.0.0\nPlatform: ${navigator.platform}\nRAM: ${navigator.deviceMemory || '?'} GB\nTheme: ${state.settings.theme}`;
-                            else if (cmd === 'ezidi') response =
-                                '🟡 Êzîdî: Eine der ältesten monotheistischen Religionen. Sprache: Kurmanji (Kurdisch). Kultur: reich an Traditionen, Musik und Poesie.';
-                            else if (cmd === 'kurdish') response =
-                                '🇰🇲 Kurdisch (Kurmanji) wird von Êzîdî und Kurden gesprochen. Die Sprache hat mehrere Dialekte und eine reiche literarische Tradition.';
+                            else if (cmd === 'whoami') response = 'haldo@cosmic';
                             else if (cmd === '') return;
                             else response = `❌ Unbekannt: "${cmd}". Tipp: help`;
                             const respLine = document.createElement('div');
@@ -1626,7 +1309,6 @@
                                     `).join('')}
                                 </div>
                                 <div style="margin-top:8px;font-size:0.75rem;color:#8899bb;">📌 Heute: ${today}.${now.getMonth()+1}.${year}</div>
-                                <div style="margin-top:4px;font-size:0.7rem;color:#8899bb;">🟡 Êzîdî-Feiertage: Çarşema Sor (Mittwoch der Roten) - 12. April</div>
                             </div>
                         `;
                     }
@@ -1638,13 +1320,11 @@
                     icon: '🎵',
                     render: (body) => {
                         const songs = [
-                            '🌌 Cosmic Dreams - HalDo',
-                            '🚀 Space Odyssey - HalDo',
-                            '💫 Starlight - HalDo',
-                            '🌙 Lunar Echo - HalDo',
-                            '☀️ Solar Flare - HalDo',
-                            '🟡 Ezidi Melody - Traditional',
-                            '🇰🇲 Kurdish Dance - HalDo'
+                            '🌌 Cosmic Dreams',
+                            '🚀 Space Odyssey',
+                            '💫 Starlight',
+                            '🌙 Lunar Echo',
+                            '☀️ Solar Flare'
                         ];
                         body.innerHTML = `
                             <div style="display:flex;flex-direction:column;gap:6px;">
@@ -1657,7 +1337,7 @@
                                 <div style="text-align:center;font-size:0.8rem;color:#8899bb;">🎵 Jetzt spielt: ${songs[0]}</div>
                                 <div style="margin-top:6px;">
                                     ${songs.map(s => `
-                                        <div style="padding:6px 10px;background:rgba(255,255,255,0.03);border-radius:8px;margin:3px 0;font-size:0.8rem;display:flex;justify-content:space-between;cursor:pointer;" onclick="HalDo.notify('▶️ ${s}')">
+                                        <div style="padding:6px 10px;background:rgba(255,255,255,0.03);border-radius:8px;margin:3px 0;font-size:0.8rem;display:flex;justify-content:space-between;">
                                             <span>${s}</span>
                                             <span style="color:#8899bb;">▶</span>
                                         </div>
@@ -1668,60 +1348,26 @@
                     }
                 });
 
-                // 9. Security / Moderation Center
-                registerApp('security', {
-                    title: 'Sicherheit & Moderation',
-                    icon: '🛡️',
+                // App World
+                registerApp('appworld', {
+                    title: 'App World',
+                    icon: '📱',
                     render: (body) => {
-                        const logs = JSON.parse(localStorage.getItem('haldo_moderation_log') || '[]');
+                        const apps = Object.entries(state.apps).filter(([id]) => id !== 'appworld');
                         body.innerHTML = `
-                            <div style="display:flex;flex-direction:column;gap:10px;">
-                                <div style="display:flex;align-items:center;gap:10px;">
-                                    <span style="font-size:1.5rem;">🛡️</span>
-                                    <div>
-                                        <div style="font-weight:600;">Sicherheitscenter</div>
-                                        <div style="font-size:0.75rem;color:#8899bb;">Moderation: ${state.settings.moderationLevel}</div>
+                            <h3 style="margin-bottom:10px;">📱 HalDo App World</h3>
+                            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;">
+                                ${apps.map(([id, app]) => `
+                                    <div style="background:rgba(255,255,255,0.04);padding:12px;border-radius:10px;text-align:center;cursor:pointer;" onclick="HalDo.launchApp('${id}')">
+                                        <div style="font-size:1.8rem;">${app.icon}</div>
+                                        <div style="font-size:0.7rem;margin-top:4px;">${app.title}</div>
                                     </div>
-                                </div>
-                                <div style="background:rgba(255,255,255,0.03);border-radius:8px;padding:10px;">
-                                    <div style="font-size:0.8rem;color:#8899bb;">📋 Moderation-Log (${logs.length} Einträge)</div>
-                                    ${logs.slice(-5).reverse().map(log => `
-                                        <div style="font-size:0.7rem;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.04);">
-                                            <span style="color:#8899bb;">${new Date(log.timestamp).toLocaleString()}</span>
-                                            <span style="color:#ffcc00;">⚠️</span>
-                                            <span>${log.user}</span>
-                                            <span style="color:#8899bb;">: "${log.text.substring(0,40)}..."</span>
-                                        </div>
-                                    `).join('') || '<div style="font-size:0.8rem;color:#8899bb;">Keine Einträge</div>'}
-                                </div>
-                                <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                                    <button id="sec-clear" style="flex:1;">🗑️ Log leeren</button>
-                                    <button id="sec-export" style="flex:1;">📤 Exportieren</button>
-                                </div>
-                                <div style="font-size:0.7rem;color:#8899bb;border-top:1px solid rgba(255,255,255,0.04);padding-top:8px;">
-                                    🔒 Geschützte Daten · Nur für autorisierte Nutzer
-                                </div>
+                                `).join('')}
+                            </div>
+                            <div style="margin-top:12px;font-size:0.7rem;color:#8899bb;border-top:1px solid rgba(255,255,255,0.04);padding-top:8px;">
+                                ${apps.length} Apps installiert · HalDo AI OS v20.0.0
                             </div>
                         `;
-                        body.querySelector('#sec-clear').addEventListener('click', () => {
-                            if (confirm('Moderation-Log wirklich leeren?')) {
-                                localStorage.removeItem('haldo_moderation_log');
-                                state.moderationLog = [];
-                                notify('🗑️ Log geleert.');
-                                body.querySelector('#sec-clear').closest('.window-body').innerHTML =
-                                    body.innerHTML;
-                            }
-                        });
-                        body.querySelector('#sec-export').addEventListener('click', () => {
-                            const data = JSON.stringify(state.moderationLog, null, 2);
-                            const blob = new Blob([data], { type: 'application/json' });
-                            const url = URL.createObjectURL(blob);
-                            const a = document.createElement('a');
-                            a.href = url;
-                            a.download = 'haldo_moderation_log.json';
-                            a.click();
-                            notify('📤 Export gestartet');
-                        });
                     }
                 });
             }
@@ -1734,51 +1380,20 @@
                 }
             }
 
-            // ===== MENUS =====
-            function showSystemMenu() {
-                if (!state.loggedIn) { notify('❌ Bitte zuerst anmelden.', 'warning'); return; }
-                notify('⚙️ System-Menü: Dateien · Einstellungen · Apps · Suche · AI · Sprache · Tastatur · Theme · Benutzer · Datenschutz · Sicherheit · Speicher · Benachrichtigungen · Updates · Backup · Wiederherstellung · Systeminfo');
-                launchApp('settings');
-            }
-
-            function showAppWorld() {
-                if (!state.loggedIn) { notify('❌ Bitte zuerst anmelden.', 'warning'); return; }
-                const appList = Object.keys(state.apps).map(id =>
-                    `${state.apps[id].icon} ${state.apps[id].title}`).join('\n');
-                notify('📱 App World: ' + appList);
-                // App World als Fenster öffnen
-                if (!state.windows.find(w => w.appId === 'appworld')) {
-                    launchApp('appworld');
-                }
-            }
-
-            // App World als eigene App registrieren
-            registerApp('appworld', {
-                title: 'App World',
-                icon: '📱',
-                render: (body) => {
-                    const apps = Object.entries(state.apps).filter(([id]) => id !== 'appworld');
-                    body.innerHTML = `
-                        <h3 style="margin-bottom:10px;">📱 HalDo App World</h3>
-                        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;">
-                            ${apps.map(([id, app]) => `
-                                <div style="background:rgba(255,255,255,0.04);padding:12px;border-radius:10px;text-align:center;cursor:pointer;" onclick="HalDo.launchApp('${id}')">
-                                    <div style="font-size:1.8rem;">${app.icon}</div>
-                                    <div style="font-size:0.7rem;margin-top:4px;">${app.title}</div>
-                                </div>
-                            `).join('')}
-                        </div>
-                        <div style="margin-top:12px;font-size:0.7rem;color:#8899bb;border-top:1px solid rgba(255,255,255,0.04);padding-top:8px;">
-                            ${apps.length} Apps installiert · HalDo AI OS v20.0.0
-                        </div>
-                    `;
-                }
-            });
-
             // ===== ABOUT =====
             function showAbout() {
-                notify(
-                    '⟡ HalDo AI OS v20.0.0 — Cosmic Intelligent OS\n💙 Für alle Geräte optimiert\n🛡️ Mit Moderation & Schutz für Minderheiten\n🌍 Êzîdî · Kurdisch · Deutsch · Englisch');
+                notify('⟡ HalDo AI OS v20.0.0 — Cosmic Intelligent OS\n💙 Für alle Geräte optimiert');
+            }
+
+            // ===== SHOW APP WORLD =====
+            function showAppWorld() {
+                launchApp('appworld');
+            }
+
+            // ===== SHOW SYSTEM MENU =====
+            function showSystemMenu() {
+                notify('⚙️ System-Menü: Dateien · Einstellungen · Apps · AI · Sprache · Theme · Speicher · Updates');
+                launchApp('settings');
             }
 
             // ===== INIT =====
@@ -1797,9 +1412,6 @@
                 updateClock();
                 setInterval(updateClock, 10000);
 
-                // Auth
-                initAuth();
-
                 // Dock-Events
                 dock.querySelectorAll('.dock-item').forEach(btn => {
                     btn.addEventListener('click', () => {
@@ -1813,22 +1425,9 @@
                 document.getElementById('btn-appworld').addEventListener('click', showAppWorld);
                 document.getElementById('btn-theme').addEventListener('click', toggleTheme);
                 document.getElementById('btn-about').addEventListener('click', showAbout);
-                document.getElementById('btn-logout').addEventListener('click', logout);
 
-                // Login
-                loginBtn.addEventListener('click', handleLogin);
-                loginUsername.addEventListener('keydown', (e) => { if (e.key === 'Enter') loginPassword.focus(); });
-                loginPassword.addEventListener('keydown', (e) => { if (e.key === 'Enter') loginBtn.click(); });
-                loginToggle.addEventListener('click', () => {
-                    // Demo-Modus: Gast-Login
-                    state.user = { username: 'Gast' };
-                    state.loggedIn = true;
-                    localStorage.setItem('haldo_user', JSON.stringify({ username: 'Gast' }));
-                    loginOverlay.classList.add('hidden');
-                    loginError.textContent = '';
-                    notify('👋 Willkommen, Gast!');
-                    bootSequence();
-                });
+                // Boot starten
+                bootSequence();
 
                 // Globale API
                 window.HalDo = {
@@ -1837,16 +1436,12 @@
                     showAbout,
                     launchApp,
                     state,
-                    moderateContent,
-                    logout,
                     showSystemMenu,
                     showAppWorld
                 };
 
                 console.log('⟡ HalDo AI OS v20.0.0');
                 console.log('🌌 Cosmic Intelligent OS');
-                console.log('🛡️ Mit Schutz vor Hass & Diskriminierung');
-                console.log('🌍 Êzîdî · Kurdisch · Deutsch · Englisch');
                 console.log('💡 HalDo.launchApp("ai")');
             }
 
