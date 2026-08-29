@@ -2,37 +2,51 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover, user-scalable=no" />
     <title>HalDo AI OS — Cosmic Intelligent OS</title>
-    <link rel="manifest" href="data:application/json,{}" />
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#0a0a1a" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <style>
-        /* ===== GLOBAL RESET & BASE ===== */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        /* ===== GLOBAL RESET ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         :root {
             --bg: #0a0a1a;
-            --surface: rgba(20, 20, 50, 0.85);
+            --surface: rgba(16, 16, 40, 0.92);
             --text: #e0e0ff;
             --primary: #00d4ff;
             --secondary: #7b2ffc;
-            --radius: 16px;
-            --shadow: 0 8px 40px rgba(0,0,0,0.6);
+            --radius: 14px;
+            --shadow: 0 8px 40px rgba(0, 0, 0, 0.7);
+            --safe-top: env(safe-area-inset-top, 0px);
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
         }
-        body {
+        html, body {
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
             background: var(--bg);
             color: var(--text);
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            height: 100vh;
-            overflow: hidden;
-            user-select: none;
+            font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
         }
         #root {
             width: 100vw;
             height: 100vh;
+            height: 100dvh;
             position: relative;
             display: flex;
             flex-direction: column;
+            overflow: hidden;
         }
-        /* ===== BOOT OVERLAY ===== */
+
+        /* ===== BOOT ===== */
         #boot {
             position: fixed;
             inset: 0;
@@ -42,47 +56,56 @@
             align-items: center;
             justify-content: center;
             background: #0a0a1a;
-            transition: opacity 1.5s ease;
+            transition: opacity 1.2s ease;
+            padding: 20px;
         }
-        #boot.hidden { opacity: 0; pointer-events: none; }
+        #boot.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
         #boot-logo {
-            font-size: 4.5rem;
+            font-size: clamp(3rem, 12vw, 5rem);
             font-weight: 900;
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            animation: pulse 2s infinite alternate;
+            animation: pulseGlow 2s infinite alternate;
+            text-shadow: none;
         }
-        @keyframes pulse {
-            0% { filter: drop-shadow(0 0 20px rgba(0,212,255,0.3)); transform: scale(1); }
-            100% { filter: drop-shadow(0 0 60px rgba(123,47,252,0.5)); transform: scale(1.05); }
+        @keyframes pulseGlow {
+            0% { filter: drop-shadow(0 0 20px rgba(0, 212, 255, 0.3)); transform: scale(1); }
+            100% { filter: drop-shadow(0 0 60px rgba(123, 47, 252, 0.5)); transform: scale(1.05); }
         }
         #boot-status {
-            margin-top: 20px;
-            font-size: 0.9rem;
+            margin-top: 16px;
+            font-size: clamp(0.8rem, 2vw, 1rem);
             color: #8899bb;
             letter-spacing: 3px;
         }
         .boot-spinner {
-            width: 60px;
-            height: 60px;
+            width: 50px;
+            height: 50px;
             border: 3px solid transparent;
             border-top: 3px solid var(--primary);
             border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-top: 30px;
+            animation: spin 0.9s linear infinite;
+            margin-top: 24px;
         }
-        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
 
-        /* ===== COSMIC WORLD (Canvas) ===== */
+        /* ===== COSMIC CANVAS ===== */
         #cosmic {
             position: absolute;
             inset: 0;
             z-index: 0;
             pointer-events: none;
+            width: 100%;
+            height: 100%;
         }
 
-        /* ===== HALDO DISPLAY ===== */
+        /* ===== DISPLAY ===== */
         #display {
             position: relative;
             z-index: 1;
@@ -90,1017 +113,1306 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            padding-top: var(--safe-top);
+            padding-bottom: var(--safe-bottom);
         }
 
-        /* ===== TOP BAR ===== */
+        /* ===== TOPBAR ===== */
         #topbar {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 8px 20px;
-            background: rgba(10,10,30,0.6);
+            padding: 6px 14px;
+            background: rgba(10, 10, 30, 0.5);
             backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(255,255,255,0.05);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
             z-index: 20;
-            font-size: 0.85rem;
+            font-size: clamp(0.7rem, 1.6vw, 0.85rem);
+            min-height: 40px;
+            flex-shrink: 0;
         }
-        #topbar-left { display: flex; gap: 16px; align-items: center; }
-        #topbar-left .haldo-icon { font-weight: 700; color: var(--primary); }
-        #topbar-right { display: flex; gap: 12px; align-items: center; }
+        #topbar-left {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        #topbar-left .haldo-icon {
+            font-weight: 700;
+            color: var(--primary);
+            font-size: clamp(0.9rem, 2vw, 1.1rem);
+        }
+        #topbar-right {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
         .top-btn {
             background: none;
             border: none;
             color: #8899bb;
-            font-size: 1.1rem;
+            font-size: clamp(0.9rem, 2vw, 1.1rem);
             cursor: pointer;
             padding: 4px 8px;
             border-radius: 8px;
             transition: 0.2s;
+            touch-action: manipulation;
         }
-        .top-btn:hover { background: rgba(255,255,255,0.08); color: #fff; }
+        .top-btn:active {
+            background: rgba(255, 255, 255, 0.1);
+        }
 
-        /* ===== APP CONTAINER (Fenster) ===== */
+        /* ===== APP CONTAINER ===== */
         #app-container {
             flex: 1;
             position: relative;
             z-index: 2;
             overflow: hidden;
+            touch-action: none;
         }
 
-        /* ===== WINDOW ===== */
+        /* ===== WINDOW (mobile-optimiert) ===== */
         .window {
             position: absolute;
             background: var(--surface);
             backdrop-filter: blur(20px);
-            border: 1px solid rgba(255,255,255,0.08);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
             border-radius: var(--radius);
             box-shadow: var(--shadow);
-            min-width: 280px;
-            min-height: 200px;
             display: flex;
             flex-direction: column;
             overflow: hidden;
             transition: box-shadow 0.3s;
-            resize: both;
+            min-width: 200px;
+            min-height: 150px;
+            max-width: 98vw;
+            max-height: 90vh;
+            touch-action: none;
         }
         .window.active {
-            box-shadow: 0 8px 60px rgba(0,212,255,0.15);
-            border-color: rgba(0,212,255,0.2);
+            box-shadow: 0 8px 60px rgba(0, 212, 255, 0.12);
+            border-color: rgba(0, 212, 255, 0.15);
         }
         .window-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 14px;
-            background: rgba(0,0,0,0.3);
+            padding: 8px 12px;
+            background: rgba(0, 0, 0, 0.25);
             cursor: grab;
             flex-shrink: 0;
+            min-height: 36px;
+            touch-action: none;
         }
-        .window-header:active { cursor: grabbing; }
-        .window-title { font-size: 0.9rem; font-weight: 600; display: flex; align-items: center; gap: 8px; }
-        .window-controls { display: flex; gap: 8px; }
+        .window-header:active {
+            cursor: grabbing;
+        }
+        .window-title {
+            font-size: clamp(0.75rem, 1.8vw, 0.9rem);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .window-controls {
+            display: flex;
+            gap: 4px;
+            flex-shrink: 0;
+        }
         .win-btn {
             background: none;
             border: none;
             color: #8899bb;
             cursor: pointer;
-            font-size: 1rem;
-            padding: 2px 6px;
+            font-size: clamp(0.8rem, 1.8vw, 1rem);
+            padding: 2px 8px;
             border-radius: 6px;
             transition: 0.2s;
+            touch-action: manipulation;
+            min-width: 28px;
+            min-height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        .win-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
-        .win-btn.close:hover { background: #ff4444; color: #fff; }
+        .win-btn:active {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        .win-btn.close:active {
+            background: #ff4444;
+            color: #fff;
+        }
         .window-body {
             flex: 1;
-            padding: 16px;
+            padding: 12px;
             overflow-y: auto;
-            font-size: 0.9rem;
-            line-height: 1.6;
+            font-size: clamp(0.8rem, 1.6vw, 0.9rem);
+            line-height: 1.5;
+            -webkit-overflow-scrolling: touch;
         }
-        .window-body input, .window-body textarea, .window-body select {
+        .window-body input,
+        .window-body textarea,
+        .window-body select {
             width: 100%;
-            padding: 8px 12px;
-            background: rgba(255,255,255,0.06);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 8px;
+            padding: 10px 12px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
             color: #fff;
-            font-size: 0.9rem;
+            font-size: clamp(0.8rem, 1.6vw, 0.9rem);
             margin-bottom: 10px;
+            -webkit-appearance: none;
+            appearance: none;
         }
         .window-body button {
-            padding: 8px 16px;
+            padding: 10px 18px;
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             color: #fff;
             font-weight: 600;
+            font-size: clamp(0.8rem, 1.6vw, 0.9rem);
             cursor: pointer;
             transition: 0.2s;
+            touch-action: manipulation;
+            min-height: 44px;
         }
-        .window-body button:hover { transform: scale(1.03); opacity: 0.9; }
+        .window-body button:active {
+            transform: scale(0.96);
+            opacity: 0.8;
+        }
+        .window-body .ai-quick {
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 20px;
+            font-size: clamp(0.7rem, 1.4vw, 0.8rem);
+            min-height: 36px;
+        }
+        .window-body .ai-quick:active {
+            background: rgba(255, 255, 255, 0.15);
+        }
 
-        /* ===== DOCK ===== */
+        /* ===== DOCK (mobile-optimiert) ===== */
         #dock {
             position: absolute;
-            bottom: 20px;
+            bottom: clamp(8px, 2vh, 20px);
             left: 50%;
             transform: translateX(-50%);
             z-index: 10;
             display: flex;
-            gap: 10px;
-            background: rgba(10,10,30,0.7);
+            gap: clamp(4px, 1vw, 10px);
+            background: rgba(10, 10, 30, 0.7);
             backdrop-filter: blur(16px);
-            padding: 10px 18px;
+            -webkit-backdrop-filter: blur(16px);
+            padding: clamp(6px, 1.5vw, 10px) clamp(10px, 2vw, 18px);
             border-radius: 40px;
-            border: 1px solid rgba(255,255,255,0.06);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            flex-wrap: nowrap;
+            max-width: 98vw;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
         }
         .dock-item {
-            width: 48px;
-            height: 48px;
+            width: clamp(40px, 9vw, 52px);
+            height: clamp(40px, 9vw, 52px);
             border-radius: 14px;
-            background: rgba(255,255,255,0.05);
+            background: rgba(255, 255, 255, 0.04);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.5rem;
+            font-size: clamp(1.2rem, 3.5vw, 1.6rem);
             cursor: pointer;
             transition: 0.2s;
             border: none;
             color: #fff;
+            touch-action: manipulation;
+            flex-shrink: 0;
         }
-        .dock-item:hover { background: rgba(255,255,255,0.15); transform: scale(1.08); }
+        .dock-item:active {
+            background: rgba(255, 255, 255, 0.15);
+            transform: scale(0.92);
+        }
 
-        /* ===== NOTIFICATION ===== */
+        /* ===== NOTIFICATION (mobile-optimiert) ===== */
         .notification {
             position: fixed;
-            top: 70px;
-            right: 20px;
+            top: clamp(50px, 10vh, 70px);
+            right: clamp(8px, 2vw, 20px);
+            left: clamp(8px, 2vw, 20px);
             z-index: 999;
             background: var(--surface);
             backdrop-filter: blur(16px);
-            border: 1px solid rgba(255,255,255,0.08);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
             border-radius: var(--radius);
-            padding: 14px 20px;
-            max-width: 320px;
+            padding: 14px 18px;
+            max-width: 400px;
+            margin: 0 auto;
             box-shadow: var(--shadow);
             animation: slideIn 0.4s ease;
             border-left: 4px solid var(--primary);
+            font-size: clamp(0.8rem, 1.6vw, 0.9rem);
+        }
+        .notification.success {
+            border-left-color: #44ff88;
+        }
+        .notification.error {
+            border-left-color: #ff4444;
         }
         @keyframes slideIn {
-            from { transform: translateX(120%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
+            from {
+                transform: translateY(-120%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
-        .notification.success { border-left-color: #44ff88; }
-        .notification.error { border-left-color: #ff4444; }
+
+        /* ===== SCROLLBAR STYLING ===== */
+        .window-body::-webkit-scrollbar {
+            width: 4px;
+        }
+        .window-body::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .window-body::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 4px;
+        }
 
         /* ===== RESPONSIVE ===== */
-        @media (max-width: 640px) {
-            #boot-logo { font-size: 3rem; }
-            #dock { gap: 6px; padding: 8px 12px; }
-            .dock-item { width: 40px; height: 40px; font-size: 1.2rem; }
-            .window { min-width: 200px; min-height: 150px; }
-            #topbar { font-size: 0.75rem; padding: 4px 12px; }
+        @media (max-width: 480px) {
+            .window {
+                border-radius: 12px;
+                min-width: 160px;
+                min-height: 120px;
+            }
+            .window-header {
+                padding: 6px 10px;
+                min-height: 32px;
+            }
+            .window-body {
+                padding: 10px;
+            }
+            #topbar {
+                padding: 4px 10px;
+                min-height: 34px;
+            }
+            .win-btn {
+                min-width: 24px;
+                min-height: 24px;
+                padding: 2px 6px;
+            }
+        }
+        @media (orientation: landscape) and (max-height: 500px) {
+            .window {
+                max-height: 80vh;
+            }
+            #dock {
+                bottom: 4px;
+                padding: 4px 10px;
+                gap: 4px;
+            }
+            .dock-item {
+                width: 34px;
+                height: 34px;
+                font-size: 1rem;
+                border-radius: 10px;
+            }
+            #topbar {
+                min-height: 28px;
+                padding: 2px 10px;
+            }
+            .window-header {
+                min-height: 28px;
+                padding: 4px 10px;
+            }
+            .window-body {
+                padding: 8px;
+            }
+            .window-body button {
+                min-height: 32px;
+                padding: 6px 12px;
+            }
         }
     </style>
 </head>
 <body>
-
-<div id="root">
-    <!-- BOOT -->
-    <div id="boot">
-        <div id="boot-logo">⟡ HalDo</div>
-        <div class="boot-spinner"></div>
-        <div id="boot-status">⟡ Kernel initialisiert ...</div>
-    </div>
-
-    <!-- COSMIC WORLD (Canvas) -->
-    <canvas id="cosmic"></canvas>
-
-    <!-- DISPLAY -->
-    <div id="display">
-        <!-- TOPBAR -->
-        <div id="topbar">
-            <div id="topbar-left">
-                <span class="haldo-icon">⟡ HalDo</span>
-                <span id="clock-display">--:--</span>
-            </div>
-            <div id="topbar-right">
-                <button class="top-btn" onclick="HalDo.notify('🌌 Cosmic World aktiviert')">🌌</button>
-                <button class="top-btn" onclick="HalDo.toggleTheme()">🎨</button>
-                <button class="top-btn" onclick="HalDo.showAbout()">ℹ️</button>
-            </div>
+    <div id="root">
+        <!-- BOOT -->
+        <div id="boot">
+            <div id="boot-logo">⟡ HalDo</div>
+            <div class="boot-spinner"></div>
+            <div id="boot-status">⟡ System initialisiert ...</div>
         </div>
 
-        <!-- APP CONTAINER -->
-        <div id="app-container"></div>
+        <!-- COSMIC CANVAS -->
+        <canvas id="cosmic"></canvas>
 
-        <!-- DOCK -->
-        <div id="dock">
-            <button class="dock-item" data-app="ai">🤖</button>
-            <button class="dock-item" data-app="files">📁</button>
-            <button class="dock-item" data-app="settings">⚙️</button>
-            <button class="dock-item" data-app="cosmic">🌌</button>
-            <button class="dock-item" data-app="notes">📝</button>
-            <button class="dock-item" data-app="terminal">⌨️</button>
-        </div>
-    </div>
-</div>
-
-<script>
-// ================================================================
-//  HALDO AI OS — COMPLETE SYSTEM (ALL IN ONE)
-//  Version 20.0.0 — Cosmic Intelligent Operating System
-// ================================================================
-
-const HalDo = (() => {
-    // ===== PRIVATE STATE =====
-    const state = {
-        apps: {},
-        windows: [],
-        windowZIndex: 100,
-        activeWindow: null,
-        theme: 'cosmic',
-        language: 'de',
-        notifications: [],
-        booted: false,
-        aiMemory: [],
-        conversations: [],
-        settings: {
-            theme: 'cosmic',
-            language: 'de',
-            voiceEnabled: false,
-            notifications: true
-        }
-    };
-
-    // ===== DOM REFS =====
-    const $ = id => document.getElementById(id);
-    const boot = $('boot');
-    const bootStatus = $('boot-status');
-    const cosmicCanvas = $('cosmic');
-    const appContainer = $('app-container');
-    const dock = $('dock');
-
-    // ===== COSMIC WORLD (Canvas Animation) =====
-    let stars = [];
-    let particles = [];
-    let cosmicRunning = false;
-
-    function initCosmic() {
-        const ctx = cosmicCanvas.getContext('2d');
-        let w, h;
-
-        function resize() {
-            w = cosmicCanvas.width = window.innerWidth;
-            h = cosmicCanvas.height = window.innerHeight;
-        }
-        window.addEventListener('resize', resize);
-        resize();
-
-        // Stars
-        stars = [];
-        for (let i = 0; i < 200; i++) {
-            stars.push({
-                x: Math.random() * w,
-                y: Math.random() * h,
-                r: Math.random() * 2 + 0.5,
-                speed: Math.random() * 0.3 + 0.1,
-                brightness: Math.random() * 0.8 + 0.2
-            });
-        }
-
-        // Particles (Nebula)
-        particles = [];
-        for (let i = 0; i < 50; i++) {
-            particles.push({
-                x: Math.random() * w,
-                y: Math.random() * h,
-                vx: (Math.random() - 0.5) * 0.3,
-                vy: (Math.random() - 0.5) * 0.3,
-                r: Math.random() * 40 + 20,
-                alpha: Math.random() * 0.03 + 0.01,
-                hue: Math.random() * 60 + 220
-            });
-        }
-
-        cosmicRunning = true;
-        animateCosmic(ctx, w, h);
-    }
-
-    function animateCosmic(ctx, w, h) {
-        if (!cosmicRunning) return;
-        ctx.clearRect(0, 0, w, h);
-
-        // Nebula particles
-        particles.forEach(p => {
-            p.x += p.vx;
-            p.y += p.vy;
-            if (p.x < 0) p.x = w;
-            if (p.x > w) p.x = 0;
-            if (p.y < 0) p.y = h;
-            if (p.y > h) p.y = 0;
-            const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r);
-            grad.addColorStop(0, `hsla(${p.hue}, 80%, 60%, ${p.alpha})`);
-            grad.addColorStop(1, `hsla(${p.hue}, 80%, 40%, 0)`);
-            ctx.fillStyle = grad;
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-            ctx.fill();
-        });
-
-        // Stars
-        stars.forEach(s => {
-            s.y += s.speed;
-            if (s.y > h) { s.y = 0; s.x = Math.random() * w; }
-            ctx.fillStyle = `rgba(255,255,255,${s.brightness * (0.7 + 0.3 * Math.sin(Date.now() / 2000 + s.x))})`;
-            ctx.beginPath();
-            ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-            ctx.fill();
-        });
-
-        // Subtle glow effect
-        const grad = ctx.createRadialGradient(w/2, h/2, 0, w/2, h/2, w/2);
-        grad.addColorStop(0, 'rgba(0,212,255,0.02)');
-        grad.addColorStop(1, 'rgba(0,0,0,0)');
-        ctx.fillStyle = grad;
-        ctx.fillRect(0, 0, w, h);
-
-        requestAnimationFrame(() => animateCosmic(ctx, w, h));
-    }
-
-    // ===== BOOT SEQUENCE =====
-    function bootSequence() {
-        const statuses = [
-            '⟡ Kernel lädt ...',
-            '⟡ System initialisiert ...',
-            '⟡ Event Bus aktiviert ...',
-            '⟡ App Registry wird aufgebaut ...',
-            '⟡ Cosmic World startet ...',
-            '⟡ Living AI wird geweckt ...',
-            '⟡ HalDo AI OS ist READY 🚀'
-        ];
-
-        let i = 0;
-        const interval = setInterval(() => {
-            if (i < statuses.length) {
-                bootStatus.textContent = statuses[i];
-                i++;
-            } else {
-                clearInterval(interval);
-                boot.classList.add('hidden');
-                state.booted = true;
-                HalDo.notify('🚀 HalDo AI OS erfolgreich gestartet!');
-                // Starte Standard-Apps
-                setTimeout(() => launchApp('ai'), 400);
-                setTimeout(() => launchApp('cosmic'), 600);
-            }
-        }, 600);
-    }
-
-    // ===== APP SYSTEM =====
-    function registerApp(id, config) {
-        state.apps[id] = { ...config, id, instance: null };
-    }
-
-    function launchApp(id) {
-        const app = state.apps[id];
-        if (!app) {
-            HalDo.notify(`❌ App "${id}" nicht gefunden`, 'error');
-            return;
-        }
-
-        // Prüfe ob bereits offen
-        const existing = state.windows.find(w => w.appId === id);
-        if (existing) {
-            focusWindow(existing.id);
-            return;
-        }
-
-        const winId = 'win-' + Date.now();
-        const win = {
-            id: winId,
-            appId: id,
-            title: app.title || id,
-            icon: app.icon || '📦',
-            x: 80 + Math.random() * 120,
-            y: 60 + Math.random() * 80,
-            width: Math.min(540, window.innerWidth - 100),
-            height: Math.min(400, window.innerHeight - 180),
-            zIndex: state.windowZIndex++,
-            element: null
-        };
-
-        state.windows.push(win);
-        renderWindow(win);
-        focusWindow(winId);
-
-        // App-Content laden
-        if (app.render) {
-            const body = win.element.querySelector('.window-body');
-            app.render(body, win);
-        }
-
-        HalDo.notify(`🔄 ${app.title || id} geöffnet`);
-    }
-
-    function renderWindow(win) {
-        // Entferne alte Elemente
-        const existing = document.getElementById(win.id);
-        if (existing) existing.remove();
-
-        const el = document.createElement('div');
-        el.id = win.id;
-        el.className = 'window';
-        el.style.left = win.x + 'px';
-        el.style.top = win.y + 'px';
-        el.style.width = win.width + 'px';
-        el.style.height = win.height + 'px';
-        el.style.zIndex = win.zIndex;
-        el.dataset.appId = win.appId;
-
-        el.innerHTML = `
-            <div class="window-header">
-                <span class="window-title">${win.icon} ${win.title}</span>
-                <div class="window-controls">
-                    <button class="win-btn" data-action="minimize">─</button>
-                    <button class="win-btn" data-action="maximize">⧉</button>
-                    <button class="win-btn close" data-action="close">✕</button>
+        <!-- DISPLAY -->
+        <div id="display">
+            <!-- TOPBAR -->
+            <div id="topbar">
+                <div id="topbar-left">
+                    <span class="haldo-icon">⟡ HalDo</span>
+                    <span id="clock-display">--:--</span>
+                </div>
+                <div id="topbar-right">
+                    <button class="top-btn" id="btn-cosmic" aria-label="Cosmic World">🌌</button>
+                    <button class="top-btn" id="btn-theme" aria-label="Theme wechseln">🎨</button>
+                    <button class="top-btn" id="btn-about" aria-label="Info">ℹ️</button>
                 </div>
             </div>
-            <div class="window-body"></div>
-        `;
 
-        appContainer.appendChild(el);
-        win.element = el;
+            <!-- APP CONTAINER -->
+            <div id="app-container"></div>
 
-        // Event-Listener für Fenster-Steuerung
-        el.querySelectorAll('.win-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const action = btn.dataset.action;
-                if (action === 'close') closeWindow(win.id);
-                else if (action === 'minimize') minimizeWindow(win.id);
-                else if (action === 'maximize') maximizeWindow(win.id);
-            });
-        });
+            <!-- DOCK -->
+            <div id="dock">
+                <button class="dock-item" data-app="ai">🤖</button>
+                <button class="dock-item" data-app="files">📁</button>
+                <button class="dock-item" data-app="settings">⚙️</button>
+                <button class="dock-item" data-app="cosmic">🌌</button>
+                <button class="dock-item" data-app="notes">📝</button>
+                <button class="dock-item" data-app="terminal">⌨️</button>
+                <button class="dock-item" data-app="calendar">📅</button>
+                <button class="dock-item" data-app="music">🎵</button>
+            </div>
+        </div>
+    </div>
 
-        // Drag & Drop
-        const header = el.querySelector('.window-header');
-        let drag = false, startX, startY, origX, origY;
-        header.addEventListener('mousedown', (e) => {
-            if (e.target.closest('.win-btn')) return;
-            drag = true;
-            startX = e.clientX;
-            startY = e.clientY;
-            origX = win.x;
-            origY = win.y;
-            focusWindow(win.id);
-            el.style.cursor = 'grabbing';
-        });
-        document.addEventListener('mousemove', (e) => {
-            if (!drag) return;
-            const dx = e.clientX - startX;
-            const dy = e.clientY - startY;
-            win.x = Math.max(0, Math.min(window.innerWidth - win.width, origX + dx));
-            win.y = Math.max(0, Math.min(window.innerHeight - win.height - 60, origY + dy));
-            el.style.left = win.x + 'px';
-            el.style.top = win.y + 'px';
-        });
-        document.addEventListener('mouseup', () => {
-            if (drag) { drag = false; el.style.cursor = ''; }
-        });
+    <script>
+        // ============================================================
+        //  HALDO AI OS — MOBILE-OPTIMIERTE VERSION
+        //  Enthält: Boot, Cosmic World, Window Manager, AI, 8 Demo-Apps
+        //  Alle Fenster passen sich automatisch an jedes Gerät an
+        // ============================================================
 
-        // Resize (einfach)
-        const resizeHandle = document.createElement('div');
-        resizeHandle.style.cssText = 'position:absolute;bottom:0;right:0;width:16px;height:16px;cursor:se-resize;';
-        el.appendChild(resizeHandle);
-        let resize = false;
-        resizeHandle.addEventListener('mousedown', (e) => {
-            e.stopPropagation();
-            resize = true;
-            const startW = win.width, startH = win.height, startX2 = e.clientX, startY2 = e.clientY;
-            const onMove = (ev) => {
-                if (!resize) return;
-                const dw = ev.clientX - startX2, dh = ev.clientY - startY2;
-                win.width = Math.max(280, startW + dw);
-                win.height = Math.max(200, startH + dh);
+        (function() {
+            'use strict';
+
+            // ===== STATE =====
+            const state = {
+                apps: {},
+                windows: [],
+                windowZIndex: 100,
+                activeWindow: null,
+                theme: 'cosmic',
+                language: 'de',
+                booted: false,
+                aiMemory: [],
+                settings: {
+                    theme: 'cosmic',
+                    language: 'de',
+                    voiceEnabled: false,
+                    notifications: true
+                }
+            };
+
+            // ===== DOM HELPERS =====
+            const $ = (id) => document.getElementById(id);
+            const boot = $('boot');
+            const bootStatus = $('boot-status');
+            const cosmicCanvas = $('cosmic');
+            const appContainer = $('app-container');
+            const dock = $('dock');
+
+            // ===== COSMIC WORLD =====
+            let stars = [];
+            let particles = [];
+            let cosmicRunning = false;
+            let cosmicCtx = null;
+            let cosmicW = 0,
+                cosmicH = 0;
+
+            function initCosmic() {
+                const ctx = cosmicCanvas.getContext('2d');
+                cosmicCtx = ctx;
+
+                function resize() {
+                    cosmicW = cosmicCanvas.width = window.innerWidth;
+                    cosmicH = cosmicCanvas.height = window.innerHeight;
+                }
+                window.addEventListener('resize', resize);
+                resize();
+
+                stars = [];
+                for (let i = 0; i < 150; i++) {
+                    stars.push({
+                        x: Math.random() * cosmicW,
+                        y: Math.random() * cosmicH,
+                        r: Math.random() * 2 + 0.5,
+                        speed: Math.random() * 0.3 + 0.1,
+                        brightness: Math.random() * 0.8 + 0.2,
+                        phase: Math.random() * Math.PI * 2
+                    });
+                }
+
+                particles = [];
+                for (let i = 0; i < 35; i++) {
+                    particles.push({
+                        x: Math.random() * cosmicW,
+                        y: Math.random() * cosmicH,
+                        vx: (Math.random() - 0.5) * 0.2,
+                        vy: (Math.random() - 0.5) * 0.2,
+                        r: Math.random() * 35 + 15,
+                        alpha: Math.random() * 0.025 + 0.008,
+                        hue: Math.random() * 60 + 220
+                    });
+                }
+
+                cosmicRunning = true;
+                animateCosmic();
+            }
+
+            function animateCosmic() {
+                if (!cosmicRunning || !cosmicCtx) return;
+                const ctx = cosmicCtx;
+                const w = cosmicW,
+                    h = cosmicH;
+
+                ctx.clearRect(0, 0, w, h);
+
+                // Particles (Nebula)
+                particles.forEach(p => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    if (p.x < 0) p.x = w;
+                    if (p.x > w) p.x = 0;
+                    if (p.y < 0) p.y = h;
+                    if (p.y > h) p.y = 0;
+                    const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r);
+                    grad.addColorStop(0, `hsla(${p.hue}, 80%, 60%, ${p.alpha})`);
+                    grad.addColorStop(1, `hsla(${p.hue}, 80%, 40%, 0)`);
+                    ctx.fillStyle = grad;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+
+                // Stars
+                const time = Date.now() / 2000;
+                stars.forEach(s => {
+                    s.y += s.speed;
+                    if (s.y > h) { s.y = 0;
+                        s.x = Math.random() * w; }
+                    const bright = s.brightness * (0.7 + 0.3 * Math.sin(time + s.phase));
+                    ctx.fillStyle = `rgba(255,255,255,${bright})`;
+                    ctx.beginPath();
+                    ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+
+                // Center glow
+                const grad = ctx.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, w / 2);
+                grad.addColorStop(0, 'rgba(0,212,255,0.015)');
+                grad.addColorStop(1, 'rgba(0,0,0,0)');
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, w, h);
+
+                requestAnimationFrame(animateCosmic);
+            }
+
+            // ===== BOOT =====
+            function bootSequence() {
+                const statuses = [
+                    '⟡ Kernel lädt ...',
+                    '⟡ System initialisiert ...',
+                    '⟡ Event Bus aktiviert ...',
+                    '⟡ Cosmic World startet ...',
+                    '⟡ Living AI wird geweckt ...',
+                    '⟡ HalDo AI OS ist READY 🚀'
+                ];
+
+                let i = 0;
+                const interval = setInterval(() => {
+                    if (i < statuses.length) {
+                        bootStatus.textContent = statuses[i];
+                        i++;
+                    } else {
+                        clearInterval(interval);
+                        boot.classList.add('hidden');
+                        state.booted = true;
+                        notify('🚀 HalDo AI OS erfolgreich gestartet!');
+                        setTimeout(() => launchApp('ai'), 400);
+                        setTimeout(() => launchApp('cosmic'), 700);
+                    }
+                }, 500);
+            }
+
+            // ===== WINDOW MANAGEMENT =====
+            function getSafeWindowPosition() {
+                const vw = window.innerWidth;
+                const vh = window.innerHeight;
+                const w = Math.min(500, vw - 40);
+                const h = Math.min(400, vh - 160);
+                const x = Math.max(10, (vw - w) / 2);
+                const y = Math.max(40, (vh - h) / 2 - 20);
+                return { x, y, w, h };
+            }
+
+            function launchApp(id) {
+                const app = state.apps[id];
+                if (!app) {
+                    notify(`❌ App "${id}" nicht gefunden`, 'error');
+                    return;
+                }
+
+                const existing = state.windows.find(w => w.appId === id);
+                if (existing) {
+                    focusWindow(existing.id);
+                    return;
+                }
+
+                const pos = getSafeWindowPosition();
+                const winId = 'win-' + Date.now();
+                const win = {
+                    id: winId,
+                    appId: id,
+                    title: app.title || id,
+                    icon: app.icon || '📦',
+                    x: pos.x + Math.random() * 20,
+                    y: pos.y + Math.random() * 20,
+                    width: pos.w,
+                    height: pos.h,
+                    zIndex: state.windowZIndex++,
+                    element: null
+                };
+
+                state.windows.push(win);
+                renderWindow(win);
+                focusWindow(winId);
+
+                if (app.render) {
+                    const body = win.element.querySelector('.window-body');
+                    app.render(body, win);
+                }
+
+                notify(`🔄 ${app.title || id} geöffnet`);
+            }
+
+            function renderWindow(win) {
+                const existing = document.getElementById(win.id);
+                if (existing) existing.remove();
+
+                const el = document.createElement('div');
+                el.id = win.id;
+                el.className = 'window';
+                el.style.left = win.x + 'px';
+                el.style.top = win.y + 'px';
                 el.style.width = win.width + 'px';
                 el.style.height = win.height + 'px';
-            };
-            const onUp = () => { resize = false; document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp); };
-            document.addEventListener('mousemove', onMove);
-            document.addEventListener('mouseup', onUp);
-        });
-    }
+                el.style.zIndex = win.zIndex;
+                el.dataset.appId = win.appId;
 
-    function closeWindow(winId) {
-        const idx = state.windows.findIndex(w => w.id === winId);
-        if (idx === -1) return;
-        const win = state.windows[idx];
-        if (win.element) win.element.remove();
-        state.windows.splice(idx, 1);
-        if (state.activeWindow === winId) state.activeWindow = null;
-        // Fokussiere letztes Fenster
-        if (state.windows.length > 0) {
-            focusWindow(state.windows[state.windows.length-1].id);
-        }
-    }
-
-    function focusWindow(winId) {
-        const win = state.windows.find(w => w.id === winId);
-        if (!win) return;
-        state.activeWindow = winId;
-        win.zIndex = state.windowZIndex++;
-        if (win.element) {
-            win.element.style.zIndex = win.zIndex;
-            win.element.classList.add('active');
-            state.windows.forEach(w => {
-                if (w.id !== winId && w.element) w.element.classList.remove('active');
-            });
-        }
-    }
-
-    function minimizeWindow(winId) {
-        const win = state.windows.find(w => w.id === winId);
-        if (win && win.element) {
-            win.element.style.display = 'none';
-            // Später: Miniaturansicht in Dock
-        }
-    }
-
-    function maximizeWindow(winId) {
-        const win = state.windows.find(w => w.id === winId);
-        if (!win || !win.element) return;
-        if (win.width === window.innerWidth - 20) {
-            // Wiederherstellen
-            win.width = win._prevWidth || 540;
-            win.height = win._prevHeight || 400;
-            win.x = win._prevX || 80;
-            win.y = win._prevY || 60;
-        } else {
-            win._prevWidth = win.width;
-            win._prevHeight = win.height;
-            win._prevX = win.x;
-            win._prevY = win.y;
-            win.width = window.innerWidth - 20;
-            win.height = window.innerHeight - 120;
-            win.x = 10;
-            win.y = 50;
-        }
-        win.element.style.width = win.width + 'px';
-        win.element.style.height = win.height + 'px';
-        win.element.style.left = win.x + 'px';
-        win.element.style.top = win.y + 'px';
-    }
-
-    // ===== APP DEFINITIONS =====
-    function defineApps() {
-        // 1. AI Assistant
-        registerApp('ai', {
-            title: 'HalDo AI',
-            icon: '🤖',
-            render: (body) => {
-                body.innerHTML = `
-                    <div style="display:flex;flex-direction:column;height:100%;gap:10px;">
-                        <div style="flex:1;overflow-y:auto;background:rgba(0,0,0,0.2);border-radius:10px;padding:12px;min-height:80px;" id="ai-chat">
-                            <div style="color:#8899bb;text-align:center;">💬 HalDo AI — bereit für deine Fragen</div>
-                        </div>
-                        <div style="display:flex;gap:8px;">
-                            <input type="text" id="ai-input" placeholder="Frage an HalDo ..." style="flex:1;" />
-                            <button id="ai-send">Senden</button>
-                            <button id="ai-voice" style="background:#4444ff;">🎤</button>
-                        </div>
-                        <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                            <button class="ai-quick" data-cmd="Öffne Einstellungen">⚙️ Einstellungen</button>
-                            <button class="ai-quick" data-cmd="Zeige meine Dateien">📁 Dateien</button>
-                            <button class="ai-quick" data-cmd="Wechsle zu Cosmic">🌌 Cosmic</button>
-                            <button class="ai-quick" data-cmd="Hilfe">❓ Hilfe</button>
+                el.innerHTML = `
+                    <div class="window-header">
+                        <span class="window-title">${win.icon} ${win.title}</span>
+                        <div class="window-controls">
+                            <button class="win-btn" data-action="minimize" aria-label="Minimieren">─</button>
+                            <button class="win-btn" data-action="maximize" aria-label="Maximieren">⧉</button>
+                            <button class="win-btn close" data-action="close" aria-label="Schließen">✕</button>
                         </div>
                     </div>
+                    <div class="window-body"></div>
                 `;
-                const chat = body.querySelector('#ai-chat');
-                const input = body.querySelector('#ai-input');
-                const sendBtn = body.querySelector('#ai-send');
 
-                function addMessage(role, text) {
-                    const div = document.createElement('div');
-                    div.style.cssText = `padding:6px 10px;margin:4px 0;border-radius:8px;max-width:85%;${role === 'user' ? 'background:rgba(0,212,255,0.15);align-self:flex-end;' : 'background:rgba(123,47,252,0.15);'}`;
-                    div.textContent = (role === 'user' ? '👤 ' : '🤖 ') + text;
-                    chat.appendChild(div);
-                    chat.scrollTop = chat.scrollHeight;
-                }
+                appContainer.appendChild(el);
+                win.element = el;
 
-                function processCommand(cmd) {
-                    addMessage('user', cmd);
-                    const lower = cmd.toLowerCase();
-                    let response = '';
-                    if (lower.includes('einstellung') || lower.includes('settings')) {
-                        response = '⚙️ Öffne Einstellungen ...';
-                        setTimeout(() => launchApp('settings'), 300);
-                    } else if (lower.includes('datei') || lower.includes('files')) {
-                        response = '📁 Öffne Datei-Manager ...';
-                        setTimeout(() => launchApp('files'), 300);
-                    } else if (lower.includes('cosmic') || lower.includes('weltraum')) {
-                        response = '🌌 Aktiviere Cosmic World ...';
-                        setTimeout(() => launchApp('cosmic'), 300);
-                    } else if (lower.includes('hilfe') || lower.includes('help')) {
-                        response = '❓ Ich kann: Apps öffnen, Dateien verwalten, Theme wechseln, Fragen beantworten. Was möchtest du?';
-                    } else if (lower.includes('hallo') || lower.includes('hi')) {
-                        response = '👋 Hallo! Ich bin HalDo, dein intelligentes OS. Wie kann ich dir helfen?';
-                    } else if (lower.includes('wetter')) {
-                        response = '🌤️ Aktuell: 22°C, sonnig. (Demo-Daten)';
-                    } else if (lower.includes('danke')) {
-                        response = '❤️ Gern geschehen! Immer für dich da.';
-                    } else if (lower.includes('theme') || lower.includes('design')) {
-                        response = '🎨 Theme wird gewechselt ...';
-                        setTimeout(() => toggleTheme(), 200);
-                    } else {
-                        response = `💡 Ich habe verstanden: "${cmd}". Leider habe ich dafür noch keine spezifische Aktion. Versuche: "Öffne Einstellungen", "Zeige meine Dateien" oder "Hilfe".`;
-                    }
-                    setTimeout(() => addMessage('assistant', response), 400);
-                    // Memory speichern
-                    state.aiMemory.push({ role: 'user', content: cmd });
-                    state.aiMemory.push({ role: 'assistant', content: response });
-                }
-
-                sendBtn.addEventListener('click', () => {
-                    const val = input.value.trim();
-                    if (!val) return;
-                    processCommand(val);
-                    input.value = '';
-                });
-                input.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendBtn.click(); });
-
-                body.querySelectorAll('.ai-quick').forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        processCommand(btn.dataset.cmd);
+                // Window controls
+                el.querySelectorAll('.win-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const action = btn.dataset.action;
+                        if (action === 'close') closeWindow(win.id);
+                        else if (action === 'minimize') minimizeWindow(win.id);
+                        else if (action === 'maximize') maximizeWindow(win.id);
                     });
                 });
 
-                // Voice (Demo)
-                body.querySelector('#ai-voice').addEventListener('click', () => {
-                    if ('webkitSpeechRecognition' in window) {
-                        const rec = new webkitSpeechRecognition();
-                        rec.lang = 'de-DE';
-                        rec.onresult = (e) => {
-                            const text = e.results[0][0].transcript;
-                            input.value = text;
-                            sendBtn.click();
-                        };
-                        rec.start();
-                        HalDo.notify('🎤 Höre zu ...');
-                    } else {
-                        HalDo.notify('❌ Speech Recognition nicht unterstützt', 'error');
-                    }
-                });
-            }
-        });
+                // Drag (Touch + Mouse)
+                const header = el.querySelector('.window-header');
+                let drag = false,
+                    startX, startY, origX, origY, isTouch = false;
 
-        // 2. File Manager
-        registerApp('files', {
-            title: 'Datei-Manager',
-            icon: '📁',
-            render: (body) => {
-                const files = [
-                    { name: 'Dokumente', type: 'folder', size: '-' },
-                    { name: 'Bilder', type: 'folder', size: '-' },
-                    { name: 'Musik', type: 'folder', size: '-' },
-                    { name: 'Projekt_HalDo.pdf', type: 'pdf', size: '2.4 MB' },
-                    { name: 'Systembericht.txt', type: 'txt', size: '128 KB' },
-                    { name: 'Cosmic_Wallpaper.jpg', type: 'jpg', size: '4.1 MB' },
-                ];
-                body.innerHTML = `
-                    <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;">
-                        <input type="text" placeholder="🔍 Suche ..." style="flex:1;min-width:120px;" id="file-search" />
-                        <button id="file-new">➕ Neu</button>
-                        <button id="file-upload">📤 Upload</button>
-                    </div>
-                    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;" id="file-grid">
-                        ${files.map(f => `
-                            <div style="background:rgba(255,255,255,0.05);padding:12px;border-radius:10px;text-align:center;cursor:pointer;transition:0.2s;" 
-                                 onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">
-                                <div style="font-size:2rem;">${f.type === 'folder' ? '📁' : '📄'}</div>
-                                <div style="font-size:0.8rem;font-weight:500;margin-top:4px;">${f.name}</div>
-                                <div style="font-size:0.7rem;color:#8899bb;">${f.size}</div>
-                            </div>
-                        `).join('')}
-                    </div>
-                    <div style="margin-top:12px;font-size:0.8rem;color:#8899bb;border-top:1px solid rgba(255,255,255,0.05);padding-top:10px;">
-                        📊 6 Elemente — Speicher: 12.4 GB frei von 32 GB                    </div>
-                `;
-                body.querySelector('#file-search').addEventListener('input', (e) => {
-                    const q = e.target.value.toLowerCase();
-                    const items = body.querySelectorAll('#file-grid > div');
-                    items.forEach(el => {
-                        const name = el.querySelector('div:nth-child(2)').textContent.toLowerCase();
-                        el.style.display = name.includes(q) ? '' : 'none';
+                function startDrag(clientX, clientY) {
+                    if (header.querySelector('.win-btn') && document.activeElement?.tagName === 'BUTTON') return;
+                    drag = true;
+                    startX = clientX;
+                    startY = clientY;
+                    origX = win.x;
+                    origY = win.y;
+                    focusWindow(win.id);
+                    el.style.cursor = 'grabbing';
+                }
+
+                function moveDrag(clientX, clientY) {
+                    if (!drag) return;
+                    const dx = clientX - startX;
+                    const dy = clientY - startY;
+                    win.x = Math.max(0, Math.min(window.innerWidth - win.width, origX + dx));
+                    win.y = Math.max(0, Math.min(window.innerHeight - win.height - 60, origY + dy));
+                    el.style.left = win.x + 'px';
+                    el.style.top = win.y + 'px';
+                }
+
+                function endDrag() {
+                    if (drag) { drag = false;
+                        el.style.cursor = ''; }
+                }
+
+                header.addEventListener('mousedown', (e) => {
+                    if (e.target.closest('.win-btn')) return;
+                    startDrag(e.clientX, e.clientY);
+                });
+                document.addEventListener('mousemove', (e) => {
+                    if (!drag) return;
+                    moveDrag(e.clientX, e.clientY);
+                });
+                document.addEventListener('mouseup', endDrag);
+
+                // Touch events
+                header.addEventListener('touchstart', (e) => {
+                    const touch = e.touches[0];
+                    if (e.target.closest('.win-btn')) return;
+                    isTouch = true;
+                    startDrag(touch.clientX, touch.clientY);
+                }, { passive: true });
+                document.addEventListener('touchmove', (e) => {
+                    if (!drag || !isTouch) return;
+                    const touch = e.touches[0];
+                    moveDrag(touch.clientX, touch.clientY);
+                }, { passive: true });
+                document.addEventListener('touchend', () => {
+                    if (isTouch) { isTouch = false;
+                        endDrag(); }
+                }, { passive: true });
+
+                // Resize (Touch + Mouse)
+                const resizeHandle = document.createElement('div');
+                resizeHandle.style.cssText =
+                    'position:absolute;bottom:0;right:0;width:24px;height:24px;cursor:se-resize;touch-action:none;';
+                el.appendChild(resizeHandle);
+
+                let resize = false,
+                    startW, startH, startX2, startY2;
+
+                function startResize(clientX, clientY) {
+                    resize = true;
+                    startW = win.width;
+                    startH = win.height;
+                    startX2 = clientX;
+                    startY2 = clientY;
+                }
+
+                function moveResize(clientX, clientY) {
+                    if (!resize) return;
+                    const dw = clientX - startX2,
+                        dh = clientY - startY2;
+                    win.width = Math.max(200, Math.min(window.innerWidth - win.x - 10, startW + dw));
+                    win.height = Math.max(120, Math.min(window.innerHeight - win.y - 80, startH + dh));
+                    el.style.width = win.width + 'px';
+                    el.style.height = win.height + 'px';
+                }
+
+                function endResize() { resize = false; }
+
+                resizeHandle.addEventListener('mousedown', (e) => {
+                    e.stopPropagation();
+                    startResize(e.clientX, e.clientY);
+                });
+                document.addEventListener('mousemove', (e) => {
+                    if (!resize) return;
+                    moveResize(e.clientX, e.clientY);
+                });
+                document.addEventListener('mouseup', endResize);
+
+                resizeHandle.addEventListener('touchstart', (e) => {
+                    e.stopPropagation();
+                    const touch = e.touches[0];
+                    startResize(touch.clientX, touch.clientY);
+                }, { passive: true });
+                document.addEventListener('touchmove', (e) => {
+                    if (!resize) return;
+                    const touch = e.touches[0];
+                    moveResize(touch.clientX, touch.clientY);
+                }, { passive: true });
+                document.addEventListener('touchend', endResize, { passive: true });
+            }
+
+            function closeWindow(winId) {
+                const idx = state.windows.findIndex(w => w.id === winId);
+                if (idx === -1) return;
+                const win = state.windows[idx];
+                if (win.element) win.element.remove();
+                state.windows.splice(idx, 1);
+                if (state.activeWindow === winId) state.activeWindow = null;
+                if (state.windows.length > 0) {
+                    focusWindow(state.windows[state.windows.length - 1].id);
+                }
+            }
+
+            function focusWindow(winId) {
+                const win = state.windows.find(w => w.id === winId);
+                if (!win) return;
+                state.activeWindow = winId;
+                win.zIndex = state.windowZIndex++;
+                if (win.element) {
+                    win.element.style.zIndex = win.zIndex;
+                    win.element.classList.add('active');
+                    state.windows.forEach(w => {
+                        if (w.id !== winId && w.element) w.element.classList.remove('active');
                     });
-                });
-                body.querySelector('#file-new').addEventListener('click', () => {
-                    const name = prompt('📁 Neuer Ordnername:');
-                    if (name) HalDo.notify(`📁 Ordner "${name}" erstellt`);
-                });
-                body.querySelector('#file-upload').addEventListener('click', () => {
-                    HalDo.notify('📤 Upload-Dialog geöffnet (Demo)');
-                });
+                }
             }
-        });
 
-        // 3. Settings
-        registerApp('settings', {
-            title: 'Einstellungen',
-            icon: '⚙️',
-            render: (body) => {
-                body.innerHTML = `
-                    <h3 style="margin-bottom:12px;">⚙️ System-Einstellungen</h3>
-                    <div style="display:flex;flex-direction:column;gap:12px;">
-                        <div><label>Theme</label>
-                            <select id="settings-theme">
-                                <option value="cosmic" ${state.settings.theme === 'cosmic' ? 'selected' : ''}>🌌 Cosmic</option>
-                                <option value="dark" ${state.settings.theme === 'dark' ? 'selected' : ''}>🌙 Dark</option>
-                                <option value="light" ${state.settings.theme === 'light' ? 'selected' : ''}>☀️ Light</option>
-                            </select>
-                        </div>
-                        <div><label>Sprache</label>
-                            <select id="settings-language">
-                                <option value="de" ${state.settings.language === 'de' ? 'selected' : ''}>🇩🇪 Deutsch</option>
-                                <option value="en" ${state.settings.language === 'en' ? 'selected' : ''}>🇬🇧 English</option>
-                                <option value="ezidi" ${state.settings.language === 'ezidi' ? 'selected' : ''}>𒀭 Êzîdî</option>
-                            </select>
-                        </div>
-                        <div><label><input type="checkbox" id="settings-voice" ${state.settings.voiceEnabled ? 'checked' : ''} /> Sprachsteuerung aktivieren</label></div>
-                        <div><label><input type="checkbox" id="settings-notifications" ${state.settings.notifications ? 'checked' : ''} /> Benachrichtigungen</label></div>
-                        <button id="settings-save" style="margin-top:10px;">💾 Einstellungen speichern</button>
-                        <div style="font-size:0.8rem;color:#8899bb;margin-top:10px;border-top:1px solid rgba(255,255,255,0.05);padding-top:10px;">
-                            HalDo AI OS v20.0.0 — Kernel 5.2.1
-                        </div>
-                    </div>
-                `;
-                body.querySelector('#settings-save').addEventListener('click', () => {
-                    state.settings.theme = body.querySelector('#settings-theme').value;
-                    state.settings.language = body.querySelector('#settings-language').value;
-                    state.settings.voiceEnabled = body.querySelector('#settings-voice').checked;
-                    state.settings.notifications = body.querySelector('#settings-notifications').checked;
-                    applyTheme(state.settings.theme);
-                    HalDo.notify('✅ Einstellungen gespeichert!');
-                });
+            function minimizeWindow(winId) {
+                const win = state.windows.find(w => w.id === winId);
+                if (win && win.element) {
+                    win.element.style.display = 'none';
+                    notify(`⏬ ${win.title} minimiert`);
+                }
             }
-        });
 
-        // 4. Cosmic World
-        registerApp('cosmic', {
-            title: 'Cosmic World',
-            icon: '🌌',
-            render: (body) => {
-                body.innerHTML = `
-                    <div style="text-align:center;padding:20px;">
-                        <div style="font-size:3rem;margin-bottom:10px;">🌌</div>
-                        <h3 style="margin-bottom:8px;">Cosmic World aktiv</h3>
-                        <p style="color:#8899bb;font-size:0.9rem;">Sterne, Nebel und Partikel tanzen für dich.</p>
-                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px;">
-                            <button id="cosmic-stars">⭐ Sterne intensiv</button>
-                            <button id="cosmic-nebula">🌫️ Nebel-Modus</button>
-                            <button id="cosmic-rainbow">🌈 Regenbogen</button>
-                            <button id="cosmic-reset">🔄 Zurücksetzen</button>
-                        </div>
-                        <div style="margin-top:16px;font-size:0.8rem;color:#8899bb;">
-                            🌠 ${stars.length} Sterne · ${particles.length} Nebel-Partikel
-                        </div>
-                    </div>
-                `;
-                body.querySelector('#cosmic-stars').addEventListener('click', () => {
-                    stars.forEach(s => s.brightness = 1.0);
-                    HalDo.notify('⭐ Sterne leuchten heller');
-                });
-                body.querySelector('#cosmic-nebula').addEventListener('click', () => {
-                    particles.forEach(p => p.alpha = 0.08);
-                    HalDo.notify('🌫️ Nebel intensiviert');
-                });
-                body.querySelector('#cosmic-rainbow').addEventListener('click', () => {
-                    particles.forEach((p, i) => p.hue = (i * 7) % 360);
-                    HalDo.notify('🌈 Regenbogen-Modus aktiviert');
-                });
-                body.querySelector('#cosmic-reset').addEventListener('click', () => {
-                    location.reload();
-                });
+            function maximizeWindow(winId) {
+                const win = state.windows.find(w => w.id === winId);
+                if (!win || !win.element) return;
+                if (win.width === window.innerWidth - 20) {
+                    win.width = win._prevWidth || 500;
+                    win.height = win._prevHeight || 400;
+                    win.x = win._prevX || 20;
+                    win.y = win._prevY || 40;
+                } else {
+                    win._prevWidth = win.width;
+                    win._prevHeight = win.height;
+                    win._prevX = win.x;
+                    win._prevY = win.y;
+                    win.width = window.innerWidth - 20;
+                    win.height = window.innerHeight - 100;
+                    win.x = 10;
+                    win.y = 30;
+                }
+                win.element.style.width = win.width + 'px';
+                win.element.style.height = win.height + 'px';
+                win.element.style.left = win.x + 'px';
+                win.element.style.top = win.y + 'px';
             }
-        });
 
-        // 5. Notes
-        registerApp('notes', {
-            title: 'Notizen',
-            icon: '📝',
-            render: (body) => {
-                let notes = JSON.parse(localStorage.getItem('haldo_notes') || '[]');
-                body.innerHTML = `
-                    <div style="display:flex;gap:8px;margin-bottom:12px;">
-                        <input type="text" id="note-input" placeholder="📝 Neue Notiz ..." style="flex:1;" />
-                        <button id="note-add">➕ Hinzufügen</button>
-                    </div>
-                    <div id="note-list" style="display:flex;flex-direction:column;gap:6px;max-height:200px;overflow-y:auto;">
-                        ${notes.map((n, i) => `
-                            <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.05);padding:8px 12px;border-radius:8px;">
-                                <span>${n}</span>
-                                <button class="note-del" data-idx="${i}" style="background:none;border:none;color:#ff6666;cursor:pointer;">✕</button>
+            // ===== NOTIFICATION =====
+            function notify(message, type = 'info') {
+                const el = document.createElement('div');
+                el.className = `notification ${type}`;
+                el.textContent = message;
+                document.body.appendChild(el);
+                setTimeout(() => {
+                    el.style.opacity = '0';
+                    el.style.transform = 'translateY(-120%)';
+                    setTimeout(() => el.remove(), 400);
+                }, 2800);
+            }
+
+            // ===== THEME =====
+            function applyTheme(theme) {
+                const root = document.documentElement;
+                if (theme === 'cosmic') {
+                    root.style.setProperty('--bg', '#0a0a1a');
+                    root.style.setProperty('--text', '#e0e0ff');
+                    root.style.setProperty('--surface', 'rgba(16,16,40,0.92)');
+                } else if (theme === 'dark') {
+                    root.style.setProperty('--bg', '#0a0a0a');
+                    root.style.setProperty('--text', '#ffffff');
+                    root.style.setProperty('--surface', 'rgba(30,30,40,0.92)');
+                } else if (theme === 'light') {
+                    root.style.setProperty('--bg', '#e8e8f0');
+                    root.style.setProperty('--text', '#1a1a2e');
+                    root.style.setProperty('--surface', 'rgba(255,255,255,0.92)');
+                }
+                state.settings.theme = theme;
+                localStorage.setItem('haldo_theme', theme);
+            }
+
+            function toggleTheme() {
+                const themes = ['cosmic', 'dark', 'light'];
+                const current = state.settings.theme;
+                const next = themes[(themes.indexOf(current) + 1) % themes.length];
+                applyTheme(next);
+                notify(`🎨 Theme: ${next}`);
+            }
+
+            // ===== APP REGISTRATION =====
+            function registerApp(id, config) {
+                state.apps[id] = { ...config, id, instance: null };
+            }
+
+            // ===== APP DEFINITIONS =====
+            function defineApps() {
+                // 1. AI Assistant
+                registerApp('ai', {
+                    title: 'HalDo AI',
+                    icon: '🤖',
+                    render: (body) => {
+                        body.innerHTML = `
+                            <div style="display:flex;flex-direction:column;height:100%;gap:8px;">
+                                <div style="flex:1;overflow-y:auto;background:rgba(0,0,0,0.2);border-radius:10px;padding:10px;min-height:60px;max-height:300px;" id="ai-chat">
+                                    <div style="color:#8899bb;text-align:center;">💬 HalDo AI — bereit</div>
+                                </div>
+                                <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                                    <input type="text" id="ai-input" placeholder="Frage ..." style="flex:1;min-width:100px;" />
+                                    <button id="ai-send">Senden</button>
+                                    <button id="ai-voice" style="background:#4444ff;">🎤</button>
+                                </div>
+                                <div style="display:flex;gap:4px;flex-wrap:wrap;">
+                                    <button class="ai-quick" data-cmd="Öffne Einstellungen">⚙️</button>
+                                    <button class="ai-quick" data-cmd="Zeige meine Dateien">📁</button>
+                                    <button class="ai-quick" data-cmd="Wechsle zu Cosmic">🌌</button>
+                                    <button class="ai-quick" data-cmd="Hilfe">❓</button>
+                                </div>
                             </div>
-                        `).join('')}
-                    </div>
-                `;
-                const input = body.querySelector('#note-input');
-                body.querySelector('#note-add').addEventListener('click', () => {
-                    const val = input.value.trim();
-                    if (!val) return;
-                    notes.push(val);
-                    localStorage.setItem('haldo_notes', JSON.stringify(notes));
-                    input.value = '';
-                    renderNoteList();
-                });
-                input.addEventListener('keydown', (e) => { if (e.key === 'Enter') body.querySelector('#note-add').click(); });
+                        `;
+                        const chat = body.querySelector('#ai-chat');
+                        const input = body.querySelector('#ai-input');
+                        const sendBtn = body.querySelector('#ai-send');
 
-                function renderNoteList() {
-                    const list = body.querySelector('#note-list');
-                    list.innerHTML = notes.map((n, i) => `
-                        <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.05);padding:8px 12px;border-radius:8px;">
-                            <span>${n}</span>
-                            <button class="note-del" data-idx="${i}" style="background:none;border:none;color:#ff6666;cursor:pointer;">✕</button>
-                        </div>
-                    `).join('');
-                    list.querySelectorAll('.note-del').forEach(btn => {
-                        btn.addEventListener('click', () => {
-                            const idx = parseInt(btn.dataset.idx);
-                            notes.splice(idx, 1);
-                            localStorage.setItem('haldo_notes', JSON.stringify(notes));
-                            renderNoteList();
-                            HalDo.notify('🗑️ Notiz gelöscht');
+                        function addMessage(role, text) {
+                            const div = document.createElement('div');
+                            div.style.cssText =
+                                `padding:6px 10px;margin:3px 0;border-radius:8px;max-width:90%;${role === 'user' ? 'background:rgba(0,212,255,0.12);align-self:flex-end;' : 'background:rgba(123,47,252,0.12);'}`;
+                            div.textContent = (role === 'user' ? '👤 ' : '🤖 ') + text;
+                            chat.appendChild(div);
+                            chat.scrollTop = chat.scrollHeight;
+                        }
+
+                        function processCommand(cmd) {
+                            addMessage('user', cmd);
+                            const lower = cmd.toLowerCase();
+                            let response = '';
+                            if (lower.includes('einstellung') || lower.includes('settings')) {
+                                response = '⚙️ Öffne Einstellungen ...';
+                                setTimeout(() => launchApp('settings'), 300);
+                            } else if (lower.includes('datei') || lower.includes('files')) {
+                                response = '📁 Öffne Datei-Manager ...';
+                                setTimeout(() => launchApp('files'), 300);
+                            } else if (lower.includes('cosmic')) {
+                                response = '🌌 Aktiviere Cosmic World ...';
+                                setTimeout(() => launchApp('cosmic'), 300);
+                            } else if (lower.includes('hilfe')) {
+                                response = '❓ Befehle: "Öffne Einstellungen", "Zeige meine Dateien", "Wechsle zu Cosmic", "Hallo", "Wetter"';
+                            } else if (lower.includes('hallo')) {
+                                response = '👋 Hallo! Ich bin HalDo. Wie kann ich helfen?';
+                            } else if (lower.includes('wetter')) {
+                                response = '🌤️ 22°C, sonnig (Demo)';
+                            } else if (lower.includes('danke')) {
+                                response = '❤️ Gern geschehen!';
+                            } else {
+                                response =
+                                    `💡 Verstanden: "${cmd}". Versuche: "Öffne Einstellungen", "Zeige meine Dateien" oder "Hilfe".`;
+                            }
+                            setTimeout(() => addMessage('assistant', response), 300);
+                            state.aiMemory.push({ role: 'user', content: cmd });
+                            state.aiMemory.push({ role: 'assistant', content: response });
+                        }
+
+                        sendBtn.addEventListener('click', () => {
+                            const val = input.value.trim();
+                            if (!val) return;
+                            processCommand(val);
+                            input.value = '';
                         });
-                    });
-                }
-            }
-        });
+                        input.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendBtn.click(); });
 
-        // 6. Terminal (System Info)
-        registerApp('terminal', {
-            title: 'Terminal',
-            icon: '⌨️',
-            render: (body) => {
-                body.innerHTML = `
-                    <div style="background:#050510;border-radius:8px;padding:12px;font-family:'Courier New',monospace;font-size:0.8rem;min-height:120px;max-height:250px;overflow-y:auto;" id="terminal-output">
-                        <div style="color:#44ff88;">$ HalDo AI OS v20.0.0</div>
-                        <div style="color:#8899bb;">$ Kernel 5.2.1 | System: ${navigator.platform}</div>
-                        <div style="color:#8899bb;">$ Speicher: ${Math.round(navigator.deviceMemory || 8)} GB RAM</div>
-                        <div style="color:#44ff88;">$ ready ></div>
-                    </div>
-                    <div style="display:flex;gap:8px;margin-top:8px;">
-                        <input type="text" id="terminal-input" placeholder="$ Befehl eingeben ..." style="flex:1;font-family:'Courier New',monospace;" />
-                        <button id="terminal-exec">⏎</button>
-                    </div>
-                `;
-                const output = body.querySelector('#terminal-output');
-                const input = body.querySelector('#terminal-input');
+                        body.querySelectorAll('.ai-quick').forEach(btn => {
+                            btn.addEventListener('click', () => processCommand(btn.dataset.cmd));
+                        });
 
-                function exec(cmd) {
-                    const line = document.createElement('div');
-                    line.style.color = '#44ff88';
-                    line.textContent = `$ ${cmd}`;
-                    output.appendChild(line);
-                    let response = '';
-                    if (cmd === 'help' || cmd === '?') {
-                        response = 'Verfügbare Befehle: help, version, apps, theme, clear, echo <text>, date';
-                    } else if (cmd === 'version' || cmd === 'ver') {
-                        response = 'HalDo AI OS 20.0.0 (Cosmic) | Kernel 5.2.1';
-                    } else if (cmd === 'apps') {
-                        response = 'Installierte Apps: ' + Object.keys(state.apps).join(', ');
-                    } else if (cmd === 'theme') {
-                        response = `Aktuelles Theme: ${state.settings.theme}`;
-                    } else if (cmd === 'clear' || cmd === 'cls') {
-                        output.innerHTML = '';
-                        return;
-                    } else if (cmd.startsWith('echo ')) {
-                        response = cmd.substring(5);
-                    } else if (cmd === 'date') {
-                        response = new Date().toLocaleString();
-                    } else if (cmd === 'whoami') {
-                        response = 'haldo@cosmic';
-                    } else if (cmd === '') {
-                        return;
-                    } else {
-                        response = `❌ Befehl nicht gefunden: "${cmd}". Tippe "help" für Hilfe.`;
+                        body.querySelector('#ai-voice').addEventListener('click', () => {
+                            if ('webkitSpeechRecognition' in window) {
+                                const rec = new webkitSpeechRecognition();
+                                rec.lang = 'de-DE';
+                                rec.onresult = (e) => {
+                                    const text = e.results[0][0].transcript;
+                                    input.value = text;
+                                    sendBtn.click();
+                                };
+                                rec.start();
+                                notify('🎤 Höre zu ...');
+                            } else {
+                                notify('❌ Speech nicht unterstützt', 'error');
+                            }
+                        });
                     }
-                    const respLine = document.createElement('div');
-                    respLine.style.color = '#8899bb';
-                    respLine.textContent = response;
-                    output.appendChild(respLine);
-                    output.scrollTop = output.scrollHeight;
-                }
-
-                body.querySelector('#terminal-exec').addEventListener('click', () => {
-                    const val = input.value.trim();
-                    if (val) exec(val);
-                    input.value = '';
                 });
-                input.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter') body.querySelector('#terminal-exec').click();
+
+                // 2. File Manager
+                registerApp('files', {
+                    title: 'Datei-Manager',
+                    icon: '📁',
+                    render: (body) => {
+                        const files = [
+                            { name: 'Dokumente', type: 'folder', size: '-' },
+                            { name: 'Bilder', type: 'folder', size: '-' },
+                            { name: 'Musik', type: 'folder', size: '-' },
+                            { name: 'Projekt_HalDo.pdf', type: 'pdf', size: '2.4 MB' },
+                            { name: 'Systembericht.txt', type: 'txt', size: '128 KB' },
+                        ];
+                        body.innerHTML = `
+                            <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;">
+                                <input type="text" placeholder="🔍 Suche ..." style="flex:1;min-width:80px;" id="file-search" />
+                                <button id="file-new" style="padding:8px 12px;">➕</button>
+                            </div>
+                            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:6px;" id="file-grid">
+                                ${files.map(f => `
+                                    <div style="background:rgba(255,255,255,0.04);padding:10px;border-radius:10px;text-align:center;">
+                                        <div style="font-size:1.8rem;">${f.type === 'folder' ? '📁' : '📄'}</div>
+                                        <div style="font-size:0.7rem;font-weight:500;margin-top:2px;word-break:break-all;">${f.name}</div>
+                                        <div style="font-size:0.6rem;color:#8899bb;">${f.size}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            <div style="margin-top:8px;font-size:0.7rem;color:#8899bb;border-top:1px solid rgba(255,255,255,0.04);padding-top:8px;">
+                                📊 5 Elemente · 12.4 GB frei
+                            </div>
+                        `;
+                        body.querySelector('#file-search').addEventListener('input', (e) => {
+                            const q = e.target.value.toLowerCase();
+                            body.querySelectorAll('#file-grid > div').forEach(el => {
+                                const name = el.querySelector('div:nth-child(2)')?.textContent?.toLowerCase() || '';
+                                el.style.display = name.includes(q) ? '' : 'none';
+                            });
+                        });
+                        body.querySelector('#file-new').addEventListener('click', () => {
+                            const name = prompt('📁 Neuer Ordnername:');
+                            if (name) notify(`📁 Ordner "${name}" erstellt`);
+                        });
+                    }
+                });
+
+                // 3. Settings
+                registerApp('settings', {
+                    title: 'Einstellungen',
+                    icon: '⚙️',
+                    render: (body) => {
+                        body.innerHTML = `
+                            <h3 style="margin-bottom:10px;font-size:clamp(0.9rem,2vw,1.1rem);">⚙️ Einstellungen</h3>
+                            <div style="display:flex;flex-direction:column;gap:10px;">
+                                <div><label style="display:block;font-size:0.8rem;color:#8899bb;">Theme</label>
+                                    <select id="settings-theme" style="width:100%;">
+                                        <option value="cosmic" ${state.settings.theme === 'cosmic' ? 'selected' : ''}>🌌 Cosmic</option>
+                                        <option value="dark" ${state.settings.theme === 'dark' ? 'selected' : ''}>🌙 Dark</option>
+                                        <option value="light" ${state.settings.theme === 'light' ? 'selected' : ''}>☀️ Light</option>
+                                    </select>
+                                </div>
+                                <div><label style="display:block;font-size:0.8rem;color:#8899bb;">Sprache</label>
+                                    <select id="settings-language" style="width:100%;">
+                                        <option value="de" ${state.settings.language === 'de' ? 'selected' : ''}>🇩🇪 Deutsch</option>
+                                        <option value="en" ${state.settings.language === 'en' ? 'selected' : ''}>🇬🇧 English</option>
+                                        <option value="ezidi" ${state.settings.language === 'ezidi' ? 'selected' : ''}>𒀭 Êzîdî</option>
+                                    </select>
+                                </div>
+                                <div><label style="display:flex;align-items:center;gap:8px;font-size:0.85rem;">
+                                    <input type="checkbox" id="settings-voice" ${state.settings.voiceEnabled ? 'checked' : ''} /> Sprachsteuerung
+                                </label></div>
+                                <button id="settings-save" style="margin-top:6px;">💾 Speichern</button>
+                                <div style="font-size:0.7rem;color:#8899bb;border-top:1px solid rgba(255,255,255,0.04);padding-top:8px;">
+                                    HalDo AI OS v20.0.0
+                                </div>
+                            </div>
+                        `;
+                        body.querySelector('#settings-save').addEventListener('click', () => {
+                            state.settings.theme = body.querySelector('#settings-theme').value;
+                            state.settings.language = body.querySelector('#settings-language').value;
+                            state.settings.voiceEnabled = body.querySelector('#settings-voice').checked;
+                            applyTheme(state.settings.theme);
+                            notify('✅ Einstellungen gespeichert!');
+                        });
+                    }
+                });
+
+                // 4. Cosmic World
+                registerApp('cosmic', {
+                    title: 'Cosmic World',
+                    icon: '🌌',
+                    render: (body) => {
+                        body.innerHTML = `
+                            <div style="text-align:center;padding:10px;">
+                                <div style="font-size:2.5rem;">🌌</div>
+                                <h3 style="margin:6px 0;font-size:clamp(0.9rem,2vw,1.1rem);">Cosmic World</h3>
+                                <p style="color:#8899bb;font-size:0.8rem;">Sterne & Nebel tanzen</p>
+                                <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:12px;">
+                                    <button id="cosmic-stars">⭐ Sterne</button>
+                                    <button id="cosmic-nebula">🌫️ Nebel</button>
+                                    <button id="cosmic-rainbow">🌈 Regenbogen</button>
+                                    <button id="cosmic-reset">🔄 Reset</button>
+                                </div>
+                                <div style="margin-top:10px;font-size:0.7rem;color:#8899bb;">
+                                    🌠 ${stars.length} Sterne · ${particles.length} Partikel
+                                </div>
+                            </div>
+                        `;
+                        body.querySelector('#cosmic-stars').addEventListener('click', () => {
+                            stars.forEach(s => s.brightness = 1.0);
+                            notify('⭐ Sterne heller');
+                        });
+                        body.querySelector('#cosmic-nebula').addEventListener('click', () => {
+                            particles.forEach(p => p.alpha = 0.06);
+                            notify('🌫️ Nebel intensiv');
+                        });
+                        body.querySelector('#cosmic-rainbow').addEventListener('click', () => {
+                            particles.forEach((p, i) => p.hue = (i * 10) % 360);
+                            notify('🌈 Regenbogen');
+                        });
+                        body.querySelector('#cosmic-reset').addEventListener('click', () => {
+                            location.reload();
+                        });
+                    }
+                });
+
+                // 5. Notes
+                registerApp('notes', {
+                    title: 'Notizen',
+                    icon: '📝',
+                    render: (body) => {
+                        let notes = JSON.parse(localStorage.getItem('haldo_notes') || '[]');
+                        body.innerHTML = `
+                            <div style="display:flex;gap:6px;margin-bottom:10px;">
+                                <input type="text" id="note-input" placeholder="📝 Notiz ..." style="flex:1;" />
+                                <button id="note-add">➕</button>
+                            </div>
+                            <div id="note-list" style="display:flex;flex-direction:column;gap:4px;max-height:200px;overflow-y:auto;">
+                                ${notes.map((n, i) => `
+                                    <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.04);padding:6px 10px;border-radius:8px;font-size:0.85rem;">
+                                        <span style="word-break:break-word;flex:1;">${n}</span>
+                                        <button class="note-del" data-idx="${i}" style="background:none;border:none;color:#ff6666;cursor:pointer;padding:4px 8px;">✕</button>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        `;
+                        const input = body.querySelector('#note-input');
+
+                        function renderNotes() {
+                            const list = body.querySelector('#note-list');
+                            list.innerHTML = notes.map((n, i) => `
+                                <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.04);padding:6px 10px;border-radius:8px;font-size:0.85rem;">
+                                    <span style="word-break:break-word;flex:1;">${n}</span>
+                                    <button class="note-del" data-idx="${i}" style="background:none;border:none;color:#ff6666;cursor:pointer;padding:4px 8px;">✕</button>
+                                </div>
+                            `).join('');
+                            list.querySelectorAll('.note-del').forEach(btn => {
+                                btn.addEventListener('click', () => {
+                                    const idx = parseInt(btn.dataset.idx);
+                                    notes.splice(idx, 1);
+                                    localStorage.setItem('haldo_notes', JSON.stringify(notes));
+                                    renderNotes();
+                                    notify('🗑️ Gelöscht');
+                                });
+                            });
+                        }
+
+                        body.querySelector('#note-add').addEventListener('click', () => {
+                            const val = input.value.trim();
+                            if (!val) return;
+                            notes.push(val);
+                            localStorage.setItem('haldo_notes', JSON.stringify(notes));
+                            input.value = '';
+                            renderNotes();
+                        });
+                        input.addEventListener('keydown', (e) => { if (e.key === 'Enter') body.querySelector('#note-add')
+                                .click(); });
+                    }
+                });
+
+                // 6. Terminal
+                registerApp('terminal', {
+                    title: 'Terminal',
+                    icon: '⌨️',
+                    render: (body) => {
+                        body.innerHTML = `
+                            <div style="background:#050510;border-radius:8px;padding:10px;font-family:'Courier New',monospace;font-size:0.75rem;min-height:80px;max-height:200px;overflow-y:auto;" id="terminal-output">
+                                <div style="color:#44ff88;">$ HalDo AI OS v20.0.0</div>
+                                <div style="color:#8899bb;">$ ${navigator.platform}</div>
+                                <div style="color:#44ff88;">$ ready ></div>
+                            </div>
+                            <div style="display:flex;gap:6px;margin-top:6px;">
+                                <input type="text" id="terminal-input" placeholder="$ Befehl ..." style="flex:1;font-family:'Courier New',monospace;font-size:0.75rem;" />
+                                <button id="terminal-exec" style="padding:6px 12px;">⏎</button>
+                            </div>
+                        `;
+                        const output = body.querySelector('#terminal-output');
+                        const input = body.querySelector('#terminal-input');
+
+                        function exec(cmd) {
+                            const line = document.createElement('div');
+                            line.style.color = '#44ff88';
+                            line.textContent = `$ ${cmd}`;
+                            output.appendChild(line);
+                            let response = '';
+                            if (cmd === 'help') response = 'help, version, apps, theme, clear, echo, date, whoami';
+                            else if (cmd === 'version') response = 'HalDo AI OS 20.0.0 | Kernel 5.2.1';
+                            else if (cmd === 'apps') response = 'Apps: ' + Object.keys(state.apps).join(', ');
+                            else if (cmd === 'theme') response = `Theme: ${state.settings.theme}`;
+                            else if (cmd === 'clear') { output.innerHTML = ''; return; }
+                            else if (cmd.startsWith('echo ')) response = cmd.substring(5);
+                            else if (cmd === 'date') response = new Date().toLocaleString();
+                            else if (cmd === 'whoami') response = 'haldo@cosmic';
+                            else if (cmd === '') return;
+                            else response = `❌ Unbekannt: "${cmd}". Tipp: help`;
+                            const respLine = document.createElement('div');
+                            respLine.style.color = '#8899bb';
+                            respLine.textContent = response;
+                            output.appendChild(respLine);
+                            output.scrollTop = output.scrollHeight;
+                        }
+
+                        body.querySelector('#terminal-exec').addEventListener('click', () => {
+                            const val = input.value.trim();
+                            if (val) exec(val);
+                            input.value = '';
+                        });
+                        input.addEventListener('keydown', (e) => { if (e.key === 'Enter') body.querySelector('#terminal-exec')
+                                .click(); });
+                    }
+                });
+
+                // 7. Calendar
+                registerApp('calendar', {
+                    title: 'Kalender',
+                    icon: '📅',
+                    render: (body) => {
+                        const now = new Date();
+                        const today = now.getDate();
+                        const month = now.toLocaleString('de', { month: 'long' });
+                        const year = now.getFullYear();
+                        const days = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
+                        body.innerHTML = `
+                            <div style="text-align:center;">
+                                <div style="font-size:1.2rem;font-weight:600;">${month} ${year}</div>
+                                <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:8px;font-size:0.7rem;color:#8899bb;">
+                                    ${days.map(d => `<div style="text-align:center;">${d}</div>`).join('')}
+                                </div>
+                                <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:4px;">
+                                    ${Array.from({length: 30}, (_, i) => i + 1).map(d => `
+                                        <div style="text-align:center;padding:6px 0;border-radius:8px;${d === today ? 'background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff;' : ''}font-size:0.85rem;">
+                                            ${d}
+                                        </div>
+                                    `).join('')}
+                                </div>
+                                <div style="margin-top:8px;font-size:0.75rem;color:#8899bb;">📌 Heute: ${today}.${now.getMonth()+1}.${year}</div>
+                            </div>
+                        `;
+                    }
+                });
+
+                // 8. Music
+                registerApp('music', {
+                    title: 'Musik',
+                    icon: '🎵',
+                    render: (body) => {
+                        const songs = [
+                            '🌌 Cosmic Dreams',
+                            '🚀 Space Odyssey',
+                            '💫 Starlight',
+                            '🌙 Lunar Echo',
+                            '☀️ Solar Flare'
+                        ];
+                        body.innerHTML = `
+                            <div style="display:flex;flex-direction:column;gap:6px;">
+                                <div style="display:flex;gap:10px;justify-content:center;font-size:1.8rem;padding:8px 0;">
+                                    <span style="cursor:pointer;">⏮</span>
+                                    <span style="cursor:pointer;">▶️</span>
+                                    <span style="cursor:pointer;">⏭</span>
+                                    <span style="cursor:pointer;">🔊</span>
+                                </div>
+                                <div style="text-align:center;font-size:0.8rem;color:#8899bb;">🎵 Jetzt spielt: ${songs[0]}</div>
+                                <div style="margin-top:6px;">
+                                    ${songs.map(s => `
+                                        <div style="padding:6px 10px;background:rgba(255,255,255,0.03);border-radius:8px;margin:3px 0;font-size:0.8rem;display:flex;justify-content:space-between;">
+                                            <span>${s}</span>
+                                            <span style="color:#8899bb;">▶</span>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `;
+                    }
                 });
             }
-        });
-    }
 
-    // ===== THEME SYSTEM =====
-    function applyTheme(theme) {
-        const root = document.documentElement;
-        if (theme === 'cosmic') {
-            root.style.setProperty('--bg', '#0a0a1a');
-            root.style.setProperty('--text', '#e0e0ff');
-            root.style.setProperty('--surface', 'rgba(20,20,50,0.85)');
-        } else if (theme === 'dark') {
-            root.style.setProperty('--bg', '#0a0a0a');
-            root.style.setProperty('--text', '#ffffff');
-            root.style.setProperty('--surface', 'rgba(30,30,40,0.9)');
-        } else if (theme === 'light') {
-            root.style.setProperty('--bg', '#f0f0ff');
-            root.style.setProperty('--text', '#1a1a2e');
-            root.style.setProperty('--surface', 'rgba(255,255,255,0.85)');
-        }
-        state.settings.theme = theme;
-        localStorage.setItem('haldo_theme', theme);
-    }
+            // ===== CLOCK =====
+            function updateClock() {
+                const el = document.getElementById('clock-display');
+                if (el) {
+                    el.textContent = new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+                }
+            }
 
-    function toggleTheme() {
-        const themes = ['cosmic', 'dark', 'light'];
-        const current = state.settings.theme;
-        const next = themes[(themes.indexOf(current) + 1) % themes.length];
-        applyTheme(next);
-        HalDo.notify(`🎨 Theme gewechselt zu ${next}`);
-    }
+            // ===== ABOUT =====
+            function showAbout() {
+                notify('⟡ HalDo AI OS v20.0.0 — Cosmic Intelligent OS\n💙 Für alle Geräte optimiert');
+            }
 
-    // ===== NOTIFICATION SYSTEM =====
-    function notify(message, type = 'info') {
-        const el = document.createElement('div');
-        el.className = `notification ${type}`;
-        el.textContent = message;
-        document.body.appendChild(el);
-        setTimeout(() => { el.style.opacity = '0'; el.style.transform = 'translateX(120%)'; setTimeout(() => el.remove(), 500); }, 3000);
-    }
+            // ===== INIT =====
+            function init() {
+                // Theme laden
+                const savedTheme = localStorage.getItem('haldo_theme') || 'cosmic';
+                applyTheme(savedTheme);
 
-    // ===== ABOUT =====
-    function showAbout() {
-        notify('⟡ HalDo AI OS v20.0.0 — Cosmic Intelligent Operating System\n💙 Entwickelt mit ❤️ für dich.');
-    }
+                // Apps definieren
+                defineApps();
 
-    // ===== CLOCK =====
-    function updateClock() {
-        const el = document.getElementById('clock-display');
-        if (el) el.textContent = new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
-    }
+                // Cosmic starten
+                initCosmic();
 
-    // ===== INIT =====
-    function init() {
-        // Theme laden
-        const savedTheme = localStorage.getItem('haldo_theme') || 'cosmic';
-        applyTheme(savedTheme);
+                // Uhr
+                updateClock();
+                setInterval(updateClock, 10000);
 
-        // Apps definieren
-        defineApps();
+                // Dock-Events
+                dock.querySelectorAll('.dock-item').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const appId = btn.dataset.app;
+                        launchApp(appId);
+                    });
+                    // Touch feedback
+                    btn.addEventListener('touchstart', () => {}, { passive: true });
+                });
 
-        // Cosmic starten
-        initCosmic();
+                // Topbar Buttons
+                document.getElementById('btn-cosmic').addEventListener('click', () => launchApp('cosmic'));
+                document.getElementById('btn-theme').addEventListener('click', toggleTheme);
+                document.getElementById('btn-about').addEventListener('click', showAbout);
 
-        // Uhr
-        updateClock();
-        setInterval(updateClock, 10000);
+                // Boot starten
+                bootSequence();
 
-        // Dock-Events
-        dock.querySelectorAll('.dock-item').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const appId = btn.dataset.app;
-                launchApp(appId);
-            });
-        });
+                // Globale API
+                window.HalDo = {
+                    notify,
+                    toggleTheme,
+                    showAbout,
+                    launchApp,
+                    state
+                };
 
-        // Boot starten
-        bootSequence();
+                console.log('⟡ HalDo AI OS v20.0.0');
+                console.log('🌌 Cosmic Intelligent OS');
+                console.log('📱 Mobile-optimiert für alle Geräte');
+                console.log('💡 HalDo.notify("Hallo")');
+            }
 
-        // Globale Befehle (für AI)
-        window.HalDo = {
-            notify,
-            toggleTheme,
-            showAbout,
-            launchApp,
-            state,
-            get apps() { return state.apps; }
-        };
-
-        // Console-Welcome
-        console.log('⟡ HalDo AI OS v20.0.0');
-        console.log('🌌 Cosmic Intelligent Operating System');
-        console.log('💡 Tipp: HalDo.notify("Hallo") oder HalDo.launchApp("ai")');
-    }
-
-    // ===== START =====
-    document.addEventListener('DOMContentLoaded', init);
-    return { notify, toggleTheme, showAbout, launchApp, state };
-})();
-</script>
+            // ===== START =====
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', init);
+            } else {
+                init();
+            }
+        })();
+    </script>
 </body>
 </html>
