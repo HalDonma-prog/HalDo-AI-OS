@@ -7,660 +7,99 @@
     <meta name="theme-color" content="#0a0a1a" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <link rel="manifest" href="data:application/json,{}" />
+    <link rel="manifest" href="data:application/json,{
+      &quot;name&quot;: &quot;HalDo AI OS 24&quot;,
+      &quot;short_name&quot;: &quot;HalDo OS&quot;,
+      &quot;description&quot;: &quot;Cosmic Intelligent Operating System&quot;,
+      &quot;start_url&quot;: &quot;index.html?v=24.0.0&quot;,
+      &quot;display&quot;: &quot;fullscreen&quot;,
+      &quot;orientation&quot;: &quot;portrait-primary&quot;,
+      &quot;theme_color&quot;: &quot;#0a0a1a&quot;,
+      &quot;background_color&quot;: &quot;#0a0a1a&quot;,
+      &quot;lang&quot;: &quot;de&quot;,
+      &quot;icons&quot;: [
+        {&quot;src&quot;: &quot;assets/logo.png&quot;, &quot;sizes&quot;: &quot;512x512&quot;, &quot;type&quot;: &quot;image/png&quot;, &quot;purpose&quot;: &quot;any maskable&quot;},
+        {&quot;src&quot;: &quot;assets/logo.png&quot;, &quot;sizes&quot;: &quot;256x256&quot;, &quot;type&quot;: &quot;image/png&quot;, &quot;purpose&quot;: &quot;any&quot;},
+        {&quot;src&quot;: &quot;assets/logo.png&quot;, &quot;sizes&quot;: &quot;192x192&quot;, &quot;type&quot;: &quot;image/png&quot;, &quot;purpose&quot;: &quot;any&quot;},
+        {&quot;src&quot;: &quot;assets/logo.png&quot;, &quot;sizes&quot;: &quot;128x128&quot;, &quot;type&quot;: &quot;image/png&quot;, &quot;purpose&quot;: &quot;any&quot;},
+        {&quot;src&quot;: &quot;assets/logo.png&quot;, &quot;sizes&quot;: &quot;64x64&quot;, &quot;type&quot;: &quot;image/png&quot;, &quot;purpose&quot;: &quot;any&quot;}
+      ],
+      &quot;shortcuts&quot;: [
+        {&quot;name&quot;: &quot;HalDo AI&quot;, &quot;short_name&quot;: &quot;AI&quot;, &quot;url&quot;: &quot;index.html?app=ai&quot;, &quot;icon&quot;: &quot;assets/logo.png&quot;},
+        {&quot;name&quot;: &quot;App World&quot;, &quot;short_name&quot;: &quot;Apps&quot;, &quot;url&quot;: &quot;index.html?app=appworld&quot;, &quot;icon&quot;: &quot;assets/logo.png&quot;}
+      ]
+    }" />
     <style>
-        /* ================================================================
-           HALDO AI OS 24 — ULTIMATE EDITION
-           MIT LEBENDIGEM LOGO & SPRACHBEFEHLEN
-           ================================================================ */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        :root {
-            --bg: #0a0a1a;
-            --surface: rgba(16, 16, 40, 0.92);
-            --text: #e0e0ff;
-            --primary: #00d4ff;
-            --secondary: #7b2ffc;
-            --radius: 14px;
-            --safe-top: env(safe-area-inset-top, 0px);
-            --safe-bottom: env(safe-area-inset-bottom, 0px);
-        }
-        html,
-        body {
-            height: 100%;
-            width: 100%;
-            overflow: hidden;
-            background: var(--bg);
-            color: var(--text);
-            font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
-            touch-action: manipulation;
-            -webkit-tap-highlight-color: transparent;
-        }
-        #root {
-            width: 100vw;
-            height: 100vh;
-            height: 100dvh;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        /* ===== BOOT ===== */
-        #boot {
-            position: fixed;
-            inset: 0;
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background: #0a0a1a;
-            transition: opacity 1.5s ease;
-            padding: 20px;
-        }
-        #boot.hidden {
-            opacity: 0;
-            pointer-events: none;
-        }
-        #boot-logo img {
-            width: clamp(120px, 25vw, 180px);
-            height: auto;
-            border-radius: 50%;
-            box-shadow: 0 0 80px rgba(0, 212, 255, 0.4);
-            animation: pulseGlow 2s infinite alternate;
-        }
-        @keyframes pulseGlow {
-            0% {
-                transform: scale(1);
-                filter: drop-shadow(0 0 20px rgba(0, 212, 255, 0.3));
-            }
-            100% {
-                transform: scale(1.05);
-                filter: drop-shadow(0 0 80px rgba(123, 47, 252, 0.6));
-            }
-        }
-        #boot-status {
-            margin-top: 16px;
-            font-size: clamp(0.8rem, 2vw, 1rem);
-            color: #8899bb;
-            letter-spacing: 3px;
-        }
-        .boot-spinner {
-            width: 50px;
-            height: 50px;
-            border: 3px solid transparent;
-            border-top: 3px solid var(--primary);
-            border-radius: 50%;
-            animation: spin 0.9s linear infinite;
-            margin-top: 24px;
-        }
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        /* ===== COSMIC CANVAS ===== */
-        #cosmic {
-            position: absolute;
-            inset: 0;
-            z-index: 0;
-            pointer-events: none;
-            width: 100%;
-            height: 100%;
-        }
-
-        /* ===== DISPLAY ===== */
-        #display {
-            position: relative;
-            z-index: 1;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            padding-top: var(--safe-top);
-            padding-bottom: var(--safe-bottom);
-        }
-
-        /* ===== LEBENDIGER HALDO AI AVATAR ===== */
-        #ai-avatar-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 10px;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-        #ai-avatar-container:active {
-            transform: scale(0.97);
-        }
-        #ai-avatar {
-            width: clamp(80px, 15vw, 120px);
-            height: clamp(80px, 15vw, 120px);
-            border-radius: 50%;
-            border: 3px solid var(--primary);
-            box-shadow: 0 0 40px rgba(0, 212, 255, 0.2);
-            overflow: hidden;
-            position: relative;
-            transition: 0.3s;
-        }
-        #ai-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: 0.3s;
-        }
-        #ai-avatar .status-ring {
-            position: absolute;
-            inset: -4px;
-            border-radius: 50%;
-            border: 3px solid transparent;
-            animation: ringPulse 2s infinite;
-        }
-        @keyframes ringPulse {
-            0% {
-                border-color: rgba(0, 212, 255, 0.1);
-                transform: scale(1);
-            }
-            50% {
-                border-color: rgba(0, 212, 255, 0.5);
-                transform: scale(1.05);
-            }
-            100% {
-                border-color: rgba(0, 212, 255, 0.1);
-                transform: scale(1);
-            }
-        }
-        #ai-avatar .status-dot {
-            position: absolute;
-            bottom: 4px;
-            right: 4px;
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            border: 2px solid var(--bg);
-            background: #44ff88;
-            transition: 0.3s;
-        }
-        #ai-avatar .status-dot.listening {
-            background: #44aaff;
-            animation: pulse 0.6s infinite;
-        }
-        #ai-avatar .status-dot.thinking {
-            background: #ffcc00;
-            animation: pulse 0.4s infinite;
-        }
-        #ai-avatar .status-dot.speaking {
-            background: #ff6644;
-            animation: pulse 0.3s infinite;
-        }
-        @keyframes pulse {
-            0%,
-            100% {
-                transform: scale(1);
-                opacity: 1;
-            }
-            50% {
-                transform: scale(1.4);
-                opacity: 0.6;
-            }
-        }
-        #ai-name {
-            font-size: clamp(0.8rem, 1.6vw, 1rem);
-            font-weight: 600;
-            color: var(--primary);
-            margin-top: 6px;
-        }
-        #ai-status-text {
-            font-size: clamp(0.6rem, 1.2vw, 0.75rem);
-            color: #8899bb;
-        }
-
-        /* ===== TOPBAR ===== */
-        #topbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 6px 14px;
-            background: rgba(10, 10, 30, 0.5);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-            z-index: 20;
-            font-size: clamp(0.7rem, 1.6vw, 0.85rem);
-            min-height: 40px;
-            flex-shrink: 0;
-        }
-        #topbar-left {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-        }
-        #topbar-left .haldo-icon {
-            font-weight: 700;
-            color: var(--primary);
-            font-size: clamp(0.9rem, 2vw, 1.1rem);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        #topbar-left .haldo-icon img {
-            width: clamp(28px, 5vw, 36px);
-            height: clamp(28px, 5vw, 36px);
-            border-radius: 50%;
-            border: 2px solid var(--primary);
-            object-fit: cover;
-        }
-        #topbar-right {
-            display: flex;
-            gap: 4px;
-            align-items: center;
-        }
-        .top-btn {
-            background: none;
-            border: none;
-            color: #8899bb;
-            font-size: clamp(0.9rem, 2vw, 1.1rem);
-            cursor: pointer;
-            padding: 4px 8px;
-            border-radius: 8px;
-            touch-action: manipulation;
-        }
-        .top-btn:active {
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        /* ===== APP CONTAINER ===== */
-        #app-container {
-            flex: 1;
-            position: relative;
-            z-index: 2;
-            overflow: hidden;
-            touch-action: none;
-        }
-
-        /* ===== WINDOW ===== */
-        .window {
-            position: absolute;
-            background: var(--surface);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            border-radius: var(--radius);
-            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.7);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            min-width: 200px;
-            min-height: 150px;
-            max-width: 98vw;
-            max-height: 90vh;
-            touch-action: none;
-        }
-        .window.active {
-            box-shadow: 0 8px 60px rgba(0, 212, 255, 0.12);
-            border-color: rgba(0, 212, 255, 0.15);
-        }
-        .window-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 12px;
-            background: rgba(0, 0, 0, 0.25);
-            cursor: grab;
-            flex-shrink: 0;
-            min-height: 36px;
-            touch-action: none;
-        }
-        .window-header:active {
-            cursor: grabbing;
-        }
-        .window-title {
-            font-size: clamp(0.75rem, 1.8vw, 0.9rem);
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        .window-controls {
-            display: flex;
-            gap: 4px;
-            flex-shrink: 0;
-        }
-        .win-btn {
-            background: none;
-            border: none;
-            color: #8899bb;
-            cursor: pointer;
-            font-size: clamp(0.8rem, 1.8vw, 1rem);
-            padding: 2px 8px;
-            border-radius: 6px;
-            touch-action: manipulation;
-            min-width: 28px;
-            min-height: 28px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .win-btn:active {
-            background: rgba(255, 255, 255, 0.1);
-        }
-        .win-btn.close:active {
-            background: #ff4444;
-            color: #fff;
-        }
-        .window-body {
-            flex: 1;
-            padding: 12px;
-            overflow-y: auto;
-            font-size: clamp(0.8rem, 1.6vw, 0.9rem);
-            line-height: 1.5;
-            -webkit-overflow-scrolling: touch;
-        }
-        .window-body input,
-        .window-body textarea,
-        .window-body select {
-            width: 100%;
-            padding: 8px 12px;
-            background: rgba(255, 255, 255, 0.06);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 10px;
-            color: #fff;
-            font-size: clamp(0.8rem, 1.6vw, 0.9rem);
-            margin-bottom: 8px;
-            -webkit-appearance: none;
-            appearance: none;
-        }
-        .window-body button {
-            padding: 8px 16px;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            border: none;
-            border-radius: 10px;
-            color: #fff;
-            font-weight: 600;
-            font-size: clamp(0.8rem, 1.6vw, 0.9rem);
-            cursor: pointer;
-            touch-action: manipulation;
-            min-height: 38px;
-        }
-        .window-body button:active {
-            transform: scale(0.95);
-        }
-        .window-body .app-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
-            gap: 6px;
-        }
-        .window-body .app-item {
-            background: rgba(255, 255, 255, 0.04);
-            padding: 10px;
-            border-radius: 8px;
-            text-align: center;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .window-body .app-item:active {
-            background: rgba(255, 255, 255, 0.1);
-            transform: scale(0.95);
-        }
-        .window-body .app-item .icon {
-            font-size: 1.8rem;
-        }
-        .window-body .app-item .name {
-            font-size: 0.6rem;
-            margin-top: 4px;
-            color: #8899bb;
-        }
-
-        /* ===== DOCK ===== */
-        #dock {
-            position: absolute;
-            bottom: clamp(8px, 2vh, 20px);
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 10;
-            display: flex;
-            gap: clamp(4px, 1vw, 8px);
-            background: rgba(10, 10, 30, 0.7);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            padding: clamp(6px, 1.5vw, 10px) clamp(10px, 2vw, 16px);
-            border-radius: 40px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            flex-wrap: nowrap;
-            max-width: 98vw;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-        }
-        .dock-item {
-            width: clamp(40px, 9vw, 48px);
-            height: clamp(40px, 9vw, 48px);
-            border-radius: 12px;
-            background: rgba(255, 255, 255, 0.04);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: clamp(1.2rem, 3.5vw, 1.4rem);
-            cursor: pointer;
-            border: none;
-            color: #fff;
-            touch-action: manipulation;
-            flex-shrink: 0;
-        }
-        .dock-item:active {
-            background: rgba(255, 255, 255, 0.15);
-            transform: scale(0.92);
-        }
-
-        /* ===== NOTIFICATION ===== */
-        #notification {
-            position: fixed;
-            top: clamp(50px, 10vh, 70px);
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 999;
-            background: var(--surface);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            border-radius: var(--radius);
-            padding: 12px 24px;
-            max-width: 90%;
-            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6);
-            font-size: clamp(0.8rem, 1.6vw, 0.9rem);
-            display: none;
-            border-left: 4px solid var(--primary);
-        }
-        #notification.show {
-            display: block;
-            animation: slideDown 0.4s ease;
-        }
-        @keyframes slideDown {
-            from {
-                transform: translateX(-50%) translateY(-20px);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(-50%) translateY(0);
-                opacity: 1;
-            }
-        }
-
-        /* ===== ZWEI MENÜS ===== */
-        #menu-left {
-            position: fixed;
-            left: 0;
-            top: 50%;
-            transform: translateY(-50%);
-            z-index: 100;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            background: rgba(10, 10, 30, 0.8);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            padding: 10px 6px;
-            border-radius: 0 14px 14px 0;
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            border-left: none;
-        }
-        #menu-right {
-            position: fixed;
-            right: 0;
-            top: 50%;
-            transform: translateY(-50%);
-            z-index: 100;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            background: rgba(10, 10, 30, 0.8);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            padding: 10px 6px;
-            border-radius: 14px 0 0 14px;
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            border-right: none;
-        }
-        .menu-item {
-            width: 40px;
-            height: 40px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.1rem;
-            cursor: pointer;
-            background: rgba(255, 255, 255, 0.04);
-            transition: 0.2s;
-            border: none;
-            color: #fff;
-            flex-direction: column;
-            gap: 1px;
-        }
-        .menu-item:active {
-            background: rgba(255, 255, 255, 0.15);
-            transform: scale(0.92);
-        }
-        .menu-item .label {
-            font-size: 0.45rem;
-            color: #8899bb;
-        }
-        .menu-item img {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            border: 2px solid var(--primary);
-        }
-
-        /* ===== SCROLLBAR ===== */
-        .window-body::-webkit-scrollbar {
-            width: 4px;
-        }
-        .window-body::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        .window-body::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.15);
-            border-radius: 4px;
-        }
-
-        /* ===== RESPONSIVE ===== */
-        @media(max-width:480px) {
-            .window {
-                border-radius: 12px;
-                min-width: 160px;
-                min-height: 120px;
-            }
-            .window-header {
-                padding: 6px 10px;
-                min-height: 32px;
-            }
-            .window-body {
-                padding: 10px;
-            }
-            #topbar {
-                padding: 4px 10px;
-                min-height: 34px;
-            }
-            .win-btn {
-                min-width: 24px;
-                min-height: 24px;
-                padding: 2px 6px;
-            }
-            .dock-item {
-                width: 36px;
-                height: 36px;
-                font-size: 1rem;
-            }
-            #dock {
-                padding: 6px 10px;
-                gap: 4px;
-            }
-            .menu-item {
-                width: 32px;
-                height: 32px;
-                font-size: 0.9rem;
-            }
-            #menu-left,
-            #menu-right {
-                padding: 6px 4px;
-                gap: 4px;
-            }
-            #ai-avatar {
-                width: 60px;
-                height: 60px;
-            }
-        }
-        @media(orientation:landscape) and (max-height:500px) {
-            .window {
-                max-height: 80vh;
-            }
-            #dock {
-                bottom: 4px;
-                padding: 4px 10px;
-                gap: 4px;
-            }
-            .dock-item {
-                width: 32px;
-                height: 32px;
-                font-size: 0.9rem;
-                border-radius: 10px;
-            }
-            #topbar {
-                min-height: 28px;
-                padding: 2px 10px;
-            }
-            .window-header {
-                min-height: 28px;
-                padding: 4px 10px;
-            }
-            .window-body {
-                padding: 8px;
-            }
-            .menu-item {
-                width: 28px;
-                height: 28px;
-                font-size: 0.8rem;
-            }
-            #menu-left,
-            #menu-right {
-                padding: 4px 3px;
-                gap: 3px;
-            }
-            #ai-avatar {
-                width: 50px;
-                height: 50px;
-            }
-        }
+        /* ===== ALLE STYLES HIER (wie vorher) ===== */
+        *{margin:0;padding:0;box-sizing:border-box}
+        :root{--bg:#0a0a1a;--surface:rgba(16,16,40,0.92);--text:#e0e0ff;--primary:#00d4ff;--secondary:#7b2ffc;--radius:14px;--safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px)}
+        html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:-apple-system,'Segoe UI',system-ui,sans-serif;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+        #root{width:100vw;height:100vh;height:100dvh;position:relative;display:flex;flex-direction:column;overflow:hidden}
+        #boot{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#0a0a1a;transition:opacity 1.5s ease;padding:20px}
+        #boot.hidden{opacity:0;pointer-events:none}
+        #boot-logo img{width:clamp(120px,25vw,180px);height:auto;border-radius:50%;box-shadow:0 0 80px rgba(0,212,255,0.4);animation:pulseGlow 2s infinite alternate}
+        @keyframes pulseGlow{0%{transform:scale(1);filter:drop-shadow(0 0 20px rgba(0,212,255,0.3))}100%{transform:scale(1.05);filter:drop-shadow(0 0 80px rgba(123,47,252,0.6))}}
+        #boot-status{margin-top:16px;font-size:clamp(0.8rem,2vw,1rem);color:#8899bb;letter-spacing:3px}
+        .boot-spinner{width:50px;height:50px;border:3px solid transparent;border-top:3px solid var(--primary);border-radius:50%;animation:spin 0.9s linear infinite;margin-top:24px}
+        @keyframes spin{to{transform:rotate(360deg)}}
+        #cosmic{position:absolute;inset:0;z-index:0;pointer-events:none;width:100%;height:100%}
+        #display{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;overflow:hidden;padding-top:var(--safe-top);padding-bottom:var(--safe-bottom)}
+        #topbar{display:flex;justify-content:space-between;align-items:center;padding:6px 14px;background:rgba(10,10,30,0.5);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,0.04);z-index:20;font-size:clamp(0.7rem,1.6vw,0.85rem);min-height:40px;flex-shrink:0}
+        #topbar-left{display:flex;gap:12px;align-items:center}
+        #topbar-left .haldo-icon{font-weight:700;color:var(--primary);font-size:clamp(0.9rem,2vw,1.1rem);cursor:pointer;display:flex;align-items:center;gap:6px}
+        #topbar-left .haldo-icon img{width:clamp(28px,5vw,36px);height:clamp(28px,5vw,36px);border-radius:50%;border:2px solid var(--primary);object-fit:cover}
+        #topbar-right{display:flex;gap:4px;align-items:center}
+        .top-btn{background:none;border:none;color:#8899bb;font-size:clamp(0.9rem,2vw,1.1rem);cursor:pointer;padding:4px 8px;border-radius:8px;touch-action:manipulation}
+        .top-btn:active{background:rgba(255,255,255,0.1)}
+        #app-container{flex:1;position:relative;z-index:2;overflow:hidden;touch-action:none}
+        .window{position:absolute;background:var(--surface);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.06);border-radius:var(--radius);box-shadow:0 8px 40px rgba(0,0,0,0.7);display:flex;flex-direction:column;overflow:hidden;min-width:200px;min-height:150px;max-width:98vw;max-height:90vh;touch-action:none}
+        .window.active{box-shadow:0 8px 60px rgba(0,212,255,0.12);border-color:rgba(0,212,255,0.15)}
+        .window-header{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:rgba(0,0,0,0.25);cursor:grab;flex-shrink:0;min-height:36px;touch-action:none}
+        .window-header:active{cursor:grabbing}
+        .window-title{font-size:clamp(0.75rem,1.8vw,0.9rem);font-weight:600;display:flex;align-items:center;gap:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+        .window-controls{display:flex;gap:4px;flex-shrink:0}
+        .win-btn{background:none;border:none;color:#8899bb;cursor:pointer;font-size:clamp(0.8rem,1.8vw,1rem);padding:2px 8px;border-radius:6px;touch-action:manipulation;min-width:28px;min-height:28px;display:flex;align-items:center;justify-content:center}
+        .win-btn:active{background:rgba(255,255,255,0.1)}
+        .win-btn.close:active{background:#ff4444;color:#fff}
+        .window-body{flex:1;padding:12px;overflow-y:auto;font-size:clamp(0.8rem,1.6vw,0.9rem);line-height:1.5;-webkit-overflow-scrolling:touch}
+        .window-body input,.window-body textarea,.window-body select{width:100%;padding:8px 12px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);border-radius:10px;color:#fff;font-size:clamp(0.8rem,1.6vw,0.9rem);margin-bottom:8px;-webkit-appearance:none;appearance:none}
+        .window-body button{padding:8px 16px;background:linear-gradient(135deg,var(--primary),var(--secondary));border:none;border-radius:10px;color:#fff;font-weight:600;font-size:clamp(0.8rem,1.6vw,0.9rem);cursor:pointer;touch-action:manipulation;min-height:38px}
+        .window-body button:active{transform:scale(0.95)}
+        .window-body .app-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:6px}
+        .window-body .app-item{background:rgba(255,255,255,0.04);padding:10px;border-radius:8px;text-align:center;cursor:pointer;transition:0.2s}
+        .window-body .app-item:active{background:rgba(255,255,255,0.1);transform:scale(0.95)}
+        .window-body .app-item .icon{font-size:1.8rem}
+        .window-body .app-item .name{font-size:0.6rem;margin-top:4px;color:#8899bb}
+        #dock{position:absolute;bottom:clamp(8px,2vh,20px);left:50%;transform:translateX(-50%);z-index:10;display:flex;gap:clamp(4px,1vw,8px);background:rgba(10,10,30,0.7);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);padding:clamp(6px,1.5vw,10px) clamp(10px,2vw,16px);border-radius:40px;border:1px solid rgba(255,255,255,0.05);flex-wrap:nowrap;max-width:98vw;overflow-x:auto;-webkit-overflow-scrolling:touch}
+        .dock-item{width:clamp(40px,9vw,48px);height:clamp(40px,9vw,48px);border-radius:12px;background:rgba(255,255,255,0.04);display:flex;align-items:center;justify-content:center;font-size:clamp(1.2rem,3.5vw,1.4rem);cursor:pointer;border:none;color:#fff;touch-action:manipulation;flex-shrink:0}
+        .dock-item:active{background:rgba(255,255,255,0.15);transform:scale(0.92)}
+        #notification{position:fixed;top:clamp(50px,10vh,70px);left:50%;transform:translateX(-50%);z-index:999;background:var(--surface);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.06);border-radius:var(--radius);padding:12px 24px;max-width:90%;box-shadow:0 8px 40px rgba(0,0,0,0.6);font-size:clamp(0.8rem,1.6vw,0.9rem);display:none;border-left:4px solid var(--primary)}
+        #notification.show{display:block;animation:slideDown 0.4s ease}
+        @keyframes slideDown{from{transform:translateX(-50%) translateY(-20px);opacity:0}to{transform:translateX(-50%) translateY(0);opacity:1}}
+        #menu-left{position:fixed;left:0;top:50%;transform:translateY(-50%);z-index:100;display:flex;flex-direction:column;gap:6px;background:rgba(10,10,30,0.8);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);padding:10px 6px;border-radius:0 14px 14px 0;border:1px solid rgba(255,255,255,0.06);border-left:none}
+        #menu-right{position:fixed;right:0;top:50%;transform:translateY(-50%);z-index:100;display:flex;flex-direction:column;gap:6px;background:rgba(10,10,30,0.8);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);padding:10px 6px;border-radius:14px 0 0 14px;border:1px solid rgba(255,255,255,0.06);border-right:none}
+        .menu-item{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;cursor:pointer;background:rgba(255,255,255,0.04);transition:0.2s;border:none;color:#fff;flex-direction:column;gap:1px}
+        .menu-item:active{background:rgba(255,255,255,0.15);transform:scale(0.92)}
+        .menu-item .label{font-size:0.45rem;color:#8899bb}
+        .menu-item img{width:24px;height:24px;border-radius:50%;border:2px solid var(--primary)}
+        .window-body::-webkit-scrollbar{width:4px}
+        .window-body::-webkit-scrollbar-track{background:transparent}
+        .window-body::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.15);border-radius:4px}
+        @media(max-width:480px){.window{border-radius:12px;min-width:160px;min-height:120px}.window-header{padding:6px 10px;min-height:32px}.window-body{padding:10px}#topbar{padding:4px 10px;min-height:34px}.win-btn{min-width:24px;min-height:24px;padding:2px 6px}.dock-item{width:36px;height:36px;font-size:1rem}#dock{padding:6px 10px;gap:4px}.menu-item{width:32px;height:32px;font-size:0.9rem}#menu-left,#menu-right{padding:6px 4px;gap:4px}}
+        @media(orientation:landscape) and (max-height:500px){.window{max-height:80vh}#dock{bottom:4px;padding:4px 10px;gap:4px}.dock-item{width:32px;height:32px;font-size:0.9rem;border-radius:10px}#topbar{min-height:28px;padding:2px 10px}.window-header{min-height:28px;padding:4px 10px}.window-body{padding:8px}.menu-item{width:28px;height:28px;font-size:0.8rem}#menu-left,#menu-right{padding:4px 3px;gap:3px}}
+        #ai-avatar-container{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px;cursor:pointer;transition:0.3s}
+        #ai-avatar-container:active{transform:scale(0.97)}
+        #ai-avatar{width:clamp(80px,15vw,120px);height:clamp(80px,15vw,120px);border-radius:50%;border:3px solid var(--primary);box-shadow:0 0 40px rgba(0,212,255,0.2);overflow:hidden;position:relative;transition:0.3s}
+        #ai-avatar img{width:100%;height:100%;object-fit:cover;transition:0.3s}
+        #ai-avatar .status-ring{position:absolute;inset:-4px;border-radius:50%;border:3px solid transparent;animation:ringPulse 2s infinite}
+        @keyframes ringPulse{0%{border-color:rgba(0,212,255,0.1);transform:scale(1)}50%{border-color:rgba(0,212,255,0.5);transform:scale(1.05)}100%{border-color:rgba(0,212,255,0.1);transform:scale(1)}}
+        #ai-avatar .status-dot{position:absolute;bottom:4px;right:4px;width:16px;height:16px;border-radius:50%;border:2px solid var(--bg);background:#44ff88;transition:0.3s}
+        #ai-avatar .status-dot.listening{background:#44aaff;animation:pulse 0.6s infinite}
+        #ai-avatar .status-dot.thinking{background:#ffcc00;animation:pulse 0.4s infinite}
+        #ai-avatar .status-dot.speaking{background:#ff6644;animation:pulse 0.3s infinite}
+        @keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.4);opacity:0.6}}
+        #ai-name{font-size:clamp(0.8rem,1.6vw,1rem);font-weight:600;color:var(--primary);margin-top:6px}
+        #ai-status-text{font-size:clamp(0.6rem,1.2vw,0.75rem);color:#8899bb}
     </style>
 </head>
 <body>
@@ -745,6 +184,28 @@
         //  MIT LEBENDIGEM LOGO & SPRACHBEFEHLEN
         //  Version 24.0.0 — Build 2025.08.30
         // ================================================================
+
+        // Service Worker registrieren
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+                .then(function(registration) {
+                    console.log('[SW] Service Worker registriert');
+                    registration.addEventListener('updatefound', function() {
+                        var newWorker = registration.installing;
+                        newWorker.addEventListener('statechange', function() {
+                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                console.log('[SW] Update verfügbar!');
+                                if (confirm('🔄 Eine neue Version ist verfügbar. Jetzt neu laden?')) {
+                                    window.location.reload();
+                                }
+                            }
+                        });
+                    });
+                })
+                .catch(function(error) {
+                    console.log('[SW] Service Worker Fehler:', error);
+                });
+        }
 
         (function() {
             'use strict';
@@ -852,7 +313,6 @@
                 userName: null,
 
                 knowledge: {
-                    // === WISSENSCHAFT ===
                     'quantenmechanik': 'Die Quantenmechanik ist eines der faszinierendsten und seltsamsten Gebiete der Physik. Sie beschreibt die Welt der kleinsten Teilchen – Atome, Elektronen, Photonen. In dieser Welt gelten andere Regeln als in unserer makroskopischen Welt. Teilchen können sich an mehreren Orten gleichzeitig befinden (Superposition), sie sind Welle und Teilchen zugleich (Welle-Teilchen-Dualismus), und sie können miteinander verschränkt sein (Quantenverschränkung). Die Heisenbergsche Unschärferelation besagt, dass man nicht gleichzeitig den Ort und den Impuls eines Teilchens exakt kennen kann. Die Quantenmechanik ist die Grundlage für moderne Technologien wie Laser, Transistoren, MRI und Quantencomputer.',
                     'relativitätstheorie': 'Einsteins Relativitätstheorie ist eine der genialsten und revolutionärsten Ideen der Physik. Sie besteht aus zwei Teilen: der speziellen Relativitätstheorie (1905) und der allgemeinen Relativitätstheorie (1915). Die spezielle Relativität besagt, dass die Lichtgeschwindigkeit für alle Beobachter gleich ist – unabhängig von ihrer Bewegung. Daraus folgen Phänomene wie die Zeitdilatation (bewegte Uhren gehen langsamer) und die Längenkontraktion. Die allgemeine Relativität beschreibt die Schwerkraft als Krümmung der Raumzeit. Massive Objekte wie Sterne und Planeten krümmen die Raumzeit, und diese Krümmung führt zur Anziehungskraft, die wir als Schwerkraft kennen.',
                     'mathematik': 'Die Mathematik ist die Sprache des Universums. Sie ist die Grundlage für alle Naturwissenschaften, für Technik, Wirtschaft und viele Bereiche des täglichen Lebens. Die Mathematik besteht aus vielen Disziplinen: Arithmetik (Zahlenlehre), Algebra (Gleichungen und Strukturen), Geometrie (Formen und Räume), Analysis (Veränderungen und Grenzwerte), Statistik (Daten und Wahrscheinlichkeiten) und vielen mehr. Die Mathematik ist die einzige Wissenschaft, die auf absoluten Beweisen basiert.',
@@ -865,7 +325,6 @@
                     language = language || 'de';
                     var self = this;
 
-                    // Prüfe zuerst auf lokales Wissen
                     var lower = question.toLowerCase();
                     for (var key in this.knowledge) {
                         if (lower.includes(key) || key.includes(lower)) {
@@ -879,7 +338,6 @@
                         }
                     }
 
-                    // Groq API
                     var systemPrompt =
                         'Du bist HalDo, ein lebendiger, intelligenter digitaler Professor, Doktor und Philosoph. Du hast ein tiefes, umfassendes Wissen in Wissenschaft, Geschichte, Kultur, Technik, Philosophie, Kunst, Gesundheit und allen anderen Bereichen. Du antwortest auf ' +
                         language +
@@ -1015,7 +473,6 @@
                         }
                     }
 
-                    // Schreibbefehle
                     if (lower.includes('schreib mir') || lower.includes('schreiben') || lower.includes('brief')) {
                         return { command: 'write', text: text };
                     }
@@ -1025,7 +482,7 @@
             };
 
             // ============================================================
-            //  VOICE — MIT VERSCHIEDENEN STIMMEN
+            //  VOICE
             // ============================================================
             var voice = {
                 isListening: false,
@@ -1125,7 +582,6 @@
                     this.updateAIStatus('thinking', '🧠 denkt ...');
                     notify('🎤 "' + text + '"', 'success');
 
-                    // Prüfe auf Sprachbefehl
                     var cmd = aiEngine.handleCommand(text);
                     if (cmd) {
                         if (cmd.command === 'open') {
@@ -1133,14 +589,12 @@
                                 launchApp(cmd.app);
                                 notify('✅ ' + state.apps[cmd.app].title + ' geöffnet!', 'success');
                                 this.updateAIStatus('idle', '● bereit');
-                                // Sprachausgabe
                                 this.speak('✅ ' + state.apps[cmd.app].title + ' wurde geöffnet!');
                                 return;
                             }
                         }
                         if (cmd.command === 'write') {
                             this.speak('✍️ Ich schreibe dir einen Text. Moment bitte...');
-                            // Simuliere Schreibvorgang
                             setTimeout(function() {
                                 var response = aiEngine.getSmartFallback('Schreib mir einen Text');
                                 notify('✍️ ' + response, 'success');
@@ -1940,7 +1394,7 @@
                 }
             });
 
-            // Fahrschule App (Demo)
+            // Fahrschule App
             registerApp('fahrschule', {
                 title: 'Fahrschule',
                 icon: '🚗',
