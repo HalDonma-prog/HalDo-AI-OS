@@ -3,11 +3,9 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover, user-scalable=no" />
-    <title>HalDo OS 24 — Professional Ultimate</title>
+    <title>HalDo OS 24 — Ultimate</title>
     <meta name="theme-color" content="#0a0a1a" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <link rel="manifest" href="data:application/json,{}" />
     <style>
         /* ===== GLOBAL ===== */
         * {
@@ -34,7 +32,6 @@
             color: var(--text);
             font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
             touch-action: manipulation;
-            -webkit-tap-highlight-color: transparent;
         }
         #root {
             width: 100vw;
@@ -63,11 +60,12 @@
             opacity: 0;
             pointer-events: none;
         }
-        #boot-logo img {
-            width: clamp(100px, 20vw, 160px);
-            height: auto;
-            border-radius: 50%;
-            box-shadow: 0 0 60px rgba(0, 212, 255, 0.3);
+        #boot-logo {
+            font-size: clamp(3rem, 12vw, 5rem);
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
             animation: pulseGlow 2s infinite alternate;
         }
         @keyframes pulseGlow {
@@ -131,7 +129,6 @@
             padding: 6px 14px;
             background: rgba(10, 10, 30, 0.5);
             backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
             border-bottom: 1px solid rgba(255, 255, 255, 0.04);
             z-index: 20;
             font-size: clamp(0.7rem, 1.6vw, 0.85rem);
@@ -191,7 +188,6 @@
             position: absolute;
             background: var(--surface);
             backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.06);
             border-radius: var(--radius);
             box-shadow: 0 8px 40px rgba(0, 0, 0, 0.7);
@@ -296,6 +292,31 @@
         .window-body button:active {
             transform: scale(0.95);
         }
+        .window-body .app-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 8px;
+        }
+        .window-body .app-item {
+            background: rgba(255, 255, 255, 0.04);
+            padding: 12px;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .window-body .app-item:active {
+            background: rgba(255, 255, 255, 0.1);
+            transform: scale(0.95);
+        }
+        .window-body .app-item .icon {
+            font-size: 1.8rem;
+        }
+        .window-body .app-item .name {
+            font-size: 0.65rem;
+            margin-top: 4px;
+            color: #8899bb;
+        }
 
         /* ===== DOCK ===== */
         #dock {
@@ -308,14 +329,12 @@
             gap: clamp(4px, 1vw, 8px);
             background: rgba(10, 10, 30, 0.7);
             backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
             padding: clamp(6px, 1.5vw, 10px) clamp(10px, 2vw, 16px);
             border-radius: 40px;
             border: 1px solid rgba(255, 255, 255, 0.05);
             flex-wrap: nowrap;
             max-width: 98vw;
             overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
         }
         .dock-item {
             width: clamp(40px, 9vw, 48px);
@@ -346,7 +365,6 @@
             z-index: 999;
             background: var(--surface);
             backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
             border: 1px solid rgba(255, 255, 255, 0.06);
             border-radius: var(--radius);
             padding: 12px 24px;
@@ -371,7 +389,6 @@
             }
         }
 
-        /* ===== SCROLLBAR ===== */
         .window-body::-webkit-scrollbar {
             width: 4px;
         }
@@ -383,7 +400,6 @@
             border-radius: 4px;
         }
 
-        /* ===== RESPONSIVE ===== */
         @media (max-width: 480px) {
             .window {
                 border-radius: 12px;
@@ -449,9 +465,7 @@
     <div id="root">
         <!-- BOOT -->
         <div id="boot">
-            <div id="boot-logo">
-                <img src="assets/logo.png" alt="HalDo Logo" onerror="this.parentElement.textContent='⟡ HalDo';this.parentElement.style.fontSize='clamp(3rem,12vw,5rem)';this.parentElement.style.fontWeight='900';this.parentElement.style.background='linear-gradient(135deg,#00d4ff,#7b2ffc)';this.parentElement.style.webkitBackgroundClip='text';this.parentElement.style.webkitTextFillColor='transparent';" />
-            </div>
+            <div id="boot-logo">⟡ HalDo</div>
             <div class="boot-spinner"></div>
             <div id="boot-status">⟡ System wird initialisiert ...</div>
         </div>
@@ -464,17 +478,14 @@
             <!-- TOPBAR -->
             <div id="topbar">
                 <div id="topbar-left">
-                    <span class="haldo-icon" id="menu-system">
-                        <img src="assets/logo.png" alt="HalDo" onerror="this.style.display='none';" />
-                        <span>HalDo</span>
-                    </span>
+                    <span class="haldo-icon" id="menu-system">⟡ HalDo</span>
                     <span id="clock-display">--:--</span>
                 </div>
                 <div id="topbar-right">
-                    <button class="top-btn" id="btn-appworld" title="App World">📱</button>
-                    <button class="top-btn" id="btn-ai" title="HalDo AI">🤖</button>
-                    <button class="top-btn" id="btn-settings" title="Einstellungen">⚙️</button>
-                    <button class="top-btn" id="btn-about" title="Info">ℹ️</button>
+                    <button class="top-btn" id="btn-appworld">📱</button>
+                    <button class="top-btn" id="btn-ai">🤖</button>
+                    <button class="top-btn" id="btn-settings">⚙️</button>
+                    <button class="top-btn" id="btn-about">ℹ️</button>
                 </div>
             </div>
 
@@ -483,18 +494,18 @@
 
             <!-- DOCK -->
             <div id="dock">
-                <button class="dock-item" data-app="ai" title="HalDo AI">🤖</button>
-                <button class="dock-item" data-app="settings" title="Einstellungen">⚙️</button>
-                <button class="dock-item" data-app="files" title="Dateien">📁</button>
-                <button class="dock-item" data-app="notes" title="Notizen">📝</button>
-                <button class="dock-item" data-app="cosmic" title="Cosmic World">🌌</button>
-                <button class="dock-item" data-app="calendar" title="Kalender">📅</button>
-                <button class="dock-item" data-app="music" title="Musik">🎵</button>
-                <button class="dock-item" data-app="terminal" title="Terminal">⌨️</button>
-                <button class="dock-item" data-app="email" title="E-Mail">✉️</button>
-                <button class="dock-item" data-app="messages" title="Chat">💬</button>
-                <button class="dock-item" data-app="contacts" title="Kontakte">👤</button>
-                <button class="dock-item" data-app="appworld" title="App World">📱</button>
+                <button class="dock-item" data-app="ai">🤖</button>
+                <button class="dock-item" data-app="settings">⚙️</button>
+                <button class="dock-item" data-app="files">📁</button>
+                <button class="dock-item" data-app="notes">📝</button>
+                <button class="dock-item" data-app="cosmic">🌌</button>
+                <button class="dock-item" data-app="calendar">📅</button>
+                <button class="dock-item" data-app="music">🎵</button>
+                <button class="dock-item" data-app="terminal">⌨️</button>
+                <button class="dock-item" data-app="email">✉️</button>
+                <button class="dock-item" data-app="messages">💬</button>
+                <button class="dock-item" data-app="contacts">👤</button>
+                <button class="dock-item" data-app="appworld">📱</button>
             </div>
         </div>
     </div>
@@ -502,12 +513,10 @@
     <!-- NOTIFICATION -->
     <div id="notification"></div>
 
-    <!-- ===== SYSTEM SCRIPTS ===== -->
     <script>
         // ================================================================
-        //  HALDO OS 24 — PROFESSIONAL ULTIMATE
-        //  ALLES IN EINER DATEI — KOMPLETT FUNKTIONSFÄHIG
-        //  Version 24.0.0 — Build 2025.08.30
+        //  HALDO OS 24 — ULTIMATE EDITION
+        //  KOMPLETT IN EINER DATEI — PROFESSIONELL & LEBENDIG
         // ================================================================
 
         (function() {
@@ -520,7 +529,8 @@
                 apiKey: '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',
                 apiUrl: 'https://api.groq.com/openai/v1/chat/completions',
                 model: 'llama3-70b-8192',
-                language: 'de'
+                language: 'de',
+                languages: ['de', 'en', 'ku', 'ezidi']
             };
 
             // ===== STATE =====
@@ -544,7 +554,8 @@
                 notes: JSON.parse(localStorage.getItem('haldo_notes') || '[]'),
                 contacts: [],
                 mail: { inbox: [], sent: [] },
-                aiMemory: []
+                aiMemory: [],
+                language: 'de'
             };
 
             // ===== DOM =====
@@ -592,12 +603,12 @@
                                     { role: 'system',
                                         content: 'Du bist HalDo, ein intelligenter Assistent. Du bist wie ein Professor, Doktor und Philosoph. Du antwortest auf ' +
                                         language +
-                                        '. Du hilfst bei Wissenschaft, Geschichte, Kultur, Technik, Philosophie, und allen anderen Themen. Du bist freundlich, hilfsbereit und präzise. Du unterstützt auch Êzîdî, Kurdisch und andere Minderheiten-Sprachen.'
+                                        '. Du hilfst bei Wissenschaft, Geschichte, Kultur, Technik, Philosophie, und allen anderen Themen. Du bist freundlich, hilfsbereit und präzise. Du unterstützt auch Êzîdî, Kurdisch und andere Minderheiten-Sprachen. Du kannst Apps öffnen, wenn der Benutzer sagt: "Öffne [App-Name]". Du kannst Texte schreiben, korrigieren, formulieren und zusammenfassen.'
                                         },
                                     { role: 'user', content: question }
                                 ],
                                 temperature: 0.7,
-                                max_tokens: 600
+                                max_tokens: 800
                             })
                         }).then(function(response) {
                             if (!response.ok) {
@@ -613,6 +624,159 @@
                             reject(error);
                         });
                     });
+                },
+
+                // Sprachbefehle erkennen
+                handleCommand: function(text) {
+                    var lower = text.toLowerCase();
+                    var commands = {
+                        'mail': ['mail', 'e-mail', 'email', 'post'],
+                        'chat': ['chat', 'nachricht', 'message'],
+                        'contacts': ['kontakte', 'adressbuch', 'contacts'],
+                        'settings': ['einstellungen', 'settings', 'optionen'],
+                        'files': ['dateien', 'files', 'ordner'],
+                        'notes': ['notizen', 'notes', 'zettel'],
+                        'calendar': ['kalender', 'calendar', 'termin'],
+                        'music': ['musik', 'music', 'lieder'],
+                        'terminal': ['terminal', 'konsole', 'command'],
+                        'cosmic': ['cosmic', 'weltraum', 'space'],
+                        'appworld': ['app world', 'apps', 'anwendungen']
+                    };
+
+                    for (var appId in commands) {
+                        for (var i = 0; i < commands[appId].length; i++) {
+                            if (lower.includes('öffne ' + commands[appId][i]) ||
+                                lower.includes('starte ' + commands[appId][i]) ||
+                                lower.includes('zeige ' + commands[appId][i])) {
+                                return { command: 'open', app: appId };
+                            }
+                        }
+                    }
+                    return null;
+                }
+            };
+
+            // ================================================================
+            //  VOICE — Sprachausgabe & -eingabe
+            // ================================================================
+            var voice = {
+                isListening: false,
+                isSpeaking: false,
+                recognition: null,
+                synthesis: window.speechSynthesis,
+
+                init: function() {
+                    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                        var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                        this.recognition = new SpeechRecognition();
+                        this.recognition.lang = 'de-DE';
+                        this.recognition.continuous = false;
+                        this.recognition.interimResults = false;
+                        this.recognition.onresult = this.onResult.bind(this);
+                        this.recognition.onerror = this.onError.bind(this);
+                        this.recognition.onend = this.onEnd.bind(this);
+                        console.log('[Voice] Speech Recognition bereit');
+                    } else {
+                        console.log('[Voice] Speech Recognition nicht unterstützt');
+                    }
+                },
+
+                startListening: function() {
+                    if (!this.recognition) {
+                        notify('❌ Sprachsteuerung nicht unterstützt', 'error');
+                        return;
+                    }
+                    if (this.isListening) {
+                        this.recognition.stop();
+                        return;
+                    }
+                    try {
+                        this.recognition.start();
+                        this.isListening = true;
+                        notify('🎤 Höre zu ...', 'info');
+                        this.updateAIStatus('listening', '🎤 hört zu ...');
+                    } catch (e) { console.log('[Voice] Fehler:', e); }
+                },
+
+                onResult: function(event) {
+                    var text = event.results[0][0].transcript;
+                    console.log('[Voice] Verstanden:', text);
+                    this.isListening = false;
+                    notify('🎤 "' + text + '"', 'success');
+                    this.updateAIStatus('thinking', '🧠 denkt ...');
+
+                    // Prüfe auf Sprachbefehl
+                    var cmd = aiEngine.handleCommand(text);
+                    if (cmd && cmd.command === 'open') {
+                        if (state.apps[cmd.app]) {
+                            launchApp(cmd.app);
+                            notify('✅ ' + state.apps[cmd.app].title + ' geöffnet!', 'success');
+                            this.updateAIStatus('idle', '● bereit');
+                            return;
+                        }
+                    }
+
+                    // Sende an AI
+                    var input = document.getElementById('ai-input');
+                    if (input) {
+                        input.value = text;
+                        var sendBtn = document.getElementById('ai-send');
+                        if (sendBtn) sendBtn.click();
+                    }
+                },
+
+                onError: function(event) {
+                    console.log('[Voice] Fehler:', event.error);
+                    this.isListening = false;
+                    this.updateAIStatus('idle', '● bereit');
+                    if (event.error === 'not-allowed') {
+                        notify('❌ Mikrofon-Zugriff verweigert', 'error');
+                    }
+                },
+
+                onEnd: function() {
+                    this.isListening = false;
+                    this.updateAIStatus('idle', '● bereit');
+                },
+
+                speak: function(text, language) {
+                    language = language || 'de-DE';
+                    if (!('speechSynthesis' in window)) return;
+                    if (this.isSpeaking) this.synthesis.cancel();
+                    this.isSpeaking = true;
+                    this.updateAIStatus('speaking', '🔊 spricht ...');
+                    var utterance = new SpeechSynthesisUtterance(text);
+                    utterance.lang = language;
+                    utterance.rate = 0.9;
+                    utterance.pitch = 1.0;
+                    utterance.volume = 1;
+                    utterance.onend = function() {
+                        this.isSpeaking = false;
+                        this.updateAIStatus('idle', '● bereit');
+                    }.bind(this);
+                    utterance.onerror = function() {
+                        this.isSpeaking = false;
+                        this.updateAIStatus('idle', '● bereit');
+                    }.bind(this);
+                    this.synthesis.speak(utterance);
+                },
+
+                updateAIStatus: function(state, text) {
+                    var statusDot = document.getElementById('ai-status-dot');
+                    var statusText = document.getElementById('ai-status-text');
+                    var aiState = document.getElementById('ai-state');
+                    if (statusDot) {
+                        statusDot.className = '';
+                        if (state === 'thinking') statusDot.classList.add('thinking');
+                        else if (state === 'listening') statusDot.classList.add('listening');
+                        else if (state === 'speaking') statusDot.classList.add('speaking');
+                    }
+                    if (statusText) statusText.textContent = text || '● bereit';
+                    if (aiState) {
+                        aiState.textContent = text || '● bereit';
+                        aiState.style.color = state === 'thinking' ? '#ffcc00' : state === 'listening' ?
+                            '#44aaff' : state === 'speaking' ? '#44ff88' : '#44ff88';
+                    }
                 }
             };
 
@@ -856,21 +1020,456 @@
             }
 
             // ================================================================
-            //  APPS DEFINIEREN (ALLE 84 APPS)
+            //  COSMIC WORLD — MIT 12 PLANETEN, STUNDE/MINUTE/SEKUNDE
+            // ================================================================
+            function initCosmic() {
+                var ctx = cosmicCanvas.getContext('2d');
+                var W, H;
+
+                function resize() {
+                    W = cosmicCanvas.width = window.innerWidth;
+                    H = cosmicCanvas.height = window.innerHeight;
+                }
+                window.addEventListener('resize', resize);
+                resize();
+
+                // ===== STERNE (3000) =====
+                var stars = [];
+                for (var i = 0; i < 3000; i++) {
+                    stars.push({
+                        x: Math.random() * W,
+                        y: Math.random() * H,
+                        r: Math.random() * 2.5 + 0.3,
+                        speed: Math.random() * 0.03 + 0.005,
+                        bright: Math.random() * 0.8 + 0.2,
+                        phase: Math.random() * Math.PI * 2,
+                        color: 'hsl(' + (200 + Math.random() * 60) + ', 80%, ' + (60 + Math.random() * 40) + '%)'
+                    });
+                }
+
+                // ===== SONNE =====
+                var sun = {
+                    x: W / 2,
+                    y: H / 2,
+                    radius: 55,
+                    glow: 200,
+                    phase: 0,
+                    pulseSpeed: 0.008,
+                    flares: 16
+                };
+
+                // ===== 12 PLANETEN (mit Stunde/Minute/Sekunde) =====
+                var planetData = [
+                    { name: 'Merkur', r: 8, color: '#aaaaaa', orbit: 80, speed: 0.03, role: 'second' },
+                    { name: 'Venus', r: 12, color: '#ffaa44', orbit: 120, speed: 0.022, role: 'minute' },
+                    { name: 'Erde', r: 14, color: '#4488ff', orbit: 170, speed: 0.015, role: 'hour' },
+                    { name: 'Mars', r: 10, color: '#ff6644', orbit: 220, speed: 0.012 },
+                    { name: 'Jupiter', r: 26, color: '#ddaa77', orbit: 280, speed: 0.008 },
+                    { name: 'Saturn', r: 20, color: '#ddcc88', orbit: 350, speed: 0.006 },
+                    { name: 'Uranus', r: 16, color: '#88ddff', orbit: 420, speed: 0.0045 },
+                    { name: 'Neptun', r: 15, color: '#4466ff', orbit: 490, speed: 0.0035 },
+                    { name: 'Pluto', r: 6, color: '#ccbb99', orbit: 560, speed: 0.0025 },
+                    { name: 'HalDo-1', r: 11, color: '#ff88dd', orbit: 620, speed: 0.0018 },
+                    { name: 'HalDo-2', r: 13, color: '#88ffaa', orbit: 680, speed: 0.0012 },
+                    { name: 'HalDo-3', r: 9, color: '#ffaa88', orbit: 740, speed: 0.0008 }
+                ];
+
+                var planets = [];
+                for (var p = 0; p < planetData.length; p++) {
+                    var pd = planetData[p];
+                    planets.push({
+                        name: pd.name,
+                        r: pd.r,
+                        color: pd.color,
+                        orbit: pd.orbit,
+                        speed: pd.speed,
+                        angle: Math.random() * Math.PI * 2,
+                        cx: W / 2,
+                        cy: H / 2,
+                        role: pd.role || 'normal',
+                        trail: []
+                    });
+                }
+
+                // ===== MOND =====
+                var moon = {
+                    x: 0,
+                    y: 0,
+                    r: 6,
+                    color: '#cccccc',
+                    orbit: 30,
+                    speed: 0.08,
+                    angle: 0,
+                    ex: 0,
+                    ey: 0
+                };
+
+                // ===== STERNSCHNUPPEN =====
+                var shootingStars = [];
+
+                function createShootingStar() {
+                    shootingStars.push({
+                        x: Math.random() * W,
+                        y: Math.random() * H * 0.5,
+                        vx: (Math.random() - 0.5) * 8,
+                        vy: Math.random() * 4 + 2,
+                        life: 1,
+                        maxLife: 0.5 + Math.random() * 0.5
+                    });
+                }
+                setInterval(function() { if (Math.random() > 0.3) createShootingStar(); }, 30000 + Math.random() *
+                30000);
+
+                // ===== ANIMATION =====
+                function animate() {
+                    var time = Date.now() / 2000;
+                    var now = new Date();
+                    var seconds = now.getSeconds();
+                    var minutes = now.getMinutes();
+                    var hours = now.getHours() % 12;
+
+                    ctx.clearRect(0, 0, W, H);
+
+                    // === HINTERGRUND ===
+                    var bgGrad = ctx.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, W * 0.9);
+                    var hue1 = 220 + 20 * Math.sin(time * 0.1);
+                    var hue2 = 240 + 30 * Math.sin(time * 0.07 + 1);
+                    bgGrad.addColorStop(0, 'hsl(' + hue1 + ', 70%, 12%)');
+                    bgGrad.addColorStop(0.5, 'hsl(' + hue2 + ', 60%, 8%)');
+                    bgGrad.addColorStop(1, '#000005');
+                    ctx.fillStyle = bgGrad;
+                    ctx.fillRect(0, 0, W, H);
+
+                    // === PLANETEN-TRAILS ===
+                    for (var pt = 0; pt < planets.length; pt++) {
+                        var pTrail = planets[pt];
+                        if (pTrail.trail) {
+                            for (var ti = 0; ti < pTrail.trail.length; ti++) {
+                                var t2 = pTrail.trail[ti];
+                                ctx.fillStyle = 'rgba(255,255,255,' + (t2.life * 0.04) + ')';
+                                ctx.beginPath();
+                                ctx.arc(t2.x, t2.y, 1.5, 0, Math.PI * 2);
+                                ctx.fill();
+                            }
+                        }
+                    }
+
+                    // === SONNE ===
+                    sun.phase += sun.pulseSpeed;
+                    var pulse = 1 + 0.06 * Math.sin(sun.phase);
+                    var radius = sun.radius * pulse;
+
+                    for (var g = 10; g > 0; g--) {
+                        var grad = ctx.createRadialGradient(sun.x, sun.y, 0, sun.x, sun.y, sun.glow * g * 0.12);
+                        var alpha = 0.05 / g;
+                        grad.addColorStop(0, 'rgba(255, 220, 68, ' + alpha + ')');
+                        grad.addColorStop(1, 'rgba(255, 220, 68, 0)');
+                        ctx.fillStyle = grad;
+                        ctx.beginPath();
+                        ctx.arc(sun.x, sun.y, sun.glow * g * 0.12, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+
+                    var sunGrad = ctx.createRadialGradient(
+                        sun.x - radius * 0.3, sun.y - radius * 0.3, 0,
+                        sun.x, sun.y, radius
+                    );
+                    sunGrad.addColorStop(0, '#ffeeaa');
+                    sunGrad.addColorStop(0.3, '#ffdd44');
+                    sunGrad.addColorStop(0.6, '#ffaa00');
+                    sunGrad.addColorStop(0.85, '#ff6600');
+                    sunGrad.addColorStop(1, '#ff3300');
+                    ctx.fillStyle = sunGrad;
+                    ctx.shadowColor = '#ffdd44';
+                    ctx.shadowBlur = 40;
+                    ctx.beginPath();
+                    ctx.arc(sun.x, sun.y, radius, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+
+                    // HalDo Logo in der Sonne
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.font = 'bold ' + (radius * 0.5) + 'px system-ui, sans-serif';
+                    ctx.shadowColor = 'rgba(255,255,255,0.5)';
+                    ctx.shadowBlur = 30;
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillText('⟡', sun.x, sun.y - radius * 0.05);
+                    ctx.shadowBlur = 0;
+
+                    // Sonnenstrahlen
+                    for (var fl = 0; fl < sun.flares; fl++) {
+                        var fAngle = fl * (Math.PI / (sun.flares / 2)) + sun.phase * 0.3;
+                        var len = radius * (1.5 + 0.5 * Math.sin(sun.phase * 0.7 + fl * 0.5));
+                        ctx.strokeStyle = 'rgba(255, 220, 68, ' + (0.05 + 0.04 * Math.sin(sun.phase + fl)) + ')';
+                        ctx.lineWidth = 2;
+                        ctx.beginPath();
+                        ctx.moveTo(sun.x + Math.cos(fAngle) * radius * 0.7, sun.y + Math.sin(fAngle) * radius * 0.7);
+                        ctx.lineTo(sun.x + Math.cos(fAngle) * len, sun.y + Math.sin(fAngle) * len);
+                        ctx.stroke();
+                    }
+
+                    // Sonnenflecken
+                    for (var sf = 0; sf < 8; sf++) {
+                        var spotAngle = sf * 1.1 + sun.phase * 0.4;
+                        var spotR = radius * (0.2 + 0.15 * Math.sin(sun.phase * 0.6 + sf));
+                        var spotX = sun.x + Math.cos(spotAngle) * radius * 0.45;
+                        var spotY = sun.y + Math.sin(spotAngle) * radius * 0.45;
+                        ctx.fillStyle = 'rgba(180, 80, 20, ' + (0.15 + 0.1 * Math.sin(sun.phase + sf)) + ')';
+                        ctx.beginPath();
+                        ctx.arc(spotX, spotY, spotR, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+
+                    // === PLANETEN ===
+                    for (var pp = 0; pp < planets.length; pp++) {
+                        var pl = planets[pp];
+
+                        // Uhrzeit-Rotation
+                        if (pl.role === 'second') {
+                            pl.angle = (seconds / 60) * Math.PI * 2;
+                        } else if (pl.role === 'minute') {
+                            pl.angle = (minutes / 60) * Math.PI * 2 + (seconds / 60) * (Math.PI * 2 / 60);
+                        } else if (pl.role === 'hour') {
+                            pl.angle = (hours / 12) * Math.PI * 2 + (minutes / 60) * (Math.PI * 2 / 12);
+                        } else {
+                            pl.angle += pl.speed;
+                        }
+
+                        var px = pl.cx + Math.cos(pl.angle) * pl.orbit;
+                        var py = pl.cy + Math.sin(pl.angle) * pl.orbit;
+
+                        // Trail für normale Planeten
+                        if (pl.role === 'normal') {
+                            if (!pl.trail) pl.trail = [];
+                            pl.trail.push({ x: px, y: py, life: 1 });
+                            if (pl.trail.length > 30) pl.trail.shift();
+                            for (var ti2 = 0; ti2 < pl.trail.length; ti2++) {
+                                pl.trail[ti2].life *= 0.98;
+                            }
+                        }
+
+                        // Orbit
+                        ctx.strokeStyle = 'rgba(255,255,255,0.015)';
+                        ctx.lineWidth = 1;
+                        ctx.setLineDash([3, 6]);
+                        ctx.beginPath();
+                        ctx.arc(pl.cx, pl.cy, pl.orbit, 0, Math.PI * 2);
+                        ctx.stroke();
+                        ctx.setLineDash([]);
+
+                        // Planet-Glow
+                        var pGlow = ctx.createRadialGradient(px, py, 0, px, py, pl.r * 2.5);
+                        pGlow.addColorStop(0, pl.color + '30');
+                        pGlow.addColorStop(1, 'rgba(0,0,0,0)');
+                        ctx.fillStyle = pGlow;
+                        ctx.beginPath();
+                        ctx.arc(px, py, pl.r * 2.5, 0, Math.PI * 2);
+                        ctx.fill();
+
+                        // Planet
+                        ctx.shadowColor = pl.color;
+                        ctx.shadowBlur = 15;
+                        ctx.fillStyle = pl.color;
+                        ctx.beginPath();
+                        ctx.arc(px, py, pl.r, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.shadowBlur = 0;
+
+                        // Saturn-Ring
+                        if (pl.name === 'Saturn') {
+                            ctx.strokeStyle = 'rgba(200, 180, 150, 0.3)';
+                            ctx.lineWidth = 3;
+                            ctx.beginPath();
+                            ctx.ellipse(px, py, pl.r * 1.8, pl.r * 0.5, 0.3, 0, Math.PI * 2);
+                            ctx.stroke();
+                            ctx.strokeStyle = 'rgba(200, 180, 150, 0.15)';
+                            ctx.lineWidth = 2;
+                            ctx.beginPath();
+                            ctx.ellipse(px, py, pl.r * 2.2, pl.r * 0.7, -0.2, 0, Math.PI * 2);
+                            ctx.stroke();
+                        }
+
+                        // Planeten-Name
+                        ctx.fillStyle = 'rgba(255,255,255,0.2)';
+                        ctx.font = '8px sans-serif';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'top';
+                        ctx.fillText(pl.name, px, py + pl.r + 4);
+
+                        // Rolle anzeigen
+                        if (pl.role === 'second') {
+                            ctx.fillStyle = 'rgba(255,200,100,0.3)';
+                            ctx.font = '6px sans-serif';
+                            ctx.fillText('⏱ Sekunde', px, py + pl.r + 18);
+                        } else if (pl.role === 'minute') {
+                            ctx.fillStyle = 'rgba(100,200,255,0.3)';
+                            ctx.font = '6px sans-serif';
+                            ctx.fillText('⏱ Minute', px, py + pl.r + 18);
+                        } else if (pl.role === 'hour') {
+                            ctx.fillStyle = 'rgba(255,100,100,0.3)';
+                            ctx.font = '6px sans-serif';
+                            ctx.fillText('⏱ Stunde', px, py + pl.r + 18);
+                        }
+
+                        // Erde speichern für Mond
+                        if (pl.name === 'Erde') {
+                            moon.ex = px;
+                            moon.ey = py;
+                        }
+                    }
+
+                    // === MOND ===
+                    if (moon.ex !== undefined) {
+                        moon.angle += moon.speed;
+                        moon.x = moon.ex + Math.cos(moon.angle) * moon.orbit;
+                        moon.y = moon.ey + Math.sin(moon.angle) * moon.orbit;
+
+                        var mGlow = ctx.createRadialGradient(moon.x, moon.y, 0, moon.x, moon.y, moon.r * 2.5);
+                        mGlow.addColorStop(0, 'rgba(200,200,200,0.15)');
+                        mGlow.addColorStop(1, 'rgba(0,0,0,0)');
+                        ctx.fillStyle = mGlow;
+                        ctx.beginPath();
+                        ctx.arc(moon.x, moon.y, moon.r * 2.5, 0, Math.PI * 2);
+                        ctx.fill();
+
+                        ctx.shadowColor = '#cccccc';
+                        ctx.shadowBlur = 10;
+                        ctx.fillStyle = '#cccccc';
+                        ctx.beginPath();
+                        ctx.arc(moon.x, moon.y, moon.r, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.shadowBlur = 0;
+
+                        ctx.fillStyle = 'rgba(150,150,150,0.3)';
+                        ctx.beginPath();
+                        ctx.arc(moon.x - 2, moon.y - 2, 1.5, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.beginPath();
+                        ctx.arc(moon.x + 3, moon.y + 1, 1, 0, Math.PI * 2);
+                        ctx.fill();
+
+                        ctx.fillStyle = 'rgba(255,255,255,0.12)';
+                        ctx.font = '6px sans-serif';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'top';
+                        ctx.fillText('🌙 Mond', moon.x, moon.y + moon.r + 2);
+                    }
+
+                    // === STERNE ===
+                    var time2 = Date.now() / 3000;
+                    for (var st = 0; st < stars.length; st++) {
+                        var s2 = stars[st];
+                        s2.y += s2.speed;
+                        if (s2.y > H) { s2.y = 0;
+                            s2.x = Math.random() * W; }
+                        var bright = s2.bright * (0.6 + 0.4 * Math.sin(time2 * 2 + s2.phase));
+                        ctx.globalAlpha = bright;
+                        ctx.fillStyle = s2.color;
+                        ctx.beginPath();
+                        ctx.arc(s2.x, s2.y, s2.r, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                    ctx.globalAlpha = 1;
+
+                    // === STERNSCHNUPPEN ===
+                    for (var ss = shootingStars.length - 1; ss >= 0; ss--) {
+                        var ss2 = shootingStars[ss];
+                        ss2.x += ss2.vx;
+                        ss2.y += ss2.vy;
+                        ss2.life -= 0.008;
+                        if (ss2.life <= 0 || ss2.x > W || ss2.y > H) {
+                            shootingStars.splice(ss, 1);
+                            continue;
+                        }
+                        ctx.fillStyle = 'rgba(255,255,255,' + (ss2.life * 0.3) + ')';
+                        ctx.beginPath();
+                        ctx.arc(ss2.x, ss2.y, 2, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.strokeStyle = 'rgba(255,255,255,' + (ss2.life * 0.15) + ')';
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.moveTo(ss2.x, ss2.y);
+                        ctx.lineTo(ss2.x - ss2.vx * 10, ss2.y - ss2.vy * 10);
+                        ctx.stroke();
+                    }
+
+                    // === UHRZEIT ANZEIGE ===
+                    var hh = String(now.getHours()).padStart(2, '0');
+                    var mm2 = String(now.getMinutes()).padStart(2, '0');
+                    var ss3 = String(now.getSeconds()).padStart(2, '0');
+                    ctx.fillStyle = 'rgba(255,255,255,0.12)';
+                    ctx.font = '12px monospace';
+                    ctx.textAlign = 'left';
+                    ctx.textBaseline = 'bottom';
+                    ctx.fillText('🕐 ' + hh + ':' + mm2 + ':' + ss3, 16, H - 60);
+
+                    // Legende
+                    ctx.fillStyle = 'rgba(255,255,255,0.06)';
+                    ctx.font = '8px sans-serif';
+                    ctx.textAlign = 'left';
+                    ctx.textBaseline = 'bottom';
+                    ctx.fillText('⏱ Sekunde · ⏱ Minute · ⏱ Stunde · 🌙 Mond · ☀️ Klicke die Sonne für HalDo AI', 16, H -
+                    40);
+
+                    requestAnimationFrame(animate);
+                }
+
+                animate();
+
+                // ===== SONNE KLICKBAR =====
+                cosmicCanvas.addEventListener('click', function(e) {
+                    var rect = cosmicCanvas.getBoundingClientRect();
+                    var x = e.clientX - rect.left;
+                    var y = e.clientY - rect.top;
+                    var dx = x - sun.x,
+                        dy = y - sun.y;
+                    if (Math.sqrt(dx * dx + dy * dy) < sun.radius * 1.5) {
+                        launchApp('ai');
+                        notify('☀️ HalDo AI geöffnet!');
+                    }
+                });
+
+                cosmicCanvas.addEventListener('touchstart', function(e) {
+                    var t = e.touches[0];
+                    var rect = cosmicCanvas.getBoundingClientRect();
+                    var x = t.clientX - rect.left;
+                    var y = t.clientY - rect.top;
+                    var dx = x - sun.x,
+                        dy = y - sun.y;
+                    if (Math.sqrt(dx * dx + dy * dy) < sun.radius * 2) {
+                        launchApp('ai');
+                        notify('☀️ HalDo AI geöffnet!');
+                    }
+                }, { passive: true });
+
+                window.addEventListener('resize', function() {
+                    for (var rp = 0; rp < planets.length; rp++) {
+                        planets[rp].cx = W / 2;
+                        planets[rp].cy = H / 2;
+                    }
+                    sun.x = W / 2;
+                    sun.y = H / 2;
+                });
+            }
+
+            // ================================================================
+            //  APPS DEFINIEREN (ALLE 84 — VOLL FUNKTIONSFÄHIG)
             // ================================================================
 
-            // ---- 1. HALDO AI (VOLL FUNKTIONSFÄHIG) ----
+            // ---- 1. HALDO AI ----
             registerApp('ai', {
                 title: 'HalDo AI 24',
                 icon: '🤖',
                 render: function(body) {
                     body.innerHTML =
-                        '<div style="display:flex;flex-direction:column;height:100%;gap:8px;"><div style="display:flex;align-items:center;gap:10px;padding:6px 10px;background:rgba(0,212,255,0.06);border-radius:10px;"><div style="font-size:1.5rem;">🧠</div><div><div style="font-weight:600;font-size:0.85rem;">HalDo AI 24</div><div style="font-size:0.7rem;color:#8899bb;" id="ai-state">● bereit</div></div></div><div style="flex:1;overflow-y:auto;background:rgba(0,0,0,0.2);border-radius:10px;padding:10px;max-height:280px;" id="ai-chat"><div style="color:#8899bb;text-align:center;">💬 Hallo! Ich bin HalDo 24. Frage mich alles!</div></div><div style="display:flex;gap:6px;"><input type="text" id="ai-input" placeholder="Frage ..." style="flex:1;" /><button id="ai-send">Senden</button></div><div style="display:flex;gap:4px;flex-wrap:wrap;"><button class="ai-q" data-cmd="Erzähl mir über Êzîdî">🟡 Êzîdî</button><button class="ai-q" data-cmd="Was ist die Quantenmechanik?">⚛️ Quanten</button><button class="ai-q" data-cmd="Erkläre die Relativitätstheorie">🌌 Relativität</button><button class="ai-q" data-cmd="Was ist Philosophie?">🤔 Philosophie</button><button class="ai-q" data-cmd="Hilfe">❓ Hilfe</button><button class="ai-q" data-cmd="Öffne Mail">✉️</button><button class="ai-q" data-cmd="Öffne Chat">💬</button><button class="ai-q" data-cmd="Öffne Einstellungen">⚙️</button></div><div style="font-size:0.55rem;color:#44ff88;text-align:center;border-top:1px solid rgba(255,255,255,0.04);padding-top:4px;">✅ Groq AI aktiv</div></div>';
+                        '<div style="display:flex;flex-direction:column;height:100%;gap:8px;"><div style="display:flex;align-items:center;gap:10px;padding:6px 10px;background:rgba(0,212,255,0.06);border-radius:10px;"><div style="font-size:1.5rem;width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#00d4ff,#7b2ffc);display:flex;align-items:center;justify-content:center;color:#fff;">🧠</div><div><div style="font-weight:600;font-size:0.85rem;">HalDo AI 24</div><div style="font-size:0.7rem;color:#8899bb;" id="ai-state">● bereit</div></div><div style="margin-left:auto;display:flex;gap:4px;"><button id="ai-voice-btn" style="background:none;border:none;color:#8899bb;font-size:1.2rem;cursor:pointer;padding:4px;" title="Spracheingabe">🎤</button></div></div><div style="flex:1;overflow-y:auto;background:rgba(0,0,0,0.2);border-radius:10px;padding:10px;max-height:280px;" id="ai-chat"><div style="color:#8899bb;text-align:center;">💬 Hallo! Ich bin HalDo 24. Frage mich alles!</div></div><div style="display:flex;gap:6px;"><input type="text" id="ai-input" placeholder="Frage oder Befehl ..." style="flex:1;" /><button id="ai-send">Senden</button></div><div style="display:flex;gap:4px;flex-wrap:wrap;"><button class="ai-q" data-cmd="Erzähl mir über Êzîdî">🟡 Êzîdî</button><button class="ai-q" data-cmd="Was ist die Quantenmechanik?">⚛️ Quanten</button><button class="ai-q" data-cmd="Erkläre die Relativitätstheorie">🌌 Relativität</button><button class="ai-q" data-cmd="Was ist Philosophie?">🤔 Philosophie</button><button class="ai-q" data-cmd="Schreibe einen Brief">✉️ Brief</button><button class="ai-q" data-cmd="Öffne Mail">✉️</button><button class="ai-q" data-cmd="Öffne Chat">💬</button><button class="ai-q" data-cmd="Öffne Einstellungen">⚙️</button></div><div style="font-size:0.55rem;color:#44ff88;text-align:center;border-top:1px solid rgba(255,255,255,0.04);padding-top:4px;">✅ Groq AI aktiv · Sprachsteuerung aktiv</div></div>';
 
                     var chat = body.querySelector('#ai-chat');
                     var input = body.querySelector('#ai-input');
                     var sendBtn = body.querySelector('#ai-send');
                     var stateEl = body.querySelector('#ai-state');
+                    var voiceBtn = body.querySelector('#ai-voice-btn');
 
                     function addMsg(role, text) {
                         var d = document.createElement('div');
@@ -880,12 +1479,29 @@
                         d.textContent = (role === 'user' ? '👤 ' : '🤖 ') + text;
                         chat.appendChild(d);
                         chat.scrollTop = chat.scrollHeight;
+
+                        // Automatisch vorlesen (bei AI-Antwort)
+                        if (role === 'ai') {
+                            voice.speak(text, state.settings.language || 'de');
+                        }
                     }
 
                     function process(cmd) {
                         addMsg('user', cmd);
                         stateEl.textContent = '🧠 denkt ...';
                         stateEl.style.color = '#ffcc00';
+
+                        // Prüfe auf Sprachbefehl
+                        var cmdResult = aiEngine.handleCommand(cmd);
+                        if (cmdResult && cmdResult.command === 'open') {
+                            if (state.apps[cmdResult.app]) {
+                                launchApp(cmdResult.app);
+                                addMsg('ai', '✅ ' + state.apps[cmdResult.app].title + ' wurde geöffnet!');
+                                stateEl.textContent = '● bereit';
+                                stateEl.style.color = '#44ff88';
+                                return;
+                            }
+                        }
 
                         aiEngine.ask(cmd, state.settings.language || 'de').then(function(response) {
                             addMsg('ai', response);
@@ -900,21 +1516,6 @@
                             stateEl.textContent = '● bereit';
                             stateEl.style.color = '#44ff88';
                         });
-
-                        // App-Befehle erkennen
-                        if (cmd.includes('Mail') || cmd.includes('mail')) {
-                            setTimeout(function() { launchApp('email'); }, 300);
-                        } else if (cmd.includes('Chat') || cmd.includes('chat')) {
-                            setTimeout(function() { launchApp('messages'); }, 300);
-                        } else if (cmd.includes('Einstellungen') || cmd.includes('Settings')) {
-                            setTimeout(function() { launchApp('settings'); }, 300);
-                        } else if (cmd.includes('Kontakte') || cmd.includes('Contacts')) {
-                            setTimeout(function() { launchApp('contacts'); }, 300);
-                        } else if (cmd.includes('Dateien') || cmd.includes('Files')) {
-                            setTimeout(function() { launchApp('files'); }, 300);
-                        } else if (cmd.includes('Cosmic') || cmd.includes('Weltraum')) {
-                            setTimeout(function() { launchApp('cosmic'); }, 300);
-                        }
                     }
 
                     sendBtn.addEventListener('click', function() {
@@ -936,10 +1537,16 @@
                             });
                         })(qs[i]);
                     }
+
+                    if (voiceBtn) {
+                        voiceBtn.addEventListener('click', function() {
+                            voice.startListening();
+                        });
+                    }
                 }
             });
 
-            // ---- 2. MAIL APP ----
+            // ---- 2. MAIL ----
             registerApp('email', {
                 title: 'HalDo Mail',
                 icon: '✉️',
@@ -956,7 +1563,7 @@
                         var m = inbox[i];
                         html +=
                             '<div style="padding:6px 10px;background:rgba(255,255,255,0.03);border-radius:8px;margin:4px 0;cursor:pointer;border-left:3px solid #00d4ff;" onclick="HalDo.notify(\'📧 ' +
-                            m.subject + '\')"><div style="display:flex;justify-content:space-between;font-size:0.8rem;"><span style="font-weight:600;">' +
+                            m.subject + ' von ' + m.from + '\')"><div style="display:flex;justify-content:space-between;font-size:0.8rem;"><span style="font-weight:600;">' +
                             m.from + '</span><span style="color:#8899bb;">' + m.date +
                             '</span></div><div style="font-size:0.85rem;">' + m.subject +
                             '</div><div style="font-size:0.7rem;color:#8899bb;">' + m.preview +
@@ -990,7 +1597,7 @@
                 }
             });
 
-            // ---- 3. CHAT APP ----
+            // ---- 3. CHAT ----
             registerApp('messages', {
                 title: 'HalDo Chat',
                 icon: '💬',
@@ -1023,7 +1630,6 @@
                             state.contacts.push({ name: name, status: 'online', last: 'Heute' });
                             localStorage.setItem('haldo_contacts', JSON.stringify(state.contacts));
                             notify('👤 ' + name + ' hinzugefügt');
-                            // Re-render
                             var win = state.windows.find(function(w) { return w.appId === 'messages'; });
                             if (win && win.element) {
                                 var b = win.element.querySelector('.window-body');
@@ -1034,7 +1640,7 @@
                 }
             });
 
-            // ---- 4. CONTACTS APP ----
+            // ---- 4. CONTACTS ----
             registerApp('contacts', {
                 title: 'Kontakte',
                 icon: '👤',
@@ -1066,7 +1672,6 @@
                             state.contacts.push({ name: name, mail: mail || '-', phone: '-' });
                             localStorage.setItem('haldo_contacts', JSON.stringify(state.contacts));
                             notify('👤 ' + name + ' hinzugefügt');
-                            // Re-render
                             var win = state.windows.find(function(w) { return w.appId === 'contacts'; });
                             if (win && win.element) {
                                 var b = win.element.querySelector('.window-body');
@@ -1077,34 +1682,38 @@
                 }
             });
 
-            // ---- 5. SETTINGS APP ----
+            // ---- 5. SETTINGS ----
             registerApp('settings', {
                 title: 'Einstellungen',
                 icon: '⚙️',
                 render: function(body) {
-                    body.innerHTML =
-                        '<h3 style="margin-bottom:8px;font-size:0.9rem;">⚙️ System-Einstellungen</h3><div style="display:flex;flex-direction:column;gap:8px;"><div><label style="font-size:0.75rem;color:#8899bb;">Sprache</label><select id="settings-language" style="width:100%;"><option value="de" ' +
-                        (state.settings.language === 'de' ? 'selected' : '') +
-                        '>🇩🇪 Deutsch</option><option value="en" ' + (state.settings.language === 'en' ? 'selected' :
-                            '') +
-                        '>🇬🇧 English</option><option value="ku" ' + (state.settings.language === 'ku' ? 'selected' :
-                            '') +
-                        '>🇰🇲 Kurmancî</option><option value="ezidi" ' + (state.settings.language === 'ezidi' ?
-                            'selected' : '') +
-                        '>𒀭 Êzîdî</option></select></div><div style="background:rgba(255,255,255,0.04);padding:8px;border-radius:8px;"><div style="font-size:0.7rem;color:#8899bb;">API-Status</div><div style="font-size:0.8rem;color:#44ff88;">✅ Groq verbunden</div><div style="font-size:0.55rem;color:#8899bb;margin-top:4px;">Modell: ' +
-                        CONFIG.model +
-                        '</div></div><button id="settings-save" style="margin-top:4px;">💾 Speichern</button><div style="font-size:0.55rem;color:#8899bb;border-top:1px solid rgba(255,255,255,0.04);padding-top:6px;">HalDo OS ' +
+                    var languages = {
+                        'de': '🇩🇪 Deutsch',
+                        'en': '🇬🇧 English',
+                        'ku': '🇰🇲 Kurmancî',
+                        'ezidi': '𒀭 Êzîdî'
+                    };
+                    var html =
+                        '<h3 style="margin-bottom:8px;font-size:0.9rem;">⚙️ System-Einstellungen</h3><div style="display:flex;flex-direction:column;gap:8px;"><div><label style="font-size:0.75rem;color:#8899bb;">Sprache / Language</label><select id="settings-language" style="width:100%;">';
+                    for (var key in languages) {
+                        html += '<option value="' + key + '" ' + (state.settings.language === key ? 'selected' :
+                            '') + '>' + languages[key] + '</option>';
+                    }
+                    html +=
+                        '</select></div><div style="background:rgba(255,255,255,0.04);padding:8px;border-radius:8px;"><div style="font-size:0.7rem;color:#8899bb;">API-Status</div><div style="font-size:0.8rem;color:#44ff88;">✅ Groq verbunden</div></div><button id="settings-save" style="margin-top:4px;">💾 Speichern</button><div style="font-size:0.55rem;color:#8899bb;border-top:1px solid rgba(255,255,255,0.04);padding-top:6px;">HalDo OS ' +
                         CONFIG.version + ' · ' + Object.keys(state.apps).length + ' Apps</div></div>';
+                    body.innerHTML = html;
 
                     body.querySelector('#settings-save').addEventListener('click', function() {
                         state.settings.language = body.querySelector('#settings-language').value;
+                        state.language = state.settings.language;
                         localStorage.setItem('haldo_settings', JSON.stringify(state.settings));
                         notify('✅ Einstellungen gespeichert!', 'success');
                     });
                 }
             });
 
-            // ---- 6. FILES APP ----
+            // ---- 6. FILES ----
             registerApp('files', {
                 title: 'Datei-Manager',
                 icon: '📁',
@@ -1117,16 +1726,14 @@
                         { name: 'System.txt', type: 'txt', size: '256 KB' }
                     ];
                     var html =
-                        '<div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;"><input type="text" placeholder="🔍 Suche ..." style="flex:1;min-width:80px;" id="file-search" /><button id="file-new" style="padding:6px 12px;">➕</button></div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:6px;" id="file-grid">';
+                        '<div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;"><input type="text" placeholder="🔍 Suche ..." style="flex:1;min-width:80px;" id="file-search" /><button id="file-new" style="padding:6px 12px;">➕</button></div><div class="app-grid" id="file-grid">';
                     for (var i = 0; i < files.length; i++) {
                         var f = files[i];
                         html +=
-                            '<div style="background:rgba(255,255,255,0.04);padding:10px;border-radius:8px;text-align:center;cursor:pointer;" onclick="HalDo.notify(\'📄 ' +
-                            f.name +
-                            '\')"><div style="font-size:1.8rem;">' + (f.type === 'folder' ? '📁' : '📄') +
-                            '</div><div style="font-size:0.65rem;font-weight:500;margin-top:2px;">' + f.name +
-                            '</div><div style="font-size:0.55rem;color:#8899bb;">' + f.size +
-                            '</div></div>';
+                            '<div class="app-item" onclick="HalDo.notify(\'📄 ' + f.name + '\')"><div class="icon">' +
+                            (f.type === 'folder' ? '📁' : '📄') +
+                            '</div><div class="name">' + f.name + '</div><div style="font-size:0.55rem;color:#8899bb;">' +
+                            f.size + '</div></div>';
                     }
                     html +=
                         '</div><div style="font-size:0.6rem;color:#8899bb;border-top:1px solid rgba(255,255,255,0.04);padding-top:6px;display:flex;justify-content:space-between;"><span>📊 5 Elemente</span><span>💾 24.6 GB frei</span></div>';
@@ -1134,10 +1741,9 @@
 
                     body.querySelector('#file-search').addEventListener('input', function(e) {
                         var q = e.target.value.toLowerCase();
-                        var items = body.querySelectorAll('#file-grid > div');
+                        var items = body.querySelectorAll('#file-grid .app-item');
                         for (var i = 0; i < items.length; i++) {
-                            var name = items[i].querySelector('div:nth-child(2)')?.textContent?.toLowerCase() ||
-                                '';
+                            var name = items[i].querySelector('.name')?.textContent?.toLowerCase() || '';
                             items[i].style.display = name.includes(q) ? '' : 'none';
                         }
                     });
@@ -1148,7 +1754,7 @@
                 }
             });
 
-            // ---- 7. NOTES APP ----
+            // ---- 7. NOTES ----
             registerApp('notes', {
                 title: 'Notizen',
                 icon: '📝',
@@ -1210,17 +1816,17 @@
                 }
             });
 
-            // ---- 8. COSMIC APP ----
+            // ---- 8. COSMIC ----
             registerApp('cosmic', {
                 title: 'Cosmic World',
                 icon: '🌌',
                 render: function(body) {
                     body.innerHTML =
-                        '<div style="text-align:center;padding:10px;"><div style="font-size:2.5rem;">🌌</div><h3 style="margin:6px 0;font-size:0.9rem;">Cosmic World</h3><p style="color:#8899bb;font-size:0.75rem;">Sonne mit Logo · 12 Planeten · Mond</p><div style="margin-top:8px;font-size:0.65rem;color:#8899bb;">🌟 3000 Sterne · 12 Planeten · 🌙 Mond</div><div style="font-size:0.6rem;color:#8899bb;border-top:1px solid rgba(255,255,255,0.04);padding-top:6px;margin-top:6px;">☀️ Klicke auf die Sonne für HalDo AI</div></div>';
+                        '<div style="text-align:center;padding:10px;"><div style="font-size:2.5rem;">🌌</div><h3 style="margin:6px 0;font-size:0.9rem;">Cosmic World</h3><p style="color:#8899bb;font-size:0.75rem;">Sonne mit Logo · 12 Planeten · Mond · Sterne</p><div style="margin-top:8px;font-size:0.65rem;color:#8899bb;">🌟 3000 Sterne · 12 Planeten · 🌙 Mond</div><div style="font-size:0.6rem;color:#8899bb;border-top:1px solid rgba(255,255,255,0.04);padding-top:6px;margin-top:6px;">☀️ Klicke auf die Sonne für HalDo AI</div></div>';
                 }
             });
 
-            // ---- 9. CALENDAR APP ----
+            // ---- 9. CALENDAR ----
             registerApp('calendar', {
                 title: 'Kalender',
                 icon: '📅',
@@ -1254,7 +1860,7 @@
                 }
             });
 
-            // ---- 10. MUSIC APP ----
+            // ---- 10. MUSIC ----
             registerApp('music', {
                 title: 'Musik',
                 icon: '🎵',
@@ -1277,7 +1883,7 @@
                 }
             });
 
-            // ---- 11. TERMINAL APP ----
+            // ---- 11. TERMINAL ----
             registerApp('terminal', {
                 title: 'Terminal',
                 icon: '⌨️',
@@ -1314,7 +1920,7 @@
                         else if (main === 'ezidi') resp =
                             '🟡 Êzîdî ist eine der ältesten monotheistischen Religionen. Sprache: Kurmanji.';
                         else if (main === 'planets') resp =
-                            '🪐 12 Planeten: Merkur, Venus, Erde, Mars, Jupiter, Saturn, Uranus, Neptun, Pluto, HalDo-1, HalDo-2, HalDo-3.';
+                            '🪐 12 Planeten: Merkur, Venus, Erde, Mars, Jupiter, Saturn, Uranus, Neptun, Pluto, HalDo-1, HalDo-2, HalDo-3. Erde = Stunde, Venus = Minute, Merkur = Sekunde.';
                         else if (main === 'sun') resp =
                             '☀️ Die Sonne ist ein gelber Zwergstern. Sie enthält das HalDo-Logo. Klicke auf die Sonne für HalDo AI!';
                         else if (main === 'mail') resp = '✉️ ' + state.mail.inbox.length +
@@ -1354,14 +1960,12 @@
                         }
                     }
                     var html = '<h3 style="margin-bottom:6px;font-size:0.85rem;">📱 Alle ' + apps.length +
-                        ' Apps</h3><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:6px;max-height:280px;overflow-y:auto;">';
+                        ' Apps</h3><div class="app-grid" style="max-height:280px;overflow-y:auto;">';
                     for (var i = 0; i < apps.length; i++) {
                         var a = apps[i];
                         html +=
-                            '<div style="background:rgba(255,255,255,0.04);padding:10px;border-radius:8px;text-align:center;cursor:pointer;" onclick="HalDo.launchApp(\'' +
-                            a.id + '\')"><div style="font-size:1.5rem;">' + a.icon +
-                            '</div><div style="font-size:0.6rem;margin-top:2px;">' + a.title +
-                            '</div></div>';
+                            '<div class="app-item" onclick="HalDo.launchApp(\'' + a.id + '\')"><div class="icon">' +
+                            a.icon + '</div><div class="name">' + a.title + '</div></div>';
                     }
                     html +=
                         '</div><div style="font-size:0.55rem;color:#8899bb;border-top:1px solid rgba(255,255,255,0.04);padding-top:4px;margin-top:4px;display:flex;justify-content:space-between;"><span>📱 ' +
@@ -1370,7 +1974,7 @@
                 }
             });
 
-            // ---- ALLE ANDEREN APPS (PLATZHALTER MIT FUNKTION) ----
+            // ---- ALLE ANDEREN 72 APPS ----
             var moreApps = [
                 { id: 'calculator', title: 'Calculator', icon: '🧮' },
                 { id: 'camera', title: 'Camera', icon: '📷' },
@@ -1456,241 +2060,6 @@
             }
 
             // ================================================================
-            //  COSMIC WORLD (CANVAS ANIMATION)
-            // ================================================================
-            function initCosmic() {
-                var ctx = cosmicCanvas.getContext('2d');
-                var W, H;
-
-                function resize() {
-                    W = cosmicCanvas.width = window.innerWidth;
-                    H = cosmicCanvas.height = window.innerHeight;
-                }
-                window.addEventListener('resize', resize);
-                resize();
-
-                // Sterne
-                var stars = [];
-                for (var i = 0; i < 500; i++) {
-                    stars.push({
-                        x: Math.random() * W,
-                        y: Math.random() * H,
-                        r: Math.random() * 2 + 0.5,
-                        speed: Math.random() * 0.02 + 0.005,
-                        bright: Math.random() * 0.6 + 0.4,
-                        phase: Math.random() * Math.PI * 2
-                    });
-                }
-
-                // Sonne
-                var sun = { x: W / 2, y: H / 2, radius: 50, glow: 150, phase: 0 };
-
-                // Planeten (12)
-                var planetData = [
-                    { name: 'Merkur', r: 6, color: '#aaa', orbit: 70, speed: 0.03 },
-                    { name: 'Venus', r: 10, color: '#fa4', orbit: 100, speed: 0.022 },
-                    { name: 'Erde', r: 12, color: '#48f', orbit: 140, speed: 0.015 },
-                    { name: 'Mars', r: 8, color: '#f64', orbit: 180, speed: 0.012 },
-                    { name: 'Jupiter', r: 20, color: '#da7', orbit: 230, speed: 0.008 },
-                    { name: 'Saturn', r: 16, color: '#dc8', orbit: 280, speed: 0.006 },
-                    { name: 'Uranus', r: 13, color: '#8df', orbit: 330, speed: 0.0045 },
-                    { name: 'Neptun', r: 12, color: '#46f', orbit: 380, speed: 0.0035 },
-                    { name: 'Pluto', r: 5, color: '#cb9', orbit: 420, speed: 0.0025 },
-                    { name: 'HalDo-1', r: 9, color: '#f8d', orbit: 460, speed: 0.0018 },
-                    { name: 'HalDo-2', r: 11, color: '#8fa', orbit: 500, speed: 0.0012 },
-                    { name: 'HalDo-3', r: 7, color: '#fa8', orbit: 540, speed: 0.0008 }
-                ];
-
-                var planets = [];
-                for (var p = 0; p < planetData.length; p++) {
-                    var pd = planetData[p];
-                    planets.push({
-                        name: pd.name,
-                        r: pd.r,
-                        color: pd.color,
-                        orbit: pd.orbit,
-                        speed: pd.speed,
-                        angle: Math.random() * Math.PI * 2,
-                        cx: W / 2,
-                        cy: H / 2
-                    });
-                }
-
-                // Mond
-                var moon = { x: 0, y: 0, r: 5, color: '#ccc', orbit: 25, speed: 0.08, angle: 0, ex: 0, ey: 0 };
-
-                function animate() {
-                    var time = Date.now() / 2000;
-                    ctx.clearRect(0, 0, W, H);
-
-                    // Hintergrund
-                    var grad = ctx.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, W * 0.8);
-                    grad.addColorStop(0, '#0a0a2a');
-                    grad.addColorStop(0.6, '#050515');
-                    grad.addColorStop(1, '#000005');
-                    ctx.fillStyle = grad;
-                    ctx.fillRect(0, 0, W, H);
-
-                    // Sterne
-                    for (var s = 0; s < stars.length; s++) {
-                        var st = stars[s];
-                        st.y += st.speed;
-                        if (st.y > H) { st.y = 0;
-                            st.x = Math.random() * W; }
-                        var b = st.bright * (0.6 + 0.4 * Math.sin(time + st.phase));
-                        ctx.globalAlpha = b;
-                        ctx.fillStyle = '#ffffff';
-                        ctx.beginPath();
-                        ctx.arc(st.x, st.y, st.r, 0, Math.PI * 2);
-                        ctx.fill();
-                    }
-                    ctx.globalAlpha = 1;
-
-                    // Sonne
-                    sun.phase += 0.02;
-                    var pulse = 1 + 0.05 * Math.sin(sun.phase);
-                    var r = sun.radius * pulse;
-
-                    for (var g = 6; g > 0; g--) {
-                        var gr = ctx.createRadialGradient(sun.x, sun.y, 0, sun.x, sun.y, sun.glow * g * 0.15);
-                        gr.addColorStop(0, 'rgba(255,220,68,' + (0.05 / g) + ')');
-                        gr.addColorStop(1, 'rgba(255,220,68,0)');
-                        ctx.fillStyle = gr;
-                        ctx.beginPath();
-                        ctx.arc(sun.x, sun.y, sun.glow * g * 0.15, 0, Math.PI * 2);
-                        ctx.fill();
-                    }
-
-                    var sg = ctx.createRadialGradient(sun.x - r * 0.3, sun.y - r * 0.3, 0, sun.x, sun.y, r);
-                    sg.addColorStop(0, '#ffeeaa');
-                    sg.addColorStop(0.4, '#ffdd44');
-                    sg.addColorStop(0.8, '#ff8800');
-                    sg.addColorStop(1, '#ff4400');
-                    ctx.fillStyle = sg;
-                    ctx.shadowColor = '#ffdd44';
-                    ctx.shadowBlur = 30;
-                    ctx.beginPath();
-                    ctx.arc(sun.x, sun.y, r, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.shadowBlur = 0;
-
-                    // HalDo Logo in Sonne
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
-                    ctx.font = 'bold ' + (r * 0.5) + 'px system-ui, sans-serif';
-                    ctx.shadowColor = 'rgba(255,255,255,0.5)';
-                    ctx.shadowBlur = 20;
-                    ctx.fillStyle = '#ffffff';
-                    ctx.fillText('⟡', sun.x, sun.y - r * 0.05);
-                    ctx.shadowBlur = 0;
-
-                    // Planeten
-                    for (var pl = 0; pl < planets.length; pl++) {
-                        var p2 = planets[pl];
-                        p2.angle += p2.speed;
-                        var px = p2.cx + Math.cos(p2.angle) * p2.orbit;
-                        var py = p2.cy + Math.sin(p2.angle) * p2.orbit;
-
-                        ctx.strokeStyle = 'rgba(255,255,255,0.02)';
-                        ctx.lineWidth = 1;
-                        ctx.setLineDash([2, 4]);
-                        ctx.beginPath();
-                        ctx.arc(p2.cx, p2.cy, p2.orbit, 0, Math.PI * 2);
-                        ctx.stroke();
-                        ctx.setLineDash([]);
-
-                        ctx.shadowColor = p2.color;
-                        ctx.shadowBlur = 10;
-                        ctx.fillStyle = p2.color;
-                        ctx.beginPath();
-                        ctx.arc(px, py, p2.r, 0, Math.PI * 2);
-                        ctx.fill();
-                        ctx.shadowBlur = 0;
-
-                        ctx.fillStyle = 'rgba(255,255,255,0.15)';
-                        ctx.font = '6px sans-serif';
-                        ctx.textAlign = 'center';
-                        ctx.textBaseline = 'top';
-                        ctx.fillText(p2.name, px, py + p2.r + 3);
-
-                        if (p2.name === 'Erde') { moon.ex = px;
-                            moon.ey = py; }
-                    }
-
-                    // Mond
-                    if (moon.ex !== undefined) {
-                        moon.angle += moon.speed;
-                        moon.x = moon.ex + Math.cos(moon.angle) * moon.orbit;
-                        moon.y = moon.ey + Math.sin(moon.angle) * moon.orbit;
-
-                        ctx.shadowColor = '#ccc';
-                        ctx.shadowBlur = 8;
-                        ctx.fillStyle = '#ccc';
-                        ctx.beginPath();
-                        ctx.arc(moon.x, moon.y, moon.r, 0, Math.PI * 2);
-                        ctx.fill();
-                        ctx.shadowBlur = 0;
-
-                        ctx.fillStyle = 'rgba(255,255,255,0.1)';
-                        ctx.font = '5px sans-serif';
-                        ctx.textAlign = 'center';
-                        ctx.textBaseline = 'top';
-                        ctx.fillText('🌙', moon.x, moon.y + moon.r + 2);
-                    }
-
-                    // Uhrzeit
-                    var now = new Date();
-                    var hh = String(now.getHours()).padStart(2, '0');
-                    var mm = String(now.getMinutes()).padStart(2, '0');
-                    var ss = String(now.getSeconds()).padStart(2, '0');
-                    ctx.fillStyle = 'rgba(255,255,255,0.1)';
-                    ctx.font = '11px monospace';
-                    ctx.textAlign = 'left';
-                    ctx.textBaseline = 'bottom';
-                    ctx.fillText('🕐 ' + hh + ':' + mm + ':' + ss, 12, H - 60);
-
-                    requestAnimationFrame(animate);
-                }
-
-                animate();
-
-                // Sonne klickbar
-                cosmicCanvas.addEventListener('click', function(e) {
-                    var rect = cosmicCanvas.getBoundingClientRect();
-                    var x = e.clientX - rect.left;
-                    var y = e.clientY - rect.top;
-                    var dx = x - sun.x,
-                        dy = y - sun.y;
-                    if (Math.sqrt(dx * dx + dy * dy) < sun.radius * 1.5) {
-                        launchApp('ai');
-                        notify('☀️ HalDo AI geöffnet!');
-                    }
-                });
-
-                cosmicCanvas.addEventListener('touchstart', function(e) {
-                    var t = e.touches[0];
-                    var rect = cosmicCanvas.getBoundingClientRect();
-                    var x = t.clientX - rect.left;
-                    var y = t.clientY - rect.top;
-                    var dx = x - sun.x,
-                        dy = y - sun.y;
-                    if (Math.sqrt(dx * dx + dy * dy) < sun.radius * 2) {
-                        launchApp('ai');
-                        notify('☀️ HalDo AI geöffnet!');
-                    }
-                }, { passive: true });
-
-                window.addEventListener('resize', function() {
-                    for (var rp = 0; rp < planets.length; rp++) {
-                        planets[rp].cx = W / 2;
-                        planets[rp].cy = H / 2;
-                    }
-                    sun.x = W / 2;
-                    sun.y = H / 2;
-                });
-            }
-
-            // ================================================================
             //  SYSTEM INIT
             // ================================================================
 
@@ -1734,8 +2103,12 @@
                                 state.settings[key] = parsed[key];
                             }
                         }
+                        if (parsed.language) state.language = parsed.language;
                     }
                 } catch (e) {}
+
+                // Voice init
+                voice.init();
 
                 // Cosmic starten
                 initCosmic();
@@ -1771,8 +2144,9 @@
                 });
                 document.getElementById('btn-about').addEventListener('click', function() {
                     notify('⟡ HalDo OS ' + CONFIG.version +
-                        '\n💙❤️🚀 Professional Ultimate Edition\n' + Object.keys(state.apps).length +
-                        ' Apps · Kernel ' + CONFIG.kernel + '\n✅ Groq AI verbunden');
+                        '\n💙❤️🚀 Ultimate Edition\n' + Object.keys(state.apps).length +
+                        ' Apps · Kernel ' + CONFIG.kernel + '\n✅ Groq AI verbunden\n🌍 Sprachen: Deutsch, Englisch, Kurdisch, Êzîdî'
+                        );
                 });
 
                 // Globale API
@@ -1782,16 +2156,19 @@
                     state: state,
                     CONFIG: CONFIG,
                     aiEngine: aiEngine,
+                    voice: voice,
                     get apps() { return state.apps; }
                 };
 
                 // Boot starten
                 bootSequence();
 
-                console.log('⟡ HalDo OS ' + CONFIG.version + ' — Professional Ultimate Edition');
+                console.log('⟡ HalDo OS ' + CONFIG.version + ' — Ultimate Edition');
                 console.log('📱 ' + Object.keys(state.apps).length + ' Apps geladen');
                 console.log('✅ Groq API-Key verbunden');
                 console.log('☀️ Klicke auf die Sonne für HalDo AI');
+                console.log('🌍 Sprachen: Deutsch, Englisch, Kurdisch, Êzîdî');
+                console.log('🎤 Sprachbefehle: "Öffne Mail", "Öffne Chat", "Öffne Einstellungen"');
             }
 
             if (document.readyState === 'loading') {
