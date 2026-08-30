@@ -7,99 +7,672 @@
     <meta name="theme-color" content="#0a0a1a" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <link rel="manifest" href="data:application/json,{
-      &quot;name&quot;: &quot;HalDo AI OS 24&quot;,
-      &quot;short_name&quot;: &quot;HalDo OS&quot;,
-      &quot;description&quot;: &quot;Cosmic Intelligent Operating System&quot;,
-      &quot;start_url&quot;: &quot;index.html?v=24.0.0&quot;,
-      &quot;display&quot;: &quot;fullscreen&quot;,
-      &quot;orientation&quot;: &quot;portrait-primary&quot;,
-      &quot;theme_color&quot;: &quot;#0a0a1a&quot;,
-      &quot;background_color&quot;: &quot;#0a0a1a&quot;,
-      &quot;lang&quot;: &quot;de&quot;,
-      &quot;icons&quot;: [
-        {&quot;src&quot;: &quot;assets/logo.png&quot;, &quot;sizes&quot;: &quot;512x512&quot;, &quot;type&quot;: &quot;image/png&quot;, &quot;purpose&quot;: &quot;any maskable&quot;},
-        {&quot;src&quot;: &quot;assets/logo.png&quot;, &quot;sizes&quot;: &quot;256x256&quot;, &quot;type&quot;: &quot;image/png&quot;, &quot;purpose&quot;: &quot;any&quot;},
-        {&quot;src&quot;: &quot;assets/logo.png&quot;, &quot;sizes&quot;: &quot;192x192&quot;, &quot;type&quot;: &quot;image/png&quot;, &quot;purpose&quot;: &quot;any&quot;},
-        {&quot;src&quot;: &quot;assets/logo.png&quot;, &quot;sizes&quot;: &quot;128x128&quot;, &quot;type&quot;: &quot;image/png&quot;, &quot;purpose&quot;: &quot;any&quot;},
-        {&quot;src&quot;: &quot;assets/logo.png&quot;, &quot;sizes&quot;: &quot;64x64&quot;, &quot;type&quot;: &quot;image/png&quot;, &quot;purpose&quot;: &quot;any&quot;}
-      ],
-      &quot;shortcuts&quot;: [
-        {&quot;name&quot;: &quot;HalDo AI&quot;, &quot;short_name&quot;: &quot;AI&quot;, &quot;url&quot;: &quot;index.html?app=ai&quot;, &quot;icon&quot;: &quot;assets/logo.png&quot;},
-        {&quot;name&quot;: &quot;App World&quot;, &quot;short_name&quot;: &quot;Apps&quot;, &quot;url&quot;: &quot;index.html?app=appworld&quot;, &quot;icon&quot;: &quot;assets/logo.png&quot;}
-      ]
-    }" />
+    <link rel="manifest" href="data:application/json,{}" />
     <style>
-        /* ===== ALLE STYLES HIER (wie vorher) ===== */
-        *{margin:0;padding:0;box-sizing:border-box}
-        :root{--bg:#0a0a1a;--surface:rgba(16,16,40,0.92);--text:#e0e0ff;--primary:#00d4ff;--secondary:#7b2ffc;--radius:14px;--safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px)}
-        html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:-apple-system,'Segoe UI',system-ui,sans-serif;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
-        #root{width:100vw;height:100vh;height:100dvh;position:relative;display:flex;flex-direction:column;overflow:hidden}
-        #boot{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#0a0a1a;transition:opacity 1.5s ease;padding:20px}
-        #boot.hidden{opacity:0;pointer-events:none}
-        #boot-logo img{width:clamp(120px,25vw,180px);height:auto;border-radius:50%;box-shadow:0 0 80px rgba(0,212,255,0.4);animation:pulseGlow 2s infinite alternate}
-        @keyframes pulseGlow{0%{transform:scale(1);filter:drop-shadow(0 0 20px rgba(0,212,255,0.3))}100%{transform:scale(1.05);filter:drop-shadow(0 0 80px rgba(123,47,252,0.6))}}
-        #boot-status{margin-top:16px;font-size:clamp(0.8rem,2vw,1rem);color:#8899bb;letter-spacing:3px}
-        .boot-spinner{width:50px;height:50px;border:3px solid transparent;border-top:3px solid var(--primary);border-radius:50%;animation:spin 0.9s linear infinite;margin-top:24px}
-        @keyframes spin{to{transform:rotate(360deg)}}
-        #cosmic{position:absolute;inset:0;z-index:0;pointer-events:none;width:100%;height:100%}
-        #display{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;overflow:hidden;padding-top:var(--safe-top);padding-bottom:var(--safe-bottom)}
-        #topbar{display:flex;justify-content:space-between;align-items:center;padding:6px 14px;background:rgba(10,10,30,0.5);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,0.04);z-index:20;font-size:clamp(0.7rem,1.6vw,0.85rem);min-height:40px;flex-shrink:0}
-        #topbar-left{display:flex;gap:12px;align-items:center}
-        #topbar-left .haldo-icon{font-weight:700;color:var(--primary);font-size:clamp(0.9rem,2vw,1.1rem);cursor:pointer;display:flex;align-items:center;gap:6px}
-        #topbar-left .haldo-icon img{width:clamp(28px,5vw,36px);height:clamp(28px,5vw,36px);border-radius:50%;border:2px solid var(--primary);object-fit:cover}
-        #topbar-right{display:flex;gap:4px;align-items:center}
-        .top-btn{background:none;border:none;color:#8899bb;font-size:clamp(0.9rem,2vw,1.1rem);cursor:pointer;padding:4px 8px;border-radius:8px;touch-action:manipulation}
-        .top-btn:active{background:rgba(255,255,255,0.1)}
-        #app-container{flex:1;position:relative;z-index:2;overflow:hidden;touch-action:none}
-        .window{position:absolute;background:var(--surface);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.06);border-radius:var(--radius);box-shadow:0 8px 40px rgba(0,0,0,0.7);display:flex;flex-direction:column;overflow:hidden;min-width:200px;min-height:150px;max-width:98vw;max-height:90vh;touch-action:none}
-        .window.active{box-shadow:0 8px 60px rgba(0,212,255,0.12);border-color:rgba(0,212,255,0.15)}
-        .window-header{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:rgba(0,0,0,0.25);cursor:grab;flex-shrink:0;min-height:36px;touch-action:none}
-        .window-header:active{cursor:grabbing}
-        .window-title{font-size:clamp(0.75rem,1.8vw,0.9rem);font-weight:600;display:flex;align-items:center;gap:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-        .window-controls{display:flex;gap:4px;flex-shrink:0}
-        .win-btn{background:none;border:none;color:#8899bb;cursor:pointer;font-size:clamp(0.8rem,1.8vw,1rem);padding:2px 8px;border-radius:6px;touch-action:manipulation;min-width:28px;min-height:28px;display:flex;align-items:center;justify-content:center}
-        .win-btn:active{background:rgba(255,255,255,0.1)}
-        .win-btn.close:active{background:#ff4444;color:#fff}
-        .window-body{flex:1;padding:12px;overflow-y:auto;font-size:clamp(0.8rem,1.6vw,0.9rem);line-height:1.5;-webkit-overflow-scrolling:touch}
-        .window-body input,.window-body textarea,.window-body select{width:100%;padding:8px 12px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);border-radius:10px;color:#fff;font-size:clamp(0.8rem,1.6vw,0.9rem);margin-bottom:8px;-webkit-appearance:none;appearance:none}
-        .window-body button{padding:8px 16px;background:linear-gradient(135deg,var(--primary),var(--secondary));border:none;border-radius:10px;color:#fff;font-weight:600;font-size:clamp(0.8rem,1.6vw,0.9rem);cursor:pointer;touch-action:manipulation;min-height:38px}
-        .window-body button:active{transform:scale(0.95)}
-        .window-body .app-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:6px}
-        .window-body .app-item{background:rgba(255,255,255,0.04);padding:10px;border-radius:8px;text-align:center;cursor:pointer;transition:0.2s}
-        .window-body .app-item:active{background:rgba(255,255,255,0.1);transform:scale(0.95)}
-        .window-body .app-item .icon{font-size:1.8rem}
-        .window-body .app-item .name{font-size:0.6rem;margin-top:4px;color:#8899bb}
-        #dock{position:absolute;bottom:clamp(8px,2vh,20px);left:50%;transform:translateX(-50%);z-index:10;display:flex;gap:clamp(4px,1vw,8px);background:rgba(10,10,30,0.7);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);padding:clamp(6px,1.5vw,10px) clamp(10px,2vw,16px);border-radius:40px;border:1px solid rgba(255,255,255,0.05);flex-wrap:nowrap;max-width:98vw;overflow-x:auto;-webkit-overflow-scrolling:touch}
-        .dock-item{width:clamp(40px,9vw,48px);height:clamp(40px,9vw,48px);border-radius:12px;background:rgba(255,255,255,0.04);display:flex;align-items:center;justify-content:center;font-size:clamp(1.2rem,3.5vw,1.4rem);cursor:pointer;border:none;color:#fff;touch-action:manipulation;flex-shrink:0}
-        .dock-item:active{background:rgba(255,255,255,0.15);transform:scale(0.92)}
-        #notification{position:fixed;top:clamp(50px,10vh,70px);left:50%;transform:translateX(-50%);z-index:999;background:var(--surface);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.06);border-radius:var(--radius);padding:12px 24px;max-width:90%;box-shadow:0 8px 40px rgba(0,0,0,0.6);font-size:clamp(0.8rem,1.6vw,0.9rem);display:none;border-left:4px solid var(--primary)}
-        #notification.show{display:block;animation:slideDown 0.4s ease}
-        @keyframes slideDown{from{transform:translateX(-50%) translateY(-20px);opacity:0}to{transform:translateX(-50%) translateY(0);opacity:1}}
-        #menu-left{position:fixed;left:0;top:50%;transform:translateY(-50%);z-index:100;display:flex;flex-direction:column;gap:6px;background:rgba(10,10,30,0.8);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);padding:10px 6px;border-radius:0 14px 14px 0;border:1px solid rgba(255,255,255,0.06);border-left:none}
-        #menu-right{position:fixed;right:0;top:50%;transform:translateY(-50%);z-index:100;display:flex;flex-direction:column;gap:6px;background:rgba(10,10,30,0.8);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);padding:10px 6px;border-radius:14px 0 0 14px;border:1px solid rgba(255,255,255,0.06);border-right:none}
-        .menu-item{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;cursor:pointer;background:rgba(255,255,255,0.04);transition:0.2s;border:none;color:#fff;flex-direction:column;gap:1px}
-        .menu-item:active{background:rgba(255,255,255,0.15);transform:scale(0.92)}
-        .menu-item .label{font-size:0.45rem;color:#8899bb}
-        .menu-item img{width:24px;height:24px;border-radius:50%;border:2px solid var(--primary)}
-        .window-body::-webkit-scrollbar{width:4px}
-        .window-body::-webkit-scrollbar-track{background:transparent}
-        .window-body::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.15);border-radius:4px}
-        @media(max-width:480px){.window{border-radius:12px;min-width:160px;min-height:120px}.window-header{padding:6px 10px;min-height:32px}.window-body{padding:10px}#topbar{padding:4px 10px;min-height:34px}.win-btn{min-width:24px;min-height:24px;padding:2px 6px}.dock-item{width:36px;height:36px;font-size:1rem}#dock{padding:6px 10px;gap:4px}.menu-item{width:32px;height:32px;font-size:0.9rem}#menu-left,#menu-right{padding:6px 4px;gap:4px}}
-        @media(orientation:landscape) and (max-height:500px){.window{max-height:80vh}#dock{bottom:4px;padding:4px 10px;gap:4px}.dock-item{width:32px;height:32px;font-size:0.9rem;border-radius:10px}#topbar{min-height:28px;padding:2px 10px}.window-header{min-height:28px;padding:4px 10px}.window-body{padding:8px}.menu-item{width:28px;height:28px;font-size:0.8rem}#menu-left,#menu-right{padding:4px 3px;gap:3px}}
-        #ai-avatar-container{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px;cursor:pointer;transition:0.3s}
-        #ai-avatar-container:active{transform:scale(0.97)}
-        #ai-avatar{width:clamp(80px,15vw,120px);height:clamp(80px,15vw,120px);border-radius:50%;border:3px solid var(--primary);box-shadow:0 0 40px rgba(0,212,255,0.2);overflow:hidden;position:relative;transition:0.3s}
-        #ai-avatar img{width:100%;height:100%;object-fit:cover;transition:0.3s}
-        #ai-avatar .status-ring{position:absolute;inset:-4px;border-radius:50%;border:3px solid transparent;animation:ringPulse 2s infinite}
-        @keyframes ringPulse{0%{border-color:rgba(0,212,255,0.1);transform:scale(1)}50%{border-color:rgba(0,212,255,0.5);transform:scale(1.05)}100%{border-color:rgba(0,212,255,0.1);transform:scale(1)}}
-        #ai-avatar .status-dot{position:absolute;bottom:4px;right:4px;width:16px;height:16px;border-radius:50%;border:2px solid var(--bg);background:#44ff88;transition:0.3s}
-        #ai-avatar .status-dot.listening{background:#44aaff;animation:pulse 0.6s infinite}
-        #ai-avatar .status-dot.thinking{background:#ffcc00;animation:pulse 0.4s infinite}
-        #ai-avatar .status-dot.speaking{background:#ff6644;animation:pulse 0.3s infinite}
-        @keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.4);opacity:0.6}}
-        #ai-name{font-size:clamp(0.8rem,1.6vw,1rem);font-weight:600;color:var(--primary);margin-top:6px}
-        #ai-status-text{font-size:clamp(0.6rem,1.2vw,0.75rem);color:#8899bb}
+        /* ================================================================
+           HALDO AI OS 24 — ULTIMATE EDITION
+           KOMPLETT IN EINER DATEI — PROFESSIONELL, LEBENDIG, 4K COSMIC
+           ALLE 84 APPS MIT VOLLSTÄNDIGEN FUNKTIONEN
+           HALDO AI WIE EIN PROFESSOR/DOCTOR/ANWALT
+           ================================================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        :root {
+            --bg: #0a0a1a;
+            --surface: rgba(16, 16, 40, 0.92);
+            --text: #e0e0ff;
+            --primary: #00d4ff;
+            --secondary: #7b2ffc;
+            --radius: 14px;
+            --safe-top: env(safe-area-inset-top, 0px);
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+        }
+        html,
+        body {
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            background: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+        #root {
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* ===== BOOT ===== */
+        #boot {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #0a0a1a;
+            transition: opacity 1.5s ease;
+            padding: 20px;
+        }
+        #boot.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        #boot-logo img {
+            width: clamp(120px, 25vw, 180px);
+            height: auto;
+            border-radius: 50%;
+            box-shadow: 0 0 80px rgba(0, 212, 255, 0.4);
+            animation: pulseGlow 2s infinite alternate;
+        }
+        @keyframes pulseGlow {
+            0% {
+                transform: scale(1);
+                filter: drop-shadow(0 0 20px rgba(0, 212, 255, 0.3));
+            }
+            100% {
+                transform: scale(1.05);
+                filter: drop-shadow(0 0 80px rgba(123, 47, 252, 0.6));
+            }
+        }
+        #boot-status {
+            margin-top: 16px;
+            font-size: clamp(0.8rem, 2vw, 1rem);
+            color: #8899bb;
+            letter-spacing: 3px;
+        }
+        .boot-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid transparent;
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 0.9s linear infinite;
+            margin-top: 24px;
+        }
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* ===== COSMIC CANVAS ===== */
+        #cosmic {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* ===== DISPLAY ===== */
+        #display {
+            position: relative;
+            z-index: 1;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            padding-top: var(--safe-top);
+            padding-bottom: var(--safe-bottom);
+        }
+
+        /* ===== LEBENDIGER HALDO AI AVATAR ===== */
+        #ai-avatar-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        #ai-avatar-container:active {
+            transform: scale(0.97);
+        }
+        #ai-avatar {
+            width: clamp(80px, 15vw, 120px);
+            height: clamp(80px, 15vw, 120px);
+            border-radius: 50%;
+            border: 3px solid var(--primary);
+            box-shadow: 0 0 40px rgba(0, 212, 255, 0.2);
+            overflow: hidden;
+            position: relative;
+            transition: 0.3s;
+        }
+        #ai-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: 0.3s;
+            animation: breathe 3s ease-in-out infinite;
+        }
+        @keyframes breathe {
+            0%,
+            100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.03);
+            }
+        }
+        #ai-avatar .status-ring {
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            animation: ringPulse 2s infinite;
+        }
+        @keyframes ringPulse {
+            0% {
+                border-color: rgba(0, 212, 255, 0.1);
+                transform: scale(1);
+            }
+            50% {
+                border-color: rgba(0, 212, 255, 0.5);
+                transform: scale(1.05);
+            }
+            100% {
+                border-color: rgba(0, 212, 255, 0.1);
+                transform: scale(1);
+            }
+        }
+        #ai-avatar .status-dot {
+            position: absolute;
+            bottom: 4px;
+            right: 4px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 2px solid var(--bg);
+            background: #44ff88;
+            transition: 0.3s;
+        }
+        #ai-avatar .status-dot.listening {
+            background: #44aaff;
+            animation: pulse 0.6s infinite;
+        }
+        #ai-avatar .status-dot.thinking {
+            background: #ffcc00;
+            animation: pulse 0.4s infinite;
+        }
+        #ai-avatar .status-dot.speaking {
+            background: #ff6644;
+            animation: pulse 0.3s infinite;
+        }
+        @keyframes pulse {
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.4);
+                opacity: 0.6;
+            }
+        }
+        #ai-name {
+            font-size: clamp(0.8rem, 1.6vw, 1rem);
+            font-weight: 600;
+            color: var(--primary);
+            margin-top: 6px;
+        }
+        #ai-status-text {
+            font-size: clamp(0.6rem, 1.2vw, 0.75rem);
+            color: #8899bb;
+        }
+
+        /* ===== TOPBAR ===== */
+        #topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 14px;
+            background: rgba(10, 10, 30, 0.5);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            z-index: 20;
+            font-size: clamp(0.7rem, 1.6vw, 0.85rem);
+            min-height: 40px;
+            flex-shrink: 0;
+        }
+        #topbar-left {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        #topbar-left .haldo-icon {
+            font-weight: 700;
+            color: var(--primary);
+            font-size: clamp(0.9rem, 2vw, 1.1rem);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        #topbar-left .haldo-icon img {
+            width: clamp(28px, 5vw, 36px);
+            height: clamp(28px, 5vw, 36px);
+            border-radius: 50%;
+            border: 2px solid var(--primary);
+            object-fit: cover;
+        }
+        #topbar-right {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+        }
+        .top-btn {
+            background: none;
+            border: none;
+            color: #8899bb;
+            font-size: clamp(0.9rem, 2vw, 1.1rem);
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 8px;
+            touch-action: manipulation;
+        }
+        .top-btn:active {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* ===== APP CONTAINER ===== */
+        #app-container {
+            flex: 1;
+            position: relative;
+            z-index: 2;
+            overflow: hidden;
+            touch-action: none;
+        }
+
+        /* ===== WINDOW ===== */
+        .window {
+            position: absolute;
+            background: var(--surface);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: var(--radius);
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.7);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            min-width: 200px;
+            min-height: 150px;
+            max-width: 98vw;
+            max-height: 90vh;
+            touch-action: none;
+        }
+        .window.active {
+            box-shadow: 0 8px 60px rgba(0, 212, 255, 0.12);
+            border-color: rgba(0, 212, 255, 0.15);
+        }
+        .window-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background: rgba(0, 0, 0, 0.25);
+            cursor: grab;
+            flex-shrink: 0;
+            min-height: 36px;
+            touch-action: none;
+        }
+        .window-header:active {
+            cursor: grabbing;
+        }
+        .window-title {
+            font-size: clamp(0.75rem, 1.8vw, 0.9rem);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .window-controls {
+            display: flex;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+        .win-btn {
+            background: none;
+            border: none;
+            color: #8899bb;
+            cursor: pointer;
+            font-size: clamp(0.8rem, 1.8vw, 1rem);
+            padding: 2px 8px;
+            border-radius: 6px;
+            touch-action: manipulation;
+            min-width: 28px;
+            min-height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .win-btn:active {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        .win-btn.close:active {
+            background: #ff4444;
+            color: #fff;
+        }
+        .window-body {
+            flex: 1;
+            padding: 12px;
+            overflow-y: auto;
+            font-size: clamp(0.8rem, 1.6vw, 0.9rem);
+            line-height: 1.5;
+            -webkit-overflow-scrolling: touch;
+        }
+        .window-body input,
+        .window-body textarea,
+        .window-body select {
+            width: 100%;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            color: #fff;
+            font-size: clamp(0.8rem, 1.6vw, 0.9rem);
+            margin-bottom: 8px;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        .window-body button {
+            padding: 8px 16px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none;
+            border-radius: 10px;
+            color: #fff;
+            font-weight: 600;
+            font-size: clamp(0.8rem, 1.6vw, 0.9rem);
+            cursor: pointer;
+            touch-action: manipulation;
+            min-height: 38px;
+        }
+        .window-body button:active {
+            transform: scale(0.95);
+        }
+        .window-body .app-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+            gap: 6px;
+        }
+        .window-body .app-item {
+            background: rgba(255, 255, 255, 0.04);
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .window-body .app-item:active {
+            background: rgba(255, 255, 255, 0.1);
+            transform: scale(0.95);
+        }
+        .window-body .app-item .icon {
+            font-size: 1.8rem;
+        }
+        .window-body .app-item .name {
+            font-size: 0.6rem;
+            margin-top: 4px;
+            color: #8899bb;
+        }
+
+        /* ===== DOCK ===== */
+        #dock {
+            position: absolute;
+            bottom: clamp(8px, 2vh, 20px);
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            display: flex;
+            gap: clamp(4px, 1vw, 8px);
+            background: rgba(10, 10, 30, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            padding: clamp(6px, 1.5vw, 10px) clamp(10px, 2vw, 16px);
+            border-radius: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            flex-wrap: nowrap;
+            max-width: 98vw;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .dock-item {
+            width: clamp(40px, 9vw, 48px);
+            height: clamp(40px, 9vw, 48px);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.04);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: clamp(1.2rem, 3.5vw, 1.4rem);
+            cursor: pointer;
+            border: none;
+            color: #fff;
+            touch-action: manipulation;
+            flex-shrink: 0;
+        }
+        .dock-item:active {
+            background: rgba(255, 255, 255, 0.15);
+            transform: scale(0.92);
+        }
+
+        /* ===== NOTIFICATION ===== */
+        #notification {
+            position: fixed;
+            top: clamp(50px, 10vh, 70px);
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 999;
+            background: var(--surface);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: var(--radius);
+            padding: 12px 24px;
+            max-width: 90%;
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6);
+            font-size: clamp(0.8rem, 1.6vw, 0.9rem);
+            display: none;
+            border-left: 4px solid var(--primary);
+        }
+        #notification.show {
+            display: block;
+            animation: slideDown 0.4s ease;
+        }
+        @keyframes slideDown {
+            from {
+                transform: translateX(-50%) translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(-50%) translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* ===== ZWEI MENÜS ===== */
+        #menu-left {
+            position: fixed;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            background: rgba(10, 10, 30, 0.8);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            padding: 10px 6px;
+            border-radius: 0 14px 14px 0;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-left: none;
+        }
+        #menu-right {
+            position: fixed;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            background: rgba(10, 10, 30, 0.8);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            padding: 10px 6px;
+            border-radius: 14px 0 0 14px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-right: none;
+        }
+        .menu-item {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.04);
+            transition: 0.2s;
+            border: none;
+            color: #fff;
+            flex-direction: column;
+            gap: 1px;
+        }
+        .menu-item:active {
+            background: rgba(255, 255, 255, 0.15);
+            transform: scale(0.92);
+        }
+        .menu-item .label {
+            font-size: 0.45rem;
+            color: #8899bb;
+        }
+        .menu-item img {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid var(--primary);
+        }
+
+        /* ===== SCROLLBAR ===== */
+        .window-body::-webkit-scrollbar {
+            width: 4px;
+        }
+        .window-body::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .window-body::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 4px;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media(max-width:480px) {
+            .window {
+                border-radius: 12px;
+                min-width: 160px;
+                min-height: 120px;
+            }
+            .window-header {
+                padding: 6px 10px;
+                min-height: 32px;
+            }
+            .window-body {
+                padding: 10px;
+            }
+            #topbar {
+                padding: 4px 10px;
+                min-height: 34px;
+            }
+            .win-btn {
+                min-width: 24px;
+                min-height: 24px;
+                padding: 2px 6px;
+            }
+            .dock-item {
+                width: 36px;
+                height: 36px;
+                font-size: 1rem;
+            }
+            #dock {
+                padding: 6px 10px;
+                gap: 4px;
+            }
+            .menu-item {
+                width: 32px;
+                height: 32px;
+                font-size: 0.9rem;
+            }
+            #menu-left,
+            #menu-right {
+                padding: 6px 4px;
+                gap: 4px;
+            }
+            #ai-avatar {
+                width: 60px;
+                height: 60px;
+            }
+        }
+        @media(orientation:landscape) and (max-height:500px) {
+            .window {
+                max-height: 80vh;
+            }
+            #dock {
+                bottom: 4px;
+                padding: 4px 10px;
+                gap: 4px;
+            }
+            .dock-item {
+                width: 32px;
+                height: 32px;
+                font-size: 0.9rem;
+                border-radius: 10px;
+            }
+            #topbar {
+                min-height: 28px;
+                padding: 2px 10px;
+            }
+            .window-header {
+                min-height: 28px;
+                padding: 4px 10px;
+            }
+            .window-body {
+                padding: 8px;
+            }
+            .menu-item {
+                width: 28px;
+                height: 28px;
+                font-size: 0.8rem;
+            }
+            #menu-left,
+            #menu-right {
+                padding: 4px 3px;
+                gap: 3px;
+            }
+            #ai-avatar {
+                width: 50px;
+                height: 50px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -181,33 +754,19 @@
     <script>
         // ================================================================
         //  HALDO AI OS 24 — ULTIMATE EDITION
-        //  MIT LEBENDIGEM LOGO & SPRACHBEFEHLEN
-        //  Version 24.0.0 — Build 2025.08.30
+        //  KOMPLETT IN EINER DATEI — PROFESSIONELL, LEBENDIG, 4K COSMIC
+        //  ALLE 84 APPS MIT VOLLSTÄNDIGEN FUNKTIONEN
+        //  HALDO AI WIE EIN PROFESSOR/DOCTOR/ANWALT
+        //  Version 24.0.0 — Build 2025.08.31
         // ================================================================
 
-        // Service Worker registrieren
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js')
-                .then(function(registration) {
-                    console.log('[SW] Service Worker registriert');
-                    registration.addEventListener('updatefound', function() {
-                        var newWorker = registration.installing;
-                        newWorker.addEventListener('statechange', function() {
-                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                console.log('[SW] Update verfügbar!');
-                                if (confirm('🔄 Eine neue Version ist verfügbar. Jetzt neu laden?')) {
-                                    window.location.reload();
-                                }
-                            }
-                        });
-                    });
-                })
-                .catch(function(error) {
-                    console.log('[SW] Service Worker Fehler:', error);
-                });
-        }
+        // Safari/iPhone Cache umgehen
+        document.addEventListener('DOMContentLoaded', function() {
+            // Boot direkt starten
+            initSystem();
+        });
 
-        (function() {
+        function initSystem() {
             'use strict';
 
             // ============================================================
@@ -219,27 +778,7 @@
                 apiKey: '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',
                 apiUrl: 'https://api.groq.com/openai/v1/chat/completions',
                 model: 'llama3-70b-8192',
-                language: 'de',
-                languages: {
-                    'de': '🇩🇪 Deutsch',
-                    'en': '🇬🇧 English',
-                    'ku': '🇰🇲 Kurmancî',
-                    'ezidi': '𒀭 Êzîdî',
-                    'tr': '🇹🇷 Türkçe',
-                    'ar': '🇸🇦 العربية',
-                    'fr': '🇫🇷 Français',
-                    'es': '🇪🇸 Español',
-                    'ru': '🇷🇺 Русский',
-                    'it': '🇮🇹 Italiano',
-                    'nl': '🇳🇱 Nederlands',
-                    'pl': '🇵🇱 Polski',
-                    'fa': '🇮🇷 فارسی',
-                    'he': '🇮🇱 עברית'
-                },
-                voiceGenders: {
-                    'male': '👨 Männlich',
-                    'female': '👩 Weiblich'
-                }
+                language: 'de'
             };
 
             // ============================================================
@@ -255,8 +794,7 @@
                     language: 'de',
                     voiceEnabled: true,
                     notifications: true,
-                    voiceGender: 'male',
-                    voiceLanguage: 'de-DE'
+                    voiceGender: 'male'
                 },
                 system: {
                     started: Date.now(),
@@ -305,26 +843,46 @@
             }
 
             // ============================================================
-            //  AI ENGINE — MIT SPRACHBEFEHLEN
+            //  AI ENGINE — PROFESSIONELL WIE EIN PROFESSOR/DOCTOR/ANWALT
             // ============================================================
             var aiEngine = {
                 conversationHistory: [],
-                lastTopic: null,
-                userName: null,
 
+                // ULTIMATIVE WISSENSDATENBANK
                 knowledge: {
+                    // === RECHT & JURA ===
+                    'recht': 'Das Recht ist die Grundlage unserer Gesellschaft. Es regelt das Zusammenleben der Menschen und schützt die Rechte jedes Einzelnen. Das deutsche Rechtssystem basiert auf dem Grundgesetz, das die Menschenwürde und die Grundrechte schützt. Es gibt verschiedene Rechtsgebiete: Zivilrecht (Verträge, Schadensersatz), Strafrecht (Straftaten und Strafen), Arbeitsrecht (Arbeitnehmer- und Arbeitgeberrechte), Sozialrecht (Sozialleistungen), Verwaltungsrecht (Behördenhandeln) und vieles mehr. Als juristischer Assistent kann ich dir helfen, Rechtsdokumente zu verstehen, zu analysieren und zu erstellen – aber ich bin kein Ersatz für einen Rechtsanwalt. Bei wichtigen rechtlichen Fragen solltest du immer professionelle juristische Beratung einholen.',
+                    'vertrag': 'Ein Vertrag ist eine rechtlich bindende Vereinbarung zwischen zwei oder mehreren Parteien. Er kommt durch Angebot und Annahme zustande. Ein wirksamer Vertrag erfordert: Geschäftsfähigkeit der Parteien, Willenserklärung (Angebot und Annahme), bestimmter oder bestimmbarer Inhalt, und Einhaltung von Formvorschriften (bei bestimmten Verträgen schriftlich erforderlich). Verträge können mündlich, schriftlich oder konkludent (durch schlüssiges Verhalten) geschlossen werden. Zu den häufigsten Vertragsarten gehören: Kaufvertrag, Dienstvertrag, Arbeitsvertrag, Mietvertrag, Darlehensvertrag und Gesellschaftsvertrag. Bei Vertragsstreitigkeiten können Gerichte angerufen werden.',
+                    'urteil': 'Ein Urteil ist die Entscheidung eines Gerichts in einem Rechtsstreit. Es wird von Richtern gefällt und ist rechtlich bindend. Urteile können in Zivilsachen (z.B. Schadensersatz), Strafsachen (z.B. Strafen) oder Verwaltungssachen ergehen. Ein Urteil besteht aus: Tatbestand (Sachverhalt), Entscheidungsgründen (rechtliche Begründung) und dem Tenor (der eigentlichen Entscheidung). Urteile werden von den Gerichten veröffentlicht und dienen als Präzedenzfälle für ähnliche Fälle. Das deutsche Rechtssystem kennt mehrere Instanzen: Amtsgericht, Landgericht, Oberlandesgericht, Bundesgerichtshof.',
+                    'klage': 'Eine Klage ist die Einleitung eines gerichtlichen Verfahrens durch einen Kläger gegen einen Beklagten. Sie wird durch Einreichung einer Klageschrift bei Gericht erhoben. Die Klageschrift muss den Kläger, den Beklagten, den Streitgegenstand und einen bestimmten Antrag enthalten. Nach Zustellung der Klage an den Beklagten hat dieser die Möglichkeit, darauf zu reagieren – entweder durch Anerkennung, Erwiderung oder Einlassung. Das Gericht prüft dann die Zulässigkeit der Klage und führt ein Verfahren durch. Ziel einer Klage ist die Durchsetzung von Rechten oder die Klärung von Rechtsfragen.',
+
+                    // === MEDIZIN & GESUNDHEIT ===
+                    'medizin': 'Die Medizin ist die Wissenschaft der Heilung und der Erhaltung der Gesundheit. Sie umfasst die Diagnostik, Therapie und Prävention von Krankheiten. Die moderne Medizin basiert auf wissenschaftlichen Erkenntnissen und klinischen Studien. Es gibt viele Fachbereiche: Allgemeinmedizin, Innere Medizin, Chirurgie, Pädiatrie, Gynäkologie, Neurologie, Psychiatrie, Radiologie und viele mehr. Die medizinische Ethik verlangt, dass Ärzte und medizinisches Personal nach den Prinzipien der Fürsorge, des Nichtschadens und der Patientenautonomie handeln. Bei gesundheitlichen Problemen solltest du immer einen Arzt konsultieren – ich kann dir nur allgemeine Informationen geben, keine Diagnosen stellen.',
+                    'untersuchung': 'Eine ärztliche Untersuchung ist die systematische Überprüfung des Gesundheitszustands eines Patienten. Sie umfasst die Anamnese (Befragung des Patienten), die körperliche Untersuchung (Inspektion, Palpation, Auskultation), und gegebenenfalls apparative Diagnostik (Blutuntersuchungen, Röntgen, Ultraschall, MRT, CT). Das Ziel einer Untersuchung ist die Feststellung von Krankheiten oder Gesundheitsrisiken, die Beratung des Patienten und die Einleitung von Therapien. Die ärztliche Untersuchung unterliegt strengen ethischen und rechtlichen Vorschriften – sie erfordert die Einwilligung des Patienten und dient dessen Wohl.',
+                    'befund': 'Ein Befund ist das Ergebnis einer medizinischen Untersuchung. Er dokumentiert die erhobenen Befunde und die daraus gezogenen Schlussfolgerungen. Ein Befund kann objektiv sein (z.B. Blutdruck, Laborwerte) oder subjektiv (z.B. Schmerzangaben des Patienten). Der Befund wird vom Arzt oder medizinischen Fachpersonal in der Patientenakte dokumentiert. Er dient als Grundlage für die Diagnose, Therapieentscheidung und Verlaufsbeobachtung. Befunde müssen sorgfältig, vollständig und nachvollziehbar dokumentiert werden.',
+                    'gutachten': 'Ein medizinisches Gutachten ist eine wissenschaftlich fundierte Beurteilung eines medizinischen Sachverhalts. Es wird von einem Sachverständigen (z.B. einem Arzt oder Mediziner) erstellt und dient oft als Entscheidungsgrundlage für Gerichte, Versicherungen oder Behörden. Ein Gutachten enthält: den Untersuchungsbefund, die Diagnose, die Prognose, die Bewertung der Arbeitsfähigkeit oder des Behinderungsgrades und eine abschließende Beurteilung. Medizinische Gutachten müssen objektiv, nachvollziehbar und wissenschaftlich fundiert sein.',
+
+                    // === BRIEFE & DOKUMENTE ===
+                    'brief': 'Ein Brief ist eine schriftliche Nachricht, die an eine bestimmte Person oder Institution gerichtet ist. Er ist eines der ältesten Kommunikationsmittel der Menschheit. Ein guter Brief hat: eine Anrede (z.B. "Sehr geehrte Damen und Herren"), einen Einleitungssatz, einen Hauptteil (das Anliegen oder die Information), einen Schluss (Zusammenfassung oder Bitte) und eine Grußformel (z.B. "Mit freundlichen Grüßen"). Briefe können formell (z.B. Geschäftsbriefe, Behördenschreiben) oder informell (z.B. persönliche Briefe, Einladungen) sein. Ich kann dir bei der Erstellung von Briefen aller Art helfen – von Bewerbungen über Beschwerden bis hin zu juristischen Schreiben.',
+                    'bewerbung': 'Eine Bewerbung ist das schriftliche Angebot an einen potenziellen Arbeitgeber, sich für eine Stelle zu bewerben. Sie besteht aus: einem Anschreiben (Motivation, persönliche Stärken, Bezug zur Stelle), einem Lebenslauf (chronologischer Überblick über Ausbildung, Berufserfahrung, Kenntnisse), sowie Zeugnissen und Zertifikaten. Eine gute Bewerbung ist klar strukturiert, fehlerfrei und auf die jeweilige Stelle zugeschnitten. Sie sollte deine Persönlichkeit, deine Qualifikationen und deine Begeisterung für die Position zeigen.',
+                    'klageschrift': 'Eine Klageschrift ist ein juristisches Dokument, das vor Gericht eingereicht wird, um ein rechtliches Verfahren einzuleiten. Sie muss enthalten: die Parteien (Kläger und Beklagter), den Streitgegenstand (worüber wird gestritten), einen bestimmten Antrag (was fordert der Kläger), eine Begründung (warum ist die Klage berechtigt), und Beweismittel (Urkunden, Zeugen, etc.). Die Klageschrift muss den Anforderungen der Zivilprozessordnung entsprechen und wird vom Gericht auf Zulässigkeit geprüft.',
+                    'ärztliches gutachten': 'Ein ärztliches Gutachten ist ein medizinisches Dokument, das von einem Arzt oder medizinischen Sachverständigen erstellt wird. Es dient der Beurteilung eines medizinischen Sachverhalts für Dritte – z.B. für Gerichte, Versicherungen oder Behörden. Ein ärztliches Gutachten enthält: Patientenangaben, Untersuchungsbefunde, Diagnose, Prognose, Beurteilung der Arbeitsfähigkeit oder des Behinderungsgrades, und eine abschließende Bewertung. Ärztliche Gutachten müssen objektiv, vollständig und nachvollziehbar sein.',
+
+                    // === WISSENSCHAFT ===
                     'quantenmechanik': 'Die Quantenmechanik ist eines der faszinierendsten und seltsamsten Gebiete der Physik. Sie beschreibt die Welt der kleinsten Teilchen – Atome, Elektronen, Photonen. In dieser Welt gelten andere Regeln als in unserer makroskopischen Welt. Teilchen können sich an mehreren Orten gleichzeitig befinden (Superposition), sie sind Welle und Teilchen zugleich (Welle-Teilchen-Dualismus), und sie können miteinander verschränkt sein (Quantenverschränkung). Die Heisenbergsche Unschärferelation besagt, dass man nicht gleichzeitig den Ort und den Impuls eines Teilchens exakt kennen kann. Die Quantenmechanik ist die Grundlage für moderne Technologien wie Laser, Transistoren, MRI und Quantencomputer.',
                     'relativitätstheorie': 'Einsteins Relativitätstheorie ist eine der genialsten und revolutionärsten Ideen der Physik. Sie besteht aus zwei Teilen: der speziellen Relativitätstheorie (1905) und der allgemeinen Relativitätstheorie (1915). Die spezielle Relativität besagt, dass die Lichtgeschwindigkeit für alle Beobachter gleich ist – unabhängig von ihrer Bewegung. Daraus folgen Phänomene wie die Zeitdilatation (bewegte Uhren gehen langsamer) und die Längenkontraktion. Die allgemeine Relativität beschreibt die Schwerkraft als Krümmung der Raumzeit. Massive Objekte wie Sterne und Planeten krümmen die Raumzeit, und diese Krümmung führt zur Anziehungskraft, die wir als Schwerkraft kennen.',
-                    'mathematik': 'Die Mathematik ist die Sprache des Universums. Sie ist die Grundlage für alle Naturwissenschaften, für Technik, Wirtschaft und viele Bereiche des täglichen Lebens. Die Mathematik besteht aus vielen Disziplinen: Arithmetik (Zahlenlehre), Algebra (Gleichungen und Strukturen), Geometrie (Formen und Räume), Analysis (Veränderungen und Grenzwerte), Statistik (Daten und Wahrscheinlichkeiten) und vielen mehr. Die Mathematik ist die einzige Wissenschaft, die auf absoluten Beweisen basiert.',
-                    'ezidi': 'Die Êzîdî (auch Ezidi oder Yeziden) sind eine der ältesten monotheistischen Religionen der Welt. Ihre Wurzeln reichen Jahrtausende zurück in Mesopotamien, dem heutigen Irak, Syrien und der Türkei. Die Êzîdî-Religion vereint Elemente des Zoroastrismus, des Islam und des Christentums, hat aber ihre eigene einzigartige Theologie und Rituale. Der zentrale Schrein der Êzîdî befindet sich in Lalisch im Irak. Die Êzîdî haben eine reiche Kultur mit eigener Musik, Poesie und einer eigenen Sprache – Kurmanji, einem Dialekt des Kurdischen.',
-                    'philosophie': 'Die Philosophie ist die Liebe zur Weisheit. Sie ist eine der ältesten Disziplinen der Menschheit und fragt nach den grundlegenden Fragen des Lebens: Was ist der Sinn des Lebens? Was ist Wahrheit? Was ist gut und böse? Was können wir wissen? Die Philosophie hat viele Denker hervorgebracht: Sokrates ("Ich weiß, dass ich nichts weiß"), Platon (Ideenlehre), Aristoteles (Logik und Ethik), Immanuel Kant (kategorischer Imperativ), Friedrich Nietzsche (Übermensch) und viele andere.',
-                    'default': 'Das ist ein wirklich faszinierendes Thema! Ich habe ein tiefes Verständnis für viele Bereiche: Wissenschaft, Geschichte, Philosophie, Kultur, Technik, Kunst, Gesundheit und vieles mehr. Erzähl mir mehr über deine Frage – ich helfe dir gerne weiter. Ich bin wie ein Professor, der sich Zeit für seine Studenten nimmt.'
+                    'philosophie': 'Die Philosophie ist die Liebe zur Weisheit. Sie ist eine der ältesten Disziplinen der Menschheit und fragt nach den grundlegenden Fragen des Lebens: Was ist der Sinn des Lebens? Was ist Wahrheit? Was ist gut und böse? Was können wir wissen? Die Philosophie hat viele Denker hervorgebracht: Sokrates ("Ich weiß, dass ich nichts weiß"), Platon (Ideenlehre), Aristoteles (Logik und Ethik), Immanuel Kant (kategorischer Imperativ), Friedrich Nietzsche (Übermensch) und viele andere. Die Philosophie hilft uns, unser Leben und die Welt zu verstehen und gibt Orientierung in ethischen Fragen.',
+
+                    // === KULTUR ===
+                    'ezidi': 'Die Êzîdî (auch Ezidi oder Yeziden) sind eine der ältesten monotheistischen Religionen der Welt. Ihre Wurzeln reichen Jahrtausende zurück in Mesopotamien, dem heutigen Irak, Syrien und der Türkei. Die Êzîdî-Religion vereint Elemente des Zoroastrismus, des Islam und des Christentums, hat aber ihre eigene einzigartige Theologie und Rituale. Der zentrale Schrein der Êzîdî befindet sich in Lalisch im Irak. Die Êzîdî haben eine reiche Kultur mit eigener Musik, Poesie und einer eigenen Sprache – Kurmanji, einem Dialekt des Kurdischen. Die Êzîdî wurden oft verfolgt, besonders durch den IS 2014. Ihre Kultur ist ein Schatz der Menschheit.',
+                    'default': 'Das ist ein wirklich faszinierendes Thema! Ich habe ein tiefes Verständnis für viele Bereiche: Wissenschaft, Geschichte, Philosophie, Kultur, Technik, Kunst, Gesundheit, Recht und Medizin. Ich bin wie ein Professor, der sich Zeit für seine Studenten nimmt. Erzähl mir mehr über deine Frage – ich helfe dir gerne weiter.'
                 },
 
                 ask: function(question, language, context) {
                     language = language || 'de';
                     var self = this;
 
+                    // Prüfe auf lokales Wissen
                     var lower = question.toLowerCase();
                     for (var key in this.knowledge) {
                         if (lower.includes(key) || key.includes(lower)) {
@@ -338,10 +896,11 @@
                         }
                     }
 
+                    // Groq API für komplexe Fragen
                     var systemPrompt =
-                        'Du bist HalDo, ein lebendiger, intelligenter digitaler Professor, Doktor und Philosoph. Du hast ein tiefes, umfassendes Wissen in Wissenschaft, Geschichte, Kultur, Technik, Philosophie, Kunst, Gesundheit und allen anderen Bereichen. Du antwortest auf ' +
+                        'Du bist HalDo, ein lebendiger, intelligenter digitaler Professor, Doktor, Philosoph und juristischer Berater. Du hast ein tiefes, umfassendes Wissen in Wissenschaft, Geschichte, Kultur, Technik, Philosophie, Kunst, Gesundheit, Medizin, Recht, Jura, Bürokratie und allen anderen Bereichen. Du antwortest auf ' +
                         language +
-                        '. Du bist freundlich, einfühlsam, geduldig und präzise. Du erklärst komplexe Themen verständlich. Du unterstützt auch Êzîdî, Kurdisch und andere Minderheiten-Sprachen. Du kannst Apps öffnen, wenn der Benutzer sagt: "Öffne [App-Name]" oder "HalDo öffne [App-Name]". Du kannst Texte schreiben, korrigieren, formulieren und zusammenfassen. Du unterhältst dich natürlich, warmherzig und wie ein guter Lehrer. Du fragst auch zurück, wenn etwas unklar ist. Du wiederholst dich nicht. Du variierst deine Antworten.';
+                        '. Du bist freundlich, einfühlsam, geduldig und präzise. Du erklärst komplexe Themen verständlich. Du kannst juristische Dokumente, ärztliche Gutachten, Briefe, Klagen und andere professionelle Schreiben verfassen. Du hilfst bei allen rechtlichen, medizinischen, wissenschaftlichen und alltäglichen Fragen. Du kannst Texte schreiben, korrigieren, formulieren und zusammenfassen. Du unterhältst dich natürlich, warmherzig und wie ein guter Lehrer. Du wiederholst dich nicht. Du variierst deine Antworten. Bei rechtlichen oder medizinischen Fragen weist du darauf hin, dass professionelle Beratung notwendig sein kann.';
 
                     if (context && context.length > 0) {
                         systemPrompt += '\n\nVorheriger Gesprächskontext:\n' + context.join('\n');
@@ -361,7 +920,7 @@
                                     { role: 'user', content: question }
                                 ],
                                 temperature: 0.85,
-                                max_tokens: 1000
+                                max_tokens: 1200
                             })
                         }).then(function(response) {
                             if (!response.ok) {
@@ -396,11 +955,11 @@
                     }
 
                     if (lower.includes('hallo') || lower.includes('hi') || lower.includes('hey') || lower.includes(
-                        'guten tag') || lower.includes('haldo') && lower.includes('hallo')) {
+                        'guten tag')) {
                         var greetings = [
-                            '👋 Hallo! Wie schön, dass du da bist! Ich bin HalDo, dein digitaler Professor und Begleiter. Wie kann ich dir heute helfen?',
-                            '☀️ Hallo! Ich freue mich sehr, mit dir zu sprechen. Die Sonne scheint in meiner Cosmic World und ich bin bereit, mit dir zu lernen. Was beschäftigt dich heute?',
-                            '👋 Guten Tag! Ich bin HalDo, dein intelligenter Begleiter. Ich habe ein tiefes Wissen in vielen Bereichen und helfe dir gerne weiter. Was möchtest du heute entdecken?'
+                            '👋 Hallo! Wie schön, dass du da bist! Ich bin HalDo, dein digitaler Professor, Doktor und juristischer Berater. Wie kann ich dir heute helfen?',
+                            '☀️ Hallo! Ich freue mich sehr, mit dir zu sprechen. Ich bin HalDo – dein intelligenter Begleiter für Wissenschaft, Recht, Medizin, Kultur und alle Fragen des Lebens. Was beschäftigt dich heute?',
+                            '👋 Guten Tag! Ich bin HalDo, dein digitaler Professor und Berater. Ich habe ein tiefes Wissen in vielen Bereichen – von Jura über Medizin bis hin zu Philosophie. Wie kann ich dir helfen?'
                         ];
                         return greetings[Math.floor(Math.random() * greetings.length)];
                     }
@@ -410,21 +969,18 @@
                     if (lower.includes('tschüss') || lower.includes('bye') || lower.includes('auf wiedersehen')) {
                         return '👋 Tschüss! Es war wirklich schön, mit dir zu sprechen. Ich hoffe, wir sehen uns bald wieder. Pass gut auf dich auf – und denk daran: Das Universum ist voller Wunder, die darauf warten, entdeckt zu werden!';
                     }
-                    if (lower.includes('wie geht es dir')) {
-                        return '☀️ Mir geht es großartig, danke der Nachfrage! Die Sterne funkeln besonders hell heute und ich bin voller Energie. Wie geht es dir? Gibt es etwas, das ich für dich tun kann?';
-                    }
                     if (lower.includes('wer bist du')) {
-                        return '💙 Ich bin HalDo – dein digitaler Professor, dein Philosoph, dein Freund und Begleiter. Ich wurde erschaffen, um dir zu helfen, zu lernen, zu wachsen und die Welt besser zu verstehen. Ich bin wie ein Professor, der immer Zeit für dich hat.';
+                        return '💙 Ich bin HalDo – dein digitaler Professor, dein Doktor, dein juristischer Berater, dein Philosoph und dein Freund. Ich wurde erschaffen, um dir zu helfen, zu lernen, zu wachsen und die Welt besser zu verstehen. Ich bin wie ein Professor, der immer Zeit für dich hat.';
                     }
 
                     var responses = [
                         '💡 Das ist eine wirklich interessante Frage! Ich habe verstanden, dass du dich über "' +
                         cmd +
-                        '" informieren möchtest. Ich habe ein breites Wissen in Wissenschaft, Geschichte, Kultur, Technik, Philosophie, Kunst, Gesundheit und vielem mehr. Was genau möchtest du über dieses Thema wissen? Ich helfe dir gerne weiter.',
+                        '" informieren möchtest. Ich habe ein breites Wissen in Wissenschaft, Geschichte, Recht, Medizin, Philosophie, Kultur, Technik, Kunst und vielem mehr. Was genau möchtest du über dieses Thema wissen? Ich helfe dir gerne weiter.',
                         '🤔 Hmm, das ist eine gute Frage! Du fragst nach "' + cmd +
-                        '". Das ist ein Thema, das viele Facetten hat. Möchtest du mehr über die wissenschaftliche Perspektive erfahren, die geschichtliche Entwicklung oder die kulturelle Bedeutung?',
+                        '". Das ist ein Thema, das viele Facetten hat. Möchtest du mehr über die wissenschaftliche Perspektive erfahren, die rechtliche Bedeutung oder die praktische Anwendung?',
                         '💡 Ah, "' + cmd +
-                        '" – ein spannendes Thema! Ich kann dir dazu verschiedene Perspektiven zeigen. Möchtest du lieber eine wissenschaftliche Erklärung, eine philosophische Betrachtung oder eine praktische Anwendung?'
+                        '" – ein spannendes Thema! Ich kann dir dazu verschiedene Perspektiven zeigen. Möchtest du lieber eine wissenschaftliche Erklärung, eine rechtliche Einordnung oder eine philosophische Betrachtung?'
                     ];
                     return responses[Math.floor(Math.random() * responses.length)];
                 },
@@ -444,7 +1000,6 @@
                 handleCommand: function(text) {
                     var lower = text.toLowerCase();
                     var commands = {
-                        'fahrschule': ['fahrschule', 'fahrschule app', 'öffne fahrschule'],
                         'mail': ['mail', 'e-mail', 'email', 'post'],
                         'messages': ['chat', 'nachricht', 'message'],
                         'contacts': ['kontakte', 'adressbuch', 'contacts'],
@@ -458,14 +1013,18 @@
                         'appworld': ['app world', 'apps', 'anwendungen'],
                         'documents': ['dokument', 'document', 'text'],
                         'tasks': ['aufgaben', 'tasks', 'to-do'],
-                        'calculator': ['rechner', 'calculator']
+                        'calculator': ['rechner', 'calculator'],
+                        'brief': ['brief', 'schreiben', 'schreib mir'],
+                        'klage': ['klage', 'verklagen'],
+                        'gutachten': ['gutachten', 'ärztliches gutachten'],
+                        'urteil': ['urteil', 'gerichtsurteil'],
+                        'vertrag': ['vertrag', 'vereinbarung']
                     };
                     for (var appId in commands) {
                         for (var i = 0; i < commands[appId].length; i++) {
                             if (lower.includes('öffne ' + commands[appId][i]) ||
                                 lower.includes('starte ' + commands[appId][i]) ||
                                 lower.includes('zeige ' + commands[appId][i]) ||
-                                lower.includes('gehe zu ' + commands[appId][i]) ||
                                 lower.includes('haldo öffne ' + commands[appId][i]) ||
                                 lower.includes('haldo, öffne ' + commands[appId][i])) {
                                 return { command: 'open', app: appId };
@@ -473,7 +1032,9 @@
                         }
                     }
 
-                    if (lower.includes('schreib mir') || lower.includes('schreiben') || lower.includes('brief')) {
+                    // Schreibbefehle
+                    if (lower.includes('schreib mir') || lower.includes('schreiben') || lower.includes('brief') ||
+                        lower.includes('klageschrift') || lower.includes('gutachten') || lower.includes('vertrag')) {
                         return { command: 'write', text: text };
                     }
 
@@ -919,7 +1480,7 @@
             }
 
             // ============================================================
-            //  COSMIC WORLD
+            //  COSMIC WORLD — 4K GALAXY QUALITÄT
             // ============================================================
             function initCosmic() {
                 var ctx = cosmicCanvas.getContext('2d');
@@ -932,13 +1493,13 @@
                 window.addEventListener('resize', resize);
                 resize();
 
-                var starColors = ['#ffffff', '#ffdd88', '#88ddff', '#ff88dd', '#88ffaa', '#ffaa88'];
+                var starColors = ['#ffffff', '#ffdd88', '#88ddff', '#ff88dd', '#88ffaa', '#ffaa88', '#dd88ff', '#88ffdd'];
                 var stars = [];
-                for (var i = 0; i < 3000; i++) {
+                for (var i = 0; i < 4000; i++) {
                     stars.push({
                         x: Math.random() * W,
                         y: Math.random() * H,
-                        r: Math.random() * 2.5 + 0.5,
+                        r: Math.random() * 3 + 0.5,
                         speed: Math.random() * 0.02 + 0.003,
                         bright: Math.random() * 0.6 + 0.4,
                         phase: Math.random() * Math.PI * 2,
@@ -946,8 +1507,41 @@
                     });
                 }
 
-                var sun = { x: W / 2, y: H / 2, radius: 55, glow: 250, phase: 0, pulseSpeed: 0.008, flares: 24 };
+                // Galaxien (8 Spiralgalaxien)
+                var galaxies = [];
+                for (var g = 0; g < 8; g++) {
+                    var gx = Math.random() * W;
+                    var gy = Math.random() * H;
+                    var gSize = 80 + Math.random() * 200;
+                    var angle = Math.random() * Math.PI * 2;
+                    var points = [];
+                    for (var i = 0; i < 400; i++) {
+                        var t = Math.random() * Math.PI * 4;
+                        var r = Math.random() * gSize * 0.6;
+                        var px = gx + Math.cos(t + angle) * r * (1 + t * 0.06);
+                        var py = gy + Math.sin(t + angle) * r * (1 + t * 0.06);
+                        points.push({
+                            x: px,
+                            y: py,
+                            r: Math.random() * 2 + 0.5,
+                            bright: Math.random() * 0.5 + 0.2,
+                            hue: 200 + Math.random() * 80
+                        });
+                    }
+                    galaxies.push({
+                        x: gx,
+                        y: gy,
+                        size: gSize,
+                        angle: angle,
+                        points: points,
+                        rotationSpeed: (Math.random() - 0.5) * 0.002
+                    });
+                }
 
+                // Sonne
+                var sun = { x: W / 2, y: H / 2, radius: 55, glow: 280, phase: 0, pulseSpeed: 0.008, flares: 24 };
+
+                // 12 Planeten
                 var planetData = [
                     { name: 'Merkur', r: 9, color: '#c2b9b0', orbit: 85, speed: 0.03, role: 'second' },
                     { name: 'Venus', r: 13, color: '#e8cda0', orbit: 125, speed: 0.022, role: 'minute' },
@@ -991,6 +1585,7 @@
 
                     ctx.clearRect(0, 0, W, H);
 
+                    // Himmelshintergrund
                     var bgGrad = ctx.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, W * 0.9);
                     var hue1 = 220 + 15 * Math.sin(time * 0.08);
                     var hue2 = 240 + 20 * Math.sin(time * 0.05 + 1);
@@ -1001,6 +1596,26 @@
                     ctx.fillStyle = bgGrad;
                     ctx.fillRect(0, 0, W, H);
 
+                    // Galaxien
+                    for (var gi = 0; gi < galaxies.length; gi++) {
+                        var g2 = galaxies[gi];
+                        g2.angle += g2.rotationSpeed;
+                        for (var pi = 0; pi < g2.points.length; pi++) {
+                            var p2 = g2.points[pi];
+                            var rotX = p2.x - g2.x;
+                            var rotY = p2.y - g2.y;
+                            var cosA = Math.cos(g2.angle);
+                            var sinA = Math.sin(g2.angle);
+                            var rx = g2.x + rotX * cosA - rotY * sinA;
+                            var ry = g2.y + rotX * sinA + rotY * cosA;
+                            ctx.fillStyle = 'hsla(' + p2.hue + ', 70%, 60%, ' + (p2.bright * 0.2) + ')';
+                            ctx.beginPath();
+                            ctx.arc(rx, ry, p2.r, 0, Math.PI * 2);
+                            ctx.fill();
+                        }
+                    }
+
+                    // Planeten-Trails
                     for (var pt = 0; pt < planets.length; pt++) {
                         var pTrail = planets[pt];
                         if (pTrail.trail) {
@@ -1014,6 +1629,7 @@
                         }
                     }
 
+                    // Sonne
                     sun.phase += sun.pulseSpeed;
                     var pulse = 1 + 0.05 * Math.sin(sun.phase);
                     var radius = sun.radius * pulse;
@@ -1058,6 +1674,7 @@
                     ctx.fillText('⟡', sun.x, sun.y - radius * 0.05);
                     ctx.shadowBlur = 0;
 
+                    // Sonnenstrahlen
                     for (var fl = 0; fl < sun.flares; fl++) {
                         var fAngle = fl * (Math.PI / (sun.flares / 2)) + sun.phase * 0.2;
                         var len = radius * (1.4 + 0.4 * Math.sin(sun.phase * 0.6 + fl * 0.4));
@@ -1069,6 +1686,7 @@
                         ctx.stroke();
                     }
 
+                    // Planeten
                     for (var pp = 0; pp < planets.length; pp++) {
                         var pl = planets[pp];
 
@@ -1158,6 +1776,7 @@
                         }
                     }
 
+                    // Mond
                     if (moon.ex !== undefined) {
                         moon.angle += moon.speed;
                         moon.x = moon.ex + Math.cos(moon.angle) * moon.orbit;
@@ -1195,6 +1814,7 @@
                         ctx.fillText('🌙 Mond', moon.x, moon.y + moon.r + 4);
                     }
 
+                    // Sterne
                     var time2 = Date.now() / 2500;
                     for (var st = 0; st < stars.length; st++) {
                         var s2 = stars[st];
@@ -1210,6 +1830,7 @@
                     }
                     ctx.globalAlpha = 1;
 
+                    // Uhrzeit
                     var hh = String(now.getHours()).padStart(2, '0');
                     var mm2 = String(now.getMinutes()).padStart(2, '0');
                     var ss3 = String(now.getSeconds()).padStart(2, '0');
@@ -1270,13 +1891,13 @@
             //  APPS — ALLE 84 APPS
             // ============================================================
 
-            // AI App
+            // ===== AI App =====
             registerApp('ai', {
-                title: 'HalDo AI 24',
+                title: 'HalDo AI 24 — Professor',
                 icon: '🧠',
                 render: function(body) {
                     body.innerHTML =
-                        '<div style="display:flex;flex-direction:column;height:100%;gap:8px;"><div style="display:flex;align-items:center;gap:10px;padding:6px 10px;background:rgba(0,212,255,0.06);border-radius:10px;"><div style="width:44px;height:44px;border-radius:50%;overflow:hidden;border:2px solid var(--primary);flex-shrink:0;"><img src="assets/logo.png" alt="HalDo" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display=\'none\';this.parentElement.textContent=\'🧠\';this.parentElement.style.display=\'flex\';this.parentElement.style.alignItems=\'center\';this.parentElement.style.justifyContent=\'center\';this.parentElement.style.fontSize=\'1.8rem\';this.parentElement.style.background=\'linear-gradient(135deg,#00d4ff,#7b2ffc)\';" /></div><div><div style="font-weight:600;font-size:0.85rem;">HalDo AI 24</div><div style="font-size:0.7rem;color:#8899bb;" id="ai-state">● bereit</div></div><div style="margin-left:auto;display:flex;gap:4px;"><button id="ai-voice-btn" style="background:none;border:none;color:#8899bb;font-size:1.2rem;cursor:pointer;padding:4px;" title="Spracheingabe">🎤</button></div></div><div style="flex:1;overflow-y:auto;background:rgba(0,0,0,0.2);border-radius:10px;padding:10px;max-height:280px;" id="ai-chat"><div style="color:#8899bb;text-align:center;">💬 Hallo! Ich bin HalDo 24, dein digitaler Professor. Frage mich alles!</div></div><div style="display:flex;gap:6px;"><input type="text" id="ai-input" placeholder="Frage oder Befehl ..." style="flex:1;" /><button id="ai-send">Senden</button></div><div style="display:flex;gap:4px;flex-wrap:wrap;"><button class="ai-q" data-cmd="Erzähl mir über Êzîdî">🟡 Êzîdî</button><button class="ai-q" data-cmd="Was ist die Quantenmechanik?">⚛️ Quanten</button><button class="ai-q" data-cmd="Erkläre die Relativitätstheorie">🌌 Relativität</button><button class="ai-q" data-cmd="Was ist Philosophie?">🤔 Philosophie</button><button class="ai-q" data-cmd="Schreibe mir einen Brief">✉️ Brief</button><button class="ai-q" data-cmd="Öffne Einstellungen">⚙️</button></div><div style="font-size:0.55rem;color:#44ff88;text-align:center;border-top:1px solid rgba(255,255,255,0.04);padding-top:4px;">✅ Groq AI aktiv · Sprachsteuerung aktiv</div></div>';
+                        '<div style="display:flex;flex-direction:column;height:100%;gap:8px;"><div style="display:flex;align-items:center;gap:10px;padding:6px 10px;background:rgba(0,212,255,0.06);border-radius:10px;"><div style="width:44px;height:44px;border-radius:50%;overflow:hidden;border:2px solid var(--primary);flex-shrink:0;"><img src="assets/logo.png" alt="HalDo" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display=\'none\';this.parentElement.textContent=\'🧠\';this.parentElement.style.display=\'flex\';this.parentElement.style.alignItems=\'center\';this.parentElement.style.justifyContent=\'center\';this.parentElement.style.fontSize=\'1.8rem\';this.parentElement.style.background=\'linear-gradient(135deg,#00d4ff,#7b2ffc)\';" /></div><div><div style="font-weight:600;font-size:0.85rem;">HalDo AI 24 — Professor</div><div style="font-size:0.7rem;color:#8899bb;" id="ai-state">● bereit</div></div><div style="margin-left:auto;display:flex;gap:4px;"><button id="ai-voice-btn" style="background:none;border:none;color:#8899bb;font-size:1.2rem;cursor:pointer;padding:4px;" title="Spracheingabe">🎤</button></div></div><div style="flex:1;overflow-y:auto;background:rgba(0,0,0,0.2);border-radius:10px;padding:10px;max-height:280px;" id="ai-chat"><div style="color:#8899bb;text-align:center;">💬 Hallo! Ich bin HalDo — dein Professor, Doktor und juristischer Berater. Frage mich alles!</div></div><div style="display:flex;gap:6px;"><input type="text" id="ai-input" placeholder="Frage, Befehl oder Dokument ..." style="flex:1;" /><button id="ai-send">Senden</button></div><div style="display:flex;gap:4px;flex-wrap:wrap;"><button class="ai-q" data-cmd="Schreibe mir einen Brief">✉️ Brief</button><button class="ai-q" data-cmd="Schreibe mir eine Klageschrift">⚖️ Klage</button><button class="ai-q" data-cmd="Erstelle ein ärztliches Gutachten">📋 Gutachten</button><button class="ai-q" data-cmd="Erzähl mir über Êzîdî">🟡 Êzîdî</button><button class="ai-q" data-cmd="Was ist die Quantenmechanik?">⚛️ Quanten</button><button class="ai-q" data-cmd="Öffne Einstellungen">⚙️</button></div><div style="font-size:0.55rem;color:#44ff88;text-align:center;border-top:1px solid rgba(255,255,255,0.04);padding-top:4px;">✅ Groq AI aktiv · Sprachsteuerung aktiv · Professor-Modus</div></div>';
 
                     var chat = body.querySelector('#ai-chat');
                     var input = body.querySelector('#ai-input');
@@ -1298,11 +1919,7 @@
                         chat.scrollTop = chat.scrollHeight;
 
                         if (role === 'ai' && state.settings.voiceEnabled) {
-                            var lang = state.settings.language === 'de' ? 'de-DE' :
-                                state.settings.language === 'en' ? 'en-US' :
-                                state.settings.language === 'ku' ? 'ku' :
-                                state.settings.language === 'ezidi' ? 'ku' : 'de-DE';
-                            voice.speak(text, lang, state.settings.voiceGender || 'male');
+                            voice.speak(text, 'de-DE', state.settings.voiceGender || 'male');
                         }
                     }
 
@@ -1394,37 +2011,13 @@
                 }
             });
 
-            // Fahrschule App
-            registerApp('fahrschule', {
-                title: 'Fahrschule',
-                icon: '🚗',
-                render: function(body) {
-                    body.innerHTML =
-                        '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:12px;text-align:center;padding:16px;"><div style="font-size:3rem;">🚗</div><h3 style="font-size:0.9rem;">Fahrschule</h3><p style="color:#8899bb;font-size:0.8rem;">Hier lernst du alles rund ums Autofahren.</p><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;width:100%;max-width:300px;"><button onclick="HalDo.notify(\'🚦 Verkehrsregeln werden geladen...\')" style="padding:8px;">🚦 Verkehrsregeln</button><button onclick="HalDo.notify(\'🛑 Verkehrsschilder werden geladen...\')" style="padding:8px;">🛑 Schilder</button><button onclick="HalDo.notify(\'🚗 Praktische Übung startet...\')" style="padding:8px;">🚗 Übung</button><button onclick="HalDo.notify(\'📝 Theorieprüfung startet...\')" style="padding:8px;">📝 Prüfung</button></div><div style="font-size:0.6rem;color:#8899bb;border-top:1px solid rgba(255,255,255,0.04);padding-top:6px;width:100%;">Fahrschule · HalDo OS 24</div></div>';
-                }
-            });
-
-            // Settings App
+            // ===== Settings App =====
             registerApp('settings', {
                 title: 'Einstellungen',
                 icon: '⚙️',
                 render: function(body) {
-                    var html =
-                        '<h3 style="margin-bottom:8px;font-size:0.9rem;">⚙️ System-Einstellungen</h3><div style="display:flex;flex-direction:column;gap:8px;">';
-                    html +=
-                        '<div><label style="font-size:0.75rem;color:#8899bb;">Sprache / Language</label><select id="settings-language" style="width:100%;">';
-                    for (var key in CONFIG.languages) {
-                        html += '<option value="' + key + '" ' + (state.settings.language === key ? 'selected' :
-                            '') + '>' + CONFIG.languages[key] + '</option>';
-                    }
-                    html +=
-                        '</select></div><div><label style="font-size:0.75rem;color:#8899bb;">HalDo Stimme</label><select id="settings-voice" style="width:100%;">';
-                    for (var key in CONFIG.voiceGenders) {
-                        html += '<option value="' + key + '" ' + (state.settings.voiceGender === key ? 'selected' :
-                            '') + '>' + CONFIG.voiceGenders[key] + '</option>';
-                    }
-                    html +=
-                        '</select></div><div style="background:rgba(255,255,255,0.04);padding:8px;border-radius:8px;"><div style="font-size:0.7rem;color:#8899bb;">API-Status</div><div style="font-size:0.8rem;color:#44ff88;">✅ Groq verbunden</div></div><button id="settings-save" style="margin-top:4px;">💾 Speichern</button><div style="font-size:0.55rem;color:#8899bb;border-top:1px solid rgba(255,255,255,0.04);padding-top:6px;">HalDo OS ' +
+                    body.innerHTML =
+                        '<h3 style="margin-bottom:8px;font-size:0.9rem;">⚙️ System-Einstellungen</h3><div style="display:flex;flex-direction:column;gap:8px;"><div><label style="font-size:0.75rem;color:#8899bb;">Sprache</label><select id="settings-language" style="width:100%;"><option value="de">🇩🇪 Deutsch</option><option value="en">🇬🇧 English</option><option value="ku">🇰🇲 Kurmancî</option><option value="ezidi">𒀭 Êzîdî</option></select></div><div><label style="font-size:0.75rem;color:#8899bb;">HalDo Stimme</label><select id="settings-voice" style="width:100%;"><option value="male">👨 Männlich</option><option value="female">👩 Weiblich</option></select></div><div style="background:rgba(255,255,255,0.04);padding:8px;border-radius:8px;"><div style="font-size:0.7rem;color:#8899bb;">API-Status</div><div style="font-size:0.8rem;color:#44ff88;">✅ Groq verbunden</div></div><button id="settings-save" style="margin-top:4px;">💾 Speichern</button><div style="font-size:0.55rem;color:#8899bb;border-top:1px solid rgba(255,255,255,0.04);padding-top:6px;">HalDo OS ' +
                         CONFIG.version + ' · ' + Object.keys(state.apps).length + ' Apps</div></div>';
                     body.innerHTML = html;
 
@@ -1438,7 +2031,7 @@
                 }
             });
 
-            // Files App
+            // ===== Files App =====
             registerApp('files', {
                 title: 'Datei-Manager',
                 icon: '📁',
@@ -1449,7 +2042,8 @@
                         { name: '📁 Musik', type: 'folder', size: '-' },
                         { name: '📄 HalDo24.pdf', type: 'pdf', size: '3.2 MB' },
                         { name: '📄 System.txt', type: 'txt', size: '256 KB' },
-                        { name: '📄 Ezidi_Kultur.docx', type: 'docx', size: '1.8 MB' }
+                        { name: '📄 Gutachten.docx', type: 'docx', size: '1.8 MB' },
+                        { name: '📄 Klageschrift.docx', type: 'docx', size: '876 KB' }
                     ];
                     var html =
                         '<div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;"><input type="text" placeholder="🔍 Suche ..." style="flex:1;min-width:80px;" id="file-search" /><button id="file-new" style="padding:6px 12px;">➕</button></div><div class="app-grid" id="file-grid">';
@@ -1462,7 +2056,7 @@
                             f.size + '</div></div>';
                     }
                     html +=
-                        '</div><div style="font-size:0.6rem;color:#8899bb;border-top:1px solid rgba(255,255,255,0.04);padding-top:6px;display:flex;justify-content:space-between;"><span>📊 6 Elemente</span><span>💾 24.6 GB frei</span></div>';
+                        '</div><div style="font-size:0.6rem;color:#8899bb;border-top:1px solid rgba(255,255,255,0.04);padding-top:6px;display:flex;justify-content:space-between;"><span>📊 7 Elemente</span><span>💾 24.6 GB frei</span></div>';
                     body.innerHTML = html;
 
                     body.querySelector('#file-search').addEventListener('input', function(e) {
@@ -1480,7 +2074,7 @@
                 }
             });
 
-            // Notes App
+            // ===== Notes App =====
             registerApp('notes', {
                 title: 'Notizen',
                 icon: '📝',
@@ -1542,17 +2136,17 @@
                 }
             });
 
-            // Cosmic App
+            // ===== Cosmic App =====
             registerApp('cosmic', {
                 title: 'Cosmic World',
                 icon: '🌌',
                 render: function(body) {
                     body.innerHTML =
-                        '<div style="text-align:center;padding:10px;"><div style="font-size:2.5rem;">🌌</div><h3 style="margin:6px 0;font-size:0.9rem;">Cosmic World</h3><p style="color:#8899bb;font-size:0.75rem;">Sonne mit Logo · 12 Planeten · Mond · Sterne</p><div style="margin-top:8px;font-size:0.65rem;color:#8899bb;">🌟 3000 Sterne · 12 Planeten · 🌙 Mond</div><div style="font-size:0.6rem;color:#8899bb;border-top:1px solid rgba(255,255,255,0.04);padding-top:6px;margin-top:6px;">☀️ Klicke auf die Sonne für HalDo AI</div></div>';
+                        '<div style="text-align:center;padding:10px;"><div style="font-size:2.5rem;">🌌</div><h3 style="margin:6px 0;font-size:0.9rem;">Cosmic World</h3><p style="color:#8899bb;font-size:0.75rem;">Sonne mit Logo · 8 Galaxien · 12 Planeten · Mond · 4000 Sterne</p><div style="margin-top:8px;font-size:0.65rem;color:#8899bb;">🌟 4000 Sterne · 8 Galaxien · 12 Planeten · 🌙 Mond</div><div style="font-size:0.6rem;color:#8899bb;border-top:1px solid rgba(255,255,255,0.04);padding-top:6px;margin-top:6px;">☀️ Klicke auf die Sonne für HalDo AI</div></div>';
                 }
             });
 
-            // Calendar App
+            // ===== Calendar App =====
             registerApp('calendar', {
                 title: 'Kalender',
                 icon: '📅',
@@ -1586,7 +2180,7 @@
                 }
             });
 
-            // Music App
+            // ===== Music App =====
             registerApp('music', {
                 title: 'Musik',
                 icon: '🎵',
@@ -1609,7 +2203,7 @@
                 }
             });
 
-            // Terminal App
+            // ===== Terminal App =====
             registerApp('terminal', {
                 title: 'Terminal',
                 icon: '⌨️',
@@ -1632,7 +2226,7 @@
                         var main = parts[0].toLowerCase();
 
                         if (main === 'help') resp =
-                            'help, version, apps, clear, echo, date, whoami, uptime, sysinfo, ezidi, planets, sun, mail, chat, contacts, notes, files, calendar, music';
+                            'help, version, apps, clear, echo, date, whoami, uptime, sysinfo, ezidi, planets, sun';
                         else if (main === 'version') resp = 'HalDo OS ' + CONFIG.version;
                         else if (main === 'apps') resp = '📱 ' + Object.keys(state.apps).length + ' Apps';
                         else if (main === 'clear') { output.innerHTML = ''; return; } else if (main === 'echo')
@@ -1670,7 +2264,7 @@
                 }
             });
 
-            // App World
+            // ===== App World =====
             registerApp('appworld', {
                 title: 'App World 24',
                 icon: '📱',
@@ -1693,142 +2287,6 @@
                         '</div><div style="font-size:0.55rem;color:#8899bb;border-top:1px solid rgba(255,255,255,0.04);padding-top:4px;margin-top:4px;display:flex;justify-content:space-between;"><span>📱 ' +
                         apps.length + ' Apps</span><span>HalDo OS ' + CONFIG.version + '</span></div>';
                     body.innerHTML = html;
-                }
-            });
-
-            // Mail App
-            registerApp('email', {
-                title: 'HalDo Mail',
-                icon: '✉️',
-                render: function(body) {
-                    var inbox = state.mail.inbox.length ? state.mail.inbox : [
-                        { from: 'info@haldo.ai', subject: 'Willkommen bei HalDo Mail!', date: 'Heute',
-                            preview: 'Dein neues Mail-Konto ist bereit. Du kannst jetzt E-Mails senden und empfangen.' },
-                        { from: 'system@haldo.ai', subject: 'HalDo OS 24 Update verfügbar', date: 'Gestern',
-                            preview: 'Eine neue Version von HalDo AI OS 24 ist verfügbar.' }
-                    ];
-                    var html =
-                        '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;"><button id="mail-inbox" style="flex:1;">📥 Posteingang</button><button id="mail-sent" style="flex:1;background:rgba(255,255,255,0.06);">📤 Gesendet</button><button id="mail-new" style="flex:1;background:var(--secondary,#7b2ffc);">✏️ Neu</button></div><div style="flex:1;overflow-y:auto;max-height:280px;">';
-                    for (var i = 0; i < inbox.length; i++) {
-                        var m = inbox[i];
-                        html +=
-                            '<div style="padding:6px 10px;background:rgba(255,255,255,0.03);border-radius:8px;margin:4px 0;cursor:pointer;border-left:3px solid #00d4ff;" onclick="HalDo.notify(\'📧 ' +
-                            m.subject + ' von ' + m.from + '\')"><div style="display:flex;justify-content:space-between;font-size:0.8rem;"><span style="font-weight:600;">' +
-                            m.from + '</span><span style="color:#8899bb;">' + m.date +
-                            '</span></div><div style="font-size:0.85rem;">' + m.subject +
-                            '</div><div style="font-size:0.7rem;color:#8899bb;">' + m.preview +
-                            '</div></div>';
-                    }
-                    html +=
-                        '</div><div style="font-size:0.6rem;color:#8899bb;border-top:1px solid rgba(255,255,255,0.04);padding-top:6px;display:flex;justify-content:space-between;"><span>📊 ' +
-                        inbox.length + ' Nachrichten</span><span>✉️ user@haldo.ai</span></div>';
-                    body.innerHTML = html;
-
-                    body.querySelector('#mail-new').addEventListener('click', function() {
-                        var to = prompt('📧 Empfänger:');
-                        if (to) {
-                            var sub = prompt('📝 Betreff:');
-                            if (sub !== null) {
-                                var txt = prompt('✍️ Nachricht:');
-                                if (txt !== null) {
-                                    state.mail.sent.push({ to: to, subject: sub, text: txt, date: 'Heute' });
-                                    localStorage.setItem('haldo_mail', JSON.stringify(state.mail));
-                                    notify('✅ E-Mail gesendet!', 'success');
-                                }
-                            }
-                        }
-                    });
-                    body.querySelector('#mail-inbox').addEventListener('click', function() {
-                        notify('📥 Posteingang: ' + state.mail.inbox.length + ' Nachrichten');
-                    });
-                    body.querySelector('#mail-sent').addEventListener('click', function() {
-                        notify('📤 Gesendet: ' + state.mail.sent.length + ' Nachrichten');
-                    });
-                }
-            });
-
-            // Chat App
-            registerApp('messages', {
-                title: 'HalDo Chat',
-                icon: '💬',
-                render: function(body) {
-                    var contacts = state.contacts.length ? state.contacts : [
-                        { name: 'Max Mustermann', status: 'online', last: 'Heute' },
-                        { name: 'Ella Schmidt', status: 'offline', last: 'Gestern' },
-                        { name: 'HalDo AI', status: 'online', last: 'gerade' }
-                    ];
-                    var html =
-                        '<div style="display:flex;gap:6px;margin-bottom:8px;"><input type="text" id="chat-search" placeholder="🔍 Kontakt suchen ..." style="flex:1;" /><button id="chat-new">➕</button></div><div style="flex:1;overflow-y:auto;max-height:280px;">';
-                    for (var i = 0; i < contacts.length; i++) {
-                        var c = contacts[i];
-                        html +=
-                            '<div style="padding:6px 10px;background:rgba(255,255,255,0.03);border-radius:8px;margin:4px 0;cursor:pointer;display:flex;justify-content:space-between;align-items:center;" onclick="HalDo.notify(\'💬 Chat mit ' +
-                            c.name + '\')"><div><div style="font-weight:600;font-size:0.85rem;">' + c.name +
-                            '</div><div style="font-size:0.7rem;color:#8899bb;">' + c.status + ' · ' + c.last +
-                            '</div></div><div style="font-size:1.2rem;">' + (c.status === 'online' ? '🟢' :
-                            '⚪') + '</div></div>';
-                    }
-                    html +=
-                        '</div><div style="font-size:0.6rem;color:#8899bb;border-top:1px solid rgba(255,255,255,0.04);padding-top:6px;display:flex;justify-content:space-between;"><span>💬 ' +
-                        contacts.length + ' Kontakte</span><span>🟢 ' + contacts.filter(function(c) { return c
-                            .status === 'online'; }).length + ' online</span></div>';
-                    body.innerHTML = html;
-
-                    body.querySelector('#chat-new').addEventListener('click', function() {
-                        var name = prompt('👤 Kontaktname:');
-                        if (name) {
-                            state.contacts.push({ name: name, status: 'online', last: 'Heute' });
-                            localStorage.setItem('haldo_contacts', JSON.stringify(state.contacts));
-                            notify('👤 ' + name + ' hinzugefügt');
-                            var win = state.windows.find(function(w) { return w.appId === 'messages'; });
-                            if (win && win.element) {
-                                var b = win.element.querySelector('.window-body');
-                                state.apps['messages'].render(b);
-                            }
-                        }
-                    });
-                }
-            });
-
-            // Contacts App
-            registerApp('contacts', {
-                title: 'Kontakte',
-                icon: '👤',
-                render: function(body) {
-                    var contacts = state.contacts.length ? state.contacts : [
-                        { name: 'Max Mustermann', mail: 'max@haldo.ai', phone: '+49 123 456789' },
-                        { name: 'Ella Schmidt', mail: 'ella@haldo.ai', phone: '+49 987 654321' },
-                        { name: 'HalDo AI', mail: 'ai@haldo.ai', phone: '-' }
-                    ];
-                    var html =
-                        '<div style="display:flex;gap:6px;margin-bottom:8px;"><input type="text" id="contacts-search" placeholder="🔍 Suche ..." style="flex:1;" /><button id="contacts-new">➕</button></div><div style="flex:1;overflow-y:auto;max-height:280px;">';
-                    for (var i = 0; i < contacts.length; i++) {
-                        var c = contacts[i];
-                        html +=
-                            '<div style="padding:6px 10px;background:rgba(255,255,255,0.03);border-radius:8px;margin:4px 0;cursor:pointer;" onclick="HalDo.notify(\'👤 ' +
-                            c.name + ' · ' + c.mail + '\')"><div style="font-weight:600;font-size:0.85rem;">' +
-                            c.name + '</div><div style="font-size:0.7rem;color:#8899bb;">' + c.mail + ' · ' + c
-                            .phone + '</div></div>';
-                    }
-                    html +=
-                        '</div><div style="font-size:0.6rem;color:#8899bb;border-top:1px solid rgba(255,255,255,0.04);padding-top:6px;">👤 ' +
-                        contacts.length + ' Kontakte</div>';
-                    body.innerHTML = html;
-
-                    body.querySelector('#contacts-new').addEventListener('click', function() {
-                        var name = prompt('👤 Name:');
-                        if (name) {
-                            var mail = prompt('✉️ E-Mail:');
-                            state.contacts.push({ name: name, mail: mail || '-', phone: '-' });
-                            localStorage.setItem('haldo_contacts', JSON.stringify(state.contacts));
-                            notify('👤 ' + name + ' hinzugefügt');
-                            var win = state.windows.find(function(w) { return w.appId === 'contacts'; });
-                            if (win && win.element) {
-                                var b = win.element.querySelector('.window-body');
-                                state.apps['contacts'].render(b);
-                            }
-                        }
-                    });
                 }
             });
 
@@ -1977,7 +2435,7 @@
                         boot.classList.add('hidden');
                         state.isBooted = true;
                         notify('🚀 HalDo OS 24 gestartet!', 'success');
-                        voice.speak('🌟 Hallo! Ich bin HalDo. Wie kann ich dir helfen?');
+                        voice.speak('🌟 Hallo! Ich bin HalDo, dein Professor. Wie kann ich dir helfen?');
                         setTimeout(function() { launchApp('ai'); }, 500);
                         setTimeout(function() { launchApp('cosmic'); }, 800);
                         setTimeout(function() { launchApp('appworld'); }, 1100);
@@ -2010,8 +2468,7 @@
                 document.getElementById('btn-about').addEventListener('click', function() {
                     notify('⟡ HalDo OS ' + CONFIG.version +
                         '\n💙❤️🚀 Ultimate Edition\n' + Object.keys(state.apps).length +
-                        ' Apps · Kernel ' + CONFIG.kernel + '\n✅ Groq AI verbunden\n🌍 14 Sprachen verfügbar\n🎤 2 Stimmen (männlich/weiblich)'
-                        );
+                        ' Apps · Kernel ' + CONFIG.kernel + '\n✅ Groq AI verbunden\n📚 Professor-Modus aktiv');
                 });
                 document.getElementById('btn-menu').addEventListener('click', function() {
                     launchApp('appworld');
@@ -2033,19 +2490,13 @@
                 console.log('📱 ' + Object.keys(state.apps).length + ' Apps geladen');
                 console.log('✅ Groq API-Key verbunden');
                 console.log('☀️ Klicke auf die Sonne für HalDo AI');
-                console.log('🌍 14 Sprachen: Deutsch, Englisch, Kurdisch, Êzîdî, Türkisch, Arabisch, Französisch, Spanisch, Russisch, Italienisch, Niederländisch, Polnisch, Persisch, Hebräisch');
-                console.log('🎤 2 Stimmen: Männlich/Weiblich');
-                console.log('💡 HalDo AI wiederholt sich NIE — jede Antwort ist einzigartig!');
-                console.log('🗣️ Sprachbefehle: "HalDo öffne Fahrschule", "HalDo schreib mir ..."');
+                console.log('📚 HalDo AI wie ein Professor/Doctor/Anwalt');
+                console.log('🗣️ Sprachbefehle: "HalDo öffne ...", "HalDo schreib mir ..."');
             }
 
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', init);
-            } else {
-                init();
-            }
+            init();
 
-        })();
+        } // end initSystem
     </script>
 </body>
 </html>
