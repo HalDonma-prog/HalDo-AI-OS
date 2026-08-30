@@ -1,5 +1,6 @@
 // ================================================================
 //  HALDO STORAGE — IndexedDB + LocalStorage
+//  TEIL 2/30
 // ================================================================
 
 var HalDoStorage = {
@@ -69,7 +70,6 @@ var HalDoStorage = {
         }.bind(this));
     },
 
-    // LocalStorage Helper
     setLocal: function(key, data) {
         try {
             localStorage.setItem('haldo_' + key, JSON.stringify(data));
