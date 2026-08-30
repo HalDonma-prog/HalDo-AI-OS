@@ -3,569 +3,92 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover, user-scalable=no" />
-    <title>HalDo OS 24 — Ultimate</title>
+    <title>HalDo AI OS 24 — Ultimate</title>
+    <meta name="theme-color" content="#0a0a1a" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="manifest" href="data:application/json,{}" />
     <style>
-        /* ================================================================
-           HALDO OS 24 — ULTIMATE EDITION
-           ALLES IN EINER DATEI — PROFESSIONELL & LEBENDIG
-           Version 24.0.0 — Build 2025.08.30
-           ================================================================ */
-
         /* ===== GLOBAL ===== */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        :root {
-            --bg: #0a0a1a;
-            --surface: rgba(16, 16, 40, 0.92);
-            --text: #e0e0ff;
-            --primary: #00d4ff;
-            --secondary: #7b2ffc;
-            --radius: 14px;
-            --safe-top: env(safe-area-inset-top, 0px);
-            --safe-bottom: env(safe-area-inset-bottom, 0px);
-        }
-        html,
-        body {
-            height: 100%;
-            width: 100%;
-            overflow: hidden;
-            background: var(--bg);
-            color: var(--text);
-            font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
-            touch-action: manipulation;
-            -webkit-tap-highlight-color: transparent;
-        }
-        #root {
-            width: 100vw;
-            height: 100vh;
-            height: 100dvh;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
+        *{margin:0;padding:0;box-sizing:border-box}
+        :root{--bg:#0a0a1a;--surface:rgba(16,16,40,0.92);--text:#e0e0ff;--primary:#00d4ff;--secondary:#7b2ffc;--radius:14px;--safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px)}
+        html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:-apple-system,'Segoe UI',system-ui,sans-serif;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+        #root{width:100vw;height:100vh;height:100dvh;position:relative;display:flex;flex-direction:column;overflow:hidden}
 
         /* ===== BOOT ===== */
-        #boot {
-            position: fixed;
-            inset: 0;
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background: #0a0a1a;
-            transition: opacity 1.5s ease;
-            padding: 20px;
-        }
-        #boot.hidden {
-            opacity: 0;
-            pointer-events: none;
-        }
-        #boot-logo {
-            font-size: clamp(3rem, 12vw, 5rem);
-            font-weight: 900;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: pulseGlow 2s infinite alternate;
-        }
-        @keyframes pulseGlow {
-            0% {
-                transform: scale(1);
-                filter: drop-shadow(0 0 20px rgba(0, 212, 255, 0.3));
-            }
-            100% {
-                transform: scale(1.05);
-                filter: drop-shadow(0 0 60px rgba(123, 47, 252, 0.5));
-            }
-        }
-        #boot-logo img {
-            width: clamp(100px, 20vw, 160px);
-            height: auto;
-            border-radius: 50%;
-            box-shadow: 0 0 60px rgba(0, 212, 255, 0.3);
-            animation: pulseGlow 2s infinite alternate;
-        }
-        #boot-status {
-            margin-top: 16px;
-            font-size: clamp(0.8rem, 2vw, 1rem);
-            color: #8899bb;
-            letter-spacing: 3px;
-        }
-        .boot-spinner {
-            width: 50px;
-            height: 50px;
-            border: 3px solid transparent;
-            border-top: 3px solid var(--primary);
-            border-radius: 50%;
-            animation: spin 0.9s linear infinite;
-            margin-top: 24px;
-        }
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
+        #boot{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#0a0a1a;transition:opacity 1.5s ease;padding:20px}
+        #boot.hidden{opacity:0;pointer-events:none}
+        #boot-logo{font-size:clamp(3rem,12vw,5rem);font-weight:900;background:linear-gradient(135deg,var(--primary),var(--secondary));-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:pulseGlow 2s infinite alternate}
+        @keyframes pulseGlow{0%{transform:scale(1);filter:drop-shadow(0 0 20px rgba(0,212,255,0.3))}100%{transform:scale(1.05);filter:drop-shadow(0 0 60px rgba(123,47,252,0.5))}}
+        #boot-logo img{width:clamp(100px,20vw,160px);height:auto;border-radius:50%;box-shadow:0 0 60px rgba(0,212,255,0.3);animation:pulseGlow 2s infinite alternate}
+        #boot-status{margin-top:16px;font-size:clamp(0.8rem,2vw,1rem);color:#8899bb;letter-spacing:3px}
+        .boot-spinner{width:50px;height:50px;border:3px solid transparent;border-top:3px solid var(--primary);border-radius:50%;animation:spin 0.9s linear infinite;margin-top:24px}
+        @keyframes spin{to{transform:rotate(360deg)}}
 
-        /* ===== COSMIC CANVAS ===== */
-        #cosmic {
-            position: absolute;
-            inset: 0;
-            z-index: 0;
-            pointer-events: none;
-            width: 100%;
-            height: 100%;
-        }
+        /* ===== COSMIC ===== */
+        #cosmic{position:absolute;inset:0;z-index:0;pointer-events:none;width:100%;height:100%}
 
         /* ===== DISPLAY ===== */
-        #display {
-            position: relative;
-            z-index: 1;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            padding-top: var(--safe-top);
-            padding-bottom: var(--safe-bottom);
-        }
+        #display{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;overflow:hidden;padding-top:var(--safe-top);padding-bottom:var(--safe-bottom)}
 
         /* ===== TOPBAR ===== */
-        #topbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 6px 14px;
-            background: rgba(10, 10, 30, 0.5);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-            z-index: 20;
-            font-size: clamp(0.7rem, 1.6vw, 0.85rem);
-            min-height: 40px;
-            flex-shrink: 0;
-        }
-        #topbar-left {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-        }
-        #topbar-left .haldo-icon {
-            font-weight: 700;
-            color: var(--primary);
-            font-size: clamp(0.9rem, 2vw, 1.1rem);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        #topbar-left .haldo-icon img {
-            width: clamp(28px, 5vw, 36px);
-            height: clamp(28px, 5vw, 36px);
-            border-radius: 50%;
-            border: 2px solid var(--primary);
-        }
-        #topbar-right {
-            display: flex;
-            gap: 4px;
-            align-items: center;
-        }
-        .top-btn {
-            background: none;
-            border: none;
-            color: #8899bb;
-            font-size: clamp(0.9rem, 2vw, 1.1rem);
-            cursor: pointer;
-            padding: 4px 8px;
-            border-radius: 8px;
-            touch-action: manipulation;
-        }
-        .top-btn:active {
-            background: rgba(255, 255, 255, 0.1);
-        }
+        #topbar{display:flex;justify-content:space-between;align-items:center;padding:6px 14px;background:rgba(10,10,30,0.5);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,0.04);z-index:20;font-size:clamp(0.7rem,1.6vw,0.85rem);min-height:40px;flex-shrink:0}
+        #topbar-left{display:flex;gap:12px;align-items:center}
+        #topbar-left .haldo-icon{font-weight:700;color:var(--primary);font-size:clamp(0.9rem,2vw,1.1rem);cursor:pointer;display:flex;align-items:center;gap:6px}
+        #topbar-left .haldo-icon img{width:clamp(28px,5vw,36px);height:clamp(28px,5vw,36px);border-radius:50%;border:2px solid var(--primary)}
+        #topbar-right{display:flex;gap:4px;align-items:center}
+        .top-btn{background:none;border:none;color:#8899bb;font-size:clamp(0.9rem,2vw,1.1rem);cursor:pointer;padding:4px 8px;border-radius:8px;touch-action:manipulation}
+        .top-btn:active{background:rgba(255,255,255,0.1)}
 
         /* ===== APP CONTAINER ===== */
-        #app-container {
-            flex: 1;
-            position: relative;
-            z-index: 2;
-            overflow: hidden;
-            touch-action: none;
-        }
+        #app-container{flex:1;position:relative;z-index:2;overflow:hidden;touch-action:none}
 
         /* ===== WINDOW ===== */
-        .window {
-            position: absolute;
-            background: var(--surface);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            border-radius: var(--radius);
-            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.7);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            min-width: 200px;
-            min-height: 150px;
-            max-width: 98vw;
-            max-height: 90vh;
-            touch-action: none;
-        }
-        .window.active {
-            box-shadow: 0 8px 60px rgba(0, 212, 255, 0.12);
-            border-color: rgba(0, 212, 255, 0.15);
-        }
-        .window-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 12px;
-            background: rgba(0, 0, 0, 0.25);
-            cursor: grab;
-            flex-shrink: 0;
-            min-height: 36px;
-            touch-action: none;
-        }
-        .window-header:active {
-            cursor: grabbing;
-        }
-        .window-title {
-            font-size: clamp(0.75rem, 1.8vw, 0.9rem);
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        .window-controls {
-            display: flex;
-            gap: 4px;
-            flex-shrink: 0;
-        }
-        .win-btn {
-            background: none;
-            border: none;
-            color: #8899bb;
-            cursor: pointer;
-            font-size: clamp(0.8rem, 1.8vw, 1rem);
-            padding: 2px 8px;
-            border-radius: 6px;
-            touch-action: manipulation;
-            min-width: 28px;
-            min-height: 28px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .win-btn:active {
-            background: rgba(255, 255, 255, 0.1);
-        }
-        .win-btn.close:active {
-            background: #ff4444;
-            color: #fff;
-        }
-        .window-body {
-            flex: 1;
-            padding: 12px;
-            overflow-y: auto;
-            font-size: clamp(0.8rem, 1.6vw, 0.9rem);
-            line-height: 1.5;
-            -webkit-overflow-scrolling: touch;
-        }
-        .window-body input,
-        .window-body textarea,
-        .window-body select {
-            width: 100%;
-            padding: 8px 12px;
-            background: rgba(255, 255, 255, 0.06);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 10px;
-            color: #fff;
-            font-size: clamp(0.8rem, 1.6vw, 0.9rem);
-            margin-bottom: 8px;
-            -webkit-appearance: none;
-            appearance: none;
-        }
-        .window-body button {
-            padding: 8px 16px;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            border: none;
-            border-radius: 10px;
-            color: #fff;
-            font-weight: 600;
-            font-size: clamp(0.8rem, 1.6vw, 0.9rem);
-            cursor: pointer;
-            touch-action: manipulation;
-            min-height: 38px;
-        }
-        .window-body button:active {
-            transform: scale(0.95);
-        }
-        .window-body .app-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
-            gap: 6px;
-        }
-        .window-body .app-item {
-            background: rgba(255, 255, 255, 0.04);
-            padding: 10px;
-            border-radius: 8px;
-            text-align: center;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .window-body .app-item:active {
-            background: rgba(255, 255, 255, 0.1);
-            transform: scale(0.95);
-        }
-        .window-body .app-item .icon {
-            font-size: 1.8rem;
-        }
-        .window-body .app-item .name {
-            font-size: 0.6rem;
-            margin-top: 4px;
-            color: #8899bb;
-        }
+        .window{position:absolute;background:var(--surface);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.06);border-radius:var(--radius);box-shadow:0 8px 40px rgba(0,0,0,0.7);display:flex;flex-direction:column;overflow:hidden;min-width:200px;min-height:150px;max-width:98vw;max-height:90vh;touch-action:none}
+        .window.active{box-shadow:0 8px 60px rgba(0,212,255,0.12);border-color:rgba(0,212,255,0.15)}
+        .window-header{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:rgba(0,0,0,0.25);cursor:grab;flex-shrink:0;min-height:36px;touch-action:none}
+        .window-header:active{cursor:grabbing}
+        .window-title{font-size:clamp(0.75rem,1.8vw,0.9rem);font-weight:600;display:flex;align-items:center;gap:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+        .window-controls{display:flex;gap:4px;flex-shrink:0}
+        .win-btn{background:none;border:none;color:#8899bb;cursor:pointer;font-size:clamp(0.8rem,1.8vw,1rem);padding:2px 8px;border-radius:6px;touch-action:manipulation;min-width:28px;min-height:28px;display:flex;align-items:center;justify-content:center}
+        .win-btn:active{background:rgba(255,255,255,0.1)}
+        .win-btn.close:active{background:#ff4444;color:#fff}
+        .window-body{flex:1;padding:12px;overflow-y:auto;font-size:clamp(0.8rem,1.6vw,0.9rem);line-height:1.5;-webkit-overflow-scrolling:touch}
+        .window-body input,.window-body textarea,.window-body select{width:100%;padding:8px 12px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);border-radius:10px;color:#fff;font-size:clamp(0.8rem,1.6vw,0.9rem);margin-bottom:8px;-webkit-appearance:none;appearance:none}
+        .window-body button{padding:8px 16px;background:linear-gradient(135deg,var(--primary),var(--secondary));border:none;border-radius:10px;color:#fff;font-weight:600;font-size:clamp(0.8rem,1.6vw,0.9rem);cursor:pointer;touch-action:manipulation;min-height:38px}
+        .window-body button:active{transform:scale(0.95)}
+        .window-body .app-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:6px}
+        .window-body .app-item{background:rgba(255,255,255,0.04);padding:10px;border-radius:8px;text-align:center;cursor:pointer;transition:0.2s}
+        .window-body .app-item:active{background:rgba(255,255,255,0.1);transform:scale(0.95)}
+        .window-body .app-item .icon{font-size:1.8rem}
+        .window-body .app-item .name{font-size:0.6rem;margin-top:4px;color:#8899bb}
 
         /* ===== DOCK ===== */
-        #dock {
-            position: absolute;
-            bottom: clamp(8px, 2vh, 20px);
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 10;
-            display: flex;
-            gap: clamp(4px, 1vw, 8px);
-            background: rgba(10, 10, 30, 0.7);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            padding: clamp(6px, 1.5vw, 10px) clamp(10px, 2vw, 16px);
-            border-radius: 40px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            flex-wrap: nowrap;
-            max-width: 98vw;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-        }
-        .dock-item {
-            width: clamp(40px, 9vw, 48px);
-            height: clamp(40px, 9vw, 48px);
-            border-radius: 12px;
-            background: rgba(255, 255, 255, 0.04);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: clamp(1.2rem, 3.5vw, 1.4rem);
-            cursor: pointer;
-            border: none;
-            color: #fff;
-            touch-action: manipulation;
-            flex-shrink: 0;
-        }
-        .dock-item:active {
-            background: rgba(255, 255, 255, 0.15);
-            transform: scale(0.92);
-        }
+        #dock{position:absolute;bottom:clamp(8px,2vh,20px);left:50%;transform:translateX(-50%);z-index:10;display:flex;gap:clamp(4px,1vw,8px);background:rgba(10,10,30,0.7);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);padding:clamp(6px,1.5vw,10px) clamp(10px,2vw,16px);border-radius:40px;border:1px solid rgba(255,255,255,0.05);flex-wrap:nowrap;max-width:98vw;overflow-x:auto;-webkit-overflow-scrolling:touch}
+        .dock-item{width:clamp(40px,9vw,48px);height:clamp(40px,9vw,48px);border-radius:12px;background:rgba(255,255,255,0.04);display:flex;align-items:center;justify-content:center;font-size:clamp(1.2rem,3.5vw,1.4rem);cursor:pointer;border:none;color:#fff;touch-action:manipulation;flex-shrink:0}
+        .dock-item:active{background:rgba(255,255,255,0.15);transform:scale(0.92)}
 
         /* ===== NOTIFICATION ===== */
-        #notification {
-            position: fixed;
-            top: clamp(50px, 10vh, 70px);
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 999;
-            background: var(--surface);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            border-radius: var(--radius);
-            padding: 12px 24px;
-            max-width: 90%;
-            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6);
-            font-size: clamp(0.8rem, 1.6vw, 0.9rem);
-            display: none;
-            border-left: 4px solid var(--primary);
-        }
-        #notification.show {
-            display: block;
-            animation: slideDown 0.4s ease;
-        }
-        @keyframes slideDown {
-            from {
-                transform: translateX(-50%) translateY(-20px);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(-50%) translateY(0);
-                opacity: 1;
-            }
-        }
+        #notification{position:fixed;top:clamp(50px,10vh,70px);left:50%;transform:translateX(-50%);z-index:999;background:var(--surface);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.06);border-radius:var(--radius);padding:12px 24px;max-width:90%;box-shadow:0 8px 40px rgba(0,0,0,0.6);font-size:clamp(0.8rem,1.6vw,0.9rem);display:none;border-left:4px solid var(--primary)}
+        #notification.show{display:block;animation:slideDown 0.4s ease}
+        @keyframes slideDown{from{transform:translateX(-50%) translateY(-20px);opacity:0}to{transform:translateX(-50%) translateY(0);opacity:1}}
 
-        /* ===== ZWEI MENÜS (Links & Rechts) ===== */
-        #menu-left {
-            position: fixed;
-            left: 0;
-            top: 50%;
-            transform: translateY(-50%);
-            z-index: 100;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            background: rgba(10, 10, 30, 0.8);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            padding: 10px 6px;
-            border-radius: 0 14px 14px 0;
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            border-left: none;
-        }
-        #menu-right {
-            position: fixed;
-            right: 0;
-            top: 50%;
-            transform: translateY(-50%);
-            z-index: 100;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            background: rgba(10, 10, 30, 0.8);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            padding: 10px 6px;
-            border-radius: 14px 0 0 14px;
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            border-right: none;
-        }
-        .menu-item {
-            width: 40px;
-            height: 40px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.1rem;
-            cursor: pointer;
-            background: rgba(255, 255, 255, 0.04);
-            transition: 0.2s;
-            border: none;
-            color: #fff;
-            flex-direction: column;
-            gap: 1px;
-        }
-        .menu-item:active {
-            background: rgba(255, 255, 255, 0.15);
-            transform: scale(0.92);
-        }
-        .menu-item .label {
-            font-size: 0.45rem;
-            color: #8899bb;
-        }
-        .menu-item img {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            border: 2px solid var(--primary);
-        }
+        /* ===== MENÜS ===== */
+        #menu-left{position:fixed;left:0;top:50%;transform:translateY(-50%);z-index:100;display:flex;flex-direction:column;gap:6px;background:rgba(10,10,30,0.8);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);padding:10px 6px;border-radius:0 14px 14px 0;border:1px solid rgba(255,255,255,0.06);border-left:none}
+        #menu-right{position:fixed;right:0;top:50%;transform:translateY(-50%);z-index:100;display:flex;flex-direction:column;gap:6px;background:rgba(10,10,30,0.8);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);padding:10px 6px;border-radius:14px 0 0 14px;border:1px solid rgba(255,255,255,0.06);border-right:none}
+        .menu-item{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;cursor:pointer;background:rgba(255,255,255,0.04);transition:0.2s;border:none;color:#fff;flex-direction:column;gap:1px}
+        .menu-item:active{background:rgba(255,255,255,0.15);transform:scale(0.92)}
+        .menu-item .label{font-size:0.45rem;color:#8899bb}
+        .menu-item img{width:24px;height:24px;border-radius:50%;border:2px solid var(--primary)}
 
         /* ===== SCROLLBAR ===== */
-        .window-body::-webkit-scrollbar {
-            width: 4px;
-        }
-        .window-body::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        .window-body::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.15);
-            border-radius: 4px;
-        }
+        .window-body::-webkit-scrollbar{width:4px}
+        .window-body::-webkit-scrollbar-track{background:transparent}
+        .window-body::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.15);border-radius:4px}
 
         /* ===== RESPONSIVE ===== */
-        @media (max-width: 480px) {
-            .window {
-                border-radius: 12px;
-                min-width: 160px;
-                min-height: 120px;
-            }
-            .window-header {
-                padding: 6px 10px;
-                min-height: 32px;
-            }
-            .window-body {
-                padding: 10px;
-            }
-            #topbar {
-                padding: 4px 10px;
-                min-height: 34px;
-            }
-            .win-btn {
-                min-width: 24px;
-                min-height: 24px;
-                padding: 2px 6px;
-            }
-            .dock-item {
-                width: 36px;
-                height: 36px;
-                font-size: 1rem;
-            }
-            #dock {
-                padding: 6px 10px;
-                gap: 4px;
-            }
-            .menu-item {
-                width: 32px;
-                height: 32px;
-                font-size: 0.9rem;
-            }
-            #menu-left,
-            #menu-right {
-                padding: 6px 4px;
-                gap: 4px;
-            }
-        }
-        @media (orientation: landscape) and (max-height: 500px) {
-            .window {
-                max-height: 80vh;
-            }
-            #dock {
-                bottom: 4px;
-                padding: 4px 10px;
-                gap: 4px;
-            }
-            .dock-item {
-                width: 32px;
-                height: 32px;
-                font-size: 0.9rem;
-                border-radius: 10px;
-            }
-            #topbar {
-                min-height: 28px;
-                padding: 2px 10px;
-            }
-            .window-header {
-                min-height: 28px;
-                padding: 4px 10px;
-            }
-            .window-body {
-                padding: 8px;
-            }
-            .menu-item {
-                width: 28px;
-                height: 28px;
-                font-size: 0.8rem;
-            }
-            #menu-left,
-            #menu-right {
-                padding: 4px 3px;
-                gap: 3px;
-            }
-        }
+        @media(max-width:480px){.window{border-radius:12px;min-width:160px;min-height:120px}.window-header{padding:6px 10px;min-height:32px}.window-body{padding:10px}#topbar{padding:4px 10px;min-height:34px}.win-btn{min-width:24px;min-height:24px;padding:2px 6px}.dock-item{width:36px;height:36px;font-size:1rem}#dock{padding:6px 10px;gap:4px}.menu-item{width:32px;height:32px;font-size:0.9rem}#menu-left,#menu-right{padding:6px 4px;gap:4px}}
+        @media(orientation:landscape) and (max-height:500px){.window{max-height:80vh}#dock{bottom:4px;padding:4px 10px;gap:4px}.dock-item{width:32px;height:32px;font-size:0.9rem;border-radius:10px}#topbar{min-height:28px;padding:2px 10px}.window-header{min-height:28px;padding:4px 10px}.window-body{padding:8px}.menu-item{width:28px;height:28px;font-size:0.8rem}#menu-left,#menu-right{padding:4px 3px;gap:3px}}
     </style>
 </head>
 <body>
@@ -599,9 +122,7 @@
                     <button class="top-btn" id="btn-menu">📱</button>
                 </div>
             </div>
-
             <div id="app-container"></div>
-
             <div id="dock">
                 <button class="dock-item" data-app="ai">🤖</button>
                 <button class="dock-item" data-app="settings">⚙️</button>
@@ -616,60 +137,29 @@
         </div>
     </div>
 
-    <!-- NOTIFICATION -->
     <div id="notification"></div>
 
-    <!-- ===== ZWEI MENÜS ===== -->
+    <!-- MENÜS -->
     <div id="menu-left">
-        <div class="menu-item" id="menu-apps" title="App World">
-            <span>📱</span>
-            <span class="label">Apps</span>
-        </div>
-        <div class="menu-item" id="menu-ai" title="HalDo AI">
-            <span>🤖</span>
-            <span class="label">AI</span>
-        </div>
-        <div class="menu-item" id="menu-mail" title="E-Mail">
-            <span>✉️</span>
-            <span class="label">Mail</span>
-        </div>
-        <div class="menu-item" id="menu-chat" title="Chat">
-            <span>💬</span>
-            <span class="label">Chat</span>
-        </div>
-        <div class="menu-item" id="menu-contacts" title="Kontakte">
-            <span>👤</span>
-            <span class="label">Kontakte</span>
-        </div>
+        <div class="menu-item" id="menu-apps"><span>📱</span><span class="label">Apps</span></div>
+        <div class="menu-item" id="menu-ai"><span>🤖</span><span class="label">AI</span></div>
+        <div class="menu-item" id="menu-mail"><span>✉️</span><span class="label">Mail</span></div>
+        <div class="menu-item" id="menu-chat"><span>💬</span><span class="label">Chat</span></div>
+        <div class="menu-item" id="menu-contacts"><span>👤</span><span class="label">Kontakte</span></div>
     </div>
 
     <div id="menu-right">
-        <div class="menu-item" id="menu-system" title="System">
-            <span>⚙️</span>
-            <span class="label">System</span>
-        </div>
-        <div class="menu-item" id="menu-files" title="Dateien">
-            <span>📁</span>
-            <span class="label">Dateien</span>
-        </div>
-        <div class="menu-item" id="menu-settings" title="Einstellungen">
-            <span>⚙️</span>
-            <span class="label">Settings</span>
-        </div>
-        <div class="menu-item" id="menu-update" title="Update">
-            <span>🔄</span>
-            <span class="label">Update</span>
-        </div>
-        <div class="menu-item" id="menu-help" title="Hilfe">
-            <span>❓</span>
-            <span class="label">Hilfe</span>
-        </div>
+        <div class="menu-item" id="menu-system"><span>⚙️</span><span class="label">System</span></div>
+        <div class="menu-item" id="menu-files"><span>📁</span><span class="label">Dateien</span></div>
+        <div class="menu-item" id="menu-settings"><span>⚙️</span><span class="label">Settings</span></div>
+        <div class="menu-item" id="menu-update"><span>🔄</span><span class="label">Update</span></div>
+        <div class="menu-item" id="menu-help"><span>❓</span><span class="label">Hilfe</span></div>
     </div>
 
     <script>
         // ================================================================
-        //  HALDO OS 24 — ULTIMATE EDITION
-        //  ALLES IN EINER DATEI — PROFESSIONELL, LEBENDIG, KOMPLETT
+        //  HALDO AI OS 24 — ULTIMATE EDITION
+        //  ALLES IN EINER DATEI — KOMPLETT
         //  Version 24.0.0 — Build 2025.08.30
         // ================================================================
 
@@ -745,7 +235,7 @@
             }
 
             // ============================================================
-            //  AI ENGINE — Groq API
+            //  AI ENGINE
             // ============================================================
             var aiEngine = {
                 ask: function(question, language) {
@@ -763,7 +253,7 @@
                                     { role: 'system',
                                         content: 'Du bist HalDo, ein intelligenter Assistent. Du bist wie ein Professor, Doktor und Philosoph. Du antwortest auf ' +
                                         language +
-                                        '. Du hilfst bei Wissenschaft, Geschichte, Kultur, Technik, Philosophie, und allen anderen Themen. Du bist freundlich, hilfsbereit und präzise. Du unterstützt auch Êzîdî, Kurdisch und andere Minderheiten-Sprachen. Du kannst Apps öffnen, wenn der Benutzer sagt: "Öffne [App-Name]". Du kannst Texte schreiben, korrigieren, formulieren und zusammenfassen.'
+                                        '. Du hilfst bei Wissenschaft, Geschichte, Kultur, Technik, Philosophie, und allen anderen Themen. Du bist freundlich, hilfsbereit und präzise. Du unterstützt auch Êzîdî, Kurdisch und andere Minderheiten-Sprachen.'
                                         },
                                     { role: 'user', content: question }
                                 ],
@@ -801,7 +291,6 @@
                         'cosmic': ['cosmic', 'weltraum', 'space'],
                         'appworld': ['app world', 'apps', 'anwendungen']
                     };
-
                     for (var appId in commands) {
                         for (var i = 0; i < commands[appId].length; i++) {
                             if (lower.includes('öffne ' + commands[appId][i]) ||
@@ -812,11 +301,32 @@
                         }
                     }
                     return null;
+                },
+
+                getFallback: function(cmd) {
+                    var lower = cmd.toLowerCase();
+                    if (lower.includes('ezidi') || lower.includes('êzîdî')) {
+                        return '🟡 Êzîdî ist eine der ältesten monotheistischen Religionen. Die Êzîdî haben eine reiche Kultur, Musik, Poesie und eine eigene Sprache (Kurmanji).';
+                    }
+                    if (lower.includes('quanten')) {
+                        return '⚛️ Die Quantenmechanik beschreibt die Welt der kleinsten Teilchen. Teilchen können sich an mehreren Orten gleichzeitig befinden (Superposition).';
+                    }
+                    if (lower.includes('relativität')) {
+                        return '🌌 Einsteins Relativitätstheorie veränderte unser Verständnis von Raum und Zeit. Die Lichtgeschwindigkeit ist für alle Beobachter gleich.';
+                    }
+                    if (lower.includes('philosophie')) {
+                        return '🤔 Philosophie ist die Liebe zur Weisheit. Sie fragt nach dem Sinn des Lebens, der Wahrheit, der Ethik und dem Wissen.';
+                    }
+                    if (lower.includes('hilfe')) {
+                        return '❓ Ich kann dir helfen bei: Wissenschaft, Geschichte, Kultur, Technik, Philosophie, Schreiben, Übersetzen, Programmieren, und vielem mehr.';
+                    }
+                    return '💡 Ich habe verstanden: "' + cmd +
+                        '". Ich kann dir bei Wissenschaft, Geschichte, Kultur, Technik, Philosophie und vielem mehr helfen.';
                 }
             };
 
             // ============================================================
-            //  VOICE — Sprachausgabe & -eingabe
+            //  VOICE
             // ============================================================
             var voice = {
                 isListening: false,
@@ -838,8 +348,6 @@
                     } else {
                         console.log('[Voice] Speech Recognition nicht unterstützt');
                     }
-
-                    // Mikrofon-Berechtigung anfragen
                     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
                         navigator.mediaDevices.getUserMedia({ audio: true })
                             .then(function(stream) {
@@ -880,7 +388,6 @@
                     this.isListening = false;
                     notify('🎤 "' + text + '"', 'success');
                     this.updateAIStatus('thinking', '🧠 denkt ...');
-
                     var cmd = aiEngine.handleCommand(text);
                     if (cmd && cmd.command === 'open') {
                         if (state.apps[cmd.app]) {
@@ -890,7 +397,6 @@
                             return;
                         }
                     }
-
                     var input = document.getElementById('ai-input');
                     if (input) {
                         input.value = text;
@@ -968,14 +474,12 @@
             function launchApp(id) {
                 var app = state.apps[id];
                 if (!app) { notify('❌ App "' + id + '" nicht gefunden', 'error'); return; }
-
                 for (var i = 0; i < state.windows.length; i++) {
                     if (state.windows[i].appId === id) {
                         focusWindow(state.windows[i].id);
                         return;
                     }
                 }
-
                 var pos = getSafePosition();
                 var winId = 'win-' + Date.now();
                 var win = {
@@ -990,7 +494,6 @@
                     zIndex: state.windowZIndex++,
                     element: null
                 };
-
                 state.windows.push(win);
                 renderWindow(win);
                 focusWindow(winId);
@@ -1002,7 +505,6 @@
             function renderWindow(win) {
                 var existing = document.getElementById(win.id);
                 if (existing) existing.remove();
-
                 var el = document.createElement('div');
                 el.id = win.id;
                 el.className = 'window';
@@ -1012,11 +514,9 @@
                 el.style.height = win.height + 'px';
                 el.style.zIndex = win.zIndex;
                 el.dataset.appId = win.appId;
-
                 el.innerHTML =
                     '<div class="window-header"><span class="window-title">' + win.icon + ' ' + win.title +
                     '</span><div class="window-controls"><button class="win-btn" data-action="minimize">─</button><button class="win-btn" data-action="maximize">⧉</button><button class="win-btn close" data-action="close">✕</button></div></div><div class="window-body"></div>';
-
                 appContainer.appendChild(el);
                 win.element = el;
 
@@ -1194,7 +694,7 @@
             }
 
             // ============================================================
-            //  COSMIC WORLD — MIT 12 PLANETEN, STUNDE/MINUTE/SEKUNDE
+            //  COSMIC WORLD
             // ============================================================
             function initCosmic() {
                 var ctx = cosmicCanvas.getContext('2d');
@@ -1207,7 +707,6 @@
                 window.addEventListener('resize', resize);
                 resize();
 
-                // ===== STERNE (2500) =====
                 var stars = [];
                 for (var i = 0; i < 2500; i++) {
                     stars.push({
@@ -1221,18 +720,8 @@
                     });
                 }
 
-                // ===== SONNE =====
-                var sun = {
-                    x: W / 2,
-                    y: H / 2,
-                    radius: 55,
-                    glow: 220,
-                    phase: 0,
-                    pulseSpeed: 0.008,
-                    flares: 16
-                };
+                var sun = { x: W / 2, y: H / 2, radius: 55, glow: 220, phase: 0, pulseSpeed: 0.008, flares: 16 };
 
-                // ===== 12 PLANETEN (mit Stunde/Minute/Sekunde) =====
                 var planetData = [
                     { name: 'Merkur', r: 8, color: '#aaaaaa', orbit: 80, speed: 0.03, role: 'second' },
                     { name: 'Venus', r: 12, color: '#ffaa44', orbit: 120, speed: 0.022, role: 'minute' },
@@ -1265,20 +754,8 @@
                     });
                 }
 
-                // ===== MOND =====
-                var moon = {
-                    x: 0,
-                    y: 0,
-                    r: 6,
-                    color: '#cccccc',
-                    orbit: 30,
-                    speed: 0.08,
-                    angle: 0,
-                    ex: 0,
-                    ey: 0
-                };
+                var moon = { x: 0, y: 0, r: 6, color: '#cccccc', orbit: 30, speed: 0.08, angle: 0, ex: 0, ey: 0 };
 
-                // ===== STERNSCHNUPPEN =====
                 var shootingStars = [];
 
                 function createShootingStar() {
@@ -1294,7 +771,6 @@
                 setInterval(function() { if (Math.random() > 0.3) createShootingStar(); }, 30000 + Math.random() *
                 30000);
 
-                // ===== ANIMATION =====
                 function animate() {
                     var time = Date.now() / 2000;
                     var now = new Date();
@@ -1304,7 +780,6 @@
 
                     ctx.clearRect(0, 0, W, H);
 
-                    // === HINTERGRUND ===
                     var bgGrad = ctx.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, W * 0.9);
                     var hue1 = 220 + 20 * Math.sin(time * 0.1);
                     var hue2 = 240 + 30 * Math.sin(time * 0.07 + 1);
@@ -1314,7 +789,6 @@
                     ctx.fillStyle = bgGrad;
                     ctx.fillRect(0, 0, W, H);
 
-                    // === PLANETEN-TRAILS ===
                     for (var pt = 0; pt < planets.length; pt++) {
                         var pTrail = planets[pt];
                         if (pTrail.trail) {
@@ -1328,7 +802,6 @@
                         }
                     }
 
-                    // === SONNE ===
                     sun.phase += sun.pulseSpeed;
                     var pulse = 1 + 0.06 * Math.sin(sun.phase);
                     var radius = sun.radius * pulse;
@@ -1371,7 +844,6 @@
                     ctx.fillText('⟡', sun.x, sun.y - radius * 0.05);
                     ctx.shadowBlur = 0;
 
-                    // Sonnenstrahlen
                     for (var fl = 0; fl < sun.flares; fl++) {
                         var fAngle = fl * (Math.PI / (sun.flares / 2)) + sun.phase * 0.3;
                         var len = radius * (1.5 + 0.5 * Math.sin(sun.phase * 0.7 + fl * 0.5));
@@ -1383,7 +855,6 @@
                         ctx.stroke();
                     }
 
-                    // Sonnenflecken
                     for (var sf = 0; sf < 8; sf++) {
                         var spotAngle = sf * 1.1 + sun.phase * 0.4;
                         var spotR = radius * (0.2 + 0.15 * Math.sin(sun.phase * 0.6 + sf));
@@ -1395,11 +866,9 @@
                         ctx.fill();
                     }
 
-                    // === PLANETEN ===
                     for (var pp = 0; pp < planets.length; pp++) {
                         var pl = planets[pp];
 
-                        // Uhrzeit-Rotation
                         if (pl.role === 'second') {
                             pl.angle = (seconds / 60) * Math.PI * 2;
                         } else if (pl.role === 'minute') {
@@ -1413,7 +882,6 @@
                         var px = pl.cx + Math.cos(pl.angle) * pl.orbit;
                         var py = pl.cy + Math.sin(pl.angle) * pl.orbit;
 
-                        // Trail für normale Planeten
                         if (pl.role === 'normal') {
                             if (!pl.trail) pl.trail = [];
                             pl.trail.push({ x: px, y: py, life: 1 });
@@ -1423,7 +891,6 @@
                             }
                         }
 
-                        // Orbit
                         ctx.strokeStyle = 'rgba(255,255,255,0.015)';
                         ctx.lineWidth = 1;
                         ctx.setLineDash([3, 6]);
@@ -1432,7 +899,6 @@
                         ctx.stroke();
                         ctx.setLineDash([]);
 
-                        // Planet-Glow
                         var pGlow = ctx.createRadialGradient(px, py, 0, px, py, pl.r * 2.5);
                         pGlow.addColorStop(0, pl.color + '30');
                         pGlow.addColorStop(1, 'rgba(0,0,0,0)');
@@ -1441,7 +907,6 @@
                         ctx.arc(px, py, pl.r * 2.5, 0, Math.PI * 2);
                         ctx.fill();
 
-                        // Planet
                         ctx.shadowColor = pl.color;
                         ctx.shadowBlur = 15;
                         ctx.fillStyle = pl.color;
@@ -1450,7 +915,6 @@
                         ctx.fill();
                         ctx.shadowBlur = 0;
 
-                        // Saturn-Ring
                         if (pl.name === 'Saturn') {
                             ctx.strokeStyle = 'rgba(200, 180, 150, 0.3)';
                             ctx.lineWidth = 3;
@@ -1464,14 +928,12 @@
                             ctx.stroke();
                         }
 
-                        // Planeten-Name
                         ctx.fillStyle = 'rgba(255,255,255,0.2)';
                         ctx.font = '8px sans-serif';
                         ctx.textAlign = 'center';
                         ctx.textBaseline = 'top';
                         ctx.fillText(pl.name, px, py + pl.r + 4);
 
-                        // Rolle anzeigen
                         if (pl.role === 'second') {
                             ctx.fillStyle = 'rgba(255,200,100,0.3)';
                             ctx.font = '6px sans-serif';
@@ -1486,14 +948,12 @@
                             ctx.fillText('⏱ Stunde', px, py + pl.r + 18);
                         }
 
-                        // Erde speichern für Mond
                         if (pl.name === 'Erde') {
                             moon.ex = px;
                             moon.ey = py;
                         }
                     }
 
-                    // === MOND ===
                     if (moon.ex !== undefined) {
                         moon.angle += moon.speed;
                         moon.x = moon.ex + Math.cos(moon.angle) * moon.orbit;
@@ -1530,7 +990,6 @@
                         ctx.fillText('🌙 Mond', moon.x, moon.y + moon.r + 2);
                     }
 
-                    // === STERNE ===
                     var time2 = Date.now() / 3000;
                     for (var st = 0; st < stars.length; st++) {
                         var s2 = stars[st];
@@ -1546,7 +1005,6 @@
                     }
                     ctx.globalAlpha = 1;
 
-                    // === STERNSCHNUPPEN ===
                     for (var ss = shootingStars.length - 1; ss >= 0; ss--) {
                         var ss2 = shootingStars[ss];
                         ss2.x += ss2.vx;
@@ -1568,7 +1026,6 @@
                         ctx.stroke();
                     }
 
-                    // === UHRZEIT ANZEIGE ===
                     var hh = String(now.getHours()).padStart(2, '0');
                     var mm2 = String(now.getMinutes()).padStart(2, '0');
                     var ss3 = String(now.getSeconds()).padStart(2, '0');
@@ -1578,7 +1035,6 @@
                     ctx.textBaseline = 'bottom';
                     ctx.fillText('🕐 ' + hh + ':' + mm2 + ':' + ss3, 16, H - 60);
 
-                    // Legende
                     ctx.fillStyle = 'rgba(255,255,255,0.06)';
                     ctx.font = '8px sans-serif';
                     ctx.textAlign = 'left';
@@ -1591,7 +1047,6 @@
 
                 animate();
 
-                // ===== SONNE KLICKBAR =====
                 cosmicCanvas.addEventListener('click', function(e) {
                     var rect = cosmicCanvas.getBoundingClientRect();
                     var x = e.clientX - rect.left;
@@ -1628,10 +1083,10 @@
             }
 
             // ============================================================
-            //  APP RENDERER — ALLE 84 APPS
+            //  APPS
             // ============================================================
 
-            // ---- 1. AI App ----
+            // AI App
             registerApp('ai', {
                 title: 'HalDo AI 24',
                 icon: '🤖',
@@ -1682,29 +1137,7 @@
                             stateEl.textContent = '● bereit';
                             stateEl.style.color = '#44ff88';
                         }).catch(function() {
-                            // Fallback Antworten
-                            var lower = cmd.toLowerCase();
-                            var fallback = '';
-                            if (lower.includes('ezidi') || lower.includes('êzîdî')) {
-                                fallback =
-                                    '🟡 Êzîdî ist eine der ältesten monotheistischen Religionen. Die Êzîdî haben eine reiche Kultur, Musik, Poesie und eine eigene Sprache (Kurmanji).';
-                            } else if (lower.includes('quanten')) {
-                                fallback =
-                                    '⚛️ Die Quantenmechanik beschreibt die Welt der kleinsten Teilchen. Teilchen können sich an mehreren Orten gleichzeitig befinden (Superposition).';
-                            } else if (lower.includes('relativität')) {
-                                fallback =
-                                    '🌌 Einsteins Relativitätstheorie veränderte unser Verständnis von Raum und Zeit. Die Lichtgeschwindigkeit ist für alle Beobachter gleich.';
-                            } else if (lower.includes('philosophie')) {
-                                fallback =
-                                    '🤔 Philosophie ist die Liebe zur Weisheit. Sie fragt nach dem Sinn des Lebens, der Wahrheit, der Ethik und dem Wissen.';
-                            } else if (lower.includes('brief')) {
-                                fallback =
-                                    '✉️ Ein Brief hat: Anrede, Einleitung, Hauptteil, Schluss, Grußformel und Unterschrift. Möchtest du einen Brief schreiben?';
-                            } else {
-                                fallback =
-                                    '💡 Ich habe verstanden: "' + cmd +
-                                    '". Ich kann dir bei Wissenschaft, Geschichte, Kultur, Technik, Philosophie und vielem mehr helfen.';
-                            }
+                            var fallback = aiEngine.getFallback(cmd);
                             addMsg('ai', fallback);
                             stateEl.textContent = '● bereit';
                             stateEl.style.color = '#44ff88';
@@ -1739,153 +1172,13 @@
                 }
             });
 
-            // ---- 2. Mail App ----
-            registerApp('email', {
-                title: 'HalDo Mail',
-                icon: '✉️',
-                render: function(body) {
-                    var inbox = state.mail.inbox.length ? state.mail.inbox : [
-                        { from: 'info@haldo.ai', subject: 'Willkommen bei HalDo Mail!', date: 'Heute',
-                            preview: 'Dein neues Mail-Konto ist bereit.' },
-                        { from: 'system@haldo.ai', subject: 'HalDo OS 24 Update', date: 'Gestern',
-                            preview: 'Neue Funktionen verfügbar.' }
-                    ];
-                    var html =
-                        '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;"><button id="mail-inbox" style="flex:1;">📥 Posteingang</button><button id="mail-sent" style="flex:1;background:rgba(255,255,255,0.06);">📤 Gesendet</button><button id="mail-new" style="flex:1;background:var(--secondary,#7b2ffc);">✏️ Neu</button></div><div style="flex:1;overflow-y:auto;max-height:280px;">';
-                    for (var i = 0; i < inbox.length; i++) {
-                        var m = inbox[i];
-                        html +=
-                            '<div style="padding:6px 10px;background:rgba(255,255,255,0.03);border-radius:8px;margin:4px 0;cursor:pointer;border-left:3px solid #00d4ff;" onclick="HalDo.notify(\'📧 ' +
-                            m.subject + ' von ' + m.from + '\')"><div style="display:flex;justify-content:space-between;font-size:0.8rem;"><span style="font-weight:600;">' +
-                            m.from + '</span><span style="color:#8899bb;">' + m.date +
-                            '</span></div><div style="font-size:0.85rem;">' + m.subject +
-                            '</div><div style="font-size:0.7rem;color:#8899bb;">' + m.preview +
-                            '</div></div>';
-                    }
-                    html +=
-                        '</div><div style="font-size:0.6rem;color:#8899bb;border-top:1px solid rgba(255,255,255,0.04);padding-top:6px;display:flex;justify-content:space-between;"><span>📊 ' +
-                        inbox.length + ' Nachrichten</span><span>✉️ user@haldo.ai</span></div>';
-                    body.innerHTML = html;
-
-                    body.querySelector('#mail-new').addEventListener('click', function() {
-                        var to = prompt('📧 Empfänger:');
-                        if (to) {
-                            var sub = prompt('📝 Betreff:');
-                            if (sub !== null) {
-                                var txt = prompt('✍️ Nachricht:');
-                                if (txt !== null) {
-                                    state.mail.sent.push({ to: to, subject: sub, text: txt, date: 'Heute' });
-                                    localStorage.setItem('haldo_mail', JSON.stringify(state.mail));
-                                    notify('✅ E-Mail gesendet!', 'success');
-                                }
-                            }
-                        }
-                    });
-                    body.querySelector('#mail-inbox').addEventListener('click', function() {
-                        notify('📥 Posteingang: ' + state.mail.inbox.length + ' Nachrichten');
-                    });
-                    body.querySelector('#mail-sent').addEventListener('click', function() {
-                        notify('📤 Gesendet: ' + state.mail.sent.length + ' Nachrichten');
-                    });
-                }
-            });
-
-            // ---- 3. Chat App ----
-            registerApp('messages', {
-                title: 'HalDo Chat',
-                icon: '💬',
-                render: function(body) {
-                    var contacts = state.contacts.length ? state.contacts : [
-                        { name: 'Max Mustermann', status: 'online', last: 'Heute' },
-                        { name: 'Ella Schmidt', status: 'offline', last: 'Gestern' },
-                        { name: 'HalDo AI', status: 'online', last: 'gerade' }
-                    ];
-                    var html =
-                        '<div style="display:flex;gap:6px;margin-bottom:8px;"><input type="text" id="chat-search" placeholder="🔍 Kontakt suchen ..." style="flex:1;" /><button id="chat-new">➕</button></div><div style="flex:1;overflow-y:auto;max-height:280px;">';
-                    for (var i = 0; i < contacts.length; i++) {
-                        var c = contacts[i];
-                        html +=
-                            '<div style="padding:6px 10px;background:rgba(255,255,255,0.03);border-radius:8px;margin:4px 0;cursor:pointer;display:flex;justify-content:space-between;align-items:center;" onclick="HalDo.notify(\'💬 Chat mit ' +
-                            c.name + '\')"><div><div style="font-weight:600;font-size:0.85rem;">' + c.name +
-                            '</div><div style="font-size:0.7rem;color:#8899bb;">' + c.status + ' · ' + c.last +
-                            '</div></div><div style="font-size:1.2rem;">' + (c.status === 'online' ? '🟢' :
-                            '⚪') + '</div></div>';
-                    }
-                    html +=
-                        '</div><div style="font-size:0.6rem;color:#8899bb;border-top:1px solid rgba(255,255,255,0.04);padding-top:6px;display:flex;justify-content:space-between;"><span>💬 ' +
-                        contacts.length + ' Kontakte</span><span>🟢 ' + contacts.filter(function(c) { return c
-                            .status === 'online'; }).length + ' online</span></div>';
-                    body.innerHTML = html;
-
-                    body.querySelector('#chat-new').addEventListener('click', function() {
-                        var name = prompt('👤 Kontaktname:');
-                        if (name) {
-                            state.contacts.push({ name: name, status: 'online', last: 'Heute' });
-                            localStorage.setItem('haldo_contacts', JSON.stringify(state.contacts));
-                            notify('👤 ' + name + ' hinzugefügt');
-                            var win = state.windows.find(function(w) { return w.appId === 'messages'; });
-                            if (win && win.element) {
-                                var b = win.element.querySelector('.window-body');
-                                state.apps['messages'].render(b);
-                            }
-                        }
-                    });
-                }
-            });
-
-            // ---- 4. Contacts App ----
-            registerApp('contacts', {
-                title: 'Kontakte',
-                icon: '👤',
-                render: function(body) {
-                    var contacts = state.contacts.length ? state.contacts : [
-                        { name: 'Max Mustermann', mail: 'max@haldo.ai', phone: '+49 123 456789' },
-                        { name: 'Ella Schmidt', mail: 'ella@haldo.ai', phone: '+49 987 654321' },
-                        { name: 'HalDo AI', mail: 'ai@haldo.ai', phone: '-' }
-                    ];
-                    var html =
-                        '<div style="display:flex;gap:6px;margin-bottom:8px;"><input type="text" id="contacts-search" placeholder="🔍 Suche ..." style="flex:1;" /><button id="contacts-new">➕</button></div><div style="flex:1;overflow-y:auto;max-height:280px;">';
-                    for (var i = 0; i < contacts.length; i++) {
-                        var c = contacts[i];
-                        html +=
-                            '<div style="padding:6px 10px;background:rgba(255,255,255,0.03);border-radius:8px;margin:4px 0;cursor:pointer;" onclick="HalDo.notify(\'👤 ' +
-                            c.name + ' · ' + c.mail + '\')"><div style="font-weight:600;font-size:0.85rem;">' +
-                            c.name + '</div><div style="font-size:0.7rem;color:#8899bb;">' + c.mail + ' · ' + c
-                            .phone + '</div></div>';
-                    }
-                    html +=
-                        '</div><div style="font-size:0.6rem;color:#8899bb;border-top:1px solid rgba(255,255,255,0.04);padding-top:6px;">👤 ' +
-                        contacts.length + ' Kontakte</div>';
-                    body.innerHTML = html;
-
-                    body.querySelector('#contacts-new').addEventListener('click', function() {
-                        var name = prompt('👤 Name:');
-                        if (name) {
-                            var mail = prompt('✉️ E-Mail:');
-                            state.contacts.push({ name: name, mail: mail || '-', phone: '-' });
-                            localStorage.setItem('haldo_contacts', JSON.stringify(state.contacts));
-                            notify('👤 ' + name + ' hinzugefügt');
-                            var win = state.windows.find(function(w) { return w.appId === 'contacts'; });
-                            if (win && win.element) {
-                                var b = win.element.querySelector('.window-body');
-                                state.apps['contacts'].render(b);
-                            }
-                        }
-                    });
-                }
-            });
-
-            // ---- 5. Settings App ----
+            // Settings App
             registerApp('settings', {
                 title: 'Einstellungen',
                 icon: '⚙️',
                 render: function(body) {
-                    var languages = {
-                        'de': '🇩🇪 Deutsch',
-                        'en': '🇬🇧 English',
-                        'ku': '🇰🇲 Kurmancî',
-                        'ezidi': '𒀭 Êzîdî'
-                    };
+                    var languages = { 'de': '🇩🇪 Deutsch', 'en': '🇬🇧 English', 'ku': '🇰🇲 Kurmancî',
+                        'ezidi': '𒀭 Êzîdî' };
                     var html =
                         '<h3 style="margin-bottom:8px;font-size:0.9rem;">⚙️ System-Einstellungen</h3><div style="display:flex;flex-direction:column;gap:8px;"><div><label style="font-size:0.75rem;color:#8899bb;">Sprache / Language</label><select id="settings-language" style="width:100%;">';
                     for (var key in languages) {
@@ -1905,7 +1198,7 @@
                 }
             });
 
-            // ---- 6. Files App ----
+            // Files App
             registerApp('files', {
                 title: 'Datei-Manager',
                 icon: '📁',
@@ -1946,7 +1239,7 @@
                 }
             });
 
-            // ---- 7. Notes App ----
+            // Notes App
             registerApp('notes', {
                 title: 'Notizen',
                 icon: '📝',
@@ -2008,7 +1301,7 @@
                 }
             });
 
-            // ---- 8. Cosmic App ----
+            // Cosmic App
             registerApp('cosmic', {
                 title: 'Cosmic World',
                 icon: '🌌',
@@ -2018,7 +1311,7 @@
                 }
             });
 
-            // ---- 9. Calendar App ----
+            // Calendar App
             registerApp('calendar', {
                 title: 'Kalender',
                 icon: '📅',
@@ -2052,7 +1345,7 @@
                 }
             });
 
-            // ---- 10. Music App ----
+            // Music App
             registerApp('music', {
                 title: 'Musik',
                 icon: '🎵',
@@ -2075,7 +1368,7 @@
                 }
             });
 
-            // ---- 11. Terminal App ----
+            // Terminal App
             registerApp('terminal', {
                 title: 'Terminal',
                 icon: '⌨️',
@@ -2140,7 +1433,7 @@
                 }
             });
 
-            // ---- 12. App World ----
+            // App World
             registerApp('appworld', {
                 title: 'App World 24',
                 icon: '📱',
@@ -2166,7 +1459,7 @@
                 }
             });
 
-            // ---- ALLE ANDEREN 72 APPS (Platzhalter mit voller Funktion) ----
+            // ===== ALLE ANDEREN APPS =====
             var moreApps = [
                 { id: 'calculator', title: 'Calculator', icon: '🧮' },
                 { id: 'camera', title: 'Camera', icon: '📷' },
@@ -2273,14 +1566,11 @@
             }
 
             function initMenus() {
-                // Linkes Menü (Apps)
                 document.getElementById('menu-apps').addEventListener('click', function() { launchApp('appworld'); });
                 document.getElementById('menu-ai').addEventListener('click', function() { launchApp('ai'); });
                 document.getElementById('menu-mail').addEventListener('click', function() { launchApp('email'); });
                 document.getElementById('menu-chat').addEventListener('click', function() { launchApp('messages'); });
                 document.getElementById('menu-contacts').addEventListener('click', function() { launchApp('contacts'); });
-
-                // Rechtes Menü (System)
                 document.getElementById('menu-system').addEventListener('click', function() { launchApp('settings'); });
                 document.getElementById('menu-files').addEventListener('click', function() { launchApp('files'); });
                 document.getElementById('menu-settings').addEventListener('click', function() { launchApp('settings'); });
@@ -2319,7 +1609,6 @@
             }
 
             function init() {
-                // Settings laden
                 try {
                     var saved = localStorage.getItem('haldo_settings');
                     if (saved) {
@@ -2332,23 +1621,13 @@
                     }
                 } catch (e) {}
 
-                // Voice init
                 voice.init();
-
-                // Cosmic starten
                 initCosmic();
-
-                // Clock
                 updateClock();
                 setInterval(updateClock, 10000);
-
-                // Dock
                 initDock();
-
-                // Menüs
                 initMenus();
 
-                // Topbar
                 document.getElementById('btn-ai').addEventListener('click', function() { launchApp('ai'); });
                 document.getElementById('btn-settings').addEventListener('click', function() { launchApp('settings'); });
                 document.getElementById('btn-about').addEventListener('click', function() {
@@ -2361,7 +1640,6 @@
                     launchApp('appworld');
                 });
 
-                // Globale API
                 window.HalDo = {
                     launchApp: launchApp,
                     notify: notify,
@@ -2372,7 +1650,6 @@
                     get apps() { return state.apps; }
                 };
 
-                // Boot starten
                 bootSequence();
 
                 console.log('⟡ HalDo OS ' + CONFIG.version + ' — Ultimate Edition');
