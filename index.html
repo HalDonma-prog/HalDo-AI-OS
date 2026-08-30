@@ -9,6 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <link rel="manifest" href="data:application/json,{}" />
     <style>
+        /* ===== GLOBAL ===== */
         * {
             margin: 0;
             padding: 0;
@@ -44,6 +45,8 @@
             flex-direction: column;
             overflow: hidden;
         }
+
+        /* ===== BOOT ===== */
         #boot {
             position: fixed;
             inset: 0;
@@ -97,6 +100,8 @@
                 transform: rotate(360deg);
             }
         }
+
+        /* ===== COSMIC CANVAS ===== */
         #cosmic {
             position: absolute;
             inset: 0;
@@ -105,6 +110,8 @@
             width: 100%;
             height: 100%;
         }
+
+        /* ===== DISPLAY ===== */
         #display {
             position: relative;
             z-index: 1;
@@ -115,6 +122,8 @@
             padding-top: var(--safe-top);
             padding-bottom: var(--safe-bottom);
         }
+
+        /* ===== TOPBAR ===== */
         #topbar {
             display: flex;
             justify-content: space-between;
@@ -167,6 +176,8 @@
         .top-btn:active {
             background: rgba(255, 255, 255, 0.1);
         }
+
+        /* ===== APP CONTAINER ===== */
         #app-container {
             flex: 1;
             position: relative;
@@ -174,6 +185,8 @@
             overflow: hidden;
             touch-action: none;
         }
+
+        /* ===== WINDOW ===== */
         .window {
             position: absolute;
             background: var(--surface);
@@ -283,6 +296,8 @@
         .window-body button:active {
             transform: scale(0.95);
         }
+
+        /* ===== DOCK ===== */
         #dock {
             position: absolute;
             bottom: clamp(8px, 2vh, 20px);
@@ -321,6 +336,8 @@
             background: rgba(255, 255, 255, 0.15);
             transform: scale(0.92);
         }
+
+        /* ===== NOTIFICATION ===== */
         #notification {
             position: fixed;
             top: clamp(50px, 10vh, 70px);
@@ -353,6 +370,8 @@
                 opacity: 1;
             }
         }
+
+        /* ===== SCROLLBAR ===== */
         .window-body::-webkit-scrollbar {
             width: 4px;
         }
@@ -363,6 +382,8 @@
             background: rgba(255, 255, 255, 0.15);
             border-radius: 4px;
         }
+
+        /* ===== RESPONSIVE ===== */
         @media (max-width: 480px) {
             .window {
                 border-radius: 12px;
@@ -426,15 +447,21 @@
 </head>
 <body>
     <div id="root">
+        <!-- BOOT -->
         <div id="boot">
             <div id="boot-logo">
-                <img src="assets/logo.png" alt="HalDo Logo" onerror="this.parentElement.textContent='⟡ HalDo';" />
+                <img src="assets/logo.png" alt="HalDo Logo" onerror="this.parentElement.textContent='⟡ HalDo';this.parentElement.style.fontSize='clamp(3rem,12vw,5rem)';this.parentElement.style.fontWeight='900';this.parentElement.style.background='linear-gradient(135deg,#00d4ff,#7b2ffc)';this.parentElement.style.webkitBackgroundClip='text';this.parentElement.style.webkitTextFillColor='transparent';" />
             </div>
             <div class="boot-spinner"></div>
             <div id="boot-status">⟡ System wird initialisiert ...</div>
         </div>
+
+        <!-- COSMIC CANVAS -->
         <canvas id="cosmic"></canvas>
+
+        <!-- DISPLAY -->
         <div id="display">
+            <!-- TOPBAR -->
             <div id="topbar">
                 <div id="topbar-left">
                     <span class="haldo-icon" id="menu-system">
@@ -444,35 +471,62 @@
                     <span id="clock-display">--:--</span>
                 </div>
                 <div id="topbar-right">
-                    <button class="top-btn" id="btn-appworld">📱</button>
-                    <button class="top-btn" id="btn-ai">🤖</button>
-                    <button class="top-btn" id="btn-settings">⚙️</button>
-                    <button class="top-btn" id="btn-about">ℹ️</button>
+                    <button class="top-btn" id="btn-appworld" title="App World">📱</button>
+                    <button class="top-btn" id="btn-ai" title="HalDo AI">🤖</button>
+                    <button class="top-btn" id="btn-settings" title="Einstellungen">⚙️</button>
+                    <button class="top-btn" id="btn-about" title="Info">ℹ️</button>
                 </div>
             </div>
+
+            <!-- APP CONTAINER -->
             <div id="app-container"></div>
+
+            <!-- DOCK -->
             <div id="dock">
-                <button class="dock-item" data-app="ai">🤖</button>
-                <button class="dock-item" data-app="settings">⚙️</button>
-                <button class="dock-item" data-app="files">📁</button>
-                <button class="dock-item" data-app="notes">📝</button>
-                <button class="dock-item" data-app="cosmic">🌌</button>
-                <button class="dock-item" data-app="calendar">📅</button>
-                <button class="dock-item" data-app="music">🎵</button>
-                <button class="dock-item" data-app="terminal">⌨️</button>
-                <button class="dock-item" data-app="appworld">📱</button>
+                <button class="dock-item" data-app="ai" title="HalDo AI">🤖</button>
+                <button class="dock-item" data-app="settings" title="Einstellungen">⚙️</button>
+                <button class="dock-item" data-app="files" title="Dateien">📁</button>
+                <button class="dock-item" data-app="notes" title="Notizen">📝</button>
+                <button class="dock-item" data-app="cosmic" title="Cosmic World">🌌</button>
+                <button class="dock-item" data-app="calendar" title="Kalender">📅</button>
+                <button class="dock-item" data-app="music" title="Musik">🎵</button>
+                <button class="dock-item" data-app="terminal" title="Terminal">⌨️</button>
+                <button class="dock-item" data-app="email" title="E-Mail">✉️</button>
+                <button class="dock-item" data-app="messages" title="Chat">💬</button>
+                <button class="dock-item" data-app="contacts" title="Kontakte">👤</button>
+                <button class="dock-item" data-app="appworld" title="App World">📱</button>
             </div>
         </div>
     </div>
+
+    <!-- NOTIFICATION -->
     <div id="notification"></div>
 
     <!-- ===== SYSTEM SCRIPTS ===== -->
+    <!-- Basissystem -->
     <script src="js/storage.js"></script>
     <script src="js/kernel.js"></script>
     <script src="js/ai-engine.js"></script>
     <script src="js/window.js"></script>
     <script src="js/app-loader.js"></script>
     <script src="js/cosmic.js"></script>
+
+    <!-- Erweiterungen -->
+    <script src="js/voice.js"></script>
+    <script src="js/ai-enhanced.js"></script>
+    <script src="js/mail.js"></script>
+    <script src="js/chat.js"></script>
+    <script src="js/contacts.js"></script>
+    <script src="js/system-update.js"></script>
+    <script src="js/ai-integration.js"></script>
+    <script src="js/logo-fix.js"></script>
+    <script src="js/menu.js"></script>
+    <script src="js/cosmic-enhanced.js"></script>
+    <script src="js/app-generator.js"></script>
+    <script src="js/final-integration.js"></script>
+
+    <!-- System-Start -->
+    <script src="js/system-loader.js"></script>
     <script src="js/system.js"></script>
 </body>
 </html>
