@@ -1,257 +1,86 @@
-/*
-==========================================
-HalDo AI OS 18
-STORAGE MANAGER
-Professional Ultimate Foundation
-Version 18.0.0
-==========================================
-*/
+// ================================================================
+//  HALDO STORAGE — IndexedDB + LocalStorage
+// ================================================================
 
-(function () {
+var HalDoStorage = {
+    db: null,
 
-    "use strict";
-
-    const HalDoStorage = {
-
-        name: "HalDo Storage",
-        version: "18.0.0",
-
-        prefix: "haldo_ai_os_18_",
-
-        status: "ready",
-
-
-        key(name) {
-
-            return (
-                this.prefix +
-                name
-            );
-
-        },
-
-
-        set(
-            name,
-            value
-        ) {
-
-            try {
-
-                localStorage.setItem(
-                    this.key(name),
-                    JSON.stringify(value)
-                );
-
-                return true;
-
-            } catch (error) {
-
-                console.error(
-                    "HalDo Storage SET Error:",
-                    error
-                );
-
-                return false;
-
-            }
-
-        },
-
-
-        get(
-            name,
-            fallback = null
-        ) {
-
-            try {
-
-                const value =
-                    localStorage.getItem(
-                        this.key(name)
-                    );
-
-                if (value === null) {
-                    return fallback;
+    init: function() {
+        return new Promise(function(resolve) {
+            var req = indexedDB.open('HalDoOS', 1);
+            req.onupgradeneeded = function(e) {
+                var db = e.target.result;
+                if (!db.objectStoreNames.contains('appData')) {
+                    db.createObjectStore('appData', { keyPath: 'id' });
                 }
-
-                return JSON.parse(value);
-
-            } catch (error) {
-
-                console.error(
-                    "HalDo Storage GET Error:",
-                    error
-                );
-
-                return fallback;
-
-            }
-
-        },
-
-
-        remove(name) {
-
-            try {
-
-                localStorage.removeItem(
-                    this.key(name)
-                );
-
-                return true;
-
-            } catch (error) {
-
-                console.error(
-                    "HalDo Storage REMOVE Error:",
-                    error
-                );
-
-                return false;
-
-            }
-
-        },
-
-
-        clear() {
-
-            try {
-
-                const keys = [];
-
-                for (
-                    let i = 0;
-                    i < localStorage.length;
-                    i++
-                ) {
-
-                    const key =
-                        localStorage.key(i);
-
-                    if (
-                        key &&
-                        key.startsWith(
-                            this.prefix
-                        )
-                    ) {
-
-                        keys.push(key);
-
-                    }
-
+                if (!db.objectStoreNames.contains('userData')) {
+                    db.createObjectStore('userData', { keyPath: 'key' });
                 }
-
-                keys.forEach(
-                    key =>
-                        localStorage.removeItem(
-                            key
-                        )
-                );
-
-                return true;
-
-            } catch (error) {
-
-                console.error(
-                    "HalDo Storage CLEAR Error:",
-                    error
-                );
-
-                return false;
-
-            }
-
-        },
-
-
-        has(name) {
-
-            return (
-                localStorage.getItem(
-                    this.key(name)
-                ) !== null
-            );
-
-        },
-
-
-        keys() {
-
-            const result = [];
-
-            for (
-                let i = 0;
-                i < localStorage.length;
-                i++
-            ) {
-
-                const key =
-                    localStorage.key(i);
-
-                if (
-                    key &&
-                    key.startsWith(
-                        this.prefix
-                    )
-                ) {
-
-                    result.push(
-                        key.substring(
-                            this.prefix.length
-                        )
-                    );
-
-                }
-
-            }
-
-            return result;
-
-        },
-
-
-        getStatus() {
-
-            return {
-
-                status:
-                    this.status,
-
-                storage:
-                    "localStorage",
-
-                keys:
-                    this.keys()
-
             };
+            req.onsuccess = function(e) {
+                this.db = e.target.result;
+                console.log('[Storage] IndexedDB bereit');
+                resolve();
+            }.bind(this);
+            req.onerror = function(e) {
+                console.log('[Storage] Fehler:', e.target.error);
+                resolve();
+            };
+        }.bind(this));
+    },
 
-        }
+    set: function(store, data) {
+        return new Promise(function(resolve) {
+            var tx = this.db.transaction(store, 'readwrite');
+            var obj = tx.objectStore(store);
+            var req = obj.put(data);
+            req.onsuccess = function() { resolve(true); };
+            req.onerror = function() { resolve(false); };
+        }.bind(this));
+    },
 
-    };
+    get: function(store, key) {
+        return new Promise(function(resolve) {
+            var tx = this.db.transaction(store, 'readonly');
+            var obj = tx.objectStore(store);
+            var req = obj.get(key);
+            req.onsuccess = function() { resolve(req.result); };
+            req.onerror = function() { resolve(null); };
+        }.bind(this));
+    },
 
+    getAll: function(store) {
+        return new Promise(function(resolve) {
+            var tx = this.db.transaction(store, 'readonly');
+            var obj = tx.objectStore(store);
+            var req = obj.getAll();
+            req.onsuccess = function() { resolve(req.result); };
+            req.onerror = function() { resolve([]); };
+        }.bind(this));
+    },
 
-    window.HalDoStorage =
-        HalDoStorage;
+    delete: function(store, key) {
+        return new Promise(function(resolve) {
+            var tx = this.db.transaction(store, 'readwrite');
+            var obj = tx.objectStore(store);
+            var req = obj.delete(key);
+            req.onsuccess = function() { resolve(true); };
+            req.onerror = function() { resolve(false); };
+        }.bind(this));
+    },
 
+    // LocalStorage Helper
+    setLocal: function(key, data) {
+        try {
+            localStorage.setItem('haldo_' + key, JSON.stringify(data));
+            return true;
+        } catch (e) { return false; }
+    },
 
-    window.addEventListener(
-        "DOMContentLoaded",
-        function () {
-
-            if (
-                window.HalDoKernel
-            ) {
-
-                HalDoKernel.registerModule(
-                    "storage",
-                    HalDoStorage
-                );
-
-            }
-
-        }
-    );
-
-})();
+    getLocal: function(key) {
+        try {
+            var data = localStorage.getItem('haldo_' + key);
+            return data ? JSON.parse(data) : null;
+        } catch (e) { return null; }
+    }
+};
