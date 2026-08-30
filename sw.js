@@ -1,32 +1,13 @@
 // ================================================================
-//  HALDO SERVICE WORKER — Offline-Fähigkeit & Caching
-//  TEIL 25/30
+//  HALDO SERVICE WORKER — Update & Cache
+//  Version 24.0.0
 // ================================================================
 
 var CACHE_NAME = 'haldo-os-v24.0.0';
 var urlsToCache = [
     'index.html',
     'assets/logo.png',
-    'js/storage.js',
-    'js/kernel.js',
-    'js/ai-engine.js',
-    'js/window.js',
-    'js/app-loader.js',
-    'js/cosmic.js',
-    'js/system.js',
-    'js/voice.js',
-    'js/ai-enhanced.js',
-    'js/mail.js',
-    'js/chat.js',
-    'js/contacts.js',
-    'js/system-update.js',
-    'js/ai-integration.js',
-    'js/logo-fix.js',
-    'js/menu.js',
-    'js/cosmic-enhanced.js',
-    'js/app-generator.js',
-    'js/final-integration.js',
-    'js/system-loader.js'
+    'manifest.json'
 ];
 
 // ===== INSTALL =====
@@ -57,7 +38,7 @@ self.addEventListener('activate', function(event) {
                 })
             );
         }).then(function() {
-            console.log('[SW] Aktiviert');
+            console.log('[SW] Aktiviert — Version 24.0.0');
             return self.clients.claim();
         })
     );
@@ -68,34 +49,19 @@ self.addEventListener('fetch', function(event) {
     event.respondWith(
         caches.match(event.request)
         .then(function(response) {
-            // Cache Treffer zurückgeben
             if (response) {
                 return response;
             }
-
-            // Fallback: Netzwerk Anfrage
             return fetch(event.request).then(function(response) {
-                // Nur erfolgreiche Antworten cachen
                 if (!response || response.status !== 200 || response.type !== 'basic') {
                     return response;
                 }
-
                 var responseToCache = response.clone();
                 caches.open(CACHE_NAME)
                     .then(function(cache) {
                         cache.put(event.request, responseToCache);
                     });
-
                 return response;
-            }).catch(function() {
-                // Offline-Fallback
-                if (event.request.headers.get('accept').includes('text/html')) {
-                    return caches.match('index.html');
-                }
-                return new Response('Offline — Bitte verbinde dich mit dem Internet.', {
-                    status: 503,
-                    statusText: 'Service Unavailable'
-                });
             });
         })
     );
@@ -108,4 +74,4 @@ self.addEventListener('message', function(event) {
     }
 });
 
-console.log('[SW] Service Worker geladen');
+console.log('[SW] Service Worker geladen — Version 24.0.0');
