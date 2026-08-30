@@ -1,2338 +1,1214 @@
 <!DOCTYPE html>
 <html lang="de">
-
 <head>
-
-<meta charset="UTF-8">
-
-<meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
->
-
-<meta
-    name="theme-color"
-    content="#050914"
->
-
-<title>HalDo AI OS 18 — AI Chat</title>
-
-
-<style>
-
-/* =====================================================
-   HALDO AI OS 18
-   AI CHAT
-===================================================== */
-
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    -webkit-tap-highlight-color: transparent;
-}
-
-html,
-body {
-    width: 100%;
-    min-height: 100%;
-}
-
-body {
-
-    min-height: 100vh;
-
-    color: #fff;
-
-    background:
-        radial-gradient(
-            circle at 50% -10%,
-            rgba(0,126,255,.18),
-            transparent 35%
-        ),
-        radial-gradient(
-            circle at 100% 80%,
-            rgba(125,55,255,.12),
-            transparent 30%
-        ),
-        #050914;
-
-    font-family:
-        -apple-system,
-        BlinkMacSystemFont,
-        "Segoe UI",
-        Roboto,
-        Arial,
-        sans-serif;
-
-    overflow: hidden;
-}
-
-
-/* =====================================================
-   BACKGROUND
-===================================================== */
-
-.background {
-
-    position: fixed;
-
-    inset: 0;
-
-    pointer-events: none;
-
-    overflow: hidden;
-
-    z-index: 0;
-}
-
-.orb {
-
-    position: absolute;
-
-    width: 240px;
-    height: 240px;
-
-    border-radius: 50%;
-
-    filter: blur(90px);
-
-    opacity: .13;
-}
-
-.orb.one {
-
-    top: -130px;
-    left: -100px;
-
-    background: #087cff;
-}
-
-.orb.two {
-
-    right: -120px;
-    bottom: 5%;
-
-    background: #793dff;
-}
-
-
-/* =====================================================
-   APP
-===================================================== */
-
-.app {
-
-    position: relative;
-
-    z-index: 1;
-
-    width: min(950px,100%);
-
-    height: 100vh;
-
-    margin: auto;
-
-    display: flex;
-
-    flex-direction: column;
-}
-
-
-/* =====================================================
-   HEADER
-===================================================== */
-
-.header {
-
-    flex-shrink: 0;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: space-between;
-
-    padding:
-        8px 12px;
-
-    background:
-        rgba(5,9,20,.90);
-
-    border-bottom:
-        1px solid
-        rgba(255,255,255,.08);
-
-    backdrop-filter:
-        blur(22px);
-
-    -webkit-backdrop-filter:
-        blur(22px);
-}
-
-.brand {
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 9px;
-}
-
-.logo {
-
-    width: 43px;
-    height: 43px;
-
-    object-fit: contain;
-
-    animation:
-        logoRotate 10s linear infinite,
-        logoGlow 2.4s ease-in-out infinite;
-}
-
-@keyframes logoRotate {
-
-    from {
-        transform: rotate(0deg);
-    }
-
-    to {
-        transform: rotate(360deg);
-    }
-}
-
-@keyframes logoGlow {
-
-    0%,
-    100% {
-
-        filter:
-            drop-shadow(
-                0 0 5px
-                rgba(255,255,255,.5)
-            )
-            drop-shadow(
-                0 0 12px
-                rgba(0,126,255,.5)
-            );
-
-    }
-
-    50% {
-
-        filter:
-            drop-shadow(
-                0 0 10px
-                rgba(255,255,255,1)
-            )
-            drop-shadow(
-                0 0 25px
-                rgba(0,150,255,.9)
-            );
-
-    }
-}
-
-.brand-name strong {
-
-    display: block;
-
-    font-size: 14px;
-}
-
-.brand-name span {
-
-    display: block;
-
-    margin-top: 2px;
-
-    color: #73829a;
-
-    font-size: 8px;
-
-    letter-spacing: .6px;
-}
-
-.header-actions {
-
-    display: flex;
-
-    gap: 6px;
-}
-
-.header-button {
-
-    width: 35px;
-    height: 35px;
-
-    border-radius: 11px;
-
-    color: #9bb0c9;
-
-    background:
-        rgba(255,255,255,.045);
-
-    border:
-        1px solid
-        rgba(255,255,255,.07);
-
-    cursor: pointer;
-}
-
-
-/* =====================================================
-   STATUS
-===================================================== */
-
-.status-bar {
-
-    flex-shrink: 0;
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 7px;
-
-    padding:
-        7px 14px;
-
-    color: #75849c;
-
-    font-size: 8px;
-
-    background:
-        rgba(255,255,255,.018);
-
-    border-bottom:
-        1px solid
-        rgba(255,255,255,.05);
-}
-
-.status-dot {
-
-    width: 6px;
-    height: 6px;
-
-    border-radius: 50%;
-
-    background: #00e7a2;
-
-    box-shadow:
-        0 0 10px
-        rgba(0,231,162,.9);
-
-    animation:
-        pulse 1.8s infinite;
-}
-
-@keyframes pulse {
-
-    0%,
-    100% {
-        opacity: .45;
-    }
-
-    50% {
-        opacity: 1;
-    }
-}
-
-
-/* =====================================================
-   CHAT
-===================================================== */
-
-.chat {
-
-    flex: 1;
-
-    min-height: 0;
-
-    overflow-y: auto;
-
-    padding:
-        16px 12px 15px;
-
-    scroll-behavior: smooth;
-
-    scrollbar-width: thin;
-}
-
-.chat::-webkit-scrollbar {
-
-    width: 4px;
-}
-
-.chat::-webkit-scrollbar-thumb {
-
-    background:
-        rgba(255,255,255,.12);
-
-    border-radius: 10px;
-}
-
-
-/* =====================================================
-   WELCOME
-===================================================== */
-
-.welcome {
-
-    max-width: 600px;
-
-    margin:
-        15px auto 25px;
-
-    padding:
-        21px;
-
-    text-align: center;
-
-    border-radius: 23px;
-
-    background:
-        linear-gradient(
-            145deg,
-            rgba(0,126,255,.08),
-            rgba(120,55,255,.06)
-        );
-
-    border:
-        1px solid
-        rgba(255,255,255,.07);
-}
-
-.welcome-logo {
-
-    width: 72px;
-    height: 72px;
-
-    object-fit: contain;
-
-    animation:
-        logoRotate 13s linear infinite,
-        logoGlow 2.4s ease-in-out infinite;
-}
-
-.welcome h1 {
-
-    margin-top: 10px;
-
-    font-size: 21px;
-}
-
-.welcome p {
-
-    margin-top: 7px;
-
-    color: #77879f;
-
-    font-size: 9px;
-
-    line-height: 1.6;
-}
-
-
-/* =====================================================
-   QUICK ACTIONS
-===================================================== */
-
-.quick-actions {
-
-    display: grid;
-
-    grid-template-columns:
-        repeat(2,1fr);
-
-    gap: 7px;
-
-    margin-top: 15px;
-}
-
-.quick {
-
-    min-height: 42px;
-
-    padding: 8px;
-
-    border-radius: 12px;
-
-    color: #91b9dc;
-
-    background:
-        rgba(255,255,255,.04);
-
-    border:
-        1px solid
-        rgba(255,255,255,.07);
-
-    font-size: 8px;
-
-    cursor: pointer;
-}
-
-
-/* =====================================================
-   MESSAGE
-===================================================== */
-
-.message-row {
-
-    display: flex;
-
-    margin:
-        8px 0;
-}
-
-.message-row.user {
-
-    justify-content: flex-end;
-}
-
-.message {
-
-    max-width:
-        min(78%,620px);
-
-    padding:
-        10px 12px;
-
-    border-radius: 16px;
-
-    font-size: 9px;
-
-    line-height: 1.6;
-
-    word-break: break-word;
-}
-
-.message.ai {
-
-    background:
-        rgba(255,255,255,.045);
-
-    border:
-        1px solid
-        rgba(255,255,255,.065);
-
-    border-bottom-left-radius: 5px;
-}
-
-.message.user {
-
-    background:
-        rgba(0,126,255,.14);
-
-    border:
-        1px solid
-        rgba(0,126,255,.18);
-
-    border-bottom-right-radius: 5px;
-}
-
-.message-meta {
-
-    margin-bottom: 4px;
-
-    color: #68809d;
-
-    font-size: 7px;
-}
-
-
-/* =====================================================
-   TYPING
-===================================================== */
-
-.typing {
-
-    display: none;
-
-    width: fit-content;
-
-    margin:
-        7px 0;
-
-    padding:
-        10px 12px;
-
-    border-radius: 15px;
-
-    background:
-        rgba(255,255,255,.04);
-
-    border:
-        1px solid
-        rgba(255,255,255,.06);
-}
-
-.typing.show {
-
-    display: flex;
-
-    gap: 4px;
-}
-
-.typing span {
-
-    width: 5px;
-    height: 5px;
-
-    border-radius: 50%;
-
-    background: #80a9cc;
-
-    animation:
-        typing 1.1s infinite;
-}
-
-.typing span:nth-child(2) {
-
-    animation-delay: .15s;
-}
-
-.typing span:nth-child(3) {
-
-    animation-delay: .30s;
-}
-
-@keyframes typing {
-
-    0%,
-    60%,
-    100% {
-        opacity: .25;
-        transform: translateY(0);
-    }
-
-    30% {
-        opacity: 1;
-        transform: translateY(-3px);
-    }
-}
-
-
-/* =====================================================
-   INPUT AREA
-===================================================== */
-
-.input-zone {
-
-    flex-shrink: 0;
-
-    padding:
-        8px 10px
-        calc(8px + env(safe-area-inset-bottom));
-
-    background:
-        rgba(5,9,20,.94);
-
-    border-top:
-        1px solid
-        rgba(255,255,255,.08);
-
-    backdrop-filter:
-        blur(20px);
-
-    -webkit-backdrop-filter:
-        blur(20px);
-}
-
-.input-tools {
-
-    display: flex;
-
-    gap: 5px;
-
-    margin-bottom: 6px;
-
-    overflow-x: auto;
-
-    scrollbar-width: none;
-}
-
-.input-tools::-webkit-scrollbar {
-
-    display: none;
-}
-
-.tool {
-
-    flex-shrink: 0;
-
-    min-height: 28px;
-
-    padding:
-        0 9px;
-
-    border-radius: 10px;
-
-    color: #7187a1;
-
-    background:
-        rgba(255,255,255,.035);
-
-    border:
-        1px solid
-        rgba(255,255,255,.06);
-
-    font-size: 7px;
-
-    cursor: pointer;
-}
-
-.input-row {
-
-    display: flex;
-
-    align-items: flex-end;
-
-    gap: 6px;
-}
-
-.text-wrap {
-
-    flex: 1;
-
-    position: relative;
-}
-
-#messageInput {
-
-    width: 100%;
-
-    min-height: 44px;
-
-    max-height: 130px;
-
-    resize: none;
-
-    overflow-y: auto;
-
-    padding:
-        12px 42px 12px 12px;
-
-    border-radius: 15px;
-
-    outline: none;
-
-    color: #e6f1ff;
-
-    background:
-        rgba(255,255,255,.045);
-
-    border:
-        1px solid
-        rgba(255,255,255,.08);
-
-    font-size: 10px;
-
-    line-height: 1.4;
-}
-
-#messageInput::placeholder {
-
-    color: #63738b;
-}
-
-.keyboard-button {
-
-    position: absolute;
-
-    right: 7px;
-    bottom: 7px;
-
-    width: 30px;
-    height: 30px;
-
-    border-radius: 9px;
-
-    color: #8bc9f4;
-
-    background:
-        rgba(0,126,255,.08);
-
-    border:
-        1px solid
-        rgba(0,126,255,.12);
-
-    cursor: pointer;
-}
-
-.send {
-
-    flex-shrink: 0;
-
-    width: 45px;
-    height: 45px;
-
-    border-radius: 14px;
-
-    color: #eaf7ff;
-
-    background:
-        rgba(0,126,255,.16);
-
-    border:
-        1px solid
-        rgba(0,126,255,.20);
-
-    cursor: pointer;
-
-    font-size: 16px;
-}
-
-.send:active {
-
-    transform: scale(.94);
-}
-
-
-/* =====================================================
-   EZIDI KEYBOARD
-===================================================== */
-
-.keyboard-panel {
-
-    position: fixed;
-
-    z-index: 200;
-
-    left: 0;
-    right: 0;
-    bottom: 0;
-
-    padding:
-        12px 10px
-        calc(12px + env(safe-area-inset-bottom));
-
-    background:
-        rgba(7,12,25,.98);
-
-    border-top:
-        1px solid
-        rgba(255,255,255,.10);
-
-    box-shadow:
-        0 -15px 45px
-        rgba(0,0,0,.42);
-
-    transform:
-        translateY(110%);
-
-    transition:
-        transform .22s ease;
-}
-
-.keyboard-panel.open {
-
-    transform:
-        translateY(0);
-}
-
-.keyboard-head {
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: space-between;
-
-    margin-bottom: 9px;
-}
-
-.keyboard-head strong {
-
-    font-size: 10px;
-}
-
-.keyboard-head span {
-
-    color: #687991;
-
-    font-size: 7px;
-}
-
-.keyboard-close {
-
-    width: 30px;
-    height: 30px;
-
-    border-radius: 9px;
-
-    color: #9ab0c8;
-
-    background:
-        rgba(255,255,255,.05);
-
-    border:
-        1px solid
-        rgba(255,255,255,.07);
-}
-
-.keyboard-grid {
-
-    display: grid;
-
-    grid-template-columns:
-        repeat(8,1fr);
-
-    gap: 5px;
-}
-
-.key {
-
-    min-height: 38px;
-
-    border-radius: 10px;
-
-    color: #c8e6ff;
-
-    background:
-        rgba(255,255,255,.045);
-
-    border:
-        1px solid
-        rgba(255,255,255,.07);
-
-    font-size: 13px;
-
-    cursor: pointer;
-}
-
-.key:active {
-
-    transform: scale(.94);
-
-    background:
-        rgba(0,126,255,.14);
-}
-
-
-/* =====================================================
-   MODAL
-===================================================== */
-
-.overlay {
-
-    position: fixed;
-
-    inset: 0;
-
-    z-index: 300;
-
-    display: flex;
-
-    align-items: flex-end;
-
-    justify-content: center;
-
-    padding: 10px;
-
-    background:
-        rgba(0,0,0,.52);
-
-    backdrop-filter:
-        blur(7px);
-
-    -webkit-backdrop-filter:
-        blur(7px);
-
-    opacity: 0;
-
-    visibility: hidden;
-
-    pointer-events: none;
-
-    transition: .2s ease;
-}
-
-.overlay.open {
-
-    opacity: 1;
-
-    visibility: visible;
-
-    pointer-events: auto;
-}
-
-.panel {
-
-    width:
-        min(580px,100%);
-
-    padding: 17px;
-
-    border-radius:
-        22px 22px 16px 16px;
-
-    background:
-        #0a1222;
-
-    border:
-        1px solid
-        rgba(255,255,255,.09);
-}
-
-.panel-head {
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: space-between;
-}
-
-.panel-head strong {
-
-    font-size: 12px;
-}
-
-.panel-close {
-
-    width: 32px;
-    height: 32px;
-
-    border-radius: 10px;
-
-    color: #9eb1c7;
-
-    background:
-        rgba(255,255,255,.05);
-
-    border:
-        1px solid
-        rgba(255,255,255,.07);
-}
-
-.panel-content {
-
-    margin-top: 14px;
-
-    color: #8190a7;
-
-    font-size: 9px;
-
-    line-height: 1.7;
-}
-
-
-/* =====================================================
-   TOAST
-===================================================== */
-
-.toast {
-
-    position: fixed;
-
-    z-index: 500;
-
-    left: 50%;
-
-    bottom: 75px;
-
-    padding:
-        9px 13px;
-
-    border-radius: 12px;
-
-    color: #dcecff;
-
-    background:
-        rgba(18,28,47,.96);
-
-    border:
-        1px solid
-        rgba(255,255,255,.09);
-
-    font-size: 8px;
-
-    opacity: 0;
-
-    pointer-events: none;
-
-    transform:
-        translate(-50%,10px);
-
-    transition: .2s ease;
-}
-
-.toast.show {
-
-    opacity: 1;
-
-    transform:
-        translate(-50%,0);
-}
-
-
-/* =====================================================
-   RESPONSIVE
-===================================================== */
-
-@media (min-width:700px) {
-
-    .quick-actions {
-
-        grid-template-columns:
-            repeat(4,1fr);
-
-    }
-
-    .keyboard-grid {
-
-        grid-template-columns:
-            repeat(12,1fr);
-
-    }
-
-}
-
-</style>
-
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover, user-scalable=no" />
+    <title>HalDo Chat — Private Messaging</title>
+    <meta name="theme-color" content="#0a0a1a" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <style>
+        /* ================================================================
+           HALDO CHAT — KOMPLETTE CHAT-APP
+           Professionell, mobil optimiert, voll funktionsfähig
+           ================================================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        :root {
+            --bg: #0a0a1a;
+            --surface: rgba(16, 16, 40, 0.92);
+            --text: #e0e0ff;
+            --primary: #00d4ff;
+            --secondary: #7b2ffc;
+            --radius: 14px;
+            --safe-top: env(safe-area-inset-top, 0px);
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+        }
+        html,
+        body {
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            background: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+        #root {
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* ===== TOPBAR ===== */
+        #topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 14px;
+            background: rgba(10, 10, 30, 0.5);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            z-index: 20;
+            font-size: clamp(0.7rem, 1.6vw, 0.85rem);
+            min-height: 50px;
+            flex-shrink: 0;
+        }
+        #topbar-left {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        #topbar-left .logo {
+            font-weight: 700;
+            color: var(--primary);
+            font-size: clamp(0.9rem, 2vw, 1.1rem);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        #topbar-left .logo img {
+            width: clamp(28px, 5vw, 36px);
+            height: clamp(28px, 5vw, 36px);
+            border-radius: 50%;
+            border: 2px solid var(--primary);
+            object-fit: cover;
+        }
+        #topbar-right {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+        .top-btn {
+            background: none;
+            border: none;
+            color: #8899bb;
+            font-size: clamp(0.9rem, 2vw, 1.1rem);
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 8px;
+            touch-action: manipulation;
+        }
+        .top-btn:active {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        .top-btn .badge {
+            background: #ff4444;
+            color: #fff;
+            border-radius: 50%;
+            padding: 1px 6px;
+            font-size: 0.6rem;
+            margin-left: 4px;
+        }
+
+        /* ===== CHAT CONTAINER ===== */
+        #chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+            padding-top: var(--safe-top);
+            padding-bottom: var(--safe-bottom);
+        }
+
+        /* ===== CONTACT LIST ===== */
+        #contact-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px 12px;
+            -webkit-overflow-scrolling: touch;
+        }
+        #contact-list .section-title {
+            font-size: 0.65rem;
+            color: #8899bb;
+            padding: 8px 4px 4px 4px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            margin: 4px 0;
+            cursor: pointer;
+            transition: 0.2s;
+            border: 1px solid transparent;
+        }
+        .contact-item:active {
+            background: rgba(255, 255, 255, 0.08);
+            transform: scale(0.98);
+        }
+        .contact-item.active {
+            background: rgba(0, 212, 255, 0.08);
+            border-color: rgba(0, 212, 255, 0.15);
+        }
+        .contact-item .avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+            background: rgba(255, 255, 255, 0.04);
+            position: relative;
+        }
+        .contact-item .avatar .status {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid var(--bg);
+        }
+        .contact-item .avatar .status.online {
+            background: #44ff88;
+        }
+        .contact-item .avatar .status.offline {
+            background: #8899bb;
+        }
+        .contact-item .avatar .status.abwesend {
+            background: #ffcc00;
+        }
+        .contact-item .info {
+            flex: 1;
+            min-width: 0;
+        }
+        .contact-item .info .name {
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+        .contact-item .info .preview {
+            font-size: 0.7rem;
+            color: #8899bb;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .contact-item .info .preview .sender {
+            color: #8899bb;
+        }
+        .contact-item .meta {
+            text-align: right;
+            flex-shrink: 0;
+        }
+        .contact-item .meta .time {
+            font-size: 0.6rem;
+            color: #8899bb;
+        }
+        .contact-item .meta .unread {
+            background: var(--primary);
+            color: #fff;
+            border-radius: 50%;
+            padding: 2px 8px;
+            font-size: 0.6rem;
+            margin-top: 4px;
+            display: inline-block;
+        }
+
+        /* ===== CHAT VIEW ===== */
+        #chat-view {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+            background: var(--surface);
+        }
+        #chat-view.active {
+            display: flex;
+        }
+
+        /* Chat Header */
+        #chat-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 14px;
+            background: rgba(0, 0, 0, 0.2);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            flex-shrink: 0;
+            min-height: 56px;
+        }
+        #chat-header .back-btn {
+            background: none;
+            border: none;
+            color: #8899bb;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 4px 8px;
+        }
+        #chat-header .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            background: rgba(255, 255, 255, 0.04);
+            flex-shrink: 0;
+        }
+        #chat-header .info {
+            flex: 1;
+        }
+        #chat-header .info .name {
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+        #chat-header .info .status-text {
+            font-size: 0.6rem;
+            color: #8899bb;
+        }
+        #chat-header .info .status-text.online {
+            color: #44ff88;
+        }
+
+        /* Messages */
+        #messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            -webkit-overflow-scrolling: touch;
+        }
+        .msg {
+            max-width: 85%;
+            padding: 8px 14px;
+            border-radius: 16px;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            word-wrap: break-word;
+            animation: msgIn 0.2s ease;
+        }
+        @keyframes msgIn {
+            from {
+                opacity: 0;
+                transform: translateY(6px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .msg.sent {
+            align-self: flex-end;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: #fff;
+            border-bottom-right-radius: 4px;
+        }
+        .msg.received {
+            align-self: flex-start;
+            background: rgba(255, 255, 255, 0.06);
+            border-bottom-left-radius: 4px;
+        }
+        .msg .time {
+            font-size: 0.55rem;
+            color: rgba(255, 255, 255, 0.4);
+            margin-top: 2px;
+            display: block;
+            text-align: right;
+        }
+        .msg.sent .time {
+            color: rgba(255, 255, 255, 0.5);
+        }
+        .msg .sender-name {
+            font-size: 0.6rem;
+            color: var(--primary);
+            font-weight: 600;
+            display: block;
+            margin-bottom: 2px;
+        }
+        .msg-date {
+            text-align: center;
+            font-size: 0.6rem;
+            color: #8899bb;
+            padding: 8px 0;
+        }
+
+        /* Input Area */
+        #chat-input-area {
+            display: flex;
+            gap: 8px;
+            padding: 8px 14px;
+            background: rgba(0, 0, 0, 0.2);
+            border-top: 1px solid rgba(255, 255, 255, 0.04);
+            flex-shrink: 0;
+            min-height: 56px;
+            align-items: center;
+        }
+        #chat-input-area input {
+            flex: 1;
+            padding: 10px 14px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            color: #fff;
+            font-size: 0.85rem;
+            outline: none;
+            min-height: 40px;
+        }
+        #chat-input-area input::placeholder {
+            color: #556688;
+        }
+        #chat-input-area button {
+            padding: 8px 18px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none;
+            border-radius: 24px;
+            color: #fff;
+            font-weight: 600;
+            font-size: 0.8rem;
+            cursor: pointer;
+            touch-action: manipulation;
+            min-height: 40px;
+            min-width: 60px;
+            white-space: nowrap;
+        }
+        #chat-input-area button:active {
+            transform: scale(0.95);
+        }
+        #chat-input-area .emoji-btn {
+            background: none;
+            border: none;
+            color: #8899bb;
+            font-size: 1.4rem;
+            cursor: pointer;
+            padding: 4px 8px;
+        }
+        #chat-input-area .attach-btn {
+            background: none;
+            border: none;
+            color: #8899bb;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 4px 8px;
+        }
+
+        /* ===== EMPTY STATE ===== */
+        #empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #8899bb;
+            text-align: center;
+            padding: 20px;
+        }
+        #empty-state .icon {
+            font-size: 4rem;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+        #empty-state h3 {
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            color: #e0e0ff;
+        }
+        #empty-state p {
+            font-size: 0.85rem;
+            max-width: 300px;
+        }
+
+        /* ===== NOTIFICATION ===== */
+        #notification {
+            position: fixed;
+            top: clamp(50px, 10vh, 70px);
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 999;
+            background: var(--surface);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: var(--radius);
+            padding: 12px 24px;
+            max-width: 90%;
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6);
+            font-size: clamp(0.8rem, 1.6vw, 0.9rem);
+            display: none;
+            border-left: 4px solid var(--primary);
+        }
+        #notification.show {
+            display: block;
+            animation: slideDown 0.4s ease;
+        }
+        @keyframes slideDown {
+            from {
+                transform: translateX(-50%) translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(-50%) translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* ===== SCROLLBAR ===== */
+        #contact-list::-webkit-scrollbar,
+        #messages::-webkit-scrollbar {
+            width: 4px;
+        }
+        #contact-list::-webkit-scrollbar-track,
+        #messages::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        #contact-list::-webkit-scrollbar-thumb,
+        #messages::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 4px;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media(max-width:480px) {
+            .contact-item {
+                padding: 8px 10px;
+            }
+            .contact-item .avatar {
+                width: 36px;
+                height: 36px;
+                font-size: 1.2rem;
+            }
+            .msg {
+                max-width: 92%;
+                font-size: 0.8rem;
+                padding: 6px 12px;
+            }
+            #chat-header {
+                padding: 6px 10px;
+                min-height: 46px;
+            }
+            #chat-input-area {
+                padding: 6px 10px;
+                min-height: 46px;
+            }
+            #chat-input-area input {
+                padding: 8px 12px;
+                font-size: 0.8rem;
+                min-height: 34px;
+            }
+            #chat-input-area button {
+                padding: 6px 14px;
+                font-size: 0.75rem;
+                min-height: 34px;
+                min-width: 50px;
+            }
+        }
+        @media(min-width:768px) {
+            #chat-container {
+                flex-direction: row;
+            }
+            #contact-list {
+                flex: 0 0 320px;
+                border-right: 1px solid rgba(255, 255, 255, 0.04);
+            }
+            #chat-view {
+                flex: 1;
+            }
+            #chat-view.active {
+                display: flex;
+            }
+            #empty-state {
+                flex: 1;
+            }
+        }
+    </style>
 </head>
-
-
 <body>
-
-
-<div class="background">
-
-    <div class="orb one"></div>
-
-    <div class="orb two"></div>
-
-</div>
-
-
-<main class="app">
-
-
-<!-- =====================================================
-     HEADER
-===================================================== -->
-
-<header class="header">
-
-
-    <div class="brand">
-
-        <img
-            class="logo"
-            src="assets/logo/logo.png"
-            alt="HalDo AI"
-        >
-
-        <div class="brand-name">
-
-            <strong>
-                HalDo AI
-            </strong>
-
-            <span>
-                AI CHAT • OS 18
-            </span>
-
+    <div id="root">
+        <!-- ===== TOPBAR ===== -->
+        <div id="topbar">
+            <div id="topbar-left">
+                <span class="logo">
+                    <img src="assets/logo.png" alt="HalDo" onerror="this.style.display='none';" />
+                    <span>HalDo Chat</span>
+                </span>
+            </div>
+            <div id="topbar-right">
+                <button class="top-btn" id="btn-new-chat" title="Neuer Chat">➕</button>
+                <button class="top-btn" id="btn-search" title="Suchen">🔍</button>
+                <button class="top-btn" id="btn-settings" title="Einstellungen">⚙️</button>
+                <button class="top-btn" id="btn-back" title="Zurück" style="display:none;">✕</button>
+            </div>
         </div>
 
-    </div>
+        <!-- ===== CHAT CONTAINER ===== -->
+        <div id="chat-container">
+            <!-- Contact List -->
+            <div id="contact-list">
+                <div class="section-title">💬 Aktive Chats</div>
+                <div id="contacts"></div>
+                <div id="empty-contacts" style="color:#8899bb;text-align:center;padding:30px;font-size:0.85rem;">
+                    👤 Keine Kontakte<br>
+                    <span style="font-size:0.7rem;">Tippe auf ➕ um einen neuen Chat zu starten</span>
+                </div>
+            </div>
 
+            <!-- Chat View -->
+            <div id="chat-view">
+                <!-- Chat Header -->
+                <div id="chat-header">
+                    <button class="back-btn" id="chat-back">‹</button>
+                    <div class="avatar" id="chat-avatar">👤</div>
+                    <div class="info">
+                        <div class="name" id="chat-name">Kontakt</div>
+                        <div class="status-text" id="chat-status">● online</div>
+                    </div>
+                    <button class="top-btn" id="chat-menu" style="margin-left:auto;">⋮</button>
+                </div>
 
-    <div class="header-actions">
+                <!-- Messages -->
+                <div id="messages"></div>
 
+                <!-- Input Area -->
+                <div id="chat-input-area">
+                    <button class="emoji-btn">😊</button>
+                    <input type="text" id="msg-input" placeholder="Nachricht schreiben ..." autocomplete="off" />
+                    <button class="attach-btn">📎</button>
+                    <button id="msg-send">Senden</button>
+                </div>
+            </div>
 
-        <button
-            class="header-button"
-            onclick="clearChat()"
-            title="Chat löschen"
-        >
-            ⌫
-        </button>
-
-
-        <button
-            class="header-button"
-            onclick="openHome()"
-            title="Home"
-        >
-            ⌂
-        </button>
-
-
-    </div>
-
-
-</header>
-
-
-<!-- =====================================================
-     STATUS
-===================================================== -->
-
-<div class="status-bar">
-
-    <span class="status-dot"></span>
-
-    HalDo AI Core bereit
-
-    <span>
-        •
-    </span>
-
-    lokale Chat-Funktion aktiv
-
-</div>
-
-
-<!-- =====================================================
-     CHAT
-===================================================== -->
-
-<section
-    class="chat"
-    id="chat"
->
-
-
-    <div
-        class="welcome"
-        id="welcome"
-    >
-
-
-        <img
-            class="welcome-logo"
-            src="assets/logo/logo.png"
-            alt="HalDo AI"
-        >
-
-
-        <h1>
-            Willkommen bei HalDo AI
-        </h1>
-
-
-        <p>
-
-            Deine HalDo-AI-Eingabe ist bereit.
-            Du kannst schreiben, Fragen stellen
-            oder die vorbereiteten Werkzeuge öffnen.
-
-        </p>
-
-
-        <div class="quick-actions">
-
-
-            <button
-                class="quick"
-                onclick="quickMessage(
-                    'Was kannst du alles?'
-                )"
-            >
-                ✦ Was kannst du?
-            </button>
-
-
-            <button
-                class="quick"
-                onclick="quickMessage(
-                    'Hilf mir mit HalDo AI OS 18'
-                )"
-            >
-                ◈ OS 18 Hilfe
-            </button>
-
-
-            <button
-                class="quick"
-                onclick="quickMessage(
-                    'Schreibe mir eine Idee'
-                )"
-            >
-                ✎ Idee schreiben
-            </button>
-
-
-            <button
-                class="quick"
-                onclick="quickMessage(
-                    'Zeige mir die verfügbaren Module'
-                )"
-            >
-                ◇ Module
-            </button>
-
-
+            <!-- Empty State (Desktop) -->
+            <div id="empty-state">
+                <div class="icon">💬</div>
+                <h3>Kein Chat ausgewählt</h3>
+                <p>Wähle einen Kontakt aus der Liste oder starte einen neuen Chat.</p>
+            </div>
         </div>
-
-
     </div>
 
-
-    <div id="messages"></div>
-
-
-    <div
-        class="typing"
-        id="typing"
-    >
-
-        <span></span>
-        <span></span>
-        <span></span>
-
-    </div>
-
-
-</section>
-
-
-<!-- =====================================================
-     INPUT
-===================================================== -->
-
-<section class="input-zone">
-
-
-    <div class="input-tools">
-
-
-        <button
-            class="tool"
-            onclick="insertText('Hallo HalDo AI! ')"
-        >
-            👋 Hallo
-        </button>
-
-
-        <button
-            class="tool"
-            onclick="insertText('Bitte erkläre mir ')"
-        >
-            💡 Erklären
-        </button>
-
-
-        <button
-            class="tool"
-            onclick="insertText('Bitte erstelle ')"
-        >
-            ✎ Erstellen
-        </button>
-
-
-        <button
-            class="tool"
-            onclick="insertText('Bitte verbessere ')"
-        >
-            ✨ Verbessern
-        </button>
-
-
-        <button
-            class="tool"
-            onclick="toggleKeyboard()"
-        >
-            ⌨ Êzîdî
-        </button>
-
-
-    </div>
-
-
-    <div class="input-row">
-
-
-        <div class="text-wrap">
-
-
-            <textarea
-                id="messageInput"
-                rows="1"
-                placeholder="Schreibe an HalDo AI …"
-                autocomplete="off"
-            ></textarea>
-
-
-            <button
-                class="keyboard-button"
-                onclick="toggleKeyboard()"
-                title="Êzîdî Tastatur"
-            >
-                ⌨
-            </button>
-
-
-        </div>
-
-
-        <button
-            class="send"
-            onclick="sendMessage()"
-            title="Senden"
-        >
-            ➤
-        </button>
-
-
-    </div>
-
-
-</section>
-
-
-</main>
-
-
-<!-- =====================================================
-     EZIDI KEYBOARD
-===================================================== -->
-
-<section
-    class="keyboard-panel"
-    id="keyboardPanel"
->
-
-
-    <div class="keyboard-head">
-
-
-        <div>
-
-            <strong>
-                Êzîdî Tastatur
-            </strong>
-
-            <span>
-                HalDo AI Eingabe
-            </span>
-
-        </div>
-
-
-        <button
-            class="keyboard-close"
-            onclick="toggleKeyboard()"
-        >
-            ×
-        </button>
-
-
-    </div>
-
-
-    <div class="keyboard-grid">
-
-
-        <button class="key" onclick="keyInsert('ê')">ê</button>
-        <button class="key" onclick="keyInsert('Ê')">Ê</button>
-        <button class="key" onclick="keyInsert('î')">î</button>
-        <button class="key" onclick="keyInsert('Î')">Î</button>
-        <button class="key" onclick="keyInsert('û')">û</button>
-        <button class="key" onclick="keyInsert('Û')">Û</button>
-        <button class="key" onclick="keyInsert('ş')">ş</button>
-        <button class="key" onclick="keyInsert('Ş')">Ş</button>
-
-        <button class="key" onclick="keyInsert('ç')">ç</button>
-        <button class="key" onclick="keyInsert('Ç')">Ç</button>
-        <button class="key" onclick="keyInsert('ḧ')">ḧ</button>
-        <button class="key" onclick="keyInsert('Ḧ')">Ḧ</button>
-        <button class="key" onclick="keyInsert('ẍ')">ẍ</button>
-        <button class="key" onclick="keyInsert('Ẍ')">Ẍ</button>
-        <button class="key" onclick="keyInsert('’')">’</button>
-        <button class="key" onclick="keyInsert(' ')">␠</button>
-
-    </div>
-
-
-</section>
-
-
-<!-- =====================================================
-     PANEL
-===================================================== -->
-
-<div
-    class="overlay"
-    id="overlay"
-    onclick="closePanelOutside(event)"
->
-
-
-    <div class="panel">
-
-
-        <div class="panel-head">
-
-
-            <strong id="panelTitle">
-                HalDo AI
-            </strong>
-
-
-            <button
-                class="panel-close"
-                onclick="closePanel()"
-            >
-                ×
-            </button>
-
-
-        </div>
-
-
-        <div
-            class="panel-content"
-            id="panelContent"
-        >
-        </div>
-
-
-    </div>
-
-
-</div>
-
-
-<div
-    class="toast"
-    id="toast"
->
-</div>
-
-
-<script>
-
-/* =====================================================
-   HALDO AI CHAT CORE
-===================================================== */
-
-const STORAGE_KEY =
-    "haldo_ai_chat_os18";
-
-
-const input =
-    document.getElementById(
-        "messageInput"
-    );
-
-
-const messages =
-    document.getElementById(
-        "messages"
-    );
-
-
-const chat =
-    document.getElementById(
-        "chat"
-    );
-
-
-const typing =
-    document.getElementById(
-        "typing"
-    );
-
-
-const welcome =
-    document.getElementById(
-        "welcome"
-    );
-
-
-/* =====================================================
-   START
-===================================================== */
-
-document.addEventListener(
-    "DOMContentLoaded",
-    function() {
-
-        loadChat();
-
-        resizeInput();
-
-        input.focus();
-
-    }
-);
-
-
-/* =====================================================
-   INPUT
-===================================================== */
-
-input.addEventListener(
-    "input",
-    resizeInput
-);
-
-
-input.addEventListener(
-    "keydown",
-    function(event) {
-
-        if (
-            event.key === "Enter"
-            &&
-            !event.shiftKey
-        ) {
-
-            event.preventDefault();
-
-            sendMessage();
-
-        }
-
-    }
-);
-
-
-function resizeInput() {
-
-    input.style.height =
-        "auto";
-
-    input.style.height =
-        Math.min(
-            input.scrollHeight,
-            130
-        ) + "px";
-
-}
-
-
-/* =====================================================
-   SEND
-===================================================== */
-
-function sendMessage() {
-
-    const text =
-        input.value.trim();
-
-
-    if (!text) {
-
-        showToast(
-            "Bitte zuerst eine Nachricht eingeben."
-        );
-
-        return;
-
-    }
-
-
-    addMessage(
-        "user",
-        text
-    );
-
-
-    input.value = "";
-
-    resizeInput();
-
-
-    hideWelcome();
-
-
-    saveChat();
-
-
-    showTyping();
-
-
-    setTimeout(
-        function() {
-
-            hideTyping();
-
-            addMessage(
-                "ai",
-                createLocalResponse(
-                    text
-                )
-            );
-
-            saveChat();
-
-        },
-        650
-    );
-
-}
-
-
-/* =====================================================
-   QUICK MESSAGE
-===================================================== */
-
-function quickMessage(
-    text
-) {
-
-    input.value =
-        text;
-
-    resizeInput();
-
-    sendMessage();
-
-}
-
-
-/* =====================================================
-   INSERT
-===================================================== */
-
-function insertText(
-    text
-) {
-
-    input.focus();
-
-
-    const start =
-        input.selectionStart;
-
-    const end =
-        input.selectionEnd;
-
-
-    input.value =
-        input.value.substring(
-            0,
-            start
-        )
-        +
-        text
-        +
-        input.value.substring(
-            end
-        );
-
-
-    input.selectionStart =
-        input.selectionEnd =
-            start +
-            text.length;
-
-
-    resizeInput();
-
-}
-
-
-/* =====================================================
-   ADD MESSAGE
-===================================================== */
-
-function addMessage(
-    type,
-    text
-) {
-
-    const row =
-        document.createElement(
-            "div"
-        );
-
-    row.className =
-        "message-row " +
-        (
-            type === "user"
-                ? "user"
-                : ""
-        );
-
-
-    const bubble =
-        document.createElement(
-            "div"
-        );
-
-    bubble.className =
-        "message " +
-        (
-            type === "user"
-                ? "user"
-                : "ai"
-        );
-
-
-    const meta =
-        document.createElement(
-            "div"
-        );
-
-    meta.className =
-        "message-meta";
-
-
-    meta.textContent =
-        type === "user"
-            ? "DU"
-            : "HALDO AI";
-
-
-    const content =
-        document.createElement(
-            "div"
-        );
-
-
-    content.textContent =
-        text;
-
-
-    bubble.appendChild(
-        meta
-    );
-
-    bubble.appendChild(
-        content
-    );
-
-    row.appendChild(
-        bubble
-    );
-
-    messages.appendChild(
-        row
-    );
-
-
-    scrollBottom();
-
-}
-
-
-/* =====================================================
-   LOCAL RESPONSE
-===================================================== */
-
-function createLocalResponse(
-    text
-) {
-
-    const lower =
-        text.toLowerCase();
-
-
-    if (
-        lower.includes("hallo")
-        ||
-        lower.includes("hi")
-        ||
-        lower.includes("hey")
-    ) {
-
-        return (
-            "Hallo Bruder! 💙❤️🚀 " +
-            "HalDo AI ist bereit. " +
-            "Was möchtest du als Nächstes aufbauen?"
-        );
-
-    }
-
-
-    if (
-        lower.includes("was kannst")
-        ||
-        lower.includes("funktionen")
-    ) {
-
-        return (
-            "Im aktuellen HalDo AI OS 18 " +
-            "Foundation-Aufbau sind unter anderem " +
-            "Dashboard, App Center, AI Chat, " +
-            "Systemmodule, Einstellungen, " +
-            "Werkzeuge und die Êzîdî-Tastatur " +
-            "vorbereitet."
-        );
-
-    }
-
-
-    if (
-        lower.includes("404")
-    ) {
-
-        return (
-            "404 bedeutet normalerweise, dass " +
-            "eine verlinkte Datei nicht existiert " +
-            "oder der Dateiname/Pfad nicht stimmt. " +
-            "Genau deshalb bauen wir die nächsten " +
-            "Module so, dass sie zuerst wirklich " +
-            "vorhanden und erreichbar sind."
-        );
-
-    }
-
-
-    if (
-        lower.includes("dashboard")
-    ) {
-
-        return (
-            "Das Dashboard ist die zentrale " +
-            "Übersichtsseite. Von dort können " +
-            "wir später die Module, Systemstatus, " +
-            "AI und Apps miteinander verbinden."
-        );
-
-    }
-
-
-    if (
-        lower.includes("tastatur")
-        ||
-        lower.includes("ezidi")
-        ||
-        lower.includes("êzîdî")
-    ) {
-
-        return (
-            "Die Êzîdî-Tastatur ist bereits direkt " +
-            "in dieser Chat-Eingabe vorbereitet. " +
-            "Tippe unten auf ⌨ und füge eigene " +
-            "Zeichen direkt in das Eingabefeld ein."
-        );
-
-    }
-
-
-    if (
-        lower.includes("hilfe")
-    ) {
-
-        return (
-            "Natürlich. Schreib mir einfach, " +
-            "welches HalDo-Modul wir als Nächstes " +
-            "bauen sollen. Wir erweitern die " +
-            "bestehenden Dateien, statt funktionierende " +
-            "Teile unnötig zu entfernen."
-        );
-
-    }
-
-
-    return (
-        "Ich habe deine Nachricht empfangen. " +
-        "Das aktuelle Chat-Modul arbeitet lokal " +
-        "und speichert den Verlauf auf diesem Gerät. " +
-        "Die echte externe KI-Anbindung können wir " +
-        "anschließend als eigenes Core-Modul " +
-        "sauber integrieren."
-    );
-
-}
-
-
-/* =====================================================
-   WELCOME
-===================================================== */
-
-function hideWelcome() {
-
-    welcome.style.display =
-        "none";
-
-}
-
-
-/* =====================================================
-   TYPING
-===================================================== */
-
-function showTyping() {
-
-    typing.classList.add(
-        "show"
-    );
-
-    scrollBottom();
-
-}
-
-
-function hideTyping() {
-
-    typing.classList.remove(
-        "show"
-    );
-
-}
-
-
-/* =====================================================
-   SCROLL
-===================================================== */
-
-function scrollBottom() {
-
-    requestAnimationFrame(
-        function() {
-
-            chat.scrollTop =
-                chat.scrollHeight;
-
-        }
-    );
-
-}
-
-
-/* =====================================================
-   SAVE
-===================================================== */
-
-function saveChat() {
-
-    const data = [];
-
-
-    document
-        .querySelectorAll(
-            ".message-row"
-        )
-        .forEach(
-            function(row) {
-
-                const bubble =
-                    row.querySelector(
-                        ".message"
-                    );
-
-                const content =
-                    bubble.lastElementChild;
-
-
-                data.push({
-
-                    type:
-                        bubble.classList.contains(
-                            "user"
-                        )
-                            ? "user"
-                            : "ai",
-
-                    text:
-                        content.textContent
-
+    <!-- ===== NOTIFICATION ===== -->
+    <div id="notification"></div>
+
+    <script>
+        // ================================================================
+        //  HALDO CHAT — KOMPLETTE CHAT-APP
+        //  Version 24.0.0 — Build 2025.08.30
+        // ================================================================
+
+        (function() {
+            'use strict';
+
+            // ============================================================
+            //  STATE
+            // ============================================================
+            var state = {
+                contacts: [],
+                messages: {},
+                activeChat: null,
+                currentUser: {
+                    id: 'me',
+                    name: 'Du',
+                    avatar: '👤'
+                },
+                unread: {}
+            };
+
+            // ============================================================
+            //  DOM
+            // ============================================================
+            var $ = function(id) { return document.getElementById(id); };
+            var contactsEl = $('contacts');
+            var emptyContacts = $('empty-contacts');
+            var chatView = $('chat-view');
+            var emptyState = $('empty-state');
+            var messagesEl = $('messages');
+            var msgInput = $('msg-input');
+            var msgSend = $('msg-send');
+            var chatBack = $('chat-back');
+            var chatName = $('chat-name');
+            var chatAvatar = $('chat-avatar');
+            var chatStatus = $('chat-status');
+            var notification = $('notification');
+            var btnNewChat = $('btn-new-chat');
+            var btnSearch = $('btn-search');
+            var btnSettings = $('btn-settings');
+
+            // ============================================================
+            //  NOTIFICATION
+            // ============================================================
+            function notify(text, type) {
+                type = type || 'info';
+                notification.textContent = text;
+                notification.style.borderLeftColor = type === 'error' ? '#ff4444' : type === 'success' ? '#44ff88' :
+                    '#00d4ff';
+                notification.classList.add('show');
+                clearTimeout(notification._timeout);
+                notification._timeout = setTimeout(function() {
+                    notification.classList.remove('show');
+                }, 2800);
+                console.log('[Chat]', text);
+            }
+
+            // ============================================================
+            //  STORAGE
+            // ============================================================
+            function saveState() {
+                try {
+                    var data = {
+                        contacts: state.contacts,
+                        messages: state.messages,
+                        unread: state.unread
+                    };
+                    localStorage.setItem('haldo_chat_data', JSON.stringify(data));
+                } catch (e) {}
+            }
+
+            function loadState() {
+                try {
+                    var data = localStorage.getItem('haldo_chat_data');
+                    if (data) {
+                        var parsed = JSON.parse(data);
+                        state.contacts = parsed.contacts || [];
+                        state.messages = parsed.messages || {};
+                        state.unread = parsed.unread || {};
+                        return true;
+                    }
+                } catch (e) {}
+                return false;
+            }
+
+            // ============================================================
+            //  DEMO DATA
+            // ============================================================
+            function loadDemoData() {
+                if (state.contacts.length > 0) return;
+
+                state.contacts = [
+                    { id: 'c1', name: 'Max Mustermann', avatar: '👨', status: 'online', lastSeen: 'gerade' },
+                    { id: 'c2', name: 'Ella Schmidt', avatar: '👩', status: 'offline', lastSeen: 'vor 2 Std.' },
+                    { id: 'c3', name: 'HalDo AI', avatar: '🧠', status: 'online', lastSeen: 'gerade' },
+                    { id: 'c4', name: 'Dr. Weber', avatar: '👨‍⚕️', status: 'abwesend', lastSeen: 'vor 1 Std.' },
+                    { id: 'c5', name: 'Prof. Kaya', avatar: '👩‍🏫', status: 'online', lastSeen: 'vor 5 Min.' }
+                ];
+
+                state.messages = {
+                    'c1': [
+                        { from: 'c1', text: 'Hallo! Wie geht es dir?', time: '10:30' },
+                        { from: 'me', text: 'Hallo Max! Mir geht es gut, danke!', time: '10:32' },
+                        { from: 'c1', text: 'Super! Hast du schon HalDo OS 24 getestet?', time: '10:35' },
+                        { from: 'me', text: 'Ja, es ist großartig! Die neue Cosmic World ist beeindruckend.', time: '10:38' },
+                        { from: 'c1', text: 'Das freut mich! Wir sollten uns bald treffen.', time: '10:40' }
+                    ],
+                    'c2': [
+                        { from: 'c2', text: 'Hey! Wann hast du Zeit für das Projekt?', time: 'Gestern 14:20' },
+                        { from: 'me', text: 'Morgen Nachmittag wäre gut.', time: 'Gestern 14:25' },
+                        { from: 'c2', text: 'Perfekt! Ich melde mich.', time: 'Gestern 14:30' }
+                    ],
+                    'c3': [
+                        { from: 'c3', text: '👋 Hallo! Ich bin HalDo AI. Wie kann ich dir helfen?', time: '09:00' },
+                        { from: 'me', text: 'Hallo! Erzähl mir etwas über Êzîdî.', time: '09:02' },
+                        { from: 'c3', text: '🟡 Êzîdî ist eine der ältesten monotheistischen Religionen der Welt...',
+                            time: '09:05' },
+                        { from: 'me', text: 'Das ist faszinierend! Danke für die Erklärung.', time: '09:10' },
+                        { from: 'c3', text: 'Gern geschehen! Möchtest du noch mehr wissen?', time: '09:12' }
+                    ],
+                    'c4': [
+                        { from: 'c4', text: 'Die Vorlesung über Quantenmechanik beginnt um 14 Uhr.', time: 'Heute 08:00' },
+                        { from: 'me', text: 'Vielen Dank, Herr Dr. Weber! Ich komme.', time: 'Heute 08:05' }
+                    ],
+                    'c5': [
+                        { from: 'c5', text: 'Ich habe deine Hausarbeit gelesen. Sehr gut!', time: 'Heute 11:00' },
+                        { from: 'me', text: 'Vielen Dank, Frau Professorin!', time: 'Heute 11:05' },
+                        { from: 'c5', text: 'Gerne. Besprich das Thema in der nächsten Sitzung.', time: 'Heute 11:10' }
+                    ]
+                };
+
+                state.unread = {
+                    'c1': 2,
+                    'c3': 1
+                };
+
+                saveState();
+            }
+
+            // ============================================================
+            //  RENDER FUNCTIONS
+            // ============================================================
+
+            function getContact(id) {
+                for (var i = 0; i < state.contacts.length; i++) {
+                    if (state.contacts[i].id === id) return state.contacts[i];
+                }
+                return null;
+            }
+
+            function getMessages(id) {
+                return state.messages[id] || [];
+            }
+
+            function getLastMessage(id) {
+                var msgs = getMessages(id);
+                if (msgs.length === 0) return '';
+                var last = msgs[msgs.length - 1];
+                var sender = last.from === 'me' ? 'Du: ' : '';
+                return sender + last.text;
+            }
+
+            function getStatusText(contact) {
+                if (!contact) return '';
+                var statusMap = {
+                    'online': '🟢 online',
+                    'offline': '⚪ offline',
+                    'abwesend': '🟡 abwesend'
+                };
+                return statusMap[contact.status] || '⚪ offline';
+            }
+
+            function getStatusClass(contact) {
+                if (!contact) return '';
+                return contact.status || 'offline';
+            }
+
+            function formatTime(time) {
+                if (!time) return '';
+                var now = new Date();
+                var today = now.toDateString();
+                var parts = time.split(' ');
+                if (parts.length === 2) {
+                    var dateStr = parts[0];
+                    var timeStr = parts[1];
+                    if (dateStr === 'Heute' || dateStr === 'Gestern') {
+                        return timeStr;
+                    }
+                    return time;
+                }
+                return time;
+            }
+
+            function renderContacts() {
+                var html = '';
+                var online = [];
+                var offline = [];
+
+                for (var i = 0; i < state.contacts.length; i++) {
+                    var c = state.contacts[i];
+                    var unread = state.unread[c.id] || 0;
+                    var lastMsg = getLastMessage(c.id);
+                    var statusClass = getStatusClass(c);
+                    var isActive = state.activeChat === c.id;
+
+                    var item = {
+                        id: c.id,
+                        name: c.name,
+                        avatar: c.avatar || '👤',
+                        statusClass: statusClass,
+                        isActive: isActive,
+                        unread: unread,
+                        lastMsg: lastMsg,
+                        statusText: c.status === 'online' ? 'online' : c.status === 'abwesend' ? 'abwesend' : 'offline'
+                    };
+
+                    if (c.status === 'online' || c.status === 'abwesend') {
+                        online.push(item);
+                    } else {
+                        offline.push(item);
+                    }
+                }
+
+                // Sortiere online nach unread
+                online.sort(function(a, b) { return (b.unread || 0) - (a.unread || 0); });
+                offline.sort(function(a, b) { return (b.unread || 0) - (a.unread || 0); });
+
+                var allItems = online.concat(offline);
+
+                if (allItems.length === 0) {
+                    emptyContacts.style.display = 'block';
+                    contactsEl.innerHTML = '';
+                    return;
+                }
+                emptyContacts.style.display = 'none';
+
+                for (var j = 0; j < allItems.length; j++) {
+                    var item = allItems[j];
+                    var unreadBadge = item.unread > 0 ? '<span class="unread">' + item.unread + '</span>' : '';
+                    var activeClass = item.isActive ? 'active' : '';
+                    var statusDot = item.statusClass === 'online' ? '🟢' : item.statusClass === 'abwesend' ? '🟡' : '⚪';
+
+                    html += '<div class="contact-item ' + activeClass + '" data-id="' + item.id + '" onclick="HalDoChat.openChat(\'' +
+                        item.id + '\')">';
+                    html += '<div class="avatar">' + item.avatar + '<span class="status ' + item.statusClass + '"></span></div>';
+                    html += '<div class="info">';
+                    html += '<div class="name">' + item.name + ' ' + unreadBadge + '</div>';
+                    html += '<div class="preview">' + statusDot + ' ' + item.lastMsg + '</div>';
+                    html += '</div>';
+                    html += '<div class="meta">';
+                    html += '<div class="time">' + (item.isActive ? 'aktiv' : '') + '</div>';
+                    html += '</div>';
+                    html += '</div>';
+                }
+
+                contactsEl.innerHTML = html;
+            }
+
+            function renderMessages(contactId) {
+                var contact = getContact(contactId);
+                if (!contact) return;
+
+                var msgs = getMessages(contactId);
+                var html = '';
+                var lastDate = '';
+
+                for (var i = 0; i < msgs.length; i++) {
+                    var m = msgs[i];
+                    var isMe = m.from === 'me';
+                    var senderName = isMe ? 'Du' : contact.name;
+                    var msgClass = isMe ? 'sent' : 'received';
+                    var time = formatTime(m.time) || '';
+
+                    html += '<div class="msg ' + msgClass + '">';
+                    if (!isMe) {
+                        html += '<span class="sender-name">' + senderName + '</span>';
+                    }
+                    html += m.text;
+                    html += '<span class="time">' + time + '</span>';
+                    html += '</div>';
+                }
+
+                if (html === '') {
+                    html = '<div style="color:#8899bb;text-align:center;padding:30px;font-size:0.8rem;">💬 Noch keine Nachrichten. Schreibe etwas!</div>';
+                }
+
+                messagesEl.innerHTML = html;
+                messagesEl.scrollTop = messagesEl.scrollHeight;
+            }
+
+            function renderChatView(contactId) {
+                var contact = getContact(contactId);
+                if (!contact) return;
+
+                state.activeChat = contactId;
+
+                // Header
+                chatName.textContent = contact.name;
+                chatAvatar.textContent = contact.avatar || '👤';
+                chatStatus.textContent = getStatusText(contact);
+                chatStatus.className = 'status-text ' + getStatusClass(contact);
+
+                // Messages
+                renderMessages(contactId);
+
+                // View
+                chatView.classList.add('active');
+                emptyState.style.display = 'none';
+
+                // Unread zurücksetzen
+                if (state.unread[contactId]) {
+                    state.unread[contactId] = 0;
+                    saveState();
+                }
+
+                // Input fokussieren
+                setTimeout(function() { msgInput.focus(); }, 300);
+
+                // Contacts neu laden
+                renderContacts();
+            }
+
+            // ============================================================
+            //  CHAT FUNCTIONS
+            // ============================================================
+
+            function openChat(contactId) {
+                var contact = getContact(contactId);
+                if (!contact) {
+                    notify('❌ Kontakt nicht gefunden', 'error');
+                    return;
+                }
+                renderChatView(contactId);
+            }
+
+            function sendMessage() {
+                var text = msgInput.value.trim();
+                if (!text) return;
+                if (!state.activeChat) {
+                    notify('❌ Kein Chat ausgewählt', 'error');
+                    return;
+                }
+
+                var contactId = state.activeChat;
+                var msg = {
+                    from: 'me',
+                    text: text,
+                    time: new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+                };
+
+                if (!state.messages[contactId]) {
+                    state.messages[contactId] = [];
+                }
+                state.messages[contactId].push(msg);
+                saveState();
+
+                msgInput.value = '';
+                renderMessages(contactId);
+
+                // Simuliere Antwort (bei HalDo AI)
+                if (contactId === 'c3') {
+                    setTimeout(function() {
+                        simulateAIResponse(contactId);
+                    }, 800);
+                }
+
+                // Contacts neu laden
+                renderContacts();
+            }
+
+            function simulateAIResponse(contactId) {
+                var contact = getContact(contactId);
+                if (!contact) return;
+
+                var responses = [
+                    '🤖 Interessant! Erzähl mir mehr dazu.',
+                    '💡 Das ist ein faszinierendes Thema. Was möchtest du genau wissen?',
+                    '🌟 Ich verstehe. Möchtest du eine detaillierte Erklärung?',
+                    '🟡 Ich kann dir bei Wissenschaft, Geschichte, Kultur, Technik und vielem mehr helfen.',
+                    '📚 Ich habe ein breites Wissen. Stelle mir gerne weitere Fragen!',
+                    '💬 Ja, das ist ein wichtiger Punkt. Lass uns tiefer eintauchen.',
+                    '😊 Das freut mich zu hören! Gibt es noch etwas, das dich interessiert?'
+                ];
+
+                var randomResponse = responses[Math.floor(Math.random() * responses.length)];
+
+                var msg = {
+                    from: 'c3',
+                    text: randomResponse,
+                    time: new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+                };
+
+                if (!state.messages[contactId]) {
+                    state.messages[contactId] = [];
+                }
+                state.messages[contactId].push(msg);
+
+                // Unread setzen (wenn Chat nicht aktiv)
+                if (state.activeChat !== contactId) {
+                    state.unread[contactId] = (state.unread[contactId] || 0) + 1;
+                    notify('💬 Neue Nachricht von ' + contact.name, 'success');
+                }
+
+                saveState();
+
+                if (state.activeChat === contactId) {
+                    renderMessages(contactId);
+                }
+                renderContacts();
+            }
+
+            // ============================================================
+            //  NEW CHAT
+            // ============================================================
+
+            function createNewChat() {
+                var name = prompt('👤 Name des Kontakts:');
+                if (!name || name.trim() === '') return;
+
+                var avatar = prompt('🎭 Avatar (z.B. 👤, 👩, 🧑, 🤖):') || '👤';
+
+                var newContact = {
+                    id: 'c' + Date.now(),
+                    name: name.trim(),
+                    avatar: avatar,
+                    status: 'online',
+                    lastSeen: 'gerade'
+                };
+
+                state.contacts.push(newContact);
+                state.messages[newContact.id] = [];
+                saveState();
+
+                notify('👤 ' + newContact.name + ' wurde hinzugefügt!', 'success');
+                renderContacts();
+
+                // Öffne neuen Chat
+                openChat(newContact.id);
+            }
+
+            // ============================================================
+            //  SEARCH
+            // ============================================================
+
+            function toggleSearch() {
+                var query = prompt('🔍 Kontakt suchen:');
+                if (!query) return;
+
+                var results = [];
+                var lower = query.toLowerCase();
+                for (var i = 0; i < state.contacts.length; i++) {
+                    if (state.contacts[i].name.toLowerCase().includes(lower)) {
+                        results.push(state.contacts[i]);
+                    }
+                }
+
+                if (results.length === 0) {
+                    notify('🔍 Keine Kontakte gefunden für "' + query + '"', 'info');
+                    return;
+                }
+
+                if (results.length === 1) {
+                    openChat(results[0].id);
+                    return;
+                }
+
+                var msg = '🔍 Gefundene Kontakte:\n';
+                for (var j = 0; j < results.length; j++) {
+                    msg += (j + 1) + '. ' + results[j].name + '\n';
+                }
+                msg += '\nTippe die Nummer ein um zu öffnen:';
+                var choice = prompt(msg);
+                if (choice) {
+                    var idx = parseInt(choice) - 1;
+                    if (idx >= 0 && idx < results.length) {
+                        openChat(results[idx].id);
+                    }
+                }
+            }
+
+            // ============================================================
+            //  EVENT BINDING
+            // ============================================================
+
+            function initEvents() {
+                // Send
+                msgSend.addEventListener('click', sendMessage);
+                msgInput.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        sendMessage();
+                    }
                 });
 
-            }
-        );
+                // Back
+                chatBack.addEventListener('click', function() {
+                    chatView.classList.remove('active');
+                    emptyState.style.display = 'flex';
+                    state.activeChat = null;
+                    renderContacts();
+                });
 
+                // New Chat
+                btnNewChat.addEventListener('click', createNewChat);
 
-    try {
+                // Search
+                btnSearch.addEventListener('click', toggleSearch);
 
-        localStorage.setItem(
-            STORAGE_KEY,
-            JSON.stringify(
-                data
-            )
-        );
+                // Settings (Demo)
+                btnSettings.addEventListener('click', function() {
+                    notify('⚙️ Chat-Einstellungen: Thema, Benachrichtigungen, Datenschutz', 'info');
+                });
 
-    } catch {
+                // Emoji (Demo)
+                document.querySelector('.emoji-btn').addEventListener('click', function() {
+                    var emojis = ['😊', '😂', '🤔', '😍', '🤗', '😎', '🥰', '😘', '🤩', '😜', '😏', '😒', '😢', '😭', '😡', '😤',
+                        '😇', '🤓', '🥳'
+                    ];
+                    var randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
+                    msgInput.value = randomEmoji;
+                    msgInput.focus();
+                });
 
-        showToast(
-            "Chat konnte nicht gespeichert werden."
-        );
+                // Attach (Demo)
+                document.querySelector('.attach-btn').addEventListener('click', function() {
+                    notify('📎 Datei-Anhang (Demo) — Bilder, Dokumente, Audio möglich', 'info');
+                });
 
-    }
-
-}
-
-
-/* =====================================================
-   LOAD
-===================================================== */
-
-function loadChat() {
-
-    let data = [];
-
-
-    try {
-
-        data =
-            JSON.parse(
-                localStorage.getItem(
-                    STORAGE_KEY
-                ) || "[]"
-            );
-
-    } catch {
-
-        data = [];
-
-    }
-
-
-    if (
-        !Array.isArray(data)
-        ||
-        data.length === 0
-    ) {
-
-        return;
-
-    }
-
-
-    hideWelcome();
-
-
-    data.forEach(
-        function(item) {
-
-            if (
-                item &&
-                (
-                    item.type === "user"
-                    ||
-                    item.type === "ai"
-                )
-            ) {
-
-                addMessage(
-                    item.type,
-                    String(
-                        item.text || ""
-                    )
-                );
-
+                // Chat Menu (Demo)
+                document.getElementById('chat-menu').addEventListener('click', function() {
+                    if (!state.activeChat) return;
+                    var contact = getContact(state.activeChat);
+                    if (!contact) return;
+                    var actions = '📋 Aktionen für ' + contact.name + ':\n1. 📌 Chat fixieren\n2. 🔕 Stummschalten\n3. 🗑️ Chat löschen\n4. 👤 Profil anzeigen';
+                    var choice = prompt(actions);
+                    if (choice === '3' || choice === '🗑️') {
+                        if (confirm('Chat mit ' + contact.name + ' wirklich löschen?')) {
+                            delete state.messages[contact.id];
+                            state.contacts = state.contacts.filter(function(c) { return c.id !== contact.id; });
+                            saveState();
+                            chatView.classList.remove('active');
+                            emptyState.style.display = 'flex';
+                            state.activeChat = null;
+                            renderContacts();
+                            notify('🗑️ Chat gelöscht', 'info');
+                        }
+                    } else if (choice === '4') {
+                        notify('👤 ' + contact.name + '\n' + getStatusText(contact) + '\n📱 Profil: ' + contact.id,
+                            'info');
+                    } else {
+                        notify('ℹ️ Aktion für ' + contact.name + ' (Demo)', 'info');
+                    }
+                });
             }
 
-        }
-    );
-
-}
-
-
-/* =====================================================
-   CLEAR
-===================================================== */
-
-function clearChat() {
-
-    if (
-        !confirm(
-            "Den gesamten HalDo AI Chat löschen?"
-        )
-    ) {
-
-        return;
-
-    }
-
-
-    messages.innerHTML =
-        "";
-
-
-    localStorage.removeItem(
-        STORAGE_KEY
-    );
-
-
-    welcome.style.display =
-        "";
-
-
-    showToast(
-        "Chat wurde gelöscht."
-    );
-
-}
-
-
-/* =====================================================
-   EZIDI KEYBOARD
-===================================================== */
-
-const keyboardPanel =
-    document.getElementById(
-        "keyboardPanel"
-    );
-
-
-function toggleKeyboard() {
-
-    keyboardPanel.classList.toggle(
-        "open"
-    );
-
-}
-
-
-function keyInsert(
-    character
-) {
-
-    insertText(
-        character
-    );
-
-}
-
-
-/* =====================================================
-   PANEL
-===================================================== */
-
-const overlay =
-    document.getElementById(
-        "overlay"
-    );
-
-
-const panelTitle =
-    document.getElementById(
-        "panelTitle"
-    );
-
-
-const panelContent =
-    document.getElementById(
-        "panelContent"
-    );
-
-
-function openPanel(
-    title,
-    content
-) {
-
-    panelTitle.textContent =
-        title;
-
-    panelContent.textContent =
-        content;
-
-    overlay.classList.add(
-        "open"
-    );
-
-}
-
-
-function closePanel() {
-
-    overlay.classList.remove(
-        "open"
-    );
-
-}
-
-
-function closePanelOutside(
-    event
-) {
-
-    if (
-        event.target === overlay
-    ) {
-
-        closePanel();
-
-    }
-
-}
-
-
-/* =====================================================
-   HOME
-===================================================== */
-
-function openHome() {
-
-    window.location.href =
-        "index.html";
-
-}
-
-
-/* =====================================================
-   TOAST
-===================================================== */
-
-let toastTimer;
-
-
-function showToast(
-    text
-) {
-
-    const toast =
-        document.getElementById(
-            "toast"
-        );
-
-
-    toast.textContent =
-        text;
-
-
-    toast.classList.add(
-        "show"
-    );
-
-
-    clearTimeout(
-        toastTimer
-    );
-
-
-    toastTimer =
-        setTimeout(
-            function() {
-
-                toast.classList.remove(
-                    "show"
-                );
-
-            },
-            2200
-        );
-
-}
-
-
-/* =====================================================
-   ESC
-===================================================== */
-
-document.addEventListener(
-    "keydown",
-    function(event) {
-
-        if (
-            event.key ===
-            "Escape"
-        ) {
-
-            keyboardPanel.classList.remove(
-                "open"
-            );
-
-            closePanel();
-
-        }
-
-    }
-);
-
-</script>
-
-
+            // ============================================================
+            //  INIT
+            // ============================================================
+
+            function init() {
+                // Daten laden
+                var hasData = loadState();
+
+                if (!hasData || state.contacts.length === 0) {
+                    loadDemoData();
+                    notify('💬 Demo-Kontakte geladen', 'success');
+                }
+
+                // Render
+                renderContacts();
+
+                // Bei Desktop: ersten Chat öffnen (wenn vorhanden)
+                if (state.contacts.length > 0 && window.innerWidth >= 768) {
+                    openChat(state.contacts[0].id);
+                }
+
+                // Events
+                initEvents();
+
+                // Globale API
+                window.HalDoChat = {
+                    openChat: openChat,
+                    sendMessage: sendMessage,
+                    state: state,
+                    renderContacts: renderContacts,
+                    renderMessages: renderMessages,
+                    notify: notify,
+                    createNewChat: createNewChat
+                };
+
+                console.log('💬 HalDo Chat — Version 24.0.0');
+                console.log('📱 ' + state.contacts.length + ' Kontakte geladen');
+                console.log('💡 HalDoChat.openChat("c1")');
+
+                // Auf Mobilgeräten: bei Klick auf leeren Bereich Chat schließen
+                if (window.innerWidth < 768) {
+                    document.getElementById('empty-state').addEventListener('click', function() {
+                        // nichts tun
+                    });
+                }
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', init);
+            } else {
+                init();
+            }
+
+        })();
+    </script>
 </body>
-
 </html>
