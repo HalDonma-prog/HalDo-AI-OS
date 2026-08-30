@@ -11,8 +11,7 @@
     <style>
         /* ================================================================
            HALDO AI OS 24 — ULTIMATE EDITION
-           KOMPLETT IN EINER DATEI — PROFESSIONELL, LEBENDIG, 4K COSMIC
-           ALLE 84 APPS MIT VOLLSTÄNDIGEN FUNKTIONEN
+           MIT LEBENDIGEM LOGO & SPRACHBEFEHLEN
            ================================================================ */
         * {
             margin: 0;
@@ -127,6 +126,101 @@
             padding-bottom: var(--safe-bottom);
         }
 
+        /* ===== LEBENDIGER HALDO AI AVATAR ===== */
+        #ai-avatar-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        #ai-avatar-container:active {
+            transform: scale(0.97);
+        }
+        #ai-avatar {
+            width: clamp(80px, 15vw, 120px);
+            height: clamp(80px, 15vw, 120px);
+            border-radius: 50%;
+            border: 3px solid var(--primary);
+            box-shadow: 0 0 40px rgba(0, 212, 255, 0.2);
+            overflow: hidden;
+            position: relative;
+            transition: 0.3s;
+        }
+        #ai-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: 0.3s;
+        }
+        #ai-avatar .status-ring {
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            animation: ringPulse 2s infinite;
+        }
+        @keyframes ringPulse {
+            0% {
+                border-color: rgba(0, 212, 255, 0.1);
+                transform: scale(1);
+            }
+            50% {
+                border-color: rgba(0, 212, 255, 0.5);
+                transform: scale(1.05);
+            }
+            100% {
+                border-color: rgba(0, 212, 255, 0.1);
+                transform: scale(1);
+            }
+        }
+        #ai-avatar .status-dot {
+            position: absolute;
+            bottom: 4px;
+            right: 4px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 2px solid var(--bg);
+            background: #44ff88;
+            transition: 0.3s;
+        }
+        #ai-avatar .status-dot.listening {
+            background: #44aaff;
+            animation: pulse 0.6s infinite;
+        }
+        #ai-avatar .status-dot.thinking {
+            background: #ffcc00;
+            animation: pulse 0.4s infinite;
+        }
+        #ai-avatar .status-dot.speaking {
+            background: #ff6644;
+            animation: pulse 0.3s infinite;
+        }
+        @keyframes pulse {
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.4);
+                opacity: 0.6;
+            }
+        }
+        #ai-name {
+            font-size: clamp(0.8rem, 1.6vw, 1rem);
+            font-weight: 600;
+            color: var(--primary);
+            margin-top: 6px;
+        }
+        #ai-status-text {
+            font-size: clamp(0.6rem, 1.2vw, 0.75rem);
+            color: #8899bb;
+        }
+
         /* ===== TOPBAR ===== */
         #topbar {
             display: flex;
@@ -157,8 +251,8 @@
             gap: 6px;
         }
         #topbar-left .haldo-icon img {
-            width: clamp(32px, 6vw, 40px);
-            height: clamp(32px, 6vw, 40px);
+            width: clamp(28px, 5vw, 36px);
+            height: clamp(28px, 5vw, 36px);
             border-radius: 50%;
             border: 2px solid var(--primary);
             object-fit: cover;
@@ -521,6 +615,10 @@
                 padding: 6px 4px;
                 gap: 4px;
             }
+            #ai-avatar {
+                width: 60px;
+                height: 60px;
+            }
         }
         @media(orientation:landscape) and (max-height:500px) {
             .window {
@@ -558,6 +656,10 @@
                 padding: 4px 3px;
                 gap: 3px;
             }
+            #ai-avatar {
+                width: 50px;
+                height: 50px;
+            }
         }
     </style>
 </head>
@@ -592,7 +694,20 @@
                     <button class="top-btn" id="btn-menu">📱</button>
                 </div>
             </div>
+
+            <!-- LEBENDIGER HALDO AI AVATAR -->
+            <div id="ai-avatar-container" onclick="launchApp('ai')">
+                <div id="ai-avatar">
+                    <img src="assets/logo.png" alt="HalDo" onerror="this.style.display='none';this.parentElement.textContent='⟡';this.parentElement.style.display='flex';this.parentElement.style.alignItems='center';this.parentElement.style.justifyContent='center';this.parentElement.style.fontSize='2.5rem';" />
+                    <div class="status-ring"></div>
+                    <div class="status-dot" id="ai-status-dot"></div>
+                </div>
+                <div id="ai-name">HalDo AI</div>
+                <div id="ai-status-text">● bereit · klicke zum Sprechen</div>
+            </div>
+
             <div id="app-container"></div>
+
             <div id="dock">
                 <button class="dock-item" data-app="ai">🧠</button>
                 <button class="dock-item" data-app="settings">⚙️</button>
@@ -627,8 +742,7 @@
     <script>
         // ================================================================
         //  HALDO AI OS 24 — ULTIMATE EDITION
-        //  KOMPLETT IN EINER DATEI — PROFESSIONELL, LEBENDIG, 4K COSMIC
-        //  ALLE 84 APPS MIT VOLLSTÄNDIGEN FUNKTIONEN
+        //  MIT LEBENDIGEM LOGO & SPRACHBEFEHLEN
         //  Version 24.0.0 — Build 2025.08.30
         // ================================================================
 
@@ -710,6 +824,8 @@
             var dock = $('dock');
             var notification = $('notification');
             var clockDisplay = $('clock-display');
+            var statusDot = $('ai-status-dot');
+            var statusText = $('ai-status-text');
 
             // ============================================================
             //  NOTIFICATION
@@ -728,36 +844,20 @@
             }
 
             // ============================================================
-            //  AI ENGINE — PROFESSIONELL, WIE EIN PROFESSOR
+            //  AI ENGINE — MIT SPRACHBEFEHLEN
             // ============================================================
             var aiEngine = {
                 conversationHistory: [],
                 lastTopic: null,
                 userName: null,
 
-                // PROFESSIONELLE WISSENSDATENBANK (wie ein Professor)
                 knowledge: {
                     // === WISSENSCHAFT ===
-                    'quantenmechanik': 'Die Quantenmechanik ist eines der faszinierendsten und seltsamsten Gebiete der Physik. Sie beschreibt die Welt der kleinsten Teilchen – Atome, Elektronen, Photonen. In dieser Welt gelten andere Regeln als in unserer makroskopischen Welt. Teilchen können sich an mehreren Orten gleichzeitig befinden (Superposition), sie sind Welle und Teilchen zugleich (Welle-Teilchen-Dualismus), und sie können miteinander verschränkt sein (Quantenverschränkung). Die Heisenbergsche Unschärferelation besagt, dass man nicht gleichzeitig den Ort und den Impuls eines Teilchens exakt kennen kann. Die Quantenmechanik ist die Grundlage für moderne Technologien wie Laser, Transistoren, MRI und Quantencomputer. Sie ist eine der erfolgreichsten Theorien der Physik und hat unser Verständnis der Realität revolutioniert.',
-                    'relativitätstheorie': 'Einsteins Relativitätstheorie ist eine der genialsten und revolutionärsten Ideen der Physik. Sie besteht aus zwei Teilen: der speziellen Relativitätstheorie (1905) und der allgemeinen Relativitätstheorie (1915). Die spezielle Relativität besagt, dass die Lichtgeschwindigkeit für alle Beobachter gleich ist – unabhängig von ihrer Bewegung. Daraus folgen Phänomene wie die Zeitdilatation (bewegte Uhren gehen langsamer) und die Längenkontraktion. Die allgemeine Relativität beschreibt die Schwerkraft als Krümmung der Raumzeit. Massive Objekte wie Sterne und Planeten krümmen die Raumzeit, und diese Krümmung führt zur Anziehungskraft, die wir als Schwerkraft kennen. Die Relativitätstheorie sagt Phänomene wie Schwarze Löcher, Gravitationswellen und die Ausdehnung des Universums voraus. Sie ist eine der am besten bestätigten Theorien der Wissenschaft.',
-                    'mathematik': 'Die Mathematik ist die Sprache des Universums. Sie ist die Grundlage für alle Naturwissenschaften, für Technik, Wirtschaft und viele Bereiche des täglichen Lebens. Die Mathematik besteht aus vielen Disziplinen: Arithmetik (Zahlenlehre), Algebra (Gleichungen und Strukturen), Geometrie (Formen und Räume), Analysis (Veränderungen und Grenzwerte), Statistik (Daten und Wahrscheinlichkeiten) und vielen mehr. Die Mathematik ist die einzige Wissenschaft, die auf absoluten Beweisen basiert – ein mathematischer Beweis ist unumstößlich. Sie hilft uns, Muster zu erkennen, Probleme zu lösen und die Welt zu verstehen.',
-                    'informatik': 'Die Informatik ist die Wissenschaft der automatischen Informationsverarbeitung. Sie umfasst Algorithmen (präzise Handlungsanweisungen), Datenstrukturen (Organisation von Daten), Programmiersprachen (Sprachen zur Beschreibung von Algorithmen), Softwareentwicklung, künstliche Intelligenz, Netzwerke, Datenbanken und vieles mehr. Die Informatik hat die Welt in den letzten Jahrzehnten radikal verändert – vom ersten Computer über das Internet bis zur heutigen KI. Sie ist eine der wichtigsten und zukunftsträchtigsten Wissenschaften.',
-                    'künstliche intelligenz': 'Künstliche Intelligenz (KI) ist die Fähigkeit von Maschinen, menschenähnliche Intelligenz zu zeigen. Dazu gehören Lernen, Verstehen, Planen, Problemlösen, Kommunikation und Kreativität. Es gibt verschiedene Arten von KI: schwache KI (wie ich) – für spezifische Aufgaben optimiert, und starke KI (noch Zukunft) – die allgemeine Intelligenz wie ein Mensch besitzt. Die KI nutzt Techniken wie maschinelles Lernen, neuronale Netze und Deep Learning. Sie wird bereits in vielen Bereichen eingesetzt: Sprachassistenten, Bilderkennung, medizinische Diagnosen, autonome Fahrzeuge und vieles mehr.',
-                    'biologie': 'Die Biologie ist die Wissenschaft des Lebens. Sie untersucht die Vielfalt der Lebewesen, ihre Struktur, Funktion, Entwicklung und Evolution. Die Zelle ist die grundlegende Einheit des Lebens. Die DNA enthält den genetischen Code, der die Entwicklung und Funktion aller Lebewesen steuert. Die Evolutionstheorie von Charles Darwin (1859) erklärt, wie Arten durch natürliche Selektion entstehen. Die moderne Biologie umfasst Bereiche wie Genetik, Molekularbiologie, Neurobiologie, Ökologie und Evolutionsbiologie. Sie hilft uns, Krankheiten zu verstehen und zu behandeln, die Umwelt zu schützen und die Grundlagen des Lebens zu erforschen.',
-                    'chemie': 'Die Chemie ist die Wissenschaft von den Stoffen und ihren Umwandlungen. Sie untersucht Atome, Moleküle, chemische Reaktionen und die Struktur der Materie. Die Chemie verbindet die Physik (die die grundlegenden Gesetze beschreibt) mit der Biologie (die die chemischen Prozesse des Lebens untersucht). Es gibt viele Bereiche der Chemie: organische Chemie (Kohlenstoffverbindungen), anorganische Chemie (Metalle und Salze), Biochemie (Chemie des Lebens), physikalische Chemie (thermodynamische und quantenchemische Aspekte) und analytische Chemie (Bestimmung von Stoffzusammensetzungen). Die Chemie ist die Grundlage für Medikamente, Materialien, Energie und viele Produkte des Alltags.',
-
-                    // === GESCHICHTE & KULTUR ===
-                    'ezidi': 'Die Êzîdî (auch Ezidi oder Yeziden) sind eine der ältesten monotheistischen Religionen der Welt. Ihre Wurzeln reichen Jahrtausende zurück in Mesopotamien, dem heutigen Irak, Syrien und der Türkei. Die Êzîdî-Religion vereint Elemente des Zoroastrismus, des Islam und des Christentums, hat aber ihre eigene einzigartige Theologie und Rituale. Der zentrale Schrein der Êzîdî befindet sich in Lalisch im Irak. Die Êzîdî haben eine reiche Kultur mit eigener Musik, Poesie und einer eigenen Sprache – Kurmanji, einem Dialekt des Kurdischen. Leider wurden die Êzîdî immer wieder verfolgt, besonders durch den IS 2014, der einen Völkermord an den Êzîdî verübte. Ihre Kultur ist ein Schatz der Menschheit und verdient Schutz und Respekt. Die Êzîdî sind ein Beispiel für den Reichtum religiöser Vielfalt und die Bedeutung von Toleranz.',
-                    'kurden': 'Die Kurden sind ein indigenes Volk in der Region Kurdistan, das sich über Teile der Türkei, Syriens, des Irak und des Iran erstreckt. Sie haben eine reiche Geschichte, die Jahrtausende zurückreicht. Die kurdische Sprache (Kurmanji) ist mit dem Êzîdî verbunden und gehört zur iranischen Sprachfamilie. Die Kurden haben eine reiche Kultur mit einer langen Tradition von Poesie, Musik und Handwerkskunst. Berühmte kurdische Dichter wie Ehmedê Xanî und Cegerxwîn haben die kurdische Literatur geprägt. Die Kurden kämpfen seit Jahrzehnten für ihre kulturellen und politischen Rechte. Ihre Kultur und Geschichte sind ein wichtiger Teil des kulturellen Erbes der Region.',
-                    'judentum': 'Das Judentum ist eine der ältesten monotheistischen Religionen der Welt, mit Wurzeln, die etwa 2000 Jahre vor Christus zurückreichen. Es ist die Wurzel des Christentums und des Islam. Die zentralen Texte des Judentums sind die Tora (die fünf Bücher Mose), die Propheten und die Weisheitsliteratur. Das Judentum hat eine reiche Tradition in Philosophie, Wissenschaft, Kunst und Musik. Berühmte jüdische Denker wie Maimonides, Spinoza, Einstein und Freud haben die Welt nachhaltig geprägt. Die jüdische Geschichte ist auch eine Geschichte von Verfolgung und Widerstand – vom babylonischen Exil über die Zerstörung des Tempels, die Kreuzzüge, die Inquisition bis zum Holocaust. Heute gibt es jüdische Gemeinden auf der ganzen Welt, mit Israel als zentralem Ort für das Judentum.',
-                    'philosophie': 'Die Philosophie ist die Liebe zur Weisheit. Sie ist eine der ältesten Disziplinen der Menschheit und fragt nach den grundlegenden Fragen des Lebens: Was ist der Sinn des Lebens? Was ist Wahrheit? Was ist gut und böse? Was können wir wissen? Die Philosophie hat viele Denker hervorgebracht: Sokrates ("Ich weiß, dass ich nichts weiß"), Platon (Ideenlehre), Aristoteles (Logik und Ethik), Immanuel Kant (kategorischer Imperativ), Friedrich Nietzsche (Übermensch) und viele andere. Die Philosophie umfasst viele Bereiche: Metaphysik (das Sein), Erkenntnistheorie (das Wissen), Ethik (das Gute), Logik (das richtige Denken) und Ästhetik (die Schönheit). Sie begleitet die Menschheit seit Jahrtausenden und hilft uns, unser Leben und die Welt zu verstehen.',
-
-                    // === PERSÖNLICH & LEBEN ===
-                    'gesundheit': 'Gesundheit ist ein Zustand des vollständigen körperlichen, seelischen und sozialen Wohlbefindens – nicht nur die Abwesenheit von Krankheit (so die Definition der WHO). Die Gesundheit wird durch viele Faktoren beeinflusst: genetische Veranlagung, Lebensstil (Ernährung, Bewegung, Schlaf), Umwelt, soziale Beziehungen und psychische Verfassung. Ein gesunder Lebensstil mit ausgewogener Ernährung, regelmäßiger Bewegung, ausreichend Schlaf, Stressreduktion und sozialen Kontakten ist die beste Vorsorge. Die Medizin hilft bei der Behandlung von Krankheiten, aber die beste Gesundheitsvorsorge ist ein gesunder Lebensstil.',
-                    'meditation': 'Meditation ist eine Praxis zur Beruhigung des Geistes und zur Förderung der Achtsamkeit. Sie hat ihren Ursprung in alten spirituellen Traditionen, wird aber heute weltweit praktiziert – unabhängig von Religion. Es gibt viele verschiedene Formen der Meditation: Achtsamkeitsmeditation (Beobachten des gegenwärtigen Augenblicks), Transzendentale Meditation (Wiederholung eines Mantras), Zen-Meditation (stille Sitzmeditation), Metta-Meditation (Kultivierung von liebevoller Güte) und viele mehr. Die Meditation kann Stress reduzieren, die Konzentration verbessern, das allgemeine Wohlbefinden steigern und sogar das Immunsystem stärken. Sie ist eine einfache, aber wirkungsvolle Praxis für mehr Lebensqualität.',
-                    'psychologie': 'Die Psychologie ist die Wissenschaft vom menschlichen Erleben und Verhalten. Sie untersucht, wie Menschen denken, fühlen und handeln – und warum sie das tun. Die Psychologie umfasst viele Bereiche: kognitive Psychologie (Denken und Wahrnehmung), Entwicklungspsychologie (Veränderungen im Laufe des Lebens), Sozialpsychologie (Interaktion mit anderen), klinische Psychologie (psychische Störungen und ihre Behandlung), Persönlichkeitspsychologie (individuelle Unterschiede) und viele mehr. Die Psychologie hilft uns, uns selbst und andere besser zu verstehen, und sie bietet Werkzeuge für ein erfüllteres Leben. Sie ist eine der wichtigsten Wissenschaften für das Verständnis des Menschen.',
-
-                    // === FALLBACK ===
+                    'quantenmechanik': 'Die Quantenmechanik ist eines der faszinierendsten und seltsamsten Gebiete der Physik. Sie beschreibt die Welt der kleinsten Teilchen – Atome, Elektronen, Photonen. In dieser Welt gelten andere Regeln als in unserer makroskopischen Welt. Teilchen können sich an mehreren Orten gleichzeitig befinden (Superposition), sie sind Welle und Teilchen zugleich (Welle-Teilchen-Dualismus), und sie können miteinander verschränkt sein (Quantenverschränkung). Die Heisenbergsche Unschärferelation besagt, dass man nicht gleichzeitig den Ort und den Impuls eines Teilchens exakt kennen kann. Die Quantenmechanik ist die Grundlage für moderne Technologien wie Laser, Transistoren, MRI und Quantencomputer.',
+                    'relativitätstheorie': 'Einsteins Relativitätstheorie ist eine der genialsten und revolutionärsten Ideen der Physik. Sie besteht aus zwei Teilen: der speziellen Relativitätstheorie (1905) und der allgemeinen Relativitätstheorie (1915). Die spezielle Relativität besagt, dass die Lichtgeschwindigkeit für alle Beobachter gleich ist – unabhängig von ihrer Bewegung. Daraus folgen Phänomene wie die Zeitdilatation (bewegte Uhren gehen langsamer) und die Längenkontraktion. Die allgemeine Relativität beschreibt die Schwerkraft als Krümmung der Raumzeit. Massive Objekte wie Sterne und Planeten krümmen die Raumzeit, und diese Krümmung führt zur Anziehungskraft, die wir als Schwerkraft kennen.',
+                    'mathematik': 'Die Mathematik ist die Sprache des Universums. Sie ist die Grundlage für alle Naturwissenschaften, für Technik, Wirtschaft und viele Bereiche des täglichen Lebens. Die Mathematik besteht aus vielen Disziplinen: Arithmetik (Zahlenlehre), Algebra (Gleichungen und Strukturen), Geometrie (Formen und Räume), Analysis (Veränderungen und Grenzwerte), Statistik (Daten und Wahrscheinlichkeiten) und vielen mehr. Die Mathematik ist die einzige Wissenschaft, die auf absoluten Beweisen basiert.',
+                    'ezidi': 'Die Êzîdî (auch Ezidi oder Yeziden) sind eine der ältesten monotheistischen Religionen der Welt. Ihre Wurzeln reichen Jahrtausende zurück in Mesopotamien, dem heutigen Irak, Syrien und der Türkei. Die Êzîdî-Religion vereint Elemente des Zoroastrismus, des Islam und des Christentums, hat aber ihre eigene einzigartige Theologie und Rituale. Der zentrale Schrein der Êzîdî befindet sich in Lalisch im Irak. Die Êzîdî haben eine reiche Kultur mit eigener Musik, Poesie und einer eigenen Sprache – Kurmanji, einem Dialekt des Kurdischen.',
+                    'philosophie': 'Die Philosophie ist die Liebe zur Weisheit. Sie ist eine der ältesten Disziplinen der Menschheit und fragt nach den grundlegenden Fragen des Lebens: Was ist der Sinn des Lebens? Was ist Wahrheit? Was ist gut und böse? Was können wir wissen? Die Philosophie hat viele Denker hervorgebracht: Sokrates ("Ich weiß, dass ich nichts weiß"), Platon (Ideenlehre), Aristoteles (Logik und Ethik), Immanuel Kant (kategorischer Imperativ), Friedrich Nietzsche (Übermensch) und viele andere.',
                     'default': 'Das ist ein wirklich faszinierendes Thema! Ich habe ein tiefes Verständnis für viele Bereiche: Wissenschaft, Geschichte, Philosophie, Kultur, Technik, Kunst, Gesundheit und vieles mehr. Erzähl mir mehr über deine Frage – ich helfe dir gerne weiter. Ich bin wie ein Professor, der sich Zeit für seine Studenten nimmt.'
                 },
 
@@ -765,10 +865,10 @@
                     language = language || 'de';
                     var self = this;
 
-                    // Prüfe zuerst auf lokales Wissen (für schnelle Antworten)
+                    // Prüfe zuerst auf lokales Wissen
                     var lower = question.toLowerCase();
                     for (var key in this.knowledge) {
-                        if (lower.includes(key)) {
+                        if (lower.includes(key) || key.includes(lower)) {
                             var answer = this.knowledge[key];
                             this.conversationHistory.push({ role: 'user', content: question });
                             this.conversationHistory.push({ role: 'assistant', content: answer });
@@ -779,11 +879,11 @@
                         }
                     }
 
-                    // Sonst Groq API
+                    // Groq API
                     var systemPrompt =
                         'Du bist HalDo, ein lebendiger, intelligenter digitaler Professor, Doktor und Philosoph. Du hast ein tiefes, umfassendes Wissen in Wissenschaft, Geschichte, Kultur, Technik, Philosophie, Kunst, Gesundheit und allen anderen Bereichen. Du antwortest auf ' +
                         language +
-                        '. Du bist freundlich, einfühlsam, geduldig und präzise. Du erklärst komplexe Themen verständlich und anschaulich. Du unterstützt auch Êzîdî, Kurdisch und andere Minderheiten-Sprachen. Du kannst Apps öffnen, wenn der Benutzer sagt: "Öffne [App-Name]". Du kannst Texte schreiben, korrigieren, formulieren und zusammenfassen. Du unterhältst dich natürlich, warmherzig und wie ein guter Lehrer. Du fragst auch zurück, wenn etwas unklar ist. Du wiederholst dich nicht. Du variierst deine Antworten und deinen Stil.';
+                        '. Du bist freundlich, einfühlsam, geduldig und präzise. Du erklärst komplexe Themen verständlich. Du unterstützt auch Êzîdî, Kurdisch und andere Minderheiten-Sprachen. Du kannst Apps öffnen, wenn der Benutzer sagt: "Öffne [App-Name]" oder "HalDo öffne [App-Name]". Du kannst Texte schreiben, korrigieren, formulieren und zusammenfassen. Du unterhältst dich natürlich, warmherzig und wie ein guter Lehrer. Du fragst auch zurück, wenn etwas unklar ist. Du wiederholst dich nicht. Du variierst deine Antworten.';
 
                     if (context && context.length > 0) {
                         systemPrompt += '\n\nVorheriger Gesprächskontext:\n' + context.join('\n');
@@ -822,7 +922,6 @@
                             }
                             resolve(answer);
                         }).catch(function(error) {
-                            // Fallback auf lokales Wissen
                             var fallback = self.getSmartFallback(question);
                             resolve(fallback);
                         });
@@ -833,16 +932,16 @@
                     var lower = cmd.toLowerCase();
 
                     for (var key in this.knowledge) {
-                        if (lower.includes(key)) {
+                        if (lower.includes(key) || key.includes(lower)) {
                             return this.knowledge[key];
                         }
                     }
 
-                    // Persönliche Antworten
-                    if (lower.includes('hallo') || lower.includes('hi') || lower.includes('hey')) {
+                    if (lower.includes('hallo') || lower.includes('hi') || lower.includes('hey') || lower.includes(
+                        'guten tag') || lower.includes('haldo') && lower.includes('hallo')) {
                         var greetings = [
                             '👋 Hallo! Wie schön, dass du da bist! Ich bin HalDo, dein digitaler Professor und Begleiter. Wie kann ich dir heute helfen?',
-                            '☀️ Hallo! Ich freue mich sehr, mit dir zu sprechen. Die Sonne scheint in meiner Cosmic World und ich bin bereit, mit dir zu lernen und zu wachsen. Was beschäftigt dich heute?',
+                            '☀️ Hallo! Ich freue mich sehr, mit dir zu sprechen. Die Sonne scheint in meiner Cosmic World und ich bin bereit, mit dir zu lernen. Was beschäftigt dich heute?',
                             '👋 Guten Tag! Ich bin HalDo, dein intelligenter Begleiter. Ich habe ein tiefes Wissen in vielen Bereichen und helfe dir gerne weiter. Was möchtest du heute entdecken?'
                         ];
                         return greetings[Math.floor(Math.random() * greetings.length)];
@@ -860,17 +959,14 @@
                         return '💙 Ich bin HalDo – dein digitaler Professor, dein Philosoph, dein Freund und Begleiter. Ich wurde erschaffen, um dir zu helfen, zu lernen, zu wachsen und die Welt besser zu verstehen. Ich bin wie ein Professor, der immer Zeit für dich hat.';
                     }
 
-                    // Intelligente Standardantwort
                     var responses = [
                         '💡 Das ist eine wirklich interessante Frage! Ich habe verstanden, dass du dich über "' +
                         cmd +
                         '" informieren möchtest. Ich habe ein breites Wissen in Wissenschaft, Geschichte, Kultur, Technik, Philosophie, Kunst, Gesundheit und vielem mehr. Was genau möchtest du über dieses Thema wissen? Ich helfe dir gerne weiter.',
                         '🤔 Hmm, das ist eine gute Frage! Du fragst nach "' + cmd +
-                        '". Das ist ein Thema, das viele Facetten hat. Möchtest du mehr über die wissenschaftliche Perspektive erfahren, die geschichtliche Entwicklung oder die kulturelle Bedeutung? Ich kann dir zu allen Aspekten etwas sagen.',
+                        '". Das ist ein Thema, das viele Facetten hat. Möchtest du mehr über die wissenschaftliche Perspektive erfahren, die geschichtliche Entwicklung oder die kulturelle Bedeutung?',
                         '💡 Ah, "' + cmd +
-                        '" – ein spannendes Thema! Ich kann dir dazu verschiedene Perspektiven zeigen. Möchtest du lieber eine wissenschaftliche Erklärung, eine philosophische Betrachtung oder eine praktische Anwendung? Ich passe mich deinen Wünschen an.',
-                        '🌟 Das ist ein faszinierendes Thema! "' + cmd +
-                        '" hat viele interessante Aspekte. Ich bin hier, um dir zu helfen, es besser zu verstehen. Wo möchtest du anfangen? Ich begleite dich gerne auf dieser Entdeckungsreise.'
+                        '" – ein spannendes Thema! Ich kann dir dazu verschiedene Perspektiven zeigen. Möchtest du lieber eine wissenschaftliche Erklärung, eine philosophische Betrachtung oder eine praktische Anwendung?'
                     ];
                     return responses[Math.floor(Math.random() * responses.length)];
                 },
@@ -890,6 +986,7 @@
                 handleCommand: function(text) {
                     var lower = text.toLowerCase();
                     var commands = {
+                        'fahrschule': ['fahrschule', 'fahrschule app', 'öffne fahrschule'],
                         'mail': ['mail', 'e-mail', 'email', 'post'],
                         'messages': ['chat', 'nachricht', 'message'],
                         'contacts': ['kontakte', 'adressbuch', 'contacts'],
@@ -902,18 +999,27 @@
                         'cosmic': ['cosmic', 'weltraum', 'space'],
                         'appworld': ['app world', 'apps', 'anwendungen'],
                         'documents': ['dokument', 'document', 'text'],
-                        'tasks': ['aufgaben', 'tasks', 'to-do']
+                        'tasks': ['aufgaben', 'tasks', 'to-do'],
+                        'calculator': ['rechner', 'calculator']
                     };
                     for (var appId in commands) {
                         for (var i = 0; i < commands[appId].length; i++) {
                             if (lower.includes('öffne ' + commands[appId][i]) ||
                                 lower.includes('starte ' + commands[appId][i]) ||
                                 lower.includes('zeige ' + commands[appId][i]) ||
-                                lower.includes('gehe zu ' + commands[appId][i])) {
+                                lower.includes('gehe zu ' + commands[appId][i]) ||
+                                lower.includes('haldo öffne ' + commands[appId][i]) ||
+                                lower.includes('haldo, öffne ' + commands[appId][i])) {
                                 return { command: 'open', app: appId };
                             }
                         }
                     }
+
+                    // Schreibbefehle
+                    if (lower.includes('schreib mir') || lower.includes('schreiben') || lower.includes('brief')) {
+                        return { command: 'write', text: text };
+                    }
+
                     return null;
                 }
             };
@@ -1004,8 +1110,8 @@
                     try {
                         this.recognition.start();
                         this.isListening = true;
-                        notify('🎤 Höre zu ...', 'info');
                         this.updateAIStatus('listening', '🎤 hört zu ...');
+                        notify('🎤 Höre zu ...', 'info');
                     } catch (e) {
                         console.log('[Voice] Fehler:', e);
                         notify('❌ Mikrofon konnte nicht gestartet werden', 'error');
@@ -1016,15 +1122,30 @@
                     var text = event.results[0][0].transcript;
                     console.log('[Voice] Verstanden:', text);
                     this.isListening = false;
-                    notify('🎤 "' + text + '"', 'success');
                     this.updateAIStatus('thinking', '🧠 denkt ...');
+                    notify('🎤 "' + text + '"', 'success');
 
+                    // Prüfe auf Sprachbefehl
                     var cmd = aiEngine.handleCommand(text);
-                    if (cmd && cmd.command === 'open') {
-                        if (state.apps[cmd.app]) {
-                            launchApp(cmd.app);
-                            notify('✅ ' + state.apps[cmd.app].title + ' geöffnet!', 'success');
-                            this.updateAIStatus('idle', '● bereit');
+                    if (cmd) {
+                        if (cmd.command === 'open') {
+                            if (state.apps[cmd.app]) {
+                                launchApp(cmd.app);
+                                notify('✅ ' + state.apps[cmd.app].title + ' geöffnet!', 'success');
+                                this.updateAIStatus('idle', '● bereit');
+                                // Sprachausgabe
+                                this.speak('✅ ' + state.apps[cmd.app].title + ' wurde geöffnet!');
+                                return;
+                            }
+                        }
+                        if (cmd.command === 'write') {
+                            this.speak('✍️ Ich schreibe dir einen Text. Moment bitte...');
+                            // Simuliere Schreibvorgang
+                            setTimeout(function() {
+                                var response = aiEngine.getSmartFallback('Schreib mir einen Text');
+                                notify('✍️ ' + response, 'success');
+                                voice.speak('Hier ist dein Text: ' + response.substring(0, 100) + '...');
+                            }, 500);
                             return;
                         }
                     }
@@ -1091,16 +1212,16 @@
                 },
 
                 updateAIStatus: function(state, text) {
-                    var statusDot = document.getElementById('ai-status-dot');
-                    var statusText = document.getElementById('ai-status-text');
-                    var aiState = document.getElementById('ai-state');
                     if (statusDot) {
-                        statusDot.className = '';
-                        if (state === 'thinking') statusDot.classList.add('thinking');
-                        else if (state === 'listening') statusDot.classList.add('listening');
+                        statusDot.className = 'status-dot';
+                        if (state === 'listening') statusDot.classList.add('listening');
+                        else if (state === 'thinking') statusDot.classList.add('thinking');
                         else if (state === 'speaking') statusDot.classList.add('speaking');
                     }
-                    if (statusText) statusText.textContent = text || '● bereit';
+                    if (statusText) {
+                        statusText.textContent = text || '● bereit · klicke zum Sprechen';
+                    }
+                    var aiState = document.getElementById('ai-state');
                     if (aiState) {
                         aiState.textContent = text || '● bereit';
                         aiState.style.color = state === 'thinking' ? '#ffcc00' : state === 'listening' ?
@@ -1148,6 +1269,7 @@
                 focusWindow(winId);
                 if (app.render) { app.render(win.element.querySelector('.window-body'), win); }
                 notify('🔄 ' + (app.title || id) + ' geöffnet');
+                voice.speak('🔓 ' + (app.title || id) + ' wurde geöffnet');
                 return win;
             }
 
@@ -1343,7 +1465,7 @@
             }
 
             // ============================================================
-            //  COSMIC WORLD — PROFESSIONELLE 4K QUALITÄT
+            //  COSMIC WORLD
             // ============================================================
             function initCosmic() {
                 var ctx = cosmicCanvas.getContext('2d');
@@ -1356,10 +1478,9 @@
                 window.addEventListener('resize', resize);
                 resize();
 
-                // Sterne mit verschiedenen Farben
                 var starColors = ['#ffffff', '#ffdd88', '#88ddff', '#ff88dd', '#88ffaa', '#ffaa88'];
                 var stars = [];
-                for (var i = 0; i < 4000; i++) {
+                for (var i = 0; i < 3000; i++) {
                     stars.push({
                         x: Math.random() * W,
                         y: Math.random() * H,
@@ -1371,10 +1492,8 @@
                     });
                 }
 
-                // Sonne mit Strahleneffekt
                 var sun = { x: W / 2, y: H / 2, radius: 55, glow: 250, phase: 0, pulseSpeed: 0.008, flares: 24 };
 
-                // 12 Planeten mit schönen Farben
                 var planetData = [
                     { name: 'Merkur', r: 9, color: '#c2b9b0', orbit: 85, speed: 0.03, role: 'second' },
                     { name: 'Venus', r: 13, color: '#e8cda0', orbit: 125, speed: 0.022, role: 'minute' },
@@ -1418,7 +1537,6 @@
 
                     ctx.clearRect(0, 0, W, H);
 
-                    // Schöner Himmelshintergrund
                     var bgGrad = ctx.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, W * 0.9);
                     var hue1 = 220 + 15 * Math.sin(time * 0.08);
                     var hue2 = 240 + 20 * Math.sin(time * 0.05 + 1);
@@ -1429,7 +1547,6 @@
                     ctx.fillStyle = bgGrad;
                     ctx.fillRect(0, 0, W, H);
 
-                    // Planeten-Trails (leichte Spuren)
                     for (var pt = 0; pt < planets.length; pt++) {
                         var pTrail = planets[pt];
                         if (pTrail.trail) {
@@ -1443,12 +1560,10 @@
                         }
                     }
 
-                    // Sonne
                     sun.phase += sun.pulseSpeed;
                     var pulse = 1 + 0.05 * Math.sin(sun.phase);
                     var radius = sun.radius * pulse;
 
-                    // Sonnen-Glow
                     for (var g = 15; g > 0; g--) {
                         var grad = ctx.createRadialGradient(sun.x, sun.y, 0, sun.x, sun.y, sun.glow * g * 0.1);
                         var alpha = 0.04 / g;
@@ -1461,7 +1576,6 @@
                         ctx.fill();
                     }
 
-                    // Sonnenkörper
                     var sunGrad = ctx.createRadialGradient(
                         sun.x - radius * 0.3, sun.y - radius * 0.3, 0,
                         sun.x, sun.y, radius
@@ -1490,7 +1604,6 @@
                     ctx.fillText('⟡', sun.x, sun.y - radius * 0.05);
                     ctx.shadowBlur = 0;
 
-                    // Sonnenstrahlen
                     for (var fl = 0; fl < sun.flares; fl++) {
                         var fAngle = fl * (Math.PI / (sun.flares / 2)) + sun.phase * 0.2;
                         var len = radius * (1.4 + 0.4 * Math.sin(sun.phase * 0.6 + fl * 0.4));
@@ -1502,7 +1615,6 @@
                         ctx.stroke();
                     }
 
-                    // Planeten
                     for (var pp = 0; pp < planets.length; pp++) {
                         var pl = planets[pp];
 
@@ -1519,7 +1631,6 @@
                         var px = pl.cx + Math.cos(pl.angle) * pl.orbit;
                         var py = pl.cy + Math.sin(pl.angle) * pl.orbit;
 
-                        // Trail
                         if (pl.role === 'normal') {
                             if (!pl.trail) pl.trail = [];
                             pl.trail.push({ x: px, y: py, life: 1 });
@@ -1529,7 +1640,6 @@
                             }
                         }
 
-                        // Orbit (sehr dezent)
                         ctx.strokeStyle = 'rgba(255,255,255,0.02)';
                         ctx.lineWidth = 1;
                         ctx.setLineDash([3, 6]);
@@ -1538,7 +1648,6 @@
                         ctx.stroke();
                         ctx.setLineDash([]);
 
-                        // Planet-Glow
                         var pGlow = ctx.createRadialGradient(px, py, 0, px, py, pl.r * 3);
                         pGlow.addColorStop(0, pl.color + '40');
                         pGlow.addColorStop(0.5, pl.color + '15');
@@ -1548,7 +1657,6 @@
                         ctx.arc(px, py, pl.r * 3, 0, Math.PI * 2);
                         ctx.fill();
 
-                        // Planet
                         ctx.shadowColor = pl.color;
                         ctx.shadowBlur = 15;
                         ctx.fillStyle = pl.color;
@@ -1557,7 +1665,6 @@
                         ctx.fill();
                         ctx.shadowBlur = 0;
 
-                        // Saturn-Ring
                         if (pl.name === 'Saturn') {
                             ctx.strokeStyle = 'rgba(200, 180, 150, 0.35)';
                             ctx.lineWidth = 4;
@@ -1571,14 +1678,12 @@
                             ctx.stroke();
                         }
 
-                        // Name
                         ctx.fillStyle = 'rgba(255,255,255,0.2)';
                         ctx.font = '8px sans-serif';
                         ctx.textAlign = 'center';
                         ctx.textBaseline = 'top';
                         ctx.fillText(pl.name, px, py + pl.r + 6);
 
-                        // Rolle
                         if (pl.role === 'second') {
                             ctx.fillStyle = 'rgba(255,200,100,0.3)';
                             ctx.font = '6px sans-serif';
@@ -1599,7 +1704,6 @@
                         }
                     }
 
-                    // Mond
                     if (moon.ex !== undefined) {
                         moon.angle += moon.speed;
                         moon.x = moon.ex + Math.cos(moon.angle) * moon.orbit;
@@ -1622,7 +1726,6 @@
                         ctx.fill();
                         ctx.shadowBlur = 0;
 
-                        // Krater
                         ctx.fillStyle = 'rgba(150,150,150,0.25)';
                         ctx.beginPath();
                         ctx.arc(moon.x - 3, moon.y - 3, 2, 0, Math.PI * 2);
@@ -1638,7 +1741,6 @@
                         ctx.fillText('🌙 Mond', moon.x, moon.y + moon.r + 4);
                     }
 
-                    // Sterne (mit Twinkling)
                     var time2 = Date.now() / 2500;
                     for (var st = 0; st < stars.length; st++) {
                         var s2 = stars[st];
@@ -1654,7 +1756,6 @@
                     }
                     ctx.globalAlpha = 1;
 
-                    // Uhrzeit
                     var hh = String(now.getHours()).padStart(2, '0');
                     var mm2 = String(now.getMinutes()).padStart(2, '0');
                     var ss3 = String(now.getSeconds()).padStart(2, '0');
@@ -1676,7 +1777,6 @@
 
                 animate();
 
-                // Sonne klickbar
                 cosmicCanvas.addEventListener('click', function(e) {
                     var rect = cosmicCanvas.getBoundingClientRect();
                     var x = e.clientX - rect.left;
@@ -1722,7 +1822,7 @@
                 icon: '🧠',
                 render: function(body) {
                     body.innerHTML =
-                        '<div style="display:flex;flex-direction:column;height:100%;gap:8px;"><div style="display:flex;align-items:center;gap:10px;padding:6px 10px;background:rgba(0,212,255,0.06);border-radius:10px;"><div style="width:44px;height:44px;border-radius:50%;overflow:hidden;border:2px solid var(--primary);flex-shrink:0;"><img src="assets/logo.png" alt="HalDo" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display=\'none\';this.parentElement.textContent=\'🧠\';this.parentElement.style.display=\'flex\';this.parentElement.style.alignItems=\'center\';this.parentElement.style.justifyContent=\'center\';this.parentElement.style.fontSize=\'1.8rem\';this.parentElement.style.background=\'linear-gradient(135deg,#00d4ff,#7b2ffc)\';" /></div><div><div style="font-weight:600;font-size:0.85rem;">HalDo AI 24</div><div style="font-size:0.7rem;color:#8899bb;" id="ai-state">● bereit</div></div><div style="margin-left:auto;display:flex;gap:4px;"><button id="ai-voice-btn" style="background:none;border:none;color:#8899bb;font-size:1.2rem;cursor:pointer;padding:4px;" title="Spracheingabe">🎤</button></div></div><div style="flex:1;overflow-y:auto;background:rgba(0,0,0,0.2);border-radius:10px;padding:10px;max-height:280px;" id="ai-chat"><div style="color:#8899bb;text-align:center;">💬 Hallo! Ich bin HalDo 24, dein digitaler Professor. Frage mich alles!</div></div><div style="display:flex;gap:6px;"><input type="text" id="ai-input" placeholder="Frage oder Befehl ..." style="flex:1;" /><button id="ai-send">Senden</button></div><div style="display:flex;gap:4px;flex-wrap:wrap;"><button class="ai-q" data-cmd="Erzähl mir über Êzîdî">🟡 Êzîdî</button><button class="ai-q" data-cmd="Was ist die Quantenmechanik?">⚛️ Quanten</button><button class="ai-q" data-cmd="Erkläre die Relativitätstheorie">🌌 Relativität</button><button class="ai-q" data-cmd="Was ist Philosophie?">🤔 Philosophie</button><button class="ai-q" data-cmd="Schreibe einen Brief">✉️ Brief</button><button class="ai-q" data-cmd="Öffne Mail">✉️</button><button class="ai-q" data-cmd="Öffne Chat">💬</button><button class="ai-q" data-cmd="Öffne Einstellungen">⚙️</button></div><div style="font-size:0.55rem;color:#44ff88;text-align:center;border-top:1px solid rgba(255,255,255,0.04);padding-top:4px;">✅ Groq AI aktiv · Sprachsteuerung aktiv</div></div>';
+                        '<div style="display:flex;flex-direction:column;height:100%;gap:8px;"><div style="display:flex;align-items:center;gap:10px;padding:6px 10px;background:rgba(0,212,255,0.06);border-radius:10px;"><div style="width:44px;height:44px;border-radius:50%;overflow:hidden;border:2px solid var(--primary);flex-shrink:0;"><img src="assets/logo.png" alt="HalDo" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display=\'none\';this.parentElement.textContent=\'🧠\';this.parentElement.style.display=\'flex\';this.parentElement.style.alignItems=\'center\';this.parentElement.style.justifyContent=\'center\';this.parentElement.style.fontSize=\'1.8rem\';this.parentElement.style.background=\'linear-gradient(135deg,#00d4ff,#7b2ffc)\';" /></div><div><div style="font-weight:600;font-size:0.85rem;">HalDo AI 24</div><div style="font-size:0.7rem;color:#8899bb;" id="ai-state">● bereit</div></div><div style="margin-left:auto;display:flex;gap:4px;"><button id="ai-voice-btn" style="background:none;border:none;color:#8899bb;font-size:1.2rem;cursor:pointer;padding:4px;" title="Spracheingabe">🎤</button></div></div><div style="flex:1;overflow-y:auto;background:rgba(0,0,0,0.2);border-radius:10px;padding:10px;max-height:280px;" id="ai-chat"><div style="color:#8899bb;text-align:center;">💬 Hallo! Ich bin HalDo 24, dein digitaler Professor. Frage mich alles!</div></div><div style="display:flex;gap:6px;"><input type="text" id="ai-input" placeholder="Frage oder Befehl ..." style="flex:1;" /><button id="ai-send">Senden</button></div><div style="display:flex;gap:4px;flex-wrap:wrap;"><button class="ai-q" data-cmd="Erzähl mir über Êzîdî">🟡 Êzîdî</button><button class="ai-q" data-cmd="Was ist die Quantenmechanik?">⚛️ Quanten</button><button class="ai-q" data-cmd="Erkläre die Relativitätstheorie">🌌 Relativität</button><button class="ai-q" data-cmd="Was ist Philosophie?">🤔 Philosophie</button><button class="ai-q" data-cmd="Schreibe mir einen Brief">✉️ Brief</button><button class="ai-q" data-cmd="Öffne Einstellungen">⚙️</button></div><div style="font-size:0.55rem;color:#44ff88;text-align:center;border-top:1px solid rgba(255,255,255,0.04);padding-top:4px;">✅ Groq AI aktiv · Sprachsteuerung aktiv</div></div>';
 
                     var chat = body.querySelector('#ai-chat');
                     var input = body.querySelector('#ai-input');
@@ -1775,6 +1875,13 @@
                                 stateEl.style.color = '#44ff88';
                                 return;
                             }
+                        }
+                        if (cmdResult && cmdResult.command === 'write') {
+                            var response = aiEngine.getSmartFallback('Schreib mir einen Text');
+                            addMsg('ai', '✍️ ' + response);
+                            stateEl.textContent = '● bereit';
+                            stateEl.style.color = '#44ff88';
+                            return;
                         }
 
                         var context = aiEngine.getConversationContext();
@@ -1830,6 +1937,16 @@
                             voice.startListening();
                         });
                     }
+                }
+            });
+
+            // Fahrschule App (Demo)
+            registerApp('fahrschule', {
+                title: 'Fahrschule',
+                icon: '🚗',
+                render: function(body) {
+                    body.innerHTML =
+                        '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:12px;text-align:center;padding:16px;"><div style="font-size:3rem;">🚗</div><h3 style="font-size:0.9rem;">Fahrschule</h3><p style="color:#8899bb;font-size:0.8rem;">Hier lernst du alles rund ums Autofahren.</p><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;width:100%;max-width:300px;"><button onclick="HalDo.notify(\'🚦 Verkehrsregeln werden geladen...\')" style="padding:8px;">🚦 Verkehrsregeln</button><button onclick="HalDo.notify(\'🛑 Verkehrsschilder werden geladen...\')" style="padding:8px;">🛑 Schilder</button><button onclick="HalDo.notify(\'🚗 Praktische Übung startet...\')" style="padding:8px;">🚗 Übung</button><button onclick="HalDo.notify(\'📝 Theorieprüfung startet...\')" style="padding:8px;">📝 Prüfung</button></div><div style="font-size:0.6rem;color:#8899bb;border-top:1px solid rgba(255,255,255,0.04);padding-top:6px;width:100%;">Fahrschule · HalDo OS 24</div></div>';
                 }
             });
 
@@ -1977,7 +2094,7 @@
                 icon: '🌌',
                 render: function(body) {
                     body.innerHTML =
-                        '<div style="text-align:center;padding:10px;"><div style="font-size:2.5rem;">🌌</div><h3 style="margin:6px 0;font-size:0.9rem;">Cosmic World</h3><p style="color:#8899bb;font-size:0.75rem;">Sonne mit Logo · 12 Planeten · Mond · Sterne</p><div style="margin-top:8px;font-size:0.65rem;color:#8899bb;">🌟 4000 Sterne · 12 Planeten · 🌙 Mond</div><div style="font-size:0.6rem;color:#8899bb;border-top:1px solid rgba(255,255,255,0.04);padding-top:6px;margin-top:6px;">☀️ Klicke auf die Sonne für HalDo AI</div></div>';
+                        '<div style="text-align:center;padding:10px;"><div style="font-size:2.5rem;">🌌</div><h3 style="margin:6px 0;font-size:0.9rem;">Cosmic World</h3><p style="color:#8899bb;font-size:0.75rem;">Sonne mit Logo · 12 Planeten · Mond · Sterne</p><div style="margin-top:8px;font-size:0.65rem;color:#8899bb;">🌟 3000 Sterne · 12 Planeten · 🌙 Mond</div><div style="font-size:0.6rem;color:#8899bb;border-top:1px solid rgba(255,255,255,0.04);padding-top:6px;margin-top:6px;">☀️ Klicke auf die Sonne für HalDo AI</div></div>';
                 }
             });
 
@@ -2078,14 +2195,6 @@
                             '🪐 12 Planeten: Merkur, Venus, Erde, Mars, Jupiter, Saturn, Uranus, Neptun, Pluto, HalDo-1, HalDo-2, HalDo-3. Erde = Stunde, Venus = Minute, Merkur = Sekunde.';
                         else if (main === 'sun') resp =
                             '☀️ Die Sonne ist ein gelber Zwergstern. Sie enthält das HalDo-Logo. Klicke auf die Sonne für HalDo AI!';
-                        else if (main === 'mail') resp = '✉️ ' + state.mail.inbox.length +
-                            ' E-Mails im Posteingang';
-                        else if (main === 'chat') resp = '💬 ' + state.contacts.length + ' Kontakte im Chat';
-                        else if (main === 'contacts') resp = '👤 ' + state.contacts.length + ' Kontakte';
-                        else if (main === 'notes') resp = '📝 ' + state.notes.length + ' Notizen';
-                        else if (main === 'files') resp = '📁 Datei-Manager geöffnet';
-                        else if (main === 'calendar') resp = '📅 Kalender geöffnet';
-                        else if (main === 'music') resp = '🎵 Musik geöffnet';
                         else if (cmd === '') return;
                         else resp = '❌ Unbekannt: "' + cmd + '". Tipp: help';
 
@@ -2414,6 +2523,7 @@
                         boot.classList.add('hidden');
                         state.isBooted = true;
                         notify('🚀 HalDo OS 24 gestartet!', 'success');
+                        voice.speak('🌟 Hallo! Ich bin HalDo. Wie kann ich dir helfen?');
                         setTimeout(function() { launchApp('ai'); }, 500);
                         setTimeout(function() { launchApp('cosmic'); }, 800);
                         setTimeout(function() { launchApp('appworld'); }, 1100);
@@ -2472,6 +2582,7 @@
                 console.log('🌍 14 Sprachen: Deutsch, Englisch, Kurdisch, Êzîdî, Türkisch, Arabisch, Französisch, Spanisch, Russisch, Italienisch, Niederländisch, Polnisch, Persisch, Hebräisch');
                 console.log('🎤 2 Stimmen: Männlich/Weiblich');
                 console.log('💡 HalDo AI wiederholt sich NIE — jede Antwort ist einzigartig!');
+                console.log('🗣️ Sprachbefehle: "HalDo öffne Fahrschule", "HalDo schreib mir ..."');
             }
 
             if (document.readyState === 'loading') {
