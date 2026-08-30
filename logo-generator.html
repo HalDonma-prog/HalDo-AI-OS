@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head><title>HalDo Logo</title></head>
+<body style="background:#0a0a1a;display:flex;justify-content:center;align-items:center;height:100vh;margin:0;">
+    <div style="text-align:center;">
+        <canvas id="logo" width="512" height="512"></canvas>
+        <br><br>
+        <button onclick="downloadLogo()" style="padding:12px 24px;background:#00d4ff;border:none;border-radius:8px;color:#fff;font-size:1rem;cursor:pointer;">⬇️ Logo herunterladen</button>
+    </div>
+    <script>
+        var canvas = document.getElementById('logo');
+        var ctx = canvas.getContext('2d');
+
+        // Hintergrund
+        var grad = ctx.createRadialGradient(256, 256, 0, 256, 256, 300);
+        grad.addColorStop(0, '#0a0a2a');
+        grad.addColorStop(1, '#050510');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, 512, 512);
+
+        // Kreis
+        var cGrad = ctx.createRadialGradient(256, 200, 0, 256, 256, 220);
+        cGrad.addColorStop(0, '#00d4ff');
+        cGrad.addColorStop(0.5, '#7b2ffc');
+        cGrad.addColorStop(1, '#2a0a4a');
+        ctx.shadowColor = '#00d4ff';
+        ctx.shadowBlur = 40;
+        ctx.beginPath();
+        ctx.arc(256, 256, 180, 0, Math.PI * 2);
+        ctx.fillStyle = cGrad;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+
+        // Rand
+        ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.arc(256, 256, 185, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // HalDo Symbol
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.shadowColor = 'rgba(255,255,255,0.3)';
+        ctx.shadowBlur = 30;
+        ctx.font = 'bold 180px system-ui, sans-serif';
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText('⟡', 256, 256);
+        ctx.shadowBlur = 0;
+
+        // HalDo Text
+        ctx.font = 'bold 48px system-ui, sans-serif';
+        ctx.fillStyle = 'rgba(255,255,255,0.6)';
+        ctx.fillText('HalDo', 256, 350);
+
+        // Kleine Sterne
+        for (var i = 0; i < 30; i++) {
+            var angle = Math.random() * Math.PI * 2;
+            var dist = 160 + Math.random() * 180;
+            var x = 256 + Math.cos(angle) * dist;
+            var y = 256 + Math.sin(angle) * dist;
+            var r = Math.random() * 2 + 0.5;
+            ctx.fillStyle = 'rgba(255,255,255,' + (0.2 + Math.random() * 0.3) + ')';
+            ctx.beginPath();
+            ctx.arc(x, y, r, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function downloadLogo() {
+            var link = document.createElement('a');
+            link.download = 'logo.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+    </script>
+</body>
+</html>
