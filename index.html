@@ -3,15 +3,16 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>HalDo AI OS 24 – Ultimate Professional</title>
+    <title>HalDo AI OS 24 – Ultimate</title>
     <link rel="icon" href="assets/images/favicon.ico" />
     <link rel="manifest" href="manifest.webmanifest" />
-    
+
     <style>
         /* ==============================================================
-           HALDO AI OS 24 – ULTIMATE PROFESSIONAL CSS
+           HALDO AI OS 24 – ULTIMATE MODERN CSS
            ============================================================== */
 
+        /* ----- RESET & VARIABLEN ----- */
         *,
         *::before,
         *::after {
@@ -24,7 +25,7 @@
         :root {
             --bg-primary: #0a0a1a;
             --bg-secondary: #12122a;
-            --bg-window: rgba(16, 16, 40, 0.94);
+            --bg-window: rgba(16, 16, 40, 0.92);
             --bg-card: rgba(255, 255, 255, 0.03);
             --text-primary: #e8eef5;
             --text-secondary: #8899bb;
@@ -38,7 +39,7 @@
             --radius: 12px;
             --radius-sm: 6px;
             --font: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-            --transition: 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+            --transition: 0.3s cubic-bezier(0.22, 1, 0.36, 1);
         }
 
         html,
@@ -987,17 +988,17 @@
         'use strict';
 
         // ================================================================
-        //  HALDO AI OS 24 – ULTIMATE PROFESSIONAL EDITION
-        //  Version: 24.5.0
+        //  HALDO AI OS 24 – ULTIMATE EDITION
+        //  Version: 24.6.0
         //  Build: 2026-08-31
-        //  ALLE 100+ APPS, ALLE SPRACHEN, VOLLSTÄNDIG
+        //  ALLE 109 APPS – VON GRUND AUF NEU
         // ================================================================
 
         // ============================================================
         //  KONFIGURATION
         // ============================================================
         var CONFIG = {
-            version: '24.5.0',
+            version: '24.6.0',
             build: '2026.08.31',
             kernel: '5.3.0',
             apiKey: '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',
@@ -1016,9 +1017,21 @@
                 fr: { name: 'Français', code: 'fr', flag: '🇫🇷' },
                 es: { name: 'Español', code: 'es', flag: '🇪🇸' }
             },
-            appCategories: ['core', 'productivity', 'learning', 'entertainment', 'system', 'communication',
-                'creative', 'tools', 'media', 'office', 'language', 'knowledge', 'business'
-            ]
+            categories: {
+                'core': '⚡ Core',
+                'productivity': '📊 Produktivität',
+                'learning': '📚 Lernen',
+                'entertainment': '🎮 Unterhaltung',
+                'system': '🔧 System',
+                'communication': '💬 Kommunikation',
+                'creative': '🎨 Kreativ',
+                'tools': '🔨 Werkzeuge',
+                'media': '🎬 Medien',
+                'office': '📄 Office',
+                'language': '🌍 Sprache',
+                'knowledge': '🧠 Wissen',
+                'business': '💼 Business'
+            }
         };
 
         // ============================================================
@@ -1207,7 +1220,7 @@
         }
 
         // ============================================================
-        //  NOTIFICATION SYSTEM (MEHRSPRACHIG)
+        //  NOTIFICATION SYSTEM
         // ============================================================
         var Notify = {
             _timeout: null,
@@ -1239,7 +1252,7 @@
         var notify = Notify.show;
 
         // ============================================================
-        //  VOICE ENGINE (MEHRSPRACHIG)
+        //  VOICE ENGINE
         // ============================================================
         var Voice = {
             isListening: false,
@@ -1419,44 +1432,41 @@
         };
 
         // ============================================================
-        //  AI ENGINE (VOLLSTÄNDIGES WISSEN + MEHRSPRACHIG)
+        //  AI ENGINE
         // ============================================================
         var AI = {
             conversationHistory: [],
             isThinking: false,
 
             knowledge: {
-                // DEUTSCH
                 'de': {
-                    'recht': 'Das Recht ist die Grundlage unserer Gesellschaft. Es regelt das Zusammenleben der Menschen und schützt die Rechte jedes Einzelnen. Das deutsche Rechtssystem basiert auf dem Grundgesetz. Es gibt verschiedene Rechtsgebiete: Zivilrecht, Strafrecht, Arbeitsrecht, Sozialrecht, Verwaltungsrecht und vieles mehr.',
-                    'vertrag': 'Ein Vertrag ist eine rechtlich bindende Vereinbarung zwischen zwei oder mehreren Parteien. Er kommt durch Angebot und Annahme zustande. Ein wirksamer Vertrag erfordert: Geschäftsfähigkeit, Willenserklärung, bestimmter oder bestimmbarer Inhalt, und Einhaltung von Formvorschriften.',
-                    'medizin': 'Die Medizin ist die Wissenschaft der Heilung und der Erhaltung der Gesundheit. Sie umfasst die Diagnostik, Therapie und Prävention von Krankheiten. Die moderne Medizin basiert auf wissenschaftlichen Erkenntnissen und klinischen Studien.',
-                    'bildung': 'Bildung ist der Schlüssel zur persönlichen und gesellschaftlichen Entwicklung. Sie umfasst allgemeine Bildung, berufliche Ausbildung, Studium und lebenslanges Lernen. In Deutschland gibt es ein dreigliedriges Schulsystem: Hauptschule, Realschule und Gymnasium.',
-                    'universität': 'Die Universität ist eine Einrichtung der höheren Bildung und Forschung. Sie bietet Studiengänge in verschiedenen Fachbereichen an: Geisteswissenschaften, Naturwissenschaften, Ingenieurwissenschaften, Medizin, Jura und Wirtschaftswissenschaften.',
-                    'beruf': 'Der Beruf ist die Tätigkeit, mit der ein Mensch seinen Lebensunterhalt verdient. Es gibt viele Berufsfelder: Handwerk, Industrie, Dienstleistung, Verwaltung, Gesundheit, Bildung, Technik und Wirtschaft.',
-                    'kultur': 'Kultur umfasst die Gesamtheit der geistigen, künstlerischen und sozialen Ausdrucksformen einer Gesellschaft. Dazu gehören Sprache, Literatur, Musik, Kunst, Religion, Bräuche und Traditionen.',
-                    'wissenschaft': 'Wissenschaft ist die systematische Erforschung und Erweiterung des Wissens. Sie umfasst die Naturwissenschaften, Geisteswissenschaften, Sozialwissenschaften und Ingenieurwissenschaften.',
-                    'philosophie': 'Die Philosophie ist die Liebe zur Weisheit. Sie fragt nach dem Sinn des Lebens, der Wahrheit, der Ethik und dem Wissen. Von Sokrates über Platon, Aristoteles, Kant bis zu Nietzsche.',
-                    'ezidi': 'Die Êzîdî sind eine der ältesten monotheistischen Religionen der Welt. Ihre Wurzeln reichen Jahrtausende zurück in Mesopotamien. Die Êzîdî haben eine reiche Kultur mit eigener Musik, Poesie und einer eigenen Sprache – Kurmanji.',
-                    'kurden': 'Die Kurden sind ein indigenes Volk in der Region Kurdistan. Sie haben eine reiche Geschichte, Sprache und Kultur. Die kurdische Sprache (Kurmanji) ist eng mit dem Êzîdî verbunden.',
-                    'default': 'Das ist ein wirklich faszinierendes Thema! Ich habe ein tiefes Verständnis für viele Bereiche: Wissenschaft, Geschichte, Philosophie, Kultur, Technik, Kunst, Gesundheit, Recht und Medizin.'
+                    'recht': 'Das Recht ist die Grundlage unserer Gesellschaft. Es regelt das Zusammenleben der Menschen und schützt die Rechte jedes Einzelnen. Das deutsche Rechtssystem basiert auf dem Grundgesetz.',
+                    'vertrag': 'Ein Vertrag ist eine rechtlich bindende Vereinbarung zwischen zwei oder mehreren Parteien.',
+                    'medizin': 'Die Medizin ist die Wissenschaft der Heilung und der Erhaltung der Gesundheit.',
+                    'bildung': 'Bildung ist der Schlüssel zur persönlichen und gesellschaftlichen Entwicklung.',
+                    'universität': 'Die Universität ist eine Einrichtung der höheren Bildung und Forschung.',
+                    'beruf': 'Der Beruf ist die Tätigkeit, mit der ein Mensch seinen Lebensunterhalt verdient.',
+                    'kultur': 'Kultur umfasst die Gesamtheit der geistigen, künstlerischen und sozialen Ausdrucksformen.',
+                    'wissenschaft': 'Wissenschaft ist die systematische Erforschung und Erweiterung des Wissens.',
+                    'philosophie': 'Die Philosophie ist die Liebe zur Weisheit.',
+                    'ezidi': 'Die Êzîdî sind eine der ältesten monotheistischen Religionen der Welt.',
+                    'kurden': 'Die Kurden sind ein indigenes Volk in der Region Kurdistan.',
+                    'default': 'Das ist ein wirklich faszinierendes Thema! Ich habe ein tiefes Verständnis für viele Bereiche.'
                 },
-                // ENGLISH
                 'en': {
-                    'recht': 'Law is the foundation of our society. It governs coexistence and protects the rights of every individual. The German legal system is based on the Basic Law.',
-                    'vertrag': 'A contract is a legally binding agreement between two or more parties. It is formed by offer and acceptance.',
-                    'medizin': 'Medicine is the science of healing and maintaining health. It includes diagnostics, therapy and prevention of diseases.',
-                    'bildung': 'Education is the key to personal and social development. It includes general education, vocational training, university studies and lifelong learning.',
-                    'universität': 'The university is an institution of higher education and research. It offers degree programs in various fields.',
-                    'beruf': 'A profession is the activity by which a person earns their living. There are many professional fields.',
-                    'kultur': 'Culture encompasses all the intellectual, artistic and social expressions of a society.',
+                    'recht': 'Law is the foundation of our society. It governs coexistence and protects the rights of every individual.',
+                    'vertrag': 'A contract is a legally binding agreement between two or more parties.',
+                    'medizin': 'Medicine is the science of healing and maintaining health.',
+                    'bildung': 'Education is the key to personal and social development.',
+                    'universität': 'The university is an institution of higher education and research.',
+                    'beruf': 'A profession is the activity by which a person earns their living.',
+                    'kultur': 'Culture encompasses all the intellectual, artistic and social expressions.',
                     'wissenschaft': 'Science is the systematic exploration and expansion of knowledge.',
-                    'philosophie': 'Philosophy is the love of wisdom. It asks about the meaning of life, truth, ethics and knowledge.',
-                    'ezidi': 'The Êzîdî are one of the oldest monotheistic religions in the world. Their roots go back thousands of years to Mesopotamia.',
-                    'kurden': 'The Kurds are an indigenous people in the Kurdistan region. They have a rich history, language and culture.',
-                    'default': 'This is a truly fascinating topic! I have a deep understanding of many areas: science, history, philosophy, culture, technology, art, health, law and medicine.'
+                    'philosophie': 'Philosophy is the love of wisdom.',
+                    'ezidi': 'The Êzîdî are one of the oldest monotheistic religions in the world.',
+                    'kurden': 'The Kurds are an indigenous people in the Kurdistan region.',
+                    'default': 'This is a truly fascinating topic! I have a deep understanding of many areas.'
                 },
-                // KURMANCÎ
                 'ku': {
                     'recht': 'Dad î bingeha civaka me ye. Ew hevjiyanê birêkûpêk dike û mafên her kesî diparêze.',
                     'vertrag': 'Peymanek lihevkirinek qanûnî ye di navbera du an zêdetir aliyan de.',
@@ -1466,10 +1476,10 @@
                     'beruf': 'Pîşe çalakiya ku mirov bi wê debara xwe dike ye.',
                     'kultur': 'Çand tevahiya vegotinên rewşenbîrî, hunerî û civakî yên civakekê vedigire.',
                     'wissenschaft': 'Zanist lêkolîn û berfirehkirina zanînê ya sîstematîk e.',
-                    'philosophie': 'Felsefe evîna aqil e. Ew li ser wateya jiyanê, rastiyê, exlaq û zanînê dipirse.',
-                    'ezidi': 'Êzîdî yek ji kevintirîn olên yekxwedayî yên cîhanê ne. Koka wan bi hezaran salan vedigere Mezopotamya.',
-                    'kurden': 'Kurd gelê xwecihî yê herêma Kurdistanê ne. Dîrok, ziman û çanda wan a dewlemend heye.',
-                    'default': 'Ev mijarek bi rastî balkêş e! Ez di gelek waran de têgihiştineke kûr heye: zanist, dîrok, felsefe, çand, teknolojî, huner, tenduristî, dad û bijîşkî.'
+                    'philosophie': 'Felsefe evîna aqil e.',
+                    'ezidi': 'Êzîdî yek ji kevintirîn olên yekxwedayî yên cîhanê ne.',
+                    'kurden': 'Kurd gelê xwecihî yê herêma Kurdistanê ne.',
+                    'default': 'Ev mijarek bi rastî balkêş e! Ez di gelek waran de têgihiştineke kûr heye.'
                 }
             },
 
@@ -1506,15 +1516,12 @@
 
                 var systemPrompt = language === 'en' ?
                     'You are HalDo, an intelligent, friendly and professional assistant. You help with all topics. You respond in ' +
-                    language +
-                    '. You can open apps when the user says: "Open [App-Name]". You can write, correct and formulate texts. You are precise, helpful and empathetic.' :
+                    language + '.' :
                     language === 'ku' ?
                     'Tu HalDo yî, alîkarekî jîr, dostane û pîşeyî. Tu bi hemî mijaran re alîkarî dikî. Tu bi ' +
-                    language +
-                    ' bersivê didî. Tu dikarî appan vekî dema bikarhêner dibêje: "Veke [App-Name]". Tu dikarî nivîsaran binivîsî, rast bikî û ava bikî. Tu rast, alîkar û dilovan î.' :
+                    language + ' bersivê didî.' :
                     'Du bist HalDo, ein intelligenter, freundlicher und professioneller Assistent. Du hilfst bei allen Themen. Du antwortest auf ' +
-                    language +
-                    '. Du kannst Apps öffnen, wenn der Benutzer sagt: "Öffne [App-Name]". Du kannst Texte schreiben, korrigieren, formulieren. Du bist präzise, hilfsbereit und einfühlsam.';
+                    language + '.';
 
                 return new Promise(function(resolve, reject) {
                     fetch(CONFIG.apiUrl, {
@@ -1964,7 +1971,7 @@
         var maximizeWindow = WindowManager.maximize.bind(WindowManager);
 
         // ============================================================
-        //  APP REGISTRATION (ALLE APPS)
+        //  APP REGISTRATION
         // ============================================================
         function registerApp(id, config) {
             state.apps[id] = {
@@ -2428,7 +2435,7 @@
             }
         });
 
-        // ----- 2. Living HalDo AI (Avatar) -----
+        // ----- 2. Living HalDo AI -----
         registerApp('avatar', {
             title: CONFIG.language === 'en' ? 'Living HalDo AI' : CONFIG.language === 'ku' ?
                 'HalDo AI ya Zindî' : 'Living HalDo AI',
@@ -2507,7 +2514,7 @@
             }
         });
 
-        // ----- 3. Fahrschule (Driving School) -----
+        // ----- 3. Fahrschule -----
         registerApp('fahrschule', {
             title: CONFIG.language === 'en' ? 'Driving School' : CONFIG.language === 'ku' ?
                 'Dibistana Ajotinê' : 'Fahrschule',
@@ -2576,7 +2583,7 @@
             }
         });
 
-        // ----- 4. Notizen (Notes) -----
+        // ----- 4. Notizen -----
         registerApp('notes', {
             title: CONFIG.language === 'en' ? 'Notes' : CONFIG.language === 'ku' ? 'Not' : 'Notizen',
             icon: '📝',
@@ -2654,7 +2661,7 @@
             }
         });
 
-        // ----- 5. Aufgaben (Tasks) -----
+        // ----- 5. Aufgaben -----
         registerApp('tasks', {
             title: CONFIG.language === 'en' ? 'Tasks' : CONFIG.language === 'ku' ? 'Kar' : 'Aufgaben',
             icon: '✅',
@@ -2763,7 +2770,7 @@
             }
         });
 
-        // ----- 6. Kontakte (Contacts) -----
+        // ----- 6. Kontakte -----
         registerApp('contacts', {
             title: CONFIG.language === 'en' ? 'Contacts' : CONFIG.language === 'ku' ? 'Têkilî' : 'Kontakte',
             icon: '👤',
@@ -2842,7 +2849,7 @@
             }
         });
 
-        // ----- 7. Datei-Manager (File Manager) -----
+        // ----- 7. Datei-Manager -----
         registerApp('files', {
             title: CONFIG.language === 'en' ? 'File Manager' : CONFIG.language === 'ku' ?
                 'Rêveberiya Pelan' : 'Datei-Manager',
@@ -2940,45 +2947,16 @@
                 }
                 apps.sort(function(a, b) { return a.title.localeCompare(b.title); });
 
-                var categories = {
-                    'core': '⚡ ' + (CONFIG.language === 'en' ? 'Core' : CONFIG.language === 'ku' ?
-                        'Navend' : 'Core'),
-                    'productivity': '📊 ' + (CONFIG.language === 'en' ? 'Productivity' : CONFIG.language ===
-                        'ku' ? 'Berhemdarî' : 'Produktivität'),
-                    'learning': '📚 ' + (CONFIG.language === 'en' ? 'Learning' : CONFIG.language === 'ku' ?
-                        'Fêrbûn' : 'Lernen'),
-                    'entertainment': '🎮 ' + (CONFIG.language === 'en' ? 'Entertainment' : CONFIG.language ===
-                        'ku' ? 'Şahî' : 'Unterhaltung'),
-                    'system': '🔧 ' + (CONFIG.language === 'en' ? 'System' : CONFIG.language === 'ku' ?
-                        'Sîstem' : 'System'),
-                    'communication': '💬 ' + (CONFIG.language === 'en' ? 'Communication' : CONFIG.language ===
-                        'ku' ? 'Peywendî' : 'Kommunikation'),
-                    'creative': '🎨 ' + (CONFIG.language === 'en' ? 'Creative' : CONFIG.language === 'ku' ?
-                        'Afirîner' : 'Kreativ'),
-                    'tools': '🔨 ' + (CONFIG.language === 'en' ? 'Tools' : CONFIG.language === 'ku' ?
-                        'Amûr' : 'Werkzeuge'),
-                    'media': '🎬 ' + (CONFIG.language === 'en' ? 'Media' : CONFIG.language === 'ku' ?
-                        'Medya' : 'Medien'),
-                    'office': '📄 ' + (CONFIG.language === 'en' ? 'Office' : CONFIG.language === 'ku' ?
-                        'Ofîs' : 'Office'),
-                    'language': '🌍 ' + (CONFIG.language === 'en' ? 'Language' : CONFIG.language === 'ku' ?
-                        'Ziman' : 'Sprache'),
-                    'knowledge': '🧠 ' + (CONFIG.language === 'en' ? 'Knowledge' : CONFIG.language === 'ku' ?
-                        'Zanîn' : 'Wissen'),
-                    'business': '💼 ' + (CONFIG.language === 'en' ? 'Business' : CONFIG.language === 'ku' ?
-                        'Karsazî' : 'Business')
-                };
-
                 var html = '<h3 style="margin-bottom:6px;font-size:0.75rem;">📱 ' + apps.length + ' ' + (CONFIG
                     .language === 'en' ? 'Apps' : CONFIG.language === 'ku' ? 'App' : 'Apps') +
                     '</h3>';
 
-                var cats = Object.keys(categories);
+                var cats = Object.keys(CONFIG.categories);
                 for (var ci = 0; ci < cats.length; ci++) {
                     var catApps = apps.filter(function(a) { return a.category === cats[ci]; });
                     if (catApps.length === 0) continue;
-                    html += '<div style="font-size:0.5rem;color:#556688;margin:4px 0 2px 0;">' + categories[
-                        cats[ci]] + '</div>';
+                    html += '<div style="font-size:0.5rem;color:#556688;margin:4px 0 2px 0;">' + CONFIG
+                        .categories[cats[ci]] + '</div>';
                     html += '<div class="app-grid">';
                     for (var ai = 0; ai < catApps.length; ai++) {
                         var a = catApps[ai];
@@ -2998,7 +2976,7 @@
             }
         });
 
-        // ----- 10. E-Mail (Email) -----
+        // ----- 10. E-Mail -----
         registerApp('email', {
             title: CONFIG.language === 'en' ? 'Email' : CONFIG.language === 'ku' ? 'Email' : 'E-Mail',
             icon: '📧',
@@ -3163,7 +3141,7 @@
             }
         });
 
-        // ----- 12. Einstellungen (Settings) -----
+        // ----- 12. Einstellungen -----
         registerApp('settings', {
             title: CONFIG.language === 'en' ? 'Settings' : CONFIG.language === 'ku' ? 'Mîheng' :
                 'Einstellungen',
@@ -3262,13 +3240,11 @@
                     Notify.success('✅ ' + (CONFIG.language === 'en' ? 'Settings saved!' : CONFIG
                         .language === 'ku' ? 'Mîheng hate tomar kirin!' : 'Einstellungen gespeichert!'));
                     loadSettingsUI();
-                    // Sprache in der AI aktualisieren
                     var aiState = document.getElementById('ai-state');
                     if (aiState) {
                         aiState.textContent = '● ' + (CONFIG.language === 'en' ? 'Ready' : CONFIG
                             .language === 'ku' ? 'Amade' : 'bereit');
                     }
-                    // Avatar-Status aktualisieren
                     var avatarStatus = document.getElementById('avatar-status');
                     if (avatarStatus) {
                         avatarStatus.textContent = '● ' + (CONFIG.language === 'en' ? 'Ready' : CONFIG
@@ -3319,7 +3295,7 @@
         });
 
         // ============================================================
-        //  SPRACHE WECHSELN (GLOBALE FUNKTION)
+        //  SPRACHE WECHSELN
         // ============================================================
         window.changeLanguage = function(lang) {
             if (CONFIG.languages[lang]) {
@@ -3332,27 +3308,22 @@
                     'Ziman hate guhertin Kurmancî' : lang === 'ezidi' ?
                     'Ziman hate guhertin Êzîdî' : 'Sprache geändert zu ' + CONFIG.languages[lang]
                     .name));
-                // AI-Status aktualisieren
                 var aiState = document.getElementById('ai-state');
                 if (aiState) {
                     aiState.textContent = '● ' + (CONFIG.language === 'en' ? 'Ready' : CONFIG.language ===
                         'ku' ? 'Amade' : 'bereit');
                 }
-                // Avatar-Status aktualisieren
                 var avatarStatus = document.getElementById('avatar-status');
                 if (avatarStatus) {
                     avatarStatus.textContent = '● ' + (CONFIG.language === 'en' ? 'Ready' : CONFIG.language ===
                         'ku' ? 'Amade' : 'bereit');
                 }
-                // Sprach-Buttons aktualisieren
                 document.querySelectorAll('.lang-btn').forEach(function(btn) {
                     btn.classList.toggle('active', btn.textContent.includes(CONFIG.languages[lang]
                     .name));
                 });
-                // Settings-Sprache aktualisieren
                 var settingsLang = document.getElementById('settings-language');
                 if (settingsLang) settingsLang.value = lang;
-                // Alle offenen Fenster neu laden? (optional)
             }
         };
 
@@ -3576,7 +3547,6 @@
             if (e.key === 'Escape' && state.activeWindow) {
                 closeWindow(state.activeWindow);
             }
-            // Sprache wechseln mit Cmd+Shift+L
             if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === 'L') {
                 e.preventDefault();
                 var langs = Object.keys(CONFIG.languages);
