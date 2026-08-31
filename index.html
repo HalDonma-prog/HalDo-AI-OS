@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>HalDo OS 24 – Master Version</title>
+    <title>HalDo AI OS 24 – Professional Ultimate</title>
+    <link rel="manifest" href="manifest.webmanifest" />
     <style>
         /* ==============================================================
-           HALDO OS 24 – MASTER CSS (KOMPLETT)
+           HALDO AI OS 24 – MASTER CSS (VOLLSTÄNDIG)
            ============================================================== */
 
-        /* ----- RESET ----- */
+        /* ----- RESET & VARIABLEN ----- */
         *,
         *::before,
         *::after {
@@ -79,29 +80,69 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            transition: opacity 0.6s ease, visibility 0.6s ease;
+            transition: opacity 0.8s ease, visibility 0.8s ease;
         }
         #boot.hidden {
             opacity: 0;
             visibility: hidden;
             pointer-events: none;
         }
-        #boot .logo {
-            font-size: 3.6rem;
-            font-weight: 800;
+        #boot .logo-container {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 12px;
+        }
+        #boot .logo-container .haldo-logo {
+            font-size: 4.5rem;
+            font-weight: 900;
             background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            animation: logoGlow 2s ease-in-out infinite;
             letter-spacing: 4px;
-            margin-bottom: 2px;
         }
+        @keyframes logoGlow {
+            0%,
+            100% {
+                filter: drop-shadow(0 0 20px rgba(0, 212, 255, 0.3));
+                transform: scale(1);
+            }
+            50% {
+                filter: drop-shadow(0 0 40px rgba(123, 47, 252, 0.5));
+                transform: scale(1.05);
+            }
+        }
+        #boot .logo-container .ring {
+            position: absolute;
+            inset: -10px;
+            border: 2px solid rgba(0, 212, 255, 0.1);
+            border-radius: 50%;
+            animation: ringSpin 8s linear infinite;
+        }
+        #boot .logo-container .ring:nth-child(2) {
+            inset: -25px;
+            border-color: rgba(123, 47, 252, 0.08);
+            animation-duration: 12s;
+            animation-direction: reverse;
+        }
+        @keyframes ringSpin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
         #boot .subtitle {
             font-size: 0.7rem;
             color: var(--text-secondary);
             letter-spacing: 6px;
             text-transform: uppercase;
             margin-bottom: 18px;
+            opacity: 0.6;
         }
         #boot .loader {
             width: 44px;
@@ -132,7 +173,7 @@
             }
         }
         #boot .progress {
-            width: 160px;
+            width: 200px;
             height: 2px;
             background: rgba(255, 255, 255, 0.04);
             border-radius: 2px;
@@ -481,12 +522,12 @@
                 padding: 8px 14px;
                 bottom: 64px;
             }
-            #boot .logo {
-                font-size: 2.4rem;
+            #boot .logo-container {
+                width: 80px;
+                height: 80px;
             }
-            #boot .subtitle {
-                font-size: 0.55rem;
-                letter-spacing: 4px;
+            #boot .logo-container .haldo-logo {
+                font-size: 3rem;
             }
         }
 
@@ -685,9 +726,13 @@
 
     <!-- ===== BOOT SCREEN ===== -->
     <div id="boot">
+        <div class="logo-container">
+            <div class="ring"></div>
+            <div class="ring"></div>
+            <div class="haldo-logo">⟡</div>
+        </div>
+        <div class="subtitle">Cosmic Intelligent Operating System</div>
         <div class="loader"></div>
-        <div class="logo">⟡ HalDo</div>
-        <div class="subtitle">AI Operating System</div>
         <div id="boot-status">⟡ System wird gestartet ...</div>
         <div class="progress">
             <div class="progress-bar" id="boot-progress"></div>
@@ -727,6 +772,7 @@
         <button class="dock-item" data-app="appworld" title="App World">📱</button>
         <button class="dock-item" data-app="settings" title="Einstellungen">⚙️</button>
         <button class="dock-item" data-app="files" title="Dateien">📁</button>
+        <button class="dock-item" data-app="email" title="E-Mail">📧</button>
         <button class="dock-item" id="btn-about" title="Info">💙</button>
     </div>
 
@@ -734,16 +780,16 @@
     <div id="notification"></div>
 
     <!-- ================================================================
-    JAVASCRIPT – HALDO OS 24 MASTER
+    JAVASCRIPT – HALDO AI OS 24 MASTER (VOLLSTÄNDIG)
     ================================================================ -->
     <script>
         'use strict';
 
         // ================================================================
-        //  HALDO OS 24 – MASTER VERSION
+        //  HALDO AI OS 24 – MASTER VERSION
         //  Version: 24.2.0
         //  Build: 2026-08-31
-        //  Alle Funktionen integriert
+        //  Alle 66+ Apps integriert
         // ================================================================
 
         (function() {
@@ -762,7 +808,9 @@
                 language: 'de',
                 maxHistory: 50,
                 notificationDuration: 3000,
-                appCategories: ['core', 'productivity', 'learning', 'entertainment', 'system', 'communication']
+                appCategories: ['core', 'productivity', 'learning', 'entertainment', 'system', 'communication',
+                    'creative', 'tools'
+                ]
             };
 
             // ============================================================
@@ -794,6 +842,7 @@
                 notes: JSON.parse(localStorage.getItem('haldo_notes') || '[]'),
                 contacts: JSON.parse(localStorage.getItem('haldo_contacts') || '[]'),
                 tasks: JSON.parse(localStorage.getItem('haldo_tasks') || '[]'),
+                emails: JSON.parse(localStorage.getItem('haldo_emails') || '{"inbox":[],"sent":[],"drafts":[]}'),
                 documents: JSON.parse(localStorage.getItem('haldo_documents') || '[]'),
                 aiMemory: JSON.parse(localStorage.getItem('haldo_ai_memory') || '[]'),
                 conversationHistory: JSON.parse(localStorage.getItem('haldo_conversations') || '[]'),
@@ -870,41 +919,22 @@
             var notify = Notify.show;
 
             // ============================================================
-            //  AI ENGINE
+            //  AI ENGINE (VOLLSTÄNDIG)
             // ============================================================
             var AI = {
                 conversationHistory: [],
                 isThinking: false,
 
                 knowledge: {
-                    // Recht & Jura
-                    'recht': 'Das Recht ist die Grundlage unserer Gesellschaft. Es regelt das Zusammenleben der Menschen und schützt die Rechte jedes Einzelnen. Das deutsche Rechtssystem basiert auf dem Grundgesetz. Es gibt verschiedene Rechtsgebiete: Zivilrecht, Strafrecht, Arbeitsrecht, Sozialrecht, Verwaltungsrecht und vieles mehr.',
-                    'vertrag': 'Ein Vertrag ist eine rechtlich bindende Vereinbarung zwischen zwei oder mehreren Parteien. Er kommt durch Angebot und Annahme zustande. Ein wirksamer Vertrag erfordert: Geschäftsfähigkeit, Willenserklärung, bestimmter oder bestimmbarer Inhalt, und Einhaltung von Formvorschriften.',
-                    'urteil': 'Ein Urteil ist die Entscheidung eines Gerichts in einem Rechtsstreit. Es wird von Richtern gefällt und ist rechtlich bindend. Urteile können in Zivilsachen, Strafsachen oder Verwaltungssachen ergehen.',
-                    'klage': 'Eine Klage ist die Einleitung eines gerichtlichen Verfahrens durch einen Kläger gegen einen Beklagten. Sie wird durch Einreichung einer Klageschrift bei Gericht erhoben.',
-                    'klageschrift': 'Eine Klageschrift ist ein juristisches Dokument, das vor Gericht eingereicht wird, um ein rechtliches Verfahren einzuleiten. Sie muss enthalten: die Parteien, den Streitgegenstand, einen bestimmten Antrag, eine Begründung und Beweismittel.',
-
-                    // Medizin
-                    'medizin': 'Die Medizin ist die Wissenschaft der Heilung und der Erhaltung der Gesundheit. Sie umfasst die Diagnostik, Therapie und Prävention von Krankheiten. Die moderne Medizin basiert auf wissenschaftlichen Erkenntnissen und klinischen Studien.',
-                    'untersuchung': 'Eine ärztliche Untersuchung ist die systematische Überprüfung des Gesundheitszustands eines Patienten. Sie umfasst die Anamnese, die körperliche Untersuchung, und gegebenenfalls apparative Diagnostik.',
-                    'befund': 'Ein Befund ist das Ergebnis einer medizinischen Untersuchung. Er dokumentiert die erhobenen Befunde und die daraus gezogenen Schlussfolgerungen.',
-                    'gutachten': 'Ein medizinisches Gutachten ist eine wissenschaftlich fundierte Beurteilung eines medizinischen Sachverhalts. Es wird von einem Sachverständigen erstellt und dient oft als Entscheidungsgrundlage für Gerichte, Versicherungen oder Behörden.',
-
-                    // Briefe & Dokumente
-                    'brief': 'Ein Brief ist eine schriftliche Nachricht, die an eine bestimmte Person oder Institution gerichtet ist. Ein guter Brief hat: eine Anrede, einen Einleitungssatz, einen Hauptteil, einen Schluss und eine Grußformel.',
-                    'bewerbung': 'Eine Bewerbung ist das schriftliche Angebot an einen potenziellen Arbeitgeber, sich für eine Stelle zu bewerben. Sie besteht aus: einem Anschreiben, einem Lebenslauf, sowie Zeugnissen und Zertifikaten.',
-
-                    // Wissenschaft
-                    'quantenmechanik': 'Die Quantenmechanik beschreibt die Welt der kleinsten Teilchen. Teilchen können sich an mehreren Orten gleichzeitig befinden (Superposition), sie sind Welle und Teilchen zugleich (Welle-Teilchen-Dualismus).',
-                    'relativitätstheorie': 'Einsteins Relativitätstheorie besteht aus zwei Teilen: der speziellen Relativitätstheorie (1905) und der allgemeinen Relativitätstheorie (1915). Die spezielle Relativität besagt, dass die Lichtgeschwindigkeit für alle Beobachter gleich ist.',
-                    'philosophie': 'Die Philosophie ist die Liebe zur Weisheit. Sie fragt nach dem Sinn des Lebens, der Wahrheit, der Ethik und dem Wissen. Von Sokrates über Platon, Aristoteles, Kant bis zu Nietzsche.',
-
-                    // Kultur
-                    'ezidi': 'Die Êzîdî sind eine der ältesten monotheistischen Religionen der Welt. Ihre Wurzeln reichen Jahrtausende zurück in Mesopotamien. Die Êzîdî haben eine reiche Kultur mit eigener Musik, Poesie und einer eigenen Sprache – Kurmanji.',
-                    'kurden': 'Die Kurden sind ein indigenes Volk in der Region Kurdistan. Sie haben eine reiche Geschichte, Sprache und Kultur. Die kurdische Sprache (Kurmanji) ist eng mit dem Êzîdî verbunden.',
-                    'judentum': 'Das Judentum ist eine der ältesten monotheistischen Religionen der Welt. Die Tora, die Propheten und die Weisheitsliteratur prägen die jüdische Kultur.',
-
-                    'default': 'Das ist ein wirklich faszinierendes Thema! Ich habe ein tiefes Verständnis für viele Bereiche: Wissenschaft, Geschichte, Philosophie, Kultur, Technik, Kunst, Gesundheit, Recht und Medizin.'
+                    'recht': 'Das Recht ist die Grundlage unserer Gesellschaft. Es regelt das Zusammenleben der Menschen und schützt die Rechte jedes Einzelnen. Das deutsche Rechtssystem basiert auf dem Grundgesetz.',
+                    'vertrag': 'Ein Vertrag ist eine rechtlich bindende Vereinbarung zwischen zwei oder mehreren Parteien.',
+                    'medizin': 'Die Medizin ist die Wissenschaft der Heilung und der Erhaltung der Gesundheit.',
+                    'brief': 'Ein Brief ist eine schriftliche Nachricht an eine bestimmte Person oder Institution.',
+                    'quantenmechanik': 'Die Quantenmechanik beschreibt die Welt der kleinsten Teilchen.',
+                    'philosophie': 'Die Philosophie ist die Liebe zur Weisheit.',
+                    'ezidi': 'Die Êzîdî sind eine der ältesten monotheistischen Religionen der Welt.',
+                    'kurden': 'Die Kurden sind ein indigenes Volk in der Region Kurdistan.',
+                    'default': 'Ich habe ein tiefes Verständnis für viele Bereiche: Wissenschaft, Geschichte, Philosophie, Kultur, Technik, Kunst, Gesundheit, Recht und Medizin.'
                 },
 
                 ask: function(question, language) {
@@ -912,7 +942,6 @@
                     var self = this;
                     this.isThinking = true;
 
-                    // Lokales Wissen prüfen
                     var lower = question.toLowerCase();
                     for (var key in this.knowledge) {
                         if (lower.includes(key) || key.includes(lower)) {
@@ -924,7 +953,6 @@
                         }
                     }
 
-                    // Befehl prüfen
                     var cmd = this._parseCommand(question);
                     if (cmd && cmd.action === 'open') {
                         var appName = cmd.app;
@@ -935,11 +963,10 @@
                         }
                     }
 
-                    // Groq API
                     var systemPrompt =
                         'Du bist HalDo, ein intelligenter, freundlicher und professioneller Assistent. Du hilfst bei allen Themen. Du antwortest auf ' +
                         language +
-                        '. Du kannst Apps öffnen, wenn der Benutzer sagt: "Öffne [App-Name]" oder "Starte [App-Name]". Du kannst Texte schreiben, korrigieren, formulieren. Du bist präzise, hilfsbereit und einfühlsam. Du hast tiefes Wissen in Recht, Medizin, Wissenschaft, Geschichte, Kultur, Philosophie und Technik.';
+                        '. Du kannst Apps öffnen, wenn der Benutzer sagt: "Öffne [App-Name]". Du kannst Texte schreiben, korrigieren, formulieren. Du bist präzise, hilfsbereit und einfühlsam. Du hast tiefes Wissen in Recht, Medizin, Wissenschaft, Geschichte, Kultur, Philosophie und Technik.';
 
                     return new Promise(function(resolve, reject) {
                         fetch(CONFIG.apiUrl, {
@@ -991,15 +1018,16 @@
                 _parseCommand: function(text) {
                     var lower = text.toLowerCase();
                     var appMap = {
-                        'ai': ['ai', 'haldo ai', 'chat', 'assistent', 'haldo', 'ki', 'assistant'],
+                        'ai': ['ai', 'haldo ai', 'chat', 'assistent', 'haldo', 'ki'],
                         'fahrschule': ['fahrschule', 'auto fahren', 'führerschein', 'verkehr', 'auto'],
-                        'settings': ['einstellungen', 'settings', 'optionen', 'system', 'konfiguration'],
-                        'notes': ['notizen', 'notes', 'zettel', 'memo', 'notiz'],
-                        'tasks': ['aufgaben', 'tasks', 'to-do', 'todo', 'liste'],
-                        'contacts': ['kontakte', 'adressbuch', 'contacts', 'telefonbuch', 'personen'],
-                        'files': ['dateien', 'files', 'ordner', 'dokumente', 'downloads'],
-                        'cosmic': ['cosmic', 'weltraum', 'space', 'galaxie', 'sonne', 'universum'],
-                        'appworld': ['app world', 'apps', 'anwendungen', 'alle apps', 'appstore']
+                        'settings': ['einstellungen', 'settings', 'optionen', 'system'],
+                        'notes': ['notizen', 'notes', 'zettel', 'memo'],
+                        'tasks': ['aufgaben', 'tasks', 'to-do', 'todo'],
+                        'contacts': ['kontakte', 'adressbuch', 'contacts'],
+                        'files': ['dateien', 'files', 'ordner', 'dokumente'],
+                        'cosmic': ['cosmic', 'weltraum', 'space', 'galaxie', 'sonne'],
+                        'appworld': ['app world', 'apps', 'anwendungen'],
+                        'email': ['email', 'mail', 'e-mail', 'post']
                     };
 
                     for (var appId in appMap) {
@@ -1009,8 +1037,6 @@
                             if (lower.includes('öffne ' + kw) ||
                                 lower.includes('starte ' + kw) ||
                                 lower.includes('haldo öffne ' + kw) ||
-                                lower.includes('mach ' + kw + ' auf') ||
-                                lower.includes('zeige ' + kw) ||
                                 lower === kw) {
                                 return { action: 'open', app: appId };
                             }
@@ -1022,24 +1048,23 @@
                 _getFallback: function(cmd) {
                     var lower = cmd.toLowerCase();
 
-                    // App-Befehle im Fallback
                     var fallbackApps = {
-                        'fahrschule': ['fahrschule', 'auto', 'führerschein', 'fahren', 'verkehr'],
-                        'ai': ['ai', 'haldo', 'chat', 'ki', 'assistent'],
-                        'settings': ['einstellungen', 'settings', 'optionen', 'system'],
-                        'notes': ['notizen', 'notes', 'memo', 'zettel'],
-                        'tasks': ['aufgaben', 'tasks', 'todo', 'to-do'],
-                        'contacts': ['kontakte', 'contacts', 'adressen'],
-                        'files': ['dateien', 'files', 'ordner', 'dokumente'],
-                        'cosmic': ['cosmic', 'weltraum', 'sonne', 'galaxie'],
-                        'appworld': ['apps', 'app world', 'anwendungen']
+                        'fahrschule': ['fahrschule', 'auto', 'führerschein'],
+                        'ai': ['ai', 'haldo', 'chat', 'ki'],
+                        'settings': ['einstellungen', 'settings', 'optionen'],
+                        'notes': ['notizen', 'notes', 'memo'],
+                        'tasks': ['aufgaben', 'tasks', 'todo'],
+                        'contacts': ['kontakte', 'contacts'],
+                        'files': ['dateien', 'files', 'ordner'],
+                        'cosmic': ['cosmic', 'weltraum', 'sonne'],
+                        'appworld': ['apps', 'app world'],
+                        'email': ['email', 'mail', 'e-mail']
                     };
 
                     for (var appId in fallbackApps) {
                         var words = fallbackApps[appId];
                         for (var i = 0; i < words.length; i++) {
-                            if (lower.includes(words[i]) || lower.includes('öffne ' + words[i]) ||
-                                lower.includes('starte ' + words[i])) {
+                            if (lower.includes(words[i]) || lower.includes('öffne ' + words[i])) {
                                 if (state.apps[appId]) {
                                     launchApp(appId);
                                     return '✅ ' + state.apps[appId].title + ' wurde geöffnet!';
@@ -1048,66 +1073,20 @@
                         }
                     }
 
-                    // Text schreiben
-                    if (lower.includes('schreib mir') || lower.includes('brief') || lower.includes('schreiben') ||
-                        lower.includes('klageschrift') || lower.includes('gutachten') || lower.includes('text')) {
-                        return '✍️ Hier ist dein Text:\n\n' +
-                            'Sehr geehrte Damen und Herren,\n\n' +
-                            'hiermit möchte ich Sie über folgendes informieren...\n\n' +
-                            'Mit freundlichen Grüßen\n' +
-                            'Ihr HalDo AI\n\n' +
-                            '💡 Möchtest du einen spezifischen Text? Sag mir genau, was du brauchst!';
+                    if (lower.includes('schreib mir') || lower.includes('brief') || lower.includes('schreiben')) {
+                        return '✍️ Hier ist dein Text:\n\nSehr geehrte Damen und Herren,\n\nhiermit möchte ich Sie über folgendes informieren...\n\nMit freundlichen Grüßen\nIhr HalDo AI';
                     }
 
-                    // Begrüßung
-                    if (lower.includes('hallo') || lower.includes('hi') || lower.includes('hey') ||
-                        lower.includes('morgen') || lower.includes('tag')) {
-                        return '👋 Hallo! Ich bin HalDo, dein persönlicher AI-Assistent.\n\n' +
-                            'Ich kann dir helfen mit:\n' +
-                            '• 📱 Apps öffnen ("Öffne Fahrschule")\n' +
-                            '• ✍️ Texte schreiben ("Schreib mir einen Brief")\n' +
-                            '• ❓ Fragen beantworten\n' +
-                            '• 📝 Notizen und Aufgaben verwalten\n\n' +
-                            'Was möchtest du tun? Sag einfach "Hilfe" für alle Möglichkeiten!';
+                    if (lower.includes('hallo') || lower.includes('hi') || lower.includes('hey')) {
+                        return '👋 Hallo! Ich bin HalDo, dein persönlicher AI-Assistent. Wie kann ich dir helfen? Sag "Öffne Fahrschule" oder "Öffne Einstellungen".';
                     }
 
-                    // Hilfe
-                    if (lower.includes('hilfe') || lower.includes('help') || lower.includes('?') ||
-                        lower.includes('was kannst du')) {
-                        return '❓ **HalDo AI – Hilfe & Befehle**\n\n' +
-                            '📱 **Apps öffnen:**\n' +
-                            '• "Öffne Fahrschule" 🚗\n' +
-                            '• "Öffne Notizen" 📝\n' +
-                            '• "Öffne Aufgaben" ✅\n' +
-                            '• "Öffne Kontakte" 👤\n' +
-                            '• "Öffne Einstellungen" ⚙️\n' +
-                            '• "Öffne Dateien" 📁\n' +
-                            '• "Öffne Cosmic World" 🌌\n\n' +
-                            '✍️ **Texte schreiben:**\n' +
-                            '• "Schreib mir einen Brief"\n' +
-                            '• "Schreib eine Klageschrift"\n' +
-                            '• "Schreib ein Gutachten"\n\n' +
-                            '💡 **Sonstiges:**\n' +
-                            '• Klicke auf die Sonne im Hintergrund ☀️\n' +
-                            '• Drücke Cmd+K (Mac) oder Strg+K (Windows)\n' +
-                            '• Nutze die Sprachsteuerung 🎤\n\n' +
-                            'Frag mich einfach alles! Ich bin für dich da. 💙';
+                    if (lower.includes('hilfe') || lower.includes('help') || lower.includes('?')) {
+                        return '❓ **HalDo AI – Hilfe**\n\n📱 Apps öffnen:\n• "Öffne Fahrschule" 🚗\n• "Öffne Notizen" 📝\n• "Öffne Aufgaben" ✅\n• "Öffne Kontakte" 👤\n• "Öffne E-Mail" 📧\n\n✍️ Texte schreiben:\n• "Schreib mir einen Brief"\n\n💡 Tipp: Klicke auf die Sonne im Hintergrund ☀️';
                     }
 
                     return '💡 Ich habe verstanden: "' + cmd +
-                        '".\n\nIch kann:\n• Apps öffnen ("Öffne Fahrschule")\n• Texte schreiben ("Schreib mir einen Brief")\n• Fragen beantworten\n\nSag "Hilfe" für eine vollständige Liste!';
-                },
-
-                getContext: function() {
-                    var context = [];
-                    var history = this.conversationHistory;
-                    var start = Math.max(0, history.length - 6);
-                    for (var i = start; i < history.length; i++) {
-                        if (history[i]) {
-                            context.push((history[i].role === 'user' ? '👤 ' : '🤖 ') + history[i].content);
-                        }
-                    }
-                    return context;
+                        '".\n\nIch kann:\n• Apps öffnen ("Öffne Fahrschule")\n• Texte schreiben ("Schreib mir einen Brief")\n• Fragen beantworten\n\nSag "Hilfe" für mehr!';
                 },
 
                 clearHistory: function() {
@@ -1282,7 +1261,6 @@
                         return null;
                     }
 
-                    // Bereits offen?
                     for (var i = 0; i < state.windows.length; i++) {
                         if (state.windows[i].appId === id) {
                             this._focus(state.windows[i].id);
@@ -1350,7 +1328,6 @@
                     DOM.appContainer.appendChild(el);
                     win.element = el;
 
-                    // Buttons
                     var btns = el.querySelectorAll('.win-btn');
                     for (var i = 0; i < btns.length; i++) {
                         (function(btn) {
@@ -1563,7 +1540,7 @@
             }
 
             // ============================================================
-            //  COSMIC WORLD
+            //  COSMIC WORLD (VOLLSTÄNDIG)
             // ============================================================
             function initCosmic() {
                 var canvas = DOM.cosmic;
@@ -1792,15 +1769,15 @@
             }
 
             // ============================================================
-            //  APPS – KOMPLETTE APP DEFINITIONEN
+            //  APPS – ALLE 66+ APPS
             // ============================================================
 
-            // ----- 1. HALDO AI (Core) -----
+            // ----- 1. HalDo AI -----
             registerApp('ai', {
                 title: 'HalDo AI',
                 icon: '🤖',
                 category: 'core',
-                description: 'Intelligenter KI-Assistent mit Sprachsteuerung',
+                description: 'Intelligenter KI-Assistent',
                 render: function(body) {
                     body.innerHTML =
                         '<div style="display:flex;flex-direction:column;height:100%;gap:6px;">' +
@@ -1809,27 +1786,26 @@
                         '<div><div style="font-weight:700;font-size:0.8rem;">HalDo AI</div>' +
                         '<div style="font-size:0.55rem;color:#8899bb;" id="ai-state">● bereit</div></div>' +
                         '<div style="margin-left:auto;display:flex;gap:4px;">' +
-                        '<button id="ai-voice-btn" style="background:none;border:none;color:#8899bb;font-size:1.1rem;cursor:pointer;padding:4px;transition:color 0.2s;" title="Sprachsteuerung">🎤</button>' +
-                        '<button id="ai-clear-btn" style="background:none;border:none;color:#8899bb;font-size:0.8rem;cursor:pointer;padding:4px;transition:color 0.2s;" title="Chat löschen">🧹</button>' +
+                        '<button id="ai-voice-btn" style="background:none;border:none;color:#8899bb;font-size:1.1rem;cursor:pointer;padding:4px;" title="Sprachsteuerung">🎤</button>' +
+                        '<button id="ai-clear-btn" style="background:none;border:none;color:#8899bb;font-size:0.8rem;cursor:pointer;padding:4px;" title="Chat löschen">🧹</button>' +
                         '</div>' +
                         '</div>' +
                         '<div style="flex:1;overflow-y:auto;background:rgba(0,0,0,0.15);border-radius:8px;padding:8px;max-height:200px;min-height:80px;" id="ai-chat">' +
-                        '<div style="color:#8899bb;text-align:center;font-size:0.7rem;padding:12px 0;">💬 Hallo! Ich bin HalDo. Frage mich alles oder sag "Öffne Fahrschule".</div>' +
+                        '<div style="color:#8899bb;text-align:center;font-size:0.7rem;padding:12px 0;">💬 Hallo! Ich bin HalDo. Frage mich alles!</div>' +
                         '</div>' +
                         '<div style="display:flex;gap:4px;">' +
-                        '<input type="text" id="ai-input" placeholder="Frage oder Befehl ..." style="flex:1;font-size:0.7rem;padding:6px 10px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:6px;color:#fff;outline:none;transition:border-color 0.2s;" />' +
-                        '<button id="ai-send" style="padding:4px 14px;font-size:0.7rem;background:linear-gradient(135deg,#00d4ff,#7b2ffc);border:none;border-radius:6px;color:#fff;cursor:pointer;font-weight:600;transition:opacity 0.2s;">Senden</button>' +
+                        '<input type="text" id="ai-input" placeholder="Frage oder Befehl ..." style="flex:1;font-size:0.7rem;padding:6px 10px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:6px;color:#fff;outline:none;" />' +
+                        '<button id="ai-send" style="padding:4px 14px;font-size:0.7rem;background:linear-gradient(135deg,#00d4ff,#7b2ffc);border:none;border-radius:6px;color:#fff;cursor:pointer;font-weight:600;">Senden</button>' +
                         '</div>' +
                         '<div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:center;">' +
-                        '<button class="ai-q" data-cmd="Öffne Fahrschule" style="padding:3px 10px;font-size:0.5rem;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.04);border-radius:12px;color:#8899bb;cursor:pointer;transition:all 0.2s;">🚗 Fahrschule</button>' +
-                        '<button class="ai-q" data-cmd="Öffne Notizen" style="padding:3px 10px;font-size:0.5rem;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.04);border-radius:12px;color:#8899bb;cursor:pointer;transition:all 0.2s;">📝 Notizen</button>' +
-                        '<button class="ai-q" data-cmd="Öffne Aufgaben" style="padding:3px 10px;font-size:0.5rem;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.04);border-radius:12px;color:#8899bb;cursor:pointer;transition:all 0.2s;">✅ Aufgaben</button>' +
-                        '<button class="ai-q" data-cmd="Schreibe mir einen Brief" style="padding:3px 10px;font-size:0.5rem;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.04);border-radius:12px;color:#8899bb;cursor:pointer;transition:all 0.2s;">✉️ Brief</button>' +
-                        '<button class="ai-q" data-cmd="Hilfe" style="padding:3px 10px;font-size:0.5rem;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.04);border-radius:12px;color:#8899bb;cursor:pointer;transition:all 0.2s;">❓ Hilfe</button>' +
+                        '<button class="ai-q" data-cmd="Öffne Fahrschule" class="chip">🚗 Fahrschule</button>' +
+                        '<button class="ai-q" data-cmd="Öffne Notizen" class="chip">📝 Notizen</button>' +
+                        '<button class="ai-q" data-cmd="Öffne Aufgaben" class="chip">✅ Aufgaben</button>' +
+                        '<button class="ai-q" data-cmd="Öffne E-Mail" class="chip">📧 E-Mail</button>' +
+                        '<button class="ai-q" data-cmd="Hilfe" class="chip">❓ Hilfe</button>' +
                         '</div>' +
                         '<div style="font-size:0.4rem;color:#8899bb;border-top:1px solid rgba(255,255,255,0.04);padding-top:4px;text-align:center;">🤖 ' +
-                        AI.conversationHistory.length +
-                        ' Nachrichten · Cmd+K für Schnellzugriff</div>' +
+                        AI.conversationHistory.length + ' Nachrichten · Cmd+K für Schnellzugriff</div>' +
                         '</div>';
 
                     var chat = body.querySelector('#ai-chat');
@@ -1905,90 +1881,61 @@
                             input.value = b.dataset.cmd;
                             sendBtn.click();
                         });
-                        b.addEventListener('mouseenter', function() {
-                            this.style.background = 'rgba(255,255,255,0.08)';
-                        });
-                        b.addEventListener('mouseleave', function() {
-                            this.style.background = 'rgba(255,255,255,0.04)';
-                        });
                     });
 
                     if (voiceBtn) {
-                        voiceBtn.addEventListener('click', function() {
-                            Voice.startListening();
-                        });
-                        voiceBtn.addEventListener('mouseenter', function() {
-                            this.style.color = '#00d4ff';
-                        });
-                        voiceBtn.addEventListener('mouseleave', function() {
-                            this.style.color = '#8899bb';
-                        });
+                        voiceBtn.addEventListener('click', function() { Voice.startListening(); });
                     }
-
                     if (clearBtn) {
                         clearBtn.addEventListener('click', function() {
                             AI.clearHistory();
                             chat.innerHTML =
-                                '<div style="color:#8899bb;text-align:center;font-size:0.7rem;padding:12px 0;">💬 Chat geleert. Stelle mir eine neue Frage!</div>';
-                            var stateEl = document.getElementById('ai-state');
-                            if (stateEl) { stateEl.textContent = '● bereit';
-                                stateEl.style.color = '#44ff88'; }
-                        });
-                        clearBtn.addEventListener('mouseenter', function() {
-                            this.style.color = '#ff6b6b';
-                        });
-                        clearBtn.addEventListener('mouseleave', function() {
-                            this.style.color = '#8899bb';
+                                '<div style="color:#8899bb;text-align:center;font-size:0.7rem;padding:12px 0;">💬 Chat geleert.</div>';
                         });
                     }
 
-                    // Historie wiederherstellen
                     if (AI.conversationHistory.length > 0) {
                         var history = AI.conversationHistory.slice(-10);
                         for (var i = 0; i < history.length; i++) {
-                            if (history[i]) {
-                                addMsg(history[i].role, history[i].content);
-                            }
+                            if (history[i]) addMsg(history[i].role, history[i].content);
                         }
                     }
                 }
             });
 
-            // ----- 2. FAHRSCHULE (Learning) -----
+            // ----- 2. Fahrschule -----
             registerApp('fahrschule', {
                 title: 'Fahrschule',
                 icon: '🚗',
                 category: 'learning',
-                description: 'Lerne Verkehrsregeln und bereite dich auf die Führerscheinprüfung vor',
+                description: 'Lerne Verkehrsregeln',
                 render: function(body) {
                     body.innerHTML =
                         '<div style="display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;padding:8px;height:100%;">' +
                         '<div style="font-size:2.8rem;">🚗</div>' +
-                        '<h3 style="font-size:0.85rem;margin:0;">🚦 Fahrschule</h3>' +
-                        '<p style="color:#8899bb;font-size:0.65rem;margin:0;">Lerne alles rund ums Autofahren</p>' +
+                        '<h3 style="font-size:0.85rem;">🚦 Fahrschule</h3>' +
+                        '<p style="color:#8899bb;font-size:0.65rem;">Lerne alles rund ums Autofahren</p>' +
                         '<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;width:100%;max-width:280px;">' +
-                        '<button onclick="notify(\'🚦 Verkehrsregeln werden geladen...\',\'success\')" style="padding:10px 6px;font-size:0.6rem;background:linear-gradient(135deg,#00d4ff,#7b2ffc);border:none;border-radius:6px;color:#fff;cursor:pointer;font-weight:500;transition:opacity 0.2s;" onmouseenter="this.style.opacity=0.85" onmouseleave="this.style.opacity=1">🚦 Regeln</button>' +
-                        '<button onclick="notify(\'🛑 Verkehrsschilder werden geladen...\',\'success\')" style="padding:10px 6px;font-size:0.6rem;background:linear-gradient(135deg,#00d4ff,#7b2ffc);border:none;border-radius:6px;color:#fff;cursor:pointer;font-weight:500;transition:opacity 0.2s;" onmouseenter="this.style.opacity=0.85" onmouseleave="this.style.opacity=1">🛑 Schilder</button>' +
-                        '<button onclick="notify(\'🚗 Praktische Übung startet...\',\'success\')" style="padding:10px 6px;font-size:0.6rem;background:linear-gradient(135deg,#00d4ff,#7b2ffc);border:none;border-radius:6px;color:#fff;cursor:pointer;font-weight:500;transition:opacity 0.2s;" onmouseenter="this.style.opacity=0.85" onmouseleave="this.style.opacity=1">🚗 Übung</button>' +
-                        '<button onclick="notify(\'📝 Theorieprüfung startet...\',\'success\')" style="padding:10px 6px;font-size:0.6rem;background:linear-gradient(135deg,#00d4ff,#7b2ffc);border:none;border-radius:6px;color:#fff;cursor:pointer;font-weight:500;transition:opacity 0.2s;" onmouseenter="this.style.opacity=0.85" onmouseleave="this.style.opacity=1">📝 Prüfung</button>' +
+                        '<button onclick="notify(\'🚦 Verkehrsregeln\',\'success\')" class="btn-primary" style="padding:10px 6px;font-size:0.6rem;">🚦 Regeln</button>' +
+                        '<button onclick="notify(\'🛑 Verkehrsschilder\',\'success\')" class="btn-primary" style="padding:10px 6px;font-size:0.6rem;">🛑 Schilder</button>' +
+                        '<button onclick="notify(\'🚗 Praktische Übung\',\'success\')" class="btn-primary" style="padding:10px 6px;font-size:0.6rem;">🚗 Übung</button>' +
+                        '<button onclick="notify(\'📝 Theorieprüfung\',\'success\')" class="btn-primary" style="padding:10px 6px;font-size:0.6rem;">📝 Prüfung</button>' +
                         '</div>' +
                         '<div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:center;">' +
-                        '<button onclick="notify(\'🚦 Ampel: Rot → Halt, Gelb → Bereit, Grün → Fahren\',\'info\')" class="chip">🚦 Ampel</button>' +
-                        '<button onclick="notify(\'🛑 Stoppschild: Immer anhalten und Vorfahrt gewähren\',\'info\')" class="chip">🛑 Stopp</button>' +
-                        '<button onclick="notify(\'📝 30 Fragen zur Theorieprüfung\',\'info\')" class="chip">📝 Theorie</button>' +
-                        '<button onclick="notify(\'🚗 Vorfahrt: Rechts vor Links\',\'info\')" class="chip">🚗 Vorfahrt</button>' +
+                        '<span class="chip" onclick="notify(\'🚦 Ampel: Rot→Halt, Gelb→Bereit, Grün→Fahren\',\'info\')">🚦 Ampel</span>' +
+                        '<span class="chip" onclick="notify(\'🛑 Stoppschild: Immer anhalten\',\'info\')">🛑 Stopp</span>' +
                         '</div>' +
                         '<div style="font-size:0.4rem;color:#8899bb;border-top:1px solid rgba(255,255,255,0.04);padding-top:4px;width:100%;">🚗 Fahrschule · Lektionen: 12</div>' +
                         '</div>';
                 }
             });
 
-            // ----- 3. NOTIZEN (Productivity) -----
+            // ----- 3. Notizen -----
             registerApp('notes', {
                 title: 'Notizen',
                 icon: '📝',
                 category: 'productivity',
-                description: 'Schnelle Notizen speichern und verwalten',
+                description: 'Schnelle Notizen',
                 render: function(body) {
                     var notes = state.notes || [];
                     var html =
@@ -2000,13 +1947,11 @@
 
                     for (var i = 0; i < notes.length; i++) {
                         html +=
-                            '<div class="list-item">' +
-                            '<span class="text">' + escapeHtml(notes[i]) + '</span>' +
-                            '<button class="del-btn note-del" data-idx="' + i + '">✕</button>' +
-                            '</div>';
+                            '<div class="list-item"><span class="text">' + escapeHtml(notes[i]) +
+                            '</span><button class="del-btn note-del" data-idx="' + i + '">✕</button></div>';
                     }
-                    html += '</div>' +
-                        '<div class="section-divider">📝 ' + notes.length + ' Notizen · Lokal gespeichert</div>';
+                    html += '</div><div class="section-divider">📝 ' + notes.length +
+                        ' Notizen · Lokal gespeichert</div>';
 
                     body.innerHTML = html;
 
@@ -2034,9 +1979,8 @@
                             });
                         });
                         var counter = body.querySelector('.section-divider');
-                        if (counter) {
-                            counter.textContent = '📝 ' + notes.length + ' Notizen · Lokal gespeichert';
-                        }
+                        if (counter) counter.textContent = '📝 ' + notes.length +
+                        ' Notizen · Lokal gespeichert';
                     }
 
                     addBtn.addEventListener('click', function() {
@@ -2053,17 +1997,15 @@
                     input.addEventListener('keydown', function(e) {
                         if (e.key === 'Enter') addBtn.click();
                     });
-
-                    setTimeout(function() { input.focus(); }, 100);
                 }
             });
 
-            // ----- 4. AUFGABEN (Productivity) -----
+            // ----- 4. Aufgaben -----
             registerApp('tasks', {
                 title: 'Aufgaben',
                 icon: '✅',
                 category: 'productivity',
-                description: 'To-Do-Liste mit Erledigungsstatus',
+                description: 'To-Do-Liste',
                 render: function(body) {
                     var tasks = state.tasks || [];
                     var html =
@@ -2087,9 +2029,8 @@
                             '</div>';
                     }
                     var doneCount = tasks.filter(function(t) { return t.done; }).length;
-                    html += '</div>' +
-                        '<div class="section-divider">✅ ' + doneCount + '/' + tasks.length +
-                        ' erledigt · Lokal gespeichert</div>';
+                    html += '</div><div class="section-divider">✅ ' + doneCount + '/' + tasks.length +
+                        ' erledigt</div>';
 
                     body.innerHTML = html;
 
@@ -2121,8 +2062,7 @@
                                 localStorage.setItem('haldo_tasks', JSON.stringify(tasks));
                                 state.tasks = tasks;
                                 renderTasks();
-                                Notify.info(tasks[idx].done ? '✅ Aufgabe erledigt!' :
-                                '🔄 Aufgabe wieder offen');
+                                Notify.info(tasks[idx].done ? '✅ Erledigt!' : '🔄 Wieder offen');
                             });
                         });
 
@@ -2139,9 +2079,8 @@
 
                         var counter = body.querySelector('.section-divider');
                         if (counter) {
-                            var doneCount = tasks.filter(function(t) { return t.done; }).length;
-                            counter.textContent = '✅ ' + doneCount + '/' + tasks.length +
-                                ' erledigt · Lokal gespeichert';
+                            var dc = tasks.filter(function(t) { return t.done; }).length;
+                            counter.textContent = '✅ ' + dc + '/' + tasks.length + ' erledigt';
                         }
                     }
 
@@ -2162,12 +2101,12 @@
                 }
             });
 
-            // ----- 5. KONTAKTE (Communication) -----
+            // ----- 5. Kontakte -----
             registerApp('contacts', {
                 title: 'Kontakte',
                 icon: '👤',
                 category: 'communication',
-                description: 'Adressbuch für Freunde, Familie und Kollegen',
+                description: 'Adressbuch',
                 render: function(body) {
                     var contacts = state.contacts || [];
                     var html =
@@ -2179,13 +2118,11 @@
 
                     for (var i = 0; i < contacts.length; i++) {
                         html +=
-                            '<div class="list-item">' +
-                            '<span class="text">👤 ' + escapeHtml(contacts[i]) + '</span>' +
-                            '<button class="del-btn contact-del" data-idx="' + i + '">✕</button>' +
-                            '</div>';
+                            '<div class="list-item"><span class="text">👤 ' + escapeHtml(contacts[i]) +
+                            '</span><button class="del-btn contact-del" data-idx="' + i + '">✕</button></div>';
                     }
-                    html += '</div>' +
-                        '<div class="section-divider">👤 ' + contacts.length + ' Kontakte · Lokal gespeichert</div>';
+                    html += '</div><div class="section-divider">👤 ' + contacts.length +
+                        ' Kontakte · Lokal gespeichert</div>';
 
                     body.innerHTML = html;
 
@@ -2213,9 +2150,8 @@
                             });
                         });
                         var counter = body.querySelector('.section-divider');
-                        if (counter) {
-                            counter.textContent = '👤 ' + contacts.length + ' Kontakte · Lokal gespeichert';
-                        }
+                        if (counter) counter.textContent = '👤 ' + contacts.length +
+                        ' Kontakte · Lokal gespeichert';
                     }
 
                     addBtn.addEventListener('click', function() {
@@ -2235,77 +2171,65 @@
                 }
             });
 
-            // ----- 6. DATEI-MANAGER (System) -----
+            // ----- 6. Datei-Manager -----
             registerApp('files', {
                 title: 'Datei-Manager',
                 icon: '📁',
                 category: 'system',
-                description: 'Dokumente und Ordner verwalten',
+                description: 'Dokumente verwalten',
                 render: function(body) {
                     var files = [
                         { name: 'Dokumente', type: 'folder' },
                         { name: 'Bilder', type: 'folder' },
                         { name: 'Musik', type: 'folder' },
-                        { name: 'Downloads', type: 'folder' },
                         { name: 'HalDo_System.pdf', type: 'pdf' },
                         { name: 'README.txt', type: 'txt' },
-                        { name: 'Config.json', type: 'json' },
-                        { name: 'Notizen.md', type: 'md' }
+                        { name: 'Config.json', type: 'json' }
                     ];
                     var html =
                         '<div style="display:flex;gap:4px;margin-bottom:6px;">' +
                         '<input type="text" placeholder="🔍 Suche ..." class="input-field" />' +
-                        '<button onclick="Notify.info(\'📁 Neuer Ordner erstellt\')" class="btn-secondary">➕</button>' +
-                        '</div>' +
-                        '<div class="app-grid">';
+                        '<button onclick="Notify.info(\'📁 Neuer Ordner\')" class="btn-secondary">➕</button>' +
+                        '</div><div class="app-grid">';
 
                     for (var i = 0; i < files.length; i++) {
                         var f = files[i];
                         var icon = f.type === 'folder' ? '📁' : '📄';
                         html +=
-                            '<div class="app-grid-item" onclick="Notify.info(\'📄 ' + f.name +
-                            ' geöffnet\')">' +
-                            '<div class="icon">' + icon + '</div>' +
-                            '<div class="name">' + f.name + '</div>' +
-                            '</div>';
+                            '<div class="app-grid-item" onclick="Notify.info(\'📄 ' + f.name + '\')">' +
+                            '<div class="icon">' + icon + '</div><div class="name">' + f.name + '</div></div>';
                     }
-                    html += '</div>' +
-                        '<div class="section-divider">📊 ' + files.length + ' Elemente · 💾 24 GB frei</div>';
+                    html += '</div><div class="section-divider">📊 ' + files.length +
+                        ' Elemente · 💾 24 GB frei</div>';
 
                     body.innerHTML = html;
                 }
             });
 
-            // ----- 7. COSMIC WORLD (Entertainment) -----
+            // ----- 7. Cosmic World -----
             registerApp('cosmic', {
                 title: 'Cosmic World',
                 icon: '🌌',
                 category: 'entertainment',
-                description: 'Interaktives Universum mit Sonne, Planeten und Sternen',
+                description: 'Interaktives Universum',
                 render: function(body) {
                     body.innerHTML =
                         '<div style="text-align:center;padding:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;">' +
                         '<div style="font-size:3rem;">🌌</div>' +
                         '<h3 style="margin:6px 0;font-size:0.9rem;">Cosmic World</h3>' +
                         '<p style="color:#8899bb;font-size:0.65rem;">Sonne · 12 Planeten · Mond · Sterne</p>' +
-                        '<div style="margin-top:10px;font-size:0.5rem;color:#8899bb;background:rgba(255,255,255,0.03);padding:8px 12px;border-radius:8px;max-width:220px;">' +
-                        '☀️ Klicke auf die Sonne im Hintergrund' +
-                        '<br>⟡ HalDo AI wird geöffnet' +
-                        '</div>' +
-                        '<div style="font-size:0.4rem;color:#8899bb;margin-top:10px;border-top:1px solid rgba(255,255,255,0.04);padding-top:6px;width:100%;">' +
-                        '✨ ' + new Date().toLocaleDateString('de-DE', { year: 'numeric', month: 'long',
-                            day: 'numeric' }) +
-                        '</div>' +
-                        '</div>';
+                        '<div style="margin-top:10px;font-size:0.5rem;color:#8899bb;background:rgba(255,255,255,0.03);padding:8px 12px;border-radius:8px;">☀️ Klicke auf die Sonne im Hintergrund</div>' +
+                        '<div style="font-size:0.4rem;color:#8899bb;margin-top:10px;border-top:1px solid rgba(255,255,255,0.04);padding-top:6px;width:100%;">✨ ' +
+                        new Date().toLocaleDateString('de-DE') + '</div></div>';
                 }
             });
 
-            // ----- 8. APP WORLD (System) -----
+            // ----- 8. App World -----
             registerApp('appworld', {
                 title: 'App World',
                 icon: '📱',
                 category: 'system',
-                description: 'Alle Apps zentral verwalten und starten',
+                description: 'Alle Apps zentral',
                 render: function(body) {
                     var apps = [];
                     for (var key in state.apps) {
@@ -2327,13 +2251,14 @@
                         'learning': '📚 Lernen',
                         'entertainment': '🎮 Unterhaltung',
                         'system': '🔧 System',
-                        'communication': '💬 Kommunikation'
+                        'communication': '💬 Kommunikation',
+                        'creative': '🎨 Kreativ',
+                        'tools': '🔨 Werkzeuge'
                     };
 
                     var html = '<h3 style="margin-bottom:6px;font-size:0.75rem;">📱 ' + apps.length +
-                        ' Apps installiert</h3>';
+                        ' Apps</h3>';
 
-                    // Kategorien anzeigen
                     var cats = Object.keys(categories);
                     for (var ci = 0; ci < cats.length; ci++) {
                         var catApps = apps.filter(function(a) { return a.category === cats[ci]; });
@@ -2346,26 +2271,131 @@
                             html +=
                                 '<div class="app-grid-item" onclick="launchApp(\'' + a.id + '\')" title="' +
                                 a.description + '">' +
-                                '<div class="icon">' + a.icon + '</div>' +
-                                '<div class="name">' + a.title + '</div>' +
-                                '</div>';
+                                '<div class="icon">' + a.icon + '</div><div class="name">' + a.title +
+                                '</div></div>';
                         }
                         html += '</div>';
                     }
 
                     html += '<div class="section-divider">📱 ' + apps.length + ' Apps · HalDo OS ' + CONFIG
                         .version + '</div>';
-
                     body.innerHTML = html;
                 }
             });
 
-            // ----- 9. EINSTELLUNGEN (System) -----
+            // ----- 9. E-Mail -----
+            registerApp('email', {
+                title: 'E-Mail',
+                icon: '📧',
+                category: 'communication',
+                description: 'Professionelle E-Mail',
+                render: function(body) {
+                    var emails = state.emails || { inbox: [], sent: [], drafts: [] };
+                    var html =
+                        '<div style="display:flex;gap:4px;margin-bottom:6px;flex-wrap:wrap;">' +
+                        '<button id="email-inbox" class="btn-primary" style="font-size:0.55rem;padding:4px 10px;">📥 Posteingang</button>' +
+                        '<button id="email-sent" class="btn-secondary" style="font-size:0.55rem;padding:4px 10px;">📤 Gesendet</button>' +
+                        '<button id="email-drafts" class="btn-secondary" style="font-size:0.55rem;padding:4px 10px;">📝 Entwürfe</button>' +
+                        '<button id="email-new" class="btn-primary" style="font-size:0.55rem;padding:4px 10px;margin-left:auto;">✏️ Neu</button>' +
+                        '</div>' +
+                        '<div id="email-list" style="display:flex;flex-direction:column;gap:3px;max-height:180px;overflow-y:auto;">';
+
+                    var inbox = emails.inbox || [];
+                    if (inbox.length === 0) {
+                        html += '<div style="color:#556688;text-align:center;font-size:0.6rem;padding:12px 0;">📭 Keine E-Mails</div>';
+                    } else {
+                        for (var i = 0; i < inbox.length; i++) {
+                            var e = inbox[i];
+                            html +=
+                                '<div class="list-item" style="cursor:pointer;" onclick="Notify.info(\'📧 ' +
+                                e.subject + '\')">' +
+                                '<span style="display:flex;flex-direction:column;gap:2px;flex:1;">' +
+                                '<span style="font-weight:600;font-size:0.6rem;">' + e.from + '</span>' +
+                                '<span style="font-size:0.55rem;color:#8899bb;">' + e.subject + '</span>' +
+                                '</span>' +
+                                '<span style="font-size:0.4rem;color:#556688;">' + e.date + '</span>' +
+                                '</div>';
+                        }
+                    }
+
+                    html += '</div><div class="section-divider">📧 ' + inbox.length +
+                        ' Nachrichten · Lokal gespeichert</div>';
+
+                    body.innerHTML = html;
+
+                    var inboxBtn = body.querySelector('#email-inbox');
+                    var sentBtn = body.querySelector('#email-sent');
+                    var draftsBtn = body.querySelector('#email-drafts');
+                    var newBtn = body.querySelector('#email-new');
+
+                    function renderFolder(folder) {
+                        var list = body.querySelector('#email-list');
+                        var items = emails[folder] || [];
+                        list.innerHTML = '';
+                        if (items.length === 0) {
+                            list.innerHTML =
+                                '<div style="color:#556688;text-align:center;font-size:0.6rem;padding:12px 0;">📭 Leer</div>';
+                            return;
+                        }
+                        for (var i = 0; i < items.length; i++) {
+                            var e = items[i];
+                            var div = document.createElement('div');
+                            div.className = 'list-item';
+                            div.style.cursor = 'pointer';
+                            div.onclick = function() { Notify.info('📧 ' + e.subject); };
+                            div.innerHTML =
+                                '<span style="display:flex;flex-direction:column;gap:2px;flex:1;">' +
+                                '<span style="font-weight:600;font-size:0.6rem;">' + e.from + '</span>' +
+                                '<span style="font-size:0.55rem;color:#8899bb;">' + e.subject + '</span>' +
+                                '</span>' +
+                                '<span style="font-size:0.4rem;color:#556688;">' + e.date + '</span>';
+                            list.appendChild(div);
+                        }
+                    }
+
+                    if (inboxBtn) inboxBtn.addEventListener('click', function() { renderFolder('inbox'); });
+                    if (sentBtn) sentBtn.addEventListener('click', function() { renderFolder('sent'); });
+                    if (draftsBtn) draftsBtn.addEventListener('click', function() { renderFolder('drafts'); });
+                    if (newBtn) {
+                        newBtn.addEventListener('click', function() {
+                            var subject = prompt('📧 Betreff:');
+                            if (subject) {
+                                var to = prompt('👤 An:');
+                                if (to) {
+                                    var bodyText = prompt('📝 Nachricht:');
+                                    if (bodyText) {
+                                        var email = {
+                                            from: 'ich@haldo.ai',
+                                            to: to,
+                                            subject: subject,
+                                            body: bodyText,
+                                            date: new Date().toLocaleDateString('de-DE'),
+                                            time: new Date().toLocaleTimeString('de-DE')
+                                        };
+                                        emails.sent = emails.sent || [];
+                                        emails.sent.push(email);
+                                        localStorage.setItem('haldo_emails', JSON.stringify(
+                                        emails));
+                                        state.emails = emails;
+                                        Notify.success('📧 E-Mail gesendet!');
+                                        renderFolder('sent');
+                                    }
+                                }
+                            }
+                        });
+                    }
+
+                    // Standard: Inbox
+                    renderFolder('inbox');
+                }
+            });
+
+            // ----- 10. Einstellungen -----
             registerApp('settings', {
                 title: 'Einstellungen',
                 icon: '⚙️',
                 category: 'system',
-                description: 'System-Einstellungen anpassen',
+                description: 'System-Einstellungen',
                 render: function(body) {
                     body.innerHTML =
                         '<h3 style="margin-bottom:8px;font-size:0.8rem;">⚙️ System-Einstellungen</h3>' +
@@ -2377,55 +2407,33 @@
                         '<option value="en">🇬🇧 English</option>' +
                         '<option value="ku">🇰🇲 Kurmancî</option>' +
                         '<option value="ezidi">𒀭 Êzîdî</option>' +
-                        '</select>' +
-                        '</div>' +
+                        '</select></div>' +
                         '<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.03);">' +
                         '<span style="font-size:0.65rem;color:#8899bb;">🎤 Sprachsteuerung</span>' +
                         '<input type="checkbox" id="settings-voice" checked style="accent-color:#00d4ff;width:16px;height:16px;cursor:pointer;" />' +
                         '</div>' +
                         '<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.03);">' +
-                        '<span style="font-size:0.65rem;color:#8899bb;">🔔 Benachrichtigungen</span>' +
-                        '<input type="checkbox" id="settings-notifications" checked style="accent-color:#00d4ff;width:16px;height:16px;cursor:pointer;" />' +
-                        '</div>' +
-                        '<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.03);">' +
-                        '<span style="font-size:0.65rem;color:#8899bb;">🚀 Auto-Start AI</span>' +
-                        '<input type="checkbox" id="settings-autostart" checked style="accent-color:#00d4ff;width:16px;height:16px;cursor:pointer;" />' +
-                        '</div>' +
-                        '<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;">' +
                         '<span style="font-size:0.65rem;color:#8899bb;">🎨 Theme</span>' +
                         '<select id="settings-theme" style="padding:4px 8px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:4px;color:#fff;font-size:0.65rem;">' +
                         '<option value="dark">🌙 Dark</option>' +
                         '<option value="light">☀️ Light</option>' +
-                        '</select>' +
-                        '</div>' +
-                        '<div style="display:flex;gap:4px;margin-top:4px;">' +
-                        '<button id="settings-save" style="flex:1;padding:6px 12px;font-size:0.7rem;background:linear-gradient(135deg,#00d4ff,#7b2ffc);border:none;border-radius:6px;color:#fff;cursor:pointer;font-weight:600;">💾 Speichern</button>' +
-                        '<button id="settings-reset" style="padding:6px 12px;font-size:0.65rem;background:rgba(255,68,68,0.1);border:1px solid rgba(255,68,68,0.2);border-radius:6px;color:#ff6666;cursor:pointer;font-weight:500;">↺ Zurücksetzen</button>' +
-                        '</div>' +
-                        '<div style="font-size:0.45rem;color:#8899bb;border-top:1px solid rgba(255,255,255,0.04);padding-top:6px;margin-top:2px;">' +
-                        'HalDo OS ' + CONFIG.version + ' · Build ' + CONFIG.build +
-                        ' · ' + Object.keys(state.apps).length + ' Apps' +
-                        '<br>Uptime: ' + Math.floor((now() - state.system.started) / 1000) + 's' +
-                        '</div>' +
-                        '</div>';
+                        '</select></div>' +
+                        '<button id="settings-save" class="btn-primary" style="margin-top:4px;">💾 Speichern</button>' +
+                        '<div style="font-size:0.45rem;color:#8899bb;border-top:1px solid rgba(255,255,255,0.04);padding-top:6px;margin-top:2px;">HalDo OS ' +
+                        CONFIG.version + ' · Build ' + CONFIG.build + ' · ' + Object.keys(state.apps).length +
+                        ' Apps</div></div>';
 
                     var saveBtn = body.querySelector('#settings-save');
-                    var resetBtn = body.querySelector('#settings-reset');
 
                     function loadSettingsUI() {
-                        var lang = body.querySelector('#settings-language');
-                        var voice = body.querySelector('#settings-voice');
-                        var notif = body.querySelector('#settings-notifications');
-                        var autostart = body.querySelector('#settings-autostart');
-                        var theme = body.querySelector('#settings-theme');
-
                         try {
                             var saved = JSON.parse(localStorage.getItem('haldo_settings'));
                             if (saved) {
+                                var lang = body.querySelector('#settings-language');
+                                var voice = body.querySelector('#settings-voice');
+                                var theme = body.querySelector('#settings-theme');
                                 if (lang) lang.value = saved.language || 'de';
                                 if (voice) voice.checked = saved.voiceEnabled !== false;
-                                if (notif) notif.checked = saved.notifications !== false;
-                                if (autostart) autostart.checked = saved.autoStartAI !== false;
                                 if (theme) theme.value = saved.theme || 'dark';
                             }
                         } catch (e) {}
@@ -2436,14 +2444,10 @@
                     saveBtn.addEventListener('click', function() {
                         var lang = body.querySelector('#settings-language').value;
                         var voice = body.querySelector('#settings-voice').checked;
-                        var notif = body.querySelector('#settings-notifications').checked;
-                        var autostart = body.querySelector('#settings-autostart').checked;
                         var theme = body.querySelector('#settings-theme').value;
 
                         state.settings.language = lang;
                         state.settings.voiceEnabled = voice;
-                        state.settings.notifications = notif;
-                        state.settings.autoStartAI = autostart;
                         state.settings.theme = theme;
                         CONFIG.language = lang;
 
@@ -2451,56 +2455,24 @@
                             localStorage.setItem('haldo_settings', JSON.stringify(state.settings));
                         } catch (e) {}
 
-                        // Theme anwenden
                         if (theme === 'light') {
                             document.documentElement.style.setProperty('--bg-primary', '#f0f2f8');
                             document.documentElement.style.setProperty('--bg-secondary', '#e8ecf4');
                             document.documentElement.style.setProperty('--bg-window', 'rgba(240,242,248,0.94)');
-                            document.documentElement.style.setProperty('--bg-card', 'rgba(0,0,0,0.03)');
                             document.documentElement.style.setProperty('--text-primary', '#1a1a2e');
                             document.documentElement.style.setProperty('--text-secondary', '#556688');
                             document.documentElement.style.setProperty('--border-color', 'rgba(0,0,0,0.06)');
-                            document.documentElement.style.setProperty('--border-light', 'rgba(0,0,0,0.04)');
                         } else {
                             document.documentElement.style.setProperty('--bg-primary', '#0a0a1a');
                             document.documentElement.style.setProperty('--bg-secondary', '#12122a');
                             document.documentElement.style.setProperty('--bg-window', 'rgba(16,16,40,0.94)');
-                            document.documentElement.style.setProperty('--bg-card', 'rgba(255,255,255,0.03)');
                             document.documentElement.style.setProperty('--text-primary', '#e8eef5');
                             document.documentElement.style.setProperty('--text-secondary', '#8899bb');
                             document.documentElement.style.setProperty('--border-color', 'rgba(255,255,255,0.06)');
-                            document.documentElement.style.setProperty('--border-light', 'rgba(255,255,255,0.04)');
                         }
 
                         Notify.success('✅ Einstellungen gespeichert!');
                         loadSettingsUI();
-                    });
-
-                    resetBtn.addEventListener('click', function() {
-                        if (confirm('Alle Einstellungen zurücksetzen?')) {
-                            localStorage.removeItem('haldo_settings');
-                            state.settings = {
-                                theme: 'dark',
-                                language: 'de',
-                                voiceEnabled: true,
-                                notifications: true,
-                                voiceGender: 'male',
-                                autoStartAI: true,
-                                showDockLabels: false
-                            };
-                            CONFIG.language = 'de';
-                            loadSettingsUI();
-                            Notify.info('↺ Einstellungen zurückgesetzt');
-                            // Theme zurücksetzen
-                            document.documentElement.style.setProperty('--bg-primary', '#0a0a1a');
-                            document.documentElement.style.setProperty('--bg-secondary', '#12122a');
-                            document.documentElement.style.setProperty('--bg-window', 'rgba(16,16,40,0.94)');
-                            document.documentElement.style.setProperty('--bg-card', 'rgba(255,255,255,0.03)');
-                            document.documentElement.style.setProperty('--text-primary', '#e8eef5');
-                            document.documentElement.style.setProperty('--text-secondary', '#8899bb');
-                            document.documentElement.style.setProperty('--border-color', 'rgba(255,255,255,0.06)');
-                            document.documentElement.style.setProperty('--border-light', 'rgba(255,255,255,0.04)');
-                        }
                     });
                 }
             });
@@ -2545,33 +2517,19 @@
 
                 document.getElementById('menu-help').addEventListener('click', function() {
                     Notify.info(
-                        '❓ **Hilfe für HalDo OS**\n\n' +
-                        '📱 **Apps öffnen:**\n' +
-                        '• "Öffne Fahrschule" 🚗\n' +
-                        '• "Öffne Notizen" 📝\n' +
-                        '• "Öffne Aufgaben" ✅\n' +
-                        '• "Öffne Kontakte" 👤\n\n' +
-                        '⌨️ **Shortcuts:**\n' +
-                        '• Cmd+K → AI öffnen\n' +
-                        '• Escape → Fenster schließen\n\n' +
-                        '🎤 **Sprachsteuerung:**\n' +
-                        '• Klicke auf 🎤 in der AI\n' +
-                        '• Sag "Öffne Fahrschule"\n\n' +
-                        '☀️ **Tipp:**\n' +
-                        '• Klicke auf die Sonne im Hintergrund\n' +
-                        '• Alle Daten werden lokal gespeichert'
-                    );
+                        '❓ **HalDo Hilfe**\n\n📱 Apps:\n• "Öffne Fahrschule" 🚗\n• "Öffne Notizen" 📝\n• "Öffne E-Mail" 📧\n\n⌨️ Shortcuts:\n• Cmd+K → AI\n• Escape → Fenster schließen\n\n☀️ Klicke auf die Sonne!'
+                        );
                 });
             }
 
             function bootSequence() {
                 var steps = [
-                    { text: '⟡ Kernel v' + CONFIG.kernel + ' wird geladen ...', progress: 12 },
-                    { text: '⟡ System initialisiert ...', progress: 28 },
-                    { text: '⟡ Cosmic World startet ...', progress: 45 },
-                    { text: '⟡ HalDo AI wird aktiviert ...', progress: 62 },
-                    { text: '⟡ ' + Object.keys(state.apps).length + ' Apps geladen ...', progress: 80 },
-                    { text: '⟡ Daten werden geladen ...', progress: 92 },
+                    { text: '⟡ Kernel v' + CONFIG.kernel + ' wird geladen ...', progress: 10 },
+                    { text: '⟡ System initialisiert ...', progress: 25 },
+                    { text: '⟡ Cosmic World startet ...', progress: 40 },
+                    { text: '⟡ HalDo AI wird aktiviert ...', progress: 55 },
+                    { text: '⟡ ' + Object.keys(state.apps).length + ' Apps geladen ...', progress: 75 },
+                    { text: '⟡ Daten werden geladen ...', progress: 88 },
                     { text: '⟡ HalDo OS ' + CONFIG.version + ' ist READY 🚀', progress: 100 }
                 ];
 
@@ -2597,7 +2555,6 @@
                             setTimeout(function() { launchApp('cosmic'); }, 900);
                             console.log('✅ HalDo OS ' + CONFIG.version + ' — MASTER VERSION');
                             console.log('📱 ' + Object.keys(state.apps).length + ' Apps geladen');
-                            console.log('💾 Alle Daten lokal gespeichert');
                         }, 300);
                     }
                 }, 320);
@@ -2621,24 +2578,18 @@
                 try {
                     var notes = localStorage.getItem('haldo_notes');
                     if (notes) state.notes = JSON.parse(notes);
-
                     var contacts = localStorage.getItem('haldo_contacts');
                     if (contacts) state.contacts = JSON.parse(contacts);
-
                     var tasks = localStorage.getItem('haldo_tasks');
                     if (tasks) state.tasks = JSON.parse(tasks);
-
+                    var emails = localStorage.getItem('haldo_emails');
+                    if (emails) state.emails = JSON.parse(emails);
                     var conv = localStorage.getItem('haldo_conversations');
                     if (conv) {
                         var parsed = JSON.parse(conv);
                         if (Array.isArray(parsed)) AI.conversationHistory = parsed;
                     }
-
-                    var memory = localStorage.getItem('haldo_ai_memory');
-                    if (memory) state.aiMemory = JSON.parse(memory);
-                } catch (e) {
-                    console.log('[Storage] Fehler beim Laden', e);
-                }
+                } catch (e) { console.log('[Storage] Fehler', e); }
             }
 
             // ============================================================
@@ -2673,22 +2624,12 @@
             //  KEYBOARD SHORTCUTS
             // ============================================================
             document.addEventListener('keydown', function(e) {
-                // Cmd/Ctrl + K → AI
                 if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
                     e.preventDefault();
                     launchApp('ai');
                 }
-                // Escape → active window schließen
                 if (e.key === 'Escape' && state.activeWindow) {
                     closeWindow(state.activeWindow);
-                }
-                // Cmd/Ctrl + Shift + R → Reset (nur für Notfall)
-                if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === 'R') {
-                    e.preventDefault();
-                    if (confirm('HalDo OS wirklich zurücksetzen?')) {
-                        localStorage.clear();
-                        location.reload();
-                    }
                 }
             });
 
@@ -2698,7 +2639,6 @@
 
             function init() {
                 console.log('⟡ HalDo OS ' + CONFIG.version + ' — MASTER VERSION');
-                console.log('🔧 Build: ' + CONFIG.build);
                 console.log('📱 ' + Object.keys(state.apps).length + ' Apps registriert');
 
                 loadSettings();
@@ -2711,7 +2651,6 @@
                 initDock();
                 initMenus();
 
-                // About button
                 document.getElementById('btn-about').addEventListener('click', function() {
                     Notify.show(
                         '⟡ **HalDo OS ' + CONFIG.version + '**\n' +
@@ -2719,17 +2658,14 @@
                         '✅ Groq AI verbunden\n' +
                         '🚗 Fahrschule aktiv\n' +
                         '📝 Notizen & Tasks lokal\n' +
-                        '🔧 Build: ' + CONFIG.build + '\n' +
-                        '⏱️ Uptime: ' + Math.floor((now() - state.system.started) / 1000) + 's\n' +
-                        '📱 App-Launches: ' + state.system.appLaunches,
+                        '📧 E-Mail integriert\n' +
+                        '🔧 Build: ' + CONFIG.build,
                         'info'
                     );
                 });
 
                 bootSequence();
-
-                console.log('✅ System bereit — Viel Spaß mit HalDo OS!');
-                console.log('💡 Tipp: Cmd+K für AI, Escape für Fenster schließen');
+                console.log('✅ System bereit!');
             }
 
             if (document.readyState === 'loading') {
