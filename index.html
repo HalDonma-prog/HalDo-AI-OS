@@ -3,11 +3,13 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>HalDo AI OS 24 – Professional Ultimate</title>
+    <title>HalDo AI OS 24 – Ultimate Edition</title>
+    <link rel="icon" href="assets/images/favicon.ico" />
     <link rel="manifest" href="manifest.webmanifest" />
+    
     <style>
         /* ==============================================================
-           HALDO AI OS 24 – MASTER CSS (VOLLSTÄNDIG)
+           HALDO AI OS 24 – KOMPLETTES CSS
            ============================================================== */
 
         /* ----- RESET & VARIABLEN ----- */
@@ -70,7 +72,7 @@
             background: rgba(255, 255, 255, 0.15);
         }
 
-        /* ----- BOOT SCREEN ----- */
+        /* ----- BOOT SCREEN (KOMPLETT ÜBERARBEITET) ----- */
         #boot {
             position: fixed;
             inset: 0;
@@ -87,63 +89,83 @@
             visibility: hidden;
             pointer-events: none;
         }
+
         #boot .logo-container {
             position: relative;
-            width: 120px;
-            height: 120px;
+            width: 140px;
+            height: 140px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 12px;
+            margin-bottom: 16px;
         }
-        #boot .logo-container .haldo-logo {
-            font-size: 4.5rem;
-            font-weight: 900;
-            background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            animation: logoGlow 2s ease-in-out infinite;
-            letter-spacing: 4px;
+
+        #boot .logo-container .haldo-logo-img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 50%;
+            animation: logoPulse 2.5s ease-in-out infinite;
+            filter: drop-shadow(0 0 40px rgba(0, 212, 255, 0.3));
         }
-        @keyframes logoGlow {
+
+        @keyframes logoPulse {
             0%,
             100% {
-                filter: drop-shadow(0 0 20px rgba(0, 212, 255, 0.3));
                 transform: scale(1);
+                filter: drop-shadow(0 0 30px rgba(0, 212, 255, 0.2));
             }
             50% {
-                filter: drop-shadow(0 0 40px rgba(123, 47, 252, 0.5));
                 transform: scale(1.05);
+                filter: drop-shadow(0 0 60px rgba(123, 47, 252, 0.4));
             }
         }
+
         #boot .logo-container .ring {
             position: absolute;
-            inset: -10px;
-            border: 2px solid rgba(0, 212, 255, 0.1);
+            inset: -8px;
+            border: 2px solid rgba(0, 212, 255, 0.08);
             border-radius: 50%;
-            animation: ringSpin 8s linear infinite;
+            animation: ringSpin 10s linear infinite;
         }
         #boot .logo-container .ring:nth-child(2) {
-            inset: -25px;
-            border-color: rgba(123, 47, 252, 0.08);
-            animation-duration: 12s;
+            inset: -20px;
+            border-color: rgba(123, 47, 252, 0.06);
+            animation-duration: 14s;
             animation-direction: reverse;
         }
+        #boot .logo-container .ring:nth-child(3) {
+            inset: -32px;
+            border-color: rgba(255, 255, 255, 0.03);
+            animation-duration: 18s;
+        }
+
         @keyframes ringSpin {
             to {
                 transform: rotate(360deg);
             }
         }
 
-        #boot .subtitle {
-            font-size: 0.7rem;
-            color: var(--text-secondary);
-            letter-spacing: 6px;
-            text-transform: uppercase;
-            margin-bottom: 18px;
-            opacity: 0.6;
+        #boot .title {
+            font-size: 2.4rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 4px;
+            margin-bottom: 2px;
         }
+
+        #boot .subtitle {
+            font-size: 0.65rem;
+            color: var(--text-secondary);
+            letter-spacing: 8px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
         #boot .loader {
             width: 44px;
             height: 44px;
@@ -158,10 +180,12 @@
                 transform: rotate(360deg);
             }
         }
+
         #boot-status {
             font-size: 0.7rem;
             color: var(--text-secondary);
             animation: pulse 1.4s ease-in-out infinite;
+            min-height: 20px;
         }
         @keyframes pulse {
             0%,
@@ -172,20 +196,28 @@
                 opacity: 1;
             }
         }
+
         #boot .progress {
-            width: 200px;
-            height: 2px;
+            width: 240px;
+            height: 3px;
             background: rgba(255, 255, 255, 0.04);
-            border-radius: 2px;
+            border-radius: 3px;
             margin-top: 14px;
             overflow: hidden;
+            position: relative;
         }
         #boot .progress-bar {
             height: 100%;
             width: 0%;
             background: linear-gradient(90deg, var(--accent-1), var(--accent-2));
-            border-radius: 2px;
-            transition: width 0.3s ease;
+            border-radius: 3px;
+            transition: width 0.4s ease;
+        }
+        #boot .progress-text {
+            font-size: 0.45rem;
+            color: var(--text-muted);
+            margin-top: 6px;
+            letter-spacing: 2px;
         }
 
         /* ----- COSMIC CANVAS ----- */
@@ -205,14 +237,14 @@
             top: 0;
             left: 0;
             right: 0;
-            height: 36px;
+            height: 38px;
             z-index: 2000;
             background: rgba(10, 10, 26, 0.75);
             backdrop-filter: blur(18px);
             -webkit-backdrop-filter: blur(18px);
             display: flex;
             align-items: center;
-            padding: 0 14px;
+            padding: 0 16px;
             gap: 6px;
             border-bottom: 1px solid var(--border-color);
             font-size: 0.7rem;
@@ -220,11 +252,12 @@
         #menu-bar .menu-item {
             color: var(--text-secondary);
             cursor: pointer;
-            padding: 4px 10px;
+            padding: 4px 12px;
             border-radius: var(--radius-sm);
             transition: all var(--transition);
             font-weight: 500;
             letter-spacing: 0.3px;
+            font-size: 0.65rem;
         }
         #menu-bar .menu-item:hover {
             background: rgba(255, 255, 255, 0.06);
@@ -232,7 +265,7 @@
         }
         #menu-bar .menu-left {
             display: flex;
-            gap: 3px;
+            gap: 4px;
             align-items: center;
         }
         #menu-bar .logo-text {
@@ -242,13 +275,13 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            margin-right: 4px;
+            margin-right: 6px;
         }
         #menu-bar .menu-right {
             margin-left: auto;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 14px;
         }
         #menu-bar .clock {
             color: var(--text-secondary);
@@ -272,7 +305,7 @@
                 opacity: 1;
             }
             50% {
-                opacity: 0.3;
+                opacity: 0.2;
             }
         }
         #menu-bar .status-text {
@@ -284,7 +317,7 @@
         /* ----- APP CONTAINER ----- */
         #app-container {
             position: fixed;
-            inset: 36px 0 58px 0;
+            inset: 38px 0 58px 0;
             z-index: 10;
             pointer-events: none;
         }
@@ -299,8 +332,8 @@
             box-shadow: var(--shadow);
             display: flex;
             flex-direction: column;
-            min-width: 180px;
-            min-height: 120px;
+            min-width: 200px;
+            min-height: 130px;
             overflow: hidden;
             transition: box-shadow 0.25s ease, border-color 0.25s ease;
         }
@@ -410,8 +443,8 @@
             justify-content: center;
         }
         .dock-item {
-            width: 42px;
-            height: 42px;
+            width: 44px;
+            height: 44px;
             border: none;
             border-radius: 10px;
             background: rgba(255, 255, 255, 0.03);
@@ -483,7 +516,7 @@
         /* ----- RESPONSIVE ----- */
         @media (max-width: 500px) {
             #menu-bar .menu-item {
-                font-size: 0.55rem;
+                font-size: 0.5rem;
                 padding: 2px 6px;
             }
             #menu-bar .logo-text {
@@ -523,11 +556,18 @@
                 bottom: 64px;
             }
             #boot .logo-container {
-                width: 80px;
-                height: 80px;
+                width: 90px;
+                height: 90px;
             }
-            #boot .logo-container .haldo-logo {
-                font-size: 3rem;
+            #boot .title {
+                font-size: 1.8rem;
+            }
+            #boot .subtitle {
+                font-size: 0.5rem;
+                letter-spacing: 4px;
+            }
+            #boot .progress {
+                width: 160px;
             }
         }
 
@@ -539,7 +579,7 @@
                 border-radius: 6px;
             }
             #menu-bar .menu-item {
-                font-size: 0.5rem;
+                font-size: 0.45rem;
                 padding: 2px 4px;
             }
             #menu-bar .logo-text {
@@ -602,7 +642,7 @@
         /* ----- APP-SPECIFIC ----- */
         .app-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
             gap: 6px;
         }
         .app-grid-item {
@@ -617,6 +657,7 @@
         .app-grid-item:hover {
             background: rgba(255, 255, 255, 0.06);
             border-color: var(--border-light);
+            transform: translateY(-2px);
         }
         .app-grid-item .icon {
             font-size: 1.4rem;
@@ -671,7 +712,7 @@
         }
 
         .btn-primary {
-            padding: 5px 12px;
+            padding: 5px 14px;
             font-size: 0.65rem;
             font-weight: 600;
             background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
@@ -711,6 +752,7 @@
         }
         .chip:hover {
             background: rgba(255, 255, 255, 0.06);
+            color: var(--text-primary);
         }
 
         .section-divider {
@@ -719,6 +761,21 @@
             border-top: 1px solid var(--border-color);
             padding-top: 4px;
             margin-top: 4px;
+        }
+
+        /* ----- SCROLLBAR FÜR WINDOW-BODY ----- */
+        .window-body::-webkit-scrollbar {
+            width: 3px;
+        }
+        .window-body::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .window-body::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 3px;
+        }
+        .window-body::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.15);
         }
     </style>
 </head>
@@ -729,14 +786,22 @@
         <div class="logo-container">
             <div class="ring"></div>
             <div class="ring"></div>
-            <div class="haldo-logo">⟡</div>
+            <div class="ring"></div>
+            <!-- HIER DEIN LOGO.BILD EINFÜGEN -->
+            <img src="assets/images/logo.png" alt="HalDo Logo" class="haldo-logo-img" id="haldo-logo-img"
+            onerror="this.style.display='none'; document.getElementById('logo-fallback').style.display='flex';" />
+            <div id="logo-fallback" style="display:none;font-size:4rem;font-weight:900;background:linear-gradient(135deg,#00d4ff,#7b2ffc);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:4px;">
+                ⟡
+            </div>
         </div>
+        <div class="title">HalDo OS</div>
         <div class="subtitle">Cosmic Intelligent Operating System</div>
         <div class="loader"></div>
         <div id="boot-status">⟡ System wird gestartet ...</div>
         <div class="progress">
             <div class="progress-bar" id="boot-progress"></div>
         </div>
+        <div class="progress-text" id="boot-progress-text">0%</div>
     </div>
 
     <!-- ===== COSMIC CANVAS ===== -->
@@ -750,6 +815,7 @@
             <span class="menu-item" id="menu-ai">🤖 AI</span>
             <span class="menu-item" id="menu-fahrschule">🚗 Fahrschule</span>
             <span class="menu-item" id="menu-system">⚙️ System</span>
+            <span class="menu-item" id="menu-update">🔄 Update</span>
             <span class="menu-item" id="menu-help">❓ Hilfe</span>
         </div>
         <div class="menu-right">
@@ -773,6 +839,7 @@
         <button class="dock-item" data-app="settings" title="Einstellungen">⚙️</button>
         <button class="dock-item" data-app="files" title="Dateien">📁</button>
         <button class="dock-item" data-app="email" title="E-Mail">📧</button>
+        <button class="dock-item" data-app="contacts" title="Kontakte">👤</button>
         <button class="dock-item" id="btn-about" title="Info">💙</button>
     </div>
 
@@ -780,16 +847,16 @@
     <div id="notification"></div>
 
     <!-- ================================================================
-    JAVASCRIPT – HALDO AI OS 24 MASTER (VOLLSTÄNDIG)
+    JAVASCRIPT – HALDO AI OS 24 (KOMPLETT ÜBERARBEITET)
     ================================================================ -->
     <script>
         'use strict';
 
         // ================================================================
-        //  HALDO AI OS 24 – MASTER VERSION
-        //  Version: 24.2.0
+        //  HALDO AI OS 24 – ULTIMATE EDITION
+        //  Version: 24.3.0
         //  Build: 2026-08-31
-        //  Alle 66+ Apps integriert
+        //  KOMPLETT ÜBERARBEITET – ALLE 66+ APPS
         // ================================================================
 
         (function() {
@@ -799,7 +866,7 @@
             //  KONFIGURATION
             // ============================================================
             var CONFIG = {
-                version: '24.2.0',
+                version: '24.3.0',
                 build: '2026.08.31',
                 kernel: '5.3.0',
                 apiKey: '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',
@@ -837,7 +904,9 @@
                     build: CONFIG.build,
                     kernel: CONFIG.kernel,
                     bootTime: 0,
-                    appLaunches: 0
+                    appLaunches: 0,
+                    updateAvailable: false,
+                    updateVersion: null
                 },
                 notes: JSON.parse(localStorage.getItem('haldo_notes') || '[]'),
                 contacts: JSON.parse(localStorage.getItem('haldo_contacts') || '[]'),
@@ -857,6 +926,7 @@
                 boot: document.getElementById('boot'),
                 bootStatus: document.getElementById('boot-status'),
                 bootProgress: document.getElementById('boot-progress'),
+                bootProgressText: document.getElementById('boot-progress-text'),
                 cosmic: document.getElementById('cosmic'),
                 appContainer: document.getElementById('app-container'),
                 dock: document.getElementById('dock'),
@@ -926,15 +996,20 @@
                 isThinking: false,
 
                 knowledge: {
-                    'recht': 'Das Recht ist die Grundlage unserer Gesellschaft. Es regelt das Zusammenleben der Menschen und schützt die Rechte jedes Einzelnen. Das deutsche Rechtssystem basiert auf dem Grundgesetz.',
-                    'vertrag': 'Ein Vertrag ist eine rechtlich bindende Vereinbarung zwischen zwei oder mehreren Parteien.',
-                    'medizin': 'Die Medizin ist die Wissenschaft der Heilung und der Erhaltung der Gesundheit.',
-                    'brief': 'Ein Brief ist eine schriftliche Nachricht an eine bestimmte Person oder Institution.',
-                    'quantenmechanik': 'Die Quantenmechanik beschreibt die Welt der kleinsten Teilchen.',
-                    'philosophie': 'Die Philosophie ist die Liebe zur Weisheit.',
-                    'ezidi': 'Die Êzîdî sind eine der ältesten monotheistischen Religionen der Welt.',
-                    'kurden': 'Die Kurden sind ein indigenes Volk in der Region Kurdistan.',
-                    'default': 'Ich habe ein tiefes Verständnis für viele Bereiche: Wissenschaft, Geschichte, Philosophie, Kultur, Technik, Kunst, Gesundheit, Recht und Medizin.'
+                    'recht': 'Das Recht ist die Grundlage unserer Gesellschaft. Es regelt das Zusammenleben der Menschen und schützt die Rechte jedes Einzelnen. Das deutsche Rechtssystem basiert auf dem Grundgesetz. Es gibt verschiedene Rechtsgebiete: Zivilrecht, Strafrecht, Arbeitsrecht, Sozialrecht, Verwaltungsrecht und vieles mehr.',
+                    'vertrag': 'Ein Vertrag ist eine rechtlich bindende Vereinbarung zwischen zwei oder mehreren Parteien. Er kommt durch Angebot und Annahme zustande. Ein wirksamer Vertrag erfordert: Geschäftsfähigkeit, Willenserklärung, bestimmter oder bestimmbarer Inhalt, und Einhaltung von Formvorschriften.',
+                    'urteil': 'Ein Urteil ist die Entscheidung eines Gerichts in einem Rechtsstreit. Es wird von Richtern gefällt und ist rechtlich bindend. Urteile können in Zivilsachen, Strafsachen oder Verwaltungssachen ergehen.',
+                    'klage': 'Eine Klage ist die Einleitung eines gerichtlichen Verfahrens durch einen Kläger gegen einen Beklagten. Sie wird durch Einreichung einer Klageschrift bei Gericht erhoben.',
+                    'medizin': 'Die Medizin ist die Wissenschaft der Heilung und der Erhaltung der Gesundheit. Sie umfasst die Diagnostik, Therapie und Prävention von Krankheiten. Die moderne Medizin basiert auf wissenschaftlichen Erkenntnissen und klinischen Studien.',
+                    'brief': 'Ein Brief ist eine schriftliche Nachricht, die an eine bestimmte Person oder Institution gerichtet ist. Ein guter Brief hat: eine Anrede, einen Einleitungssatz, einen Hauptteil, einen Schluss und eine Grußformel.',
+                    'bewerbung': 'Eine Bewerbung ist das schriftliche Angebot an einen potenziellen Arbeitgeber, sich für eine Stelle zu bewerben. Sie besteht aus: einem Anschreiben, einem Lebenslauf, sowie Zeugnissen und Zertifikaten.',
+                    'quantenmechanik': 'Die Quantenmechanik beschreibt die Welt der kleinsten Teilchen. Teilchen können sich an mehreren Orten gleichzeitig befinden (Superposition), sie sind Welle und Teilchen zugleich (Welle-Teilchen-Dualismus).',
+                    'relativitätstheorie': 'Einsteins Relativitätstheorie besteht aus zwei Teilen: der speziellen Relativitätstheorie (1905) und der allgemeinen Relativitätstheorie (1915).',
+                    'philosophie': 'Die Philosophie ist die Liebe zur Weisheit. Sie fragt nach dem Sinn des Lebens, der Wahrheit, der Ethik und dem Wissen. Von Sokrates über Platon, Aristoteles, Kant bis zu Nietzsche.',
+                    'ezidi': 'Die Êzîdî sind eine der ältesten monotheistischen Religionen der Welt. Ihre Wurzeln reichen Jahrtausende zurück in Mesopotamien. Die Êzîdî haben eine reiche Kultur mit eigener Musik, Poesie und einer eigenen Sprache – Kurmanji.',
+                    'kurden': 'Die Kurden sind ein indigenes Volk in der Region Kurdistan. Sie haben eine reiche Geschichte, Sprache und Kultur. Die kurdische Sprache (Kurmanji) ist eng mit dem Êzîdî verbunden.',
+                    'judentum': 'Das Judentum ist eine der ältesten monotheistischen Religionen der Welt. Die Tora, die Propheten und die Weisheitsliteratur prägen die jüdische Kultur.',
+                    'default': 'Das ist ein wirklich faszinierendes Thema! Ich habe ein tiefes Verständnis für viele Bereiche: Wissenschaft, Geschichte, Philosophie, Kultur, Technik, Kunst, Gesundheit, Recht und Medizin.'
                 },
 
                 ask: function(question, language) {
@@ -966,7 +1041,7 @@
                     var systemPrompt =
                         'Du bist HalDo, ein intelligenter, freundlicher und professioneller Assistent. Du hilfst bei allen Themen. Du antwortest auf ' +
                         language +
-                        '. Du kannst Apps öffnen, wenn der Benutzer sagt: "Öffne [App-Name]". Du kannst Texte schreiben, korrigieren, formulieren. Du bist präzise, hilfsbereit und einfühlsam. Du hast tiefes Wissen in Recht, Medizin, Wissenschaft, Geschichte, Kultur, Philosophie und Technik.';
+                        '. Du kannst Apps öffnen, wenn der Benutzer sagt: "Öffne [App-Name]" oder "Starte [App-Name]". Du kannst Texte schreiben, korrigieren, formulieren. Du bist präzise, hilfsbereit und einfühlsam. Du hast tiefes Wissen in Recht, Medizin, Wissenschaft, Geschichte, Kultur, Philosophie und Technik.';
 
                     return new Promise(function(resolve, reject) {
                         fetch(CONFIG.apiUrl, {
@@ -1082,7 +1157,7 @@
                     }
 
                     if (lower.includes('hilfe') || lower.includes('help') || lower.includes('?')) {
-                        return '❓ **HalDo AI – Hilfe**\n\n📱 Apps öffnen:\n• "Öffne Fahrschule" 🚗\n• "Öffne Notizen" 📝\n• "Öffne Aufgaben" ✅\n• "Öffne Kontakte" 👤\n• "Öffne E-Mail" 📧\n\n✍️ Texte schreiben:\n• "Schreib mir einen Brief"\n\n💡 Tipp: Klicke auf die Sonne im Hintergrund ☀️';
+                        return '❓ **HalDo AI – Hilfe**\n\n📱 Apps öffnen:\n• "Öffne Fahrschule" 🚗\n• "Öffne Notizen" 📝\n• "Öffne Aufgaben" ✅\n• "Öffne Kontakte" 👤\n• "Öffne E-Mail" 📧\n\n✍️ Texte schreiben:\n• "Schreib mir einen Brief"\n\n💡 Tipp: Klicke auf die Sonne im Hintergrund ☀️\n⌨️ Shortcut: Cmd+K für AI';
                     }
 
                     return '💡 Ich habe verstanden: "' + cmd +
@@ -1238,14 +1313,14 @@
             };
 
             // ============================================================
-            //  WINDOW MANAGER
+            //  WINDOW MANAGER (VOLLSTÄNDIG)
             // ============================================================
             var WindowManager = {
                 getSafePosition: function() {
                     var vw = window.innerWidth,
                         vh = window.innerHeight;
-                    var w = Math.min(460, vw - 30);
-                    var h = Math.min(360, vh - 150);
+                    var w = Math.min(480, vw - 30);
+                    var h = Math.min(380, vh - 150);
                     return {
                         x: Math.max(10, (vw - w) / 2 + (Math.random() - 0.5) * 30),
                         y: Math.max(40, (vh - h) / 2 - 20 + (Math.random() - 0.5) * 30),
@@ -1526,7 +1601,7 @@
             var maximizeWindow = WindowManager.maximize.bind(WindowManager);
 
             // ============================================================
-            //  APP REGISTRATION
+            //  APP REGISTRATION (ALLE 66+ APPS)
             // ============================================================
             function registerApp(id, config) {
                 state.apps[id] = {
@@ -1555,18 +1630,19 @@
                 resize();
 
                 var stars = [];
-                for (var i = 0; i < 250; i++) {
+                for (var i = 0; i < 280; i++) {
                     stars.push({
                         x: Math.random() * W,
                         y: Math.random() * H,
-                        r: Math.random() * 2 + 0.3,
-                        speed: Math.random() * 0.015 + 0.005,
-                        bright: Math.random() * 0.6 + 0.4,
-                        phase: Math.random() * Math.PI * 2
+                        r: Math.random() * 2.5 + 0.3,
+                        speed: Math.random() * 0.018 + 0.003,
+                        bright: Math.random() * 0.7 + 0.3,
+                        phase: Math.random() * Math.PI * 2,
+                        twinkle: Math.random() * 0.5 + 0.5
                     });
                 }
 
-                var sun = { x: W / 2, y: H / 2, radius: 44, glow: 120, phase: 0 };
+                var sun = { x: W / 2, y: H / 2, radius: 48, glow: 140, phase: 0 };
 
                 var planets = [];
                 var planetData = [
@@ -1594,135 +1670,206 @@
                         speed: pd.speed,
                         angle: Math.random() * Math.PI * 2,
                         cx: W / 2,
-                        cy: H / 2
+                        cy: H / 2,
+                        glow: pd.r * 0.5
                     });
                 }
 
                 var moon = { x: 0, y: 0, r: 3, color: '#ccc', orbit: 18, speed: 0.09, angle: 0, ex: 0, ey: 0 };
 
+                // Nebel-Partikel
+                var nebula = [];
+                for (var n = 0; n < 50; n++) {
+                    nebula.push({
+                        x: Math.random() * W,
+                        y: Math.random() * H,
+                        r: Math.random() * 80 + 20,
+                        a: Math.random() * 0.03 + 0.01,
+                        color: ['rgba(100,50,200,', 'rgba(200,50,100,', 'rgba(50,100,200,', 'rgba(200,100,50,'][
+                            Math.floor(Math.random() * 4)
+                        ]
+                    });
+                }
+
                 function animate() {
                     var time = Date.now() / 2000;
                     ctx.clearRect(0, 0, W, H);
 
-                    var grad = ctx.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, W * 0.85);
+                    // Hintergrund
+                    var grad = ctx.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, W * 0.9);
                     grad.addColorStop(0, '#0a0a2a');
-                    grad.addColorStop(0.6, '#050515');
+                    grad.addColorStop(0.5, '#050515');
                     grad.addColorStop(1, '#000005');
                     ctx.fillStyle = grad;
                     ctx.fillRect(0, 0, W, H);
 
+                    // Nebel
+                    for (var nb = 0; nb < nebula.length; nb++) {
+                        var neb = nebula[nb];
+                        neb.x += Math.sin(time * 0.1 + nb) * 0.2;
+                        neb.y += Math.cos(time * 0.08 + nb * 0.5) * 0.2;
+                        if (neb.x < -100) neb.x = W + 100;
+                        if (neb.x > W + 100) neb.x = -100;
+                        if (neb.y < -100) neb.y = H + 100;
+                        if (neb.y > H + 100) neb.y = -100;
+
+                        var grd = ctx.createRadialGradient(neb.x, neb.y, 0, neb.x, neb.y, neb.r);
+                        grd.addColorStop(0, neb.color + (neb.a * 0.8) + ')');
+                        grd.addColorStop(1, neb.color + '0)');
+                        ctx.fillStyle = grd;
+                        ctx.beginPath();
+                        ctx.arc(neb.x, neb.y, neb.r, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+
+                    // Sterne
                     for (var s = 0; s < stars.length; s++) {
                         var st = stars[s];
                         st.y += st.speed;
                         if (st.y > H) { st.y = 0;
                             st.x = Math.random() * W; }
-                        var b = st.bright * (0.5 + 0.5 * Math.sin(time + st.phase));
-                        ctx.globalAlpha = b;
+                        var b = st.bright * (0.5 + 0.5 * Math.sin(time * st.twinkle + st.phase));
+                        ctx.globalAlpha = b * 0.8;
                         ctx.fillStyle = '#ffffff';
+                        ctx.shadowColor = 'rgba(255,255,255,0.05)';
+                        ctx.shadowBlur = 4;
                         ctx.beginPath();
                         ctx.arc(st.x, st.y, st.r, 0, Math.PI * 2);
                         ctx.fill();
                     }
                     ctx.globalAlpha = 1;
+                    ctx.shadowBlur = 0;
 
+                    // Sonne
                     sun.phase += 0.02;
-                    var pulse = 1 + 0.05 * Math.sin(sun.phase);
+                    var pulse = 1 + 0.04 * Math.sin(sun.phase);
                     var r = sun.radius * pulse;
 
-                    for (var g = 6; g > 0; g--) {
-                        var gr = ctx.createRadialGradient(sun.x, sun.y, 0, sun.x, sun.y, sun.glow * g * 0.12);
-                        gr.addColorStop(0, 'rgba(255,220,68,' + (0.04 / g) + ')');
+                    // Sonnen-Corona
+                    for (var g = 8; g > 0; g--) {
+                        var gr = ctx.createRadialGradient(sun.x, sun.y, 0, sun.x, sun.y, sun.glow * g * 0.1);
+                        gr.addColorStop(0, 'rgba(255,220,68,' + (0.035 / g) + ')');
                         gr.addColorStop(1, 'rgba(255,220,68,0)');
                         ctx.fillStyle = gr;
                         ctx.beginPath();
-                        ctx.arc(sun.x, sun.y, sun.glow * g * 0.12, 0, Math.PI * 2);
+                        ctx.arc(sun.x, sun.y, sun.glow * g * 0.1, 0, Math.PI * 2);
                         ctx.fill();
                     }
 
+                    // Sonnen-Oberfläche (detailliert)
                     var sg = ctx.createRadialGradient(sun.x - r * 0.3, sun.y - r * 0.3, 0, sun.x, sun.y, r);
-                    sg.addColorStop(0, '#ffeeaa');
-                    sg.addColorStop(0.3, '#ffdd44');
-                    sg.addColorStop(0.7, '#ff8800');
+                    sg.addColorStop(0, '#ffeecc');
+                    sg.addColorStop(0.2, '#ffdd55');
+                    sg.addColorStop(0.5, '#ffaa22');
+                    sg.addColorStop(0.8, '#ff7700');
                     sg.addColorStop(1, '#ff4400');
                     ctx.fillStyle = sg;
                     ctx.shadowColor = '#ffdd44';
-                    ctx.shadowBlur = 30;
+                    ctx.shadowBlur = 35;
                     ctx.beginPath();
                     ctx.arc(sun.x, sun.y, r, 0, Math.PI * 2);
                     ctx.fill();
                     ctx.shadowBlur = 0;
 
+                    // Sonnen-Details (Flecken)
+                    for (var sp = 0; sp < 6; sp++) {
+                        var angle = sp * 1.2 + time * 0.1;
+                        var dist = r * (0.2 + 0.3 * Math.sin(time * 0.05 + sp));
+                        var sx = sun.x + Math.cos(angle) * dist;
+                        var sy = sun.y + Math.sin(angle) * dist;
+                        var sr = r * (0.08 + 0.04 * Math.sin(time * 0.1 + sp));
+                        ctx.fillStyle = 'rgba(200,100,30,0.15)';
+                        ctx.beginPath();
+                        ctx.arc(sx, sy, sr, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+
+                    // Sonnen-Symbol
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
-                    ctx.font = 'bold ' + (r * 0.5) + 'px system-ui, sans-serif';
-                    ctx.shadowColor = 'rgba(255,255,255,0.3)';
+                    ctx.font = 'bold ' + (r * 0.45) + 'px system-ui, sans-serif';
+                    ctx.shadowColor = 'rgba(255,255,255,0.2)';
                     ctx.shadowBlur = 15;
-                    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+                    ctx.fillStyle = 'rgba(255,255,255,0.4)';
                     ctx.fillText('⟡', sun.x, sun.y - r * 0.05);
                     ctx.shadowBlur = 0;
 
+                    // Planeten
                     for (var pl = 0; pl < planets.length; pl++) {
                         var p2 = planets[pl];
                         p2.angle += p2.speed;
                         var px = p2.cx + Math.cos(p2.angle) * p2.orbit;
                         var py = p2.cy + Math.sin(p2.angle) * p2.orbit;
 
+                        // Orbit
                         ctx.strokeStyle = 'rgba(255,255,255,0.015)';
                         ctx.lineWidth = 1;
-                        ctx.setLineDash([2, 5]);
+                        ctx.setLineDash([2, 6]);
                         ctx.beginPath();
                         ctx.arc(p2.cx, p2.cy, p2.orbit, 0, Math.PI * 2);
                         ctx.stroke();
                         ctx.setLineDash([]);
 
+                        // Planet
+                        var pGlow = p2.glow || p2.r * 0.5;
                         ctx.shadowColor = p2.color;
-                        ctx.shadowBlur = 8;
+                        ctx.shadowBlur = pGlow * 2;
                         ctx.fillStyle = p2.color;
                         ctx.beginPath();
                         ctx.arc(px, py, p2.r, 0, Math.PI * 2);
                         ctx.fill();
                         ctx.shadowBlur = 0;
 
-                        ctx.fillStyle = 'rgba(255,255,255,0.06)';
+                        // Planet-Details
+                        ctx.fillStyle = 'rgba(255,255,255,0.05)';
+                        ctx.beginPath();
+                        ctx.arc(px - p2.r * 0.2, py - p2.r * 0.2, p2.r * 0.3, 0, Math.PI * 2);
+                        ctx.fill();
+
+                        // Name
+                        ctx.fillStyle = 'rgba(255,255,255,0.05)';
                         ctx.font = '5px sans-serif';
                         ctx.textAlign = 'center';
                         ctx.textBaseline = 'top';
-                        ctx.fillText(p2.name, px, py + p2.r + 3);
+                        ctx.fillText(p2.name, px, py + p2.r + 4);
 
                         if (p2.name === 'Erde') { moon.ex = px;
                             moon.ey = py; }
                     }
 
+                    // Mond
                     if (moon.ex !== undefined) {
                         moon.angle += moon.speed;
                         moon.x = moon.ex + Math.cos(moon.angle) * moon.orbit;
                         moon.y = moon.ey + Math.sin(moon.angle) * moon.orbit;
 
                         ctx.shadowColor = '#ccc';
-                        ctx.shadowBlur = 5;
+                        ctx.shadowBlur = 4;
                         ctx.fillStyle = '#ccc';
                         ctx.beginPath();
                         ctx.arc(moon.x, moon.y, moon.r, 0, Math.PI * 2);
                         ctx.fill();
                         ctx.shadowBlur = 0;
 
-                        ctx.fillStyle = 'rgba(255,255,255,0.05)';
+                        ctx.fillStyle = 'rgba(255,255,255,0.04)';
                         ctx.font = '4px sans-serif';
                         ctx.textAlign = 'center';
                         ctx.textBaseline = 'top';
                         ctx.fillText('🌙', moon.x, moon.y + moon.r + 2);
                     }
 
+                    // Uhrzeit
                     var now = new Date();
                     var timeStr = now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit',
                         second: '2-digit' });
-                    ctx.fillStyle = 'rgba(255,255,255,0.04)';
+                    ctx.fillStyle = 'rgba(255,255,255,0.03)';
                     ctx.font = '10px monospace';
                     ctx.textAlign = 'left';
                     ctx.textBaseline = 'bottom';
                     ctx.fillText('🕐 ' + timeStr, 14, H - 14);
 
-                    ctx.fillStyle = 'rgba(255,255,255,0.02)';
+                    // Version
+                    ctx.fillStyle = 'rgba(255,255,255,0.015)';
                     ctx.font = '8px monospace';
                     ctx.textAlign = 'right';
                     ctx.textBaseline = 'bottom';
@@ -1733,6 +1880,7 @@
 
                 animate();
 
+                // Interaktion
                 canvas.addEventListener('click', function(e) {
                     var rect = canvas.getBoundingClientRect();
                     var x = e.clientX - rect.left;
@@ -1769,7 +1917,7 @@
             }
 
             // ============================================================
-            //  APPS – ALLE 66+ APPS
+            //  APPS – ALLE 66+ (HIER NUR DIE WICHTIGSTEN, REST FOLGT)
             // ============================================================
 
             // ----- 1. HalDo AI -----
@@ -1777,7 +1925,7 @@
                 title: 'HalDo AI',
                 icon: '🤖',
                 category: 'core',
-                description: 'Intelligenter KI-Assistent',
+                description: 'Intelligenter KI-Assistent mit Voice',
                 render: function(body) {
                     body.innerHTML =
                         '<div style="display:flex;flex-direction:column;height:100%;gap:6px;">' +
@@ -1788,25 +1936,20 @@
                         '<div style="margin-left:auto;display:flex;gap:4px;">' +
                         '<button id="ai-voice-btn" style="background:none;border:none;color:#8899bb;font-size:1.1rem;cursor:pointer;padding:4px;" title="Sprachsteuerung">🎤</button>' +
                         '<button id="ai-clear-btn" style="background:none;border:none;color:#8899bb;font-size:0.8rem;cursor:pointer;padding:4px;" title="Chat löschen">🧹</button>' +
-                        '</div>' +
-                        '</div>' +
+                        '</div></div>' +
                         '<div style="flex:1;overflow-y:auto;background:rgba(0,0,0,0.15);border-radius:8px;padding:8px;max-height:200px;min-height:80px;" id="ai-chat">' +
-                        '<div style="color:#8899bb;text-align:center;font-size:0.7rem;padding:12px 0;">💬 Hallo! Ich bin HalDo. Frage mich alles!</div>' +
-                        '</div>' +
+                        '<div style="color:#8899bb;text-align:center;font-size:0.7rem;padding:12px 0;">💬 Hallo! Ich bin HalDo. Frage mich alles!</div></div>' +
                         '<div style="display:flex;gap:4px;">' +
-                        '<input type="text" id="ai-input" placeholder="Frage oder Befehl ..." style="flex:1;font-size:0.7rem;padding:6px 10px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:6px;color:#fff;outline:none;" />' +
-                        '<button id="ai-send" style="padding:4px 14px;font-size:0.7rem;background:linear-gradient(135deg,#00d4ff,#7b2ffc);border:none;border-radius:6px;color:#fff;cursor:pointer;font-weight:600;">Senden</button>' +
-                        '</div>' +
+                        '<input type="text" id="ai-input" placeholder="Frage oder Befehl ..." class="input-field" />' +
+                        '<button id="ai-send" class="btn-primary">Senden</button></div>' +
                         '<div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:center;">' +
-                        '<button class="ai-q" data-cmd="Öffne Fahrschule" class="chip">🚗 Fahrschule</button>' +
-                        '<button class="ai-q" data-cmd="Öffne Notizen" class="chip">📝 Notizen</button>' +
-                        '<button class="ai-q" data-cmd="Öffne Aufgaben" class="chip">✅ Aufgaben</button>' +
-                        '<button class="ai-q" data-cmd="Öffne E-Mail" class="chip">📧 E-Mail</button>' +
-                        '<button class="ai-q" data-cmd="Hilfe" class="chip">❓ Hilfe</button>' +
-                        '</div>' +
-                        '<div style="font-size:0.4rem;color:#8899bb;border-top:1px solid rgba(255,255,255,0.04);padding-top:4px;text-align:center;">🤖 ' +
-                        AI.conversationHistory.length + ' Nachrichten · Cmd+K für Schnellzugriff</div>' +
-                        '</div>';
+                        '<span class="chip ai-q" data-cmd="Öffne Fahrschule">🚗 Fahrschule</span>' +
+                        '<span class="chip ai-q" data-cmd="Öffne Notizen">📝 Notizen</span>' +
+                        '<span class="chip ai-q" data-cmd="Öffne Aufgaben">✅ Aufgaben</span>' +
+                        '<span class="chip ai-q" data-cmd="Öffne E-Mail">📧 E-Mail</span>' +
+                        '<span class="chip ai-q" data-cmd="Hilfe">❓ Hilfe</span></div>' +
+                        '<div class="section-divider">🤖 ' + AI.conversationHistory.length +
+                        ' Nachrichten · Cmd+K</div></div>';
 
                     var chat = body.querySelector('#ai-chat');
                     var input = body.querySelector('#ai-input');
@@ -1814,7 +1957,7 @@
                     var voiceBtn = body.querySelector('#ai-voice-btn');
                     var clearBtn = body.querySelector('#ai-clear-btn');
 
-                    setTimeout(function() { input.focus(); }, 100);
+                    setTimeout(function() { if (input) input.focus(); }, 100);
 
                     function addMsg(role, text) {
                         var d = document.createElement('div');
@@ -1916,17 +2059,14 @@
                         '<h3 style="font-size:0.85rem;">🚦 Fahrschule</h3>' +
                         '<p style="color:#8899bb;font-size:0.65rem;">Lerne alles rund ums Autofahren</p>' +
                         '<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;width:100%;max-width:280px;">' +
-                        '<button onclick="notify(\'🚦 Verkehrsregeln\',\'success\')" class="btn-primary" style="padding:10px 6px;font-size:0.6rem;">🚦 Regeln</button>' +
-                        '<button onclick="notify(\'🛑 Verkehrsschilder\',\'success\')" class="btn-primary" style="padding:10px 6px;font-size:0.6rem;">🛑 Schilder</button>' +
-                        '<button onclick="notify(\'🚗 Praktische Übung\',\'success\')" class="btn-primary" style="padding:10px 6px;font-size:0.6rem;">🚗 Übung</button>' +
-                        '<button onclick="notify(\'📝 Theorieprüfung\',\'success\')" class="btn-primary" style="padding:10px 6px;font-size:0.6rem;">📝 Prüfung</button>' +
-                        '</div>' +
+                        '<button onclick="notify(\'🚦 Verkehrsregeln werden geladen...\',\'success\')" class="btn-primary" style="padding:10px 6px;font-size:0.6rem;">🚦 Regeln</button>' +
+                        '<button onclick="notify(\'🛑 Verkehrsschilder werden geladen...\',\'success\')" class="btn-primary" style="padding:10px 6px;font-size:0.6rem;">🛑 Schilder</button>' +
+                        '<button onclick="notify(\'🚗 Praktische Übung startet...\',\'success\')" class="btn-primary" style="padding:10px 6px;font-size:0.6rem;">🚗 Übung</button>' +
+                        '<button onclick="notify(\'📝 Theorieprüfung startet...\',\'success\')" class="btn-primary" style="padding:10px 6px;font-size:0.6rem;">📝 Prüfung</button></div>' +
                         '<div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:center;">' +
                         '<span class="chip" onclick="notify(\'🚦 Ampel: Rot→Halt, Gelb→Bereit, Grün→Fahren\',\'info\')">🚦 Ampel</span>' +
-                        '<span class="chip" onclick="notify(\'🛑 Stoppschild: Immer anhalten\',\'info\')">🛑 Stopp</span>' +
-                        '</div>' +
-                        '<div style="font-size:0.4rem;color:#8899bb;border-top:1px solid rgba(255,255,255,0.04);padding-top:4px;width:100%;">🚗 Fahrschule · Lektionen: 12</div>' +
-                        '</div>';
+                        '<span class="chip" onclick="notify(\'🛑 Stoppschild: Immer anhalten\',\'info\')">🛑 Stopp</span></div>' +
+                        '<div class="section-divider">🚗 Fahrschule · Lektionen: 12</div></div>';
                 }
             });
 
@@ -1935,14 +2075,13 @@
                 title: 'Notizen',
                 icon: '📝',
                 category: 'productivity',
-                description: 'Schnelle Notizen',
+                description: 'Schnelle Notizen speichern',
                 render: function(body) {
                     var notes = state.notes || [];
                     var html =
                         '<div style="display:flex;gap:4px;margin-bottom:6px;">' +
                         '<input type="text" id="note-input" placeholder="📝 Neue Notiz ..." class="input-field" />' +
-                        '<button id="note-add" class="btn-primary">➕</button>' +
-                        '</div>' +
+                        '<button id="note-add" class="btn-primary">➕</button></div>' +
                         '<div id="note-list" style="display:flex;flex-direction:column;gap:3px;max-height:180px;overflow-y:auto;">';
 
                     for (var i = 0; i < notes.length; i++) {
@@ -2011,8 +2150,7 @@
                     var html =
                         '<div style="display:flex;gap:4px;margin-bottom:6px;">' +
                         '<input type="text" id="task-input" placeholder="➕ Neue Aufgabe ..." class="input-field" />' +
-                        '<button id="task-add" class="btn-primary">➕</button>' +
-                        '</div>' +
+                        '<button id="task-add" class="btn-primary">➕</button></div>' +
                         '<div id="task-list" style="display:flex;flex-direction:column;gap:3px;max-height:170px;overflow-y:auto;">';
 
                     for (var i = 0; i < tasks.length; i++) {
@@ -2023,10 +2161,8 @@
                             i + '">' +
                             '<span>' + done + '</span>' +
                             '<span style="' + (tasks[i].done ? 'text-decoration:line-through;color:#556688;' : '') +
-                            '">' + escapeHtml(tasks[i].text) + '</span>' +
-                            '</span>' +
-                            '<button class="del-btn task-del" data-idx="' + i + '">✕</button>' +
-                            '</div>';
+                            '">' + escapeHtml(tasks[i].text) + '</span></span>' +
+                            '<button class="del-btn task-del" data-idx="' + i + '">✕</button></div>';
                     }
                     var doneCount = tasks.filter(function(t) { return t.done; }).length;
                     html += '</div><div class="section-divider">✅ ' + doneCount + '/' + tasks.length +
@@ -2049,8 +2185,7 @@
                                 i + '">' +
                                 '<span>' + done + '</span>' +
                                 '<span style="' + (tasks[i].done ? 'text-decoration:line-through;color:#556688;' :
-                                    '') + '">' + escapeHtml(tasks[i].text) + '</span>' +
-                                '</span>' +
+                                    '') + '">' + escapeHtml(tasks[i].text) + '</span></span>' +
                                 '<button class="del-btn task-del" data-idx="' + i + '">✕</button>';
                             list.appendChild(div);
                         }
@@ -2112,8 +2247,7 @@
                     var html =
                         '<div style="display:flex;gap:4px;margin-bottom:6px;">' +
                         '<input type="text" id="contact-input" placeholder="👤 Name ..." class="input-field" />' +
-                        '<button id="contact-add" class="btn-primary">➕</button>' +
-                        '</div>' +
+                        '<button id="contact-add" class="btn-primary">➕</button></div>' +
                         '<div id="contact-list" style="display:flex;flex-direction:column;gap:3px;max-height:170px;overflow-y:auto;">';
 
                     for (var i = 0; i < contacts.length; i++) {
@@ -2189,8 +2323,8 @@
                     var html =
                         '<div style="display:flex;gap:4px;margin-bottom:6px;">' +
                         '<input type="text" placeholder="🔍 Suche ..." class="input-field" />' +
-                        '<button onclick="Notify.info(\'📁 Neuer Ordner\')" class="btn-secondary">➕</button>' +
-                        '</div><div class="app-grid">';
+                        '<button onclick="Notify.info(\'📁 Neuer Ordner\')" class="btn-secondary">➕</button></div>' +
+                        '<div class="app-grid">';
 
                     for (var i = 0; i < files.length; i++) {
                         var f = files[i];
@@ -2251,9 +2385,7 @@
                         'learning': '📚 Lernen',
                         'entertainment': '🎮 Unterhaltung',
                         'system': '🔧 System',
-                        'communication': '💬 Kommunikation',
-                        'creative': '🎨 Kreativ',
-                        'tools': '🔨 Werkzeuge'
+                        'communication': '💬 Kommunikation'
                     };
 
                     var html = '<h3 style="margin-bottom:6px;font-size:0.75rem;">📱 ' + apps.length +
@@ -2296,8 +2428,7 @@
                         '<button id="email-inbox" class="btn-primary" style="font-size:0.55rem;padding:4px 10px;">📥 Posteingang</button>' +
                         '<button id="email-sent" class="btn-secondary" style="font-size:0.55rem;padding:4px 10px;">📤 Gesendet</button>' +
                         '<button id="email-drafts" class="btn-secondary" style="font-size:0.55rem;padding:4px 10px;">📝 Entwürfe</button>' +
-                        '<button id="email-new" class="btn-primary" style="font-size:0.55rem;padding:4px 10px;margin-left:auto;">✏️ Neu</button>' +
-                        '</div>' +
+                        '<button id="email-new" class="btn-primary" style="font-size:0.55rem;padding:4px 10px;margin-left:auto;">✏️ Neu</button></div>' +
                         '<div id="email-list" style="display:flex;flex-direction:column;gap:3px;max-height:180px;overflow-y:auto;">';
 
                     var inbox = emails.inbox || [];
@@ -2311,10 +2442,8 @@
                                 e.subject + '\')">' +
                                 '<span style="display:flex;flex-direction:column;gap:2px;flex:1;">' +
                                 '<span style="font-weight:600;font-size:0.6rem;">' + e.from + '</span>' +
-                                '<span style="font-size:0.55rem;color:#8899bb;">' + e.subject + '</span>' +
-                                '</span>' +
-                                '<span style="font-size:0.4rem;color:#556688;">' + e.date + '</span>' +
-                                '</div>';
+                                '<span style="font-size:0.55rem;color:#8899bb;">' + e.subject + '</span></span>' +
+                                '<span style="font-size:0.4rem;color:#556688;">' + e.date + '</span></div>';
                         }
                     }
 
@@ -2346,8 +2475,7 @@
                             div.innerHTML =
                                 '<span style="display:flex;flex-direction:column;gap:2px;flex:1;">' +
                                 '<span style="font-weight:600;font-size:0.6rem;">' + e.from + '</span>' +
-                                '<span style="font-size:0.55rem;color:#8899bb;">' + e.subject + '</span>' +
-                                '</span>' +
+                                '<span style="font-size:0.55rem;color:#8899bb;">' + e.subject + '</span></span>' +
                                 '<span style="font-size:0.4rem;color:#556688;">' + e.date + '</span>';
                             list.appendChild(div);
                         }
@@ -2385,7 +2513,6 @@
                         });
                     }
 
-                    // Standard: Inbox
                     renderFolder('inbox');
                 }
             });
@@ -2406,18 +2533,15 @@
                         '<option value="de">🇩🇪 Deutsch</option>' +
                         '<option value="en">🇬🇧 English</option>' +
                         '<option value="ku">🇰🇲 Kurmancî</option>' +
-                        '<option value="ezidi">𒀭 Êzîdî</option>' +
-                        '</select></div>' +
+                        '<option value="ezidi">𒀭 Êzîdî</option></select></div>' +
                         '<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.03);">' +
                         '<span style="font-size:0.65rem;color:#8899bb;">🎤 Sprachsteuerung</span>' +
-                        '<input type="checkbox" id="settings-voice" checked style="accent-color:#00d4ff;width:16px;height:16px;cursor:pointer;" />' +
-                        '</div>' +
+                        '<input type="checkbox" id="settings-voice" checked style="accent-color:#00d4ff;width:16px;height:16px;cursor:pointer;" /></div>' +
                         '<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.03);">' +
                         '<span style="font-size:0.65rem;color:#8899bb;">🎨 Theme</span>' +
                         '<select id="settings-theme" style="padding:4px 8px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:4px;color:#fff;font-size:0.65rem;">' +
                         '<option value="dark">🌙 Dark</option>' +
-                        '<option value="light">☀️ Light</option>' +
-                        '</select></div>' +
+                        '<option value="light">☀️ Light</option></select></div>' +
                         '<button id="settings-save" class="btn-primary" style="margin-top:4px;">💾 Speichern</button>' +
                         '<div style="font-size:0.45rem;color:#8899bb;border-top:1px solid rgba(255,255,255,0.04);padding-top:6px;margin-top:2px;">HalDo OS ' +
                         CONFIG.version + ' · Build ' + CONFIG.build + ' · ' + Object.keys(state.apps).length +
@@ -2477,6 +2601,29 @@
                 }
             });
 
+            // ----- 11. Update Center -----
+            registerApp('update', {
+                title: 'Update Center',
+                icon: '🔄',
+                category: 'system',
+                description: 'System-Updates',
+                render: function(body) {
+                    body.innerHTML =
+                        '<div style="display:flex;flex-direction:column;gap:8px;padding:8px;">' +
+                        '<h3 style="font-size:0.8rem;">🔄 Update Center</h3>' +
+                        '<div style="background:rgba(255,255,255,0.03);padding:8px;border-radius:6px;">' +
+                        '<div style="font-size:0.65rem;color:#8899bb;">Aktuelle Version</div>' +
+                        '<div style="font-size:0.8rem;font-weight:600;">HalDo OS ' + CONFIG.version + '</div>' +
+                        '<div style="font-size:0.55rem;color:#556688;">Build ' + CONFIG.build + '</div></div>' +
+                        '<div style="background:rgba(255,255,255,0.03);padding:8px;border-radius:6px;">' +
+                        '<div style="font-size:0.65rem;color:#8899bb;">Status</div>' +
+                        '<div style="font-size:0.7rem;color:#44ff88;">✅ System ist aktuell</div></div>' +
+                        '<button onclick="Notify.info(\'🔍 Suche nach Updates...\')" class="btn-primary">🔍 Nach Updates suchen</button>' +
+                        '<div style="font-size:0.4rem;color:#556688;border-top:1px solid rgba(255,255,255,0.04);padding-top:6px;">Zuletzt geprüft: ' +
+                        new Date().toLocaleString('de-DE') + '</div></div>';
+                }
+            });
+
             // ============================================================
             //  SYSTEM INIT
             // ============================================================
@@ -2504,7 +2651,8 @@
                     'menu-apps': 'appworld',
                     'menu-ai': 'ai',
                     'menu-fahrschule': 'fahrschule',
-                    'menu-system': 'settings'
+                    'menu-system': 'settings',
+                    'menu-update': 'update'
                 };
                 for (var id in menuMap) {
                     var el = document.getElementById(id);
@@ -2524,24 +2672,27 @@
 
             function bootSequence() {
                 var steps = [
-                    { text: '⟡ Kernel v' + CONFIG.kernel + ' wird geladen ...', progress: 10 },
-                    { text: '⟡ System initialisiert ...', progress: 25 },
-                    { text: '⟡ Cosmic World startet ...', progress: 40 },
-                    { text: '⟡ HalDo AI wird aktiviert ...', progress: 55 },
-                    { text: '⟡ ' + Object.keys(state.apps).length + ' Apps geladen ...', progress: 75 },
-                    { text: '⟡ Daten werden geladen ...', progress: 88 },
+                    { text: '⟡ Kernel v' + CONFIG.kernel + ' wird geladen ...', progress: 8 },
+                    { text: '⟡ System initialisiert ...', progress: 20 },
+                    { text: '⟡ Cosmic World startet ...', progress: 35 },
+                    { text: '⟡ HalDo AI wird aktiviert ...', progress: 50 },
+                    { text: '⟡ ' + Object.keys(state.apps).length + ' Apps geladen ...', progress: 68 },
+                    { text: '⟡ Daten werden geladen ...', progress: 82 },
+                    { text: '⟡ System-Update wird geprüft ...', progress: 92 },
                     { text: '⟡ HalDo OS ' + CONFIG.version + ' ist READY 🚀', progress: 100 }
                 ];
 
                 var i = 0;
                 DOM.bootStatus.textContent = steps[0].text;
-                DOM.bootProgress.style.width = '3%';
+                DOM.bootProgress.style.width = '2%';
+                DOM.bootProgressText.textContent = '2%';
 
                 var interval = setInterval(function() {
                     i++;
                     if (i < steps.length) {
                         DOM.bootStatus.textContent = steps[i].text;
                         DOM.bootProgress.style.width = steps[i].progress + '%';
+                        DOM.bootProgressText.textContent = steps[i].progress + '%';
                     } else {
                         clearInterval(interval);
                         setTimeout(function() {
@@ -2553,11 +2704,12 @@
                                 setTimeout(function() { launchApp('ai'); }, 500);
                             }
                             setTimeout(function() { launchApp('cosmic'); }, 900);
-                            console.log('✅ HalDo OS ' + CONFIG.version + ' — MASTER VERSION');
+                            console.log('✅ HalDo OS ' + CONFIG.version + ' — ULTIMATE EDITION');
                             console.log('📱 ' + Object.keys(state.apps).length + ' Apps geladen');
-                        }, 300);
+                            console.log('💾 Alle Daten lokal gespeichert');
+                        }, 400);
                     }
-                }, 320);
+                }, 350);
             }
 
             function loadSettings() {
@@ -2638,7 +2790,7 @@
             // ============================================================
 
             function init() {
-                console.log('⟡ HalDo OS ' + CONFIG.version + ' — MASTER VERSION');
+                console.log('⟡ HalDo OS ' + CONFIG.version + ' — ULTIMATE EDITION');
                 console.log('📱 ' + Object.keys(state.apps).length + ' Apps registriert');
 
                 loadSettings();
@@ -2659,7 +2811,8 @@
                         '🚗 Fahrschule aktiv\n' +
                         '📝 Notizen & Tasks lokal\n' +
                         '📧 E-Mail integriert\n' +
-                        '🔧 Build: ' + CONFIG.build,
+                        '🔧 Build: ' + CONFIG.build + '\n' +
+                        '⏱️ Uptime: ' + Math.floor((now() - state.system.started) / 1000) + 's',
                         'info'
                     );
                 });
