@@ -1,0 +1,60 @@
+# ================================================================
+#  HALDO AI OS 24 – GitHub Actions Workflow
+#  Deploy to GitHub Pages
+#  Version: 24.6.0
+#  Build: 2026-08-31
+# ================================================================
+
+name: Deploy HalDo AI OS 24
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🚀 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: 🛠️ Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: 📦 Upload Pages Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+          name: github-pages
+
+      - name: 🧹 Cleanup
+        run: |
+          echo "✅ HalDo AI OS 24 bereit für Deployment"
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: 🚀 Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+        with:
+          token: ${{ github.token }}
+          artifact_name: github-pages
+          timeout: 600000
