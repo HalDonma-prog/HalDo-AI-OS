@@ -1,6 +1,6 @@
 /**
  * HALDO AI OS 24.6 – COSMIC WORLD
- * 3D-Universum mit Three.js
+ * 3D-Universum mit Sonne, Planeten, Sternen – OHNE KONSOLE!
  */
 
 const CosmicWorld = {
@@ -8,74 +8,99 @@ const CosmicWorld = {
     camera: null,
     renderer: null,
     quality: 'ultra',
-    resolution: '1920x1080',
     isReady: false,
     animationId: null,
 
     init() {
         console.log('🌌 Cosmic World wird initialisiert...');
 
-        // Qualität aus Storage laden
-        const savedQuality = Storage.get('cosmic_quality', 'ultra');
-        if (savedQuality) this.quality = savedQuality;
-
         const container = document.getElementById('cosmic-canvas-container');
         if (!container) {
-            console.warn('⚠️ Cosmic Container nicht gefunden');
-            return false;
+            console.warn('⚠️ Cosmic Container nicht gefunden – erstelle ihn...');
+            // Container automatisch erstellen, falls nicht vorhanden
+            const newContainer = document.createElement('div');
+            newContainer.id = 'cosmic-canvas-container';
+            newContainer.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;';
+            document.body.prepend(newContainer);
+            // container neu setzen
+            this.container = newContainer;
+        } else {
+            this.container = container;
         }
 
-        // Three.js Setup
+        // ---- THREE.JS PRÜFEN ----
+        if (typeof THREE === 'undefined') {
+            console.warn('⚠️ Three.js nicht geladen – lade es automatisch...');
+            this.loadThreeJS();
+            return;
+        }
+
+        this.setupScene();
+        this.animate();
+        this.isReady = true;
+
+        // Fenster-Größenänderung
+        window.addEventListener('resize', () => this.onResize());
+
+        console.log('✅ Cosmic World ready!');
+        return this;
+    },
+
+    loadThreeJS() {
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
+        script.onload = () => {
+            console.log('✅ Three.js geladen!');
+            this.setupScene();
+            this.animate();
+            this.isReady = true;
+        };
+        document.head.appendChild(script);
+    },
+
+    setupScene() {
+        // ---- SZENE ----
         this.scene = new THREE.Scene();
 
-        // Kamera
+        // ---- KAMERA ----
         this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-        this.camera.position.set(0, 20, 40);
+        this.camera.position.set(0, 15, 35);
         this.camera.lookAt(0, 0, 0);
 
-        // Renderer
+        // ---- RENDERER ----
         this.renderer = new THREE.WebGLRenderer({
-            antialias: this.quality !== 'low',
+            antialias: true,
             alpha: false
         });
-
         this.renderer.setSize(window.innerWidth, window.innerHeight);
-        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, this.quality === 'ultra' ? 2 : 1.5));
-        this.renderer.shadowMap.enabled = this.quality !== 'low';
+        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        this.renderer.shadowMap.enabled = true;
         this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
         this.renderer.toneMappingExposure = 1.2;
 
-        container.appendChild(this.renderer.domElement);
+        this.container.appendChild(this.renderer.domElement);
 
-        // Beleuchtung
+        // ---- BELEUCHTUNG ----
         this.setupLighting();
 
-        // Sonne
+        // ---- SONNE ----
         this.createSun();
 
-        // Planeten
+        // ---- PLANETEN ----
         this.createPlanets();
 
-        // Sterne
+        // ---- STERNE ----
         this.createStars();
 
-        // Nebel
+        // ---- NEBEL ----
         this.createNebula();
 
-        // Events
-        window.addEventListener('resize', () => this.onResize());
-
-        // Animation starten
-        this.animate();
-
-        this.isReady = true;
-        console.log('✅ Cosmic World ready');
-        return true;
+        console.log('🌌 Cosmic World Setup abgeschlossen!');
     },
 
     setupLighting() {
-        // Ambient
+        // Umgebungslicht
         const ambient = new THREE.AmbientLight(0x222244, 0.5);
         this.scene.add(ambient);
 
@@ -115,7 +140,6 @@ const CosmicWorld = {
         glow.position.set(0, 0, 0);
         this.scene.add(glow);
 
-        // Sonne speichern
         this.sun = sun;
         this.sunGlow = glow;
     },
@@ -144,14 +168,13 @@ const CosmicWorld = {
             });
             const mesh = new THREE.Mesh(geometry, material);
 
-            // Zufällige Startposition
             const angle = (index / planets.length) * Math.PI * 2;
             mesh.position.x = Math.cos(angle) * data.distance;
             mesh.position.z = Math.sin(angle) * data.distance;
 
             this.scene.add(mesh);
 
-            // Umlaufbahn (Ring)
+            // Umlaufbahn
             const orbitPoints = [];
             for (let i = 0; i <= 64; i++) {
                 const theta = (i / 64) * Math.PI * 2;
@@ -170,15 +193,6 @@ const CosmicWorld = {
             const orbit = new THREE.Line(orbitGeo, orbitMat);
             this.scene.add(orbit);
 
-            // Mond für Erde
-            if (data.name === 'Erde') {
-                const moonGeo = new THREE.SphereGeometry(0.15, 16, 16);
-                const moonMat = new THREE.MeshStandardMaterial({ color: 0xcccccc });
-                const moon = new THREE.Mesh(moonGeo, moonMat);
-                moon.position.set(1.2, 0.3, 0);
-                mesh.add(moon);
-            }
-
             this.planetData.push({
                 mesh,
                 distance: data.distance,
@@ -189,11 +203,10 @@ const CosmicWorld = {
     },
 
     createStars() {
-        const starCount = this.quality === 'ultra' ? 800 : this.quality === 'high' ? 500 : 200;
+        const starCount = 800;
         const geometry = new THREE.BufferGeometry();
         const positions = new Float32Array(starCount * 3);
         const colors = new Float32Array(starCount * 3);
-        const sizes = new Float32Array(starCount);
 
         for (let i = 0; i < starCount; i++) {
             const radius = 50 + Math.random() * 150;
@@ -208,13 +221,10 @@ const CosmicWorld = {
             colors[i * 3] = color.r;
             colors[i * 3 + 1] = color.g;
             colors[i * 3 + 2] = color.b;
-
-            sizes[i] = 0.1 + Math.random() * 0.5;
         }
 
         geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
         geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-        geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
 
         const material = new THREE.PointsMaterial({
             size: 0.3,
@@ -230,7 +240,6 @@ const CosmicWorld = {
     },
 
     createNebula() {
-        // Einfache Nebel-Partikel
         const particleCount = 2000;
         const geometry = new THREE.BufferGeometry();
         const positions = new Float32Array(particleCount * 3);
@@ -270,6 +279,8 @@ const CosmicWorld = {
     animate() {
         this.animationId = requestAnimationFrame(() => this.animate());
 
+        if (!this.scene || !this.camera || !this.renderer) return;
+
         // Sonne rotieren
         if (this.sun) {
             this.sun.rotation.y += 0.002;
@@ -281,22 +292,20 @@ const CosmicWorld = {
         }
 
         // Planeten bewegen
-        this.planetData.forEach(data => {
-            data.angle += data.speed;
-            data.mesh.position.x = Math.cos(data.angle) * data.distance;
-            data.mesh.position.z = Math.sin(data.angle) * data.distance;
-            data.mesh.rotation.y += 0.01;
-        });
-
-        // Kamera langsam schwenken
-        if (this.camera) {
-            // Leichte Bewegung
+        if (this.planetData) {
+            this.planetData.forEach(data => {
+                data.angle += data.speed;
+                data.mesh.position.x = Math.cos(data.angle) * data.distance;
+                data.mesh.position.z = Math.sin(data.angle) * data.distance;
+                data.mesh.rotation.y += 0.01;
+            });
         }
 
         this.renderer.render(this.scene, this.camera);
     },
 
     onResize() {
+        if (!this.camera || !this.renderer) return;
         const width = window.innerWidth;
         const height = window.innerHeight;
         this.camera.aspect = width / height;
@@ -304,28 +313,15 @@ const CosmicWorld = {
         this.renderer.setSize(width, height);
     },
 
-    setQuality(quality) {
-        this.quality = quality;
-        Storage.set('cosmic_quality', quality);
-        // Rebuild stars
-        this.scene.remove(this.stars);
-        this.createStars();
-        console.log(`🌌 Qualität auf ${quality} gesetzt`);
-    },
-
-    toggleAutoRotate() {
-        // TODO: Implementieren
-    },
-
     destroy() {
         if (this.animationId) {
             cancelAnimationFrame(this.animationId);
+            this.animationId = null;
         }
         if (this.renderer) {
             this.renderer.dispose();
-            const container = document.getElementById('cosmic-canvas-container');
-            if (container) {
-                container.innerHTML = '';
+            if (this.container) {
+                this.container.innerHTML = '';
             }
         }
         this.isReady = false;
@@ -333,4 +329,17 @@ const CosmicWorld = {
     }
 };
 
+// ---- AUTOMATISCH STARTEN, WENN DIE SEITE GELADEN IST ----
+document.addEventListener('DOMContentLoaded', () => {
+    // Kurze Verzögerung, damit alles andere geladen ist
+    setTimeout(() => {
+        if (typeof CosmicWorld !== 'undefined') {
+            CosmicWorld.init();
+        }
+    }, 300);
+});
+
+// Global verfügbar machen
 window.CosmicWorld = CosmicWorld;
+
+console.log('🌌 Cosmic World geladen – startet automatisch!');
