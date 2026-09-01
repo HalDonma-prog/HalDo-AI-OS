@@ -1,18 +1,16 @@
 /**
  * HALDO AI OS 24.6 – AI CORE
- * KI-Engine mit Groq API
+ * KI-Engine mit Groq API – OHNE festen API-Key!
  */
 
 const AICore = {
-    apiKey: '',  // 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
-
+    apiKey: '',
     model: 'mixtral-8x7b-32768',
     temperature: 0.7,
     maxTokens: 1024,
     isReady: false,
     isProcessing: false,
 
-    // System-Prompt für HalDo
     systemPrompt: `Du bist HalDo, die lebendige KI-Assistentin des HalDo AI OS 24.6.
 Du bist freundlich, intelligent, einfühlsam und hilfsbereit.
 Du sprichst mit dem Benutzer wie ein menschlicher Freund.
@@ -29,15 +27,8 @@ Antworte immer in der Sprache des Benutzers.`,
     init() {
         console.log('🧠 AI Core wird initialisiert...');
 
-        // 🔥 WICHTIG: Der Key wird AUS DER UI GELADEN (Settings)
-        // So bleibt er sicher und wird NIE im Code gespeichert!
+        // 🔥 Der Key wird AUS DEM STORAGE geladen (Settings)
         this.apiKey = Storage.get('groq_api_key', '');
-        
-        // FALLBACK für lokale Tests (NUR WENN DU WILLST):
-        // if (!this.apiKey) {
-        //     this.apiKey = 'gsk_DEIN_NEUER_KEY_HIER'; // <-- NUR LOKAL!
-        // }
-        
         this.temperature = Storage.get('ai_temperature', 0.7);
         this.model = Storage.get('ai_model', 'mixtral-8x7b-32768');
 
@@ -50,12 +41,16 @@ Antworte immer in der Sprache des Benutzers.`,
         return this;
     },
 
+    // ---- API-KEY SICHER SETZEN (NUR ÜBER SETTINGS) ----
+
     setApiKey(key) {
         this.apiKey = key;
         Storage.set('groq_api_key', key);
-        console.log('🔑 API Key gespeichert (lokal)');
+        console.log('🔑 API Key wurde sicher im Storage gespeichert');
         return this;
     },
+
+    // ---- CHAT ----
 
     async chat(messages, options = {}) {
         if (!this.apiKey) {
@@ -76,8 +71,6 @@ Antworte immer in der Sprache des Benutzers.`,
                 { role: 'system', content: this.systemPrompt },
                 ...messages
             ];
-
-            console.log('📤 Sende Anfrage an Groq API...');
 
             const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
                 method: 'POST',
@@ -102,7 +95,6 @@ Antworte immer in der Sprache des Benutzers.`,
             const data = await response.json();
             const content = data.choices[0]?.message?.content || '';
 
-            // Memory speichern
             if (options.saveMemory !== false) {
                 AICore.saveToMemory(messages, content);
             }
