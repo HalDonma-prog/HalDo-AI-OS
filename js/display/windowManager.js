@@ -1,241 +1,339 @@
 /**
- * HALDO AI OS 24.6 – WINDOW MANAGER
- * Fenster-System mit Drag, Resize, Minimize, Maximize
+ * HALDO AI OS 24.6.0 – WINDOW MANAGER
+ * Professionelle Fensterverwaltung mit Drag, Resize, Minimize, Maximize
+ * Version: 1.0.0
  */
 
 const WindowManager = {
+    // ---- KONFIGURATION ----
     windows: [],
     zIndex: 100,
-    activeWindow: null,
     maxWindows: 20,
-
+    isReady: false,
+    
+    // ---- DOM-REFERENZEN ----
+    container: null,
+    
+    // ---- INITIALISIERUNG ----
     init() {
-        console.log('🪟 Window Manager initialisiert');
+        console.log('🪟 Window Manager wird initialisiert...');
+        
+        this.container = document.getElementById('window-container');
+        if (!this.container) {
+            console.warn('⚠️ Window-Container nicht gefunden – erstelle ihn...');
+            this.container = document.createElement('div');
+            this.container.id = 'window-container';
+            this.container.style.cssText = `
+                position: fixed;
+                top: var(--menu-top-height, 40px);
+                left: 0;
+                width: 100%;
+                height: calc(100% - var(--menu-top-height, 40px) - var(--taskbar-height, 48px));
+                z-index: 10;
+                pointer-events: none;
+                padding: 6px;
+            `;
+            document.body.appendChild(this.container);
+        }
+        
+        this.isReady = true;
         this.setupGlobalListeners();
+        
+        EventBus.emit('window:ready', { timestamp: Date.now() });
+        console.log('✅ Window Manager ready');
         return this;
     },
-
+    
+    // ---- GLOBALE LISTENER ----
     setupGlobalListeners() {
-        // Fenster nach vorne bringen bei Klick
+        // Fenster in den Vordergrund bringen
         document.addEventListener('mousedown', (e) => {
             const windowEl = e.target.closest('.window');
             if (windowEl) {
                 this.bringToFront(windowEl);
             }
         });
-
+        
         // Escape schließt aktives Fenster
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && this.activeWindow) {
-                this.closeWindow(this.activeWindow);
+            if (e.key === 'Escape' && this.getActiveWindow()) {
+                this.closeWindow(this.getActiveWindow());
             }
         });
+        
+        // Fenstergröße anpassen
+        window.addEventListener('resize', () => {
+            this.adjustWindows();
+        });
     },
-
-    // ---- OPEN WINDOW ----
-
-    openWindow(appId, title, content, icon = null, width = 600, height = 500) {
-        if (this.windows.length >= this.maxWindows) {
-            console.warn('⚠️ Maximale Fensteranzahl erreicht');
+    
+    // ---- FENSTER ÖFFNEN ----
+    openWindow(appId, title, content, icon = null, width = 400, height = 320) {
+        if (!this.isReady) {
+            console.warn('⚠️ Window Manager nicht bereit');
             return null;
         }
-
+        
         // Prüfen ob schon offen
         const existing = this.windows.find(w => w.appId === appId && !w.minimized);
         if (existing) {
             this.bringToFront(existing.element);
             return existing.element;
         }
-
-        const container = document.getElementById('window-container');
-        const windowEl = document.createElement('div');
-        windowEl.className = 'window';
-        windowEl.dataset.appId = appId;
-
-        // Position (leicht versetzt)
-        const offset = this.windows.length * 28;
-        const maxOffset = 120;
-        const x = Math.min(offset, maxOffset) + 60;
-        const y = Math.min(offset, maxOffset) + 40;
-
-        Object.assign(windowEl.style, {
-            left: x + 'px',
-            top: y + 'px',
-            width: Math.min(width, window.innerWidth - 80) + 'px',
-            height: Math.min(height, window.innerHeight - 120) + 'px',
-            zIndex: ++this.zIndex
-        });
-
+        
+        // Prüfen ob zu viele Fenster
+        if (this.windows.length >= this.maxWindows) {
+            console.warn('⚠️ Maximale Fensteranzahl erreicht');
+            EventBus.emit('window:error', { 
+                error: 'max_windows_reached',
+                max: this.maxWindows 
+            });
+            return null;
+        }
+        
+        // Fenster-Element erstellen
+        const windowEl = this.createWindowElement(appId, title, content, icon, width, height);
+        
+        // Fenster-Daten speichern
+        const windowData = {
+            id: Date.now().toString(36) + Math.random().toString(36).substr(2, 4),
+            appId: appId,
+            title: title,
+            icon: icon,
+            element: windowEl,
+            width: width,
+            height: height,
+            x: this.getNextPosition().x,
+            y: this.getNextPosition().y,
+            minimized: false,
+            maximized: false,
+            fullscreen: false,
+            zIndex: ++this.zIndex,
+            openedAt: Date.now()
+        };
+        
+        this.windows.push(windowData);
+        this.activeWindow = windowEl;
+        
+        // Event auslösen
+        EventBus.emit('window:opened', windowData);
+        
+        // Taskbar aktualisieren
+        this.updateTaskbar();
+        
+        console.log(`📂 Fenster geöffnet: ${title} (${appId})`);
+        return windowEl;
+    },
+    
+    // ---- FENSTER-ELEMENT ERSTELLEN ----
+    createWindowElement(appId, title, content, icon, width, height) {
+        const win = document.createElement('div');
+        win.className = 'window';
+        win.dataset.appId = appId;
+        
+        const w = Math.min(width, window.innerWidth - 40);
+        const h = Math.min(height, window.innerHeight - 100);
+        
+        win.style.cssText = `
+            position: absolute;
+            left: ${this.getNextPosition().x}px;
+            top: ${this.getNextPosition().y}px;
+            width: ${w}px;
+            height: ${h}px;
+            z-index: ${++this.zIndex};
+            min-width: 200px;
+            min-height: 120px;
+            max-width: 94vw;
+            max-height: 88vh;
+            background: var(--glass-bg, rgba(255,255,255,0.04));
+            backdrop-filter: var(--glass-blur, blur(20px));
+            -webkit-backdrop-filter: var(--glass-blur, blur(20px));
+            border: 1px solid var(--glass-border, rgba(255,255,255,0.06));
+            border-radius: var(--radius, 10px);
+            box-shadow: var(--glass-shadow, 0 8px 32px rgba(0,0,0,0.5));
+            pointer-events: all;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            animation: windowOpen 0.18s ease;
+            font-family: var(--font-primary, Inter, sans-serif);
+        `;
+        
         // Header
         const header = document.createElement('div');
         header.className = 'window-header';
-
+        header.style.cssText = `
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 4px 8px;
+            background: rgba(255, 255, 255, 0.01);
+            border-bottom: 1px solid var(--glass-border, rgba(255,255,255,0.06));
+            cursor: grab;
+            flex-shrink: 0;
+            min-height: 28px;
+            user-select: none;
+        `;
+        
+        // Titel
         const titleEl = document.createElement('div');
         titleEl.className = 'window-title';
+        titleEl.style.cssText = `
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-primary, #ffffff);
+        `;
         if (icon) {
-            const img = document.createElement('img');
-            img.src = icon;
-            img.alt = title;
-            titleEl.appendChild(img);
+            const iconSpan = document.createElement('span');
+            iconSpan.className = 'icon';
+            iconSpan.textContent = icon;
+            titleEl.appendChild(iconSpan);
         }
-        const span = document.createElement('span');
-        span.textContent = title;
-        titleEl.appendChild(span);
+        const titleSpan = document.createElement('span');
+        titleSpan.textContent = title;
+        titleEl.appendChild(titleSpan);
         header.appendChild(titleEl);
-
+        
         // Controls
         const controls = document.createElement('div');
         controls.className = 'window-controls';
-
+        controls.style.cssText = `
+            display: flex;
+            gap: 4px;
+        `;
+        
         const btnMin = document.createElement('button');
         btnMin.className = 'btn-minimize';
-        btnMin.innerHTML = '−';
-        btnMin.title = 'Minimieren';
-        btnMin.onclick = (e) => { e.stopPropagation();
-            this.minimizeWindow(windowEl); };
-
+        btnMin.textContent = '−';
+        btnMin.style.cssText = `
+            width: 10px;
+            height: 10px;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            padding: 0;
+            font-size: 6px;
+            line-height: 10px;
+            text-align: center;
+            color: transparent;
+            background: #FFBD2E;
+        `;
+        btnMin.onclick = (e) => { e.stopPropagation(); this.minimizeWindow(win); };
+        controls.appendChild(btnMin);
+        
         const btnMax = document.createElement('button');
         btnMax.className = 'btn-maximize';
-        btnMax.innerHTML = '⛶';
-        btnMax.title = 'Maximieren';
-        btnMax.onclick = (e) => { e.stopPropagation();
-            this.maximizeWindow(windowEl); };
-
+        btnMax.textContent = '⛶';
+        btnMax.style.cssText = `
+            width: 10px;
+            height: 10px;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            padding: 0;
+            font-size: 6px;
+            line-height: 10px;
+            text-align: center;
+            color: transparent;
+            background: #28C840;
+        `;
+        btnMax.onclick = (e) => { e.stopPropagation(); this.maximizeWindow(win); };
+        controls.appendChild(btnMax);
+        
         const btnClose = document.createElement('button');
         btnClose.className = 'btn-close';
-        btnClose.innerHTML = '✕';
-        btnClose.title = 'Schließen';
-        btnClose.onclick = (e) => { e.stopPropagation();
-            this.closeWindow(windowEl); };
-
-        controls.appendChild(btnMin);
-        controls.appendChild(btnMax);
+        btnClose.textContent = '✕';
+        btnClose.style.cssText = `
+            width: 10px;
+            height: 10px;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            padding: 0;
+            font-size: 6px;
+            line-height: 10px;
+            text-align: center;
+            color: transparent;
+            background: #FF5F57;
+        `;
+        btnClose.onclick = (e) => { e.stopPropagation(); this.closeWindow(win); };
         controls.appendChild(btnClose);
+        
         header.appendChild(controls);
-        windowEl.appendChild(header);
-
+        win.appendChild(header);
+        
         // Body
         const body = document.createElement('div');
         body.className = 'window-body';
+        body.style.cssText = `
+            flex: 1;
+            padding: 8px;
+            overflow: auto;
+            color: var(--text-secondary, rgba(255,255,255,0.7));
+            font-size: 12px;
+            line-height: 1.4;
+        `;
         if (typeof content === 'string') {
             body.innerHTML = content;
         } else if (content instanceof HTMLElement) {
             body.appendChild(content);
         }
-        windowEl.appendChild(body);
-
-        container.appendChild(windowEl);
-
-        // Drag
-        this.makeDraggable(windowEl, header);
-
-        // Resize
-        this.makeResizable(windowEl);
-
-        // Speichern
-        const windowData = {
-            id: Date.now(),
-            appId,
-            title,
-            element: windowEl,
-            minimized: false,
-            maximized: false
-        };
-        this.windows.push(windowData);
-        this.activeWindow = windowEl;
-
-        // Taskbar aktualisieren
-        EventBus.emit('window:opened', windowData);
-
-        // App in Taskbar anzeigen
-        this.updateTaskbar();
-
-        console.log(`📂 Fenster geöffnet: ${title}`);
-        return windowEl;
-    },
-
-    // ---- CLOSE WINDOW ----
-
-    closeWindow(windowEl) {
-        const index = this.windows.findIndex(w => w.element === windowEl);
-        if (index === -1) return;
-
-        const data = this.windows[index];
-        data.element.remove();
-        this.windows.splice(index, 1);
-
-        if (this.activeWindow === windowEl) {
-            this.activeWindow = this.windows.length > 0 ? this.windows[this.windows.length - 1].element : null;
+        win.appendChild(body);
+        
+        // Drag-Funktion
+        this.makeDraggable(win, header);
+        
+        // Resize-Funktion
+        this.makeResizable(win);
+        
+        this.container.appendChild(win);
+        
+        // CSS-Animation für Fenster
+        if (!document.getElementById('window-animations')) {
+            const style = document.createElement('style');
+            style.id = 'window-animations';
+            style.textContent = `
+                @keyframes windowOpen {
+                    from { opacity: 0; transform: scale(0.94) translateY(8px); }
+                    to { opacity: 1; transform: scale(1) translateY(0); }
+                }
+                .window.minimized {
+                    transform: scale(0.8) translateY(30px);
+                    opacity: 0;
+                    pointer-events: none;
+                }
+                .window.maximized {
+                    top: 0 !important;
+                    left: 0 !important;
+                    width: 100% !important;
+                    height: 100% !important;
+                    border-radius: 0 !important;
+                    max-width: 100vw !important;
+                    max-height: 100vh !important;
+                }
+            `;
+            document.head.appendChild(style);
         }
-
-        EventBus.emit('window:closed', data);
-        this.updateTaskbar();
-        console.log(`📂 Fenster geschlossen: ${data.title}`);
+        
+        return win;
     },
-
-    // ---- MINIMIZE ----
-
-    minimizeWindow(windowEl) {
-        const data = this.windows.find(w => w.element === windowEl);
-        if (!data) return;
-        data.minimized = !data.minimized;
-        windowEl.classList.toggle('minimized', data.minimized);
-        if (data.minimized) {
-            this.activeWindow = null;
-        } else {
-            this.bringToFront(windowEl);
-        }
-        this.updateTaskbar();
-        EventBus.emit('window:minimized', data);
-    },
-
-    // ---- MAXIMIZE ----
-
-    maximizeWindow(windowEl) {
-        const data = this.windows.find(w => w.element === windowEl);
-        if (!data) return;
-        data.maximized = !data.maximized;
-        windowEl.classList.toggle('maximized', data.maximized);
-
-        if (data.maximized) {
-            windowEl.style.left = '0';
-            windowEl.style.top = '0';
-            windowEl.style.width = '100%';
-            windowEl.style.height = '100%';
-        } else {
-            windowEl.style.left = '60px';
-            windowEl.style.top = '40px';
-            windowEl.style.width = '600px';
-            windowEl.style.height = '500px';
-        }
-        this.bringToFront(windowEl);
-        EventBus.emit('window:maximized', data);
-    },
-
-    // ---- BRING TO FRONT ----
-
-    bringToFront(windowEl) {
-        if (!windowEl) return;
-        this.activeWindow = windowEl;
-        windowEl.style.zIndex = ++this.zIndex;
-        const data = this.windows.find(w => w.element === windowEl);
-        if (data && data.minimized) {
-            data.minimized = false;
-            windowEl.classList.remove('minimized');
-        }
-        this.updateTaskbar();
-    },
-
+    
     // ---- DRAGGABLE ----
-
     makeDraggable(windowEl, handle) {
         let isDragging = false;
         let startX, startY, origX, origY;
-
+        
         handle.addEventListener('mousedown', (e) => {
             const data = this.windows.find(w => w.element === windowEl);
             if (data && data.maximized) return;
-
+            if (e.target.closest('.window-controls')) return;
+            
             isDragging = true;
             const rect = windowEl.getBoundingClientRect();
             startX = e.clientX;
@@ -243,9 +341,10 @@ const WindowManager = {
             origX = rect.left;
             origY = rect.top;
             windowEl.style.cursor = 'grabbing';
+            windowEl.style.transition = 'none';
             e.preventDefault();
         });
-
+        
         document.addEventListener('mousemove', (e) => {
             if (!isDragging) return;
             const dx = e.clientX - startX;
@@ -254,72 +353,274 @@ const WindowManager = {
             windowEl.style.top = (origY + dy) + 'px';
             windowEl.style.right = 'auto';
             windowEl.style.bottom = 'auto';
+            
+            // Fenster-Daten aktualisieren
+            const data = this.windows.find(w => w.element === windowEl);
+            if (data) {
+                data.x = origX + dx;
+                data.y = origY + dy;
+            }
         });
-
+        
         document.addEventListener('mouseup', () => {
             if (isDragging) {
                 isDragging = false;
                 windowEl.style.cursor = '';
+                windowEl.style.transition = '';
             }
         });
     },
-
+    
     // ---- RESIZABLE ----
-
     makeResizable(windowEl) {
         const resizeHandle = document.createElement('div');
-        Object.assign(resizeHandle.style, {
-            position: 'absolute',
-            bottom: '0',
-            right: '0',
-            width: '16px',
-            height: '16px',
-            cursor: 'nwse-resize',
-            zIndex: '1000'
-        });
+        resizeHandle.style.cssText = `
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 14px;
+            height: 14px;
+            cursor: nwse-resize;
+            z-index: 1000;
+            background: transparent;
+        `;
         windowEl.appendChild(resizeHandle);
-
+        
         let isResizing = false;
         let startX, startY, startWidth, startHeight;
-
+        
         resizeHandle.addEventListener('mousedown', (e) => {
             const data = this.windows.find(w => w.element === windowEl);
             if (data && data.maximized) return;
-
+            
             isResizing = true;
             startX = e.clientX;
             startY = e.clientY;
             startWidth = windowEl.offsetWidth;
             startHeight = windowEl.offsetHeight;
+            windowEl.style.transition = 'none';
             e.preventDefault();
             e.stopPropagation();
         });
-
+        
         document.addEventListener('mousemove', (e) => {
             if (!isResizing) return;
             const dw = e.clientX - startX;
             const dh = e.clientY - startY;
-            windowEl.style.width = Math.max(300, startWidth + dw) + 'px';
-            windowEl.style.height = Math.max(200, startHeight + dh) + 'px';
+            const newWidth = Math.max(200, startWidth + dw);
+            const newHeight = Math.max(120, startHeight + dh);
+            windowEl.style.width = newWidth + 'px';
+            windowEl.style.height = newHeight + 'px';
+            
+            const data = this.windows.find(w => w.element === windowEl);
+            if (data) {
+                data.width = newWidth;
+                data.height = newHeight;
+            }
         });
-
+        
         document.addEventListener('mouseup', () => {
-            isResizing = false;
+            if (isResizing) {
+                isResizing = false;
+                windowEl.style.transition = '';
+            }
         });
     },
-
-    // ---- TASKBAR ----
-
+    
+    // ---- FENSTER SCHLIEßEN ----
+    closeWindow(windowEl) {
+        const index = this.windows.findIndex(w => w.element === windowEl);
+        if (index === -1) return false;
+        
+        const data = this.windows[index];
+        data.element.remove();
+        this.windows.splice(index, 1);
+        
+        if (this.activeWindow === windowEl) {
+            this.activeWindow = this.windows.length > 0 ? this.windows[this.windows.length - 1].element : null;
+        }
+        
+        EventBus.emit('window:closed', data);
+        this.updateTaskbar();
+        
+        console.log(`📂 Fenster geschlossen: ${data.title}`);
+        return true;
+    },
+    
+    // ---- FENSTER MINIMIEREN ----
+    minimizeWindow(windowEl) {
+        const data = this.windows.find(w => w.element === windowEl);
+        if (!data) return false;
+        
+        data.minimized = !data.minimized;
+        windowEl.classList.toggle('minimized', data.minimized);
+        
+        if (data.minimized) {
+            this.activeWindow = null;
+            EventBus.emit('window:minimized', data);
+        } else {
+            this.bringToFront(windowEl);
+            EventBus.emit('window:restored', data);
+        }
+        
+        this.updateTaskbar();
+        return true;
+    },
+    
+    // ---- FENSTER MAXIMIEREN ----
+    maximizeWindow(windowEl) {
+        const data = this.windows.find(w => w.element === windowEl);
+        if (!data) return false;
+        
+        data.maximized = !data.maximized;
+        windowEl.classList.toggle('maximized', data.maximized);
+        
+        if (data.maximized) {
+            EventBus.emit('window:maximized', data);
+        } else {
+            // Zurück zur vorherigen Größe
+            windowEl.style.width = data.width + 'px';
+            windowEl.style.height = data.height + 'px';
+            windowEl.style.left = data.x + 'px';
+            windowEl.style.top = data.y + 'px';
+            EventBus.emit('window:restored', data);
+        }
+        
+        this.bringToFront(windowEl);
+        this.updateTaskbar();
+        return true;
+    },
+    
+    // ---- FENSTER IN DEN VORDERGRUND ----
+    bringToFront(windowEl) {
+        if (!windowEl) return false;
+        
+        this.activeWindow = windowEl;
+        windowEl.style.zIndex = ++this.zIndex;
+        
+        const data = this.windows.find(w => w.element === windowEl);
+        if (data && data.minimized) {
+            data.minimized = false;
+            windowEl.classList.remove('minimized');
+            EventBus.emit('window:restored', data);
+        }
+        
+        EventBus.emit('window:focused', data);
+        this.updateTaskbar();
+        return true;
+    },
+    
+    // ---- AKTIVES FENSTER ----
+    getActiveWindow() {
+        return this.activeWindow;
+    },
+    
+    getActiveWindowData() {
+        return this.windows.find(w => w.element === this.activeWindow) || null;
+    },
+    
+    // ---- FENSTER POSITION ----
+    getNextPosition() {
+        const baseX = 20;
+        const baseY = 15;
+        const offset = this.windows.length * 20;
+        const maxOffset = 80;
+        const actualOffset = Math.min(offset, maxOffset);
+        
+        return {
+            x: baseX + actualOffset % 60,
+            y: baseY + Math.floor(actualOffset / 60) * 30
+        };
+    },
+    
+    // ---- FENSTER ANPASSEN ----
+    adjustWindows() {
+        for (const data of this.windows) {
+            if (!data.maximized && !data.minimized) {
+                const maxW = window.innerWidth - 40;
+                const maxH = window.innerHeight - 120;
+                if (data.width > maxW) {
+                    data.width = maxW;
+                    data.element.style.width = maxW + 'px';
+                }
+                if (data.height > maxH) {
+                    data.height = maxH;
+                    data.element.style.height = maxH + 'px';
+                }
+                if (data.x + data.width > window.innerWidth - 20) {
+                    data.x = window.innerWidth - data.width - 20;
+                    data.element.style.left = data.x + 'px';
+                }
+                if (data.y + data.height > window.innerHeight - 100) {
+                    data.y = window.innerHeight - data.height - 100;
+                    data.element.style.top = data.y + 'px';
+                }
+            }
+        }
+    },
+    
+    // ---- ALLE FENSTER SCHLIEßEN ----
+    closeAll() {
+        const windows = [...this.windows];
+        for (const data of windows) {
+            this.closeWindow(data.element);
+        }
+        EventBus.emit('window:all-closed', { count: windows.length });
+        return true;
+    },
+    
+    // ---- FENSTER NACH APP-ID FINDEN ----
+    getWindowByAppId(appId) {
+        return this.windows.find(w => w.appId === appId) || null;
+    },
+    
+    // ---- FENSTERSTATISTIK ----
+    getStats() {
+        const total = this.windows.length;
+        const minimized = this.windows.filter(w => w.minimized).length;
+        const maximized = this.windows.filter(w => w.maximized).length;
+        const open = total - minimized;
+        
+        return {
+            total,
+            open,
+            minimized,
+            maximized,
+            active: this.activeWindow ? this.windows.find(w => w.element === this.activeWindow)?.title || null : null
+        };
+    },
+    
+    // ---- TASKBAR AKTUALISIEREN ----
     updateTaskbar() {
         const container = document.getElementById('taskbar-apps');
         if (!container) return;
-
+        
         container.innerHTML = '';
-        this.windows.forEach(data => {
+        for (const data of this.windows) {
             const btn = document.createElement('button');
-            btn.className = 'taskbar-app-btn' + (data.element === this.activeWindow ? ' active' : '') +
+            btn.className = 'taskbar-app-btn' + 
+                (data.element === this.activeWindow ? ' active' : '') + 
                 (data.minimized ? ' minimized' : '');
-            btn.textContent = data.title;
+            btn.textContent = data.icon ? `${data.icon} ${data.title}` : data.title;
+            btn.title = data.title;
+            btn.style.cssText = `
+                padding: 2px 6px;
+                height: 24px;
+                background: ${data.element === this.activeWindow ? 'rgba(108,60,225,0.2)' : 'rgba(255,255,255,0.03)'};
+                border: 1px solid ${data.element === this.activeWindow ? 'var(--primary, #6C3CE1)' : 'transparent'};
+                border-radius: 5px;
+                color: var(--text-secondary, rgba(255,255,255,0.7));
+                font-size: 9px;
+                font-weight: 500;
+                cursor: pointer;
+                transition: all 0.15s ease;
+                display: flex;
+                align-items: center;
+                gap: 3px;
+                white-space: nowrap;
+                flex-shrink: 0;
+                font-family: var(--font-primary, Inter, sans-serif);
+            `;
             btn.onclick = () => {
                 if (data.minimized) {
                     data.minimized = false;
@@ -333,22 +634,16 @@ const WindowManager = {
                 this.updateTaskbar();
             };
             container.appendChild(btn);
-        });
+        }
     },
-
-    // ---- HELPER ----
-
-    getWindowByAppId(appId) {
-        return this.windows.find(w => w.appId === appId);
-    },
-
-    closeAll() {
-        this.windows.forEach(w => this.closeWindow(w.element));
-    },
-
-    getActiveWindow() {
-        return this.activeWindow;
+    
+    // ---- VERSION ----
+    getVersion() {
+        return '1.0.0';
     }
 };
 
+// ---- WINDOW MANAGER GLOBAL VERFÜGBAR MACHEN ----
 window.WindowManager = WindowManager;
+
+console.log('🪟 Window Manager geladen – HalDo AI OS 24.6.0');
