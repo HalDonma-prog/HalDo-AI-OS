@@ -1,455 +1,626 @@
 /**
- * HALDO AI OS 24.6 – LIVING AI
- * Avatar mit Gesicht, Emotionen, Animationen
+ * HALDO AI OS 24.6.0 – LIVING AI
+ * Lebendiger Avatar mit Gesicht, Emotionen, Händen und Interaktion
+ * Version: 1.0.0
  */
 
 const LivingAI = {
-    avatar: null,
-    currentEmotion: 'neutral',
+    // ---- KONFIGURATION ----
+    width: 300,
+    height: 350,
+    isReady: false,
+    isVisible: false,
+    
+    // ---- ZUSTAND ----
+    emotion: 'neutral', // neutral | happy | thinking | speaking | listening | sad | surprised
     isSpeaking: false,
-    isListening: false,
     isThinking: false,
-
-    // Canvas-Komponenten
+    isListening: false,
+    eyeState: 'open', // open | closed | winking
+    handWave: 0,
+    breathPhase: 0,
+    blinkTimer: 0,
+    
+    // ---- DOM ----
     canvas: null,
     ctx: null,
-    width: 300,
-    height: 400,
-
-    // Gesichts-Komponenten
-    face: {
-        head: { x: 150, y: 180, radius: 80 },
-        eyeLeft: { x: 120, y: 160, radius: 12 },
-        eyeRight: { x: 180, y: 160, radius: 12 },
-        pupilLeft: { x: 0, y: 0, radius: 5 },
-        pupilRight: { x: 0, y: 0, radius: 5 },
-        eyebrowLeft: { x1: 105, y1: 140, x2: 135, y2: 135 },
-        eyebrowRight: { x1: 165, y1: 135, x2: 195, y2: 140 },
-        mouth: { x: 150, y: 210, width: 40, height: 12, type: 'neutral' },
-        nose: { x: 150, y: 185, size: 8 },
-        blushLeft: { x: 100, y: 195, radius: 15 },
-        blushRight: { x: 200, y: 195, radius: 15 }
-    },
-
-    emotionStates: {
+    container: null,
+    
+    // ---- EMOTIONEN ----
+    emotions: {
         neutral: {
-            eyeWidth: 1,
-            mouthWidth: 1,
-            mouthHeight: 0.4,
-            blushAlpha: 0,
-            eyebrowAngle: 0,
-            label: '😐 Neutral'
+            label: '😐 Neutral',
+            eyeWidth: 1.0,
+            eyeHeight: 1.0,
+            mouthType: 'neutral',
+            browY: 0,
+            blush: 0,
+            hand: 'rest'
         },
         happy: {
-            eyeWidth: 0.8,
-            mouthWidth: 1.2,
-            mouthHeight: 0.6,
-            blushAlpha: 0.3,
-            eyebrowAngle: 0.1,
-            label: '😊 Glücklich'
+            label: '😊 Glücklich',
+            eyeWidth: 0.9,
+            eyeHeight: 0.9,
+            mouthType: 'smile',
+            browY: -2,
+            blush: 0.15,
+            hand: 'wave'
         },
         thinking: {
-            eyeWidth: 0.6,
-            mouthWidth: 0.6,
-            mouthHeight: 0.2,
-            blushAlpha: 0,
-            eyebrowAngle: -0.2,
-            label: '🤔 Denkend'
+            label: '🤔 Denkend',
+            eyeWidth: 0.8,
+            eyeHeight: 0.8,
+            mouthType: 'thinking',
+            browY: -6,
+            blush: 0,
+            hand: 'chin'
         },
         speaking: {
-            eyeWidth: 0.9,
-            mouthWidth: 1.4,
-            mouthHeight: 0.7,
-            blushAlpha: 0.1,
-            eyebrowAngle: 0.05,
-            label: '🗣️ Sprechend'
+            label: '🗣️ Sprechend',
+            eyeWidth: 0.95,
+            eyeHeight: 0.95,
+            mouthType: 'speaking',
+            browY: 0,
+            blush: 0.1,
+            hand: 'gesture'
         },
-        surprised: {
-            eyeWidth: 1.3,
-            mouthWidth: 1.1,
-            mouthHeight: 0.9,
-            blushAlpha: 0.1,
-            eyebrowAngle: 0.3,
-            label: '😮 Überrascht'
+        listening: {
+            label: '🎧 Zuhörend',
+            eyeWidth: 1.0,
+            eyeHeight: 1.0,
+            mouthType: 'listening',
+            browY: 2,
+            blush: 0.05,
+            hand: 'ear'
         },
         sad: {
-            eyeWidth: 0.7,
-            mouthWidth: 0.7,
-            mouthHeight: -0.3,
-            blushAlpha: 0,
-            eyebrowAngle: 0.3,
-            label: '😢 Traurig'
+            label: '😢 Traurig',
+            eyeWidth: 0.8,
+            eyeHeight: 0.7,
+            mouthType: 'sad',
+            browY: 4,
+            blush: 0,
+            hand: 'rest'
+        },
+        surprised: {
+            label: '😮 Überrascht',
+            eyeWidth: 1.3,
+            eyeHeight: 1.3,
+            mouthType: 'surprised',
+            browY: -4,
+            blush: 0.1,
+            hand: 'cheek'
         }
     },
-
-    // ---- INIT ----
-
+    
+    // ---- INITIALISIERUNG ----
     init(containerId = 'living-ai-container') {
         console.log('👤 Living AI wird initialisiert...');
-
-        const container = document.getElementById(containerId);
-        if (!container) {
-            console.warn('⚠️ Container für Living AI nicht gefunden');
-            return false;
+        
+        this.container = document.getElementById(containerId);
+        if (!this.container) {
+            console.warn('⚠️ Living AI Container nicht gefunden – erstelle...');
+            this.container = document.createElement('div');
+            this.container.id = containerId;
+            this.container.style.cssText = `
+                width: 100%;
+                height: 100%;
+                min-height: 300px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: radial-gradient(ellipse at center, rgba(10,10,30,0.8), rgba(0,0,0,0.9));
+                border-radius: var(--radius, 10px);
+            `;
+            // Container in den aktuellen Fenster-Body einfügen
+            const body = document.querySelector('.window-body');
+            if (body) {
+                body.appendChild(this.container);
+            } else {
+                document.body.appendChild(this.container);
+            }
         }
-
+        
+        // Canvas erstellen
         this.canvas = document.createElement('canvas');
         this.canvas.width = this.width;
         this.canvas.height = this.height;
-        container.appendChild(this.canvas);
+        this.canvas.style.cssText = `
+            width: 100%;
+            height: 100%;
+            max-width: ${this.width}px;
+            max-height: ${this.height}px;
+            border-radius: var(--radius, 10px);
+        `;
+        this.container.appendChild(this.canvas);
         this.ctx = this.canvas.getContext('2d');
-
-        // Emotion auf neutral setzen
-        this.setEmotion('neutral');
-
+        
+        // Event-Listener
+        this.setupEventListeners();
+        
         // Animation starten
         this.animate();
-
-        // Events
-        EventBus.on('ai:processing', (processing) => {
-            if (processing) {
-                this.setEmotion('thinking');
-            } else {
-                this.setEmotion('neutral');
-            }
+        this.isReady = true;
+        this.isVisible = true;
+        
+        EventBus.emit('living-ai:ready', { 
+            width: this.width, 
+            height: this.height,
+            emotion: this.emotion 
         });
-
-        EventBus.on('voice:speaking', (speaking) => {
-            if (speaking) {
-                this.setEmotion('speaking');
-            } else {
-                this.setEmotion('neutral');
-            }
-        });
-
-        EventBus.on('voice:listening', (listening) => {
-            this.isListening = listening;
-            if (listening) {
-                this.setEmotion('thinking');
-            }
-        });
-
-        console.log('✅ Living AI ready');
+        
+        console.log('✅ Living AI ready!');
         return this;
     },
-
-    // ---- EMOTION ----
-
-    setEmotion(emotion) {
-        if (!this.emotionStates[emotion]) {
-            emotion = 'neutral';
-        }
-        this.currentEmotion = emotion;
-        this.emotionTarget = this.emotionStates[emotion];
-        // Sofort zeichnen
-        this.draw();
-        EventBus.emit('ai:emotion-changed', { emotion });
+    
+    // ---- EVENT LISTENER ----
+    setupEventListeners() {
+        // AI Events
+        EventBus.on('ai:processing', (data) => {
+            this.isThinking = data === true;
+            this.emotion = this.isThinking ? 'thinking' : 'neutral';
+            if (this.isThinking) {
+                this.speak('...');
+            }
+        });
+        
+        EventBus.on('ai:response', (data) => {
+            if (data && data.content) {
+                this.speak(data.content);
+                this.emotion = 'happy';
+                setTimeout(() => {
+                    if (!this.isSpeaking) {
+                        this.emotion = 'neutral';
+                    }
+                }, 1000);
+            }
+        });
+        
+        EventBus.on('voice:speaking', (speaking) => {
+            this.isSpeaking = speaking;
+            if (speaking) {
+                this.emotion = 'speaking';
+            } else if (!this.isThinking) {
+                this.emotion = 'neutral';
+            }
+        });
+        
+        EventBus.on('voice:listening', (listening) => {
+            this.isListening = listening;
+            this.emotion = listening ? 'listening' : this.isThinking ? 'thinking' : 'neutral';
+        });
+        
+        EventBus.on('ai:error', () => {
+            this.emotion = 'sad';
+            setTimeout(() => {
+                if (!this.isSpeaking && !this.isThinking) {
+                    this.emotion = 'neutral';
+                }
+            }, 2000);
+        });
+        
+        // Klick auf Avatar
+        this.container.addEventListener('click', () => {
+            this.wave();
+            EventBus.emit('living-ai:clicked', { emotion: this.emotion });
+        });
     },
-
+    
     // ---- ANIMATION ----
-
     animate() {
-        // Mund-Animation beim Sprechen
-        if (this.currentEmotion === 'speaking' || this.isSpeaking) {
-            const breath = Math.sin(Date.now() * 0.008) * 0.15 + 0.5;
-            this.face.mouth.height = 8 + breath * 8;
-        }
-
-        // Blinzeln
-        if (Math.random() < 0.005) {
-            this.eyeState = 'closed';
-            setTimeout(() => { this.eyeState = 'open'; }, 150);
-        }
-
-        // Sanftes Atmen
-        const breathe = Math.sin(Date.now() * 0.001) * 2;
-        this.face.head.radius = 80 + breathe;
-
-        this.draw();
         requestAnimationFrame(() => this.animate());
+        
+        // Atmung
+        this.breathPhase += 0.02;
+        
+        // Blinzeln
+        this.blinkTimer += 0.01;
+        if (this.blinkTimer > 3 + Math.random() * 2) {
+            this.eyeState = 'closed';
+            setTimeout(() => {
+                this.eyeState = 'open';
+                this.blinkTimer = 0;
+            }, 150);
+        }
+        
+        // Hand-Welle automatisch bei happy
+        if (this.emotion === 'happy' && Math.random() < 0.01) {
+            this.handWave = 2;
+            setTimeout(() => {
+                this.handWave = Math.max(0, this.handWave - 1);
+            }, 500);
+        }
+        
+        this.draw();
     },
-
-    // ---- DRAW ----
-
+    
+    // ---- ZEICHNEN ----
     draw() {
         const ctx = this.ctx;
         const w = this.width;
         const h = this.height;
-
+        
         // Canvas leeren
         ctx.clearRect(0, 0, w, h);
-
-        // Hintergrund (mit sanftem Verlauf)
-        const gradient = ctx.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, 200);
-        gradient.addColorStop(0, 'rgba(20, 10, 40, 0.8)');
-        gradient.addColorStop(1, 'rgba(10, 5, 20, 0.9)');
-        ctx.fillStyle = gradient;
+        
+        // Hintergrund
+        const grad = ctx.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, 180);
+        grad.addColorStop(0, 'rgba(20, 10, 40, 0.7)');
+        grad.addColorStop(1, 'rgba(5, 5, 15, 0.9)');
+        ctx.fillStyle = grad;
         ctx.fillRect(0, 0, w, h);
-
-        // Kopf (Hals)
-        ctx.fillStyle = '#3a2a1a';
-        ctx.fillRect(w / 2 - 25, h - 40, 50, 40);
-
-        // Kopf (rund)
-        const head = this.face.head;
+        
+        // Schatten
         ctx.shadowColor = 'rgba(0,0,0,0.3)';
         ctx.shadowBlur = 20;
-
-        // Hautfarbe
-        const skinColor = '#e8c9a0';
+        
+        // Hals
+        const neckX = w / 2;
+        const neckY = h - 30;
+        ctx.fillStyle = '#3a2a1a';
+        ctx.shadowBlur = 5;
+        ctx.fillRect(neckX - 20, neckY, 40, 30);
+        ctx.shadowBlur = 0;
+        
+        // Kopf
+        const headX = w / 2;
+        const headY = h / 2 - 10;
+        const headR = 70;
+        
+        // Kopf-Basis
+        ctx.shadowColor = 'rgba(0,0,0,0.3)';
+        ctx.shadowBlur = 15;
         ctx.beginPath();
-        ctx.arc(head.x, head.y, head.radius, 0, Math.PI * 2);
-        ctx.fillStyle = skinColor;
+        ctx.arc(headX, headY, headR, 0, Math.PI * 2);
+        ctx.fillStyle = '#e8c9a0';
         ctx.fill();
         ctx.shadowBlur = 0;
-
-        // Wangen-Rot
-        if (this.emotionTarget?.blushAlpha > 0) {
-            const blush = this.face.blushLeft;
-            ctx.globalAlpha = this.emotionTarget.blushAlpha;
-            ctx.beginPath();
-            ctx.arc(blush.x, blush.y, blush.radius, 0, Math.PI * 2);
+        
+        // Wangen (bei happy)
+        const emotionData = this.emotions[this.emotion] || this.emotions.neutral;
+        if (emotionData.blush > 0) {
+            ctx.globalAlpha = emotionData.blush;
             ctx.fillStyle = '#ff6b8a';
+            ctx.beginPath();
+            ctx.arc(headX - 42, headY + 15, 18, 0, Math.PI * 2);
             ctx.fill();
             ctx.beginPath();
-            ctx.arc(this.face.blushRight.x, this.face.blushRight.y, blush.radius, 0, Math.PI * 2);
+            ctx.arc(headX + 42, headY + 15, 18, 0, Math.PI * 2);
             ctx.fill();
             ctx.globalAlpha = 1;
         }
-
-        // Augen
-        this.drawEyes(ctx);
-
-        // Augenbrauen
-        this.drawEyebrows(ctx);
-
-        // Nase
-        this.drawNose(ctx);
-
-        // Mund
-        this.drawMouth(ctx);
-
-        // Emotion-Label
-        ctx.fillStyle = 'rgba(255,255,255,0.5)';
-        ctx.font = '12px Inter, sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText(this.emotionTarget?.label || 'Neutral', w / 2, h - 10);
-
-        // Status
-        const status = this.isSpeaking ? '🔊' : this.isListening ? '🎤' : this.isThinking ? '🧠' : '●';
-        ctx.fillStyle = this.isSpeaking ? '#00ff88' : this.isListening ? '#ffaa00' : this.isThinking ? '#6666ff' : '#00ff88';
-        ctx.font = '14px sans-serif';
-        ctx.textAlign = 'right';
-        ctx.fillText(status, w - 10, 20);
-    },
-
-    drawEyes(ctx) {
-        const eyeL = this.face.eyeLeft;
-        const eyeR = this.face.eyeRight;
+        
+        // ---- AUGEN ----
+        const eyeY = headY - 10;
+        const eyeSpacing = 28;
+        const eyeR = 14;
+        const eyeW = emotionData.eyeWidth || 1;
+        const eyeH = emotionData.eyeHeight || 1;
         const isClosed = this.eyeState === 'closed';
-
+        
         // Weiß
         ctx.fillStyle = '#ffffff';
-        ctx.shadowBlur = 5;
+        ctx.shadowBlur = 3;
         ctx.shadowColor = 'rgba(0,0,0,0.1)';
-
-        const eyeWidth = this.emotionTarget?.eyeWidth || 1;
-
+        
         // Linkes Auge
         ctx.beginPath();
-        ctx.ellipse(eyeL.x, eyeL.y, eyeL.radius * eyeWidth, isClosed ? 2 : eyeL.radius, 0, 0, Math.PI * 2);
+        ctx.ellipse(headX - eyeSpacing, eyeY, eyeR * eyeW, isClosed ? 2 : eyeR * eyeH, 0, 0, Math.PI * 2);
         ctx.fill();
-
+        
         // Rechtes Auge
         ctx.beginPath();
-        ctx.ellipse(eyeR.x, eyeR.y, eyeR.radius * eyeWidth, isClosed ? 2 : eyeR.radius, 0, 0, Math.PI * 2);
+        ctx.ellipse(headX + eyeSpacing, eyeY, eyeR * eyeW, isClosed ? 2 : eyeR * eyeH, 0, 0, Math.PI * 2);
         ctx.fill();
-
         ctx.shadowBlur = 0;
-
+        
         if (!isClosed) {
             // Pupillen
             ctx.fillStyle = '#2a1a0a';
-            const pupilL = this.face.pupilLeft;
-            const pupilR = this.face.pupilRight;
+            const pupilSize = 5;
             ctx.beginPath();
-            ctx.arc(eyeL.x + pupilL.x, eyeL.y + pupilL.y, pupilL.radius, 0, Math.PI * 2);
+            ctx.arc(headX - eyeSpacing + 3, eyeY + 1, pupilSize, 0, Math.PI * 2);
             ctx.fill();
             ctx.beginPath();
-            ctx.arc(eyeR.x + pupilR.x, eyeR.y + pupilR.y, pupilR.radius, 0, Math.PI * 2);
+            ctx.arc(headX + eyeSpacing + 3, eyeY + 1, pupilSize, 0, Math.PI * 2);
             ctx.fill();
-
-            // Glanz (Lichtreflex)
-            ctx.fillStyle = 'rgba(255,255,255,0.8)';
+            
+            // Glanz
+            ctx.fillStyle = 'rgba(255,255,255,0.7)';
             ctx.beginPath();
-            ctx.arc(eyeL.x + 4, eyeL.y - 4, 3, 0, Math.PI * 2);
+            ctx.arc(headX - eyeSpacing + 5, eyeY - 4, 2.5, 0, Math.PI * 2);
             ctx.fill();
             ctx.beginPath();
-            ctx.arc(eyeR.x + 4, eyeR.y - 4, 3, 0, Math.PI * 2);
+            ctx.arc(headX + eyeSpacing + 5, eyeY - 4, 2.5, 0, Math.PI * 2);
             ctx.fill();
+            
+            // Augenbrauen
+            ctx.strokeStyle = '#3a2a1a';
+            ctx.lineWidth = 2.5;
+            ctx.lineCap = 'round';
+            const browYOffset = emotionData.browY || 0;
+            const browYBase = eyeY - 22;
+            
+            // Linke Augenbraue
+            ctx.beginPath();
+            ctx.moveTo(headX - eyeSpacing - 12, browYBase + browYOffset);
+            ctx.quadraticCurveTo(headX - eyeSpacing, browYBase - 6 + browYOffset * 0.5, headX - eyeSpacing + 12, browYBase +
+                2 + browYOffset * 0.3);
+            ctx.stroke();
+            
+            // Rechte Augenbraue
+            ctx.beginPath();
+            ctx.moveTo(headX + eyeSpacing - 12, browYBase + 2 + browYOffset * 0.3);
+            ctx.quadraticCurveTo(headX + eyeSpacing, browYBase - 6 + browYOffset * 0.5, headX + eyeSpacing + 12, browYBase +
+                browYOffset);
+            ctx.stroke();
         }
-    },
-
-    drawEyebrows(ctx) {
-        const ebL = this.face.eyebrowLeft;
-        const ebR = this.face.eyebrowRight;
-        const angle = this.emotionTarget?.eyebrowAngle || 0;
-
-        ctx.strokeStyle = '#3a2a1a';
-        ctx.lineWidth = 3;
-        ctx.lineCap = 'round';
-
-        // Linke Augenbraue
-        ctx.beginPath();
-        ctx.moveTo(ebL.x1, ebL.y1 - angle * 10);
-        ctx.quadraticCurveTo((ebL.x1 + ebL.x2) / 2, ebL.y1 - 8 - angle * 15, ebL.x2, ebL.y2 + angle * 5);
-        ctx.stroke();
-
-        // Rechte Augenbraue
-        ctx.beginPath();
-        ctx.moveTo(ebR.x1, ebR.y1 + angle * 10);
-        ctx.quadraticCurveTo((ebR.x1 + ebR.x2) / 2, ebR.y1 - 8 + angle * 15, ebR.x2, ebR.y2 - angle * 5);
-        ctx.stroke();
-    },
-
-    drawNose(ctx) {
-        const nose = this.face.nose;
+        
+        // ---- NASE ----
         ctx.strokeStyle = '#c4a080';
         ctx.lineWidth = 2;
-
         ctx.beginPath();
-        ctx.moveTo(nose.x, nose.y - nose.size);
-        ctx.quadraticCurveTo(nose.x + nose.size / 2, nose.y + nose.size / 2, nose.x, nose.y + nose.size);
-        ctx.quadraticCurveTo(nose.x - nose.size / 2, nose.y + nose.size / 2, nose.x, nose.y - nose.size);
+        ctx.moveTo(headX, headY + 6);
+        ctx.quadraticCurveTo(headX + 8, headY + 16, headX, headY + 22);
+        ctx.quadraticCurveTo(headX - 8, headY + 16, headX, headY + 6);
         ctx.stroke();
-
+        
         // Nasenflügel
-        ctx.beginPath();
-        ctx.arc(nose.x - 6, nose.y + 2, 4, 0, Math.PI * 2);
         ctx.fillStyle = '#c4a080';
-        ctx.fill();
-
         ctx.beginPath();
-        ctx.arc(nose.x + 6, nose.y + 2, 4, 0, Math.PI * 2);
+        ctx.arc(headX - 6, headY + 14, 3, 0, Math.PI * 2);
         ctx.fill();
-    },
-
-    drawMouth(ctx) {
-        const mouth = this.face.mouth;
-        const isHappy = this.currentEmotion === 'happy';
-        const isSad = this.currentEmotion === 'sad';
-        const isSurprised = this.currentEmotion === 'surprised';
-
-        const mw = mouth.width * (this.emotionTarget?.mouthWidth || 1);
-        const mh = mouth.height * (this.emotionTarget?.mouthHeight || 0.4);
-
-        ctx.fillStyle = '#cc4466';
-        ctx.shadowBlur = 10;
-        ctx.shadowColor = 'rgba(200,60,80,0.3)';
-
-        if (isHappy) {
-            // Lächeln
-            ctx.beginPath();
-            ctx.arc(mouth.x, mouth.y - 5, mw / 2, 0.1, Math.PI - 0.1);
-            ctx.lineWidth = 3;
-            ctx.strokeStyle = '#cc4466';
-            ctx.stroke();
-            // Unterlippe
-            ctx.beginPath();
-            ctx.arc(mouth.x, mouth.y + 5, mw / 2.5, 0, Math.PI);
-            ctx.fill();
-        } else if (isSad) {
-            // Traurig
-            ctx.beginPath();
-            ctx.arc(mouth.x, mouth.y + 15, mw / 2, Math.PI + 0.2, Math.PI * 2 - 0.2);
-            ctx.lineWidth = 3;
-            ctx.strokeStyle = '#cc4466';
-            ctx.stroke();
-        } else if (isSurprised) {
-            // Überrascht (offen)
-            ctx.beginPath();
-            ctx.ellipse(mouth.x, mouth.y, mw / 2, mh / 2 + 6, 0, 0, Math.PI * 2);
-            ctx.fillStyle = '#552233';
-            ctx.fill();
-            ctx.fillStyle = '#cc4466';
-            ctx.beginPath();
-            ctx.ellipse(mouth.x, mouth.y, mw / 2.5, mh / 2 + 3, 0, 0, Math.PI * 2);
-            ctx.fill();
-        } else {
-            // Neutral / Sprechend
-            ctx.shadowBlur = 0;
-            ctx.beginPath();
-            ctx.ellipse(mouth.x, mouth.y, mw / 2, Math.max(mh / 2, 3), 0, 0, Math.PI * 2);
-            ctx.fillStyle = '#cc4466';
-            ctx.fill();
-
-            // Lippenlinie
-            ctx.strokeStyle = '#aa3355';
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.ellipse(mouth.x, mouth.y, mw / 2.5, Math.max(mh / 2, 2), 0, 0, Math.PI * 2);
-            ctx.stroke();
-        }
-
+        ctx.beginPath();
+        ctx.arc(headX + 6, headY + 14, 3, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // ---- MUND ----
+        const mouthX = headX;
+        const mouthY = headY + 42;
+        const mouthW = 32;
+        const mouthH = 12;
+        const mouthType = emotionData.mouthType || 'neutral';
+        
         ctx.shadowBlur = 0;
+        
+        switch (mouthType) {
+            case 'speaking':
+                // Sprechender Mund (animiert)
+                const breath = Math.sin(this.breathPhase * 2) * 0.3 + 0.5;
+                ctx.fillStyle = '#aa3355';
+                ctx.beginPath();
+                ctx.ellipse(mouthX, mouthY + 4, mouthW / 2 * (0.6 + breath * 0.4), mouthH / 2 * (0.4 + breath * 0.6), 0, 0,
+                    Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#552233';
+                ctx.beginPath();
+                ctx.ellipse(mouthX, mouthY + 4, mouthW / 4 * (0.4 + breath * 0.4), mouthH / 3 * (0.2 + breath * 0.5), 0, 0,
+                    Math.PI * 2);
+                ctx.fill();
+                break;
+                
+            case 'smile':
+                // Lächeln
+                ctx.strokeStyle = '#cc4466';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.arc(mouthX, mouthY - 2, mouthW / 2, 0.1, Math.PI - 0.1);
+                ctx.stroke();
+                ctx.fillStyle = '#cc4466';
+                ctx.beginPath();
+                ctx.arc(mouthX, mouthY + 8, mouthW / 2.6, 0, Math.PI);
+                ctx.fill();
+                break;
+                
+            case 'thinking':
+                // Nachdenklicher Mund
+                ctx.strokeStyle = '#cc4466';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(mouthX, mouthY + 6, mouthW / 3, 0.1, Math.PI - 0.1);
+                ctx.stroke();
+                break;
+                
+            case 'sad':
+                // Trauriger Mund
+                ctx.strokeStyle = '#cc4466';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.arc(mouthX, mouthY + 14, mouthW / 2, Math.PI + 0.2, Math.PI * 2 - 0.2);
+                ctx.stroke();
+                break;
+                
+            case 'surprised':
+                // Überrascht (offen)
+                ctx.fillStyle = '#552233';
+                ctx.beginPath();
+                ctx.ellipse(mouthX, mouthY + 2, mouthW / 2, mouthH * 0.8, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#aa3355';
+                ctx.beginPath();
+                ctx.ellipse(mouthX, mouthY + 2, mouthW / 2.8, mouthH * 0.5, 0, 0, Math.PI * 2);
+                ctx.fill();
+                break;
+                
+            case 'listening':
+                // Zuhörend (leicht geöffnet)
+                ctx.fillStyle = '#aa3355';
+                ctx.beginPath();
+                ctx.ellipse(mouthX, mouthY + 2, mouthW / 2.8, mouthH / 2, 0, 0, Math.PI * 2);
+                ctx.fill();
+                break;
+                
+            default:
+                // Neutraler Mund
+                ctx.fillStyle = '#cc4466';
+                ctx.beginPath();
+                ctx.ellipse(mouthX, mouthY + 2, mouthW / 2.4, mouthH / 2.5, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = '#aa3355';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.ellipse(mouthX, mouthY + 2, mouthW / 3.4, mouthH / 3.5, 0, 0, Math.PI * 2);
+                ctx.stroke();
+                break;
+        }
+        
+        // ---- HÄNDE ----
+        const handType = emotionData.hand || 'rest';
+        
+        switch (handType) {
+            case 'wave':
+                if (this.handWave > 0) {
+                    const waveX = headX + 80 + Math.sin(Date.now() * 0.008) * 8;
+                    const waveY = headY - 30 + Math.sin(Date.now() * 0.012) * 6;
+                    ctx.font = '32px sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillStyle = '#e8c9a0';
+                    ctx.shadowBlur = 10;
+                    ctx.shadowColor = 'rgba(0,0,0,0.2)';
+                    ctx.fillText('✋', waveX, waveY);
+                    ctx.shadowBlur = 0;
+                }
+                break;
+                
+            case 'chin':
+                // Hand am Kinn (denkend)
+                ctx.font = '28px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillStyle = '#e8c9a0';
+                ctx.fillText('✋', headX + 55, headY + 50);
+                break;
+                
+            case 'cheek':
+                // Hand an der Wange (überrascht)
+                ctx.font = '28px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillStyle = '#e8c9a0';
+                ctx.fillText('✋', headX + 50, headY + 30);
+                break;
+                
+            case 'ear':
+                // Hand am Ohr (zuhörend)
+                ctx.font = '28px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillStyle = '#e8c9a0';
+                ctx.fillText('✋', headX + 65, headY - 10);
+                break;
+                
+            case 'gesture':
+                // Sprechende Hand
+                const gestureY = headY + 20 + Math.sin(Date.now() * 0.004) * 10;
+                ctx.font = '28px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillStyle = '#e8c9a0';
+                ctx.fillText('✋', headX + 70, gestureY);
+                break;
+        }
+        
+        // ---- STATUS ANZEIGE ----
+        const status = this.isSpeaking ? '🔊' :
+                      this.isThinking ? '🧠' :
+                      this.isListening ? '🎧' : '●';
+        ctx.fillStyle = this.isSpeaking ? '#00ff88' :
+                       this.isThinking ? '#6666ff' :
+                       this.isListening ? '#ffaa00' : '#00ff88';
+        ctx.font = '14px sans-serif';
+        ctx.textAlign = 'right';
+        ctx.shadowBlur = 0;
+        ctx.fillText(status, w - 10, 18);
+        
+        // ---- EMOTION LABEL ----
+        ctx.fillStyle = 'rgba(255,255,255,0.25)';
+        ctx.font = '10px Inter, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(emotionData.label || 'Neutral', w / 2, h - 8);
+        
+        // ---- NAMENS-TAG ----
+        ctx.fillStyle = 'rgba(255,255,255,0.15)';
+        ctx.font = '9px Inter, sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText('💙 HalDo', 10, h - 8);
     },
-
-    // ---- PUBLIC METHODS ----
-
+    
+    // ---- SPRECHEN ----
     speak(text) {
         this.isSpeaking = true;
-        this.setEmotion('speaking');
-        // Text in der UI anzeigen
-        EventBus.emit('ai:speaking', { text });
-
-        // Nach Ende wieder neutral
-        const duration = Math.min(text.length * 30, 3000);
+        this.emotion = 'speaking';
+        
+        // Mund-Animation für die Dauer des Textes
+        const duration = Math.min(text.length * 20, 3000);
         setTimeout(() => {
             this.isSpeaking = false;
-            this.setEmotion('neutral');
+            if (!this.isThinking && !this.isListening) {
+                this.emotion = 'neutral';
+            }
         }, duration);
+        
+        EventBus.emit('living-ai:speaking', { text, duration });
     },
-
-    listen() {
-        this.isListening = true;
-        this.setEmotion('thinking');
-        EventBus.emit('ai:listening', true);
-
-        // Nach 5 Sekunden automatisch stoppen
+    
+    // ---- WELLE ----
+    wave() {
+        this.handWave = 2;
         setTimeout(() => {
-            this.isListening = false;
-            this.setEmotion('neutral');
-            EventBus.emit('ai:listening', false);
-        }, 5000);
+            this.handWave = Math.max(0, this.handWave - 1);
+        }, 500);
+        EventBus.emit('living-ai:wave', { timestamp: Date.now() });
     },
-
-    think() {
-        this.isThinking = true;
-        this.setEmotion('thinking');
-        EventBus.emit('ai:thinking', true);
-
-        setTimeout(() => {
-            this.isThinking = false;
-            this.setEmotion('neutral');
-            EventBus.emit('ai:thinking', false);
-        }, 2000);
+    
+    // ---- EMOTION SETZEN ----
+    setEmotion(emotion) {
+        if (this.emotions[emotion]) {
+            this.emotion = emotion;
+            EventBus.emit('living-ai:emotion-changed', { emotion });
+        }
     },
-
-    getEmotion() {
-        return this.currentEmotion;
+    
+    // ---- SICHTBARKEIT ----
+    show() {
+        this.isVisible = true;
+        this.container.style.display = 'flex';
+        EventBus.emit('living-ai:shown');
     },
-
+    
+    hide() {
+        this.isVisible = false;
+        this.container.style.display = 'none';
+        EventBus.emit('living-ai:hidden');
+    },
+    
+    // ---- TOGGLE ----
+    toggle() {
+        if (this.isVisible) {
+            this.hide();
+        } else {
+            this.show();
+        }
+    },
+    
+    // ---- GRÖSSE ÄNDERN ----
     setSize(width, height) {
         this.width = width;
         this.height = height;
         this.canvas.width = width;
         this.canvas.height = height;
-        // Positionen skalieren
-        const scaleX = width / 300;
-        const scaleY = height / 400;
-        // TODO: Alle Positionen skalieren
-        this.draw();
+        this.canvas.style.maxWidth = width + 'px';
+        this.canvas.style.maxHeight = height + 'px';
+        EventBus.emit('living-ai:resized', { width, height });
+    },
+    
+    // ---- ZERSTÖREN ----
+    destroy() {
+        this.isReady = false;
+        this.isVisible = false;
+        if (this.container) {
+            this.container.innerHTML = '';
+        }
+        EventBus.emit('living-ai:destroyed', { timestamp: Date.now() });
+        console.log('👤 Living AI zerstört');
     }
 };
 
+// ---- LIVING AI GLOBAL VERFÜGBAR MACHEN ----
 window.LivingAI = LivingAI;
+
+console.log('👤 Living AI geladen – HalDo AI OS 24.6.0');
