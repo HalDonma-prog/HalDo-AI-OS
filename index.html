@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes" />
     <meta name="theme-color" content="#0a0a1a" />
     <meta name="description" content="HalDo AI OS 24.6 – Cosmic Intelligent Operating System" />
     <title>HalDo AI OS 24.6</title>
@@ -15,9 +15,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
 
     <style>
-        /* ============================================
-           HALDO AI OS 24.6 – KOMPLETTES DESIGN
-           ============================================ */
+        /* ============================================================
+           HALDO AI OS 24.6 – ULTIMATE DESIGN
+           ============================================================ */
 
         :root {
             --primary: #6C3CE1;
@@ -29,18 +29,20 @@
             --success: #00FF88;
             --warning: #FFB800;
             --danger: #FF3B30;
-            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-bg: rgba(255, 255, 255, 0.06);
             --glass-border: rgba(255, 255, 255, 0.1);
             --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
             --glass-blur: blur(20px);
             --text-primary: #FFFFFF;
-            --text-secondary: rgba(255, 255, 255, 0.7);
+            --text-secondary: rgba(255, 255, 255, 0.75);
             --text-muted: rgba(255, 255, 255, 0.4);
             --bg-primary: #0a0a1a;
             --taskbar-height: 56px;
+            --menu-top-height: 48px;
             --font-primary: 'Inter', sans-serif;
             --transition-fast: 0.15s ease;
             --transition-normal: 0.3s ease;
+            --radius: 12px;
         }
 
         * {
@@ -61,17 +63,21 @@
             user-select: none;
         }
 
+        /* ===== SCROLLBAR ===== */
         ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
+            width: 5px;
+            height: 5px;
         }
         ::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.03);
             border-radius: 10px;
         }
         ::-webkit-scrollbar-thumb {
             background: var(--primary);
             border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-light);
         }
 
         /* ===== BOOT SCREEN ===== */
@@ -99,6 +105,7 @@
             flex-direction: column;
             align-items: center;
             gap: 16px;
+            padding: 20px;
         }
         .boot-logo {
             width: 120px;
@@ -124,7 +131,7 @@
                 box-shadow: 0 0 60px rgba(108, 60, 225, 0.3);
             }
             50% {
-                transform: scale(1.05);
+                transform: scale(1.04);
                 box-shadow: 0 0 100px rgba(108, 60, 225, 0.5);
             }
         }
@@ -147,7 +154,7 @@
         .boot-ring {
             width: 48px;
             height: 48px;
-            border: 3px solid rgba(255, 255, 255, 0.1);
+            border: 3px solid rgba(255, 255, 255, 0.08);
             border-top: 3px solid var(--primary-light);
             border-right: 3px solid var(--secondary);
             border-radius: 50%;
@@ -168,7 +175,7 @@
         .boot-progress {
             width: 280px;
             height: 4px;
-            background: rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.06);
             border-radius: 10px;
             overflow: hidden;
         }
@@ -191,6 +198,7 @@
             height: 100vh;
             position: relative;
             background: var(--bg-primary);
+            display: none;
         }
         #cosmic-canvas-container {
             position: fixed;
@@ -206,56 +214,74 @@
             height: 100% !important;
         }
 
-        /* ===== DESKTOP ICONS ===== */
-        #desktop-icons {
+        /* ===== TOP MENU ===== */
+        #top-menu {
             position: fixed;
-            top: 20px;
-            left: 20px;
-            display: grid;
-            grid-template-columns: repeat(auto-fill, 80px);
-            gap: 12px;
-            z-index: 1;
-            padding: 12px;
-            max-width: 80%;
-        }
-        .desktop-icon {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            width: 80px;
-            height: 90px;
-            padding: 8px;
-            border-radius: 16px;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: var(--menu-top-height);
             background: var(--glass-bg);
-            border: 1px solid transparent;
-            transition: all var(--transition-fast);
-            cursor: pointer;
-            text-align: center;
-            gap: 4px;
             backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border-bottom: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            z-index: 90;
+            gap: 8px;
         }
-        .desktop-icon:hover {
-            background: rgba(255, 255, 255, 0.12);
-            border-color: var(--glass-border);
-            transform: translateY(-3px);
-            box-shadow: var(--glass-shadow);
+        .menu-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            overflow-x: auto;
+            flex: 1;
+            padding: 4px 0;
+            -webkit-overflow-scrolling: touch;
         }
-        .desktop-icon:active {
-            transform: scale(0.95);
+        .menu-left::-webkit-scrollbar {
+            height: 0;
         }
-        .desktop-icon .icon-img {
-            font-size: 32px;
-            line-height: 1;
+        .menu-logo {
+            width: 32px;
+            height: 32px;
+            object-fit: contain;
+            border-radius: 8px;
+            flex-shrink: 0;
         }
-        .desktop-icon .icon-label {
-            font-size: 11px;
-            color: var(--text-secondary);
+        .menu-item {
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 13px;
             font-weight: 500;
-            text-shadow: 0 1px 6px rgba(0, 0, 0, 0.9);
-            line-height: 1.2;
-            max-width: 72px;
-            word-wrap: break-word;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            white-space: nowrap;
+            flex-shrink: 0;
+            border: none;
+            background: transparent;
+            font-family: var(--font-primary);
+        }
+        .menu-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-primary);
+        }
+        .menu-item.active {
+            background: var(--primary);
+            color: white;
+        }
+        .menu-right {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+        .menu-right .menu-item {
+            font-size: 12px;
+            padding: 4px 10px;
         }
 
         /* ===== TASKBAR ===== */
@@ -272,16 +298,16 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 16px;
+            padding: 0 12px;
             z-index: 100;
-            box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.3);
+            gap: 4px;
         }
-        .taskbar-left,
-        .taskbar-center,
-        .taskbar-right {
+        .taskbar-left {
             display: flex;
             align-items: center;
             gap: 8px;
+            flex-shrink: 0;
         }
         #taskbar-logo {
             width: 32px;
@@ -292,26 +318,31 @@
             transition: transform var(--transition-fast);
         }
         #taskbar-logo:hover {
-            transform: scale(1.1);
+            transform: scale(1.08);
         }
         #taskbar-time {
             font-size: 13px;
             font-weight: 500;
             color: var(--text-secondary);
             font-variant-numeric: tabular-nums;
+            min-width: 60px;
         }
-        #taskbar-apps {
+        .taskbar-center {
             display: flex;
             align-items: center;
             gap: 4px;
             flex: 1;
             overflow-x: auto;
             padding: 0 8px;
+            -webkit-overflow-scrolling: touch;
+        }
+        .taskbar-center::-webkit-scrollbar {
+            height: 0;
         }
         .taskbar-app-btn {
             padding: 4px 12px;
-            height: 34px;
-            background: rgba(255, 255, 255, 0.06);
+            height: 32px;
+            background: rgba(255, 255, 255, 0.05);
             border: 1px solid transparent;
             border-radius: 8px;
             color: var(--text-secondary);
@@ -323,30 +354,36 @@
             align-items: center;
             gap: 6px;
             white-space: nowrap;
+            flex-shrink: 0;
         }
         .taskbar-app-btn:hover {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.08);
             border-color: var(--glass-border);
         }
         .taskbar-app-btn.active {
-            background: rgba(108, 60, 225, 0.3);
+            background: rgba(108, 60, 225, 0.25);
             border-color: var(--primary);
             color: var(--text-primary);
         }
         .taskbar-right {
-            gap: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
             flex-shrink: 0;
         }
-        .taskbar-right span {
-            font-size: 14px;
+        .taskbar-right .tb-icon {
+            font-size: 16px;
             color: var(--text-secondary);
             cursor: pointer;
             padding: 4px 6px;
             border-radius: 8px;
             transition: all var(--transition-fast);
             line-height: 1;
+            background: none;
+            border: none;
+            font-family: var(--font-primary);
         }
-        .taskbar-right span:hover {
+        .taskbar-right .tb-icon:hover {
             background: rgba(255, 255, 255, 0.08);
             color: var(--text-primary);
         }
@@ -358,35 +395,37 @@
         /* ===== WINDOWS ===== */
         #window-container {
             position: fixed;
-            top: 0;
+            top: var(--menu-top-height);
             left: 0;
             width: 100%;
-            height: calc(100% - var(--taskbar-height));
+            height: calc(100% - var(--menu-top-height) - var(--taskbar-height));
             z-index: 10;
             pointer-events: none;
+            padding: 12px;
         }
         .window {
             position: absolute;
-            min-width: 400px;
-            min-height: 300px;
-            max-width: 92vw;
-            max-height: 85vh;
+            min-width: 320px;
+            min-height: 240px;
+            max-width: 94vw;
+            max-height: 88vh;
             background: var(--glass-bg);
             backdrop-filter: var(--glass-blur);
             -webkit-backdrop-filter: var(--glass-blur);
             border: 1px solid var(--glass-border);
-            border-radius: 16px;
+            border-radius: var(--radius);
             box-shadow: var(--glass-shadow);
             pointer-events: all;
             display: flex;
             flex-direction: column;
             overflow: hidden;
             animation: windowOpen 0.25s ease;
+            transition: all 0.15s ease;
         }
         @keyframes windowOpen {
             from {
                 opacity: 0;
-                transform: scale(0.92) translateY(16px);
+                transform: scale(0.92) translateY(12px);
             }
             to {
                 opacity: 1;
@@ -402,7 +441,7 @@
             top: 0 !important;
             left: 0 !important;
             width: 100% !important;
-            height: calc(100% - var(--taskbar-height)) !important;
+            height: 100% !important;
             border-radius: 0;
             max-width: 100vw;
             max-height: 100vh;
@@ -411,12 +450,12 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 10px 16px;
-            background: rgba(255, 255, 255, 0.03);
+            padding: 8px 14px;
+            background: rgba(255, 255, 255, 0.02);
             border-bottom: 1px solid var(--glass-border);
             cursor: grab;
             flex-shrink: 0;
-            min-height: 44px;
+            min-height: 40px;
         }
         .window-header:active {
             cursor: grabbing;
@@ -424,30 +463,28 @@
         .window-title {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             font-size: 13px;
             font-weight: 600;
             color: var(--text-primary);
         }
-        .window-title img {
-            width: 20px;
-            height: 20px;
-            object-fit: contain;
+        .window-title .icon {
+            font-size: 18px;
         }
         .window-controls {
             display: flex;
             gap: 6px;
         }
         .window-controls button {
-            width: 14px;
-            height: 14px;
+            width: 13px;
+            height: 13px;
             border: none;
             border-radius: 50%;
             cursor: pointer;
             transition: all var(--transition-fast);
             padding: 0;
             font-size: 8px;
-            line-height: 14px;
+            line-height: 13px;
             text-align: center;
             color: transparent;
         }
@@ -477,18 +514,25 @@
             padding: 16px;
             overflow: auto;
             color: var(--text-secondary);
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        .window-body h2 {
+            color: var(--text-primary);
+            margin-bottom: 12px;
+            font-weight: 700;
         }
 
         /* ===== AI FLOATING BUTTON ===== */
         .floating-btn {
             position: fixed;
             bottom: 80px;
-            right: 24px;
-            width: 60px;
-            height: 60px;
+            right: 20px;
+            width: 56px;
+            height: 56px;
             border-radius: 50%;
             background: linear-gradient(135deg, var(--primary), var(--secondary));
-            box-shadow: 0 4px 30px rgba(108, 60, 225, 0.5);
+            box-shadow: 0 4px 30px rgba(108, 60, 225, 0.4);
             display: none;
             align-items: center;
             justify-content: center;
@@ -499,26 +543,74 @@
             outline: none;
         }
         .floating-btn:hover {
-            transform: scale(1.08);
-            box-shadow: 0 6px 40px rgba(108, 60, 225, 0.7);
+            transform: scale(1.06);
+            box-shadow: 0 6px 40px rgba(108, 60, 225, 0.6);
         }
         .floating-btn:active {
-            transform: scale(0.95);
+            transform: scale(0.94);
         }
         .floating-logo {
-            width: 32px;
-            height: 32px;
+            width: 30px;
+            height: 30px;
             object-fit: contain;
             filter: brightness(0) invert(1);
+        }
+
+        /* ===== FORM ELEMENTS ===== */
+        .haldo-input {
+            width: 100%;
+            padding: 10px 14px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-family: var(--font-primary);
+            font-size: 14px;
+            outline: none;
+            transition: all var(--transition-fast);
+        }
+        .haldo-input:focus {
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.08);
+        }
+        .haldo-input::placeholder {
+            color: var(--text-muted);
+        }
+        .haldo-btn {
+            padding: 8px 20px;
+            background: var(--primary);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-family: var(--font-primary);
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+        .haldo-btn:hover {
+            background: var(--primary-light);
+            transform: scale(1.02);
+        }
+        .haldo-btn:active {
+            transform: scale(0.96);
+        }
+        .haldo-btn-secondary {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--glass-border);
+        }
+        .haldo-btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
         }
 
         /* ===== RESPONSIVE ===== */
         @media (max-width: 768px) {
             :root {
                 --taskbar-height: 48px;
+                --menu-top-height: 42px;
             }
             .boot-title {
-                font-size: 22px;
+                font-size: 24px;
             }
             .boot-logo {
                 width: 80px;
@@ -531,27 +623,24 @@
             .boot-progress {
                 width: 200px;
             }
-            #desktop-icons {
-                grid-template-columns: repeat(auto-fill, 64px);
-                gap: 8px;
-                top: 12px;
-                left: 12px;
-                padding: 8px;
+            #top-menu {
+                padding: 0 8px;
+                height: var(--menu-top-height);
             }
-            .desktop-icon {
-                width: 64px;
-                height: 72px;
-                padding: 4px;
+            .menu-logo {
+                width: 26px;
+                height: 26px;
             }
-            .desktop-icon .icon-img {
-                font-size: 28px;
+            .menu-item {
+                font-size: 11px;
+                padding: 4px 10px;
             }
-            .desktop-icon .icon-label {
-                font-size: 9px;
-                max-width: 56px;
+            .menu-right .menu-item {
+                font-size: 10px;
+                padding: 3px 8px;
             }
             #taskbar {
-                padding: 0 8px;
+                padding: 0 6px;
                 height: var(--taskbar-height);
             }
             #taskbar-logo {
@@ -560,44 +649,118 @@
             }
             #taskbar-time {
                 font-size: 11px;
+                min-width: 45px;
             }
             .taskbar-app-btn {
                 font-size: 10px;
                 padding: 2px 8px;
-                height: 28px;
+                height: 26px;
             }
-            .taskbar-right span {
-                font-size: 12px;
+            .taskbar-right .tb-icon {
+                font-size: 14px;
+                padding: 2px 4px;
+            }
+            #window-container {
+                padding: 8px;
+                top: var(--menu-top-height);
+                height: calc(100% - var(--menu-top-height) - var(--taskbar-height));
             }
             .window {
                 min-width: 85vw;
-                min-height: 50vh;
-                max-width: 95vw;
-                max-height: 80vh;
+                min-height: 40vh;
+                max-width: 96vw;
+                max-height: 85vh;
             }
             .window-header {
-                padding: 8px 12px;
-                min-height: 36px;
+                padding: 6px 10px;
+                min-height: 34px;
             }
             .window-title {
                 font-size: 12px;
             }
+            .window-title .icon {
+                font-size: 16px;
+            }
             .window-controls button {
-                width: 12px;
-                height: 12px;
-                line-height: 12px;
+                width: 11px;
+                height: 11px;
+                line-height: 11px;
                 font-size: 7px;
             }
+            .window-body {
+                padding: 12px;
+                font-size: 13px;
+            }
             .floating-btn {
-                width: 48px;
-                height: 48px;
-                bottom: 64px;
-                right: 16px;
+                width: 44px;
+                height: 44px;
+                bottom: 62px;
+                right: 12px;
             }
             .floating-logo {
                 width: 24px;
                 height: 24px;
             }
+            .haldo-input {
+                font-size: 13px;
+                padding: 8px 12px;
+            }
+            .haldo-btn {
+                font-size: 13px;
+                padding: 6px 16px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .menu-left {
+                gap: 4px;
+            }
+            .menu-item {
+                font-size: 10px;
+                padding: 3px 8px;
+            }
+            .window {
+                min-width: 92vw;
+                min-height: 50vh;
+            }
+            .window-body {
+                padding: 10px;
+                font-size: 12px;
+            }
+            .boot-title {
+                font-size: 20px;
+            }
+            .boot-subtitle {
+                font-size: 10px;
+                letter-spacing: 2px;
+            }
+        }
+
+        @media (min-width: 1200px) {
+            #window-container {
+                padding: 20px;
+            }
+            .window {
+                min-width: 500px;
+                min-height: 350px;
+            }
+        }
+
+        /* ===== THEMES ===== */
+        [data-theme="light"] {
+            --bg-primary: #f0f0f5;
+            --text-primary: #1a1a2e;
+            --text-secondary: rgba(26, 26, 46, 0.7);
+            --glass-bg: rgba(255, 255, 255, 0.5);
+            --glass-border: rgba(0, 0, 0, 0.08);
+        }
+        [data-theme="cosmic"] {
+            --bg-primary: #050510;
+            --text-primary: #ffffff;
+            --glass-bg: rgba(108, 60, 225, 0.12);
+            --glass-border: rgba(108, 60, 225, 0.2);
+            --primary: #8B5CF6;
+            --secondary: #00D4FF;
         }
     </style>
 </head>
@@ -624,45 +787,57 @@
     </div>
 
     <!-- ===== DESKTOP ===== -->
-    <div id="desktop" style="display:none;">
+    <div id="desktop">
 
-        <!-- Cosmic World Canvas -->
+        <!-- Cosmic Canvas -->
         <div id="cosmic-canvas-container"></div>
 
-        <!-- Desktop Icons -->
-        <div id="desktop-icons"></div>
+        <!-- ===== TOP MENU ===== -->
+        <div id="top-menu">
+            <div class="menu-left" id="menu-left">
+                <img src="assets/images/logo.png" alt="HalDo" class="menu-logo" id="menu-logo" />
+                <button class="menu-item active" data-menu="apps">📱 Apps</button>
+                <button class="menu-item" data-menu="ai">🧠 AI</button>
+                <button class="menu-item" data-menu="system">⚙️ System</button>
+                <button class="menu-item" data-menu="tools">🔧 Tools</button>
+                <button class="menu-item" data-menu="media">🎬 Medien</button>
+                <button class="menu-item" data-menu="communication">📡 Kommunikation</button>
+                <button class="menu-item" data-menu="office">📊 Office</button>
+                <button class="menu-item" data-menu="settings">⚙️ Einstellungen</button>
+            </div>
+            <div class="menu-right">
+                <button class="menu-item" id="menu-theme">🌙</button>
+                <button class="menu-item" id="menu-voice">👩</button>
+                <button class="menu-item" id="menu-lang">DE</button>
+            </div>
+        </div>
 
-        <!-- Window Container -->
+        <!-- ===== WINDOW CONTAINER ===== -->
         <div id="window-container"></div>
 
-        <!-- AI Floating Button -->
+        <!-- ===== AI FLOATING BUTTON ===== -->
         <div id="ai-floating-btn" class="floating-btn">
             <img src="assets/images/logo.png" alt="AI" class="floating-logo" />
         </div>
 
-        <!-- Taskbar -->
+        <!-- ===== TASKBAR ===== -->
         <div id="taskbar">
             <div class="taskbar-left">
                 <img src="assets/images/logo.png" alt="HalDo" id="taskbar-logo" />
                 <span id="taskbar-time">00:00</span>
             </div>
-            <div class="taskbar-center">
-                <div id="taskbar-apps"></div>
-            </div>
+            <div class="taskbar-center" id="taskbar-apps"></div>
             <div class="taskbar-right">
-                <span id="taskbar-language">DE</span>
-                <span id="taskbar-voice">👩 DE</span>
-                <span id="taskbar-theme">🌙</span>
-                <span id="taskbar-notifications">🔔</span>
-                <span id="taskbar-status">●</span>
+                <button class="tb-icon" id="tb-notifications" title="Benachrichtigungen">🔔</button>
+                <button class="tb-icon" id="tb-status" title="Systemstatus">●</button>
             </div>
         </div>
 
     </div>
 
-    <!-- ============================================= -->
-    <!-- JAVASCRIPT – DAS GANZE SYSTEM IN EINER DATEI -->
-    <!-- ============================================= -->
+    <!-- ============================================================
+    JAVASCRIPT – DAS KOMPLETTE SYSTEM
+    ============================================================ -->
 
     <script>
         // ============================================================
@@ -671,21 +846,13 @@
         const Storage = {
             prefix: 'haldo_',
             get(key, fallback = null) {
-                try {
-                    const data = localStorage.getItem(this.prefix + key);
-                    return data ? JSON.parse(data) : fallback;
-                } catch { return fallback; }
+                try { const d = localStorage.getItem(this.prefix + key); return d ? JSON.parse(d) : fallback; } catch {
+                    return fallback; }
             },
             set(key, value) {
-                try {
-                    localStorage.setItem(this.prefix + key, JSON.stringify(value));
-                    return true;
-                } catch { return false; }
+                try { localStorage.setItem(this.prefix + key, JSON.stringify(value)); return true; } catch { return false; }
             },
-            remove(key) {
-                localStorage.removeItem(this.prefix + key);
-                return true;
-            },
+            remove(key) { localStorage.removeItem(this.prefix + key); return true; },
             clear() {
                 Object.keys(localStorage).filter(k => k.startsWith(this.prefix)).forEach(k => localStorage.removeItem(k));
                 return true;
@@ -697,11 +864,9 @@
         //  2. EVENT BUS
         // ============================================================
         class EventBus {
-            constructor() {
-                this.events = {};
+            constructor() { this.events = {};
                 this.onceEvents = {};
-                this.debug = false;
-            }
+                this.debug = false; }
             on(event, callback, context = null) {
                 if (!this.events[event]) this.events[event] = [];
                 this.events[event].push({ callback, context });
@@ -752,15 +917,9 @@
                 EventBus.emit('kernel:ready');
                 return this;
             },
-            getUptime() {
-                return Math.floor((Date.now() - this.state.uptime) / 1000);
-            },
-            reboot() {
-                location.reload();
-            },
-            shutdown() {
-                if (window.close) window.close();
-            }
+            getUptime() { return Math.floor((Date.now() - this.state.uptime) / 1000); },
+            reboot() { location.reload(); },
+            shutdown() { if (window.close) window.close(); }
         };
         window.Kernel = Kernel;
 
@@ -771,7 +930,6 @@
             status: 'idle',
             progress: 0,
             totalSteps: 6,
-            currentStep: 0,
             statusEl: null,
             progressBar: null,
 
@@ -785,44 +943,88 @@
                 if (this.status === 'booting') return;
                 this.status = 'booting';
                 this.progress = 0;
-                this.currentStep = 0;
 
                 const steps = [
                     { label: 'Kernel wird geladen…', fn: () => Kernel.init() },
                     { label: 'Speicher wird initialisiert…', fn: () => Storage.set('boot_test', true) },
-                    { label: 'Event-System wird gestartet…', fn: () => EventBus.emit('boot:step') },
                     { label: 'Cosmic World wird aufgebaut…', fn: () => CosmicWorld.init() },
                     { label: 'Apps werden geladen…', fn: () => AppManager.init() },
+                    { label: 'System wird vorbereitet…', fn: () => this.prepareSystem() },
                     { label: 'System bereit! 🚀', fn: () => this.finish() }
                 ];
 
                 for (const step of steps) {
-                    this.currentStep++;
                     this.updateStatus(step.label);
-                    this.updateProgress((this.currentStep / this.totalSteps) * 100);
-                    try {
-                        await step.fn();
-                    } catch (e) {
-                        console.warn('⚠️ Schritt fehlgeschlagen:', e);
-                    }
-                    await this.sleep(200);
+                    this.updateProgress((steps.indexOf(step) + 1) / steps.length * 100);
+                    try { await step.fn(); } catch (e) { console.warn('⚠️ Schritt fehlgeschlagen:', e); }
+                    await this.sleep(150);
                 }
-
                 this.status = 'ready';
                 this.hideBootScreen();
             },
 
-            updateStatus(text) {
-                if (this.statusEl) this.statusEl.textContent = text;
+            prepareSystem() {
+                // Top-Menu Events
+                document.querySelectorAll('.menu-item[data-menu]').forEach(el => {
+                    el.addEventListener('click', () => {
+                        document.querySelectorAll('.menu-item[data-menu]').forEach(e => e.classList.remove(
+                        'active'));
+                        el.classList.add('active');
+                        AppManager.openCategory(el.dataset.menu);
+                    });
+                });
+
+                // Theme toggle
+                document.getElementById('menu-theme')?.addEventListener('click', () => {
+                    const themes = ['dark', 'light', 'cosmic'];
+                    const current = document.documentElement.getAttribute('data-theme') || 'dark';
+                    const next = themes[(themes.indexOf(current) + 1) % themes.length];
+                    document.documentElement.setAttribute('data-theme', next);
+                    document.getElementById('menu-theme').textContent = next === 'dark' ? '🌙' : next === 'light' ?
+                        '☀️' : '🌌';
+                });
+
+                // Voice toggle (Demo)
+                document.getElementById('menu-voice')?.addEventListener('click', () => {
+                    const voices = ['👩', '👨', '🧑', '👧', '👦'];
+                    const current = document.getElementById('menu-voice').textContent;
+                    const idx = voices.indexOf(current);
+                    document.getElementById('menu-voice').textContent = voices[(idx + 1) % voices.length];
+                });
+
+                // Language toggle (Demo)
+                document.getElementById('menu-lang')?.addEventListener('click', () => {
+                    const langs = ['DE', 'EN', 'KU', 'TR', 'AR'];
+                    const current = document.getElementById('menu-lang').textContent;
+                    const idx = langs.indexOf(current);
+                    document.getElementById('menu-lang').textContent = langs[(idx + 1) % langs.length];
+                });
+
+                // Taskbar clicks
+                document.getElementById('taskbar-logo')?.addEventListener('click', () => AppManager.openApp(
+                'app-center'));
+                document.getElementById('tb-notifications')?.addEventListener('click', () => alert(
+                    '🔔 Keine neuen Benachrichtigungen'));
+                document.getElementById('tb-status')?.addEventListener('click', () => alert(
+                    `✅ System läuft\nVersion: ${Kernel.version}\nUptime: ${Kernel.getUptime()}s`));
+
+                // AI Floating Button
+                document.getElementById('ai-floating-btn')?.addEventListener('click', () => AppManager.openApp(
+                'haldo-ai'));
+
+                // Clock
+                updateClock();
+                setInterval(updateClock, 10000);
+
+                return true;
             },
-            updateProgress(value) {
-                this.progress = Math.min(value, 100);
-                if (this.progressBar) this.progressBar.style.width = this.progress + '%';
-            },
+
+            updateStatus(text) { if (this.statusEl) this.statusEl.textContent = text; },
+            updateProgress(value) { this.progress = Math.min(value, 100); if (this.progressBar) this.progressBar.style
+                    .width = this.progress + '%'; },
             hideBootScreen() {
-                const screen = document.getElementById('boot-screen');
-                screen.classList.add('hidden');
-                setTimeout(() => screen.style.display = 'none', 800);
+                document.getElementById('boot-screen').classList.add('hidden');
+                setTimeout(() => { document.getElementById('boot-screen').style.display = 'none'; }, 800);
                 document.getElementById('desktop').style.display = 'block';
                 document.querySelector('.floating-btn').style.display = 'flex';
             },
@@ -844,10 +1046,10 @@
             clock: null,
             sunMesh: null,
             logoTexture: null,
+            container: null,
 
             init() {
-                console.log('🌌 Cosmic World ULTIMATE wird initialisiert...');
-
+                console.log('🌌 Cosmic World wird initialisiert...');
                 let container = document.getElementById('cosmic-canvas-container');
                 if (!container) {
                     container = document.createElement('div');
@@ -860,7 +1062,6 @@
 
                 this.loadLogo();
                 if (typeof THREE === 'undefined') {
-                    console.warn('⚠️ Three.js nicht geladen – lade...');
                     const script = document.createElement('script');
                     script.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
                     script.onload = () => { this.setupScene();
@@ -883,7 +1084,6 @@
                 img.crossOrigin = 'anonymous';
                 img.src = 'assets/images/logo.png';
                 img.onload = () => {
-                    console.log('✅ Logo geladen!');
                     this.logoTexture = new THREE.Texture(img);
                     if (this.sunMesh) {
                         this.sunMesh.material.map = this.logoTexture;
@@ -898,7 +1098,7 @@
                 this.scene.background = new THREE.Color(0x0a0a1a);
 
                 this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-                this.camera.position.set(0, 20, 50);
+                this.camera.position.set(0, 18, 45);
                 this.camera.lookAt(0, 0, 0);
 
                 this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
@@ -909,7 +1109,15 @@
                 this.renderer.toneMappingExposure = 1.2;
                 this.container.appendChild(this.renderer.domElement);
 
-                this.setupLighting();
+                // Lighting
+                this.scene.add(new THREE.AmbientLight(0x222244, 0.6));
+                const sunLight = new THREE.PointLight(0xffaa33, 2.8, 150);
+                sunLight.position.set(0, 0, 0);
+                this.scene.add(sunLight);
+                const dirLight = new THREE.DirectionalLight(0x4466ff, 0.3);
+                dirLight.position.set(10, 20, 10);
+                this.scene.add(dirLight);
+
                 this.createSun();
                 this.createPlanets();
                 this.createStars(365);
@@ -917,89 +1125,66 @@
                 this.clock = new THREE.Clock();
             },
 
-            setupLighting() {
-                this.scene.add(new THREE.AmbientLight(0x222244, 0.6));
-                const sunLight = new THREE.PointLight(0xffaa33, 3, 150);
-                sunLight.position.set(0, 0, 0);
-                this.scene.add(sunLight);
-                const dirLight = new THREE.DirectionalLight(0x4466ff, 0.3);
-                dirLight.position.set(10, 20, 10);
-                this.scene.add(dirLight);
-            },
-
             createSun() {
-                const geo = new THREE.SphereGeometry(3.5, 64, 64);
-                let mat;
-                if (this.logoTexture) {
-                    mat = new THREE.MeshStandardMaterial({
-                        map: this.logoTexture,
-                        emissive: 0xff6600,
-                        emissiveIntensity: 0.3,
-                        roughness: 0.2,
-                        metalness: 0.0
-                    });
-                } else {
-                    mat = new THREE.MeshStandardMaterial({
-                        color: 0xff8800,
-                        emissive: 0xff4400,
-                        emissiveIntensity: 1.0,
-                        roughness: 0.2,
-                        metalness: 0.0
-                    });
-                }
+                const geo = new THREE.SphereGeometry(3.2, 64, 64);
+                const mat = this.logoTexture ? new THREE.MeshStandardMaterial({
+                    map: this.logoTexture,
+                    emissive: 0xff6600,
+                    emissiveIntensity: 0.3,
+                    roughness: 0.2,
+                    metalness: 0.0
+                }) : new THREE.MeshStandardMaterial({
+                    color: 0xff8800,
+                    emissive: 0xff4400,
+                    emissiveIntensity: 1.0,
+                    roughness: 0.2,
+                    metalness: 0.0
+                });
                 this.sunMesh = new THREE.Mesh(geo, mat);
                 this.sunMesh.position.set(0, 0, 0);
                 this.sunMesh.userData.isSun = true;
                 this.scene.add(this.sunMesh);
 
                 // Glow
-                const glowGeo = new THREE.SphereGeometry(4.2, 32, 32);
-                const glowMat = new THREE.MeshBasicMaterial({
-                    color: 0xff6600,
-                    transparent: true,
-                    opacity: 0.2,
-                    blending: THREE.AdditiveBlending
-                });
-                const glow = new THREE.Mesh(glowGeo, glowMat);
+                const glow = new THREE.Mesh(
+                    new THREE.SphereGeometry(3.8, 32, 32),
+                    new THREE.MeshBasicMaterial({ color: 0xff6600, transparent: true, opacity: 0.2,
+                        blending: THREE.AdditiveBlending })
+                );
                 glow.position.set(0, 0, 0);
                 this.scene.add(glow);
                 this.sunGlow = glow;
 
-                // Äußere Corona
-                const outerGlowGeo = new THREE.SphereGeometry(5.5, 32, 32);
-                const outerGlowMat = new THREE.MeshBasicMaterial({
-                    color: 0xff4400,
-                    transparent: true,
-                    opacity: 0.08,
-                    blending: THREE.AdditiveBlending
-                });
-                const outerGlow = new THREE.Mesh(outerGlowGeo, outerGlowMat);
-                outerGlow.position.set(0, 0, 0);
-                this.scene.add(outerGlow);
-                this.outerGlow = outerGlow;
+                // Outer Corona
+                const outer = new THREE.Mesh(
+                    new THREE.SphereGeometry(5.0, 32, 32),
+                    new THREE.MeshBasicMaterial({ color: 0xff4400, transparent: true, opacity: 0.07,
+                        blending: THREE.AdditiveBlending })
+                );
+                outer.position.set(0, 0, 0);
+                this.scene.add(outer);
+                this.outerGlow = outer;
             },
 
             createPlanets() {
                 const planets = [
-                    { name: 'Merkur', size: 0.3, distance: 5.0, color: 0xaaaaaa, speed: 0.04, moons: 0,
-                    type: 'second' },
-                    { name: 'Venus', size: 0.5, distance: 7.0, color: 0xffcc88, speed: 0.025, moons: 0,
-                    type: 'minute' },
-                    { name: 'Erde', size: 0.55, distance: 9.5, color: 0x4488ff, speed: 0.018, moons: 1,
-                    type: 'hour' },
-                    { name: 'Mars', size: 0.45, distance: 12.0, color: 0xff4422, speed: 0.014, moons: 0 },
-                    { name: 'Jupiter', size: 1.3, distance: 15.0, color: 0xddbb88, speed: 0.009, moons: 0 },
-                    { name: 'Saturn', size: 1.1, distance: 18.5, color: 0xeeddbb, speed: 0.007, moons: 0 },
-                    { name: 'Uranus', size: 0.8, distance: 22.0, color: 0x88ddff, speed: 0.005, moons: 0 },
-                    { name: 'Neptun', size: 0.75, distance: 25.5, color: 0x3366ff, speed: 0.004, moons: 0 },
-                    { name: 'Pluto', size: 0.2, distance: 29.0, color: 0xccbbaa, speed: 0.003, moons: 0 },
-                    { name: 'HalDo-1', size: 0.4, distance: 33.0, color: 0x8B5CF6, speed: 0.0025, moons: 0 },
-                    { name: 'HalDo-2', size: 0.35, distance: 37.0, color: 0x00D4FF, speed: 0.002, moons: 0 },
-                    { name: 'HalDo-3', size: 0.3, distance: 41.0, color: 0xFF6B9D, speed: 0.0015, moons: 0 }
+                    { name: 'Merkur', size: 0.3, distance: 4.8, color: 0xaaaaaa, speed: 0.04, type: 'second' },
+                    { name: 'Venus', size: 0.5, distance: 6.8, color: 0xffcc88, speed: 0.025, type: 'minute' },
+                    { name: 'Erde', size: 0.55, distance: 9.0, color: 0x4488ff, speed: 0.018, type: 'hour',
+                    hasMoon: true },
+                    { name: 'Mars', size: 0.45, distance: 11.5, color: 0xff4422, speed: 0.014 },
+                    { name: 'Jupiter', size: 1.3, distance: 14.5, color: 0xddbb88, speed: 0.009 },
+                    { name: 'Saturn', size: 1.1, distance: 18.0, color: 0xeeddbb, speed: 0.007 },
+                    { name: 'Uranus', size: 0.8, distance: 21.5, color: 0x88ddff, speed: 0.005 },
+                    { name: 'Neptun', size: 0.75, distance: 25.0, color: 0x3366ff, speed: 0.004 },
+                    { name: 'Pluto', size: 0.2, distance: 28.5, color: 0xccbbaa, speed: 0.003 },
+                    { name: 'HalDo-1', size: 0.4, distance: 32.0, color: 0x8B5CF6, speed: 0.0025 },
+                    { name: 'HalDo-2', size: 0.35, distance: 35.5, color: 0x00D4FF, speed: 0.002 },
+                    { name: 'HalDo-3', size: 0.3, distance: 39.0, color: 0xFF6B9D, speed: 0.0015 }
                 ];
 
                 this.planetData = [];
-                planets.forEach((data, index) => {
+                planets.forEach((data, idx) => {
                     const geo = new THREE.SphereGeometry(data.size, 32, 32);
                     const mat = new THREE.MeshStandardMaterial({
                         color: data.color,
@@ -1009,122 +1194,97 @@
                         emissiveIntensity: 0.05
                     });
                     const mesh = new THREE.Mesh(geo, mat);
-                    const angle = (index / planets.length) * Math.PI * 2 + Math.random() * 0.3;
+                    const angle = (idx / planets.length) * Math.PI * 2 + Math.random() * 0.2;
                     mesh.position.x = Math.cos(angle) * data.distance;
                     mesh.position.z = Math.sin(angle) * data.distance;
-                    mesh.userData = {
-                        distance: data.distance,
-                        speed: data.speed,
-                        angle: angle,
-                        name: data.name,
-                        moons: data.moons,
-                        type: data.type || 'normal'
-                    };
+                    mesh.userData = { distance: data.distance, speed: data.speed, angle: angle, name: data.name,
+                        type: data.type || 'normal' };
                     this.scene.add(mesh);
 
-                    // Umlaufbahn
-                    const orbitPoints = [];
+                    // Orbit
+                    const pts = [];
                     for (let i = 0; i <= 80; i++) {
-                        const theta = (i / 80) * Math.PI * 2;
-                        orbitPoints.push(new THREE.Vector3(
-                            Math.cos(theta) * data.distance,
-                            0,
-                            Math.sin(theta) * data.distance
-                        ));
+                        const t = (i / 80) * Math.PI * 2;
+                        pts.push(new THREE.Vector3(Math.cos(t) * data.distance, 0, Math.sin(t) * data.distance));
                     }
-                    const orbitGeo = new THREE.BufferGeometry().setFromPoints(orbitPoints);
-                    const orbitMat = new THREE.LineBasicMaterial({
-                        color: data.color,
-                        transparent: true,
-                        opacity: 0.15
-                    });
-                    const orbit = new THREE.Line(orbitGeo, orbitMat);
+                    const orbit = new THREE.Line(
+                        new THREE.BufferGeometry().setFromPoints(pts),
+                        new THREE.LineBasicMaterial({ color: data.color, transparent: true, opacity: 0.12 })
+                    );
                     this.scene.add(orbit);
 
                     // Erde + Mond
-                    if (data.name === 'Erde') {
-                        const moonGeo = new THREE.SphereGeometry(0.15, 16, 16);
-                        const moonMat = new THREE.MeshStandardMaterial({ color: 0xcccccc, roughness: 0.9 });
-                        const moon = new THREE.Mesh(moonGeo, moonMat);
+                    if (data.hasMoon) {
+                        const moon = new THREE.Mesh(
+                            new THREE.SphereGeometry(0.15, 16, 16),
+                            new THREE.MeshStandardMaterial({ color: 0xcccccc, roughness: 0.9 })
+                        );
                         moon.userData = { angle: 0, speed: 0.06, distance: 1.2 };
                         mesh.add(moon);
                         this.moon = moon;
                     }
 
-                    this.planetData.push({
-                        mesh,
-                        distance: data.distance,
-                        speed: data.speed,
-                        angle: angle,
-                        name: data.name,
-                        type: data.type || 'normal'
-                    });
+                    this.planetData.push({ mesh, distance: data.distance, speed: data.speed, angle: angle,
+                        name: data.name, type: data.type || 'normal' });
                 });
             },
 
             createStars(count = 365) {
                 const geo = new THREE.BufferGeometry();
-                const positions = new Float32Array(count * 3);
-                const colors = new Float32Array(count * 3);
-                const sizes = new Float32Array(count);
-
+                const pos = new Float32Array(count * 3);
+                const col = new Float32Array(count * 3);
                 for (let i = 0; i < count; i++) {
-                    const radius = 40 + Math.random() * 180;
-                    const theta = Math.random() * Math.PI * 2;
-                    const phi = Math.acos(2 * Math.random() - 1);
-                    positions[i * 3] = radius * Math.sin(phi) * Math.cos(theta);
-                    positions[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
-                    positions[i * 3 + 2] = radius * Math.cos(phi);
-                    const color = new THREE.Color().setHSL(0.55 + Math.random() * 0.25, 0.3, 0.6 + Math.random() * 0.4);
-                    colors[i * 3] = color.r;
-                    colors[i * 3 + 1] = color.g;
-                    colors[i * 3 + 2] = color.b;
-                    sizes[i] = 0.15 + Math.random() * 0.6;
+                    const r = 40 + Math.random() * 180,
+                        t = Math.random() * Math.PI * 2,
+                        p = Math.acos(2 * Math.random() - 1);
+                    pos[i * 3] = r * Math.sin(p) * Math.cos(t);
+                    pos[i * 3 + 1] = r * Math.sin(p) * Math.sin(t);
+                    pos[i * 3 + 2] = r * Math.cos(p);
+                    const c = new THREE.Color().setHSL(0.55 + Math.random() * 0.25, 0.3, 0.6 + Math.random() * 0.4);
+                    col[i * 3] = c.r;
+                    col[i * 3 + 1] = c.g;
+                    col[i * 3 + 2] = c.b;
                 }
-
-                geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-                geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-                const mat = new THREE.PointsMaterial({
-                    size: 0.35,
+                geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+                geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
+                this.starField = new THREE.Points(geo, new THREE.PointsMaterial({
+                    size: 0.3,
                     vertexColors: true,
                     transparent: true,
                     opacity: 0.95,
                     blending: THREE.AdditiveBlending
-                });
-                this.starField = new THREE.Points(geo, mat);
+                }));
                 this.scene.add(this.starField);
             },
 
             createNebula() {
                 const count = 2000;
                 const geo = new THREE.BufferGeometry();
-                const positions = new Float32Array(count * 3);
-                const colors = new Float32Array(count * 3);
+                const pos = new Float32Array(count * 3);
+                const col = new Float32Array(count * 3);
                 for (let i = 0; i < count; i++) {
-                    const radius = 20 + Math.random() * 80;
-                    const theta = Math.random() * Math.PI * 2;
-                    const phi = Math.acos(2 * Math.random() - 1);
-                    positions[i * 3] = radius * Math.sin(phi) * Math.cos(theta);
-                    positions[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta) * 0.3;
-                    positions[i * 3 + 2] = radius * Math.cos(phi);
-                    const hue = 0.65 + Math.random() * 0.25;
-                    const color = new THREE.Color().setHSL(hue, 0.6, 0.15 + Math.random() * 0.25);
-                    colors[i * 3] = color.r;
-                    colors[i * 3 + 1] = color.g;
-                    colors[i * 3 + 2] = color.b;
+                    const r = 20 + Math.random() * 80,
+                        t = Math.random() * Math.PI * 2,
+                        p = Math.acos(2 * Math.random() - 1);
+                    pos[i * 3] = r * Math.sin(p) * Math.cos(t);
+                    pos[i * 3 + 1] = r * Math.sin(p) * Math.sin(t) * 0.3;
+                    pos[i * 3 + 2] = r * Math.cos(p);
+                    const c = new THREE.Color().setHSL(0.65 + Math.random() * 0.25, 0.5, 0.15 + Math.random() * 0.2);
+                    col[i * 3] = c.r;
+                    col[i * 3 + 1] = c.g;
+                    col[i * 3 + 2] = c.b;
                 }
-                geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-                geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-                const mat = new THREE.PointsMaterial({
-                    size: 0.8,
+                geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+                geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
+                const neb = new THREE.Points(geo, new THREE.PointsMaterial({
+                    size: 0.6,
                     vertexColors: true,
                     transparent: true,
-                    opacity: 0.1,
+                    opacity: 0.08,
                     blending: THREE.AdditiveBlending
-                });
-                const nebula = new THREE.Points(geo, mat);
-                this.scene.add(nebula);
-                this.nebula = nebula;
+                }));
+                this.scene.add(neb);
+                this.nebula = neb;
             },
 
             animate() {
@@ -1132,86 +1292,83 @@
                 if (!this.scene || !this.camera || !this.renderer) return;
                 const time = this.clock ? this.clock.getElapsedTime() : Date.now() * 0.001;
 
-                // Sonne
+                // Sun
                 if (this.sunMesh) {
                     this.sunMesh.rotation.y += 0.002;
                     if (this.sunGlow) {
-                        const pulse = 1 + Math.sin(time * 0.6) * 0.04;
-                        this.sunGlow.scale.set(pulse, pulse, pulse);
-                        this.sunGlow.material.opacity = 0.2 + Math.sin(time * 0.5) * 0.05;
+                        const p = 1 + Math.sin(time * 0.6) * 0.04;
+                        this.sunGlow.scale.set(p, p, p);
+                        this.sunGlow.material.opacity = 0.2 + Math.sin(time * 0.5) * 0.04;
                     }
                     if (this.outerGlow) {
-                        const pulse2 = 1 + Math.sin(time * 0.3 + 1) * 0.06;
-                        this.outerGlow.scale.set(pulse2, pulse2, pulse2);
+                        const p2 = 1 + Math.sin(time * 0.3 + 1) * 0.05;
+                        this.outerGlow.scale.set(p2, p2, p2);
                     }
                 }
 
-                // Planeten
+                // Planets
                 if (this.planetData) {
                     this.planetData.forEach(data => {
-                        let speedFactor = 1;
-                        if (data.type === 'second') speedFactor = 2.0;
-                        else if (data.type === 'minute') speedFactor = 1.0;
-                        else if (data.type === 'hour') speedFactor = 0.5;
-                        data.angle += data.speed * speedFactor * 0.5;
+                        let sf = 1;
+                        if (data.type === 'second') sf = 2.0;
+                        else if (data.type === 'minute') sf = 1.0;
+                        else if (data.type === 'hour') sf = 0.5;
+                        data.angle += data.speed * sf * 0.5;
                         data.mesh.position.x = Math.cos(data.angle) * data.distance;
                         data.mesh.position.z = Math.sin(data.angle) * data.distance;
-                        data.mesh.rotation.y += 0.02;
+                        data.mesh.rotation.y += 0.015;
 
                         if (data.name === 'Erde' && this.moon) {
-                            const moonData = this.moon.userData;
-                            moonData.angle += moonData.speed;
-                            this.moon.position.x = Math.cos(moonData.angle) * moonData.distance;
-                            this.moon.position.z = Math.sin(moonData.angle) * moonData.distance;
+                            const md = this.moon.userData;
+                            md.angle += md.speed;
+                            this.moon.position.x = Math.cos(md.angle) * md.distance;
+                            this.moon.position.z = Math.sin(md.angle) * md.distance;
                         }
                     });
                 }
 
-                // Sterne funkeln
+                // Stars flicker
                 if (this.starField) {
-                    const sizes = this.starField.geometry.attributes.size;
-                    if (sizes) {
-                        for (let i = 0; i < sizes.count; i++) {
-                            sizes.array[i] = 0.15 + (0.3 + Math.sin(time * (0.5 + i * 0.01)) * 0.3) * 0.5;
+                    const sz = this.starField.geometry.attributes.size;
+                    if (sz) {
+                        for (let i = 0; i < sz.count; i++) {
+                            sz.array[i] = 0.15 + (0.3 + Math.sin(time * (0.5 + i * 0.01)) * 0.3) * 0.4;
                         }
-                        sizes.needsUpdate = true;
+                        sz.needsUpdate = true;
                     }
                 }
 
-                // Kamera
+                // Camera
                 if (this.camera) {
-                    const camAngle = time * 0.015;
-                    this.camera.position.x = Math.sin(camAngle) * 8;
-                    this.camera.position.z = 48 + Math.sin(camAngle * 0.7) * 4;
-                    this.camera.position.y = 18 + Math.sin(camAngle * 0.5) * 2;
+                    const a = time * 0.012;
+                    this.camera.position.x = Math.sin(a) * 7;
+                    this.camera.position.z = 42 + Math.sin(a * 0.7) * 4;
+                    this.camera.position.y = 16 + Math.sin(a * 0.5) * 2;
                     this.camera.lookAt(0, 0, 0);
                 }
 
                 this.renderer.render(this.scene, this.camera);
             },
 
-            onSunClick(event) {
+            onSunClick(e) {
                 if (!this.scene || !this.camera) return;
                 const rect = this.container.getBoundingClientRect();
-                const x = (event.clientX - rect.left) / rect.width * 2 - 1;
-                const y = -(event.clientY - rect.top) / rect.height * 2 + 1;
-                const raycaster = new THREE.Raycaster();
-                const mouse = new THREE.Vector2(x, y);
-                raycaster.setFromCamera(mouse, this.camera);
-                const intersects = raycaster.intersectObjects(this.scene.children, true);
+                const x = (e.clientX - rect.left) / rect.width * 2 - 1;
+                const y = -(e.clientY - rect.top) / rect.height * 2 + 1;
+                const ray = new THREE.Raycaster();
+                ray.setFromCamera(new THREE.Vector2(x, y), this.camera);
+                const hits = ray.intersectObjects(this.scene.children, true);
                 let hitSun = false;
-                for (let hit of intersects) {
-                    let obj = hit.object;
+                for (let h of hits) {
+                    let obj = h.object;
                     while (obj) {
                         if (obj.userData && obj.userData.isSun) { hitSun = true; break; }
                         obj = obj.parent;
                     }
                     if (hitSun) break;
                 }
-                if (hitSun) {
-                    console.log('☀️ Sonne geklickt – öffne HalDo AI!');
-                    AppManager.openApp('haldo-ai');
-                }
+                if (hitSun) { console.log('☀️ Sonne geklickt!');
+                    AppManager.openApp('haldo-ai'); }
             },
 
             onResize() {
@@ -1224,7 +1381,7 @@
         window.CosmicWorld = CosmicWorld;
 
         // ============================================================
-        //  6. APP MANAGER (mit allen Apps)
+        //  6. APP MANAGER (KOMPLETT)
         // ============================================================
         const AppManager = {
             apps: [],
@@ -1232,26 +1389,70 @@
             isReady: false,
 
             appDefinitions: [
-                { id: 'settings', name: 'Einstellungen', icon: '⚙️', category: 'System' },
-                { id: 'haldo-ai', name: 'HalDo AI', icon: '🤖', category: 'AI' },
-                { id: 'ai-chat', name: 'AI Chat', icon: '💬', category: 'AI' },
-                { id: 'notes', name: 'Notizen', icon: '📝', category: 'Tools' },
-                { id: 'calculator', name: 'Taschenrechner', icon: '🧮', category: 'Tools' },
-                { id: 'calendar', name: 'Kalender', icon: '📅', category: 'Tools' },
-                { id: 'browser', name: 'Browser', icon: '🌐', category: 'Internet' },
-                { id: 'weather', name: 'Wetter', icon: '🌦️', category: 'Internet' },
-                { id: 'contacts', name: 'Kontakte', icon: '👥', category: 'Kommunikation' },
-                { id: 'file-manager', name: 'Dateien', icon: '📂', category: 'System' },
-                { id: 'gallery', name: 'Galerie', icon: '🖼️', category: 'Media' },
-                { id: 'music', name: 'Musik', icon: '🎵', category: 'Media' },
-                { id: 'video-player', name: 'Video', icon: '🎬', category: 'Media' },
-                { id: 'camera', name: 'Kamera', icon: '📷', category: 'Tools' },
-                { id: 'voice-center', name: 'Voice Center', icon: '🎤', category: 'System' },
-                { id: 'themes', name: 'Themes', icon: '🎨', category: 'System' },
-                { id: 'system-monitor', name: 'System Monitor', icon: '📊', category: 'System' },
-                { id: 'terminal', name: 'Terminal', icon: '⌨️', category: 'System' },
-                { id: 'app-center', name: 'App Center', icon: '📱', category: 'System' },
-                { id: 'cosmic-world', name: 'Cosmic World', icon: '🌌', category: 'Cosmic' }
+                // SYSTEM
+                { id: 'app-center', name: 'App Center', icon: '📱', category: 'system', desc: 'Alle Apps' },
+                { id: 'settings', name: 'Einstellungen', icon: '⚙️', category: 'system', desc: 'Systemeinstellungen' },
+                { id: 'system-monitor', name: 'System Monitor', icon: '📊', category: 'system', desc: 'Systemstatus' },
+                { id: 'terminal', name: 'Terminal', icon: '⌨️', category: 'system', desc: 'Kommandozeile' },
+                { id: 'themes', name: 'Themes', icon: '🎨', category: 'system', desc: 'Designs' },
+                { id: 'file-manager', name: 'Dateien', icon: '📂', category: 'system', desc: 'Dateiverwaltung' },
+
+                // AI
+                { id: 'haldo-ai', name: 'HalDo AI', icon: '🤖', category: 'ai', desc: 'Persönliche KI' },
+                { id: 'ai-chat', name: 'AI Chat', icon: '💬', category: 'ai', desc: 'Chat mit KI' },
+                { id: 'ai-memory', name: 'AI Memory', icon: '🧠', category: 'ai', desc: 'KI-Gedächtnis' },
+                { id: 'ai-tools', name: 'AI Tools', icon: '🔧', category: 'ai', desc: 'KI-Werkzeuge' },
+
+                // TOOLS
+                { id: 'notes', name: 'Notizen', icon: '📝', category: 'tools', desc: 'Notizen verwalten' },
+                { id: 'calculator', name: 'Taschenrechner', icon: '🧮', category: 'tools', desc: 'Rechner' },
+                { id: 'calendar', name: 'Kalender', icon: '📅', category: 'tools', desc: 'Termine' },
+                { id: 'clock', name: 'Uhr', icon: '🕐', category: 'tools', desc: 'Uhr & Timer' },
+                { id: 'qr-scanner', name: 'QR Scanner', icon: '📲', category: 'tools', desc: 'QR-Code scannen' },
+                { id: 'voice-recorder', name: 'Voice Recorder', icon: '🎙️', category: 'tools', desc: 'Sprachaufnahme' },
+
+                // MEDIA
+                { id: 'gallery', name: 'Galerie', icon: '🖼️', category: 'media', desc: 'Bilder & Videos' },
+                { id: 'music', name: 'Musik', icon: '🎵', category: 'media', desc: 'Musikplayer' },
+                { id: 'video-player', name: 'Video', icon: '🎬', category: 'media', desc: 'Videoplayer' },
+                { id: 'camera', name: 'Kamera', icon: '📷', category: 'media', desc: 'Foto & Video' },
+                { id: 'image-editor', name: 'Bildbearbeitung', icon: '🎨', category: 'media', desc: 'Bilder bearbeiten' },
+
+                // COMMUNICATION
+                { id: 'contacts', name: 'Kontakte', icon: '👥', category: 'communication', desc: 'Adressbuch' },
+                { id: 'messages', name: 'Nachrichten', icon: '💬', category: 'communication', desc: 'Chat & SMS' },
+                { id: 'email', name: 'E-Mail', icon: '✉️', category: 'communication', desc: 'E-Mail Client' },
+                { id: 'calls', name: 'Anrufe', icon: '📞', category: 'communication', desc: 'Telefonie' },
+                { id: 'browser', name: 'Browser', icon: '🌐', category: 'communication', desc: 'Internet' },
+
+                // OFFICE
+                { id: 'documents', name: 'Dokumente', icon: '📄', category: 'office', desc: 'Dokumente verwalten' },
+                { id: 'pdf-viewer', name: 'PDF Viewer', icon: '📕', category: 'office', desc: 'PDF anzeigen' },
+                { id: 'office-center', name: 'Office Center', icon: '📊', category: 'office', desc: 'Büro-Apps' },
+                { id: 'journal', name: 'Journal', icon: '📓', category: 'office', desc: 'Tagebuch' },
+                { id: 'zip', name: 'Archiv Manager', icon: '📦', category: 'office', desc: 'ZIP & Archive' },
+
+                // COSMIC
+                { id: 'cosmic-world', name: 'Cosmic World', icon: '🌌', category: 'cosmic', desc: '3D-Universum' },
+                { id: 'solar-system', name: 'Sonnensystem', icon: '☀️', category: 'cosmic', desc: 'Planeten anzeigen' },
+                { id: 'planet-center', name: 'Planeten Center', icon: '🪐', category: 'cosmic', desc: 'Planeten-Info' },
+
+                // WEATHER & MAPS
+                { id: 'weather', name: 'Wetter', icon: '🌦️', category: 'tools', desc: 'Wettervorhersage' },
+                { id: 'maps', name: 'Karten', icon: '🗺️', category: 'tools', desc: 'Karten & Routen' },
+                { id: 'web-search', name: 'Websuche', icon: '🔎', category: 'communication', desc: 'Internet-Suche' },
+
+                // SYSTEM TOOLS
+                { id: 'security', name: 'Sicherheit', icon: '🛡️', category: 'system', desc: 'Sicherheitseinstellungen' },
+                { id: 'privacy', name: 'Privacy', icon: '🔒', category: 'system', desc: 'Datenschutz' },
+                { id: 'backup', name: 'Backup', icon: '💾', category: 'system', desc: 'Backup & Wiederherstellung' },
+                { id: 'updates', name: 'Updates', icon: '🔄', category: 'system', desc: 'System-Updates' },
+                { id: 'diagnostics', name: 'Diagnose', icon: '🩺', category: 'system', desc: 'Systemdiagnose' },
+                { id: 'logs', name: 'Logs', icon: '📋', category: 'system', desc: 'System-Logs' },
+                { id: 'process', name: 'Prozesse', icon: '⚡', category: 'system', desc: 'Laufende Prozesse' },
+                { id: 'storage', name: 'Speicher', icon: '💿', category: 'system', desc: 'Speicherverwaltung' },
+                { id: 'language', name: 'Sprachen', icon: '🌍', category: 'system', desc: 'Sprache & Tastatur' },
+                { id: 'voice-center', name: 'Voice Center', icon: '🎤', category: 'system', desc: 'Sprachsteuerung' },
             ],
 
             init() {
@@ -1270,55 +1471,52 @@
 
             openApp(appId) {
                 const app = this.apps.find(a => a.id === appId);
-                if (!app) return false;
+                if (!app) { alert('App nicht gefunden'); return false; }
                 if (!this.installedApps.includes(appId)) {
-                    alert('App nicht installiert');
-                    return false;
+                    this.installApp(appId);
                 }
 
-                // Spezialfall: Cosmic World
+                // Spezialfälle
                 if (appId === 'cosmic-world') {
-                    if (CosmicWorld.isReady) {
-                        alert('🌌 Cosmic World läuft bereits im Hintergrund!');
-                    } else {
-                        CosmicWorld.init();
-                    }
+                    if (!CosmicWorld.isReady) CosmicWorld.init();
+                    else alert('🌌 Cosmic World läuft bereits!');
                     return true;
                 }
 
-                // Spezialfall: Settings
+                if (appId === 'haldo-ai' || appId === 'ai-chat') {
+                    this.openAIChat(app);
+                    return true;
+                }
+
                 if (appId === 'settings') {
-                    this.openSettingsWindow();
+                    this.openSettings(app);
                     return true;
                 }
 
-                // Spezialfall: AI Chat
-                if (appId === 'ai-chat' || appId === 'haldo-ai') {
-                    this.openAIChatWindow();
-                    return true;
-                }
-
-                // Allgemeine App
+                // Standard App öffnen
                 this.openGenericWindow(app);
                 return true;
             },
 
             openGenericWindow(app) {
                 const content = this.getAppContent(app.id);
-                const windowEl = this.createWindow(app.name, app.icon, content);
-                document.getElementById('window-container').appendChild(windowEl);
+                const win = this.createWindow(app.name, app.icon, content);
+                document.getElementById('window-container').appendChild(win);
                 this.updateTaskbar();
             },
 
-            createWindow(title, icon, content) {
+            createWindow(title, icon, content, width = 520, height = 420) {
                 const win = document.createElement('div');
                 win.className = 'window';
-                win.style.cssText = 'left:80px;top:60px;width:500px;height:400px;z-index:100;';
+                const w = Math.min(width, window.innerWidth - 60);
+                const h = Math.min(height, window.innerHeight - 140);
+                win.style.cssText =
+                `left:${40+Math.random()*40}px;top:${20+Math.random()*40}px;width:${w}px;height:${h}px;z-index:${Date.now()%1000+100};`;
 
                 win.innerHTML = `
                     <div class="window-header">
                         <div class="window-title">
-                            <span style="font-size:20px;">${icon}</span>
+                            <span class="icon">${icon}</span>
                             <span>${title}</span>
                         </div>
                         <div class="window-controls">
@@ -1329,6 +1527,29 @@
                     </div>
                     <div class="window-body">${content}</div>
                 `;
+
+                // Drag
+                const header = win.querySelector('.window-header');
+                let drag = false,
+                    sx, sy, ox, oy;
+                header.addEventListener('mousedown', (e) => {
+                    if (win.classList.contains('maximized')) return;
+                    drag = true;
+                    const r = win.getBoundingClientRect();
+                    sx = e.clientX;
+                    sy = e.clientY;
+                    ox = r.left;
+                    oy = r.top;
+                    win.style.cursor = 'grabbing';
+                });
+                document.addEventListener('mousemove', (e) => {
+                    if (!drag) return;
+                    win.style.left = (ox + e.clientX - sx) + 'px';
+                    win.style.top = (oy + e.clientY - sy) + 'px';
+                });
+                document.addEventListener('mouseup', () => { if (drag) { drag = false;
+                        win.style.cursor = ''; } });
+
                 return win;
             },
 
@@ -1338,41 +1559,52 @@
 
                 switch (appId) {
                     case 'notes':
-                        return this.getNotesContent();
+                        return this.getNotesUI();
                     case 'calculator':
-                        return this.getCalculatorContent();
+                        return this.getCalculatorUI();
                     case 'calendar':
-                        return this.getCalendarContent();
+                        return this.getCalendarUI();
                     case 'weather':
-                        return this.getWeatherContent();
+                        return this.getWeatherUI();
                     case 'contacts':
-                        return this.getContactsContent();
+                        return this.getContactsUI();
+                    case 'system-monitor':
+                        return this.getSystemMonitorUI();
+                    case 'terminal':
+                        return this.getTerminalUI();
+                    case 'file-manager':
+                        return this.getFileManagerUI();
+                    case 'music':
+                        return this.getMusicUI();
+                    case 'gallery':
+                        return this.getGalleryUI();
                     default:
                         return `
-                            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:12px;">
-                                <div style="font-size:64px;">${app.icon}</div>
-                                <h2>${app.name}</h2>
-                                <p style="color:var(--text-secondary);">Diese App ist bereit für HalDo OS 24.6</p>
+                            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:12px;text-align:center;">
+                                <div style="font-size:56px;">${app.icon}</div>
+                                <h2 style="color:var(--text-primary);">${app.name}</h2>
+                                <p style="color:var(--text-secondary);">${app.desc || 'Bereit für HalDo OS 24.6'}</p>
                                 <p style="color:var(--text-muted);font-size:12px;">Version 1.0 | ${app.category}</p>
                             </div>
                         `;
                 }
             },
 
-            getNotesContent() {
+            // ===== NOTIZEN =====
+            getNotesUI() {
                 const notes = Storage.get('notes', []);
                 return `
                     <div style="display:flex;flex-direction:column;height:100%;">
                         <div style="display:flex;gap:8px;margin-bottom:12px;">
-                            <input id="notes-input" type="text" placeholder="Neue Notiz..." style="flex:1;padding:8px 12px;background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:8px;color:var(--text-primary);outline:none;">
-                            <button onclick="AppManager.addNote()" style="padding:8px 16px;background:var(--primary);border:none;border-radius:8px;color:white;cursor:pointer;">+</button>
+                            <input id="notes-input" class="haldo-input" placeholder="Neue Notiz..." style="flex:1;">
+                            <button onclick="AppManager.addNote()" class="haldo-btn">+</button>
                         </div>
                         <div id="notes-list" style="flex:1;overflow-y:auto;">
-                            ${notes.length === 0 ? '<p style="color:var(--text-muted);">Keine Notizen</p>' :
+                            ${notes.length === 0 ? '<p style="color:var(--text-muted);text-align:center;">Keine Notizen</p>' :
                             notes.map((n, i) => `
-                                <div style="display:flex;justify-content:space-between;padding:8px 12px;background:var(--glass-bg);border-radius:8px;margin:4px 0;">
+                                <div style="display:flex;justify-content:space-between;padding:10px 14px;background:var(--glass-bg);border-radius:8px;margin:4px 0;border:1px solid var(--glass-border);">
                                     <span>${n}</span>
-                                    <button onclick="AppManager.deleteNote(${i})" style="background:none;border:none;color:var(--text-muted);cursor:pointer;">✕</button>
+                                    <button onclick="AppManager.deleteNote(${i})" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:16px;">✕</button>
                                 </div>
                             `).join('')}
                         </div>
@@ -1380,92 +1612,284 @@
                 `;
             },
 
-            getCalculatorContent() {
+            addNote() {
+                const input = document.getElementById('notes-input');
+                if (!input || !input.value.trim()) return;
+                const notes = Storage.get('notes', []);
+                notes.push(input.value.trim());
+                Storage.set('notes', notes);
+                input.value = '';
+                const body = document.querySelector('.window .window-body');
+                if (body) body.innerHTML = this.getNotesUI();
+            },
+
+            deleteNote(index) {
+                const notes = Storage.get('notes', []);
+                notes.splice(index, 1);
+                Storage.set('notes', notes);
+                const body = document.querySelector('.window .window-body');
+                if (body) body.innerHTML = this.getNotesUI();
+            },
+
+            // ===== TASCHENRECHNER =====
+            getCalculatorUI() {
                 return `
-                    <div style="max-width:280px;margin:0 auto;">
-                        <div style="padding:12px;background:rgba(0,0,0,0.2);border-radius:8px;text-align:right;font-size:28px;font-weight:700;margin-bottom:12px;" id="calc-display">0</div>
+                    <div style="max-width:300px;margin:0 auto;">
+                        <div id="calc-display" style="padding:16px;background:rgba(0,0,0,0.2);border-radius:10px;text-align:right;font-size:28px;font-weight:700;margin-bottom:12px;min-height:60px;display:flex;align-items:center;justify-content:flex-end;">0</div>
                         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;">
                             ${['C','±','%','÷','7','8','9','×','4','5','6','−','1','2','3','+','0','.','⌫','='].map(b => `
-                                <button onclick="AppManager.calcInput('${b}')" style="padding:12px;background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:8px;color:var(--text-primary);font-size:18px;cursor:pointer;">${b}</button>
+                                <button onclick="AppManager.calcInput('${b}')" style="padding:12px;background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:8px;color:var(--text-primary);font-size:18px;cursor:pointer;transition:all var(--transition-fast);">${b}</button>
                             `).join('')}
                         </div>
                     </div>
                 `;
             },
 
-            getCalendarContent() {
+            calcInput(value) {
+                const d = document.getElementById('calc-display');
+                if (!d) return;
+                if (value === '=') {
+                    try { d.textContent = eval(d.textContent.replace('×', '*').replace('÷', '/')); } catch { d.textContent =
+                            'Error'; }
+                } else if (value === 'C') { d.textContent = '0'; } else if (value === '⌫') { d.textContent = d.textContent
+                        .length > 1 ? d.textContent.slice(0, -1) : '0'; } else {
+                    if (d.textContent === '0' && value !== '.') d.textContent = value;
+                    else d.textContent += value;
+                }
+            },
+
+            // ===== KALENDER =====
+            getCalendarUI() {
                 const now = new Date();
                 const month = now.toLocaleString('de', { month: 'long' });
                 const year = now.getFullYear();
+                const days = Array.from({ length: 30 }, (_, i) => i + 1);
                 return `
                     <div style="text-align:center;">
-                        <h2 style="margin-bottom:12px;">${month} ${year}</h2>
-                        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;">
-                            ${['Mo','Di','Mi','Do','Fr','Sa','So'].map(d => `<div style="color:var(--text-muted);font-size:12px;">${d}</div>`).join('')}
-                            ${Array.from({length:30}, (_,i) => `
-                                <div style="padding:8px;border-radius:8px;${i+1===now.getDate()?'background:var(--primary);color:white;':'background:var(--glass-bg);'}">${i+1}</div>
+                        <h2 style="color:var(--text-primary);">${month} ${year}</h2>
+                        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:12px;">
+                            ${['Mo','Di','Mi','Do','Fr','Sa','So'].map(d => `<div style="color:var(--text-muted);font-size:12px;padding:4px;">${d}</div>`).join('')}
+                            ${days.map(d => `<div style="padding:8px;border-radius:8px;background:${d===now.getDate()?'var(--primary)':'var(--glass-bg)'};color:${d===now.getDate()?'white':'var(--text-secondary)'};cursor:pointer;">${d}</div>`).join('')}
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ===== WETTER =====
+            getWeatherUI() {
+                return `
+                    <div style="text-align:center;padding:20px;">
+                        <div style="font-size:64px;">☀️</div>
+                        <div style="font-size:36px;font-weight:700;color:var(--text-primary);">22°C</div>
+                        <p style="color:var(--text-secondary);">Sonnig • Berlin</p>
+                        <div style="display:flex;justify-content:center;gap:32px;margin-top:16px;">
+                            <div>💧 65%</div>
+                            <div>💨 12 km/h</div>
+                        </div>
+                        <div style="display:flex;gap:8px;margin-top:16px;justify-content:center;">
+                            ${['Mo','Di','Mi','Do','Fr'].map(d => `<div style="padding:8px;background:var(--glass-bg);border-radius:8px;min-width:40px;"><div>☀️</div><div style="font-size:12px;">${d}</div></div>`).join('')}
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ===== KONTAKTE =====
+            getContactsUI() {
+                const contacts = Storage.get('contacts', [
+                    { name: 'HalDo AI', phone: '+49 123 456789', email: 'haldo@haldo-os.com' },
+                    { name: 'Max Mustermann', phone: '+49 987 654321', email: 'max@example.com' }
+                ]);
+                return `
+                    <div>
+                        <div style="display:flex;gap:8px;margin-bottom:12px;">
+                            <input class="haldo-input" placeholder="Suchen..." style="flex:1;">
+                            <button class="haldo-btn" onclick="AppManager.addContact()">+</button>
+                        </div>
+                        ${contacts.map(c => `
+                            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--glass-bg);border-radius:8px;margin:4px 0;border:1px solid var(--glass-border);">
+                                <div>
+                                    <div style="font-weight:600;color:var(--text-primary);">${c.name}</div>
+                                    <div style="font-size:12px;color:var(--text-muted);">${c.phone}</div>
+                                </div>
+                                <button style="background:none;border:none;color:var(--text-muted);cursor:pointer;">✉️</button>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            },
+
+            // ===== SYSTEM MONITOR =====
+            getSystemMonitorUI() {
+                return `
+                    <div>
+                        <h2 style="color:var(--text-primary);">📊 System Monitor</h2>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;">
+                            <div style="padding:12px;background:var(--glass-bg);border-radius:8px;border:1px solid var(--glass-border);">
+                                <div style="color:var(--text-muted);font-size:12px;">CPU</div>
+                                <div style="font-size:24px;font-weight:700;color:var(--text-primary);">12%</div>
+                            </div>
+                            <div style="padding:12px;background:var(--glass-bg);border-radius:8px;border:1px solid var(--glass-border);">
+                                <div style="color:var(--text-muted);font-size:12px;">RAM</div>
+                                <div style="font-size:24px;font-weight:700;color:var(--text-primary);">3.2 GB</div>
+                            </div>
+                            <div style="padding:12px;background:var(--glass-bg);border-radius:8px;border:1px solid var(--glass-border);">
+                                <div style="color:var(--text-muted);font-size:12px;">Speicher</div>
+                                <div style="font-size:24px;font-weight:700;color:var(--text-primary);">42%</div>
+                            </div>
+                            <div style="padding:12px;background:var(--glass-bg);border-radius:8px;border:1px solid var(--glass-border);">
+                                <div style="color:var(--text-muted);font-size:12px;">Uptime</div>
+                                <div style="font-size:24px;font-weight:700;color:var(--text-primary);">${Kernel.getUptime()}s</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            },
+
+            // ===== TERMINAL =====
+            getTerminalUI() {
+                return `
+                    <div style="display:flex;flex-direction:column;height:100%;">
+                        <div id="terminal-output" style="flex:1;background:rgba(0,0,0,0.3);border-radius:8px;padding:12px;font-family:monospace;font-size:13px;overflow-y:auto;min-height:120px;color:#00ff88;">
+                            > HalDo OS Terminal v1.0\n> Bereit für Befehle...\n> ⚡
+                        </div>
+                        <div style="display:flex;gap:8px;margin-top:8px;">
+                            <span style="color:var(--text-secondary);">$</span>
+                            <input id="terminal-input" class="haldo-input" placeholder="Befehl eingeben..." style="flex:1;" onkeydown="if(event.key==='Enter')AppManager.runCommand()">
+                            <button onclick="AppManager.runCommand()" class="haldo-btn">⏎</button>
+                        </div>
+                    </div>
+                `;
+            },
+
+            runCommand() {
+                const input = document.getElementById('terminal-input');
+                const output = document.getElementById('terminal-output');
+                if (!input || !output) return;
+                const cmd = input.value.trim();
+                if (!cmd) return;
+                output.textContent += `\n$ ${cmd}`;
+                input.value = '';
+
+                // Einfache Commands
+                const responses = {
+                    help: 'Verfügbare Befehle: help, version, apps, clear, echo <text>, date, uptime',
+                    version: `HalDo AI OS ${Kernel.version}`,
+                    apps: `Installierte Apps: ${AppManager.installedApps.length}`,
+                    clear: '> Terminal gelöscht',
+                    date: new Date().toLocaleString(),
+                    uptime: `${Kernel.getUptime()}s`,
+                    echo: (args) => args.join(' ')
+                };
+
+                const parts = cmd.split(' ');
+                const command = parts[0].toLowerCase();
+                if (command === 'clear') {
+                    output.textContent = '> Terminal gelöscht';
+                } else if (command === 'echo') {
+                    output.textContent += `\n> ${parts.slice(1).join(' ')}`;
+                } else if (responses[command]) {
+                    const result = typeof responses[command] === 'function' ? responses[command](parts.slice(1)) :
+                        responses[command];
+                    output.textContent += `\n> ${result}`;
+                } else {
+                    output.textContent += `\n> Unbekannter Befehl: ${cmd}`;
+                }
+                output.scrollTop = output.scrollHeight;
+            },
+
+            // ===== DATEI-MANAGER =====
+            getFileManagerUI() {
+                const files = Storage.get('files', [
+                    { name: 'Dokumente', type: 'folder', icon: '📁' },
+                    { name: 'Bilder', type: 'folder', icon: '📁' },
+                    { name: 'Musik', type: 'folder', icon: '📁' },
+                    { name: 'Notizen.txt', type: 'file', icon: '📄' }
+                ]);
+                return `
+                    <div>
+                        <div style="display:flex;gap:8px;margin-bottom:12px;">
+                            <button class="haldo-btn haldo-btn-secondary">📁 Neu</button>
+                            <button class="haldo-btn haldo-btn-secondary">📤 Upload</button>
+                            <input class="haldo-input" placeholder="Suchen..." style="flex:1;">
+                        </div>
+                        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px;">
+                            ${files.map(f => `
+                                <div style="padding:12px;background:var(--glass-bg);border-radius:8px;text-align:center;border:1px solid var(--glass-border);cursor:pointer;">
+                                    <div style="font-size:32px;">${f.icon}</div>
+                                    <div style="font-size:12px;color:var(--text-secondary);margin-top:4px;">${f.name}</div>
+                                </div>
                             `).join('')}
                         </div>
                     </div>
                 `;
             },
 
-            getWeatherContent() {
+            // ===== MUSIK =====
+            getMusicUI() {
                 return `
                     <div style="text-align:center;padding:20px;">
-                        <div style="font-size:64px;">☀️</div>
-                        <div style="font-size:32px;font-weight:700;">22°C</div>
-                        <p style="color:var(--text-secondary);">Sonnig • Berlin</p>
-                        <div style="display:flex;justify-content:center;gap:24px;margin-top:16px;">
-                            <div>💧 65%</div>
-                            <div>💨 12 km/h</div>
+                        <div style="font-size:64px;">🎵</div>
+                        <h2 style="color:var(--text-primary);">Musikplayer</h2>
+                        <p style="color:var(--text-secondary);">Keine Titel in der Bibliothek</p>
+                        <div style="display:flex;justify-content:center;gap:16px;margin-top:16px;">
+                            <button class="haldo-btn haldo-btn-secondary">⏮</button>
+                            <button class="haldo-btn">▶</button>
+                            <button class="haldo-btn haldo-btn-secondary">⏭</button>
                         </div>
                     </div>
                 `;
             },
 
-            getContactsContent() {
+            // ===== GALERIE =====
+            getGalleryUI() {
                 return `
-                    <div style="padding:16px;">
-                        <input type="text" placeholder="Suchen..." style="width:100%;padding:8px 12px;background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:8px;color:var(--text-primary);outline:none;margin-bottom:12px;">
-                        <p style="color:var(--text-muted);text-align:center;">Keine Kontakte</p>
+                    <div>
+                        <h2 style="color:var(--text-primary);">🖼️ Galerie</h2>
+                        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px;margin-top:12px;">
+                            ${Array.from({length:8}, (_,i) => `
+                                <div style="padding:20px;background:var(--glass-bg);border-radius:8px;text-align:center;border:1px solid var(--glass-border);aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:32px;">
+                                    ${['🌄','🌅','🌠','🖼️','📷','🌈','🌌','🏞️'][i]}
+                                </div>
+                            `).join('')}
+                        </div>
                     </div>
                 `;
             },
 
-            openSettingsWindow() {
+            // ===== SETTINGS =====
+            openSettings(app) {
                 const categories = [
-                    { id: 'display', label: '🖥️ Display' },
+                    { id: 'general', label: '⚙️ Allgemein' },
                     { id: 'ai', label: '🧠 AI & Memory' },
+                    { id: 'display', label: '🖥️ Display' },
                     { id: 'language', label: '🌍 Sprache' },
                     { id: 'themes', label: '🎨 Themes' },
+                    { id: 'voice', label: '🎤 Voice' },
                     { id: 'system', label: '📊 System' }
                 ];
                 const content = `
                     <div style="display:flex;height:100%;">
-                        <div style="width:150px;padding:8px;border-right:1px solid var(--glass-border);">
+                        <div style="width:140px;padding:4px;border-right:1px solid var(--glass-border);flex-shrink:0;overflow-y:auto;">
                             ${categories.map(c => `
-                                <div onclick="AppManager.showSettings('${c.id}')" style="padding:8px 12px;margin:2px 0;border-radius:8px;cursor:pointer;color:var(--text-secondary);hover:background:var(--glass-bg);" data-cat="${c.id}">${c.label}</div>
+                                <div onclick="AppManager.showSettings('${c.id}')" data-cat="${c.id}" style="padding:8px 12px;margin:2px 0;border-radius:8px;cursor:pointer;color:var(--text-secondary);transition:all var(--transition-fast);">${c.label}</div>
                             `).join('')}
                         </div>
                         <div id="settings-content" style="flex:1;padding:16px;overflow-y:auto;">
-                            <h2>Einstellungen</h2>
+                            <h2 style="color:var(--text-primary);">Einstellungen</h2>
                             <p style="color:var(--text-secondary);">Wähle eine Kategorie</p>
                         </div>
                     </div>
                 `;
-                const win = this.createWindow('Einstellungen', '⚙️', content);
+                const win = this.createWindow(app.name, app.icon, content, 620, 480);
                 document.getElementById('window-container').appendChild(win);
                 this.updateTaskbar();
-                // AI & Memory Tab als Standard
-                setTimeout(() => this.showSettings('ai'), 100);
+                setTimeout(() => this.showSettings('general'), 100);
             },
 
             showSettings(category) {
                 const container = document.getElementById('settings-content');
                 if (!container) return;
 
-                // Aktive Kategorie hervorheben
                 document.querySelectorAll('[data-cat]').forEach(el => {
                     el.style.background = el.dataset.cat === category ? 'var(--primary)' : 'transparent';
                     el.style.color = el.dataset.cat === category ? 'white' : 'var(--text-secondary)';
@@ -1473,66 +1897,82 @@
 
                 let content = '';
                 switch (category) {
-                    case 'display':
+                    case 'general':
                         content = `
-                            <h2>🖥️ Display</h2>
+                            <h2 style="color:var(--text-primary);">⚙️ Allgemein</h2>
                             <div style="margin-top:12px;">
-                                <label style="display:block;margin:8px 0;">Auflösung</label>
-                                <select style="width:100%;padding:8px;background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:8px;color:var(--text-primary);">
-                                    <option>Full HD (1920x1080)</option>
-                                    <option>4K (3840x2160)</option>
-                                    <option>8K (7680x4320)</option>
-                                </select>
+                                <div style="margin:12px 0;"><label style="display:block;color:var(--text-secondary);margin-bottom:4px;">Systemname</label><input class="haldo-input" value="HalDo AI OS 24.6"></div>
+                                <div style="margin:12px 0;"><label style="display:block;color:var(--text-secondary);margin-bottom:4px;">Zeitzone</label><select class="haldo-input"><option>Europe/Berlin</option><option>Europe/London</option><option>America/New_York</option></select></div>
                             </div>
                         `;
                         break;
                     case 'ai':
                         const apiKey = Storage.get('groq_api_key', '');
                         content = `
-                            <h2>🧠 AI & Memory</h2>
+                            <h2 style="color:var(--text-primary);">🧠 AI & Memory</h2>
                             <div style="margin-top:12px;">
-                                <label style="display:block;margin:8px 0;">🔑 Groq API Key</label>
-                                <input type="password" id="ai-key-input" value="${apiKey}" placeholder="gsk_..." style="width:100%;padding:8px 12px;background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:8px;color:var(--text-primary);outline:none;">
-                                <button onclick="AppManager.saveAIKey()" style="margin-top:8px;padding:8px 16px;background:var(--primary);border:none;border-radius:8px;color:white;cursor:pointer;">Speichern</button>
-                                <div style="margin-top:12px;padding:12px;background:var(--glass-bg);border-radius:8px;">
-                                    <p style="color:var(--text-secondary);">🧠 Memory: ${Storage.get('ai_memory', []).length} Einträge</p>
-                                    <button onclick="Storage.set('ai_memory', []);alert('Memory gelöscht!');" style="margin-top:8px;padding:4px 12px;background:var(--danger);border:none;border-radius:6px;color:white;cursor:pointer;">Löschen</button>
+                                <div style="margin:12px 0;">
+                                    <label style="display:block;color:var(--text-secondary);margin-bottom:4px;">🔑 Groq API Key</label>
+                                    <input id="ai-key-input" class="haldo-input" type="password" value="${apiKey}" placeholder="gsk_...">
+                                    <button onclick="AppManager.saveAIKey()" class="haldo-btn" style="margin-top:8px;">Speichern</button>
                                 </div>
+                                <div style="padding:12px;background:var(--glass-bg);border-radius:8px;margin-top:12px;">
+                                    <p style="color:var(--text-secondary);">🧠 Memory: ${Storage.get('ai_memory', []).length} Einträge</p>
+                                    <button onclick="Storage.set('ai_memory', []);alert('Memory gelöscht!');" class="haldo-btn haldo-btn-secondary" style="margin-top:8px;">🗑️ Löschen</button>
+                                </div>
+                            </div>
+                        `;
+                        break;
+                    case 'display':
+                        content = `
+                            <h2 style="color:var(--text-primary);">🖥️ Display</h2>
+                            <div style="margin-top:12px;">
+                                <div style="margin:12px 0;"><label style="display:block;color:var(--text-secondary);margin-bottom:4px;">Auflösung</label><select class="haldo-input"><option>Full HD (1920x1080)</option><option>4K (3840x2160)</option><option>8K (7680x4320)</option></select></div>
+                                <div style="margin:12px 0;"><label style="display:block;color:var(--text-secondary);margin-bottom:4px;">Helligkeit</label><input type="range" min="0" max="100" value="80" style="width:100%;accent-color:var(--primary);"></div>
                             </div>
                         `;
                         break;
                     case 'language':
                         content = `
-                            <h2>🌍 Sprache</h2>
+                            <h2 style="color:var(--text-primary);">🌍 Sprache</h2>
                             <div style="margin-top:12px;">
-                                <label style="display:block;margin:8px 0;">Systemsprache</label>
-                                <select style="width:100%;padding:8px;background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:8px;color:var(--text-primary);">
-                                    <option>🇩🇪 Deutsch</option>
-                                    <option>🇬🇧 English</option>
-                                    <option>🏴 Kurmancî</option>
-                                    <option>🇹🇷 Türkçe</option>
-                                </select>
+                                <div style="margin:12px 0;"><label style="display:block;color:var(--text-secondary);margin-bottom:4px;">Systemsprache</label><select class="haldo-input"><option>🇩🇪 Deutsch</option><option>🇬🇧 English</option><option>🏴 Kurmancî</option><option>🇹🇷 Türkçe</option><option>🇸🇦 العربية</option><option>🇫🇷 Français</option><option>🇪🇸 Español</option></select></div>
+                                <div style="margin:12px 0;"><label style="display:block;color:var(--text-secondary);margin-bottom:4px;">Tastaturlayout</label><select class="haldo-input"><option>QWERTZ</option><option>QWERTY</option><option>Êzîdî</option></select></div>
                             </div>
                         `;
                         break;
                     case 'themes':
                         content = `
-                            <h2>🎨 Themes</h2>
-                            <div style="display:flex;gap:12px;margin-top:12px;">
-                                <div onclick="document.documentElement.setAttribute('data-theme','dark')" style="padding:12px;background:var(--glass-bg);border-radius:12px;cursor:pointer;border:2px solid var(--glass-border);">🌙 Dark</div>
-                                <div onclick="document.documentElement.setAttribute('data-theme','light')" style="padding:12px;background:var(--glass-bg);border-radius:12px;cursor:pointer;border:2px solid var(--glass-border);">☀️ Light</div>
-                                <div onclick="document.documentElement.setAttribute('data-theme','cosmic')" style="padding:12px;background:var(--glass-bg);border-radius:12px;cursor:pointer;border:2px solid var(--glass-border);">🌌 Cosmic</div>
+                            <h2 style="color:var(--text-primary);">🎨 Themes</h2>
+                            <div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:12px;">
+                                <div onclick="document.documentElement.setAttribute('data-theme','dark')" style="padding:16px;background:var(--glass-bg);border-radius:12px;cursor:pointer;border:2px solid ${document.documentElement.getAttribute('data-theme')==='dark'?'var(--primary)':'var(--glass-border)'};flex:1;min-width:80px;text-align:center;">🌙 Dark</div>
+                                <div onclick="document.documentElement.setAttribute('data-theme','light')" style="padding:16px;background:var(--glass-bg);border-radius:12px;cursor:pointer;border:2px solid ${document.documentElement.getAttribute('data-theme')==='light'?'var(--primary)':'var(--glass-border)'};flex:1;min-width:80px;text-align:center;">☀️ Light</div>
+                                <div onclick="document.documentElement.setAttribute('data-theme','cosmic')" style="padding:16px;background:var(--glass-bg);border-radius:12px;cursor:pointer;border:2px solid ${document.documentElement.getAttribute('data-theme')==='cosmic'?'var(--primary)':'var(--glass-border)'};flex:1;min-width:80px;text-align:center;">🌌 Cosmic</div>
+                            </div>
+                        `;
+                        break;
+                    case 'voice':
+                        content = `
+                            <h2 style="color:var(--text-primary);">🎤 Voice</h2>
+                            <div style="margin-top:12px;">
+                                <div style="margin:12px 0;"><label style="display:block;color:var(--text-secondary);margin-bottom:4px;">Stimme</label><select class="haldo-input"><option>👩 Deutsch – weiblich</option><option>👨 Deutsch – männlich</option><option>👧 Deutsch – jung</option><option>🇬🇧 English – female</option><option>🇬🇧 English – male</option></select></div>
+                                <div style="margin:12px 0;"><label style="display:block;color:var(--text-secondary);margin-bottom:4px;">Geschwindigkeit</label><input type="range" min="0.5" max="2" step="0.1" value="1" style="width:100%;accent-color:var(--primary);"></div>
+                                <button class="haldo-btn" onclick="alert('🎤 Voice Test: Hallo, ich bin HalDo!')">🔊 Test</button>
                             </div>
                         `;
                         break;
                     case 'system':
                         content = `
-                            <h2>📊 System</h2>
+                            <h2 style="color:var(--text-primary);">📊 System</h2>
                             <div style="margin-top:12px;">
-                                <p><strong>Version:</strong> 24.6</p>
-                                <p><strong>Uptime:</strong> ${Kernel.getUptime()}s</p>
-                                <p><strong>Apps:</strong> ${this.installedApps.length}</p>
-                                <button onclick="Kernel.reboot()" style="margin-top:12px;padding:8px 16px;background:var(--warning);border:none;border-radius:8px;color:white;cursor:pointer;">🔄 Neustart</button>
+                                <p style="color:var(--text-secondary);"><strong>Version:</strong> ${Kernel.version}</p>
+                                <p style="color:var(--text-secondary);"><strong>Uptime:</strong> ${Kernel.getUptime()}s</p>
+                                <p style="color:var(--text-secondary);"><strong>Apps:</strong> ${this.installedApps.length}</p>
+                                <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
+                                    <button onclick="Kernel.reboot()" class="haldo-btn haldo-btn-secondary">🔄 Neustart</button>
+                                    <button onclick="Storage.clear();alert('Cache geleert!');" class="haldo-btn haldo-btn-secondary">🗑️ Cache leeren</button>
+                                    <button onclick="AppManager.installAll()" class="haldo-btn">📱 Alle Apps installieren</button>
+                                </div>
                             </div>
                         `;
                         break;
@@ -1544,30 +1984,28 @@
                 const input = document.getElementById('ai-key-input');
                 if (!input) return;
                 const key = input.value.trim();
-                if (key) {
-                    Storage.set('groq_api_key', key);
-                    alert('✅ API Key gespeichert!');
-                } else {
-                    alert('⚠️ Bitte einen gültigen Key eingeben.');
-                }
+                if (key) { Storage.set('groq_api_key', key);
+                    alert('✅ API Key gespeichert!'); } else { alert('⚠️ Bitte einen gültigen Key eingeben.'); }
             },
 
-            openAIChatWindow() {
+            // ===== AI CHAT =====
+            openAIChat(app) {
                 const content = `
                     <div style="display:flex;flex-direction:column;height:100%;padding:0;">
                         <div id="ai-chat-messages" style="flex:1;overflow-y:auto;padding:12px;margin-bottom:8px;">
                             <div style="text-align:center;color:var(--text-muted);padding:20px;">
-                                💙 Hallo! Ich bin HalDo, deine KI-Assistentin.
+                                💙 Hallo! Ich bin <strong style="color:var(--text-primary);">HalDo</strong>, deine intelligente KI-Assistentin.<br>
+                                Stelle mir eine Frage, oder sag mir, was du möchtest.
                             </div>
                         </div>
                         <div style="display:flex;gap:8px;padding:8px 12px;border-top:1px solid var(--glass-border);">
-                            <input id="ai-chat-input" type="text" placeholder="Nachricht an HalDo..." style="flex:1;padding:10px 14px;background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:12px;color:var(--text-primary);outline:none;font-size:14px;">
-                            <button onclick="AppManager.sendAIMessage()" style="padding:10px 18px;background:var(--primary);border:none;border-radius:12px;color:white;cursor:pointer;">📤</button>
-                            <button onclick="AppManager.toggleVoice()" style="padding:10px 14px;background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:12px;color:var(--text-secondary);cursor:pointer;font-size:16px;">🎤</button>
+                            <input id="ai-chat-input" class="haldo-input" placeholder="Nachricht an HalDo..." style="flex:1;" onkeydown="if(event.key==='Enter')AppManager.sendAIMessage()">
+                            <button onclick="AppManager.sendAIMessage()" class="haldo-btn">📤</button>
+                            <button onclick="AppManager.toggleVoiceInput()" class="haldo-btn haldo-btn-secondary" id="ai-voice-btn" style="font-size:16px;">🎤</button>
                         </div>
                     </div>
                 `;
-                const win = this.createWindow('HalDo AI', '🤖', content);
+                const win = this.createWindow(app.name, app.icon, content, 560, 480);
                 document.getElementById('window-container').appendChild(win);
                 this.updateTaskbar();
             },
@@ -1583,140 +2021,147 @@
                 // User-Nachricht
                 const userMsg = document.createElement('div');
                 userMsg.style.cssText =
-                    'text-align:right;margin:6px 0;padding:10px 14px;background:var(--primary);border-radius:12px;color:white;max-width:85%;margin-left:auto;';
+                    'text-align:right;margin:6px 0;padding:10px 16px;background:var(--primary);border-radius:12px;color:white;max-width:85%;margin-left:auto;border-bottom-right-radius:4px;';
                 userMsg.textContent = '🧑 ' + text;
                 messages.appendChild(userMsg);
 
                 // Lade-Indikator
                 const loading = document.createElement('div');
-                loading.style.cssText = 'text-align:left;margin:6px 0;padding:10px 14px;background:var(--glass-bg);border-radius:12px;color:var(--text-secondary);max-width:85%;';
+                loading.style.cssText =
+                    'text-align:left;margin:6px 0;padding:10px 16px;background:var(--glass-bg);border-radius:12px;color:var(--text-secondary);max-width:85%;border-bottom-left-radius:4px;';
                 loading.textContent = '💭 HalDo denkt...';
                 messages.appendChild(loading);
                 messages.scrollTop = messages.scrollHeight;
 
-                // API-Key prüfen
                 const apiKey = Storage.get('groq_api_key', '');
                 if (!apiKey) {
-                    loading.textContent = '⚠️ Bitte trage deinen Groq API Key in den Settings ein!';
+                    loading.textContent = '⚠️ Bitte trage deinen Groq API Key in den Settings ein! (AI & Memory)';
                     return;
                 }
 
-                // Anfrage an Groq
                 fetch('https://api.groq.com/openai/v1/chat/completions', {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${apiKey}`
-                        },
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
                         body: JSON.stringify({
                             model: 'mixtral-8x7b-32768',
                             messages: [
-                                { role: 'system', content: 'Du bist HalDo, eine freundliche KI-Assistentin.' },
+                                { role: 'system', content: 'Du bist HalDo, eine freundliche, intelligente KI-Assistentin. Du sprichst wie ein Mensch, bist einfühlsam, hilfsbereit und professionell. Antworte immer in der Sprache des Benutzers.' },
                                 { role: 'user', content: text }
                             ],
                             temperature: 0.7,
-                            max_tokens: 500
+                            max_tokens: 600
                         })
                     })
                     .then(res => res.json())
                     .then(data => {
                         loading.remove();
-                        const reply = data.choices?.[0]?.message?.content || 'Keine Antwort';
+                        const reply = data.choices?.[0]?.message?.content || 'Entschuldigung, ich habe keine Antwort.';
                         const aiMsg = document.createElement('div');
                         aiMsg.style.cssText =
-                            'text-align:left;margin:6px 0;padding:10px 14px;background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:12px;color:var(--text-primary);max-width:85%;';
+                            'text-align:left;margin:6px 0;padding:10px 16px;background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:12px;color:var(--text-primary);max-width:85%;border-bottom-left-radius:4px;';
                         aiMsg.textContent = '💙 ' + reply;
                         messages.appendChild(aiMsg);
                         messages.scrollTop = messages.scrollHeight;
 
-                        // Memory speichern
+                        // Memory
                         const memory = Storage.get('ai_memory', []);
                         memory.push({ user: text, assistant: reply, time: Date.now() });
                         if (memory.length > 50) memory.shift();
                         Storage.set('ai_memory', memory);
+
+                        // Voice Ausgabe
+                        if ('speechSynthesis' in window) {
+                            const utter = new SpeechSynthesisUtterance(reply);
+                            utter.lang = 'de-DE';
+                            window.speechSynthesis.speak(utter);
+                        }
                     })
                     .catch(err => {
                         loading.textContent = '❌ Fehler: ' + err.message;
                     });
             },
 
-            toggleVoice() {
-                const btn = document.querySelector('#ai-chat-input + button + button');
-                if (btn) {
-                    btn.textContent = btn.textContent === '🎤' ? '⏹️' : '🎤';
-                    btn.style.color = btn.textContent === '⏹️' ? 'var(--success)' : 'var(--text-secondary)';
-                }
-                // Speech Recognition (vereinfacht)
+            toggleVoiceInput() {
+                const btn = document.getElementById('ai-voice-btn');
+                if (!btn) return;
                 if ('webkitSpeechRecognition' in window) {
-                    const recognition = new webkitSpeechRecognition();
-                    recognition.lang = 'de-DE';
-                    recognition.onresult = (event) => {
-                        const text = event.results[0][0].transcript;
+                    const rec = new webkitSpeechRecognition();
+                    rec.lang = 'de-DE';
+                    rec.onstart = () => { btn.textContent = '⏹️';
+                        btn.style.color = 'var(--success)'; };
+                    rec.onend = () => { btn.textContent = '🎤';
+                        btn.style.color = ''; };
+                    rec.onresult = (e) => {
+                        const text = e.results[0][0].transcript;
                         const input = document.getElementById('ai-chat-input');
-                        if (input) {
-                            input.value = text;
-                            AppManager.sendAIMessage();
-                        }
+                        if (input) { input.value = text;
+                            AppManager.sendAIMessage(); }
                     };
-                    recognition.start();
+                    rec.start();
                 } else {
                     alert('🎤 Speech Recognition wird von deinem Browser nicht unterstützt.');
                 }
             },
 
-            addNote() {
-                const input = document.getElementById('notes-input');
-                if (!input || !input.value.trim()) return;
-                const notes = Storage.get('notes', []);
-                notes.push(input.value.trim());
-                Storage.set('notes', notes);
-                input.value = '';
-                // Refresh notes list
-                const win = document.querySelector('.window .window-body');
-                if (win) {
-                    win.innerHTML = AppManager.getNotesContent();
+            // ===== KATEGORIEN =====
+            openCategory(category) {
+                const apps = this.apps.filter(a => a.category === category);
+                if (apps.length === 0) {
+                    alert(`📱 Keine Apps in Kategorie "${category}"`);
+                    return;
                 }
+                const content = `
+                    <div>
+                        <h2 style="color:var(--text-primary);">📱 ${category.charAt(0).toUpperCase()+category.slice(1)}</h2>
+                        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px;margin-top:12px;">
+                            ${apps.map(app => `
+                                <div onclick="AppManager.openApp('${app.id}')" style="padding:16px;background:var(--glass-bg);border-radius:12px;text-align:center;border:1px solid var(--glass-border);cursor:pointer;transition:all var(--transition-fast);">
+                                    <div style="font-size:32px;">${app.icon}</div>
+                                    <div style="font-size:12px;color:var(--text-secondary);margin-top:4px;">${app.name}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+                const win = this.createWindow(`${category}`, '📱', content, 500, 400);
+                document.getElementById('window-container').appendChild(win);
+                this.updateTaskbar();
             },
 
-            deleteNote(index) {
-                const notes = Storage.get('notes', []);
-                notes.splice(index, 1);
-                Storage.set('notes', notes);
-                const win = document.querySelector('.window .window-body');
-                if (win) {
-                    win.innerHTML = AppManager.getNotesContent();
-                }
+            // ===== INSTALLATION =====
+            installApp(appId) {
+                if (this.installedApps.includes(appId)) return false;
+                this.installedApps.push(appId);
+                Storage.set('installed_apps', this.installedApps);
+                this.renderDesktopIcons();
+                return true;
             },
 
-            calcInput(value) {
-                const display = document.getElementById('calc-display');
-                if (!display) return;
-                if (value === '=') {
-                    try {
-                        display.textContent = eval(display.textContent.replace('×', '*').replace('÷', '/'));
-                    } catch { display.textContent = 'Error'; }
-                } else if (value === 'C') {
-                    display.textContent = '0';
-                } else if (value === '⌫') {
-                    display.textContent = display.textContent.length > 1 ? display.textContent.slice(0, -1) : '0';
-                } else {
-                    if (display.textContent === '0' && value !== '.') display.textContent = value;
-                    else display.textContent += value;
-                }
+            installAll() {
+                this.apps.forEach(a => {
+                    if (!this.installedApps.includes(a.id)) {
+                        this.installedApps.push(a.id);
+                    }
+                });
+                Storage.set('installed_apps', this.installedApps);
+                this.renderDesktopIcons();
+                alert(`✅ ${this.installedApps.length} Apps installiert!`);
             },
 
+            // ===== DESKTOP ICONS =====
             renderDesktopIcons() {
                 const container = document.getElementById('desktop-icons');
                 if (!container) return;
                 const apps = this.apps.filter(a => this.installedApps.includes(a.id));
                 container.innerHTML = apps.map(app => `
-                    <div class="desktop-icon" onclick="AppManager.openApp('${app.id}')">
+                    <div class="desktop-icon" onclick="AppManager.openApp('${app.id}')" title="${app.desc || app.name}">
                         <div class="icon-img">${app.icon}</div>
                         <div class="icon-label">${app.name}</div>
                     </div>
                 `).join('');
             },
 
+            // ===== TASKBAR =====
             updateTaskbar() {
                 const container = document.getElementById('taskbar-apps');
                 if (!container) return;
@@ -1738,65 +2183,27 @@
         window.AppManager = AppManager;
 
         // ============================================================
-        //  7. UHR & TASKBAR
+        //  7. UHR
         // ============================================================
         function updateClock() {
             const el = document.getElementById('taskbar-time');
             if (el) {
-                const now = new Date();
-                el.textContent = now.toLocaleTimeString('de', { hour: '2-digit', minute: '2-digit' });
+                el.textContent = new Date().toLocaleTimeString('de', { hour: '2-digit', minute: '2-digit' });
             }
         }
 
         // ============================================================
-        //  8. MAIN – START
+        //  8. MAIN START
         // ============================================================
         document.addEventListener('DOMContentLoaded', () => {
             console.log('🚀 HalDo AI OS 24.6 startet...');
-
-            // Boot initialisieren
             Boot.init();
-
-            // Taskbar Klicks
-            document.getElementById('taskbar-logo')?.addEventListener('click', () => {
-                AppManager.openApp('app-center');
-            });
-
-            document.getElementById('taskbar-notifications')?.addEventListener('click', () => {
-                alert('🔔 Keine neuen Benachrichtigungen');
-            });
-
-            document.getElementById('taskbar-status')?.addEventListener('click', () => {
-                alert(`✅ System läuft\nVersion: 24.6\nUptime: ${Kernel.getUptime()}s`);
-            });
-
-            document.getElementById('taskbar-theme')?.addEventListener('click', () => {
-                const themes = ['dark', 'light', 'cosmic'];
-                const current = document.documentElement.getAttribute('data-theme') || 'dark';
-                const next = themes[(themes.indexOf(current) + 1) % themes.length];
-                document.documentElement.setAttribute('data-theme', next);
-                document.getElementById('taskbar-theme').textContent = next === 'dark' ? '🌙' : next === 'light' ?
-                    '☀️' : '🌌';
-            });
-
-            // AI Floating Button
-            document.getElementById('ai-floating-btn')?.addEventListener('click', () => {
-                AppManager.openApp('haldo-ai');
-            });
-
-            // Uhr starten
-            updateClock();
-            setInterval(updateClock, 10000);
-
-            // Boot starten
-            setTimeout(() => Boot.start(), 300);
-
-            console.log('✅ HalDo AI OS 24.6 bereit! 💙❤️🚀');
+            setTimeout(() => Boot.start(), 400);
         });
 
         // Globale Fehlerbehandlung
         window.onerror = (msg, url, line) => {
-            console.error('❌ Globaler Fehler:', msg, url, line);
+            console.error('❌ Fehler:', msg, url, line);
         };
 
         console.log('💙❤️🚀 HalDo AI OS 24.6 – Cosmic Intelligent Operating System');
