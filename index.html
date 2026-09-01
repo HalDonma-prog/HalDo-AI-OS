@@ -1,32 +1,35 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#0a0a1a">
-    <meta name="description" content="HalDo AI OS 24.6 – Cosmic Intelligent Operating System">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="theme-color" content="#0a0a1a" />
+    <meta name="description" content="HalDo AI OS 24.6 – Cosmic Intelligent Operating System" />
     <title>HalDo AI OS 24.6</title>
-    
-    <!-- Three.js für Cosmic World -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    
-    <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
-    <!-- Main Styles -->
-    <link rel="stylesheet" href="css/style.css">
-    
-    <!-- Favicon / Logo -->
-    <link rel="icon" href="assets/logo.png" type="image/png">
+
+    <!-- Three.js für 3D / Cosmic World -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js">
+    </script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+
+    <!-- Haupt-Styles -->
+    <link rel="stylesheet" href="css/style.css" />
+
+    <!-- Favicon -->
+    <link rel="icon" href="assets/logo.png" type="image/png" />
 </head>
+
 <body>
+
     <!-- ========================================= -->
     <!-- BOOT / LOADER SCREEN                      -->
     <!-- ========================================= -->
     <div id="boot-screen">
         <div class="boot-container">
             <div class="boot-logo">
-                <img src="assets/logo.png" alt="HalDo OS" id="boot-logo-img">
+                <img src="assets/logo.png" alt="HalDo OS" id="boot-logo-img" />
             </div>
             <h1 class="boot-title">HalDo AI OS</h1>
             <p class="boot-subtitle">cosmic intelligent operating system</p>
@@ -42,25 +45,31 @@
     </div>
 
     <!-- ========================================= -->
-    <!-- DESKTOP (wird nach Boot eingeblendet)    -->
+    <!-- DESKTOP                                   -->
     <!-- ========================================= -->
     <div id="desktop" style="display:none;">
+
         <!-- Cosmic World Canvas (Hintergrund) -->
         <div id="cosmic-canvas-container"></div>
 
         <!-- Desktop Icons -->
-        <div id="desktop-icons">
-            <!-- Wird dynamisch von appManager.js generiert -->
+        <div id="desktop-icons"></div>
+
+        <!-- Fenster-Container -->
+        <div id="window-container"></div>
+
+        <!-- AI Floating Button -->
+        <div id="ai-floating-btn" class="floating-btn">
+            <img src="assets/logo.png" alt="AI" class="floating-logo" />
         </div>
 
         <!-- Taskbar / Dock -->
         <div id="taskbar">
             <div class="taskbar-left">
-                <img src="assets/logo.png" alt="HalDo" id="taskbar-logo" class="taskbar-icon">
+                <img src="assets/logo.png" alt="HalDo" id="taskbar-logo" class="taskbar-icon" />
                 <span id="taskbar-time">00:00</span>
             </div>
             <div class="taskbar-center">
-                <!-- Offene Apps werden hier angezeigt -->
                 <div id="taskbar-apps"></div>
             </div>
             <div class="taskbar-right">
@@ -72,52 +81,53 @@
             </div>
         </div>
 
-        <!-- Window Container (für geöffnete Apps) -->
-        <div id="window-container"></div>
-
-        <!-- AI Chat Floating Button -->
-        <div id="ai-floating-btn" class="floating-btn">
-            <img src="assets/logo.png" alt="AI" class="floating-logo">
-        </div>
     </div>
 
     <!-- ========================================= -->
     <!-- SCRIPTS                                   -->
     <!-- ========================================= -->
-    <!-- Core System -->
+
+    <!-- CORE -->
     <script src="js/core/kernel.js"></script>
     <script src="js/core/eventBus.js"></script>
-    <script src="js/core/serviceBridge.js"></script>
     <script src="js/core/storage.js"></script>
+    <script src="js/core/serviceBridge.js"></script>
     <script src="js/core/boot.js"></script>
 
-    <!-- Display System -->
+    <!-- DISPLAY -->
     <script src="js/display/windowManager.js"></script>
     <script src="js/display/appRegistry.js"></script>
     <script src="js/display/appRouter.js"></script>
     <script src="js/display/appRuntime.js"></script>
 
-    <!-- Cosmic World -->
+    <!-- COSMIC WORLD -->
     <script src="js/cosmic/cosmicEffects.js"></script>
     <script src="js/cosmic/solarSystem.js"></script>
     <script src="js/cosmic/cosmicWorld.js"></script>
 
-    <!-- AI & Voice -->
+    <!-- AI -->
     <script src="js/ai/aiMemory.js"></script>
     <script src="js/ai/aiCore.js"></script>
+    <script src="js/ai/aiTools.js"></script>
     <script src="js/ai/livingAI.js"></script>
+
+    <!-- VOICE & LANGUAGE -->
     <script src="js/voice/languageSystem.js"></script>
     <script src="js/voice/voiceSystem.js"></script>
 
-    <!-- Apps -->
+    <!-- APPS -->
     <script src="js/apps/appManager.js"></script>
 
-    <!-- Utils -->
+    <!-- SETTINGS -->
+    <script src="js/settings/settings.js"></script>
+
+    <!-- UTILS -->
     <script src="js/utils/shortcuts.js"></script>
     <script src="js/utils/themes.js"></script>
     <script src="js/utils/helpers.js"></script>
 
-    <!-- Main Entry -->
+    <!-- MAIN -->
     <script src="js/main.js"></script>
+
 </body>
 </html>
