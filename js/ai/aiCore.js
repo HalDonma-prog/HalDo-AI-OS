@@ -4,7 +4,10 @@
  */
 
 const AICore = {
-    apiKey: '',
+    // ⚠️ NUR FÜR LOKALE TESTS – HIER KANNST DU DEINEN KEY EINFÜGEN
+    // ABER: Settings-Variante ist SICHERER!
+    apiKey: '',  // <-- HIER KANNST DU LOKAL DEINEN KEY EINFÜGEN (NICHT TEILEN!)
+    
     model: 'mixtral-8x7b-32768',
     temperature: 0.7,
     maxTokens: 1024,
@@ -28,12 +31,18 @@ Antworte immer in der Sprache des Benutzers.`,
     init() {
         console.log('🧠 AI Core wird initialisiert...');
 
-        // API-Key aus Storage laden
+        // 🔥 WICHTIG: Der Key wird AUS DER UI GELADEN (Settings)
+        // So bleibt er sicher und wird NIE im Code gespeichert!
         this.apiKey = Storage.get('groq_api_key', '');
+        
+        // FALLBACK für lokale Tests (NUR WENN DU WILLST):
+        // if (!this.apiKey) {
+        //     this.apiKey = 'gsk_DEIN_NEUER_KEY_HIER'; // <-- NUR LOKAL!
+        // }
+        
         this.temperature = Storage.get('ai_temperature', 0.7);
         this.model = Storage.get('ai_model', 'mixtral-8x7b-32768');
 
-        // System-Prompt aus Storage laden (falls geändert)
         const savedPrompt = Storage.get('ai_system_prompt');
         if (savedPrompt) this.systemPrompt = savedPrompt;
 
@@ -46,12 +55,13 @@ Antworte immer in der Sprache des Benutzers.`,
     setApiKey(key) {
         this.apiKey = key;
         Storage.set('groq_api_key', key);
+        console.log('🔑 API Key gespeichert (lokal)');
         return this;
     },
 
     async chat(messages, options = {}) {
         if (!this.apiKey) {
-            console.warn('⚠️ Kein API-Key für Groq');
+            console.warn('⚠️ Kein API-Key für Groq – bitte in Settings eintragen!');
             return this.fallbackResponse(messages);
         }
 
@@ -68,6 +78,8 @@ Antworte immer in der Sprache des Benutzers.`,
                 { role: 'system', content: this.systemPrompt },
                 ...messages
             ];
+
+            console.log('📤 Sende Anfrage an Groq API...');
 
             const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
                 method: 'POST',
@@ -86,7 +98,7 @@ Antworte immer in der Sprache des Benutzers.`,
 
             if (!response.ok) {
                 const error = await response.json();
-                throw new Error(error.error?.message || 'API-Fehler');
+                throw new Error(error.error?.message || `API-Fehler (${response.status})`);
             }
 
             const data = await response.json();
@@ -148,7 +160,6 @@ Frag mich einfach: "Öffne Notizen" oder "Zeige mir die Planeten"! 💙❤️�
             response: response
         });
 
-        // Nur die letzten 100 Gespräche speichern
         if (memory.length > 100) {
             memory.splice(0, memory.length - 100);
         }
