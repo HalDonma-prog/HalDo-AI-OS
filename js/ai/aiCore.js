@@ -4,10 +4,8 @@
  */
 
 const AICore = {
-    // ⚠️ NUR FÜR LOKALE TESTS – HIER KANNST DU DEINEN KEY EINFÜGEN
-    // ABER: Settings-Variante ist SICHERER!
-    apiKey: '',  // <-- HIER KANNST DU LOKAL DEINEN KEY EINFÜGEN (NICHT TEILEN!)
-    
+    apiKey: '',  // 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
+
     model: 'mixtral-8x7b-32768',
     temperature: 0.7,
     maxTokens: 1024,
