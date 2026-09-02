@@ -14,7 +14,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
 
     <style>
-        /* ===== DESIGNS ===== */
+        /* ===== DESIGNS (wie gehabt) ===== */
         :root {
             --primary: #6C3CE1;
             --primary-dark: #4A1FA6;
@@ -1010,11 +1010,16 @@
     </div>
 
     <!-- ============================================================
-    JAVASCRIPT – DAS KOMPLETTE SYSTEM
+    JAVASCRIPT – DAS KOMPLETTE SYSTEM MIT FESTEM API-KEY
     ============================================================ -->
 
-    <!-- CORE -->
     <script>
+        // ============================================================
+        //  ⚡ HIER DEINEN NEUEN GROQ API KEY EINFÜGEN (gsk_...)
+        //  ⚡ NUR DIESE EINE ZEILE ÄNDERN!
+        // ============================================================
+        const HALDO_API_KEY = 'gsk_DEIN_NEUEN_KEY_HIER'; // ← HIER DEINEN KEY EINFÜGEN!
+
         // ============================================================
         //  STORAGE
         // ============================================================
@@ -2081,10 +2086,10 @@
         window.LivingAI = LivingAI;
 
         // ============================================================
-        //  AI CORE (ULTIMATE)
+        //  ⚡ AI CORE (ULTIMATE) – MIT FESTEM API-KEY!
         // ============================================================
         const AICore = {
-            apiKey: '',
+            apiKey: HALDO_API_KEY, // ← KEY WIRD VON OBEN GELADEN!
             model: 'mixtral-8x7b-32768',
             temperature: 0.7,
             isReady: false,
@@ -2188,7 +2193,7 @@ Wichtige Prinzipien:
 
             init() {
                 console.log('🧠 AI Core ULTIMATE wird initialisiert...');
-                this.apiKey = Storage.get('groq_api_key', '');
+                this.apiKey = HALDO_API_KEY; // ← KEY WIRD HIER GESETZT!
                 this.temperature = Storage.get('ai_temperature', 0.7);
                 this.model = Storage.get('ai_model', 'mixtral-8x7b-32768');
                 const savedPrompt = Storage.get('ai_system_prompt');
@@ -2196,6 +2201,7 @@ Wichtige Prinzipien:
                 this.isReady = true;
                 EventBus.emit('ai:ready');
                 console.log('✅ AI Core ULTIMATE ready!');
+                console.log('🔑 API Key:', this.apiKey ? '✅ Vorhanden' : '❌ Fehlt');
                 return this;
             },
 
@@ -2217,9 +2223,8 @@ Wichtige Prinzipien:
                 }
 
                 if (!this.hasValidKey()) {
-                    const errorMsg = '⚠️ Bitte trage deinen Groq API Key in den Settings ein! (AI & Memory)';
-                    EventBus.emit('ai:error', { error: 'missing_api_key', message: errorMsg });
-                    return errorMsg;
+                    console.error('❌ KEIN GÜLTIGER API KEY!');
+                    return '⚠️ Bitte trage einen gültigen Groq API Key ein! (gsk_...)';
                 }
 
                 this.isProcessing = true;
@@ -2230,6 +2235,8 @@ Wichtige Prinzipien:
                         { role: 'system', content: this.systemPrompt },
                         ...messages
                     ];
+
+                    console.log('📤 Sende Anfrage an Groq API...');
 
                     const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
                         method: 'POST',
@@ -2254,6 +2261,7 @@ Wichtige Prinzipien:
                     const data = await response.json();
                     const content = data.choices[0]?.message?.content || 'Entschuldigung, ich habe keine Antwort.';
 
+                    // Memory speichern
                     const memory = Storage.get('ai_memory', []);
                     memory.push({ user: messages[messages.length - 1]?.content || '', assistant: content,
                         time: Date.now() });
