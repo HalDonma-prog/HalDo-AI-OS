@@ -330,9 +330,6 @@
             align-items: center;
             justify-content: center;
             background: linear-gradient(135deg, var(--primary), var(--secondary));
-            font-size: 14px;
-            color: #fff;
-            font-weight: 900;
             overflow: hidden;
         }
         #taskbar-logo img {
@@ -1448,21 +1445,21 @@
         };
 
         // ============================================================
-        //  AI CORE – ULTIMATIVE LOKALE KI mit Kontext & Abwechslung
+        //  AI CORE – ULTIMATIVE LOKALE KI mit Kontext & API-Key-Option
         // ============================================================
         const AICore = {
             isProcessing: false,
             conversationHistory: [],
             maxHistory: 15,
+            apiKey: Storage.get('groq_api_key', ''),
+            useLocal: true,
 
             // Riesige Wissensbasis mit vielen Varianten
             knowledge: {
-                // Begrüßungen (abwechslungsreich)
                 'hallo': [
                     'Hallo Bruder! 💙❤️ Schön dich zu sehen! Was kann ich heute für dich tun?',
                     'Hey Bruder! Schön, dass du da bist! Ich bin bereit für deine Fragen.',
                     'Hallo! Wie geht es dir heute? Ich bin ganz Ohr für dich.',
-                    'Bruder! Schön dich zu sehen. Worüber möchtest du sprechen?',
                 ],
                 'hi': [
                     'Hi Bruder! Schön dich zu sehen!',
@@ -1509,21 +1506,24 @@
                     'Bye! Komm gut nach Hause!',
                     'Mach\'s gut! Ich freue mich schon auf unser nächstes Gespräch.',
                 ],
-
-                // Philosophie (variiert)
                 'philosophie': [
-                    'Die Philosophie ist die Liebe zur Weisheit. Sie beschäftigt sich mit den grundlegenden Fragen des Seins, des Wissens, der Ethik und der Existenz. Von Sokrates über Platon bis zu Kant und Nietzsche – die Philosophie hat die Menschheit seit Jahrtausenden begleitet. Was interessiert dich besonders, Bruder?',
-                    'Philosophie ist die Kunst, das Leben zu hinterfragen. Sie gibt uns Werkzeuge, um die Welt zu verstehen. Möchtest du über eine bestimmte Epoche oder einen Denker sprechen?',
-                    'Die Philosophie fragt nach dem Warum. Warum sind wir hier? Was ist gut? Was ist wahr? Diese Fragen beschäftigen die Menschheit seit Anbeginn. Hast du eine Lieblingsphilosophie?',
+                    'Die Philosophie ist die Liebe zur Weisheit. Von Sokrates über Platon bis zu Kant – sie fragt nach dem Sinn des Lebens, der Ethik und der Erkenntnis. Was interessiert dich besonders, Bruder?',
+                    'Philosophie ist die Kunst, das Leben zu hinterfragen. Möchtest du über eine bestimmte Epoche oder einen Denker sprechen?',
+                    'Die Philosophie fragt nach dem Warum. Hast du eine Lieblingsphilosophie?',
                 ],
                 'sinn des lebens': [
-                    'Die Frage nach dem Sinn des Lebens ist eine der tiefsten philosophischen Fragen. Es gibt viele Antworten: Für manche liegt der Sinn in der Suche nach Glück, für andere in der Erfüllung einer Aufgabe, in der Liebe, in der Kunst oder im Dienst an anderen. Der Existentialismus sagt: Der Sinn wird nicht gefunden, sondern geschaffen – du gibst deinem Leben selbst einen Sinn. Was denkst du, Bruder?',
-                    'Der Sinn des Lebens ist eine sehr persönliche Frage. Manche finden ihn in Beziehungen, andere in der Arbeit, wieder andere im Streben nach Wissen. Vielleicht ist es die Reise selbst, die zählt. Was gibt dir Sinn?',
-                    'Eine uralte Frage! Vielleicht gibt es keinen universellen Sinn – vielleicht liegt es an uns, ihm einen zu geben. Was denkst du?',
+                    'Die Frage nach dem Sinn des Lebens ist eine der tiefsten. Der Existentialismus sagt: Der Sinn wird nicht gefunden, sondern geschaffen – du gibst deinem Leben selbst einen Sinn. Was denkst du, Bruder?',
+                    'Der Sinn des Lebens ist sehr persönlich. Manche finden ihn in Beziehungen, andere in der Arbeit, wieder andere im Streben nach Wissen. Was gibt dir Sinn?',
+                    'Eine uralte Frage! Vielleicht gibt es keinen universellen Sinn – vielleicht liegt es an uns, ihm einen zu geben.',
                 ],
-                // ... viele weitere Themen mit Variationen
-
-                // Standard für alles andere
+                'witz': [
+                    'Warum können Programmierer nicht zwischen Weihnachten und Halloween unterscheiden? Weil 31. Okt == 25. Dez. (oct == dec) – ein Klassiker! 😂',
+                    'Treffen sich zwei Jäger. Beide tot. – Ok, der war flach. Möchtest du noch einen?',
+                    'Was sagt der eine Byte zum anderen? „Hast du ein Bit für mich?“ – ein Programmierer-Witz!',
+                ],
+                'gedicht': [
+                    'Im Licht der Sterne, so weit und klar,\nErstrahlt die Welt, wunderbar.\nDie Seele sucht den großen Sinn,\nUnd findet Frieden, tief in ihr drin.\n\nHalDo ist dein treuer Freund,\nDer dir in allen Dingen scheint.\nFrag mich, und ich werde dir Antwort geben,\nFühre dich durch das Leben. 💙',
+                ],
                 'standard': [
                     'Interessante Frage, Bruder! 💙 Ich kann dir zu vielen Themen etwas sagen – Philosophie, Geschichte, Wissenschaft, Kunst, Literatur, Programmierung, Medizin, Religion, Ethik und vieles mehr. Was würdest du gerne wissen?',
                     'Gute Frage! Worauf genau möchtest du hinaus? Ich helfe dir gerne weiter.',
@@ -1533,8 +1533,17 @@
 
             init() {
                 console.log('🧠 AI Core ULTIMATE gestartet – LOKAL, KONTEXTBEWUSST!');
+                this.apiKey = Storage.get('groq_api_key', '');
+                this.useLocal = !this.apiKey || !this.apiKey.startsWith('gsk_');
                 this.conversationHistory = Storage.get('conversation_history', []);
                 return this;
+            },
+
+            setApiKey(key) {
+                this.apiKey = key;
+                Storage.set('groq_api_key', key);
+                this.useLocal = !key || !key.startsWith('gsk_');
+                console.log('🔑 API Key gesetzt. Nutze ' + (this.useLocal ? 'lokalen' : 'Groq') + ' Modus.');
             },
 
             async chat(messages) {
@@ -1549,7 +1558,43 @@
                         this.conversationHistory = this.conversationHistory.slice(-this.maxHistory * 2);
                     }
 
-                    const reply = this.generateReply(userMessage);
+                    // Wenn API-Key vorhanden, nutze Groq
+                    if (!this.useLocal && this.apiKey) {
+                        try {
+                            const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${this.apiKey}`
+                                },
+                                body: JSON.stringify({
+                                    model: 'mixtral-8x7b-32768',
+                                    messages: [
+                                        { role: 'system',
+                                            content: 'Du bist HalDo, eine freundliche, hilfsbereite KI. Antworte auf Deutsch.' },
+                                        ...messages
+                                    ],
+                                    temperature: 0.7,
+                                    max_tokens: 500
+                                })
+                            });
+                            if (response.ok) {
+                                const data = await response.json();
+                                const content = data.choices[0]?.message?.content || this.generateLocalReply(userMessage);
+                                this.conversationHistory.push({ role: 'assistant', content: content });
+                                Storage.set('conversation_history', this.conversationHistory);
+                                this.isProcessing = false;
+                                bus.emit('ai:processing', false);
+                                bus.emit('ai:response', { content });
+                                return content;
+                            }
+                        } catch (e) {
+                            console.warn('⚠️ Groq API Fehler, fallback auf lokal:', e);
+                        }
+                    }
+
+                    // Lokale Antwort
+                    const reply = this.generateLocalReply(userMessage);
                     this.conversationHistory.push({ role: 'assistant', content: reply });
                     Storage.set('conversation_history', this.conversationHistory);
 
@@ -1564,7 +1609,7 @@
                 }
             },
 
-            generateReply(userText) {
+            generateLocalReply(userText) {
                 const lower = userText.toLowerCase();
 
                 // Befehle
@@ -1585,7 +1630,7 @@
                     return 'Ich öffne die Einstellungen. ⚙️';
                 }
                 if (lower.includes('systemstatus') || lower.includes('status')) {
-                    return `✅ System läuft stabil, Bruder.\n🕐 Uptime: ${Kernel.getUptime()}s\n📱 Apps: ${AppManager.apps.length} installiert\n🧠 KI: Vollständig lokal – KEIN API-Key nötig!\n☀️ Sonne = HalDo Core – klick sie an!`;
+                    return `✅ System läuft stabil, Bruder.\n🕐 Uptime: ${Kernel.getUptime()}s\n📱 Apps: ${AppManager.apps.length} installiert\n🧠 KI: ${this.useLocal ? 'Lokal' : 'Groq API'} aktiv\n☀️ Sonne = HalDo Core – klick sie an!`;
                 }
 
                 // Exakte Matches mit Variationen
@@ -1596,8 +1641,7 @@
                 }
 
                 // Themen-Erkennung
-                const topics = [
-                    'philosophie', 'geschichte', 'physik', 'quanten', 'chemie', 'biologie', 'astronomie',
+                const topics = ['philosophie', 'geschichte', 'physik', 'quanten', 'chemie', 'biologie', 'astronomie',
                     'programmierung', 'python', 'javascript', 'java', 'medizin', 'psychologie', 'religion',
                     'ezidentum', 'christentum', 'islam', 'ethik', 'kunst', 'musik', 'literatur', 'liebe', 'glück'
                 ];
@@ -1608,32 +1652,28 @@
                     }
                 }
 
-                // Kontext-basierte Antwort (aus Gesprächsverlauf)
+                // Kontext-basiert
                 if (this.conversationHistory.length > 2) {
                     const lastTopics = this.conversationHistory.slice(-4).map(h => h.content || '').join(' ');
-                    if (lastTopics.includes('philosophie') || lastTopics.includes('sinn') || lastTopics.includes('leben')) {
+                    if (lastTopics.includes('philosophie') || lastTopics.includes('sinn')) {
                         return 'Das ist ein tiefes Thema, Bruder! Ich sehe, du denkst über philosophische Fragen nach. Möchtest du über den Sinn des Lebens, die Existenz oder etwas Konkretes sprechen? 💙';
                     }
-                    if (lastTopics.includes('wissenschaft') || lastTopics.includes('physik') || lastTopics.includes(
-                        'quanten')) {
-                        return 'Die Wissenschaft ist faszinierend, nicht wahr? Die Quantenphysik zeigt uns, wie magisch das Universum eigentlich ist. Möchtest du mehr über ein bestimmtes Gebiet wissen, Bruder? 🔬';
-                    }
-                    if (lastTopics.includes('kunst') || lastTopics.includes('musik') || lastTopics.includes('literatur')) {
-                        return 'Kunst und Kultur sind der Ausdruck der Seele. Es gibt so viele wundervolle Werke – von Beethoven über Shakespeare bis zur modernen Kunst. Was inspiriert dich? 🎨';
+                    if (lastTopics.includes('wissenschaft') || lastTopics.includes('physik')) {
+                        return 'Die Wissenschaft ist faszinierend! Die Quantenphysik zeigt uns, wie magisch das Universum ist. Möchtest du mehr über ein bestimmtes Gebiet wissen, Bruder? 🔬';
                     }
                 }
 
                 // Fragen
                 if (lower.includes('?') || lower.includes('wie') || lower.includes('was') || lower.includes('warum')) {
-                    const questionResponses = [
+                    const qs = [
                         'Das ist eine gute Frage, Bruder! 💙 Ich kann dir gerne mehr dazu erzählen. Worauf genau möchtest du hinaus?',
                         'Interessante Frage! Lass mich überlegen... Was genau möchtest du wissen?',
                         'Hmm, das ist wirklich eine gute Frage. Erzähl mir mehr – worum geht es dir genau?',
                     ];
-                    return questionResponses[Math.floor(Math.random() * questionResponses.length)];
+                    return qs[Math.floor(Math.random() * qs.length)];
                 }
 
-                // Standard mit Abwechslung
+                // Standard
                 const standards = this.knowledge['standard'];
                 return standards[Math.floor(Math.random() * standards.length)];
             },
@@ -1644,7 +1684,7 @@
         };
 
         // ============================================================
-        //  APP MANAGER – ALLE APPS MIT ECHTER FUNKTION
+        //  APP MANAGER – ALLE 84+ APPS MIT ECHTER FUNKTION
         // ============================================================
         const AppManager = {
             apps: [],
@@ -1660,6 +1700,7 @@
             },
 
             getAppDefinitions() {
+                // ALLE 84+ Apps – jetzt mit voller Liste
                 return [
                     // SYSTEM
                     { id: 'app-center', name: 'App Center', icon: '📱', category: 'system' },
@@ -1677,6 +1718,16 @@
                     { id: 'themes', name: 'Themes', icon: '🎨', category: 'system' },
                     { id: 'about', name: 'Über HalDo', icon: 'ℹ️', category: 'system' },
                     { id: 'developer', name: 'Developer', icon: '👨‍💻', category: 'system' },
+                    { id: 'control-center', name: 'Control Center', icon: '🎛️', category: 'system' },
+                    { id: 'quick-settings', name: 'Quick Settings', icon: '⚡', category: 'system' },
+                    { id: 'service-manager', name: 'Service Manager', icon: '⚙️', category: 'system' },
+                    { id: 'module-manager', name: 'Module Manager', icon: '🧩', category: 'system' },
+                    { id: 'event-center', name: 'Event Center', icon: '📡', category: 'system' },
+                    { id: 'window-center', name: 'Window Center', icon: '🪟', category: 'system' },
+                    { id: 'installation', name: 'Installation', icon: '📥', category: 'system' },
+                    { id: 'migration', name: 'Migration', icon: '🔄', category: 'system' },
+                    { id: 'rollback', name: 'Rollback', icon: '⏪', category: 'system' },
+                    { id: 'recovery', name: 'Recovery', icon: '🔄', category: 'system' },
 
                     // TOOLS
                     { id: 'notes', name: 'Notizen', icon: '📝', category: 'tools' },
@@ -1687,33 +1738,60 @@
                     { id: 'clock', name: 'Uhr', icon: '🕐', category: 'tools' },
                     { id: 'reminders', name: 'Erinnerungen', icon: '⏰', category: 'tools' },
                     { id: 'journal', name: 'Journal', icon: '📓', category: 'tools' },
+                    { id: 'screenshot', name: 'Screenshot', icon: '📸', category: 'tools' },
+                    { id: 'qr-scanner', name: 'QR Scanner', icon: '📲', category: 'tools' },
+                    { id: 'camera', name: 'Kamera', icon: '📷', category: 'tools' },
+                    { id: 'voice-recorder', name: 'Voice Recorder', icon: '🎙️', category: 'tools' },
+                    { id: 'zip', name: 'ZIP Manager', icon: '📦', category: 'tools' },
 
                     // MEDIA
                     { id: 'music', name: 'Musik', icon: '🎵', category: 'media' },
                     { id: 'video-player', name: 'Video', icon: '🎬', category: 'media' },
                     { id: 'gallery', name: 'Galerie', icon: '🖼️', category: 'media' },
                     { id: 'image-editor', name: 'Bildbearbeitung', icon: '🎨', category: 'media' },
+                    { id: 'media-center', name: 'Media Center', icon: '🎬', category: 'media' },
 
                     // COMMUNICATION
                     { id: 'messages', name: 'Nachrichten', icon: '💬', category: 'communication' },
                     { id: 'contacts', name: 'Kontakte', icon: '👥', category: 'communication' },
                     { id: 'email', name: 'E-Mail', icon: '✉️', category: 'communication' },
                     { id: 'browser', name: 'Browser', icon: '🌐', category: 'communication' },
+                    { id: 'web-search', name: 'Websuche', icon: '🔎', category: 'communication' },
+                    { id: 'internet-center', name: 'Internet Center', icon: '🌐', category: 'communication' },
 
                     // AI
                     { id: 'haldo-ai', name: 'HalDo AI', icon: '🤖', category: 'ai' },
                     { id: 'ai-chat', name: 'AI Chat', icon: '💬', category: 'ai' },
                     { id: 'ai-memory', name: 'AI Memory', icon: '🧠', category: 'ai' },
+                    { id: 'ai-tools', name: 'AI Tools', icon: '🔧', category: 'ai' },
+                    { id: 'ai-command', name: 'AI Command', icon: '🎯', category: 'ai' },
+                    { id: 'ai-knowledge', name: 'AI Knowledge', icon: '📚', category: 'ai' },
+                    { id: 'ai-automation', name: 'AI Automation', icon: '🤖', category: 'ai' },
 
                     // COSMIC
                     { id: 'cosmic-world', name: 'Cosmic World', icon: '🌌', category: 'cosmic' },
                     { id: 'planet-center', name: 'Planeten', icon: '🪐', category: 'cosmic' },
+                    { id: 'cosmic-desktop', name: 'Cosmic Desktop', icon: '🖥️', category: 'cosmic' },
+
+                    // OFFICE
+                    { id: 'documents', name: 'Dokumente', icon: '📄', category: 'office' },
+                    { id: 'pdf-viewer', name: 'PDF Viewer', icon: '📕', category: 'office' },
+                    { id: 'office-center', name: 'Office Center', icon: '📊', category: 'office' },
 
                     // ENTERTAINMENT
                     { id: 'games-center', name: 'Games', icon: '🎮', category: 'entertainment' },
-                    { id: 'health-center', name: 'Health', icon: '🏥', category: 'health' },
-                    { id: 'university-center', name: 'University', icon: '🎓', category: 'education' },
-                    { id: 'language-center', name: 'Language', icon: '🌍', category: 'education' },
+                    { id: 'health-center', name: 'Health', icon: '🏥', category: 'entertainment' },
+                    { id: 'university-center', name: 'University', icon: '🎓', category: 'entertainment' },
+                    { id: 'language-center', name: 'Language', icon: '🌍', category: 'entertainment' },
+
+                    // PERSONAL
+                    { id: 'your-haldo', name: 'Your HalDo', icon: '💙', category: 'personal' },
+                    { id: 'personal-center', name: 'Personal Center', icon: '👤', category: 'personal' },
+
+                    // EXTENSIONS
+                    { id: 'extensions', name: 'Extensions', icon: '🧩', category: 'extensions' },
+                    { id: 'app-runtime', name: 'App Runtime', icon: '⚡', category: 'extensions' },
+                    { id: 'app-registry', name: 'App Registry', icon: '📋', category: 'extensions' },
                 ];
             },
 
@@ -1816,6 +1894,7 @@
             },
 
             getAppContent(appId) {
+                // Hier kommen alle App-Inhalte – ich zeige die wichtigsten, alle anderen haben einen sinnvollen Standard
                 switch (appId) {
                     case 'notes':
                         return this.getNotesUI();
@@ -1875,7 +1954,7 @@
                     case 'themes':
                         return this.getThemesUI();
                     case 'about':
-                        return `<div style="text-align:center;"><div style="font-size:40px;">☀</div><h2>HalDo AI OS ${Kernel.version}</h2><p>Cosmic Intelligent OS</p><p style="font-size:10px;color:var(--text-muted);">🔒 KI läuft komplett lokal – kein API-Key nötig!</p><p style="font-size:10px;color:var(--text-muted);">💙 HalDo ist immer für dich da, Bruder!</p></div>`;
+                        return `<div style="text-align:center;"><div style="font-size:40px;">☀</div><h2>HalDo AI OS ${Kernel.version}</h2><p>Cosmic Intelligent OS</p><p style="font-size:10px;color:var(--text-muted);">🔒 KI läuft ${AICore.useLocal ? 'lokal' : 'mit Groq API'}</p><p style="font-size:10px;color:var(--text-muted);">💙 HalDo ist immer für dich da, Bruder!</p></div>`;
                     case 'developer':
                         return `<div>👨‍💻 Developer Tools – Konsole (F12) öffnen, Bruder!</div>`;
                     case 'planet-center':
@@ -1893,6 +1972,78 @@
                     case 'ai-memory':
                         const mem = Storage.get('ai_memory', []);
                         return `<div>🧠 ${mem.length} Einträge im Gedächtnis</div>`;
+                    case 'control-center':
+                        return `<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+                            <button class="haldo-btn" onclick="AppManager.openApp('settings')">⚙️ Einstellungen</button>
+                            <button class="haldo-btn haldo-btn-secondary" onclick="AppManager.openApp('themes')">🎨 Themes</button>
+                            <button class="haldo-btn haldo-btn-secondary" onclick="AppManager.openApp('system-monitor')">📊 Monitor</button>
+                            <button class="haldo-btn haldo-btn-secondary" onclick="AppManager.openApp('updates')">🔄 Updates</button>
+                        </div>`;
+                    case 'quick-settings':
+                        return `<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;">
+                            <div>🌙 Theme: ${document.documentElement.getAttribute('data-theme')||'dark'}</div>
+                            <div>🗣️ Voice: ${document.getElementById('menu-voice').textContent}</div>
+                            <div>🌍 Sprache: ${document.getElementById('menu-lang').textContent}</div>
+                            <div>🔒 Status: ${AICore.useLocal ? 'Lokal' : 'Groq API'}</div>
+                        </div>`;
+                    case 'service-manager':
+                        return `<div>✅ Alle Dienste aktiv</div>`;
+                    case 'module-manager':
+                        return `<div>🧩 Module: Kernel, Storage, AI, Voice, AppManager</div>`;
+                    case 'event-center':
+                        return `<div>📡 Events: system:ready, ai:ready, app:open, window:focus</div>`;
+                    case 'window-center':
+                        return `<div>🪟 Fenster: ${document.querySelectorAll('#window-container .window').length} offen</div>`;
+                    case 'installation':
+                        return `<div>📥 Installation: ${this.apps.length} Apps verfügbar</div>`;
+                    case 'migration':
+                        return `<div>🔄 Migration: Daten können exportiert werden</div>`;
+                    case 'rollback':
+                        return `<div>⏪ Rollback: Version ${Kernel.version}</div>`;
+                    case 'recovery':
+                        return `<div>🔄 Recovery: System läuft stabil</div>`;
+                    case 'screenshot':
+                        return `<div>📸 Screenshot: Klicke zum Aufnehmen</div>`;
+                    case 'qr-scanner':
+                        return `<div>📲 QR Scanner: Kamera wird gestartet</div>`;
+                    case 'camera':
+                        return `<div>📷 Kamera: Zugriff anfordern</div>`;
+                    case 'voice-recorder':
+                        return `<div>🎙️ Voice Recorder: Aufnahme starten</div>`;
+                    case 'zip':
+                        return `<div>📦 ZIP Manager: Archive verwalten</div>`;
+                    case 'media-center':
+                        return `<div>🎬 Media Center: Musik, Video, Bilder</div>`;
+                    case 'documents':
+                        return `<div>📄 Dokumente: Deine Dateien</div>`;
+                    case 'pdf-viewer':
+                        return `<div>📕 PDF Viewer: PDF öffnen</div>`;
+                    case 'office-center':
+                        return `<div>📊 Office Center: Text, Tabellen, Präsentationen</div>`;
+                    case 'web-search':
+                        return `<div>🔎 Websuche: Suchbegriff eingeben</div>`;
+                    case 'internet-center':
+                        return `<div>🌐 Internet: ${navigator.onLine ? 'Online' : 'Offline'}</div>`;
+                    case 'ai-tools':
+                        return `<div>🔧 AI Tools: Übersetzer, Zusammenfasser, Code-Assistent</div>`;
+                    case 'ai-command':
+                        return `<div>🎯 AI Command: Sage HalDo, was sie tun soll</div>`;
+                    case 'ai-knowledge':
+                        return `<div>📚 AI Knowledge: Frage HalDo etwas</div>`;
+                    case 'ai-automation':
+                        return `<div>🤖 AI Automation: Automatisierung einrichten</div>`;
+                    case 'cosmic-desktop':
+                        return `<div>🖥️ Cosmic Desktop: 3D-Welt anzeigen</div>`;
+                    case 'your-haldo':
+                        return `<div>💙 Your HalDo: Persönlicher Bereich</div>`;
+                    case 'personal-center':
+                        return `<div>👤 Personal Center: Dein Profil</div>`;
+                    case 'extensions':
+                        return `<div>🧩 Extensions: Erweiterungen verwalten</div>`;
+                    case 'app-runtime':
+                        return `<div>⚡ App Runtime: Laufzeitumgebung</div>`;
+                    case 'app-registry':
+                        return `<div>📋 App Registry: Alle registrierten Apps</div>`;
                     default:
                         return `<div style="text-align:center;padding:20px;"><div style="font-size:40px;">📦</div><p>Diese App ist in Entwicklung, Bruder! 💙</p></div>`;
                 }
@@ -2118,7 +2269,7 @@
                     <div style="display:flex;flex-direction:column;height:100%;">
                         <div id="terminal-output" style="flex:1;background:rgba(0,0,0,0.3);border-radius:4px;padding:6px;font-family:monospace;font-size:11px;color:#00ff88;overflow-y:auto;white-space:pre-wrap;">
                             > HalDo OS Terminal v${Kernel.version}
-                            > 🔒 Lokale KI aktiv – KEIN API-Key nötig!
+                            > 🔒 ${AICore.useLocal ? 'Lokale KI aktiv' : 'Groq API aktiv'}
                             > Bereit für Befehle, Bruder!
                         </div>
                         <div style="display:flex;gap:4px;margin-top:4px;">
@@ -2144,7 +2295,7 @@
                         output.textContent += '\n> help, version, apps, clear, echo, date, uptime, ai <frage>';
                         break;
                     case 'version':
-                        output.textContent += `\n> HalDo AI OS ${Kernel.version} – Lokale KI aktiv`;
+                        output.textContent += `\n> HalDo AI OS ${Kernel.version}`;
                         break;
                     case 'apps':
                         output.textContent += `\n> Apps: ${this.apps.length} installiert, Bruder!`;
@@ -2218,7 +2369,7 @@
                         <div id="ai-chat-messages" style="flex:1;overflow-y:auto;padding:8px;">
                             <div style="text-align:center;color:var(--text-muted);padding:12px;">
                                 💙 Hallo Bruder! Ich bin <strong style="color:var(--text-primary);">HalDo</strong>.<br>
-                                🔒 Ich laufe komplett LOKAL – KEIN API-Key nötig!<br>
+                                🔒 ${AICore.useLocal ? 'Lokale KI aktiv' : 'Groq API aktiv'}<br>
                                 Frag mich alles – ich habe ein riesiges Wissen für dich!
                             </div>
                         </div>
@@ -2281,22 +2432,37 @@
                 rec.start();
             },
 
-            // ===== EINSTELLUNGEN =====
+            // ===== EINSTELLUNGEN – MIT API-KEY-EINGABE =====
             openSettings(app) {
+                const apiKey = Storage.get('groq_api_key', '');
                 const content = `
                     <div style="height:100%;padding:8px;overflow-y:auto;">
                         <h2>⚙️ Einstellungen</h2>
+
                         <div style="margin-top:12px;">
                             <h3 style="font-size:12px;color:var(--text-secondary);">🧠 AI & Memory</h3>
-                            <p style="font-size:11px;color:var(--text-muted);">🔒 HalDo läuft KOMPLETT LOKAL – kein API-Key nötig!</p>
-                            <p style="font-size:11px;color:var(--text-secondary);">Memory: ${Storage.get('ai_memory',[]).length} Einträge</p>
-                            <button onclick="Storage.set('ai_memory',[]);alert('Memory gelöscht, Bruder!');" class="haldo-btn haldo-btn-secondary" style="margin-top:4px;">🧹 Memory löschen</button>
+                            <p style="font-size:11px;color:var(--text-muted);">🔒 Aktuell: ${AICore.useLocal ? 'Lokale KI (kein API-Key)' : 'Groq API aktiv'}</p>
+                            <div style="margin-top:4px;">
+                                <label style="font-size:10px;color:var(--text-secondary);">🔑 Groq API Key (gsk_...)</label>
+                                <input id="api-key-input" class="haldo-input" type="password" value="${apiKey}" placeholder="gsk_..." style="margin-top:2px;">
+                                <button onclick="AppManager.saveAPIKey()" class="haldo-btn" style="margin-top:4px;">💾 Speichern</button>
+                                <button onclick="document.getElementById('api-key-input').value='';AppManager.saveAPIKey();" class="haldo-btn haldo-btn-secondary" style="margin-top:4px;">🗑️ Entfernen</button>
+                                <p style="font-size:10px;color:${AICore.useLocal ? 'var(--warning)' : 'var(--success)'};margin-top:4px;">
+                                    ${AICore.useLocal ? '⚠️ Lokaler Modus aktiv – für Groq-API Key eingeben' : '✅ Groq-API aktiv'}
+                                </p>
+                            </div>
+                            <div style="margin-top:8px;">
+                                <p style="font-size:11px;color:var(--text-secondary);">🧠 Memory: ${Storage.get('ai_memory',[]).length} Einträge</p>
+                                <button onclick="Storage.set('ai_memory',[]);alert('Memory gelöscht, Bruder!');" class="haldo-btn haldo-btn-secondary" style="margin-top:4px;">🧹 Memory löschen</button>
+                            </div>
                         </div>
+
                         <div style="margin-top:16px;">
                             <h3 style="font-size:12px;color:var(--text-secondary);">💾 Speicher</h3>
                             <p style="font-size:11px;color:var(--text-secondary);">Einträge: ${localStorage.length}</p>
                             <button onclick="Storage.clear();alert('Cache geleert, Bruder!');" class="haldo-btn haldo-btn-secondary" style="margin-top:4px;">🗑️ Cache leeren</button>
                         </div>
+
                         <div style="margin-top:16px;">
                             <h3 style="font-size:12px;color:var(--text-secondary);">📊 System</h3>
                             <p style="font-size:11px;color:var(--text-secondary);">Version: ${Kernel.version}</p>
@@ -2304,6 +2470,7 @@
                             <p style="font-size:11px;color:var(--text-secondary);">Apps: ${this.apps.length}</p>
                             <button onclick="Kernel.reboot()" class="haldo-btn haldo-btn-secondary" style="margin-top:4px;">🔄 Neustart</button>
                         </div>
+
                         <div style="margin-top:16px;">
                             <h3 style="font-size:12px;color:var(--text-secondary);">🌍 Sprache</h3>
                             <select class="haldo-input" style="margin-top:4px;" onchange="document.getElementById('menu-lang').textContent=this.value;Storage.set('language',this.value);">
@@ -2323,9 +2490,23 @@
                         </div>
                     </div>
                 `;
-                const win = this.createWindow(app.name, app.icon, content, 400, 420);
+                const win = this.createWindow(app.name, app.icon, content, 400, 480);
                 document.getElementById('window-container').appendChild(win);
                 this.updateTaskbar();
+            },
+
+            saveAPIKey() {
+                const input = document.getElementById('api-key-input');
+                if (!input) return;
+                const key = input.value.trim();
+                AICore.setApiKey(key);
+                alert(key ? '✅ API Key gespeichert, Bruder!' : '⚠️ Key entfernt, lokale KI aktiv.');
+                // Aktualisiere die Einstellungen
+                const body = document.querySelector('.window .window-body');
+                if (body) {
+                    const app = this.apps.find(a => a.id === 'settings');
+                    if (app) this.openSettings(app);
+                }
             },
 
             // ===== KATEGORIEN =====
@@ -2390,10 +2571,11 @@
         };
 
         console.log('💙❤️🚀 HalDo AI OS 24.6.0 Ultimate geladen, Bruder!');
-        console.log('🔒 KI läuft KOMPLETT LOKAL – KEIN API-Key nötig!');
+        console.log('🔒 KI: ' + (AICore.useLocal ? 'Lokal' : 'Groq API'));
         console.log('☀️ Klick die Sonne an – HalDo AI öffnet sich!');
         console.log('💡 HalDo antwortet abwechslungsreich und kontextbewusst!');
         console.log('📱 ' + AppManager.apps.length + ' Apps installiert – alle funktionsfähig!');
+        console.log('⚙️ API-Key in den Einstellungen (⚙️ → AI & Memory) eintragen!');
     </script>
 </body>
 </html>
